@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{124AB335-EEAC-416F-B06B-80AD3CF56E38}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>asm.Media</RootNamespace>
+    <AssemblyName>asm.Media</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <Prefer32Bit>false</Prefer32Bit>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug' OR '$(Configuration)' == 'Release'">
+    <OutputPath>..\..\bin\$(Configuration)\$(Platform)\netframework\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Independent'">
+    <OutputPath>bin\$(Platform)\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug' OR '$(Configuration)' == 'Independent'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Common, Version=4.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Drawing.Common.4.7.0\lib\net461\System.Drawing.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\GlobalSuppressions.cs">
+      <Link>GlobalSuppressions.cs</Link>
+    </Compile>
+    <Compile Include="AudioSampleRateEnum.cs" />
+    <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\InputCommand.cs" />
+    <Compile Include="ConversionSearchRestriction.cs" />
+    <Compile Include="ffmpeg\Commands\FastMetadataCommand.cs" />
+    <Compile Include="ffmpeg\ConversionPreset.cs" />
+    <Compile Include="Commands\IProgressMonitor.cs" />
+    <Compile Include="ffmpeg\ConversionProfile.cs" />
+    <Compile Include="ffmpeg\FastProgressMonitor.cs" />
+    <Compile Include="ffmpeg\Quality.cs" />
+    <Compile Include="Helpers\VideoHelper.cs" />
+    <Compile Include="JetBrains.Annotations\JetBrains.Annotations.cs" />
+    <Compile Include="Helpers\VideoSizeHelper.cs" />
+    <Compile Include="ffmpeg\Commands\ConvertCommand.cs" />
+    <Compile Include="ffmpeg\Commands\InputCommand.cs" />
+    <Compile Include="ffmpeg\Commands\InputOutputCommand.cs" />
+    <Compile Include="ffmpeg\Commands\MetadataCommand.cs" />
+    <Compile Include="ffmpeg\Commands\ThumbnailCommand.cs" />
+    <Compile Include="Metadata.cs" />
+    <Compile Include="ffmpeg\ConversionOptions.cs" />
+    <Compile Include="VideoSize.cs" />
+    <Compile Include="VideoSizeEnum.cs" />
+    <Compile Include="Target.cs" />
+    <Compile Include="VideoAspectRatio.cs" />
+    <Compile Include="ffmpeg\ConversionEnums.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Youtube\Internal\AacAudioExtractor.cs" />
+    <Compile Include="Youtube\AudioDownloader.cs" />
+    <Compile Include="Youtube\AudioEncoding.cs" />
+    <Compile Include="Youtube\AudioStreamInfo.cs" />
+    <Compile Include="Youtube\ChannelInfo.cs" />
+    <Compile Include="Youtube\ClosedCaption.cs" />
+    <Compile Include="Youtube\ClosedCaptionTrack.cs" />
+    <Compile Include="Youtube\ClosedCaptionTrackInfo.cs" />
+    <Compile Include="Youtube\Container.cs" />
+    <Compile Include="Youtube\Downloader.cs" />
+    <Compile Include="Youtube\Exceptions\AudioExtractionException.cs" />
+    <Compile Include="Youtube\Exceptions\ParseException.cs" />
+    <Compile Include="Youtube\Exceptions\VideoNotAvailableException.cs" />
+    <Compile Include="Youtube\Exceptions\VideoRequiresPurchaseException.cs" />
+    <Compile Include="Youtube\Internal\FlvFile.cs" />
+    <Compile Include="Youtube\Internal\IAudioExtractor.cs" />
+    <Compile Include="Youtube\Internal\CipherOperations\ICipherOperation.cs" />
+    <Compile Include="Youtube\Internal\CipherOperations\ReverseCipherOperation.cs" />
+    <Compile Include="Youtube\Internal\CipherOperations\SliceCipherOperation.cs" />
+    <Compile Include="Youtube\Internal\CipherOperations\SwapCipherOperation.cs" />
+    <Compile Include="Youtube\ItagDescriptor.cs" />
+    <Compile Include="Youtube\Internal\PlayerContext.cs" />
+    <Compile Include="Youtube\Internal\PlayerSource.cs" />
+    <Compile Include="Youtube\MediaStream.cs" />
+    <Compile Include="Youtube\MediaStreamInfo.cs" />
+    <Compile Include="Youtube\MixedStreamInfo.cs" />
+    <Compile Include="Youtube\Internal\Mp3AudioExtractor.cs" />
+    <Compile Include="Youtube\PlaylistInfo.cs" />
+    <Compile Include="Youtube\PlaylistType.cs" />
+    <Compile Include="Youtube\TagTypeEnum.cs" />
+    <Compile Include="Youtube\VideoDownloader.cs" />
+    <Compile Include="Youtube\VideoEncoding.cs" />
+    <Compile Include="Youtube\VideoInfo.cs" />
+    <Compile Include="Youtube\VideoInfoSnippet.cs" />
+    <Compile Include="Youtube\VideoStreamInfo.cs" />
+    <Compile Include="Youtube\YoutubeClient.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Standard\asm.Compression\asm.Compression.csproj">
+      <Project>{77dbbe04-02eb-43df-b40d-200a3b53bc95}</Project>
+      <Name>asm.Compression</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Standard\asm.Data\asm.Data.csproj">
+      <Project>{fd02815c-e2b4-4899-beb6-57aa9b7ecc36}</Project>
+      <Name>asm.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Standard\asm.Drawing\asm.Drawing.csproj">
+      <Project>{EA90A1AF-0FB2-4363-9B02-AB4B6889EFF5}</Project>
+      <Name>asm.Drawing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Standard\asm\asm.csproj">
+      <Project>{ad2d9eec-efeb-4184-810c-ac2c5804e35e}</Project>
+      <Name>asm</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ffmpeg.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ffprobe.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,0 +1,22 @@
+﻿using System;
+using System.Runtime.Serialization;
+using asm.Exceptions.Properties;
+using JetBrains.Annotations;
+
+namespace asm.Exceptions.IO
+{
+	[Serializable]
+	public class InvalidHandleException : Exception
+	{
+		public InvalidHandleException()
+			: base(Resources.InvalidHandle)
+		{
+		}
+
+		public InvalidHandleException(string message) : base(message) { }
+
+		public InvalidHandleException(string message, Exception innerException) : base(message, innerException) { }
+
+		protected InvalidHandleException([NotNull] SerializationInfo info, StreamingContext context) : base(info, context) { }
+	}
+}

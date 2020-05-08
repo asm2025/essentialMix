@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<LangVersion>8.0</LangVersion>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Version>10.0.0.0</Version>
+		<Copyright>Copyright © 2019</Copyright>
+		<FileVersion>20.5.7.0</FileVersion>
+		<Authors>asm</Authors>
+		<PackageTags>utilities, tools, extensions, helpers, core, mvc, web api</PackageTags>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug' OR '$(Configuration)' == 'Release'">
+		<OutputPath>..\..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Independent'">
+		<OutputPath>bin\$(Platform)\</OutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="..\..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.4.1" />
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Standard\asm.Json.Abstraction\asm.Json.Abstraction.csproj" />
+		<ProjectReference Include="..\..\Standard\asm.Logging\asm.Logging.csproj" />
+		<ProjectReference Include="..\asm.Core\asm.Core.csproj" />
+		<ProjectReference Include="..\..\Standard\asm.Data\asm.Data.csproj" />
+		<ProjectReference Include="..\..\Standard\asm\asm.csproj" />
+	</ItemGroup>
+
+</Project>

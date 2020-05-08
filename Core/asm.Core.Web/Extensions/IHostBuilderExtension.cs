@@ -1,0 +1,34 @@
+﻿using System;
+using asm.Core.Extensions;
+using asm.Extensions;
+using asm.Helpers;
+using JetBrains.Annotations;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+
+namespace asm.Core.Web.Extensions
+{
+	public static class IHostBuilderExtension
+	{
+		public static IHostBuilder Setup([NotNull] this IHostBuilder thisValue) { return Setup(thisValue, null, null); }
+		public static IHostBuilder Setup([NotNull] this IHostBuilder thisValue, Action<WebHostBuilderContext, IConfigurationBuilder> configureDelegate) { return Setup(thisValue, null, configureDelegate); }
+		public static IHostBuilder Setup([NotNull] this IHostBuilder thisValue, Action<IWebHostBuilder> configureHost) { return Setup(thisValue, configureHost, null); }
+		public static IHostBuilder Setup([NotNull] this IHostBuilder thisValue, Action<IWebHostBuilder> configureHost, Action<WebHostBuilderContext, IConfigurationBuilder> configureDelegate)
+		{
+			return thisValue.ConfigureWebHostDefaults(builder =>
+			{
+				builder.UseContentRoot(AssemblyHelper.GetEntryAssembly().GetDirectoryPath())
+						.ConfigureAppConfiguration((context, configurationBuilder) =>
+						{
+							configurationBuilder.Setup(context.HostingEnvironment)
+												.AddConfigurationFiles((IHostEnvironment)context.HostingEnvironment)
+												.AddEnvironmentVariables()
+												.AddUserSecrets();
+							configureDelegate?.Invoke(context, configurationBuilder);
+						});
+				configureHost?.Invoke(builder);
+			});
+		}
+	}
+}

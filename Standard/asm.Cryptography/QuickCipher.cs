@@ -1,0 +1,469 @@
+using System;
+using System.Text;
+using asm.Cryptography.Asymmetric;
+using asm.Cryptography.Encoders;
+using asm.Cryptography.Hash;
+using asm.Cryptography.RandomNumber;
+using asm.Cryptography.Settings;
+using asm.Cryptography.Symmetric;
+using asm.Extensions;
+using asm.Helpers;
+using asm.Numeric;
+using JetBrains.Annotations;
+using RSACng = asm.Cryptography.Asymmetric.RSACng;
+
+namespace asm.Cryptography
+{
+	public static class QuickCipher
+	{
+		public static string Hash(string text, Encoding encoding = null)
+		{
+			if (string.IsNullOrEmpty(text)) return text;
+
+			IHashAlgorithm hashAlgorithm = null;
+
+			try
+			{
+				hashAlgorithm = CreateHashAlgorithm(encoding);
+				return hashAlgorithm.ComputeHash(text);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref hashAlgorithm);
+			}
+		}
+
+		public static string Base64Encode(string text, Settings.Settings settings = null)
+		{
+			/*
+			* finalBytes will contain the following:
+			* +---------+-------+------+
+			* | Salt    | Salt  | Data |
+			* | bytes   | bytes |      |
+			* | Length  |       |      |
+			* | 2 bytes |       |      |
+			* +---------+-------+------+
+			*/
+			if (string.IsNullOrEmpty(text)) return text;
+			if (settings == null) settings = new Settings.Settings();
+
+			ushort saltSize = ByteHelper.GetByteSize(settings.SaltSize);
+			byte[] bytes = settings.Encoding.GetBytes(text);
+			byte[] finalBytes = new byte[Constants.SHORT_SIZE + saltSize // Salt
+										+ bytes.Length // Data
+			];
+			int n = 0;
+			BitConverter.GetBytes(saltSize).CopyTo(finalBytes, n);
+			n += Constants.SHORT_SIZE;
+
+			if (saltSize > 0)
+			{
+				byte[] saltBytes = new byte[saltSize];
+
+				using (IRandomNumberGenerator random = CreateRandomNumberGenerator()) 
+					random.GetNonZeroBytes(saltBytes);
+
+				saltBytes.CopyTo(finalBytes, n);
+				n += saltBytes.Length;
+			}
+
+			bytes.CopyTo(finalBytes, n);
+			return Convert.ToBase64String(finalBytes);
+		}
+
+		public static string Base64Decode(string base64Text, Encoding encoding = null)
+		{
+			// See Base64Encode for details
+			if (string.IsNullOrEmpty(base64Text)) return base64Text;
+
+			byte[] finalBytes = Convert.FromBase64String(base64Text);
+			ushort size = BitConverter.ToUInt16(finalBytes, 0);
+			// Skip Salt
+			int n = Constants.SHORT_SIZE + size;
+			// Convert to string
+			return (encoding ?? Encoding.Unicode).GetString(finalBytes, n, finalBytes.Length - n).TrimEnd('\0');
+		}
+
+		public static string NumericEncode(string text, NumericSettings settings = null)
+		{
+			if (string.IsNullOrEmpty(text)) return text;
+			INumericEncoder encoder = null;
+
+			try
+			{
+				encoder = CreateNumericEncoder(settings);
+				return encoder.Encode(text);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref encoder);
+			}
+		}
+
+		public static string NumericDecode(string numericText, NumericSettings settings = null)
+		{
+			if (string.IsNullOrEmpty(numericText)) return numericText;
+			INumericEncoder encoder = null;
+
+			try
+			{
+				encoder = CreateNumericEncoder(settings);
+				return encoder.Decode(numericText);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref encoder);
+			}
+		}
+
+		public static string AsymmetricEncrypt([NotNull] string publicKeyXml, string value, RSASettings settings = null)
+		{
+			if (publicKeyXml.Length == 0) throw new ArgumentNullException(nameof(publicKeyXml));
+			if (string.IsNullOrEmpty(value)) return value;
+			if (settings == null) settings = new RSASettings();
+			byte[] data = settings.Encoding.GetBytes(value);
+			byte[] encrypted = AsymmetricEncrypt(publicKeyXml, data, settings);
+			return encrypted == null ? null : Convert.ToBase64String(encrypted);
+		}
+
+		public static byte[] AsymmetricEncrypt([NotNull] string publicKeyXml, [NotNull] byte[] data, RSASettings settings = null)
+		{
+			if (publicKeyXml.Length == 0) throw new ArgumentNullException(nameof(publicKeyXml));
+			if (data.Length == 0) return null;
+			IAsymmetricAlgorithm asymmetric = null;
+			if (settings == null) settings = new RSASettings();
+
+			try
+			{
+				asymmetric = CreateAsymmetricAlgorithm(settings);
+				asymmetric.FromXmlString(publicKeyXml);
+
+				if (settings.UseExpiration)
+				{
+					byte[] expiration = BitConverter.GetBytes(settings.GetExpiration().Ticks);
+					byte[] buffer = new byte[expiration.Length + data.Length];
+					expiration.CopyTo(buffer, 0);
+					data.CopyTo(buffer, expiration.Length);
+					data = buffer;
+				}
+
+				return asymmetric.Encrypt(data);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref asymmetric);
+			}
+		}
+
+		public static string AsymmetricDecrypt([NotNull] string privateKeyXml, string value, RSASettings settings = null)
+		{
+			if (privateKeyXml.Length == 0) throw new ArgumentNullException(nameof(privateKeyXml));
+			if (string.IsNullOrEmpty(value)) return value;
+			if (settings == null) settings = new RSASettings();
+			byte[] encrypted = Convert.FromBase64String(value);
+			byte[] data = AsymmetricDecrypt(privateKeyXml, encrypted, settings);
+			return data == null ? null : settings.Encoding.GetString(data).TrimEnd('\0');
+		}
+
+		public static byte[] AsymmetricDecrypt([NotNull] string privateKeyXml, [NotNull] byte[] data, RSASettings settings = null)
+		{
+			if (privateKeyXml.Length == 0) throw new ArgumentNullException(nameof(privateKeyXml));
+			if (data.Length == 0) return null;
+
+			IAsymmetricAlgorithm asymmetric = null;
+			if (settings == null) settings = new RSASettings();
+
+			try
+			{
+				asymmetric = CreateAsymmetricAlgorithm(settings);
+				asymmetric.FromXmlString(privateKeyXml);
+
+				byte[] decrypted = asymmetric.Decrypt(data);
+
+				if (settings.UseExpiration)
+				{
+					long ticks = BitConverter.ToInt64(decrypted, 0);
+					DateTime expiration = new DateTime(ticks);
+					if (DateTime.UtcNow > expiration) return null;
+					decrypted = decrypted.GetRange(sizeof(long), -1);
+				}
+
+				return decrypted;
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref asymmetric);
+			}
+		}
+
+		public static string SymmetricEncrypt([NotNull] string base64Key, string value, SymmetricSettings settings = null)
+		{
+			if (base64Key.Length == 0) throw new ArgumentNullException(nameof(base64Key));
+			if (string.IsNullOrEmpty(value)) return value;
+
+			byte[] key = Convert.FromBase64String(base64Key);
+			if (settings == null) settings = new SymmetricSettings();
+			byte[] data = settings.Encoding.GetBytes(value);
+			byte[] encrypted = SymmetricEncrypt(key, data, settings);
+			return encrypted == null ? null : Convert.ToBase64String(encrypted);
+		}
+
+		public static byte[] SymmetricEncrypt([NotNull] byte[] key, [NotNull] byte[] data, SymmetricSettings settings = null)
+		{
+			if (key.Length == 0) throw new ArgumentNullException(nameof(key));
+			if (data.Length == 0) return null;
+			int keySize = BitHelper.GetBitSize(key.Length);
+
+			if (settings == null) settings = new SymmetricSettings(keySize);
+			else settings.KeySize = keySize;
+
+			ISymmetricAlgorithm symmetric = null;
+
+			try
+			{
+				symmetric = CreateSymmetricAlgorithm(settings);
+				symmetric.Key = key;
+
+				if (settings.UseExpiration)
+				{
+					byte[] expiration = BitConverter.GetBytes(settings.GetExpiration().Ticks);
+					byte[] buffer = new byte[expiration.Length + data.Length];
+					expiration.CopyTo(buffer, 0);
+					data.CopyTo(buffer, expiration.Length);
+					data = buffer;
+				}
+
+				return symmetric.Encrypt(data);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref symmetric);
+			}
+		}
+
+		public static string SymmetricDecrypt([NotNull] string base64Key, string value, SymmetricSettings settings = null)
+		{
+			if (base64Key.Length == 0) throw new ArgumentNullException(nameof(base64Key));
+			if (string.IsNullOrEmpty(value)) return value;
+
+			byte[] key = Convert.FromBase64String(base64Key);
+			if (settings == null) settings = new SymmetricSettings();
+			byte[] encrypted = Convert.FromBase64String(value);
+			byte[] data = SymmetricDecrypt(key, encrypted, settings);
+			return data == null ? null : settings.Encoding.GetString(data).TrimEnd('\0');
+		}
+
+		public static byte[] SymmetricDecrypt([NotNull] byte[] key, [NotNull] byte[] data, SymmetricSettings settings = null)
+		{
+			if (key.Length == 0) throw new ArgumentNullException(nameof(key));
+			if (data.Length == 0) return null;
+			int keySize = BitHelper.GetBitSize(key.Length);
+
+			if (settings == null) settings = new SymmetricSettings(keySize);
+			else settings.KeySize = keySize;
+
+			ISymmetricAlgorithm symmetric = null;
+
+			try
+			{
+				symmetric = CreateSymmetricAlgorithm(settings);
+				symmetric.Key = key;
+
+				byte[] decrypted = symmetric.Decrypt(data);
+
+				if (settings.UseExpiration)
+				{
+					long ticks = BitConverter.ToInt64(decrypted, 0);
+					DateTime expiration = new DateTime(ticks);
+					if (DateTime.UtcNow > expiration) return null;
+					decrypted = decrypted.GetRange(sizeof(long), -1);
+				}
+
+				return decrypted;
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref symmetric);
+			}
+		}
+
+		public static string HyperEncrypt([NotNull] string publicKeyXml, string value, HyperSettings settings = null)
+		{
+			if (publicKeyXml.Length == 0) throw new ArgumentNullException(nameof(publicKeyXml));
+			if (string.IsNullOrEmpty(value)) return value;
+			if (settings == null) settings = new HyperSettings();
+
+			byte[] data = settings.Encoding.GetBytes(value);
+			byte[] encrypted = HyperEncrypt(publicKeyXml, data, settings);
+			return encrypted == null ? null : Convert.ToBase64String(encrypted);
+		}
+
+		public static byte[] HyperEncrypt([NotNull] string publicKeyXml, [NotNull] byte[] data, HyperSettings settings = null)
+		{
+			/*
+			 * finalBytes will contain the following:
+			 * +-----------+-----------+--------+
+			 * | Symmetric | Symmetric | Data   |
+			 * | key       | key       | bytes  |
+			 * | length    | bytes     |        |
+			 * | 4 bytes   |           |        |
+			 * +-----------+-----------+--------+
+			 */
+			if (publicKeyXml.Length == 0) throw new ArgumentNullException(nameof(publicKeyXml));
+			if (data.Length == 0) return null;
+
+			// Key
+			byte[] key = GenerateSymmetricKey(settings);
+			byte[] encryptedKey = AsymmetricEncrypt(publicKeyXml, key, settings?.RSASettings);
+			if (encryptedKey == null) return null;
+
+			// Data
+			byte[] encryptedData = SymmetricEncrypt(key, data, settings);
+			if (encryptedData == null) return null;
+
+			int n = 0;
+			byte[] finalBytes = new byte[Constants.INT_SIZE + encryptedKey.Length // Key
+										+ encryptedData.Length // Data
+			];
+
+			// Key
+			BitConverter.GetBytes(encryptedKey.Length).CopyTo(finalBytes, n);
+			n += Constants.INT_SIZE;
+			encryptedKey.CopyTo(finalBytes, n);
+			n += encryptedKey.Length;
+
+			// Data
+			encryptedData.CopyTo(finalBytes, n);
+			return finalBytes;
+		}
+
+		public static string HyperDecrypt([NotNull] string privateKeyXml, string value, HyperSettings settings = null)
+		{
+			if (privateKeyXml.Length == 0) throw new ArgumentNullException(nameof(privateKeyXml));
+			if (string.IsNullOrEmpty(value)) return value;
+			if (settings == null) settings = new HyperSettings();
+
+			byte[] encrypted = Convert.FromBase64String(value);
+			byte[] data = HyperDecrypt(privateKeyXml, encrypted, settings);
+			return data == null ? null : settings.Encoding.GetString(data).TrimEnd('\0');
+		}
+
+		public static byte[] HyperDecrypt([NotNull] string privateKeyXml, [NotNull] byte[] data, HyperSettings settings = null)
+		{
+			// see Encrypt method for details
+			if (data.Length < Constants.INT_SIZE) return null;
+
+			// Key
+			int n = 0;
+			int size = BitConverter.ToInt32(data, n);
+			n += Constants.INT_SIZE;
+			if (n + size > data.Length) return null;
+
+			byte[] encryptedKey = data.GetRange(n, size);
+			// Decrypt key
+			byte[] key = AsymmetricDecrypt(privateKeyXml, encryptedKey, settings?.RSASettings);
+			if (key == null) return null;
+			n += size;
+			
+			byte[] encryptedData = data.GetRange(n, size);
+			return SymmetricDecrypt(key, encryptedData, settings);
+		}
+
+		[NotNull]
+		public static string RandomString(int length, NumericSettings settings = null)
+		{
+			if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+			if (length == 0) return string.Empty;
+
+			INumericEncoder encoder = null;
+			IRandomNumberGenerator random = null;
+
+			try
+			{
+				encoder = CreateNumericEncoder(settings);
+
+				int unitLength = BitVector.GetUnitLength(encoder.Mode);
+				int n = length * unitLength;
+				byte[] bytes = new byte[n];
+				random = CreateRandomNumberGenerator();
+				random.GetNonZeroBytes(bytes);
+				return encoder.Encode(bytes).Left(length);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref random);
+				ObjectHelper.Dispose(ref encoder);
+			}
+		}
+
+		[NotNull]
+		public static IRandomNumberGenerator CreateRandomNumberGenerator() { return new RNGCryptoServiceProvider(); }
+
+		[NotNull]
+		public static INumericEncoder CreateNumericEncoder(NumericSettings settings = null)
+		{
+			if (settings == null) settings = new NumericSettings();
+			return new NumericEncoder(settings.Mode, settings.Encoding);
+		}
+
+		[NotNull]
+		public static IHashAlgorithm CreateHashAlgorithm(Encoding encoding = null) { return new SHA256CryptoServiceProvider(encoding ?? Encoding.Unicode); }
+
+		public static (string Public, string Private) GenerateAsymmetricKeys(RSASettings settings = null)
+		{
+			using (IAsymmetricAlgorithm asymmetric = CreateAsymmetricAlgorithm(settings))
+			{
+				int bitStrength = asymmetric.KeySize;
+				string privateKey = $"<BitStrength>{bitStrength}</BitStrength>{asymmetric.ToXmlString(true)}";
+				string publicKey = $"<BitStrength>{bitStrength}</BitStrength>{asymmetric.ToXmlString(false)}";
+				return (publicKey, privateKey);
+			}
+		}
+
+		[NotNull]
+		public static byte[] GenerateSymmetricKey(SymmetricSettings settings = null)
+		{
+			byte[] keyBytes;
+			if (settings == null) settings = new SymmetricSettings();
+
+			using (ISymmetricAlgorithm symmetric = CreateSymmetricAlgorithm(settings))
+			{
+				int keySize = ByteHelper.GetByteSize(symmetric.KeySize);
+				string passphraseStr = symmetric.RandomString(keySize);
+				symmetric.GenerateKey(passphraseStr.Secure(), settings.SaltSize, settings.RFC2898Iterations);
+				keyBytes = new byte[ByteHelper.GetByteSize(symmetric.KeySize)];
+				Array.Copy(symmetric.Key, keyBytes, keyBytes.Length);
+			}
+
+			return keyBytes;
+		}
+
+		[NotNull]
+		public static IAsymmetricAlgorithm CreateAsymmetricAlgorithm(RSASettings settings = null)
+		{
+			if (settings == null) settings = new RSASettings();
+			IRSAAlgorithm algorithm = new RSACng(settings.Encoding)
+									{
+										KeySize = settings.KeySize,
+										Padding = settings.Padding,
+										SignaturePadding = settings.SignaturePadding,
+										HashAlgorithm = settings.HashAlgorithm
+									};
+			return algorithm;
+		}
+
+		[NotNull]
+		public static ISymmetricAlgorithm CreateSymmetricAlgorithm(SymmetricSettings settings = null)
+		{
+			if (settings == null) settings = new SymmetricSettings();
+			ISymmetricAlgorithm algorithm = new AESCryptoServiceProvider(settings.Encoding)
+											{
+												KeySize = settings.KeySize,
+												BlockSize = settings.BlockSize,
+												Mode = settings.Mode,
+												Padding = settings.PaddingMode
+											};
+			return algorithm;
+		}
+	}
+}
