@@ -1,0 +1,271 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="LexerBatchFile" xml:space="preserve">
+    <value>&lt;SyntaxLanguage Key="BatchFile" LanguageDefinitionVersion="4.0" Secure="True" xmlns="http://ActiproSoftware/SyntaxEditor/4.0/LanguageDefinition"&gt;
+
+	&lt;!-- String Properties --&gt;
+	&lt;Properties&gt;
+		&lt;Property Key="Creator" Value="Actipro Software LLC" /&gt;
+		&lt;Property Key="Copyright" Value="Copyright (c) 2001-2014 Actipro Software LLC.  All rights reserved." /&gt;
+	&lt;/Properties&gt;
+
+	&lt;!-- Highlighting Styles --&gt;	
+	&lt;Styles&gt;
+		&lt;Style Key="ReservedWordStyle" ForeColor="Blue" /&gt;
+		&lt;Style Key="LabelStyle" ForeColor="Maroon" /&gt;
+		&lt;Style Key="VariableStyle" ForeColor="Purple" /&gt;
+		&lt;Style Key="DelimiterStyle" ForeColor="Black" /&gt;
+		&lt;Style Key="NumberStyle" ForeColor="Black" /&gt;
+		&lt;Style Key="StringDelimiterStyle" ForeColor="Black" /&gt;
+		&lt;Style Key="StringDefaultStyle" ForeColor="Black" /&gt;
+		&lt;Style Key="CommentDelimiterStyle" ForeColor="Green" /&gt;
+		&lt;Style Key="CommentDefaultStyle" ForeColor="Green" /&gt;
+	&lt;/Styles&gt;
+	
+	&lt;!-- States --&gt;
+	&lt;States&gt;
+		&lt;!-- Code --&gt;
+		&lt;State Key="DefaultState"&gt;
+			&lt;!-- Patterns Groups --&gt;
+			&lt;PatternGroups&gt;
+				&lt;!-- Whitespace --&gt;
+				&lt;RegexPatternGroup TokenKey="WhitespaceToken" PatternValue="{WhitespaceMacro}+" IsWhitespace="True" /&gt;
+				&lt;!-- Line Terminators --&gt;
+				&lt;RegexPatternGroup TokenKey="LineTerminatorToken" PatternValue="{LineTerminatorMacro}" IsWhitespace="True" /&gt;
+				&lt;!-- Batch Commands --&gt;
+				&lt;ExplicitPatternGroup TokenKey="BatchCommandToken" Style="ReservedWordStyle" LookAhead="{NonWordMacro}|\z" CaseSensitivity="Insensitive"&gt;
+					&lt;ExplicitPatterns&gt;
+						do else end errorlevel exist exit for goto if not pause return say select then when
+					&lt;/ExplicitPatterns&gt;
+				&lt;/ExplicitPatternGroup&gt;
+				&lt;!-- DOS Commands --&gt;
+				&lt;ExplicitPatternGroup TokenKey="DOSCommandToken" Style="ReservedWordStyle" LookAhead="{NonWordMacro}|\z" CaseSensitivity="Insensitive"&gt;
+					&lt;ExplicitPatterns&gt;
+						ansi append assign attrib autofail backup basedev boot break buffers cache call cd chcp 
+						chdir chkdsk choice cls cmd codepage command comp copy country date ddinstal debug del 
+						detach device devicehigh devinfo dir diskcoache diskcomp diskcopy doskey dpath dumpprocess
+						eautil endlocal erase exit_vdm extproc fcbs fdisk fdiskpm files find format fsaccess fsfilter
+						graftabl iopl join keyb keys label lastdrive libpath lh loadhigh makeini maxwait md mem 
+						memman mkdir mode move net patch path pauseonerror picview pmrexx print printmonbufsize 
+						priority priority_disk_io prompt protectonly protshell pstat rd recover reipl ren rename 
+						replace restore rmdir rmsize run set setboot setlocal shell shift sort spool start subst 
+						suppresspopups swappath syslevel syslog threads time timeslice trace tracebuf tracefmt 
+						trapdump tree type undelete unpack use ver verify view vmdisk vol xcopy xcopy32 xdfcopy
+					&lt;/ExplicitPatterns&gt;
+				&lt;/ExplicitPatternGroup&gt;
+				&lt;!-- Echo --&gt;
+				&lt;ExplicitPatternGroup TokenKey="EchoToken" Style="ReservedWordStyle" LookAhead="{NonWordMacro}|\z" CaseSensitivity="Insensitive"&gt;
+					&lt;ExplicitPatterns&gt;
+						@echo echo off on
+					&lt;/ExplicitPatterns&gt;
+				&lt;/ExplicitPatternGroup&gt;
+				&lt;!-- Labels --&gt;
+				&lt;RegexPatternGroup TokenKey="LabelToken" PatternValue=": (_ | {AlphaMacro})({WordMacro})*" Style="LabelStyle" /&gt;
+				&lt;!-- Variables --&gt;
+				&lt;RegexPatternGroup TokenKey="VariableToken" PatternValue="% {DigitMacro}+" Style="VariableStyle" /&gt;
+				&lt;!-- Identifier --&gt;
+				&lt;RegexPatternGroup TokenKey="IdentifierToken" PatternValue="(_ | {AlphaMacro})({WordMacro})*" /&gt;
+				&lt;!-- Delimiters --&gt;
+				&lt;ExplicitPatternGroup TokenKey="DelimiterToken" Style="DelimiterStyle"&gt;
+					&lt;ExplicitPatterns&gt;
+						# $ ( ) + , . // / ; &amp;lt; = &amp;gt; \
+					&lt;/ExplicitPatterns&gt;
+				&lt;/ExplicitPatternGroup&gt;
+				&lt;!-- Numbers --&gt;
+				&lt;RegexPatternGroup TokenKey="RealNumberToken" Style="NumberStyle" LookAhead="{NonWordMacro}|\z"&gt;
+					&lt;RegexPattern Value="{DigitMacro}* \. {DigitMacro}+ ([Ee] [\+\-]? {DigitMacro}+)?" /&gt;
+					&lt;RegexPattern Value="{DigitMacro}+ [Ee] [\+\-]? {DigitMacro}+" /&gt;
+				&lt;/RegexPatternGroup&gt;
+				&lt;RegexPatternGroup TokenKey="IntegerNumberToken" Style="NumberStyle" PatternValue="{DigitMacro}+" LookAhead="{NonWordMacro}|\z" /&gt;
+				&lt;RegexPatternGroup TokenKey="HexIntegerNumberToken" Style="NumberStyle" PatternValue="0 [xX] {HexDigitMacro}+" LookAhead="{NonWordMacro}|\z" /&gt;
+			&lt;/PatternGroups&gt;
+			&lt;!-- Child States --&gt;
+			&lt;ChildStates&gt;
+				&lt;ChildState Key="StringState" /&gt;
+				&lt;ChildState Key="CommentState" /&gt;
+			&lt;/ChildStates&gt;
+		&lt;/State&gt;
+
+		&lt;!-- Double Quote Strings --&gt;
+		&lt;State Key="StringState" TokenKey="StringDefaultToken" Style="StringDefaultStyle"&gt;
+			&lt;!-- Scopes --&gt;
+			&lt;Scopes&gt;
+				&lt;Scope&gt;
+					&lt;ExplicitPatternGroup Type="StartScope" TokenKey="StringStartToken" Style="StringDelimiterStyle" PatternValue="&amp;quot;" /&gt;
+					&lt;ExplicitPatternGroup Type="EndScope" TokenKey="StringEndToken" Style="StringDelimiterStyle" PatternValue="&amp;quot;" /&gt;	
+				&lt;/Scope&gt;
+			&lt;/Scopes&gt;
+			&lt;!-- Patterns Groups --&gt;
+			&lt;PatternGroups&gt;
+				&lt;RegexPatternGroup TokenKey="StringEscapedCharacterToken" PatternValue="\\." /&gt;
+				&lt;RegexPatternGroup TokenKey="StringWhitespaceToken" PatternValue="{WhitespaceMacro}+" IsWhitespace="True" /&gt;
+				&lt;RegexPatternGroup TokenKey="StringWordToken" PatternValue="\w+" /&gt;
+				&lt;RegexPatternGroup TokenKey="StringDefaultToken" PatternValue="[^\&amp;quot;]" /&gt;
+			&lt;/PatternGroups&gt;
+		&lt;/State&gt;
+		
+		&lt;!-- Comments --&gt;
+		&lt;State Key="CommentState" TokenKey="CommentDefaultToken" Style="CommentDefaultStyle"&gt;
+			&lt;!-- Scopes --&gt;
+			&lt;Scopes&gt;
+				&lt;Scope&gt;
+					&lt;ExplicitPatternGroup Type="StartScope" TokenKey="CommentStartToken" Style="CommentDelimiterStyle" PatternValue="rem" LookAhead="{NonWordMacro}|\z" CaseSensitivity="Insensitive" /&gt;
+					&lt;RegexPatternGroup Type="EndScope" TokenKey="CommentEndToken" Style="CommentDelimiterStyle" PatternValue="{LineTerminatorMacro}" IsWhitespace="True" /&gt;	
+				&lt;/Scope&gt;
+				&lt;Scope&gt;
+					&lt;ExplicitPatternGroup Type="StartScope" TokenKey="CommentStartToken" Style="CommentDelimiterStyle" PatternValue="::" /&gt;
+					&lt;RegexPatternGroup Type="EndScope" TokenKey="CommentEndToken" Style="CommentDelimiterStyle" PatternValue="{LineTerminatorMacro}" IsWhitespace="True" /&gt;	
+				&lt;/Scope&gt;
+			&lt;/Scopes&gt;
+			&lt;!-- Patterns Groups --&gt;
+			&lt;PatternGroups&gt;			 
+				&lt;RegexPatternGroup TokenKey="CommentWhitespaceToken" PatternValue="{WhitespaceMacro}+" IsWhitespace="True" /&gt;
+				&lt;RegexPatternGroup TokenKey="CommentWordToken" PatternValue="\w+" /&gt;
+				&lt;RegexPatternGroup TokenKey="CommentDefaultToken" PatternValue="{NonLineTerminatorMacro}" /&gt;
+			&lt;/PatternGroups&gt;
+		&lt;/State&gt;
+		
+	&lt;/States&gt;
+					
+	&lt;!-- Example Text --&gt;
+	&lt;ExampleText&gt;@ECHO OFF
+REM - This batch file accepts a choice
+:BEGIN
+CLS
+REM - Present the user with a choice
+CHOICE /N /C:123 PICK A NUMBER (1, 2, or 3)%1
+REM - Redirect to the proper output based on the choice
+IF ERRORLEVEL == 3 GOTO THREE
+IF ERRORLEVEL == 2 GOTO TWO
+IF ERRORLEVEL == 1 GOTO ONE
+GOTO END
+:THREE
+ECHO You pressed three.
+GOTO END
+:TWO
+ECHO You pressed two.
+GOTO END
+:ONE
+ECHO You pressed one.
+:END&lt;/ExampleText&gt;
+		
+&lt;/SyntaxLanguage&gt;</value>
+  </data>
+</root>
