@@ -20,7 +20,7 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	/// <summary>
-	/// Binary tree implementation using the linked representation.
+	/// Red-Black tree implementation using the linked representation.
 	/// </summary>
 	/// <typeparam name="T">The element type of the tree</typeparam>
 	/*
@@ -40,7 +40,7 @@ namespace asm.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[ComVisible(false)]
 	[Serializable]
-	public abstract class LinkedBinaryTree<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
+	public sealed class RedBlackTree<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
 	{
 		[DebuggerDisplay("{Value}")]
 		[Serializable]
@@ -93,11 +93,15 @@ namespace asm.Collections
 				internal set
 				{
 					if (ReferenceEquals(_nodes[LEFT], value)) return;
+					
 					// reset old left, access the fields directly to avoid StackOverflowException
-					if (_nodes[LEFT] != null && ReferenceEquals(_nodes[LEFT]._nodes[PARENT], this)) _nodes[LEFT]._nodes[PARENT] = null;
+					if (_nodes[LEFT] != null && ReferenceEquals(_nodes[LEFT]._nodes[PARENT], this))
+					{
+						_nodes[LEFT]._nodes[PARENT] = null;
+					}
+
 					_nodes[LEFT] = value;
-					if (_nodes[LEFT] == null) return;
-					_nodes[LEFT]._nodes[PARENT] = this;
+					if (_nodes[LEFT] != null) _nodes[LEFT]._nodes[PARENT] = this;
 				}
 			}
 
@@ -107,27 +111,32 @@ namespace asm.Collections
 				internal set
 				{
 					if (ReferenceEquals(_nodes[RIGHT], value)) return;
+					
 					// reset old right, access the fields directly to avoid StackOverflowException
-					if (_nodes[RIGHT] != null && ReferenceEquals(_nodes[RIGHT]._nodes[PARENT], this)) _nodes[RIGHT]._nodes[PARENT] = null;
+					if (_nodes[RIGHT] != null && ReferenceEquals(_nodes[RIGHT]._nodes[PARENT], this))
+					{
+						_nodes[RIGHT]._nodes[PARENT] = null;
+					}
+
 					_nodes[RIGHT] = value;
-					if (_nodes[RIGHT] == null) return;
-					_nodes[RIGHT]._nodes[PARENT] = this;
+					if (_nodes[RIGHT] != null) _nodes[RIGHT]._nodes[PARENT] = this;
 				}
 			}
 
 			public T Value { get; set; }
 
-			public int Height { get; internal set; }
+			/// <summary>
+			/// True means Red and False = no color or Black
+			/// </summary>
+			public bool Color { get; internal set; } = true;
 
 			public int Depth { get; internal set; }
 
-			public int BalanceFactor => (_nodes[LEFT]?.Height ?? -1) - (_nodes[RIGHT]?.Height ?? -1);
-
 			public bool IsRoot => _nodes[PARENT] == null;
 
-			public bool IsLeft => _nodes[PARENT] != null && Equals(_nodes[PARENT]._nodes[LEFT]);
+			public bool IsLeft => ReferenceEquals(_nodes[PARENT]?._nodes[LEFT], this);
 
-			public bool IsRight => _nodes[PARENT] != null && Equals(_nodes[PARENT]._nodes[RIGHT]);
+			public bool IsRight => ReferenceEquals(_nodes[PARENT]?._nodes[RIGHT], this);
 
 			public bool IsLeaf => _nodes[LEFT] == null && _nodes[RIGHT] == null;
 
@@ -152,8 +161,6 @@ namespace asm.Collections
 					node = node.Parent;
 				}
 			}
-
-			public static implicit operator T([NotNull] Node node) { return node.Value; }
 		}
 
 		/// <summary>
@@ -161,7 +168,7 @@ namespace asm.Collections
 		/// </summary>
 		internal sealed class Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
 		{
-			private readonly LinkedBinaryTree<T> _tree;
+			private readonly RedBlackTree<T> _tree;
 			private readonly int _version;
 			private readonly Node _root;
 			private readonly DynamicQueue<Node> _queueOrStack;
@@ -173,7 +180,7 @@ namespace asm.Collections
 			private bool _started;
 			private bool _done;
 
-			internal Enumerator([NotNull] LinkedBinaryTree<T> tree, Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction)
+			internal Enumerator([NotNull] RedBlackTree<T> tree, [NotNull] Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction)
 			{
 				_tree = tree;
 				_version = _tree._version;
@@ -257,11 +264,7 @@ namespace asm.Collections
 			}
 
 			/// <inheritdoc />
-			public void Dispose()
-			{
-				_current = null;
-				_queueOrStack.Clear();
-			}
+			public void Dispose() { }
 
 			private bool LevelOrderLR()
 			{
@@ -279,8 +282,8 @@ namespace asm.Collections
 
 				// visit the next queued node
 				_current = _queueOrStack.Count > 0
-								? _queueOrStack.Dequeue()
-								: null;
+							? _queueOrStack.Dequeue()
+							: null;
 
 				if (_current == null)
 				{
@@ -310,8 +313,8 @@ namespace asm.Collections
 
 				// visit the next queued node
 				_current = _queueOrStack.Count > 0
-								? _queueOrStack.Dequeue()
-								: null;
+									? _queueOrStack.Dequeue()
+									: null;
 
 				if (_current == null)
 				{
@@ -341,8 +344,8 @@ namespace asm.Collections
 
 				// visit the next queued node
 				_current = _queueOrStack.Count > 0
-								? _queueOrStack.Dequeue()
-								: null;
+									? _queueOrStack.Dequeue()
+									: null;
 
 				if (_current == null)
 				{
@@ -372,8 +375,8 @@ namespace asm.Collections
 
 				// visit the next queued node
 				_current = _queueOrStack.Count > 0
-								? _queueOrStack.Dequeue()
-								: null;
+									? _queueOrStack.Dequeue()
+									: null;
 
 				if (_current == null)
 				{
@@ -522,11 +525,9 @@ namespace asm.Collections
 					}
 
 					if (_version != _tree._version) throw new VersionChangedException();
-
 					_current = _queueOrStack.Count > 0
 									? _queueOrStack.Dequeue()
 									: null;
-
 					if (_current == null) continue;
 
 					/*
@@ -623,11 +624,11 @@ namespace asm.Collections
 		/// </summary>
 		internal sealed class Iterator
 		{
-			private readonly LinkedBinaryTree<T> _tree;
+			private readonly RedBlackTree<T> _tree;
 			private readonly Node _root;
 			private readonly TraverseMethod _method;
 
-			internal Iterator([NotNull] LinkedBinaryTree<T> tree, [NotNull] Node root, TraverseMethod method)
+			internal Iterator([NotNull] RedBlackTree<T> tree, [NotNull] Node root, TraverseMethod method)
 			{
 				_tree = tree;
 				_root = root;
@@ -905,7 +906,7 @@ namespace asm.Collections
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the left branch.
-						 * Is there a right Node
+						 * Is there a right node?
 						 * if yes, then navigate right.
 						 */
 						if (peek.Right != null && !ReferenceEquals(lastVisited, peek.Right))
@@ -957,7 +958,7 @@ namespace asm.Collections
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the right branch.
-						 * Is there a left Node
+						 * Is there a left node?
 						 * if yes, then navigate left.
 						 */
 						if (peek.Left != null && !ReferenceEquals(lastVisited, peek.Left))
@@ -1252,7 +1253,7 @@ namespace asm.Collections
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the left branch.
-						 * Is there a right Node
+						 * Is there a right node?
 						 * if yes, then navigate right.
 						 */
 						if (peek.Right != null && !ReferenceEquals(lastVisited, peek.Right))
@@ -1304,7 +1305,7 @@ namespace asm.Collections
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the right branch.
-						 * Is there a left Node
+						 * Is there a left node?
 						 * if yes, then navigate left.
 						 */
 						if (peek.Left != null && !ReferenceEquals(lastVisited, peek.Left))
@@ -1334,13 +1335,13 @@ namespace asm.Collections
 		/// </summary>
 		internal sealed class LevelIterator
 		{
-			private readonly LinkedBinaryTree<T> _tree;
+			private readonly RedBlackTree<T> _tree;
 			private readonly Node _root;
 			private readonly Queue<Node> _queue = new Queue<Node>();
 
 			private int _level = -1;
 
-			internal LevelIterator([NotNull] LinkedBinaryTree<T> tree, [NotNull] Node root)
+			internal LevelIterator([NotNull] RedBlackTree<T> tree, [NotNull] Node root)
 			{
 				_tree = tree;
 				_root = root;
@@ -1511,20 +1512,43 @@ namespace asm.Collections
 
 		private SerializationInfo siInfo; //A temporary variable which we need during deserialization.        
 		private object _syncRoot;
-		protected internal int _version;
+		internal int _version;
 
 		/// <inheritdoc />
-		protected LinkedBinaryTree()
+		public RedBlackTree()
 			: this(Comparer<T>.Default)
 		{
 		}
 
-		protected LinkedBinaryTree(IComparer<T> comparer)
+		public RedBlackTree(IComparer<T> comparer)
 		{
 			Comparer = comparer ?? Comparer<T>.Default;
 		}
 
-		protected LinkedBinaryTree(SerializationInfo info, StreamingContext context)
+		/// <inheritdoc />
+		public RedBlackTree(T value)
+			: this(value, Comparer<T>.Default)
+		{
+		}
+
+		public RedBlackTree(T value, IComparer<T> comparer)
+			: this(comparer)
+		{
+			Add(value);
+		}
+
+		public RedBlackTree([NotNull] IEnumerable<T> collection)
+			: this(collection, null)
+		{
+		}
+
+		public RedBlackTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
+			: this(comparer)
+		{
+			Add(collection);
+		}
+
+		internal RedBlackTree(SerializationInfo info, StreamingContext context)
 		{
 			siInfo = info;
 		}
@@ -1545,20 +1569,12 @@ namespace asm.Collections
 		/// <inheritdoc />
 		bool ICollection<T>.IsReadOnly => false;
 
-		public abstract bool AutoBalance { get; }
-
 		[NotNull]
 		public IComparer<T> Comparer { get; private set; }
 
-		public Node Root { get; protected internal set; }
+		public Node Root { get; internal set; }
 
-		public int Count { get; protected internal set; }
-
-		public int Height => Root?.Height ?? 0;
-
-		public bool IsFull => Root == null || Root.IsFull;
-
-		public int BalanceFactor => Root?.BalanceFactor ?? 0;
+		public int Count { get; internal set; }
 
 		/// <inheritdoc />
 		[NotNull]
@@ -1699,15 +1715,51 @@ namespace asm.Collections
 			return GeNodesAtLevel(level)?.FirstOrDefault(e => Comparer.IsEqual(e.Value, value));
 		}
 
-		/// <summary>
-		/// Finds the closest parent node relative to the specified value
-		/// </summary>
-		/// <param name="value">The value to search for</param>
-		/// <returns>The found node or null if no match is found</returns>
-		public abstract Node Successor(T value);
+		public Node Successor(T value)
+		{
+			Node current = null, next = Root;
+
+			while (next != null)
+			{
+				current = next;
+				next = Comparer.IsLessThan(value, next.Value)
+							? next.Left
+							: next.Right;
+				// handle duplicates
+				if (next != null && Comparer.IsEqual(next.Value, value)) continue;
+				// OK, found it if are equal
+				if (Comparer.IsEqual(current.Value, value)) break;
+			}
+
+			return current;
+		}
 
 		/// <inheritdoc />
-		public abstract void Add(T value);
+		public void Add(T value)
+		{
+			Node parent = Successor(value);
+
+			if (parent == null)
+			{
+				// no parent means there is no root currently
+				Root = new Node(value) { Color = false };
+				Count++;
+				_version++;
+				return;
+			}
+
+			Node node = new Node(value);
+
+			if (Comparer.IsLessThan(value, parent.Value)) parent.Left = node;
+			else parent.Right = node;
+
+			// update nodes
+			Update(node);
+			Count++;
+			_version++;
+			if (IsBalanced(node)) return;
+			Balance(node);
+		}
 
 		public void Add([NotNull] IEnumerable<T> collection)
 		{
@@ -1722,7 +1774,111 @@ namespace asm.Collections
 			return node != null && Remove(node);
 		}
 
-		public abstract bool Remove([NotNull] Node node);
+		public bool Remove([NotNull] Node node)
+		{
+			Node parent = node.Parent;
+			Node child;
+
+			// case 1: node has no right child
+			if (node.Right == null)
+			{
+				child = node.Left;
+
+				if (parent == null)
+				{
+					Root = child;
+				}
+				else if (Comparer.IsLessThan(node.Value, parent.Value))
+				{
+					// if node < parent, move the left to the parent's left
+					parent.Left = child;
+				}
+				else
+				{
+					// else, move the left to the parent's right
+					parent.Right = child;
+				}
+			}
+			// case 2: node has a right child which doesn't have a left child
+			else if (node.Right.Left == null)
+			{
+				// move the left to the right child's left
+				node.Right.Left = node.Left;
+				child = node.Right;
+
+				if (parent == null)
+				{
+					Root = child;
+				}
+				else if (Comparer.IsLessThan(node.Value, parent.Value))
+				{
+					// if node < parent, move the right to the parent's left
+					parent.Left = child;
+				}
+				else
+				{
+					// else, move the right to the parent's right
+					parent.Right = child;
+				}
+			}
+			// case 3: node has a right child that has a left child
+			else
+			{
+				// find the right child's left most child
+				Node leftmost = node.Right.Left;
+
+				while (leftmost.Left != null)
+				{
+					leftmost = leftmost.Left;
+				}
+
+				// move the left-most right to the parent's left
+				Node leftMostParent = leftmost.Parent;
+				leftMostParent.Left = leftmost.Right;
+				// update nodes
+				Update(leftMostParent.Left);
+				if (!IsBalanced(leftMostParent)) Balance(leftMostParent);
+				// adjust the left-most child nodes
+				leftmost.Left = node.Left;
+				leftmost.Right = node.Right;
+				child = leftmost;
+
+				if (parent == null)
+				{
+					Root = child;
+				}
+				else if (Comparer.IsLessThan(node.Value, parent.Value))
+				{
+					// if node < parent, move the left-most to the parent's left
+					parent.Left = child;
+				}
+				else
+				{
+					// else, move the left-most to the parent's right
+					parent.Right = child;
+				}
+			}
+
+			if (child != null)
+			{
+				if (parent == null) child.Parent = null;
+				// update nodes
+				Update(child);
+			}
+			else if (parent != null)
+			{
+				// update nodes
+				Update(parent);
+			}
+
+			Count--;
+			_version++;
+			if (parent == null) return true;
+			if (IsBalanced(parent)) parent = parent.Parent;
+			if (IsBalanced(parent)) return true;
+			Balance(parent);
+			return true;
+		}
 
 		/// <inheritdoc />
 		public void Clear()
@@ -1730,27 +1886,6 @@ namespace asm.Collections
 			Root = null;
 			Count = 0;
 		}
-
-		/// <summary>
-		/// Validates the tree nodes
-		/// </summary>
-		/// <returns></returns>
-		public bool Validate() { return Root == null || Root.IsLeaf || Validate(Root); }
-
-		/// <summary>
-		/// Validates the node and its children.
-		/// </summary>
-		/// <param name="node"></param>
-		/// <returns></returns>
-		public abstract bool Validate(Node node);
-
-		public bool IsBalanced() { return IsBalanced(Root); }
-		public abstract bool IsBalanced(Node node);
-
-		/// <summary>
-		/// Balances the tree if it supports it.
-		/// </summary>
-		public abstract void Balance();
 
 		public IReadOnlyList<Node> GeNodesAtLevel(int level)
 		{
@@ -1832,6 +1967,182 @@ namespace asm.Collections
 			}
 		}
 
+		/// <summary>
+		/// Validates the tree nodes
+		/// </summary>
+		/// <returns></returns>
+		public bool Validate() { return Root == null || Root.IsLeaf || Validate(Root); }
+
+		/// <summary>
+		/// Validates the node and its children.
+		/// </summary>
+		/// <param name="node"></param>
+		/// <returns></returns>
+		public bool Validate(Node node)
+		{
+			if (node == null || node.IsLeaf) return true;
+
+			bool isValid = true;
+			Iterate(TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, e =>
+			{
+				if (e.IsLeft)
+				{
+					if (Comparer.IsGreaterThanOrEqual(e.Value, e.Parent.Value)) isValid = false;
+					if (isValid && e.Parent.IsRight && Comparer.IsLessThan(e.Value, e.Parent.Parent.Value)) isValid = false;
+				}
+
+				if (isValid && e.IsRight)
+				{
+					if (Comparer.IsLessThan(e.Value, e.Parent.Value)) isValid = false;
+					if (isValid && e.Parent.IsLeft && Comparer.IsGreaterThanOrEqual(e.Value, e.Parent.Parent.Value)) isValid = false;
+				}
+
+				return isValid;
+			});
+			return isValid;
+		}
+
+		public bool IsBalanced() { return IsBalanced(Root); }
+		public bool IsBalanced(Node node)
+		{
+			if (node == null) return true;
+
+			// node is red => its parent must be either null or black and all its direct children must be either null or black.
+			if (node.Color)
+			{
+				return (node.Parent == null || !node.Parent.Color)
+						&& (node.Left == null || !node.Left.Color) 
+						&& (node.Right == null || !node.Right.Color);
+			}
+
+			// node is black
+			// left is null or black
+			return (node.Left == null || !node.Left.Color
+					// or left is red and all its direct children are either null or black
+					|| (node.Left.Left == null || !node.Left.Left.Color) && (node.Left.Right == null || !node.Left.Right.Color))
+					// and right is null or black
+					&& (node.Right == null || !node.Right.Color
+						// or right is red and all its direct children are either null or black
+						|| (node.Right.Left == null || !node.Right.Left.Color) && (node.Right.Right == null || !node.Right.Right.Color));
+		}
+
+		/// <summary>
+		/// Balances the tree if it supports it.
+		/// <para><strong>RedBlackTree implementation of balancing the tree</strong></para>
+		/// </summary>
+		public void Balance()
+		{
+			if (Root == null || Root.IsLeaf) return;
+
+			// find all unbalanced nodes
+			Queue<Node> unbalancedNodes = new Queue<Node>();
+			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, e =>
+			{
+				if (IsBalanced(e)) return;
+				unbalancedNodes.Enqueue(e);
+			});
+
+			while (unbalancedNodes.Count > 0)
+			{
+				Node node = unbalancedNodes.Dequeue();
+				// check again if status changed
+				if (IsBalanced(node)) continue;
+				Balance(node);
+			}
+		}
+
+		private void Balance(Node node)
+		{
+			/*
+			 * balance the tree
+			 * There are 2 cases with 3 sub-cases for each unbalanced node
+			 *
+			 * 1. parent is left
+			 *	1.1 uncle (parent.Parent.Right) is Red => Recolor only
+			 *	1.2 node is right => Rotate left
+			 *	1.3 node is left => Rotate right
+			 * 2. parent is right
+			 *	2.1 uncle (parent.Parent.Right) is Red => Recolor only
+			 *	2.2 node is left => Rotate right
+			 *	2.3 node is right => Rotate left
+			 *
+			 *     y                               x
+			 *    / \     Right Rotation(y) ->    /  \
+			 *   x   T3                          T1   y 
+			 *  / \                                  / \
+			 * T1  T2     <- Left Rotation(x)       T2  T3
+			 */
+			if (node == null || IsBalanced(node)) return;
+
+			while (!node.IsRoot && node.Color && node.Parent.Color)
+			{
+				Node parent = node.Parent;
+				Node grandParent = parent.Parent;
+
+				// 1. parent is left
+				if (parent.IsLeft)
+				{
+					Node uncle = grandParent.Right;
+
+					// 1.1 uncle is Red
+					if (uncle != null && uncle.Color)
+					{
+						grandParent.Color = true;
+						parent.Color = false;
+						uncle.Color = false;
+						node = grandParent;
+					}
+					else
+					{
+						// 1.2 node is right
+						if (node.IsRight)
+						{
+							RotateLeft(parent);
+							node = parent;
+							parent = node.Parent;
+						}
+
+						// 1.3 node is left
+						RotateRight(grandParent);
+						parent.SwapColor(grandParent);
+						node = parent;
+					}
+				}
+				else
+				{
+					// 2. parent is right - because !node.IsRoot && !parent.IsLeft
+					Node uncle = grandParent.Left;
+
+					// 2.1 uncle is Red
+					if (uncle != null && uncle.Color)
+					{
+						grandParent.Color = true;
+						parent.Color = false;
+						uncle.Color = false;
+						node = grandParent;
+					}
+					else
+					{
+						// 2.2 node is left
+						if (node.IsLeft)
+						{
+							RotateRight(parent);
+							node = parent;
+							parent = node.Parent;
+						}
+
+						// 2.3 node is right
+						RotateLeft(grandParent);
+						parent.SwapColor(grandParent);
+						node = parent;
+					}
+				}
+			}
+
+			if (node.IsRoot) Root = node;
+			Root.Color = false;
+		}
+
 		/*
 		* https://www.geeksforgeeks.org/avl-tree-set-1-insertion/
 		*     y                               x
@@ -1843,7 +2154,7 @@ namespace asm.Collections
 		* A reference to the drawing only, not the code
 		*/
 		[NotNull]
-		protected Node RotateLeft([NotNull] Node sourceNode /* x */)
+		private Node RotateLeft([NotNull] Node sourceNode /* x */)
 		{
 			bool isLeft = sourceNode.IsLeft;
 			Node oldParent = sourceNode.Parent;
@@ -1861,15 +2172,14 @@ namespace asm.Collections
 			}
 
 			// update nodes
-			UpdateDown(newRoot);
-			UpdateUp(sourceNode);
+			Update(newRoot);
 			_version++;
 			// Return new root
 			return newRoot;
 		}
 
 		[NotNull]
-		protected Node RotateRight([NotNull] Node sourceNode /* y */)
+		private Node RotateRight([NotNull] Node sourceNode /* y */)
 		{
 			bool isLeft = sourceNode.IsLeft;
 			Node oldParent = sourceNode.Parent;
@@ -1887,49 +2197,44 @@ namespace asm.Collections
 			}
 
 			// update nodes
-			UpdateDown(newRoot);
-			UpdateUp(sourceNode);
+			Update(newRoot);
 			_version++;
 			// Return new root
 			return newRoot;
 		}
 
-		protected void UpdateUp(Node node)
+		private void Update(Node node)
 		{
 			if (node == null) return;
-			node.Height = 1 + Math.Max(node.Left?.Height ?? -1, node.Right?.Height ?? -1);
 
-			Node parent = node.Parent;
-
-			while (parent != null)
-			{
-				parent.Height = 1 + Math.Max(parent.Left?.Height ?? -1, parent.Right?.Height ?? -1);
-				parent = parent.Parent;
-			}
-		}
-
-		protected void UpdateDown(Node node)
-		{
-			if (node == null) return;
-			if (node.IsLeaf) node.Depth = 1 + (node.Parent?.Depth ?? -1);
-			else Iterate(node, TraverseMethod.LevelOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, e => e.Depth = 1 + (e.Parent?.Depth ?? -1));
+			if (node.IsLeaf)
+				node.Depth = 1 + (node.Parent?.Depth ?? -1);
+			else
+				Iterate(node, TraverseMethod.LevelOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, e => e.Depth = 1 + (e.Parent?.Depth ?? -1));
 		}
 	}
 
-	public static class LinkedBinaryTreeNodeExtension
+	public static class RedBlackTreeNodeExtension
 	{
-		public static void Swap<T>([NotNull] this LinkedBinaryTree<T>.Node thisValue, [NotNull] LinkedBinaryTree<T>.Node other)
+		public static void Swap<T>([NotNull] this RedBlackTree<T>.Node thisValue, [NotNull] RedBlackTree<T>.Node other)
 		{
 			T tmp = other.Value;
 			other.Value = thisValue.Value;
 			thisValue.Value = tmp;
 		}
+
+		public static void SwapColor<T>([NotNull] this RedBlackTree<T>.Node thisValue, [NotNull] RedBlackTree<T>.Node other)
+		{
+			bool tmp = other.Color;
+			other.Color = thisValue.Color;
+			thisValue.Color = tmp;
+		}
 	}
 
-	public static class LinkedBinaryTreeExtension
+	public static class RedBlackTreeExtension
 	{
-		public static string ToString<T>([NotNull] this LinkedBinaryTree<T> thisValue, Orientation orientation, bool diagnosticInfo = false) { return ToString(thisValue, thisValue.Root, orientation, diagnosticInfo); }
-		public static string ToString<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node node, Orientation orientation, bool diagnosticInfo = false)
+		public static string ToString<T>([NotNull] this RedBlackTree<T> thisValue, Orientation orientation, bool diagnosticInfo = false) { return ToString(thisValue, thisValue.Root, orientation, diagnosticInfo); }
+		public static string ToString<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node node, Orientation orientation, bool diagnosticInfo = false)
 		{
 			if (node == null) return string.Empty;
 			if (node.IsLeaf) return Format(node, diagnosticInfo);
@@ -1940,16 +2245,16 @@ namespace asm.Collections
 				_ => throw new ArgumentOutOfRangeException(nameof(orientation), orientation, null)
 			};
 
-			static string Format(LinkedBinaryTree<T>.Node node, bool diagnosticInfo)
+			static string Format(RedBlackTree<T>.Node node, bool diagnosticInfo)
 			{
 				return node == null
 							? string.Empty
 							: diagnosticInfo
-								? $"{node} :D{node.Depth}H{node.Height}B{node.BalanceFactor}"
+								? $"{node} :D{node.Depth}{(node.Color ? 'R' : 'B')}"
 								: node.ToString();
 			}
 
-			static string Horizontally(LinkedBinaryTree<T> tree, LinkedBinaryTree<T>.Node node, bool diagnostic)
+			static string Horizontally(RedBlackTree<T> tree, RedBlackTree<T>.Node node, bool diagnostic)
 			{
 				const string STR_BLANK = "    ";
 				const string STR_EXT = "│   ";
@@ -1987,7 +2292,7 @@ namespace asm.Collections
 				return sb.ToString();
 			}
 
-			static string Vertically(LinkedBinaryTree<T> tree, LinkedBinaryTree<T>.Node node, bool diagnostic)
+			static string Vertically(RedBlackTree<T> tree, RedBlackTree<T>.Node node, bool diagnostic)
 			{
 				const char C_BLANK = ' ';
 				const char C_EXT = '─';
@@ -2031,742 +2336,736 @@ namespace asm.Collections
 		}
 
 		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this LinkedBinaryTree<T> thisValue, HorizontalDirectionFlags direction)
+		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalDirectionFlags direction)
 		{
 			return thisValue.GetEnumerator(TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction);
 		}
 		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, HorizontalDirectionFlags direction)
+		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalDirectionFlags direction)
 		{
 			return thisValue.GetEnumerator(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction);
 		}
 
 		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this LinkedBinaryTree<T> thisValue, HorizontalFlow flow)
+		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow)
 		{
 			return thisValue.GetEnumerator(TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default);
 		}
 		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, HorizontalFlow flow)
+		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow)
 		{
 			return thisValue.GetEnumerator(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default);
 		}
 
 		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this LinkedBinaryTree<T> thisValue, HorizontalFlow flow, HorizontalDirectionFlags direction)
+		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, HorizontalDirectionFlags direction)
 		{
 			return thisValue.GetEnumerator(TraverseMethod.InOrder, flow, direction);
 		}
 		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, HorizontalFlow flow, HorizontalDirectionFlags direction)
+		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, HorizontalDirectionFlags direction)
 		{
 			return thisValue.GetEnumerator(root, TraverseMethod.InOrder, flow, direction);
 		}
 
 		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this LinkedBinaryTree<T> thisValue, TraverseMethod method)
+		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method)
 		{
 			return thisValue.GetEnumerator(method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default);
 		}
 		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, TraverseMethod method)
+		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method)
 		{
 			return thisValue.GetEnumerator(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default);
 		}
 
 		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this LinkedBinaryTree<T> thisValue, TraverseMethod method, HorizontalDirectionFlags direction)
+		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, HorizontalDirectionFlags direction)
 		{
 			return thisValue.GetEnumerator(method, HorizontalFlow.LeftToRight, direction);
 		}
 		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, TraverseMethod method, HorizontalDirectionFlags direction)
+		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, HorizontalDirectionFlags direction)
 		{
 			return thisValue.GetEnumerator(root, method, HorizontalFlow.LeftToRight, direction);
 		}
 
 		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this LinkedBinaryTree<T> thisValue, TraverseMethod method, HorizontalFlow flow)
+		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, HorizontalFlow flow)
 		{
 			return thisValue.GetEnumerator(method, flow, HorizontalDirectionFlags.Default);
 		}
 		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, TraverseMethod method, HorizontalFlow flow)
+		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, HorizontalFlow flow)
 		{
 			return thisValue.GetEnumerator(root, method, flow, HorizontalDirectionFlags.Default);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, HorizontalDirectionFlags direction, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalDirectionFlags direction, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, HorizontalDirectionFlags direction, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalDirectionFlags direction, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, HorizontalFlow flow, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, HorizontalFlow flow, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(TraverseMethod.InOrder, flow, direction, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(root, TraverseMethod.InOrder, flow, direction, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, TraverseMethod method, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, TraverseMethod method, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(method, HorizontalFlow.LeftToRight, direction, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(root, method, HorizontalFlow.LeftToRight, direction, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(method, flow, HorizontalDirectionFlags.Default, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<LinkedBinaryTree<T>.Node, bool> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
 		{
 			thisValue.Iterate(root, method, flow, HorizontalDirectionFlags.Default, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, HorizontalDirectionFlags direction, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalDirectionFlags direction, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, HorizontalDirectionFlags direction, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalDirectionFlags direction, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, HorizontalFlow flow, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, HorizontalFlow flow, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(TraverseMethod.InOrder, flow, direction, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(root, TraverseMethod.InOrder, flow, direction, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, TraverseMethod method, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, TraverseMethod method, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(method, HorizontalFlow.LeftToRight, direction, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(root, method, HorizontalFlow.LeftToRight, direction, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(method, flow, HorizontalDirectionFlags.Default, visitCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<LinkedBinaryTree<T>.Node> visitCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
 		{
 			thisValue.Iterate(root, method, flow, HorizontalDirectionFlags.Default, visitCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] Func<int, IReadOnlyCollection<LinkedBinaryTree<T>.Node>, bool> levelCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] Func<int, IReadOnlyCollection<RedBlackTree<T>.Node>, bool> levelCallback)
 		{
 			thisValue.Iterate(HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, levelCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, [NotNull] Func<int, IReadOnlyCollection<LinkedBinaryTree<T>.Node>, bool> levelCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, [NotNull] Func<int, IReadOnlyCollection<RedBlackTree<T>.Node>, bool> levelCallback)
 		{
 			thisValue.Iterate(root, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, levelCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, HorizontalDirectionFlags direction, [NotNull] Func<int, IReadOnlyCollection<LinkedBinaryTree<T>.Node>, bool> levelCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalDirectionFlags direction, [NotNull] Func<int, IReadOnlyCollection<RedBlackTree<T>.Node>, bool> levelCallback)
 		{
 			thisValue.Iterate(HorizontalFlow.LeftToRight, direction, levelCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, HorizontalDirectionFlags direction, [NotNull] Func<int, IReadOnlyCollection<LinkedBinaryTree<T>.Node>, bool> levelCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalDirectionFlags direction, [NotNull] Func<int, IReadOnlyCollection<RedBlackTree<T>.Node>, bool> levelCallback)
 		{
 			thisValue.Iterate(root, HorizontalFlow.LeftToRight, direction, levelCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, HorizontalFlow flow, [NotNull] Func<int, IReadOnlyCollection<LinkedBinaryTree<T>.Node>, bool> levelCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, [NotNull] Func<int, IReadOnlyCollection<RedBlackTree<T>.Node>, bool> levelCallback)
 		{
 			thisValue.Iterate(flow, HorizontalDirectionFlags.Default, levelCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, HorizontalFlow flow, [NotNull] Func<int, IReadOnlyCollection<LinkedBinaryTree<T>.Node>, bool> levelCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, [NotNull] Func<int, IReadOnlyCollection<RedBlackTree<T>.Node>, bool> levelCallback)
 		{
 			thisValue.Iterate(root, flow, HorizontalDirectionFlags.Default, levelCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] Action<int, IReadOnlyCollection<LinkedBinaryTree<T>.Node>> levelCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] Action<int, IReadOnlyCollection<RedBlackTree<T>.Node>> levelCallback)
 		{
 			thisValue.Iterate(HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, levelCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, [NotNull] Action<int, IReadOnlyCollection<LinkedBinaryTree<T>.Node>> levelCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, [NotNull] Action<int, IReadOnlyCollection<RedBlackTree<T>.Node>> levelCallback)
 		{
 			thisValue.Iterate(root, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, levelCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, HorizontalDirectionFlags direction, [NotNull] Action<int, IReadOnlyCollection<LinkedBinaryTree<T>.Node>> levelCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalDirectionFlags direction, [NotNull] Action<int, IReadOnlyCollection<RedBlackTree<T>.Node>> levelCallback)
 		{
 			thisValue.Iterate(HorizontalFlow.LeftToRight, direction, levelCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, HorizontalDirectionFlags direction, [NotNull] Action<int, IReadOnlyCollection<LinkedBinaryTree<T>.Node>> levelCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalDirectionFlags direction, [NotNull] Action<int, IReadOnlyCollection<RedBlackTree<T>.Node>> levelCallback)
 		{
 			thisValue.Iterate(root, HorizontalFlow.LeftToRight, direction, levelCallback);
 		}
 
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<LinkedBinaryTree<T>.Node>> levelCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<RedBlackTree<T>.Node>> levelCallback)
 		{
 			thisValue.Iterate(flow, HorizontalDirectionFlags.Default, levelCallback);
 		}
-		public static void Iterate<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node root, HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<LinkedBinaryTree<T>.Node>> levelCallback)
+		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<RedBlackTree<T>.Node>> levelCallback)
 		{
 			thisValue.Iterate(root, flow, HorizontalDirectionFlags.Default, levelCallback);
 		}
 
-		/// <summary>
-		/// Fill a <see cref="LinkedBinaryTree{T}"/> from the LevelOrder <see cref="collection"/>.
-		/// <para>
-		/// LevelOrder => Root-Left-Right (Queue)
-		/// </para>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="thisValue"></param>
-		/// <param name="collection"></param>
-		public static void FromLevelOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> collection)
-		{
-			IReadOnlyList<T> list = new Lister<T>(collection);
-			// try simple cases first
-			if (FromSimpleList(thisValue, list)) return;
-
-			int index = 0;
-			LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(list[index++]);
-			thisValue.Root = node;
-
-			IComparer<T> comparer = thisValue.Comparer;
-			Queue<LinkedBinaryTree<T>.Node> queue = new Queue<LinkedBinaryTree<T>.Node>();
-			queue.Enqueue(node);
-
-			// not all queued items will be parents, it's expected the queue will contain enough nodes
-			while (index < list.Count)
-			{
-				int oldIndex = index;
-				LinkedBinaryTree<T>.Node root = queue.Dequeue();
-
-				// add left node
-				if (comparer.IsLessThan(list[index], root.Value))
-				{
-					node = new LinkedBinaryTree<T>.Node(list[index]);
-					root.Left = node;
-					queue.Enqueue(node);
-					index++;
-				}
-
-				// add right node
-				if (index < list.Count && comparer.IsGreaterThanOrEqual(list[index], root.Value))
-				{
-					node = new LinkedBinaryTree<T>.Node(list[index]);
-					root.Right = node;
-					queue.Enqueue(node);
-					index++;
-				}
-
-				if (oldIndex == index) index++;
-			}
-
-			Update(thisValue);
-			if (!thisValue.AutoBalance) return;
-			thisValue.Balance();
-		}
-
-		/// <summary>
-		/// Constructs a <see cref="LinkedBinaryTree{T}"/> from the PreOrder <see cref="collection"/>.
-		/// <para>
-		/// PreOrder => Root-Left-Right (Stack)
-		/// </para>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="thisValue"></param>
-		/// <param name="collection"></param>
-		public static void FromPreOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> collection)
-		{
-			// https://www.geeksforgeeks.org/construct-bst-from-given-preorder-traversal-set-2/
-			IReadOnlyList<T> list = new Lister<T>(collection);
-			// try simple cases first
-			if (FromSimpleList(thisValue, list)) return;
-
-			// first node of PreOrder will be root of tree
-			LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(list[0]);
-			thisValue.Root = node;
-
-			Stack<LinkedBinaryTree<T>.Node> stack = new Stack<LinkedBinaryTree<T>.Node>();
-			// Push root of the BST to the stack i.e, first element of the array.
-			stack.Push(node);
-
-			/*
-			 * Keep popping nodes while the stack is not empty.
-			 * When the value is greater than stack’s top value, make it the right
-			 * child of the last popped node and push it to the stack.
-			 * If the next value is less than the stack’s top value, make it the left
-			 * child of the stack’s top node and push it to the stack.
-			 */
-			IComparer<T> comparer = thisValue.Comparer;
-
-			// Traverse from second node
-			for (int i = 1; i < list.Count; i++)
-			{
-				LinkedBinaryTree<T>.Node root = null;
-
-				// Keep popping nodes while top of stack is greater.
-				while (stack.Count > 0 && comparer.IsGreaterThan(list[i], stack.Peek()))
-					root = stack.Pop();
-
-				node = new LinkedBinaryTree<T>.Node(list[i]);
-
-				if (root != null) root.Right = node;
-				else if (stack.Count > 0) stack.Peek().Left = node;
-
-				stack.Push(node);
-			}
-
-			Update(thisValue);
-			if (!thisValue.AutoBalance) return;
-			thisValue.Balance();
-		}
-
-		/// <summary>
-		/// Constructs a <see cref="LinkedBinaryTree{T}"/> from the InOrder <see cref="collection"/>.
-		/// <para>
-		/// Note that it is not possible to construct a unique binary tree from InOrder collection alone.
-		/// </para>
-		/// <para>
-		/// InOrder => Left-Root-Right (Stack)
-		/// </para>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="thisValue"></param>
-		/// <param name="collection"></param>
-		public static void FromInOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> collection)
-		{
-			IReadOnlyList<T> list = new Lister<T>(collection);
-			// try simple cases first
-			if (FromSimpleList(thisValue, list)) return;
-
-			int start = 0;
-			int end = list.Count - 1;
-			int index = IndexMid(start, end);
-			LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(list[index]);
-			thisValue.Root = node;
-
-			Queue<(int Index, int Start, int End, LinkedBinaryTree<T>.Node Node)> queue = new Queue<(int Index, int Start, int End, LinkedBinaryTree<T>.Node Node)>();
-			queue.Enqueue((index, start, end, node));
-
-			while (queue.Count > 0)
-			{
-				(int Index, int Start, int End, LinkedBinaryTree<T>.Node Node) tuple = queue.Dequeue();
-
-				// get the next left index
-				start = tuple.Start;
-				end = tuple.Index - 1;
-				int nodeIndex = IndexMid(start, end);
-
-				// add left node
-				if (nodeIndex > -1)
-				{
-					node = new LinkedBinaryTree<T>.Node(list[nodeIndex]);
-					tuple.Node.Left = node;
-					queue.Enqueue((nodeIndex, start, end, node));
-				}
-
-				// get the next right index
-				start = tuple.Index + 1;
-				end = tuple.End;
-				nodeIndex = IndexMid(start, end);
-
-				// add right node
-				if (nodeIndex > -1)
-				{
-					node = new LinkedBinaryTree<T>.Node(list[nodeIndex]);
-					tuple.Node.Right = node;
-					queue.Enqueue((nodeIndex, start, end, node));
-				}
-			}
-
-			Update(thisValue);
-			if (!thisValue.AutoBalance) return;
-			thisValue.Balance();
-
-			static int IndexMid(int start, int end)
-			{
-				return start > end
-							? -1
-							: start + (end - start) / 2;
-			}
-		}
-
-		/// <summary>
-		/// Constructs a <see cref="LinkedBinaryTree{T}"/> from the PostOrder <see cref="collection"/>.
-		/// <para>
-		/// PostOrder => Left-Right-Root (Stack)
-		/// </para>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="thisValue"></param>
-		/// <param name="collection"></param>
-		public static void FromPostOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> collection)
-		{
-			// https://www.geeksforgeeks.org/construct-a-bst-from-given-postorder-traversal-using-stack/
-			IReadOnlyList<T> list = new Lister<T>(collection);
-			// try simple cases first
-			if (FromSimpleList(thisValue, list)) return;
-
-			// last node of PostOrder will be root of tree
-			LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(list[list.Count - 1]);
-			thisValue.Root = node;
-
-			Stack<LinkedBinaryTree<T>.Node> stack = new Stack<LinkedBinaryTree<T>.Node>();
-			// Push root of the BST to the stack i.e, last element of the array.
-			stack.Push(node);
-
-			/*
-			 * The idea is to traverse the array in reverse.
-			 * If next element is > the element at the top of the stack then,
-			 * set this element as the right child of the element at the top
-			 * of the stack and also push it to the stack.
-			 * Else if, next element is < the element at the top of the stack then,
-			 * start popping all the elements from the stack until either the stack
-			 * is empty or the current element becomes > the element at the top of
-			 * the stack.
-			 * Make this element left child of the last popped node and repeat until
-			 * the array is traversed completely.
-			 */
-			IComparer<T> comparer = thisValue.Comparer;
-
-			// Traverse from second last node
-			for (int i = list.Count - 2; i >= 0; i--)
-			{
-				LinkedBinaryTree<T>.Node root = null;
-
-				// Keep popping nodes while top of stack is greater.
-				while (stack.Count > 0 && comparer.IsLessThan(list[i], stack.Peek()))
-					root = stack.Pop();
-
-				node = new LinkedBinaryTree<T>.Node(list[i]);
-
-				if (root != null) root.Left = node;
-				else if (stack.Count > 0) stack.Peek().Right = node;
-
-				stack.Push(node);
-			}
-
-			Update(thisValue);
-			if (!thisValue.AutoBalance) return;
-			thisValue.Balance();
-		}
-
-		/// <summary>
-		/// Constructs a <see cref="LinkedBinaryTree{T}"/> from <see cref="inOrderCollection"/> and <see cref="levelOrderCollection"/>.
-		/// <para>
-		/// InOrder => Left-Root-Right (Stack)
-		/// </para>
-		/// <para>
-		/// LevelOrder => Root-Left-Right (Queue)
-		/// </para>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="thisValue"></param>
-		/// <param name="inOrderCollection"></param>
-		/// <param name="levelOrderCollection"></param>
-		public static void FromInOrderAndLevelOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> levelOrderCollection)
-		{
-			IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
-			// Root-Left-Right
-			IReadOnlyList<T> levelOrder = new Lister<T>(levelOrderCollection);
-			if (inOrder.Count != levelOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(levelOrderCollection));
-			if (levelOrder.Count == 1 && inOrder.Count == 1 && !thisValue.Comparer.IsEqual(inOrder[0], levelOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(levelOrderCollection));
-			// try simple cases first
-			if (FromSimpleList(thisValue, levelOrder)) return;
-
-			/*
-			 * using the facts that:
-			 * 1. LevelOrder is organized in the form Root-Left-Right.
-			 * 2. InOrder is organized in the form Left-Root-Right,
-			 * from 1 and 2, the LevelOrder list can be used to identify
-			 * the root and other elements locations in the InOrder list.
-			 */
-			// the lookup will enhance the speed of looking for the index of the item to O(1)
-			IDictionary<T, int> lookup = new Dictionary<T, int>(thisValue.Comparer.AsEqualityComparer());
-
-			// add all InOrder items to the lookup
-			for (int i = 0; i < inOrder.Count; i++)
-			{
-				T key = inOrder[i];
-				if (lookup.ContainsKey(key)) continue;
-				lookup.Add(key, i);
-			}
-
-			int index = 0;
-			LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(levelOrder[index++]);
-			thisValue.Root = node;
-
-			Queue<(int Start, int End, LinkedBinaryTree<T>.Node Node)> queue = new Queue<(int Start, int End, LinkedBinaryTree<T>.Node Node)>();
-			queue.Enqueue((0, inOrder.Count - 1, node));
-
-			while (index < levelOrder.Count && queue.Count > 0)
-			{
-				(int Start, int End, LinkedBinaryTree<T>.Node Node) tuple = queue.Dequeue();
-
-				// get the root index (the current node index in the InOrder collection)
-				int rootIndex = lookup[tuple.Node.Value];
-				// find out the index of the next entry of LevelOrder in the InOrder collection
-				int levelIndex = lookup[levelOrder[index]];
-
-				// add left node
-				if (levelIndex >= tuple.Start && levelIndex <= rootIndex - 1)
-				{
-					node = new LinkedBinaryTree<T>.Node(inOrder[levelIndex]);
-					tuple.Node.Left = node;
-					queue.Enqueue((tuple.Start, rootIndex - 1, node));
-					index++;
-					// index and node changed, so will need to get the next entry of LevelOrder in the InOrder collection
-					levelIndex = index < levelOrder.Count
-									? lookup[levelOrder[index]]
-									: -1;
-				}
-
-				// add right node
-				if (levelIndex >= rootIndex + 1 && levelIndex <= tuple.End)
-				{
-					node = new LinkedBinaryTree<T>.Node(inOrder[levelIndex]);
-					tuple.Node.Right = node;
-					queue.Enqueue((rootIndex + 1, tuple.End, node));
-					index++;
-				}
-			}
-
-			Update(thisValue);
-			if (!thisValue.AutoBalance) return;
-			thisValue.Balance();
-		}
-
-		/// <summary>
-		/// Constructs a <see cref="LinkedBinaryTree{T}"/> from <see cref="inOrderCollection"/> and <see cref="preOrderCollection"/>.
-		/// <para>
-		/// InOrder => Left-Root-Right (Stack)
-		/// </para>
-		/// <para>
-		/// PreOrder => Root-Left-Right (Stack)
-		/// </para>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="thisValue"></param>
-		/// <param name="inOrderCollection"></param>
-		/// <param name="preOrderCollection"></param>
-		public static void FromInOrderAndPreOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> preOrderCollection)
-		{
-			IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
-			IReadOnlyList<T> preOrder = new Lister<T>(preOrderCollection);
-			if (inOrder.Count != preOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(preOrderCollection));
-			if (preOrder.Count == 1 && inOrder.Count == 1 && !thisValue.Comparer.IsEqual(inOrder[0], preOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(preOrderCollection));
-			// try simple cases first
-			if (FromSimpleList(thisValue, preOrder)) return;
-
-			/*
-			 * https://stackoverflow.com/questions/48352513/construct-binary-tree-given-its-inorder-and-preorder-traversals-without-recursio#48364040
-			 * 
-			 * The idea is to keep tree nodes in a stack from PreOrder traversal, till their counterpart is not found in InOrder traversal.
-			 * Once a counterpart is found, all children in the left sub-tree of the node must have been already visited.
-			 */
-			int preIndex = 0;
-			int inIndex = 0;
-			LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(preOrder[preIndex++]);
-			thisValue.Root = node;
-
-			IComparer<T> comparer = thisValue.Comparer;
-			Stack<LinkedBinaryTree<T>.Node> stack = new Stack<LinkedBinaryTree<T>.Node>();
-			stack.Push(node);
-
-			while (stack.Count > 0)
-			{
-				LinkedBinaryTree<T>.Node root = stack.Peek();
-
-				if (comparer.IsEqual(root.Value, inOrder[inIndex]))
-				{
-					stack.Pop();
-					inIndex++;
-
-					// if all the elements in inOrder have been visited, we are done
-					if (inIndex == inOrder.Count) break;
-					// if there are still some unvisited nodes in the left, skip
-					if (stack.Count > 0 && comparer.IsEqual(stack.Peek().Value, inOrder[inIndex])) continue;
-
-					/*
-					 * As top node in stack, still has not encountered its counterpart
-					 * in inOrder, so next element in preOrder must be right child of
-					 * the removed node
-					 */
-					node = new LinkedBinaryTree<T>.Node(preOrder[preIndex++]);
-					root.Right = node;
-					stack.Push(node);
-				}
-				else
-				{
-					/*
-					 * Top node in the stack has not encountered its counterpart
-					 * in inOrder, so next element in preOrder must be left child
-					 * of this node
-					 */
-					node = new LinkedBinaryTree<T>.Node(preOrder[preIndex++]);
-					root.Left = node;
-					stack.Push(node);
-				}
-			}
-
-			Update(thisValue);
-			if (!thisValue.AutoBalance) return;
-			thisValue.Balance();
-		}
-
-		/// <summary>
-		/// Constructs a <see cref="LinkedBinaryTree{T}"/> from <see cref="inOrderCollection"/> and <see cref="postOrderCollection"/>.
-		/// <para>
-		/// InOrder => Left-Root-Right (Stack)
-		/// </para>
-		/// <para>
-		/// PostOrder => Left-Right-Root (Stack)
-		/// </para>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="thisValue"></param>
-		/// <param name="inOrderCollection"></param>
-		/// <param name="postOrderCollection"></param>
-		public static void FromInOrderAndPostOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> postOrderCollection)
-		{
-			IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
-			IReadOnlyList<T> postOrder = new Lister<T>(postOrderCollection);
-			if (inOrder.Count != postOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(postOrderCollection));
-			if (postOrder.Count == 1 && inOrder.Count == 1 && !thisValue.Comparer.IsEqual(inOrder[0], postOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(postOrderCollection));
-			if (FromSimpleList(thisValue, postOrder)) return;
-
-			// the lookup will enhance the speed of looking for the index of the item to O(1)
-			IDictionary<T, int> lookup = new Dictionary<T, int>(thisValue.Comparer.AsEqualityComparer());
-
-			// add all InOrder items to the lookup
-			for (int i = 0; i < inOrder.Count; i++)
-			{
-				T key = inOrder[i];
-				if (lookup.ContainsKey(key)) continue;
-				lookup.Add(key, i);
-			}
-
-			// Traverse postOrder in reverse
-			int postIndex = postOrder.Count - 1;
-			LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(postOrder[postIndex--]);
-			thisValue.Root = node;
-
-			Stack<LinkedBinaryTree<T>.Node> stack = new Stack<LinkedBinaryTree<T>.Node>();
-			// Push root of the BST to the stack i.e, last element of the array.
-			stack.Push(node);
-
-			IComparer<T> comparer = thisValue.Comparer;
-
-			while (postIndex >= 0 && stack.Count > 0)
-			{
-				LinkedBinaryTree<T>.Node root = stack.Peek();
-				// get the root index (the current node index in the InOrder collection)
-				int rootIndex = lookup[root.Value];
-				// find out the index of the next entry of PostOrder in the InOrder collection
-				int index = lookup[postOrder[postIndex]];
-
-				// add right node
-				if (index > rootIndex)
-				{
-					node = new LinkedBinaryTree<T>.Node(inOrder[index]);
-					root.Right = node;
-					stack.Push(node);
-					postIndex--;
-
-					// index and node changed, so will need to get the next entry of PostOrder in the InOrder collection
-					index = postIndex > -1
-								? lookup[postOrder[postIndex]]
-								: -1;
-				}
-
-				// add left node
-				if (index > -1 && index < rootIndex)
-				{
-					if (comparer.IsLessThan(postOrder[postIndex], root.Value))
-					{
-						// Keep popping nodes while top of stack is greater.
-						while (stack.Count > 0 && comparer.IsLessThan(postOrder[postIndex], stack.Peek().Value))
-							root = stack.Pop();
-					}
-
-					node = new LinkedBinaryTree<T>.Node(inOrder[index]);
-					root.Left = node;
-					stack.Push(node);
-					postIndex--;
-				}
-			}
-
-			Update(thisValue);
-			if (!thisValue.AutoBalance) return;
-			thisValue.Balance();
-		}
-
-		private static bool FromSimpleList<T>([NotNull] LinkedBinaryTree<T> tree, [NotNull] IReadOnlyList<T> list)
+		// todo
+		///// <summary>
+		///// Fill a <see cref="RedBlackTree{T}"/> from the LevelOrder <see cref="collection"/>.
+		///// <para>
+		///// LevelOrder => Root-Left-Right (Queue)
+		///// </para>
+		///// </summary>
+		///// <typeparam name="T"></typeparam>
+		///// <param name="thisValue"></param>
+		///// <param name="collection"></param>
+		//public static void FromLevelOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> collection)
+		//{
+		//	IReadOnlyList<T> list = new Lister<T>(collection);
+		//	// try simple cases first
+		//	if (FromSimpleList(thisValue, list)) return;
+
+		//	int index = 0;
+		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(list[index++]);
+		//	thisValue.Root = node;
+
+		//	IComparer<T> comparer = thisValue.Comparer;
+		//	Queue<RedBlackTree<T>.Node> queue = new Queue<RedBlackTree<T>.Node>();
+		//	queue.Enqueue(node);
+
+		//	// not all queued items will be parents, it's expected the queue will contain enough nodes
+		//	while (index < list.Count)
+		//	{
+		//		int oldIndex = index;
+		//		RedBlackTree<T>.Node root = queue.Dequeue();
+
+		//		// add left node
+		//		if (comparer.IsLessThan(list[index], root.Value))
+		//		{
+		//			node = new RedBlackTree<T>.Node(list[index]);
+		//			root.Left = node;
+		//			queue.Enqueue(node);
+		//			index++;
+		//		}
+
+		//		// add right node
+		//		if (index < list.Count && comparer.IsGreaterThanOrEqual(list[index], root.Value))
+		//		{
+		//			node = new RedBlackTree<T>.Node(list[index]);
+		//			root.Right = node;
+		//			queue.Enqueue(node);
+		//			index++;
+		//		}
+
+		//		if (oldIndex == index) index++;
+		//	}
+
+		//	Update(thisValue);
+		//	thisValue.Balance();
+		//}
+
+		///// <summary>
+		///// Constructs a <see cref="RedBlackTree{T}"/> from the PreOrder <see cref="collection"/>.
+		///// <para>
+		///// PreOrder => Root-Left-Right (Stack)
+		///// </para>
+		///// </summary>
+		///// <typeparam name="T"></typeparam>
+		///// <param name="thisValue"></param>
+		///// <param name="collection"></param>
+		//public static void FromPreOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> collection)
+		//{
+		//	// https://www.geeksforgeeks.org/construct-bst-from-given-preorder-traversal-set-2/
+		//	IReadOnlyList<T> list = new Lister<T>(collection);
+		//	// try simple cases first
+		//	if (FromSimpleList(thisValue, list)) return;
+
+		//	// first node of PreOrder will be root of tree
+		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(list[0]);
+		//	thisValue.Root = node;
+
+		//	Stack<RedBlackTree<T>.Node> stack = new Stack<RedBlackTree<T>.Node>();
+		//	// Push root of the BST to the stack i.e, first element of the array.
+		//	stack.Push(node);
+
+		//	/*
+		//	 * Keep popping nodes while the stack is not empty.
+		//	 * When the value is greater than stack’s top value, make it the right
+		//	 * child of the last popped node and push it to the stack.
+		//	 * If the next value is less than the stack’s top value, make it the left
+		//	 * child of the stack’s top node and push it to the stack.
+		//	 */
+		//	IComparer<T> comparer = thisValue.Comparer;
+
+		//	// Traverse from second node
+		//	for (int i = 1; i < list.Count; i++)
+		//	{
+		//		RedBlackTree<T>.Node root = null;
+
+		//		// Keep popping nodes while top of stack is greater.
+		//		while (stack.Count > 0 && comparer.IsGreaterThan(list[i], stack.Peek().Value))
+		//			root = stack.Pop();
+
+		//		node = new RedBlackTree<T>.Node(list[i]);
+
+		//		if (root != null) root.Right = node;
+		//		else if (stack.Count > 0) stack.Peek().Left = node;
+
+		//		stack.Push(node);
+		//	}
+
+		//	Update(thisValue);
+		//	thisValue.Balance();
+		//}
+
+		///// <summary>
+		///// Constructs a <see cref="RedBlackTree{T}"/> from the InOrder <see cref="collection"/>.
+		///// <para>
+		///// Note that it is not possible to construct a unique binary tree from InOrder collection alone.
+		///// </para>
+		///// <para>
+		///// InOrder => Left-Root-Right (Stack)
+		///// </para>
+		///// </summary>
+		///// <typeparam name="T"></typeparam>
+		///// <param name="thisValue"></param>
+		///// <param name="collection"></param>
+		//public static void FromInOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> collection)
+		//{
+		//	IReadOnlyList<T> list = new Lister<T>(collection);
+		//	// try simple cases first
+		//	if (FromSimpleList(thisValue, list)) return;
+
+		//	int start = 0;
+		//	int end = list.Count - 1;
+		//	int index = IndexMid(start, end);
+		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(list[index]);
+		//	thisValue.Root = node;
+
+		//	Queue<(int Index, int Start, int End, RedBlackTree<T>.Node Node)> queue = new Queue<(int Index, int Start, int End, RedBlackTree<T>.Node Node)>();
+		//	queue.Enqueue((index, start, end, node));
+
+		//	while (queue.Count > 0)
+		//	{
+		//		(int Index, int Start, int End, RedBlackTree<T>.Node Node) tuple = queue.Dequeue();
+
+		//		// get the next left index
+		//		start = tuple.Start;
+		//		end = tuple.Index - 1;
+		//		int nodeIndex = IndexMid(start, end);
+
+		//		// add left node
+		//		if (nodeIndex > -1)
+		//		{
+		//			node = new RedBlackTree<T>.Node(list[nodeIndex]);
+		//			tuple.Node.Left = node;
+		//			queue.Enqueue((nodeIndex, start, end, node));
+		//		}
+
+		//		// get the next right index
+		//		start = tuple.Index + 1;
+		//		end = tuple.End;
+		//		nodeIndex = IndexMid(start, end);
+
+		//		// add right node
+		//		if (nodeIndex > -1)
+		//		{
+		//			node = new RedBlackTree<T>.Node(list[nodeIndex]);
+		//			tuple.Node.Right = node;
+		//			queue.Enqueue((nodeIndex, start, end, node));
+		//		}
+		//	}
+
+		//	Update(thisValue);
+		//	thisValue.Balance();
+
+		//	static int IndexMid(int start, int end)
+		//	{
+		//		return start > end
+		//					? -1
+		//					: start + (end - start) / 2;
+		//	}
+		//}
+
+		///// <summary>
+		///// Constructs a <see cref="RedBlackTree{T}"/> from the PostOrder <see cref="collection"/>.
+		///// <para>
+		///// PostOrder => Left-Right-Root (Stack)
+		///// </para>
+		///// </summary>
+		///// <typeparam name="T"></typeparam>
+		///// <param name="thisValue"></param>
+		///// <param name="collection"></param>
+		//public static void FromPostOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> collection)
+		//{
+		//	// https://www.geeksforgeeks.org/construct-a-bst-from-given-postorder-traversal-using-stack/
+		//	IReadOnlyList<T> list = new Lister<T>(collection);
+		//	// try simple cases first
+		//	if (FromSimpleList(thisValue, list)) return;
+
+		//	// last node of PostOrder will be root of tree
+		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(list[list.Count - 1]);
+		//	thisValue.Root = node;
+
+		//	Stack<RedBlackTree<T>.Node> stack = new Stack<RedBlackTree<T>.Node>();
+		//	// Push root of the BST to the stack i.e, last element of the array.
+		//	stack.Push(node);
+
+		//	/*
+		//	 * The idea is to traverse the array in reverse.
+		//	 * If next element is > the element at the top of the stack then,
+		//	 * set this element as the right child of the element at the top
+		//	 * of the stack and also push it to the stack.
+		//	 * Else if, next element is < the element at the top of the stack then,
+		//	 * start popping all the elements from the stack until either the stack
+		//	 * is empty or the current element becomes > the element at the top of
+		//	 * the stack.
+		//	 * Make this element left child of the last popped node and repeat until
+		//	 * the array is traversed completely.
+		//	 */
+		//	IComparer<T> comparer = thisValue.Comparer;
+
+		//	// Traverse from second last node
+		//	for (int i = list.Count - 2; i >= 0; i--)
+		//	{
+		//		RedBlackTree<T>.Node root = null;
+
+		//		// Keep popping nodes while top of stack is greater.
+		//		while (stack.Count > 0 && comparer.IsLessThan(list[i], stack.Peek().Value))
+		//			root = stack.Pop();
+
+		//		node = new RedBlackTree<T>.Node(list[i]);
+
+		//		if (root != null) root.Left = node;
+		//		else if (stack.Count > 0) stack.Peek().Right = node;
+
+		//		stack.Push(node);
+		//	}
+
+		//	Update(thisValue);
+		//	thisValue.Balance();
+		//}
+
+		///// <summary>
+		///// Constructs a <see cref="RedBlackTree{T}"/> from <see cref="inOrderCollection"/> and <see cref="levelOrderCollection"/>.
+		///// <para>
+		///// InOrder => Left-Root-Right (Stack)
+		///// </para>
+		///// <para>
+		///// LevelOrder => Root-Left-Right (Queue)
+		///// </para>
+		///// </summary>
+		///// <typeparam name="T"></typeparam>
+		///// <param name="thisValue"></param>
+		///// <param name="inOrderCollection"></param>
+		///// <param name="levelOrderCollection"></param>
+		//public static void FromInOrderAndLevelOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> levelOrderCollection)
+		//{
+		//	IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
+		//	// Root-Left-Right
+		//	IReadOnlyList<T> levelOrder = new Lister<T>(levelOrderCollection);
+		//	if (inOrder.Count != levelOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(levelOrderCollection));
+		//	if (levelOrder.Count == 1 && inOrder.Count == 1 && !thisValue.Comparer.IsEqual(inOrder[0], levelOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(levelOrderCollection));
+		//	// try simple cases first
+		//	if (FromSimpleList(thisValue, levelOrder)) return;
+
+		//	/*
+		//	 * using the facts that:
+		//	 * 1. LevelOrder is organized in the form Root-Left-Right.
+		//	 * 2. InOrder is organized in the form Left-Root-Right,
+		//	 * from 1 and 2, the LevelOrder list can be used to identify
+		//	 * the root and other elements locations in the InOrder list.
+		//	 */
+		//	// the lookup will enhance the speed of looking for the index of the item to O(1)
+		//	IDictionary<T, int> lookup = new Dictionary<T, int>(thisValue.Comparer.AsEqualityComparer());
+
+		//	// add all InOrder items to the lookup
+		//	for (int i = 0; i < inOrder.Count; i++)
+		//	{
+		//		T key = inOrder[i];
+		//		if (lookup.ContainsKey(key)) continue;
+		//		lookup.Add(key, i);
+		//	}
+
+		//	int index = 0;
+		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(levelOrder[index++]);
+		//	thisValue.Root = node;
+
+		//	Queue<(int Start, int End, RedBlackTree<T>.Node Node)> queue = new Queue<(int Start, int End, RedBlackTree<T>.Node Node)>();
+		//	queue.Enqueue((0, inOrder.Count - 1, node));
+
+		//	while (index < levelOrder.Count && queue.Count > 0)
+		//	{
+		//		(int Start, int End, RedBlackTree<T>.Node Node) tuple = queue.Dequeue();
+
+		//		// get the root index (the current node index in the InOrder collection)
+		//		int rootIndex = lookup[tuple.Node.Value];
+		//		// find out the index of the next entry of LevelOrder in the InOrder collection
+		//		int levelIndex = lookup[levelOrder[index]];
+
+		//		// add left node
+		//		if (levelIndex >= tuple.Start && levelIndex <= rootIndex - 1)
+		//		{
+		//			node = new RedBlackTree<T>.Node(inOrder[levelIndex]);
+		//			tuple.Node.Left = node;
+		//			queue.Enqueue((tuple.Start, rootIndex - 1, node));
+		//			index++;
+		//			// index and node changed, so will need to get the next entry of LevelOrder in the InOrder collection
+		//			levelIndex = index < levelOrder.Count
+		//							? lookup[levelOrder[index]]
+		//							: -1;
+		//		}
+
+		//		// add right node
+		//		if (levelIndex >= rootIndex + 1 && levelIndex <= tuple.End)
+		//		{
+		//			node = new RedBlackTree<T>.Node(inOrder[levelIndex]);
+		//			tuple.Node.Right = node;
+		//			queue.Enqueue((rootIndex + 1, tuple.End, node));
+		//			index++;
+		//		}
+		//	}
+
+		//	Update(thisValue);
+		//	thisValue.Balance();
+		//}
+
+		///// <summary>
+		///// Constructs a <see cref="RedBlackTree{T}"/> from <see cref="inOrderCollection"/> and <see cref="preOrderCollection"/>.
+		///// <para>
+		///// InOrder => Left-Root-Right (Stack)
+		///// </para>
+		///// <para>
+		///// PreOrder => Root-Left-Right (Stack)
+		///// </para>
+		///// </summary>
+		///// <typeparam name="T"></typeparam>
+		///// <param name="thisValue"></param>
+		///// <param name="inOrderCollection"></param>
+		///// <param name="preOrderCollection"></param>
+		//public static void FromInOrderAndPreOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> preOrderCollection)
+		//{
+		//	IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
+		//	IReadOnlyList<T> preOrder = new Lister<T>(preOrderCollection);
+		//	if (inOrder.Count != preOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(preOrderCollection));
+		//	if (preOrder.Count == 1 && inOrder.Count == 1 && !thisValue.Comparer.IsEqual(inOrder[0], preOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(preOrderCollection));
+		//	// try simple cases first
+		//	if (FromSimpleList(thisValue, preOrder)) return;
+
+		//	/*
+		//	 * https://stackoverflow.com/questions/48352513/construct-binary-tree-given-its-inorder-and-preorder-traversals-without-recursio#48364040
+		//	 * 
+		//	 * The idea is to keep tree nodes in a stack from PreOrder traversal, till their counterpart is not found in InOrder traversal.
+		//	 * Once a counterpart is found, all children in the left sub-tree of the node must have been already visited.
+		//	 */
+		//	int preIndex = 0;
+		//	int inIndex = 0;
+		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(preOrder[preIndex++]);
+		//	thisValue.Root = node;
+
+		//	IComparer<T> comparer = thisValue.Comparer;
+		//	Stack<RedBlackTree<T>.Node> stack = new Stack<RedBlackTree<T>.Node>();
+		//	stack.Push(node);
+
+		//	while (stack.Count > 0)
+		//	{
+		//		RedBlackTree<T>.Node root = stack.Peek();
+
+		//		if (comparer.IsEqual(root.Value, inOrder[inIndex]))
+		//		{
+		//			stack.Pop();
+		//			inIndex++;
+
+		//			// if all the elements in inOrder have been visited, we are done
+		//			if (inIndex == inOrder.Count) break;
+		//			// if there are still some unvisited nodes in the left, skip
+		//			if (stack.Count > 0 && comparer.IsEqual(stack.Peek().Value, inOrder[inIndex])) continue;
+
+		//			/*
+		//			 * As top node in stack, still has not encountered its counterpart
+		//			 * in inOrder, so next element in preOrder must be right child of
+		//			 * the removed node
+		//			 */
+		//			node = new RedBlackTree<T>.Node(preOrder[preIndex++]);
+		//			root.Right = node;
+		//			stack.Push(node);
+		//		}
+		//		else
+		//		{
+		//			/*
+		//			 * Top node in the stack has not encountered its counterpart
+		//			 * in inOrder, so next element in preOrder must be left child
+		//			 * of this node
+		//			 */
+		//			node = new RedBlackTree<T>.Node(preOrder[preIndex++]);
+		//			root.Left = node;
+		//			stack.Push(node);
+		//		}
+		//	}
+
+		//	Update(thisValue);
+		//	thisValue.Balance();
+		//}
+
+		///// <summary>
+		///// Constructs a <see cref="RedBlackTree{T}"/> from <see cref="inOrderCollection"/> and <see cref="postOrderCollection"/>.
+		///// <para>
+		///// InOrder => Left-Root-Right (Stack)
+		///// </para>
+		///// <para>
+		///// PostOrder => Left-Right-Root (Stack)
+		///// </para>
+		///// </summary>
+		///// <typeparam name="T"></typeparam>
+		///// <param name="thisValue"></param>
+		///// <param name="inOrderCollection"></param>
+		///// <param name="postOrderCollection"></param>
+		//public static void FromInOrderAndPostOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> postOrderCollection)
+		//{
+		//	IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
+		//	IReadOnlyList<T> postOrder = new Lister<T>(postOrderCollection);
+		//	if (inOrder.Count != postOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(postOrderCollection));
+		//	if (postOrder.Count == 1 && inOrder.Count == 1 && !thisValue.Comparer.IsEqual(inOrder[0], postOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(postOrderCollection));
+		//	if (FromSimpleList(thisValue, postOrder)) return;
+
+		//	// the lookup will enhance the speed of looking for the index of the item to O(1)
+		//	IDictionary<T, int> lookup = new Dictionary<T, int>(thisValue.Comparer.AsEqualityComparer());
+
+		//	// add all InOrder items to the lookup
+		//	for (int i = 0; i < inOrder.Count; i++)
+		//	{
+		//		T key = inOrder[i];
+		//		if (lookup.ContainsKey(key)) continue;
+		//		lookup.Add(key, i);
+		//	}
+
+		//	// Traverse postOrder in reverse
+		//	int postIndex = postOrder.Count - 1;
+		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(postOrder[postIndex--]);
+		//	thisValue.Root = node;
+
+		//	Stack<RedBlackTree<T>.Node> stack = new Stack<RedBlackTree<T>.Node>();
+		//	// Push root of the BST to the stack i.e, last element of the array.
+		//	stack.Push(node);
+
+		//	IComparer<T> comparer = thisValue.Comparer;
+
+		//	while (postIndex >= 0 && stack.Count > 0)
+		//	{
+		//		RedBlackTree<T>.Node root = stack.Peek();
+		//		// get the root index (the current node index in the InOrder collection)
+		//		int rootIndex = lookup[root.Value];
+		//		// find out the index of the next entry of PostOrder in the InOrder collection
+		//		int index = lookup[postOrder[postIndex]];
+
+		//		// add right node
+		//		if (index > rootIndex)
+		//		{
+		//			node = new RedBlackTree<T>.Node(inOrder[index]);
+		//			root.Right = node;
+		//			stack.Push(node);
+		//			postIndex--;
+
+		//			// index and node changed, so will need to get the next entry of PostOrder in the InOrder collection
+		//			index = postIndex > -1
+		//						? lookup[postOrder[postIndex]]
+		//						: -1;
+		//		}
+
+		//		// add left node
+		//		if (index > -1 && index < rootIndex)
+		//		{
+		//			if (comparer.IsLessThan(postOrder[postIndex], root.Value))
+		//			{
+		//				// Keep popping nodes while top of stack is greater.
+		//				while (stack.Count > 0 && comparer.IsLessThan(postOrder[postIndex], stack.Peek().Value))
+		//					root = stack.Pop();
+		//			}
+
+		//			node = new RedBlackTree<T>.Node(inOrder[index]);
+		//			root.Left = node;
+		//			stack.Push(node);
+		//			postIndex--;
+		//		}
+		//	}
+
+		//	Update(thisValue);
+		//	thisValue.Balance();
+		//}
+
+		private static bool FromSimpleList<T>([NotNull] RedBlackTree<T> tree, [NotNull] IReadOnlyList<T> list)
 		{
 			bool result;
 			tree.Clear();
@@ -2777,8 +3076,7 @@ namespace asm.Collections
 					result = true;
 					break;
 				case 1:
-					tree.Root = new LinkedBinaryTree<T>.Node(list[0]);
-					Update(tree);
+					tree.Root = new RedBlackTree<T>.Node(list[0]) { Color = false };
 					result = true;
 					break;
 				default:
@@ -2787,68 +3085,6 @@ namespace asm.Collections
 			}
 
 			return result;
-		}
-
-		private static void Update<T>([NotNull] LinkedBinaryTree<T> tree)
-		{
-			if (tree.Root == null) return;
-
-			if (tree.Root.IsLeaf)
-			{
-				tree.Count++;
-				return;
-			}
-
-			/*
-			 * will use a PostOrder traversal to update the tree.
-			 * Left-Root-Right (Stack)
-			 *
-			 * on the way down, will update children.
-			 * on the way up, will update parents
-			 */
-			int version = tree._version;
-			Stack<LinkedBinaryTree<T>.Node> stack = new Stack<LinkedBinaryTree<T>.Node>();
-			LinkedBinaryTree<T>.Node lastVisited = null;
-			// Start at the root
-			LinkedBinaryTree<T>.Node current = tree.Root;
-
-			while (current != null || stack.Count > 0)
-			{
-				if (version != tree._version) throw new VersionChangedException();
-
-				if (current != null)
-				{
-					current.Depth = 1 + (current.Parent?.Depth ?? -1);
-					tree.Count++;
-					stack.Push(current);
-					// Navigate left
-					current = current.Left;
-					continue;
-				}
-
-				LinkedBinaryTree<T>.Node peek = stack.Peek();
-				/*
-				* At this point we are either coming from
-				* either the root node or the left branch.
-				* Is there a right Node
-				* if yes, then navigate right.
-				*/
-				if (peek.Right != null && !ReferenceEquals(lastVisited, peek.Right))
-				{
-					// Navigate right
-					current = peek.Right;
-				}
-				else
-				{
-					// visit the next queued node
-					current = peek;
-					lastVisited = stack.Pop();
-					current.Height = 1 + Math.Max(current.Left?.Height ?? -1, current.Right?.Height ?? -1);
-					current = null;
-				}
-			}
-
-			tree._version++;
 		}
 
 		private static void ThrowNotFormingATree(string collection1Name, string collection2Name)

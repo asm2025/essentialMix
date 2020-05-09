@@ -15,50 +15,50 @@ namespace asm.Collections
 	/// </summary>
 	/// <typeparam name="T">The element type of the tree</typeparam>
 	[Serializable]
-	public sealed class LinkedBinarySearchTree<T> : LinkedBinaryTree<T>
+	public sealed class BinarySearchTree<T> : LinkedBinaryTree<T>
 	{
 		private const int BALANCE_FACTOR = 1;
 
 		/// <inheritdoc />
-		public LinkedBinarySearchTree()
+		public BinarySearchTree()
 			: this(Comparer<T>.Default)
 		{
 		}
 
 		/// <inheritdoc />
-		public LinkedBinarySearchTree(IComparer<T> comparer)
+		public BinarySearchTree(IComparer<T> comparer)
 			: base(comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public LinkedBinarySearchTree(T value)
+		public BinarySearchTree(T value)
 			: this(value, Comparer<T>.Default)
 		{
 		}
 
 		/// <inheritdoc />
-		public LinkedBinarySearchTree(T value, IComparer<T> comparer)
+		public BinarySearchTree(T value, IComparer<T> comparer)
 			: base(comparer)
 		{
 			Add(value);
 		}
 
 		/// <inheritdoc />
-		public LinkedBinarySearchTree([NotNull] IEnumerable<T> collection)
+		public BinarySearchTree([NotNull] IEnumerable<T> collection)
 			: this(collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public LinkedBinarySearchTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
+		public BinarySearchTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
 			: base(comparer)
 		{
 			Add(collection);
 		}
 
 		/// <inheritdoc />
-		internal LinkedBinarySearchTree(SerializationInfo info, StreamingContext context)
+		internal BinarySearchTree(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
@@ -67,17 +67,20 @@ namespace asm.Collections
 		public override bool AutoBalance { get; } = false;
 
 		/// <inheritdoc />
-		public override Node FindNearest(T value)
+		public override Node Successor(T value)
 		{
 			Node current = null, next = Root;
 
 			while (next != null)
 			{
 				current = next;
-				if (Comparer.IsEqual(current.Value, value)) break;
 				next = Comparer.IsLessThan(value, next.Value)
 							? next.Left
 							: next.Right;
+				// handle duplicates
+				if (next != null && Comparer.IsEqual(next.Value, value)) continue;
+				// OK, found it if are equal
+				if (Comparer.IsEqual(current.Value, value)) break;
 			}
 
 			return current;
@@ -86,7 +89,7 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public override void Add(T value)
 		{
-			Node parent = FindNearest(value);
+			Node parent = Successor(value);
 
 			if (parent == null)
 			{
@@ -96,9 +99,6 @@ namespace asm.Collections
 				_version++;
 				return;
 			}
-
-			// duplicate value
-			if (Comparer.IsEqual(value, parent.Value)) return;
 			
 			Node node = new Node(value);
 
@@ -247,8 +247,12 @@ namespace asm.Collections
 			return node == null
 					|| node.IsLeaf
 					|| Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR
-					&& (node.Left == null || node.Left.IsLeaf || Math.Abs(node.Left.BalanceFactor) <= BALANCE_FACTOR)
-					&& (node.Right == null || node.Right.IsLeaf || Math.Abs(node.Right.BalanceFactor) <= BALANCE_FACTOR);
+					&& (node.Left == null 
+						|| node.Left.IsLeaf 
+						|| Math.Abs(node.Left.BalanceFactor) <= BALANCE_FACTOR)
+					&& (node.Right == null 
+						|| node.Right.IsLeaf 
+						|| Math.Abs(node.Right.BalanceFactor) <= BALANCE_FACTOR);
 		}
 
 		/// <summary>
@@ -328,7 +332,7 @@ namespace asm.Collections
 			do
 			{
 				// update root reference
-				Node root = node.Parent;
+				Node parent = node.Parent;
 
 				if (node.BalanceFactor > 1)
 				{
@@ -345,16 +349,16 @@ namespace asm.Collections
 					node = RotateLeft(node);
 				}
 
-				if (root == null)
+				if (parent == null)
 				{
 					Root = node;
 					node = null;
 				}
 				else
 				{
-					node = !IsBalanced(root)
-								? root
-								: root.Parent;
+					node = !IsBalanced(parent)
+								? parent
+								: parent.Parent;
 				}
 
 				if (node == null) continue;

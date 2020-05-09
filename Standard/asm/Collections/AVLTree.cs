@@ -12,7 +12,7 @@ namespace asm.Collections
 	/// <summary>
 	/// <inheritdoc />
 	/// <para>
-	/// <strong>This is an AVLTree implementation.</strong>
+	/// <strong>AVLTree implementation.</strong>
 	/// </para>
 	/// </summary>
 	/// <typeparam name="T">The element type of the tree</typeparam>
@@ -61,17 +61,20 @@ namespace asm.Collections
 		public override bool AutoBalance { get; } = true;
 
 		/// <inheritdoc />
-		public override Node FindNearest(T value)
+		public override Node Successor(T value)
 		{
 			Node current = null, next = Root;
 
 			while (next != null)
 			{
 				current = next;
-				if (Comparer.IsEqual(current.Value, value)) break;
 				next = Comparer.IsLessThan(value, next.Value)
 							? next.Left
 							: next.Right;
+				// handle duplicates
+				if (next != null && Comparer.IsEqual(next.Value, value)) continue;
+				// OK, found it if are equal
+				if (Comparer.IsEqual(current.Value, value)) break;
 			}
 
 			return current;
@@ -80,7 +83,7 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public override void Add(T value)
 		{
-			Node parent = FindNearest(value);
+			Node parent = Successor(value);
 
 			if (parent == null)
 			{
@@ -90,9 +93,6 @@ namespace asm.Collections
 				_version++;
 				return;
 			}
-
-			// duplicate value
-			if (Comparer.IsEqual(value, parent.Value)) return;
 
 			Node node = new Node(value);
 
@@ -111,7 +111,6 @@ namespace asm.Collections
 			}
 			if (IsBalanced(parent)) return;
 			Balance(parent);
-			_version++;
 		}
 
 		/// <inheritdoc />
@@ -220,7 +219,6 @@ namespace asm.Collections
 			if (IsBalanced(parent)) parent = parent.Parent;
 			if (IsBalanced(parent)) return true;
 			Balance(parent);
-			_version++;
 			return true;
 		}
 
@@ -255,13 +253,17 @@ namespace asm.Collections
 			return node == null
 					|| node.IsLeaf
 					|| Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR
-					&& (node.Left == null || node.Left.IsLeaf || Math.Abs(node.Left.BalanceFactor) <= BALANCE_FACTOR)
-					&& (node.Right == null || node.Right.IsLeaf || Math.Abs(node.Right.BalanceFactor) <= BALANCE_FACTOR);
+					&& (node.Left == null 
+						|| node.Left.IsLeaf 
+						|| Math.Abs(node.Left.BalanceFactor) <= BALANCE_FACTOR)
+					&& (node.Right == null 
+						|| node.Right.IsLeaf 
+						|| Math.Abs(node.Right.BalanceFactor) <= BALANCE_FACTOR);
 		}
 
 		/// <summary>
 		/// <inheritdoc />
-		/// <para><strong>This is the AVLTree implementation of balancing the tree</strong></para>
+		/// <para><strong>AVLTree implementation of balancing the tree</strong></para>
 		/// </summary>
 		public override void Balance()
 		{
@@ -336,7 +338,7 @@ namespace asm.Collections
 			do
 			{
 				// update root reference
-				Node root = node.Parent;
+				Node parent = node.Parent;
 
 				if (node.BalanceFactor > 1)
 				{
@@ -353,16 +355,16 @@ namespace asm.Collections
 					node = RotateLeft(node);
 				}
 
-				if (root == null)
+				if (parent == null)
 				{
 					Root = node;
 					node = null;
 				}
 				else
 				{
-					node = !IsBalanced(root)
-								? root
-								: root.Parent;
+					node = !IsBalanced(parent)
+								? parent
+								: parent.Parent;
 				}
 
 				if (node == null) continue;
