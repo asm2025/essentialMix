@@ -3,21 +3,24 @@
 namespace asm.Patterns.Collections
 {
 	/// <summary>
-	/// How to Pick One?
-	/// 1. Extra Space required for Level Order Traversal is O(w) 
-	/// where w is maximum width of Binary Tree. In level order 
-	/// traversal, queue one by one stores nodes of different level.
-	/// 2. Extra Space required for Depth First Traversals is O(h) 
-	/// where h is maximum height of Binary Tree. In Depth First 
-	/// Traversals, stack (or function call stack) stores all 
-	/// ancestors of a node.
-	/// 3. Depth First Traversals are typically recursive and recursive 
-	/// code requires function call overheads.
-	/// 4. The most important points is, BFS starts visiting nodes from 
-	/// root while DFS starts visiting nodes from leaves. So if our problem 
-	/// is to search something that is more likely is closer to root, we 
-	/// would prefer BFS. And if the target node is close to a leaf, we 
-	/// would prefer DFS.
+	/// <para>
+	/// Breadth First (BFS) (LevelOrder): FCIADGJBEHK => Root-Left-Right (Queue)
+	/// </para>
+	/// <para>
+	/// Depth First (DFS) [PreOrder]:   FCABDEIGHJK => Root-Left-Right (Stack)
+	/// </para>
+	/// <para>
+	/// Depth First (DFS) [InOrder]:    ABCDEFGHIJK => Left-Root-Right (Stack)
+	/// </para>
+	/// <para>
+	/// Depth First (DFS) [PostOrder]:  BAEDCHGKJIF => Left-Right-Root (Stack)
+	/// </para>
+	/// <para>
+	/// If the problem is to search for a value that is more likely is closer to
+	/// the root, BFS would should be preferred but if the target node is closer
+	/// to a leaf, we would prefer DFS (more likely PostOrder or depending on the
+	/// situation).
+	/// </para>
 	/// </summary>
 	public enum TraverseMethod
 	{

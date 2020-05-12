@@ -4,6 +4,7 @@ using asm.Collections;
 using asm.Extensions;
 using asm.Helpers;
 using asm.Patterns.Layout;
+using Crayon;
 using JetBrains.Annotations;
 
 namespace TestApp
@@ -14,91 +15,208 @@ namespace TestApp
 		{
 			Console.OutputEncoding = Encoding.UTF8;
 
-			//TestBinaryTree();
-			//TestBinarySearchTree();
-			//TestAVLTree();
-			TestRedBlackTree();
+			//TestLinkedBinaryTreeFromTraversal();
+			
+			//TestBinarySearchTreeAdd();
+			//TestBinarySearchTreeRemove();
+			//TestBinarySearchTreeBalance();
+			
+			//TestAVLTreeAdd();
+			TestAVLTreeRemove();
+			
+			//TestRedBlackTreeAdd();
+			//TestRedBlackTreeRemove();
 
 			ConsoleHelper.Pause();
 		}
 
-		private static void TestBinaryTree()
+		private static void TestLinkedBinaryTreeFromTraversal()
 		{
-			const string TREE_DATA_LEVEL = "FCIADGJBEHK";
-			const string TREE_DATA_PRE = "FCABDEIGHJK";
-			const string TREE_DATA_IN = "ABCDEFGHIJK";
-			const string TREE_DATA_POST = "BAEDCHGKJIF";
-			const int NUM_TESTS = 7;
+//			const string TREE_DATA_LEVEL = "FCIADGJBEHK";
+//			const string TREE_DATA_PRE = "FCABDEIGHJK";
+//			const string TREE_DATA_IN = "ABCDEFGHIJK";
+//			const string TREE_DATA_POST = "BAEDCHGKJIF";
+//			const int NUM_TESTS = 7;
 
-			BinarySearchTree<char> tree = new BinarySearchTree<char>();
+//			BinarySearchTree<char> tree = new BinarySearchTree<char>();
 			
+//			bool more;
+//			int i = 0;
+
+//			do
+//			{
+//				Console.Clear();
+//				Console.WriteLine();
+				
+//				switch (i)
+//				{
+//					case 0:
+//						Console.WriteLine($@"Data from {"LevelOrder".BrightCyan()} traversal:
+//{TREE_DATA_LEVEL}");
+//						tree.FromLevelOrder(TREE_DATA_LEVEL);
+//						break;
+//					case 1:
+//						Console.WriteLine($@"Data from {"PreOrder".BrightCyan()} traversal:
+//{TREE_DATA_PRE}");
+//						tree.FromPreOrder(TREE_DATA_PRE);
+//						break;
+//					case 2:
+//						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} traversal:
+//{TREE_DATA_IN}");
+//						tree.FromInOrder(TREE_DATA_IN);
+//						break;
+//					case 3:
+//						Console.WriteLine($@"Data from {"PostOrder".BrightCyan()} traversal:
+//{TREE_DATA_POST}");
+//						tree.FromPostOrder(TREE_DATA_POST);
+//						break;
+//					case 4:
+//						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} and {"LevelOrder".BrightCyan()} traversals:
+//{TREE_DATA_IN}
+//{TREE_DATA_LEVEL}");
+//						tree.FromInOrderAndLevelOrder(TREE_DATA_IN, TREE_DATA_LEVEL);
+//						break;
+//					case 5:
+//						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} and {"PreOrder".BrightCyan()} traversals:
+//{TREE_DATA_IN}
+//{TREE_DATA_PRE}");
+//						tree.FromInOrderAndPreOrder(TREE_DATA_IN, TREE_DATA_PRE);
+//						break;
+//					case 6:
+//						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} and {"PostOrder".BrightCyan()} traversals:
+//{TREE_DATA_IN}
+//{TREE_DATA_POST}");
+//						tree.FromInOrderAndPostOrder(TREE_DATA_IN, TREE_DATA_POST);
+//						break;
+//				}
+
+//				tree.Print();
+//				i++;
+
+//				if (i >= NUM_TESTS)
+//				{
+//					more = false;
+//					continue;
+//				}
+
+//				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+//				ConsoleKeyInfo response = Console.ReadKey(true);
+//				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+//			}
+//			while (more);
+		}
+
+		private static void TestBinarySearchTreeAdd()
+		{
 			bool more;
-			int i = 0;
 
 			do
 			{
 				Console.Clear();
 				Console.WriteLine();
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
-				switch (i)
+				Console.WriteLine("Test adding...".BrightGreen());
+				BinarySearchTree<int> tree = new BinarySearchTree<int>();
+
+				foreach (int v in values)
 				{
-					case 0:
-						Console.WriteLine($@"Data from LevelOrder traversal:
-{TREE_DATA_LEVEL}");
-						tree.FromLevelOrder(TREE_DATA_LEVEL);
-						break;
-					case 1:
-						Console.WriteLine($@"Data from PreOrder traversal:
-{TREE_DATA_PRE}");
-						tree.FromPreOrder(TREE_DATA_PRE);
-						break;
-					case 2:
-						Console.WriteLine($@"Data from InOrder traversal:
-{TREE_DATA_IN}");
-						tree.FromInOrder(TREE_DATA_IN);
-						break;
-					case 3:
-						Console.WriteLine($@"Data from PostOrder traversal:
-{TREE_DATA_POST}");
-						tree.FromPostOrder(TREE_DATA_POST);
-						break;
-					case 4:
-						Console.WriteLine($@"Data from InOrder and LevelOrder traversals:
-{TREE_DATA_IN}
-{TREE_DATA_LEVEL}");
-						tree.FromInOrderAndLevelOrder(TREE_DATA_IN, TREE_DATA_LEVEL);
-						break;
-					case 5:
-						Console.WriteLine($@"Data from InOrder and PreOrder traversals:
-{TREE_DATA_IN}
-{TREE_DATA_PRE}");
-						tree.FromInOrderAndPreOrder(TREE_DATA_IN, TREE_DATA_PRE);
-						break;
-					case 6:
-						Console.WriteLine($@"Data from InOrder and PostOrder traversals:
-{TREE_DATA_IN}
-{TREE_DATA_POST}");
-						tree.FromInOrderAndPostOrder(TREE_DATA_IN, TREE_DATA_POST);
-						break;
+					tree.Add(v);
+					tree.Print();
 				}
 
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
-				i++;
 
-				if (i >= NUM_TESTS)
-				{
-					more = false;
-					continue;
-				}
-
-				Console.Write("Press [Y] to move to next test or any other key to exit. ");
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
 			}
 			while (more);
 		}
 
-		private static void TestBinarySearchTree()
+		private static void TestBinarySearchTreeRemove()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Console.WriteLine();
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				Console.WriteLine("Test adding...".BrightGreen());
+				BinarySearchTree<int> tree = new BinarySearchTree<int>(values);
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+				tree.Print();
+
+				Console.WriteLine("Test removing...".BrightRed());
+				int value = values.PickRandom();
+				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
+
+				if (!tree.Remove(value))
+				{
+					Console.WriteLine("Didn't remove a shit...!".BrightRed());
+					return;
+				}
+
+				tree.Print();
+
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+			}
+			while (more);
+		}
+
+		private static void TestBinarySearchTreeBalance()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Console.WriteLine();
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				Console.WriteLine("Test adding...".BrightGreen());
+				BinarySearchTree<int> tree = new BinarySearchTree<int>(values);
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+				tree.Print();
+
+				Console.WriteLine("Test removing...".BrightRed());
+				int value = values.PickRandom();
+				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
+
+				if (!tree.Remove(value))
+				{
+					Console.WriteLine("Didn't remove a shit...!".BrightRed());
+					return;
+				}
+
+				tree.Print();
+
+				if (!tree.IsBalanced())
+				{
+					Console.WriteLine("Test balancing...".BrightGreen());
+					tree.Balance();
+					tree.Print();
+				}
+
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+			}
+			while (more);
+		}
+
+		private static void TestAVLTreeAdd()
 		{
 			bool more;
 
@@ -109,40 +227,28 @@ namespace TestApp
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: " + string.Join(", ", values));
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
-				Console.WriteLine("Test adding...");
-				BinarySearchTree<int> tree = new BinarySearchTree<int>(values);
-				Console.WriteLine("InOrder: " + string.Join(", ", tree));
-				tree.Print();
+				Console.WriteLine("Test adding...".BrightGreen());
+				AVLTree<int> tree = new AVLTree<int>();
 
-				Console.WriteLine("Test removing...");
-				int value = values.PickRandom();
-				Console.WriteLine($"will remove {value}.");
-
-				if (!tree.Remove(value))
+				foreach (int v in values)
 				{
-					Console.WriteLine("Didn't remove a shit...!");
-					return;
-				}
-
-				tree.Print();
-
-				if (!tree.IsBalanced())
-				{
-					Console.WriteLine("Test balancing...");
-					tree.Balance();
+					tree.Add(v);
 					tree.Print();
 				}
 
-				Console.Write("Press [Y] to make another test or any other key to exit. ");
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+				tree.Print();
+
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
 			}
 			while (more);
 		}
 
-		private static void TestAVLTree()
+		private static void TestAVLTreeRemove()
 		{
 			bool more;
 
@@ -151,35 +257,35 @@ namespace TestApp
 				Console.Clear();
 				Console.WriteLine();
 
-				int len = RNGRandomHelper.Next(1, 20);
+				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: " + string.Join(", ", values));
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
-				Console.WriteLine("Test adding...");
+				Console.WriteLine("Test adding...".BrightGreen());
 				AVLTree<int> tree = new AVLTree<int>(values);
-				Console.WriteLine("InOrder: " + string.Join(", ", tree));
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 
-				Console.WriteLine("Test removing...");
+				Console.WriteLine("Test removing...".BrightRed());
 				int value = values.PickRandom();
-				Console.WriteLine($"will remove {value}.");
+				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
 
 				if (!tree.Remove(value))
 				{
-					Console.WriteLine("Didn't remove a shit...!");
+					Console.WriteLine("Didn't remove a shit...!".BrightRed());
 					return;
 				}
 
 				tree.Print();
 
-				Console.Write("Press [Y] to make another test or any other key to exit. ");
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
 			}
 			while (more);
 		}
 
-		private static void TestRedBlackTree()
+		private static void TestRedBlackTreeAdd()
 		{
 			bool more;
 
@@ -188,28 +294,53 @@ namespace TestApp
 				Console.Clear();
 				Console.WriteLine();
 
-				int len = RNGRandomHelper.Next(1, 20);
+				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: " + string.Join(", ", values));
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
-				Console.WriteLine("Test adding...");
+				Console.WriteLine("Test adding...".BrightGreen());
 				RedBlackTree<int> tree = new RedBlackTree<int>(values);
-				Console.WriteLine("InOrder: " + string.Join(", ", tree));
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 
-				//Console.WriteLine("Test removing...");
-				//int value = values.PickRandom();
-				//Console.WriteLine($"will remove {value}.");
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+			}
+			while (more);
+		}
 
-				//if (!tree.Remove(value))
-				//{
-				//	Console.WriteLine("Didn't remove a shit...!");
-				//	return;
-				//}
+		private static void TestRedBlackTreeRemove()
+		{
+			bool more;
 
-				//tree.Print();
+			do
+			{
+				Console.Clear();
+				Console.WriteLine();
 
-				Console.Write("Press [Y] to make another test or any other key to exit. ");
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				Console.WriteLine("Test adding...".BrightGreen());
+				RedBlackTree<int> tree = new RedBlackTree<int>(values);
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+				tree.Print();
+
+				Console.WriteLine("Test removing...".BrightRed());
+				int value = values.PickRandom();
+				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
+
+				if (!tree.Remove(value))
+				{
+					Console.WriteLine("Didn't remove a shit...!".BrightRed());
+					return;
+				}
+
+				tree.Print();
+
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
 			}
@@ -219,7 +350,7 @@ namespace TestApp
 		[NotNull]
 		private static int[] GetRandomIntegers(int len = 0)
 		{
-			if (len < 1) len = RNGRandomHelper.Next(1, 20);
+			if (len < 1) len = RNGRandomHelper.Next(1, 12);
 	
 			int[] values = new int[len];
 
@@ -234,7 +365,7 @@ namespace TestApp
 		[NotNull]
 		private static double[] GetRandomDoubles(int len = 0)
 		{
-			if (len < 1) len = RNGRandomHelper.Next(1, 20);
+			if (len < 1) len = RNGRandomHelper.Next(1, 12);
 
 			double[] values = new double[len];
 
@@ -249,7 +380,7 @@ namespace TestApp
 		[NotNull]
 		private static string[] GetRandomStrings(int len = 0)
 		{
-			if (len < 1) len = RNGRandomHelper.Next(1, 20);
+			if (len < 1) len = RNGRandomHelper.Next(1, 12);
 
 			string[] values = new string[len];
 			StringBuilder sb = new StringBuilder();
@@ -277,9 +408,9 @@ public static class LinkedBinaryTreeExtension
 	public static void Print<T>([NotNull] this LinkedBinaryTree<T> thisValue, bool diagnosticInfo = true)
 	{
 		Console.WriteLine();
-		Console.WriteLine($"Dimensions: {thisValue.Count} x {thisValue.Height}");
-		Console.WriteLine($"Balanced: {thisValue.IsBalanced()}, factor: {thisValue.BalanceFactor}");
-		Console.WriteLine($"Is valid: {thisValue.Validate()}");
+		Console.WriteLine($"{"Dimensions:".Yellow()} {thisValue.Count.ToString().Underline()} x {thisValue.Height.ToString().Underline()}.");
+		Console.WriteLine($"{"Balanced:".Yellow()} {(thisValue.IsBalanced() ? "Yes".BrightGreen() : "No".BrightRed())}");
+		Console.WriteLine($"{"Valid:".Yellow()} {(thisValue.Validate() ? "Yes".BrightGreen() : "No".BrightRed())}");
 		thisValue.Print(Orientation.Vertical, diagnosticInfo);
 	}
 
@@ -297,15 +428,15 @@ public static class RedBlackTreeExtension
 	public static void Print<T>([NotNull] this RedBlackTree<T> thisValue, bool diagnosticInfo = true)
 	{
 		Console.WriteLine();
-		Console.WriteLine($"Count: {thisValue.Count}");
-		Console.WriteLine($"Balanced: {thisValue.IsBalanced()}");
-		Console.WriteLine($"Is valid: {thisValue.Validate()}");
+		Console.WriteLine($"Count: {thisValue.Count.ToString().Underline()}");
+		Console.WriteLine($"Balanced: {(thisValue.IsBalanced() ? "Yes".BrightGreen() : "No".BrightRed())}");
+		Console.WriteLine($"{"Valid:".Yellow()} {(thisValue.Validate() ? "Yes".BrightGreen() : "No".BrightRed())}");
 		thisValue.Print(Orientation.Vertical, diagnosticInfo);
 	}
 
 	public static void Print<T>([NotNull] this RedBlackTree<T> thisValue, Orientation orientation, bool diagnosticInfo = true)
 	{
-		string treeString = thisValue.ToString(orientation, diagnosticInfo);
+		string treeString = thisValue.ToString(orientation, diagnosticInfo, e => e.Color ? e.ToString().BrightRed() : e.ToString());
 		Console.WriteLine();
 		Console.WriteLine(treeString);
 		Console.WriteLine();

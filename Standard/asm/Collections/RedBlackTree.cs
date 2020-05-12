@@ -63,7 +63,7 @@ namespace asm.Collections
 				get => _nodes[PARENT];
 				internal set
 				{
-					if (ReferenceEquals(_nodes[PARENT], value)) return;
+					if (_nodes[PARENT] == value) return;
 
 					// reset old parent
 					if (_nodes[PARENT] != null)
@@ -73,11 +73,11 @@ namespace asm.Collections
 						* could have moved to another parent. Don't use IsLeft or IsRight here.
 						*/
 						// access the fields directly to avoid StackOverflowException
-						if (ReferenceEquals(_nodes[PARENT]._nodes[LEFT], this))
+						if (_nodes[PARENT]._nodes[LEFT] == this)
 						{
 							_nodes[PARENT]._nodes[LEFT] = null;
 						}
-						else if (ReferenceEquals(_nodes[PARENT]._nodes[RIGHT], this))
+						else if (_nodes[PARENT]._nodes[RIGHT] == this)
 						{
 							_nodes[PARENT]._nodes[RIGHT] = null;
 						}
@@ -92,10 +92,10 @@ namespace asm.Collections
 				get => _nodes[LEFT];
 				internal set
 				{
-					if (ReferenceEquals(_nodes[LEFT], value)) return;
+					if (_nodes[LEFT] == value) return;
 					
 					// reset old left, access the fields directly to avoid StackOverflowException
-					if (_nodes[LEFT] != null && ReferenceEquals(_nodes[LEFT]._nodes[PARENT], this))
+					if (_nodes[LEFT] != null && _nodes[LEFT]._nodes[PARENT] == this)
 					{
 						_nodes[LEFT]._nodes[PARENT] = null;
 					}
@@ -110,10 +110,10 @@ namespace asm.Collections
 				get => _nodes[RIGHT];
 				internal set
 				{
-					if (ReferenceEquals(_nodes[RIGHT], value)) return;
+					if (_nodes[RIGHT] == value) return;
 					
 					// reset old right, access the fields directly to avoid StackOverflowException
-					if (_nodes[RIGHT] != null && ReferenceEquals(_nodes[RIGHT]._nodes[PARENT], this))
+					if (_nodes[RIGHT] != null && _nodes[RIGHT]._nodes[PARENT] == this)
 					{
 						_nodes[RIGHT]._nodes[PARENT] = null;
 					}
@@ -122,6 +122,22 @@ namespace asm.Collections
 					if (_nodes[RIGHT] != null) _nodes[RIGHT]._nodes[PARENT] = this;
 				}
 			}
+
+			// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
+			public Node Uncle =>
+				_nodes[PARENT]?._nodes[PARENT] == null
+					? null // no parent or grand parent
+					: _nodes[PARENT].IsLeft
+						? _nodes[PARENT]._nodes[PARENT]._nodes[RIGHT] // uncle on the right
+						: _nodes[PARENT]._nodes[PARENT]._nodes[LEFT];
+
+			// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
+			public Node Sibling =>
+				_nodes[PARENT] == null
+					? null // no parent
+					: IsLeft
+						? _nodes[PARENT]._nodes[RIGHT] // sibling on the right
+						: _nodes[PARENT]._nodes[LEFT];
 
 			public T Value { get; set; }
 
@@ -134,9 +150,9 @@ namespace asm.Collections
 
 			public bool IsRoot => _nodes[PARENT] == null;
 
-			public bool IsLeft => ReferenceEquals(_nodes[PARENT]?._nodes[LEFT], this);
+			public bool IsLeft => _nodes[PARENT]?._nodes[LEFT] == this;
 
-			public bool IsRight => ReferenceEquals(_nodes[PARENT]?._nodes[RIGHT], this);
+			public bool IsRight => _nodes[PARENT]?._nodes[RIGHT] == this;
 
 			public bool IsLeaf => _nodes[LEFT] == null && _nodes[RIGHT] == null;
 
@@ -161,6 +177,8 @@ namespace asm.Collections
 					node = node.Parent;
 				}
 			}
+
+			public static implicit operator T([NotNull] Node node) { return node.Value; }
 		}
 
 		/// <summary>
@@ -909,7 +927,7 @@ namespace asm.Collections
 						 * Is there a right node?
 						 * if yes, then navigate right.
 						 */
-						if (peek.Right != null && !ReferenceEquals(lastVisited, peek.Right))
+						if (peek.Right != null && lastVisited != peek.Right)
 						{
 							// Navigate right
 							current = peek.IsRoot
@@ -961,7 +979,7 @@ namespace asm.Collections
 						 * Is there a left node?
 						 * if yes, then navigate left.
 						 */
-						if (peek.Left != null && !ReferenceEquals(lastVisited, peek.Left))
+						if (peek.Left != null && lastVisited != peek.Left)
 						{
 							// Navigate left
 							current = peek.IsRoot
@@ -1256,7 +1274,7 @@ namespace asm.Collections
 						 * Is there a right node?
 						 * if yes, then navigate right.
 						 */
-						if (peek.Right != null && !ReferenceEquals(lastVisited, peek.Right))
+						if (peek.Right != null && lastVisited != peek.Right)
 						{
 							// Navigate right
 							current = peek.IsRoot
@@ -1308,7 +1326,7 @@ namespace asm.Collections
 						 * Is there a left node?
 						 * if yes, then navigate left.
 						 */
-						if (peek.Left != null && !ReferenceEquals(lastVisited, peek.Left))
+						if (peek.Left != null && lastVisited != peek.Left)
 						{
 							// Navigate left
 							current = peek.IsRoot
@@ -1551,6 +1569,7 @@ namespace asm.Collections
 		internal RedBlackTree(SerializationInfo info, StreamingContext context)
 		{
 			siInfo = info;
+			Comparer = Comparer<T>.Default;
 		}
 
 		/// <inheritdoc />
@@ -1758,7 +1777,7 @@ namespace asm.Collections
 			Count++;
 			_version++;
 			if (IsBalanced(node)) return;
-			Balance(node);
+			FixRedRed(node);
 		}
 
 		public void Add([NotNull] IEnumerable<T> collection)
@@ -1776,28 +1795,13 @@ namespace asm.Collections
 
 		public bool Remove([NotNull] Node node)
 		{
-			Node parent = node.Parent;
+			// A node that replaces the deleted node
 			Node child;
 
 			// case 1: node has no right child
 			if (node.Right == null)
 			{
 				child = node.Left;
-
-				if (parent == null)
-				{
-					Root = child;
-				}
-				else if (Comparer.IsLessThan(node.Value, parent.Value))
-				{
-					// if node < parent, move the left to the parent's left
-					parent.Left = child;
-				}
-				else
-				{
-					// else, move the left to the parent's right
-					parent.Right = child;
-				}
 			}
 			// case 2: node has a right child which doesn't have a left child
 			else if (node.Right.Left == null)
@@ -1805,57 +1809,29 @@ namespace asm.Collections
 				// move the left to the right child's left
 				node.Right.Left = node.Left;
 				child = node.Right;
-
-				if (parent == null)
-				{
-					Root = child;
-				}
-				else if (Comparer.IsLessThan(node.Value, parent.Value))
-				{
-					// if node < parent, move the right to the parent's left
-					parent.Left = child;
-				}
-				else
-				{
-					// else, move the right to the parent's right
-					parent.Right = child;
-				}
 			}
 			// case 3: node has a right child that has a left child
 			else
 			{
 				// find the right child's left most child
-				Node leftmost = node.Right.Left;
+				child = node.Right.Left;
 
-				while (leftmost.Left != null)
+				while (child.Left != null)
 				{
-					leftmost = leftmost.Left;
+					child = child.Left;
 				}
+			}
 
-				// move the left-most right to the parent's left
-				Node leftMostParent = leftmost.Parent;
-				leftMostParent.Left = leftmost.Right;
-				// update nodes
-				Update(leftMostParent.Left);
-				if (!IsBalanced(leftMostParent)) Balance(leftMostParent);
-				// adjust the left-most child nodes
-				leftmost.Left = node.Left;
-				leftmost.Right = node.Right;
-				child = leftmost;
+			Node parent = node.Parent;
+			bool dblBlack = (child == null || !child.Color) && !node.Color;
 
+			if (child == null)
+			{
+				// node is leaf
 				if (parent == null)
 				{
-					Root = child;
-				}
-				else if (Comparer.IsLessThan(node.Value, parent.Value))
-				{
-					// if node < parent, move the left-most to the parent's left
-					parent.Left = child;
-				}
-				else
-				{
-					// else, move the left-most to the parent's right
-					parent.Right = child;
+					// node is root
+					Root = null;
 				}
 			}
 
@@ -1873,10 +1849,6 @@ namespace asm.Collections
 
 			Count--;
 			_version++;
-			if (parent == null) return true;
-			if (IsBalanced(parent)) parent = parent.Parent;
-			if (IsBalanced(parent)) return true;
-			Balance(parent);
 			return true;
 		}
 
@@ -2047,11 +2019,11 @@ namespace asm.Collections
 				Node node = unbalancedNodes.Dequeue();
 				// check again if status changed
 				if (IsBalanced(node)) continue;
-				Balance(node);
+				FixRedRed(node);
 			}
 		}
 
-		private void Balance(Node node)
+		private void FixRedRed(Node node)
 		{
 			/*
 			 * balance the tree
@@ -2139,7 +2111,12 @@ namespace asm.Collections
 				}
 			}
 
-			if (node.IsRoot) Root = node;
+			if (node.IsRoot)
+			{
+				Root = node;
+				_version++;
+			}
+
 			Root.Color = false;
 		}
 
@@ -2233,28 +2210,28 @@ namespace asm.Collections
 
 	public static class RedBlackTreeExtension
 	{
-		public static string ToString<T>([NotNull] this RedBlackTree<T> thisValue, Orientation orientation, bool diagnosticInfo = false) { return ToString(thisValue, thisValue.Root, orientation, diagnosticInfo); }
-		public static string ToString<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node node, Orientation orientation, bool diagnosticInfo = false)
+		public static string ToString<T>([NotNull] this RedBlackTree<T> thisValue, Orientation orientation, bool diagnosticInfo = false, Func<RedBlackTree<T>.Node, string> onFormatNode = null) { return ToString(thisValue, thisValue.Root, orientation, diagnosticInfo, onFormatNode); }
+		public static string ToString<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node node, Orientation orientation, bool diagnosticInfo = false, Func<RedBlackTree<T>.Node, string> onFormatNode = null)
 		{
 			if (node == null) return string.Empty;
-			if (node.IsLeaf) return Format(node, diagnosticInfo);
+			if (node.IsLeaf) return Format(node, diagnosticInfo, onFormatNode);
 			return orientation switch
 			{
-				Orientation.Horizontal => Horizontally(thisValue, node, diagnosticInfo),
-				Orientation.Vertical => Vertically(thisValue, node, diagnosticInfo),
+				Orientation.Horizontal => Horizontally(thisValue, node, diagnosticInfo, onFormatNode),
+				Orientation.Vertical => Vertically(thisValue, node, diagnosticInfo, onFormatNode),
 				_ => throw new ArgumentOutOfRangeException(nameof(orientation), orientation, null)
 			};
 
-			static string Format(RedBlackTree<T>.Node node, bool diagnosticInfo)
+			static string Format(RedBlackTree<T>.Node node, bool diagnosticInfo, Func<RedBlackTree<T>.Node, string> formatNode)
 			{
-				return node == null
-							? string.Empty
-							: diagnosticInfo
-								? $"{node} :D{node.Depth}{(node.Color ? 'R' : 'B')}"
-								: node.ToString();
+				if (node == null) return string.Empty;
+				string nodeStr = formatNode?.Invoke(node) ?? node.ToString();
+				return diagnosticInfo
+							? $"{node} :D{node.Depth}{(node.Color ? 'R' : 'B')}"
+							: node.ToString();
 			}
 
-			static string Horizontally(RedBlackTree<T> tree, RedBlackTree<T>.Node node, bool diagnostic)
+			static string Horizontally(RedBlackTree<T> tree, RedBlackTree<T>.Node node, bool diagnostic, Func<RedBlackTree<T>.Node, string> formatNode)
 			{
 				const string STR_BLANK = "    ";
 				const string STR_EXT = "│   ";
@@ -2267,7 +2244,7 @@ namespace asm.Collections
 
 				tree.Iterate(node, TraverseMethod.InOrder, HorizontalFlow.RightToLeft, HorizontalDirectionFlags.Default, e =>
 				{
-					connectors.Push(Format(e, diagnostic));
+					connectors.Push(Format(e, diagnostic, formatNode));
 
 					if (e.IsRight) connectors.Push(STR_CONNECTOR_R);
 					else if (e.IsLeft) connectors.Push(STR_CONNECTOR_L);
@@ -2292,7 +2269,7 @@ namespace asm.Collections
 				return sb.ToString();
 			}
 
-			static string Vertically(RedBlackTree<T> tree, RedBlackTree<T>.Node node, bool diagnostic)
+			static string Vertically(RedBlackTree<T> tree, RedBlackTree<T>.Node node, bool diagnostic, Func<RedBlackTree<T>.Node, string> formatNode)
 			{
 				const char C_BLANK = ' ';
 				const char C_EXT = '─';
@@ -2327,7 +2304,7 @@ namespace asm.Collections
 					}
 
 					if (line.Length > 0) line.Append(C_BLANK);
-					line.Append(Format(e, diagnostic));
+					line.Append(Format(e, diagnostic, formatNode));
 					distance = line.Length;
 				});
 

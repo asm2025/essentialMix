@@ -89,9 +89,7 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public override void Add(T value)
 		{
-			Node parent = Successor(value);
-
-			if (parent == null)
+			if (Root == null)
 			{
 				// no parent means there is no root currently
 				Root = new Node(value);
@@ -99,15 +97,34 @@ namespace asm.Collections
 				_version++;
 				return;
 			}
+
+			// find a successor
+			Node parent = null, next = Root;
+			Stack<Node> stack = new Stack<Node>();
+
+			while (next != null)
+			{
+				parent = next;
+				stack.Push(parent);
+				next = Comparer.IsLessThan(value, next.Value)
+							? next.Left
+							: next.Right;
+			}
 			
+			if (parent == null) throw new Exception("No successor found."); // not suppose to happen
+
 			Node node = new Node(value);
 
 			if (Comparer.IsLessThan(value, parent.Value)) parent.Left = node;
 			else parent.Right = node;
 
 			// update nodes
-			UpdateDown(node);
-			UpdateUp(parent);
+			while (stack.Count > 0)
+			{
+				parent = stack.Pop();
+				SetHeight(parent);
+			}
+
 			Count++;
 			_version++;
 		}
@@ -116,27 +133,12 @@ namespace asm.Collections
 		public override bool Remove(Node node)
 		{
 			Node parent = node.Parent;
-			Node child;
+			Node child, leftMostParent = null;
 
 			// case 1: node has no right child
 			if (node.Right == null)
 			{
 				child = node.Left;
-
-				if (parent == null)
-				{
-					Root = child;
-				}
-				else if (Comparer.IsLessThan(node.Value, parent.Value))
-				{
-					// if node < parent, move the left to the parent's left
-					parent.Left = child;
-				}
-				else
-				{
-					// else, move the left to the parent's right
-					parent.Right = child;
-				}
 			}
 			// case 2: node has a right child which doesn't have a left child
 			else if (node.Right.Left == null)
@@ -144,21 +146,6 @@ namespace asm.Collections
 				// move the left to the right child's left
 				node.Right.Left = node.Left;
 				child = node.Right;
-
-				if (parent == null)
-				{
-					Root = child;
-				}
-				else if (Comparer.IsLessThan(node.Value, parent.Value))
-				{
-					// if node < parent, move the right to the parent's left
-					parent.Left = child;
-				}
-				else
-				{
-					// else, move the right to the parent's right
-					parent.Right = child;
-				}
 			}
 			// case 3: node has a right child that has a left child
 			else
@@ -166,49 +153,43 @@ namespace asm.Collections
 				// find the right child's left most child
 				Node leftmost = node.Right.Left;
 
-				while (leftmost.Left != null)
-				{
+				while (leftmost.Left != null) 
 					leftmost = leftmost.Left;
-				}
 
 				// move the left-most right to the parent's left
-				Node leftMostParent = leftmost.Parent;
+				leftMostParent = leftmost.Parent;
 				leftMostParent.Left = leftmost.Right;
-				// update nodes
-				UpdateDown(leftMostParent.Left);
-				UpdateUp(leftMostParent);
 				// adjust the left-most child nodes
 				leftmost.Left = node.Left;
 				leftmost.Right = node.Right;
 				child = leftmost;
-
-				if (parent == null)
-				{
-					Root = child;
-				}
-				else if (Comparer.IsLessThan(node.Value, parent.Value))
-				{
-					// if node < parent, move the left-most to the parent's left
-					parent.Left = child;
-				}
-				else
-				{
-					// else, move the left-most to the parent's right
-					parent.Right = child;
-				}
 			}
 
-			if (child != null)
+			if (parent == null)
 			{
-				if (parent == null) child.Parent = null;
-				// update nodes
-				UpdateDown(child);
-				UpdateUp(child);
+				if (child != null) child.Parent = null;
+				Root = child;
 			}
-			else if (parent != null)
+			else if (Comparer.IsLessThan(node.Value, parent.Value))
 			{
-				// update nodes
-				UpdateUp(parent);
+				// if node < parent, move the left to the parent's left
+				parent.Left = child;
+			}
+			else
+			{
+				// else, move the left to the parent's right
+				parent.Right = child;
+			}
+
+			Node update = child != null
+							? leftMostParent ?? child
+							: parent;
+
+			// update nodes
+			while (update != null)
+			{
+				SetHeight(update);
+				update = update.Parent;
 			}
 
 			Count--;
@@ -219,10 +200,10 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public override bool Validate(Node node)
 		{
-			if (node == null || node.IsLeaf) return true;
+			if (node == null) return true;
 
 			bool isValid = true;
-			Iterate(TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, e =>
+			Iterate(node, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, e =>
 			{
 				if (e.IsLeft)
 				{
@@ -327,51 +308,57 @@ namespace asm.Collections
 			 */
 			if (node == null || IsBalanced(node)) return;
 
-			int factor = Math.Abs(node.BalanceFactor);
+			Queue<Node> queue = new Queue<Node>();
+			queue.Enqueue(node);
 
-			do
+			while (queue.Count > 0)
 			{
-				// update root reference
-				Node parent = node.Parent;
+				node = queue.Dequeue();
+				if (Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR) continue;
 
-				if (node.BalanceFactor > 1)
+				Node parent = node.Parent;
+				bool isLeft = node.IsLeft;
+				bool changed = false;
+
+				if (node.BalanceFactor > 1) // left heavy
 				{
-					// Left-Left Case
-					if (node.Left?.BalanceFactor < 0) RotateLeft(node.Left);
-					// Left-Right Case
+					if (node.Left.BalanceFactor < 0) node.Left = RotateLeft(node.Left);
 					node = RotateRight(node);
+					changed = true;
 				}
-				else if (node.BalanceFactor < -1)
+				else if (node.BalanceFactor < -1) // right heavy
 				{
-					// Right-Right Case
-					if (node.Right?.BalanceFactor > 0) RotateRight(node.Right);
-					// Right-Left Case
+					if (node.Right.BalanceFactor > 0) node.Right = RotateRight(node.Right);
 					node = RotateLeft(node);
+					changed = true;
 				}
+
+				if (!changed) continue;
 
 				if (parent == null)
 				{
 					Root = node;
-					node = null;
 				}
 				else
 				{
-					node = !IsBalanced(parent)
-								? parent
-								: parent.Parent;
+					if (isLeft) parent.Left = node;
+					else parent.Right = node;
 				}
 
-				if (node == null) continue;
-				factor = Math.Abs(node.BalanceFactor);
+				if (!IsBalanced(node)) queue.Enqueue(node);
+				if (node.Left != null && !IsBalanced(node.Left)) queue.Enqueue(node.Left);
+				if (node.Right != null && !IsBalanced(node.Right)) queue.Enqueue(node.Right);
 
-				// find the first unbalanced parent, keep going up while Abs(BalanceFactor) < 2
-				while (factor <= BALANCE_FACTOR && node.Parent != null)
+				Node update = parent;
+
+				// update parents and find unbalanced ones
+				while (update != null)
 				{
-					node = node.Parent;
-					factor = Math.Abs(node.BalanceFactor);
+					SetHeight(update);
+					if (!IsBalanced(update)) queue.Enqueue(update);
+					update = update.Parent;
 				}
 			}
-			while (node != null && factor > BALANCE_FACTOR);
 		}
 	}
 }
