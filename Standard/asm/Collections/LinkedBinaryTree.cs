@@ -116,9 +116,9 @@ namespace asm.Collections
 
 			public bool IsRoot => _nodes[PARENT] == null;
 
-			public bool IsLeft => _nodes[PARENT] != null && Equals(_nodes[PARENT]._nodes[LEFT]);
+			public bool IsLeft => _nodes[PARENT]?._nodes[LEFT] == this;
 
-			public bool IsRight => _nodes[PARENT] != null && Equals(_nodes[PARENT]._nodes[RIGHT]);
+			public bool IsRight => _nodes[PARENT]?._nodes[RIGHT] == this;
 
 			public bool IsLeaf => _nodes[LEFT] == null && _nodes[RIGHT] == null;
 
@@ -164,7 +164,7 @@ namespace asm.Collections
 			private bool _started;
 			private bool _done;
 
-			internal Enumerator([NotNull] LinkedBinaryTree<T> tree, Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction)
+			internal Enumerator([NotNull] LinkedBinaryTree<T> tree, [NotNull] Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction)
 			{
 				_tree = tree;
 				_version = _tree._version;
@@ -896,7 +896,7 @@ namespace asm.Collections
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the left branch.
-						 * Is there a right Node
+						 * Is there a right node?
 						 * if yes, then navigate right.
 						 */
 						if (peek.Right != null && lastVisited != peek.Right)
@@ -948,7 +948,7 @@ namespace asm.Collections
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the right branch.
-						 * Is there a left Node
+						 * Is there a left node?
 						 * if yes, then navigate left.
 						 */
 						if (peek.Left != null && lastVisited != peek.Left)
@@ -1590,7 +1590,7 @@ namespace asm.Collections
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the left branch.
-						 * Is there a right Node
+						 * Is there a right node?
 						 * if yes, then navigate right.
 						 */
 						if (peek.Right != null && lastVisited != peek.Right)
@@ -1642,7 +1642,7 @@ namespace asm.Collections
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the right branch.
-						 * Is there a left Node
+						 * Is there a left node?
 						 * if yes, then navigate left.
 						 */
 						if (peek.Left != null && lastVisited != peek.Left)
@@ -2231,16 +2231,12 @@ namespace asm.Collections
 		/// <inheritdoc />
 		bool ICollection<T>.IsReadOnly => false;
 
-		public abstract bool AutoBalance { get; }
-
 		[NotNull]
 		public IComparer<T> Comparer { get; private set; }
 
 		public Node Root { get; protected internal set; }
 
 		public int Count { get; protected internal set; }
-
-		public int Height => Root?.Height ?? 0;
 
 		public bool IsFull => Root == null || Root.IsFull;
 
@@ -2603,6 +2599,8 @@ namespace asm.Collections
 		}
 		#endregion
 
+		public int GetHeight() { return Root?.Height ?? 0; }
+
 		/// <inheritdoc />
 		public bool Contains(T value) { return Find(value) != null; }
 
@@ -2613,7 +2611,7 @@ namespace asm.Collections
 		/// <returns>The found node or null if no match is found</returns>
 		public Node Find(T value)
 		{
-			Node current = Successor(value);
+			Node current = FindNearest(value);
 			if (current == null || Comparer.IsEqual(current.Value, value)) return current;
 			if (current.Left != null && Comparer.IsEqual(current.Left.Value, value)) return current.Left;
 			if (current.Right != null && Comparer.IsEqual(current.Right.Value, value)) return current.Right;
@@ -2655,16 +2653,10 @@ namespace asm.Collections
 		/// </summary>
 		/// <param name="value">The value to search for</param>
 		/// <returns>The found node or null if no match is found</returns>
-		public abstract Node Successor(T value);
+		public abstract Node FindNearest(T value);
 
 		/// <inheritdoc />
 		public abstract void Add(T value);
-
-		public void Add([NotNull] IEnumerable<T> collection)
-		{
-			foreach (T value in collection) 
-				Add(value);
-		}
 
 		/// <inheritdoc />
 		public bool Remove(T value)
@@ -2796,6 +2788,8 @@ namespace asm.Collections
 		[NotNull]
 		protected Node RotateLeft([NotNull] Node node /* x */)
 		{
+			bool isLeft = node.IsLeft;
+			Node oldParent = node.Parent;
 			Node newRoot /* y */ = node.Right;
 			Node oldLeft /* T2 */ = newRoot.Left;
 
@@ -2807,6 +2801,13 @@ namespace asm.Collections
 			SetHeight(node);
 			SetHeight(newRoot);
 
+			// connect the new root with the old parent
+			if (oldParent != null)
+			{
+				if (isLeft) oldParent.Left = newRoot;
+				else oldParent.Right = newRoot;
+			}
+
 			_version++;
 			// Return new root
 			return newRoot;
@@ -2815,6 +2816,8 @@ namespace asm.Collections
 		[NotNull]
 		protected Node RotateRight([NotNull] Node node /* y */)
 		{
+			bool isLeft = node.IsLeft;
+			Node oldParent = node.Parent;
 			Node newRoot /* x */ = node.Left;
 			Node oldRight /* T2 */ = newRoot.Right;
 
@@ -2826,12 +2829,19 @@ namespace asm.Collections
 			SetHeight(node);
 			SetHeight(newRoot);
 
+			// connect the new root with the old parent
+			if (oldParent != null)
+			{
+				if (isLeft) oldParent.Left = newRoot;
+				else oldParent.Right = newRoot;
+			}
+
 			_version++;
 			// Return new root
 			return newRoot;
 		}
 
-		protected static void SetHeight([NotNull] Node node)
+		protected internal static void SetHeight([NotNull] Node node)
 		{
 			node.Height = 1 + Math.Max(node.Left?.Height ?? -1, node.Right?.Height ?? -1);
 		}
@@ -2945,523 +2955,6 @@ namespace asm.Collections
 
 				return string.Join(Environment.NewLine, lines.OrderBy(e => e.Key).Select(e => e.Value));
 			}
-		}
-
-		///// <summary>
-		///// Fill a <see cref="LinkedBinaryTree{T}"/> from the LevelOrder <see cref="collection"/>.
-		///// <para>
-		///// LevelOrder => Root-Left-Right (Queue)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="collection"></param>
-		//public static void FromLevelOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> collection)
-		//{
-		//	IReadOnlyList<T> list = new Lister<T>(collection);
-		//	// try simple cases first
-		//	if (FromSimpleList(thisValue, list)) return;
-
-		//	int index = 0;
-		//	LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(list[index++]);
-		//	thisValue.Root = node;
-
-		//	IComparer<T> comparer = thisValue.Comparer;
-		//	Queue<LinkedBinaryTree<T>.Node> queue = new Queue<LinkedBinaryTree<T>.Node>();
-		//	queue.Enqueue(node);
-
-		//	// not all queued items will be parents, it's expected the queue will contain enough nodes
-		//	while (index < list.Count)
-		//	{
-		//		int oldIndex = index;
-		//		LinkedBinaryTree<T>.Node root = queue.Dequeue();
-
-		//		// add left node
-		//		if (comparer.IsLessThan(list[index], root.Value))
-		//		{
-		//			node = new LinkedBinaryTree<T>.Node(list[index]);
-		//			root.Left = node;
-		//			queue.Enqueue(node);
-		//			index++;
-		//		}
-
-		//		// add right node
-		//		if (index < list.Count && comparer.IsGreaterThanOrEqual(list[index], root.Value))
-		//		{
-		//			node = new LinkedBinaryTree<T>.Node(list[index]);
-		//			root.Right = node;
-		//			queue.Enqueue(node);
-		//			index++;
-		//		}
-
-		//		if (oldIndex == index) index++;
-		//	}
-
-		//	Update(thisValue);
-		//	if (!thisValue.AutoBalance) return;
-		//	thisValue.Balance();
-		//}
-
-		///// <summary>
-		///// Constructs a <see cref="LinkedBinaryTree{T}"/> from the PreOrder <see cref="collection"/>.
-		///// <para>
-		///// PreOrder => Root-Left-Right (Stack)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="collection"></param>
-		//public static void FromPreOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> collection)
-		//{
-		//	// https://www.geeksforgeeks.org/construct-bst-from-given-preorder-traversal-set-2/
-		//	IReadOnlyList<T> list = new Lister<T>(collection);
-		//	// try simple cases first
-		//	if (FromSimpleList(thisValue, list)) return;
-
-		//	// first node of PreOrder will be root of tree
-		//	LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(list[0]);
-		//	thisValue.Root = node;
-
-		//	Stack<LinkedBinaryTree<T>.Node> stack = new Stack<LinkedBinaryTree<T>.Node>();
-		//	// Push root of the BST to the stack i.e, first element of the array.
-		//	stack.Push(node);
-
-		//	/*
-		//	 * Keep popping nodes while the stack is not empty.
-		//	 * When the value is greater than stack’s top value, make it the right
-		//	 * child of the last popped node and push it to the stack.
-		//	 * If the next value is less than the stack’s top value, make it the left
-		//	 * child of the stack’s top node and push it to the stack.
-		//	 */
-		//	IComparer<T> comparer = thisValue.Comparer;
-
-		//	// Traverse from second node
-		//	for (int i = 1; i < list.Count; i++)
-		//	{
-		//		LinkedBinaryTree<T>.Node root = null;
-
-		//		// Keep popping nodes while top of stack is greater.
-		//		while (stack.Count > 0 && comparer.IsGreaterThan(list[i], stack.Peek()))
-		//			root = stack.Pop();
-
-		//		node = new LinkedBinaryTree<T>.Node(list[i]);
-
-		//		if (root != null) root.Right = node;
-		//		else if (stack.Count > 0) stack.Peek().Left = node;
-
-		//		stack.Push(node);
-		//	}
-
-		//	Update(thisValue);
-		//	if (!thisValue.AutoBalance) return;
-		//	thisValue.Balance();
-		//}
-
-		///// <summary>
-		///// Constructs a <see cref="LinkedBinaryTree{T}"/> from the InOrder <see cref="collection"/>.
-		///// <para>
-		///// Note that it is not possible to construct a unique binary tree from InOrder collection alone.
-		///// </para>
-		///// <para>
-		///// InOrder => Left-Root-Right (Stack)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="collection"></param>
-		//public static void FromInOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> collection)
-		//{
-		//	IReadOnlyList<T> list = new Lister<T>(collection);
-		//	// try simple cases first
-		//	if (FromSimpleList(thisValue, list)) return;
-
-		//	int start = 0;
-		//	int end = list.Count - 1;
-		//	int index = IndexMid(start, end);
-		//	LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(list[index]);
-		//	thisValue.Root = node;
-
-		//	Queue<(int Index, int Start, int End, LinkedBinaryTree<T>.Node Node)> queue = new Queue<(int Index, int Start, int End, LinkedBinaryTree<T>.Node Node)>();
-		//	queue.Enqueue((index, start, end, node));
-
-		//	while (queue.Count > 0)
-		//	{
-		//		(int Index, int Start, int End, LinkedBinaryTree<T>.Node Node) tuple = queue.Dequeue();
-
-		//		// get the next left index
-		//		start = tuple.Start;
-		//		end = tuple.Index - 1;
-		//		int nodeIndex = IndexMid(start, end);
-
-		//		// add left node
-		//		if (nodeIndex > -1)
-		//		{
-		//			node = new LinkedBinaryTree<T>.Node(list[nodeIndex]);
-		//			tuple.Node.Left = node;
-		//			queue.Enqueue((nodeIndex, start, end, node));
-		//		}
-
-		//		// get the next right index
-		//		start = tuple.Index + 1;
-		//		end = tuple.End;
-		//		nodeIndex = IndexMid(start, end);
-
-		//		// add right node
-		//		if (nodeIndex > -1)
-		//		{
-		//			node = new LinkedBinaryTree<T>.Node(list[nodeIndex]);
-		//			tuple.Node.Right = node;
-		//			queue.Enqueue((nodeIndex, start, end, node));
-		//		}
-		//	}
-
-		//	Update(thisValue);
-		//	if (!thisValue.AutoBalance) return;
-		//	thisValue.Balance();
-
-		//	static int IndexMid(int start, int end)
-		//	{
-		//		return start > end
-		//					? -1
-		//					: start + (end - start) / 2;
-		//	}
-		//}
-
-		///// <summary>
-		///// Constructs a <see cref="LinkedBinaryTree{T}"/> from the PostOrder <see cref="collection"/>.
-		///// <para>
-		///// PostOrder => Left-Right-Root (Stack)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="collection"></param>
-		//public static void FromPostOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> collection)
-		//{
-		//	// https://www.geeksforgeeks.org/construct-a-bst-from-given-postorder-traversal-using-stack/
-		//	IReadOnlyList<T> list = new Lister<T>(collection);
-		//	// try simple cases first
-		//	if (FromSimpleList(thisValue, list)) return;
-
-		//	// last node of PostOrder will be root of tree
-		//	LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(list[list.Count - 1]);
-		//	thisValue.Root = node;
-
-		//	Stack<LinkedBinaryTree<T>.Node> stack = new Stack<LinkedBinaryTree<T>.Node>();
-		//	// Push root of the BST to the stack i.e, last element of the array.
-		//	stack.Push(node);
-
-		//	/*
-		//	 * The idea is to traverse the array in reverse.
-		//	 * If next element is > the element at the top of the stack then,
-		//	 * set this element as the right child of the element at the top
-		//	 * of the stack and also push it to the stack.
-		//	 * Else if, next element is < the element at the top of the stack then,
-		//	 * start popping all the elements from the stack until either the stack
-		//	 * is empty or the current element becomes > the element at the top of
-		//	 * the stack.
-		//	 * Make this element left child of the last popped node and repeat until
-		//	 * the array is traversed completely.
-		//	 */
-		//	IComparer<T> comparer = thisValue.Comparer;
-
-		//	// Traverse from second last node
-		//	for (int i = list.Count - 2; i >= 0; i--)
-		//	{
-		//		LinkedBinaryTree<T>.Node root = null;
-
-		//		// Keep popping nodes while top of stack is greater.
-		//		while (stack.Count > 0 && comparer.IsLessThan(list[i], stack.Peek()))
-		//			root = stack.Pop();
-
-		//		node = new LinkedBinaryTree<T>.Node(list[i]);
-
-		//		if (root != null) root.Left = node;
-		//		else if (stack.Count > 0) stack.Peek().Right = node;
-
-		//		stack.Push(node);
-		//	}
-
-		//	Update(thisValue);
-		//	if (!thisValue.AutoBalance) return;
-		//	thisValue.Balance();
-		//}
-
-		///// <summary>
-		///// Constructs a <see cref="LinkedBinaryTree{T}"/> from <see cref="inOrderCollection"/> and <see cref="levelOrderCollection"/>.
-		///// <para>
-		///// InOrder => Left-Root-Right (Stack)
-		///// </para>
-		///// <para>
-		///// LevelOrder => Root-Left-Right (Queue)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="inOrderCollection"></param>
-		///// <param name="levelOrderCollection"></param>
-		//public static void FromInOrderAndLevelOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> levelOrderCollection)
-		//{
-		//	IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
-		//	// Root-Left-Right
-		//	IReadOnlyList<T> levelOrder = new Lister<T>(levelOrderCollection);
-		//	if (inOrder.Count != levelOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(levelOrderCollection));
-		//	if (levelOrder.Count == 1 && inOrder.Count == 1 && !thisValue.Comparer.IsEqual(inOrder[0], levelOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(levelOrderCollection));
-		//	// try simple cases first
-		//	if (FromSimpleList(thisValue, levelOrder)) return;
-
-		//	/*
-		//	 * using the facts that:
-		//	 * 1. LevelOrder is organized in the form Root-Left-Right.
-		//	 * 2. InOrder is organized in the form Left-Root-Right,
-		//	 * from 1 and 2, the LevelOrder list can be used to identify
-		//	 * the root and other elements locations in the InOrder list.
-		//	 */
-		//	// the lookup will enhance the speed of looking for the index of the item to O(1)
-		//	IDictionary<T, int> lookup = new Dictionary<T, int>(thisValue.Comparer.AsEqualityComparer());
-
-		//	// add all InOrder items to the lookup
-		//	for (int i = 0; i < inOrder.Count; i++)
-		//	{
-		//		T key = inOrder[i];
-		//		if (lookup.ContainsKey(key)) continue;
-		//		lookup.Add(key, i);
-		//	}
-
-		//	int index = 0;
-		//	LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(levelOrder[index++]);
-		//	thisValue.Root = node;
-
-		//	Queue<(int Start, int End, LinkedBinaryTree<T>.Node Node)> queue = new Queue<(int Start, int End, LinkedBinaryTree<T>.Node Node)>();
-		//	queue.Enqueue((0, inOrder.Count - 1, node));
-
-		//	while (index < levelOrder.Count && queue.Count > 0)
-		//	{
-		//		(int Start, int End, LinkedBinaryTree<T>.Node Node) tuple = queue.Dequeue();
-
-		//		// get the root index (the current node index in the InOrder collection)
-		//		int rootIndex = lookup[tuple.Node.Value];
-		//		// find out the index of the next entry of LevelOrder in the InOrder collection
-		//		int levelIndex = lookup[levelOrder[index]];
-
-		//		// add left node
-		//		if (levelIndex >= tuple.Start && levelIndex <= rootIndex - 1)
-		//		{
-		//			node = new LinkedBinaryTree<T>.Node(inOrder[levelIndex]);
-		//			tuple.Node.Left = node;
-		//			queue.Enqueue((tuple.Start, rootIndex - 1, node));
-		//			index++;
-		//			// index and node changed, so will need to get the next entry of LevelOrder in the InOrder collection
-		//			levelIndex = index < levelOrder.Count
-		//							? lookup[levelOrder[index]]
-		//							: -1;
-		//		}
-
-		//		// add right node
-		//		if (levelIndex >= rootIndex + 1 && levelIndex <= tuple.End)
-		//		{
-		//			node = new LinkedBinaryTree<T>.Node(inOrder[levelIndex]);
-		//			tuple.Node.Right = node;
-		//			queue.Enqueue((rootIndex + 1, tuple.End, node));
-		//			index++;
-		//		}
-		//	}
-
-		//	Update(thisValue);
-		//	if (!thisValue.AutoBalance) return;
-		//	thisValue.Balance();
-		//}
-
-		///// <summary>
-		///// Constructs a <see cref="LinkedBinaryTree{T}"/> from <see cref="inOrderCollection"/> and <see cref="preOrderCollection"/>.
-		///// <para>
-		///// InOrder => Left-Root-Right (Stack)
-		///// </para>
-		///// <para>
-		///// PreOrder => Root-Left-Right (Stack)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="inOrderCollection"></param>
-		///// <param name="preOrderCollection"></param>
-		//public static void FromInOrderAndPreOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> preOrderCollection)
-		//{
-		//	IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
-		//	IReadOnlyList<T> preOrder = new Lister<T>(preOrderCollection);
-		//	if (inOrder.Count != preOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(preOrderCollection));
-		//	if (preOrder.Count == 1 && inOrder.Count == 1 && !thisValue.Comparer.IsEqual(inOrder[0], preOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(preOrderCollection));
-		//	// try simple cases first
-		//	if (FromSimpleList(thisValue, preOrder)) return;
-
-		//	/*
-		//	 * https://stackoverflow.com/questions/48352513/construct-binary-tree-given-its-inorder-and-preorder-traversals-without-recursio#48364040
-		//	 * 
-		//	 * The idea is to keep tree nodes in a stack from PreOrder traversal, till their counterpart is not found in InOrder traversal.
-		//	 * Once a counterpart is found, all children in the left sub-tree of the node must have been already visited.
-		//	 */
-		//	int preIndex = 0;
-		//	int inIndex = 0;
-		//	LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(preOrder[preIndex++]);
-		//	thisValue.Root = node;
-
-		//	IComparer<T> comparer = thisValue.Comparer;
-		//	Stack<LinkedBinaryTree<T>.Node> stack = new Stack<LinkedBinaryTree<T>.Node>();
-		//	stack.Push(node);
-
-		//	while (stack.Count > 0)
-		//	{
-		//		LinkedBinaryTree<T>.Node root = stack.Peek();
-
-		//		if (comparer.IsEqual(root.Value, inOrder[inIndex]))
-		//		{
-		//			stack.Pop();
-		//			inIndex++;
-
-		//			// if all the elements in inOrder have been visited, we are done
-		//			if (inIndex == inOrder.Count) break;
-		//			// if there are still some unvisited nodes in the left, skip
-		//			if (stack.Count > 0 && comparer.IsEqual(stack.Peek().Value, inOrder[inIndex])) continue;
-
-		//			/*
-		//			 * As top node in stack, still has not encountered its counterpart
-		//			 * in inOrder, so next element in preOrder must be right child of
-		//			 * the removed node
-		//			 */
-		//			node = new LinkedBinaryTree<T>.Node(preOrder[preIndex++]);
-		//			root.Right = node;
-		//			stack.Push(node);
-		//		}
-		//		else
-		//		{
-		//			/*
-		//			 * Top node in the stack has not encountered its counterpart
-		//			 * in inOrder, so next element in preOrder must be left child
-		//			 * of this node
-		//			 */
-		//			node = new LinkedBinaryTree<T>.Node(preOrder[preIndex++]);
-		//			root.Left = node;
-		//			stack.Push(node);
-		//		}
-		//	}
-
-		//	Update(thisValue);
-		//	if (!thisValue.AutoBalance) return;
-		//	thisValue.Balance();
-		//}
-
-		///// <summary>
-		///// Constructs a <see cref="LinkedBinaryTree{T}"/> from <see cref="inOrderCollection"/> and <see cref="postOrderCollection"/>.
-		///// <para>
-		///// InOrder => Left-Root-Right (Stack)
-		///// </para>
-		///// <para>
-		///// PostOrder => Left-Right-Root (Stack)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="inOrderCollection"></param>
-		///// <param name="postOrderCollection"></param>
-		//public static void FromInOrderAndPostOrder<T>([NotNull] this LinkedBinaryTree<T> thisValue, [NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> postOrderCollection)
-		//{
-		//	IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
-		//	IReadOnlyList<T> postOrder = new Lister<T>(postOrderCollection);
-		//	if (inOrder.Count != postOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(postOrderCollection));
-		//	if (postOrder.Count == 1 && inOrder.Count == 1 && !thisValue.Comparer.IsEqual(inOrder[0], postOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(postOrderCollection));
-		//	if (FromSimpleList(thisValue, postOrder)) return;
-
-		//	// the lookup will enhance the speed of looking for the index of the item to O(1)
-		//	IDictionary<T, int> lookup = new Dictionary<T, int>(thisValue.Comparer.AsEqualityComparer());
-
-		//	// add all InOrder items to the lookup
-		//	for (int i = 0; i < inOrder.Count; i++)
-		//	{
-		//		T key = inOrder[i];
-		//		if (lookup.ContainsKey(key)) continue;
-		//		lookup.Add(key, i);
-		//	}
-
-		//	// Traverse postOrder in reverse
-		//	int postIndex = postOrder.Count - 1;
-		//	LinkedBinaryTree<T>.Node node = new LinkedBinaryTree<T>.Node(postOrder[postIndex--]);
-		//	thisValue.Root = node;
-
-		//	Stack<LinkedBinaryTree<T>.Node> stack = new Stack<LinkedBinaryTree<T>.Node>();
-		//	// Push root of the BST to the stack i.e, last element of the array.
-		//	stack.Push(node);
-
-		//	IComparer<T> comparer = thisValue.Comparer;
-
-		//	while (postIndex >= 0 && stack.Count > 0)
-		//	{
-		//		LinkedBinaryTree<T>.Node root = stack.Peek();
-		//		// get the root index (the current node index in the InOrder collection)
-		//		int rootIndex = lookup[root.Value];
-		//		// find out the index of the next entry of PostOrder in the InOrder collection
-		//		int index = lookup[postOrder[postIndex]];
-
-		//		// add right node
-		//		if (index > rootIndex)
-		//		{
-		//			node = new LinkedBinaryTree<T>.Node(inOrder[index]);
-		//			root.Right = node;
-		//			stack.Push(node);
-		//			postIndex--;
-
-		//			// index and node changed, so will need to get the next entry of PostOrder in the InOrder collection
-		//			index = postIndex > -1
-		//						? lookup[postOrder[postIndex]]
-		//						: -1;
-		//		}
-
-		//		// add left node
-		//		if (index > -1 && index < rootIndex)
-		//		{
-		//			if (comparer.IsLessThan(postOrder[postIndex], root.Value))
-		//			{
-		//				// Keep popping nodes while top of stack is greater.
-		//				while (stack.Count > 0 && comparer.IsLessThan(postOrder[postIndex], stack.Peek().Value))
-		//					root = stack.Pop();
-		//			}
-
-		//			node = new LinkedBinaryTree<T>.Node(inOrder[index]);
-		//			root.Left = node;
-		//			stack.Push(node);
-		//			postIndex--;
-		//		}
-		//	}
-
-		//	Update(thisValue);
-		//	if (!thisValue.AutoBalance) return;
-		//	thisValue.Balance();
-		//}
-
-		private static bool FromSimpleList<T>([NotNull] LinkedBinaryTree<T> tree, [NotNull] IReadOnlyList<T> list)
-		{
-			bool result;
-			tree.Clear();
-
-			switch (list.Count)
-			{
-				case 0:
-					result = true;
-					break;
-				case 1:
-					tree.Root = new LinkedBinaryTree<T>.Node(list[0]);
-					result = true;
-					break;
-				default:
-					result = false;
-					break;
-			}
-
-			return result;
-		}
-
-		private static void ThrowNotFormingATree(string collection1Name, string collection2Name)
-		{
-			throw new ArgumentException($"{collection1Name} and {collection2Name} do not form a binary tree.");
 		}
 	}
 }

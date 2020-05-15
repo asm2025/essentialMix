@@ -72,15 +72,8 @@ namespace asm.Collections
 						* The comparison with this and parent.left/.right is essential because the node
 						* could have moved to another parent. Don't use IsLeft or IsRight here.
 						*/
-						// access the fields directly to avoid StackOverflowException
-						if (_nodes[PARENT]._nodes[LEFT] == this)
-						{
-							_nodes[PARENT]._nodes[LEFT] = null;
-						}
-						else if (_nodes[PARENT]._nodes[RIGHT] == this)
-						{
-							_nodes[PARENT]._nodes[RIGHT] = null;
-						}
+						if (_nodes[PARENT]._nodes[LEFT] == this) _nodes[PARENT]._nodes[LEFT] = null;
+						else if (_nodes[PARENT]._nodes[RIGHT] == this) _nodes[PARENT]._nodes[RIGHT] = null;
 					}
 
 					_nodes[PARENT] = value;
@@ -93,15 +86,11 @@ namespace asm.Collections
 				internal set
 				{
 					if (_nodes[LEFT] == value) return;
-					
-					// reset old left, access the fields directly to avoid StackOverflowException
-					if (_nodes[LEFT] != null && _nodes[LEFT]._nodes[PARENT] == this)
-					{
-						_nodes[LEFT]._nodes[PARENT] = null;
-					}
-
+					// reset old left
+					if (_nodes[LEFT]?._nodes[PARENT] == this) _nodes[LEFT]._nodes[PARENT] = null;
 					_nodes[LEFT] = value;
-					if (_nodes[LEFT] != null) _nodes[LEFT]._nodes[PARENT] = this;
+					if (_nodes[LEFT] == null) return;
+					_nodes[LEFT]._nodes[PARENT] = this;
 				}
 			}
 
@@ -111,15 +100,11 @@ namespace asm.Collections
 				internal set
 				{
 					if (_nodes[RIGHT] == value) return;
-					
-					// reset old right, access the fields directly to avoid StackOverflowException
-					if (_nodes[RIGHT] != null && _nodes[RIGHT]._nodes[PARENT] == this)
-					{
-						_nodes[RIGHT]._nodes[PARENT] = null;
-					}
-
+					// reset old right
+					if (_nodes[RIGHT]?._nodes[PARENT] == this) _nodes[RIGHT]._nodes[PARENT] = null;
 					_nodes[RIGHT] = value;
-					if (_nodes[RIGHT] != null) _nodes[RIGHT]._nodes[PARENT] = this;
+					if (_nodes[RIGHT] == null) return;
+					_nodes[RIGHT]._nodes[PARENT] = this;
 				}
 			}
 
@@ -146,8 +131,6 @@ namespace asm.Collections
 			/// </summary>
 			public bool Color { get; internal set; } = true;
 
-			public int Depth { get; internal set; }
-
 			public bool IsRoot => _nodes[PARENT] == null;
 
 			public bool IsLeft => _nodes[PARENT]?._nodes[LEFT] == this;
@@ -161,6 +144,12 @@ namespace asm.Collections
 			public bool HasOneChild => (_nodes[LEFT] != null) ^ (_nodes[RIGHT] != null);
 
 			public bool IsFull => !HasOneChild;
+
+			public bool HasRedParent => _nodes[PARENT] != null && _nodes[PARENT].Color;
+
+			public bool HasRedLeft => _nodes[LEFT] != null && _nodes[LEFT].Color;
+
+			public bool HasRedRight => _nodes[RIGHT] != null && _nodes[RIGHT].Color;
 
 			/// <inheritdoc />
 			[NotNull]
@@ -282,7 +271,11 @@ namespace asm.Collections
 			}
 
 			/// <inheritdoc />
-			public void Dispose() { }
+			public void Dispose()
+			{
+				_current = null;
+				_queueOrStack.Clear();
+			}
 
 			private bool LevelOrderLR()
 			{
@@ -636,7 +629,6 @@ namespace asm.Collections
 				return !_done;
 			}
 		}
-
 		/// <summary>
 		/// iterative approach to traverse the tree
 		/// </summary>
@@ -1000,6 +992,353 @@ namespace asm.Collections
 				}
 			}
 
+			public void Iterate(HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<Node, int, bool> visitCallback)
+			{
+				int version = _tree._version;
+
+				switch (_method)
+				{
+					case TraverseMethod.LevelOrder:
+						switch (flow)
+						{
+							case HorizontalFlow.LeftToRight:
+								LevelOrderLR();
+								break;
+							case HorizontalFlow.RightToLeft:
+								LevelOrderRL();
+								break;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
+						}
+						break;
+					case TraverseMethod.PreOrder:
+						switch (flow)
+						{
+							case HorizontalFlow.LeftToRight:
+								PreOrderLR();
+								break;
+							case HorizontalFlow.RightToLeft:
+								PreOrderRL();
+								break;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
+						}
+						break;
+					case TraverseMethod.InOrder:
+						switch (flow)
+						{
+							case HorizontalFlow.LeftToRight:
+								InOrderLR();
+								break;
+							case HorizontalFlow.RightToLeft:
+								InOrderRL();
+								break;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
+						}
+						break;
+					case TraverseMethod.PostOrder:
+						switch (flow)
+						{
+							case HorizontalFlow.LeftToRight:
+								PostOrderLR();
+								break;
+							case HorizontalFlow.RightToLeft:
+								PostOrderRL();
+								break;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
+						}
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+
+				void LevelOrderLR()
+				{
+					// Root-Left-Right (Queue)
+					(bool left, bool right) = direction.GetDirections();
+					Queue<(int Depth, Node Node)> queue = new Queue<(int Depth, Node Node)>();
+
+					// Start at the root
+					queue.Enqueue((0, _root));
+
+					while (queue.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						// visit the next queued node
+						(int depth, Node node) = queue.Dequeue();
+						if (!visitCallback(node, depth)) break;
+
+						// Queue the next nodes
+						if ((!node.IsRoot || left) && node.Left != null) queue.Enqueue((depth + 1, node.Left));
+						if ((!node.IsRoot || right) && node.Right != null) queue.Enqueue((depth + 1, node.Right));
+					}
+				}
+
+				void LevelOrderRL()
+				{
+					// Root-Right-Left (Queue)
+					(bool left, bool right) = direction.GetDirections();
+					Queue<(int Depth, Node Node)> queue = new Queue<(int Depth, Node Node)>();
+
+					// Start at the root
+					queue.Enqueue((0, _root));
+
+					while (queue.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						// visit the next queued node
+						(int depth, Node node) = queue.Dequeue();
+						if (!visitCallback(node, depth)) break;
+
+						// Queue the next nodes
+						if ((!node.IsRoot || right) && node.Right != null) queue.Enqueue((depth + 1, node.Right));
+						if ((!node.IsRoot || left) && node.Left != null) queue.Enqueue((depth + 1, node.Left));
+					}
+				}
+
+				void PreOrderLR()
+				{
+					// Root-Left-Right (Stack)
+					(bool left, bool right) = direction.GetDirections();
+					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+
+					// Start at the root
+					stack.Push((0, _root));
+
+					while (stack.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						// visit the next queued node
+						(int depth, Node node) = stack.Pop();
+						if (!visitCallback(node, depth)) break;
+
+						/*
+						* The stack works backwards (LIFO).
+						* It means whatever we want to
+						* appear first, we must add last.
+						*/
+						// Queue the next nodes
+						if ((!node.IsRoot || right) && node.Right != null) stack.Push((depth + 1, node.Right));
+						if ((!node.IsRoot || left) && node.Left != null) stack.Push((depth + 1, node.Left));
+					}
+				}
+
+				void PreOrderRL()
+				{
+					// Root-Right-Left (Stack)
+					(bool left, bool right) = direction.GetDirections();
+					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+
+					// Start at the root
+					stack.Push((0, _root));
+
+					while (stack.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						// visit the next queued node
+						(int depth, Node node) = stack.Pop();
+						if (!visitCallback(node, depth)) break;
+
+						/*
+						* The stack works backwards (LIFO).
+						* It means whatever we want to
+						* appear first, we must add last.
+						*/
+						// Queue the next nodes
+						if ((!node.IsRoot || left) && node.Left != null) stack.Push((depth + 1, node.Left));
+						if ((!node.IsRoot || right) && node.Right != null) stack.Push((depth + 1, node.Right));
+					}
+				}
+
+				void InOrderLR()
+				{
+					// Left-Root-Right (Stack)
+					(bool left, bool right) = direction.GetDirections();
+					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+
+					// Start at the root
+					(int Depth, Node Node) current = (0, _root);
+
+					while (current.Node != null || stack.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						if (current.Node != null)
+						{
+							stack.Push(current);
+							// Navigate left
+							current = current.Node.IsRoot
+										? left
+											? (current.Depth + 1, current.Node.Left)
+											: (-1, null)
+										: (current.Depth + 1, current.Node.Left);
+						}
+						else
+						{
+							// visit the next queued node
+							current = stack.Pop();
+							if (!visitCallback(current.Node, current.Depth)) break;
+
+							// Navigate right
+							current = current.Node.IsRoot
+										? right
+											? (current.Depth + 1, current.Node.Right)
+											: (-1, null)
+										: (current.Depth + 1, current.Node.Right);
+						}
+					}
+				}
+
+				void InOrderRL()
+				{
+					// Right-Root-Left (Stack)
+					(bool left, bool right) = direction.GetDirections();
+					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+
+					// Start at the root
+					(int Depth, Node Node) current = (0, _root);
+
+					while (current.Node != null || stack.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						if (current.Node != null)
+						{
+							stack.Push(current);
+							// Navigate right
+							current = current.Node.IsRoot
+										? right
+											? (current.Depth + 1, current.Node.Right)
+											: (-1, null)
+										: (current.Depth + 1, current.Node.Right);
+						}
+						else
+						{
+							// visit the next queued node
+							current = stack.Pop();
+							if (!visitCallback(current.Node, current.Depth)) break;
+
+							// Navigate right
+							current = current.Node.IsRoot
+										? left
+											? (current.Depth + 1, current.Node.Left)
+											: (-1, null)
+										: (current.Depth + 1, current.Node.Left);
+						}
+					}
+				}
+
+				void PostOrderLR()
+				{
+					// Left-Root-Right (Stack)
+					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+					(bool left, bool right) = direction.GetDirections();
+					Node lastVisited = null;
+					// Start at the root
+					(int Depth, Node Node) current = (0, _root);
+
+					while (current.Node != null || stack.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						if (current.Node != null)
+						{
+							stack.Push(current);
+							// Navigate left
+							current = current.Node.IsRoot
+										? left
+											? (current.Depth + 1, current.Node.Left)
+											: (-1, null)
+										: (current.Depth + 1, current.Node.Left);
+							continue;
+						}
+
+						(int Depth, Node Node) peek = stack.Peek();
+						/*
+						 * At this point we are either coming from
+						 * either the root node or the left branch.
+						 * Is there a right Node
+						 * if yes, then navigate right.
+						 */
+						if (peek.Node.Right != null && lastVisited != peek.Node.Right)
+						{
+							// Navigate right
+							current = peek.Node.IsRoot
+										? right
+											? (peek.Depth + 1, peek.Node.Right)
+											: (-1, null)
+										: (peek.Depth + 1, peek.Node.Right);
+						}
+						else
+						{
+							// visit the next queued node
+							current = peek;
+							lastVisited = stack.Pop().Node;
+							if (!visitCallback(current.Node, current.Depth)) break;
+							current = (-1, null);
+						}
+					}
+				}
+
+				void PostOrderRL()
+				{
+					// Right-Root-Left (Stack)
+					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+					(bool left, bool right) = direction.GetDirections();
+					Node lastVisited = null;
+					// Start at the root
+					(int Depth, Node Node) current = (0, _root);
+
+					while (current.Node != null || stack.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						if (current.Node != null)
+						{
+							stack.Push(current);
+							// Navigate right
+							current = current.Node.IsRoot
+										? right
+											? (current.Depth + 1, current.Node.Right)
+											: (-1, null)
+										: (current.Depth + 1, current.Node.Right);
+							continue;
+						}
+
+						(int Depth, Node Node) peek = stack.Peek();
+						/*
+						 * At this point we are either coming from
+						 * either the root node or the right branch.
+						 * Is there a left Node
+						 * if yes, then navigate left.
+						 */
+						if (peek.Node.Left != null && lastVisited != peek.Node.Left)
+						{
+							// Navigate left
+							current = peek.Node.IsRoot
+										? left
+											? (peek.Depth + 1, peek.Node.Left)
+											: (-1, null)
+										: (peek.Depth + 1, peek.Node.Left);
+						}
+						else
+						{
+							// visit the next queued node
+							current = peek;
+							lastVisited = stack.Pop().Node;
+							if (!visitCallback(current.Node, current.Depth)) break;
+							current = (-1, null);
+						}
+					}
+				}
+			}
+
 			public void Iterate(HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<Node> visitCallback)
 			{
 				int version = _tree._version;
@@ -1346,10 +1685,357 @@ namespace asm.Collections
 					}
 				}
 			}
+
+			public void Iterate(HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<Node, int> visitCallback)
+			{
+				int version = _tree._version;
+
+				switch (_method)
+				{
+					case TraverseMethod.LevelOrder:
+						switch (flow)
+						{
+							case HorizontalFlow.LeftToRight:
+								LevelOrderLR();
+								break;
+							case HorizontalFlow.RightToLeft:
+								LevelOrderRL();
+								break;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
+						}
+						break;
+					case TraverseMethod.PreOrder:
+						switch (flow)
+						{
+							case HorizontalFlow.LeftToRight:
+								PreOrderLR();
+								break;
+							case HorizontalFlow.RightToLeft:
+								PreOrderRL();
+								break;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
+						}
+						break;
+					case TraverseMethod.InOrder:
+						switch (flow)
+						{
+							case HorizontalFlow.LeftToRight:
+								InOrderLR();
+								break;
+							case HorizontalFlow.RightToLeft:
+								InOrderRL();
+								break;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
+						}
+						break;
+					case TraverseMethod.PostOrder:
+						switch (flow)
+						{
+							case HorizontalFlow.LeftToRight:
+								PostOrderLR();
+								break;
+							case HorizontalFlow.RightToLeft:
+								PostOrderRL();
+								break;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
+						}
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+
+				void LevelOrderLR()
+				{
+					// Root-Left-Right (Queue)
+					(bool left, bool right) = direction.GetDirections();
+					Queue<(int Depth, Node Node)> queue = new Queue<(int Depth, Node Node)>();
+
+					// Start at the root
+					queue.Enqueue((0, _root));
+
+					while (queue.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						// visit the next queued node
+						(int depth, Node node) = queue.Dequeue();
+						visitCallback(node, depth);
+
+						// Queue the next nodes
+						if ((!node.IsRoot || left) && node.Left != null) queue.Enqueue((depth + 1, node.Left));
+						if ((!node.IsRoot || right) && node.Right != null) queue.Enqueue((depth + 1, node.Right));
+					}
+				}
+
+				void LevelOrderRL()
+				{
+					// Root-Right-Left (Queue)
+					(bool left, bool right) = direction.GetDirections();
+					Queue<(int Depth, Node Node)> queue = new Queue<(int Depth, Node Node)>();
+
+					// Start at the root
+					queue.Enqueue((0, _root));
+
+					while (queue.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						// visit the next queued node
+						(int depth, Node node) = queue.Dequeue();
+						visitCallback(node, depth);
+
+						// Queue the next nodes
+						if ((!node.IsRoot || right) && node.Right != null) queue.Enqueue((depth + 1, node.Right));
+						if ((!node.IsRoot || left) && node.Left != null) queue.Enqueue((depth + 1, node.Left));
+					}
+				}
+
+				void PreOrderLR()
+				{
+					// Root-Left-Right (Stack)
+					(bool left, bool right) = direction.GetDirections();
+					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+
+					// Start at the root
+					stack.Push((0, _root));
+
+					while (stack.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						// visit the next queued node
+						(int depth, Node node) = stack.Pop();
+						visitCallback(node, depth);
+
+						/*
+						* The stack works backwards (LIFO).
+						* It means whatever we want to
+						* appear first, we must add last.
+						*/
+						// Queue the next nodes
+						if ((!node.IsRoot || right) && node.Right != null) stack.Push((depth + 1, node.Right));
+						if ((!node.IsRoot || left) && node.Left != null) stack.Push((depth + 1, node.Left));
+					}
+				}
+
+				void PreOrderRL()
+				{
+					// Root-Right-Left (Stack)
+					(bool left, bool right) = direction.GetDirections();
+					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+
+					// Start at the root
+					stack.Push((0, _root));
+
+					while (stack.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						// visit the next queued node
+						(int depth, Node node) = stack.Pop();
+						visitCallback(node, depth);
+
+						/*
+						* The stack works backwards (LIFO).
+						* It means whatever we want to
+						* appear first, we must add last.
+						*/
+						// Queue the next nodes
+						if ((!node.IsRoot || left) && node.Left != null) stack.Push((depth + 1, node.Left));
+						if ((!node.IsRoot || right) && node.Right != null) stack.Push((depth + 1, node.Right));
+					}
+				}
+
+				void InOrderLR()
+				{
+					// Left-Root-Right (Stack)
+					(bool left, bool right) = direction.GetDirections();
+					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+
+					// Start at the root
+					(int Depth, Node Node) current = (0, _root);
+
+					while (current.Node != null || stack.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						if (current.Node != null)
+						{
+							stack.Push(current);
+							// Navigate left
+							current = current.Node.IsRoot
+										? left
+											? (current.Depth + 1, current.Node.Left)
+											: (-1, null)
+										: (current.Depth + 1, current.Node.Left);
+						}
+						else
+						{
+							// visit the next queued node
+							current = stack.Pop();
+							visitCallback(current.Node, current.Depth);
+
+							// Navigate right
+							current = current.Node.IsRoot
+										? right
+											? (current.Depth + 1, current.Node.Right)
+											: (-1, null)
+										: (current.Depth + 1, current.Node.Right);
+						}
+					}
+				}
+
+				void InOrderRL()
+				{
+					// Right-Root-Left (Stack)
+					(bool left, bool right) = direction.GetDirections();
+					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+
+					// Start at the root
+					(int Depth, Node Node) current = (0, _root);
+
+					while (current.Node != null || stack.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						if (current.Node != null)
+						{
+							stack.Push(current);
+							// Navigate right
+							current = current.Node.IsRoot
+										? right
+											? (current.Depth + 1, current.Node.Right)
+											: (-1, null)
+										: (current.Depth + 1, current.Node.Right);
+						}
+						else
+						{
+							// visit the next queued node
+							current = stack.Pop();
+							visitCallback(current.Node, current.Depth);
+
+							// Navigate right
+							current = current.Node.IsRoot
+										? left
+											? (current.Depth + 1, current.Node.Left)
+											: (-1, null)
+										: (current.Depth + 1, current.Node.Left);
+						}
+					}
+				}
+
+				void PostOrderLR()
+				{
+					// Left-Root-Right (Stack)
+					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+					(bool left, bool right) = direction.GetDirections();
+					Node lastVisited = null;
+					// Start at the root
+					(int Depth, Node Node) current = (0, _root);
+
+					while (current.Node != null || stack.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						if (current.Node != null)
+						{
+							stack.Push(current);
+							// Navigate left
+							current = current.Node.IsRoot
+										? left
+											? (current.Depth + 1, current.Node.Left)
+											: (-1, null)
+										: (current.Depth + 1, current.Node.Left);
+							continue;
+						}
+
+						(int Depth, Node Node) peek = stack.Peek();
+						/*
+						 * At this point we are either coming from
+						 * either the root node or the left branch.
+						 * Is there a right Node
+						 * if yes, then navigate right.
+						 */
+						if (peek.Node.Right != null && lastVisited != peek.Node.Right)
+						{
+							// Navigate right
+							current = peek.Node.IsRoot
+										? right
+											? (peek.Depth + 1, peek.Node.Right)
+											: (-1, null)
+										: (peek.Depth + 1, peek.Node.Right);
+						}
+						else
+						{
+							// visit the next queued node
+							current = peek;
+							lastVisited = stack.Pop().Node;
+							visitCallback(current.Node, current.Depth);
+							current = (-1, null);
+						}
+					}
+				}
+
+				void PostOrderRL()
+				{
+					// Right-Root-Left (Stack)
+					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+					(bool left, bool right) = direction.GetDirections();
+					Node lastVisited = null;
+					// Start at the root
+					(int Depth, Node Node) current = (0, _root);
+
+					while (current.Node != null || stack.Count > 0)
+					{
+						if (version != _tree._version) throw new VersionChangedException();
+
+						if (current.Node != null)
+						{
+							stack.Push(current);
+							// Navigate right
+							current = current.Node.IsRoot
+										? right
+											? (current.Depth + 1, current.Node.Right)
+											: (-1, null)
+										: (current.Depth + 1, current.Node.Right);
+							continue;
+						}
+
+						(int Depth, Node Node) peek = stack.Peek();
+						/*
+						 * At this point we are either coming from
+						 * either the root node or the right branch.
+						 * Is there a left Node
+						 * if yes, then navigate left.
+						 */
+						if (peek.Node.Left != null && lastVisited != peek.Node.Left)
+						{
+							// Navigate left
+							current = peek.Node.IsRoot
+										? left
+											? (peek.Depth + 1, peek.Node.Left)
+											: (-1, null)
+										: (peek.Depth + 1, peek.Node.Left);
+						}
+						else
+						{
+							// visit the next queued node
+							current = peek;
+							lastVisited = stack.Pop().Node;
+							visitCallback(current.Node, current.Depth);
+							current = (-1, null);
+						}
+					}
+				}
+			}
 		}
 
 		/// <summary>
-		/// iterative approach with level awareness. this is a different way than TraverseMethod.LevelOrder in that each level's nodes are brought all at once
+		/// iterative approach with level awareness. This is a different way than <see cref="TraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
 		/// </summary>
 		internal sealed class LevelIterator
 		{
@@ -1563,7 +2249,8 @@ namespace asm.Collections
 		public RedBlackTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
 			: this(comparer)
 		{
-			Add(collection);
+			foreach (T value in collection) 
+				Add(value);
 		}
 
 		internal RedBlackTree(SerializationInfo info, StreamingContext context)
@@ -1631,61 +2318,328 @@ namespace asm.Collections
 		[NotNull]
 		public IEnumerator<T> GetEnumerator()
 		{
-			return GetEnumerator(Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default).GetEnumerator();
+			return (IEnumerator<T>)Enumerate(Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default);
 		}
 
+		/// <summary>
+		/// Enumerate nodes' values in a semi recursive approach
+		/// </summary>
+		/// <param name="root">The starting node</param>
+		/// <param name="method">The traverse method</param>
+		/// <param name="flow">Left-to-right or right-to-left</param>
+		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
+		/// <returns></returns>
 		[NotNull]
-		public IEnumerable<T> GetEnumerator(TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction)
-		{
-			return GetEnumerator(Root, method, flow, direction);
-		}
-		[NotNull]
-		public IEnumerable<T> GetEnumerator(Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction)
+		public IEnumerable<T> Enumerate(Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction)
 		{
 			return root == null
 						? Enumerable.Empty<T>()
 						: new Enumerator(this, root, method, flow, direction);
 		}
 
-		public void Iterate(TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction, Func<Node, bool> visitCallback)
+		#region Enumerate overloads
+		[NotNull]
+		public IEnumerable<T> Enumerate(Node root, HorizontalDirectionFlags direction)
 		{
-			Iterate(Root, method, flow, direction, visitCallback);
+			return Enumerate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction);
 		}
+
+		[NotNull]
+		public IEnumerable<T> Enumerate(Node root, HorizontalFlow flow)
+		{
+			return Enumerate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default);
+		}
+
+		[NotNull]
+		public IEnumerable<T> Enumerate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction)
+		{
+			return Enumerate(root, TraverseMethod.InOrder, flow, direction);
+		}
+
+		[NotNull]
+		public IEnumerable<T> Enumerate(Node root, TraverseMethod method)
+		{
+			return Enumerate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default);
+		}
+
+		[NotNull]
+		public IEnumerable<T> Enumerate(Node root, TraverseMethod method, HorizontalDirectionFlags direction)
+		{
+			return Enumerate(root, method, HorizontalFlow.LeftToRight, direction);
+		}
+
+		[NotNull]
+		public IEnumerable<T> Enumerate(Node root, TraverseMethod method, HorizontalFlow flow)
+		{
+			return Enumerate(root, method, flow, HorizontalDirectionFlags.Default);
+		}
+		#endregion
+
+		/// <summary>
+		/// Iterate over nodes with a callback function
+		/// </summary>
+		/// <param name="root">The starting node</param>
+		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
+		/// <param name="flow">Left-to-right or right-to-left</param>
+		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
+		/// <param name="visitCallback">callback function to handle the node that can cancel the loop</param>
 		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction, Func<Node, bool> visitCallback)
 		{
 			if (root == null) return;
 			new Iterator(this, root, method).Iterate(flow, direction, visitCallback);
 		}
 
-		public void Iterate(TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction, Action<Node> visitCallback)
+		#region Iterate overloads - visitCallback function
+		public void Iterate(Node root, [NotNull] Func<Node, bool> visitCallback)
 		{
-			Iterate(Root, method, flow, direction, visitCallback);
+			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
 		}
+
+		public void Iterate(Node root, HorizontalDirectionFlags direction, [NotNull] Func<Node, bool> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
+		}
+
+		public void Iterate(Node root, HorizontalFlow flow, [NotNull] Func<Node, bool> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
+		}
+
+		public void Iterate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<Node, bool> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, flow, direction, visitCallback);
+		}
+
+		public void Iterate(Node root, TraverseMethod method, [NotNull] Func<Node, bool> visitCallback)
+		{
+			Iterate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
+		}
+
+		public void Iterate(Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Func<Node, bool> visitCallback)
+		{
+			Iterate(root, method, HorizontalFlow.LeftToRight, direction, visitCallback);
+		}
+
+		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<Node, bool> visitCallback)
+		{
+			Iterate(root, method, flow, HorizontalDirectionFlags.Default, visitCallback);
+		}
+		#endregion
+
+		/// <summary>
+		/// Iterate over nodes with a callback function
+		/// </summary>
+		/// <param name="root">The starting node</param>
+		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
+		/// <param name="flow">Left-to-right or right-to-left</param>
+		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
+		/// <param name="visitCallback">callback function to handle the node with depth awareness that can cancel the loop</param>
+		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction, Func<Node, int, bool> visitCallback)
+		{
+			if (root == null) return;
+			new Iterator(this, root, method).Iterate(flow, direction, visitCallback);
+		}
+
+		#region Iterate overloads - visitCallback with depth function
+		public void Iterate(Node root, [NotNull] Func<Node, int, bool> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
+		}
+
+		public void Iterate(Node root, HorizontalDirectionFlags direction, [NotNull] Func<Node, int, bool> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
+		}
+
+		public void Iterate(Node root, HorizontalFlow flow, [NotNull] Func<Node, int, bool> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
+		}
+
+		public void Iterate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<Node, int, bool> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, flow, direction, visitCallback);
+		}
+
+		public void Iterate(Node root, TraverseMethod method, [NotNull] Func<Node, int, bool> visitCallback)
+		{
+			Iterate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
+		}
+
+		public void Iterate(Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Func<Node, int, bool> visitCallback)
+		{
+			Iterate(root, method, HorizontalFlow.LeftToRight, direction, visitCallback);
+		}
+
+		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<Node, int, bool> visitCallback)
+		{
+			Iterate(root, method, flow, HorizontalDirectionFlags.Default, visitCallback);
+		}
+		#endregion
+
+		/// <summary>
+		/// Iterate over nodes with a callback action
+		/// </summary>
+		/// <param name="root">The starting node</param>
+		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
+		/// <param name="flow">Left-to-right or right-to-left</param>
+		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
+		/// <param name="visitCallback">callback action to handle the node</param>
 		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction, Action<Node> visitCallback)
 		{
 			if (root == null) return;
 			new Iterator(this, root, method).Iterate(flow, direction, visitCallback);
 		}
 
-		public void Iterate(HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<int, IReadOnlyCollection<Node>, bool> levelCallback)
+		#region Iterate overloads - visitCallback action
+		public void Iterate(Node root, [NotNull] Action<Node> visitCallback)
 		{
-			Iterate(Root, flow, direction, levelCallback);
+			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
 		}
+
+		public void Iterate(Node root, HorizontalDirectionFlags direction, [NotNull] Action<Node> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
+		}
+
+		public void Iterate(Node root, HorizontalFlow flow, [NotNull] Action<Node> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
+		}
+
+		public void Iterate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<Node> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, flow, direction, visitCallback);
+		}
+
+		public void Iterate(Node root, TraverseMethod method, [NotNull] Action<Node> visitCallback)
+		{
+			Iterate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
+		}
+
+		public void Iterate(Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Action<Node> visitCallback)
+		{
+			Iterate(root, method, HorizontalFlow.LeftToRight, direction, visitCallback);
+		}
+
+		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<Node> visitCallback)
+		{
+			Iterate(root, method, flow, HorizontalDirectionFlags.Default, visitCallback);
+		}
+		#endregion
+
+		/// <summary>
+		/// Iterate over nodes with a callback action
+		/// </summary>
+		/// <param name="root">The starting node</param>
+		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
+		/// <param name="flow">Left-to-right or right-to-left</param>
+		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
+		/// <param name="visitCallback">callback action to handle the node with depth awareness</param>
+		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction, Action<Node, int> visitCallback)
+		{
+			if (root == null) return;
+			new Iterator(this, root, method).Iterate(flow, direction, visitCallback);
+		}
+
+		#region Iterate overloads - visitCallback with depth action
+		public void Iterate(Node root, [NotNull] Action<Node, int> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
+		}
+
+		public void Iterate(Node root, HorizontalDirectionFlags direction, [NotNull] Action<Node, int> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
+		}
+
+		public void Iterate(Node root, HorizontalFlow flow, [NotNull] Action<Node, int> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
+		}
+
+		public void Iterate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<Node, int> visitCallback)
+		{
+			Iterate(root, TraverseMethod.InOrder, flow, direction, visitCallback);
+		}
+
+		public void Iterate(Node root, TraverseMethod method, [NotNull] Action<Node, int> visitCallback)
+		{
+			Iterate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
+		}
+
+		public void Iterate(Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Action<Node, int> visitCallback)
+		{
+			Iterate(root, method, HorizontalFlow.LeftToRight, direction, visitCallback);
+		}
+
+		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<Node, int> visitCallback)
+		{
+			Iterate(root, method, flow, HorizontalDirectionFlags.Default, visitCallback);
+		}
+		#endregion
+
+		/// <summary>
+		/// Iterate over nodes on a level by level basis with a callback function.
+		/// This is a different way than <see cref="TraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
+		/// </summary>
+		/// <param name="root">The starting node</param>
+		/// <param name="flow">Left-to-right or right-to-left</param>
+		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
+		/// <param name="levelCallback">callback function to handle the nodes of the level and can cancel the loop.</param>
 		public void Iterate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<int, IReadOnlyCollection<Node>, bool> levelCallback)
 		{
 			if (root == null) return;
 			new LevelIterator(this, root).Iterate(flow, direction, levelCallback);
 		}
 
-		public void Iterate(HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback)
+		#region LevelIterate overloads - visitCallback function
+		public void Iterate(Node root, [NotNull] Func<int, IReadOnlyCollection<Node>, bool> levelCallback)
 		{
-			Iterate(Root, flow, direction, levelCallback);
+			Iterate(root, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, levelCallback);
 		}
+
+		public void Iterate(Node root, HorizontalDirectionFlags direction, [NotNull] Func<int, IReadOnlyCollection<Node>, bool> levelCallback)
+		{
+			Iterate(root, HorizontalFlow.LeftToRight, direction, levelCallback);
+		}
+
+		public void Iterate(Node root, HorizontalFlow flow, [NotNull] Func<int, IReadOnlyCollection<Node>, bool> levelCallback)
+		{
+			Iterate(root, flow, HorizontalDirectionFlags.Default, levelCallback);
+		}
+		#endregion
+
+		/// <summary>
+		/// Iterate over nodes on a level by level basis with a callback function.
+		/// This is a different way than <see cref="TraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
+		/// </summary>
+		/// <param name="root">The starting node</param>
+		/// <param name="flow">Left-to-right or right-to-left</param>
+		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
+		/// <param name="levelCallback">callback action to handle the nodes of the level.</param>
 		public void Iterate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback)
 		{
 			if (root == null) return;
 			new LevelIterator(this, root).Iterate(flow, direction, levelCallback);
 		}
+
+		#region LevelIterate overloads - visitCallback function
+		public void Iterate(Node root, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback)
+		{
+			Iterate(root, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, levelCallback);
+		}
+
+		public void Iterate(Node root, HorizontalDirectionFlags direction, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback)
+		{
+			Iterate(root, HorizontalFlow.LeftToRight, direction, levelCallback);
+		}
+
+		public void Iterate(Node root, HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback)
+		{
+			Iterate(root, flow, HorizontalDirectionFlags.Default, levelCallback);
+		}
+		#endregion
 
 		/// <inheritdoc />
 		public bool Contains(T value) { return Find(value) != null; }
@@ -1697,7 +2651,7 @@ namespace asm.Collections
 		/// <returns>The found node or null if no match is found</returns>
 		public Node Find(T value)
 		{
-			Node current = Successor(value);
+			Node current = FindNearest(value);
 			if (current == null || Comparer.IsEqual(current.Value, value)) return current;
 			if (current.Left != null && Comparer.IsEqual(current.Left.Value, value)) return current.Left;
 			if (current.Right != null && Comparer.IsEqual(current.Right.Value, value)) return current.Right;
@@ -1734,37 +2688,46 @@ namespace asm.Collections
 			return GeNodesAtLevel(level)?.FirstOrDefault(e => Comparer.IsEqual(e.Value, value));
 		}
 
-		public Node Successor(T value)
+		public Node FindNearest(T value)
 		{
-			Node current = null, next = Root;
+			if (Root == null) return null;
 
-			while (next != null)
+			Node parent = Root, next = Root;
+
+			while (next != null && !Comparer.IsEqual(value, next.Value))
 			{
-				current = next;
+				parent = next;
 				next = Comparer.IsLessThan(value, next.Value)
 							? next.Left
 							: next.Right;
-				// handle duplicates
-				if (next != null && Comparer.IsEqual(next.Value, value)) continue;
-				// OK, found it if are equal
-				if (Comparer.IsEqual(current.Value, value)) break;
 			}
 
-			return current;
+			return parent;
 		}
 
 		/// <inheritdoc />
 		public void Add(T value)
 		{
-			Node parent = Successor(value);
-
-			if (parent == null)
+			if (Root == null)
 			{
 				// no parent means there is no root currently
-				Root = new Node(value) { Color = false };
+				Root = new Node(value);
 				Count++;
 				_version++;
 				return;
+			}
+
+			// find a parent
+			Node parent = Root, next = Root;
+			Stack<Node> stack = new Stack<Node>();
+
+			while (next != null)
+			{
+				parent = next;
+				stack.Push(parent);
+				next = Comparer.IsLessThan(value, next.Value)
+							? next.Left
+							: next.Right;
 			}
 
 			Node node = new Node(value);
@@ -1772,18 +2735,27 @@ namespace asm.Collections
 			if (Comparer.IsLessThan(value, parent.Value)) parent.Left = node;
 			else parent.Right = node;
 
-			// update nodes
-			Update(node);
+			Queue<Node> unbalancedNodes = new Queue<Node>();
+
+			// find unbalanced parents in the changed nodes
+			// this has the same effect as the recursive call but only it's iterative now
+			while (stack.Count > 0)
+			{
+				parent = stack.Pop();
+				if (IsBalanced(parent)) continue;
+				unbalancedNodes.Enqueue(parent);
+			}
+
 			Count++;
 			_version++;
-			if (IsBalanced(node)) return;
-			FixRedRed(node);
-		}
 
-		public void Add([NotNull] IEnumerable<T> collection)
-		{
-			foreach (T value in collection) 
-				Add(value);
+			while (unbalancedNodes.Count > 0)
+			{
+				node = unbalancedNodes.Dequeue();
+				// check again if status changed
+				if (IsBalanced(node)) continue;
+				Balance(node);
+			}
 		}
 
 		/// <inheritdoc />
@@ -1795,8 +2767,8 @@ namespace asm.Collections
 
 		public bool Remove([NotNull] Node node)
 		{
-			// A node that replaces the deleted node
-			Node child;
+			Node parent = node.Parent;
+			Node child, leftMostParent = null;
 
 			// case 1: node has no right child
 			if (node.Right == null)
@@ -1814,41 +2786,61 @@ namespace asm.Collections
 			else
 			{
 				// find the right child's left most child
-				child = node.Right.Left;
+				Node leftmost = node.Right.Left;
 
-				while (child.Left != null)
-				{
-					child = child.Left;
-				}
+				while (leftmost.Left != null) 
+					leftmost = leftmost.Left;
+
+				// move the left-most right to the parent's left
+				leftMostParent = leftmost.Parent;
+				leftMostParent.Left = leftmost.Right;
+				// adjust the left-most child nodes
+				leftmost.Left = node.Left;
+				leftmost.Right = node.Right;
+				child = leftmost;
 			}
 
-			Node parent = node.Parent;
 			bool dblBlack = (child == null || !child.Color) && !node.Color;
 
-			if (child == null)
+			if (parent == null)
 			{
-				// node is leaf
-				if (parent == null)
-				{
-					// node is root
-					Root = null;
-				}
+				if (child != null) child.Parent = null;
+				Root = child;
+			}
+			else if (Comparer.IsLessThan(node.Value, parent.Value))
+			{
+				// if node < parent, move the left to the parent's left
+				parent.Left = child;
+			}
+			else
+			{
+				// else, move the left to the parent's right
+				parent.Right = child;
 			}
 
-			if (child != null)
+			Queue<Node> unbalancedNodes = new Queue<Node>();
+			Node update = child != null
+							? leftMostParent ?? child
+							: parent;
+
+			// update nodes
+			while (update != null)
 			{
-				if (parent == null) child.Parent = null;
-				// update nodes
-				Update(child);
-			}
-			else if (parent != null)
-			{
-				// update nodes
-				Update(parent);
+				if (!IsBalanced(update)) unbalancedNodes.Enqueue(update);
+				update = update.Parent;
 			}
 
 			Count--;
 			_version++;
+
+			while (unbalancedNodes.Count > 0)
+			{
+				node = unbalancedNodes.Dequeue();
+				// check again if status changed
+				if (IsBalanced(node)) continue;
+				Balance(node);
+			}
+
 			return true;
 		}
 
@@ -1952,10 +2944,10 @@ namespace asm.Collections
 		/// <returns></returns>
 		public bool Validate(Node node)
 		{
-			if (node == null || node.IsLeaf) return true;
+			if (node == null) return true;
 
 			bool isValid = true;
-			Iterate(TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, e =>
+			Iterate(node, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, e =>
 			{
 				if (e.IsLeft)
 				{
@@ -1983,19 +2975,19 @@ namespace asm.Collections
 			if (node.Color)
 			{
 				return (node.Parent == null || !node.Parent.Color)
-						&& (node.Left == null || !node.Left.Color) 
-						&& (node.Right == null || !node.Right.Color);
+						&& !node.HasRedLeft
+						&& !node.HasRedRight;
 			}
 
 			// node is black
-			// left is null or black
-			return (node.Left == null || !node.Left.Color
+			// has no red left
+			return !node.HasRedLeft
 					// or left is red and all its direct children are either null or black
-					|| (node.Left.Left == null || !node.Left.Left.Color) && (node.Left.Right == null || !node.Left.Right.Color))
-					// and right is null or black
-					&& (node.Right == null || !node.Right.Color
-						// or right is red and all its direct children are either null or black
-						|| (node.Right.Left == null || !node.Right.Left.Color) && (node.Right.Right == null || !node.Right.Right.Color));
+					|| !node.Left.HasRedLeft && !node.Left.HasRedRight
+					// and has no red right
+					&& (!node.HasRedRight
+					// or right is red and all its direct children are either null or black
+					|| !node.Right.HasRedLeft && !node.Right.HasRedRight);
 		}
 
 		/// <summary>
@@ -2019,11 +3011,30 @@ namespace asm.Collections
 				Node node = unbalancedNodes.Dequeue();
 				// check again if status changed
 				if (IsBalanced(node)) continue;
-				FixRedRed(node);
+				BalanceRedRed(node);
 			}
 		}
 
-		private void FixRedRed(Node node)
+		private void Balance([NotNull] Node node)
+		{
+			if (node.Color)
+			{
+				if (node.Parent != null && node.Parent.Color)
+				{
+					BalanceRedRed(node);
+				}
+				else
+				{
+					if (node.HasRedLeft) BalanceRedRed(node.Left);
+					if (node.HasRedRight) BalanceRedRed(node.Right);
+				}
+
+				return;
+			}
+		}
+
+		// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
+		private void BalanceRedRed(Node node)
 		{
 			/*
 			 * balance the tree
@@ -2044,7 +3055,7 @@ namespace asm.Collections
 			 *  / \                                  / \
 			 * T1  T2     <- Left Rotation(x)       T2  T3
 			 */
-			if (node == null || IsBalanced(node)) return;
+			if (node?.Parent == null || !node.Color || !node.Parent.Color) return;
 
 			while (!node.IsRoot && node.Color && node.Parent.Color)
 			{
@@ -2120,8 +3131,81 @@ namespace asm.Collections
 			Root.Color = false;
 		}
 
+		// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
+		private void BalanceDoubleBlack(Node node)
+		{
+			while (node != null && !node.IsRoot && node.Color)
+			{
+				Node sibling = node.Sibling, parent = node.Parent;
+
+				while (sibling == null && parent != null)
+				{
+					// No sibling, double black pushed up
+					node = parent;
+					sibling = node.Sibling;
+					parent = node.Parent;
+				}
+
+				if (parent == null || sibling == null) return;
+
+				if (sibling.HasRedLeft)
+				{
+					if (sibling.IsLeft)
+					{
+						// Left-left case
+						sibling.Left.Color = sibling.Color;
+						sibling.Color = parent.Color;
+						RotateRight(parent);
+					}
+					else
+					{
+						// Right-left case
+						sibling.Left.Color = parent.Color;
+						RotateRight(sibling);
+						RotateLeft(parent);
+					}
+
+					node = null;
+				}
+				else if (sibling.HasRedRight)
+				{
+					if (sibling.IsLeft)
+					{
+						// Left-right case
+						sibling.Right.Color = parent.Color;
+						RotateLeft(sibling);
+						RotateRight(parent);
+					}
+					else
+					{
+						// Right-right case
+						sibling.Right.Color = sibling.Color;
+						sibling.Color = parent.Color;
+						RotateLeft(parent);
+					}
+
+					node = null;
+				}
+				else
+				{
+					// 2 black children
+					sibling.Color = true;
+
+					if (parent.Color)
+					{
+						parent.Color = false;
+						node = null;
+					}
+					else
+					{
+						node = parent;
+					}
+				}
+			}
+		}
+
 		/*
-		* https://www.geeksforgeeks.org/avl-tree-set-1-insertion/
+		* https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
 		*     y                               x
 		*    / \     Right Rotation(y) ->    /  \
 		*   x   T3                          T1   y 
@@ -2131,63 +3215,51 @@ namespace asm.Collections
 		* A reference to the drawing only, not the code
 		*/
 		[NotNull]
-		private Node RotateLeft([NotNull] Node sourceNode /* x */)
+		private Node RotateLeft([NotNull] Node node /* x */)
 		{
-			bool isLeft = sourceNode.IsLeft;
-			Node oldParent = sourceNode.Parent;
-			Node newRoot /* y */ = sourceNode.Right;
+			bool isLeft = node.IsLeft;
+			Node oldParent /* y */ = node.Parent;
+			Node newRoot /* y */ = node.Right;
 			Node oldLeft /* T2 */ = newRoot.Left;
 
 			// Perform rotation
-			newRoot.Left = sourceNode;
-			sourceNode.Right = oldLeft;
+			newRoot.Left = node;
+			node.Right = oldLeft;
 
+			// connect the new root with the old parent
 			if (oldParent != null)
 			{
 				if (isLeft) oldParent.Left = newRoot;
 				else oldParent.Right = newRoot;
 			}
 
-			// update nodes
-			Update(newRoot);
 			_version++;
 			// Return new root
 			return newRoot;
 		}
 
 		[NotNull]
-		private Node RotateRight([NotNull] Node sourceNode /* y */)
+		private Node RotateRight([NotNull] Node node /* y */)
 		{
-			bool isLeft = sourceNode.IsLeft;
-			Node oldParent = sourceNode.Parent;
-			Node newRoot /* x */ = sourceNode.Left;
+			bool isLeft = node.IsLeft;
+			Node oldParent /* y */ = node.Parent;
+			Node newRoot /* x */ = node.Left;
 			Node oldRight /* T2 */ = newRoot.Right;
 
 			// Perform rotation
-			newRoot.Right = sourceNode;
-			sourceNode.Left = oldRight;
+			newRoot.Right = node;
+			node.Left = oldRight;
 
+			// connect the new root with the old parent
 			if (oldParent != null)
 			{
 				if (isLeft) oldParent.Left = newRoot;
 				else oldParent.Right = newRoot;
 			}
 
-			// update nodes
-			Update(newRoot);
 			_version++;
 			// Return new root
 			return newRoot;
-		}
-
-		private void Update(Node node)
-		{
-			if (node == null) return;
-
-			if (node.IsLeaf)
-				node.Depth = 1 + (node.Parent?.Depth ?? -1);
-			else
-				Iterate(node, TraverseMethod.LevelOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, e => e.Depth = 1 + (e.Parent?.Depth ?? -1));
 		}
 	}
 
@@ -2210,28 +3282,27 @@ namespace asm.Collections
 
 	public static class RedBlackTreeExtension
 	{
-		public static string ToString<T>([NotNull] this RedBlackTree<T> thisValue, Orientation orientation, bool diagnosticInfo = false, Func<RedBlackTree<T>.Node, string> onFormatNode = null) { return ToString(thisValue, thisValue.Root, orientation, diagnosticInfo, onFormatNode); }
-		public static string ToString<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node node, Orientation orientation, bool diagnosticInfo = false, Func<RedBlackTree<T>.Node, string> onFormatNode = null)
+		public static string ToString<T>([NotNull] this RedBlackTree<T> thisValue, Orientation orientation, bool diagnosticInfo = false) { return ToString(thisValue, thisValue.Root, orientation, diagnosticInfo); }
+		public static string ToString<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node node, Orientation orientation, bool diagnosticInfo = false)
 		{
 			if (node == null) return string.Empty;
-			if (node.IsLeaf) return Format(node, diagnosticInfo, onFormatNode);
+			if (node.IsLeaf) return Format(node, diagnosticInfo);
 			return orientation switch
 			{
-				Orientation.Horizontal => Horizontally(thisValue, node, diagnosticInfo, onFormatNode),
-				Orientation.Vertical => Vertically(thisValue, node, diagnosticInfo, onFormatNode),
+				Orientation.Horizontal => Horizontally(thisValue, node, diagnosticInfo),
+				Orientation.Vertical => Vertically(thisValue, node, diagnosticInfo),
 				_ => throw new ArgumentOutOfRangeException(nameof(orientation), orientation, null)
 			};
 
-			static string Format(RedBlackTree<T>.Node node, bool diagnosticInfo, Func<RedBlackTree<T>.Node, string> formatNode)
+			static string Format(RedBlackTree<T>.Node node, bool diagnostic)
 			{
 				if (node == null) return string.Empty;
-				string nodeStr = formatNode?.Invoke(node) ?? node.ToString();
-				return diagnosticInfo
-							? $"{node} :D{node.Depth}{(node.Color ? 'R' : 'B')}"
+				return diagnostic
+							? $"{node} {(node.Color ? 'R' : 'B')}"
 							: node.ToString();
 			}
 
-			static string Horizontally(RedBlackTree<T> tree, RedBlackTree<T>.Node node, bool diagnostic, Func<RedBlackTree<T>.Node, string> formatNode)
+			static string Horizontally(RedBlackTree<T> tree, RedBlackTree<T>.Node node, bool diagnostic)
 			{
 				const string STR_BLANK = "    ";
 				const string STR_EXT = "│   ";
@@ -2244,7 +3315,7 @@ namespace asm.Collections
 
 				tree.Iterate(node, TraverseMethod.InOrder, HorizontalFlow.RightToLeft, HorizontalDirectionFlags.Default, e =>
 				{
-					connectors.Push(Format(e, diagnostic, formatNode));
+					connectors.Push(Format(e, diagnostic));
 
 					if (e.IsRight) connectors.Push(STR_CONNECTOR_R);
 					else if (e.IsLeft) connectors.Push(STR_CONNECTOR_L);
@@ -2258,10 +3329,8 @@ namespace asm.Collections
 						e = e.Parent;
 					}
 
-					while (connectors.Count > 1)
-					{
+					while (connectors.Count > 1) 
 						sb.Append(connectors.Pop());
-					}
 
 					sb.AppendLine(connectors.Pop());
 				});
@@ -2269,7 +3338,7 @@ namespace asm.Collections
 				return sb.ToString();
 			}
 
-			static string Vertically(RedBlackTree<T> tree, RedBlackTree<T>.Node node, bool diagnostic, Func<RedBlackTree<T>.Node, string> formatNode)
+			static string Vertically(RedBlackTree<T> tree, RedBlackTree<T>.Node node, bool diagnostic)
 			{
 				const char C_BLANK = ' ';
 				const char C_EXT = '─';
@@ -2278,16 +3347,16 @@ namespace asm.Collections
 
 				int distance = 0;
 				IDictionary<int, StringBuilder> lines = new Dictionary<int, StringBuilder>();
-				tree.Iterate(node, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, e =>
+				tree.Iterate(node, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, (e, depth) =>
 				{
-					StringBuilder line = lines.GetOrAdd(e.Depth);
+					StringBuilder line = lines.GetOrAdd(depth);
 
 					if (line.Length > 0 && line[line.Length - 1] == C_CONNECTOR_L) line.Append(C_EXT, distance - line.Length);
 					else line.Append(C_BLANK, distance - line.Length);
 
-					if (e.Depth > 0)
+					if (depth > 0)
 					{
-						StringBuilder prevLine = lines.GetOrAdd(e.Depth - 1);
+						StringBuilder prevLine = lines.GetOrAdd(depth - 1);
 
 						if (e.IsLeft)
 						{
@@ -2304,258 +3373,12 @@ namespace asm.Collections
 					}
 
 					if (line.Length > 0) line.Append(C_BLANK);
-					line.Append(Format(e, diagnostic, formatNode));
+					line.Append(Format(e, diagnostic));
 					distance = line.Length;
 				});
 
 				return string.Join(Environment.NewLine, lines.OrderBy(e => e.Key).Select(e => e.Value));
 			}
-		}
-
-		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalDirectionFlags direction)
-		{
-			return thisValue.GetEnumerator(TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction);
-		}
-		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalDirectionFlags direction)
-		{
-			return thisValue.GetEnumerator(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction);
-		}
-
-		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow)
-		{
-			return thisValue.GetEnumerator(TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default);
-		}
-		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow)
-		{
-			return thisValue.GetEnumerator(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default);
-		}
-
-		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, HorizontalDirectionFlags direction)
-		{
-			return thisValue.GetEnumerator(TraverseMethod.InOrder, flow, direction);
-		}
-		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, HorizontalDirectionFlags direction)
-		{
-			return thisValue.GetEnumerator(root, TraverseMethod.InOrder, flow, direction);
-		}
-
-		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method)
-		{
-			return thisValue.GetEnumerator(method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default);
-		}
-		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method)
-		{
-			return thisValue.GetEnumerator(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default);
-		}
-
-		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, HorizontalDirectionFlags direction)
-		{
-			return thisValue.GetEnumerator(method, HorizontalFlow.LeftToRight, direction);
-		}
-		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, HorizontalDirectionFlags direction)
-		{
-			return thisValue.GetEnumerator(root, method, HorizontalFlow.LeftToRight, direction);
-		}
-
-		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, HorizontalFlow flow)
-		{
-			return thisValue.GetEnumerator(method, flow, HorizontalDirectionFlags.Default);
-		}
-		[NotNull]
-		public static IEnumerable<T> Enumerate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, HorizontalFlow flow)
-		{
-			return thisValue.GetEnumerator(root, method, flow, HorizontalDirectionFlags.Default);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalDirectionFlags direction, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalDirectionFlags direction, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(TraverseMethod.InOrder, flow, direction, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(root, TraverseMethod.InOrder, flow, direction, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(method, HorizontalFlow.LeftToRight, direction, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(root, method, HorizontalFlow.LeftToRight, direction, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(method, flow, HorizontalDirectionFlags.Default, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<RedBlackTree<T>.Node, bool> visitCallback)
-		{
-			thisValue.Iterate(root, method, flow, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalDirectionFlags direction, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalDirectionFlags direction, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(TraverseMethod.InOrder, flow, direction, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(root, TraverseMethod.InOrder, flow, direction, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(method, HorizontalFlow.LeftToRight, direction, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(root, method, HorizontalFlow.LeftToRight, direction, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(method, flow, HorizontalDirectionFlags.Default, visitCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<RedBlackTree<T>.Node> visitCallback)
-		{
-			thisValue.Iterate(root, method, flow, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] Func<int, IReadOnlyCollection<RedBlackTree<T>.Node>, bool> levelCallback)
-		{
-			thisValue.Iterate(HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, levelCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, [NotNull] Func<int, IReadOnlyCollection<RedBlackTree<T>.Node>, bool> levelCallback)
-		{
-			thisValue.Iterate(root, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, levelCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalDirectionFlags direction, [NotNull] Func<int, IReadOnlyCollection<RedBlackTree<T>.Node>, bool> levelCallback)
-		{
-			thisValue.Iterate(HorizontalFlow.LeftToRight, direction, levelCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalDirectionFlags direction, [NotNull] Func<int, IReadOnlyCollection<RedBlackTree<T>.Node>, bool> levelCallback)
-		{
-			thisValue.Iterate(root, HorizontalFlow.LeftToRight, direction, levelCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, [NotNull] Func<int, IReadOnlyCollection<RedBlackTree<T>.Node>, bool> levelCallback)
-		{
-			thisValue.Iterate(flow, HorizontalDirectionFlags.Default, levelCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, [NotNull] Func<int, IReadOnlyCollection<RedBlackTree<T>.Node>, bool> levelCallback)
-		{
-			thisValue.Iterate(root, flow, HorizontalDirectionFlags.Default, levelCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] Action<int, IReadOnlyCollection<RedBlackTree<T>.Node>> levelCallback)
-		{
-			thisValue.Iterate(HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, levelCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, [NotNull] Action<int, IReadOnlyCollection<RedBlackTree<T>.Node>> levelCallback)
-		{
-			thisValue.Iterate(root, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, levelCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalDirectionFlags direction, [NotNull] Action<int, IReadOnlyCollection<RedBlackTree<T>.Node>> levelCallback)
-		{
-			thisValue.Iterate(HorizontalFlow.LeftToRight, direction, levelCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalDirectionFlags direction, [NotNull] Action<int, IReadOnlyCollection<RedBlackTree<T>.Node>> levelCallback)
-		{
-			thisValue.Iterate(root, HorizontalFlow.LeftToRight, direction, levelCallback);
-		}
-
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<RedBlackTree<T>.Node>> levelCallback)
-		{
-			thisValue.Iterate(flow, HorizontalDirectionFlags.Default, levelCallback);
-		}
-		public static void Iterate<T>([NotNull] this RedBlackTree<T> thisValue, RedBlackTree<T>.Node root, HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<RedBlackTree<T>.Node>> levelCallback)
-		{
-			thisValue.Iterate(root, flow, HorizontalDirectionFlags.Default, levelCallback);
 		}
 
 		// todo

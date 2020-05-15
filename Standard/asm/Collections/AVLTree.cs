@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Patterns.Collections;
 using asm.Patterns.Direction;
@@ -48,7 +49,8 @@ namespace asm.Collections
 		public AVLTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
 			: base(comparer)
 		{
-			Add(collection);
+			foreach (T value in collection) 
+				Add(value);
 		}
 
 		/// <inheritdoc />
@@ -58,26 +60,21 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public override bool AutoBalance { get; } = true;
-
-		/// <inheritdoc />
-		public override Node Successor(T value)
+		public override Node FindNearest(T value)
 		{
-			Node current = null, next = Root;
+			if (Root == null) return null;
 
-			while (next != null)
+			Node parent = Root, next = Root;
+
+			while (next != null && !Comparer.IsEqual(value, next.Value))
 			{
-				current = next;
+				parent = next;
 				next = Comparer.IsLessThan(value, next.Value)
 							? next.Left
 							: next.Right;
-				// handle duplicates
-				if (next != null && Comparer.IsEqual(next.Value, value)) continue;
-				// OK, found it if are equal
-				if (Comparer.IsEqual(current.Value, value)) break;
 			}
 
-			return current;
+			return parent;
 		}
 
 		/// <inheritdoc />
@@ -92,8 +89,8 @@ namespace asm.Collections
 				return;
 			}
 
-			// find a successor
-			Node parent = null, next = Root;
+			// find a parent
+			Node parent = Root, next = Root;
 			Stack<Node> stack = new Stack<Node>();
 
 			while (next != null)
@@ -104,8 +101,6 @@ namespace asm.Collections
 							? next.Left
 							: next.Right;
 			}
-			
-			if (parent == null) throw new Exception("No successor found."); // not suppose to happen
 
 			Node node = new Node(value);
 
@@ -114,7 +109,8 @@ namespace asm.Collections
 
 			Queue<Node> unbalancedNodes = new Queue<Node>();
 
-			// update nodes
+			// update parents and find unbalanced parents in the changed nodes along the way
+			// this has the same effect as the recursive call but only it's iterative now
 			while (stack.Count > 0)
 			{
 				parent = stack.Pop();
@@ -339,13 +335,21 @@ namespace asm.Collections
 
 				if (node.BalanceFactor > 1) // left heavy
 				{
-					if (node.Left.BalanceFactor < 0) node.Left = RotateLeft(node.Left);
+					if (node.Left.BalanceFactor < 0)
+					{
+						// duplicate values can make life miserable for us here because it will never be balanced!
+						if (Comparer.IsEqual(node.Value, node.Left.Value)) throw new DuplicateKeyException();
+						RotateLeft(node.Left);
+					}
+
 					node = RotateRight(node);
 					changed = true;
 				}
 				else if (node.BalanceFactor < -1) // right heavy
 				{
-					if (node.Right.BalanceFactor > 0) node.Right = RotateRight(node.Right);
+					if (node.Right.BalanceFactor > 0) RotateRight(node.Right);
+					// duplicate values can make life miserable for us here because it will never be balanced!
+					if (Comparer.IsEqual(node.Value, node.Right.Value)) throw new DuplicateKeyException();
 					node = RotateLeft(node);
 					changed = true;
 				}

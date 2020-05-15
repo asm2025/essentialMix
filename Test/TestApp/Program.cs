@@ -15,7 +15,7 @@ namespace TestApp
 		{
 			Console.OutputEncoding = Encoding.UTF8;
 
-			//TestLinkedBinaryTreeFromTraversal();
+			//TestBinarySearchTreeFromTraversal();
 			
 			//TestBinarySearchTreeAdd();
 			//TestBinarySearchTreeRemove();
@@ -30,80 +30,80 @@ namespace TestApp
 			ConsoleHelper.Pause();
 		}
 
-		private static void TestLinkedBinaryTreeFromTraversal()
+		private static void TestBinarySearchTreeFromTraversal()
 		{
-//			const string TREE_DATA_LEVEL = "FCIADGJBEHK";
-//			const string TREE_DATA_PRE = "FCABDEIGHJK";
-//			const string TREE_DATA_IN = "ABCDEFGHIJK";
-//			const string TREE_DATA_POST = "BAEDCHGKJIF";
-//			const int NUM_TESTS = 7;
+			const string TREE_DATA_LEVEL = "FCIADGJBEHK";
+			const string TREE_DATA_PRE = "FCABDEIGHJK";
+			const string TREE_DATA_IN = "ABCDEFGHIJK";
+			const string TREE_DATA_POST = "BAEDCHGKJIF";
+			const int NUM_TESTS = 7;
 
-//			BinarySearchTree<char> tree = new BinarySearchTree<char>();
-			
-//			bool more;
-//			int i = 0;
+			BinarySearchTree<char> tree = new BinarySearchTree<char>();
 
-//			do
-//			{
-//				Console.Clear();
-//				Console.WriteLine();
-				
-//				switch (i)
-//				{
-//					case 0:
-//						Console.WriteLine($@"Data from {"LevelOrder".BrightCyan()} traversal:
-//{TREE_DATA_LEVEL}");
-//						tree.FromLevelOrder(TREE_DATA_LEVEL);
-//						break;
-//					case 1:
-//						Console.WriteLine($@"Data from {"PreOrder".BrightCyan()} traversal:
-//{TREE_DATA_PRE}");
-//						tree.FromPreOrder(TREE_DATA_PRE);
-//						break;
-//					case 2:
-//						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} traversal:
-//{TREE_DATA_IN}");
-//						tree.FromInOrder(TREE_DATA_IN);
-//						break;
-//					case 3:
-//						Console.WriteLine($@"Data from {"PostOrder".BrightCyan()} traversal:
-//{TREE_DATA_POST}");
-//						tree.FromPostOrder(TREE_DATA_POST);
-//						break;
-//					case 4:
-//						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} and {"LevelOrder".BrightCyan()} traversals:
-//{TREE_DATA_IN}
-//{TREE_DATA_LEVEL}");
-//						tree.FromInOrderAndLevelOrder(TREE_DATA_IN, TREE_DATA_LEVEL);
-//						break;
-//					case 5:
-//						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} and {"PreOrder".BrightCyan()} traversals:
-//{TREE_DATA_IN}
-//{TREE_DATA_PRE}");
-//						tree.FromInOrderAndPreOrder(TREE_DATA_IN, TREE_DATA_PRE);
-//						break;
-//					case 6:
-//						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} and {"PostOrder".BrightCyan()} traversals:
-//{TREE_DATA_IN}
-//{TREE_DATA_POST}");
-//						tree.FromInOrderAndPostOrder(TREE_DATA_IN, TREE_DATA_POST);
-//						break;
-//				}
+			bool more;
+			int i = 0;
 
-//				tree.Print();
-//				i++;
+			do
+			{
+				Console.Clear();
+				Console.WriteLine();
 
-//				if (i >= NUM_TESTS)
-//				{
-//					more = false;
-//					continue;
-//				}
+				switch (i)
+				{
+					case 0:
+						Console.WriteLine($@"Data from {"LevelOrder".BrightCyan()} traversal:
+{TREE_DATA_LEVEL}");
+						tree.FromLevelOrder(TREE_DATA_LEVEL);
+						break;
+					case 1:
+						Console.WriteLine($@"Data from {"PreOrder".BrightCyan()} traversal:
+{TREE_DATA_PRE}");
+						tree.FromPreOrder(TREE_DATA_PRE);
+						break;
+					case 2:
+						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} traversal:
+{TREE_DATA_IN}");
+						tree.FromInOrder(TREE_DATA_IN);
+						break;
+					case 3:
+						Console.WriteLine($@"Data from {"PostOrder".BrightCyan()} traversal:
+{TREE_DATA_POST}");
+						tree.FromPostOrder(TREE_DATA_POST);
+						break;
+					case 4:
+						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} and {"LevelOrder".BrightCyan()} traversals:
+{TREE_DATA_IN}
+{TREE_DATA_LEVEL}");
+						tree.FromInOrderAndLevelOrder(TREE_DATA_IN, TREE_DATA_LEVEL);
+						break;
+					case 5:
+						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} and {"PreOrder".BrightCyan()} traversals:
+{TREE_DATA_IN}
+{TREE_DATA_PRE}");
+						tree.FromInOrderAndPreOrder(TREE_DATA_IN, TREE_DATA_PRE);
+						break;
+					case 6:
+						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} and {"PostOrder".BrightCyan()} traversals:
+{TREE_DATA_IN}
+{TREE_DATA_POST}");
+						tree.FromInOrderAndPostOrder(TREE_DATA_IN, TREE_DATA_POST);
+						break;
+				}
 
-//				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
-//				ConsoleKeyInfo response = Console.ReadKey(true);
-//				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
-//			}
-//			while (more);
+				tree.Print();
+				i++;
+
+				if (i >= NUM_TESTS)
+				{
+					more = false;
+					continue;
+				}
+
+				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+			}
+			while (more);
 		}
 
 		private static void TestBinarySearchTreeAdd()
@@ -124,7 +124,7 @@ namespace TestApp
 				foreach (int v in values)
 				{
 					tree.Add(v);
-					tree.Print();
+					//tree.Print();
 				}
 
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
@@ -186,7 +186,14 @@ namespace TestApp
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
-				BinarySearchTree<int> tree = new BinarySearchTree<int>(values);
+				BinarySearchTree<int> tree = new BinarySearchTree<int>();
+
+				foreach (int v in values)
+				{
+					tree.Add(v);
+					//tree.Print();
+				}
+
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 
@@ -299,7 +306,14 @@ namespace TestApp
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
-				RedBlackTree<int> tree = new RedBlackTree<int>(values);
+				RedBlackTree<int> tree = new RedBlackTree<int>();
+
+				foreach (int v in values)
+				{
+					tree.Add(v);
+					//tree.Print();
+				}
+
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 
@@ -408,7 +422,7 @@ public static class LinkedBinaryTreeExtension
 	public static void Print<T>([NotNull] this LinkedBinaryTree<T> thisValue, bool diagnosticInfo = true)
 	{
 		Console.WriteLine();
-		Console.WriteLine($"{"Dimensions:".Yellow()} {thisValue.Count.ToString().Underline()} x {thisValue.Height.ToString().Underline()}.");
+		Console.WriteLine($"{"Dimensions:".Yellow()} {thisValue.Count.ToString().Underline()} x {thisValue.GetHeight().ToString().Underline()}.");
 		Console.WriteLine($"{"Balanced:".Yellow()} {(thisValue.IsBalanced() ? "Yes".BrightGreen() : "No".BrightRed())}");
 		Console.WriteLine($"{"Valid:".Yellow()} {(thisValue.Validate() ? "Yes".BrightGreen() : "No".BrightRed())}");
 		thisValue.Print(Orientation.Vertical, diagnosticInfo);
@@ -436,7 +450,7 @@ public static class RedBlackTreeExtension
 
 	public static void Print<T>([NotNull] this RedBlackTree<T> thisValue, Orientation orientation, bool diagnosticInfo = true)
 	{
-		string treeString = thisValue.ToString(orientation, diagnosticInfo, e => e.Color ? e.ToString().BrightRed() : e.ToString());
+		string treeString = thisValue.ToString(orientation, diagnosticInfo);
 		Console.WriteLine();
 		Console.WriteLine(treeString);
 		Console.WriteLine();
