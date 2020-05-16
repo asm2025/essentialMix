@@ -4,7 +4,6 @@ using System.Runtime.Serialization;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Patterns.Collections;
-using asm.Patterns.Direction;
 using asm.Patterns.Layout;
 using JetBrains.Annotations;
 
@@ -12,13 +11,12 @@ namespace asm.Collections
 {
 	/// <summary>
 	/// <inheritdoc />
-	/// <para><strong>Binary search tree implementation.</strong></para>
+	/// <para>Binary search tree implementation.</para>
 	/// </summary>
-	/// <typeparam name="T">The element type of the tree</typeparam>
 	[Serializable]
-	public sealed class BinarySearchTree<T> : LinkedBinaryTree<T>
+	public class BinarySearchTree<T> : LinkedBinaryTree<T>
 	{
-		private const int BALANCE_FACTOR = 1;
+		protected const int BALANCE_FACTOR = 1;
 
 		/// <inheritdoc />
 		public BinarySearchTree()
@@ -33,37 +31,13 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public BinarySearchTree(T value)
-			: this(value, Comparer<T>.Default)
-		{
-		}
-
-		/// <inheritdoc />
-		public BinarySearchTree(T value, IComparer<T> comparer)
-			: base(comparer)
-		{
-			Add(value);
-		}
-
-		/// <inheritdoc />
-		public BinarySearchTree([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
-		{
-		}
-
-		/// <inheritdoc />
-		public BinarySearchTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
-			: base(comparer)
-		{
-			foreach (T value in collection) 
-				Add(value);
-		}
-
-		/// <inheritdoc />
-		internal BinarySearchTree(SerializationInfo info, StreamingContext context)
+		protected BinarySearchTree(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+		/// <inheritdoc />
+		public override bool AutoBalance { get; } = false;
 
 		/// <inheritdoc />
 		public override Node FindNearestLeaf(T value)
@@ -195,7 +169,7 @@ namespace asm.Collections
 			if (node == null) return true;
 
 			bool isValid = true;
-			Iterate(node, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, e =>
+			Iterate(node, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e =>
 			{
 				if (e.IsLeft)
 				{
@@ -230,7 +204,7 @@ namespace asm.Collections
 
 		/// <summary>
 		/// <inheritdoc />
-		/// <para><strong>This works the same as the <see cref="AVLTree{T}"/></strong></para>
+		/// <para><see href="https://en.wikipedia.org/wiki/AVL_tree">AVLTree</see> balance implementation.</para>
 		/// </summary>
 		public override void Balance()
 		{
@@ -238,7 +212,7 @@ namespace asm.Collections
 
 			// find all unbalanced nodes
 			Queue<Node> unbalancedNodes = new Queue<Node>();
-			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, e =>
+			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e =>
 			{
 				if (IsBalanced(e)) return;
 				unbalancedNodes.Enqueue(e);
@@ -253,7 +227,7 @@ namespace asm.Collections
 			}
 		}
 
-		private void Balance(Node node)
+		protected void Balance(Node node)
 		{
 			/*
 			 * balance the tree
@@ -371,6 +345,7 @@ namespace asm.Collections
 			int index = 0;
 			BinarySearchTree<T>.Node node = new BinarySearchTree<T>.Node(list[index++]);
 			thisValue.Root = node;
+			thisValue.Count++;
 
 			IComparer<T> comparer = thisValue.Comparer;
 			Queue<BinarySearchTree<T>.Node> queue = new Queue<BinarySearchTree<T>.Node>();
@@ -387,6 +362,7 @@ namespace asm.Collections
 				{
 					node = new BinarySearchTree<T>.Node(list[index]);
 					root.Left = node;
+					thisValue.Count++;
 					queue.Enqueue(node);
 					index++;
 				}
@@ -396,6 +372,7 @@ namespace asm.Collections
 				{
 					node = new BinarySearchTree<T>.Node(list[index]);
 					root.Right = node;
+					thisValue.Count++;
 					queue.Enqueue(node);
 					index++;
 				}
@@ -403,7 +380,9 @@ namespace asm.Collections
 				if (oldIndex == index) index++;
 			}
 
-			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, LinkedBinaryTree<T>.SetHeight);
+			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, LinkedBinaryTree<T>.SetHeight);
+			if (!thisValue.AutoBalance) return;
+			thisValue.Balance();
 		}
 
 		/// <summary>
@@ -425,6 +404,7 @@ namespace asm.Collections
 			// first node of PreOrder will be root of tree
 			BinarySearchTree<T>.Node node = new BinarySearchTree<T>.Node(list[0]);
 			thisValue.Root = node;
+			thisValue.Count++;
 
 			Stack<BinarySearchTree<T>.Node> stack = new Stack<BinarySearchTree<T>.Node>();
 			// Push root of the BST to the stack i.e, first element of the array.
@@ -450,13 +430,23 @@ namespace asm.Collections
 
 				node = new BinarySearchTree<T>.Node(list[i]);
 
-				if (root != null) root.Right = node;
-				else if (stack.Count > 0) stack.Peek().Left = node;
+				if (root != null)
+				{
+					root.Right = node;
+					thisValue.Count++;
+				}
+				else if (stack.Count > 0)
+				{
+					stack.Peek().Left = node;
+					thisValue.Count++;
+				}
 
 				stack.Push(node);
 			}
 
-			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, LinkedBinaryTree<T>.SetHeight);
+			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, LinkedBinaryTree<T>.SetHeight);
+			if (!thisValue.AutoBalance) return;
+			thisValue.Balance();
 		}
 
 		/// <summary>
@@ -482,6 +472,7 @@ namespace asm.Collections
 			int index = IndexMid(start, end);
 			BinarySearchTree<T>.Node node = new BinarySearchTree<T>.Node(list[index]);
 			thisValue.Root = node;
+			thisValue.Count++;
 
 			Queue<(int Index, int Start, int End, BinarySearchTree<T>.Node Node)> queue = new Queue<(int Index, int Start, int End, BinarySearchTree<T>.Node Node)>();
 			queue.Enqueue((index, start, end, node));
@@ -500,6 +491,7 @@ namespace asm.Collections
 				{
 					node = new BinarySearchTree<T>.Node(list[nodeIndex]);
 					tuple.Node.Left = node;
+					thisValue.Count++;
 					queue.Enqueue((nodeIndex, start, end, node));
 				}
 
@@ -513,11 +505,14 @@ namespace asm.Collections
 				{
 					node = new BinarySearchTree<T>.Node(list[nodeIndex]);
 					tuple.Node.Right = node;
+					thisValue.Count++;
 					queue.Enqueue((nodeIndex, start, end, node));
 				}
 			}
 
-			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, LinkedBinaryTree<T>.SetHeight);
+			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, LinkedBinaryTree<T>.SetHeight);
+			if (!thisValue.AutoBalance) return;
+			thisValue.Balance();
 
 			static int IndexMid(int start, int end)
 			{
@@ -546,6 +541,7 @@ namespace asm.Collections
 			// last node of PostOrder will be root of tree
 			BinarySearchTree<T>.Node node = new BinarySearchTree<T>.Node(list[list.Count - 1]);
 			thisValue.Root = node;
+			thisValue.Count++;
 
 			Stack<BinarySearchTree<T>.Node> stack = new Stack<BinarySearchTree<T>.Node>();
 			// Push root of the BST to the stack i.e, last element of the array.
@@ -576,13 +572,23 @@ namespace asm.Collections
 
 				node = new BinarySearchTree<T>.Node(list[i]);
 
-				if (root != null) root.Left = node;
-				else if (stack.Count > 0) stack.Peek().Right = node;
+				if (root != null)
+				{
+					root.Left = node;
+					thisValue.Count++;
+				}
+				else if (stack.Count > 0)
+				{
+					stack.Peek().Right = node;
+					thisValue.Count++;
+				}
 
 				stack.Push(node);
 			}
 
-			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, LinkedBinaryTree<T>.SetHeight);
+			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, LinkedBinaryTree<T>.SetHeight);
+			if (!thisValue.AutoBalance) return;
+			thisValue.Balance();
 		}
 
 		/// <summary>
@@ -629,6 +635,7 @@ namespace asm.Collections
 			int index = 0;
 			BinarySearchTree<T>.Node node = new BinarySearchTree<T>.Node(levelOrder[index++]);
 			thisValue.Root = node;
+			thisValue.Count++;
 
 			Queue<(int Start, int End, BinarySearchTree<T>.Node Node)> queue = new Queue<(int Start, int End, BinarySearchTree<T>.Node Node)>();
 			queue.Enqueue((0, inOrder.Count - 1, node));
@@ -647,6 +654,7 @@ namespace asm.Collections
 				{
 					node = new BinarySearchTree<T>.Node(inOrder[levelIndex]);
 					tuple.Node.Left = node;
+					thisValue.Count++;
 					queue.Enqueue((tuple.Start, rootIndex - 1, node));
 					index++;
 					// index and node changed, so will need to get the next entry of LevelOrder in the InOrder collection
@@ -660,12 +668,15 @@ namespace asm.Collections
 				{
 					node = new BinarySearchTree<T>.Node(inOrder[levelIndex]);
 					tuple.Node.Right = node;
+					thisValue.Count++;
 					queue.Enqueue((rootIndex + 1, tuple.End, node));
 					index++;
 				}
 			}
 
-			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, LinkedBinaryTree<T>.SetHeight);
+			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, LinkedBinaryTree<T>.SetHeight);
+			if (!thisValue.AutoBalance) return;
+			thisValue.Balance();
 		}
 
 		/// <summary>
@@ -700,6 +711,7 @@ namespace asm.Collections
 			int inIndex = 0;
 			BinarySearchTree<T>.Node node = new BinarySearchTree<T>.Node(preOrder[preIndex++]);
 			thisValue.Root = node;
+			thisValue.Count++;
 
 			IComparer<T> comparer = thisValue.Comparer;
 			Stack<BinarySearchTree<T>.Node> stack = new Stack<BinarySearchTree<T>.Node>();
@@ -726,6 +738,7 @@ namespace asm.Collections
 					 */
 					node = new BinarySearchTree<T>.Node(preOrder[preIndex++]);
 					root.Right = node;
+					thisValue.Count++;
 					stack.Push(node);
 				}
 				else
@@ -737,11 +750,14 @@ namespace asm.Collections
 					 */
 					node = new BinarySearchTree<T>.Node(preOrder[preIndex++]);
 					root.Left = node;
+					thisValue.Count++;
 					stack.Push(node);
 				}
 			}
 
-			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, LinkedBinaryTree<T>.SetHeight);
+			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, LinkedBinaryTree<T>.SetHeight);
+			if (!thisValue.AutoBalance) return;
+			thisValue.Balance();
 		}
 
 		/// <summary>
@@ -780,6 +796,7 @@ namespace asm.Collections
 			int postIndex = postOrder.Count - 1;
 			BinarySearchTree<T>.Node node = new BinarySearchTree<T>.Node(postOrder[postIndex--]);
 			thisValue.Root = node;
+			thisValue.Count++;
 
 			Stack<BinarySearchTree<T>.Node> stack = new Stack<BinarySearchTree<T>.Node>();
 			// Push root of the BST to the stack i.e, last element of the array.
@@ -800,6 +817,7 @@ namespace asm.Collections
 				{
 					node = new BinarySearchTree<T>.Node(inOrder[index]);
 					root.Right = node;
+					thisValue.Count++;
 					stack.Push(node);
 					postIndex--;
 
@@ -821,12 +839,15 @@ namespace asm.Collections
 
 					node = new BinarySearchTree<T>.Node(inOrder[index]);
 					root.Left = node;
+					thisValue.Count++;
 					stack.Push(node);
 					postIndex--;
 				}
 			}
 
-			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, LinkedBinaryTree<T>.SetHeight);
+			thisValue.Iterate(thisValue.Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, LinkedBinaryTree<T>.SetHeight);
+			if (!thisValue.AutoBalance) return;
+			thisValue.Balance();
 		}
 
 		private static bool FromSimpleList<T>([NotNull] BinarySearchTree<T> tree, [NotNull] IReadOnlyList<T> list)
@@ -841,6 +862,7 @@ namespace asm.Collections
 					break;
 				case 1:
 					tree.Root = new BinarySearchTree<T>.Node(list[0]);
+					tree.Count++;
 					result = true;
 					break;
 				default:

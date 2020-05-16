@@ -13,15 +13,15 @@ using System.Threading;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Patterns.Collections;
-using asm.Patterns.Direction;
 using asm.Patterns.Layout;
 using JetBrains.Annotations;
 
 namespace asm.Collections
 {
 	/// <summary>
-	/// Binary tree implementation using the linked representation.
+	/// Binary tree using the linked representation.
 	/// </summary>
+	/// <typeparam name="TNode">The node type. Must inherit from <see cref="LinkedBinaryTree{TNode, T}.NodeBase"/></typeparam>
 	/// <typeparam name="T">The element type of the tree</typeparam>
 	/*
 	 *	     ___ F ____
@@ -40,25 +40,26 @@ namespace asm.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[ComVisible(false)]
 	[Serializable]
-	public abstract class LinkedBinaryTree<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
+	public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
+		where TNode : LinkedBinaryTree<TNode, T>.NodeBase
 	{
 		[DebuggerDisplay("{Value}")]
 		[Serializable]
 		[StructLayout(LayoutKind.Sequential)]
-		public sealed class Node
+		public abstract class NodeBase
 		{
 			private const int LEFT = 0;
 			private const int RIGHT = 1;
 			private const int PARENT = 2;
 
-			private readonly Node[] _nodes = new Node[3];
+			private readonly TNode[] _nodes = new TNode[3];
 
-			internal Node(T value)
+			internal NodeBase(T value)
 			{
 				Value = value;
 			}
-
-			public Node Parent
+			
+			public TNode Parent
 			{
 				get => _nodes[PARENT];
 				internal set
@@ -72,15 +73,15 @@ namespace asm.Collections
 						* The comparison with this and parent.left/.right is essential because the node
 						* could have moved to another parent. Don't use IsLeft or IsRight here.
 						*/
-						if (_nodes[PARENT]._nodes[LEFT] == this) _nodes[PARENT]._nodes[LEFT] = null;
-						else if (_nodes[PARENT]._nodes[RIGHT] == this) _nodes[PARENT]._nodes[RIGHT] = null;
+						if (_nodes[PARENT].Left == this) _nodes[PARENT].Left = null;
+						else if (_nodes[PARENT].Right == this) _nodes[PARENT].Right = null;
 					}
 
 					_nodes[PARENT] = value;
 				}
 			}
 
-			public Node Left
+			public TNode Left
 			{
 				get => _nodes[LEFT];
 				internal set
@@ -90,11 +91,11 @@ namespace asm.Collections
 					if (_nodes[LEFT]?._nodes[PARENT] == this) _nodes[LEFT]._nodes[PARENT] = null;
 					_nodes[LEFT] = value;
 					if (_nodes[LEFT] == null) return;
-					_nodes[LEFT]._nodes[PARENT] = this;
+					_nodes[LEFT]._nodes[PARENT] = (TNode)this;
 				}
 			}
 
-			public Node Right
+			public TNode Right
 			{
 				get => _nodes[RIGHT];
 				internal set
@@ -104,21 +105,17 @@ namespace asm.Collections
 					if (_nodes[RIGHT]?._nodes[PARENT] == this) _nodes[RIGHT]._nodes[PARENT] = null;
 					_nodes[RIGHT] = value;
 					if (_nodes[RIGHT] == null) return;
-					_nodes[RIGHT]._nodes[PARENT] = this;
+					_nodes[RIGHT]._nodes[PARENT] = (TNode)this;
 				}
 			}
 
 			public T Value { get; set; }
 
-			public int Height { get; internal set; }
-
-			public int BalanceFactor => (_nodes[LEFT]?.Height ?? -1) - (_nodes[RIGHT]?.Height ?? -1);
-
 			public bool IsRoot => _nodes[PARENT] == null;
 
-			public bool IsLeft => _nodes[PARENT]?._nodes[LEFT] == this;
+			public bool IsLeft => _nodes[PARENT]?.Left == this;
 
-			public bool IsRight => _nodes[PARENT]?._nodes[RIGHT] == this;
+			public bool IsRight => _nodes[PARENT]?.Right == this;
 
 			public bool IsLeaf => _nodes[LEFT] == null && _nodes[RIGHT] == null;
 
@@ -131,18 +128,19 @@ namespace asm.Collections
 			/// <inheritdoc />
 			[NotNull]
 			public override string ToString() { return Convert.ToString(Value); }
-			
-			public void Swap([NotNull] Node other)
+
+			[NotNull]
+			protected internal virtual string ToString(int depth, bool diagnostic)
 			{
-				T tmp = other.Value;
-				other.Value = Value;
-				Value = tmp;
+				return diagnostic
+							? $"{Value} :D{depth}"
+							: Convert.ToString(Value);
 			}
 
 			[ItemNotNull]
-			public IEnumerable<Node> Ancestors()
+			public IEnumerable<TNode> Ancestors()
 			{
-				Node node = _nodes[PARENT];
+				TNode node = _nodes[PARENT];
 
 				while (node != null)
 				{
@@ -151,36 +149,56 @@ namespace asm.Collections
 				}
 			}
 
-			[NotNull]
-			public Node Minimum()
+			public TNode Uncle()
 			{
-				Node minimum = this;
+				// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
+				return _nodes[PARENT]?._nodes[PARENT] == null
+							? null // no parent or grand parent
+							: _nodes[PARENT].IsLeft
+								? _nodes[PARENT]._nodes[PARENT]._nodes[RIGHT] // uncle on the right
+								: _nodes[PARENT]._nodes[PARENT]._nodes[LEFT];
+			}
 
-				while (minimum._nodes[LEFT] != null) 
-					minimum = minimum._nodes[LEFT];
+			public TNode Sibling()
+			{
+				// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
+				return _nodes[PARENT] == null
+							? null // no parent
+							: IsLeft
+								? _nodes[PARENT]._nodes[RIGHT] // sibling on the right
+								: _nodes[PARENT]._nodes[LEFT];
+			}
+
+			[NotNull]
+			public TNode Minimum()
+			{
+				TNode minimum = (TNode)this;
+
+				while (minimum.Left != null) 
+					minimum = minimum.Left;
 
 				return minimum;
 			}
 
 			[NotNull]
-			public Node Maximum()
+			public TNode Maximum()
 			{
-				Node maximum = this;
+				TNode maximum = (TNode)this;
 
-				while (maximum._nodes[RIGHT] != null) 
-					maximum = maximum._nodes[RIGHT];
+				while (maximum.Right != null) 
+					maximum = maximum.Right;
 
 				return maximum;
 			}
 
-			public Node Predecessor()
+			public TNode Predecessor()
 			{
 				if (_nodes[LEFT] != null) return _nodes[LEFT].Maximum();
 
-				Node node = this;
-				Node parent = _nodes[PARENT];
+				TNode node = (TNode)this;
+				TNode parent = _nodes[PARENT];
 
-				while (parent != null && node == parent._nodes[LEFT])
+				while (parent != null && node == parent.Left)
 				{
 					node = parent;
 					parent = parent._nodes[PARENT];
@@ -189,14 +207,14 @@ namespace asm.Collections
 				return parent;
 			}
 
-			public Node Successor()
+			public TNode Successor()
 			{
 				if (_nodes[RIGHT] != null) return _nodes[RIGHT].Minimum();
 
-				Node node = this;
-				Node parent = _nodes[PARENT];
+				TNode node = (TNode)this;
+				TNode parent = _nodes[PARENT];
 
-				while (parent != null && node == parent._nodes[RIGHT])
+				while (parent != null && node == parent.Right)
 				{
 					node = parent;
 					parent = parent._nodes[PARENT];
@@ -205,7 +223,14 @@ namespace asm.Collections
 				return parent;
 			}
 
-			public static implicit operator T([NotNull] Node node) { return node.Value; }
+			public void Swap([NotNull] TNode other)
+			{
+				T tmp = other.Value;
+				other.Value = Value;
+				Value = tmp;
+			}
+
+			public static implicit operator T([NotNull] NodeBase node) { return node.Value; }
 		}
 
 		/// <summary>
@@ -213,29 +238,26 @@ namespace asm.Collections
 		/// </summary>
 		internal sealed class Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
 		{
-			private readonly LinkedBinaryTree<T> _tree;
+			private readonly LinkedBinaryTree<TNode, T> _tree;
 			private readonly int _version;
-			private readonly Node _root;
-			private readonly DynamicQueue<Node> _queueOrStack;
-			private readonly bool _left;
-			private readonly bool _right;
+			private readonly TNode _root;
+			private readonly DynamicQueue<TNode> _queueOrStack;
 			private readonly Func<bool> _moveNext;
 
-			private Node _current;
+			private TNode _current;
 			private bool _started;
 			private bool _done;
 
-			internal Enumerator([NotNull] LinkedBinaryTree<T> tree, [NotNull] Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction)
+			internal Enumerator([NotNull] LinkedBinaryTree<TNode, T> tree, [NotNull] TNode root, TraverseMethod method, HorizontalFlow flow)
 			{
 				_tree = tree;
 				_version = _tree._version;
 				_root = root;
-				(_left, _right) = direction.GetDirections();
 
 				switch (method)
 				{
 					case TraverseMethod.LevelOrder:
-						_queueOrStack = new DynamicQueue<Node>(DequeuePriority.FIFO);
+						_queueOrStack = new DynamicQueue<TNode>(DequeuePriority.FIFO);
 						_moveNext = flow switch
 						{
 							HorizontalFlow.LeftToRight => LevelOrderLR,
@@ -244,7 +266,7 @@ namespace asm.Collections
 						};
 						break;
 					case TraverseMethod.PreOrder:
-						_queueOrStack = new DynamicQueue<Node>(DequeuePriority.LIFO);
+						_queueOrStack = new DynamicQueue<TNode>(DequeuePriority.LIFO);
 						_moveNext = flow switch
 						{
 							HorizontalFlow.LeftToRight => PreOrderLR,
@@ -253,7 +275,7 @@ namespace asm.Collections
 						};
 						break;
 					case TraverseMethod.InOrder:
-						_queueOrStack = new DynamicQueue<Node>(DequeuePriority.LIFO);
+						_queueOrStack = new DynamicQueue<TNode>(DequeuePriority.LIFO);
 						_moveNext = flow switch
 						{
 							HorizontalFlow.LeftToRight => InOrderLR,
@@ -262,7 +284,7 @@ namespace asm.Collections
 						};
 						break;
 					case TraverseMethod.PostOrder:
-						_queueOrStack = new DynamicQueue<Node>(DequeuePriority.LIFO);
+						_queueOrStack = new DynamicQueue<TNode>(DequeuePriority.LIFO);
 						_moveNext = flow switch
 						{
 							HorizontalFlow.LeftToRight => PostOrderLR,
@@ -341,8 +363,8 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if ((!_current.IsRoot || _left) && _current.Left != null) _queueOrStack.Enqueue(_current.Left);
-				if ((!_current.IsRoot || _right) && _current.Right != null) _queueOrStack.Enqueue(_current.Right);
+				if (_current.Left != null) _queueOrStack.Enqueue(_current.Left);
+				if (_current.Right != null) _queueOrStack.Enqueue(_current.Right);
 				return true;
 			}
 
@@ -372,8 +394,8 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if ((!_current.IsRoot || _right) && _current.Right != null) _queueOrStack.Enqueue(_current.Right);
-				if ((!_current.IsRoot || _left) && _current.Left != null) _queueOrStack.Enqueue(_current.Left);
+				if (_current.Right != null) _queueOrStack.Enqueue(_current.Right);
+				if (_current.Left != null) _queueOrStack.Enqueue(_current.Left);
 				return true;
 			}
 
@@ -403,8 +425,8 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if ((!_current.IsRoot || _right) && _current.Right != null) _queueOrStack.Enqueue(_current.Right);
-				if ((!_current.IsRoot || _left) && _current.Left != null) _queueOrStack.Enqueue(_current.Left);
+				if (_current.Right != null) _queueOrStack.Enqueue(_current.Right);
+				if (_current.Left != null) _queueOrStack.Enqueue(_current.Left);
 				return true;
 			}
 
@@ -434,8 +456,8 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if ((!_current.IsRoot || _left) && _current.Left != null) _queueOrStack.Enqueue(_current.Left);
-				if ((!_current.IsRoot || _right) && _current.Right != null) _queueOrStack.Enqueue(_current.Right);
+				if (_current.Left != null) _queueOrStack.Enqueue(_current.Left);
+				if (_current.Right != null) _queueOrStack.Enqueue(_current.Right);
 				return true;
 			}
 
@@ -452,14 +474,10 @@ namespace asm.Collections
 					// Start at the root
 					_current = _root;
 				}
-				else if (_current != null)
+				else
 				{
 					// Navigate right
-					_current = _current.IsRoot
-									? _right
-										? _current.Right
-										: null
-									: _current.Right;
+					_current = _current?.Right;
 				}
 
 				while (_current != null || _queueOrStack.Count > 0)
@@ -470,11 +488,7 @@ namespace asm.Collections
 					{
 						_queueOrStack.Enqueue(_current);
 						// Navigate left
-						_current = _current.IsRoot
-										? _left
-											? _current.Left
-											: null
-										: _current.Left;
+						_current = _current.Left;
 					}
 					else
 					{
@@ -501,14 +515,10 @@ namespace asm.Collections
 					// Start at the root
 					_current = _root;
 				}
-				else if (_current != null)
+				else
 				{
 					// Navigate left
-					_current = _current.IsRoot
-									? _left
-										? _current.Left
-										: null
-									: _current.Left;
+					_current = _current?.Left;
 				}
 
 				while (_current != null || _queueOrStack.Count > 0)
@@ -519,11 +529,7 @@ namespace asm.Collections
 					{
 						_queueOrStack.Enqueue(_current);
 						// Navigate right
-						_current = _current.IsRoot
-										? _right
-											? _current.Right
-											: null
-										: _current.Right;
+						_current = _current.Right;
 					}
 					else
 					{
@@ -562,15 +568,13 @@ namespace asm.Collections
 						if (_version != _tree._version) throw new VersionChangedException();
 
 						// Navigate right
-						if (_current.Right != null && (!_current.IsRoot || _right))
+						if (_current.Right != null)
 							_queueOrStack.Enqueue(_current.Right);
 
 						_queueOrStack.Enqueue(_current);
 
 						// Navigate left
-						_current = !_current.IsRoot || _left
-										? _current.Left
-										: null;
+						_current = _current.Left;
 					}
 
 					if (_version != _tree._version) throw new VersionChangedException();
@@ -629,15 +633,13 @@ namespace asm.Collections
 						if (_version != _tree._version) throw new VersionChangedException();
 
 						// Navigate left
-						if (_current.Left != null && (!_current.IsRoot || _left))
+						if (_current.Left != null)
 							_queueOrStack.Enqueue(_current.Left);
 
 						_queueOrStack.Enqueue(_current);
 
 						// Navigate right
-						_current = !_current.IsRoot || _right
-										? _current.Right
-										: null;
+						_current = _current.Right;
 					}
 
 					if (_version != _tree._version) throw new VersionChangedException();
@@ -675,18 +677,18 @@ namespace asm.Collections
 		/// </summary>
 		internal sealed class Iterator
 		{
-			private readonly LinkedBinaryTree<T> _tree;
-			private readonly Node _root;
+			private readonly LinkedBinaryTree<TNode, T> _tree;
+			private readonly TNode _root;
 			private readonly TraverseMethod _method;
 
-			internal Iterator([NotNull] LinkedBinaryTree<T> tree, [NotNull] Node root, TraverseMethod method)
+			internal Iterator([NotNull] LinkedBinaryTree<TNode, T> tree, [NotNull] TNode root, TraverseMethod method)
 			{
 				_tree = tree;
 				_root = root;
 				_method = method;
 			}
 
-			public void Iterate(HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<Node, bool> visitCallback)
+			public void Iterate(HorizontalFlow flow, [NotNull] Func<TNode, bool> visitCallback)
 			{
 				int version = _tree._version;
 
@@ -751,8 +753,7 @@ namespace asm.Collections
 				void LevelOrderLR()
 				{
 					// Root-Left-Right (Queue)
-					(bool left, bool right) = direction.GetDirections();
-					Queue<Node> queue = new Queue<Node>();
+					Queue<TNode> queue = new Queue<TNode>();
 
 					// Start at the root
 					queue.Enqueue(_root);
@@ -762,20 +763,19 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						Node current = queue.Dequeue();
+						TNode current = queue.Dequeue();
 						if (!visitCallback(current)) break;
 
 						// Queue the next nodes
-						if ((!current.IsRoot || left) && current.Left != null) queue.Enqueue(current.Left);
-						if ((!current.IsRoot || right) && current.Right != null) queue.Enqueue(current.Right);
+						if (current.Left != null) queue.Enqueue(current.Left);
+						if (current.Right != null) queue.Enqueue(current.Right);
 					}
 				}
 
 				void LevelOrderRL()
 				{
 					// Root-Right-Left (Queue)
-					(bool left, bool right) = direction.GetDirections();
-					Queue<Node> queue = new Queue<Node>();
+					Queue<TNode> queue = new Queue<TNode>();
 
 					// Start at the root
 					queue.Enqueue(_root);
@@ -785,20 +785,19 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						Node current = queue.Dequeue();
+						TNode current = queue.Dequeue();
 						if (!visitCallback(current)) break;
 
 						// Queue the next nodes
-						if ((!current.IsRoot || right) && current.Right != null) queue.Enqueue(current.Right);
-						if ((!current.IsRoot || left) && current.Left != null) queue.Enqueue(current.Left);
+						if (current.Right != null) queue.Enqueue(current.Right);
+						if (current.Left != null) queue.Enqueue(current.Left);
 					}
 				}
 
 				void PreOrderLR()
 				{
 					// Root-Left-Right (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<Node> stack = new Stack<Node>();
+					Stack<TNode> stack = new Stack<TNode>();
 
 					// Start at the root
 					stack.Push(_root);
@@ -808,7 +807,7 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						Node current = stack.Pop();
+						TNode current = stack.Pop();
 						if (!visitCallback(current)) break;
 
 						/*
@@ -817,16 +816,15 @@ namespace asm.Collections
 						* appear first, we must add last.
 						*/
 						// Queue the next nodes
-						if ((!current.IsRoot || right) && current.Right != null) stack.Push(current.Right);
-						if ((!current.IsRoot || left) && current.Left != null) stack.Push(current.Left);
+						if (current.Right != null) stack.Push(current.Right);
+						if (current.Left != null) stack.Push(current.Left);
 					}
 				}
 
 				void PreOrderRL()
 				{
 					// Root-Right-Left (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<Node> stack = new Stack<Node>();
+					Stack<TNode> stack = new Stack<TNode>();
 
 					// Start at the root
 					stack.Push(_root);
@@ -836,7 +834,7 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						Node current = stack.Pop();
+						TNode current = stack.Pop();
 						if (!visitCallback(current)) break;
 
 						/*
@@ -845,19 +843,18 @@ namespace asm.Collections
 						* appear first, we must add last.
 						*/
 						// Queue the next nodes
-						if ((!current.IsRoot || left) && current.Left != null) stack.Push(current.Left);
-						if ((!current.IsRoot || right) && current.Right != null) stack.Push(current.Right);
+						if (current.Left != null) stack.Push(current.Left);
+						if (current.Right != null) stack.Push(current.Right);
 					}
 				}
 
 				void InOrderLR()
 				{
 					// Left-Root-Right (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<Node> stack = new Stack<Node>();
+					Stack<TNode> stack = new Stack<TNode>();
 
 					// Start at the root
-					Node current = _root;
+					TNode current = _root;
 
 					while (current != null || stack.Count > 0)
 					{
@@ -867,11 +864,7 @@ namespace asm.Collections
 						{
 							stack.Push(current);
 							// Navigate left
-							current = current.IsRoot
-										? left
-											? current.Left
-											: null
-										: current.Left;
+							current = current.Left;
 						}
 						else
 						{
@@ -880,11 +873,7 @@ namespace asm.Collections
 							if (!visitCallback(current)) break;
 
 							// Navigate right
-							current = current.IsRoot
-										? right
-											? current.Right
-											: null
-										: current.Right;
+							current = current.Right;
 						}
 					}
 				}
@@ -892,11 +881,10 @@ namespace asm.Collections
 				void InOrderRL()
 				{
 					// Right-Root-Left (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<Node> stack = new Stack<Node>();
+					Stack<TNode> stack = new Stack<TNode>();
 
 					// Start at the root
-					Node current = _root;
+					TNode current = _root;
 
 					while (current != null || stack.Count > 0)
 					{
@@ -906,11 +894,7 @@ namespace asm.Collections
 						{
 							stack.Push(current);
 							// Navigate right
-							current = current.IsRoot
-										? right
-											? current.Right
-											: null
-										: current.Right;
+							current = current.Right;
 						}
 						else
 						{
@@ -919,11 +903,7 @@ namespace asm.Collections
 							if (!visitCallback(current)) break;
 
 							// Navigate right
-							current = current.IsRoot
-										? left
-											? current.Left
-											: null
-										: current.Left;
+							current = current.Left;
 						}
 					}
 				}
@@ -931,11 +911,10 @@ namespace asm.Collections
 				void PostOrderLR()
 				{
 					// Left-Root-Right (Stack)
-					Stack<Node> stack = new Stack<Node>();
-					(bool left, bool right) = direction.GetDirections();
-					Node lastVisited = null;
+					Stack<TNode> stack = new Stack<TNode>();
+					TNode lastVisited = null;
 					// Start at the root
-					Node current = _root;
+					TNode current = _root;
 
 					while (current != null || stack.Count > 0)
 					{
@@ -945,15 +924,11 @@ namespace asm.Collections
 						{
 							stack.Push(current);
 							// Navigate left
-							current = current.IsRoot
-										? left
-											? current.Left
-											: null
-										: current.Left;
+							current = current.Left;
 							continue;
 						}
 
-						Node peek = stack.Peek();
+						TNode peek = stack.Peek();
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the left branch.
@@ -963,11 +938,7 @@ namespace asm.Collections
 						if (peek.Right != null && lastVisited != peek.Right)
 						{
 							// Navigate right
-							current = peek.IsRoot
-										? right
-											? peek.Right
-											: null
-										: peek.Right;
+							current = peek.Right;
 						}
 						else
 						{
@@ -983,11 +954,10 @@ namespace asm.Collections
 				void PostOrderRL()
 				{
 					// Right-Root-Left (Stack)
-					Stack<Node> stack = new Stack<Node>();
-					(bool left, bool right) = direction.GetDirections();
-					Node lastVisited = null;
+					Stack<TNode> stack = new Stack<TNode>();
+					TNode lastVisited = null;
 					// Start at the root
-					Node current = _root;
+					TNode current = _root;
 
 					while (current != null || stack.Count > 0)
 					{
@@ -997,15 +967,11 @@ namespace asm.Collections
 						{
 							stack.Push(current);
 							// Navigate right
-							current = current.IsRoot
-										? right
-											? current.Right
-											: null
-										: current.Right;
+							current = current.Right;
 							continue;
 						}
 
-						Node peek = stack.Peek();
+						TNode peek = stack.Peek();
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the right branch.
@@ -1015,11 +981,7 @@ namespace asm.Collections
 						if (peek.Left != null && lastVisited != peek.Left)
 						{
 							// Navigate left
-							current = peek.IsRoot
-										? left
-											? peek.Left
-											: null
-										: peek.Left;
+							current = peek.Left;
 						}
 						else
 						{
@@ -1033,7 +995,7 @@ namespace asm.Collections
 				}
 			}
 
-			public void Iterate(HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<Node, int, bool> visitCallback)
+			public void Iterate(HorizontalFlow flow, [NotNull] Func<TNode, int, bool> visitCallback)
 			{
 				int version = _tree._version;
 
@@ -1098,8 +1060,7 @@ namespace asm.Collections
 				void LevelOrderLR()
 				{
 					// Root-Left-Right (Queue)
-					(bool left, bool right) = direction.GetDirections();
-					Queue<(int Depth, Node Node)> queue = new Queue<(int Depth, Node Node)>();
+					Queue<(int Depth, TNode TNode)> queue = new Queue<(int Depth, TNode TNode)>();
 
 					// Start at the root
 					queue.Enqueue((0, _root));
@@ -1109,20 +1070,19 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						(int depth, Node node) = queue.Dequeue();
+						(int depth, TNode node) = queue.Dequeue();
 						if (!visitCallback(node, depth)) break;
 
 						// Queue the next nodes
-						if ((!node.IsRoot || left) && node.Left != null) queue.Enqueue((depth + 1, node.Left));
-						if ((!node.IsRoot || right) && node.Right != null) queue.Enqueue((depth + 1, node.Right));
+						if (node.Left != null) queue.Enqueue((depth + 1, node.Left));
+						if (node.Right != null) queue.Enqueue((depth + 1, node.Right));
 					}
 				}
 
 				void LevelOrderRL()
 				{
 					// Root-Right-Left (Queue)
-					(bool left, bool right) = direction.GetDirections();
-					Queue<(int Depth, Node Node)> queue = new Queue<(int Depth, Node Node)>();
+					Queue<(int Depth, TNode TNode)> queue = new Queue<(int Depth, TNode TNode)>();
 
 					// Start at the root
 					queue.Enqueue((0, _root));
@@ -1132,20 +1092,19 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						(int depth, Node node) = queue.Dequeue();
+						(int depth, TNode node) = queue.Dequeue();
 						if (!visitCallback(node, depth)) break;
 
 						// Queue the next nodes
-						if ((!node.IsRoot || right) && node.Right != null) queue.Enqueue((depth + 1, node.Right));
-						if ((!node.IsRoot || left) && node.Left != null) queue.Enqueue((depth + 1, node.Left));
+						if (node.Right != null) queue.Enqueue((depth + 1, node.Right));
+						if (node.Left != null) queue.Enqueue((depth + 1, node.Left));
 					}
 				}
 
 				void PreOrderLR()
 				{
 					// Root-Left-Right (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+					Stack<(int Depth, TNode TNode)> stack = new Stack<(int Depth, TNode TNode)>();
 
 					// Start at the root
 					stack.Push((0, _root));
@@ -1155,7 +1114,7 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						(int depth, Node node) = stack.Pop();
+						(int depth, TNode node) = stack.Pop();
 						if (!visitCallback(node, depth)) break;
 
 						/*
@@ -1164,16 +1123,15 @@ namespace asm.Collections
 						* appear first, we must add last.
 						*/
 						// Queue the next nodes
-						if ((!node.IsRoot || right) && node.Right != null) stack.Push((depth + 1, node.Right));
-						if ((!node.IsRoot || left) && node.Left != null) stack.Push((depth + 1, node.Left));
+						if (node.Right != null) stack.Push((depth + 1, node.Right));
+						if (node.Left != null) stack.Push((depth + 1, node.Left));
 					}
 				}
 
 				void PreOrderRL()
 				{
 					// Root-Right-Left (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+					Stack<(int Depth, TNode TNode)> stack = new Stack<(int Depth, TNode TNode)>();
 
 					// Start at the root
 					stack.Push((0, _root));
@@ -1183,7 +1141,7 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						(int depth, Node node) = stack.Pop();
+						(int depth, TNode node) = stack.Pop();
 						if (!visitCallback(node, depth)) break;
 
 						/*
@@ -1192,46 +1150,37 @@ namespace asm.Collections
 						* appear first, we must add last.
 						*/
 						// Queue the next nodes
-						if ((!node.IsRoot || left) && node.Left != null) stack.Push((depth + 1, node.Left));
-						if ((!node.IsRoot || right) && node.Right != null) stack.Push((depth + 1, node.Right));
-					}
+						if (node.Left != null) stack.Push((depth + 1, node.Left));
+						if (node.Right != null) stack.Push((depth + 1, node.Right));
+					}		
 				}
 
 				void InOrderLR()
 				{
 					// Left-Root-Right (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+					Stack<(int Depth, TNode TNode)> stack = new Stack<(int Depth, TNode TNode)>();
 
 					// Start at the root
-					(int Depth, Node Node) current = (0, _root);
+					(int Depth, TNode TNode) current = (0, _root);
 
-					while (current.Node != null || stack.Count > 0)
+					while (current.TNode != null || stack.Count > 0)
 					{
 						if (version != _tree._version) throw new VersionChangedException();
 
-						if (current.Node != null)
+						if (current.TNode != null)
 						{
 							stack.Push(current);
 							// Navigate left
-							current = current.Node.IsRoot
-										? left
-											? (current.Depth + 1, current.Node.Left)
-											: (-1, null)
-										: (current.Depth + 1, current.Node.Left);
+							current = (current.Depth + 1, current.TNode.Left);
 						}
 						else
 						{
 							// visit the next queued node
 							current = stack.Pop();
-							if (!visitCallback(current.Node, current.Depth)) break;
+							if (!visitCallback(current.TNode, current.Depth)) break;
 
 							// Navigate right
-							current = current.Node.IsRoot
-										? right
-											? (current.Depth + 1, current.Node.Right)
-											: (-1, null)
-										: (current.Depth + 1, current.Node.Right);
+							current = (current.Depth + 1, current.TNode.Right);
 						}
 					}
 				}
@@ -1239,38 +1188,29 @@ namespace asm.Collections
 				void InOrderRL()
 				{
 					// Right-Root-Left (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+					Stack<(int Depth, TNode TNode)> stack = new Stack<(int Depth, TNode TNode)>();
 
 					// Start at the root
-					(int Depth, Node Node) current = (0, _root);
+					(int Depth, TNode TNode) current = (0, _root);
 
-					while (current.Node != null || stack.Count > 0)
+					while (current.TNode != null || stack.Count > 0)
 					{
 						if (version != _tree._version) throw new VersionChangedException();
 
-						if (current.Node != null)
+						if (current.TNode != null)
 						{
 							stack.Push(current);
 							// Navigate right
-							current = current.Node.IsRoot
-										? right
-											? (current.Depth + 1, current.Node.Right)
-											: (-1, null)
-										: (current.Depth + 1, current.Node.Right);
+							current = (current.Depth + 1, current.TNode.Right);
 						}
 						else
 						{
 							// visit the next queued node
 							current = stack.Pop();
-							if (!visitCallback(current.Node, current.Depth)) break;
+							if (!visitCallback(current.TNode, current.Depth)) break;
 
 							// Navigate right
-							current = current.Node.IsRoot
-										? left
-											? (current.Depth + 1, current.Node.Left)
-											: (-1, null)
-										: (current.Depth + 1, current.Node.Left);
+							current = (current.Depth + 1, current.TNode.Left);
 						}
 					}
 				}
@@ -1278,50 +1218,41 @@ namespace asm.Collections
 				void PostOrderLR()
 				{
 					// Left-Root-Right (Stack)
-					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
-					(bool left, bool right) = direction.GetDirections();
-					Node lastVisited = null;
+					Stack<(int Depth, TNode TNode)> stack = new Stack<(int Depth, TNode TNode)>();
+					TNode lastVisited = null;
 					// Start at the root
-					(int Depth, Node Node) current = (0, _root);
+					(int Depth, TNode TNode) current = (0, _root);
 
-					while (current.Node != null || stack.Count > 0)
+					while (current.TNode != null || stack.Count > 0)
 					{
 						if (version != _tree._version) throw new VersionChangedException();
 
-						if (current.Node != null)
+						if (current.TNode != null)
 						{
 							stack.Push(current);
 							// Navigate left
-							current = current.Node.IsRoot
-										? left
-											? (current.Depth + 1, current.Node.Left)
-											: (-1, null)
-										: (current.Depth + 1, current.Node.Left);
+							current = (current.Depth + 1, current.TNode.Left);
 							continue;
 						}
 
-						(int Depth, Node Node) peek = stack.Peek();
+						(int Depth, TNode TNode) peek = stack.Peek();
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the left branch.
-						 * Is there a right Node
+						 * Is there a right TNode
 						 * if yes, then navigate right.
 						 */
-						if (peek.Node.Right != null && lastVisited != peek.Node.Right)
+						if (peek.TNode.Right != null && lastVisited != peek.TNode.Right)
 						{
 							// Navigate right
-							current = peek.Node.IsRoot
-										? right
-											? (peek.Depth + 1, peek.Node.Right)
-											: (-1, null)
-										: (peek.Depth + 1, peek.Node.Right);
+							current = (peek.Depth + 1, peek.TNode.Right);
 						}
 						else
 						{
 							// visit the next queued node
 							current = peek;
-							lastVisited = stack.Pop().Node;
-							if (!visitCallback(current.Node, current.Depth)) break;
+							lastVisited = stack.Pop().TNode;
+							if (!visitCallback(current.TNode, current.Depth)) break;
 							current = (-1, null);
 						}
 					}
@@ -1330,57 +1261,48 @@ namespace asm.Collections
 				void PostOrderRL()
 				{
 					// Right-Root-Left (Stack)
-					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
-					(bool left, bool right) = direction.GetDirections();
-					Node lastVisited = null;
+					Stack<(int Depth, TNode TNode)> stack = new Stack<(int Depth, TNode TNode)>();
+					TNode lastVisited = null;
 					// Start at the root
-					(int Depth, Node Node) current = (0, _root);
+					(int Depth, TNode TNode) current = (0, _root);
 
-					while (current.Node != null || stack.Count > 0)
+					while (current.TNode != null || stack.Count > 0)
 					{
 						if (version != _tree._version) throw new VersionChangedException();
 
-						if (current.Node != null)
+						if (current.TNode != null)
 						{
 							stack.Push(current);
 							// Navigate right
-							current = current.Node.IsRoot
-										? right
-											? (current.Depth + 1, current.Node.Right)
-											: (-1, null)
-										: (current.Depth + 1, current.Node.Right);
+							current = (current.Depth + 1, current.TNode.Right);
 							continue;
 						}
 
-						(int Depth, Node Node) peek = stack.Peek();
+						(int Depth, TNode TNode) peek = stack.Peek();
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the right branch.
-						 * Is there a left Node
+						 * Is there a left TNode
 						 * if yes, then navigate left.
 						 */
-						if (peek.Node.Left != null && lastVisited != peek.Node.Left)
+						if (peek.TNode.Left != null && lastVisited != peek.TNode.Left)
 						{
 							// Navigate left
-							current = peek.Node.IsRoot
-										? left
-											? (peek.Depth + 1, peek.Node.Left)
-											: (-1, null)
-										: (peek.Depth + 1, peek.Node.Left);
+							current = (peek.Depth + 1, peek.TNode.Left);
 						}
 						else
 						{
 							// visit the next queued node
 							current = peek;
-							lastVisited = stack.Pop().Node;
-							if (!visitCallback(current.Node, current.Depth)) break;
+							lastVisited = stack.Pop().TNode;
+							if (!visitCallback(current.TNode, current.Depth)) break;
 							current = (-1, null);
 						}
 					}
 				}
 			}
 
-			public void Iterate(HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<Node> visitCallback)
+			public void Iterate(HorizontalFlow flow, [NotNull] Action<TNode> visitCallback)
 			{
 				int version = _tree._version;
 
@@ -1445,8 +1367,7 @@ namespace asm.Collections
 				void LevelOrderLR()
 				{
 					// Root-Left-Right (Queue)
-					(bool left, bool right) = direction.GetDirections();
-					Queue<Node> queue = new Queue<Node>();
+					Queue<TNode> queue = new Queue<TNode>();
 
 					// Start at the root
 					queue.Enqueue(_root);
@@ -1456,20 +1377,19 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						Node current = queue.Dequeue();
+						TNode current = queue.Dequeue();
 						visitCallback(current);
 
 						// Queue the next nodes
-						if ((!current.IsRoot || left) && current.Left != null) queue.Enqueue(current.Left);
-						if ((!current.IsRoot || right) && current.Right != null) queue.Enqueue(current.Right);
+						if (current.Left != null) queue.Enqueue(current.Left);
+						if (current.Right != null) queue.Enqueue(current.Right);
 					}
 				}
 
 				void LevelOrderRL()
 				{
 					// Root-Right-Left (Queue)
-					(bool left, bool right) = direction.GetDirections();
-					Queue<Node> queue = new Queue<Node>();
+					Queue<TNode> queue = new Queue<TNode>();
 
 					// Start at the root
 					queue.Enqueue(_root);
@@ -1479,20 +1399,19 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						Node current = queue.Dequeue();
+						TNode current = queue.Dequeue();
 						visitCallback(current);
 
 						// Queue the next nodes
-						if ((!current.IsRoot || right) && current.Right != null) queue.Enqueue(current.Right);
-						if ((!current.IsRoot || left) && current.Left != null) queue.Enqueue(current.Left);
+						if (current.Right != null) queue.Enqueue(current.Right);
+						if (current.Left != null) queue.Enqueue(current.Left);
 					}
 				}
 
 				void PreOrderLR()
 				{
 					// Root-Left-Right (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<Node> stack = new Stack<Node>();
+					Stack<TNode> stack = new Stack<TNode>();
 
 					// Start at the root
 					stack.Push(_root);
@@ -1502,7 +1421,7 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						Node current = stack.Pop();
+						TNode current = stack.Pop();
 						visitCallback(current);
 
 						/*
@@ -1511,16 +1430,15 @@ namespace asm.Collections
 						* appear first, we must add last.
 						*/
 						// Queue the next nodes
-						if ((!current.IsRoot || right) && current.Right != null) stack.Push(current.Right);
-						if ((!current.IsRoot || left) && current.Left != null) stack.Push(current.Left);
+						if (current.Right != null) stack.Push(current.Right);
+						if (current.Left != null) stack.Push(current.Left);
 					}
 				}
 
 				void PreOrderRL()
 				{
 					// Root-Right-Left (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<Node> stack = new Stack<Node>();
+					Stack<TNode> stack = new Stack<TNode>();
 
 					// Start at the root
 					stack.Push(_root);
@@ -1530,7 +1448,7 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						Node current = stack.Pop();
+						TNode current = stack.Pop();
 						visitCallback(current);
 
 						/*
@@ -1539,19 +1457,18 @@ namespace asm.Collections
 						* appear first, we must add last.
 						*/
 						// Queue the next nodes
-						if ((!current.IsRoot || left) && current.Left != null) stack.Push(current.Left);
-						if ((!current.IsRoot || right) && current.Right != null) stack.Push(current.Right);
+						if (current.Left != null) stack.Push(current.Left);
+						if (current.Right != null) stack.Push(current.Right);
 					}
 				}
 
 				void InOrderLR()
 				{
 					// Left-Root-Right (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<Node> stack = new Stack<Node>();
+					Stack<TNode> stack = new Stack<TNode>();
 
 					// Start at the root
-					Node current = _root;
+					TNode current = _root;
 
 					while (current != null || stack.Count > 0)
 					{
@@ -1561,11 +1478,7 @@ namespace asm.Collections
 						{
 							stack.Push(current);
 							// Navigate left
-							current = current.IsRoot
-										? left
-											? current.Left
-											: null
-										: current.Left;
+							current = current.Left;
 						}
 						else
 						{
@@ -1574,11 +1487,7 @@ namespace asm.Collections
 							visitCallback(current);
 
 							// Navigate right
-							current = current.IsRoot
-										? right
-											? current.Right
-											: null
-										: current.Right;
+							current = current.Right;
 						}
 					}
 				}
@@ -1586,11 +1495,10 @@ namespace asm.Collections
 				void InOrderRL()
 				{
 					// Right-Root-Left (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<Node> stack = new Stack<Node>();
+					Stack<TNode> stack = new Stack<TNode>();
 
 					// Start at the root
-					Node current = _root;
+					TNode current = _root;
 
 					while (current != null || stack.Count > 0)
 					{
@@ -1600,11 +1508,7 @@ namespace asm.Collections
 						{
 							stack.Push(current);
 							// Navigate right
-							current = current.IsRoot
-										? right
-											? current.Right
-											: null
-										: current.Right;
+							current = current.Right;
 						}
 						else
 						{
@@ -1613,11 +1517,7 @@ namespace asm.Collections
 							visitCallback(current);
 
 							// Navigate right
-							current = current.IsRoot
-										? left
-											? current.Left
-											: null
-										: current.Left;
+							current = current.Left;
 						}
 					}
 				}
@@ -1625,11 +1525,10 @@ namespace asm.Collections
 				void PostOrderLR()
 				{
 					// Left-Root-Right (Stack)
-					Stack<Node> stack = new Stack<Node>();
-					(bool left, bool right) = direction.GetDirections();
-					Node lastVisited = null;
+					Stack<TNode> stack = new Stack<TNode>();
+					TNode lastVisited = null;
 					// Start at the root
-					Node current = _root;
+					TNode current = _root;
 
 					while (current != null || stack.Count > 0)
 					{
@@ -1639,15 +1538,11 @@ namespace asm.Collections
 						{
 							stack.Push(current);
 							// Navigate left
-							current = current.IsRoot
-										? left
-											? current.Left
-											: null
-										: current.Left;
+							current = current.Left;
 							continue;
 						}
 
-						Node peek = stack.Peek();
+						TNode peek = stack.Peek();
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the left branch.
@@ -1657,11 +1552,7 @@ namespace asm.Collections
 						if (peek.Right != null && lastVisited != peek.Right)
 						{
 							// Navigate right
-							current = peek.IsRoot
-										? right
-											? peek.Right
-											: null
-										: peek.Right;
+							current = peek.Right;
 						}
 						else
 						{
@@ -1677,11 +1568,10 @@ namespace asm.Collections
 				void PostOrderRL()
 				{
 					// Right-Root-Left (Stack)
-					Stack<Node> stack = new Stack<Node>();
-					(bool left, bool right) = direction.GetDirections();
-					Node lastVisited = null;
+					Stack<TNode> stack = new Stack<TNode>();
+					TNode lastVisited = null;
 					// Start at the root
-					Node current = _root;
+					TNode current = _root;
 
 					while (current != null || stack.Count > 0)
 					{
@@ -1691,15 +1581,11 @@ namespace asm.Collections
 						{
 							stack.Push(current);
 							// Navigate right
-							current = current.IsRoot
-										? right
-											? current.Right
-											: null
-										: current.Right;
+							current = current.Right;
 							continue;
 						}
 
-						Node peek = stack.Peek();
+						TNode peek = stack.Peek();
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the right branch.
@@ -1709,11 +1595,7 @@ namespace asm.Collections
 						if (peek.Left != null && lastVisited != peek.Left)
 						{
 							// Navigate left
-							current = peek.IsRoot
-										? left
-											? peek.Left
-											: null
-										: peek.Left;
+							current = peek.Left;
 						}
 						else
 						{
@@ -1727,7 +1609,7 @@ namespace asm.Collections
 				}
 			}
 
-			public void Iterate(HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<Node, int> visitCallback)
+			public void Iterate(HorizontalFlow flow, [NotNull] Action<TNode, int> visitCallback)
 			{
 				int version = _tree._version;
 
@@ -1792,8 +1674,7 @@ namespace asm.Collections
 				void LevelOrderLR()
 				{
 					// Root-Left-Right (Queue)
-					(bool left, bool right) = direction.GetDirections();
-					Queue<(int Depth, Node Node)> queue = new Queue<(int Depth, Node Node)>();
+					Queue<(int Depth, TNode TNode)> queue = new Queue<(int Depth, TNode TNode)>();
 
 					// Start at the root
 					queue.Enqueue((0, _root));
@@ -1803,20 +1684,19 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						(int depth, Node node) = queue.Dequeue();
+						(int depth, TNode node) = queue.Dequeue();
 						visitCallback(node, depth);
 
 						// Queue the next nodes
-						if ((!node.IsRoot || left) && node.Left != null) queue.Enqueue((depth + 1, node.Left));
-						if ((!node.IsRoot || right) && node.Right != null) queue.Enqueue((depth + 1, node.Right));
+						if (node.Left != null) queue.Enqueue((depth + 1, node.Left));
+						if (node.Right != null) queue.Enqueue((depth + 1, node.Right));
 					}
 				}
 
 				void LevelOrderRL()
 				{
 					// Root-Right-Left (Queue)
-					(bool left, bool right) = direction.GetDirections();
-					Queue<(int Depth, Node Node)> queue = new Queue<(int Depth, Node Node)>();
+					Queue<(int Depth, TNode TNode)> queue = new Queue<(int Depth, TNode TNode)>();
 
 					// Start at the root
 					queue.Enqueue((0, _root));
@@ -1826,20 +1706,19 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						(int depth, Node node) = queue.Dequeue();
+						(int depth, TNode node) = queue.Dequeue();
 						visitCallback(node, depth);
 
 						// Queue the next nodes
-						if ((!node.IsRoot || right) && node.Right != null) queue.Enqueue((depth + 1, node.Right));
-						if ((!node.IsRoot || left) && node.Left != null) queue.Enqueue((depth + 1, node.Left));
+						if (node.Right != null) queue.Enqueue((depth + 1, node.Right));
+						if (node.Left != null) queue.Enqueue((depth + 1, node.Left));
 					}
 				}
 
 				void PreOrderLR()
 				{
 					// Root-Left-Right (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+					Stack<(int Depth, TNode TNode)> stack = new Stack<(int Depth, TNode TNode)>();
 
 					// Start at the root
 					stack.Push((0, _root));
@@ -1849,7 +1728,7 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						(int depth, Node node) = stack.Pop();
+						(int depth, TNode node) = stack.Pop();
 						visitCallback(node, depth);
 
 						/*
@@ -1858,16 +1737,15 @@ namespace asm.Collections
 						* appear first, we must add last.
 						*/
 						// Queue the next nodes
-						if ((!node.IsRoot || right) && node.Right != null) stack.Push((depth + 1, node.Right));
-						if ((!node.IsRoot || left) && node.Left != null) stack.Push((depth + 1, node.Left));
+						if (node.Right != null) stack.Push((depth + 1, node.Right));
+						if (node.Left != null) stack.Push((depth + 1, node.Left));
 					}
 				}
 
 				void PreOrderRL()
 				{
 					// Root-Right-Left (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+					Stack<(int Depth, TNode TNode)> stack = new Stack<(int Depth, TNode TNode)>();
 
 					// Start at the root
 					stack.Push((0, _root));
@@ -1877,7 +1755,7 @@ namespace asm.Collections
 						if (version != _tree._version) throw new VersionChangedException();
 
 						// visit the next queued node
-						(int depth, Node node) = stack.Pop();
+						(int depth, TNode node) = stack.Pop();
 						visitCallback(node, depth);
 
 						/*
@@ -1886,46 +1764,37 @@ namespace asm.Collections
 						* appear first, we must add last.
 						*/
 						// Queue the next nodes
-						if ((!node.IsRoot || left) && node.Left != null) stack.Push((depth + 1, node.Left));
-						if ((!node.IsRoot || right) && node.Right != null) stack.Push((depth + 1, node.Right));
+						if (node.Left != null) stack.Push((depth + 1, node.Left));
+						if (node.Right != null) stack.Push((depth + 1, node.Right));
 					}
 				}
 
 				void InOrderLR()
 				{
 					// Left-Root-Right (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+					Stack<(int Depth, TNode TNode)> stack = new Stack<(int Depth, TNode TNode)>();
 
 					// Start at the root
-					(int Depth, Node Node) current = (0, _root);
+					(int Depth, TNode TNode) current = (0, _root);
 
-					while (current.Node != null || stack.Count > 0)
+					while (current.TNode != null || stack.Count > 0)
 					{
 						if (version != _tree._version) throw new VersionChangedException();
 
-						if (current.Node != null)
+						if (current.TNode != null)
 						{
 							stack.Push(current);
 							// Navigate left
-							current = current.Node.IsRoot
-										? left
-											? (current.Depth + 1, current.Node.Left)
-											: (-1, null)
-										: (current.Depth + 1, current.Node.Left);
+							current = (current.Depth + 1, current.TNode.Left);
 						}
 						else
 						{
 							// visit the next queued node
 							current = stack.Pop();
-							visitCallback(current.Node, current.Depth);
+							visitCallback(current.TNode, current.Depth);
 
 							// Navigate right
-							current = current.Node.IsRoot
-										? right
-											? (current.Depth + 1, current.Node.Right)
-											: (-1, null)
-										: (current.Depth + 1, current.Node.Right);
+							current = (current.Depth + 1, current.TNode.Right);
 						}
 					}
 				}
@@ -1933,38 +1802,29 @@ namespace asm.Collections
 				void InOrderRL()
 				{
 					// Right-Root-Left (Stack)
-					(bool left, bool right) = direction.GetDirections();
-					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
+					Stack<(int Depth, TNode TNode)> stack = new Stack<(int Depth, TNode TNode)>();
 
 					// Start at the root
-					(int Depth, Node Node) current = (0, _root);
+					(int Depth, TNode TNode) current = (0, _root);
 
-					while (current.Node != null || stack.Count > 0)
+					while (current.TNode != null || stack.Count > 0)
 					{
 						if (version != _tree._version) throw new VersionChangedException();
 
-						if (current.Node != null)
+						if (current.TNode != null)
 						{
 							stack.Push(current);
 							// Navigate right
-							current = current.Node.IsRoot
-										? right
-											? (current.Depth + 1, current.Node.Right)
-											: (-1, null)
-										: (current.Depth + 1, current.Node.Right);
+							current = (current.Depth + 1, current.TNode.Right);
 						}
 						else
 						{
 							// visit the next queued node
 							current = stack.Pop();
-							visitCallback(current.Node, current.Depth);
+							visitCallback(current.TNode, current.Depth);
 
 							// Navigate right
-							current = current.Node.IsRoot
-										? left
-											? (current.Depth + 1, current.Node.Left)
-											: (-1, null)
-										: (current.Depth + 1, current.Node.Left);
+							current = (current.Depth + 1, current.TNode.Left);
 						}
 					}
 				}
@@ -1972,50 +1832,41 @@ namespace asm.Collections
 				void PostOrderLR()
 				{
 					// Left-Root-Right (Stack)
-					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
-					(bool left, bool right) = direction.GetDirections();
-					Node lastVisited = null;
+					Stack<(int Depth, TNode TNode)> stack = new Stack<(int Depth, TNode TNode)>();
+					TNode lastVisited = null;
 					// Start at the root
-					(int Depth, Node Node) current = (0, _root);
+					(int Depth, TNode TNode) current = (0, _root);
 
-					while (current.Node != null || stack.Count > 0)
+					while (current.TNode != null || stack.Count > 0)
 					{
 						if (version != _tree._version) throw new VersionChangedException();
 
-						if (current.Node != null)
+						if (current.TNode != null)
 						{
 							stack.Push(current);
 							// Navigate left
-							current = current.Node.IsRoot
-										? left
-											? (current.Depth + 1, current.Node.Left)
-											: (-1, null)
-										: (current.Depth + 1, current.Node.Left);
+							current = (current.Depth + 1, current.TNode.Left);
 							continue;
 						}
 
-						(int Depth, Node Node) peek = stack.Peek();
+						(int Depth, TNode TNode) peek = stack.Peek();
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the left branch.
-						 * Is there a right Node
+						 * Is there a right TNode
 						 * if yes, then navigate right.
 						 */
-						if (peek.Node.Right != null && lastVisited != peek.Node.Right)
+						if (peek.TNode.Right != null && lastVisited != peek.TNode.Right)
 						{
 							// Navigate right
-							current = peek.Node.IsRoot
-										? right
-											? (peek.Depth + 1, peek.Node.Right)
-											: (-1, null)
-										: (peek.Depth + 1, peek.Node.Right);
+							current = (peek.Depth + 1, peek.TNode.Right);
 						}
 						else
 						{
 							// visit the next queued node
 							current = peek;
-							lastVisited = stack.Pop().Node;
-							visitCallback(current.Node, current.Depth);
+							lastVisited = stack.Pop().TNode;
+							visitCallback(current.TNode, current.Depth);
 							current = (-1, null);
 						}
 					}
@@ -2024,50 +1875,41 @@ namespace asm.Collections
 				void PostOrderRL()
 				{
 					// Right-Root-Left (Stack)
-					Stack<(int Depth, Node Node)> stack = new Stack<(int Depth, Node Node)>();
-					(bool left, bool right) = direction.GetDirections();
-					Node lastVisited = null;
+					Stack<(int Depth, TNode TNode)> stack = new Stack<(int Depth, TNode TNode)>();
+					TNode lastVisited = null;
 					// Start at the root
-					(int Depth, Node Node) current = (0, _root);
+					(int Depth, TNode TNode) current = (0, _root);
 
-					while (current.Node != null || stack.Count > 0)
+					while (current.TNode != null || stack.Count > 0)
 					{
 						if (version != _tree._version) throw new VersionChangedException();
 
-						if (current.Node != null)
+						if (current.TNode != null)
 						{
 							stack.Push(current);
 							// Navigate right
-							current = current.Node.IsRoot
-										? right
-											? (current.Depth + 1, current.Node.Right)
-											: (-1, null)
-										: (current.Depth + 1, current.Node.Right);
+							current = (current.Depth + 1, current.TNode.Right);
 							continue;
 						}
 
-						(int Depth, Node Node) peek = stack.Peek();
+						(int Depth, TNode TNode) peek = stack.Peek();
 						/*
 						 * At this point we are either coming from
 						 * either the root node or the right branch.
-						 * Is there a left Node
+						 * Is there a left TNode
 						 * if yes, then navigate left.
 						 */
-						if (peek.Node.Left != null && lastVisited != peek.Node.Left)
+						if (peek.TNode.Left != null && lastVisited != peek.TNode.Left)
 						{
 							// Navigate left
-							current = peek.Node.IsRoot
-										? left
-											? (peek.Depth + 1, peek.Node.Left)
-											: (-1, null)
-										: (peek.Depth + 1, peek.Node.Left);
+							current = (peek.Depth + 1, peek.TNode.Left);
 						}
 						else
 						{
 							// visit the next queued node
 							current = peek;
-							lastVisited = stack.Pop().Node;
-							visitCallback(current.Node, current.Depth);
+							lastVisited = stack.Pop().TNode;
+							visitCallback(current.TNode, current.Depth);
 							current = (-1, null);
 						}
 					}
@@ -2080,19 +1922,19 @@ namespace asm.Collections
 		/// </summary>
 		internal sealed class LevelIterator
 		{
-			private readonly LinkedBinaryTree<T> _tree;
-			private readonly Node _root;
-			private readonly Queue<Node> _queue = new Queue<Node>();
+			private readonly LinkedBinaryTree<TNode, T> _tree;
+			private readonly TNode _root;
+			private readonly Queue<TNode> _queue = new Queue<TNode>();
 
 			private int _level = -1;
 
-			internal LevelIterator([NotNull] LinkedBinaryTree<T> tree, [NotNull] Node root)
+			internal LevelIterator([NotNull] LinkedBinaryTree<TNode, T> tree, [NotNull] TNode root)
 			{
 				_tree = tree;
 				_root = root;
 			}
 
-			public void Iterate(HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<int, IReadOnlyCollection<Node>, bool> levelCallback)
+			public void Iterate(HorizontalFlow flow, [NotNull] Func<int, IReadOnlyCollection<TNode>, bool> levelCallback)
 			{
 				int version = _tree._version;
 
@@ -2111,7 +1953,6 @@ namespace asm.Collections
 				void IterateLR()
 				{
 					// Root-Left-Right (Queue)
-					(bool left, bool right) = direction.GetDirections();
 					_queue.Clear();
 
 					// Start at the root
@@ -2129,11 +1970,11 @@ namespace asm.Collections
 						for (int i = 0; i < count; i++)
 						{
 							// visit the next queued node
-							Node current = _queue.Dequeue();
+							TNode current = _queue.Dequeue();
 
 							// Queue the next nodes
-							if ((!current.IsRoot || left) && current.Left != null) _queue.Enqueue(current.Left);
-							if ((!current.IsRoot || right) && current.Right != null) _queue.Enqueue(current.Right);
+							if (current.Left != null) _queue.Enqueue(current.Left);
+							if (current.Right != null) _queue.Enqueue(current.Right);
 						}
 					}
 
@@ -2143,7 +1984,6 @@ namespace asm.Collections
 				void IterateRL()
 				{
 					// Root-Right-Left (Queue)
-					(bool left, bool right) = direction.GetDirections();
 					_queue.Clear();
 
 					// Start at the root
@@ -2161,11 +2001,11 @@ namespace asm.Collections
 						for (int i = 0; i < count; i++)
 						{
 							// visit the next queued node
-							Node current = _queue.Dequeue();
+							TNode current = _queue.Dequeue();
 
 							// Queue the next nodes
-							if ((!current.IsRoot || right) && current.Right != null) _queue.Enqueue(current.Right);
-							if ((!current.IsRoot || left) && current.Left != null) _queue.Enqueue(current.Left);
+							if (current.Right != null) _queue.Enqueue(current.Right);
+							if (current.Left != null) _queue.Enqueue(current.Left);
 						}
 					}
 
@@ -2173,7 +2013,7 @@ namespace asm.Collections
 				}
 			}
 
-			public void Iterate(HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback)
+			public void Iterate(HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
 			{
 				int version = _tree._version;
 
@@ -2192,7 +2032,6 @@ namespace asm.Collections
 				void IterateLR()
 				{
 					// Root-Left-Right (Queue)
-					(bool left, bool right) = direction.GetDirections();
 					_queue.Clear();
 
 					// Start at the root
@@ -2210,11 +2049,11 @@ namespace asm.Collections
 						for (int i = 0; i < count; i++)
 						{
 							// visit the next queued node
-							Node current = _queue.Dequeue();
+							TNode current = _queue.Dequeue();
 
 							// Queue the next nodes
-							if ((!current.IsRoot || left) && current.Left != null) _queue.Enqueue(current.Left);
-							if ((!current.IsRoot || right) && current.Right != null) _queue.Enqueue(current.Right);
+							if (current.Left != null) _queue.Enqueue(current.Left);
+							if (current.Right != null) _queue.Enqueue(current.Right);
 						}
 					}
 
@@ -2224,7 +2063,6 @@ namespace asm.Collections
 				void IterateRL()
 				{
 					// Root-Right-Left (Queue)
-					(bool left, bool right) = direction.GetDirections();
 					_queue.Clear();
 
 					// Start at the root
@@ -2242,11 +2080,11 @@ namespace asm.Collections
 						for (int i = 0; i < count; i++)
 						{
 							// visit the next queued node
-							Node current = _queue.Dequeue();
+							TNode current = _queue.Dequeue();
 
 							// Queue the next nodes
-							if ((!current.IsRoot || right) && current.Right != null) _queue.Enqueue(current.Right);
-							if ((!current.IsRoot || left) && current.Left != null) _queue.Enqueue(current.Left);
+							if (current.Right != null) _queue.Enqueue(current.Right);
+							if (current.Left != null) _queue.Enqueue(current.Left);
 						}
 					}
 
@@ -2295,7 +2133,9 @@ namespace asm.Collections
 		[NotNull]
 		public IComparer<T> Comparer { get; private set; }
 
-		public Node Root { get; protected internal set; }
+		public abstract bool AutoBalance { get; }
+
+		public TNode Root { get; protected internal set; }
 
 		public int Count { get; protected internal set; }
 
@@ -2309,7 +2149,7 @@ namespace asm.Collections
 		{
 			if (siInfo == null) return; //Somebody had a dependency on this Dictionary and fixed us up before the ObjectManager got to it.
 			Comparer = (IComparer<T>)siInfo.GetValue(nameof(Comparer), typeof(IComparer<T>));
-			Root = (Node)siInfo.GetValue(nameof(Root), typeof(Node));
+			Root = (TNode)siInfo.GetValue(nameof(Root), typeof(TNode));
 			Count = siInfo.GetInt32(nameof(Count));
 			siInfo = null;
 		}
@@ -2324,7 +2164,7 @@ namespace asm.Collections
 			// This will give us the flexibility to change internal implementation freely in future.
 			if (info == null) throw new ArgumentNullException(nameof(info));
 			siInfo.AddValue(nameof(Comparer), Comparer, typeof(IComparer<T>));
-			siInfo.AddValue(nameof(Root), Root, typeof(Node));
+			siInfo.AddValue(nameof(Root), Root, typeof(TNode));
 			siInfo.AddValue(nameof(Count), Count);
 		}
 
@@ -2337,7 +2177,7 @@ namespace asm.Collections
 		[NotNull]
 		public IEnumerator<T> GetEnumerator()
 		{
-			return (IEnumerator<T>)Enumerate(Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default);
+			return (IEnumerator<T>)Enumerate(Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight);
 		}
 
 		/// <summary>
@@ -2346,51 +2186,32 @@ namespace asm.Collections
 		/// <param name="root">The starting node</param>
 		/// <param name="method">The traverse method</param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
-		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
 		/// <returns></returns>
 		[NotNull]
-		public IEnumerable<T> Enumerate(Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction)
+		public IEnumerable<T> Enumerate(TNode root, TraverseMethod method, HorizontalFlow flow)
 		{
 			return root == null
 						? Enumerable.Empty<T>()
-						: new Enumerator(this, root, method, flow, direction);
+						: new Enumerator(this, root, method, flow);
 		}
 
 		#region Enumerate overloads
 		[NotNull]
-		public IEnumerable<T> Enumerate(Node root, HorizontalDirectionFlags direction)
+		public IEnumerable<T> Enumerate(TNode root)
 		{
-			return Enumerate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction);
+			return Enumerate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight);
 		}
 
 		[NotNull]
-		public IEnumerable<T> Enumerate(Node root, HorizontalFlow flow)
+		public IEnumerable<T> Enumerate(TNode root, HorizontalFlow flow)
 		{
-			return Enumerate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default);
+			return Enumerate(root, TraverseMethod.InOrder, flow);
 		}
 
 		[NotNull]
-		public IEnumerable<T> Enumerate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction)
+		public IEnumerable<T> Enumerate(TNode root, TraverseMethod method)
 		{
-			return Enumerate(root, TraverseMethod.InOrder, flow, direction);
-		}
-
-		[NotNull]
-		public IEnumerable<T> Enumerate(Node root, TraverseMethod method)
-		{
-			return Enumerate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default);
-		}
-
-		[NotNull]
-		public IEnumerable<T> Enumerate(Node root, TraverseMethod method, HorizontalDirectionFlags direction)
-		{
-			return Enumerate(root, method, HorizontalFlow.LeftToRight, direction);
-		}
-
-		[NotNull]
-		public IEnumerable<T> Enumerate(Node root, TraverseMethod method, HorizontalFlow flow)
-		{
-			return Enumerate(root, method, flow, HorizontalDirectionFlags.Default);
+			return Enumerate(root, method, HorizontalFlow.LeftToRight);
 		}
 		#endregion
 
@@ -2400,48 +2221,27 @@ namespace asm.Collections
 		/// <param name="root">The starting node</param>
 		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
-		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
 		/// <param name="visitCallback">callback function to handle the node that can cancel the loop</param>
-		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction, Func<Node, bool> visitCallback)
+		public void Iterate(TNode root, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<TNode, bool> visitCallback)
 		{
 			if (root == null) return;
-			new Iterator(this, root, method).Iterate(flow, direction, visitCallback);
+			new Iterator(this, root, method).Iterate(flow, visitCallback);
 		}
 
 		#region Iterate overloads - visitCallback function
-		public void Iterate(Node root, [NotNull] Func<Node, bool> visitCallback)
+		public void Iterate(TNode root, [NotNull] Func<TNode, bool> visitCallback)
 		{
-			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
+			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
 		}
 
-		public void Iterate(Node root, HorizontalDirectionFlags direction, [NotNull] Func<Node, bool> visitCallback)
+		public void Iterate(TNode root, HorizontalFlow flow, [NotNull] Func<TNode, bool> visitCallback)
 		{
-			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
+			Iterate(root, TraverseMethod.InOrder, flow, visitCallback);
 		}
 
-		public void Iterate(Node root, HorizontalFlow flow, [NotNull] Func<Node, bool> visitCallback)
+		public void Iterate(TNode root, TraverseMethod method, [NotNull] Func<TNode, bool> visitCallback)
 		{
-			Iterate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public void Iterate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<Node, bool> visitCallback)
-		{
-			Iterate(root, TraverseMethod.InOrder, flow, direction, visitCallback);
-		}
-
-		public void Iterate(Node root, TraverseMethod method, [NotNull] Func<Node, bool> visitCallback)
-		{
-			Iterate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public void Iterate(Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Func<Node, bool> visitCallback)
-		{
-			Iterate(root, method, HorizontalFlow.LeftToRight, direction, visitCallback);
-		}
-
-		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<Node, bool> visitCallback)
-		{
-			Iterate(root, method, flow, HorizontalDirectionFlags.Default, visitCallback);
+			Iterate(root, method, HorizontalFlow.LeftToRight, visitCallback);
 		}
 		#endregion
 
@@ -2451,48 +2251,27 @@ namespace asm.Collections
 		/// <param name="root">The starting node</param>
 		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
-		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
 		/// <param name="visitCallback">callback function to handle the node with depth awareness that can cancel the loop</param>
-		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction, Func<Node, int, bool> visitCallback)
+		public void Iterate(TNode root, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<TNode, int, bool> visitCallback)
 		{
 			if (root == null) return;
-			new Iterator(this, root, method).Iterate(flow, direction, visitCallback);
+			new Iterator(this, root, method).Iterate(flow, visitCallback);
 		}
 
 		#region Iterate overloads - visitCallback with depth function
-		public void Iterate(Node root, [NotNull] Func<Node, int, bool> visitCallback)
+		public void Iterate(TNode root, [NotNull] Func<TNode, int, bool> visitCallback)
 		{
-			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
+			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
 		}
 
-		public void Iterate(Node root, HorizontalDirectionFlags direction, [NotNull] Func<Node, int, bool> visitCallback)
+		public void Iterate(TNode root, HorizontalFlow flow, [NotNull] Func<TNode, int, bool> visitCallback)
 		{
-			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
+			Iterate(root, TraverseMethod.InOrder, flow, visitCallback);
 		}
 
-		public void Iterate(Node root, HorizontalFlow flow, [NotNull] Func<Node, int, bool> visitCallback)
+		public void Iterate(TNode root, TraverseMethod method, [NotNull] Func<TNode, int, bool> visitCallback)
 		{
-			Iterate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public void Iterate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<Node, int, bool> visitCallback)
-		{
-			Iterate(root, TraverseMethod.InOrder, flow, direction, visitCallback);
-		}
-
-		public void Iterate(Node root, TraverseMethod method, [NotNull] Func<Node, int, bool> visitCallback)
-		{
-			Iterate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public void Iterate(Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Func<Node, int, bool> visitCallback)
-		{
-			Iterate(root, method, HorizontalFlow.LeftToRight, direction, visitCallback);
-		}
-
-		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<Node, int, bool> visitCallback)
-		{
-			Iterate(root, method, flow, HorizontalDirectionFlags.Default, visitCallback);
+			Iterate(root, method, HorizontalFlow.LeftToRight, visitCallback);
 		}
 		#endregion
 
@@ -2502,48 +2281,27 @@ namespace asm.Collections
 		/// <param name="root">The starting node</param>
 		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
-		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
 		/// <param name="visitCallback">callback action to handle the node</param>
-		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction, Action<Node> visitCallback)
+		public void Iterate(TNode root, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<TNode> visitCallback)
 		{
 			if (root == null) return;
-			new Iterator(this, root, method).Iterate(flow, direction, visitCallback);
+			new Iterator(this, root, method).Iterate(flow, visitCallback);
 		}
 
 		#region Iterate overloads - visitCallback action
-		public void Iterate(Node root, [NotNull] Action<Node> visitCallback)
+		public void Iterate(TNode root, [NotNull] Action<TNode> visitCallback)
 		{
-			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
+			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
 		}
 
-		public void Iterate(Node root, HorizontalDirectionFlags direction, [NotNull] Action<Node> visitCallback)
+		public void Iterate(TNode root, HorizontalFlow flow, [NotNull] Action<TNode> visitCallback)
 		{
-			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
+			Iterate(root, TraverseMethod.InOrder, flow, visitCallback);
 		}
 
-		public void Iterate(Node root, HorizontalFlow flow, [NotNull] Action<Node> visitCallback)
+		public void Iterate(TNode root, TraverseMethod method, [NotNull] Action<TNode> visitCallback)
 		{
-			Iterate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public void Iterate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<Node> visitCallback)
-		{
-			Iterate(root, TraverseMethod.InOrder, flow, direction, visitCallback);
-		}
-
-		public void Iterate(Node root, TraverseMethod method, [NotNull] Action<Node> visitCallback)
-		{
-			Iterate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public void Iterate(Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Action<Node> visitCallback)
-		{
-			Iterate(root, method, HorizontalFlow.LeftToRight, direction, visitCallback);
-		}
-
-		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<Node> visitCallback)
-		{
-			Iterate(root, method, flow, HorizontalDirectionFlags.Default, visitCallback);
+			Iterate(root, method, HorizontalFlow.LeftToRight, visitCallback);
 		}
 		#endregion
 
@@ -2553,48 +2311,27 @@ namespace asm.Collections
 		/// <param name="root">The starting node</param>
 		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
-		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
 		/// <param name="visitCallback">callback action to handle the node with depth awareness</param>
-		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, HorizontalDirectionFlags direction, Action<Node, int> visitCallback)
+		public void Iterate(TNode root, TraverseMethod method, HorizontalFlow flow, Action<TNode, int> visitCallback)
 		{
 			if (root == null) return;
-			new Iterator(this, root, method).Iterate(flow, direction, visitCallback);
+			new Iterator(this, root, method).Iterate(flow, visitCallback);
 		}
 
 		#region Iterate overloads - visitCallback with depth action
-		public void Iterate(Node root, [NotNull] Action<Node, int> visitCallback)
+		public void Iterate(TNode root, [NotNull] Action<TNode, int> visitCallback)
 		{
-			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
+			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
 		}
 
-		public void Iterate(Node root, HorizontalDirectionFlags direction, [NotNull] Action<Node, int> visitCallback)
+		public void Iterate(TNode root, HorizontalFlow flow, [NotNull] Action<TNode, int> visitCallback)
 		{
-			Iterate(root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, direction, visitCallback);
+			Iterate(root, TraverseMethod.InOrder, flow, visitCallback);
 		}
 
-		public void Iterate(Node root, HorizontalFlow flow, [NotNull] Action<Node, int> visitCallback)
+		public void Iterate(TNode root, TraverseMethod method, [NotNull] Action<TNode, int> visitCallback)
 		{
-			Iterate(root, TraverseMethod.InOrder, flow, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public void Iterate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<Node, int> visitCallback)
-		{
-			Iterate(root, TraverseMethod.InOrder, flow, direction, visitCallback);
-		}
-
-		public void Iterate(Node root, TraverseMethod method, [NotNull] Action<Node, int> visitCallback)
-		{
-			Iterate(root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, visitCallback);
-		}
-
-		public void Iterate(Node root, TraverseMethod method, HorizontalDirectionFlags direction, [NotNull] Action<Node, int> visitCallback)
-		{
-			Iterate(root, method, HorizontalFlow.LeftToRight, direction, visitCallback);
-		}
-
-		public void Iterate(Node root, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<Node, int> visitCallback)
-		{
-			Iterate(root, method, flow, HorizontalDirectionFlags.Default, visitCallback);
+			Iterate(root, method, HorizontalFlow.LeftToRight, visitCallback);
 		}
 		#endregion
 
@@ -2604,28 +2341,17 @@ namespace asm.Collections
 		/// </summary>
 		/// <param name="root">The starting node</param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
-		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
 		/// <param name="levelCallback">callback function to handle the nodes of the level and can cancel the loop.</param>
-		public void Iterate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Func<int, IReadOnlyCollection<Node>, bool> levelCallback)
+		public void Iterate(TNode root, HorizontalFlow flow, [NotNull] Func<int, IReadOnlyCollection<TNode>, bool> levelCallback)
 		{
 			if (root == null) return;
-			new LevelIterator(this, root).Iterate(flow, direction, levelCallback);
+			new LevelIterator(this, root).Iterate(flow, levelCallback);
 		}
 
 		#region LevelIterate overloads - visitCallback function
-		public void Iterate(Node root, [NotNull] Func<int, IReadOnlyCollection<Node>, bool> levelCallback)
+		public void Iterate(TNode root, [NotNull] Func<int, IReadOnlyCollection<TNode>, bool> levelCallback)
 		{
-			Iterate(root, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, levelCallback);
-		}
-
-		public void Iterate(Node root, HorizontalDirectionFlags direction, [NotNull] Func<int, IReadOnlyCollection<Node>, bool> levelCallback)
-		{
-			Iterate(root, HorizontalFlow.LeftToRight, direction, levelCallback);
-		}
-
-		public void Iterate(Node root, HorizontalFlow flow, [NotNull] Func<int, IReadOnlyCollection<Node>, bool> levelCallback)
-		{
-			Iterate(root, flow, HorizontalDirectionFlags.Default, levelCallback);
+			Iterate(root, HorizontalFlow.LeftToRight, levelCallback);
 		}
 		#endregion
 
@@ -2635,32 +2361,19 @@ namespace asm.Collections
 		/// </summary>
 		/// <param name="root">The starting node</param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
-		/// <param name="direction">left branch, right branch or default which will traverse both branches</param>
 		/// <param name="levelCallback">callback action to handle the nodes of the level.</param>
-		public void Iterate(Node root, HorizontalFlow flow, HorizontalDirectionFlags direction, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback)
+		public void Iterate(TNode root, HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
 		{
 			if (root == null) return;
-			new LevelIterator(this, root).Iterate(flow, direction, levelCallback);
+			new LevelIterator(this, root).Iterate(flow, levelCallback);
 		}
 
 		#region LevelIterate overloads - visitCallback function
-		public void Iterate(Node root, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback)
+		public void Iterate(TNode root, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
 		{
-			Iterate(root, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, levelCallback);
-		}
-
-		public void Iterate(Node root, HorizontalDirectionFlags direction, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback)
-		{
-			Iterate(root, HorizontalFlow.LeftToRight, direction, levelCallback);
-		}
-
-		public void Iterate(Node root, HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback)
-		{
-			Iterate(root, flow, HorizontalDirectionFlags.Default, levelCallback);
+			Iterate(root, HorizontalFlow.LeftToRight, levelCallback);
 		}
 		#endregion
-
-		public int GetHeight() { return Root?.Height ?? 0; }
 
 		/// <inheritdoc />
 		public bool Contains(T value) { return Find(value) != null; }
@@ -2670,9 +2383,9 @@ namespace asm.Collections
 		/// </summary>
 		/// <param name="value">The value to search for</param>
 		/// <returns>The found node or null if no match is found</returns>
-		public Node Find(T value)
+		public TNode Find(T value)
 		{
-			Node current = FindNearestLeaf(value);
+			TNode current = FindNearestLeaf(value);
 			if (current == null || Comparer.IsEqual(current.Value, value)) return current;
 			if (current.Left != null && Comparer.IsEqual(current.Left.Value, value)) return current.Left;
 			if (current.Right != null && Comparer.IsEqual(current.Right.Value, value)) return current.Right;
@@ -2685,10 +2398,10 @@ namespace asm.Collections
 		/// <param name="value">The value to search for</param>
 		/// <param name="method">The <see cref="TraverseMethod"/> to use in the search.</param>
 		/// <returns>The found node or null if no match is found</returns>
-		public Node Find(T value, TraverseMethod method)
+		public TNode Find(T value, TraverseMethod method)
 		{
-			Node node = null;
-			Iterate(Root, method, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, e =>
+			TNode node = null;
+			Iterate(Root, method, HorizontalFlow.LeftToRight, e =>
 			{
 				if (Comparer.Compare(e.Value, value) != 0) return true;
 				node = e;
@@ -2703,7 +2416,7 @@ namespace asm.Collections
 		/// <param name="value">The value to search for</param>
 		/// <param name="level">The target level starting from base zero.</param>
 		/// <returns>The found node or null if no match is found</returns>
-		public Node Find(T value, int level)
+		public TNode Find(T value, int level)
 		{
 			if (level < 0) throw new ArgumentOutOfRangeException(nameof(level));
 			return GeNodesAtLevel(level)?.FirstOrDefault(e => Comparer.IsEqual(e.Value, value));
@@ -2714,7 +2427,7 @@ namespace asm.Collections
 		/// </summary>
 		/// <param name="value">The value to search for</param>
 		/// <returns>The found node or null if no match is found</returns>
-		public abstract Node FindNearestLeaf(T value);
+		public abstract TNode FindNearestLeaf(T value);
 
 		/// <inheritdoc />
 		public abstract void Add(T value);
@@ -2722,11 +2435,11 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public bool Remove(T value)
 		{
-			Node node = Find(value);
+			TNode node = Find(value);
 			return node != null && Remove(node);
 		}
 
-		public abstract bool Remove([NotNull] Node node);
+		public abstract bool Remove([NotNull] TNode node);
 
 		/// <inheritdoc />
 		public void Clear()
@@ -2746,23 +2459,23 @@ namespace asm.Collections
 		/// </summary>
 		/// <param name="node"></param>
 		/// <returns></returns>
-		public abstract bool Validate(Node node);
+		public abstract bool Validate(TNode node);
 
 		public bool IsBalanced() { return IsBalanced(Root); }
-		public abstract bool IsBalanced(Node node);
+		public abstract bool IsBalanced(TNode node);
 
 		/// <summary>
 		/// Balances the tree if it supports it.
 		/// </summary>
 		public abstract void Balance();
 
-		public IReadOnlyList<Node> GeNodesAtLevel(int level)
+		public IReadOnlyList<TNode> GeNodesAtLevel(int level)
 		{
 			if (level < 0) throw new ArgumentOutOfRangeException(nameof(level));
-			if (Root == null) return Array.Empty<Node>();
+			if (Root == null) return Array.Empty<TNode>();
 
-			IReadOnlyList<Node> list = null;
-			Iterate(Root, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, (lvl, nodes) =>
+			IReadOnlyList<TNode> list = null;
+			Iterate(Root, HorizontalFlow.LeftToRight, (lvl, nodes) =>
 			{
 				if (lvl < level) return true;
 				if (lvl == level) list = nodes.ToArray();
@@ -2776,7 +2489,7 @@ namespace asm.Collections
 		{
 			array.Length.ValidateRange(arrayIndex, Count);
 			int lo = arrayIndex, hi = lo + Count;
-			Iterate(Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, node =>
+			Iterate(Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, node =>
 			{
 				array[lo++] = node.Value;
 				return lo < hi;
@@ -2803,12 +2516,12 @@ namespace asm.Collections
 			*/
 			array.Length.ValidateRange(index, Count);
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
-			Type sourceType = typeof(Node);
+			Type sourceType = typeof(TNode);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
 			if (Count == 0) return;
 			int lo = index, hi = lo + Count;
-			Iterate(Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, node =>
+			Iterate(Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, node =>
 			{
 				objects[lo++] = node;
 				return lo < hi;
@@ -2827,7 +2540,7 @@ namespace asm.Collections
 				default:
 					int index = 0;
 					T[] array = new T[Count];
-					Iterate(Root, method, flow, HorizontalDirectionFlags.Default, node =>
+					Iterate(Root, method, flow, node =>
 					{
 						array[index++] = node.Value;
 						return index < Count;
@@ -2835,6 +2548,52 @@ namespace asm.Collections
 					return array;
 			}
 		}
+	}
+
+	/// <inheritdoc />
+	[Serializable]
+	public abstract class LinkedBinaryTree<T> : LinkedBinaryTree<LinkedBinaryTree<T>.Node, T>
+	{
+		[Serializable]
+		[StructLayout(LayoutKind.Sequential)]
+		public sealed class Node : NodeBase
+		{
+			internal Node(T value)
+				: base(value)
+			{
+			}
+
+			/// <inheritdoc />
+			protected internal override string ToString(int depth, bool diagnostic)
+			{
+				return diagnostic
+						   ? $"{Value} :D{depth}H{Height}B{BalanceFactor}"
+						   : Convert.ToString(Value);
+			}
+
+			public int Height { get; internal set; }
+
+			public int BalanceFactor => (Left?.Height ?? -1) - (Right?.Height ?? -1);
+		}
+
+		/// <inheritdoc />
+		protected LinkedBinaryTree() 
+		{
+		}
+
+		/// <inheritdoc />
+		protected LinkedBinaryTree(IComparer<T> comparer)
+			: base(comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		protected LinkedBinaryTree(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+		}
+
+		public int GetHeight() { return Root?.Height ?? 0; }
 
 		/*
 		* https://www.geeksforgeeks.org/avl-tree-set-1-insertion/
@@ -2918,8 +2677,13 @@ namespace asm.Collections
 
 	public static class LinkedBinaryTreeExtension
 	{
-		public static string ToString<T>([NotNull] this LinkedBinaryTree<T> thisValue, Orientation orientation, bool diagnosticInfo = false) { return ToString(thisValue, thisValue.Root, orientation, diagnosticInfo); }
-		public static string ToString<T>([NotNull] this LinkedBinaryTree<T> thisValue, LinkedBinaryTree<T>.Node node, Orientation orientation, bool diagnosticInfo = false)
+		public static string ToString<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, Orientation orientation, bool diagnosticInfo = false)
+			where TNode : LinkedBinaryTree<TNode, T>.NodeBase
+		{
+			return ToString(thisValue, thisValue.Root, orientation, diagnosticInfo);
+		}
+		public static string ToString<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, TNode node, Orientation orientation, bool diagnosticInfo = false)
+			where TNode : LinkedBinaryTree<TNode, T>.NodeBase
 		{
 			if (node == null) return string.Empty;
 			return orientation switch
@@ -2929,15 +2693,7 @@ namespace asm.Collections
 				_ => throw new ArgumentOutOfRangeException(nameof(orientation), orientation, null)
 			};
 
-			static string Format(LinkedBinaryTree<T>.Node node, int depth, bool diagnostic)
-			{
-				if (node == null) return string.Empty;
-				return diagnostic
-							? $"{node} :D{depth}H{node.Height}B{node.BalanceFactor}"
-							: node.ToString();
-			}
-
-			static string Horizontally(LinkedBinaryTree<T> tree, LinkedBinaryTree<T>.Node node, bool diagnostic)
+			static string Horizontally(LinkedBinaryTree<TNode, T> tree, TNode node, bool diagnostic)
 			{
 				const string STR_BLANK = "    ";
 				const string STR_EXT = "│   ";
@@ -2948,9 +2704,9 @@ namespace asm.Collections
 				StringBuilder sb = new StringBuilder();
 				Stack<string> connectors = new Stack<string>();
 
-				tree.Iterate(node, TraverseMethod.InOrder, HorizontalFlow.RightToLeft, HorizontalDirectionFlags.Default, (e, depth) =>
+				tree.Iterate(node, TraverseMethod.InOrder, HorizontalFlow.RightToLeft, (e, depth) =>
 				{
-					connectors.Push(Format(e, depth, diagnostic));
+					connectors.Push(e.ToString(depth, diagnostic));
 
 					if (e.IsRight) connectors.Push(STR_CONNECTOR_R);
 					else if (e.IsLeft) connectors.Push(STR_CONNECTOR_L);
@@ -2973,7 +2729,7 @@ namespace asm.Collections
 				return sb.ToString();
 			}
 
-			static string Vertically(LinkedBinaryTree<T> tree, LinkedBinaryTree<T>.Node node, bool diagnostic)
+			static string Vertically(LinkedBinaryTree<TNode, T> tree, TNode node, bool diagnostic)
 			{
 				const char C_BLANK = ' ';
 				const char C_EXT = '─';
@@ -2982,7 +2738,7 @@ namespace asm.Collections
 
 				int distance = 0;
 				IDictionary<int, StringBuilder> lines = new Dictionary<int, StringBuilder>();
-				tree.Iterate(node, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, HorizontalDirectionFlags.Default, (e, depth) =>
+				tree.Iterate(node, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, (e, depth) =>
 				{
 					StringBuilder line = lines.GetOrAdd(depth);
 
@@ -3008,7 +2764,7 @@ namespace asm.Collections
 					}
 
 					if (line.Length > 0) line.Append(C_BLANK);
-					line.Append(Format(e, depth, diagnostic));
+					line.Append(e.ToString(depth, diagnostic));
 					distance = line.Length;
 				});
 

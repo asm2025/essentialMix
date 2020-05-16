@@ -150,7 +150,14 @@ namespace TestApp
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
-				BinarySearchTree<int> tree = new BinarySearchTree<int>(values);
+				BinarySearchTree<int> tree = new BinarySearchTree<int>();
+
+				foreach (int v in values)
+				{
+					tree.Add(v);
+					//tree.Print();
+				}
+
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 
