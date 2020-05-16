@@ -66,18 +66,19 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public override Node FindNearest(T value)
+		public override Node FindNearestLeaf(T value)
 		{
-			if (Root == null) return null;
+			Node parent = null, next = Root;
 
-			Node parent = Root, next = Root;
-
-			while (next != null && !Comparer.IsEqual(value, next.Value))
+			while (next != null)
 			{
 				parent = next;
-				next = Comparer.IsLessThan(value, next.Value)
-							? next.Left
-							: next.Right;
+				int cmp = Comparer.Compare(value, next.Value);
+				next = cmp == 0
+							? null
+							: cmp < 0
+								? next.Left
+								: next.Right;
 			}
 
 			return parent;
@@ -146,11 +147,7 @@ namespace asm.Collections
 			else
 			{
 				// find the right child's left most child
-				Node leftmost = node.Right.Left;
-
-				while (leftmost.Left != null) 
-					leftmost = leftmost.Left;
-
+				Node leftmost = node.Right.Minimum();
 				// move the left-most right to the parent's left
 				leftMostParent = leftmost.Parent;
 				leftMostParent.Left = leftmost.Right;
@@ -312,7 +309,6 @@ namespace asm.Collections
 				if (Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR) continue;
 
 				Node parent = node.Parent;
-				bool isLeft = node.IsLeft;
 				bool changed = false;
 
 				if (node.BalanceFactor > 1) // left heavy
@@ -337,16 +333,6 @@ namespace asm.Collections
 				}
 
 				if (!changed) continue;
-
-				if (parent == null)
-				{
-					Root = node;
-				}
-				else
-				{
-					if (isLeft) parent.Left = node;
-					else parent.Right = node;
-				}
 
 				if (!IsBalanced(node)) queue.Enqueue(node);
 				if (node.Left != null && !IsBalanced(node.Left)) queue.Enqueue(node.Left);

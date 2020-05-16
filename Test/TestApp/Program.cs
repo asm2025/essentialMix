@@ -22,10 +22,10 @@ namespace TestApp
 			//TestBinarySearchTreeBalance();
 			
 			//TestAVLTreeAdd();
-			TestAVLTreeRemove();
+			//TestAVLTreeRemove();
 			
 			//TestRedBlackTreeAdd();
-			//TestRedBlackTreeRemove();
+			TestRedBlackTreeRemove();
 
 			ConsoleHelper.Pause();
 		}
@@ -311,7 +311,7 @@ namespace TestApp
 				foreach (int v in values)
 				{
 					tree.Add(v);
-					//tree.Print();
+					tree.Print();
 				}
 
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));

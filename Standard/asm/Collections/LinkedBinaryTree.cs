@@ -131,17 +131,78 @@ namespace asm.Collections
 			/// <inheritdoc />
 			[NotNull]
 			public override string ToString() { return Convert.ToString(Value); }
+			
+			public void Swap([NotNull] Node other)
+			{
+				T tmp = other.Value;
+				other.Value = Value;
+				Value = tmp;
+			}
 
 			[ItemNotNull]
 			public IEnumerable<Node> Ancestors()
 			{
-				Node node = Parent;
+				Node node = _nodes[PARENT];
 
 				while (node != null)
 				{
 					yield return node;
-					node = node.Parent;
+					node = node._nodes[PARENT];
 				}
+			}
+
+			[NotNull]
+			public Node Minimum()
+			{
+				Node minimum = this;
+
+				while (minimum._nodes[LEFT] != null) 
+					minimum = minimum._nodes[LEFT];
+
+				return minimum;
+			}
+
+			[NotNull]
+			public Node Maximum()
+			{
+				Node maximum = this;
+
+				while (maximum._nodes[RIGHT] != null) 
+					maximum = maximum._nodes[RIGHT];
+
+				return maximum;
+			}
+
+			public Node Predecessor()
+			{
+				if (_nodes[LEFT] != null) return _nodes[LEFT].Maximum();
+
+				Node node = this;
+				Node parent = _nodes[PARENT];
+
+				while (parent != null && node == parent._nodes[LEFT])
+				{
+					node = parent;
+					parent = parent._nodes[PARENT];
+				}
+
+				return parent;
+			}
+
+			public Node Successor()
+			{
+				if (_nodes[RIGHT] != null) return _nodes[RIGHT].Minimum();
+
+				Node node = this;
+				Node parent = _nodes[PARENT];
+
+				while (parent != null && node == parent._nodes[RIGHT])
+				{
+					node = parent;
+					parent = parent._nodes[PARENT];
+				}
+
+				return parent;
 			}
 
 			public static implicit operator T([NotNull] Node node) { return node.Value; }
@@ -2611,7 +2672,7 @@ namespace asm.Collections
 		/// <returns>The found node or null if no match is found</returns>
 		public Node Find(T value)
 		{
-			Node current = FindNearest(value);
+			Node current = FindNearestLeaf(value);
 			if (current == null || Comparer.IsEqual(current.Value, value)) return current;
 			if (current.Left != null && Comparer.IsEqual(current.Left.Value, value)) return current.Left;
 			if (current.Right != null && Comparer.IsEqual(current.Right.Value, value)) return current.Right;
@@ -2653,7 +2714,7 @@ namespace asm.Collections
 		/// </summary>
 		/// <param name="value">The value to search for</param>
 		/// <returns>The found node or null if no match is found</returns>
-		public abstract Node FindNearest(T value);
+		public abstract Node FindNearestLeaf(T value);
 
 		/// <inheritdoc />
 		public abstract void Add(T value);
@@ -2807,6 +2868,10 @@ namespace asm.Collections
 				if (isLeft) oldParent.Left = newRoot;
 				else oldParent.Right = newRoot;
 			}
+			else
+			{
+				Root = newRoot;
+			}
 
 			_version++;
 			// Return new root
@@ -2835,6 +2900,10 @@ namespace asm.Collections
 				if (isLeft) oldParent.Left = newRoot;
 				else oldParent.Right = newRoot;
 			}
+			else
+			{
+				Root = newRoot;
+			}
 
 			_version++;
 			// Return new root
@@ -2844,16 +2913,6 @@ namespace asm.Collections
 		protected internal static void SetHeight([NotNull] Node node)
 		{
 			node.Height = 1 + Math.Max(node.Left?.Height ?? -1, node.Right?.Height ?? -1);
-		}
-	}
-
-	public static class LinkedBinaryTreeNodeExtension
-	{
-		public static void Swap<T>([NotNull] this LinkedBinaryTree<T>.Node thisValue, [NotNull] LinkedBinaryTree<T>.Node other)
-		{
-			T tmp = other.Value;
-			other.Value = thisValue.Value;
-			thisValue.Value = tmp;
 		}
 	}
 

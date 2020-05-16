@@ -108,22 +108,6 @@ namespace asm.Collections
 				}
 			}
 
-			// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
-			public Node Uncle =>
-				_nodes[PARENT]?._nodes[PARENT] == null
-					? null // no parent or grand parent
-					: _nodes[PARENT].IsLeft
-						? _nodes[PARENT]._nodes[PARENT]._nodes[RIGHT] // uncle on the right
-						: _nodes[PARENT]._nodes[PARENT]._nodes[LEFT];
-
-			// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
-			public Node Sibling =>
-				_nodes[PARENT] == null
-					? null // no parent
-					: IsLeft
-						? _nodes[PARENT]._nodes[RIGHT] // sibling on the right
-						: _nodes[PARENT]._nodes[LEFT];
-
 			public T Value { get; set; }
 
 			/// <summary>
@@ -158,13 +142,101 @@ namespace asm.Collections
 			[ItemNotNull]
 			public IEnumerable<Node> Ancestors()
 			{
-				Node node = Parent;
+				Node node = _nodes[PARENT];
 
 				while (node != null)
 				{
 					yield return node;
-					node = node.Parent;
+					node = node._nodes[PARENT];
 				}
+			}
+
+			public Node Uncle()
+			{
+				// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
+				return _nodes[PARENT]?._nodes[PARENT] == null
+							? null // no parent or grand parent
+							: _nodes[PARENT].IsLeft
+								? _nodes[PARENT]._nodes[PARENT]._nodes[RIGHT] // uncle on the right
+								: _nodes[PARENT]._nodes[PARENT]._nodes[LEFT];
+			}
+
+			public Node Sibling()
+			{
+				// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
+				return _nodes[PARENT] == null
+							? null // no parent
+							: IsLeft
+								? _nodes[PARENT]._nodes[RIGHT] // sibling on the right
+								: _nodes[PARENT]._nodes[LEFT];
+			}
+			
+			public void Swap([NotNull] Node other)
+			{
+				T tmp = other.Value;
+				other.Value = Value;
+				Value = tmp;
+			}
+			
+			public void SwapColor([NotNull] Node other)
+			{
+				bool tmp = other.Color;
+				other.Color = Color;
+				Color = tmp;
+			}
+
+			[NotNull]
+			public Node Minimum()
+			{
+				Node minimum = this;
+
+				while (minimum._nodes[LEFT] != null) 
+					minimum = minimum._nodes[LEFT];
+
+				return minimum;
+			}
+
+			[NotNull]
+			public Node Maximum()
+			{
+				Node maximum = this;
+
+				while (maximum._nodes[RIGHT] != null) 
+					maximum = maximum._nodes[RIGHT];
+
+				return maximum;
+			}
+
+			public Node Predecessor()
+			{
+				if (_nodes[LEFT] != null) return _nodes[LEFT].Maximum();
+
+				Node node = this;
+				Node parent = _nodes[PARENT];
+
+				while (parent != null && node == parent._nodes[LEFT])
+				{
+					node = parent;
+					parent = parent._nodes[PARENT];
+				}
+
+				return parent;
+			}
+
+			public Node Successor()
+			{
+				if (_nodes[RIGHT] != null) return _nodes[RIGHT].Minimum();
+
+				Node node = this;
+				Node parent = _nodes[PARENT];
+
+				while (parent != null && node == parent._nodes[RIGHT])
+				{
+					node = parent;
+					parent = parent._nodes[PARENT];
+				}
+
+				return parent;
 			}
 
 			public static implicit operator T([NotNull] Node node) { return node.Value; }
@@ -2651,7 +2723,7 @@ namespace asm.Collections
 		/// <returns>The found node or null if no match is found</returns>
 		public Node Find(T value)
 		{
-			Node current = FindNearest(value);
+			Node current = FindNearestLeaf(value);
 			if (current == null || Comparer.IsEqual(current.Value, value)) return current;
 			if (current.Left != null && Comparer.IsEqual(current.Left.Value, value)) return current.Left;
 			if (current.Right != null && Comparer.IsEqual(current.Right.Value, value)) return current.Right;
@@ -2688,18 +2760,19 @@ namespace asm.Collections
 			return GeNodesAtLevel(level)?.FirstOrDefault(e => Comparer.IsEqual(e.Value, value));
 		}
 
-		public Node FindNearest(T value)
+		public Node FindNearestLeaf(T value)
 		{
-			if (Root == null) return null;
+			Node parent = null, next = Root;
 
-			Node parent = Root, next = Root;
-
-			while (next != null && !Comparer.IsEqual(value, next.Value))
+			while (next != null)
 			{
 				parent = next;
-				next = Comparer.IsLessThan(value, next.Value)
-							? next.Left
-							: next.Right;
+				int cmp = Comparer.Compare(value, next.Value);
+				next = cmp == 0
+							? null
+							: cmp < 0
+								? next.Left
+								: next.Right;
 			}
 
 			return parent;
@@ -2708,54 +2781,33 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public void Add(T value)
 		{
-			if (Root == null)
+			// find a parent
+			Node parent = FindNearestLeaf(value);
+
+			if (parent == null)
 			{
 				// no parent means there is no root currently
-				Root = new Node(value);
+				Root = new Node(value)
+				{
+					Color = false
+				};
 				Count++;
 				_version++;
 				return;
 			}
 
-			// find a parent
-			Node parent = Root, next = Root;
-			Stack<Node> stack = new Stack<Node>();
-
-			while (next != null)
-			{
-				parent = next;
-				stack.Push(parent);
-				next = Comparer.IsLessThan(value, next.Value)
-							? next.Left
-							: next.Right;
-			}
+			// duplicate values can make life miserable for us here because it will never be balanced!
+			if (Comparer.IsEqual(value, parent.Value)) throw new DuplicateKeyException();
 
 			Node node = new Node(value);
 
 			if (Comparer.IsLessThan(value, parent.Value)) parent.Left = node;
 			else parent.Right = node;
 
-			Queue<Node> unbalancedNodes = new Queue<Node>();
-
-			// find unbalanced parents in the changed nodes
-			// this has the same effect as the recursive call but only it's iterative now
-			while (stack.Count > 0)
-			{
-				parent = stack.Pop();
-				if (IsBalanced(parent)) continue;
-				unbalancedNodes.Enqueue(parent);
-			}
-
 			Count++;
 			_version++;
-
-			while (unbalancedNodes.Count > 0)
-			{
-				node = unbalancedNodes.Dequeue();
-				// check again if status changed
-				if (IsBalanced(node)) continue;
-				Balance(node);
-			}
+			if (IsBalanced(node)) return;
+			Balance(node);
 		}
 
 		/// <inheritdoc />
@@ -2767,80 +2819,66 @@ namespace asm.Collections
 
 		public bool Remove([NotNull] Node node)
 		{
+			// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
+			Node newNode;
+
+			// case 1: node has both left and right children
+			while (node.IsNode)
+			{
+				newNode = node.Right.Minimum();
+				newNode.Swap(node);
+				node = newNode;
+			}
+
+			newNode = node.Left ?? node.Right;
+			bool dblBlack = !node.Color && (newNode == null || !newNode.Color);
 			Node parent = node.Parent;
-			Node child, leftMostParent = null;
 
-			// case 1: node has no right child
-			if (node.Right == null)
+			// case 2: node is a leaf
+			if (newNode == null)
 			{
-				child = node.Left;
+				if (node.IsRoot)
+				{
+					Root = null;
+				}
+				else
+				{
+					if (dblBlack)
+					{
+						// newNode and node are both black, node is a leaf => fix double black at node
+						Balance(node);
+					}
+					else
+					{
+						Node sibling = node.Sibling();
+						if (sibling != null) sibling.Color = true;
+					}
+
+					if (node.IsLeft) parent.Left = null;
+					else parent.Right = null;
+				}
 			}
-			// case 2: node has a right child which doesn't have a left child
-			else if (node.Right.Left == null)
-			{
-				// move the left to the right child's left
-				node.Right.Left = node.Left;
-				child = node.Right;
-			}
-			// case 3: node has a right child that has a left child
+			// case 3: node has either left or right child
 			else
 			{
-				// find the right child's left most child
-				Node leftmost = node.Right.Left;
+				if (node == Root)
+				{
+					node.Value = newNode.Value;
+					node.Left = node.Right = null;
+				}
+				else
+				{
+					// Detach the node from tree and move newNode up
+					if (node.IsLeft) parent.Left = newNode;
+					else parent.Right = newNode;
 
-				while (leftmost.Left != null) 
-					leftmost = leftmost.Left;
-
-				// move the left-most right to the parent's left
-				leftMostParent = leftmost.Parent;
-				leftMostParent.Left = leftmost.Right;
-				// adjust the left-most child nodes
-				leftmost.Left = node.Left;
-				leftmost.Right = node.Right;
-				child = leftmost;
-			}
-
-			bool dblBlack = (child == null || !child.Color) && !node.Color;
-
-			if (parent == null)
-			{
-				if (child != null) child.Parent = null;
-				Root = child;
-			}
-			else if (Comparer.IsLessThan(node.Value, parent.Value))
-			{
-				// if node < parent, move the left to the parent's left
-				parent.Left = child;
-			}
-			else
-			{
-				// else, move the left to the parent's right
-				parent.Right = child;
-			}
-
-			Queue<Node> unbalancedNodes = new Queue<Node>();
-			Node update = child != null
-							? leftMostParent ?? child
-							: parent;
-
-			// update nodes
-			while (update != null)
-			{
-				if (!IsBalanced(update)) unbalancedNodes.Enqueue(update);
-				update = update.Parent;
+					if (dblBlack) Balance(newNode);
+					else newNode.Color = false;
+				}
 			}
 
 			Count--;
 			_version++;
-
-			while (unbalancedNodes.Count > 0)
-			{
-				node = unbalancedNodes.Dequeue();
-				// check again if status changed
-				if (IsBalanced(node)) continue;
-				Balance(node);
-			}
-
 			return true;
 		}
 
@@ -3011,197 +3049,170 @@ namespace asm.Collections
 				Node node = unbalancedNodes.Dequeue();
 				// check again if status changed
 				if (IsBalanced(node)) continue;
-				BalanceRedRed(node);
+				Balance(node);
 			}
 		}
 
-		private void Balance([NotNull] Node node)
+		private void Balance(Node node)
 		{
-			if (node.Color)
+			// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
+			if (node?.Parent == null) return;
+
+			// fix red-red
+			if (node.Color && node.Parent.Color)
 			{
-				if (node.Parent != null && node.Parent.Color)
+				/*
+				* There are 2 cases with 3 sub-cases for each unbalanced node
+				*
+				* 1. parent is left
+				*	1.1 uncle (parent.Parent.Right) is Red => Recolor only
+				*	1.2 node is right => Rotate left
+				*	1.3 node is left => Rotate right
+				* 2. parent is right
+				*	2.1 uncle (parent.Parent.Right) is Red => Recolor only
+				*	2.2 node is left => Rotate right
+				*	2.3 node is right => Rotate left
+				*
+				*     y                               x
+				*    / \     Right Rotation(y) ->    /  \
+				*   x   T3                          T1   y 
+				*  / \                                  / \
+				* T1  T2     <- Left Rotation(x)       T2  T3
+				*/
+				while (node != null && !node.IsRoot && node.Color && node.Parent.Color /* node.Parent will never be null because IsRoot is true if reached here */)
 				{
-					BalanceRedRed(node);
-				}
-				else
-				{
-					if (node.HasRedLeft) BalanceRedRed(node.Left);
-					if (node.HasRedRight) BalanceRedRed(node.Right);
-				}
+					Node parent = node.Parent;
+					Node grandParent = parent.Parent;
+					Node uncle = node.Uncle();
 
-				return;
-			}
-		}
-
-		// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
-		private void BalanceRedRed(Node node)
-		{
-			/*
-			 * balance the tree
-			 * There are 2 cases with 3 sub-cases for each unbalanced node
-			 *
-			 * 1. parent is left
-			 *	1.1 uncle (parent.Parent.Right) is Red => Recolor only
-			 *	1.2 node is right => Rotate left
-			 *	1.3 node is left => Rotate right
-			 * 2. parent is right
-			 *	2.1 uncle (parent.Parent.Right) is Red => Recolor only
-			 *	2.2 node is left => Rotate right
-			 *	2.3 node is right => Rotate left
-			 *
-			 *     y                               x
-			 *    / \     Right Rotation(y) ->    /  \
-			 *   x   T3                          T1   y 
-			 *  / \                                  / \
-			 * T1  T2     <- Left Rotation(x)       T2  T3
-			 */
-			if (node?.Parent == null || !node.Color || !node.Parent.Color) return;
-
-			while (!node.IsRoot && node.Color && node.Parent.Color)
-			{
-				Node parent = node.Parent;
-				Node grandParent = parent.Parent;
-
-				// 1. parent is left
-				if (parent.IsLeft)
-				{
-					Node uncle = grandParent.Right;
-
-					// 1.1 uncle is Red
 					if (uncle != null && uncle.Color)
 					{
-						grandParent.Color = true;
-						parent.Color = false;
-						uncle.Color = false;
+						// uncle red, perform recoloring and go up
+						parent.Color = uncle.Color = false;
+						if (grandParent != null) grandParent.Color = true;
 						node = grandParent;
+						continue;
 					}
-					else
-					{
-						// 1.2 node is right
-						if (node.IsRight)
-						{
-							RotateLeft(parent);
-							node = parent;
-							parent = node.Parent;
-						}
 
-						// 1.3 node is left
-						RotateRight(grandParent);
-						parent.SwapColor(grandParent);
-						node = parent;
-					}
-				}
-				else
-				{
-					// 2. parent is right - because !node.IsRoot && !parent.IsLeft
-					Node uncle = grandParent.Left;
+					if (grandParent == null) break;
 
-					// 2.1 uncle is Red
-					if (uncle != null && uncle.Color)
+					// Else perform LR, LL, RL, RR
+					if (parent.IsLeft)
 					{
-						grandParent.Color = true;
-						parent.Color = false;
-						uncle.Color = false;
-						node = grandParent;
-					}
-					else
-					{
-						// 2.2 node is left
 						if (node.IsLeft)
 						{
-							RotateRight(parent);
-							node = parent;
-							parent = node.Parent;
+							// Left-right case
+							parent.SwapColor(grandParent);
+						}
+						else
+						{
+							RotateLeft(parent);
+							node.SwapColor(grandParent);
 						}
 
-						// 2.3 node is right
+						// Left-left and left-right
+						RotateRight(grandParent);
+					}
+					else
+					{
+						if (node.IsLeft)
+						{
+							// Right-left case
+							RotateRight(parent);
+							node.SwapColor(grandParent);
+						}
+						else
+						{
+							parent.SwapColor(grandParent);
+						}
+
+						// Right-right and right-left
 						RotateLeft(grandParent);
-						parent.SwapColor(grandParent);
+					}
+
+					break;
+				}
+			}
+			// fix double black
+			else
+			{
+				while (node != null && !node.IsRoot && node.Color)
+				{
+					Node sibling = node.Sibling(), parent = node.Parent;
+
+					while (sibling == null && parent != null)
+					{
+						// No sibling, double black pushed up
 						node = parent;
+						sibling = node.Sibling();
+						parent = node.Parent;
+					}
+
+					if (parent == null || sibling == null) return;
+
+					if (sibling.HasRedLeft)
+					{
+						if (sibling.IsLeft)
+						{
+							// Left-left case
+							sibling.Left.Color = sibling.Color;
+							sibling.Color = parent.Color;
+							RotateRight(parent);
+						}
+						else
+						{
+							// Right-left case
+							sibling.Left.Color = parent.Color;
+							RotateRight(sibling);
+							RotateLeft(parent);
+						}
+
+						node = null;
+					}
+					else if (sibling.HasRedRight)
+					{
+						if (sibling.IsLeft)
+						{
+							// Left-right case
+							sibling.Right.Color = parent.Color;
+							RotateLeft(sibling);
+							RotateRight(parent);
+						}
+						else
+						{
+							// Right-right case
+							sibling.Right.Color = sibling.Color;
+							sibling.Color = parent.Color;
+							RotateLeft(parent);
+						}
+
+						node = null;
+					}
+					else
+					{
+						// 2 black children
+						sibling.Color = true;
+
+						if (parent.Color)
+						{
+							parent.Color = false;
+							node = null;
+						}
+						else
+						{
+							node = parent;
+						}
 					}
 				}
 			}
 
-			if (node.IsRoot)
+			if (node != null && node.IsRoot)
 			{
 				Root = node;
 				_version++;
 			}
 
 			Root.Color = false;
-		}
-
-		// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
-		private void BalanceDoubleBlack(Node node)
-		{
-			while (node != null && !node.IsRoot && node.Color)
-			{
-				Node sibling = node.Sibling, parent = node.Parent;
-
-				while (sibling == null && parent != null)
-				{
-					// No sibling, double black pushed up
-					node = parent;
-					sibling = node.Sibling;
-					parent = node.Parent;
-				}
-
-				if (parent == null || sibling == null) return;
-
-				if (sibling.HasRedLeft)
-				{
-					if (sibling.IsLeft)
-					{
-						// Left-left case
-						sibling.Left.Color = sibling.Color;
-						sibling.Color = parent.Color;
-						RotateRight(parent);
-					}
-					else
-					{
-						// Right-left case
-						sibling.Left.Color = parent.Color;
-						RotateRight(sibling);
-						RotateLeft(parent);
-					}
-
-					node = null;
-				}
-				else if (sibling.HasRedRight)
-				{
-					if (sibling.IsLeft)
-					{
-						// Left-right case
-						sibling.Right.Color = parent.Color;
-						RotateLeft(sibling);
-						RotateRight(parent);
-					}
-					else
-					{
-						// Right-right case
-						sibling.Right.Color = sibling.Color;
-						sibling.Color = parent.Color;
-						RotateLeft(parent);
-					}
-
-					node = null;
-				}
-				else
-				{
-					// 2 black children
-					sibling.Color = true;
-
-					if (parent.Color)
-					{
-						parent.Color = false;
-						node = null;
-					}
-					else
-					{
-						node = parent;
-					}
-				}
-			}
 		}
 
 		/*
@@ -3232,6 +3243,10 @@ namespace asm.Collections
 				if (isLeft) oldParent.Left = newRoot;
 				else oldParent.Right = newRoot;
 			}
+			else
+			{
+				Root = newRoot;
+			}
 
 			_version++;
 			// Return new root
@@ -3256,27 +3271,14 @@ namespace asm.Collections
 				if (isLeft) oldParent.Left = newRoot;
 				else oldParent.Right = newRoot;
 			}
+			else
+			{
+				Root = newRoot;
+			}
 
 			_version++;
 			// Return new root
 			return newRoot;
-		}
-	}
-
-	public static class RedBlackTreeNodeExtension
-	{
-		public static void Swap<T>([NotNull] this RedBlackTree<T>.Node thisValue, [NotNull] RedBlackTree<T>.Node other)
-		{
-			T tmp = other.Value;
-			other.Value = thisValue.Value;
-			thisValue.Value = tmp;
-		}
-
-		public static void SwapColor<T>([NotNull] this RedBlackTree<T>.Node thisValue, [NotNull] RedBlackTree<T>.Node other)
-		{
-			bool tmp = other.Color;
-			other.Color = thisValue.Color;
-			thisValue.Color = tmp;
 		}
 	}
 
@@ -3379,517 +3381,6 @@ namespace asm.Collections
 
 				return string.Join(Environment.NewLine, lines.OrderBy(e => e.Key).Select(e => e.Value));
 			}
-		}
-
-		// todo
-		///// <summary>
-		///// Fill a <see cref="RedBlackTree{T}"/> from the LevelOrder <see cref="collection"/>.
-		///// <para>
-		///// LevelOrder => Root-Left-Right (Queue)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="collection"></param>
-		//public static void FromLevelOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> collection)
-		//{
-		//	IReadOnlyList<T> list = new Lister<T>(collection);
-		//	// try simple cases first
-		//	if (FromSimpleList(thisValue, list)) return;
-
-		//	int index = 0;
-		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(list[index++]);
-		//	thisValue.Root = node;
-
-		//	IComparer<T> comparer = thisValue.Comparer;
-		//	Queue<RedBlackTree<T>.Node> queue = new Queue<RedBlackTree<T>.Node>();
-		//	queue.Enqueue(node);
-
-		//	// not all queued items will be parents, it's expected the queue will contain enough nodes
-		//	while (index < list.Count)
-		//	{
-		//		int oldIndex = index;
-		//		RedBlackTree<T>.Node root = queue.Dequeue();
-
-		//		// add left node
-		//		if (comparer.IsLessThan(list[index], root.Value))
-		//		{
-		//			node = new RedBlackTree<T>.Node(list[index]);
-		//			root.Left = node;
-		//			queue.Enqueue(node);
-		//			index++;
-		//		}
-
-		//		// add right node
-		//		if (index < list.Count && comparer.IsGreaterThanOrEqual(list[index], root.Value))
-		//		{
-		//			node = new RedBlackTree<T>.Node(list[index]);
-		//			root.Right = node;
-		//			queue.Enqueue(node);
-		//			index++;
-		//		}
-
-		//		if (oldIndex == index) index++;
-		//	}
-
-		//	Update(thisValue);
-		//	thisValue.Balance();
-		//}
-
-		///// <summary>
-		///// Constructs a <see cref="RedBlackTree{T}"/> from the PreOrder <see cref="collection"/>.
-		///// <para>
-		///// PreOrder => Root-Left-Right (Stack)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="collection"></param>
-		//public static void FromPreOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> collection)
-		//{
-		//	// https://www.geeksforgeeks.org/construct-bst-from-given-preorder-traversal-set-2/
-		//	IReadOnlyList<T> list = new Lister<T>(collection);
-		//	// try simple cases first
-		//	if (FromSimpleList(thisValue, list)) return;
-
-		//	// first node of PreOrder will be root of tree
-		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(list[0]);
-		//	thisValue.Root = node;
-
-		//	Stack<RedBlackTree<T>.Node> stack = new Stack<RedBlackTree<T>.Node>();
-		//	// Push root of the BST to the stack i.e, first element of the array.
-		//	stack.Push(node);
-
-		//	/*
-		//	 * Keep popping nodes while the stack is not empty.
-		//	 * When the value is greater than stack’s top value, make it the right
-		//	 * child of the last popped node and push it to the stack.
-		//	 * If the next value is less than the stack’s top value, make it the left
-		//	 * child of the stack’s top node and push it to the stack.
-		//	 */
-		//	IComparer<T> comparer = thisValue.Comparer;
-
-		//	// Traverse from second node
-		//	for (int i = 1; i < list.Count; i++)
-		//	{
-		//		RedBlackTree<T>.Node root = null;
-
-		//		// Keep popping nodes while top of stack is greater.
-		//		while (stack.Count > 0 && comparer.IsGreaterThan(list[i], stack.Peek().Value))
-		//			root = stack.Pop();
-
-		//		node = new RedBlackTree<T>.Node(list[i]);
-
-		//		if (root != null) root.Right = node;
-		//		else if (stack.Count > 0) stack.Peek().Left = node;
-
-		//		stack.Push(node);
-		//	}
-
-		//	Update(thisValue);
-		//	thisValue.Balance();
-		//}
-
-		///// <summary>
-		///// Constructs a <see cref="RedBlackTree{T}"/> from the InOrder <see cref="collection"/>.
-		///// <para>
-		///// Note that it is not possible to construct a unique binary tree from InOrder collection alone.
-		///// </para>
-		///// <para>
-		///// InOrder => Left-Root-Right (Stack)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="collection"></param>
-		//public static void FromInOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> collection)
-		//{
-		//	IReadOnlyList<T> list = new Lister<T>(collection);
-		//	// try simple cases first
-		//	if (FromSimpleList(thisValue, list)) return;
-
-		//	int start = 0;
-		//	int end = list.Count - 1;
-		//	int index = IndexMid(start, end);
-		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(list[index]);
-		//	thisValue.Root = node;
-
-		//	Queue<(int Index, int Start, int End, RedBlackTree<T>.Node Node)> queue = new Queue<(int Index, int Start, int End, RedBlackTree<T>.Node Node)>();
-		//	queue.Enqueue((index, start, end, node));
-
-		//	while (queue.Count > 0)
-		//	{
-		//		(int Index, int Start, int End, RedBlackTree<T>.Node Node) tuple = queue.Dequeue();
-
-		//		// get the next left index
-		//		start = tuple.Start;
-		//		end = tuple.Index - 1;
-		//		int nodeIndex = IndexMid(start, end);
-
-		//		// add left node
-		//		if (nodeIndex > -1)
-		//		{
-		//			node = new RedBlackTree<T>.Node(list[nodeIndex]);
-		//			tuple.Node.Left = node;
-		//			queue.Enqueue((nodeIndex, start, end, node));
-		//		}
-
-		//		// get the next right index
-		//		start = tuple.Index + 1;
-		//		end = tuple.End;
-		//		nodeIndex = IndexMid(start, end);
-
-		//		// add right node
-		//		if (nodeIndex > -1)
-		//		{
-		//			node = new RedBlackTree<T>.Node(list[nodeIndex]);
-		//			tuple.Node.Right = node;
-		//			queue.Enqueue((nodeIndex, start, end, node));
-		//		}
-		//	}
-
-		//	Update(thisValue);
-		//	thisValue.Balance();
-
-		//	static int IndexMid(int start, int end)
-		//	{
-		//		return start > end
-		//					? -1
-		//					: start + (end - start) / 2;
-		//	}
-		//}
-
-		///// <summary>
-		///// Constructs a <see cref="RedBlackTree{T}"/> from the PostOrder <see cref="collection"/>.
-		///// <para>
-		///// PostOrder => Left-Right-Root (Stack)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="collection"></param>
-		//public static void FromPostOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> collection)
-		//{
-		//	// https://www.geeksforgeeks.org/construct-a-bst-from-given-postorder-traversal-using-stack/
-		//	IReadOnlyList<T> list = new Lister<T>(collection);
-		//	// try simple cases first
-		//	if (FromSimpleList(thisValue, list)) return;
-
-		//	// last node of PostOrder will be root of tree
-		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(list[list.Count - 1]);
-		//	thisValue.Root = node;
-
-		//	Stack<RedBlackTree<T>.Node> stack = new Stack<RedBlackTree<T>.Node>();
-		//	// Push root of the BST to the stack i.e, last element of the array.
-		//	stack.Push(node);
-
-		//	/*
-		//	 * The idea is to traverse the array in reverse.
-		//	 * If next element is > the element at the top of the stack then,
-		//	 * set this element as the right child of the element at the top
-		//	 * of the stack and also push it to the stack.
-		//	 * Else if, next element is < the element at the top of the stack then,
-		//	 * start popping all the elements from the stack until either the stack
-		//	 * is empty or the current element becomes > the element at the top of
-		//	 * the stack.
-		//	 * Make this element left child of the last popped node and repeat until
-		//	 * the array is traversed completely.
-		//	 */
-		//	IComparer<T> comparer = thisValue.Comparer;
-
-		//	// Traverse from second last node
-		//	for (int i = list.Count - 2; i >= 0; i--)
-		//	{
-		//		RedBlackTree<T>.Node root = null;
-
-		//		// Keep popping nodes while top of stack is greater.
-		//		while (stack.Count > 0 && comparer.IsLessThan(list[i], stack.Peek().Value))
-		//			root = stack.Pop();
-
-		//		node = new RedBlackTree<T>.Node(list[i]);
-
-		//		if (root != null) root.Left = node;
-		//		else if (stack.Count > 0) stack.Peek().Right = node;
-
-		//		stack.Push(node);
-		//	}
-
-		//	Update(thisValue);
-		//	thisValue.Balance();
-		//}
-
-		///// <summary>
-		///// Constructs a <see cref="RedBlackTree{T}"/> from <see cref="inOrderCollection"/> and <see cref="levelOrderCollection"/>.
-		///// <para>
-		///// InOrder => Left-Root-Right (Stack)
-		///// </para>
-		///// <para>
-		///// LevelOrder => Root-Left-Right (Queue)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="inOrderCollection"></param>
-		///// <param name="levelOrderCollection"></param>
-		//public static void FromInOrderAndLevelOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> levelOrderCollection)
-		//{
-		//	IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
-		//	// Root-Left-Right
-		//	IReadOnlyList<T> levelOrder = new Lister<T>(levelOrderCollection);
-		//	if (inOrder.Count != levelOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(levelOrderCollection));
-		//	if (levelOrder.Count == 1 && inOrder.Count == 1 && !thisValue.Comparer.IsEqual(inOrder[0], levelOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(levelOrderCollection));
-		//	// try simple cases first
-		//	if (FromSimpleList(thisValue, levelOrder)) return;
-
-		//	/*
-		//	 * using the facts that:
-		//	 * 1. LevelOrder is organized in the form Root-Left-Right.
-		//	 * 2. InOrder is organized in the form Left-Root-Right,
-		//	 * from 1 and 2, the LevelOrder list can be used to identify
-		//	 * the root and other elements locations in the InOrder list.
-		//	 */
-		//	// the lookup will enhance the speed of looking for the index of the item to O(1)
-		//	IDictionary<T, int> lookup = new Dictionary<T, int>(thisValue.Comparer.AsEqualityComparer());
-
-		//	// add all InOrder items to the lookup
-		//	for (int i = 0; i < inOrder.Count; i++)
-		//	{
-		//		T key = inOrder[i];
-		//		if (lookup.ContainsKey(key)) continue;
-		//		lookup.Add(key, i);
-		//	}
-
-		//	int index = 0;
-		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(levelOrder[index++]);
-		//	thisValue.Root = node;
-
-		//	Queue<(int Start, int End, RedBlackTree<T>.Node Node)> queue = new Queue<(int Start, int End, RedBlackTree<T>.Node Node)>();
-		//	queue.Enqueue((0, inOrder.Count - 1, node));
-
-		//	while (index < levelOrder.Count && queue.Count > 0)
-		//	{
-		//		(int Start, int End, RedBlackTree<T>.Node Node) tuple = queue.Dequeue();
-
-		//		// get the root index (the current node index in the InOrder collection)
-		//		int rootIndex = lookup[tuple.Node.Value];
-		//		// find out the index of the next entry of LevelOrder in the InOrder collection
-		//		int levelIndex = lookup[levelOrder[index]];
-
-		//		// add left node
-		//		if (levelIndex >= tuple.Start && levelIndex <= rootIndex - 1)
-		//		{
-		//			node = new RedBlackTree<T>.Node(inOrder[levelIndex]);
-		//			tuple.Node.Left = node;
-		//			queue.Enqueue((tuple.Start, rootIndex - 1, node));
-		//			index++;
-		//			// index and node changed, so will need to get the next entry of LevelOrder in the InOrder collection
-		//			levelIndex = index < levelOrder.Count
-		//							? lookup[levelOrder[index]]
-		//							: -1;
-		//		}
-
-		//		// add right node
-		//		if (levelIndex >= rootIndex + 1 && levelIndex <= tuple.End)
-		//		{
-		//			node = new RedBlackTree<T>.Node(inOrder[levelIndex]);
-		//			tuple.Node.Right = node;
-		//			queue.Enqueue((rootIndex + 1, tuple.End, node));
-		//			index++;
-		//		}
-		//	}
-
-		//	Update(thisValue);
-		//	thisValue.Balance();
-		//}
-
-		///// <summary>
-		///// Constructs a <see cref="RedBlackTree{T}"/> from <see cref="inOrderCollection"/> and <see cref="preOrderCollection"/>.
-		///// <para>
-		///// InOrder => Left-Root-Right (Stack)
-		///// </para>
-		///// <para>
-		///// PreOrder => Root-Left-Right (Stack)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="inOrderCollection"></param>
-		///// <param name="preOrderCollection"></param>
-		//public static void FromInOrderAndPreOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> preOrderCollection)
-		//{
-		//	IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
-		//	IReadOnlyList<T> preOrder = new Lister<T>(preOrderCollection);
-		//	if (inOrder.Count != preOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(preOrderCollection));
-		//	if (preOrder.Count == 1 && inOrder.Count == 1 && !thisValue.Comparer.IsEqual(inOrder[0], preOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(preOrderCollection));
-		//	// try simple cases first
-		//	if (FromSimpleList(thisValue, preOrder)) return;
-
-		//	/*
-		//	 * https://stackoverflow.com/questions/48352513/construct-binary-tree-given-its-inorder-and-preorder-traversals-without-recursio#48364040
-		//	 * 
-		//	 * The idea is to keep tree nodes in a stack from PreOrder traversal, till their counterpart is not found in InOrder traversal.
-		//	 * Once a counterpart is found, all children in the left sub-tree of the node must have been already visited.
-		//	 */
-		//	int preIndex = 0;
-		//	int inIndex = 0;
-		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(preOrder[preIndex++]);
-		//	thisValue.Root = node;
-
-		//	IComparer<T> comparer = thisValue.Comparer;
-		//	Stack<RedBlackTree<T>.Node> stack = new Stack<RedBlackTree<T>.Node>();
-		//	stack.Push(node);
-
-		//	while (stack.Count > 0)
-		//	{
-		//		RedBlackTree<T>.Node root = stack.Peek();
-
-		//		if (comparer.IsEqual(root.Value, inOrder[inIndex]))
-		//		{
-		//			stack.Pop();
-		//			inIndex++;
-
-		//			// if all the elements in inOrder have been visited, we are done
-		//			if (inIndex == inOrder.Count) break;
-		//			// if there are still some unvisited nodes in the left, skip
-		//			if (stack.Count > 0 && comparer.IsEqual(stack.Peek().Value, inOrder[inIndex])) continue;
-
-		//			/*
-		//			 * As top node in stack, still has not encountered its counterpart
-		//			 * in inOrder, so next element in preOrder must be right child of
-		//			 * the removed node
-		//			 */
-		//			node = new RedBlackTree<T>.Node(preOrder[preIndex++]);
-		//			root.Right = node;
-		//			stack.Push(node);
-		//		}
-		//		else
-		//		{
-		//			/*
-		//			 * Top node in the stack has not encountered its counterpart
-		//			 * in inOrder, so next element in preOrder must be left child
-		//			 * of this node
-		//			 */
-		//			node = new RedBlackTree<T>.Node(preOrder[preIndex++]);
-		//			root.Left = node;
-		//			stack.Push(node);
-		//		}
-		//	}
-
-		//	Update(thisValue);
-		//	thisValue.Balance();
-		//}
-
-		///// <summary>
-		///// Constructs a <see cref="RedBlackTree{T}"/> from <see cref="inOrderCollection"/> and <see cref="postOrderCollection"/>.
-		///// <para>
-		///// InOrder => Left-Root-Right (Stack)
-		///// </para>
-		///// <para>
-		///// PostOrder => Left-Right-Root (Stack)
-		///// </para>
-		///// </summary>
-		///// <typeparam name="T"></typeparam>
-		///// <param name="thisValue"></param>
-		///// <param name="inOrderCollection"></param>
-		///// <param name="postOrderCollection"></param>
-		//public static void FromInOrderAndPostOrder<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> postOrderCollection)
-		//{
-		//	IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
-		//	IReadOnlyList<T> postOrder = new Lister<T>(postOrderCollection);
-		//	if (inOrder.Count != postOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(postOrderCollection));
-		//	if (postOrder.Count == 1 && inOrder.Count == 1 && !thisValue.Comparer.IsEqual(inOrder[0], postOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(postOrderCollection));
-		//	if (FromSimpleList(thisValue, postOrder)) return;
-
-		//	// the lookup will enhance the speed of looking for the index of the item to O(1)
-		//	IDictionary<T, int> lookup = new Dictionary<T, int>(thisValue.Comparer.AsEqualityComparer());
-
-		//	// add all InOrder items to the lookup
-		//	for (int i = 0; i < inOrder.Count; i++)
-		//	{
-		//		T key = inOrder[i];
-		//		if (lookup.ContainsKey(key)) continue;
-		//		lookup.Add(key, i);
-		//	}
-
-		//	// Traverse postOrder in reverse
-		//	int postIndex = postOrder.Count - 1;
-		//	RedBlackTree<T>.Node node = new RedBlackTree<T>.Node(postOrder[postIndex--]);
-		//	thisValue.Root = node;
-
-		//	Stack<RedBlackTree<T>.Node> stack = new Stack<RedBlackTree<T>.Node>();
-		//	// Push root of the BST to the stack i.e, last element of the array.
-		//	stack.Push(node);
-
-		//	IComparer<T> comparer = thisValue.Comparer;
-
-		//	while (postIndex >= 0 && stack.Count > 0)
-		//	{
-		//		RedBlackTree<T>.Node root = stack.Peek();
-		//		// get the root index (the current node index in the InOrder collection)
-		//		int rootIndex = lookup[root.Value];
-		//		// find out the index of the next entry of PostOrder in the InOrder collection
-		//		int index = lookup[postOrder[postIndex]];
-
-		//		// add right node
-		//		if (index > rootIndex)
-		//		{
-		//			node = new RedBlackTree<T>.Node(inOrder[index]);
-		//			root.Right = node;
-		//			stack.Push(node);
-		//			postIndex--;
-
-		//			// index and node changed, so will need to get the next entry of PostOrder in the InOrder collection
-		//			index = postIndex > -1
-		//						? lookup[postOrder[postIndex]]
-		//						: -1;
-		//		}
-
-		//		// add left node
-		//		if (index > -1 && index < rootIndex)
-		//		{
-		//			if (comparer.IsLessThan(postOrder[postIndex], root.Value))
-		//			{
-		//				// Keep popping nodes while top of stack is greater.
-		//				while (stack.Count > 0 && comparer.IsLessThan(postOrder[postIndex], stack.Peek().Value))
-		//					root = stack.Pop();
-		//			}
-
-		//			node = new RedBlackTree<T>.Node(inOrder[index]);
-		//			root.Left = node;
-		//			stack.Push(node);
-		//			postIndex--;
-		//		}
-		//	}
-
-		//	Update(thisValue);
-		//	thisValue.Balance();
-		//}
-
-		private static bool FromSimpleList<T>([NotNull] RedBlackTree<T> tree, [NotNull] IReadOnlyList<T> list)
-		{
-			bool result;
-			tree.Clear();
-
-			switch (list.Count)
-			{
-				case 0:
-					result = true;
-					break;
-				case 1:
-					tree.Root = new RedBlackTree<T>.Node(list[0]) { Color = false };
-					result = true;
-					break;
-				default:
-					result = false;
-					break;
-			}
-
-			return result;
-		}
-
-		private static void ThrowNotFormingATree(string collection1Name, string collection2Name)
-		{
-			throw new ArgumentException($"{collection1Name} and {collection2Name} do not form a binary tree.");
 		}
 	}
 }
