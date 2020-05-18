@@ -1,9 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Text;
+using System.Threading;
 using asm.Collections;
+using asm.Exceptions;
 using asm.Extensions;
 using asm.Helpers;
 using asm.Patterns.Layout;
+using Bogus;
 using Crayon;
 using JetBrains.Annotations;
 
@@ -11,9 +17,16 @@ namespace TestApp
 {
 	internal class Program
 	{
+		private static readonly Lazy<Faker> __stringGenerator = new Lazy<Faker>(() => new Faker(), LazyThreadSafetyMode.PublicationOnly);
+
 		private static void Main()
 		{
 			Console.OutputEncoding = Encoding.UTF8;
+
+			TestSortAlgorithms();
+
+			//TestLinkedQueue();
+			//TestMinMaxQueue();
 
 			//TestBinarySearchTreeFromTraversal();
 			
@@ -25,9 +38,222 @@ namespace TestApp
 			//TestAVLTreeRemove();
 			
 			//TestRedBlackTreeAdd();
-			TestRedBlackTreeRemove();
+			//TestRedBlackTreeRemove();
 
 			ConsoleHelper.Pause();
+		}
+
+		private static void TestSortAlgorithms()
+		{
+			const int TRIES = 10;
+			const int RESULT_COUNT = 5;
+
+			string[] sortAlgorithms = 
+			{
+				nameof(IListExtension.SortBubble),
+				nameof(IListExtension.SortSelection),
+				nameof(IListExtension.SortInsertion),
+				nameof(IListExtension.SortHeap),
+				nameof(IListExtension.SortMerge),
+				nameof(IListExtension.SortQuick),
+				nameof(IListExtension.SortShell),
+				nameof(IListExtension.SortComb),
+				nameof(IListExtension.SortTim),
+				nameof(IListExtension.SortCocktail),
+				nameof(IListExtension.SortBitonic),
+				nameof(IListExtension.SortPancake),
+				nameof(IListExtension.SortBinary),
+				nameof(IListExtension.SortGnome),
+				nameof(IListExtension.SortBrick)
+			};
+
+			Stopwatch watch = new Stopwatch();
+			IComparer<int> numbersComparer = Comparer<int>.Default;
+			IComparer<string> stringComparer = StringComparer.Ordinal;
+			IDictionary<string, double> numericResults = new Dictionary<string, double>();
+			IDictionary<string, double> stringResults = new Dictionary<string, double>();
+			double[] time = new double[TRIES];
+			string sectionSeparator = new string('*', 80).BrightMagenta();
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				int[] numbers = GetRandomIntegers(RNGRandomHelper.Next(5, 20));
+				string[] strings = GetRandomStrings(RNGRandomHelper.Next(3, 10));
+				Console.WriteLine("Numbers: ".BrightCyan() + string.Join(", ", numbers));
+				Console.WriteLine("String: ".BrightCyan() + string.Join(", ", strings.Select(e => e.SingleQuote())));
+				Console.WriteLine($"Taking an average of {TRIES.ToString().BrightCyan()} times for each algorithm.");
+
+				foreach (string algorithm in sortAlgorithms)
+				{
+					Action<IList<int>, int, int, IComparer<int>, bool> sortNumbers = GetAlgorithm<int>(algorithm);
+					Action<IList<string>, int, int, IComparer<string>, bool> sortStrings = GetAlgorithm<string>(algorithm);
+					Console.WriteLine(sectionSeparator);
+					Console.WriteLine($"Testing {algorithm.BrightCyan()} algorithm: ");
+
+					Console.Write("Numbers");
+					int[] ints = (int[])numbers.Clone();
+
+					for (int i = 0; i < time.Length; i++)
+					{
+						watch.Restart();
+						sortNumbers(ints, 0, -1, numbersComparer, false);
+						time[i] = watch.Elapsed.TotalMilliseconds;
+						watch.Stop();
+						if (i < time.Length - 1) ints = (int[])numbers.Clone();
+					}
+
+					numericResults[algorithm] = time.Average();
+					Console.WriteLine($" => {numericResults[algorithm].ToString("F6").BrightGreen()}");
+					Console.WriteLine("Result: " + string.Join(", ", ints));
+					Console.WriteLine();
+
+					Console.Write("Strings");
+
+					string[] str = (string[])strings.Clone();
+
+					for (int i = 0; i < time.Length; i++)
+					{
+						watch.Restart();
+						sortStrings(str, 0, -1, stringComparer, false);
+						time[i] = watch.Elapsed.TotalMilliseconds;
+						watch.Stop();
+						if (i < time.Length - 1) ints = (int[])numbers.Clone();
+					}
+
+					stringResults[algorithm] = time.Average();
+					Console.WriteLine($" => {numericResults[algorithm].ToString("F6").BrightGreen()}");
+					Console.WriteLine("Result: " + string.Join(", ", str.Select(e => e.SingleQuote())));
+					Console.WriteLine();
+				}
+
+				Console.WriteLine(sectionSeparator);
+				Console.WriteLine("Finished".BrightYellow());
+				Console.WriteLine();
+				Console.WriteLine($"Fastest {RESULT_COUNT} numeric sort:".BrightGreen());
+			
+				foreach (KeyValuePair<string, double> pair in numericResults
+															.OrderBy(e => e.Value)
+															.Take(RESULT_COUNT))
+				{
+					Console.WriteLine($"{pair.Key} {pair.Value:F6}");
+				}
+
+				Console.WriteLine();
+				Console.WriteLine($"Fastest {RESULT_COUNT} string sort:".BrightGreen());
+
+				foreach (KeyValuePair<string, double> pair in stringResults
+															.OrderBy(e => e.Value)
+															.Take(RESULT_COUNT))
+				{
+					Console.WriteLine($"{pair.Key} {pair.Value:F6}");
+				}
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+			}
+			while (more);
+
+			static Action<IList<T>, int, int, IComparer<T>, bool> GetAlgorithm<T>(string name)
+			{
+				return name switch
+				{
+					nameof(IListExtension.SortBubble) => IListExtension.SortBubble,
+					nameof(IListExtension.SortSelection) => IListExtension.SortSelection,
+					nameof(IListExtension.SortInsertion) => IListExtension.SortInsertion,
+					nameof(IListExtension.SortHeap) => IListExtension.SortHeap,
+					nameof(IListExtension.SortMerge) => IListExtension.SortMerge,
+					nameof(IListExtension.SortQuick) => IListExtension.SortQuick,
+					nameof(IListExtension.SortShell) => IListExtension.SortShell,
+					nameof(IListExtension.SortComb) => IListExtension.SortComb,
+					nameof(IListExtension.SortTim) => IListExtension.SortTim,
+					nameof(IListExtension.SortCocktail) => IListExtension.SortCocktail,
+					nameof(IListExtension.SortBitonic) => IListExtension.SortBitonic,
+					nameof(IListExtension.SortPancake) => IListExtension.SortPancake,
+					nameof(IListExtension.SortBinary) => IListExtension.SortBinary,
+					nameof(IListExtension.SortGnome) => IListExtension.SortGnome,
+					nameof(IListExtension.SortBrick) => IListExtension.SortBrick,
+					_ => throw new NotFoundException()
+				};
+			}
+		}
+
+		private static void TestLinkedQueue()
+		{
+			int len = RNGRandomHelper.Next(5, 20);
+			int[] values = GetRandomIntegers(len);
+			Console.WriteLine("Array: " + string.Join(", ", values));
+
+			Console.WriteLine("As Queue:");
+			LinkedQueue<int> queue = new LinkedQueue<int>(DequeuePriority.FIFO);
+	
+			foreach (int value in values)
+			{
+				queue.Enqueue(value);
+			}
+	
+			while (queue.Count > 0)
+			{
+				Console.WriteLine(queue.Dequeue());
+			}
+
+			Console.WriteLine("As Stack:");
+			queue = new LinkedQueue<int>(DequeuePriority.LIFO);
+
+			foreach (int value in values)
+			{
+				queue.Enqueue(value);
+			}
+
+			while (queue.Count > 0)
+			{
+				Console.WriteLine(queue.Dequeue());
+			}
+		}
+
+		private static void TestMinMaxQueue()
+		{
+			int len = RNGRandomHelper.Next(5, 20);
+			int[] values = GetRandomIntegers(len);
+			Console.WriteLine("Array: " + string.Join(", ", values));
+
+			Console.WriteLine("As Queue:");
+			MinMaxQueue<int> queue = new MinMaxQueue<int>(DequeuePriority.FIFO);
+
+			foreach (int value in values)
+			{
+				queue.Enqueue(value);
+				Console.WriteLine($"Adding Value: {value}, Min: {queue.Minimum}, Max: {queue.Maximum}");
+			}
+	
+			Console.WriteLine();
+
+			while (queue.Count > 0)
+			{
+				Console.WriteLine($"Dequeue Value: {queue.Dequeue()}, Min: {queue.Minimum}, Max: {queue.Maximum}");
+			}
+
+
+			Console.WriteLine();
+			Console.WriteLine();
+			Console.WriteLine("As Stack:");
+			queue = new MinMaxQueue<int>(DequeuePriority.LIFO);
+
+			foreach (int value in values)
+			{
+				queue.Enqueue(value);
+				Console.WriteLine($"Adding Value: {value}, Min: {queue.Minimum}, Max: {queue.Maximum}");
+			}
+
+			Console.WriteLine();
+
+			while (queue.Count > 0)
+			{
+				Console.WriteLine($"Dequeue Value: {queue.Dequeue()}, Min: {queue.Minimum}, Max: {queue.Maximum}");
+			}
 		}
 
 		private static void TestBinarySearchTreeFromTraversal()
@@ -99,6 +325,7 @@ namespace TestApp
 					continue;
 				}
 
+				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
@@ -130,6 +357,7 @@ namespace TestApp
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 
+				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
@@ -173,6 +401,7 @@ namespace TestApp
 
 				tree.Print();
 
+				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
@@ -223,6 +452,7 @@ namespace TestApp
 					tree.Print();
 				}
 
+				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
@@ -255,6 +485,7 @@ namespace TestApp
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 
+				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
@@ -292,6 +523,7 @@ namespace TestApp
 
 				tree.Print();
 
+				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
@@ -324,6 +556,7 @@ namespace TestApp
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 
+				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
@@ -361,6 +594,7 @@ namespace TestApp
 
 				tree.Print();
 
+				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
@@ -402,24 +636,7 @@ namespace TestApp
 		private static string[] GetRandomStrings(int len = 0)
 		{
 			if (len < 1) len = RNGRandomHelper.Next(1, 12);
-
-			string[] values = new string[len];
-			StringBuilder sb = new StringBuilder();
-	
-			for (int i = 0; i < len; i++)
-			{
-				sb.Length = 0;
-				int n = RNGRandomHelper.Next(1, 20);
-		
-				for (int j = 0; j < n; j++)
-				{
-					sb.Append((char)RNGRandomHelper.Next(32, 126));
-				}
-		
-				values[i] = sb.ToString();
-			}
-	
-			return values;
+			return __stringGenerator.Value.Lorem.Words(len);
 		}
 	}
 }

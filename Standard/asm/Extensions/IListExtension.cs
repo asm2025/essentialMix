@@ -8,7 +8,6 @@ using asm.Collections;
 using JetBrains.Annotations;
 using asm.Comparers;
 using asm.Helpers;
-using asm.Patterns.Collections;
 
 namespace asm.Extensions
 {
@@ -521,8 +520,7 @@ namespace asm.Extensions
 		public static int BinarySearch<T>([NotNull] this IList<T> thisValue, T value, int index, int count, IComparer<T> comparer)
 		{
 			thisValue.Count.ValidateRange(index, ref count);
-			if (comparer == null)
-				comparer = Comparer<T>.Default;
+			comparer ??= Comparer<T>.Default;
 
 			int lo = index;
 			int hi = index + count - 1;
@@ -547,12 +545,9 @@ namespace asm.Extensions
 		public static void Sort<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
 		{
 			thisValue.Count.ValidateRange(index, ref count);
-			if (count < 2 || thisValue.Count < 2)
-				return;
-			if (comparer == null)
-				comparer = Comparer<T>.Default;
-			if (descending)
-				comparer = comparer.Reverse();
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
 
 			switch (thisValue)
 			{
@@ -593,8 +588,7 @@ namespace asm.Extensions
 		}
 
 		/// <summary>
-		/// Sorts the elements in the entire System.Collections.Generic.List{T} using
-		/// a projection.
+		/// Sorts the elements in the entire System.Collections.Generic.List{T} using a projection.
 		/// </summary>
 		/// <param name="thisValue">Data source</param>
 		/// <param name="selector">The projection to use to obtain values for comparison</param>
@@ -608,548 +602,250 @@ namespace asm.Extensions
 			Sort(thisValue, index, count, itemComparer, descending);
 		}
 
-		public static void Sort<T>([NotNull] this IList<T> thisValue, ListSortAlgorithm algorithm = ListSortAlgorithm.Default, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		public static void SortBubble<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
 		{
+			// Udemy - Data Structures and Algorithms Deep Dive Using Java
 			thisValue.Count.ValidateRange(index, ref count);
 			if (count < 2 || thisValue.Count < 2) return;
-			if (comparer == null) comparer = Comparer<T>.Default;
+			comparer ??= Comparer<T>.Default;
 			if (descending) comparer = comparer.Reverse();
-			
-			switch (algorithm)
-			{
-				case ListSortAlgorithm.Bubble:
-					BubbleSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Selection:
-					SelectionSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Insertion:
-					InsertionSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Heap:
-					HeapSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Merge:
-					MergeSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Quick:
-					QuickSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Shell:
-					ShellSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Comb:
-					CombSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Tim:
-					TimSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Cycle:
-					CycleSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Cocktail:
-					CocktailSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Bitonic:
-					BitonicSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Pancake:
-					PancakeSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Default:
-				case ListSortAlgorithm.Binary:
-					BinarySort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Gnome:
-					GnomeSort(thisValue, index, count, comparer);
-					break;
-				case ListSortAlgorithm.Brick:
-					BrickSort(thisValue, index, count, comparer);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null);
-			}
 
-			// todo O(?) best, worst
-			static void BubbleSort(IList<T> list, int x, int n, IComparer<T> c)
+			for (int lastUnsorted = count - 1; lastUnsorted > index; lastUnsorted--)
 			{
-				// https://www.researchgate.net/publication/2434273_A_Comparative_Study_Of_Linked_List_Sorting_Algorithms
-				// https://www.geeksforgeeks.org/bubble-sort/
-				// a stable optimized version.
-				// Best: O(n - 1), Worst: O(n ^ 2)
-				int hi = n - 1;
-		
-				// swapped is for detecting sorted arrays
-				for (int i = x, swapped = -1; (i == x || swapped > -1) && i < n - 1; i++, swapped = -1)
+				for (int i = index; i < lastUnsorted; i++)
 				{
-					for (int j = x; j < hi; j++)
-					{
-						if (c.IsLessThanOrEqual(list[j], list[j + 1])) continue;
-						list.FastSwap(j, j + 1);
-						swapped = j;
-					}
+					if (comparer.IsLessThanOrEqual(thisValue[i], thisValue[i + 1])) continue;
+					thisValue.FastSwap(i, i + 1);
+				}
+			}
+		}
 
-					if (swapped > -1) hi = swapped;
+		public static void SortSelection<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// Udemy - Data Structures and Algorithms Deep Dive Using Java
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			for (int lastUnsorted = count - 1; lastUnsorted > index; lastUnsorted--)
+			{
+				int largest = index;
+
+				for (int i = index + 1; i <= lastUnsorted; i++)
+				{
+					if (comparer.IsLessThanOrEqual(thisValue[i], thisValue[largest])) continue;
+					largest = i;
+				}
+
+				thisValue.FastSwap(largest, lastUnsorted);
+			}
+		}
+
+		public static void SortInsertion<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// Udemy - Data Structures and Algorithms Deep Dive Using Java
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			for (int firstUnsorted = index + 1; firstUnsorted < count; firstUnsorted++)
+			{
+				T value = thisValue[firstUnsorted];
+				int i;
+
+				for (i = firstUnsorted; i > 0 && comparer.IsGreaterThan(thisValue[i - 1], value); i--)
+				{
+					thisValue.FastSwap(i, i - 1);
+				}
+
+				thisValue[i] = value;
+			}
+		}
+
+		public static void SortShell<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// https://www.geeksforgeeks.org/shellsort/
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			// Start with a big gap, then reduce the gap 
+			for (int gap = count / 2; gap > 0; gap /= 2)
+			{
+				// Do a gaped insertion sort for this gap size. 
+				// The first gap elements a[0..gap-1] are already in gaped order 
+				// keep adding one more element until the entire array is gap sorted  
+				for (int i = gap; i < count; i++)
+				{
+					// add a[i] to the elements that have been gap sorted 
+					// save a[i] in temp and make a hole at position i 
+					T value = thisValue[index + i];
+
+					// shift earlier gap-sorted elements up until the correct  
+					// location for a[i] is found 
+					int j;
+
+					for (j = i; j >= gap && comparer.IsGreaterThan(thisValue[index + j - gap], value); j -= gap)
+						thisValue[index + j] = thisValue[index + j - gap];
+
+					// put temp (the original a[i]) in its correct location 
+					thisValue[index + j] = value;
+				}
+			}
+		}
+
+		public static void SortMerge<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// https://www.geeksforgeeks.org/in-place-merge-sort/
+			// https://www.geeksforgeeks.org/iterative-merge-sort/
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			/* Merge sub arrays in bottom up manner. First merge sub arrays
+			* of size 1 to create sorted sub arrays of size 2, then merge
+			* sub arrays of size 2 to create sorted sub arrays of size 4,
+			* and so on.
+			*/
+			// i = current size
+			for (int size = index + 1; size < count; size *= 2)
+			{
+				// Pick starting point of different sub arrays of current size
+				for (int left = index; left < count - 1; left += size * 2)
+				{
+					// Find ending point of left sub array.
+					int mid = Math.Min(left + size - 1, count - 1);
+					// mid + 1 is starting point of right.
+					int right = Math.Min(left + 2 * size - 1, count - 1);
+					// Merge sub arrays thisValue[i...m] and arr[m + 1...r] 
+					Merge(thisValue, left, mid, right, comparer);
 				}
 			}
 
-			static void SelectionSort(IList<T> list, int x, int n, IComparer<T> c)
+			static void Merge(IList<T> list, int l, int m, int r, IComparer<T> c)
 			{
-				// https://www.geeksforgeeks.org/selection-sort/
-				// an optimized version.
-				for (int i = x; i < n; i++)
+				// start of the second range
+				int l2 = Math.Min(m + 1, r);
+				if (c.IsLessThanOrEqual(list[m], list[l2])) return;
+
+				while (l <= m && l2 <= r)
 				{
-					int min_key = i;
-
-					for (int j = i + 1; j < n; j++)
+					if (c.IsLessThanOrEqual(list[l], list[l2]))
 					{
-						if (c.IsGreaterThanOrEqual(list[j], list[min_key])) continue;
-						min_key = j;
-					}
-			
-					if (min_key == i) continue;
-					list.FastSwap(min_key, i);
-				}
-			}
-
-			static void InsertionSort(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				// https://www.geeksforgeeks.org/insertion-sort/
-				for (int i = x + 1; i < n; i++)
-				{
-					int j = i - 1;
-
-					while (j >= 0 && c.IsGreaterThan(list[j], list[i]))
-					{
-						list.FastSwap(j + 1, j--);
-					}
-
-					list[j + 1] = list[i];
-				}
-			}
-
-			static void HeapSort(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				// https://www.geeksforgeeks.org/heap-sort/
-				// Build heap (rearrange array) 
-				for (int i = n / 2 - 1; i >= x; i--)
-					Heap_Heapify(list, i, n, c);
-
-				// One by one extract an element from heap 
-				for (int i = n - 1; i >= x; i--)
-				{
-					// Move current root to end 
-					list.FastSwap(x, i);
-					// call max heapify on the reduced heap 
-					Heap_Heapify(list, x, i, c);
-				}
-			}
-
-			static void MergeSort(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				// https://www.geeksforgeeks.org/iterative-merge-sort/
-				/* Merge sub arrays in bottom up manner. First merge sub arrays
-				 * of size 1 to create sorted sub arrays of size 2, then merge
-				 * sub arrays of size 2 to create sorted sub arrays of size 4,
-				 * and so on.
-				 */
-				// i = current size
-				for (int i = x + 1; i < n; i *= 2)
-				{
-					// Pick starting point of different sub arrays of current size
-					for (int j = x; j < n - 1; j += i * 2)
-					{
-						// Find ending point of left sub array.
-						int m = j + i - 1;
-						// m + 1 is starting point of right.
-						int r = Math.Min(j + 2 * i - 1, n - 1);
-						// Merge sub arrays list[i...m] and arr[m + 1...r] 
-						Merge_Merge(list, j, m, r, c);
-					}
-				}
-			}
-
-			static void QuickSort(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				// https://www.geeksforgeeks.org/iterative-quick-sort/
-				if (n > list.Count - 1)
-					n = list.Count - 1;
-
-				// Create an auxiliary stack 
-				int[] stack = new int[n - x + 1];
-
-				// initialize top of stack 
-				int top = -1;
-
-				// push initial values of l and h to stack 
-				stack[++top] = x;
-				stack[++top] = n;
-
-				// Keep popping from stack while is not empty 
-				while (top >= 0)
-				{
-					// Pop h and l 
-					n = stack[top--];
-					x = stack[top--];
-
-					// Set pivot element at its 
-					// correct position in 
-					// sorted array 
-					int p = Quick_Partition(list, x, n, c);
-
-					// If there are elements on 
-					// left side of pivot, then 
-					// push left side to stack 
-					if (p - 1 > x)
-					{
-						stack[++top] = x;
-						stack[++top] = p - 1;
-					}
-
-					if (p + 1 >= n) continue;
-					// If there are elements on 
-					// right side of pivot, then 
-					// push right side to stack 
-					stack[++top] = p + 1;
-					stack[++top] = n;
-				}
-			}
-
-			static void ShellSort(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				// https://www.geeksforgeeks.org/shellsort/
-				// Start with a big gap, then reduce the gap 
-				for (int gap = n / 2; gap > 0; gap /= 2)
-				{
-					// Do a gaped insertion sort for this gap size. 
-					// The first gap elements a[0..gap-1] are already in gaped order 
-					// keep adding one more element until the entire array is gap sorted  
-					for (int i = gap; i < n; i += 1)
-					{
-						// add a[i] to the elements that have been gap sorted 
-						// save a[i] in temp and make a hole at position i 
-						T temp = list[x + i];
-
-						// shift earlier gap-sorted elements up until the correct  
-						// location for a[i] is found 
-						int j;
-
-						for (j = i; j >= gap && c.IsGreaterThan(list[x + j - gap], temp); j -= gap)
-							list[x + j] = list[x + j - gap];
-
-						// put temp (the original a[i]) in its correct location 
-						list[x + j] = temp;
-					}
-				}
-			}
-
-			static void CombSort(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				// https://www.geeksforgeeks.org/comb-sort/
-				// Initialize gap 
-				int gap = n;
-				// Initialize swapped as true to make sure the loop runs 
-				bool swapped = true;
-
-				// Keep running while gap is more than 1 and last 
-				// iteration caused a swap 
-				while (gap != 1 || swapped)
-				{
-					// Find next gap 
-					gap = Comb_GetNextGap(gap);
-					// Initialize swapped as false so that we can check if swap happened
-					swapped = false;
-
-					// Compare all elements with current gap 
-					for (int i = x; i < n - gap; i++)
-					{
-						if (c.IsLessThanOrEqual(list[i], list[i + gap])) continue;
-						list.FastSwap(i, i + gap);
-						swapped = true;
-					}
-				}
-			}
-
-			static void TimSort(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				// https://www.geeksforgeeks.org/timsort/
-				/*
-				* This algorithm is based on InsertionSort and MergeSort.
-				* It will sort individual sub arrays of size TIM using InsertionSort,
-				* then will use MergeSort to form size 64, then 128, 256 and so on.
-				*/
-				const int TIM = 32;
-
-				// Sort individual sub arrays of size TIM  
-				for (int i = x; i < n; i += TIM)
-					InsertionSort(list, i, Math.Min(i + TIM, n), c);
-
-				// start merging from size TIM, and multiplications
-				for (int i = TIM; i < n; i *= 2)
-				{
-					/*
-					* Pick starting point of left sub array.
-					* Merging list[left..left + size] and list[left + size, left + 2 * size]
-					*/
-					for (int j = x; j < n; j++)
-					{
-						// find ending point of left sub array  
-						// mid+1 is starting point of right sub array  
-						int mid = i + j - 1;
-						int right = Math.Min(i + 2 * j, n);
-
-						// merge sub array arr[left.....mid] &  
-						// arr[mid+1....right]  
-						Merge_Merge(list, i, mid, right - 1, c);
-					}
-				}
-			}
-
-			static void CycleSort(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				// https://www.geeksforgeeks.org/cycle-sort/
-				// traverse array elements
-				for (int i = x; i < n - 2; i++)
-				{
-					// Find position where we put the item.  
-					// We basically count all smaller elements  
-					// on right side of item. 
-					int pos = i;
-
-					for (int j = i + 1; j < n; j++)
-					{
-						if (c.IsGreaterThanOrEqual(list[j], list[i]))
-							continue;
-						pos++;
-					}
-
-					// If item is already in correct position 
-					if (pos == i)
-						continue;
-
-					// ignore all duplicate elements 
-					while (c.IsEqual(list[i], list[pos]))
-						pos++;
-
-					// put the item to it's right position 
-					if (pos != i) list.FastSwap(i, pos);
-
-					// Rotate rest of the cycle 
-					while (pos != i)
-					{
-						pos = i;
-
-						// Find position where we put the element 
-						for (int j = i + 1; j < n; j++)
-						{
-							if (c.IsGreaterThanOrEqual(list[j], list[i])) continue;
-							pos++;
-						}
-
-						// ignore all duplicate elements 
-						while (c.IsEqual(list[i], list[pos]))
-							pos++;
-
-						if (c.IsEqual(list[i], list[pos])) continue;
-						// put the item to it's right position 
-						list.FastSwap(i, pos);
-					}
-				}
-			}
-
-			static void CocktailSort(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				// https://www.geeksforgeeks.org/cocktail-sort/
-				bool swapped;
-
-				do
-				{
-					// reset the swapped flag
-					swapped = false;
-
-					for (int i = x; i < n - 1; ++i)
-					{
-						if (c.IsLessThanOrEqual(list[i], list[i + 1])) continue;
-						list.FastSwap(i, i + 1);
-						swapped = true;
-					}
-
-					// if nothing moved, then array is sorted.
-					if (!swapped) break;
-					// otherwise, reset the swapped flag
-					swapped = false;
-					// move the end point back by one,
-					n--;
-
-					// same comparison but backwards
-					for (int i = n - 1; i >= x; i--)
-					{
-						if (c.IsLessThanOrEqual(list[i], list[i + 1])) continue;
-						list.FastSwap(i, i + 1);
-						swapped = true;
-					}
-
-					// increase the starting point
-					x++;
-				}
-				while (swapped);
-			}
-
-			static void BitonicSort(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				// https://www.geeksforgeeks.org/bitonic-sort/
-				if (n - x < 2) return;
-
-				int k = n / 2;
-
-				// sort in given order
-				BitonicSort(list, x, k, c);
-
-				// sort in reverse order
-				BitonicSort(list, x + k, k, c.Reverse());
-
-				// Will merge whole sequence in ascending order  
-				Bitonic_Merge(list, x, n, c);
-			}
-
-			static void PancakeSort(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				// https://www.geeksforgeeks.org/pancake-sorting/
-				for (int i = n; i > x; i--)
-				{
-					int mi = 0;
-
-					for (int j = x; j < i; j++)
-					{
-						if (c.IsGreaterThan(list[j], list[mi]))
-							mi = j;
-					}
-
-					if (mi == i - 1) continue;
-
-					if (mi > 0)
-					{
-						mi++;
-
-						for (int j = x; j < --mi; j++)
-						{
-							list.FastSwap(j, mi);
-						}
-					}
-
-					// flip
-					int m = i;
-
-					for (int j = x; j < --m; j++)
-					{
-						list.FastSwap(j, m);
-					}
-				}
-			}
-
-			static void BinarySort(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				// https://stackoverflow.com/questions/26454911/how-does-binary-insertion-sort-work
-				for (int i = x + 1; i < n; i++)
-				{
-					T item = list[i];
-
-					// Find location to insert using binary search
-					int lo = x;
-					int hi = i - 1;
-
-					// this works a little different than the normal binary search
-					// It's the same basic general idea but the start and end values are different
-					// So we can't use Array.BinarySearch or IListExtension.BinarySearch
-					while (lo <= hi)
-					{
-						// Same as (l + r) / 2, but avoids overflow
-						int mid = lo + (hi - lo) / 2;
-
-						if (c.IsLessThan(item, list[mid]))
-							hi = mid - 1;
-						else
-							lo = mid + 1;
-					}
-
-					// Shifting array to one location right
-					for (int j = i - 1; j >= lo; j--)
-					{
-						list[j + 1] = list[j];
-					}
-
-					// Placing element at its correct location 
-					list[lo] = item;
-				}
-			}
-
-			static void GnomeSort(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				// https://www.geeksforgeeks.org/gnome-sort-a-stupid-one/
-				int i = x + 1;
-
-				while (i < n)
-				{
-					if (i <= x || c.IsGreaterThanOrEqual(list[i], list[i - 1]))
-					{
-						i++;
+						l++;
 						continue;
 					}
+					
+					T value = list[l2];
 
-					list.FastSwap(i, --i);
+					// Shift all the elements between element 1 and element 2 to the right by 1.
+					for (int i = l2; i > l; i--)
+					{
+						list[i] = list[i - 1];
+					}
+
+					list[l] = value;
+					// Update all the pointers
+					l++;
+					l2++;
+					m++;
 				}
 			}
+		}
 
-			static void BrickSort(IList<T> list, int x, int n, IComparer<T> c)
+		public static void SortHeap<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// https://www.geeksforgeeks.org/heap-sort/
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			// Build heap (rearrange array) 
+			for (int i = count / 2 - 1; i >= index; i--)
+				Heapify(thisValue, i, count, comparer);
+
+			// One by one extract an element from heap 
+			for (int i = count - 1; i >= index; i--)
 			{
-				// https://www.geeksforgeeks.org/odd-even-sort-brick-sort/
-				bool isSorted = false;
-
-				while (!isSorted)
-				{
-					isSorted = true;
-
-					// Perform Bubble sort on odd indexed element 
-					for (int i = x + 1; i <= n - 2; i += 2) 
-					{ 
-						if (c.IsLessThanOrEqual(list[i], list[i + 1])) continue;
-						list.FastSwap(i, i + 1);
-						isSorted = false;
-					} 
-  
-					// Perform Bubble sort on even indexed element 
-					for (int i = x; i <= n - 2; i += 2) 
-					{ 
-						if (c.IsLessThanOrEqual(list[i], list[i + 1])) continue;
-						list.FastSwap(i, i + 1);
-						isSorted = false;
-					} 
-				}
+				// Move current root to end 
+				thisValue.FastSwap(index, i);
+				// call max heapify on the reduced heap 
+				Heapify(thisValue, index, i, comparer);
 			}
 
-			// Helper functions
-			static void Heap_Heapify(IList<T> list, int x, int n, IComparer<T> c)
+			static void Heapify(IList<T> list, int x, int n, IComparer<T> c)
 			{
 				int largest = x; // Initialize largest as root 
-				int l = 2 * x + 1; // left = 2 * x + 1 
-				int r = 2 * x + 2; // right = 2 * x + 2 
+				int l = 2 * x + 1; // left = 2 * index + 1 
+				int r = 2 * x + 2; // right = 2 * index + 2 
 
 				// If left child is larger than root 
-				if (l < n && c.IsGreaterThan(list[l], list[largest]))
-					largest = l;
+				if (l < n && c.IsGreaterThan(list[l], list[largest])) largest = l;
 				// If right child is larger than largest so far 
-				if (r < n && c.IsGreaterThan(list[r], list[largest]))
-					largest = r;
-				if (largest == x)
-					return;
+				if (r < n && c.IsGreaterThan(list[r], list[largest])) largest = r;
+				if (largest == x) return;
 
 				// If largest is not root 
 				list.FastSwap(x, largest);
 				// Recursively heapify the affected sub-tree 
-				Heap_Heapify(list, largest, n, c);
+				Heapify(list, largest, n, c);
+			}
+		}
+
+		public static void SortQuick<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// https://www.geeksforgeeks.org/iterative-quick-sort/
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			if (count > thisValue.Count - 1) count = thisValue.Count - 1;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			// Create an auxiliary stack 
+			int[] stack = new int[count - index + 1];
+
+			// initialize top of stack 
+			int top = -1;
+
+			// push initial values of l and h to stack 
+			stack[++top] = index;
+			stack[++top] = count;
+
+			// Keep popping from stack while is not empty 
+			while (top >= 0)
+			{
+				// Pop h and l 
+				count = stack[top--];
+				index = stack[top--];
+
+				// Set pivot element at its 
+				// correct position in 
+				// sorted array 
+				int p = Partition(thisValue, index, count, comparer);
+
+				// If there are elements on 
+				// left side of pivot, then 
+				// push left side to stack 
+				if (p - 1 > index)
+				{
+					stack[++top] = index;
+					stack[++top] = p - 1;
+				}
+
+				if (p + 1 >= count) continue;
+				// If there are elements on 
+				// right side of pivot, then 
+				// push right side to stack 
+				stack[++top] = p + 1;
+				stack[++top] = count;
 			}
 
-			static int Quick_Partition(IList<T> list, int lo, int hi, IComparer<T> c)
+			static int Partition(IList<T> list, int lo, int hi, IComparer<T> c)
 			{
 				T pivot = list[hi];
 				// index of smaller element 
@@ -1157,26 +853,105 @@ namespace asm.Extensions
 
 				for (int j = lo; j < hi; j++)
 				{
-					if (c.IsGreaterThanOrEqual(list[j], pivot))
-						continue;
+					if (c.IsGreaterThanOrEqual(list[j], pivot)) continue;
 					// If current element is smaller than the pivot 
 					i++;
-					// swap list[i] and list[j] 
+					// swap thisValue[i] and thisValue[j] 
 					list.FastSwap(i, j);
 				}
 
-				// swap list[i + 1] and list[hi] (or pivot) 
+				// swap thisValue[i + 1] and thisValue[hi] (or pivot) 
 				list.FastSwap(i + 1, hi);
 				return i + 1;
 			}
+		}
 
-			static void Merge_Merge(IList<T> list, int l, int m, int r, IComparer<T> c)
+		public static void SortComb<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// https://www.geeksforgeeks.org/comb-sort/
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+			// Initialize gap 
+			int gap = count;
+			// Initialize swapped as true to make sure the loop runs 
+			bool swapped = true;
+
+			// Keep running while gap is more than 1 and last 
+			// iteration caused a swap 
+			while (gap != 1 || swapped)
+			{
+				// Find next gap 
+				gap = GetNextGap(gap);
+				// Initialize swapped as false so that we can check if swap happened
+				swapped = false;
+
+				// Compare all elements with current gap 
+				for (int i = index; i < count - gap; i++)
+				{
+					if (comparer.IsLessThanOrEqual(thisValue[i], thisValue[i + gap])) continue;
+					thisValue.FastSwap(i, i + gap);
+					swapped = true;
+				}
+			}
+
+			static int GetNextGap(int gap)
+			{
+				// Shrink gap by Shrink factor 
+				gap = gap * 10 / 13;
+				return gap < 1
+							? 1
+							: gap;
+			}
+		}
+
+		public static void SortTim<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			const int TIM = 32;
+
+			// https://www.geeksforgeeks.org/timsort/
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			/*
+			* This algorithm is based on InsertionSort and MergeSort.
+			* It will sort individual sub arrays of size TIM using InsertionSort,
+			* then will use MergeSort to form size 64, then 128, 256 and so on.
+			*/
+			// Sort individual sub arrays of size TIM  
+			for (int i = index; i < count; i += TIM)
+				SortInsertion(thisValue, i, Math.Min(i + TIM, count), comparer);
+
+			// start merging from size TIM, and multiplications
+			for (int i = TIM; i < count; i *= 2)
+			{
+				/*
+				* Pick starting point of left sub array.
+				* Merging thisValue[left..left + size] and thisValue[left + size, left + 2 * size]
+				*/
+				for (int j = index; j < count; j++)
+				{
+					// find ending point of left sub array  
+					// mid+1 is starting point of right sub array  
+					int mid = i + j - 1;
+					int right = Math.Min(i + 2 * j, count);
+
+					// merge sub array arr[left.....mid] &  
+					// arr[mid+1....right]  
+					Merge(thisValue, i, mid, right - 1, comparer);
+				}
+			}
+
+			static void Merge(IList<T> list, int l, int m, int r, IComparer<T> c)
 			{
 				// https://www.geeksforgeeks.org/in-place-merge-sort/
 				/*
-				 * l = start of the first range, l2 is the 2nd pointer to maintain the start
-				 * of the 2nd range (array in the original implementation).
-				 */
+				* l = start of the first range, l2 is the 2nd pointer to maintain the start
+				* of the 2nd range (array in the original implementation).
+				*/
 				int l2 = m + 1;
 				// if the direct merge is already sorted
 				if (c.IsLessThanOrEqual(list[m], list[l2])) return;
@@ -1205,30 +980,235 @@ namespace asm.Extensions
 					m++;
 				}
 			}
+		}
 
-			static int Comb_GetNextGap(int gap)
+		public static void SortCocktail<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// https://www.geeksforgeeks.org/cocktail-sort/
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			bool swapped;
+
+			do
 			{
-				// Shrink gap by Shrink factor 
-				gap *= 10 / 13;
-				return gap < 1
-							? 1
-							: gap;
+				// reset the swapped flag
+				swapped = false;
+
+				for (int i = index; i < count - 1; ++i)
+				{
+					if (comparer.IsLessThanOrEqual(thisValue[i], thisValue[i + 1])) continue;
+					thisValue.FastSwap(i, i + 1);
+					swapped = true;
+				}
+
+				// if nothing moved, then array is sorted.
+				if (!swapped) break;
+				// otherwise, reset the swapped flag
+				swapped = false;
+				// move the end point back by one,
+				count--;
+
+				// same comparison but backwards
+				for (int i = count - 1; i >= index; i--)
+				{
+					if (comparer.IsLessThanOrEqual(thisValue[i], thisValue[i + 1])) continue;
+					thisValue.FastSwap(i, i + 1);
+					swapped = true;
+				}
+
+				// increase the starting point
+				index++;
 			}
+			while (swapped);
+		}
 
-			static void Bitonic_Merge(IList<T> list, int x, int n, IComparer<T> c)
+		public static void SortBitonic<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// https://www.geeksforgeeks.org/bitonic-sort/
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			if (count - index < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			// sort in given order
+			Sort(thisValue, index, count, comparer, descending ? -1 : 1);
+
+			static void Sort(IList<T> list, int x, int n, IComparer<T> c, int dir)
 			{
-				if (n - x < 2) return;
+				if (n < 2) return;
+
+				int mid = n / 2;
+
+				// sort in given order
+				Sort(list, x, mid, c, 1 /* ascending */);
+				// sort in reverse order
+				Sort(list, x + mid, mid, c, -1 /* descending */);
+				// merge whole sequence in given order  
+				Merge(list, x, n, c, dir);
+			}
+			
+			static void Merge(IList<T> list, int x, int n, IComparer<T> c, int dir)
+			{
+				if (n < 2) return;
 
 				int k = n / 2;
 
 				for (int i = x; i < x + k; i++)
 				{
-					if (c.IsGreaterThan(list[i], list[i + k])) continue;
+					if (c.Compare(list[i], list[i + k]) != dir) continue;
 					list.FastSwap(i, i + k);
 				}
 
-				Bitonic_Merge(list, x, k, c);
-				Bitonic_Merge(list, x + k, k, c);
+				Merge(list, x, k, c, dir);
+				Merge(list, x + k, k, c, dir);
+			}
+		}
+
+		public static void SortPancake<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// https://www.geeksforgeeks.org/pancake-sorting/
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			for (int i = count; i > index; i--)
+			{
+				int mi = 0;
+
+				for (int j = index; j < i; j++)
+				{
+					if (comparer.IsGreaterThan(thisValue[j], thisValue[mi]))
+						mi = j;
+				}
+
+				if (mi == i - 1) continue;
+
+				if (mi > 0)
+				{
+					mi++;
+
+					for (int j = index; j < --mi; j++)
+					{
+						thisValue.FastSwap(j, mi);
+					}
+				}
+
+				// flip
+				int m = i;
+
+				for (int j = index; j < --m; j++)
+				{
+					thisValue.FastSwap(j, m);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Fastest and most efficient sort algorithm of all
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="thisValue"></param>
+		/// <param name="index"></param>
+		/// <param name="count"></param>
+		/// <param name="comparer"></param>
+		/// <param name="descending"></param>
+		public static void SortBinary<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// https://stackoverflow.com/questions/26454911/how-does-binary-insertion-sort-work
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			for (int i = index + 1; i < count; i++)
+			{
+				T value = thisValue[i];
+
+				// Find location to insert using binary search
+				int lo = index;
+				int hi = i - 1;
+
+				// this works a little different than the normal binary search
+				// It's the same basic general idea but the start and end values are different
+				// So we can't use Array.BinarySearch or IListExtension.BinarySearch
+				while (lo <= hi)
+				{
+					// Same as (l + r) / 2, but avoids overflow
+					int mid = lo + (hi - lo) / 2;
+
+					if (comparer.IsLessThan(value, thisValue[mid]))
+						hi = mid - 1;
+					else
+						lo = mid + 1;
+				}
+
+				// Shifting array to one location right
+				for (int j = i - 1; j >= lo; j--)
+				{
+					thisValue[j + 1] = thisValue[j];
+				}
+
+				// Placing element at its correct location 
+				thisValue[lo] = value;
+			}
+		}
+
+		public static void SortGnome<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// https://www.geeksforgeeks.org/gnome-sort-a-stupid-one/
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			int i = index + 1;
+
+			while (i < count)
+			{
+				if (i <= index || comparer.IsGreaterThanOrEqual(thisValue[i], thisValue[i - 1]))
+				{
+					i++;
+					continue;
+				}
+
+				thisValue.FastSwap(i, --i);
+			}
+		}
+
+		public static void SortBrick<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// https://www.geeksforgeeks.org/odd-even-sort-brick-sort/
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			bool isSorted = false;
+
+			while (!isSorted)
+			{
+				isSorted = true;
+
+				// Perform Bubble sort on odd indexed element 
+				for (int i = index + 1; i <= count - 2; i += 2) 
+				{ 
+					if (comparer.IsLessThanOrEqual(thisValue[i], thisValue[i + 1])) continue;
+					thisValue.FastSwap(i, i + 1);
+					isSorted = false;
+				} 
+
+				// Perform Bubble sort on even indexed element 
+				for (int i = index; i <= count - 2; i += 2) 
+				{ 
+					if (comparer.IsLessThanOrEqual(thisValue[i], thisValue[i + 1])) continue;
+					thisValue.FastSwap(i, i + 1);
+					isSorted = false;
+				} 
 			}
 		}
 
