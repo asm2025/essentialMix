@@ -9,7 +9,7 @@ namespace asm.Collections
 {
 	/// <summary>
 	/// <inheritdoc />
-	/// <para>AVLTree implementation.</para>
+	/// <para><see href="https://en.wikipedia.org/wiki/AVL_tree">AVLTree</see> implementation.</para>
 	/// </summary>
 	[Serializable]
 	public sealed class AVLTree<T> : BinarySearchTree<T>
@@ -60,8 +60,9 @@ namespace asm.Collections
 			if (Root == null)
 			{
 				// no parent means there is no root currently
-				Root = new Node(value);
+				Root = NewNode(value);
 				Count++;
+				SetHeight(Root);
 				_version++;
 				return;
 			}
@@ -82,7 +83,7 @@ namespace asm.Collections
 			// duplicate values can make life miserable for us here because it will never be balanced!
 			if (Comparer.IsEqual(value, parent.Value)) throw new DuplicateKeyException();
 
-			Node node = new Node(value);
+			Node node = NewNode(value);
 
 			if (Comparer.IsLessThan(value, parent.Value)) parent.Left = node;
 			else parent.Right = node;
@@ -133,7 +134,7 @@ namespace asm.Collections
 			else
 			{
 				// find the right child's left most child
-				Node leftmost = node.Right.Minimum();
+				Node leftmost = node.Right.LeftMost();
 				// move the left-most right to the parent's left
 				leftMostParent = leftmost.Parent;
 				leftMostParent.Left = leftmost.Right;

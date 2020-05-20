@@ -12,7 +12,7 @@ namespace asm.Collections
 {
 	/// <summary>
 	/// <inheritdoc />
-	/// <para>Red-Black tree implementation using the linked representation.</para>
+	/// <para><see href="https://en.wikipedia.org/wiki/Red%E2%80%93black_tree">RedBlackTree (RBT)</see> implementation using the linked representation.</para>
 	/// </summary>
 	/// <typeparam name="T">The element type of the tree</typeparam>
 	[Serializable]
@@ -94,6 +94,18 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public override bool AutoBalance { get; } = true;
 
+		/// <inheritdoc />
+		public override Node NewNode(T value) { return new Node(value); }
+
+		/// <inheritdoc />
+		public override int GetHeight()
+		{
+			if (Root == null || Root.IsLeaf) return 0;
+			int height = 0;
+			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e => height += 1 + Math.Max(e.Left == null ? -1 : 1, e.Right == null ? -1 : 1));
+			return height;
+		}
+
 		public override Node FindNearestLeaf(T value)
 		{
 			Node parent = null, next = Root;
@@ -121,10 +133,8 @@ namespace asm.Collections
 			if (parent == null)
 			{
 				// no parent means there is no root currently
-				Root = new Node(value)
-				{
-					Color = false
-				};
+				Root = NewNode(value);
+				Root.Color = false;
 				Count++;
 				_version++;
 				return;
@@ -133,7 +143,7 @@ namespace asm.Collections
 			// duplicate values can make life miserable for us here because it will never be balanced!
 			if (Comparer.IsEqual(value, parent.Value)) throw new DuplicateKeyException();
 
-			Node node = new Node(value);
+			Node node = NewNode(value);
 
 			if (Comparer.IsLessThan(value, parent.Value)) parent.Left = node;
 			else parent.Right = node;
@@ -152,7 +162,7 @@ namespace asm.Collections
 			// case 1: node has both left and right children
 			while (node.IsNode)
 			{
-				newNode = node.Right.Minimum();
+				newNode = node.Right.LeftMost();
 				newNode.Swap(node);
 				node = newNode;
 			}
@@ -209,6 +219,22 @@ namespace asm.Collections
 			return true;
 		}
 
+		/// <inheritdoc />
+		public override T Minimum()
+		{
+			return Root == null
+						? default(T)
+						: Root.LeftMost().Value;
+		}
+
+		/// <inheritdoc />
+		public override T Maximum()
+		{
+			return Root == null
+						? default(T)
+						: Root.RightMost().Value;
+		}
+
 		/// <summary>
 		/// Validates the node and its children.
 		/// </summary>
@@ -223,14 +249,18 @@ namespace asm.Collections
 			{
 				if (e.IsLeft)
 				{
-					if (Comparer.IsGreaterThanOrEqual(e.Value, e.Parent.Value)) isValid = false;
-					if (isValid && e.Parent.IsRight && Comparer.IsLessThan(e.Value, e.Parent.Parent.Value)) isValid = false;
+					if (Comparer.IsGreaterThanOrEqual(e.Value, e.Parent.Value))
+						isValid = false;
+					else if (e.Parent.IsRight && Comparer.IsLessThan(e.Value, e.Parent.Parent.Value)) 
+						isValid = false;
 				}
 
 				if (isValid && e.IsRight)
 				{
-					if (Comparer.IsLessThan(e.Value, e.Parent.Value)) isValid = false;
-					if (isValid && e.Parent.IsLeft && Comparer.IsGreaterThanOrEqual(e.Value, e.Parent.Parent.Value)) isValid = false;
+					if (Comparer.IsLessThan(e.Value, e.Parent.Value)) 
+						isValid = false;
+					else if (isValid && e.Parent.IsLeft && Comparer.IsGreaterThanOrEqual(e.Value, e.Parent.Parent.Value)) 
+						isValid = false;
 				}
 
 				return isValid;
@@ -284,6 +314,62 @@ namespace asm.Collections
 				if (IsBalanced(node)) continue;
 				Balance(node);
 			}
+		}
+
+		/// <inheritdoc />
+		public override void FromLevelOrder(IEnumerable<T> collection)
+		{
+			base.FromLevelOrder(collection);
+			if (Root == null) return;
+			Balance();
+		}
+
+		/// <inheritdoc />
+		public override void FromPreOrder(IEnumerable<T> collection)
+		{
+			base.FromPreOrder(collection);
+			if (Root == null) return;
+			Balance();
+		}
+
+		/// <inheritdoc />
+		public override void FromInOrder(IEnumerable<T> collection)
+		{
+			base.FromInOrder(collection);
+			if (Root == null) return;
+			Balance();
+		}
+
+		/// <inheritdoc />
+		public override void FromPostOrder(IEnumerable<T> collection)
+		{
+			base.FromPostOrder(collection);
+			if (Root == null) return;
+			Balance();
+		}
+
+		/// <inheritdoc />
+		public override void FromInOrderAndLevelOrder(IEnumerable<T> inOrderCollection, IEnumerable<T> levelOrderCollection)
+		{
+			base.FromInOrderAndLevelOrder(inOrderCollection, levelOrderCollection);
+			if (Root == null) return;
+			Balance();
+		}
+
+		/// <inheritdoc />
+		public override void FromInOrderAndPreOrder(IEnumerable<T> inOrderCollection, IEnumerable<T> preOrderCollection)
+		{
+			base.FromInOrderAndPreOrder(inOrderCollection, preOrderCollection);
+			if (Root == null) return;
+			Balance();
+		}
+
+		/// <inheritdoc />
+		public override void FromInOrderAndPostOrder(IEnumerable<T> inOrderCollection, IEnumerable<T> postOrderCollection)
+		{
+			base.FromInOrderAndPostOrder(inOrderCollection, postOrderCollection);
+			if (Root == null) return;
+			Balance();
 		}
 
 		private void Balance(Node node)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using asm.Collections;
@@ -23,12 +24,12 @@ namespace TestApp
 		{
 			Console.OutputEncoding = Encoding.UTF8;
 
-			TestSortAlgorithms();
+			//TestSortAlgorithms();
 
 			//TestLinkedQueue();
 			//TestMinMaxQueue();
 
-			//TestBinarySearchTreeFromTraversal();
+			//TestBinaryTreeFromTraversal();
 			
 			//TestBinarySearchTreeAdd();
 			//TestBinarySearchTreeRemove();
@@ -40,13 +41,17 @@ namespace TestApp
 			//TestRedBlackTreeAdd();
 			//TestRedBlackTreeRemove();
 
+			TestAllBinaryTrees();
+
 			ConsoleHelper.Pause();
 		}
 
 		private static void TestSortAlgorithms()
 		{
-			const int TRIES = 10;
+			const int TRIES = 100;
 			const int RESULT_COUNT = 5;
+
+			TestTitle("Testing Sort Algorithms...");
 
 			string[] sortAlgorithms = 
 			{
@@ -183,6 +188,8 @@ namespace TestApp
 
 		private static void TestLinkedQueue()
 		{
+			TestTitle("Testing LinkedQueue...");
+			
 			int len = RNGRandomHelper.Next(5, 20);
 			int[] values = GetRandomIntegers(len);
 			Console.WriteLine("Array: " + string.Join(", ", values));
@@ -216,6 +223,8 @@ namespace TestApp
 
 		private static void TestMinMaxQueue()
 		{
+			TestTitle("Testing MinMaxQueue...");
+
 			int len = RNGRandomHelper.Next(5, 20);
 			int[] values = GetRandomIntegers(len);
 			Console.WriteLine("Array: " + string.Join(", ", values));
@@ -256,13 +265,15 @@ namespace TestApp
 			}
 		}
 
-		private static void TestBinarySearchTreeFromTraversal()
+		private static void TestBinaryTreeFromTraversal()
 		{
 			const string TREE_DATA_LEVEL = "FCIADGJBEHK";
 			const string TREE_DATA_PRE = "FCABDEIGHJK";
 			const string TREE_DATA_IN = "ABCDEFGHIJK";
 			const string TREE_DATA_POST = "BAEDCHGKJIF";
 			const int NUM_TESTS = 7;
+
+			TestTitle("Testing BinaryTree from traversal values...");
 
 			BinarySearchTree<char> tree = new BinarySearchTree<char>();
 
@@ -317,6 +328,7 @@ namespace TestApp
 				}
 
 				tree.Print();
+				tree.Print(Orientation.Horizontal);
 				i++;
 
 				if (i >= NUM_TESTS)
@@ -335,6 +347,8 @@ namespace TestApp
 
 		private static void TestBinarySearchTreeAdd()
 		{
+			TestTitle("Testing BinarySearchTree.Add()...");
+
 			bool more;
 
 			do
@@ -356,6 +370,7 @@ namespace TestApp
 
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
+				tree.Print(Orientation.Horizontal);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -367,6 +382,8 @@ namespace TestApp
 
 		private static void TestBinarySearchTreeRemove()
 		{
+			TestTitle("Testing BinarySearchTree.Remove()...");
+
 			bool more;
 
 			do
@@ -388,6 +405,7 @@ namespace TestApp
 
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
+				tree.Print(Orientation.Horizontal);
 
 				Console.WriteLine("Test removing...".BrightRed());
 				int value = values.PickRandom();
@@ -411,6 +429,8 @@ namespace TestApp
 
 		private static void TestBinarySearchTreeBalance()
 		{
+			TestTitle("Testing BinarySearchTree.Balance()...");
+
 			bool more;
 
 			do
@@ -432,6 +452,7 @@ namespace TestApp
 
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
+				tree.Print(Orientation.Horizontal);
 
 				Console.WriteLine("Test removing...".BrightRed());
 				int value = values.PickRandom();
@@ -462,6 +483,8 @@ namespace TestApp
 
 		private static void TestAVLTreeAdd()
 		{
+			TestTitle("Testing AVLTree.Add()...");
+
 			bool more;
 
 			do
@@ -479,11 +502,12 @@ namespace TestApp
 				foreach (int v in values)
 				{
 					tree.Add(v);
-					tree.Print();
+					//tree.Print();
 				}
 
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
+				tree.Print(Orientation.Horizontal);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -495,6 +519,8 @@ namespace TestApp
 
 		private static void TestAVLTreeRemove()
 		{
+			TestTitle("Testing AVLTree.Remove()...");
+
 			bool more;
 
 			do
@@ -510,6 +536,7 @@ namespace TestApp
 				AVLTree<int> tree = new AVLTree<int>(values);
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
+				tree.Print(Orientation.Horizontal);
 
 				Console.WriteLine("Test removing...".BrightRed());
 				int value = values.PickRandom();
@@ -533,6 +560,8 @@ namespace TestApp
 
 		private static void TestRedBlackTreeAdd()
 		{
+			TestTitle("Testing RedBlackTree.Add()...");
+
 			bool more;
 
 			do
@@ -550,11 +579,12 @@ namespace TestApp
 				foreach (int v in values)
 				{
 					tree.Add(v);
-					tree.Print();
+					//tree.Print();
 				}
 
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
+				tree.Print(Orientation.Horizontal);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -566,6 +596,8 @@ namespace TestApp
 
 		private static void TestRedBlackTreeRemove()
 		{
+			TestTitle("Testing RedBlackTree.Remove()...");
+
 			bool more;
 
 			do
@@ -581,6 +613,7 @@ namespace TestApp
 				RedBlackTree<int> tree = new RedBlackTree<int>(values);
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
+				tree.Print(Orientation.Horizontal);
 
 				Console.WriteLine("Test removing...".BrightRed());
 				int value = values.PickRandom();
@@ -600,6 +633,74 @@ namespace TestApp
 				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
 			}
 			while (more);
+		}
+
+		private static void TestAllBinaryTrees()
+		{
+			TestTitle("Testing all BinaryTrees...");
+
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Console.WriteLine();
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				LinkedBinaryTree<int> tree = new BinarySearchTree<int>();
+				DoTheTest(tree, values);
+
+				tree = new AVLTree<int>();
+				DoTheTest(tree, values);
+
+				RedBlackTree<int> rbTree = new RedBlackTree<int>();
+				DoTheTest(rbTree, values);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+			}
+			while (more);
+
+			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, int[] array)
+				where TNode : LinkedBinaryTree<TNode, int>.NodeBase
+			{
+				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
+				tree.Add(array);
+
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+				tree.Print();
+				tree.Print(Orientation.Horizontal);
+
+				Console.WriteLine("Test removing...".BrightRed());
+				int value = array.PickRandom();
+				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
+
+				if (!tree.Remove(value))
+				{
+					Console.WriteLine("Didn't remove a shit...!".BrightRed());
+					return;
+				}
+
+				tree.Print();
+				if (tree.AutoBalance || tree.IsBalanced()) return;
+
+				Console.WriteLine("Test balancing...".BrightGreen());
+				tree.Balance();
+				tree.Print();
+			}
+		}
+
+		private static void TestTitle(string title)
+		{
+			Console.WriteLine();
+			Console.WriteLine();
+			Console.WriteLine(title.Bold().BrightBlack());
+			Console.WriteLine();
 		}
 
 		[NotNull]
@@ -641,42 +742,34 @@ namespace TestApp
 	}
 }
 
-public static class LinkedBinaryTreeExtension
+public static class Extension
 {
-	public static void Print<T>([NotNull] this LinkedBinaryTree<T> thisValue, bool diagnosticInfo = true)
+
+	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+	[NotNull]
+	public static string ToYesNo(this bool thisValue)
+	{
+		return thisValue
+					? "Yes".BrightGreen()
+					: "No".BrightRed();
+	}
+
+	public static void Print<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, bool diagnosticInfo = true)
+		where TNode : LinkedBinaryTree<TNode, T>.NodeBase
 	{
 		Console.WriteLine();
 		Console.WriteLine($"{"Dimensions:".Yellow()} {thisValue.Count.ToString().Underline()} x {thisValue.GetHeight().ToString().Underline()}.");
-		Console.WriteLine($"{"Balanced:".Yellow()} {(thisValue.IsBalanced() ? "Yes".BrightGreen() : "No".BrightRed())}");
-		Console.WriteLine($"{"Valid:".Yellow()} {(thisValue.Validate() ? "Yes".BrightGreen() : "No".BrightRed())}");
+		Console.WriteLine($"{"Balanced:".Yellow()} {thisValue.IsBalanced().ToYesNo()}");
+		Console.WriteLine($"{"Valid:".Yellow()} {thisValue.Validate().ToYesNo()}");
+		Console.WriteLine($"{"Minimum:".Yellow()} {thisValue.Minimum()} {"Maximum:".Yellow()} {thisValue.Maximum()}");
 		thisValue.Print(Orientation.Vertical, diagnosticInfo);
 	}
 
-	public static void Print<T>([NotNull] this LinkedBinaryTree<T> thisValue, Orientation orientation, bool diagnosticInfo = true)
+	public static void Print<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, Orientation orientation, bool diagnosticInfo = true)
+		where TNode : LinkedBinaryTree<TNode, T>.NodeBase
 	{
 		string treeString = thisValue.ToString(orientation, diagnosticInfo);
 		Console.WriteLine();
 		Console.WriteLine(treeString);
-		Console.WriteLine();
-	}
-}
-
-public static class RedBlackTreeExtension
-{
-	public static void Print<T>([NotNull] this RedBlackTree<T> thisValue, bool diagnosticInfo = true)
-	{
-		Console.WriteLine();
-		Console.WriteLine($"Count: {thisValue.Count.ToString().Underline()}");
-		Console.WriteLine($"Balanced: {(thisValue.IsBalanced() ? "Yes".BrightGreen() : "No".BrightRed())}");
-		Console.WriteLine($"{"Valid:".Yellow()} {(thisValue.Validate() ? "Yes".BrightGreen() : "No".BrightRed())}");
-		thisValue.Print(Orientation.Vertical, diagnosticInfo);
-	}
-
-	public static void Print<T>([NotNull] this RedBlackTree<T> thisValue, Orientation orientation, bool diagnosticInfo = true)
-	{
-		string treeString = thisValue.ToString(orientation, diagnosticInfo);
-		Console.WriteLine();
-		Console.WriteLine(treeString);
-		Console.WriteLine();
 	}
 }

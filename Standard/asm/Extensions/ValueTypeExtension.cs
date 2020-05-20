@@ -20,11 +20,21 @@ namespace asm.Extensions
 		private const string NUM_SELF_FORMAT = "#.##############################";
 		private const byte SBYTE_DIFF = sbyte.MinValue * -1;
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int Value(this bool thisValue)
 		{
 			return thisValue
 						? 1
 						: 0;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		[NotNull]
+		public static string ToYesNo(this bool thisValue)
+		{
+			return thisValue
+						? "Yes"
+						: "No";
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

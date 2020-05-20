@@ -19,7 +19,7 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	/// <summary>
-	/// Binary tree using the linked representation.
+	/// <see href="https://en.wikipedia.org/wiki/Binary_tree">BinaryTree</see> using the linked representation.
 	/// </summary>
 	/// <typeparam name="TNode">The node type. Must inherit from <see cref="LinkedBinaryTree{TNode, T}.NodeBase"/></typeparam>
 	/// <typeparam name="T">The element type of the tree</typeparam>
@@ -54,7 +54,7 @@ namespace asm.Collections
 
 			private readonly TNode[] _nodes = new TNode[3];
 
-			internal NodeBase(T value)
+			protected NodeBase(T value)
 			{
 				Value = value;
 			}
@@ -170,30 +170,30 @@ namespace asm.Collections
 			}
 
 			[NotNull]
-			public TNode Minimum()
+			public TNode LeftMost()
 			{
-				TNode minimum = (TNode)this;
+				TNode leftMost = (TNode)this;
 
-				while (minimum.Left != null) 
-					minimum = minimum.Left;
+				while (leftMost.Left != null) 
+					leftMost = leftMost.Left;
 
-				return minimum;
+				return leftMost;
 			}
 
 			[NotNull]
-			public TNode Maximum()
+			public TNode RightMost()
 			{
-				TNode maximum = (TNode)this;
+				TNode rightMost = (TNode)this;
 
-				while (maximum.Right != null) 
-					maximum = maximum.Right;
+				while (rightMost.Right != null) 
+					rightMost = rightMost.Right;
 
-				return maximum;
+				return rightMost;
 			}
 
 			public TNode Predecessor()
 			{
-				if (_nodes[LEFT] != null) return _nodes[LEFT].Maximum();
+				if (_nodes[LEFT] != null) return _nodes[LEFT].RightMost();
 
 				TNode node = (TNode)this;
 				TNode parent = _nodes[PARENT];
@@ -209,7 +209,7 @@ namespace asm.Collections
 
 			public TNode Successor()
 			{
-				if (_nodes[RIGHT] != null) return _nodes[RIGHT].Minimum();
+				if (_nodes[RIGHT] != null) return _nodes[RIGHT].LeftMost();
 
 				TNode node = (TNode)this;
 				TNode parent = _nodes[PARENT];
@@ -2133,11 +2133,11 @@ namespace asm.Collections
 		[NotNull]
 		public IComparer<T> Comparer { get; private set; }
 
+		public TNode Root { get; protected set; }
+
+		public int Count { get; protected set; }
+
 		public abstract bool AutoBalance { get; }
-
-		public TNode Root { get; protected internal set; }
-
-		public int Count { get; protected internal set; }
 
 		public bool IsFull => Root == null || Root.IsFull;
 
@@ -2375,6 +2375,9 @@ namespace asm.Collections
 		}
 		#endregion
 
+		[NotNull]
+		public abstract TNode NewNode(T value);
+
 		/// <inheritdoc />
 		public bool Contains(T value) { return Find(value) != null; }
 
@@ -2432,6 +2435,12 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public abstract void Add(T value);
 
+		public void Add([NotNull] IEnumerable<T> values)
+		{
+			foreach (T value in values) 
+				Add(value);
+		}
+
 		/// <inheritdoc />
 		public bool Remove(T value)
 		{
@@ -2447,6 +2456,62 @@ namespace asm.Collections
 			Root = null;
 			Count = 0;
 		}
+
+		public virtual T Minimum()
+		{
+			if (Root == null) return default(T);
+
+			T minimum = Root.Value;
+			
+			if (Root.Left != null)
+			{
+				Iterate(Root.Left, TraverseMethod.PreOrder, HorizontalFlow.LeftToRight, e =>
+				{
+					if (Comparer.IsLessThan(minimum, e.Value)) return;
+					minimum = e.Value;
+				});
+			}
+			
+			if (Root.Right != null)
+			{
+				Iterate(Root.Right, TraverseMethod.PreOrder, HorizontalFlow.LeftToRight, e =>
+				{
+					if (Comparer.IsLessThan(minimum, e.Value)) return;
+					minimum = e.Value;
+				});
+			}
+
+			return minimum;
+		}
+
+		public virtual T Maximum()
+		{
+			if (Root == null) return default(T);
+
+			T maximum = Root.Value;
+			
+			if (Root.Left != null)
+			{
+				Iterate(Root.Left, TraverseMethod.PreOrder, HorizontalFlow.LeftToRight, e =>
+				{
+					if (Comparer.IsGreaterThan(maximum, e.Value)) return;
+					maximum = e.Value;
+				});
+			}
+			
+			if (Root.Right != null)
+			{
+				Iterate(Root.Right, TraverseMethod.PreOrder, HorizontalFlow.LeftToRight, e =>
+				{
+					if (Comparer.IsGreaterThan(maximum, e.Value)) return;
+					maximum = e.Value;
+				});
+			}
+
+			return maximum;
+		}
+
+		public abstract int GetHeight();
 
 		/// <summary>
 		/// Validates the tree nodes
@@ -2469,19 +2534,19 @@ namespace asm.Collections
 		/// </summary>
 		public abstract void Balance();
 
-		public IReadOnlyList<TNode> GeNodesAtLevel(int level)
+		public IReadOnlyCollection<TNode> GeNodesAtLevel(int level)
 		{
 			if (level < 0) throw new ArgumentOutOfRangeException(nameof(level));
-			if (Root == null) return Array.Empty<TNode>();
+			if (Root == null) return null;
 
-			IReadOnlyList<TNode> list = null;
+			IReadOnlyCollection<TNode> collection = null;
 			Iterate(Root, HorizontalFlow.LeftToRight, (lvl, nodes) =>
 			{
 				if (lvl < level) return true;
-				if (lvl == level) list = nodes.ToArray();
+				if (lvl == level) collection = nodes;
 				return false;
 			});
-			return list ?? throw new ArgumentOutOfRangeException(nameof(level));
+			return collection;
 		}
 
 		/// <inheritdoc />
@@ -2548,6 +2613,522 @@ namespace asm.Collections
 					return array;
 			}
 		}
+		
+		/// <summary>
+		/// Fill a <see cref="LinkedBinaryTree{TNode,T}"/> from the LevelOrder <see cref="collection"/>.
+		/// <para>
+		/// LevelOrder => Root-Left-Right (Queue)
+		/// </para>
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="collection"></param>
+		public virtual void FromLevelOrder([NotNull] IEnumerable<T> collection)
+		{
+			IReadOnlyList<T> list = new Lister<T>(collection);
+			// try simple cases first
+			if (FromSimpleList(list)) return;
+
+			int index = 0;
+			TNode node = NewNode(list[index++]);
+			Root = node;
+			Count++;
+
+			IComparer<T> comparer = Comparer;
+			Queue<TNode> queue = new Queue<TNode>();
+			queue.Enqueue(node);
+
+			// not all queued items will be parents, it's expected the queue will contain enough nodes
+			while (index < list.Count)
+			{
+				int oldIndex = index;
+				TNode root = queue.Dequeue();
+
+				// add left node
+				if (comparer.IsLessThan(list[index], root.Value))
+				{
+					node = NewNode(list[index]);
+					root.Left = node;
+					Count++;
+					queue.Enqueue(node);
+					index++;
+				}
+
+				// add right node
+				if (index < list.Count && comparer.IsGreaterThanOrEqual(list[index], root.Value))
+				{
+					node = NewNode(list[index]);
+					root.Right = node;
+					Count++;
+					queue.Enqueue(node);
+					index++;
+				}
+
+				if (oldIndex == index) index++;
+			}
+		}
+
+		/// <summary>
+		/// Constructs a <see cref="LinkedBinaryTree{TNode,T}"/> from the PreOrder <see cref="collection"/>.
+		/// <para>
+		/// PreOrder => Root-Left-Right (Stack)
+		/// </para>
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="collection"></param>
+		public virtual void FromPreOrder([NotNull] IEnumerable<T> collection)
+		{
+			// https://www.geeksforgeeks.org/construct-bst-from-given-preorder-traversal-set-2/
+			IReadOnlyList<T> list = new Lister<T>(collection);
+			// try simple cases first
+			if (FromSimpleList(list)) return;
+
+			// first node of PreOrder will be root of tree
+			TNode node = NewNode(list[0]);
+			Root = node;
+			Count++;
+
+			Stack<TNode> stack = new Stack<TNode>();
+			// Push root of the BST to the stack i.e, first element of the array.
+			stack.Push(node);
+
+			/*
+			 * Keep popping nodes while the stack is not empty.
+			 * When the value is greater than stack’s top value, make it the right
+			 * child of the last popped node and push it to the stack.
+			 * If the next value is less than the stack’s top value, make it the left
+			 * child of the stack’s top node and push it to the stack.
+			 */
+			IComparer<T> comparer = Comparer;
+
+			// Traverse from second node
+			for (int i = 1; i < list.Count; i++)
+			{
+				TNode root = null;
+
+				// Keep popping nodes while top of stack is greater.
+				while (stack.Count > 0 && comparer.IsGreaterThan(list[i], stack.Peek()))
+					root = stack.Pop();
+
+				node = NewNode(list[i]);
+
+				if (root != null)
+				{
+					root.Right = node;
+					Count++;
+				}
+				else if (stack.Count > 0)
+				{
+					stack.Peek().Left = node;
+					Count++;
+				}
+
+				stack.Push(node);
+			}
+		}
+
+		/// <summary>
+		/// Constructs a <see cref="LinkedBinaryTree{TNode,T}"/> from the InOrder <see cref="collection"/>.
+		/// <para>
+		/// Note that it is not possible to construct a unique binary tree from InOrder collection alone.
+		/// </para>
+		/// <para>
+		/// InOrder => Left-Root-Right (Stack)
+		/// </para>
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="collection"></param>
+		public virtual void FromInOrder([NotNull] IEnumerable<T> collection)
+		{
+			IReadOnlyList<T> list = new Lister<T>(collection);
+			// try simple cases first
+			if (FromSimpleList(list)) return;
+
+			int start = 0;
+			int end = list.Count - 1;
+			int index = IndexMid(start, end);
+			TNode node = NewNode(list[index]);
+			Root = node;
+			Count++;
+
+			Queue<(int Index, int Start, int End, TNode TNode)> queue = new Queue<(int Index, int Start, int End, TNode TNode)>();
+			queue.Enqueue((index, start, end, node));
+
+			while (queue.Count > 0)
+			{
+				(int Index, int Start, int End, TNode TNode) tuple = queue.Dequeue();
+
+				// get the next left index
+				start = tuple.Start;
+				end = tuple.Index - 1;
+				int nodeIndex = IndexMid(start, end);
+
+				// add left node
+				if (nodeIndex > -1)
+				{
+					node = NewNode(list[nodeIndex]);
+					tuple.TNode.Left = node;
+					Count++;
+					queue.Enqueue((nodeIndex, start, end, node));
+				}
+
+				// get the next right index
+				start = tuple.Index + 1;
+				end = tuple.End;
+				nodeIndex = IndexMid(start, end);
+
+				// add right node
+				if (nodeIndex > -1)
+				{
+					node = NewNode(list[nodeIndex]);
+					tuple.TNode.Right = node;
+					Count++;
+					queue.Enqueue((nodeIndex, start, end, node));
+				}
+			}
+
+			static int IndexMid(int start, int end)
+			{
+				return start > end
+							? -1
+							: start + (end - start) / 2;
+			}
+		}
+
+		/// <summary>
+		/// Constructs a <see cref="LinkedBinaryTree{TNode,T}"/> from the PostOrder <see cref="collection"/>.
+		/// <para>
+		/// PostOrder => Left-Right-Root (Stack)
+		/// </para>
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="collection"></param>
+		public virtual void FromPostOrder([NotNull] IEnumerable<T> collection)
+		{
+			// https://www.geeksforgeeks.org/construct-a-bst-from-given-postorder-traversal-using-stack/
+			IReadOnlyList<T> list = new Lister<T>(collection);
+			// try simple cases first
+			if (FromSimpleList(list)) return;
+
+			// last node of PostOrder will be root of tree
+			TNode node = NewNode(list[list.Count - 1]);
+			Root = node;
+			Count++;
+
+			Stack<TNode> stack = new Stack<TNode>();
+			// Push root of the BST to the stack i.e, last element of the array.
+			stack.Push(node);
+
+			/*
+			 * The idea is to traverse the array in reverse.
+			 * If next element is > the element at the top of the stack then,
+			 * set this element as the right child of the element at the top
+			 * of the stack and also push it to the stack.
+			 * Else if, next element is < the element at the top of the stack then,
+			 * start popping all the elements from the stack until either the stack
+			 * is empty or the current element becomes > the element at the top of
+			 * the stack.
+			 * Make this element left child of the last popped node and repeat until
+			 * the array is traversed completely.
+			 */
+			IComparer<T> comparer = Comparer;
+
+			// Traverse from second last node
+			for (int i = list.Count - 2; i >= 0; i--)
+			{
+				TNode root = null;
+
+				// Keep popping nodes while top of stack is greater.
+				while (stack.Count > 0 && comparer.IsLessThan(list[i], stack.Peek()))
+					root = stack.Pop();
+
+				node = NewNode(list[i]);
+
+				if (root != null)
+				{
+					root.Left = node;
+					Count++;
+				}
+				else if (stack.Count > 0)
+				{
+					stack.Peek().Right = node;
+					Count++;
+				}
+
+				stack.Push(node);
+			}
+		}
+
+		/// <summary>
+		/// Constructs a <see cref="LinkedBinaryTree{TNode,T}"/> from <see cref="inOrderCollection"/> and <see cref="levelOrderCollection"/>.
+		/// <para>
+		/// InOrder => Left-Root-Right (Stack)
+		/// </para>
+		/// <para>
+		/// LevelOrder => Root-Left-Right (Queue)
+		/// </para>
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="inOrderCollection"></param>
+		/// <param name="levelOrderCollection"></param>
+		public virtual void FromInOrderAndLevelOrder([NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> levelOrderCollection)
+		{
+			IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
+			// Root-Left-Right
+			IReadOnlyList<T> levelOrder = new Lister<T>(levelOrderCollection);
+			if (inOrder.Count != levelOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(levelOrderCollection));
+			if (levelOrder.Count == 1 && inOrder.Count == 1 && !Comparer.IsEqual(inOrder[0], levelOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(levelOrderCollection));
+			// try simple cases first
+			if (FromSimpleList(levelOrder)) return;
+
+			/*
+			 * using the facts that:
+			 * 1. LevelOrder is organized in the form Root-Left-Right.
+			 * 2. InOrder is organized in the form Left-Root-Right,
+			 * from 1 and 2, the LevelOrder list can be used to identify
+			 * the root and other elements locations in the InOrder list.
+			 */
+			// the lookup will enhance the speed of looking for the index of the item to O(1)
+			IDictionary<T, int> lookup = new Dictionary<T, int>(Comparer.AsEqualityComparer());
+
+			// add all InOrder items to the lookup
+			for (int i = 0; i < inOrder.Count; i++)
+			{
+				T key = inOrder[i];
+				if (lookup.ContainsKey(key)) continue;
+				lookup.Add(key, i);
+			}
+
+			int index = 0;
+			TNode node = NewNode(levelOrder[index++]);
+			Root = node;
+			Count++;
+
+			Queue<(int Start, int End, TNode TNode)> queue = new Queue<(int Start, int End, TNode TNode)>();
+			queue.Enqueue((0, inOrder.Count - 1, node));
+
+			while (index < levelOrder.Count && queue.Count > 0)
+			{
+				(int Start, int End, TNode TNode) tuple = queue.Dequeue();
+
+				// get the root index (the current node index in the InOrder collection)
+				int rootIndex = lookup[tuple.TNode.Value];
+				// find out the index of the next entry of LevelOrder in the InOrder collection
+				int levelIndex = lookup[levelOrder[index]];
+
+				// add left node
+				if (levelIndex >= tuple.Start && levelIndex <= rootIndex - 1)
+				{
+					node = NewNode(inOrder[levelIndex]);
+					tuple.TNode.Left = node;
+					Count++;
+					queue.Enqueue((tuple.Start, rootIndex - 1, node));
+					index++;
+					// index and node changed, so will need to get the next entry of LevelOrder in the InOrder collection
+					levelIndex = index < levelOrder.Count
+									? lookup[levelOrder[index]]
+									: -1;
+				}
+
+				// add right node
+				if (levelIndex >= rootIndex + 1 && levelIndex <= tuple.End)
+				{
+					node = NewNode(inOrder[levelIndex]);
+					tuple.TNode.Right = node;
+					Count++;
+					queue.Enqueue((rootIndex + 1, tuple.End, node));
+					index++;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Constructs a <see cref="LinkedBinaryTree{TNode,T}"/> from <see cref="inOrderCollection"/> and <see cref="preOrderCollection"/>.
+		/// <para>
+		/// InOrder => Left-Root-Right (Stack)
+		/// </para>
+		/// <para>
+		/// PreOrder => Root-Left-Right (Stack)
+		/// </para>
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="inOrderCollection"></param>
+		/// <param name="preOrderCollection"></param>
+		public virtual void FromInOrderAndPreOrder([NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> preOrderCollection)
+		{
+			IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
+			IReadOnlyList<T> preOrder = new Lister<T>(preOrderCollection);
+			if (inOrder.Count != preOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(preOrderCollection));
+			if (preOrder.Count == 1 && inOrder.Count == 1 && !Comparer.IsEqual(inOrder[0], preOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(preOrderCollection));
+			// try simple cases first
+			if (FromSimpleList(preOrder)) return;
+
+			/*
+			 * https://stackoverflow.com/questions/48352513/construct-binary-tree-given-its-inorder-and-preorder-traversals-without-recursio#48364040
+			 * 
+			 * The idea is to keep tree nodes in a stack from PreOrder traversal, till their counterpart is not found in InOrder traversal.
+			 * Once a counterpart is found, all children in the left sub-tree of the node must have been already visited.
+			 */
+			int preIndex = 0;
+			int inIndex = 0;
+			TNode node = NewNode(preOrder[preIndex++]);
+			Root = node;
+			Count++;
+
+			IComparer<T> comparer = Comparer;
+			Stack<TNode> stack = new Stack<TNode>();
+			stack.Push(node);
+
+			while (stack.Count > 0)
+			{
+				TNode root = stack.Peek();
+
+				if (comparer.IsEqual(root.Value, inOrder[inIndex]))
+				{
+					stack.Pop();
+					inIndex++;
+
+					// if all the elements in inOrder have been visited, we are done
+					if (inIndex == inOrder.Count) break;
+					// if there are still some unvisited nodes in the left, skip
+					if (stack.Count > 0 && comparer.IsEqual(stack.Peek().Value, inOrder[inIndex])) continue;
+
+					/*
+					 * As top node in stack, still has not encountered its counterpart
+					 * in inOrder, so next element in preOrder must be right child of
+					 * the removed node
+					 */
+					node = NewNode(preOrder[preIndex++]);
+					root.Right = node;
+					Count++;
+					stack.Push(node);
+				}
+				else
+				{
+					/*
+					 * Top node in the stack has not encountered its counterpart
+					 * in inOrder, so next element in preOrder must be left child
+					 * of this node
+					 */
+					node = NewNode(preOrder[preIndex++]);
+					root.Left = node;
+					Count++;
+					stack.Push(node);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Constructs a <see cref="LinkedBinaryTree{TNode,T}"/> from <see cref="inOrderCollection"/> and <see cref="postOrderCollection"/>.
+		/// <para>
+		/// InOrder => Left-Root-Right (Stack)
+		/// </para>
+		/// <para>
+		/// PostOrder => Left-Right-Root (Stack)
+		/// </para>
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="inOrderCollection"></param>
+		/// <param name="postOrderCollection"></param>
+		public virtual void FromInOrderAndPostOrder([NotNull] IEnumerable<T> inOrderCollection, [NotNull] IEnumerable<T> postOrderCollection)
+		{
+			IReadOnlyList<T> inOrder = new Lister<T>(inOrderCollection);
+			IReadOnlyList<T> postOrder = new Lister<T>(postOrderCollection);
+			if (inOrder.Count != postOrder.Count) ThrowNotFormingATree(nameof(inOrderCollection), nameof(postOrderCollection));
+			if (postOrder.Count == 1 && inOrder.Count == 1 && !Comparer.IsEqual(inOrder[0], postOrder[0])) ThrowNotFormingATree(nameof(inOrderCollection), nameof(postOrderCollection));
+			if (FromSimpleList(postOrder)) return;
+
+			// the lookup will enhance the speed of looking for the index of the item to O(1)
+			IDictionary<T, int> lookup = new Dictionary<T, int>(Comparer.AsEqualityComparer());
+
+			// add all InOrder items to the lookup
+			for (int i = 0; i < inOrder.Count; i++)
+			{
+				T key = inOrder[i];
+				if (lookup.ContainsKey(key)) continue;
+				lookup.Add(key, i);
+			}
+
+			// Traverse postOrder in reverse
+			int postIndex = postOrder.Count - 1;
+			TNode node = NewNode(postOrder[postIndex--]);
+			Root = node;
+			Count++;
+
+			Stack<TNode> stack = new Stack<TNode>();
+			// Push root of the BST to the stack i.e, last element of the array.
+			stack.Push(node);
+
+			IComparer<T> comparer = Comparer;
+
+			while (postIndex >= 0 && stack.Count > 0)
+			{
+				TNode root = stack.Peek();
+				// get the root index (the current node index in the InOrder collection)
+				int rootIndex = lookup[root.Value];
+				// find out the index of the next entry of PostOrder in the InOrder collection
+				int index = lookup[postOrder[postIndex]];
+
+				// add right node
+				if (index > rootIndex)
+				{
+					node = NewNode(inOrder[index]);
+					root.Right = node;
+					Count++;
+					stack.Push(node);
+					postIndex--;
+
+					// index and node changed, so will need to get the next entry of PostOrder in the InOrder collection
+					index = postIndex > -1
+								? lookup[postOrder[postIndex]]
+								: -1;
+				}
+
+				// add left node
+				if (index > -1 && index < rootIndex)
+				{
+					if (comparer.IsLessThan(postOrder[postIndex], root.Value))
+					{
+						// Keep popping nodes while top of stack is greater.
+						while (stack.Count > 0 && comparer.IsLessThan(postOrder[postIndex], stack.Peek().Value))
+							root = stack.Pop();
+					}
+
+					node = NewNode(inOrder[index]);
+					root.Left = node;
+					Count++;
+					stack.Push(node);
+					postIndex--;
+				}
+			}
+		}
+
+		private bool FromSimpleList([NotNull] IReadOnlyList<T> list)
+		{
+			bool result;
+			Clear();
+
+			switch (list.Count)
+			{
+				case 0:
+					result = true;
+					break;
+				case 1:
+					Root = NewNode(list[0]);
+					Count++;
+					result = true;
+					break;
+				default:
+					result = false;
+					break;
+			}
+
+			return result;
+		}
+
+		private static void ThrowNotFormingATree(string collection1Name, string collection2Name)
+		{
+			throw new ArgumentException($"{collection1Name} and {collection2Name} do not form a binary tree.");
+		}
 	}
 
 	/// <inheritdoc />
@@ -2593,7 +3174,11 @@ namespace asm.Collections
 		{
 		}
 
-		public int GetHeight() { return Root?.Height ?? 0; }
+		/// <inheritdoc />
+		public override Node NewNode(T value) { return new Node(value); }
+
+		/// <inheritdoc />
+		public override int GetHeight() { return Root?.Height ?? 0; }
 
 		/*
 		* https://www.geeksforgeeks.org/avl-tree-set-1-insertion/
@@ -2626,6 +3211,8 @@ namespace asm.Collections
 			{
 				if (isLeft) oldParent.Left = newRoot;
 				else oldParent.Right = newRoot;
+				
+				SetHeight(oldParent);
 			}
 			else
 			{
@@ -2658,6 +3245,8 @@ namespace asm.Collections
 			{
 				if (isLeft) oldParent.Left = newRoot;
 				else oldParent.Right = newRoot;
+				
+				SetHeight(oldParent);
 			}
 			else
 			{
@@ -2669,7 +3258,7 @@ namespace asm.Collections
 			return newRoot;
 		}
 
-		protected internal static void SetHeight([NotNull] Node node)
+		protected void SetHeight([NotNull] Node node)
 		{
 			node.Height = 1 + Math.Max(node.Left?.Height ?? -1, node.Right?.Height ?? -1);
 		}
