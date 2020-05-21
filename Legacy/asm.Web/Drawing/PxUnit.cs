@@ -122,12 +122,11 @@ namespace asm.Web.Drawing
 
 		public override int GetHashCode()
 		{
-			unchecked // Overflow is fine, just wrap
+			unchecked
 			{
-				int hash = 17;
-				// Suitable nullity checks etc, of course :)
-				hash = hash * 29 + Type.GetHashCode();
-				hash = hash * 29 + Value.GetHashCode();
+				int hash = 397;
+				hash = (hash * 397) ^ Type.GetHashCode();
+				hash = (hash * 397) ^ Value.GetHashCode();
 				return hash;
 			}
 		}

@@ -68,8 +68,8 @@ namespace asm.Collections
 			}
 
 			// find a parent
-			Node parent = Root, next = Root;
-			Stack<Node> stack = new Stack<Node>();
+			LinkedBinaryNode<T> parent = Root, next = Root;
+			Stack<LinkedBinaryNode<T>> stack = new Stack<LinkedBinaryNode<T>>();
 
 			while (next != null)
 			{
@@ -83,12 +83,12 @@ namespace asm.Collections
 			// duplicate values can make life miserable for us here because it will never be balanced!
 			if (Comparer.IsEqual(value, parent.Value)) throw new DuplicateKeyException();
 
-			Node node = NewNode(value);
+			LinkedBinaryNode<T> node = NewNode(value);
 
 			if (Comparer.IsLessThan(value, parent.Value)) parent.Left = node;
 			else parent.Right = node;
 
-			Queue<Node> unbalancedNodes = new Queue<Node>();
+			Queue<LinkedBinaryNode<T>> unbalancedNodes = new Queue<LinkedBinaryNode<T>>();
 
 			// update parents and find unbalanced parents in the changed nodes along the way
 			// this has the same effect as the recursive call but only it's iterative now
@@ -113,10 +113,10 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public override bool Remove(Node node)
+		public override bool Remove(LinkedBinaryNode<T> node)
 		{
-			Node parent = node.Parent;
-			Node child, leftMostParent = null;
+			LinkedBinaryNode<T> parent = node.Parent;
+			LinkedBinaryNode<T> child, leftMostParent = null;
 
 			// case 1: node has no right child
 			if (node.Right == null)
@@ -134,7 +134,7 @@ namespace asm.Collections
 			else
 			{
 				// find the right child's left most child
-				Node leftmost = node.Right.LeftMost();
+				LinkedBinaryNode<T> leftmost = node.Right.LeftMost();
 				// move the left-most right to the parent's left
 				leftMostParent = leftmost.Parent;
 				leftMostParent.Left = leftmost.Right;
@@ -160,8 +160,8 @@ namespace asm.Collections
 				parent.Right = child;
 			}
 
-			Queue<Node> unbalancedNodes = new Queue<Node>();
-			Node update = child != null
+			Queue<LinkedBinaryNode<T>> unbalancedNodes = new Queue<LinkedBinaryNode<T>>();
+			LinkedBinaryNode<T> update = child != null
 							? leftMostParent ?? child
 							: parent;
 

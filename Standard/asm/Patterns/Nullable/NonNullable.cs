@@ -17,7 +17,7 @@ namespace asm.Patterns.Nullable
 	/// parameterized constructor.
 	/// </summary>
 	/// <typeparam name="T">Type of non-nullable reference to encapsulate</typeparam>
-	public struct NonNullable<T> : IEquatable<NonNullable<T>>
+	public readonly struct NonNullable<T> : IEquatable<NonNullable<T>>
 		where T : class
 	{
 		private readonly T _value;

@@ -146,15 +146,12 @@ namespace asm.Windows
 		{
 			unchecked
 			{
-				unchecked // Overflow is fine, just wrap
-				{
-					int hash = 17;
-					hash = hash * 29 + (int)KeyCode;
-					hash = hash * 29 + IsControlPressed.Value();
-					hash = hash * 29 + IsAltPressed.Value();
-					hash = hash * 29 + IsShiftPressed.Value();
-					return hash;
-				}
+				int hash = 397;
+				hash = (hash * 397) ^ (int)KeyCode;
+				hash = (hash * 397) ^ IsControlPressed.Value();
+				hash = (hash * 397) ^ IsAltPressed.Value();
+				hash = (hash * 397) ^ IsShiftPressed.Value();
+				return hash;
 			}
 		}
 

@@ -11,7 +11,6 @@ using System.Web.Routing;
 using System.Web.UI;
 using HtmlAgilityPack;
 using JetBrains.Annotations;
-using asm.Comparers;
 
 namespace asm.Web.Mvc
 {
@@ -68,15 +67,20 @@ namespace asm.Web.Mvc
 			return this;
 		}
 
-		[NotNull] public IEnumerable<HtmlTag> Find([NotNull] Func<HtmlTag, bool> filter) { return Children.Where(filter).Concat(Children.SelectMany(c => c.Find(filter))); }
+		[NotNull] 
+		public IEnumerable<HtmlTag> Find([NotNull] Func<HtmlTag, bool> filter) { return Children.Where(filter).Concat(Children.SelectMany(c => c.Find(filter))); }
 
+		[NotNull] 
 		public HtmlTag Prepend([NotNull] params IHtmlElement[] elements) { return Insert(0, elements); }
 
-		[NotNull] public HtmlTag Prepend([NotNull] IEnumerable<IHtmlElement> elements) { return Insert(0, elements); }
+		[NotNull] 
+		public HtmlTag Prepend([NotNull] IEnumerable<IHtmlElement> elements) { return Insert(0, elements); }
 
+		[NotNull] 
 		public HtmlTag Prepend(string text) { return Insert(0, new HtmlText(text)); }
 
-		[NotNull] public HtmlTag Insert(int index, [NotNull] params IHtmlElement[] elements) { return Insert(index, elements.AsEnumerable()); }
+		[NotNull] 
+		public HtmlTag Insert(int index, [NotNull] params IHtmlElement[] elements) { return Insert(index, elements.AsEnumerable()); }
 
 		[NotNull]
 		public HtmlTag Insert(int index, [NotNull] IEnumerable<IHtmlElement> elements)
@@ -99,7 +103,8 @@ namespace asm.Web.Mvc
 			return Insert(index, new HtmlText(text));
 		}
 
-		[NotNull] public HtmlTag Append([NotNull] params IHtmlElement[] elements) { return Append(elements.AsEnumerable()); }
+		[NotNull] 
+		public HtmlTag Append([NotNull] params IHtmlElement[] elements) { return Append(elements.AsEnumerable()); }
 
 		[NotNull]
 		public HtmlTag Append([NotNull] IEnumerable<IHtmlElement> elements)
@@ -115,7 +120,8 @@ namespace asm.Web.Mvc
 			return this;
 		}
 
-		[NotNull] public HtmlTag Append(string text) { return Append(new HtmlText(text)); }
+		[NotNull] 
+		public HtmlTag Append(string text) { return Append(new HtmlText(text)); }
 
 		public int Count => _tagBuilder.Attributes.Count;
 
@@ -272,6 +278,7 @@ namespace asm.Web.Mvc
 			return this;
 		}
 
+		[NotNull] 
 		public HtmlTag Merge<TKey, TValue>(IDictionary<TKey, TValue> attributes) { return Merge(attributes, false); }
 
 		[NotNull]
@@ -280,7 +287,8 @@ namespace asm.Web.Mvc
 			return attributes == null ? this : Merge(attributes.ToDictionary(a => Convert.ToString(a.Key), a => (object)a.Value), replaceExisting);
 		}
 
-		[NotNull] public HtmlTag Merge([NotNull] IDictionary<string, object> attributes) { return Merge(attributes, false); }
+		[NotNull] 
+		public HtmlTag Merge([NotNull] IDictionary<string, object> attributes) { return Merge(attributes, false); }
 
 		[NotNull]
 		public HtmlTag Merge([NotNull] IDictionary<string, object> attributes, bool replaceExisting)
@@ -290,9 +298,11 @@ namespace asm.Web.Mvc
 			return this;
 		}
 
-		[NotNull] public HtmlTag Merge(object attributes) { return Merge(HtmlHelper.AnonymousObjectToHtmlAttributes(attributes)); }
+		[NotNull] 
+		public HtmlTag Merge(object attributes) { return Merge(HtmlHelper.AnonymousObjectToHtmlAttributes(attributes)); }
 
-		[NotNull] public HtmlTag Merge(object attributes, bool replaceExisting) { return Merge(HtmlHelper.AnonymousObjectToHtmlAttributes(attributes), replaceExisting); }
+		[NotNull] 
+		public HtmlTag Merge(object attributes, bool replaceExisting) { return Merge(HtmlHelper.AnonymousObjectToHtmlAttributes(attributes), replaceExisting); }
 
 		[NotNull]
 		public HtmlTag Render(TagRenderMode tagRenderMode)
@@ -335,18 +345,21 @@ namespace asm.Web.Mvc
 			return MvcHtmlString.Create(stringBuilder.ToString());
 		}
 
+		[NotNull]
 		public static HtmlTag Parse([NotNull] IHtmlString html, bool validateSyntax = false)
 		{
 			if (html == null) throw new ArgumentNullException(nameof(html));
 			return Parse(html.ToString(), validateSyntax);
 		}
 
+		[NotNull]
 		public static HtmlTag Parse([NotNull] string html, bool validateSyntax = false)
 		{
 			if (html == null) throw new ArgumentNullException(nameof(html));
 			return Parse(new StringReader(html), validateSyntax);
 		}
 
+		[NotNull]
 		public static HtmlTag Parse([NotNull] TextReader textReader, bool validateSyntax = false)
 		{
 			if (textReader == null)
@@ -372,12 +385,14 @@ namespace asm.Web.Mvc
 			return ParseHtmlTag(htmlDocument.DocumentNode.ChildNodes.Single());
 		}
 
+		[NotNull]
 		public static IEnumerable<HtmlTag> ParseAll([NotNull] IHtmlString html, bool validateSyntax = false)
 		{
 			if (html == null) throw new ArgumentNullException(nameof(html));
 			return ParseAll(html.ToString(), validateSyntax);
 		}
 
+		[NotNull]
 		public static IEnumerable<HtmlTag> ParseAll([NotNull] string html, bool validateSyntax = false)
 		{
 			if (html == null) throw new ArgumentNullException(nameof(html));
@@ -437,53 +452,8 @@ namespace asm.Web.Mvc
 			return htmlTag;
 		}
 
-		[NotNull] private static HtmlText ParseHtmlText([NotNull] HtmlNode htmlNode) { return new HtmlText(htmlNode.InnerText); }
-
-		private bool Equals(HtmlTag other)
-		{
-			if (other == null) return false;
-			if (ReferenceEquals(this, other)) return true;
-			if (!string.Equals(TagName, other.TagName)) return false;
-			if (Count != other.Count) return false;
-			if (!DictionaryComparer<string, string>.Default.Equals(this, other, "class", "style")) return false;
-			if (!DictionaryComparer<string, string>.Default.Equals(Styles, other.Styles)) return false;
-			return Classes.OrderBy(c => c).SequenceEqual(other.Classes.OrderBy(c => c))
-					&& Contents.SequenceEqual(other.Contents);
-		}
-
-		public override bool Equals(object other)
-		{
-			if (other == null)
-			{
-				return false;
-			}
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
-			return other.GetType() == GetType() && Equals((HtmlTag)other);
-		}
-
-		public override int GetHashCode()
-		{
-			int hash = 17;
-			hash = hash * 23 + TagName.GetHashCode();
-			foreach (
-				KeyValuePair<string, string> attribute in
-				this.Where(attribute => !string.Equals(attribute.Key, "style") && !string.Equals(attribute.Key, "class"))
-					.OrderBy(attribute => attribute.Key))
-			{
-				hash = hash * 23 + attribute.Key.GetHashCode();
-				hash = hash * 23 + attribute.Value.GetHashCode();
-			}
-			foreach (KeyValuePair<string, string> style in Styles.OrderBy(style => style.Key))
-			{
-				hash = hash * 23 + style.Key.GetHashCode();
-				hash = hash * 23 + style.Value.GetHashCode();
-			}
-			hash = Classes.OrderBy(c => c).Aggregate(hash, (current, @class) => current * 23 + @class.GetHashCode());
-			return Contents.Aggregate(hash, (current, content) => current * 23 + content.GetHashCode());
-		}
+		[NotNull] 
+		private static HtmlText ParseHtmlText([NotNull] HtmlNode htmlNode) { return new HtmlText(htmlNode.InnerText); }
 
 		public static explicit operator string(HtmlTag value) { return value?.ToString(); }
 	}

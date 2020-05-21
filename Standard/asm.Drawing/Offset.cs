@@ -40,13 +40,13 @@ namespace asm.Drawing
 		[SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
 		public override int GetHashCode()
 		{
-			unchecked // Overflow is fine, just wrap
+			unchecked
 			{
-				int hash = 17;
-				hash = hash * 29 + Top;
-				hash = hash * 29 + Right;
-				hash = hash * 29 + Bottom;
-				hash = hash * 29 + Left;
+				int hash = 397;
+				hash = (hash * 397) ^ Top;
+				hash = (hash * 397) ^ Right;
+				hash = (hash * 397) ^ Bottom;
+				hash = (hash * 397) ^ Left;
 				return hash;
 			}
 		}

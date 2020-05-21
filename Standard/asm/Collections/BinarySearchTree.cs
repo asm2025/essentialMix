@@ -39,9 +39,9 @@ namespace asm.Collections
 		public override bool AutoBalance { get; } = false;
 
 		/// <inheritdoc />
-		public override Node FindNearestLeaf(T value)
+		public override LinkedBinaryNode<T> FindNearestLeaf(T value)
 		{
-			Node parent = null, next = Root;
+			LinkedBinaryNode<T> parent = null, next = Root;
 
 			while (next != null)
 			{
@@ -71,8 +71,8 @@ namespace asm.Collections
 			}
 
 			// find a parent
-			Node parent = Root, next = Root;
-			Stack<Node> stack = new Stack<Node>();
+			LinkedBinaryNode<T> parent = Root, next = Root;
+			Stack<LinkedBinaryNode<T>> stack = new Stack<LinkedBinaryNode<T>>();
 
 			while (next != null)
 			{
@@ -83,7 +83,7 @@ namespace asm.Collections
 							: next.Right;
 			}
 
-			Node node = NewNode(value);
+			LinkedBinaryNode<T> node = NewNode(value);
 
 			if (Comparer.IsLessThan(value, parent.Value)) parent.Left = node;
 			else parent.Right = node;
@@ -100,10 +100,10 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public override bool Remove(Node node)
+		public override bool Remove(LinkedBinaryNode<T> node)
 		{
-			Node parent = node.Parent;
-			Node child, leftMostParent = null;
+			LinkedBinaryNode<T> parent = node.Parent;
+			LinkedBinaryNode<T> child, leftMostParent = null;
 
 			// case 1: node has no right child
 			if (node.Right == null)
@@ -121,7 +121,7 @@ namespace asm.Collections
 			else
 			{
 				// find the right child's left most child
-				Node leftmost = node.Right.LeftMost();
+				LinkedBinaryNode<T> leftmost = node.Right.LeftMost();
 				// move the left-most right to the parent's left
 				leftMostParent = leftmost.Parent;
 				leftMostParent.Left = leftmost.Right;
@@ -147,7 +147,7 @@ namespace asm.Collections
 				parent.Right = child;
 			}
 
-			Node update = child != null
+			LinkedBinaryNode<T> update = child != null
 							? leftMostParent ?? child
 							: parent;
 
@@ -166,6 +166,7 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public override T Minimum()
 		{
+			// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
 			return Root == null
 						? default(T)
 						: Root.LeftMost().Value;
@@ -174,13 +175,14 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public override T Maximum()
 		{
+			// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
 			return Root == null
 						? default(T)
 						: Root.RightMost().Value;
 		}
 
 		/// <inheritdoc />
-		public override bool Validate(Node node)
+		public override bool Validate(LinkedBinaryNode<T> node)
 		{
 			if (node == null) return true;
 
@@ -209,7 +211,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public override bool IsBalanced(Node node)
+		public override bool IsBalanced(LinkedBinaryNode<T> node)
 		{
 			return node == null
 					|| node.IsLeaf
@@ -231,7 +233,7 @@ namespace asm.Collections
 			if (Root == null || Root.IsLeaf) return;
 
 			// find all unbalanced nodes
-			Queue<Node> unbalancedNodes = new Queue<Node>();
+			Queue<LinkedBinaryNode<T>> unbalancedNodes = new Queue<LinkedBinaryNode<T>>();
 			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e =>
 			{
 				if (IsBalanced(e)) return;
@@ -240,7 +242,7 @@ namespace asm.Collections
 
 			while (unbalancedNodes.Count > 0)
 			{
-				Node node = unbalancedNodes.Dequeue();
+				LinkedBinaryNode<T> node = unbalancedNodes.Dequeue();
 				// check again if status changed
 				if (IsBalanced(node)) continue;
 				Balance(node);
@@ -317,7 +319,7 @@ namespace asm.Collections
 			Balance();
 		}
 
-		protected void Balance(Node node)
+		protected void Balance(LinkedBinaryNode<T> node)
 		{
 			/*
 			 * balance the tree
@@ -364,7 +366,7 @@ namespace asm.Collections
 			 */
 			if (node == null || IsBalanced(node)) return;
 
-			Queue<Node> queue = new Queue<Node>();
+			Queue<LinkedBinaryNode<T>> queue = new Queue<LinkedBinaryNode<T>>();
 			queue.Enqueue(node);
 
 			while (queue.Count > 0)
@@ -372,7 +374,7 @@ namespace asm.Collections
 				node = queue.Dequeue();
 				if (Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR) continue;
 
-				Node parent = node.Parent;
+				LinkedBinaryNode<T> parent = node.Parent;
 				bool changed = false;
 
 				if (node.BalanceFactor > 1) // left heavy
@@ -402,7 +404,7 @@ namespace asm.Collections
 				if (node.Left != null && !IsBalanced(node.Left)) queue.Enqueue(node.Left);
 				if (node.Right != null && !IsBalanced(node.Right)) queue.Enqueue(node.Right);
 
-				Node update = parent;
+				LinkedBinaryNode<T> update = parent;
 
 				// update parents and find unbalanced ones
 				while (update != null)

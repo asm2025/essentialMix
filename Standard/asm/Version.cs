@@ -103,13 +103,16 @@ namespace asm
 
 		public override int GetHashCode()
 		{
-			int accumulator = 0;
-			accumulator |= (Major & 0x0000000F) << 28;
-			accumulator |= (Minor & 0x000000FF) << 20;
-			accumulator |= (Build & 0x000000FF) << 12;
-			accumulator |= Revision & 0x00000FFF;
-			accumulator |= ServicePack & 0x0000FFFF;
-			return accumulator;
+			unchecked
+			{
+				int hash = 397;
+				hash = (hash * 397) ^ ((Major & 0x0000000F) << 28);
+				hash = (hash * 397) ^ ((Minor & 0x000000FF) << 20);
+				hash = (hash * 397) ^ ((Build & 0x000000FF) << 12);
+				hash = (hash * 397) ^ (Revision & 0x00000FFF);
+				hash = (hash * 397) ^ (ServicePack & 0x0000FFFF);
+				return hash;
+			}
 		}
 
 		[NotNull] public override string ToString() { return ToString(-1); }

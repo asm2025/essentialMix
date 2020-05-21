@@ -20,7 +20,7 @@ namespace asm.Collections
 	{
 		[Serializable]
 		[StructLayout(LayoutKind.Sequential)]
-		public sealed class Node : NodeBase
+		public sealed class Node : LinkedBinaryNode<Node, T>
 		{
 			internal Node(T value)
 				: base(value)

@@ -46,11 +46,10 @@ namespace asm.Collections
 		{
 			unchecked
 			{
-				int hash = 17;
-				// Suitable nullity checks etc, of course :)
-				hash = hash * 29 + obj.Unit.GetHashCode();
-				hash = hash * 29 + obj.Minimum.GetHashCode();
-				hash = hash * 29 + obj.Maximum.GetHashCode();
+				int hash = 397;
+				hash = (hash * 397) ^ obj.Unit.GetHashCode();
+				hash = (hash * 397) ^ obj.Minimum.GetHashCode();
+				hash = (hash * 397) ^ obj.Maximum.GetHashCode();
 				return hash;
 			}
 		}

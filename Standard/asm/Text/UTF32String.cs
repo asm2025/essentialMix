@@ -389,7 +389,7 @@ namespace asm.Text
 		/// <summary>
 		/// Returns whether or not an integer value is a valid
 		/// UTF-32 character, that is, whether it is non-negative
-		/// and less than or equal to 0x10ffff.
+		/// and less than or equal to 0x10FFFF.
 		/// </summary>
 		/// <param name="value">The value to test.</param>
 		/// <returns>Whether or not the given value is a valid UTF-32 character.</returns>

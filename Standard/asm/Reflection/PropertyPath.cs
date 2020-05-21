@@ -61,7 +61,7 @@ namespace asm.Reflection
 
 		public override int GetHashCode()
 		{
-			return _components.Aggregate(0, (t, n) => t ^ (n.DeclaringType?.GetHashCode() ?? 0 * n.Name.GetHashCode() * 397));
+			return _components.GetHashCode();
 		}
 
 		public bool Equals(PropertyPath other)

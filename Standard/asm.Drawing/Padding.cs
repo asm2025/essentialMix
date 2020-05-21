@@ -104,13 +104,13 @@ namespace asm.Drawing
 
 		public override int GetHashCode()
 		{
-			unchecked // Overflow is fine, just wrap
+			unchecked
 			{
-				int hash = 17;
-				hash = hash * 29 + Top;
-				hash = hash * 29 + Right;
-				hash = hash * 29 + Bottom;
-				hash = hash * 29 + Left;
+				int hash = 397;
+				hash = (hash * 397) ^ Top;
+				hash = (hash * 397) ^ Right;
+				hash = (hash * 397) ^ Bottom;
+				hash = (hash * 397) ^ Left;
 				return hash;
 			}
 		}
@@ -120,14 +120,17 @@ namespace asm.Drawing
 		{
 			if (_toString != null) return _toString;
 
-			if (IsRectangle()) _toString = $"{TERM}: {Top}px;";
+			if (IsRectangle())
+			{
+				_toString = $"{TERM}: {Top}px;";
+			}
 			else
 			{
-				bool horz = IsEqualHorizontally();
-				bool vert = IsEqualVertically();
+				bool horizontally = IsEqualHorizontally();
+				bool vertically = IsEqualVertically();
 
-				if (horz && vert) _toString = $"{TERM}: {Top}px {Right}px;";
-				else if (horz) _toString = $"{TERM}: {Top}px {Right}px {Bottom}px;";
+				if (horizontally && vertically) _toString = $"{TERM}: {Top}px {Right}px;";
+				else if (horizontally) _toString = $"{TERM}: {Top}px {Right}px {Bottom}px;";
 				else _toString = $"{TERM}: {Top}px {Right}px {Bottom}px {Left}px;";
 			}
 

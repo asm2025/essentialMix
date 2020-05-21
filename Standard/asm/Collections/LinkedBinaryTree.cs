@@ -21,7 +21,7 @@ namespace asm.Collections
 	/// <summary>
 	/// <see href="https://en.wikipedia.org/wiki/Binary_tree">BinaryTree</see> using the linked representation.
 	/// </summary>
-	/// <typeparam name="TNode">The node type. Must inherit from <see cref="LinkedBinaryTree{TNode, T}.NodeBase"/></typeparam>
+	/// <typeparam name="TNode">The node type. Must inherit from <see cref="LinkedBinaryNode{TNode, T}"/></typeparam>
 	/// <typeparam name="T">The element type of the tree</typeparam>
 	/*
 	 *	     ___ F ____
@@ -41,198 +41,8 @@ namespace asm.Collections
 	[ComVisible(false)]
 	[Serializable]
 	public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
-		where TNode : LinkedBinaryTree<TNode, T>.NodeBase
+		where TNode : LinkedBinaryNode<TNode, T>
 	{
-		[DebuggerDisplay("{Value}")]
-		[Serializable]
-		[StructLayout(LayoutKind.Sequential)]
-		public abstract class NodeBase
-		{
-			private const int LEFT = 0;
-			private const int RIGHT = 1;
-			private const int PARENT = 2;
-
-			private readonly TNode[] _nodes = new TNode[3];
-
-			protected NodeBase(T value)
-			{
-				Value = value;
-			}
-			
-			public TNode Parent
-			{
-				get => _nodes[PARENT];
-				internal set
-				{
-					if (_nodes[PARENT] == value) return;
-
-					// reset old parent
-					if (_nodes[PARENT] != null)
-					{
-						/*
-						* The comparison with this and parent.left/.right is essential because the node
-						* could have moved to another parent. Don't use IsLeft or IsRight here.
-						*/
-						if (_nodes[PARENT].Left == this) _nodes[PARENT].Left = null;
-						else if (_nodes[PARENT].Right == this) _nodes[PARENT].Right = null;
-					}
-
-					_nodes[PARENT] = value;
-				}
-			}
-
-			public TNode Left
-			{
-				get => _nodes[LEFT];
-				internal set
-				{
-					if (_nodes[LEFT] == value) return;
-					// reset old left
-					if (_nodes[LEFT]?._nodes[PARENT] == this) _nodes[LEFT]._nodes[PARENT] = null;
-					_nodes[LEFT] = value;
-					if (_nodes[LEFT] == null) return;
-					_nodes[LEFT]._nodes[PARENT] = (TNode)this;
-				}
-			}
-
-			public TNode Right
-			{
-				get => _nodes[RIGHT];
-				internal set
-				{
-					if (_nodes[RIGHT] == value) return;
-					// reset old right
-					if (_nodes[RIGHT]?._nodes[PARENT] == this) _nodes[RIGHT]._nodes[PARENT] = null;
-					_nodes[RIGHT] = value;
-					if (_nodes[RIGHT] == null) return;
-					_nodes[RIGHT]._nodes[PARENT] = (TNode)this;
-				}
-			}
-
-			public T Value { get; set; }
-
-			public bool IsRoot => _nodes[PARENT] == null;
-
-			public bool IsLeft => _nodes[PARENT]?.Left == this;
-
-			public bool IsRight => _nodes[PARENT]?.Right == this;
-
-			public bool IsLeaf => _nodes[LEFT] == null && _nodes[RIGHT] == null;
-
-			public bool IsNode => _nodes[LEFT] != null && _nodes[RIGHT] != null;
-
-			public bool HasOneChild => (_nodes[LEFT] != null) ^ (_nodes[RIGHT] != null);
-
-			public bool IsFull => !HasOneChild;
-
-			/// <inheritdoc />
-			[NotNull]
-			public override string ToString() { return Convert.ToString(Value); }
-
-			[NotNull]
-			protected internal virtual string ToString(int depth, bool diagnostic)
-			{
-				return diagnostic
-							? $"{Value} :D{depth}"
-							: Convert.ToString(Value);
-			}
-
-			[ItemNotNull]
-			public IEnumerable<TNode> Ancestors()
-			{
-				TNode node = _nodes[PARENT];
-
-				while (node != null)
-				{
-					yield return node;
-					node = node._nodes[PARENT];
-				}
-			}
-
-			public TNode Uncle()
-			{
-				// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
-				return _nodes[PARENT]?._nodes[PARENT] == null
-							? null // no parent or grand parent
-							: _nodes[PARENT].IsLeft
-								? _nodes[PARENT]._nodes[PARENT]._nodes[RIGHT] // uncle on the right
-								: _nodes[PARENT]._nodes[PARENT]._nodes[LEFT];
-			}
-
-			public TNode Sibling()
-			{
-				// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
-				return _nodes[PARENT] == null
-							? null // no parent
-							: IsLeft
-								? _nodes[PARENT]._nodes[RIGHT] // sibling on the right
-								: _nodes[PARENT]._nodes[LEFT];
-			}
-
-			[NotNull]
-			public TNode LeftMost()
-			{
-				TNode leftMost = (TNode)this;
-
-				while (leftMost.Left != null) 
-					leftMost = leftMost.Left;
-
-				return leftMost;
-			}
-
-			[NotNull]
-			public TNode RightMost()
-			{
-				TNode rightMost = (TNode)this;
-
-				while (rightMost.Right != null) 
-					rightMost = rightMost.Right;
-
-				return rightMost;
-			}
-
-			public TNode Predecessor()
-			{
-				if (_nodes[LEFT] != null) return _nodes[LEFT].RightMost();
-
-				TNode node = (TNode)this;
-				TNode parent = _nodes[PARENT];
-
-				while (parent != null && node == parent.Left)
-				{
-					node = parent;
-					parent = parent._nodes[PARENT];
-				}
-
-				return parent;
-			}
-
-			public TNode Successor()
-			{
-				if (_nodes[RIGHT] != null) return _nodes[RIGHT].LeftMost();
-
-				TNode node = (TNode)this;
-				TNode parent = _nodes[PARENT];
-
-				while (parent != null && node == parent.Right)
-				{
-					node = parent;
-					parent = parent._nodes[PARENT];
-				}
-
-				return parent;
-			}
-
-			public void Swap([NotNull] TNode other)
-			{
-				T tmp = other.Value;
-				other.Value = Value;
-				Value = tmp;
-			}
-
-			public static implicit operator T([NotNull] NodeBase node) { return node.Value; }
-		}
-
 		/// <summary>
 		/// a semi recursive approach to traverse the tree
 		/// </summary>
@@ -2180,6 +1990,29 @@ namespace asm.Collections
 			return (IEnumerator<T>)Enumerate(Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight);
 		}
 
+		public virtual bool Equals<TTree>(TTree other)
+			where TTree : LinkedBinaryTree<TNode, T>
+		{
+			// Udemy - Code With Mosh - Data Structures & Algorithms Part 2
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
+			if (GetType() != other.GetType() || Count != other.Count || !Comparer.Equals(other.Comparer)) return false;
+			if (Root == null && other.Root == null) return true;
+			if (Root == null || other.Root == null) return false;
+			return Root.IsLeaf && other.Root.IsLeaf
+						? Comparer.IsEqual(Root.Value, other.Root.Value)
+						: EqualsLocal(Root, other.Root);
+
+			bool EqualsLocal(TNode x, TNode y)
+			{
+				return ReferenceEquals(x, y) 
+						|| x != null && y != null 
+									&& Comparer.IsEqual(x.Value, y.Value) 
+									&& EqualsLocal(x.Left, y.Left) 
+									&& EqualsLocal(x.Right, y.Right);
+			}
+		}
+
 		/// <summary>
 		/// Enumerate nodes' values in a semi recursive approach
 		/// </summary>
@@ -2459,8 +2292,14 @@ namespace asm.Collections
 
 		public virtual T Minimum()
 		{
+			// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
 			if (Root == null) return default(T);
 
+			/*
+			 * This tree might not be a valid binary search tree. So a traversal is need to search the entire tree.
+			 * In the overriden method of the BinarySearchTree (and any similar type of tree), this implementation
+			 * just grabs the root's left most node's value.
+			 */
 			T minimum = Root.Value;
 			
 			if (Root.Left != null)
@@ -2486,8 +2325,14 @@ namespace asm.Collections
 
 		public virtual T Maximum()
 		{
+			// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
 			if (Root == null) return default(T);
 
+			/*
+			 * This tree might not be a valid binary search tree. So a traversal is need to search the entire tree.
+			 * In the overriden method of the BinarySearchTree (and any similar type of tree), this implementation
+			 * just grabs the root's right most node's value.
+			 */
 			T maximum = Root.Value;
 			
 			if (Root.Left != null)
@@ -3133,30 +2978,8 @@ namespace asm.Collections
 
 	/// <inheritdoc />
 	[Serializable]
-	public abstract class LinkedBinaryTree<T> : LinkedBinaryTree<LinkedBinaryTree<T>.Node, T>
+	public abstract class LinkedBinaryTree<T> : LinkedBinaryTree<LinkedBinaryNode<T>, T>
 	{
-		[Serializable]
-		[StructLayout(LayoutKind.Sequential)]
-		public sealed class Node : NodeBase
-		{
-			internal Node(T value)
-				: base(value)
-			{
-			}
-
-			/// <inheritdoc />
-			protected internal override string ToString(int depth, bool diagnostic)
-			{
-				return diagnostic
-						   ? $"{Value} :D{depth}H{Height}B{BalanceFactor}"
-						   : Convert.ToString(Value);
-			}
-
-			public int Height { get; internal set; }
-
-			public int BalanceFactor => (Left?.Height ?? -1) - (Right?.Height ?? -1);
-		}
-
 		/// <inheritdoc />
 		protected LinkedBinaryTree() 
 		{
@@ -3175,7 +2998,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public override Node NewNode(T value) { return new Node(value); }
+		public override LinkedBinaryNode<T> NewNode(T value) { return new LinkedBinaryNode<T>(value); }
 
 		/// <inheritdoc />
 		public override int GetHeight() { return Root?.Height ?? 0; }
@@ -3191,12 +3014,12 @@ namespace asm.Collections
 		* A reference to the drawing only, not the code
 		*/
 		[NotNull]
-		protected Node RotateLeft([NotNull] Node node /* x */)
+		protected LinkedBinaryNode<T> RotateLeft([NotNull] LinkedBinaryNode<T> node /* x */)
 		{
 			bool isLeft = node.IsLeft;
-			Node oldParent = node.Parent;
-			Node newRoot /* y */ = node.Right;
-			Node oldLeft /* T2 */ = newRoot.Left;
+			LinkedBinaryNode<T> oldParent = node.Parent;
+			LinkedBinaryNode<T> newRoot /* y */ = node.Right;
+			LinkedBinaryNode<T> oldLeft /* T2 */ = newRoot.Left;
 
 			// Perform rotation
 			newRoot.Left = node;
@@ -3225,12 +3048,12 @@ namespace asm.Collections
 		}
 
 		[NotNull]
-		protected Node RotateRight([NotNull] Node node /* y */)
+		protected LinkedBinaryNode<T> RotateRight([NotNull] LinkedBinaryNode<T> node /* y */)
 		{
 			bool isLeft = node.IsLeft;
-			Node oldParent = node.Parent;
-			Node newRoot /* x */ = node.Left;
-			Node oldRight /* T2 */ = newRoot.Right;
+			LinkedBinaryNode<T> oldParent = node.Parent;
+			LinkedBinaryNode<T> newRoot /* x */ = node.Left;
+			LinkedBinaryNode<T> oldRight /* T2 */ = newRoot.Right;
 
 			// Perform rotation
 			newRoot.Right = node;
@@ -3258,7 +3081,7 @@ namespace asm.Collections
 			return newRoot;
 		}
 
-		protected void SetHeight([NotNull] Node node)
+		protected void SetHeight([NotNull] LinkedBinaryNode<T> node)
 		{
 			node.Height = 1 + Math.Max(node.Left?.Height ?? -1, node.Right?.Height ?? -1);
 		}
@@ -3267,12 +3090,12 @@ namespace asm.Collections
 	public static class LinkedBinaryTreeExtension
 	{
 		public static string ToString<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, Orientation orientation, bool diagnosticInfo = false)
-			where TNode : LinkedBinaryTree<TNode, T>.NodeBase
+			where TNode : LinkedBinaryNode<TNode, T>
 		{
 			return ToString(thisValue, thisValue.Root, orientation, diagnosticInfo);
 		}
 		public static string ToString<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, TNode node, Orientation orientation, bool diagnosticInfo = false)
-			where TNode : LinkedBinaryTree<TNode, T>.NodeBase
+			where TNode : LinkedBinaryNode<TNode, T>
 		{
 			if (node == null) return string.Empty;
 			return orientation switch
