@@ -57,6 +57,52 @@ namespace asm.Collections
 			return parent;
 		}
 
+		public LinkedBinaryNode<T> Predecessor(T value)
+		{
+			if (Root == null) return null;
+
+			LinkedBinaryNode<T> node = null, root = Root;
+
+			// find the node with the specified value
+			// if value is greater, find the value in the right sub-tree
+			while (root != null && Comparer.IsGreaterThan(value, root.Value))
+			{
+				node = root;
+				root = root.Right;
+			}
+
+			// the maximum value in left subtree is the predecessor node
+			if (root != null && Comparer.IsEqual(value, root.Value) && root.Left != null)
+			{
+				node = root.Left.RightMost();
+			}
+
+			return node;
+		}
+
+		public LinkedBinaryNode<T> Successor(T value)
+		{
+			if (Root == null) return null;
+
+			LinkedBinaryNode<T> node = null, root = Root;
+
+			// find the node with the specified value
+			// if value is lesser, find the value in the left sub-tree
+			while (root != null && Comparer.IsLessThan(value, root.Value))
+			{
+				node = root;
+				root = root.Left;
+			}
+
+			// the minimum value in right subtree is the successor node
+			if (root != null && Comparer.IsEqual(value, root.Value) && root.Right != null)
+			{
+				node = root.Right.LeftMost();
+			}
+
+			return node;
+		}
+
 		/// <inheritdoc />
 		public override void Add(T value)
 		{
@@ -100,10 +146,27 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public override bool Remove(LinkedBinaryNode<T> node)
+		public override bool Remove(T value)
 		{
-			LinkedBinaryNode<T> parent = node.Parent;
-			LinkedBinaryNode<T> child, leftMostParent = null;
+			if (Root == null) return false;
+
+			// find the node
+			int cmp;
+			LinkedBinaryNode<T> parent = null, node = Root;
+			Stack<LinkedBinaryNode<T>> stack = new Stack<LinkedBinaryNode<T>>();
+
+			while (node != null && (cmp = Comparer.Compare(value, node.Value)) != 0)
+			{
+				parent = node;
+				stack.Push(node);
+				node = cmp < 0
+							? node.Left
+							: node.Right;
+			}
+
+			if (node == null || !Comparer.IsEqual(value, node.Value)) return false;
+
+			LinkedBinaryNode<T> child;
 
 			// case 1: node has no right child
 			if (node.Right == null)
@@ -115,47 +178,56 @@ namespace asm.Collections
 			{
 				// move the left to the right child's left
 				node.Right.Left = node.Left;
+				stack.Push(node.Right);
 				child = node.Right;
 			}
 			// case 3: node has a right child that has a left child
 			else
 			{
 				// find the right child's left most child
-				LinkedBinaryNode<T> leftmost = node.Right.LeftMost();
+				LinkedBinaryNode<T> leftMostParent = parent;
+				LinkedBinaryNode<T> leftmost = node.Right;
+
+				while (leftmost.Left != null)
+				{
+					leftMostParent = leftmost;
+					stack.Push(leftMostParent);
+					leftmost = leftMostParent.Left;
+				}
+
+				stack.Push(leftmost);
 				// move the left-most right to the parent's left
-				leftMostParent = leftmost.Parent;
-				leftMostParent.Left = leftmost.Right;
+				if (leftMostParent != null) leftMostParent.Left = leftmost.Right;
 				// adjust the left-most child nodes
 				leftmost.Left = node.Left;
 				leftmost.Right = node.Right;
+				stack.Push(leftmost.Left);
+				stack.Push(leftmost.Right);
 				child = leftmost;
 			}
 
 			if (parent == null)
 			{
-				if (child != null) child.Parent = null;
 				Root = child;
+				if (child != null) stack.Push(child);
 			}
 			else if (Comparer.IsLessThan(node.Value, parent.Value))
 			{
 				// if node < parent, move the left to the parent's left
 				parent.Left = child;
+				stack.Push(parent);
 			}
 			else
 			{
 				// else, move the left to the parent's right
 				parent.Right = child;
+				stack.Push(parent);
 			}
 
-			LinkedBinaryNode<T> update = child != null
-							? leftMostParent ?? child
-							: parent;
-
 			// update nodes
-			while (update != null)
+			while (stack.Count > 0)
 			{
-				SetHeight(update);
-				update = update.Parent;
+				SetHeight(stack.Pop());
 			}
 
 			Count--;
@@ -184,27 +256,21 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public override bool Validate(LinkedBinaryNode<T> node)
 		{
+			// https://leetcode.com/problems/validate-binary-search-tree/solution/
 			if (node == null) return true;
 
-			bool isValid = true;
-			Iterate(node, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e =>
+			T previous = default(T);
+			bool isValid = true, started = false;
+			Iterate(node, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, e =>
 			{
-				if (e.IsLeft)
+				if (!started)
 				{
-					if (Comparer.IsGreaterThanOrEqual(e.Value, e.Parent.Value))
-						isValid = false;
-					else if (e.Parent.IsRight && Comparer.IsLessThan(e.Value, e.Parent.Parent.Value)) 
-						isValid = false;
+					started = true;
+					previous = e.Value;
+					return true;
 				}
 
-				if (isValid && e.IsRight)
-				{
-					if (Comparer.IsLessThan(e.Value, e.Parent.Value)) 
-						isValid = false;
-					else if (isValid && e.Parent.IsLeft && Comparer.IsGreaterThanOrEqual(e.Value, e.Parent.Parent.Value)) 
-						isValid = false;
-				}
-
+				isValid = Comparer.IsLessThan(previous, e.Value);
 				return isValid;
 			});
 			return isValid;
@@ -232,20 +298,21 @@ namespace asm.Collections
 		{
 			if (Root == null || Root.IsLeaf) return;
 
-			// find all unbalanced nodes
-			Queue<LinkedBinaryNode<T>> unbalancedNodes = new Queue<LinkedBinaryNode<T>>();
-			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e =>
+			Queue<(LinkedBinaryNode<T> Parent, LinkedBinaryNode<T> Node)> unbalancedNodes = new Queue<(LinkedBinaryNode<T> Parent, LinkedBinaryNode<T> Node)>();
+
+			// find all unbalanced nodes, will use a post order traversal
+			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, (node, parent, depth) =>
 			{
-				if (IsBalanced(e)) return;
-				unbalancedNodes.Enqueue(e);
+				if (IsBalanced(node)) return;
+				unbalancedNodes.Enqueue((parent, node));
 			});
 
 			while (unbalancedNodes.Count > 0)
 			{
-				LinkedBinaryNode<T> node = unbalancedNodes.Dequeue();
+				(LinkedBinaryNode<T> parent, LinkedBinaryNode<T> node) = unbalancedNodes.Dequeue();
 				// check again if status changed
 				if (IsBalanced(node)) continue;
-				Balance(node);
+				Balance(parent, node);
 			}
 		}
 
@@ -319,10 +386,9 @@ namespace asm.Collections
 			Balance();
 		}
 
-		protected void Balance(LinkedBinaryNode<T> node)
+		protected void Balance(LinkedBinaryNode<T> parent, LinkedBinaryNode<T> node)
 		{
 			/*
-			 * balance the tree
 			 * There are 4 cases for unbalanced nodes
 			 * 1. Left-Left Case: y is left child of z and x is left child of y
 			 *
@@ -359,60 +425,93 @@ namespace asm.Collections
 			 *	   z                            z                            x
 			 *	  / \                          / \                          /  \ 
 			 *	T1   y   Right Rotate (y)    T1   x      Left Rotate(z)   z      y
-			 *	    / \  - - - - - - - - ->     /  \   - - - - - - - ->  / \    / \
-			 *	   x   T4                      T2   y                  T1  T2  T3  T4
-			 *	  / \                              /  \
-			 *	T2   T3                           T3   T4
+			 *	    / \  - - - - - - - - ->      / \   - - - - - - - ->  / \    / \
+			 *	   x   T4                       T2  y                   T1  T2 T3  T4
+			 *	  / \                              / \
+			 *	T2   T3                           T3  T4
 			 */
 			if (node == null || IsBalanced(node)) return;
 
-			Queue<LinkedBinaryNode<T>> queue = new Queue<LinkedBinaryNode<T>>();
-			queue.Enqueue(node);
+			Queue<(LinkedBinaryNode<T> Parent, LinkedBinaryNode<T> Node)> queue = new Queue<(LinkedBinaryNode<T> Parent, LinkedBinaryNode<T> Node)>();
+			queue.Enqueue((parent, node));
 
 			while (queue.Count > 0)
 			{
-				node = queue.Dequeue();
+				(parent, node) = queue.Dequeue();
 				if (Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR) continue;
 
-				LinkedBinaryNode<T> parent = node.Parent;
 				bool changed = false;
 
 				if (node.BalanceFactor > 1) // left heavy
 				{
 					if (node.Left.BalanceFactor < 0)
 					{
-						// duplicate values can make life miserable for us here because it will never be balanced!
+						// duplicate values means nodes will never be balanced!
 						if (Comparer.IsEqual(node.Value, node.Left.Value)) throw new DuplicateKeyException();
-						RotateLeft(node.Left);
+						node.Left = RotateLeft(node.Left);
+						SetHeight(node);
 					}
 
+					BinaryNodeType nodeType = node.NodeType(parent);
 					node = RotateRight(node);
+
+					switch (nodeType)
+					{
+						case BinaryNodeType.Root:
+							Root = node;
+							break;
+						case BinaryNodeType.Left:
+							parent.Left = node;
+							SetHeight(parent);
+							break;
+						case BinaryNodeType.Right:
+							parent.Right = node;
+							SetHeight(parent);
+							break;
+						default:
+							throw new ArgumentOutOfRangeException();
+					}
+
 					changed = true;
 				}
 				else if (node.BalanceFactor < -1) // right heavy
 				{
-					if (node.Right.BalanceFactor > 0) RotateRight(node.Right);
-					// duplicate values can make life miserable for us here because it will never be balanced!
+					if (node.Right.BalanceFactor > 0)
+					{
+						node.Right = RotateRight(node.Right);
+						SetHeight(node);
+					}
+
+					// duplicate values means nodes will never be balanced!
 					if (Comparer.IsEqual(node.Value, node.Right.Value)) throw new DuplicateKeyException();
+					
+					BinaryNodeType nodeType = node.NodeType(parent);
 					node = RotateLeft(node);
+
+					switch (nodeType)
+					{
+						case BinaryNodeType.Root:
+							Root = node;
+							break;
+						case BinaryNodeType.Left:
+							parent.Left = node;
+							SetHeight(parent);
+							break;
+						case BinaryNodeType.Right:
+							parent.Right = node;
+							SetHeight(parent);
+							break;
+						default:
+							throw new ArgumentOutOfRangeException();
+					}
+
 					changed = true;
 				}
 
 				if (!changed) continue;
-
-				if (!IsBalanced(node)) queue.Enqueue(node);
-				if (node.Left != null && !IsBalanced(node.Left)) queue.Enqueue(node.Left);
-				if (node.Right != null && !IsBalanced(node.Right)) queue.Enqueue(node.Right);
-
-				LinkedBinaryNode<T> update = parent;
-
-				// update parents and find unbalanced ones
-				while (update != null)
-				{
-					SetHeight(update);
-					if (!IsBalanced(update)) queue.Enqueue(update);
-					update = update.Parent;
-				}
+				if (!IsBalanced(node)) queue.Enqueue((parent, node));
+				if (node.Left != null && !IsBalanced(node.Left)) queue.Enqueue((node, node.Left));
+				if (node.Right != null && !IsBalanced(node.Right)) queue.Enqueue((node, node.Right));
 			}
 		}
 	}

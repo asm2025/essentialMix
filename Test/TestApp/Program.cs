@@ -667,7 +667,7 @@ namespace TestApp
 			while (more);
 
 			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, int[] array)
-				where TNode : LinkedBinaryTree<TNode, int>.LinkedBinaryNode
+				where TNode : LinkedBinaryNode<TNode, int>
 			{
 				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
 				tree.Add(array);
@@ -755,7 +755,7 @@ public static class Extension
 	}
 
 	public static void Print<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, bool diagnosticInfo = true)
-		where TNode : LinkedBinaryTree<TNode, T>.LinkedBinaryNode
+		where TNode : LinkedBinaryNode<TNode, T>
 	{
 		Console.WriteLine();
 		Console.WriteLine($"{"Dimensions:".Yellow()} {thisValue.Count.ToString().Underline()} x {thisValue.GetHeight().ToString().Underline()}.");
@@ -766,7 +766,7 @@ public static class Extension
 	}
 
 	public static void Print<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, Orientation orientation, bool diagnosticInfo = true)
-		where TNode : LinkedBinaryTree<TNode, T>.LinkedBinaryNode
+		where TNode : LinkedBinaryNode<TNode, T>
 	{
 		string treeString = thisValue.ToString(orientation, diagnosticInfo);
 		Console.WriteLine();
