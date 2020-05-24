@@ -88,7 +88,7 @@ namespace asm.Extensions
 		public static bool In([NotNull] this string thisValue, IEqualityComparer<string> comparer, [NotNull] params string[] list)
 		{
 			if (string.IsNullOrEmpty(thisValue) || list.Length == 0) return false;
-			if (comparer == null) comparer = StringComparer.Ordinal;
+			comparer ??= StringComparer.Ordinal;
 			return list.Where(s => !string.IsNullOrEmpty(s)).Any(s => comparer.Equals(thisValue, s));
 		}
 
@@ -830,9 +830,9 @@ namespace asm.Extensions
 			thisValue.Length.ValidateRange(startIndex, ref count);
 			if (string.IsNullOrEmpty(thisValue) || remove.Length == 0 || count == 0) return thisValue;
 
-			string chrem = remove.ToString(0);
-			if (string.IsNullOrEmpty(chrem)) return thisValue;
-			Regex expression = new Regex($"[{Regex.Escape(chrem)}]", RegexHelper.OPTIONS | RegexOptions.Multiline);
+			string ch = remove.ToString(0);
+			if (string.IsNullOrEmpty(ch)) return thisValue;
+			Regex expression = new Regex($"[{Regex.Escape(ch)}]", RegexHelper.OPTIONS | RegexOptions.Multiline);
 			return expression.Replace(thisValue, string.Empty, count, startIndex);
 		}
 
@@ -959,8 +959,10 @@ namespace asm.Extensions
 			return sb.ToString();
 		}
 
-		public static string Replace(this string thisValue, string oldValue, string newValue, StringComparison comparison) { return Replace(thisValue, oldValue, newValue, comparison, 0, -1); }
-		public static string Replace(this string thisValue, string oldValue, string newValue, StringComparison comparison, int startIndex) { return Replace(thisValue, oldValue, newValue, comparison, startIndex, -1); }
+		[NotNull] 
+		public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, StringComparison comparison) { return Replace(thisValue, oldValue, newValue, comparison, 0, -1); }
+		[NotNull] 
+		public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, StringComparison comparison, int startIndex) { return Replace(thisValue, oldValue, newValue, comparison, startIndex, -1); }
 		[NotNull]
 		public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, StringComparison comparison, int startIndex, int count)
 		{
@@ -999,11 +1001,11 @@ namespace asm.Extensions
 			return Replace(thisValue, oldValue, newValue, ignoreCase, ordinal, cultureInfo.CompareInfo, startIndex, count);
 		}
 
-		public static string Replace(this string thisValue, string oldValue, string newValue, [NotNull] CultureInfo cultureInfo) { return Replace(thisValue, oldValue, newValue, false, cultureInfo, 0, -1); }
-		public static string Replace(this string thisValue, string oldValue, string newValue, [NotNull] CultureInfo cultureInfo, int startIndex) { return Replace(thisValue, oldValue, newValue, false, cultureInfo, startIndex, -1); }
-		public static string Replace(this string thisValue, string oldValue, string newValue, [NotNull] CultureInfo cultureInfo, int startIndex, int count) { return Replace(thisValue, oldValue, newValue, false, cultureInfo, startIndex, count); }
-		public static string Replace(this string thisValue, string oldValue, string newValue, bool ignoreCase, [NotNull] CultureInfo cultureInfo) { return Replace(thisValue, oldValue, newValue, ignoreCase, cultureInfo, 0, -1); }
-		public static string Replace(this string thisValue, string oldValue, string newValue, bool ignoreCase, [NotNull] CultureInfo cultureInfo, int startIndex) { return Replace(thisValue, oldValue, newValue, ignoreCase, cultureInfo, startIndex, -1); }
+		[NotNull] public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, [NotNull] CultureInfo cultureInfo) { return Replace(thisValue, oldValue, newValue, false, cultureInfo, 0, -1); }
+		[NotNull] public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, [NotNull] CultureInfo cultureInfo, int startIndex) { return Replace(thisValue, oldValue, newValue, false, cultureInfo, startIndex, -1); }
+		[NotNull] public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, [NotNull] CultureInfo cultureInfo, int startIndex, int count) { return Replace(thisValue, oldValue, newValue, false, cultureInfo, startIndex, count); }
+		[NotNull] public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, bool ignoreCase, [NotNull] CultureInfo cultureInfo) { return Replace(thisValue, oldValue, newValue, ignoreCase, cultureInfo, 0, -1); }
+		[NotNull] public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, bool ignoreCase, [NotNull] CultureInfo cultureInfo, int startIndex) { return Replace(thisValue, oldValue, newValue, ignoreCase, cultureInfo, startIndex, -1); }
 		[NotNull] public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, bool ignoreCase, [NotNull] CultureInfo cultureInfo, int startIndex, int count) { return Replace(thisValue, oldValue, newValue, ignoreCase, Equals(cultureInfo, CultureInfo.InvariantCulture), cultureInfo.CompareInfo, startIndex, count); }
 
 		public static string Reverse(this string thisValue, [NotNull] params char[] separator)
@@ -1396,8 +1398,8 @@ namespace asm.Extensions
 				yield return thisValue;
 			else
 			{
-				string seps = Regex.Escape(separator.ToString(0)).Replace("-", @"\-");
-				string pattern = string.Format(includeSeparator ? RegexHelper.RGX_PARTITIONS_P : RGX_PARTITIONS, seps);
+				string separators = Regex.Escape(separator.ToString(0)).Replace("-", @"\-");
+				string pattern = string.Format(includeSeparator ? RegexHelper.RGX_PARTITIONS_P : RGX_PARTITIONS, separators);
 				Match m = Regex.Match(thisValue, pattern, options);
 
 				while (m.Success)
@@ -1537,6 +1539,8 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		// This is lame!
+		// ReSharper disable once FunctionComplexityOverflow
 		public static string Sprintf([NotNull] this string thisValue, params object[] parameters)
 		{
 			if (parameters.IsNullOrEmpty()) return thisValue;
@@ -2178,7 +2182,7 @@ namespace asm.Extensions
 		{
 			thisValue.Length.ValidateRange(startIndex, ref count);
 			if (string.IsNullOrEmpty(thisValue) || count == 0 || string.IsNullOrEmpty(oldValue) || oldValue.Length > thisValue.Length) return thisValue;
-			if (newValue == null) newValue = string.Empty;
+			newValue ??= string.Empty;
 
 			CompareOptions options = CompareOptions.None;
 			

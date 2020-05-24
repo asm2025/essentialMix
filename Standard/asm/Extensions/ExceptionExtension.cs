@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using asm.ComponentModel.DataAnnotations;
 using asm.Helpers;
-using JetBrains.Annotations;
 
 namespace asm.Extensions
 {

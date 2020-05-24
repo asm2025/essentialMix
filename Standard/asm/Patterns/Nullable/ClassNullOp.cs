@@ -1,5 +1,4 @@
 ﻿using asm.Internal;
-using JetBrains.Annotations;
 
 namespace asm.Patterns.Nullable
 {

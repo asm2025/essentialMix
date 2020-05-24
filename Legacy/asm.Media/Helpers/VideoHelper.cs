@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using asm.Helpers;
 using asm.Media.ffmpeg.Commands;
-using JetBrains.Annotations;
 
 namespace asm.Media.Helpers
 {

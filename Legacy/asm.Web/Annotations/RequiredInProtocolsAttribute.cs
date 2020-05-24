@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Web;
 using asm.Helpers;
-using JetBrains.Annotations;
 
 namespace asm.Web.Annotations
 {

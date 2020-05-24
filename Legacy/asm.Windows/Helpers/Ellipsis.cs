@@ -3,7 +3,6 @@ using System.Drawing;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using JetBrains.Annotations;
 
 namespace asm.Windows.Helpers
 {

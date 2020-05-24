@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using asm.Extensions;
-using JetBrains.Annotations;
 
 namespace asm.Data.Patterns.Table
 {

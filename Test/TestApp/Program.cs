@@ -41,7 +41,9 @@ namespace TestApp
 			//TestRedBlackTreeAdd();
 			//TestRedBlackTreeRemove();
 
-			TestAllBinaryTrees();
+			//TestAllBinaryTrees();
+
+			TestTreeEquality();
 
 			ConsoleHelper.Pause();
 		}
@@ -51,7 +53,7 @@ namespace TestApp
 			const int TRIES = 100;
 			const int RESULT_COUNT = 5;
 
-			TestTitle("Testing Sort Algorithms...");
+			Title("Testing Sort Algorithms...");
 
 			string[] sortAlgorithms = 
 			{
@@ -188,7 +190,7 @@ namespace TestApp
 
 		private static void TestLinkedQueue()
 		{
-			TestTitle("Testing LinkedQueue...");
+			Title("Testing LinkedQueue...");
 			
 			int len = RNGRandomHelper.Next(5, 20);
 			int[] values = GetRandomIntegers(len);
@@ -223,7 +225,7 @@ namespace TestApp
 
 		private static void TestMinMaxQueue()
 		{
-			TestTitle("Testing MinMaxQueue...");
+			Title("Testing MinMaxQueue...");
 
 			int len = RNGRandomHelper.Next(5, 20);
 			int[] values = GetRandomIntegers(len);
@@ -273,7 +275,7 @@ namespace TestApp
 			const string TREE_DATA_POST = "BAEDCHGKJIF";
 			const int NUM_TESTS = 7;
 
-			TestTitle("Testing BinaryTree from traversal values...");
+			Title("Testing BinaryTree from traversal values...");
 
 			BinarySearchTree<char> tree = new BinarySearchTree<char>();
 
@@ -347,7 +349,7 @@ namespace TestApp
 
 		private static void TestBinarySearchTreeAdd()
 		{
-			TestTitle("Testing BinarySearchTree.Add()...");
+			Title("Testing BinarySearchTree.Add()...");
 
 			bool more;
 
@@ -382,7 +384,7 @@ namespace TestApp
 
 		private static void TestBinarySearchTreeRemove()
 		{
-			TestTitle("Testing BinarySearchTree.Remove()...");
+			Title("Testing BinarySearchTree.Remove()...");
 
 			bool more;
 
@@ -429,7 +431,7 @@ namespace TestApp
 
 		private static void TestBinarySearchTreeBalance()
 		{
-			TestTitle("Testing BinarySearchTree.Balance()...");
+			Title("Testing BinarySearchTree.Balance()...");
 
 			bool more;
 
@@ -483,7 +485,7 @@ namespace TestApp
 
 		private static void TestAVLTreeAdd()
 		{
-			TestTitle("Testing AVLTree.Add()...");
+			Title("Testing AVLTree.Add()...");
 
 			bool more;
 
@@ -519,7 +521,7 @@ namespace TestApp
 
 		private static void TestAVLTreeRemove()
 		{
-			TestTitle("Testing AVLTree.Remove()...");
+			Title("Testing AVLTree.Remove()...");
 
 			bool more;
 
@@ -560,7 +562,7 @@ namespace TestApp
 
 		private static void TestRedBlackTreeAdd()
 		{
-			TestTitle("Testing RedBlackTree.Add()...");
+			Title("Testing RedBlackTree.Add()...");
 
 			bool more;
 
@@ -596,7 +598,7 @@ namespace TestApp
 
 		private static void TestRedBlackTreeRemove()
 		{
-			TestTitle("Testing RedBlackTree.Remove()...");
+			Title("Testing RedBlackTree.Remove()...");
 
 			bool more;
 
@@ -637,7 +639,7 @@ namespace TestApp
 
 		private static void TestAllBinaryTrees()
 		{
-			TestTitle("Testing all BinaryTrees...");
+			Title("Testing all BinaryTrees...");
 
 			bool more;
 
@@ -695,7 +697,72 @@ namespace TestApp
 			}
 		}
 
-		private static void TestTitle(string title)
+		private static void TestTreeEquality()
+		{
+			Title("Testing tree equality...");
+
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Console.WriteLine();
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				Console.WriteLine();
+				Console.WriteLine("Testing BinarySearchTree: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine();
+				LinkedBinaryTree<int> tree1 = new BinarySearchTree<int>();
+				LinkedBinaryTree<int> tree2 = new BinarySearchTree<int>();
+				DoTheTest(tree1, tree2, values);
+
+				Console.WriteLine();
+				Console.WriteLine("Testing BinarySearchTree and AVLTree: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine();
+				tree1.Clear();
+				tree2 = new AVLTree<int>();
+				DoTheTest(tree1, tree2, values);
+
+				Console.WriteLine();
+				Console.WriteLine("Testing AVLTree: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine();
+				tree1 = new AVLTree<int>();
+				tree2 = new AVLTree<int>();
+				DoTheTest(tree1, tree2, values);
+
+				Console.WriteLine();
+				Console.WriteLine("Testing RedBlackTree: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine();
+				RedBlackTree<int> rbtree1 = new RedBlackTree<int>();
+				RedBlackTree<int> rbtree2 = new RedBlackTree<int>();
+				DoTheTest(rbtree1, rbtree2, values);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+			}
+			while (more);
+
+			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree1, LinkedBinaryTree<TNode, int> tree2, int[] array)
+				where TNode : LinkedBinaryNode<TNode, int>
+			{
+				Console.WriteLine($"Testing {tree1.GetType().Name} and {tree1.GetType().Name}...".BrightGreen());
+				tree1.Add(array);
+				tree2.Add(array);
+
+				Console.WriteLine("InOrder1: ".BrightBlack() + string.Join(", ", tree1));
+				Console.WriteLine("InOrder2: ".BrightBlack() + string.Join(", ", tree2));
+				tree1.Print();
+				tree2.Print();
+				Console.WriteLine($"tree1 == tree2? {tree1.Equals(tree2).ToYesNo()}");
+			}
+		}
+
+		private static void Title(string title)
 		{
 			Console.WriteLine();
 			Console.WriteLine();

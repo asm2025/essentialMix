@@ -3,7 +3,6 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Xml;
 using asm.Data.Extensions;
-using JetBrains.Annotations;
 
 namespace asm.Data.Helpers
 {

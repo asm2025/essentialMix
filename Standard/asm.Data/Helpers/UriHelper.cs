@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using JetBrains.Annotations;
 
 namespace asm.Data.Helpers
 {

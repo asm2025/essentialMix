@@ -298,21 +298,21 @@ namespace asm.Collections
 		{
 			if (Root == null || Root.IsLeaf) return;
 
-			Queue<(LinkedBinaryNode<T> Parent, LinkedBinaryNode<T> Node)> unbalancedNodes = new Queue<(LinkedBinaryNode<T> Parent, LinkedBinaryNode<T> Node)>();
+			Queue<LinkedBinaryNode<T>> unbalancedNodes = new Queue<LinkedBinaryNode<T>>();
 
 			// find all unbalanced nodes, will use a post order traversal
-			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, (node, parent, depth) =>
+			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e =>
 			{
-				if (IsBalanced(node)) return;
-				unbalancedNodes.Enqueue((parent, node));
+				if (IsBalanced(e)) return;
+				unbalancedNodes.Enqueue(e);
 			});
 
 			while (unbalancedNodes.Count > 0)
 			{
-				(LinkedBinaryNode<T> parent, LinkedBinaryNode<T> node) = unbalancedNodes.Dequeue();
+				LinkedBinaryNode<T> node = unbalancedNodes.Dequeue();
 				// check again if status changed
 				if (IsBalanced(node)) continue;
-				Balance(parent, node);
+				Balance(node);
 			}
 		}
 
@@ -386,7 +386,7 @@ namespace asm.Collections
 			Balance();
 		}
 
-		protected void Balance(LinkedBinaryNode<T> parent, LinkedBinaryNode<T> node)
+		protected void Balance(LinkedBinaryNode<T> node)
 		{
 			/*
 			 * There are 4 cases for unbalanced nodes
@@ -432,14 +432,15 @@ namespace asm.Collections
 			 */
 			if (node == null || IsBalanced(node)) return;
 
-			Queue<(LinkedBinaryNode<T> Parent, LinkedBinaryNode<T> Node)> queue = new Queue<(LinkedBinaryNode<T> Parent, LinkedBinaryNode<T> Node)>();
-			queue.Enqueue((parent, node));
+			Queue<LinkedBinaryNode<T>> queue = new Queue<LinkedBinaryNode<T>>();
+			queue.Enqueue(node);
 
 			while (queue.Count > 0)
 			{
-				(parent, node) = queue.Dequeue();
+				node = queue.Dequeue();
 				if (Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR) continue;
 
+				LinkedBinaryNode<T> parent = node.Parent;
 				bool changed = false;
 
 				if (node.BalanceFactor > 1) // left heavy
@@ -509,9 +510,9 @@ namespace asm.Collections
 				}
 
 				if (!changed) continue;
-				if (!IsBalanced(node)) queue.Enqueue((parent, node));
-				if (node.Left != null && !IsBalanced(node.Left)) queue.Enqueue((node, node.Left));
-				if (node.Right != null && !IsBalanced(node.Right)) queue.Enqueue((node, node.Right));
+				if (!IsBalanced(node)) queue.Enqueue(node);
+				if (node.Left != null && !IsBalanced(node.Left)) queue.Enqueue(node.Left);
+				if (node.Right != null && !IsBalanced(node.Right)) queue.Enqueue(node.Right);
 			}
 		}
 	}

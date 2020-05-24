@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -21,9 +22,9 @@ namespace asm.Extensions
 	{
 		private const BindingFlags BF_FIND_EVENT_FIELD = Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE_STATIC | BindingFlags.DeclaredOnly;
 
-		private static readonly IDictionary<Type, IDictionary<string, MethodInfo>> EXPLICIT_INTERFACE_CACHE = new Dictionary<Type, IDictionary<string, MethodInfo>>();
-		private static readonly IDictionary<KeyValuePair<Type, Type>, bool> CAST_CACHE = new Dictionary<KeyValuePair<Type, Type>, bool>();
-		private static readonly IDictionary<KeyValuePair<Type, Type>, bool> IMPLICIT_CAST_CACHE = new Dictionary<KeyValuePair<Type, Type>, bool>();
+		private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, MethodInfo>> __explicitInterfaceCache = new ConcurrentDictionary<Type, ConcurrentDictionary<string, MethodInfo>>();
+		private static readonly ConcurrentDictionary<KeyValuePair<Type, Type>, bool> __castCache = new ConcurrentDictionary<KeyValuePair<Type, Type>, bool>();
+		private static readonly ConcurrentDictionary<KeyValuePair<Type, Type>, bool> __implicitCastCache = new ConcurrentDictionary<KeyValuePair<Type, Type>, bool>();
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static TypeCode AsTypeCode([NotNull] this Type thisValue, bool resolveGenerics = false)
@@ -922,20 +923,14 @@ namespace asm.Extensions
 			if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
 			if (!thisValue.IsInterface) throw new ArgumentException("Type is not an interface.", nameof(thisValue));
 
-			if (!EXPLICIT_INTERFACE_CACHE.TryGetValue(thisValue, out IDictionary<string, MethodInfo> dictionary))
-			{
-				dictionary = new Dictionary<string, MethodInfo>(StringComparer.OrdinalIgnoreCase);
-				EXPLICIT_INTERFACE_CACHE[thisValue] = dictionary;
-			}
-
+			ConcurrentDictionary<string, MethodInfo> dictionary = __explicitInterfaceCache.GetOrAdd(thisValue, type => new ConcurrentDictionary<string, MethodInfo>(StringComparer.OrdinalIgnoreCase));
 			string key = $"{thisValue.FullName}_{name}";
-			//if (types != null && types.Length > 0) key += "_" + string.Join("_", types.Select(t => t.FullName));
-			if (dictionary.TryGetValue(key, out MethodInfo method)) return method;
-
-			string dotName = "." + name;
-			method = thisValue.GetMethods(BINDING_FLAGS)
-				.FirstOrDefault(m => m.IsFinal && (m.Name.IsSame(name) || m.Name.EndsWithOrdinal(dotName)));
-			if (method != null) dictionary[key] = method;
+			MethodInfo method = dictionary.GetOrAdd(key, s =>
+			{
+				string dotName = "." + name;
+				return thisValue.GetMethods(BINDING_FLAGS)
+								.FirstOrDefault(m => m.IsFinal && (m.Name.IsSame(name) || m.Name.EndsWithOrdinal(dotName)));
+			});
 			return method;
 		}
 
@@ -1076,41 +1071,37 @@ namespace asm.Extensions
 			// for nullable types, we can simply strip off the nullability and evaluate the underlying types
 			thisValue = thisValue.ResolveType();
 			type = type.ResolveType();
-			if (thisValue.CanImplicitlyCastTo(type)) return true;
+			if (CanImplicitlyCastTo(thisValue, type)) return true;
 
 			KeyValuePair<Type, Type> key = new KeyValuePair<Type, Type>(thisValue, type);
-			if (CAST_CACHE.TryGetValue(key, out bool cachedValue)) return cachedValue;
-
-			bool result;
-
-			if (thisValue.IsValueType)
+			return __castCache.GetOrAdd(key, e =>
 			{
-				try
+				if (thisValue.IsValueType)
 				{
-					Func<bool> expr = AttemptExplicitCast<object, object>;
-					result = (bool)expr.Method
-						.GetGenericMethodDefinition()
-						.MakeGenericMethod(thisValue, type)
-						.Invoke(null, Array.Empty<object>());
+					try
+					{
+						Func<bool> expr = AttemptExplicitCast<object, object>;
+						return (bool)expr.Method
+											.GetGenericMethodDefinition()
+											.MakeGenericMethod(thisValue, type)
+											.Invoke(null, Array.Empty<object>());
+					}
+					catch
+					{
+						// if the code runs in an environment where this message is localized, we could attempt a known failure first and base the regex on it's message
+						return false;
+					}
 				}
-				catch
-				{
-					// if the code runs in an environment where this message is localized, we could attempt a known failure first and base the regex on it's message
-					result = false;
-				}
-			}
-			else
-			{
-				// if the from type == null, the dynamic logic above won't be of any help because 
-				// either both types are nullable and thus a runtime cast of null => null will 
-				// succeed OR we get a runtime failure related to the inability to cast null to 
-				// the desired type, which may or may not indicate an actual issue. thus, we do 
-				// the work manually
-				result = thisValue.CanReferenceTypeExplicitlyCastTo(type);
-			}
 
-			CAST_CACHE[key] = result;
-			return result;
+				/*
+				 * if the from type == null, the dynamic logic above won't be of any help because
+				 * either both types are nullable and thus a runtime cast of null => null will
+				 * succeed OR we get a runtime failure related to the inability to cast null to
+				 * the desired type, which may or may not indicate an actual issue. thus, we do
+				 * the work manually
+				 */ 
+				return CanReferenceTypeExplicitlyCastTo(thisValue, type);
+			});
 		}
 
 		public static bool CanImplicitlyCastTo([NotNull] this Type thisValue, [NotNull] Type value)
@@ -1119,27 +1110,23 @@ namespace asm.Extensions
 			if (value.IsAssignableFrom(thisValue)) return true;
 
 			KeyValuePair<Type, Type> key = new KeyValuePair<Type, Type>(thisValue, value);
-			if (IMPLICIT_CAST_CACHE.TryGetValue(key, out bool cachedValue)) return cachedValue;
-
-			bool result;
-
-			try
+			return __implicitCastCache.GetOrAdd(key, e =>
 			{
-				// overload of GetMethod() from http://www.codeducky.org/10-utilities-c-developers-should-know-part-two/ 
-				// that takes Expression<Action>
-				Func<bool> expr = AttemptImplicitCast<object, object>;
-				result = (bool)expr.Method
-					.GetGenericMethodDefinition()
-					.MakeGenericMethod(thisValue, value)
-					.Invoke(null, new object[0]);
-			}
-			catch
-			{
-				result = false;
-			}
-
-			IMPLICIT_CAST_CACHE[key] = result;
-			return result;
+				try
+				{
+					// overload of GetMethod() from http://www.codeducky.org/10-utilities-c-developers-should-know-part-two/ 
+					// that takes Expression<Action>
+					Func<bool> expr = AttemptImplicitCast<object, object>;
+					return (bool)expr.Method
+									.GetGenericMethodDefinition()
+									.MakeGenericMethod(thisValue, value)
+									.Invoke(null, new object[0]);
+				}
+				catch
+				{
+					return false;
+				}
+			});
 		}
 
 		public static bool CanReferenceTypeExplicitlyCastTo([NotNull] this Type thisValue, [NotNull] Type value)
@@ -1630,7 +1617,7 @@ namespace asm.Extensions
 						case 1:
 							return genericArgs[0];
 						default:
-							if (types == null) types = new List<Type[]>();
+							types ??= new List<Type[]>();
 							types.Add(genericArgs);
 							break;
 					}

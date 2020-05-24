@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Security.Permissions;
 using System.Web;
 using asm.ComponentModel;
-using JetBrains.Annotations;
 
 namespace asm.Web.Drawing
 {

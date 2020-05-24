@@ -1,5 +1,4 @@
 using System;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 

@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using asm.Extensions;
 using asm.Helpers;
-using JetBrains.Annotations;
 using Math = asm.Numeric.Math;
 
 namespace asm.Media

@@ -1,6 +1,5 @@
 using System.IO;
 using asm.Extensions;
-using JetBrains.Annotations;
 using Microsoft.Net.Http.Headers;
 
 namespace asm.Core.Web.Extensions

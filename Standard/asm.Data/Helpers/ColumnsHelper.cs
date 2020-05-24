@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using asm.Extensions;
 using asm.Data.Annotations;
-using JetBrains.Annotations;
 
 namespace asm.Data.Helpers
 {
