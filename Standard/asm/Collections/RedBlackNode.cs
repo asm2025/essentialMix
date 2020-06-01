@@ -25,11 +25,9 @@ namespace asm.Collections
 		public bool HasRedRight => Right != null && Right.Color;
 
 		/// <inheritdoc />
-		protected internal override string ToString(int depth, bool diagnostic)
+		protected internal override string ToString(int depth)
 		{
-			return diagnostic
-						? $"{Value} {(Color ? 'R' : 'B')}"
-						: Convert.ToString(Value);
+			return $"{Value} {(Color ? 'R' : 'B')}";
 		}
 
 		public RedBlackNode<T> Uncle()

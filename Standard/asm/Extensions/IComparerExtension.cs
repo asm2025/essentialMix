@@ -52,33 +52,33 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsEqual<T>([NotNull] this IComparer<T> thisValue, T a, T b)
+		public static bool IsEqual<T>([NotNull] this IComparer<T> thisValue, T x, T y)
 		{
-			return thisValue.Compare(a, b) == 0;
+			return thisValue.Compare(x, y) == 0;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsLessThan<T>([NotNull] this IComparer<T> thisValue, T value, T minimum)
+		public static bool IsLessThan<T>([NotNull] this IComparer<T> thisValue, T x, T y)
 		{
-			return thisValue.Compare(value, minimum) < 0;
+			return thisValue.Compare(x, y) < 0;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsLessThanOrEqual<T>([NotNull] this IComparer<T> thisValue, T value, T minimum)
+		public static bool IsLessThanOrEqual<T>([NotNull] this IComparer<T> thisValue, T x, T y)
 		{
-			return thisValue.Compare(value, minimum) <= 0;
+			return thisValue.Compare(x, y) <= 0;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsGreaterThan<T>([NotNull] this IComparer<T> thisValue, T value, T minimum)
+		public static bool IsGreaterThan<T>([NotNull] this IComparer<T> thisValue, T x, T y)
 		{
-			return thisValue.Compare(value, minimum) > 0;
+			return thisValue.Compare(x, y) > 0;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsGreaterThanOrEqual<T>([NotNull] this IComparer<T> thisValue, T value, T maximum)
+		public static bool IsGreaterThanOrEqual<T>([NotNull] this IComparer<T> thisValue, T x, T y)
 		{
-			return thisValue.Compare(value, maximum) >= 0;
+			return thisValue.Compare(x, y) >= 0;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -154,11 +154,11 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static T Minimum<T>([NotNull] this IComparer<T> thisValue, T value, T other)
+		public static T Minimum<T>([NotNull] this IComparer<T> thisValue, T x, T y)
 		{
-			return thisValue.Compare(value, other) < 0
-						? value
-						: other;
+			return thisValue.Compare(x, y) < 0
+						? x
+						: y;
 		}
 
 		public static T Minimum<T>([NotNull] this IComparer<T> thisValue, T value, [NotNull] params T[] values)
@@ -178,11 +178,11 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static T Maximum<T>([NotNull] this IComparer<T> thisValue, T value, T other)
+		public static T Maximum<T>([NotNull] this IComparer<T> thisValue, T x, T y)
 		{
-			return thisValue.Compare(value, other) > 0
-						? value
-						: other;
+			return thisValue.Compare(x, y) > 0
+						? x
+						: y;
 		}
 
 		public static T Maximum<T>([NotNull] this IComparer<T> thisValue, T value, [NotNull] params T[] values)

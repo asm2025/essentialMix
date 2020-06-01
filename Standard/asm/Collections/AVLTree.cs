@@ -15,8 +15,7 @@ namespace asm.Collections
 	public sealed class AVLTree<T> : BinarySearchTree<T>
 	{
 		/// <inheritdoc />
-		public AVLTree()
-			: this(Comparer<T>.Default)
+		public AVLTree() 
 		{
 		}
 
@@ -27,26 +26,19 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public AVLTree(T value, IComparer<T> comparer)
-			: base(comparer)
-		{
-			Add(value);
-		}
-
 		public AVLTree([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
+			: base(collection)
 		{
-		}
-
-		public AVLTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
-			: base(comparer)
-		{
-			foreach (T value in collection) 
-				Add(value);
 		}
 
 		/// <inheritdoc />
-		internal AVLTree(SerializationInfo info, StreamingContext context)
+		public AVLTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
+			: base(collection, comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		public AVLTree(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}

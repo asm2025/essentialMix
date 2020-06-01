@@ -66,10 +66,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Standard\asm.Compression\asm.Compression.csproj">
-      <Project>{74b9afaa-6bb2-4f12-9bbe-a80896ac7694}</Project>
-      <Name>asm.Compression</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Standard\asm.Exceptions\asm.Exceptions.csproj">
       <Project>{54122B8A-E0FC-4137-B232-8709F445CAF6}</Project>
       <Name>asm.Exceptions</Name>

@@ -9,6 +9,7 @@ using asm.Extensions;
 using asm.Patterns.Object;
 using JetBrains.Annotations;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Windows
 {
 	/// <summary>

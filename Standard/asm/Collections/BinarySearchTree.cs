@@ -5,6 +5,7 @@ using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Patterns.Collections;
 using asm.Patterns.Layout;
+using JetBrains.Annotations;
 
 namespace asm.Collections
 {
@@ -18,14 +19,25 @@ namespace asm.Collections
 		protected const int BALANCE_FACTOR = 1;
 
 		/// <inheritdoc />
-		public BinarySearchTree()
-			: this(Comparer<T>.Default)
+		public BinarySearchTree() 
 		{
 		}
 
 		/// <inheritdoc />
 		public BinarySearchTree(IComparer<T> comparer)
 			: base(comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		public BinarySearchTree([NotNull] IEnumerable<T> collection)
+			: base(collection)
+		{
+		}
+
+		/// <inheritdoc />
+		public BinarySearchTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
+			: base(collection, comparer)
 		{
 		}
 
@@ -39,7 +51,7 @@ namespace asm.Collections
 		public override bool AutoBalance { get; } = false;
 
 		/// <inheritdoc />
-		public override LinkedBinaryNode<T> FindNearestLeaf(T value)
+		public override LinkedBinaryNode<T> FindNearestParent(T value)
 		{
 			LinkedBinaryNode<T> parent = null, next = Root;
 

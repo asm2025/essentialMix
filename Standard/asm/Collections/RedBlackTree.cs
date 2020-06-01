@@ -18,8 +18,7 @@ namespace asm.Collections
 	public sealed class RedBlackTree<T> : LinkedBinaryTree<RedBlackNode<T>, T>
 	{
 		/// <inheritdoc />
-		public RedBlackTree()
-			: this(Comparer<T>.Default)
+		public RedBlackTree() 
 		{
 		}
 
@@ -30,22 +29,15 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public RedBlackTree(T value, IComparer<T> comparer)
-			: base(comparer)
-		{
-			Add(value);
-		}
-
 		public RedBlackTree([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
+			: base(collection)
 		{
 		}
 
+		/// <inheritdoc />
 		public RedBlackTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
-			: base(comparer)
+			: base(collection, comparer)
 		{
-			foreach (T value in collection) 
-				Add(value);
 		}
 
 		/// <inheritdoc />
@@ -69,7 +61,7 @@ namespace asm.Collections
 			return height;
 		}
 
-		public override RedBlackNode<T> FindNearestLeaf(T value)
+		public override RedBlackNode<T> FindNearestParent(T value)
 		{
 			RedBlackNode<T> parent = null, next = Root;
 
@@ -137,7 +129,7 @@ namespace asm.Collections
 		public override void Add(T value)
 		{
 			// find a parent
-			RedBlackNode<T> parent = FindNearestLeaf(value);
+			RedBlackNode<T> parent = FindNearestParent(value);
 
 			if (parent == null)
 			{

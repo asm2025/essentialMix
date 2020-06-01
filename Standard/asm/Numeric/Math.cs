@@ -120,6 +120,7 @@ namespace asm.Numeric
 		public static bool IsPrime(int value) { return IsPrime((ulong)value); }
 		public static bool IsPrime(uint value) { return IsPrime((ulong)value); }
 		public static bool IsPrime(long value) { return IsPrime((ulong)value); }
+
 		public static bool IsPrime(ulong value)
 		{
 			if ((value & 1ul) == 0 || value < 2ul || value % 2ul == 0ul || value % 3ul == 0ul || value % 5ul == 0ul) return false;
@@ -129,7 +130,8 @@ namespace asm.Numeric
 			if (__primes.TakeWhile(prime => prime <= uMax).Any(prime => value % prime == 0ul)) return false;
 
 			for (ulong divisor = uMax; divisor <= uMax; divisor += 2ul)
-				if (value % divisor == 0ul) return false;
+				if (value % divisor == 0ul)
+					return false;
 
 			__primes.Add(value);
 			return true;
@@ -154,6 +156,7 @@ namespace asm.Numeric
 		public static int GetPrime(int value) { return (int)GetPrime((ulong)value); }
 		public static uint GetPrime(uint value) { return (uint)GetPrime((ulong)value); }
 		public static long GetPrime(long value) { return (long)GetPrime((ulong)value); }
+
 		public static ulong GetPrime(ulong value)
 		{
 			if (value < 2ul) return 2ul;
@@ -271,7 +274,7 @@ namespace asm.Numeric
 			if (x == 0) throw new ArgumentOutOfRangeException(nameof(x));
 			if (y == 0) throw new ArgumentOutOfRangeException(nameof(y));
 			if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
-	
+
 			if (resizeToX)
 			{
 				double ry = (double)value / x;
@@ -287,7 +290,7 @@ namespace asm.Numeric
 			if (x == 0) throw new ArgumentOutOfRangeException(nameof(x));
 			if (y == 0) throw new ArgumentOutOfRangeException(nameof(y));
 			if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
-	
+
 			if (resizeToX)
 			{
 				double ry = (double)value / x;
@@ -303,7 +306,7 @@ namespace asm.Numeric
 			if (x == 0) throw new ArgumentOutOfRangeException(nameof(x));
 			if (y == 0) throw new ArgumentOutOfRangeException(nameof(y));
 			if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
-	
+
 			if (resizeToX)
 			{
 				double ry = (double)value / x;
@@ -319,7 +322,7 @@ namespace asm.Numeric
 			if (x == 0) throw new ArgumentOutOfRangeException(nameof(x));
 			if (y == 0) throw new ArgumentOutOfRangeException(nameof(y));
 			if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
-	
+
 			if (resizeToX)
 			{
 				double ry = (double)value / x;
@@ -335,7 +338,7 @@ namespace asm.Numeric
 			if (x == 0) throw new ArgumentOutOfRangeException(nameof(x));
 			if (y == 0) throw new ArgumentOutOfRangeException(nameof(y));
 			if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
-	
+
 			if (resizeToX)
 			{
 				double ry = (double)value / x;
@@ -351,7 +354,7 @@ namespace asm.Numeric
 			if (x == 0) throw new ArgumentOutOfRangeException(nameof(x));
 			if (y == 0) throw new ArgumentOutOfRangeException(nameof(y));
 			if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
-	
+
 			if (resizeToX)
 			{
 				double ry = (double)value / x;
@@ -367,7 +370,7 @@ namespace asm.Numeric
 			if (x == 0) throw new ArgumentOutOfRangeException(nameof(x));
 			if (y == 0) throw new ArgumentOutOfRangeException(nameof(y));
 			if (value == 0) throw new ArgumentOutOfRangeException(nameof(value));
-	
+
 			if (resizeToX)
 			{
 				double ry = (double)value / x;
@@ -655,8 +658,10 @@ namespace asm.Numeric
 			if (a == 0 || b == 0) return 0;
 			if (a == 1 || b == 1) return 1;
 
-				byte gcd = GCD(a, b);
-			return gcd == 0 ? (byte)0 : (byte)(a / gcd * b);
+			byte gcd = GCD(a, b);
+			return gcd == 0
+						? (byte)0
+						: (byte)(a / gcd * b);
 		}
 
 		/// <summary>
@@ -670,8 +675,10 @@ namespace asm.Numeric
 			if (a == 0 || b == 0) return 0;
 			if (a == 1 || b == 1) return 1;
 
-				short gcd = GCD(a, b);
-			return gcd == 0 ? (short)0 : (short)(a / gcd * b);
+			short gcd = GCD(a, b);
+			return gcd == 0
+						? (short)0
+						: (short)(a / gcd * b);
 		}
 
 		/// <summary>
@@ -685,8 +692,10 @@ namespace asm.Numeric
 			if (a == 0 || b == 0) return 0;
 			if (a == 1 || b == 1) return 1;
 
-				ushort gcd = GCD(a, b);
-			return gcd == 0 ? (ushort)0 : (ushort)(a / gcd * b);
+			ushort gcd = GCD(a, b);
+			return gcd == 0
+						? (ushort)0
+						: (ushort)(a / gcd * b);
 		}
 
 		/// <summary>
@@ -700,8 +709,10 @@ namespace asm.Numeric
 			if (a == 0 || b == 0) return 0;
 			if (a == 1 || b == 1) return 1;
 
-				int gcd = GCD(a, b);
-			return gcd == 0 ? 0 : a / gcd * b;
+			int gcd = GCD(a, b);
+			return gcd == 0
+						? 0
+						: a / gcd * b;
 		}
 
 		/// <summary>
@@ -715,8 +726,10 @@ namespace asm.Numeric
 			if (a == 0 || b == 0) return 0;
 			if (a == 1 || b == 1) return 1;
 
-				uint gcd = GCD(a, b);
-			return gcd == 0 ? 0 : a / gcd * b;
+			uint gcd = GCD(a, b);
+			return gcd == 0
+						? 0
+						: a / gcd * b;
 		}
 
 		/// <summary>
@@ -730,8 +743,10 @@ namespace asm.Numeric
 			if (a == 0 || b == 0) return 0;
 			if (a == 1 || b == 1) return 1;
 
-				long gcd = GCD(a, b);
-			return gcd == 0 ? 0 : a / gcd * b;
+			long gcd = GCD(a, b);
+			return gcd == 0
+						? 0
+						: a / gcd * b;
 		}
 
 		/// <summary>
@@ -746,7 +761,9 @@ namespace asm.Numeric
 			if (a == 1 || b == 1) return 1;
 
 			ulong gcd = GCD(a, b);
-			return gcd == 0 ? 0 : a / gcd * b;
+			return gcd == 0
+						? 0
+						: a / gcd * b;
 		}
 
 		/// <summary>
@@ -897,7 +914,9 @@ namespace asm.Numeric
 			if (sign == -1) value = SysMath.Abs(value);
 
 			// Accuracy is the maximum relative error; convert to absolute maxError
-			float maxError = sign == 0 ? accuracy : value * accuracy;
+			float maxError = sign == 0
+								? accuracy
+								: value * accuracy;
 
 			int n = (int)SysMath.Floor(value);
 			value -= n;
@@ -940,7 +959,9 @@ namespace asm.Numeric
 			if (sign == -1) value = SysMath.Abs(value);
 
 			// Accuracy is the maximum relative error; convert to absolute maxError
-			double maxError = sign == 0 ? accuracy : value * accuracy;
+			double maxError = sign == 0
+								? accuracy
+								: value * accuracy;
 
 			int n = (int)SysMath.Floor(value);
 			value -= n;
@@ -983,7 +1004,9 @@ namespace asm.Numeric
 			if (sign == -1) value = SysMath.Abs(value);
 
 			// Accuracy is the maximum relative error; convert to absolute maxError
-			decimal maxError = sign == 0 ? accuracy : value * accuracy;
+			decimal maxError = sign == 0
+									? accuracy
+									: value * accuracy;
 
 			int n = (int)SysMath.Floor(value);
 			value -= n;
@@ -1026,7 +1049,9 @@ namespace asm.Numeric
 			if (sign == -1) value = SysMath.Abs(value);
 
 			// Accuracy is the maximum relative error; convert to absolute maxError
-			float maxError = sign == 0 ? accuracy : value * accuracy;
+			float maxError = sign == 0
+								? accuracy
+								: value * accuracy;
 
 			int n = (int)SysMath.Floor(value);
 			value -= n;
@@ -1087,7 +1112,9 @@ namespace asm.Numeric
 			if (sign == -1) value = SysMath.Abs(value);
 
 			// Accuracy is the maximum relative error; convert to absolute maxError
-			double maxError = sign == 0 ? accuracy : value * accuracy;
+			double maxError = sign == 0
+								? accuracy
+								: value * accuracy;
 
 			int n = (int)SysMath.Floor(value);
 			value -= n;
@@ -1148,7 +1175,9 @@ namespace asm.Numeric
 			if (sign == -1) value = SysMath.Abs(value);
 
 			// Accuracy is the maximum relative error; convert to absolute maxError
-			decimal maxError = sign == 0 ? accuracy : value * accuracy;
+			decimal maxError = sign == 0
+									? accuracy
+									: value * accuracy;
 
 			int n = (int)SysMath.Floor(value);
 			value -= n;
@@ -1240,8 +1269,18 @@ namespace asm.Numeric
 		{
 			/* Translated from the C version. */
 			/*  a: continued fraction coefficients. */
-			long[] h = { 0, 1, 0 };
-			long[] k = { 1, 0, 0 };
+			long[] h =
+			{
+				0,
+				1,
+				0
+			};
+			long[] k =
+			{
+				1,
+				0,
+				0
+			};
 			long n = 1;
 			int i, neg = 0;
 			long numerator;
@@ -1254,7 +1293,11 @@ namespace asm.Numeric
 				return new Fraction<long>(numerator, denominator);
 			}
 
-			if (value < 0) { neg = 1; value = -value; }
+			if (value < 0)
+			{
+				neg = 1;
+				value = -value;
+			}
 
 			while (!value.Equals(SysMath.Floor(value)))
 			{
@@ -1267,7 +1310,9 @@ namespace asm.Numeric
 			/* continued fraction and check denominator each step */
 			for (i = 0; i < 64; i++)
 			{
-				long a = n != 0 ? d / n : 0;
+				long a = n != 0
+							? d / n
+							: 0;
 				if (i != 0 && a == 0) break;
 
 				long x = d;
@@ -1278,42 +1323,119 @@ namespace asm.Numeric
 				if (k[1] * a + k[0] >= maximumDenominator)
 				{
 					x = (maximumDenominator - k[0]) / k[1];
-					if (x * 2 >= a || k[1] >= maximumDenominator)
-						i = 65;
-					else
-						break;
+					if (x * 2 >= a || k[1] >= maximumDenominator) i = 65;
+					else break;
 				}
 
-				h[2] = x * h[1] + h[0]; h[0] = h[1]; h[1] = h[2];
-				k[2] = x * k[1] + k[0]; k[0] = k[1]; k[1] = k[2];
+				h[2] = x * h[1] + h[0];
+				h[0] = h[1];
+				h[1] = h[2];
+				k[2] = x * k[1] + k[0];
+				k[0] = k[1];
+				k[1] = k[2];
 			}
+
 			denominator = k[1];
-			numerator = neg != 0 ? -h[1] : h[1];
+			numerator = neg != 0
+							? -h[1]
+							: h[1];
 			return new Fraction<long>(numerator, denominator);
 		}
 
-		/// <summary>
-		/// returns 0 if x is odd and 1 if x is even
-		/// </summary>
-		/// <param name="x"></param>
-		public static int F(int x) { return 1 - (x & 1); }
-
-		/// <summary>
-		/// returns 1 if x is odd and 0 if x is even
-		/// </summary>
-		/// <param name="x"></param>
-		public static int G(int x) { return x & 1; }
-
-		public static ulong Factorial(uint x)
+		public static sbyte Factorial(sbyte thisValue)
 		{
-			ulong f = x;
+			sbyte fact = 1;
 
-			for (uint i = x - 1; i > 0; i--)
+			for (sbyte i = 1; i <= thisValue; i++)
 			{
-				f *= i;
+				fact *= i;
 			}
 
-			return f;
+			return fact;
+		}
+
+		public static byte Factorial(byte thisValue)
+		{
+			byte fact = 1;
+
+			for (byte i = 1; i <= thisValue; i++)
+			{
+				fact *= i;
+			}
+
+			return fact;
+		}
+
+		public static short Factorial(short thisValue)
+		{
+			short fact = 1;
+
+			for (short i = 1; i <= thisValue; i++)
+			{
+				fact *= i;
+			}
+
+			return fact;
+		}
+
+		public static ushort Factorial(ushort thisValue)
+		{
+			ushort fact = 1;
+
+			for (ushort i = 1; i <= thisValue; i++)
+			{
+				fact *= i;
+			}
+
+			return fact;
+		}
+
+		public static int Factorial(int thisValue)
+		{
+			int fact = 1;
+
+			for (int i = 1; i <= thisValue; i++)
+			{
+				fact *= i;
+			}
+
+			return fact;
+		}
+
+		public static uint Factorial(uint thisValue)
+		{
+			uint fact = 1;
+
+			for (uint i = 1; i <= thisValue; i++)
+			{
+				fact *= i;
+			}
+
+			return fact;
+		}
+
+		public static long Factorial(long thisValue)
+		{
+			long fact = 1;
+
+			for (long i = 1; i <= thisValue; i++)
+			{
+				fact *= i;
+			}
+
+			return fact;
+		}
+
+		public static ulong Factorial(ulong thisValue)
+		{
+			ulong fact = 1;
+
+			for (ulong i = 1; i <= thisValue; i++)
+			{
+				fact *= i;
+			}
+
+			return fact;
 		}
 	}
 }

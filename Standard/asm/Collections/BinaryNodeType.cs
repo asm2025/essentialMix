@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace asm.Collections
 {
-	public enum BinaryNodeType
+	public enum BinaryNodeType : byte
 	{
 		Root,
 		Left,

@@ -11,6 +11,7 @@ using asm.Extensions;
 using asm.Helpers;
 using asm.Patterns.Layout;
 using Bogus;
+using Bogus.DataSets;
 using Crayon;
 using JetBrains.Annotations;
 
@@ -18,7 +19,7 @@ namespace TestApp
 {
 	internal class Program
 	{
-		private static readonly Lazy<Faker> __stringGenerator = new Lazy<Faker>(() => new Faker(), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly Lazy<Faker> __fakeGenerator = new Lazy<Faker>(() => new Faker(), LazyThreadSafetyMode.PublicationOnly);
 
 		private static void Main()
 		{
@@ -43,7 +44,12 @@ namespace TestApp
 
 			//TestAllBinaryTrees();
 
-			TestTreeEquality();
+			//TestTreeEquality();
+			
+			//TestHeapAdd();
+			//TestHeapRemove();
+			
+			TestPriorityQueue();
 
 			ConsoleHelper.Pause();
 		}
@@ -397,14 +403,7 @@ namespace TestApp
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
-				BinarySearchTree<int> tree = new BinarySearchTree<int>();
-
-				foreach (int v in values)
-				{
-					tree.Add(v);
-					//tree.Print();
-				}
-
+				BinarySearchTree<int> tree = new BinarySearchTree<int>(values);
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 				tree.Print(Orientation.Horizontal);
@@ -444,14 +443,7 @@ namespace TestApp
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
-				BinarySearchTree<int> tree = new BinarySearchTree<int>();
-
-				foreach (int v in values)
-				{
-					tree.Add(v);
-					//tree.Print();
-				}
-
+				BinarySearchTree<int> tree = new BinarySearchTree<int>(values);
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 				tree.Print(Orientation.Horizontal);
@@ -762,11 +754,157 @@ namespace TestApp
 			}
 		}
 
+		private static void TestHeapAdd()
+		{
+			Title("Testing Heap.Add()...");
+
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Console.WriteLine();
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				Heap<int> heap = new MaxHeap<int>();
+				DoTheTest(heap, values);
+
+				heap = new MinHeap<int>();
+				DoTheTest(heap, values);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+			}
+			while (more);
+
+			static void DoTheTest<T>(Heap<T> heap, T[] array)
+			{
+				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+
+				foreach (T value in array)
+				{
+					heap.Add(value);
+					//heap.Print();
+				}
+
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+				heap.Print(Orientation.Horizontal);
+			}
+		}
+
+		private static void TestHeapRemove()
+		{
+			Title("Testing Heap.Remove()...");
+
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Console.WriteLine();
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				Heap<int> heap = new MaxHeap<int>();
+				DoTheTest(heap, values);
+
+				heap = new MinHeap<int>();
+				DoTheTest(heap, values);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+			}
+			while (more);
+
+			static void DoTheTest<T>(Heap<T> heap, T[] array)
+			{
+				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				heap.Add(array);
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+				heap.Print(Orientation.Horizontal);
+				Console.WriteLine("Test removing...");
+				bool removeStarted = false;
+
+				while (heap.Remove(out T value))
+				{
+					if (!removeStarted) removeStarted = true;
+					else Console.Write(", ");
+
+					Console.Write(value);
+				}
+
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
+		private static void TestPriorityQueue()
+		{
+			Title("Testing PriorityQueue...");
+
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Console.WriteLine();
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				PriorityQueue<int> intQueue = new PriorityQueue<int>();
+				DoTheTest(intQueue, values);
+
+				Student[] students = GetRandomStudents(len);
+				PriorityQueue<double, Student> studentQueue = new PriorityQueue<double, Student>(e => e.Grade * -1);
+				DoTheTest(studentQueue, students);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+			}
+			while (more);
+
+			static void DoTheTest<TPriority, T>(PriorityQueue<TPriority, T> queue, T[] array)
+				where TPriority : struct, IComparable
+			{
+				Console.WriteLine($"Test adding ({queue.GetType()})...".BrightGreen());
+				queue.Add(array);
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", queue));
+				queue.Print();
+				queue.Print(Orientation.Horizontal);
+				Console.WriteLine("Test removing...");
+				bool removeStarted = false;
+
+				while (queue.Remove(out T value))
+				{
+					if (!removeStarted) removeStarted = true;
+					else Console.Write(", ");
+
+					Console.Write(value);
+				}
+
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
 		private static void Title(string title)
 		{
 			Console.WriteLine();
 			Console.WriteLine();
 			Console.WriteLine(title.Bold().BrightBlack());
+			Console.WriteLine();
 			Console.WriteLine();
 		}
 
@@ -804,7 +942,36 @@ namespace TestApp
 		private static string[] GetRandomStrings(int len = 0)
 		{
 			if (len < 1) len = RNGRandomHelper.Next(1, 12);
-			return __stringGenerator.Value.Lorem.Words(len);
+			return __fakeGenerator.Value.Lorem.Words(len);
+		}
+
+		private class Student
+		{
+			public string Name { get; set; }
+
+			public double Grade { get; set; }
+
+			/// <inheritdoc />
+			public override string ToString() { return $"{Name} > {Grade:F2}"; }
+		}
+
+		[NotNull]
+		private static Student[] GetRandomStudents(int len = 0)
+		{
+			if (len < 1) len = RNGRandomHelper.Next(1, 12);
+			
+			Student[] students = new Student[len];
+
+			for (int i = 0; i < len; i++)
+			{
+				students[i] = new Student
+				{
+					Name = __fakeGenerator.Value.Name.FirstName(__fakeGenerator.Value.PickRandom<Name.Gender>()),
+					Grade = __fakeGenerator.Value.Random.Double(0.0d, 100.0d)
+				};
+			}
+
+			return students;
 		}
 	}
 }
@@ -834,6 +1001,22 @@ public static class Extension
 
 	public static void Print<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, Orientation orientation, bool diagnosticInfo = true)
 		where TNode : LinkedBinaryNode<TNode, T>
+	{
+		string treeString = thisValue.ToString(orientation, diagnosticInfo);
+		Console.WriteLine();
+		Console.WriteLine(treeString);
+	}
+
+	public static void Print<T>([NotNull] this ArrayBinaryTree<T> thisValue, bool diagnosticInfo = true)
+	{
+		Console.WriteLine();
+		Console.WriteLine($"{"Dimensions:".Yellow()} {thisValue.Count.ToString().Underline()} x {thisValue.GetHeight().ToString().Underline()}.");
+		Console.WriteLine($"{"Valid:".Yellow()} {thisValue.Validate().ToYesNo()}");
+		Console.WriteLine($"{"Minimum:".Yellow()} {thisValue.Minimum()} {"Maximum:".Yellow()} {thisValue.Maximum()}");
+		thisValue.Print(Orientation.Vertical, diagnosticInfo);
+	}
+
+	public static void Print<T>([NotNull] this ArrayBinaryTree<T> thisValue, Orientation orientation, bool diagnosticInfo = true)
 	{
 		string treeString = thisValue.ToString(orientation, diagnosticInfo);
 		Console.WriteLine();

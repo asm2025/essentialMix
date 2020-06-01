@@ -1343,5 +1343,121 @@ namespace asm.Extensions
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static decimal Multiplier(this decimal thisValue, decimal value) { return value * SysMath.Ceiling(thisValue / value); }
+
+		/// <summary>
+		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static sbyte F(this sbyte thisValue) { return (sbyte)(1 - (thisValue & 1)); }
+
+		/// <summary>
+		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static byte F(this byte thisValue) { return (byte)(1 - (thisValue & 1)); }
+
+		/// <summary>
+		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static short F(this short thisValue) { return (short)(1 - (thisValue & 1)); }
+
+		/// <summary>
+		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static ushort F(this ushort thisValue) { return (ushort)(1 - (thisValue & 1)); }
+
+		/// <summary>
+		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static int F(this int thisValue)
+		{
+			// also the following works too: SysMath.Floor(1 + SysMath.Pow(-1, SysMath.Abs(thisValue)) / 2)
+			return 1 - (thisValue & 1);
+		}
+
+		/// <summary>
+		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static uint F(this uint thisValue) { return 1 - (thisValue & 1); }
+
+		/// <summary>
+		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static long F(this long thisValue) { return 1 - (thisValue & 1); }
+
+		/// <summary>
+		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static ulong F(this ulong thisValue) { return 1 - (thisValue & 1); }
+
+		/// <summary>
+		/// returns 1 if thisValue is odd and 0 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static sbyte G(this sbyte thisValue) { return (sbyte)(thisValue & 1); }
+
+		/// <summary>
+		/// returns 1 if thisValue is odd and 0 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static byte G(this byte thisValue) { return (byte)(thisValue & 1); }
+
+		/// <summary>
+		/// returns 1 if thisValue is odd and 0 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static short G(this short thisValue) { return (short)(thisValue & 1); }
+
+		/// <summary>
+		/// returns 1 if thisValue is odd and 0 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static ushort G(this ushort thisValue) { return (ushort)(thisValue & 1); }
+
+		/// <summary>
+		/// returns 1 if thisValue is odd and 0 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static int G(this int thisValue) { return thisValue & 1; }
+
+		/// <summary>
+		/// returns 1 if thisValue is odd and 0 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static uint G(this uint thisValue) { return thisValue & 1; }
+
+		/// <summary>
+		/// returns 1 if thisValue is odd and 0 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static long G(this long thisValue) { return thisValue & 1; }
+
+		/// <summary>
+		/// returns 1 if thisValue is odd and 0 if thisValue is even
+		/// </summary>
+		/// <param name="thisValue"></param>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static ulong G(this ulong thisValue) { return thisValue & 1; }
 	}
 }

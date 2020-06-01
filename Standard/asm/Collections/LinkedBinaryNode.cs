@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 
@@ -99,11 +100,9 @@ namespace asm.Collections
 		public override string ToString() { return Convert.ToString(Value); }
 
 		[NotNull]
-		protected internal virtual string ToString(int depth, bool diagnostic)
+		protected internal virtual string ToString(int depth)
 		{
-			return diagnostic
-						? $"{Value} :D{depth}"
-						: Convert.ToString(Value);
+			return $"{Value} :D{depth}";
 		}
 
 		[ItemNotNull]
@@ -140,6 +139,7 @@ namespace asm.Collections
 			return rightMost;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public void Swap([NotNull] TNode other)
 		{
 			T tmp = other.Value;
@@ -160,11 +160,9 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected internal override string ToString(int depth, bool diagnostic)
+		protected internal override string ToString(int depth)
 		{
-			return diagnostic
-						? $"{Value} :D{depth}H{Height}B{BalanceFactor}"
-						: Convert.ToString(Value);
+			return $"{Value} :D{depth}H{Height}B{BalanceFactor}";
 		}
 
 		public int Height { get; internal set; }

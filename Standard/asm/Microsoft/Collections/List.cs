@@ -5,13 +5,15 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Threading;
+using asm;
 using asm.Comparers;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Helpers;
 using JetBrains.Annotations;
 
-namespace asm.Microsoft.Collections
+// ReSharper disable once CheckNamespace
+namespace Microsoft.Collections
 {
 	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
@@ -651,6 +653,17 @@ namespace asm.Microsoft.Collections
 			return default(T);
 		}
 
+		public T FindLast([NotNull] Predicate<T> match)
+		{
+			for (int i = Count - 1; i >= 0; i--)
+			{
+				T item = Items[i];
+				if (!match(item)) continue;
+				return item;
+			}
+			return default(T);
+		}
+
 		public IEnumerable<T> FindAll([NotNull] Predicate<T> match)
 		{
 			for (int i = 0; i < Count; i++)
@@ -674,26 +687,7 @@ namespace asm.Microsoft.Collections
 		public int FindIndex(int startIndex, int count, [NotNull] Predicate<T> match)
 		{
 			Count.ValidateRange(startIndex, ref count);
-
-			int endIndex = startIndex + count;
-
-			for (int i = startIndex; i < endIndex; i++)
-			{
-				if (!match(Items[i])) continue;
-				return i;
-			}
-			return -1;
-		}
-
-		public T FindLast([NotNull] Predicate<T> match)
-		{
-			for (int i = Count - 1; i >= 0; i--)
-			{
-				T item = Items[i];
-				if (!match(item)) continue;
-				return item;
-			}
-			return default(T);
+			return Array.FindIndex(Items, startIndex, count, match);
 		}
 
 		public int FindLastIndex([NotNull] Predicate<T> match)
@@ -709,16 +703,7 @@ namespace asm.Microsoft.Collections
 		public int FindLastIndex(int startIndex, int count, [NotNull] Predicate<T> match)
 		{
 			Count.ValidateRange(startIndex, ref count);
-			if (startIndex == 0) startIndex = Count - 1;
-			int endIndex = startIndex - count;
-
-			for (int i = startIndex; i > endIndex; i--)
-			{
-				if (!match(Items[i])) continue;
-				return i;
-			}
-
-			return -1;
+			return Array.FindLastIndex(Items, startIndex, count, match);
 		}
 
 		public bool Exists([NotNull] Predicate<T> match) { return FindIndex(match) != -1; }

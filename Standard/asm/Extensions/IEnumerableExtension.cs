@@ -269,7 +269,7 @@ namespace asm.Extensions
 				comparer = (IEqualityComparer<T>)info?.GetValue(thisValue);
 			}
 
-			if (comparer == null) comparer = EqualityComparer<T>.Default;
+			comparer ??= EqualityComparer<T>.Default;
 
 			int n = -1, i = startIndex - 1;
 
@@ -969,6 +969,7 @@ namespace asm.Extensions
 		/// Can be used to get all permutations at a certain level. A modified copy from Linq internal implementation
 		/// </summary>
 		[NotNull]
+		[ItemNotNull]
 		public static IEnumerable<IEnumerable<T>> Combinations<T>([NotNull] this IEnumerable<T> thisValue, int count)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
@@ -1049,14 +1050,207 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[ItemNotNull]
+		public static IEnumerable<IEnumerable<T>> PermutationsHeap<T>([NotNull] this IEnumerable<T> thisValue)
+		{
+			// https://www.geeksforgeeks.org/heaps-algorithm-for-generating-permutations/
+			IList<T> values = thisValue as IList<T> ?? new List<T>(thisValue);
+			if (values.Count < 2) return new[] { values };
+
+			List<IList<T>> results = new List<IList<T>>();
+			Permute(values, results, results.Count);
+			return results;
+
+			static void Permute(IList<T> list, ICollection<IList<T>> results, int size)
+			{
+				if (size <= 1) results.Add(new List<T>(list));
+
+				for (int i = 0; i < size; i++)
+				{
+					Permute(list, results, size - 1);
+
+					/*
+					 * if size is odd, swap first and last
+					 * else (is even) swap item at i index and last.
+					 */
+					list.FastSwap(size % 2 == 1
+									? 0
+									: i, list.Count - 1);
+				}
+			}
+		}
+
+		[NotNull]
+		[ItemNotNull]
 		public static IEnumerable<IEnumerable<T>> Permutations<T>([NotNull] this IEnumerable<T> thisValue)
 		{
-			ICollection<T> collection = thisValue as ICollection<T> ?? thisValue.ToArray();
-			return collection.Count > 1
-				? collection.SelectMany(s => Permutations(collection.Take(collection.IndexOf(s))
-					.Concat(collection.Skip(collection.IndexOf(s) + 1))), (s, p) => p.Prepend(s))
-				: new[] { collection };
+			// recursive approach. this works but not possible to debug
+			//ICollection<T> collection = thisValue as ICollection<T> ?? thisValue.ToArray();
+			//return collection.Count > 1
+			//			? collection.SelectMany(s => Permutations(collection.Take(collection.IndexOf(s))
+			//																.Concat(collection.Skip(collection.IndexOf(s) + 1))), (s, p) => p.Prepend(s))
+			//			: new[] { collection };
+
+			// https://leetcode.com/problems/permutations/
+			// https://leetcode.com/problems/permutations/discuss/18239/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partioning
+			IReadOnlyCollection<T> values = thisValue as IReadOnlyCollection<T> ?? new List<T>(thisValue);
+			if (values.Count < 2) return new[] { values };
+	
+			List<IList<T>> results = new List<IList<T>>();
+			Backtrack(values, results, new HashSet<T>());
+			return results;
+
+			static void Backtrack(IReadOnlyCollection<T> list, ICollection<IList<T>> results, ISet<T> set)
+			{
+				if (set.Count == list.Count)
+				{
+					results.Add(new List<T>(set));
+					return;
+				}
+
+				foreach (T value in list)
+				{
+					if (!set.Add(value)) continue;
+					Backtrack(list, results, set);
+					set.Remove(set.Last());
+				}
+			}
 		}
+
+		[NotNull]
+		[ItemNotNull]
+		public static IEnumerable<IEnumerable<T>> Permutations<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] IEqualityComparer<T> comparer)
+		{
+			// https://leetcode.com/problems/permutations-ii/
+			// https://leetcode.com/problems/permutations/discuss/18239/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partioning
+			List<T> values = thisValue as List<T> ?? new List<T>(thisValue);
+			if (values.Count < 2) return new[] { values };
+
+			List<IList<T>> results = new List<IList<T>>();
+			values.Sort();
+			Backtrack(values, results, new List<T>(), new bool[values.Count], comparer);
+			return results;
+
+			static void Backtrack(IReadOnlyList<T> list, ICollection<IList<T>> results, IList<T> tmp, IList<bool> visited, IEqualityComparer<T> c)
+			{
+				if (tmp.Count == list.Count)
+				{
+					results.Add(new List<T>(tmp));
+					return;
+				}
+
+				for (int i = 0; i < list.Count; i++)
+				{
+					if (visited[i] || i > 0 && !visited[i - 1] && c.Equals(list[i], list[i - 1])) continue;
+					visited[i] = true;
+					tmp.Add(list[i]);
+					Backtrack(list, results, tmp, visited, c);
+					visited[i] = false;
+					tmp.RemoveAt(tmp.Count - 1);
+				}
+			}
+		}
+
+		[NotNull]
+		[ItemNotNull]
+		public static IEnumerable<IEnumerable<T>> Subsets<T>([NotNull] this IEnumerable<T> thisValue)
+		{
+			// https://leetcode.com/problems/subsets/
+			// https://leetcode.com/problems/permutations/discuss/18239/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partioning
+			List<T> values = thisValue as List<T> ?? new List<T>(thisValue);
+			if (values.Count < 2) return new[] { values };
+
+			List<IList<T>> results = new List<IList<T>>();
+			values.Sort();
+			Backtrack(values, results, new List<T>(), 0);
+			return results;
+
+			static void Backtrack(IReadOnlyList<T> list, ICollection<IList<T>> results, IList<T> tmp, int start)
+			{
+				results.Add(new List<T>(tmp));
+
+				for (int i = start; i < list.Count; i++)
+				{
+					tmp.Add(list[i]);
+					Backtrack(list, results, tmp, i + 1);
+					tmp.RemoveAt(tmp.Count - 1);
+				}
+			}
+		}
+
+		[NotNull]
+		[ItemNotNull]
+		public static IEnumerable<IEnumerable<T>> Subsets<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] IEqualityComparer<T> comparer)
+		{
+			// https://leetcode.com/problems/subsets-ii/
+			// https://leetcode.com/problems/permutations/discuss/18239/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partioning
+			List<T> values = thisValue as List<T> ?? new List<T>(thisValue);
+			if (values.Count < 2) return new[] { values };
+
+			List<IList<T>> results = new List<IList<T>>();
+			values.Sort();
+			Backtrack(values, results, new List<T>(), 0, comparer);
+			return results;
+
+			static void Backtrack(IReadOnlyList<T> list, ICollection<IList<T>> results, ICollection<T> tmp, int start, IEqualityComparer<T> c)
+			{
+				results.Add(new List<T>(tmp));
+
+				for (int i = start; i < list.Count; i++)
+				{
+					tmp.Add(list[i]);
+					Backtrack(list, results, tmp, i + 1, c);
+					tmp.Remove(list[i]);
+			
+					while (i < list.Count - 1 && c.Equals(list[i], list[i + 1]))
+						i++;
+				}
+			}
+		}
+
+		[NotNull]
+		[ItemNotNull]
+		public static IEnumerable<IEnumerable<T>> CombinationSum<T>([NotNull] this IEnumerable<T> thisValue, T target)
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
+		{
+			// https://leetcode.com/problems/combination-sum/
+			// https://leetcode.com/problems/permutations/discuss/18239/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partioning
+			List<T> values = thisValue as List<T> ?? new List<T>(thisValue);
+			if (values.Count < 2) return new[] { values };
+
+			T defaultValue = default(T);
+			List<IList<T>> results = new List<IList<T>>();
+			values.Sort();
+			Backtrack(values, results, new List<T>(), target, defaultValue, 0);
+			return results;
+
+			static void Backtrack(IReadOnlyList<T> list, ICollection<IList<T>> results, IList<T> tmp, T remain, T def, int start)
+			{
+				int cmp = remain.CompareTo(def);
+
+				if (cmp < 0) return;
+
+				if (cmp == 0)
+				{
+					results.Add(new List<T>(tmp));
+				}
+				else
+				{
+					for (int i = start; i < list.Count; i++)
+					{
+						tmp.Add(list[i]);
+						// not i + 1 because we can reuse same elements
+						Backtrack(list, results, tmp, remain.Subtract(list[i]), def, i);
+						tmp.RemoveAt(tmp.Count - 1);
+					}
+				}
+			}
+		}
+
+		// todo
+		// https://leetcode.com/problems/permutations/discuss/18239/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partioning
+		// https://leetcode.com/problems/permutations/discuss/18284/Backtrack-Summary%3A-General-Solution-for-10-Questions!!!!!!!!-Python-(Combination-Sum-Subsets-Permutation-Palindrome)
+		// https://leetcode.com/problems/next-permutation/discuss/13867/C%2B%2B-from-Wikipedia
 
 		public static IEnumerable<TSource> Distinct<TSource, TKey>([NotNull] this IEnumerable<TSource> thisValue, [NotNull] Func<TSource, TKey> selector)
 		{
@@ -1223,6 +1417,8 @@ namespace asm.Extensions
 			return thisValue as IReadOnlySet<T> ?? ToHashSet(thisValue, comparer).AsReadOnly();
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		[ItemNotNull]
 		public static IEnumerable<T> SkipNull<T>([NotNull] this IEnumerable<T> thisValue)
 		{
 			foreach (T item in thisValue.Where(e => !e.IsNull()))

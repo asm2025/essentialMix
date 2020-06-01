@@ -1334,7 +1334,7 @@ namespace asm.Collections
 							current = stack.Pop();
 							visitCallback(current.Node, current.Depth);
 
-							// Navigate right
+							// Navigate left
 							current = (current.Depth + 1, current.Node.Left);
 						}
 					}
@@ -1641,7 +1641,7 @@ namespace asm.Collections
 							current = stack.Pop();
 							if (!visitCallback(current.Node, current.Depth)) break;
 
-							// Navigate right
+							// Navigate left
 							current = (current.Depth + 1, current.Node.Left);
 						}
 					}
@@ -1926,6 +1926,17 @@ namespace asm.Collections
 			Comparer = comparer ?? Comparer<T>.Default;
 		}
 
+		protected LinkedBinaryTree([NotNull] IEnumerable<T> collection)
+			: this(collection, Comparer<T>.Default)
+		{
+		}
+
+		protected LinkedBinaryTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
+			: this(comparer)
+		{
+			Add(collection);
+		}
+
 		protected LinkedBinaryTree(SerializationInfo info, StreamingContext context)
 		{
 			siInfo = info;
@@ -1958,10 +1969,6 @@ namespace asm.Collections
 		public abstract bool AutoBalance { get; }
 
 		public bool IsFull => Root == null || Root.IsFull;
-
-		/// <inheritdoc />
-		[NotNull]
-		public override string ToString() { return Root?.ToString() ?? string.Empty; }
 
 		public void OnDeserialization(object sender)
 		{
@@ -2004,7 +2011,7 @@ namespace asm.Collections
 			// Udemy - Code With Mosh - Data Structures & Algorithms Part 2
 			if (ReferenceEquals(null, other)) return false;
 			if (ReferenceEquals(this, other)) return true;
-			if (GetType() != other.GetType() || Count != other.Count || !Comparer.Equals(other.Comparer)) return false;
+			if (Count != other.Count || !Comparer.Equals(other.Comparer)) return false;
 			if (Root == null && other.Root == null) return true;
 			if (Root == null || other.Root == null) return false;
 			return Root.IsLeaf && other.Root.IsLeaf
@@ -2123,7 +2130,7 @@ namespace asm.Collections
 		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
 		/// <param name="visitCallback">callback action to handle the node with depth awareness</param>
-		public /* virtual */ void Iterate(TNode root, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<TNode, int> visitCallback)
+		public void Iterate(TNode root, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<TNode, int> visitCallback)
 		{
 			if (root == null) return;
 			new Iterator(this, root, method).Iterate(flow, visitCallback);
@@ -2153,7 +2160,7 @@ namespace asm.Collections
 		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
 		/// <param name="visitCallback">callback function to handle the node with depth awareness that can cancel the loop</param>
-		public /* virtual */ void Iterate(TNode root, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<TNode, int, bool> visitCallback)
+		public void Iterate(TNode root, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<TNode, int, bool> visitCallback)
 		{
 			if (root == null) return;
 			new Iterator(this, root, method).Iterate(flow, visitCallback);
@@ -2229,7 +2236,7 @@ namespace asm.Collections
 		/// <returns>The found node or null if no match is found</returns>
 		public TNode Find(T value)
 		{
-			TNode current = FindNearestLeaf(value);
+			TNode current = FindNearestParent(value);
 			if (current == null || Comparer.IsEqual(current.Value, value)) return current;
 			if (current.Left != null && Comparer.IsEqual(current.Left.Value, value)) return current.Left;
 			if (current.Right != null && Comparer.IsEqual(current.Right.Value, value)) return current.Right;
@@ -2271,7 +2278,7 @@ namespace asm.Collections
 		/// </summary>
 		/// <param name="value">The value to search for</param>
 		/// <returns>The found node or null if no match is found</returns>
-		public abstract TNode FindNearestLeaf(T value);
+		public abstract TNode FindNearestParent(T value);
 
 		/// <inheritdoc />
 		public abstract void Add(T value);
@@ -2298,7 +2305,7 @@ namespace asm.Collections
 			if (Root == null) return default(T);
 
 			/*
-			 * This tree might not be a valid binary search tree. So a traversal is need to search the entire tree.
+			 * This tree might not be a valid binary search tree. So a traversal is needed to search the entire tree.
 			 * In the overriden method of the BinarySearchTree (and any similar type of tree), this implementation
 			 * just grabs the root's left most node's value.
 			 */
@@ -2331,7 +2338,7 @@ namespace asm.Collections
 			if (Root == null) return default(T);
 
 			/*
-			 * This tree might not be a valid binary search tree. So a traversal is need to search the entire tree.
+			 * This tree might not be a valid binary search tree. So a traversal is needed to search the entire tree.
 			 * In the overriden method of the BinarySearchTree (and any similar type of tree), this implementation
 			 * just grabs the root's right most node's value.
 			 */
@@ -2400,6 +2407,8 @@ namespace asm.Collections
 		public void CopyTo(T[] array, int arrayIndex)
 		{
 			array.Length.ValidateRange(arrayIndex, Count);
+			if (Count == 0) return;
+
 			int lo = arrayIndex, hi = lo + Count;
 			Iterate(Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, node =>
 			{
@@ -2994,6 +3003,18 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
+		protected LinkedBinaryTree([NotNull] IEnumerable<T> collection)
+			: base(collection)
+		{
+		}
+
+		/// <inheritdoc />
+		protected LinkedBinaryTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
+			: base(collection, comparer)
+		{
+		}
+
+		/// <inheritdoc />
 		protected LinkedBinaryTree(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
@@ -3269,7 +3290,9 @@ namespace asm.Collections
 				Stack<string> connectors = new Stack<string>();
 				tree.Iterate(tree.Root, TraverseMethod.InOrder, HorizontalFlow.RightToLeft, (e, depth) =>
 				{
-					connectors.Push(e.ToString(depth, diagnostic));
+					connectors.Push(diagnostic
+										? e.ToString(depth)
+										: e.ToString());
 
 					if (e.IsRight) connectors.Push(STR_CONNECTOR_R);
 					else if (e.IsLeft) connectors.Push(STR_CONNECTOR_L);
@@ -3327,7 +3350,9 @@ namespace asm.Collections
 					}
 
 					if (line.Length > 0) line.Append(C_BLANK);
-					line.Append(e.ToString(depth, diagnostic));
+					line.Append(diagnostic
+									? e.ToString(depth)
+									: e.ToString());
 					distance = line.Length;
 				});
 

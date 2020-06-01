@@ -14,7 +14,8 @@ using asm.Helpers;
 using JetBrains.Annotations;
 using asmMath = asm.Numeric.Math;
 
-namespace asm.Microsoft.Collections
+// ReSharper disable once CheckNamespace
+namespace Microsoft.Collections
 {
 	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]

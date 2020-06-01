@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace asm.Microsoft.Collections
+// ReSharper disable once CheckNamespace
+namespace Microsoft.Collections
 {
 	[Serializable]
 	internal class HashSetEqualityComparer<T> : IEqualityComparer<HashSet<T>>
