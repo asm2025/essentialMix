@@ -759,42 +759,7 @@ namespace asm.Extensions
 
 		public static void SortHeap<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
 		{
-			// https://www.geeksforgeeks.org/heap-sort/
-			thisValue.Count.ValidateRange(index, ref count);
-			if (count < 2 || thisValue.Count < 2) return;
-			comparer ??= Comparer<T>.Default;
-			if (descending) comparer = comparer.Reverse();
-
-			// Build heap (rearrange array) 
-			for (int i = count / 2 - 1; i >= index; i--)
-				Heapify(thisValue, i, count, comparer);
-
-			// One by one extract an element from heap 
-			for (int i = count - 1; i >= index; i--)
-			{
-				// Move current root to end 
-				thisValue.FastSwap(index, i);
-				// call max heapify on the reduced heap 
-				Heapify(thisValue, index, i, comparer);
-			}
-
-			static void Heapify(IList<T> list, int x, int n, IComparer<T> c)
-			{
-				int largest = x; // Initialize largest as root 
-				int l = 2 * x + 1; // left = 2 * index + 1 
-				int r = 2 * x + 2; // right = 2 * index + 2 
-
-				// If left child is larger than root 
-				if (l < n && c.IsGreaterThan(list[l], list[largest])) largest = l;
-				// If right child is larger than largest so far 
-				if (r < n && c.IsGreaterThan(list[r], list[largest])) largest = r;
-				if (largest == x) return;
-
-				// If largest is not root 
-				list.FastSwap(x, largest);
-				// Recursively heapify the affected sub-tree 
-				Heapify(list, largest, n, c);
-			}
+			Heap.Sort(thisValue, index, count, comparer, descending);
 		}
 
 		public static void SortQuick<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using asm.Extensions;
 using asm.Patterns.Collections;
 using asm.Patterns.Layout;
 using JetBrains.Annotations;
@@ -99,6 +100,7 @@ namespace asm.Collections
 			BubbleUp(Count - 1);
 		}
 
+		public bool Remove() { return Remove(out _); }
 		public bool Remove(out T value)
 		{
 			if (Count == 0)
@@ -122,6 +124,17 @@ namespace asm.Collections
 			if (Count == 0) return;
 			Array.Clear(Items, 0, Count);
 			Count = 0;
+		}
+
+		public T ElementAt(int k)
+		{
+			if (k < 1 || Count < k) throw new ArgumentOutOfRangeException(nameof(k));
+
+			for (int i = 0; i < k - 1 && Remove(); i++)
+			{
+			}
+
+			return Value;
 		}
 
 		/// <inheritdoc />
@@ -166,5 +179,91 @@ namespace asm.Collections
 		protected abstract void BubbleUp(int index);
 
 		protected abstract void BubbleDown(int index);
+	}
+
+	public static class Heap
+	{
+		public static void Heapify<T>([NotNull] IList<T> values) { Heapify(values, 0, -1, false, Comparer<T>.Default); }
+		public static void Heapify<T>([NotNull] IList<T> values, bool descending) { Heapify(values, 0, -1, descending, Comparer<T>.Default); }
+		public static void Heapify<T>([NotNull] IList<T> values, IComparer<T> comparer) { Heapify(values, 0, -1, false, comparer); }
+		public static void Heapify<T>([NotNull] IList<T> values, bool descending, IComparer<T> comparer) { Heapify(values, 0, -1, descending, comparer); }
+		public static void Heapify<T>([NotNull] IList<T> values, int index) { Heapify(values, index, -1, false, Comparer<T>.Default); }
+		public static void Heapify<T>([NotNull] IList<T> values, int index, bool descending) { Heapify(values, index, -1, descending, Comparer<T>.Default); }
+		public static void Heapify<T>([NotNull] IList<T> values, int index, IComparer<T> comparer) { Heapify(values, index, -1, false, comparer); }
+		public static void Heapify<T>([NotNull] IList<T> values, int index, bool descending, IComparer<T> comparer) { Heapify(values, index, -1, descending, comparer); }
+		public static void Heapify<T>([NotNull] IList<T> values, int index, int count) { Heapify(values, index, count, false, Comparer<T>.Default); }
+		public static void Heapify<T>([NotNull] IList<T> values, int index, int count, bool descending) { Heapify(values, index, count, descending, Comparer<T>.Default); }
+		public static void Heapify<T>([NotNull] IList<T> values, int index, int count, IComparer<T> comparer) { Heapify(values, index, count, false, comparer); }
+		public static void Heapify<T>([NotNull] IList<T> values, int index, int count, bool descending, IComparer<T> comparer)
+		{
+			// Udemy - Code With Mosh - Data Structures & Algorithms part 2
+			values.Count.ValidateRange(index, ref count);
+			if (count < 2 || values.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			// Build heap (rearrange array) starting from the last parent
+			for (int i = count / 2 - 1; i >= index; i--)
+			{
+				// Heapify
+				for (int parent = i, left = parent * 2 + 1, right = parent * 2 + 2, largest = parent;
+					left < count;
+					parent = largest, left = parent * 2 + 1, right = parent * 2 + 2, largest = parent)
+				{
+					// If left child is larger than root 
+					if (left < count && comparer.IsGreaterThan(values[left], values[largest])) largest = left;
+					// If right child is larger than largest so far 
+					if (right < count && comparer.IsGreaterThan(values[right], values[largest])) largest = right;
+					if (largest == parent) break;
+					values.FastSwap(i, largest);
+				}
+
+				if (comparer.IsLessThanOrEqual(values[i], values[(i - 1) / 2])) continue;
+				
+				// if child is (bigger/smaller) than parent
+				for (int child = i, parent = (child - 1) / 2; 
+					parent >= index && comparer.IsGreaterThan(values[child], values[parent]); 
+					child = parent, parent = (child - 1) / 2)
+				{
+					values.FastSwap(child, parent);
+				}
+			}
+		}
+
+		public static void Sort<T>([NotNull] IList<T> values, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
+		{
+			// https://www.geeksforgeeks.org/iterative-heap-sort/
+			values.Count.ValidateRange(index, ref count);
+			if (count < 2 || values.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			// Build heap (rearrange array) starting from the last parent
+			for (int i = index + 1; i < count; i++)
+			{
+				// swap child and parent until parent is smaller
+				for (int child = i, parent = (child - 1) / 2;
+					parent >= index && comparer.IsGreaterThan(values[child], values[parent]);
+					child = parent, parent = (child - 1) / 2)
+				{
+					values.FastSwap(child, parent);
+				}
+			}
+
+			for (int i = count - 1; i > index; i--)
+			{
+				// swap value of first indexed with last indexed
+				values.FastSwap(index, i);
+				
+				// maintaining heap property after each swapping
+				for (int parent = 0, child = parent * 2 + 1; child < i; parent = child, child = parent * 2 + 1)
+				{
+					// if left is smaller than right point index to right
+					if (child < i - 1 && comparer.IsLessThan(values[child], values[child + 1])) child++;
+					// if parent is smaller than child, swap them
+					if (child < i && comparer.IsLessThan(values[parent], values[child])) values.FastSwap(parent, child);
+				}
+			}
+		}
 	}
 }

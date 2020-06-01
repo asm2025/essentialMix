@@ -25,6 +25,7 @@ namespace TestApp
 		{
 			Console.OutputEncoding = Encoding.UTF8;
 
+			//TestSortAlgorithm();
 			//TestSortAlgorithms();
 
 			//TestLinkedQueue();
@@ -49,9 +50,84 @@ namespace TestApp
 			//TestHeapAdd();
 			//TestHeapRemove();
 			
-			TestPriorityQueue();
+			//TestPriorityQueue();
+
+			TestHeapElementAt();
 
 			ConsoleHelper.Pause();
+		}
+
+		private static void TestSortAlgorithm()
+		{
+			const string algorithm = nameof(IListExtension.SortHeap);
+
+			Action<IList<int>, int, int, IComparer<int>, bool> sortNumbers = GetAlgorithm<int>(algorithm);
+			Action<IList<string>, int, int, IComparer<string>, bool> sortStrings = GetAlgorithm<string>(algorithm);
+			Console.WriteLine($"Testing {algorithm.BrightCyan()} algorithm: ");
+
+			Stopwatch watch = new Stopwatch();
+			IComparer<int> numbersComparer = Comparer<int>.Default;
+			IComparer<string> stringComparer = StringComparer.Ordinal;
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				int[] numbers = GetRandomIntegers(RNGRandomHelper.Next(5, 20));
+				string[] strings = GetRandomStrings(RNGRandomHelper.Next(3, 10));
+				Console.WriteLine("Numbers: ".BrightCyan() + string.Join(", ", numbers));
+				Console.WriteLine("String: ".BrightCyan() + string.Join(", ", strings.Select(e => e.SingleQuote())));
+
+				Console.Write("Numbers");
+				watch.Restart();
+				sortNumbers(numbers, 0, -1, numbersComparer, false);
+				double numericResults = watch.Elapsed.TotalMilliseconds;
+				watch.Stop();
+				Console.WriteLine($" => {numericResults.ToString("F6").BrightGreen()}");
+				Console.WriteLine("Result: " + string.Join(", ", numbers));
+				Console.WriteLine();
+
+				Console.Write("Strings");
+				watch.Restart();
+				sortStrings(strings, 0, -1, stringComparer, false);
+				double stringResults = watch.Elapsed.TotalMilliseconds;
+				watch.Stop();
+				Console.WriteLine($" => {stringResults.ToString("F6").BrightGreen()}");
+				Console.WriteLine("Result: " + string.Join(", ", strings.Select(e => e.SingleQuote())));
+				Console.WriteLine();
+
+				Console.WriteLine("Finished".BrightYellow());
+				Console.WriteLine();
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+			}
+			while (more);
+
+			static Action<IList<T>, int, int, IComparer<T>, bool> GetAlgorithm<T>(string name)
+			{
+				return name switch
+				{
+					nameof(IListExtension.SortBubble) => IListExtension.SortBubble,
+					nameof(IListExtension.SortSelection) => IListExtension.SortSelection,
+					nameof(IListExtension.SortInsertion) => IListExtension.SortInsertion,
+					nameof(IListExtension.SortHeap) => IListExtension.SortHeap,
+					nameof(IListExtension.SortMerge) => IListExtension.SortMerge,
+					nameof(IListExtension.SortQuick) => IListExtension.SortQuick,
+					nameof(IListExtension.SortShell) => IListExtension.SortShell,
+					nameof(IListExtension.SortComb) => IListExtension.SortComb,
+					nameof(IListExtension.SortTim) => IListExtension.SortTim,
+					nameof(IListExtension.SortCocktail) => IListExtension.SortCocktail,
+					nameof(IListExtension.SortBitonic) => IListExtension.SortBitonic,
+					nameof(IListExtension.SortPancake) => IListExtension.SortPancake,
+					nameof(IListExtension.SortBinary) => IListExtension.SortBinary,
+					nameof(IListExtension.SortGnome) => IListExtension.SortGnome,
+					nameof(IListExtension.SortBrick) => IListExtension.SortBrick,
+					_ => throw new NotFoundException()
+				};
+			}
 		}
 
 		private static void TestSortAlgorithms()
@@ -136,7 +212,7 @@ namespace TestApp
 					}
 
 					stringResults[algorithm] = time.Average();
-					Console.WriteLine($" => {numericResults[algorithm].ToString("F6").BrightGreen()}");
+					Console.WriteLine($" => {stringResults[algorithm].ToString("F6").BrightGreen()}");
 					Console.WriteLine("Result: " + string.Join(", ", str.Select(e => e.SingleQuote())));
 					Console.WriteLine();
 				}
@@ -894,6 +970,64 @@ namespace TestApp
 					Console.Write(value);
 				}
 
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
+		private static void TestHeapElementAt()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Console.WriteLine();
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				int k = RNGRandomHelper.Next(1, values.Length);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				Heap<int> heap = new MaxHeap<int>();
+				DoTestHeap(heap, values, k);
+
+				heap = new MinHeap<int>();
+				DoTestHeap(heap, values, k);
+
+				Student[] students = GetRandomStudents(len);
+				PriorityQueue<double, Student> studentQueue = new PriorityQueue<double, Student>(e => e.Grade * -1);
+				DoTestPriorityQueue(studentQueue, students, k);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+			}
+			while (more);
+
+			static void DoTestHeap<T>(Heap<T> heap, T[] array, int k)
+			{
+				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				heap.Add(array);
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+				heap.Print(Orientation.Horizontal);
+				Console.WriteLine("Test get Kth element...");
+				Console.WriteLine($"heap {k} kth element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+
+			static void DoTestPriorityQueue<TPriority, T>(PriorityQueue<TPriority, T> queue, T[] array, int k)
+				where TPriority : struct, IComparable
+			{
+				Console.WriteLine($"Test adding ({queue.GetType()})...".BrightGreen());
+				queue.Add(array);
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", queue));
+				queue.Print();
+				queue.Print(Orientation.Horizontal);
+				Console.WriteLine("Test get Kth element...");
+				Console.WriteLine($"heap {k} kth element = {queue.ElementAt(k).ToString().BrightCyan().Underline()}");
 				Console.WriteLine();
 				Console.WriteLine();
 			}
