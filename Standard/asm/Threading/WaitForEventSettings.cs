@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using JetBrains.Annotations;
 using asm.Helpers;
+using asm.Patterns;
 
 namespace asm.Threading
 {
@@ -10,11 +11,11 @@ namespace asm.Threading
 	{
 		private TimeSpan _timeout;
 
-		/// <inheritdoc />
-		protected internal WaitForEventSettings([NotNull] TSource target, [NotNull] EventInfo eventInfo)
+		protected internal WaitForEventSettings([NotNull] TSource target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<TSource, TArgs>, TArgs> watcherCallback)
 		{
 			Target = target;
 			EventInfo = eventInfo;
+			WatcherCallback = watcherCallback;
 		}
 
 		[NotNull]
@@ -22,6 +23,9 @@ namespace asm.Threading
 
 		[NotNull]
 		public EventInfo EventInfo { get; set; }
+
+		[NotNull]
+		public Action<EventWatcher<TSource, TArgs>, TArgs> WatcherCallback { get; }
 
 		public TimeSpan Timeout
 		{
@@ -32,15 +36,13 @@ namespace asm.Threading
 				_timeout = value;
 			}
 		}
-
-		public Action<TSource, TArgs> OnEvent { get; set; }
 	}
 
 	public class WaitForEventSettings<TSource> : WaitForEventSettings<TSource, EventArgs>
 	{
 		/// <inheritdoc />
-		protected internal WaitForEventSettings([NotNull] TSource target, [NotNull] EventInfo eventInfo) 
-			: base(target, eventInfo)
+		protected internal WaitForEventSettings([NotNull] TSource target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<TSource, EventArgs>, EventArgs> watcherCallback) 
+			: base(target, eventInfo, watcherCallback)
 		{
 		}
 	}
@@ -48,47 +50,47 @@ namespace asm.Threading
 	public class WaitForEventSettings : WaitForEventSettings<object, EventArgs>
 	{
 		/// <inheritdoc />
-		private protected WaitForEventSettings([NotNull] object target, [NotNull] EventInfo eventInfo) 
-			: base(target, eventInfo)
+		private protected WaitForEventSettings([NotNull] object target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<object, EventArgs>, EventArgs> watcherCallback) 
+			: base(target, eventInfo, watcherCallback)
 		{
 		}
 
 		[NotNull]
-		public static WaitForEventSettings<TSource, TArgs> Create<TSource, TArgs>([NotNull] TSource target, [NotNull] string eventName)
+		public static WaitForEventSettings<TSource, TArgs> Create<TSource, TArgs>([NotNull] TSource target, [NotNull] string eventName, [NotNull] Action<EventWatcher<TSource, TArgs>, TArgs> watcherCallback)
 			where TArgs : EventArgs
 		{
-			return Create<TSource, TArgs>(target, GetEventInfo(target, eventName));
+			return Create(target, GetEventInfo(target, eventName), watcherCallback);
 		}
 
 		[NotNull]
-		public static WaitForEventSettings<TSource, TArgs> Create<TSource, TArgs>([NotNull] TSource target, [NotNull] EventInfo eventInfo)
+		public static WaitForEventSettings<TSource, TArgs> Create<TSource, TArgs>([NotNull] TSource target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<TSource, TArgs>, TArgs> watcherCallback)
 			where TArgs : EventArgs
 		{
-			return new WaitForEventSettings<TSource, TArgs>(target, eventInfo);
+			return new WaitForEventSettings<TSource, TArgs>(target, eventInfo, watcherCallback);
 		}
 
 		[NotNull]
-		public static WaitForEventSettings<TSource> Create<TSource>([NotNull] TSource target, [NotNull] string eventName)
+		public static WaitForEventSettings<TSource> Create<TSource>([NotNull] TSource target, [NotNull] string eventName, [NotNull] Action<EventWatcher<TSource, EventArgs>, EventArgs> watcherCallback)
 		{
-			return Create(target, GetEventInfo(target, eventName));
+			return Create(target, GetEventInfo(target, eventName), watcherCallback);
 		}
 
 		[NotNull]
-		public static WaitForEventSettings<TSource> Create<TSource>([NotNull] TSource target, [NotNull] EventInfo eventInfo)
+		public static WaitForEventSettings<TSource> Create<TSource>([NotNull] TSource target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<TSource, EventArgs>, EventArgs> watcherCallback)
 		{
-			return new WaitForEventSettings<TSource>(target, eventInfo);
+			return new WaitForEventSettings<TSource>(target, eventInfo, watcherCallback);
 		}
 
 		[NotNull]
-		public static WaitForEventSettings Create([NotNull] object target, [NotNull] string eventName)
+		public static WaitForEventSettings Create([NotNull] object target, [NotNull] string eventName, [NotNull] Action<EventWatcher<object, EventArgs>, EventArgs> watcherCallback)
 		{
-			return Create(target, GetEventInfo(target, eventName));
+			return Create(target, GetEventInfo(target, eventName), watcherCallback);
 		}
 
 		[NotNull]
-		public static WaitForEventSettings Create([NotNull] object target, [NotNull] EventInfo eventInfo)
+		public static WaitForEventSettings Create([NotNull] object target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<object, EventArgs>, EventArgs> watcherCallback)
 		{
-			return new WaitForEventSettings(target, eventInfo);
+			return new WaitForEventSettings(target, eventInfo, watcherCallback);
 		}
 
 		[NotNull]

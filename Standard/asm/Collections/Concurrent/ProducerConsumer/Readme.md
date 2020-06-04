@@ -1,5 +1,22 @@
 ﻿# Usage
+*Important:*
+* If you are going to use the DataFlowQueue, you'll need to install System.Threading.Tasks.Dataflow on the main project.
+* If you are going to use the SemaphoreQueueOptions with the SemaphoreQueue and set the SemaphoreQueueOptions.Security, you'll need to install System.Security.AccessControl on the main project.
+
 ```csharp
+// example values
+int len = RNGRandomHelper.Next(1000, 5000);
+int[] values = new int[GetRandomIntegers(len)];
+
+for (int i = 0; i < len; i++)
+{
+	values[i] = RNGRandomHelper.Next(1, short.MaxValue);
+}
+
+int timeout = RNGRandomHelper.Next(0, 1);
+bool limitThreads = RNGRandomHelper.Next(0, 1) != 0;
+int maximumThreads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
+
 // if there is a timeout, will use a CancellationTokenSource.
 using (CancellationTokenSource cts = Timeout > 0 ? new CancellationTokenSource(TimeSpan.FromMinutes(Timeout)) : null)
 {
@@ -13,67 +30,76 @@ using (CancellationTokenSource cts = Timeout > 0 ? new CancellationTokenSource(T
 	int threads = MaximumThreads;
 #endif
 
-	if (threads <= 0 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
+	if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
 	
 	// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
 	TimeSpan threshold = Threshold.Within(TimeSpan.Zero, TimeoutHelper.Hour);
 	if (threshold > TimeSpan.Zero && threshold < TimeoutHelper.Second) threshold = TimeoutHelper.Second;
 
 	ThreadQueueMode mode;
-	ProducerConsumerQueueOptions options;
+	ProducerConsumerQueueOptions<int> options;
+	Func<int, TaskResult> exec = e =>
+	{
+		Console.WriteLine(e);
+		return TaskResult.Success;
+	};
 
 	if (threshold == TimeSpan.Zero)
 	{
 		// This can be any of the thread enqueue modes
 		mode = ThreadQueueMode.task;
-		options = new ProducerConsumerQueueOptions
-		{
-			Threads = threads
-		};
+		options = new ProducerConsumerQueueOptions<int>(threads, exec);
 	}
 	else
 	{
 		// This must be set to thresholdTaskGroup to control number of tasks per time.
 		mode = ThreadQueueMode.thresholdTaskGroup;
-		options = new ProducerConsumerThresholdQueueOptions
+		options = new ProducerConsumerThresholdQueueOptions<int>(threads, exec)
 		{
-			Threads = threads,
 			Threshold = threshold
 		};
 	}
 
-	// Genericly create a queue producer
-	using (IProducerConsumer queue = ProducerConsumerFactory.Create(mode, options, token))
+	// Create a generic queue producer
+	using (IProducerConsumer<int> queue = ProducerConsumerFactory.Create(mode, options, token))
 	{
-		foreach, while, etc...
+		queue.WorkStarted += (sender, args) =>
+		{
+			Console.WriteLine();
+			Console.WriteLine($"Starting {mode}...");
+		};
+
+		queue.WorkCompleted += (sender, args) =>
+		{
+			Console.WriteLine();
+			Console.WriteLine("Finished.");
+			Console.WriteLine();
+		};
+
+		//foreach, while, etc...
+		foreach (int value in values)
 		{
 			// fill the queue with tasks
-			queue.Enqueue(new TaskItem(ti =>
-			{
-				if (ti.Token.IsCancellationRequested) return TaskQueueResult.Canceled;
-
-				try
-				{
-					// Your code...
-					return ti.Token.IsCancellationRequested
-						? TaskQueueResult.Canceled
-						: (TaskQueueResult.Success or TaskQueueResult.Error);
-				}
-				catch
-				{
-					return TaskQueueResult.Error;
-				}
-				finally
-				{
-					// Dispose any objects
-				}
-			}));
+			queue.Enqueue(value);
 		}
 
-		// Important to inform the queue producer the work is done not to wait for more tasks
-		queue.Complete();
-		// and then wait for all tasks to finish
-		queue.Wait();
+		/*
+		* when the queue is being disposed, it will wait until the queued items are processed.
+		* this works when queue.WaitOnDispose is true , which it is by default.
+		* alternatively, the following can be done to wait for all items to be processed:
+		*
+		* // Important: marks the completion of queued items, no further items can be queued
+		* // after this point. the queue will not to wait for more items other than the already queued.
+		* queue.Complete();
+		* // wait for the queue to finish
+		* queue.Wait();
+		*
+		* another way to go about it, is not to call queue.Complete(); if this queue will
+		* wait indefinitely and maybe use a CancellationTokenSource.
+		*
+		* for now, the queue will wait for the items to be finished once reached the next
+		* dispose curly bracket.
+		*/
 	}
 
 	// check if cancellation was triggered

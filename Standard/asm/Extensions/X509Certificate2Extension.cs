@@ -6,7 +6,8 @@ namespace asm.Extensions
 {
 	public static class X509Certificate2Extension
 	{
-		[NotNull] public static AsymmetricAlgorithm GetPublicEncryptor([NotNull] this X509Certificate2 thisValue) { return GetPublicEncryptor<AsymmetricAlgorithm>(thisValue); }
+		[NotNull]
+		public static AsymmetricAlgorithm GetPublicEncryptor([NotNull] this X509Certificate2 thisValue) { return GetPublicEncryptor<AsymmetricAlgorithm>(thisValue); }
 
 		public static AsymmetricAlgorithm GetPrivateDecryptor([NotNull] this X509Certificate2 thisValue) { return GetPrivateDecryptor<AsymmetricAlgorithm>(thisValue); }
 

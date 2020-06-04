@@ -9,7 +9,8 @@ namespace asm.Extensions
 {
 	public static class MethodInfoExtension
 	{
-		[NotNull] public static TDelegate CreateDelegate<TDelegate>([NotNull] this MethodInfo thisValue) { return CreateDelegate<TDelegate>(thisValue, null); }
+		[NotNull]
+		public static TDelegate CreateDelegate<TDelegate>([NotNull] this MethodInfo thisValue) { return CreateDelegate<TDelegate>(thisValue, null); }
 
 		/// <summary>
 		/// Creates a delegate of a specified type that represents the specified

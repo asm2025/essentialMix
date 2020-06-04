@@ -49,13 +49,17 @@ namespace asm.Enumeration
 
 		public int GetCount(EnumMemberSelection selection) { return _cache.GetMemberCount(selection); }
 
-		[NotNull] public IEnumerable<EnumMember> GetMembers(EnumMemberSelection selection) { return SelectEnumMembers(_cache.GetMembers(selection)); }
+		[NotNull]
+		public IEnumerable<EnumMember> GetMembers(EnumMemberSelection selection) { return SelectEnumMembers(_cache.GetMembers(selection)); }
 
-		[NotNull] public IEnumerable<string> GetNames(EnumMemberSelection selection) { return _cache.GetNames(selection); }
+		[NotNull]
+		public IEnumerable<string> GetNames(EnumMemberSelection selection) { return _cache.GetNames(selection); }
 
-		[NotNull] public IEnumerable<string> GetDisplayNames(EnumMemberSelection selection) { return _cache.GetDisplayNames(selection); }
+		[NotNull]
+		public IEnumerable<string> GetDisplayNames(EnumMemberSelection selection) { return _cache.GetDisplayNames(selection); }
 
-		[NotNull] public Enum[] GetValues(EnumMemberSelection selection) { return SelectEnumValues(_cache.GetValues(selection)); }
+		[NotNull]
+		public Enum[] GetValues(EnumMemberSelection selection) { return SelectEnumValues(_cache.GetValues(selection)); }
 
 		public Enum ToObject([NotNull] object value, EnumValidation validation = EnumValidation.None)
 		{
@@ -128,7 +132,8 @@ namespace asm.Enumeration
 
 		public string Format(Enum value, [NotNull] EnumFormat[] formats) { return _cache.Format(ToInt(value), formats); }
 
-		[NotNull] public object GetUnderlyingValue(Enum value) { return ToInt(value); }
+		[NotNull]
+		public object GetUnderlyingValue(Enum value) { return ToInt(value); }
 
 		public sbyte ToSByte(Enum value) { return ToInt(value).ToSByte(null); }
 
@@ -176,7 +181,8 @@ namespace asm.Enumeration
 
 		public string FormatFlags(Enum value, string delimiter, EnumFormat[] formats) { return _cache.FormatFlags(ToInt(value), delimiter, formats); }
 
-		[NotNull] public IEnumerable<Enum> GetFlags(Enum value) { return SelectEnumValues(_cache.GetFlags(ToInt(value))); }
+		[NotNull]
+		public IEnumerable<Enum> GetFlags(Enum value) { return SelectEnumValues(_cache.GetFlags(ToInt(value))); }
 
 		public int GetFlagCount() { return _cache.GetFlagCount(); }
 
@@ -184,7 +190,8 @@ namespace asm.Enumeration
 
 		public int GetFlagCount(Enum value, Enum otherFlags) { return _cache.GetFlagCount(ToInt(value), ToInt(otherFlags)); }
 
-		[NotNull] public IEnumerable<EnumMember> GetFlagMembers(Enum value) { return SelectEnumMembers(_cache.GetFlagMembers(ToInt(value))); }
+		[NotNull]
+		public IEnumerable<EnumMember> GetFlagMembers(Enum value) { return SelectEnumMembers(_cache.GetFlagMembers(ToInt(value))); }
 
 		public bool HasAnyFlags(Enum value) { return _cache.HasAnyFlags(ToInt(value)); }
 
@@ -234,7 +241,8 @@ namespace asm.Enumeration
 
 		public bool CustomValidate(TInt value) { return _customEnumValidator.IsValid(ToEnum(value)); }
 
-		[NotNull] public EnumMember CreateEnumMember(EnumMember<TInt, TIntProvider> member) { return new UntypedEnumMember<TInt, TIntProvider>(member); }
+		[NotNull]
+		public EnumMember CreateEnumMember(EnumMember<TInt, TIntProvider> member) { return new UntypedEnumMember<TInt, TIntProvider>(member); }
 
 		EnumMember IEnumInfo.GetMember(string value, bool ignoreCase, EnumFormat[] formats) { return GetMember(value, ignoreCase, formats); }
 
@@ -258,7 +266,8 @@ namespace asm.Enumeration
 			return members.Select(member => member.EnumMemberInternal);
 		}
 
-		[NotNull] private static Enum[] SelectEnumValues([NotNull] IEnumerable<TInt> values) { return values.Select(ToEnum).ToArray(); }
+		[NotNull]
+		private static Enum[] SelectEnumValues([NotNull] IEnumerable<TInt> values) { return values.Select(ToEnum).ToArray(); }
 
 		[SecuritySafeCritical]
 		internal static Enum ToEnum(TInt value) { return (Enum)Convert.ChangeType(value, typeof(TInt)); }
@@ -306,13 +315,17 @@ namespace asm.Enumeration
 
 		public int GetCount(EnumMemberSelection selection) { return _cache.GetMemberCount(selection); }
 
-		[NotNull] public IEnumerable<EnumMember<TEnum>> GetMembers(EnumMemberSelection selection) { return SelectEnumMembers(_cache.GetMembers(selection)); }
+		[NotNull]
+		public IEnumerable<EnumMember<TEnum>> GetMembers(EnumMemberSelection selection) { return SelectEnumMembers(_cache.GetMembers(selection)); }
 
-		[NotNull] public IEnumerable<string> GetNames(EnumMemberSelection selection) { return _cache.GetNames(selection); }
+		[NotNull]
+		public IEnumerable<string> GetNames(EnumMemberSelection selection) { return _cache.GetNames(selection); }
 
-		[NotNull] public IEnumerable<string> GetDisplayNames(EnumMemberSelection selection) { return _cache.GetDisplayNames(selection); }
+		[NotNull]
+		public IEnumerable<string> GetDisplayNames(EnumMemberSelection selection) { return _cache.GetDisplayNames(selection); }
 
-		[NotNull] public TEnum[] GetValues(EnumMemberSelection selection) { return SelectEnumValues(_cache.GetValues(selection)); }
+		[NotNull]
+		public TEnum[] GetValues(EnumMemberSelection selection) { return SelectEnumValues(_cache.GetValues(selection)); }
 
 		public TEnum ToObject([NotNull] object value, EnumValidation validation = EnumValidation.None)
 		{
@@ -384,7 +397,8 @@ namespace asm.Enumeration
 
 		public string Format(TEnum value, [NotNull] EnumFormat[] formats) { return _cache.Format(ToInt(value), formats); }
 
-		[NotNull] public object GetUnderlyingValue(TEnum value) { return ToInt(value); }
+		[NotNull]
+		public object GetUnderlyingValue(TEnum value) { return ToInt(value); }
 
 		public sbyte ToSByte(TEnum value) { return ToInt(value).ToSByte(null); }
 
@@ -432,7 +446,8 @@ namespace asm.Enumeration
 
 		public string FormatFlags(TEnum value, string delimiter, EnumFormat[] formats) { return _cache.FormatFlags(ToInt(value), delimiter, formats); }
 
-		[NotNull] public IEnumerable<TEnum> GetFlags(TEnum value) { return SelectEnumValues(_cache.GetFlags(ToInt(value))); }
+		[NotNull]
+		public IEnumerable<TEnum> GetFlags(TEnum value) { return SelectEnumValues(_cache.GetFlags(ToInt(value))); }
 
 		public int GetFlagCount() { return _cache.GetFlagCount(); }
 
@@ -440,7 +455,8 @@ namespace asm.Enumeration
 
 		public int GetFlagCount(TEnum value, TEnum otherFlags) { return _cache.GetFlagCount(ToInt(value), ToInt(otherFlags)); }
 
-		[NotNull] public IEnumerable<EnumMember<TEnum>> GetFlagMembers(TEnum value) { return SelectEnumMembers(_cache.GetFlagMembers(ToInt(value))); }
+		[NotNull]
+		public IEnumerable<EnumMember<TEnum>> GetFlagMembers(TEnum value) { return SelectEnumMembers(_cache.GetFlagMembers(ToInt(value))); }
 
 		public bool HasAnyFlags(TEnum value) { return _cache.HasAnyFlags(ToInt(value)); }
 
@@ -607,7 +623,8 @@ namespace asm.Enumeration
 
 		public bool CustomValidate(TInt value) { return _customEnumValidator.IsValid(ToEnum(value)); }
 
-		[NotNull] public EnumMember CreateEnumMember(EnumMember<TInt, TIntProvider> member) { return new EnumMember<TEnum, TInt, TIntProvider>(member); }
+		[NotNull]
+		public EnumMember CreateEnumMember(EnumMember<TInt, TIntProvider> member) { return new EnumMember<TEnum, TInt, TIntProvider>(member); }
 
 		EnumMember IEnumInfo.GetMember(string value, bool ignoreCase, EnumFormat[] formats) { return GetMember(value, ignoreCase, formats); }
 
@@ -631,7 +648,8 @@ namespace asm.Enumeration
 			return members.Select(member => (EnumMember<TEnum>)member.EnumMemberInternal);
 		}
 
-		[NotNull] private static TEnum[] SelectEnumValues([NotNull] IEnumerable<TInt> values) { return values.Select(ToEnum).ToArray(); }
+		[NotNull]
+		private static TEnum[] SelectEnumValues([NotNull] IEnumerable<TInt> values) { return values.Select(ToEnum).ToArray(); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[SecuritySafeCritical]
@@ -641,7 +659,8 @@ namespace asm.Enumeration
 		[SecuritySafeCritical]
 		private static TInt ToInt(TEnum value) { return (TInt)Convert.ChangeType(value, typeof(TInt)); }
 
-		[NotNull] private static IEnumerable<TEnum> SelectEnumObjects([NotNull] IEnumerable<TEnum> values) { return values.Select(value => value); }
+		[NotNull]
+		private static IEnumerable<TEnum> SelectEnumObjects([NotNull] IEnumerable<TEnum> values) { return values.Select(value => value); }
 
 		private static IEnumValidatorAttribute<TEnum> GetCustomEnumValidator()
 		{

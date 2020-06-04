@@ -21,6 +21,7 @@ namespace asm.Collections
 		[NotNull]
 		public new TSource Source => _source;
 
-		[NotNull] public static implicit operator TSource([NotNull] LimitedCollectionWrapper<TSource, T> wrapper) { return wrapper.Source; }
+		[NotNull]
+		public static implicit operator TSource([NotNull] LimitedCollectionWrapper<TSource, T> wrapper) { return wrapper.Source; }
 	}
 }

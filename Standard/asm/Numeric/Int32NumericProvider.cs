@@ -29,9 +29,11 @@ namespace asm.Numeric
 {
     internal class Int32NumericProvider : INumericProvider<int>
     {
-        [NotNull] public string ToHexadecimalString(int value) { return value.ToString("X8"); }
+        [NotNull]
+        public string ToHexadecimalString(int value) { return value.ToString("X8"); }
 
-		[NotNull] public string ToDecimalString(int value) { return value.ToString(); }
+		[NotNull]
+		public string ToDecimalString(int value) { return value.ToString(); }
 
 		public int One => 1;
 

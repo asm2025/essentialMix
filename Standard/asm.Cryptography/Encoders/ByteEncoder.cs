@@ -60,6 +60,7 @@ namespace asm.Cryptography.Encoders
 						: Encoding.GetString(DecodeToBytes(value));
 		}
 
-		[NotNull] public static ByteEncoder Create(BitVectorMode mode, Encoding encoding = null) { return new ByteEncoder(mode, encoding ?? EncodingHelper.Default); }
+		[NotNull]
+		public static ByteEncoder Create(BitVectorMode mode, Encoding encoding = null) { return new ByteEncoder(mode, encoding ?? EncodingHelper.Default); }
 	}
 }

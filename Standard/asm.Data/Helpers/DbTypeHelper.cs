@@ -81,7 +81,8 @@ namespace asm.Data.Helpers
 			DbType.DateTimeOffset
 		});
 
-		[NotNull] public static string FormatValue([NotNull] DataRow row, [NotNull] DataColumn column) { return FormatValue(row[column.ColumnName], MapType(column.DataType)); }
+		[NotNull]
+		public static string FormatValue([NotNull] DataRow row, [NotNull] DataColumn column) { return FormatValue(row[column.ColumnName], MapType(column.DataType)); }
 
 		[NotNull]
 		public static string FormatValue<T>(T value, DbType dbType)

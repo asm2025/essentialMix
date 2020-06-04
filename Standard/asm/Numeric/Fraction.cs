@@ -12,7 +12,8 @@ namespace asm.Numeric
 			Denominator = denominator;
 		}
 
-		[NotNull] public override string ToString() { return $"{Numerator}:{Denominator}"; }
+		[NotNull]
+		public override string ToString() { return $"{Numerator}:{Denominator}"; }
 
 		public T Numerator { get; }
 		public T Denominator { get; }

@@ -50,6 +50,7 @@ namespace asm.Caching
 			return this;
 		}
 
-		[NotNull] public override string ToString() { return _builder.ToString(); }
+		[NotNull]
+		public override string ToString() { return _builder.ToString(); }
 	}
 }

@@ -1,12 +1,24 @@
 using System;
 using asm.Extensions;
 using asm.Helpers;
+using JetBrains.Annotations;
 
 namespace asm.Collections.Concurrent.ProducerConsumer
 {
-	public class ProducerConsumerQueueOptions
+	public class ProducerConsumerQueueOptions<T>
 	{
-		private int _threads = TaskHelper.ProcessDefault;
+		private int _threads;
+
+		public ProducerConsumerQueueOptions([NotNull] Func<T, TaskResult> executeCallback)
+			: this(TaskHelper.ProcessDefault, executeCallback)
+		{
+		}
+
+		public ProducerConsumerQueueOptions(int threads, [NotNull] Func<T, TaskResult> executeCallback)
+		{
+			Threads = threads;
+			ExecuteCallback = executeCallback;
+		}
 
 		public int Threads
 		{
@@ -18,5 +30,10 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 				_threads = value;
 			}
 		}
+
+		[NotNull]
+		public Func<T, TaskResult> ExecuteCallback { get; }
+		public Func<T, TaskResult, Exception, bool> ResultCallback { get; set; }
+		public Action<T> FinalizeCallback { get; set; }
 	}
 }

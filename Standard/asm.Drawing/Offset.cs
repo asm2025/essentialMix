@@ -51,7 +51,8 @@ namespace asm.Drawing
 			}
 		}
 
-		[NotNull] public override string ToString() { return $"{Top},{Right},{Bottom},{Left}"; }
+		[NotNull]
+		public override string ToString() { return $"{Top},{Right},{Bottom},{Left}"; }
 
 		public bool Equals(Offset other) { return other.Top == Top && other.Right == Right && other.Bottom == Bottom && other.Left == Left; }
 

@@ -135,7 +135,8 @@ namespace asm.Drawing
 			}
 		}
 
-		[NotNull] public Bitmap ToBitmap() { return ToBitmap(true); }
+		[NotNull]
+		public Bitmap ToBitmap() { return ToBitmap(true); }
 
 		[NotNull]
 		public unsafe Bitmap ToBitmap(bool copy)

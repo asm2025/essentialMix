@@ -1,23 +1,17 @@
-using System;
 using System.Threading;
+using JetBrains.Annotations;
 
 namespace asm.Collections.Concurrent.ProducerConsumer
 {
-	public abstract class NamedProducerConsumerThreadQueue : ProducerConsumerThreadQueue, INamedProducerConsumerThreadQueue, IDisposable
+	public abstract class NamedProducerConsumerThreadQueue<T> : ProducerConsumerThreadQueue<T>, INamedProducerConsumerThreadQueue<T>
 	{
 		private bool _isOwner;
-		protected NamedProducerConsumerThreadQueue(CancellationToken token = default(CancellationToken))
-			: this(null, token)
-		{
-		}
 
-		protected NamedProducerConsumerThreadQueue(ProducerConsumerQueueOptions options, CancellationToken token = default(CancellationToken))
+		protected NamedProducerConsumerThreadQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			if (options is ProducerConsumerThreadNamedQueueOptions namedQueueOptions)
-			{
-				Name = namedQueueOptions.Name;
-			}
+			if (!(options is ProducerConsumerThreadNamedQueueOptions<T> namedQueueOptions)) return;
+			Name = namedQueueOptions.Name;
 		}
 
 		public string Name { get; }

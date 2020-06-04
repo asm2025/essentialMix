@@ -85,9 +85,9 @@ namespace asm.Threading
 
 		public bool StartInputProcess([NotNull] string fileName, string arguments, RunSettingsBase settings)
 		{
-			if (IsDisposedOrDisposing || _token.IsCancellationRequested) return false;
+			if (IsDisposed || _token.IsCancellationRequested) return false;
 			LastException = null;
-			if (settings == null) settings = DefaultRunSettings;
+			settings ??= DefaultRunSettings;
 
 			if (_inputProcess.IsAwaitable())
 			{
@@ -131,6 +131,7 @@ namespace asm.Threading
 					}
 					catch
 					{
+						// ignored
 					}
 				}				
 
@@ -185,9 +186,9 @@ namespace asm.Threading
 			LastException = null;
 		}
 
-		public Process Run([NotNull] string execName) { return Run(execName, null, null); }
+		public Process Run([NotNull] string execName) { return Run(execName, null, RunSettings.Default); }
 
-		public Process Run([NotNull] string execName, RunSettings settings) { return Run(execName, null, settings); }
+		public Process Run([NotNull] string execName, [NotNull] RunSettings settings) { return Run(execName, null, settings); }
 
 		public Process Run([NotNull] string execName, string arguments, [NotNull] RunSettings settings) { return ProcessHelper.Run(execName, arguments, settings); }
 
@@ -246,9 +247,11 @@ namespace asm.Threading
 			return ProcessHelper.RunAndGetOutput(execName, arguments, settings, awaitableHandle);
 		}
 
-		[NotNull] public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
+		[NotNull]
+		public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
 
-		[NotNull] public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
+		[NotNull]
+		public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
 
 		[NotNull]
 		public Task<bool> WaitAsync(int millisecondsTimeout)

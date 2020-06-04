@@ -86,7 +86,8 @@ namespace asm.Collections
 				this.RemoveAll(item => !item.IsFixed);
 			}
 
-			[NotNull] protected override string GetKeyForItem(SubItem item) { return item.Column.Name; }
+			[NotNull]
+			protected override string GetKeyForItem(SubItem item) { return item.Column.Name; }
 
 			public Item Owner { get; private set; }
 		}

@@ -182,9 +182,11 @@ namespace asm.Threading
 			return WaitInternal(millisecondsTimeout);
 		}
 
-		[NotNull] public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
+		[NotNull]
+		public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
 
-		[NotNull] public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
+		[NotNull]
+		public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
 
 		[NotNull]
 		public Task<bool> WaitAsync(int millisecondsTimeout)
@@ -201,13 +203,10 @@ namespace asm.Threading
 
 			try
 			{
-				if (millisecondsTimeout < 0)
-				{
-					_countdown.Wait(Token);
-					return true;
-				}
+				if (millisecondsTimeout > TimeSpanHelper.INFINITE) return _countdown.Wait(millisecondsTimeout, Token);
+				_countdown.Wait(Token);
+				return !Token.IsCancellationRequested;
 
-				return _countdown.Wait(millisecondsTimeout, Token);
 			}
 			catch (OperationCanceledException)
 			{
@@ -257,7 +256,7 @@ namespace asm.Threading
 			{
 				_workerWaitEvent.Reset();
 				_workerWaitEvent.Wait(Token);
-				if (Token.IsCancellationRequested || IsDisposedOrDisposing) break;
+				if (Token.IsCancellationRequested || IsDisposed) break;
 
 				lock(_lock)
 				{
@@ -273,7 +272,7 @@ namespace asm.Threading
 
 		private void Worker()
 		{
-			if (IsDisposedOrDisposing || Token.IsCancellationRequested)
+			if (IsDisposed || Token.IsCancellationRequested)
 			{
 				SignalAndCheck();
 				return;
@@ -286,7 +285,7 @@ namespace asm.Threading
 				_mainWaitEvent.Reset();
 				_workerWaitEvent.Set();
 				_mainWaitEvent.Wait(Token);
-				if (Token.IsCancellationRequested || IsDisposedOrDisposing) break;
+				if (Token.IsCancellationRequested || IsDisposed) break;
 
 				lock(_lock)
 				{
@@ -300,7 +299,7 @@ namespace asm.Threading
 
 		private void SignalAndCheck()
 		{
-			if (IsDisposedOrDisposing) return;
+			if (IsDisposed) return;
 
 			bool done;
 

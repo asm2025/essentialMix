@@ -232,11 +232,14 @@ namespace asm.Enumeration
 						: members;
 		}
 
-		[NotNull] public IEnumerable<string> GetNames(EnumMemberSelection selection) { return GetMembers(selection).Select(member => member.Name); }
+		[NotNull]
+		public IEnumerable<string> GetNames(EnumMemberSelection selection) { return GetMembers(selection).Select(member => member.Name); }
 
-		[NotNull] public IEnumerable<string> GetDisplayNames(EnumMemberSelection selection) { return GetMembers(selection).Select(member => member.DisplayName); }
+		[NotNull]
+		public IEnumerable<string> GetDisplayNames(EnumMemberSelection selection) { return GetMembers(selection).Select(member => member.DisplayName); }
 
-		[NotNull] public IEnumerable<TInt> GetValues(EnumMemberSelection selection) { return GetMembers(selection).Select(member => member.Value); }
+		[NotNull]
+		public IEnumerable<TInt> GetValues(EnumMemberSelection selection) { return GetMembers(selection).Select(member => member.Value); }
 
 		public TInt ToObject([NotNull] object value, EnumValidation validation)
 		{
@@ -479,7 +482,8 @@ namespace asm.Enumeration
 			}
 		}
 
-		[NotNull] public IEnumerable<EnumMember<TInt, TIntProvider>> GetFlagMembers(TInt value) { return GetFlags(value).Select(GetMember); }
+		[NotNull]
+		public IEnumerable<EnumMember<TInt, TIntProvider>> GetFlagMembers(TInt value) { return GetFlags(value).Select(GetMember); }
 
 		public int GetFlagCount() { return Provider.BitCount(AllFlags); }
 

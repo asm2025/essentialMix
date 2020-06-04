@@ -110,9 +110,11 @@ namespace asm.Helpers
 
 		public static int SystemEncodingCount { get; }
 
-		[NotNull] public static Encoding GetEncoding(string input) { return FindEncoding(input, EncodingCodePages); }
+		[NotNull]
+		public static Encoding GetEncoding(string input) { return FindEncoding(input, EncodingCodePages); }
 
-		[NotNull] public static Encoding GetEncoding(string input, bool preserveOrder) { return FindEncoding(input, EncodingCodePages, preserveOrder); }
+		[NotNull]
+		public static Encoding GetEncoding(string input, bool preserveOrder) { return FindEncoding(input, EncodingCodePages, preserveOrder); }
 
 		[NotNull]
 		public static Encoding GetEncoding(char[] input)
@@ -136,9 +138,11 @@ namespace asm.Helpers
 			}
 		}
 
-		[NotNull] public static Encoding[] GetEncodings(string input) { return FindEncodings(input, EncodingCodePages, true); }
+		[NotNull]
+		public static Encoding[] GetEncodings(string input) { return FindEncodings(input, EncodingCodePages, true); }
 
-		[NotNull] public static Encoding[] GetEncodings(string input, bool preserveOrder) { return FindEncodings(input, EncodingCodePages, preserveOrder); }
+		[NotNull]
+		public static Encoding[] GetEncodings(string input, bool preserveOrder) { return FindEncodings(input, EncodingCodePages, preserveOrder); }
 
 		[NotNull]
 		public static Encoding[] GetEncodings(byte[] input, int maxEncodings)
@@ -197,21 +201,29 @@ namespace asm.Helpers
 			return result.ToArray();
 		}
 
-		[NotNull] public static Encoding GetPreferredEncoding(string input) { return FindEncoding(input, PreferredEncodingCodePages); }
+		[NotNull]
+		public static Encoding GetPreferredEncoding(string input) { return FindEncoding(input, PreferredEncodingCodePages); }
 
-		[NotNull] public static Encoding GetPreferredEncoding(string input, bool preserveOrder) { return FindEncoding(input, PreferredEncodingCodePages, preserveOrder); }
+		[NotNull]
+		public static Encoding GetPreferredEncoding(string input, bool preserveOrder) { return FindEncoding(input, PreferredEncodingCodePages, preserveOrder); }
 
-		[NotNull] public static Encoding[] GetPreferredEncodings(string input) { return FindEncodings(input, PreferredEncodingCodePages, true); }
+		[NotNull]
+		public static Encoding[] GetPreferredEncodings(string input) { return FindEncodings(input, PreferredEncodingCodePages, true); }
 
-		[NotNull] public static Encoding[] GetPreferredEncodings(string input, bool preserveOrder) { return FindEncodings(input, PreferredEncodingCodePages, preserveOrder); }
+		[NotNull]
+		public static Encoding[] GetPreferredEncodings(string input, bool preserveOrder) { return FindEncodings(input, PreferredEncodingCodePages, preserveOrder); }
 
-		[NotNull] public static Encoding GetPreferredStreamEncoding(string input) { return FindEncoding(input, PreferredStreamEncodingCodePages); }
+		[NotNull]
+		public static Encoding GetPreferredStreamEncoding(string input) { return FindEncoding(input, PreferredStreamEncodingCodePages); }
 
-		[NotNull] public static Encoding GetPreferredStreamEncoding(string input, bool preserveOrder) { return FindEncoding(input, PreferredStreamEncodingCodePages, preserveOrder); }
+		[NotNull]
+		public static Encoding GetPreferredStreamEncoding(string input, bool preserveOrder) { return FindEncoding(input, PreferredStreamEncodingCodePages, preserveOrder); }
 
-		[NotNull] public static Encoding[] GetPreferredStreamEncodings(string input) { return FindEncodings(input, PreferredStreamEncodingCodePages, true); }
+		[NotNull]
+		public static Encoding[] GetPreferredStreamEncodings(string input) { return FindEncodings(input, PreferredStreamEncodingCodePages, true); }
 
-		[NotNull] public static Encoding[] GetPreferredStreamEncodings(string input, bool preserveOrder) { return FindEncodings(input, PreferredStreamEncodingCodePages, preserveOrder); }
+		[NotNull]
+		public static Encoding[] GetPreferredStreamEncodings(string input, bool preserveOrder) { return FindEncodings(input, PreferredStreamEncodingCodePages, preserveOrder); }
 
 		[NotNull]
 		private static Encoding FindEncoding(string input, int[] preferredEncodings)

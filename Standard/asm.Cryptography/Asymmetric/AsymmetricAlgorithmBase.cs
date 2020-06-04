@@ -32,7 +32,8 @@ namespace asm.Cryptography.Asymmetric
 		public KeySizes[] KeySizes => Algorithm.LegalKeySizes;
 
 		public void FromXmlString([NotNull] string value) { Algorithm.FromXmlString(value); }
-		[NotNull] public string ToXmlString(bool includePrivateParameters) { return Algorithm.ToXmlString(includePrivateParameters); }
+		[NotNull]
+		public string ToXmlString(bool includePrivateParameters) { return Algorithm.ToXmlString(includePrivateParameters); }
 
 		public void Clear() { Algorithm.Clear(); }
 	}

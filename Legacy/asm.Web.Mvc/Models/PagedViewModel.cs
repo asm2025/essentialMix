@@ -16,7 +16,8 @@ namespace asm.Web.Mvc.Models
 		private string _area;
 		private string _controller;
 		private string _action;
-		[NotNull] private PagerSettings _pager;
+		[NotNull]
+		private PagerSettings _pager;
 
 		protected PagedViewModel([AspMvcController] string controller, [AspMvcAction] string action)
 			: this(string.Empty, controller, action, new PagerSettings(page => PAGE_URL_DEF))

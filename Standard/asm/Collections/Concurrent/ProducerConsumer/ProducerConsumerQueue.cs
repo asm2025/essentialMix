@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using asm.Collections.Concurrent.ProducerConsumer.Queue;
 using asm.Extensions;
 using asm.Helpers;
 using asm.Patterns.Object;
@@ -8,19 +9,16 @@ using JetBrains.Annotations;
 
 namespace asm.Collections.Concurrent.ProducerConsumer
 {
-	public abstract class ProducerConsumerQueue : Disposable, IProducerConsumer, IDisposable
+	public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T>
 	{
 		private CancellationTokenSource _cts;
 
-		protected ProducerConsumerQueue(CancellationToken token = default(CancellationToken))
-			: this(null, token)
+		protected ProducerConsumerQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 		{
-		}
-
-		protected ProducerConsumerQueue(ProducerConsumerQueueOptions options, CancellationToken token = default(CancellationToken))
-		{
-			if (options == null) options = new ProducerConsumerQueueOptions();
-			ThreadsInternal = options.Threads;
+			Threads = options.Threads;
+			ExecuteCallback = options.ExecuteCallback;
+			ResultCallback = options.ResultCallback;
+			FinalizeCallback = options.FinalizeCallback;
 			_cts = new CancellationTokenSource();
 			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed());
 			Token = _cts.Token;
@@ -30,7 +28,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 		{
 			if (disposing)
 			{
-				StopInternal(!WaitForQueuedItemsOnDispose);
+				StopInternal(!WaitOnDispose);
 				ObjectHelper.Dispose(ref _cts);
 			}
 
@@ -40,30 +38,31 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 		public event EventHandler WorkStarted;
 		public event EventHandler WorkCompleted;
 
-		public int Count => CountInternal;
+		public abstract int Count { get; }
 
-		public bool WaitForQueuedItemsOnDispose { get; set; } = true;
+		public bool WaitOnDispose { get; set; } = true;
 
-		public int Threads => ThreadsInternal;
+		public int Threads { get; }
 
 		public CancellationToken Token { get; }
 
-		public bool IsBusy => IsBusyInternal;
+		public abstract bool IsBusy { get; }
 
 		public bool CompleteMarked { get; protected set; }
 
 		public int SleepAfterEnqueue { get; set; } = TimeSpanHelper.INFINITE;
 
-		protected abstract int CountInternal { get; }
+		[NotNull]
+		protected Func<T, TaskResult> ExecuteCallback { get; }
 
-		protected abstract bool IsBusyInternal { get; }
+		protected Func<T, TaskResult, Exception, bool> ResultCallback { get; }
 
-		protected int ThreadsInternal { get; }
+		protected Action<T> FinalizeCallback { get; }
 
 		public void Stop()
 		{
 			ThrowIfDisposed();
-			StopInternal(!WaitForQueuedItemsOnDispose);
+			StopInternal(!WaitOnDispose);
 		}
 
 		public void Stop(bool enforce)
@@ -72,7 +71,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 			StopInternal(enforce);
 		}
 
-		public void Enqueue(TaskItem item)
+		public void Enqueue(T item)
 		{
 			ThrowIfDisposed();
 			if (CompleteMarked) throw new InvalidOperationException("Completion marked.");
@@ -105,9 +104,11 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 			return WaitInternal(millisecondsTimeout);
 		}
 
-		[NotNull] public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
+		[NotNull] 
+		public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
 
-		[NotNull] public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
+		[NotNull] 
+		public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
 
 		[NotNull]
 		public Task<bool> WaitAsync(int millisecondsTimeout)
@@ -123,7 +124,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 			ClearInternal();
 		}
 
-		protected abstract void EnqueueInternal(TaskItem item);
+		protected abstract void EnqueueInternal([NotNull] T item);
 
 		protected abstract void CompleteInternal();
 
@@ -133,13 +134,77 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 
 		protected abstract void StopInternal(bool enforce);
 
-		protected virtual void OnWorkStarted(EventArgs args) { WorkStarted?.Invoke(this, args); }
+		protected virtual void OnWorkStarted(EventArgs args)
+		{
+			WorkStarted?.Invoke(this, args);
+		}
 
-		protected virtual void OnWorkCompleted(EventArgs args) { WorkCompleted?.Invoke(this, args); }
+		protected virtual void OnWorkCompleted(EventArgs args)
+		{
+			WorkCompleted?.Invoke(this, args);
+		}
+
+		protected virtual void Run([NotNull] T item)
+		{
+			if (IsDisposed || Token.IsCancellationRequested) return;
+
+			try
+			{
+				TaskResult result = ExecuteCallback(item);
+				ResultCallback?.Invoke(item, result, null);
+			}
+			catch (TimeoutException)
+			{
+				ResultCallback?.Invoke(item, TaskResult.Timeout, null);
+			}
+			catch (AggregateException aggTimeout) when(aggTimeout.InnerException is TimeoutException)
+			{
+				ResultCallback?.Invoke(item, TaskResult.Timeout, null);
+			}
+			catch (OperationCanceledException)
+			{
+				ResultCallback?.Invoke(item, TaskResult.Canceled, null);
+			}
+			catch (AggregateException aggCanceled) when(aggCanceled.InnerException is OperationCanceledException)
+			{
+				ResultCallback?.Invoke(item, TaskResult.Canceled, null);
+			}
+			catch (Exception e)
+			{
+				ResultCallback?.Invoke(item, TaskResult.Error, e);
+			}
+			finally
+			{
+				FinalizeCallback?.Invoke(item);
+			}
+		}
 
 		protected void Cancel()
 		{
 			_cts.CancelIfNotDisposed();
+		}
+	}
+
+	public static class ProducerConsumerQueue
+	{
+		[NotNull]
+		public static IProducerConsumer<T> Create<T>(ThreadQueueMode mode, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+		{
+			token.ThrowIfCancellationRequested();
+
+			return mode switch
+			{
+				ThreadQueueMode.Task => new TaskQueue<T>(options, token),
+				ThreadQueueMode.DataFlow => new DataFlowQueue<T>(options, token),
+				ThreadQueueMode.WaitAndPulse => new WaitAndPulseQueue<T>(options, token),
+				ThreadQueueMode.BlockingCollection => new BlockingCollectionQueue<T>(options, token),
+				ThreadQueueMode.TaskGroup => new TaskGroupQueue<T>(options, token),
+				ThreadQueueMode.SemaphoreSlim => new SemaphoreSlimQueue<T>(options, token),
+				ThreadQueueMode.Semaphore => new SemaphoreQueue<T>(options, token),
+				ThreadQueueMode.Mutex => new MutexQueue<T>(options, token),
+				ThreadQueueMode.ThresholdTaskGroup => new ThresholdTaskGroupQueue<T>(options, token),
+				_ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
+			};
 		}
 	}
 }

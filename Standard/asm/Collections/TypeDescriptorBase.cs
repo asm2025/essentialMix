@@ -14,7 +14,8 @@ namespace asm.Collections
 
 		public TSource Source { get; }
 
-		[NotNull] public virtual System.ComponentModel.AttributeCollection GetAttributes() { return TypeDescriptor.GetAttributes(Source, true); }
+		[NotNull]
+		public virtual System.ComponentModel.AttributeCollection GetAttributes() { return TypeDescriptor.GetAttributes(Source, true); }
 
 		public virtual string GetClassName() { return TypeDescriptor.GetClassName(Source, true); }
 
@@ -28,11 +29,14 @@ namespace asm.Collections
 
 		public virtual object GetEditor(Type editorBaseType) { return TypeDescriptor.GetEditor(Source, editorBaseType, true); }
 
-		[NotNull] public virtual EventDescriptorCollection GetEvents() { return TypeDescriptor.GetEvents(Source, true); }
+		[NotNull]
+		public virtual EventDescriptorCollection GetEvents() { return TypeDescriptor.GetEvents(Source, true); }
 
-		[NotNull] public virtual EventDescriptorCollection GetEvents(Attribute[] attributes) { return TypeDescriptor.GetEvents(Source, attributes, true); }
+		[NotNull]
+		public virtual EventDescriptorCollection GetEvents(Attribute[] attributes) { return TypeDescriptor.GetEvents(Source, attributes, true); }
 
-		[NotNull] public virtual object GetPropertyOwner(PropertyDescriptor pd) { return Source; }
+		[NotNull]
+		public virtual object GetPropertyOwner(PropertyDescriptor pd) { return Source; }
 
 		public abstract PropertyDescriptorCollection GetProperties();
 		public abstract PropertyDescriptorCollection GetProperties(Attribute[] attributes);

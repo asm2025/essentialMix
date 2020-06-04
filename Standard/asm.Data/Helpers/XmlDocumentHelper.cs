@@ -10,11 +10,14 @@ namespace asm.Data.Helpers
 {
 	public static class XmlDocumentHelper
 	{
-		[NotNull] public static string CreateDeclarationString() { return CreateDeclarationString(EncodingHelper.Default, true, 1.0f); }
+		[NotNull]
+		public static string CreateDeclarationString() { return CreateDeclarationString(EncodingHelper.Default, true, 1.0f); }
 
-		[NotNull] public static string CreateDeclarationString(Encoding encoding) { return CreateDeclarationString(encoding, true, 1.0f); }
+		[NotNull]
+		public static string CreateDeclarationString(Encoding encoding) { return CreateDeclarationString(encoding, true, 1.0f); }
 
-		[NotNull] public static string CreateDeclarationString(Encoding encoding, bool standAlone) { return CreateDeclarationString(encoding, standAlone, 1.0f); }
+		[NotNull]
+		public static string CreateDeclarationString(Encoding encoding, bool standAlone) { return CreateDeclarationString(encoding, standAlone, 1.0f); }
 
 		[NotNull]
 		public static string CreateDeclarationString(Encoding encoding, bool standAlone, float version)
@@ -28,9 +31,11 @@ namespace asm.Data.Helpers
 			return sb.ToString();
 		}
 
-		[NotNull] public static XmlDocument Create([NotNull] params string[] namespaceURI) { return Create(true, EncodingHelper.Default, true, 1.0f, namespaceURI); }
+		[NotNull]
+		public static XmlDocument Create([NotNull] params string[] namespaceURI) { return Create(true, EncodingHelper.Default, true, 1.0f, namespaceURI); }
 
-		[NotNull] public static XmlDocument Create(bool ignoreWhiteSpace, [NotNull] params string[] namespaceURI) { return Create(ignoreWhiteSpace, EncodingHelper.Default, true, 1.0f, namespaceURI); }
+		[NotNull]
+		public static XmlDocument Create(bool ignoreWhiteSpace, [NotNull] params string[] namespaceURI) { return Create(ignoreWhiteSpace, EncodingHelper.Default, true, 1.0f, namespaceURI); }
 
 		[NotNull]
 		public static XmlDocument Create(bool ignoreWhiteSpace, Encoding encoding, [NotNull] params string[] namespaceURI)
@@ -53,9 +58,11 @@ namespace asm.Data.Helpers
 			return document;
 		}
 
-		[NotNull] public static XmlDocument LoadFile([NotNull] string filename) { return LoadFile(filename, null, null); }
+		[NotNull]
+		public static XmlDocument LoadFile([NotNull] string filename) { return LoadFile(filename, null, null); }
 
-		[NotNull] public static XmlDocument LoadFile([NotNull] string filename, XmlReaderSettings settings) { return LoadFile(filename, settings, null); }
+		[NotNull]
+		public static XmlDocument LoadFile([NotNull] string filename, XmlReaderSettings settings) { return LoadFile(filename, settings, null); }
 
 		[NotNull]
 		public static XmlDocument LoadFile([NotNull] string filename, XmlReaderSettings settings, XmlParserContext context)

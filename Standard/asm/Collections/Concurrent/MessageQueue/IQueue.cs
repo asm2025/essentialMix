@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 
 namespace asm.Collections.Concurrent.MessageQueue
 {
-	public interface IQueue<T> : IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>, IDisposable
+	public interface IQueue<T> : IEnumerable<T>, IEnumerable, IReadOnlyCollection<T>, IDisposable
 	{
 		[NotNull]
 		Action<T> Callback { get; }

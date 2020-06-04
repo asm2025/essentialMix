@@ -163,6 +163,7 @@ namespace asm.Extensions
 
 		public static int ToUtf32(this char thisValue, char lowSurrogate) { return char.ConvertToUtf32(thisValue, lowSurrogate); }
 
-		[NotNull] public static string ToBase64(this char thisValue) { return Convert.ToBase64String(BitConverter.GetBytes(thisValue)); }
+		[NotNull]
+		public static string ToBase64(this char thisValue) { return Convert.ToBase64String(BitConverter.GetBytes(thisValue)); }
 	}
 }

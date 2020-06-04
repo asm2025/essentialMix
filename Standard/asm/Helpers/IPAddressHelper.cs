@@ -257,7 +257,8 @@ namespace asm.Helpers
 
 		public static uint ToUInt([NotNull] string value) { return IPAddress.Parse(value).ToUInt(); }
 
-		[NotNull] public static IPAddress ToIP(uint value) { return new IPAddress(BitConverter.GetBytes(value)); }
+		[NotNull]
+		public static IPAddress ToIP(uint value) { return new IPAddress(BitConverter.GetBytes(value)); }
 
 		public static int ToIPNumber(string value)
 		{

@@ -10,7 +10,8 @@ namespace asm.Core.Web.Extensions
 {
 	public static class ControllerBaseExtension
 	{
-		[NotNull] public static string ControllerName([NotNull] this ControllerBase thisValue) { return ControllerBaseHelper.ControllerName(thisValue.GetType()); }
+		[NotNull]
+		public static string ControllerName([NotNull] this ControllerBase thisValue) { return ControllerBaseHelper.ControllerName(thisValue.GetType()); }
 
 		public static IActionResult RedirectToLocal([NotNull] this ControllerBase thisValue, string returnUrl, ControllerActionData logOffActionData, ControllerActionData defaultUrlData)
 		{

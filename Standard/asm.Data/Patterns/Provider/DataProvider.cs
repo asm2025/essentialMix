@@ -51,7 +51,8 @@ namespace asm.Data.Patterns.Provider
 
 		public virtual string FormatValue(DataRow row, DataColumn column) { return FormatValue(row[column.ColumnName], column.DataType); }
 
-		[NotNull] public virtual string FormatValue(object value, Type type) { return FormatValue(value, MapType(type)); }
+		[NotNull]
+		public virtual string FormatValue(object value, Type type) { return FormatValue(value, MapType(type)); }
 
 		[NotNull]
 		public virtual string FormatValue<T>(T value, TType dbType)

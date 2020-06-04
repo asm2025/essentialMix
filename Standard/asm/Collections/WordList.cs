@@ -33,9 +33,11 @@ namespace asm.Collections
 			AddRange(enumerable);
 		}
 
-		[NotNull] public static explicit operator WordList([NotNull] byte[] value) { return new WordList(value); }
+		[NotNull]
+		public static explicit operator WordList([NotNull] byte[] value) { return new WordList(value); }
 
-		[NotNull] public static explicit operator byte[] ([NotNull] WordList value) { return value.ToByteArray(); }
+		[NotNull]
+		public static explicit operator byte[] ([NotNull] WordList value) { return value.ToByteArray(); }
 
 		[NotNull]
 		public byte[] ToByteArray()

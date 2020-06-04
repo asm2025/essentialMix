@@ -35,7 +35,8 @@ namespace asm.Cryptography.Asymmetric.Signature
 		public string SignatureAlgorithm => Algorithm.SignatureAlgorithm;
 
 		public void FromXmlString([NotNull] string value) { Algorithm.FromXmlString(value); }
-		[NotNull] public string ToXmlString(bool includePrivateParameters) { return Algorithm.ToXmlString(includePrivateParameters); }
+		[NotNull]
+		public string ToXmlString(bool includePrivateParameters) { return Algorithm.ToXmlString(includePrivateParameters); }
 
 		public abstract TParam ExportParameters(bool includePrivateParameters);
 		public abstract void ImportParameters(TParam parameters);

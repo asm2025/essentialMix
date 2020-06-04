@@ -742,7 +742,8 @@ namespace asm.Extensions
 							: thisValue.Substring(0, length);
 		}
 
-		[NotNull] public static string LeftMax([NotNull] this string thisValue, int length = -1) { return Left(thisValue, length.NotAbove(thisValue.Length)); }
+		[NotNull]
+		public static string LeftMax([NotNull] this string thisValue, int length = -1) { return Left(thisValue, length.NotAbove(thisValue.Length)); }
 
 		[NotNull]
 		public static string Right([NotNull] this string thisValue, int length = -1)
@@ -756,7 +757,8 @@ namespace asm.Extensions
 							: thisValue.Substring(thisValue.Length - length, length);
 		}
 
-		[NotNull] public static string RightMax([NotNull] this string thisValue, int length = -1) { return Right(thisValue, length.NotAbove(thisValue.Length)); }
+		[NotNull]
+		public static string RightMax([NotNull] this string thisValue, int length = -1) { return Right(thisValue, length.NotAbove(thisValue.Length)); }
 
 		public static bool IsLike(this string thisValue, string pattern) { return IsLike(thisValue, pattern, RegexHelper.OPTIONS_I); }
 
@@ -783,7 +785,8 @@ namespace asm.Extensions
 			return expression.IsMatch(thisValue, startIndex);
 		}
 
-		[NotNull] public static Match Match(this string thisValue, string pattern) { return Match(thisValue, pattern, RegexHelper.OPTIONS_I); }
+		[NotNull]
+		public static Match Match(this string thisValue, string pattern) { return Match(thisValue, pattern, RegexHelper.OPTIONS_I); }
 
 		[NotNull]
 		public static Match Match(this string thisValue, string pattern, RegexOptions options)
@@ -816,7 +819,8 @@ namespace asm.Extensions
 			return expression.Matches(thisValue, startIndex);
 		}
 
-		[NotNull] public static string Remove([NotNull] this string thisValue, [NotNull] params char[] remove) { return Remove(thisValue, 0, thisValue.Length, remove); }
+		[NotNull]
+		public static string Remove([NotNull] this string thisValue, [NotNull] params char[] remove) { return Remove(thisValue, 0, thisValue.Length, remove); }
 
 		[NotNull]
 		public static string Remove([NotNull] this string thisValue, int startIndex, [NotNull] params char[] remove)
@@ -836,9 +840,11 @@ namespace asm.Extensions
 			return expression.Replace(thisValue, string.Empty, count, startIndex);
 		}
 
-		[NotNull] public static string Remove([NotNull] this string thisValue, [NotNull] string remove) { return thisValue.Replace(remove, string.Empty); }
+		[NotNull]
+		public static string Remove([NotNull] this string thisValue, [NotNull] string remove) { return thisValue.Replace(remove, string.Empty); }
 
-		[NotNull] public static string Remove([NotNull] this string thisValue, string remove, int startIndex, int count) { return Remove(thisValue, remove, true, startIndex, count); }
+		[NotNull]
+		public static string Remove([NotNull] this string thisValue, string remove, int startIndex, int count) { return Remove(thisValue, remove, true, startIndex, count); }
 
 		[NotNull]
 		public static string Remove([NotNull] this string thisValue, string remove, bool ignoreCase, int startIndex, int count)
@@ -1001,12 +1007,18 @@ namespace asm.Extensions
 			return Replace(thisValue, oldValue, newValue, ignoreCase, ordinal, cultureInfo.CompareInfo, startIndex, count);
 		}
 
-		[NotNull] public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, [NotNull] CultureInfo cultureInfo) { return Replace(thisValue, oldValue, newValue, false, cultureInfo, 0, -1); }
-		[NotNull] public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, [NotNull] CultureInfo cultureInfo, int startIndex) { return Replace(thisValue, oldValue, newValue, false, cultureInfo, startIndex, -1); }
-		[NotNull] public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, [NotNull] CultureInfo cultureInfo, int startIndex, int count) { return Replace(thisValue, oldValue, newValue, false, cultureInfo, startIndex, count); }
-		[NotNull] public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, bool ignoreCase, [NotNull] CultureInfo cultureInfo) { return Replace(thisValue, oldValue, newValue, ignoreCase, cultureInfo, 0, -1); }
-		[NotNull] public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, bool ignoreCase, [NotNull] CultureInfo cultureInfo, int startIndex) { return Replace(thisValue, oldValue, newValue, ignoreCase, cultureInfo, startIndex, -1); }
-		[NotNull] public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, bool ignoreCase, [NotNull] CultureInfo cultureInfo, int startIndex, int count) { return Replace(thisValue, oldValue, newValue, ignoreCase, Equals(cultureInfo, CultureInfo.InvariantCulture), cultureInfo.CompareInfo, startIndex, count); }
+		[NotNull]
+		public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, [NotNull] CultureInfo cultureInfo) { return Replace(thisValue, oldValue, newValue, false, cultureInfo, 0, -1); }
+		[NotNull]
+		public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, [NotNull] CultureInfo cultureInfo, int startIndex) { return Replace(thisValue, oldValue, newValue, false, cultureInfo, startIndex, -1); }
+		[NotNull]
+		public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, [NotNull] CultureInfo cultureInfo, int startIndex, int count) { return Replace(thisValue, oldValue, newValue, false, cultureInfo, startIndex, count); }
+		[NotNull]
+		public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, bool ignoreCase, [NotNull] CultureInfo cultureInfo) { return Replace(thisValue, oldValue, newValue, ignoreCase, cultureInfo, 0, -1); }
+		[NotNull]
+		public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, bool ignoreCase, [NotNull] CultureInfo cultureInfo, int startIndex) { return Replace(thisValue, oldValue, newValue, ignoreCase, cultureInfo, startIndex, -1); }
+		[NotNull]
+		public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, bool ignoreCase, [NotNull] CultureInfo cultureInfo, int startIndex, int count) { return Replace(thisValue, oldValue, newValue, ignoreCase, Equals(cultureInfo, CultureInfo.InvariantCulture), cultureInfo.CompareInfo, startIndex, count); }
 
 		public static string Reverse(this string thisValue, [NotNull] params char[] separator)
 		{
@@ -1346,7 +1358,8 @@ namespace asm.Extensions
 			return maxCount == 0 ? defaultValue : separator[separatorsCount.IndexOf(maxCount)];
 		}
 
-		[NotNull] public static string Join(this string thisValue, char separator, [NotNull] params object[] objects) { return Join(thisValue, objects, separator); }
+		[NotNull]
+		public static string Join(this string thisValue, char separator, [NotNull] params object[] objects) { return Join(thisValue, objects, separator); }
 
 		[NotNull]
 		public static string Join(this string thisValue, [NotNull] IEnumerable enumerable, char separator)
@@ -1356,7 +1369,8 @@ namespace asm.Extensions
 			return sb.ToString();
 		}
 
-		[NotNull] public static string Join(this string thisValue, string separator, [NotNull] params object[] objects) { return Join(thisValue, objects, separator); }
+		[NotNull]
+		public static string Join(this string thisValue, string separator, [NotNull] params object[] objects) { return Join(thisValue, objects, separator); }
 
 		[NotNull]
 		public static string Join(this string thisValue, [NotNull] IEnumerable enumerable, string separator)

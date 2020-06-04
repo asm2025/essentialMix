@@ -14,7 +14,8 @@ namespace asm.Web.Mvc.Extensions
 
 		public static HtmlTag Readonly([NotNull] this HtmlTag thisValue, bool value) { return thisValue.ToggleAttribute("readonly", value); }
 
-		[NotNull] public static string Text([NotNull] this HtmlTag thisValue) { return string.Concat(TextContents(thisValue)); }
+		[NotNull]
+		public static string Text([NotNull] this HtmlTag thisValue) { return string.Concat(TextContents(thisValue)); }
 
 		[ItemNotNull]
 		public static IEnumerable<string> TextContents([NotNull] this HtmlTag thisValue)
@@ -83,16 +84,22 @@ namespace asm.Web.Mvc.Extensions
 			return thisValue.Style("border", border, replaceExisting);
 		}
 
-		[NotNull] public static HtmlTag Name([NotNull] this HtmlTag thisValue, string name, bool replaceExisting = true) { return thisValue.Attribute("name", name, replaceExisting); }
+		[NotNull]
+		public static HtmlTag Name([NotNull] this HtmlTag thisValue, string name, bool replaceExisting = true) { return thisValue.Attribute("name", name, replaceExisting); }
 
-		[NotNull] public static HtmlTag Title([NotNull] this HtmlTag thisValue, string title, bool replaceExisting = true) { return thisValue.Attribute("title", title, replaceExisting); }
+		[NotNull]
+		public static HtmlTag Title([NotNull] this HtmlTag thisValue, string title, bool replaceExisting = true) { return thisValue.Attribute("title", title, replaceExisting); }
 
-		[NotNull] public static HtmlTag Id([NotNull] this HtmlTag thisValue, string id, bool replaceExisting = true) { return thisValue.Attribute("id", id, replaceExisting); }
+		[NotNull]
+		public static HtmlTag Id([NotNull] this HtmlTag thisValue, string id, bool replaceExisting = true) { return thisValue.Attribute("id", id, replaceExisting); }
 
-		[NotNull] public static HtmlTag Type([NotNull] this HtmlTag thisValue, string type, bool replaceExisting = true) { return thisValue.Attribute("type", type, replaceExisting); }
+		[NotNull]
+		public static HtmlTag Type([NotNull] this HtmlTag thisValue, string type, bool replaceExisting = true) { return thisValue.Attribute("type", type, replaceExisting); }
 
-		[NotNull] public static HtmlTag Value([NotNull] this HtmlTag thisValue, string value, bool replaceExisting = true) { return thisValue.Attribute("value", value, replaceExisting); }
+		[NotNull]
+		public static HtmlTag Value([NotNull] this HtmlTag thisValue, string value, bool replaceExisting = true) { return thisValue.Attribute("value", value, replaceExisting); }
 
-		[NotNull] public static HtmlTag Href([NotNull] this HtmlTag thisValue, string href, bool replaceExisting = true) { return thisValue.Attribute("href", href, replaceExisting); }
+		[NotNull]
+		public static HtmlTag Href([NotNull] this HtmlTag thisValue, string href, bool replaceExisting = true) { return thisValue.Attribute("href", href, replaceExisting); }
 	}
 }

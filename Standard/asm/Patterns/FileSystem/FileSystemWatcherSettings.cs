@@ -25,7 +25,7 @@ namespace asm.Patterns.FileSystem
 		}
 
 		[NotNull]
-		public DirectoryInfo Directory { get; set; }
+		public DirectoryInfo Directory { get; }
 
 		public string Filter
 		{

@@ -29,7 +29,8 @@ namespace asm.Numeric
 {
     internal class SByteNumericProvider : INumericProvider<sbyte>
     {
-        [NotNull] public string ToHexadecimalString(sbyte value) { return value.ToString("X2"); }
+        [NotNull]
+        public string ToHexadecimalString(sbyte value) { return value.ToString("X2"); }
 
 		public string ToDecimalString(sbyte value) { return value.ToString(); }
 

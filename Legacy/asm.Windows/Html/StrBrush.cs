@@ -24,7 +24,8 @@ namespace asm.Windows.Html
 
 		public Color Color { get; set; }
 
-		[NotNull] public Brush GetRealBrush() { return new SolidBrush(Color); }
+		[NotNull]
+		public Brush GetRealBrush() { return new SolidBrush(Color); }
 
 		public int CompareTo(object obj)
 		{

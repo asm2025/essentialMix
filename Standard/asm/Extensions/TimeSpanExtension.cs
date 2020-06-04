@@ -226,13 +226,17 @@ namespace asm.Extensions
 
 		public static ulong TotalULongMilliseconds(this TimeSpan thisValue) { return (ulong)thisValue.TotalMilliseconds.Within(ulong.MinValue, ulong.MaxValue); }
 
-		[NotNull] public static string HoursMinutes(this TimeSpan thisValue) { return thisValue.ToString(HOURS_MINUTES); }
+		[NotNull]
+		public static string HoursMinutes(this TimeSpan thisValue) { return thisValue.ToString(HOURS_MINUTES); }
 
-		[NotNull] public static string DaysHoursMinutes(this TimeSpan thisValue) { return thisValue.ToString(DAYS_HOURS_MINUTES); }
+		[NotNull]
+		public static string DaysHoursMinutes(this TimeSpan thisValue) { return thisValue.ToString(DAYS_HOURS_MINUTES); }
 
-		[NotNull] public static string HoursMinutesSeconds(this TimeSpan thisValue) { return thisValue.ToString(HOURS_MINUTES_SECONDS); }
+		[NotNull]
+		public static string HoursMinutesSeconds(this TimeSpan thisValue) { return thisValue.ToString(HOURS_MINUTES_SECONDS); }
 
-		[NotNull] public static string DaysHoursMinutesSeconds(this TimeSpan thisValue) { return thisValue.ToString(DAYS_HOURS_MINUTES_SECONDS); }
+		[NotNull]
+		public static string DaysHoursMinutesSeconds(this TimeSpan thisValue) { return thisValue.ToString(DAYS_HOURS_MINUTES_SECONDS); }
 
 		[NotNull]
 		public static string HoursMinutesSecondsMilliseconds(this TimeSpan thisValue, byte millisecondsLength = 3, bool millisecondsAreOptional = false)
@@ -252,11 +256,14 @@ namespace asm.Extensions
 				: thisValue.ToString(DAYS_HOURS_MINUTES_SECONDS + DOT_SEP + new string(millisecondsAreOptional ? 'F' : 'f', millisecondsLength));
 		}
 
-		[NotNull] public static string ToShortString(this TimeSpan thisValue) { return thisValue.ToString(SHORT_STRING); }
+		[NotNull]
+		public static string ToShortString(this TimeSpan thisValue) { return thisValue.ToString(SHORT_STRING); }
 
-		[NotNull] public static string ToMediumString(this TimeSpan thisValue) { return thisValue.ToString(MEDIUM_STRING); }
+		[NotNull]
+		public static string ToMediumString(this TimeSpan thisValue) { return thisValue.ToString(MEDIUM_STRING); }
 
-		[NotNull] public static string ToLongString(this TimeSpan thisValue) { return thisValue.ToString(LONG_STRING); }
+		[NotNull]
+		public static string ToLongString(this TimeSpan thisValue) { return thisValue.ToString(LONG_STRING); }
 
 		[NotNull]
 		public static string ToString(this TimeSpan thisValue, TimeUnit input, byte millisecondsLength = 3, bool millisecondsAreOptional = false)

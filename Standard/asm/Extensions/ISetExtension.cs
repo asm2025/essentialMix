@@ -47,6 +47,7 @@ namespace asm.Extensions
 						: (IEqualityComparer<T>)comparerField.GetValue(thisValue);
 		}
 
-		[NotNull] public static IReadOnlySet<T> AsReadOnly<T>([NotNull] this ISet<T> thisValue) { return new ReadOnlySet<T>(thisValue); }
+		[NotNull]
+		public static IReadOnlySet<T> AsReadOnly<T>([NotNull] this ISet<T> thisValue) { return new ReadOnlySet<T>(thisValue); }
 	}
 }

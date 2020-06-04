@@ -27,9 +27,11 @@ namespace asm.Collections
 			throw new ReadOnlyException();
 		}
 
-		[NotNull] protected override string GetName() { return $"{Index}"; }
+		[NotNull]
+		protected override string GetName() { return $"{Index}"; }
 
-		[NotNull] protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
+		[NotNull]
+		protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
 
 		protected ReadOnlyListTypeDescriptor<TSource, T> TypeDescriptorSource { get; }
 		protected int Index { get; }

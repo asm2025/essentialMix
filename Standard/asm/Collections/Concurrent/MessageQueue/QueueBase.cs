@@ -10,7 +10,7 @@ using JetBrains.Annotations;
 
 namespace asm.Collections.Concurrent.MessageQueue
 {
-	public abstract class QueueBase<T> : Disposable, IQueue<T>, IDisposable
+	public abstract class QueueBase<T> : Disposable, IQueue<T>, ICollection
 	{
 		private readonly System.Collections.Generic.Queue<T> _queue = new System.Collections.Generic.Queue<T>();
 
@@ -62,21 +62,7 @@ namespace asm.Collections.Concurrent.MessageQueue
 
 		public bool IsSynchronized => true;
 
-		public int Count => CountInternal;
-
-		public bool WaitForQueuedItems { get; set; } = true;
-
-		public bool IsBackground { get; }
-
-		public ThreadPriority Priority { get; }
-
-		public CancellationToken Token { get; }
-
-		public bool IsBusy => IsBusyInternal;
-
-		public bool CompleteMarked { get; protected set; }
-
-		protected virtual int CountInternal
+		public virtual int Count
 		{
 			get
 			{
@@ -87,7 +73,17 @@ namespace asm.Collections.Concurrent.MessageQueue
 			}
 		}
 
-		protected virtual bool IsBusyInternal { get; private set; }
+		public bool WaitForQueuedItems { get; set; } = true;
+
+		public bool IsBackground { get; }
+
+		public ThreadPriority Priority { get; }
+
+		public CancellationToken Token { get; }
+
+		public bool IsBusy { get; protected set; }
+
+		public bool CompleteMarked { get; protected set; }
 
 		public IEnumerator<T> GetEnumerator()
 		{
@@ -157,9 +153,11 @@ namespace asm.Collections.Concurrent.MessageQueue
 			return WaitInternal(millisecondsTimeout);
 		}
 
-		[NotNull] public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
+		[NotNull]
+		public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
 
-		[NotNull] public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
+		[NotNull]
+		public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
 
 		[NotNull]
 		public Task<bool> WaitAsync(int millisecondsTimeout)
@@ -205,11 +203,11 @@ namespace asm.Collections.Concurrent.MessageQueue
 		protected virtual bool WaitInternal(int millisecondsTimeout)
 		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (!IsBusyInternal) return true;
+			if (!IsBusy) return true;
 
 			try
 			{
-				if (millisecondsTimeout < 0)
+				if (millisecondsTimeout < TimeSpanHelper.MINIMUM)
 					_manualResetEventSlim.Wait(Token);
 				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
 					return false;
@@ -231,12 +229,7 @@ namespace asm.Collections.Concurrent.MessageQueue
 
 		protected virtual void StopInternal(bool waitForQueue)
 		{
-			lock (SyncRoot)
-			{
-				Cancel();
-				Monitor.PulseAll(SyncRoot);
-			}
-
+			CompleteInternal();
 			// Wait for the consumer's thread to finish.
 			if (waitForQueue) WaitInternal(TimeSpanHelper.INFINITE);
 			ClearInternal();
@@ -285,16 +278,16 @@ namespace asm.Collections.Concurrent.MessageQueue
 
 		private void Consume()
 		{
-			if (IsDisposedOrDisposing || IsBusyInternal) return;
-			IsBusyInternal = true;
+			if (IsDisposed || IsBusy) return;
+			IsBusy = true;
 
 			try
 			{
-				while (!IsDisposedOrDisposing && !Token.IsCancellationRequested && !CompleteMarked)
+				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
 					T item = default(T);
 
-					while (!IsDisposedOrDisposing && !Token.IsCancellationRequested && !CompleteMarked)
+					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 					{
 						lock (SyncRoot)
 						{
@@ -304,18 +297,18 @@ namespace asm.Collections.Concurrent.MessageQueue
 								Thread.Sleep(1);
 							}
 
-							if (IsDisposedOrDisposing || Token.IsCancellationRequested || _queue.Count == 0) continue;
+							if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
 							item = _queue.Dequeue();
 						}
 
 						if (item != null) break;
 					}
 					
-					if (IsDisposedOrDisposing || Token.IsCancellationRequested) return;
+					if (IsDisposed || Token.IsCancellationRequested) return;
 					Callback(item);
 				}
 
-				while (!IsDisposedOrDisposing && !Token.IsCancellationRequested && _queue.Count > 0)
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
 				{
 					T item;
 					
@@ -325,13 +318,13 @@ namespace asm.Collections.Concurrent.MessageQueue
 						item = _queue.Dequeue();
 					}
 
-					if (IsDisposedOrDisposing || Token.IsCancellationRequested) return;
+					if (IsDisposed || Token.IsCancellationRequested) return;
 					Callback(item);
 				}
 			}
 			finally
 			{
-				IsBusyInternal = false;
+				IsBusy = false;
 				_manualResetEventSlim.Set();
 			}
 		}

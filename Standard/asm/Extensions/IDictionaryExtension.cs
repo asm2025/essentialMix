@@ -9,7 +9,8 @@ namespace asm.Extensions
 {
 	public static class IDictionaryExtension
 	{
-		[NotNull] public static DictionaryEnumerator Enumerate([NotNull] this IDictionary thisValue) { return new DictionaryEnumerator(thisValue); }
+		[NotNull]
+		public static DictionaryEnumerator Enumerate([NotNull] this IDictionary thisValue) { return new DictionaryEnumerator(thisValue); }
 
 		[NotNull]
 		public static DictionaryEnumerator<TKey, TValue> Enumerate<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue)
@@ -190,7 +191,8 @@ namespace asm.Extensions
 			}
 		}
 
-		[NotNull] public static string ToString<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, char group) { return ToString(thisValue, "=", group.ToString()); }
+		[NotNull]
+		public static string ToString<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, char group) { return ToString(thisValue, "=", group.ToString()); }
 
 		[NotNull]
 		public static string ToString<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, char separator, char group)
@@ -198,7 +200,8 @@ namespace asm.Extensions
 			return ToString(thisValue, separator.ToString(), group.ToString());
 		}
 
-		[NotNull] public static string ToString<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] string group) { return ToString(thisValue, "=", group); }
+		[NotNull]
+		public static string ToString<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] string group) { return ToString(thisValue, "=", group); }
 
 		[NotNull]
 		public static string ToString<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] string separator, [NotNull] string group)

@@ -20,12 +20,13 @@ namespace asm.Patterns
 		private bool _completed;
 
 		/// <inheritdoc />
-		protected internal EventWatcher([NotNull] TSource target, [NotNull] EventInfo eventInfo)
+		protected internal EventWatcher([NotNull] TSource target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<TSource, TArgs>, TArgs> watcherCallback)
 		{
 			Type type = target.GetType();
 			if (eventInfo.DeclaringType != type) throw new MemberAccessException($"Type '{type}' does not contain a definition for event '{eventInfo.Name}'.");
 			Target = target;
 			EventInfo = eventInfo;
+			WatcherCallback = watcherCallback;
 			_manualResetEventSlim = new ManualResetEventSlim(false);
 			_cts = new CancellationTokenSource();
 			Token = _cts.Token;
@@ -39,7 +40,6 @@ namespace asm.Patterns
 			if (disposing)
 			{
 				Stop();
-				EventOccured = null;
 				EventInfo.RemoveEventHandler(Target, _listener);
 				ObjectHelper.Dispose(ref _manualResetEventSlim);
 				ObjectHelper.Dispose(ref _cts);
@@ -48,7 +48,8 @@ namespace asm.Patterns
 			base.Dispose(disposing);
 		}
 
-		public event EventHandler<TArgs> EventOccured;
+		[NotNull]
+		protected Action<EventWatcher<TSource, TArgs>, TArgs> WatcherCallback { get; }
 		
 		[NotNull]
 		public TSource Target { get; }
@@ -86,7 +87,7 @@ namespace asm.Patterns
 
 			try
 			{
-				if (millisecondsTimeout < 0)
+				if (millisecondsTimeout < TimeSpanHelper.MINIMUM)
 					_manualResetEventSlim.Wait(Token);
 				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
 					return false;
@@ -106,9 +107,11 @@ namespace asm.Patterns
 			return false;
 		}
 
-		[NotNull] public Task<bool> WaitAsync(CancellationToken token = default(CancellationToken)) { return WaitAsync(TimeSpanHelper.INFINITE, token); }
+		[NotNull] 
+		public Task<bool> WaitAsync(CancellationToken token = default(CancellationToken)) { return WaitAsync(TimeSpanHelper.INFINITE, token); }
 
-		[NotNull] public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return WaitAsync(timeout.TotalIntMilliseconds(), token); }
+		[NotNull] 
+		public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return WaitAsync(timeout.TotalIntMilliseconds(), token); }
 
 		[NotNull]
 		public Task<bool> WaitAsync(int millisecondsTimeout, CancellationToken token = default(CancellationToken))
@@ -122,15 +125,15 @@ namespace asm.Patterns
 		private void OnEvent(object sender, TArgs args)
 		{
 			Completed = true;
-			EventOccured?.Invoke(sender, args);
+			WatcherCallback.Invoke(this, args);
 		}
 	}
 
 	public class EventWatcher<TSource> : EventWatcher<TSource, EventArgs>
 	{
 		/// <inheritdoc />
-		protected internal EventWatcher([NotNull] TSource target, [NotNull] EventInfo eventInfo)
-			: base(target, eventInfo)
+		protected internal EventWatcher([NotNull] TSource target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<TSource, EventArgs>, EventArgs> watcherCallback)
+			: base(target, eventInfo, watcherCallback)
 		{
 		}
 	}
@@ -138,8 +141,8 @@ namespace asm.Patterns
 	public class EventWatcher : EventWatcher<object, EventArgs>
 	{
 		/// <inheritdoc />
-		private protected EventWatcher([NotNull] object target, [NotNull] EventInfo eventInfo)
-			: base(target, eventInfo)
+		private protected EventWatcher([NotNull] object target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<object, EventArgs>, EventArgs> watcherCallback)
+			: base(target, eventInfo, watcherCallback)
 		{
 		}
 
@@ -159,8 +162,7 @@ namespace asm.Patterns
 		public static EventWatcher<TSource, TArgs> Create<TSource, TArgs>([NotNull] WaitForEventSettings<TSource, TArgs> settings)
 			where TArgs : EventArgs
 		{
-			EventWatcher<TSource, TArgs> watcher = new EventWatcher<TSource, TArgs>(settings.Target, settings.EventInfo);
-			if (settings.OnEvent != null) watcher.EventOccured += (sender, args) => settings.OnEvent(settings.Target, args);
+			EventWatcher<TSource, TArgs> watcher = new EventWatcher<TSource, TArgs>(settings.Target, settings.EventInfo, settings.WatcherCallback);
 			return watcher;
 		}
 	}

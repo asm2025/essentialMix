@@ -24,9 +24,11 @@ namespace asm.Collections
 			TypeDescriptorSource[Key] = value;
 		}
 
-		[NotNull] protected override string GetName() { return Convert.ToString(Key); }
+		[NotNull]
+		protected override string GetName() { return Convert.ToString(Key); }
 
-		[NotNull] protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
+		[NotNull]
+		protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
 
 		protected DictionaryTypeDescriptor<TSource> TypeDescriptorSource { get; }
 		protected object Key { get; }
@@ -52,9 +54,11 @@ namespace asm.Collections
 			TypeDescriptorSource[Key] = (TValue)value;
 		}
 
-		[NotNull] protected override string GetName() { return Convert.ToString(Key); }
+		[NotNull]
+		protected override string GetName() { return Convert.ToString(Key); }
 
-		[NotNull] protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
+		[NotNull]
+		protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
 
 		protected DictionaryTypeDescriptor<TSource, TKey, TValue> TypeDescriptorSource { get; }
 		protected TKey Key { get; }

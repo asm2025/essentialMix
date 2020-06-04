@@ -32,7 +32,8 @@ namespace asm.Numeric
 
 		public bool Subtract(bool left, bool right) { return left ^ right; }
 
-		[NotNull] public string ToHexadecimalString(bool value) { return Convert.ToByte(value).ToString("X2"); }
+		[NotNull]
+		public string ToHexadecimalString(bool value) { return Convert.ToByte(value).ToString("X2"); }
 
 		public string ToDecimalString(bool value) { return Convert.ToByte(value).ToString(); }
 

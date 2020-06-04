@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using asm.Collections;
+using asm.Collections.Concurrent.ProducerConsumer;
 using asm.Exceptions;
 using asm.Extensions;
 using asm.Helpers;
@@ -52,7 +53,9 @@ namespace TestApp
 			
 			//TestPriorityQueue();
 
-			TestHeapElementAt();
+			//TestHeapElementAt();
+
+			TestThreadQueue();
 
 			ConsoleHelper.Pause();
 		}
@@ -1033,12 +1036,114 @@ namespace TestApp
 			}
 		}
 
+		private static void TestThreadQueue()
+		{
+			// change this to true to use 1 thread only for debugging
+			const bool LIMIT_THREADS = false;
+
+			int len = RNGRandomHelper.Next(100, 150);
+			int[] values = GetRandomIntegers(len);
+			int timeout = RNGRandomHelper.Next(0, 1);
+			int maximumThreads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
+			Func<int, TaskResult> exec = e =>
+			{
+				Console.Write(", {0}", e);
+				return TaskResult.Success;
+			};
+			Queue<ThreadQueueMode> modes = new Queue<ThreadQueueMode>(new [] { ThreadQueueMode.Mutex } /*EnumHelper<ThreadQueueMode>.GetValues()*/);
+
+			while (modes.Count > 0)
+			{
+				Console.Clear();
+				Console.WriteLine();
+				ThreadQueueMode mode = modes.Dequeue();
+				Title($"Testing Thread queue [{mode.ToString().BrightCyan().Underline()}]...");
+
+				// if there is a timeout, will use a CancellationTokenSource.
+				using (CancellationTokenSource cts = timeout > 0
+														? new CancellationTokenSource(TimeSpan.FromMinutes(timeout))
+														: null)
+				{
+					CancellationToken token = cts?.Token ?? CancellationToken.None;
+
+#if DEBUG
+					// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
+					int threads = LIMIT_THREADS
+									? 1
+									: maximumThreads;
+#else
+					// Otherwise, use the default (Best to be TaskHelper.ProcessDefault which = Environment.ProcessorCount)
+					int threads = MaximumThreads;
+#endif
+
+					if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
+
+					ProducerConsumerQueueOptions<int> options = mode == ThreadQueueMode.ThresholdTaskGroup
+																	? new ProducerConsumerThresholdQueueOptions<int>(threads, exec)
+																	{
+																		// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
+																		Threshold = TimeSpan.FromSeconds(1)
+																	}
+																	: new ProducerConsumerQueueOptions<int>(threads, exec);
+					Console.WriteLine($"{len.ToString().BrightYellow()} values, {options.Threads.ToString().BrightYellow()} threads, {timeout.ToString().BrightYellow()} minute(s) timeout");
+					Console.WriteLine();
+			
+					// Create a generic queue producer
+					using (IProducerConsumer<int> queue = ProducerConsumerQueue.Create(mode, options, token))
+					{
+						queue.WorkStarted += (sender, args) =>
+						{
+							Console.WriteLine();
+							Console.WriteLine($"Starting {mode}...".BrightGreen());
+						};
+
+						queue.WorkCompleted += (sender, args) =>
+						{
+							Console.WriteLine();
+							Console.WriteLine("Finished.".BrightRed());
+							Console.WriteLine();
+						};
+
+						foreach (int value in values)
+						{
+							queue.Enqueue(value);
+						}
+
+						// call this to allow other threads to kick in
+						Thread.Sleep(0);
+
+						/*
+						 * when the queue is being disposed, it will wait until the queued items are processed.
+						 * this works when queue.WaitOnDispose is true , which it is by default.
+						 * alternatively, the following can be done to wait for all items to be processed:
+						 *
+						 * // Important: marks the completion of queued items, no further items can be queued
+						 * // after this point. the queue will not to wait for more items other than the already queued.
+						 * queue.Complete();
+						 * // wait for the queue to finish
+						 * queue.Wait();
+						 *
+						 * another way to go about it, is not to call queue.Complete(); if this queue will
+						 * wait indefinitely and maybe use a CancellationTokenSource.
+						 *
+						 * for now, the queue will wait for the items to be finished once reached the next
+						 * dispose curly bracket.
+						 */
+					}
+				}
+
+				if (modes.Count == 0) continue;
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				if (response.KeyChar != 'Y' && response.KeyChar != 'y') modes.Clear();
+			}
+		}
+
 		private static void Title(string title)
 		{
 			Console.WriteLine();
-			Console.WriteLine();
 			Console.WriteLine(title.Bold().BrightBlack());
-			Console.WriteLine();
 			Console.WriteLine();
 		}
 

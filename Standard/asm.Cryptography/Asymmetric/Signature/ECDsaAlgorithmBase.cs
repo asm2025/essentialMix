@@ -25,7 +25,8 @@ namespace asm.Cryptography.Asymmetric.Signature
 
 		public virtual void GenerateKey(ECCurve curve) { Algorithm.GenerateKey(curve); }
 
-		[NotNull] public override byte[] SignHash([NotNull] byte[] hash) { return Algorithm.SignHash(hash); }
+		[NotNull]
+		public override byte[] SignHash([NotNull] byte[] hash) { return Algorithm.SignHash(hash); }
 
 		public override bool VerifyHash([NotNull] byte[] hash, [NotNull] byte[] signature) { return Algorithm.VerifyHash(hash, signature); }
 	}

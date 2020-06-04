@@ -27,9 +27,11 @@ namespace asm.Collections
 			throw new NotSupportedException();
 		}
 
-		[NotNull] protected override string GetName() { return $"{Index}"; }
+		[NotNull]
+		protected override string GetName() { return $"{Index}"; }
 
-		[NotNull] protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
+		[NotNull]
+		protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
 
 		protected EnumerableTypeDescriptor<TSource> TypeDescriptorSource { get; }
 		protected int Index { get; }
@@ -56,9 +58,11 @@ namespace asm.Collections
 			throw new NotSupportedException();
 		}
 
-		[NotNull] protected override string GetName() { return $"{Index}"; }
+		[NotNull]
+		protected override string GetName() { return $"{Index}"; }
 
-		[NotNull] protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
+		[NotNull]
+		protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
 
 		protected EnumerableTypeDescriptor<TSource, T> TypeDescriptorSource { get; }
 		protected int Index { get; }

@@ -11,8 +11,17 @@ namespace asm.Patterns.FileSystem
 {
 	public class FileSystemNotifier : FileSystemWatcher
 	{
+		private enum EventType
+		{
+			None,
+			Created,
+			Renamed,
+			Deleted,
+			Changed
+		}
+
 		private readonly object _lock = new object();
-		private readonly Queue<Action> _queue = new Queue<Action>();
+		private readonly Queue<(EventType Type, FileSystemEventArgs Args)> _queue = new Queue<(EventType Type, FileSystemEventArgs Args)>();
 
 		private ManualResetEventSlim _manualResetEventSlim = new ManualResetEventSlim(false);
 		private Thread _worker;
@@ -124,9 +133,11 @@ namespace asm.Patterns.FileSystem
 			return WaitInternal(millisecondsTimeout);
 		}
 
-		[NotNull] public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
+		[NotNull]
+		public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
 
-		[NotNull] public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
+		[NotNull]
+		public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
 
 		[NotNull]
 		public Task<bool> WaitAsync(int millisecondsTimeout)
@@ -167,7 +178,7 @@ namespace asm.Patterns.FileSystem
 
 			try
 			{
-				if (millisecondsTimeout < 0)
+				if (millisecondsTimeout < TimeSpanHelper.MINIMUM)
 					_manualResetEventSlim.Wait(Token);
 				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
 					return false;
@@ -205,39 +216,39 @@ namespace asm.Patterns.FileSystem
 		protected override void OnCreated(FileSystemEventArgs args)
 		{
 			if (!HasCreatedSubscribers) return;
-			Enqueue(() => base.OnCreated(args));
+			Enqueue(EventType.Created, args);
 		}
 
 		/// <inheritdoc />
 		protected override void OnRenamed(RenamedEventArgs args)
 		{
 			if (!HasRenamedSubscribers) return;
-			Enqueue(() => base.OnRenamed(args));
+			Enqueue(EventType.Renamed, args);
 		}
 
 		/// <inheritdoc />
 		protected override void OnDeleted(FileSystemEventArgs args)
 		{
 			if (!HasDeletedSubscribers) return;
-			Enqueue(() => base.OnDeleted(args));
+			Enqueue(EventType.Deleted, args);
 		}
 
 		/// <inheritdoc />
 		protected override void OnChanged(FileSystemEventArgs args)
 		{
 			if (!HasChangedSubscribers) return;
-			Enqueue(() => base.OnChanged(args));
+			Enqueue(EventType.Changed, args);
 		}
 
-		private void Enqueue(Action action)
+		private void Enqueue(EventType type, FileSystemEventArgs args)
 		{
-			if (IsDisposedOrDisposing || Token.IsCancellationRequested || CompleteMarked) return;
+			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 
 			lock (_lock)
 			{
 				// the repeated check is intentional. The lock might take a while to be entered.
-				if (IsDisposedOrDisposing || Token.IsCancellationRequested || CompleteMarked) return;
-				_queue.Enqueue(action);
+				if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+				_queue.Enqueue((type, args));
 				Monitor.Pulse(_lock);
 			}
 		}
@@ -245,16 +256,17 @@ namespace asm.Patterns.FileSystem
 		private void Consume()
 		{
 			_manualResetEventSlim.Reset();
-			if (IsDisposedOrDisposing || IsBusyInternal) return;
+			if (IsDisposed || IsBusyInternal) return;
 			IsBusyInternal = true;
 
 			try
 			{
-				while (!IsDisposedOrDisposing && !Token.IsCancellationRequested && !CompleteMarked)
+				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					Action action = null;
+					EventType type = EventType.None;
+					FileSystemEventArgs args = null;
 
-					while (!IsDisposedOrDisposing && !Token.IsCancellationRequested && !CompleteMarked)
+					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && type == EventType.None)
 					{
 						lock (_lock)
 						{
@@ -264,29 +276,64 @@ namespace asm.Patterns.FileSystem
 								Thread.Sleep(1);
 							}
 
-							if (IsDisposedOrDisposing || Token.IsCancellationRequested || _queue.Count == 0) continue;
-							action = _queue.Dequeue();
+							if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
+							(type, args) = _queue.Dequeue();
 						}
-
-						if (action != null) break;
 					}
 					
-					if (IsDisposedOrDisposing || Token.IsCancellationRequested) return;
-					action?.Invoke();
+					if (type == EventType.None) continue;
+					if (IsDisposed || Token.IsCancellationRequested) return;
+
+					switch (type)
+					{
+						case EventType.Created:
+							base.OnCreated(args);
+							break;
+						case EventType.Renamed:
+							base.OnRenamed((RenamedEventArgs)args);
+							break;
+						case EventType.Deleted:
+							base.OnDeleted(args);
+							break;
+						case EventType.Changed:
+							base.OnChanged(args);
+							break;
+						default:
+							throw new ArgumentOutOfRangeException();
+					}
 				}
 
-				while (!IsDisposedOrDisposing && !Token.IsCancellationRequested && _queue.Count > 0)
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
 				{
-					Action action;
+					EventType type;
+					FileSystemEventArgs args;
 					
 					lock (_lock)
 					{
 						if (_queue.Count == 0) return;
-						action = _queue.Dequeue();
+						(type, args) = _queue.Dequeue();
 					}
 
-					if (IsDisposedOrDisposing || Token.IsCancellationRequested) return;
-					action?.Invoke();
+					if (type == EventType.None) continue;
+					if (IsDisposed || Token.IsCancellationRequested) return;
+
+					switch (type)
+					{
+						case EventType.Created:
+							base.OnCreated(args);
+							break;
+						case EventType.Renamed:
+							base.OnRenamed((RenamedEventArgs)args);
+							break;
+						case EventType.Deleted:
+							base.OnDeleted(args);
+							break;
+						case EventType.Changed:
+							base.OnChanged(args);
+							break;
+						default:
+							throw new ArgumentOutOfRangeException();
+					}
 				}
 			}
 			finally

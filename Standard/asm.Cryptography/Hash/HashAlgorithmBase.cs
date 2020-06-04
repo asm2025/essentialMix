@@ -51,18 +51,22 @@ namespace asm.Cryptography.Hash
 
 		public void Clear() {  Algorithm.Clear(); }
 
-		[NotNull] public byte[] ComputeHash(byte[] buffer) { return Algorithm.ComputeHash(buffer); }
+		[NotNull]
+		public byte[] ComputeHash(byte[] buffer) { return Algorithm.ComputeHash(buffer); }
 
-		[NotNull] public byte[] ComputeHash(byte[] buffer, int offset, int count) { return Algorithm.ComputeHash(buffer, offset, count); }
+		[NotNull]
+		public byte[] ComputeHash(byte[] buffer, int offset, int count) { return Algorithm.ComputeHash(buffer, offset, count); }
 
-		[NotNull] public byte[] ComputeHash(Stream inputStream) { return Algorithm.ComputeHash(inputStream); }
+		[NotNull]
+		public byte[] ComputeHash(Stream inputStream) { return Algorithm.ComputeHash(inputStream); }
 
 		public int TransformBlock(byte[] buffer, int offset, int count, byte[] outputBuffer, int outputOffset)
 		{
 			return Algorithm.TransformBlock(buffer, offset, count, outputBuffer, outputOffset);
 		}
 
-		[NotNull] public byte[] TransformFinalBlock(byte[] buffer, int offset, int count) { return Algorithm.TransformFinalBlock(buffer, offset, count); }
+		[NotNull]
+		public byte[] TransformFinalBlock(byte[] buffer, int offset, int count) { return Algorithm.TransformFinalBlock(buffer, offset, count); }
 
 		public static byte[] ComputeHash([NotNull] Func<HashAlgorithmBase<T>> creator, string value)
 		{

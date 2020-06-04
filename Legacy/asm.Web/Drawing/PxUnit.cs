@@ -149,7 +149,8 @@ namespace asm.Web.Drawing
 
 		public override string ToString() { return ToString((IFormatProvider)CultureInfo.CurrentUICulture); }
 
-		[NotNull] public string ToString(CultureInfo culture) { return ToString((IFormatProvider)culture); }
+		[NotNull]
+		public string ToString(CultureInfo culture) { return ToString((IFormatProvider)culture); }
 
 		[NotNull]
 		public string ToString(IFormatProvider formatProvider)

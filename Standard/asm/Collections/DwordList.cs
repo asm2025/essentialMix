@@ -34,9 +34,11 @@ namespace asm.Collections
 				Add(Convert.ToUInt16(c));
 		}
 
-		[NotNull] public static explicit operator DwordList([NotNull] byte[] value) { return new DwordList(value); }
+		[NotNull]
+		public static explicit operator DwordList([NotNull] byte[] value) { return new DwordList(value); }
 
-		[NotNull] public static explicit operator byte[] ([NotNull] DwordList value) { return value.ToByteArray(); }
+		[NotNull]
+		public static explicit operator byte[] ([NotNull] DwordList value) { return value.ToByteArray(); }
 
 		[NotNull]
 		public byte[] ToByteArray()

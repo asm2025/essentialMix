@@ -130,11 +130,13 @@ namespace asm.Extensions
 			}
 		}
 
-		[NotNull] public static string ToDateString(this DateTime thisValue) { return ToDateString(thisValue, false, true, false); }
+		[NotNull]
+		public static string ToDateString(this DateTime thisValue) { return ToDateString(thisValue, false, true, false); }
 
 		public static string ToDateString(this DateTime thisValue, bool format) { return ToDateString(thisValue, format, true); }
 
-		[NotNull] public static string ToDateString(this DateTime thisValue, bool format, bool includeTime) { return ToDateString(thisValue, format, includeTime, false); }
+		[NotNull]
+		public static string ToDateString(this DateTime thisValue, bool format, bool includeTime) { return ToDateString(thisValue, format, includeTime, false); }
 
 		[NotNull]
 		public static string ToDateString(this DateTime thisValue, bool format, bool includeTime, bool dayFirst)

@@ -13,8 +13,10 @@ namespace asm.Helpers
 	/// </summary>
 	public static class ExpressionHelper
 	{
-		[NotNull] public static Expression<Func<T, bool>> True<T>() { return f => true; }
-		[NotNull] public static Expression<Func<T, bool>> False<T>() { return f => false; }
+		[NotNull]
+		public static Expression<Func<T, bool>> True<T>() { return f => true; }
+		[NotNull]
+		public static Expression<Func<T, bool>> False<T>() { return f => false; }
 
 		[NotNull]
 		public static Func<TResult> Function<TResult>([NotNull] Func<UnaryExpression> value)

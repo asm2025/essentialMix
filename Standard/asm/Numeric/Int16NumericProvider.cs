@@ -29,7 +29,8 @@ namespace asm.Numeric
 {
     internal class Int16NumericProvider : INumericProvider<short>
     {
-        [NotNull] public string ToHexadecimalString(short value) { return value.ToString("X4"); }
+        [NotNull]
+        public string ToHexadecimalString(short value) { return value.ToString("X4"); }
 
 		public string ToDecimalString(short value) { return value.ToString(); }
 

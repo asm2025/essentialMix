@@ -69,7 +69,8 @@ namespace asm.Collections
 				this.RemoveAll(item => !item.IsFixed);
 			}
 
-			[NotNull] protected override string GetKeyForItem(Column item) { return item.Name; }
+			[NotNull]
+			protected override string GetKeyForItem(Column item) { return item.Name; }
 
 			public IBrowsable Owner { get; private set; }
 		}
@@ -131,7 +132,8 @@ namespace asm.Collections
 				this.RemoveAll(item => !item.IsFixed);
 			}
 
-			[NotNull] protected override string GetKeyForItem(IItem item) { return item.Name; }
+			[NotNull]
+			protected override string GetKeyForItem(IItem item) { return item.Name; }
 
 			public IBrowsable Owner { get; private set; }
 		}

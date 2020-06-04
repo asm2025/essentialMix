@@ -25,7 +25,8 @@ namespace asm.Network
 			Value = entry;
 		}
 
-		[NotNull] public override string ToString() { return _value ?? string.Empty; }
+		[NotNull]
+		public override string ToString() { return _value ?? string.Empty; }
 
 		[Category("Entry")]
 		public string Value

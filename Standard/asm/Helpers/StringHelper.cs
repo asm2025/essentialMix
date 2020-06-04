@@ -213,8 +213,11 @@ namespace asm.Helpers
 		public static string SingleNotNullOrWhiteSpaceOrDefault([NotNull] params string[] values) { return values.SingleNotNullOrWhiteSpaceOrDefault(); }
 		
 		public static IEnumerable<string> SkipNull([NotNull] params string[] values) { return values.SkipNull(); }
-		[NotNull] public static IEnumerable<string> SkipNullOrEmpty([NotNull] params string[] values) { return values.SkipNullOrEmpty(); }
-		[NotNull] public static IEnumerable<string> SkipNullOrEmptyTrim([NotNull] params string[] values) { return values.SkipNullOrEmptyTrim(); }
-		[NotNull] public static IEnumerable<string> SkipNullOrWhitespace([NotNull] params string[] values) { return values.SkipNullOrWhitespace(); }
+		[NotNull]
+		public static IEnumerable<string> SkipNullOrEmpty([NotNull] params string[] values) { return values.SkipNullOrEmpty(); }
+		[NotNull]
+		public static IEnumerable<string> SkipNullOrEmptyTrim([NotNull] params string[] values) { return values.SkipNullOrEmptyTrim(); }
+		[NotNull]
+		public static IEnumerable<string> SkipNullOrWhitespace([NotNull] params string[] values) { return values.SkipNullOrWhitespace(); }
 	}
 }

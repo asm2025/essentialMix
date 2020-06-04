@@ -7,8 +7,10 @@ namespace asm.Extensions
 {
 	public static class LimitedExtension
 	{
-		[NotNull] public static LimitedList AsLockable([NotNull] this IList thisValue) { return new LimitedList(thisValue); }
+		[NotNull]
+		public static LimitedList AsLockable([NotNull] this IList thisValue) { return new LimitedList(thisValue); }
 
-		[NotNull] public static LimitedList<T> AsLockable<T>([NotNull] this IList<T> thisValue) { return new LimitedList<T>(thisValue); }
+		[NotNull]
+		public static LimitedList<T> AsLockable<T>([NotNull] this IList<T> thisValue) { return new LimitedList<T>(thisValue); }
 	}
 }

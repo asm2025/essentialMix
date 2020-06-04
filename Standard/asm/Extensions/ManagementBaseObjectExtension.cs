@@ -22,6 +22,7 @@ namespace asm.Extensions
 			}
 		}
 
-		[NotNull] public static string PropertyOrString([NotNull] this ManagementBaseObject thisValue, [NotNull] string key = KEY_DEF) { return Convert.ToString(PropertyOrSelf(thisValue, key)); }
+		[NotNull]
+		public static string PropertyOrString([NotNull] this ManagementBaseObject thisValue, [NotNull] string key = KEY_DEF) { return Convert.ToString(PropertyOrSelf(thisValue, key)); }
 	}
 }

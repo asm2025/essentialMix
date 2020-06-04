@@ -44,7 +44,8 @@ namespace asm.Core.Extensions
 			return AddConfigurationFile(thisValue, environment.ContentRootPath, fileName, optional, environment.EnvironmentName);
 		}
 
-		[NotNull] public static IConfigurationBuilder AddConfigurationFile([NotNull] this IConfigurationBuilder thisValue, [NotNull] string fileName, bool optional, string environmentName) { return AddConfigurationFile(thisValue, null, fileName, optional, environmentName); }
+		[NotNull]
+		public static IConfigurationBuilder AddConfigurationFile([NotNull] this IConfigurationBuilder thisValue, [NotNull] string fileName, bool optional, string environmentName) { return AddConfigurationFile(thisValue, null, fileName, optional, environmentName); }
 		[NotNull]
 		public static IConfigurationBuilder AddConfigurationFile([NotNull] this IConfigurationBuilder thisValue, string path, [NotNull] string fileName, bool optional, string environmentName)
 		{

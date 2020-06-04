@@ -6,6 +6,7 @@ namespace asm.Web.Mvc.Extensions
 {
 	public static class IControllerExtension
 	{
-		[NotNull] public static string ControllerName([NotNull] this IController thisValue) { return IControllerHelper.ControllerName(thisValue.GetType()); }
+		[NotNull]
+		public static string ControllerName([NotNull] this IController thisValue) { return IControllerHelper.ControllerName(thisValue.GetType()); }
 	}
 }

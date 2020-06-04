@@ -39,7 +39,8 @@ namespace asm.Newtonsoft.Serialization
 		protected NamingStrategyType ExtensionDataNameStrategy { get; set; }
 		protected NamingStrategyType DictionaryKeyStrategy { get; set; }
 		
-		[NotNull] public override string GetPropertyName(string name, bool hasSpecifiedName) { return ResolvePropertyName(name, hasSpecifiedName); }
+		[NotNull]
+		public override string GetPropertyName(string name, bool hasSpecifiedName) { return ResolvePropertyName(name, hasSpecifiedName); }
 
 		/// <inheritdoc />
 		[NotNull]

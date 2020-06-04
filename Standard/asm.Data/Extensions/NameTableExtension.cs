@@ -14,7 +14,8 @@ namespace asm.Data.Extensions
 						: new XmlNamespaceManager(thisValue);
 		}
 
-		[NotNull] public static XmlParserContext CreateParserContext([NotNull] this NameTable thisValue) { return CreateParserContext(thisValue, true, null, null); }
+		[NotNull]
+		public static XmlParserContext CreateParserContext([NotNull] this NameTable thisValue) { return CreateParserContext(thisValue, true, null, null); }
 
 		[NotNull]
 		public static XmlParserContext CreateParserContext([NotNull] this NameTable thisValue, bool ignoreWhitespace)

@@ -28,7 +28,8 @@ namespace asm.Configuration
 
 		public new T this[string name] => (T)BaseGet(name);
 
-		[NotNull] protected override ConfigurationElement CreateNewElement() { return new T(); }
+		[NotNull]
+		protected override ConfigurationElement CreateNewElement() { return new T(); }
 
 		[NotNull]
 		protected static ConfigurationPropertyCollection BaseProperties => new ConfigurationPropertyCollection();

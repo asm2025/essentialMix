@@ -200,7 +200,8 @@ namespace asm.Numeric
 			}
 		}
 
-		[NotNull] public static IEnumerable<ulong> GetPrimeFactors(ulong value) { return GetPrimes(value).Where(prime => value % prime == 0); }
+		[NotNull]
+		public static IEnumerable<ulong> GetPrimeFactors(ulong value) { return GetPrimes(value).Where(prime => value % prime == 0); }
 
 		public static double Ratio(byte value, byte basis) { return value / (double)basis * 100.0d; }
 

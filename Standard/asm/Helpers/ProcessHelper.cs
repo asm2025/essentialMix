@@ -85,7 +85,7 @@ namespace asm.Helpers
 		{
 			fileName = fileName.Trim();
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
-			if (settings == null) settings = ShellSettings.Default;
+			settings ??= ShellSettings.Default;
 
 			Win32.SHELLEXECUTEINFO info = new Win32.SHELLEXECUTEINFO
 			{
@@ -123,7 +123,7 @@ namespace asm.Helpers
 		public static Process ShellExec(IntPtr lpIDList, ShellSettings settings)
 		{
 			if (lpIDList.IsZero()) throw new ArgumentNullException(nameof(lpIDList));
-			if (settings == null) settings = ShellSettings.Default;
+			settings ??= ShellSettings.Default;
 
 			Win32.SHELLEXECUTEINFO info = new Win32.SHELLEXECUTEINFO
 			{
@@ -179,7 +179,7 @@ namespace asm.Helpers
 		{
 			fileName = fileName.Trim();
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
-			if (settings == null) settings = ShellSettings.Default;
+			settings ??= ShellSettings.Default;
 
 			Win32.SHELLEXECUTEINFO info = new Win32.SHELLEXECUTEINFO
 			{
@@ -253,14 +253,13 @@ namespace asm.Helpers
 			}
 		}
 
-		public static Process Run([NotNull] string execName) { return Run(execName, null, null); }
+		public static Process Run([NotNull] string execName) { return Run(execName, null, RunSettings.Default); }
 
-		public static Process Run([NotNull] string execName, RunSettings settings) { return Run(execName, null, settings); }
+		public static Process Run([NotNull] string execName, [NotNull] RunSettings settings) { return Run(execName, null, settings); }
 
 		public static Process Run([NotNull] string execName, string arguments, [NotNull] RunSettings settings)
 		{
 			Process process = CreateForRun(execName, arguments, settings, out bool redirectOutput, out bool redirectError);
-			if (process == null) return null;
 
 			bool result = false;
 			
@@ -268,12 +267,12 @@ namespace asm.Helpers
 			{
 				result = process.Start();
 				if (!result) return null;
-				if (settings != null && !settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, process);
+				if (!settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, process);
 				
 				if (redirectOutput) process.BeginOutputReadLine();
 				if (redirectError) process.BeginErrorReadLine();
 				
-				settings?.OnStart?.Invoke(execName, process.StartTime);
+				settings.OnStart?.Invoke(execName, process.StartTime);
 				return process;
 			}
 			catch (Win32Exception e)
@@ -315,14 +314,12 @@ namespace asm.Helpers
 
 		public static bool RunAndWaitFor([NotNull] string execName, string arguments, RunAndWaitForSettings settings, WaitHandle awaitableHandle)
 		{
-			if (settings == null) settings = RunAndWaitForSettings.Default;
+			settings ??= RunAndWaitForSettings.Default;
 			if (settings.OnOutput != null) settings.RedirectOutput = true;
 			if (settings.OnError != null) settings.RedirectError = true;
 
 			using (Process process = CreateForRun(execName, arguments, settings))
 			{
-				if (process == null) return false;
-
 				if (settings.RedirectOutput)
 				{
 					process.OutputDataReceived += (sender, args) =>
@@ -358,6 +355,7 @@ namespace asm.Helpers
 						}
 						catch
 						{
+							// ignored
 						}
 					}
 
@@ -462,7 +460,7 @@ namespace asm.Helpers
 
 		public static RunOutput RunAndGetOutput([NotNull] string execName, string arguments, RunSettingsBase settings, WaitHandle awaitableHandle)
 		{
-			if (settings == null) settings = RunSettingsBase.Default;
+			settings ??= RunSettingsBase.Default;
 			settings.RedirectOutput = true;
 			settings.RedirectError = true;
 
@@ -470,8 +468,6 @@ namespace asm.Helpers
 
 			using (Process process = CreateForRun(execName, arguments, settings))
 			{
-				if (process == null) return null;
-
 				bool processReallyExited = false;
 				
 				process.Exited += (sender, args) =>
@@ -487,6 +483,7 @@ namespace asm.Helpers
 						}
 						catch
 						{
+							// ignored
 						}
 					}
 
@@ -571,7 +568,7 @@ namespace asm.Helpers
 		{
 			execName = execName.Trim();
 			if (string.IsNullOrEmpty(execName)) throw new ArgumentNullException(nameof(execName));
-			if (settings == null) settings = RunSettingsCore.Default;
+			settings ??= RunSettingsCore.Default;
 			
 			Process process = new Process
 			{
@@ -608,12 +605,18 @@ namespace asm.Helpers
 				settings.EnvironmentVariables.ForEach(pair => process.StartInfo.EnvironmentVariables.Add(pair.Key, pair.Value));
 
 			IOnProcessCreated processCreated = settings;
-			processCreated?.OnCreate?.Invoke(process);
+			processCreated.OnCreate?.Invoke(process);
 			return process;
 		}
 
+		[NotNull] 
+		public static Process CreateForRun([NotNull] string execName) { return CreateForRun(execName, null, RunSettingsBase.Default); }
+		[NotNull] 
+		public static Process CreateForRun([NotNull] string execName, string arguments) { return CreateForRun(execName, arguments, RunSettingsBase.Default); }
+		[NotNull] 
+		public static Process CreateForRun([NotNull] string execName, [NotNull] RunSettingsBase settings) { return CreateForRun(execName, null, settings); }
 		[NotNull]
-		public static Process CreateForRun([NotNull] string execName, string arguments = null, [NotNull] RunSettingsBase settings = null)
+		public static Process CreateForRun([NotNull] string execName, string arguments, [NotNull] RunSettingsBase settings)
 		{
 			return CreateForRun(execName, arguments, settings, out bool _, out bool _);
 		}
@@ -626,7 +629,7 @@ namespace asm.Helpers
 			IOnProcessEvents processEvents = settings as IOnProcessEvents;
 			redirectOutput = settings.RedirectOutput || processEvents?.OnOutput != null;
 			redirectError = settings.RedirectError || processEvents?.OnError != null;
-			process.EnableRaisingEvents = settings.RedirectInput || redirectOutput || redirectError || processStartAndExit?.OnExit != null;
+			process.EnableRaisingEvents = settings.RedirectInput || redirectOutput || redirectError || processStartAndExit.OnExit != null;
 
 			ProcessStartInfo startInfo = process.StartInfo;
 			startInfo.RedirectStandardInput = settings.RedirectInput;
@@ -639,7 +642,7 @@ namespace asm.Helpers
 				if (processEvents.OnError != null) process.ErrorDataReceived += (sender, args) => processEvents.OnError(args.Data);
 			}
 
-			if (processStartAndExit?.OnExit != null)
+			if (processStartAndExit.OnExit != null)
 			{
 				process.Exited += (sender, args) =>
 								{
@@ -656,6 +659,7 @@ namespace asm.Helpers
 										}
 										catch
 										{
+											// ignored
 										}
 									}				
 
@@ -718,7 +722,8 @@ namespace asm.Helpers
 						: WaitForProcessExitAsync(process.Id, awaitableHandle);
 		}
 
-		[NotNull] public static Task<bool> WaitForProcessExitAsync(int pid) { return WaitForProcessExitAsync(pid, null); }
+		[NotNull]
+		public static Task<bool> WaitForProcessExitAsync(int pid) { return WaitForProcessExitAsync(pid, null); }
 
 		[NotNull]
 		public static Task<bool> WaitForProcessExitAsync(int pid, WaitHandle awaitableHandle)

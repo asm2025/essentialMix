@@ -18,6 +18,7 @@ namespace asm.Windows.UITypeEditors
 
 		protected override bool CanSelectMultipleInstances() { return false; }
 
-		[NotNull] protected override Type CreateCollectionItemType() { return typeof(NumericRange<T>); }
+		[NotNull]
+		protected override Type CreateCollectionItemType() { return typeof(NumericRange<T>); }
 	}
 }

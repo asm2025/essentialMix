@@ -9,7 +9,8 @@ namespace asm.Extensions
 	{
 		public static bool IsAwaitable(this WaitHandle thisValue) { return thisValue != null && thisValue.SafeWaitHandle.IsAwaitable(); }
 
-		[NotNull] public static WaitHandle[] Merge(this WaitHandle thisValue, [NotNull] params WaitHandle[] waitHandles) { return waitHandles.Prepend(thisValue); }
+		[NotNull]
+		public static WaitHandle[] Merge(this WaitHandle thisValue, [NotNull] params WaitHandle[] waitHandles) { return waitHandles.Prepend(thisValue); }
 
 		public static bool WaitOne([NotNull] this WaitHandle thisValue, CancellationToken token = default(CancellationToken)) { return WaitOne(thisValue, TimeSpanHelper.INFINITE, false, false, token); }
 

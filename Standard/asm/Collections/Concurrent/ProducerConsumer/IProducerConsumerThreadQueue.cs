@@ -2,7 +2,7 @@
 
 namespace asm.Collections.Concurrent.ProducerConsumer
 {
-	public interface IProducerConsumerThreadQueue : IProducerConsumer
+	public interface IProducerConsumerThreadQueue<in T> : IProducerConsumer<T>
 	{
 		bool IsBackground { get; }
 		ThreadPriority Priority { get; }

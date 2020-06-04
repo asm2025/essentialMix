@@ -83,11 +83,15 @@ namespace asm.Extensions
 		[NotNull]
 		public static EventInfo GetEvent([NotNull] this object thisValue, [NotNull] LambdaExpression expression) { return thisValue.AsType().GetEvent(expression); }
 
-		[NotNull] public static MethodInfo[] GetGetters([NotNull] this object thisValue) { return thisValue.AsType().GetGetters(); }
-		[NotNull] public static MethodInfo[] GetGetters([NotNull] this object thisValue, BindingFlags bindingFlags) { return thisValue.AsType().GetGetters(bindingFlags); }
+		[NotNull]
+		public static MethodInfo[] GetGetters([NotNull] this object thisValue) { return thisValue.AsType().GetGetters(); }
+		[NotNull]
+		public static MethodInfo[] GetGetters([NotNull] this object thisValue, BindingFlags bindingFlags) { return thisValue.AsType().GetGetters(bindingFlags); }
 
-		[NotNull] public static MethodInfo[] GetSetters([NotNull] this object thisValue) { return thisValue.AsType().GetGetters(); }
-		[NotNull] public static MethodInfo[] GetSetters([NotNull] this object thisValue, BindingFlags bindingFlags) { return thisValue.AsType().GetSetters(bindingFlags); }
+		[NotNull]
+		public static MethodInfo[] GetSetters([NotNull] this object thisValue) { return thisValue.AsType().GetGetters(); }
+		[NotNull]
+		public static MethodInfo[] GetSetters([NotNull] this object thisValue, BindingFlags bindingFlags) { return thisValue.AsType().GetSetters(bindingFlags); }
 
 		public static IEnumerable<PropertyInfo> GetProperties([NotNull] this object thisValue, PropertyInfoType type) { return thisValue.AsType().GetProperties(type); }
 		public static IEnumerable<PropertyInfo> GetProperties([NotNull] this object thisValue, BindingFlags bindingFlags, PropertyInfoType type)

@@ -29,7 +29,8 @@ namespace asm.Numeric
 {
     internal class UInt64NumericProvider : INumericProvider<ulong>
     {
-        [NotNull] public string ToHexadecimalString(ulong value) { return value.ToString("X16"); }
+        [NotNull]
+        public string ToHexadecimalString(ulong value) { return value.ToString("X16"); }
 
 		public string ToDecimalString(ulong value) { return value.ToString(); }
 

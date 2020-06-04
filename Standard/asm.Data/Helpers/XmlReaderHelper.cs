@@ -75,11 +75,14 @@ namespace asm.Data.Helpers
 			return settings;
 		}
 
-		[NotNull] public static XmlParserContext CreateParserContext() { return CreateParserContext(true, null, null, null); }
+		[NotNull]
+		public static XmlParserContext CreateParserContext() { return CreateParserContext(true, null, null, null); }
 
-		[NotNull] public static XmlParserContext CreateParserContext(bool ignoreWhitespace) { return CreateParserContext(ignoreWhitespace, null, null, null); }
+		[NotNull]
+		public static XmlParserContext CreateParserContext(bool ignoreWhitespace) { return CreateParserContext(ignoreWhitespace, null, null, null); }
 
-		[NotNull] public static XmlParserContext CreateParserContext(bool ignoreWhitespace, Encoding encoding) { return CreateParserContext(ignoreWhitespace, null, null, encoding); }
+		[NotNull]
+		public static XmlParserContext CreateParserContext(bool ignoreWhitespace, Encoding encoding) { return CreateParserContext(ignoreWhitespace, null, null, encoding); }
 
 		[NotNull]
 		public static XmlParserContext CreateParserContext(bool ignoreWhitespace, [NotNull] XmlNameTable nt, Encoding encoding)

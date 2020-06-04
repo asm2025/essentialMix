@@ -41,6 +41,7 @@ namespace asm.Web.Mvc
 
 		public static explicit operator string(HtmlText value) { return value?.Text; }
 
-		[NotNull] public static explicit operator HtmlText(string value) { return new HtmlText(value); }
+		[NotNull]
+		public static explicit operator HtmlText(string value) { return new HtmlText(value); }
 	}
 }

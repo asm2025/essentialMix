@@ -459,7 +459,8 @@ namespace asm.Helpers
 			return $"{(value == 0 && part < 0 ? "-" : string.Empty)}{value:0}";
 		}
 
-		[NotNull] private static string GetNoHigherPartToString(int part) { return Math.Abs(part).ToString("00"); }
+		[NotNull]
+		private static string GetNoHigherPartToString(int part) { return Math.Abs(part).ToString("00"); }
 
 		private static TimeSpan ClearTimeSpanSign(TimeSpan timeSpan) { return new TimeSpan(timeSpan.Ticks - TimeSpan.TicksPerMillisecond * timeSpan.Milliseconds); }
 

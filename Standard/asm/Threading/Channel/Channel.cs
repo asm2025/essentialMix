@@ -101,7 +101,7 @@ namespace asm.Threading.Channel
 
 		internal void InternalDeactivate(int objectID)
 		{
-			if (IsDisposedOrDisposing) return;
+			if (IsDisposed) return;
 
 			using (MemoryStream ms = new MemoryStream())
 			{
@@ -112,7 +112,7 @@ namespace asm.Threading.Channel
 					writer.Flush();
 				}
 
-				if (IsDisposedOrDisposing) return;
+				if (IsDisposed) return;
 				_outPipe.Write(ms.ToArray());
 			}
 		}
@@ -192,7 +192,7 @@ namespace asm.Threading.Channel
 		private void OnMessageReceived(byte[] data)
 		{
 			Interlocked.Increment(ref _messagesReceived);
-			if (IsDisposedOrDisposing) return;
+			if (IsDisposed) return;
 
 			using (MemoryStream ms = new MemoryStream(data))
 			{

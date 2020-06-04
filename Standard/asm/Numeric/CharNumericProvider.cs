@@ -32,7 +32,8 @@ namespace asm.Numeric
 
 		public char Subtract(char left, char right) { return (char)(left - right); }
 
-		[NotNull] public string ToHexadecimalString(char value) { return ((ushort)value).ToString("X4"); }
+		[NotNull]
+		public string ToHexadecimalString(char value) { return ((ushort)value).ToString("X4"); }
 
 		public string ToDecimalString(char value) { return ((ushort)value).ToString(); }
 

@@ -690,9 +690,11 @@ namespace asm.Helpers
 
 		public static string GetRandomName(string extension) { return GetRandomName(extension, true); }
 
-		[NotNull] public static string GetRandomName(string extension, bool useTempDirectory) { return GetRandomName(null, extension, useTempDirectory); }
+		[NotNull]
+		public static string GetRandomName(string extension, bool useTempDirectory) { return GetRandomName(null, extension, useTempDirectory); }
 
-		[NotNull] public static string GetRandomName(string basePath, string extension) { return GetRandomName(basePath, extension, true); }
+		[NotNull]
+		public static string GetRandomName(string basePath, string extension) { return GetRandomName(basePath, extension, true); }
 
 		[NotNull]
 		private static string GetRandomName(string basePath, string extension, bool useTempDirectory)
@@ -746,7 +748,8 @@ namespace asm.Helpers
 
 		public static string GetRandomName(string basePath, string extension, string suffix) { return GetRandomName(basePath, extension, null, suffix); }
 
-		[NotNull] public static string GetRandomName(string basePath, string extension, string prefix, string suffix) { return GetRandomName(basePath, null, extension, prefix, suffix); }
+		[NotNull]
+		public static string GetRandomName(string basePath, string extension, string prefix, string suffix) { return GetRandomName(basePath, null, extension, prefix, suffix); }
 
 		[NotNull]
 		public static string GetRandomName(string basePath, string name, string extension, string prefix, string suffix)
@@ -823,9 +826,11 @@ namespace asm.Helpers
 
 		public static string GetRandomGuidName(string sExtension) { return GetRandomGuidName(sExtension, true); }
 
-		[NotNull] public static string GetRandomGuidName(string sExtension, bool useTempDirectory) { return GetRandomGuidName(null, sExtension, useTempDirectory); }
+		[NotNull]
+		public static string GetRandomGuidName(string sExtension, bool useTempDirectory) { return GetRandomGuidName(null, sExtension, useTempDirectory); }
 
-		[NotNull] public static string GetRandomGuidName(string basePath, string extension) { return GetRandomGuidName(basePath, extension, true); }
+		[NotNull]
+		public static string GetRandomGuidName(string basePath, string extension) { return GetRandomGuidName(basePath, extension, true); }
 
 		[NotNull]
 		private static string GetRandomGuidName(string basePath, string extension, bool useTempDirectory)
@@ -867,11 +872,14 @@ namespace asm.Helpers
 			return newName;
 		}
 
-		[NotNull] public static string GetTempName() { return GetTempName(null, null, 0); }
+		[NotNull]
+		public static string GetTempName() { return GetTempName(null, null, 0); }
 
-		[NotNull] public static string GetTempName(string basePath) { return GetTempName(basePath, null, 0); }
+		[NotNull]
+		public static string GetTempName(string basePath) { return GetTempName(basePath, null, 0); }
 
-		[NotNull] public static string GetTempName(string basePath, string prefix) { return GetTempName(basePath, prefix, 0); }
+		[NotNull]
+		public static string GetTempName(string basePath, string prefix) { return GetTempName(basePath, prefix, 0); }
 
 		[NotNull]
 		public static string GetTempName(string basePath, string prefix, uint unique)
@@ -885,11 +893,14 @@ namespace asm.Helpers
 			return sb.ToString();
 		}
 
-		[NotNull] public static FileStream GetTempStream() { return GetTempStream(null, null, 0); }
+		[NotNull]
+		public static FileStream GetTempStream() { return GetTempStream(null, null, 0); }
 
-		[NotNull] public static FileStream GetTempStream(string basePath) { return GetTempStream(basePath, null, 0); }
+		[NotNull]
+		public static FileStream GetTempStream(string basePath) { return GetTempStream(basePath, null, 0); }
 
-		[NotNull] public static FileStream GetTempStream(string basePath, string prefix) { return GetTempStream(basePath, prefix, 0); }
+		[NotNull]
+		public static FileStream GetTempStream(string basePath, string prefix) { return GetTempStream(basePath, prefix, 0); }
 
 		[NotNull]
 		public static FileStream GetTempStream(string basePath, string prefix, uint unique)

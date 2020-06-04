@@ -7,9 +7,11 @@ namespace asm.Data.Extensions
 {
 	public static class XmlNameTableExtension
 	{
-		[NotNull] public static XmlNamespaceManager GetNamespaceManager([NotNull] this XmlNameTable thisValue) { return new XmlNamespaceManager(thisValue); }
+		[NotNull]
+		public static XmlNamespaceManager GetNamespaceManager([NotNull] this XmlNameTable thisValue) { return new XmlNamespaceManager(thisValue); }
 
-		[NotNull] public static XmlParserContext CreateParserContext([NotNull] this XmlNameTable thisValue) { return CreateParserContext(thisValue, true, null, null); }
+		[NotNull]
+		public static XmlParserContext CreateParserContext([NotNull] this XmlNameTable thisValue) { return CreateParserContext(thisValue, true, null, null); }
 
 		[NotNull]
 		public static XmlParserContext CreateParserContext([NotNull] this XmlNameTable thisValue, bool ignoreWhitespace)

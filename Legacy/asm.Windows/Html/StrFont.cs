@@ -43,7 +43,8 @@ namespace asm.Windows.Html
 
 		public string Name { get; set; }
 
-		[NotNull] public Font GetRealFont() { return new Font(Name, Size, Style); }
+		[NotNull]
+		public Font GetRealFont() { return new Font(Name, Size, Style); }
 
 		public int CompareTo(object obj)
 		{

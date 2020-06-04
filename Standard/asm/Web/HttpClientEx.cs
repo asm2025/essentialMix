@@ -151,12 +151,16 @@ namespace asm.Web
 			return arg.Handled;
 		}
 
-		[NotNull] public static HttpClientEx FromHttpClient([NotNull] HttpClient client) { return new HttpClientEx(client); }
+		[NotNull]
+		public static HttpClientEx FromHttpClient([NotNull] HttpClient client) { return new HttpClientEx(client); }
 
-		[NotNull] public static HttpClientEx Create() { return Create((Uri)null, null); }
-		[NotNull] public static HttpClientEx Create(IOHttpRequestSettings settings) { return Create((Uri)null, settings); }
+		[NotNull]
+		public static HttpClientEx Create() { return Create((Uri)null, null); }
+		[NotNull]
+		public static HttpClientEx Create(IOHttpRequestSettings settings) { return Create((Uri)null, settings); }
 		public static HttpClientEx Create([NotNull] string baseUri) { return Create(baseUri, null); }
-		[NotNull] public static HttpClientEx Create([NotNull] string baseUri, IOHttpRequestSettings settings) { return Create(UriHelper.ToUri(baseUri), settings); }
+		[NotNull]
+		public static HttpClientEx Create([NotNull] string baseUri, IOHttpRequestSettings settings) { return Create(UriHelper.ToUri(baseUri), settings); }
 		[NotNull]
 		public static HttpClientEx Create(Uri baseUri, IOHttpRequestSettings settings)
 		{

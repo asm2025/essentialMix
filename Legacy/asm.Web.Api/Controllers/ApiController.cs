@@ -89,7 +89,8 @@ namespace asm.Web.Api.Controllers
 			base.Dispose(disposing);
 		}
 
-		[NotNull] protected virtual IHttpActionResult LocalRedirect(string returnUrl) { return this.RedirectToLocal(returnUrl, LogOffUrlExpression, DefaultUrl); }
+		[NotNull]
+		protected virtual IHttpActionResult LocalRedirect(string returnUrl) { return this.RedirectToLocal(returnUrl, LogOffUrlExpression, DefaultUrl); }
 	}
 	
 	/// <inheritdoc />

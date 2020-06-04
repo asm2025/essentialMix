@@ -288,7 +288,8 @@ namespace asm.Web.Extensions
 
 		public static HtmlForm FindForm([NotNull] this Control thisValue, string id, bool childrenOnly) { return FindControl<HtmlForm>(thisValue, id, childrenOnly); }
 
-		[NotNull] public static string GetKey([NotNull] this Control thisValue) { return GetKey(thisValue, null); }
+		[NotNull]
+		public static string GetKey([NotNull] this Control thisValue) { return GetKey(thisValue, null); }
 
 		[NotNull]
 		public static string GetKey([NotNull] this Control thisValue, string suffix)

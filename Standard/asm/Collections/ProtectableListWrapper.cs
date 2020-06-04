@@ -21,7 +21,8 @@ namespace asm.Collections
 		[NotNull]
 		public new TSource Source => _source;
 
-		[NotNull] public static implicit operator TSource([NotNull] ProtectableListWrapper<TSource> wrapper) { return wrapper.Source; }
+		[NotNull]
+		public static implicit operator TSource([NotNull] ProtectableListWrapper<TSource> wrapper) { return wrapper.Source; }
 	}
 
 	[Serializable]
@@ -40,6 +41,7 @@ namespace asm.Collections
 		[NotNull]
 		public new TSource Source => _source;
 
-		[NotNull] public static implicit operator TSource([NotNull] ProtectableListWrapper<TSource, T> wrapper) { return wrapper.Source; }
+		[NotNull]
+		public static implicit operator TSource([NotNull] ProtectableListWrapper<TSource, T> wrapper) { return wrapper.Source; }
 	}
 }

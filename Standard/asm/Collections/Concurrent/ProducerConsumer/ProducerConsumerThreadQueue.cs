@@ -1,23 +1,17 @@
 using System;
 using System.Threading;
+using JetBrains.Annotations;
 
 namespace asm.Collections.Concurrent.ProducerConsumer
 {
-	public abstract class ProducerConsumerThreadQueue : ProducerConsumerQueue, IProducerConsumerThreadQueue, IDisposable
+	public abstract class ProducerConsumerThreadQueue<T> : ProducerConsumerQueue<T>, IProducerConsumerThreadQueue<T>, IDisposable
 	{
-		protected ProducerConsumerThreadQueue(CancellationToken token = default(CancellationToken))
-			: this(null, token)
-		{
-		}
-
-		protected ProducerConsumerThreadQueue(ProducerConsumerQueueOptions options, CancellationToken token = default(CancellationToken))
+		protected ProducerConsumerThreadQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			if (options is ProducerConsumerThreadQueueOptions threadQueueOptions)
-			{
-				IsBackground = threadQueueOptions.IsBackground;
-				Priority = threadQueueOptions.Priority;
-			}
+			if (!(options is ProducerConsumerThreadQueueOptions<T> threadQueueOptions)) return;
+			IsBackground = threadQueueOptions.IsBackground;
+			Priority = threadQueueOptions.Priority;
 		}
 
 		public bool IsBackground { get; }

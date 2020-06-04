@@ -53,11 +53,14 @@ namespace asm.Comparers
 
 	public static class ComparisonComparer
 	{
-		[NotNull] public static Comparison<T> CreateComparison<T>([NotNull] IComparer<T> comparer) { return comparer.Compare; }
+		[NotNull]
+		public static Comparison<T> CreateComparison<T>([NotNull] IComparer<T> comparer) { return comparer.Compare; }
 
-		[NotNull] public static EqualityComparison<T> CreateEqualityComparison<T>([NotNull] IEqualityComparer<T> comparer) { return comparer.Equals; }
+		[NotNull]
+		public static EqualityComparison<T> CreateEqualityComparison<T>([NotNull] IEqualityComparer<T> comparer) { return comparer.Equals; }
 
-		[NotNull] public static ComparisonComparer<T> Create<T>() { return Create<T>(null, null); }
+		[NotNull]
+		public static ComparisonComparer<T> Create<T>() { return Create<T>(null, null); }
 
 		[NotNull]
 		public static ComparisonComparer<T> Create<T>(Comparison<T> comparison, EqualityComparison<T> equalityComparison)
@@ -65,8 +68,10 @@ namespace asm.Comparers
 			return new ComparisonComparer<T>(comparison, equalityComparison);
 		}
 
-		[NotNull] public static ComparisonComparer<T> FromComparison<T>(Comparison<T> comparison) { return Create(comparison, null); }
+		[NotNull]
+		public static ComparisonComparer<T> FromComparison<T>(Comparison<T> comparison) { return Create(comparison, null); }
 
-		[NotNull] public static ComparisonComparer<T> FromEqualityComparison<T>(EqualityComparison<T> equalityComparison) { return Create(null, equalityComparison); }
+		[NotNull]
+		public static ComparisonComparer<T> FromEqualityComparison<T>(EqualityComparison<T> equalityComparison) { return Create(null, equalityComparison); }
 	}
 }

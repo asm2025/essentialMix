@@ -7,7 +7,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Version>10.0.0.0</Version>
 		<Copyright>Copyright © 2008-2020</Copyright>
-		<FileVersion>20.6.1.22</FileVersion>
+		<FileVersion>20.6.4.61</FileVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
 		<PackageTags>utilities, tools, extensions, helpers</PackageTags>
@@ -40,6 +40,7 @@
 		<PackageReference Include="Microsoft.Windows.Compatibility" Version="3.1.0" />
 		<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.1" />
+		<PackageReference Include="System.Threading.AccessControl" Version="4.7.0" />
 		<PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.11.1" />
 	</ItemGroup>
 

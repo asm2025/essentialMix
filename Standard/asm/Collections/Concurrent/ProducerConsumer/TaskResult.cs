@@ -1,6 +1,6 @@
 namespace asm.Collections.Concurrent.ProducerConsumer
 {
-	public enum TaskQueueResult
+	public enum TaskResult
 	{
 		None,
 		Canceled,

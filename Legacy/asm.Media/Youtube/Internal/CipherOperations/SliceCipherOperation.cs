@@ -11,6 +11,7 @@ namespace asm.Media.Youtube.Internal.CipherOperations
 			_index = index;
 		}
 
-		[NotNull] public string Decipher([NotNull] string input) { return input.Substring(_index); }
+		[NotNull]
+		public string Decipher([NotNull] string input) { return input.Substring(_index); }
 	}
 }

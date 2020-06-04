@@ -58,7 +58,8 @@ namespace asm.Windows.UITypeEditors
 		{
 		}
 
-		[NotNull] protected override Type CreateCollectionItemType() { return typeof(TItem); }
+		[NotNull]
+		protected override Type CreateCollectionItemType() { return typeof(TItem); }
 	}
 
 	public class CollectionEditor<TCollection, TItem> : CollectionEditor<TItem>

@@ -83,7 +83,8 @@ namespace asm.Collections
 			this.RemoveAll(item => !item.IsFixed);
 		}
 
-		[NotNull] protected override string GetKeyForItem(IProperty item) { return item.Name; }
+		[NotNull]
+		protected override string GetKeyForItem(IProperty item) { return item.Name; }
 
 		public void Reset()
 		{

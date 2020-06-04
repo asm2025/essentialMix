@@ -468,7 +468,8 @@ namespace asm.Enumeration
 
 		public IEnumerable<TInt> GetFlags() { return EnumCache.GetFlags(Value); }
 
-		[NotNull] public IEnumerable<EnumMember<TInt, TIntProvider>> GetFlagMembers() { return EnumCache.GetFlagMembers(Value); }
+		[NotNull]
+		public IEnumerable<EnumMember<TInt, TIntProvider>> GetFlagMembers() { return EnumCache.GetFlagMembers(Value); }
 
 		internal int CompareTo([NotNull] EnumMember<TInt, TIntProvider> other) { return Value.CompareTo(other.Value); }
 

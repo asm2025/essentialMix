@@ -392,44 +392,6 @@ namespace asm.Extensions
 						: onNotNull(thisValue);
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		[ItemNotNull]
-		public static IEnumerable<T> Traverse<T>(this T thisValue, [NotNull] Func<T, T> next)
-		{
-			for (T current = thisValue; !ReferenceEquals(current, null); current = next(current))
-				yield return current;
-		}
-
-		public static IEnumerable<T> Traverse<T>(this T thisValue, [NotNull] Func<T, T> next, [NotNull] Func<T, IEnumerable<T>> getChildren, DequeuePriority dequeuePriority = DequeuePriority.FIFO)
-			where T : class
-		{
-			DynamicQueue<IEnumerable<T>> queue = new DynamicQueue<IEnumerable<T>>(dequeuePriority);
-
-			for (T current = thisValue; current != null; current = next(current))
-			{
-				yield return current;
-
-				IEnumerable<T> items = getChildren(current);
-				if (items != null)
-					queue.Enqueue(items);
-
-				while (queue.Count > 0)
-				{
-					IEnumerable<T> children = queue.Dequeue();
-
-					foreach (T child in children)
-					{
-						yield return child;
-						if (child == null)
-							continue;
-						items = getChildren(child);
-						if (items != null)
-							queue.Enqueue(items);
-					}
-				}
-			}
-		}
-
 		public static T ToNumber<TSource, T>([NotNull] this TSource thisValue, T defaultValue = default(T))
 		{
 			if (!thisValue.AsType().IsPrimitive()) return defaultValue;

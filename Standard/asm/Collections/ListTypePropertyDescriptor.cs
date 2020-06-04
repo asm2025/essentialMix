@@ -25,9 +25,11 @@ namespace asm.Collections
 			TypeDescriptorSource[Index] = value;
 		}
 
-		[NotNull] protected override string GetName() { return $"{Index}"; }
+		[NotNull]
+		protected override string GetName() { return $"{Index}"; }
 
-		[NotNull] protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
+		[NotNull]
+		protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
 
 		protected ListTypeDescriptor<TSource> TypeDescriptorSource { get; }
 		protected int Index { get; }
@@ -53,9 +55,11 @@ namespace asm.Collections
 			TypeDescriptorSource[Index] = (T)value;
 		}
 
-		[NotNull] protected override string GetName() { return $"{Index}"; }
+		[NotNull]
+		protected override string GetName() { return $"{Index}"; }
 
-		[NotNull] protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
+		[NotNull]
+		protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
 
 		protected ListTypeDescriptor<TSource, T> TypeDescriptorSource { get; }
 		protected int Index { get; }

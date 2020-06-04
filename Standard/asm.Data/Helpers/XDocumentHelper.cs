@@ -12,11 +12,14 @@ namespace asm.Data.Helpers
 {
 	public static class XDocumentHelper
 	{
-		[NotNull] public static string CreateDeclarationString() { return CreateDeclarationString(EncodingHelper.Default, true, 1.0f); }
+		[NotNull]
+		public static string CreateDeclarationString() { return CreateDeclarationString(EncodingHelper.Default, true, 1.0f); }
 
-		[NotNull] public static string CreateDeclarationString(Encoding encoding) { return CreateDeclarationString(encoding, true, 1.0f); }
+		[NotNull]
+		public static string CreateDeclarationString(Encoding encoding) { return CreateDeclarationString(encoding, true, 1.0f); }
 
-		[NotNull] public static string CreateDeclarationString(Encoding encoding, bool standAlone) { return CreateDeclarationString(encoding, standAlone, 1.0f); }
+		[NotNull]
+		public static string CreateDeclarationString(Encoding encoding, bool standAlone) { return CreateDeclarationString(encoding, standAlone, 1.0f); }
 
 		[NotNull]
 		public static string CreateDeclarationString(Encoding encoding, bool standAlone, float version)
@@ -30,11 +33,14 @@ namespace asm.Data.Helpers
 			return sb.ToString();
 		}
 
-		[NotNull] public static XDocument Create(params object[] content) { return Create(EncodingHelper.Default, true, 1.0f, content); }
+		[NotNull]
+		public static XDocument Create(params object[] content) { return Create(EncodingHelper.Default, true, 1.0f, content); }
 
-		[NotNull] public static XDocument Create(Encoding encoding, params object[] content) { return Create(encoding, true, 1.0f, content); }
+		[NotNull]
+		public static XDocument Create(Encoding encoding, params object[] content) { return Create(encoding, true, 1.0f, content); }
 
-		[NotNull] public static XDocument Create(Encoding encoding, bool standAlone, params object[] content) { return Create(encoding, standAlone, 1.0f, content); }
+		[NotNull]
+		public static XDocument Create(Encoding encoding, bool standAlone, params object[] content) { return Create(encoding, standAlone, 1.0f, content); }
 
 		[NotNull]
 		public static XDocument Create(Encoding encoding, bool standAlone, float version, params object[] content)
@@ -45,9 +51,11 @@ namespace asm.Data.Helpers
 			return document;
 		}
 
-		[NotNull] public static XDocument LoadFile([NotNull] string filename) { return LoadFile(filename, null, null); }
+		[NotNull]
+		public static XDocument LoadFile([NotNull] string filename) { return LoadFile(filename, null, null); }
 
-		[NotNull] public static XDocument LoadFile([NotNull] string filename, XmlReaderSettings settings) { return LoadFile(filename, settings, null); }
+		[NotNull]
+		public static XDocument LoadFile([NotNull] string filename, XmlReaderSettings settings) { return LoadFile(filename, settings, null); }
 
 		[NotNull]
 		public static XDocument LoadFile([NotNull] string filename, XmlReaderSettings settings, XmlParserContext context)

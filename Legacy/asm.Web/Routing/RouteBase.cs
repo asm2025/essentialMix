@@ -321,7 +321,8 @@ namespace asm.Web.Routing
 
 		public static RouteBase FromUrl(string url, RouteTypeEnum type) { return FromUrlInternal(url, type, null); }
 
-		[NotNull] public static IEnumerable<RouteBase> ParseRoutes(string value) { return ParseRoutesInternal(value).Select(e => e.Item1); }
+		[NotNull]
+		public static IEnumerable<RouteBase> ParseRoutes(string value) { return ParseRoutesInternal(value).Select(e => e.Item1); }
 
 		public static bool IsMvcIgnoreRoute(System.Web.Routing.RouteBase routeBase) { return routeBase != null && routeBase.GetType() == IGNORE_ROUTE_INTERNAL; }
 

@@ -37,7 +37,8 @@ namespace asm.Data.Extensions
 			return n;
 		}
 
-		[NotNull] public static XmlParserContext CreateParserContext([NotNull] this XmlNamespaceManager thisValue) { return CreateParserContext(thisValue, true, null, null); }
+		[NotNull]
+		public static XmlParserContext CreateParserContext([NotNull] this XmlNamespaceManager thisValue) { return CreateParserContext(thisValue, true, null, null); }
 
 		[NotNull]
 		public static XmlParserContext CreateParserContext([NotNull] this XmlNamespaceManager thisValue, bool ignoreWhitespace)

@@ -12,31 +12,31 @@ namespace asm.Threading
 	public sealed class SharedMemory<T> : Disposable, IDisposable
 		where T : struct
 	{
-		private Mutex _mutex;
 		private readonly string _lockName;
+
+		private Mutex _mutex;
 		private bool _isLocked;
 		private MemoryMappedFile _mmf;
 		private MemoryMappedViewAccessor _accessor;
 
-		public SharedMemory(string name, long size)
+		public SharedMemory([NotNull] string name, long size)
 			: this(name, 0, size, MemoryMappedFileAccess.ReadWrite)
 		{
 		}
 
-		public SharedMemory(string name, long offset, long size)
+		public SharedMemory([NotNull] string name, long offset, long size)
 			: this(name, offset, size, MemoryMappedFileAccess.ReadWrite)
 		{
 		}
 
-		public SharedMemory(string name, long size, MemoryMappedFileAccess access)
+		public SharedMemory([NotNull] string name, long size, MemoryMappedFileAccess access)
 			: this(name, 0, size, access)
 		{
 		}
 
-		public SharedMemory(string name, long offset, long size, MemoryMappedFileAccess access)
+		public SharedMemory([NotNull] string name, long offset, long size, MemoryMappedFileAccess access)
 		{
-			name = name?.Trim();
-			if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
+			if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
 			if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
 			if (size < 1) throw new ArgumentOutOfRangeException(nameof(size));
 			_lockName = string.Concat(name.ToUpper(), "_LOCK");

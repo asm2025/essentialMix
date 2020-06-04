@@ -60,7 +60,8 @@ namespace asm.Core.Data.Entity.Patterns.Repository
 			base.Dispose(disposing);
 		}
 
-		[NotNull] protected override IQueryable<TEntity> ListInternal(IPagination settings = null) { return PrepareListQuery(settings); }
+		[NotNull]
+		protected override IQueryable<TEntity> ListInternal(IPagination settings = null) { return PrepareListQuery(settings); }
 
 		protected override ValueTask<IQueryable<TEntity>> ListAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken))
 		{

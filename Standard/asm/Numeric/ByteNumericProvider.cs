@@ -29,7 +29,8 @@ namespace asm.Numeric
 {
     internal class ByteNumericProvider : INumericProvider<byte>
     {
-        [NotNull] public string ToHexadecimalString(byte value) { return value.ToString("X2"); }
+        [NotNull]
+        public string ToHexadecimalString(byte value) { return value.ToString("X2"); }
 
 		public string ToDecimalString(byte value) { return value.ToString(); }
 

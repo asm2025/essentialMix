@@ -69,7 +69,8 @@ namespace asm.Extensions
 			return thisValue;
 		}
 
-		[NotNull] public static Task<T> WithResult<T>([NotNull] this Task thisValue, T value, CancellationToken token = default(CancellationToken)) { return thisValue.ContinueWith(t => value, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default); }
+		[NotNull]
+		public static Task<T> WithResult<T>([NotNull] this Task thisValue, T value, CancellationToken token = default(CancellationToken)) { return thisValue.ContinueWith(t => value, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default); }
 
 		public static Task TimeoutAfter([NotNull] this Task thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken))
 		{

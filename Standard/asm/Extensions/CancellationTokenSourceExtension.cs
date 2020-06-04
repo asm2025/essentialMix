@@ -34,7 +34,8 @@ namespace asm.Extensions
 				.ToArray());
 		}
 
-		[NotNull] public static CancellationTokenSource Merge([NotNull] this CancellationTokenSource thisValue, CancellationToken token) { return thisValue.Token.Merge(token); }
+		[NotNull]
+		public static CancellationTokenSource Merge([NotNull] this CancellationTokenSource thisValue, CancellationToken token) { return thisValue.Token.Merge(token); }
 
 		[NotNull]
 		public static CancellationTokenSource Merge([NotNull] this CancellationTokenSource thisValue, [NotNull] CancellationTokenSource source)

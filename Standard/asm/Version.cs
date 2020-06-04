@@ -115,7 +115,8 @@ namespace asm
 			}
 		}
 
-		[NotNull] public override string ToString() { return ToString(-1); }
+		[NotNull]
+		public override string ToString() { return ToString(-1); }
 
 		[NotNull]
 		public string ToString(int fieldCount)

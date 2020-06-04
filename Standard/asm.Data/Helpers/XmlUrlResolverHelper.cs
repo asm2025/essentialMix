@@ -17,7 +17,8 @@ namespace asm.Data.Helpers
 					};
 		}
 
-		[NotNull] public static XmlUrlResolver CreateResolver(string userName, [NotNull] SecureString password) { return CreateResolver(userName, password, null); }
+		[NotNull]
+		public static XmlUrlResolver CreateResolver(string userName, [NotNull] SecureString password) { return CreateResolver(userName, password, null); }
 
 		[NotNull]
 		public static XmlUrlResolver CreateResolver(string userName, [NotNull] SecureString password, string domain)
@@ -37,7 +38,8 @@ namespace asm.Data.Helpers
 			return new XmlUrlResolver { Credentials = credential };
 		}
 
-		[NotNull] public static XmlUrlResolver CreateResolver(string userName, string password) { return CreateResolver(userName, password, null); }
+		[NotNull]
+		public static XmlUrlResolver CreateResolver(string userName, string password) { return CreateResolver(userName, password, null); }
 
 		[NotNull]
 		public static XmlUrlResolver CreateResolver(string userName, string password, string domain)

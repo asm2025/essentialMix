@@ -101,8 +101,10 @@ namespace asm.Helpers
 			}
 		}
 
-		[NotNull] public static string GetTempName() { return GetTempName(null, null); }
-		[NotNull] public static string GetTempName(string basePath) { return GetTempName(basePath, null); }
+		[NotNull]
+		public static string GetTempName() { return GetTempName(null, null); }
+		[NotNull]
+		public static string GetTempName(string basePath) { return GetTempName(basePath, null); }
 		[NotNull]
 		public static string GetTempName(string basePath, string prefix)
 		{

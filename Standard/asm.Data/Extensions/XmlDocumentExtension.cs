@@ -14,9 +14,11 @@ namespace asm.Data.Extensions
 {
 	public static class XmlDocumentExtension
 	{
-		[NotNull] public static XmlDeclaration CreateDeclaration([NotNull] this XmlDocument thisValue) { return CreateDeclaration(thisValue, EncodingHelper.Default, true, 1.0f); }
+		[NotNull]
+		public static XmlDeclaration CreateDeclaration([NotNull] this XmlDocument thisValue) { return CreateDeclaration(thisValue, EncodingHelper.Default, true, 1.0f); }
 
-		[NotNull] public static XmlDeclaration CreateDeclaration([NotNull] this XmlDocument thisValue, Encoding encoding) { return CreateDeclaration(thisValue, encoding, true, 1.0f); }
+		[NotNull]
+		public static XmlDeclaration CreateDeclaration([NotNull] this XmlDocument thisValue, Encoding encoding) { return CreateDeclaration(thisValue, encoding, true, 1.0f); }
 
 		[NotNull]
 		public static XmlDeclaration CreateDeclaration([NotNull] this XmlDocument thisValue, Encoding encoding, bool standAlone)
@@ -73,7 +75,8 @@ namespace asm.Data.Extensions
 						: thisValue.NameTable.Append(namespaceURI);
 		}
 
-		[NotNull] public static XmlNamespaceManager GetNamespaceManager([NotNull] this XmlDocument thisValue) { return new XmlNamespaceManager(thisValue.NameTable); }
+		[NotNull]
+		public static XmlNamespaceManager GetNamespaceManager([NotNull] this XmlDocument thisValue) { return new XmlNamespaceManager(thisValue.NameTable); }
 
 		[NotNull]
 		public static XDocument ToXDocument([NotNull] this XmlDocument thisValue)

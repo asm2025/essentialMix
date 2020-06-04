@@ -46,7 +46,8 @@ namespace asm.Collections
 		/// </summary>
 		public object Value { get; }
 
-		[NotNull] public static IndexedEntry Create(bool isFirst, bool isLast, object value, int index) { return new IndexedEntry(isFirst, isLast, value, index); }
+		[NotNull]
+		public static IndexedEntry Create(bool isFirst, bool isLast, object value, int index) { return new IndexedEntry(isFirst, isLast, value, index); }
 
 		public static object ToObject([NotNull] IndexedEntry value) { return value.Value; }
 	}
@@ -65,7 +66,8 @@ namespace asm.Collections
 		/// </summary>
 		public T Value { get; }
 
-		[NotNull] public static IndexedEntry<T> Create(bool isFirst, bool isLast, T value, int index) { return new IndexedEntry<T>(isFirst, isLast, value, index); }
+		[NotNull]
+		public static IndexedEntry<T> Create(bool isFirst, bool isLast, T value, int index) { return new IndexedEntry<T>(isFirst, isLast, value, index); }
 
 		public static implicit operator T([NotNull] IndexedEntry<T> value) { return value.Value; }
 	}

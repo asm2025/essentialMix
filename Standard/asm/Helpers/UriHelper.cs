@@ -63,7 +63,8 @@ namespace asm.Helpers
 			return builder?.Uri;
 		}
 
-		[NotNull] public static Uri Join([NotNull] string baseUri, [NotNull] params string[] paths) { return Join(ToUri(baseUri), paths); }
+		[NotNull]
+		public static Uri Join([NotNull] string baseUri, [NotNull] params string[] paths) { return Join(ToUri(baseUri), paths); }
 
 		[NotNull]
 		public static Uri Join([NotNull] Uri baseUri, [NotNull] params string[] paths)
@@ -359,7 +360,8 @@ namespace asm.Helpers
 			return request.PeekAsync(settings, token);
 		}
 
-		[NotNull] public static UrlSearchResult Search([NotNull] string url, UrlSearchFlags flags, IOHttpRequestSettings settings) { return Search(url, null, flags, settings); }
+		[NotNull]
+		public static UrlSearchResult Search([NotNull] string url, UrlSearchFlags flags, IOHttpRequestSettings settings) { return Search(url, null, flags, settings); }
 
 		[NotNull]
 		public static UrlSearchResult Search([NotNull] string url, string searchFor, UrlSearchFlags flags, IOHttpRequestSettings settings)
@@ -369,7 +371,8 @@ namespace asm.Helpers
 			return request.Search(searchFor, flags, settings);
 		}
 
-		[NotNull] public static UrlSearchResult Search([NotNull] Uri url, UrlSearchFlags flags, IOHttpRequestSettings settings) { return Search(url, null, flags, settings); }
+		[NotNull]
+		public static UrlSearchResult Search([NotNull] Uri url, UrlSearchFlags flags, IOHttpRequestSettings settings) { return Search(url, null, flags, settings); }
 
 		[NotNull]
 		public static UrlSearchResult Search([NotNull] Uri url, string searchFor, UrlSearchFlags flags, IOHttpRequestSettings settings)

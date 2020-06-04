@@ -71,7 +71,8 @@ namespace asm.Data.Patterns.Repository
 			return GetKeyValueInternal(entity);
 		}
 
-		[NotNull] protected virtual object[] GetKeyValueInternal([NotNull] TEntity entity) { return KeyProperties.Select(e => e.GetValue(entity)).ToArray(); }
+		[NotNull]
+		protected virtual object[] GetKeyValueInternal([NotNull] TEntity entity) { return KeyProperties.Select(e => e.GetValue(entity)).ToArray(); }
 
 		/// <inheritdoc />
 		public TEntity Create()

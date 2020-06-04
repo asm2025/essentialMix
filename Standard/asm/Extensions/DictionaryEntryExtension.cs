@@ -22,9 +22,11 @@ namespace asm.Extensions
 						: string.Concat(thisValue.Key, separator, FormatValue(format, thisValue.Value));
 		}
 
-		[NotNull] public static string ToString(this DictionaryEntry thisValue, char separator) { return Format(thisValue, "{0}", separator); }
+		[NotNull]
+		public static string ToString(this DictionaryEntry thisValue, char separator) { return Format(thisValue, "{0}", separator); }
 
-		[NotNull] public static string ToString(this DictionaryEntry thisValue, string separator) { return Format(thisValue, "{0}", separator); }
+		[NotNull]
+		public static string ToString(this DictionaryEntry thisValue, string separator) { return Format(thisValue, "{0}", separator); }
 
 		public static bool HasKey(this DictionaryEntry thisValue) { return thisValue.Key != null; }
 

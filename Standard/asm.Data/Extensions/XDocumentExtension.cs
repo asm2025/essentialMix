@@ -13,9 +13,11 @@ namespace asm.Data.Extensions
 {
 	public static class XDocumentExtension
 	{
-		[NotNull] public static XDeclaration CreateDeclaration([NotNull] this XDocument thisValue) { return CreateDeclaration(thisValue, EncodingHelper.Default, true, 1.0f); }
+		[NotNull]
+		public static XDeclaration CreateDeclaration([NotNull] this XDocument thisValue) { return CreateDeclaration(thisValue, EncodingHelper.Default, true, 1.0f); }
 
-		[NotNull] public static XDeclaration CreateDeclaration([NotNull] this XDocument thisValue, Encoding encoding) { return CreateDeclaration(thisValue, encoding, true, 1.0f); }
+		[NotNull]
+		public static XDeclaration CreateDeclaration([NotNull] this XDocument thisValue, Encoding encoding) { return CreateDeclaration(thisValue, encoding, true, 1.0f); }
 
 		[NotNull]
 		public static XDeclaration CreateDeclaration([NotNull] this XDocument thisValue, Encoding encoding, bool standAlone)

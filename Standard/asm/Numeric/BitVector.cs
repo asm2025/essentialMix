@@ -181,7 +181,8 @@ namespace asm.Numeric
 
 		public override int GetHashCode() { return Data; }
 
-		[NotNull] public override string ToString() { return ToHexadecimalString(this); }
+		[NotNull]
+		public override string ToString() { return ToHexadecimalString(this); }
 
 		public bool this[byte index]
 		{
@@ -213,13 +214,17 @@ namespace asm.Numeric
 
 		public static string ToString(BitVector value, BitVectorMode mode) { return GetToFunction(mode)(value); }
 
-		[NotNull] public static string ToBinaryString(BitVector value) { return Convert.ToString(value.Data, (int)BitVectorMode.Binary).PadLeft(8, '0'); }
+		[NotNull]
+		public static string ToBinaryString(BitVector value) { return Convert.ToString(value.Data, (int)BitVectorMode.Binary).PadLeft(8, '0'); }
 
-		[NotNull] public static string ToOctalString(BitVector value) { return Convert.ToString(value.Data, (int)BitVectorMode.Octal).PadLeft(3, '0'); }
+		[NotNull]
+		public static string ToOctalString(BitVector value) { return Convert.ToString(value.Data, (int)BitVectorMode.Octal).PadLeft(3, '0'); }
 
-		[NotNull] public static string ToDecimalString(BitVector value) { return value.Data.ToString("D3"); }
+		[NotNull]
+		public static string ToDecimalString(BitVector value) { return value.Data.ToString("D3"); }
 
-		[NotNull] public static string ToHexadecimalString(BitVector value) { return value.Data.ToString("X2"); }
+		[NotNull]
+		public static string ToHexadecimalString(BitVector value) { return value.Data.ToString("X2"); }
 
 		public static BitVector FromString(string value, BitVectorMode mode) { return GetFromFunction(mode)(value); }
 

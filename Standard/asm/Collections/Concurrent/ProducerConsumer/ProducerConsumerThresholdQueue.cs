@@ -1,26 +1,20 @@
 ﻿using System;
 using System.Threading;
+using JetBrains.Annotations;
 
 namespace asm.Collections.Concurrent.ProducerConsumer
 {
-	public abstract class ProducerConsumerThresholdQueue : ProducerConsumerThreadQueue, IProducerConsumerThresholdQueue, IDisposable
+	public abstract class ProducerConsumerThresholdQueue<T> : ProducerConsumerThreadQueue<T>, IProducerConsumerThresholdQueue<T>
 	{
-		protected ProducerConsumerThresholdQueue(CancellationToken token = default(CancellationToken))
-			: this(null, token)
-		{
-		}
-
-		protected ProducerConsumerThresholdQueue(ProducerConsumerQueueOptions options, CancellationToken token = default(CancellationToken))
+		protected ProducerConsumerThresholdQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			ThresholdInternal = options is ProducerConsumerThresholdQueueOptions thresholdQueueOptions ? thresholdQueueOptions.Threshold : TimeSpan.Zero;
-			HasThreshold = ThresholdInternal > TimeSpan.Zero;
+			Threshold = options is ProducerConsumerThresholdQueueOptions<T> thresholdQueueOptions ? thresholdQueueOptions.Threshold : TimeSpan.Zero;
+			HasThreshold = Threshold > TimeSpan.Zero;
 		}
 
-		public TimeSpan Threshold => ThresholdInternal;
+		public TimeSpan Threshold { get; }
 
 		public bool HasThreshold { get; }
-
-		protected TimeSpan ThresholdInternal { get; }
 	}
 }

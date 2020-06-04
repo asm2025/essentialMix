@@ -6,34 +6,29 @@ using asm.Extensions;
 using asm.Helpers;
 using JetBrains.Annotations;
 
-namespace asm.Collections.Concurrent.ProducerConsumer
+namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 {
-	public sealed class DataFlowQueue : ProducerConsumerThreadQueue, IDisposable
+	public sealed class DataFlowQueue<T> : ProducerConsumerThreadQueue<T>
 	{
 		private readonly object _lock = new object();
 		private ManualResetEventSlim _manualResetEventSlim;
-		private BufferBlock<TaskItem> _queue;
-		private ActionBlock<TaskItem> _processor;
+		private BufferBlock<T> _queue;
+		private ActionBlock<T> _processor;
 		private IDisposable _link;
 
 		private Thread _worker;
 
-		public DataFlowQueue(CancellationToken token = default(CancellationToken))
-			: this(null, token)
-		{
-		}
-
-		public DataFlowQueue(ProducerConsumerQueueOptions options, CancellationToken token = default(CancellationToken))
+		public DataFlowQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
 			_manualResetEventSlim = new ManualResetEventSlim(false);
 
 			// Define the mesh.
-			_queue = new BufferBlock<TaskItem>(new DataflowBlockOptions
+			_queue = new BufferBlock<T>(new DataflowBlockOptions
 			{
 				CancellationToken = Token
 			});
-			_processor = new ActionBlock<TaskItem>(Run,
+			_processor = new ActionBlock<T>(Run,
 				new ExecutionDataflowBlockOptions
 				{
 					MaxDegreeOfParallelism = Threads,
@@ -56,14 +51,14 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 		{
 			base.Dispose(disposing);
 			if (!disposing) return;
+			StopInternal(WaitOnDispose);
 			ObjectHelper.Dispose(ref _link);
 			ObjectHelper.Dispose(ref _processor);
 			ObjectHelper.Dispose(ref _queue);
-			ObjectHelper.Dispose(ref _worker);
 			ObjectHelper.Dispose(ref _manualResetEventSlim);
 		}
 
-		protected override int CountInternal
+		public override int Count
 		{
 			get
 			{
@@ -74,15 +69,14 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 			}
 		}
 
-		protected override bool IsBusyInternal => CountInternal > 0;
+		public override bool IsBusy => Count > 0;
 
-		protected override void EnqueueInternal(TaskItem item)
+		protected override void EnqueueInternal(T item)
 		{
-			if (IsDisposedOrDisposing || Token.IsCancellationRequested) return;
+			if (IsDisposed || Token.IsCancellationRequested) return;
 
 			lock (_lock)
 			{
-				item.Token = Token;
 				_queue.SendAsync(item, Token);
 				Monitor.Pulse(_lock);
 			}
@@ -112,11 +106,11 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 		protected override bool WaitInternal(int millisecondsTimeout)
 		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (!IsBusyInternal) return true;
+			if (!IsBusy) return true;
 			
 			try
 			{
-				if (millisecondsTimeout < 0)
+				if (millisecondsTimeout < TimeSpanHelper.MINIMUM)
 					_manualResetEventSlim.Wait(Token);
 				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
 					return false;
@@ -138,28 +132,23 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 
 		protected override void StopInternal(bool enforce)
 		{
-			lock (_lock)
-			{
-				Cancel();
-				_queue.Complete();
-				_processor.Complete();
-				Monitor.PulseAll(_lock);
-			}
-
+			CompleteInternal();
 			// Wait for the consumer's thread to finish.
 			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
+			Cancel();
 			ClearInternal();
+			ObjectHelper.Dispose(ref _worker);
 		}
 
 		private void Consume()
 		{
-			if (IsDisposedOrDisposing) return;
+			if (IsDisposed) return;
 			_manualResetEventSlim.Reset();
 			OnWorkStarted(EventArgs.Empty);
 
 			try
 			{
-				while (!IsDisposedOrDisposing && !Token.IsCancellationRequested && !CompleteMarked)
+				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 					Task.WhenAll(_queue.Completion, _processor.Completion).ConfigureAwait().Wait(Token);
 			}
 			catch (OperationCanceledException)
@@ -173,51 +162,8 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 			}
 			finally
 			{
-				OnWorkCompleted(EventArgs.Empty);
 				_manualResetEventSlim.Set();
-			}
-		}
-
-		private void Run([NotNull] TaskItem item)
-		{
-			if (IsDisposedOrDisposing || item.Token.IsCancellationRequested) return;
-
-			TaskItemResult result = new TaskItemResult(item);
-
-			try
-			{
-				result.Result = item.OnExecute(item);
-			}
-			catch (Exception e)
-			{
-				item.Exception = e;
-				result.Result = TaskQueueResult.Error;
-				return;
-			}
-			finally
-			{
-				item.OnCleanUp?.Invoke(item);
-			}
-
-			if (IsDisposedOrDisposing || item.Token.IsCancellationRequested) return;
-
-			switch (item.Exception)
-			{
-				case TimeoutException _:
-					item.OnResult?.Invoke(item, TaskQueueResult.Timeout);
-					break;
-				case AggregateException agto when agto.InnerException is TimeoutException:
-					item.OnResult?.Invoke(item, TaskQueueResult.Timeout);
-					break;
-				case OperationCanceledException _:
-					item.OnResult?.Invoke(item, TaskQueueResult.Canceled);
-					break;
-				case AggregateException agto when agto.InnerException is OperationCanceledException:
-					item.OnResult?.Invoke(item, TaskQueueResult.Canceled);
-					break;
-				default:
-					item.OnResult?.Invoke(item, item.Exception == null ? result.Result : TaskQueueResult.Error);
-					break;
+				OnWorkCompleted(EventArgs.Empty);
 			}
 		}
 	}

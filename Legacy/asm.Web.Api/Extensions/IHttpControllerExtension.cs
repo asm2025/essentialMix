@@ -6,6 +6,7 @@ namespace asm.Web.Api.Extensions
 {
 	public static class IHttpControllerExtension
 	{
-		[NotNull] public static string ControllerName([NotNull] this IHttpController thisValue) { return IHttpControllerHelper.ControllerName(thisValue.GetType()); }
+		[NotNull]
+		public static string ControllerName([NotNull] this IHttpController thisValue) { return IHttpControllerHelper.ControllerName(thisValue.GetType()); }
 	}
 }

@@ -12,7 +12,8 @@ namespace asm.Extensions
 
 		public static bool IsBOM([NotNull] this Encoding thisValue) { return thisValue.WebName.IsSame("UTF-16"); }
 
-		[NotNull] public static Encoding GetWebEncoding([NotNull] this Encoding thisValue) { return GetWebEncoding(thisValue, IsBigEndian(thisValue), IsBOM(thisValue)); }
+		[NotNull]
+		public static Encoding GetWebEncoding([NotNull] this Encoding thisValue) { return GetWebEncoding(thisValue, IsBigEndian(thisValue), IsBOM(thisValue)); }
 
 		[NotNull]
 		public static Encoding GetWebEncoding([NotNull] this Encoding thisValue, bool bigEndian, bool bom)

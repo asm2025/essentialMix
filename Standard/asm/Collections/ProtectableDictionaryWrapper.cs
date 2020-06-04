@@ -21,7 +21,8 @@ namespace asm.Collections
 		[NotNull]
 		public new TSource Source => _source;
 
-		[NotNull] public static implicit operator TSource([NotNull] ProtectableDictionaryWrapper<TSource> wrapper) { return wrapper.Source; }
+		[NotNull]
+		public static implicit operator TSource([NotNull] ProtectableDictionaryWrapper<TSource> wrapper) { return wrapper.Source; }
 	}
 
 	[Serializable]
@@ -40,6 +41,7 @@ namespace asm.Collections
 		[NotNull]
 		public new TSource Source => _source;
 
-		[NotNull] public static implicit operator TSource([NotNull] ProtectableDictionaryWrapper<TSource, TKey, TValue> wrapper) { return wrapper.Source; }
+		[NotNull]
+		public static implicit operator TSource([NotNull] ProtectableDictionaryWrapper<TSource, TKey, TValue> wrapper) { return wrapper.Source; }
 	}
 }

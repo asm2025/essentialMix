@@ -7,7 +7,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Version>10.0.0.0</Version>
 		<Copyright>Copyright © 2008-2020</Copyright>
-		<FileVersion>20.6.1.1</FileVersion>
+		<FileVersion>20.6.4.4</FileVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
 		<PackageTags>utilities, tools, extensions, helpers, Json</PackageTags>

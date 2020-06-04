@@ -25,9 +25,11 @@ namespace asm.Collections
 			throw new NotSupportedException();
 		}
 
-		[NotNull] protected override string GetName() { return $"{Index}"; }
+		[NotNull]
+		protected override string GetName() { return $"{Index}"; }
 
-		[NotNull] protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
+		[NotNull]
+		protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
 
 		protected TObservable TypeDescriptorSource { get; }
 		protected int Index { get; }

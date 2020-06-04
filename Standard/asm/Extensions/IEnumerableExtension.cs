@@ -617,7 +617,8 @@ namespace asm.Extensions
 			return sb.ToString();
 		}
 
-		[NotNull] public static string ToString<T>([NotNull] this IEnumerable<T> thisValue, char separator) { return ToString(thisValue, separator.ToString()); }
+		[NotNull]
+		public static string ToString<T>([NotNull] this IEnumerable<T> thisValue, char separator) { return ToString(thisValue, separator.ToString()); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]

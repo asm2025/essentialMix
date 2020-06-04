@@ -52,7 +52,8 @@ namespace asm.Extensions
 			return thisValue;
 		}
 
-		[NotNull] public static StringBuilder Append<TKey, TValue>([NotNull] this StringBuilder thisValue, KeyValuePair<TKey, TValue> pair) { return thisValue.Append(pair.ToString('=')); }
+		[NotNull]
+		public static StringBuilder Append<TKey, TValue>([NotNull] this StringBuilder thisValue, KeyValuePair<TKey, TValue> pair) { return thisValue.Append(pair.ToString('=')); }
 
 		[NotNull]
 		public static StringBuilder Append<TKey, TValue>([NotNull] this StringBuilder thisValue, KeyValuePair<TKey, TValue> pair, char group)
@@ -78,7 +79,8 @@ namespace asm.Extensions
 			return thisValue.Separator(group).Append(pair.ToString(separator));
 		}
 
-		[NotNull] public static StringBuilder Append([NotNull] this StringBuilder thisValue, DictionaryEntry pair) { return thisValue.Append(pair.ToString('=')); }
+		[NotNull]
+		public static StringBuilder Append([NotNull] this StringBuilder thisValue, DictionaryEntry pair) { return thisValue.Append(pair.ToString('=')); }
 
 		[NotNull]
 		public static StringBuilder Append([NotNull] this StringBuilder thisValue, DictionaryEntry pair, char group)
@@ -1134,7 +1136,8 @@ namespace asm.Extensions
 			});
 		}
 
-		[NotNull] public static StringBuilder Left([NotNull] this StringBuilder thisValue, int length = -1) { return thisValue.Substring(0, length); }
+		[NotNull]
+		public static StringBuilder Left([NotNull] this StringBuilder thisValue, int length = -1) { return thisValue.Substring(0, length); }
 
 		[NotNull]
 		public static StringBuilder Right([NotNull] this StringBuilder thisValue, int length = -1)
@@ -1146,7 +1149,8 @@ namespace asm.Extensions
 				: thisValue.Substring(thisValue.Length - length, length);
 		}
 
-		[NotNull] public static StringBuilder PadLeft([NotNull] this StringBuilder thisValue, int totalWidth) { return PadLeft(thisValue, totalWidth, ' '); }
+		[NotNull]
+		public static StringBuilder PadLeft([NotNull] this StringBuilder thisValue, int totalWidth) { return PadLeft(thisValue, totalWidth, ' '); }
 
 		[NotNull]
 		public static StringBuilder PadLeft([NotNull] this StringBuilder thisValue, int totalWidth, char paddingChar)
@@ -1156,7 +1160,8 @@ namespace asm.Extensions
 						: thisValue.Insert(0, new string(paddingChar, totalWidth - thisValue.Length));
 		}
 
-		[NotNull] public static StringBuilder PadRight([NotNull] this StringBuilder thisValue, int totalWidth) { return PadRight(thisValue, totalWidth, ' '); }
+		[NotNull]
+		public static StringBuilder PadRight([NotNull] this StringBuilder thisValue, int totalWidth) { return PadRight(thisValue, totalWidth, ' '); }
 
 		[NotNull]
 		public static StringBuilder PadRight([NotNull] this StringBuilder thisValue, int totalWidth, char paddingChar)
@@ -1166,7 +1171,8 @@ namespace asm.Extensions
 						: thisValue.Append(new string(paddingChar, totalWidth - thisValue.Length));
 		}
 
-		[NotNull] public static StringBuilder Remove([NotNull] this StringBuilder thisValue, char remove) { return Remove(thisValue, 0, thisValue.Length, remove); }
+		[NotNull]
+		public static StringBuilder Remove([NotNull] this StringBuilder thisValue, char remove) { return Remove(thisValue, 0, thisValue.Length, remove); }
 
 		[NotNull]
 		public static StringBuilder Remove([NotNull] this StringBuilder thisValue, int startIndex, char remove)
@@ -1191,7 +1197,8 @@ namespace asm.Extensions
 			return thisValue;
 		}
 
-		[NotNull] public static StringBuilder Remove([NotNull] this StringBuilder thisValue, [NotNull] params char[] remove) { return Remove(thisValue, 0, thisValue.Length, remove); }
+		[NotNull]
+		public static StringBuilder Remove([NotNull] this StringBuilder thisValue, [NotNull] params char[] remove) { return Remove(thisValue, 0, thisValue.Length, remove); }
 
 		[NotNull]
 		public static StringBuilder Remove([NotNull] this StringBuilder thisValue, int startIndex, [NotNull] params char[] remove)

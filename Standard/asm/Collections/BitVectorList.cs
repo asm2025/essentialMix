@@ -84,7 +84,8 @@ namespace asm.Collections
 						: new BitVectorList(value);
 		}
 
-		[NotNull] public static explicit operator byte[](BitVectorList value) { return value?.ToByteArray() ?? Array.Empty<byte>(); }
+		[NotNull]
+		public static explicit operator byte[](BitVectorList value) { return value?.ToByteArray() ?? Array.Empty<byte>(); }
 
 		public static explicit operator BitVectorList(bool[] value)
 		{
@@ -106,7 +107,8 @@ namespace asm.Collections
 			return bits;
 		}
 
-		[NotNull] public static explicit operator string (BitVectorList value) { return value?.ToString() ?? string.Empty; }
+		[NotNull]
+		public static explicit operator string (BitVectorList value) { return value?.ToString() ?? string.Empty; }
 
 		public new BitVector this[int index]
 		{
@@ -120,9 +122,11 @@ namespace asm.Collections
 
 		public override string ToString() { return _toString ??= ToString(this); }
 
-		[NotNull] public string ToString(char separator) { return ToString(this, Mode, separator); }
+		[NotNull]
+		public string ToString(char separator) { return ToString(this, Mode, separator); }
 
-		[NotNull] public string ToString(BitVectorMode mode, char separator = '\0') { return ToString(this, mode, separator); }
+		[NotNull]
+		public string ToString(BitVectorMode mode, char separator = '\0') { return ToString(this, mode, separator); }
 
 		public new void Add(BitVector item)
 		{
@@ -484,7 +488,8 @@ namespace asm.Collections
 			return value.All(c => validationFunction(c));
 		}
 
-		[NotNull] public static string ToString([NotNull] BitVectorList list, char? separator = null) { return ToString(list, list.Mode, separator); }
+		[NotNull]
+		public static string ToString([NotNull] BitVectorList list, char? separator = null) { return ToString(list, list.Mode, separator); }
 
 		[NotNull]
 		public static string ToString([NotNull] ICollection<BitVector> collection, BitVectorMode mode, char? separator = null)

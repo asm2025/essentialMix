@@ -29,7 +29,8 @@ namespace asm.Numeric
 {
     internal class UInt16NumericProvider : INumericProvider<ushort>
     {
-        [NotNull] public string ToHexadecimalString(ushort value) { return value.ToString("X4"); }
+        [NotNull]
+        public string ToHexadecimalString(ushort value) { return value.ToString("X4"); }
 
 		public string ToDecimalString(ushort value) { return value.ToString(); }
 

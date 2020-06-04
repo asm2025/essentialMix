@@ -177,7 +177,8 @@ namespace asm.Drawing.Helpers
 			return Crop(value, destRect);
 		}
 
-		[NotNull] public static Bitmap CreateGreyscaleImage(Size size) { return CreateGreyscaleImage(size.Width, size.Height); }
+		[NotNull]
+		public static Bitmap CreateGreyscaleImage(Size size) { return CreateGreyscaleImage(size.Width, size.Height); }
 		[NotNull]
 		public static Bitmap CreateGreyscaleImage(int width, int height)
 		{
