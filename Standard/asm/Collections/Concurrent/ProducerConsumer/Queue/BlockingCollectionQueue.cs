@@ -139,7 +139,6 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 				{
 					while (_queue.TryTake(out T item, TimeSpanHelper.MINIMUM_SCHEDULE, Token) && !IsDisposed && !Token.IsCancellationRequested)
 					{
-						if (item == null) continue;
 						Run(item);
 						if (IsDisposed || Token.IsCancellationRequested) break;
 					}
@@ -149,7 +148,6 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 
 				while (_queue.TryTake(out T item, TimeSpanHelper.MINIMUM_SCHEDULE, Token) && !IsDisposed && !Token.IsCancellationRequested)
 				{
-					if (item == null) continue;
 					Run(item);
 					if (IsDisposed || Token.IsCancellationRequested) break;
 				}

@@ -166,7 +166,6 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 						while (_queue.Count > 0 && n < tasks.Length && !IsDisposed && !Token.IsCancellationRequested)
 						{
 							T item = _queue.Dequeue();
-							if (item == null) continue;
 							tasks[n++] = Task.Run(() => Run(item), Token).ConfigureAwait();
 						}
 					}

@@ -176,7 +176,6 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 						item = _queue.Dequeue();
 					}
 
-					if (item == null) continue;
 					if (IsDisposed || Token.IsCancellationRequested) return;
 					Run(item);
 				}
@@ -214,8 +213,8 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 				if (!CompleteMarked || _countdown.CurrentCount > 1) return;
 			}
 
-			_countdown.SignalAll();
 			OnWorkCompleted(EventArgs.Empty);
+			_countdown.SignalAll();
 		}
 	}
 }

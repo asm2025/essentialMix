@@ -1041,7 +1041,7 @@ namespace TestApp
 			// change this to true to use 1 thread only for debugging
 			const bool LIMIT_THREADS = false;
 
-			int len = RNGRandomHelper.Next(100, 150);
+			int len = RNGRandomHelper.Next(1000, 5000);
 			int[] values = GetRandomIntegers(len);
 			int timeout = RNGRandomHelper.Next(0, 1);
 			int maximumThreads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
@@ -1050,7 +1050,7 @@ namespace TestApp
 				Console.Write(", {0}", e);
 				return TaskResult.Success;
 			};
-			Queue<ThreadQueueMode> modes = new Queue<ThreadQueueMode>(new [] { ThreadQueueMode.Mutex } /*EnumHelper<ThreadQueueMode>.GetValues()*/);
+			Queue<ThreadQueueMode> modes = new Queue<ThreadQueueMode>(EnumHelper<ThreadQueueMode>.GetValues());
 
 			while (modes.Count > 0)
 			{
