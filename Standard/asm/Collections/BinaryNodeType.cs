@@ -1,10 +1,10 @@
-﻿using System;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 
 namespace asm.Collections
 {
 	public enum BinaryNodeType : byte
 	{
+		None,
 		Root,
 		Left,
 		Right
@@ -15,10 +15,13 @@ namespace asm.Collections
 		public static BinaryNodeType NodeType<TNode, T>([NotNull] this LinkedBinaryNode<TNode, T> thisValue, LinkedBinaryNode<TNode, T> parent)
 			where TNode : LinkedBinaryNode<TNode, T>
 		{
-			if (parent == null) return BinaryNodeType.Root;
-			if (ReferenceEquals(parent.Left, thisValue)) return BinaryNodeType.Left;
-			if (ReferenceEquals(parent.Right, thisValue)) return BinaryNodeType.Right;
-			throw new ArgumentException("Node has unknown relationship to the parent.", nameof(parent));
+			return parent == null
+						? BinaryNodeType.Root
+						: ReferenceEquals(parent.Left, thisValue)
+							? BinaryNodeType.Left
+							: ReferenceEquals(parent.Right, thisValue)
+								? BinaryNodeType.Right
+								: BinaryNodeType.None;
 		}
 	}
 }

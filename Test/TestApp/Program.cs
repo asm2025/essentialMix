@@ -55,7 +55,7 @@ namespace TestApp
 
 			//TestHeapElementAt();
 
-			TestThreadQueue();
+			//TestThreadQueue();
 
 			ConsoleHelper.Pause();
 		}
@@ -742,6 +742,7 @@ namespace TestApp
 			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, int[] array)
 				where TNode : LinkedBinaryNode<TNode, int>
 			{
+				Console.WriteLine();
 				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
 				tree.Add(array);
 
@@ -821,6 +822,7 @@ namespace TestApp
 			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree1, LinkedBinaryTree<TNode, int> tree2, int[] array)
 				where TNode : LinkedBinaryNode<TNode, int>
 			{
+				Console.WriteLine();
 				Console.WriteLine($"Testing {tree1.GetType().Name} and {tree1.GetType().Name}...".BrightGreen());
 				tree1.Add(array);
 				tree2.Add(array);

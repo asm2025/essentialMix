@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
+using System.Text;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Patterns.Collections;
@@ -602,6 +604,102 @@ namespace asm.Collections
 			_version++;
 			// Return new root
 			return newRoot;
+		}
+	}
+
+	public static class RedBlackTreeExtension
+	{
+		public static string ToString<T>([NotNull] this RedBlackTree<T> thisValue, Orientation orientation, bool diagnosticInfo = false)
+		{
+			if (thisValue.Root == null) return string.Empty;
+			return orientation switch
+			{
+				Orientation.Horizontal => Horizontally(thisValue, diagnosticInfo),
+				Orientation.Vertical => Vertically(thisValue, diagnosticInfo),
+				_ => throw new ArgumentOutOfRangeException(nameof(orientation), orientation, null)
+			};
+
+			static string Horizontally(RedBlackTree<T> tree, bool diagnostic)
+			{
+				const string STR_BLANK = "    ";
+				const string STR_EXT = "│   ";
+				const string STR_CONNECTOR = "─── ";
+				const string STR_CONNECTOR_L = "└── ";
+				const string STR_CONNECTOR_R = "┌── ";
+
+				StringBuilder sb = new StringBuilder();
+				Stack<string> connectors = new Stack<string>();
+				tree.Iterate(tree.Root, TraverseMethod.InOrder, HorizontalFlow.RightToLeft, (e, depth) =>
+				{
+					connectors.Push(diagnostic
+										? e.ToString(depth)
+										: e.ToString());
+
+					if (e.IsRight) connectors.Push(STR_CONNECTOR_R);
+					else if (e.IsLeft) connectors.Push(STR_CONNECTOR_L);
+					else connectors.Push(STR_CONNECTOR);
+
+					while (e.Parent != null)
+					{
+						if (e.IsLeft && e.Parent.IsRight || e.IsRight && e.Parent.IsLeft) connectors.Push(STR_EXT);
+						else connectors.Push(STR_BLANK);
+
+						e = e.Parent;
+					}
+
+					while (connectors.Count > 1)
+						sb.Append(connectors.Pop());
+
+					sb.AppendLine(connectors.Pop());
+				});
+
+				return sb.ToString();
+			}
+
+			static string Vertically(RedBlackTree<T> tree, bool diagnostic)
+			{
+				const char C_BLANK = ' ';
+				const char C_EXT = '─';
+				const char C_CONNECTOR_L = '┌';
+				const char C_CONNECTOR_R = '┐';
+
+				int distance = 0;
+				IDictionary<int, StringBuilder> lines = new Dictionary<int, StringBuilder>();
+				tree.Iterate(tree.Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, (e, depth) =>
+				{
+					StringBuilder line = lines.GetOrAdd(depth);
+
+					if (line.Length > 0 && line[line.Length - 1] == C_CONNECTOR_L) line.Append(C_EXT, distance - line.Length);
+					else line.Append(C_BLANK, distance - line.Length);
+
+					if (depth > 0)
+					{
+						StringBuilder prevLine = lines.GetOrAdd(depth - 1);
+
+						if (e.IsLeft)
+						{
+							prevLine.Append(C_BLANK, distance - prevLine.Length);
+							if (line.Length > 0) prevLine.Append(C_BLANK);
+							prevLine.Append(C_CONNECTOR_L);
+						}
+						else
+						{
+							prevLine.Append(C_BLANK);
+							prevLine.Append(C_EXT, distance - prevLine.Length + 1);
+							prevLine.Append(C_CONNECTOR_R);
+						}
+					}
+
+					if (line.Length > 0) line.Append(C_BLANK);
+					line.Append(diagnostic
+									? e.ToString(depth)
+									: e.ToString());
+					distance = line.Length;
+				});
+
+				return string.Join(Environment.NewLine, lines.OrderBy(e => e.Key)
+															.Select(e => e.Value));
+			}
 		}
 	}
 }

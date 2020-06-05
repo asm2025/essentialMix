@@ -60,14 +60,14 @@ namespace asm.Collections
 			}
 
 			// find a parent
-			LinkedBinaryNode<T> parent, next = Root;
+			LinkedBinaryNode<T> parent = null, next = Root;
 			//Stack<(LinkedBinaryNode<T> Parent, LinkedBinaryNode<T> Node)> stack = new Stack<(LinkedBinaryNode<T> Parent, LinkedBinaryNode<T> Node)>();
-			Stack<LinkedBinaryNode<T>> stack = new Stack<LinkedBinaryNode<T>>();
+			Stack<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)> stack = new Stack<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)>();
 
 			do
 			{
+				stack.Push((next, parent));
 				parent = next;
-				stack.Push(parent);
 				next = Comparer.IsLessThan(value, next.Value)
 							? next.Left
 							: next.Right;
@@ -82,16 +82,16 @@ namespace asm.Collections
 			if (Comparer.IsLessThan(value, parent.Value)) parent.Left = node;
 			else parent.Right = node;
 
-			Queue<LinkedBinaryNode<T>> unbalancedNodes = new Queue<LinkedBinaryNode<T>>();
+			Queue<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)> unbalancedNodes = new Queue<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)>();
 
 			// update parents and find unbalanced parents in the changed nodes along the way
 			// this has the same effect as the recursive call but only it's iterative now
 			while (stack.Count > 0)
 			{
-				node = stack.Pop();
-				SetHeight(node);
-				if (IsBalanced(node)) continue;
-				unbalancedNodes.Enqueue(node);
+				(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent) tuple = stack.Pop();
+				SetHeight(tuple.Node);
+				if (IsBalanced(tuple.Node)) continue;
+				unbalancedNodes.Enqueue(tuple);
 			}
 
 			Count++;
@@ -99,10 +99,10 @@ namespace asm.Collections
 
 			while (unbalancedNodes.Count > 0)
 			{
-				node = unbalancedNodes.Dequeue();
+				(node, parent) = unbalancedNodes.Dequeue();
 				// check again if status changed
 				if (IsBalanced(node)) continue;
-				Balance(node);
+				Balance(node, parent);
 			}
 		}
 
@@ -113,12 +113,14 @@ namespace asm.Collections
 
 			// find the node
 			int cmp;
-			LinkedBinaryNode<T> node = Root;
-			Stack<LinkedBinaryNode<T>> stack = new Stack<LinkedBinaryNode<T>>();
+			LinkedBinaryNode<T> grandParent = null, parent = null, node = Root;
+			Stack<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)> stack = new Stack<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)>();
 
 			while (node != null && (cmp = Comparer.Compare(value, node.Value)) != 0)
 			{
-				stack.Push(node);
+				stack.Push((node, parent));
+				grandParent = parent;
+				parent = node;
 				node = cmp < 0
 							? node.Left
 							: node.Right;
@@ -126,7 +128,7 @@ namespace asm.Collections
 
 			if (node == null || !Comparer.IsEqual(value, node.Value)) return false;
 
-			LinkedBinaryNode<T> parent = node.Parent, child;
+			LinkedBinaryNode<T> child;
 
 			// case 1: node has no right child
 			if (node.Right == null)
@@ -138,7 +140,7 @@ namespace asm.Collections
 			{
 				// move the left to the right child's left
 				node.Right.Left = node.Left;
-				stack.Push(node.Right);
+				stack.Push((node.Right, node));
 				child = node.Right;
 			}
 			// case 3: node has a right child that has a left child
@@ -151,7 +153,7 @@ namespace asm.Collections
 				while (leftmost.Left != null)
 				{
 					leftMostParent = leftmost;
-					stack.Push(leftMostParent);
+					stack.Push((leftmost.Left, leftmost));
 					leftmost = leftMostParent.Left;
 				}
 
@@ -160,38 +162,38 @@ namespace asm.Collections
 				// adjust the left-most child nodes
 				leftmost.Left = node.Left;
 				leftmost.Right = node.Right;
-				stack.Push(leftmost.Left);
-				stack.Push(leftmost.Right);
+				stack.Push((leftmost.Left, leftmost));
+				stack.Push((leftmost.Right, leftmost));
 				child = leftmost;
 			}
 
 			if (parent == null)
 			{
 				Root = child;
-				if (child != null) stack.Push(child);
+				if (child != null) stack.Push((child, null));
 			}
 			else if (Comparer.IsLessThan(node.Value, parent.Value))
 			{
 				// if node < parent, move the left to the parent's left
 				parent.Left = child;
-				stack.Push(parent);
+				stack.Push((parent, grandParent));
 			}
 			else
 			{
 				// else, move the left to the parent's right
 				parent.Right = child;
-				stack.Push(parent);
+				stack.Push((parent, grandParent));
 			}
 
-			Queue<LinkedBinaryNode<T>> unbalancedNodes = new Queue<LinkedBinaryNode<T>>();
+			Queue<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)> unbalancedNodes = new Queue<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)>();
 
 			// update nodes
 			while (stack.Count > 0)
 			{
-				node = stack.Pop();
-				SetHeight(node);
-				if (IsBalanced(node)) continue;
-				unbalancedNodes.Enqueue(node);
+				(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent) tuple = stack.Pop();
+				SetHeight(tuple.Node);
+				if (IsBalanced(tuple.Node)) continue;
+				unbalancedNodes.Enqueue(tuple);
 			}
 
 			Count--;
@@ -199,10 +201,10 @@ namespace asm.Collections
 
 			while (unbalancedNodes.Count > 0)
 			{
-				node = unbalancedNodes.Dequeue();
+				(node, parent) = unbalancedNodes.Dequeue();
 				// check again if status changed
 				if (IsBalanced(node)) continue;
-				Balance(node);
+				Balance(node, parent);
 			}
 
 			return true;

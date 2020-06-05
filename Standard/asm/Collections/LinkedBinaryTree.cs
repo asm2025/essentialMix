@@ -3082,191 +3082,6 @@ namespace asm.Collections
 
 	public static class LinkedBinaryTreeExtension
 	{
-		#region This implementation works without parent node pointer
-		//public static string ToString<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, Orientation orientation, bool diagnosticInfo = false)
-		//	where TNode : LinkedBinaryNode<TNode, T>
-		//{
-		//	if (thisValue.Root == null) return string.Empty;
-		//	return orientation switch
-		//	{
-		//		Orientation.Horizontal => Horizontally(thisValue, diagnosticInfo),
-		//		Orientation.Vertical => Vertically(thisValue, diagnosticInfo),
-		//		_ => throw new ArgumentOutOfRangeException(nameof(orientation), orientation, null)
-		//	};
-
-		//	static string Horizontally(LinkedBinaryTree<TNode, T> tree, bool diagnostic)
-		//	{
-		//		const string STR_BLANK = "    ";
-		//		const string STR_EXT = "│   ";
-		//		const string STR_CONNECTOR = "─── ";
-		//		const string STR_CONNECTOR_R = "└── ";
-		//		const string STR_CONNECTOR_L = "┌── ";
-
-		//		/*
-		//		 * Will use a little bit of a strange structure and InOrder traversal.
-		//		 * For each node, a list of all its parent is needed up to the root.
-		//		 * Because BinarySearchTree (or AVLTree) don't usually store a parent
-		//		 * node pointer, and apparently it's needed only in this situation, will
-		//		 * store this list unless a better alternative is found.
-		//		 */
-		//		StringBuilder sb = new StringBuilder();
-		//		Stack<string> connectors = new Stack<string>();
-
-		//		// Left-Root-Right (Stack)
-		//		Stack<(TNode Node, IList<TNode> Parents)> stack = new Stack<(TNode Node, IList<TNode> Parents)>();
-		//		int version = tree._version;
-		//		// Start at the root
-		//		(TNode Node, IList<TNode> Parents) current = (tree.Root, null);
-
-		//		while (current.Node != null || stack.Count > 0)
-		//		{
-		//			if (version != tree._version) throw new VersionChangedException();
-
-		//			if (current.Node != null)
-		//			{
-		//				stack.Push(current);
-
-		//				// Navigate left
-		//				if (current.Node.Left != null)
-		//				{
-		//					IList<TNode> parents = new List<TNode>(current.Parents ?? Enumerable.Empty<TNode>())
-		//					{
-		//						current.Node
-		//					};
-		//					current = (current.Node.Left, parents);
-		//				}
-		//				else
-		//				{
-		//					current = (null, null);
-		//				}
-		//			}
-		//			else
-		//			{
-		//				// visit the next queued node
-		//				current = stack.Pop();
-		//				connectors.Push(current.Node.ToString(current.Parents?.Count ?? 0, diagnostic));
-
-		//				TNode parent = null;
-		//				if (current.Parents != null && current.Parents.Count > 0) parent = current.Parents[current.Parents.Count - 1];
-
-		//				BinaryNodeType nodeType = current.Node.NodeType(parent);
-
-		//				switch (nodeType)
-		//				{
-		//					case BinaryNodeType.Root:
-		//						connectors.Push(STR_CONNECTOR);
-		//						break;
-		//					case BinaryNodeType.Left:
-		//						connectors.Push(STR_CONNECTOR_L);
-		//						break;
-		//					case BinaryNodeType.Right:
-		//						connectors.Push(STR_CONNECTOR_R);
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException();
-		//				}
-
-		//				if (current.Parents != null)
-		//				{
-		//					IList<TNode> parents = current.Parents;
-		//					TNode node = current.Node;
-
-		//					for (int i = parents.Count - 1; i >= 0; i--)
-		//					{
-		//						parent = parents[i];
-		//						TNode grandParent = i > 0
-		//												? parents[i - 1]
-		//												: null;
-		//						nodeType = node.NodeType(parent);
-		//						BinaryNodeType parentNodeType = grandParent == null
-		//															? BinaryNodeType.Root
-		//															: parent.NodeType(grandParent);
-
-		//						/*
-		//						 * if (node is left and its parent is right) or (node is right and its parent is left), add STR_EXT
-		//						 */
-		//						if (nodeType == BinaryNodeType.Left && parentNodeType == BinaryNodeType.Right ||
-		//							nodeType == BinaryNodeType.Right && parentNodeType == BinaryNodeType.Left)
-		//						{
-		//							connectors.Push(STR_EXT);
-		//						}
-		//						else
-		//						{
-		//							connectors.Push(STR_BLANK);
-		//						}
-
-		//						node = parent;
-		//					}
-		//				}
-
-		//				while (connectors.Count > 1) 
-		//					sb.Append(connectors.Pop());
-
-		//				sb.AppendLine(connectors.Pop());
-
-		//				// Navigate right
-		//				if (current.Node.Right != null)
-		//				{
-		//					IList<TNode> parents = new List<TNode>(current.Parents ?? Enumerable.Empty<TNode>())
-		//					{
-		//						current.Node
-		//					};
-		//					current = (current.Node.Right, parents);
-		//				}
-		//				else
-		//				{
-		//					current = (null, null);
-		//				}
-		//			}
-		//		}
-
-		//		return sb.ToString();
-		//	}
-
-		//	static string Vertically(LinkedBinaryTree<TNode, T> tree, bool diagnostic)
-		//	{
-		//		const char C_BLANK = ' ';
-		//		const char C_EXT = '─';
-		//		const char C_CONNECTOR_L = '┌';
-		//		const char C_CONNECTOR_R = '┐';
-
-		//		int distance = 0;
-		//		IDictionary<int, StringBuilder> lines = new Dictionary<int, StringBuilder>();
-		//		tree.Iterate(tree.Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, (node, parent, depth) =>
-		//		{
-		//			StringBuilder line = lines.GetOrAdd(depth);
-
-		//			if (line.Length > 0 && line[line.Length - 1] == C_CONNECTOR_L) line.Append(C_EXT, distance - line.Length);
-		//			else line.Append(C_BLANK, distance - line.Length);
-
-		//			if (depth > 0)
-		//			{
-		//				StringBuilder prevLine = lines.GetOrAdd(depth - 1);
-
-		//				if (ReferenceEquals(parent.Left /* parent is guaranteed not to be null because depth > 0 */, node))
-		//				{
-		//					prevLine.Append(C_BLANK, distance - prevLine.Length);
-		//					if (line.Length > 0) prevLine.Append(C_BLANK);
-		//					prevLine.Append(C_CONNECTOR_L);
-		//				}
-		//				else
-		//				{
-		//					prevLine.Append(C_BLANK);
-		//					prevLine.Append(C_EXT, distance - prevLine.Length + 1);
-		//					prevLine.Append(C_CONNECTOR_R);
-		//				}
-		//			}
-
-		//			if (line.Length > 0) line.Append(C_BLANK);
-		//			line.Append(node.ToString(depth, diagnostic));
-		//			distance = line.Length;
-		//		});
-
-		//		return string.Join(Environment.NewLine, lines.OrderBy(e => e.Key).Select(e => e.Value));
-		//	}
-		//}
-		#endregion
-
 		public static string ToString<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, Orientation orientation, bool diagnosticInfo = false)
 			where TNode : LinkedBinaryNode<TNode, T>
 		{
@@ -3283,34 +3098,125 @@ namespace asm.Collections
 				const string STR_BLANK = "    ";
 				const string STR_EXT = "│   ";
 				const string STR_CONNECTOR = "─── ";
-				const string STR_CONNECTOR_L = "└── ";
-				const string STR_CONNECTOR_R = "┌── ";
+				const string STR_CONNECTOR_R = "└── ";
+				const string STR_CONNECTOR_L = "┌── ";
 
+				/*
+				 * Will use a little bit of a strange structure and InOrder traversal.
+				 * For each node, a list of all its parent is needed up to the root.
+				 * Because BinarySearchTree (or AVLTree) don't usually store a parent
+				 * node pointer, and apparently it's needed only in this situation, will
+				 * store this list unless a better alternative is found.
+				 */
 				StringBuilder sb = new StringBuilder();
 				Stack<string> connectors = new Stack<string>();
-				tree.Iterate(tree.Root, TraverseMethod.InOrder, HorizontalFlow.RightToLeft, (e, depth) =>
+				// Left-Root-Right (Stack)
+				Stack<(TNode Node, IList<TNode> Parents)> stack = new Stack<(TNode Node, IList<TNode> Parents)>();
+				int version = tree._version;
+				// Start at the root
+				(TNode Node, IList<TNode> Parents) current = (tree.Root, null);
+
+				while (current.Node != null || stack.Count > 0)
 				{
-					connectors.Push(diagnostic
-										? e.ToString(depth)
-										: e.ToString());
+					if (version != tree._version) throw new VersionChangedException();
 
-					if (e.IsRight) connectors.Push(STR_CONNECTOR_R);
-					else if (e.IsLeft) connectors.Push(STR_CONNECTOR_L);
-					else connectors.Push(STR_CONNECTOR);
-
-					while (e.Parent != null)
+					if (current.Node != null)
 					{
-						if (e.IsLeft && e.Parent.IsRight || e.IsRight && e.Parent.IsLeft) connectors.Push(STR_EXT);
-						else connectors.Push(STR_BLANK);
+						stack.Push(current);
 
-						e = e.Parent;
+						// Navigate left
+						if (current.Node.Left != null)
+						{
+							IList<TNode> parents = new List<TNode>(current.Parents ?? Enumerable.Empty<TNode>())
+							{
+								current.Node
+							};
+							current = (current.Node.Left, parents);
+						}
+						else
+						{
+							current = (null, null);
+						}
 					}
+					else
+					{
+						// visit the next queued node
+						current = stack.Pop();
+						connectors.Push(diagnostic
+											? current.Node.ToString(current.Parents?.Count ?? 0)
+											: current.Node.ToString());
 
-					while (connectors.Count > 1)
-						sb.Append(connectors.Pop());
+						TNode parent = null;
+						if (current.Parents != null && current.Parents.Count > 0) parent = current.Parents[current.Parents.Count - 1];
 
-					sb.AppendLine(connectors.Pop());
-				});
+						BinaryNodeType type = current.Node.NodeType(parent);
+
+						switch (type)
+						{
+							case BinaryNodeType.Root:
+								connectors.Push(STR_CONNECTOR);
+								break;
+							case BinaryNodeType.Left:
+								connectors.Push(STR_CONNECTOR_L);
+								break;
+							case BinaryNodeType.Right:
+								connectors.Push(STR_CONNECTOR_R);
+								break;
+							default:
+								throw new ArgumentOutOfRangeException();
+						}
+
+						if (current.Parents != null)
+						{
+							IList<TNode> parents = current.Parents;
+							TNode node = current.Node;
+
+							for (int i = parents.Count - 1; i >= 0; i--)
+							{
+								parent = parents[i];
+								TNode grandParent = i > 0
+														? parents[i - 1]
+														: null;
+								type = node.NodeType(parent);
+								BinaryNodeType parentType = grandParent == null
+																	? BinaryNodeType.Root
+																	: parent.NodeType(grandParent);
+
+								// if (node is left and its parent is right) or (node is right and its parent is left), add STR_EXT
+								if (type == BinaryNodeType.Left && parentType == BinaryNodeType.Right ||
+									type == BinaryNodeType.Right && parentType == BinaryNodeType.Left)
+								{
+									connectors.Push(STR_EXT);
+								}
+								else
+								{
+									connectors.Push(STR_BLANK);
+								}
+
+								node = parent;
+							}
+						}
+
+						while (connectors.Count > 1)
+							sb.Append(connectors.Pop());
+
+						sb.AppendLine(connectors.Pop());
+
+						// Navigate right
+						if (current.Node.Right != null)
+						{
+							IList<TNode> parents = new List<TNode>(current.Parents ?? Enumerable.Empty<TNode>())
+							{
+								current.Node
+							};
+							current = (current.Node.Right, parents);
+						}
+						else
+						{
+							current = (null, null);
+						}
+					}
+				}
 
 				return sb.ToString();
 			}
@@ -3322,42 +3228,68 @@ namespace asm.Collections
 				const char C_CONNECTOR_L = '┌';
 				const char C_CONNECTOR_R = '┐';
 
+				/*
+				 * Will use an InOrder traversal.
+				 * For each node, its parent is required with its BinaryNodeType. i.e. Root, Left, Right
+				 */
 				int distance = 0;
 				IDictionary<int, StringBuilder> lines = new Dictionary<int, StringBuilder>();
-				tree.Iterate(tree.Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, (e, depth) =>
+				// Left-Root-Right (Stack)
+				Stack<(TNode Node, BinaryNodeType Type, int Depth)> stack = new Stack<(TNode Node, BinaryNodeType Type, int Depth)>();
+				// Start at the root
+				(TNode Node, BinaryNodeType Type, int Depth) current = (tree.Root, BinaryNodeType.Root, 0);
+				int version = tree._version;
+
+				while (current.Node != null || stack.Count > 0)
 				{
-					StringBuilder line = lines.GetOrAdd(depth);
+					if (version != tree._version) throw new VersionChangedException();
 
-					if (line.Length > 0 && line[line.Length - 1] == C_CONNECTOR_L) line.Append(C_EXT, distance - line.Length);
-					else line.Append(C_BLANK, distance - line.Length);
-
-					if (depth > 0)
+					if (current.Node != null)
 					{
-						StringBuilder prevLine = lines.GetOrAdd(depth - 1);
-
-						if (e.IsLeft)
-						{
-							prevLine.Append(C_BLANK, distance - prevLine.Length);
-							if (line.Length > 0) prevLine.Append(C_BLANK);
-							prevLine.Append(C_CONNECTOR_L);
-						}
-						else
-						{
-							prevLine.Append(C_BLANK);
-							prevLine.Append(C_EXT, distance - prevLine.Length + 1);
-							prevLine.Append(C_CONNECTOR_R);
-						}
+						stack.Push(current);
+						// Navigate left
+						current = (current.Node.Left, BinaryNodeType.Left, current.Depth + 1);
 					}
+					else
+					{
+						// visit the next queued node
+						current = stack.Pop();
 
-					if (line.Length > 0) line.Append(C_BLANK);
-					line.Append(diagnostic
-									? e.ToString(depth)
-									: e.ToString());
-					distance = line.Length;
-				});
+						StringBuilder line = lines.GetOrAdd(current.Depth);
 
-				return string.Join(Environment.NewLine, lines.OrderBy(e => e.Key)
-															.Select(e => e.Value));
+						if (line.Length > 0 && line[line.Length - 1] == C_CONNECTOR_L) line.Append(C_EXT, distance - line.Length);
+						else line.Append(C_BLANK, distance - line.Length);
+						
+						if (current.Depth > 0)
+						{
+							StringBuilder prevLine = lines.GetOrAdd(current.Depth - 1);
+
+							if (current.Type == BinaryNodeType.Left)
+							{
+								prevLine.Append(C_BLANK, distance - prevLine.Length);
+								if (line.Length > 0) prevLine.Append(C_BLANK);
+								prevLine.Append(C_CONNECTOR_L);
+							}
+							else
+							{
+								prevLine.Append(C_BLANK);
+								prevLine.Append(C_EXT, distance - prevLine.Length + 1);
+								prevLine.Append(C_CONNECTOR_R);
+							}
+						}
+
+						if (line.Length > 0) line.Append(C_BLANK);
+						line.Append(diagnostic
+										? current.Node.ToString(current.Depth)
+										: current.Node.ToString());
+						distance = line.Length;
+
+						// Navigate right
+						current = (current.Node.Right, BinaryNodeType.Right, current.Depth + 1);
+					}
+				}
+
+				return string.Join(Environment.NewLine, lines.OrderBy(e => e.Key).Select(e => e.Value));
 			}
 		}
 	}
