@@ -12,18 +12,23 @@ namespace asm.Collections
 	/// <typeparam name="T">The element type of the tree</typeparam>
 	// Udemy - Code With Mosh - Data Structures & Algorithms part 2
 	// https://www.geeksforgeeks.org/types-of-tries/?ref=leftbar-rightbar
-	// https://www.geeksforgeeks.org/trie-memory-optimization-using-hash-map/
-	// https://stackoverflow.com/questions/39519288/which-is-a-better-implementation-to-implement-a-trie-nodes-children-array-or
-	// https://leetcode.com/problems/map-sum-pairs/discuss/394839/java-trie-implementations-using-both-hashmap-and-array
-	// https://www.techiedelight.com/memory-efficient-trie-implementation-using-map-insert-search-delete/
 	[ComVisible(false)]
 	[Serializable]
 	public class Trie<T>
 		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
 	{
+		/*
+		 * For a few entries, this will perform good but this will be heavy on memory for
+		 * millions of records, even when using an array or dictionary. An array with 26
+		 * (English alphabet without numbers) slots will be fast. In real world it's not
+		 * practical. A static trie with linked list might be better.
+		 *
+		 * https://www.geeksforgeeks.org/trie-memory-optimization-using-hash-map/
+		 * https://stackoverflow.com/questions/39519288/which-is-a-better-implementation-to-implement-a-trie-nodes-children-array-or
+		 * https://www.techiedelight.com/memory-efficient-trie-implementation-using-map-insert-search-delete/
+		 */
 		[DebuggerDisplay("{Value}, Count = {Count}")]
 		[Serializable]
-		// this is heavy on memory, even when using an array or dictionary. A static trie with linked list might be better.
 		protected sealed class Node : KeyedCollection<T, Node>, IComparable<Node>, IComparable, IEquatable<Node>
 		{
 			public Node(T value, IEqualityComparer<T> comparer)
@@ -164,6 +169,13 @@ namespace asm.Collections
 			do
 			{
 				(node, parent) = stack.Pop();
+
+				if (node.Count > 0)
+				{
+					node.EndOfToken = false;
+					break;
+				}
+
 				parent.Remove(node);
 			}
 			while (stack.Count > 0 && !parent.EndOfToken && parent.Count == 0);

@@ -59,7 +59,8 @@ namespace TestApp
 
 			//TestThreadQueue();
 
-			TestTrie();
+			//TestTrie();
+			TestTrieSimilarWordsRemoval();
 
 			ConsoleHelper.Pause();
 		}
@@ -1153,7 +1154,6 @@ namespace TestApp
 			bool more;
 			Trie<char> trie = new Trie<char>(CharComparer.InvariantCultureIgnoreCase);
 			ISet<string> values = new HashSet<string>();
-			Console.Clear();
 
 			do
 			{
@@ -1244,7 +1244,7 @@ namespace TestApp
 
 				if (!trie.Remove(token))
 				{
-					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					Console.WriteLine("Didn't remove a shit...!".BrightRed());
 					return;
 				}
 
@@ -1273,6 +1273,82 @@ namespace TestApp
 					if (!set.Add(value)) continue;
 					trie.Add(value);
 				}
+			}
+		}
+
+		private static void TestTrieSimilarWordsRemoval()
+		{
+			string[] values = {
+				"Car",
+				"Care",
+				"Can",
+				"Canada"
+			};
+			Trie<char> trie = new Trie<char>(CharComparer.InvariantCultureIgnoreCase);
+
+			Console.Clear();
+			Console.WriteLine("Adding similar words...");
+			Console.WriteLine("Words list: ".BrightBlack() + string.Join(", ", values));
+
+			foreach (string value in values)
+			{
+				trie.Add(value);
+			}
+
+			int results = 0;
+			string prefix = "car";
+			Console.WriteLine();
+			Console.WriteLine($"Test find '{prefix.BrightCyan().Underline()}'...");
+
+			foreach (IEnumerable<char> enumerable in trie.Find(prefix))
+			{
+				Console.WriteLine($"{++results}: " + string.Concat(enumerable));
+			}
+
+			if (results == 0)
+			{
+				Console.WriteLine("Didn't find a shit...!".BrightRed());
+				return;
+			}
+
+			string word = values[0];
+			Console.WriteLine();
+			Console.WriteLine($"Test remove '{word.BrightRed().Underline()}'");
+
+			if (!trie.Remove(word))
+			{
+				Console.WriteLine("Didn't remove a shit...!".BrightRed());
+				return;
+			}
+
+			results = 0;
+			Console.WriteLine($"Cool {"removed".BrightGreen()}.");
+			Console.WriteLine();
+			Console.WriteLine($"let's try to find the last prefix again: '{prefix.BrightCyan().Underline()}'");
+
+			foreach (IEnumerable<char> enumerable in trie.Find(prefix))
+			{
+				Console.WriteLine($"{++results}: " + string.Concat(enumerable));
+			}
+
+			word = values[values.Length - 1];
+			Console.WriteLine();
+			Console.WriteLine($"Test remove '{word.BrightRed().Underline()}'");
+
+			if (!trie.Remove(word))
+			{
+				Console.WriteLine("Didn't remove a shit...!".BrightRed());
+				return;
+			}
+
+			prefix = "ca";
+			results = 0;
+			Console.WriteLine();
+			Console.WriteLine($"Test find '{prefix.BrightCyan().Underline()}'...");
+
+			foreach (IEnumerable<char> enumerable in trie.Find(prefix))
+			{
+				Console.WriteLine($"{++results}: " + string.Concat(enumerable));
 			}
 		}
 
