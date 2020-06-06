@@ -4,9 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using asm.Collections;
 using asm.Collections.Concurrent.ProducerConsumer;
+using asm.Comparers;
 using asm.Exceptions;
 using asm.Extensions;
 using asm.Helpers;
@@ -56,6 +58,8 @@ namespace TestApp
 			//TestHeapElementAt();
 
 			//TestThreadQueue();
+
+			TestTrie();
 
 			ConsoleHelper.Pause();
 		}
@@ -808,9 +812,9 @@ namespace TestApp
 				Console.WriteLine();
 				Console.WriteLine("Testing RedBlackTree: ".BrightBlack() + string.Join(", ", values));
 				Console.WriteLine();
-				RedBlackTree<int> rbtree1 = new RedBlackTree<int>();
-				RedBlackTree<int> rbtree2 = new RedBlackTree<int>();
-				DoTheTest(rbtree1, rbtree2, values);
+				RedBlackTree<int> rbTree1 = new RedBlackTree<int>();
+				RedBlackTree<int> rbTree2 = new RedBlackTree<int>();
+				DoTheTest(rbTree1, rbTree2, values);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -994,14 +998,14 @@ namespace TestApp
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Heap<int> heap = new MaxHeap<int>();
-				DoTestHeap(heap, values, k);
+				DoTheTest(heap, values, k);
 
 				heap = new MinHeap<int>();
-				DoTestHeap(heap, values, k);
+				DoTheTest(heap, values, k);
 
 				Student[] students = GetRandomStudents(len);
 				PriorityQueue<double, Student> studentQueue = new PriorityQueue<double, Student>(e => e.Grade * -1);
-				DoTestPriorityQueue(studentQueue, students, k);
+				DoTheTest2(studentQueue, students, k);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -1010,7 +1014,7 @@ namespace TestApp
 			}
 			while (more);
 
-			static void DoTestHeap<T>(Heap<T> heap, T[] array, int k)
+			static void DoTheTest<T>(Heap<T> heap, T[] array, int k)
 			{
 				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
 				heap.Add(array);
@@ -1023,7 +1027,7 @@ namespace TestApp
 				Console.WriteLine();
 			}
 
-			static void DoTestPriorityQueue<TPriority, T>(PriorityQueue<TPriority, T> queue, T[] array, int k)
+			static void DoTheTest2<TPriority, T>(PriorityQueue<TPriority, T> queue, T[] array, int k)
 				where TPriority : struct, IComparable
 			{
 				Console.WriteLine($"Test adding ({queue.GetType()})...".BrightGreen());
@@ -1142,6 +1146,136 @@ namespace TestApp
 			}
 		}
 
+		private static void TestTrie()
+		{
+			const int MAX_LIST = 100;
+
+			bool more;
+			Trie<char> trie = new Trie<char>(CharComparer.InvariantCultureIgnoreCase);
+			ISet<string> values = new HashSet<string>();
+			Console.Clear();
+
+			do
+			{
+				Console.Clear();
+				Console.WriteLine();
+				if (values.Count == 0) AddWords(trie, values);
+				Console.WriteLine("Words list: ".BrightBlack() + string.Join(", ", values));
+
+				string word = values.PickRandom();
+				DoTheTest(trie, word, values);
+				
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				if (!more || values.Count >= MAX_LIST) continue;
+
+				Console.WriteLine();
+				Console.Write($"Would you like to add more words? {"[Y]".BrightGreen()} / {"any key".Dim()} ");
+				response = Console.ReadKey(true);
+				if (response.KeyChar != 'Y' && response.KeyChar != 'y') continue;
+				Console.WriteLine();
+				AddWords(trie, values);
+			}
+			while (more);
+
+			static void DoTheTest(Trie<char> trie, string token, ISet<string> values)
+			{
+				Console.WriteLine($"Test find '{token.BrightCyan().Underline()}'...");
+
+				if (!trie.Contains(token))
+				{
+					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					return;
+				}
+				
+				Console.WriteLine("Found...!".BrightGreen() + " Let's try all caps...");
+
+				if (!trie.Contains(token.ToUpperInvariant()))
+				{
+					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					return;
+				}
+
+				Console.WriteLine("Found...!".BrightGreen() + " Let's try words with a common prefix...");
+
+				string prefix = token;
+
+				if (prefix.Length > 1)
+				{
+					Match match = Regex.Match(prefix, @"^([\w\-]+)");
+					prefix = !match.Success || match.Value.Length == prefix.Length
+								? prefix.Left(prefix.Length / 2)
+								: match.Value;
+				}
+
+				Console.WriteLine($"Prefix: '{prefix.BrightCyan().Underline()}'");
+				int results = 0;
+
+				foreach (IEnumerable<char> enumerable in trie.Find(prefix))
+				{
+					Console.WriteLine($"{++results}: " + string.Concat(enumerable));
+				}
+
+				if (results == 0)
+				{
+					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					return;
+				}
+
+				int tries = 3;
+
+				while (prefix.Length > 1 && results < 2 && --tries > 0)
+				{
+					results = 0;
+					prefix = prefix.Left(prefix.Length / 2);
+					Console.WriteLine();
+					Console.WriteLine($"Results were too few, let's try another prefix: '{prefix.BrightCyan().Underline()}'");
+
+					foreach (IEnumerable<char> enumerable in trie.Find(prefix))
+					{
+						Console.WriteLine($"{++results}: " + string.Concat(enumerable));
+					}
+				}
+
+				Console.WriteLine();
+				Console.WriteLine($"Test remove '{token.BrightRed().Underline()}'");
+
+				if (!trie.Remove(token))
+				{
+					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					return;
+				}
+
+				values.Remove(token);
+				results = 0;
+				Console.WriteLine();
+				Console.WriteLine($"Cool {"removed".BrightGreen()}, let's try to find the last prefix again: '{prefix.BrightCyan().Underline()}'");
+
+				foreach (IEnumerable<char> enumerable in trie.Find(prefix))
+				{
+					Console.WriteLine($"{++results}: " + string.Concat(enumerable));
+				}
+
+				Console.WriteLine();
+				Console.WriteLine("Isn't that cool? :))");
+			}
+
+			static void AddWords(Trie<char> trie, ISet<string> set)
+			{
+				int len = RNGRandomHelper.Next(10, 20);
+				Console.WriteLine($"Generating {len} words: ".BrightGreen());
+				string[] newValues = GetRandomStrings(len);
+
+				foreach (string value in newValues)
+				{
+					if (!set.Add(value)) continue;
+					trie.Add(value);
+				}
+			}
+		}
+
 		private static void Title(string title)
 		{
 			Console.WriteLine();
@@ -1183,7 +1317,7 @@ namespace TestApp
 		private static string[] GetRandomStrings(int len = 0)
 		{
 			if (len < 1) len = RNGRandomHelper.Next(1, 12);
-			return __fakeGenerator.Value.Lorem.Words(len);
+			return __fakeGenerator.Value.Random.WordsArray(len);
 		}
 
 		private class Student

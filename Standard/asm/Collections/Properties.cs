@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	[Serializable]
-	public class Properties : ObservableKeyedCollection<string, IProperty>, IProperties
+	public class Properties : ObservableKeyedCollectionBase<string, IProperty>, IProperties
 	{
 		[NonSerialized] 
 		private SerializationInfo _siInfo;
@@ -57,24 +57,12 @@ namespace asm.Collections
 			_siInfo = null;
 		}
 
-		public override bool Remove(IProperty item)
-		{
-			if (item == null) throw new ArgumentNullException(nameof(item));
-			return !item.IsFixed && base.Remove(item);
-		}
-
-		public override bool Remove(string key)
-		{
-			IProperty item = base[key];
-			if (item == null || item.IsFixed) return false;
-			return base.Remove(key);
-		}
-
-		public override void RemoveAt(int index)
+		/// <inheritdoc />
+		protected override void RemoveItem(int index)
 		{
 			IProperty item = base[index];
 			if (item.IsFixed) return;
-			base.RemoveAt(index);
+			base.RemoveItem(index);
 		}
 
 		protected override void ClearItems()

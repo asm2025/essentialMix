@@ -6,15 +6,15 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	[Serializable]
-	public class ReadOnlyKeyedCollection<TKey, TValue> : IReadOnlyKeyedCollection<TKey, TValue>, IReadOnlyList<TValue>, IReadOnlyCollection<TValue>
+	public abstract class ReadOnlyKeyedCollectionBase<TKey, TValue> : IReadOnlyKeyedCollection<TKey, TValue>, IReadOnlyList<TValue>, IReadOnlyCollection<TValue>
 	{
-		public ReadOnlyKeyedCollection([NotNull] KeyedCollection<TKey, TValue> collection)
+		protected ReadOnlyKeyedCollectionBase([NotNull] KeyedCollectionBase<TKey, TValue> collection)
 		{
 			Collection = collection;
 		}
 
 		[NotNull]
-		protected KeyedCollection<TKey, TValue> Collection { get; }
+		protected KeyedCollectionBase<TKey, TValue> Collection { get; }
 
 		/// <inheritdoc />
 		IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() { return Collection.GetEnumerator(); }

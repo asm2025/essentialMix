@@ -12,7 +12,7 @@ namespace asm.Collections
 		bool Selected { get; set; }
 
 		[Browsable(false)]
-		IBrowsable Parent { get; }
+		Browsable Parent { get; }
 
 		[Browsable(false)]
 		Item.SubItemsCollection SubItems { get; }

@@ -319,7 +319,7 @@ namespace asm.Enumeration
 
 	internal class EnumMember<TEnum, TInt, TIntProvider> : EnumMember<TEnum>, IComparable<EnumMember<TEnum>>, IComparable<EnumMember>, IComparable
 		where TEnum : struct, Enum, IComparable
-		where TInt : struct, IComparable, IComparable<TInt>, IEquatable<TInt>, IConvertible
+		where TInt : struct, IComparable<TInt>, IComparable, IEquatable<TInt>, IConvertible
 		where TIntProvider : INumericProvider<TInt>, new()
 	{
 		internal EnumMember(EnumMember<TInt, TIntProvider> member)
@@ -352,7 +352,7 @@ namespace asm.Enumeration
 	}
 
 	internal class UntypedEnumMember<TInt, TIntProvider> : EnumMember, IComparable<UntypedEnumMember<TInt, TIntProvider>>, IEquatable<UntypedEnumMember<TInt, TIntProvider>>, IComparable<EnumMember>, IComparable
-		where TInt : struct, IComparable, IComparable<TInt>, IEquatable<TInt>, IConvertible
+		where TInt : struct, IComparable<TInt>, IComparable, IEquatable<TInt>, IConvertible
 		where TIntProvider : INumericProvider<TInt>, new()
 	{
 		internal UntypedEnumMember(EnumMember<TInt, TIntProvider> member)
@@ -385,7 +385,7 @@ namespace asm.Enumeration
 	// Putting the logic here as opposed to directly in EnumMember<TEnum, TInt, TIntProvider>
 	// reduces memory usage because it doesn't have the enum type as a generic type parameter.
 	internal sealed class EnumMember<TInt, TIntProvider> : IEnumMember, IConvertible
-		where TInt : struct, IComparable, IComparable<TInt>, IEquatable<TInt>, IConvertible
+		where TInt : struct, IComparable<TInt>, IComparable, IEquatable<TInt>, IConvertible
 		where TIntProvider : INumericProvider<TInt>, new()
 	{
 		private string _displayName;

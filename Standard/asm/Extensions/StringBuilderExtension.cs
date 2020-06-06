@@ -757,265 +757,292 @@ namespace asm.Extensions
 			return true;
 		}
 
-		public static StringBuilder Concat([NotNull] this StringBuilder thisValue, [NotNull] params object[] objects) { return Concat(thisValue, (IEnumerable<object>)objects); }
+		[NotNull]
+		public static StringBuilder Concat([NotNull] this StringBuilder thisValue, [NotNull] params object[] objects) { return Concat(thisValue, (IEnumerable)objects); }
 
+		[NotNull]
 		public static StringBuilder Concat([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable enumerable)
 		{
-			return enumerable.Cast<object>().Aggregate(thisValue, (builder, value) =>
+			foreach (object value in enumerable)
 			{
 				switch (value)
 				{
 					case null:
 						break;
 					case string s:
-						builder.Append(s);
+						thisValue.Append(s);
 						break;
 					case IEnumerable e:
-						Concat(builder, e);
+						Concat(thisValue, e);
 						break;
 					default:
-						builder.Append(value);
+						thisValue.Append(value);
 						break;
 				}
+			}
 
-				return builder;
-			});
+			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder Concat<T>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<T> enumerable)
 		{
-			return enumerable.Aggregate(thisValue, (builder, value) =>
-			{
-				switch (value)
-				{
-					case string s:
-						builder.Append(s);
-						break;
-					case IEnumerable<T> e:
-						Concat(builder, e);
-						break;
-					case IEnumerable e:
-						Concat(builder, e);
-						break;
-					default:
-						builder.Append(value);
-						break;
-				}
+			Type type = typeof(T);
 
-				return builder;
-			});
+			if (type == typeof(string))
+			{
+				foreach (T value in enumerable)
+				{
+					thisValue.Append(value);
+				}
+			}
+			else if (type.Implements<IEnumerable>())
+			{
+				foreach (T value in enumerable)
+				{
+					Concat(thisValue, value);
+				}
+			}
+			else
+			{
+				foreach (T value in enumerable)
+				{
+					thisValue.Append(value);
+				}
+			}
+
+			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder Concat<TKey, TValue>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<KeyValuePair<TKey, TValue>> enumerable, char group = '|')
 		{
-			return enumerable.Aggregate(thisValue, (builder, value) =>
+			foreach (KeyValuePair<TKey, TValue> pair in enumerable)
 			{
-				builder.Append(value, group);
-				return builder;
-			});
+				thisValue.Append(pair, group);
+			}
+
+			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder Concat<TKey, TValue>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<KeyValuePair<TKey, TValue>> enumerable, string group)
 		{
 			if (string.IsNullOrEmpty(group)) return Concat(thisValue, enumerable);
-			return enumerable.Aggregate(thisValue, (builder, value) =>
+
+			foreach (KeyValuePair<TKey, TValue> pair in enumerable)
 			{
-				builder.Append(value, group);
-				return builder;
-			});
+				thisValue.Append(pair, group);
+			}
+
+			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder ConcatFormat([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable enumerable, string format)
 		{
 			if (string.IsNullOrEmpty(format)) return Concat(thisValue, enumerable);
-			return enumerable.Cast<object>().Aggregate(thisValue, (builder, value) =>
+
+			foreach (object value in enumerable)
 			{
 				switch (value)
 				{
 					case null:
 						break;
 					case string s:
-						builder.AppendFormat(format, s);
+						thisValue.AppendFormat(format, s);
 						break;
 					case IEnumerable e:
-						ConcatFormat(builder, e, format);
+						ConcatFormat(thisValue, e, format);
 						break;
 					default:
-						builder.AppendFormat(format, value);
+						thisValue.AppendFormat(format, value);
 						break;
 				}
+			}
 
-				return builder;
-			});
+			return thisValue;
 		}
 
 		public static StringBuilder ConcatFormat([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable enumerable, string format, char group)
 		{
 			if (string.IsNullOrEmpty(format)) return Join(thisValue, enumerable, group);
-			return enumerable.Cast<object>().Aggregate(thisValue, (builder, value) =>
+
+			foreach (object value in enumerable)
 			{
 				switch (value)
 				{
 					case null:
 						break;
 					case string s:
-						builder.Separator(group).AppendFormat(format, s);
+						thisValue.Separator(group).AppendFormat(format, s);
 						break;
 					case IEnumerable e:
-						ConcatFormat(builder, e, format, group);
+						ConcatFormat(thisValue, e, format, group);
 						break;
 					default:
-						builder.Separator(group).AppendFormat(format, value);
+						thisValue.Separator(group).AppendFormat(format, value);
 						break;
 				}
+			}
 
-				return builder;
-			});
+			return thisValue;
 		}
 
 		public static StringBuilder ConcatFormat([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable enumerable, string format, string group)
 		{
 			if (string.IsNullOrEmpty(format)) return Join(thisValue, enumerable, group);
-			return enumerable.Cast<object>().Aggregate(thisValue, (builder, value) =>
+
+			foreach (object value in enumerable)
 			{
 				switch (value)
 				{
 					case null:
 						break;
 					case string s:
-						builder.Separator(group).AppendFormat(format, s);
+						thisValue.Separator(group).AppendFormat(format, s);
 						break;
 					case IEnumerable e:
-						ConcatFormat(builder, e, format, group);
+						ConcatFormat(thisValue, e, format, group);
 						break;
 					default:
-						builder.Separator(group).AppendFormat(format, value);
+						thisValue.Separator(group).AppendFormat(format, value);
 						break;
 				}
+			}
 
-				return builder;
-			});
+			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder ConcatFormat<T>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<T> enumerable, string format)
 		{
 			if (string.IsNullOrEmpty(format)) return Concat(thisValue, enumerable);
-			return enumerable.Aggregate(thisValue, (builder, value) =>
+
+			foreach (T value in enumerable)
 			{
 				switch (value)
 				{
 					case string s:
-						builder.AppendFormat(format, s);
+						thisValue.AppendFormat(format, s);
 						break;
 					case IEnumerable<T> e:
-						ConcatFormat(builder, e, format);
+						ConcatFormat(thisValue, e, format);
 						break;
 					case IEnumerable e:
-						ConcatFormat(builder, e, format);
+						ConcatFormat(thisValue, e, format);
 						break;
 					default:
-						builder.AppendFormat(format, value);
+						thisValue.AppendFormat(format, value);
 						break;
 				}
-
-				return builder;
-			});
+			}
+			
+			return thisValue;
 		}
 
 		public static StringBuilder ConcatFormat<T>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<T> enumerable, string format, char group)
 		{
 			if (string.IsNullOrEmpty(format)) return Join(thisValue, enumerable, group);
 
-			return enumerable.Aggregate(thisValue, (builder, value) =>
+			foreach (T value in enumerable)
 			{
 				switch (value)
 				{
 					case string s:
-						builder.Separator(group).AppendFormat(format, s);
+						thisValue.Separator(group).AppendFormat(format, s);
 						break;
 					case IEnumerable<T> e:
-						ConcatFormat(builder, e, format, group);
+						ConcatFormat(thisValue, e, format, group);
 						break;
 					case IEnumerable e:
-						ConcatFormat(builder, e, format, group);
+						ConcatFormat(thisValue, e, format, group);
 						break;
 					default:
-						builder.Separator(group).AppendFormat(format, value);
+						thisValue.Separator(group).AppendFormat(format, value);
 						break;
 				}
-
-				return builder;
-			});
+			}
+			
+			return thisValue;
 		}
 
 		public static StringBuilder ConcatFormat<T>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<T> enumerable, string format, string group)
 		{
 			if (string.IsNullOrEmpty(format)) return Join(thisValue, enumerable, group);
-			return enumerable.Aggregate(thisValue, (builder, value) =>
+
+			foreach (T value in enumerable)
 			{
 				switch (value)
 				{
 					case string s:
-						builder.Separator(group).AppendFormat(format, s);
+						thisValue.Separator(group).AppendFormat(format, s);
 						break;
 					case IEnumerable<T> e:
-						ConcatFormat(builder, e, format, group);
+						ConcatFormat(thisValue, e, format, group);
 						break;
 					case IEnumerable e:
-						ConcatFormat(builder, e, format, group);
+						ConcatFormat(thisValue, e, format, group);
 						break;
 					default:
-						builder.Separator(group).AppendFormat(format, value);
+						thisValue.Separator(group).AppendFormat(format, value);
 						break;
 				}
-
-				return builder;
-			});
+			}
+			
+			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder ConcatFormat<TKey, TValue>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<KeyValuePair<TKey, TValue>> enumerable, string format, char group = '|')
 		{
 			if (string.IsNullOrEmpty(format)) return Concat(thisValue, enumerable, group);
-			return enumerable.Aggregate(thisValue, (builder, value) =>
+
+			foreach (KeyValuePair<TKey, TValue> pair in enumerable)
 			{
-				builder.AppendFormat(value, format, group);
-				return builder;
-			});
+				thisValue.AppendFormat(pair, format, group);
+			}
+			
+			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder ConcatFormat<TKey, TValue>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<KeyValuePair<TKey, TValue>> enumerable, string format, string group)
 		{
 			if (string.IsNullOrEmpty(format)) return Concat(thisValue, enumerable, group);
-			return enumerable.Aggregate(thisValue, (builder, value) =>
+
+			foreach (KeyValuePair<TKey, TValue> pair in enumerable)
 			{
-				builder.AppendFormat(value, format, group);
-				return builder;
-			});
+				thisValue.AppendFormat(pair, format, group);
+			}
+			
+			return thisValue;
 		}
 
 		public static StringBuilder Join([NotNull] this StringBuilder thisValue, char separator, [NotNull] params object[] objects) { return Join(thisValue, objects, separator); }
 
+		[NotNull]
 		public static StringBuilder Join([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable enumerable, char separator)
 		{
-			return enumerable.Cast<object>().Aggregate(thisValue, (builder, value) =>
+			foreach (object value in enumerable)
 			{
 				switch (value)
 				{
 					case null:
 						break;
 					case string s:
-						if (s.Length > 0) builder.Separator(separator).Append(s);
+						if (s.Length > 0) thisValue.Separator(separator).Append(s);
 						break;
 					case IEnumerable e:
-						Join(builder, e, separator);
+						Join(thisValue, e, separator);
 						break;
 					default:
-						builder.Separator(separator).Append(value);
+						thisValue.Separator(separator).Append(value);
 						break;
 				}
-
-				return builder;
-			});
+			}
+			
+			return thisValue;
 		}
 
 		public static StringBuilder Join([NotNull] this StringBuilder thisValue, string separator, [NotNull] params object[] objects)
@@ -1023,117 +1050,133 @@ namespace asm.Extensions
 			return Join(thisValue, objects, separator);
 		}
 
+		[NotNull]
 		public static StringBuilder Join([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable enumerable, string separator)
 		{
 			if (string.IsNullOrEmpty(separator)) return Concat(thisValue, enumerable);
-			return enumerable.Cast<object>().Aggregate(thisValue, (builder, value) =>
+
+			foreach (object value in enumerable)
 			{
 				switch (value)
 				{
 					case null:
 						break;
 					case string s:
-						if (s.Length > 0) builder.Separator(separator).Append(s);
+						if (s.Length > 0) thisValue.Separator(separator).Append(s);
 						break;
 					case IEnumerable e:
-						Join(builder, e, separator);
+						Join(thisValue, e, separator);
 						break;
 					default:
-						builder.Separator(separator).Append(value);
+						thisValue.Separator(separator).Append(value);
 						break;
 				}
-
-				return builder;
-			});
+			}
+			
+			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder Join<T>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<T> enumerable, char separator)
 		{
-			return enumerable.Aggregate(thisValue, (builder, value) =>
+			foreach (T value in enumerable)
 			{
 				switch (value)
 				{
 					case string s:
-						builder.Separator(separator).Append(s);
+						thisValue.Separator(separator).Append(s);
 						break;
 					case IEnumerable<T> e:
-						Join(builder, e, separator);
+						Join(thisValue, e, separator);
 						break;
 					case IEnumerable e:
-						Join(builder, e, separator);
+						Join(thisValue, e, separator);
 						break;
 					default:
-						builder.Separator(separator).Append(value);
+						thisValue.Separator(separator).Append(value);
 						break;
 				}
-
-				return builder;
-			});
+			}
+			
+			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder Join<T>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<T> enumerable, string separator)
 		{
 			if (string.IsNullOrEmpty(separator)) return Concat(thisValue, enumerable);
-			return enumerable.Aggregate(thisValue, (builder, value) =>
+
+			foreach (T value in enumerable)
 			{
 				switch (value)
 				{
 					case string s:
-						builder.Separator(separator).Append(s);
+						thisValue.Separator(separator).Append(s);
 						break;
 					case IEnumerable<T> e:
-						Join(builder, e, separator);
+						Join(thisValue, e, separator);
 						break;
 					case IEnumerable e:
-						Join(builder, e, separator);
+						Join(thisValue, e, separator);
 						break;
 					default:
-						builder.Separator(separator).Append(value);
+						thisValue.Separator(separator).Append(value);
 						break;
 				}
+			}
 
-				return builder;
-			});
+			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder Join<TKey, TValue>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<KeyValuePair<TKey, TValue>> enumerable, char separator, char group)
 		{
-			return enumerable.Aggregate(thisValue, (builder, value) =>
+			foreach (KeyValuePair<TKey, TValue> pair in enumerable)
 			{
-				builder.Append(value, separator, group);
-				return builder;
-			});
+				thisValue.Append(pair, separator, group);
+			}
+			
+			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder Join<TKey, TValue>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<KeyValuePair<TKey, TValue>> enumerable, string separator, string group)
 		{
 			if (string.IsNullOrEmpty(separator)) return Concat(thisValue, enumerable, group);
-			return enumerable.Aggregate(thisValue, (builder, value) =>
+
+			foreach (KeyValuePair<TKey, TValue> pair in enumerable)
 			{
-				builder.Append(value, separator, group);
-				return builder;
-			});
+				thisValue.Append(pair, separator, group);
+			}
+			
+			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder JoinFormat<TKey, TValue>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<KeyValuePair<TKey, TValue>> enumerable, string format, char separator, char group)
 		{
 			if (string.IsNullOrEmpty(format)) return Join(thisValue, enumerable, separator, group);
-			return enumerable.Aggregate(thisValue, (builder, value) =>
+
+			foreach (KeyValuePair<TKey, TValue> pair in enumerable)
 			{
-				builder.AppendFormat(value, format, separator, group);
-				return builder;
-			});
+				thisValue.AppendFormat(pair, format, separator, group);
+			}
+
+			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder JoinFormat<TKey, TValue>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<KeyValuePair<TKey, TValue>> enumerable, string format, string separator, [NotNull] string group)
 		{
 			if (string.IsNullOrEmpty(format)) return Join(thisValue, enumerable, separator, group);
 			if (string.IsNullOrEmpty(separator)) return ConcatFormat(thisValue, enumerable, format, group);
-			return enumerable.Aggregate(thisValue, (builder, value) =>
+
+			foreach (KeyValuePair<TKey, TValue> pair in enumerable)
 			{
-				builder.AppendFormat(value, format, separator, group);
-				return builder;
-			});
+				thisValue.AppendFormat(pair, format, separator, group);
+			}
+
+			return thisValue;
 		}
 
 		[NotNull]
@@ -1245,7 +1288,7 @@ namespace asm.Extensions
 		public static StringBuilder Replace(this StringBuilder thisValue, string replace, [NotNull] params string[] anyOf)
 		{
 			if (IsNullOrEmpty(thisValue) || anyOf.Length == 0) return thisValue;
-			if (replace == null) replace = string.Empty;
+			replace ??= string.Empty;
 
 			foreach (string c in anyOf)
 				thisValue.Replace(c, replace);

@@ -20,7 +20,7 @@ using SysMath = System.Math;
 namespace asm.Enumeration
 {
 	internal sealed class EnumCache<TInt, TIntProvider>
-		where TInt : struct, IComparable, IComparable<TInt>, IEquatable<TInt>, IConvertible
+		where TInt : struct, IComparable<TInt>, IComparable, IEquatable<TInt>, IConvertible
 		where TIntProvider : INumericProvider<TInt>, new()
 	{
 		internal sealed class EnumMemberParser

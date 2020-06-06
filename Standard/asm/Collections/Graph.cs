@@ -9,7 +9,7 @@ namespace asm.Collections
 {
 	// https://en.wikipedia.org/wiki/List_of_data_structures
 	public class Graph<T> : Microsoft.Collections.Dictionary<T, ISet<T>>, IGraph<T>//, IEnumerable<T>
-		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
+		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
 	{
 		//[Serializable]
 		//public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable

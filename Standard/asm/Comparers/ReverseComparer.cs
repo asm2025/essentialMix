@@ -17,10 +17,10 @@ namespace asm.Comparers
 		{
 		}
 
-		public ReverseComparer([NotNull] IComparer<T> comparer, IEqualityComparer<T> equalityComparer)
-			: base(comparer, equalityComparer)
+		public ReverseComparer(IComparer<T> comparer, IEqualityComparer<T> equalityComparer)
+			: base(comparer ?? Comparer<T>.Default, equalityComparer)
 		{
-			Original = comparer;
+			Original = comparer ?? Comparer<T>.Default;
 		}
 
 		[NotNull]

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 namespace asm.Comparers
 {
+	// todo complete DomainNameComparer
 	public sealed class DomainNameComparer : GenericComparer<string>
 	{
 		public new static DomainNameComparer Default { get; } = new DomainNameComparer();

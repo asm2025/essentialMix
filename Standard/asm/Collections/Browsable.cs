@@ -9,10 +9,10 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	[Serializable]
-	public class Browsable : Item, IBrowsable
+	public class Browsable : Item, IBrowsable, IReadOnlyKeyedCollection<string, IItem>, IReadOnlyList<IItem>, IReadOnlyCollection<IItem>, IList<IItem>, IList, ISerializable, IDeserializationCallback
 	{
 		[Serializable]
-		public class ColumnsCollection : ObservableKeyedCollection<string, Column>
+		public class ColumnsCollection : ObservableKeyedCollectionBase<string, Column>
 		{
 			[NonSerialized] 
 			private SerializationInfo _siInfo;
@@ -43,24 +43,12 @@ namespace asm.Collections
 				_siInfo = null;
 			}
 
-			public override bool Remove(Column item)
-			{
-				if (item == null) throw new ArgumentNullException(nameof(item));
-				return !item.IsFixed && base.Remove(item);
-			}
-
-			public override bool Remove(string key)
-			{
-				Column item = base[key];
-				if (item == null || item.IsFixed) return false;
-				return base.Remove(key);
-			}
-
-			public override void RemoveAt(int index)
+			/// <inheritdoc />
+			protected override void RemoveItem(int index)
 			{
 				Column item = base[index];
 				if (item.IsFixed) return;
-				base.RemoveAt(index);
+				base.RemoveItem(index);
 			}
 
 			protected override void ClearItems()
@@ -76,7 +64,7 @@ namespace asm.Collections
 		}
 
 		[Serializable]
-		public class ItemsCollection : ObservableKeyedCollection<string, IItem>
+		public class ItemsCollection : ObservableKeyedCollectionBase<string, IItem>
 		{
 			[NonSerialized] 
 			private SerializationInfo _siInfo;
@@ -87,7 +75,7 @@ namespace asm.Collections
 				_siInfo = info;
 			}
 
-			internal ItemsCollection([NotNull] IBrowsable owner)
+			internal ItemsCollection([NotNull] Browsable owner)
 				: base(StringComparer.OrdinalIgnoreCase)
 			{
 				Owner = owner ?? throw new ArgumentNullException(nameof(owner));
@@ -96,14 +84,14 @@ namespace asm.Collections
 			public override void GetObjectData(SerializationInfo info, StreamingContext context)
 			{
 				base.GetObjectData(info, context);
-				info.AddValue("Owner", Owner, typeof(IBrowsable));
+				info.AddValue("Owner", Owner, typeof(Browsable));
 			}
 
 			public override void OnDeserialization(object sender)
 			{
 				base.OnDeserialization(sender);
 				if (_siInfo == null) return;
-				Owner = (IBrowsable)_siInfo.GetValue("Owner", typeof(IBrowsable)) ?? throw new SerializationException("Invalid owner type.");
+				Owner = (Browsable)_siInfo.GetValue("Owner", typeof(Browsable)) ?? throw new SerializationException("Invalid owner type.");
 				_siInfo = null;
 			}
 
@@ -114,17 +102,13 @@ namespace asm.Collections
 				if (item is Item t) t.Parent = Owner;
 			}
 
-			public override bool Remove(IItem item)
+			/// <inheritdoc />
+			protected override void RemoveItem(int index)
 			{
-				if (item == null) throw new ArgumentNullException(nameof(item));
-				if (item.IsFixed || !base.Remove(item)) return false;
-				if (item is Item t) t.Parent = null;
-				return true;
+				IItem item = base[index];
+				if (item.IsFixed) return;
+				base.RemoveItem(index);
 			}
-
-			public override bool Remove(string key) { return Remove(base[key]); }
-
-			public override void RemoveAt(int index) { Remove(base[index]); }
 
 			protected override void ClearItems()
 			{
@@ -135,7 +119,7 @@ namespace asm.Collections
 			[NotNull]
 			protected override string GetKeyForItem(IItem item) { return item.Name; }
 
-			public IBrowsable Owner { get; private set; }
+			public Browsable Owner { get; private set; }
 		}
 
 		[NonSerialized] 
@@ -180,7 +164,7 @@ namespace asm.Collections
 			_siInfo = info;
 		}
 
-	public override void GetObjectData(SerializationInfo info, StreamingContext context)
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			base.GetObjectData(info, context);
 			info.AddValue("Columns", _columns, typeof(ColumnsCollection));
@@ -191,15 +175,11 @@ namespace asm.Collections
 
 		public IItem this[int index] { get => Items[index]; set => Items[index] = value; }
 
-		public IItem this[string key] { get => Items[key]; set => Items[key] = value; }
+		public IItem this[[NotNull] string key] => Items[key];
 
 		object IList.this[int index] { get => this[index]; set => this[index] = (IItem)value; }
 
 		IItem IReadOnlyList<IItem>.this[int index] => this[index];
-
-		object IDictionary.this[object key] { get => this[(string)key]; set => Items[(string)key] = (IItem)value; }
-
-		IItem IReadOnlyDictionary<string, IItem>.this[[NotNull] string key] => Items[key];
 
 		public int Count => Items.Count;
 
@@ -214,10 +194,6 @@ namespace asm.Collections
 		public ColumnsCollection Columns => _columns ??= new ColumnsCollection(this);
 
 		public bool IsFixedSize => Items.IsFixedSize;
-
-		public ICollection<string> Keys => Items.Keys;
-
-		public ICollection<IItem> Values => Items.Values;
 
 		[NotNull]
 		public virtual ItemsCollection Items
@@ -243,15 +219,9 @@ namespace asm.Collections
 
 		int IReadOnlyCollection<IItem>.Count => Count;
 
-		bool IDictionary.IsFixedSize => IsFixedSize;
+		IEnumerable<string> IReadOnlyDictionary<string, IItem>.Keys => Items.Keys;
 
-		IEnumerable<string> IReadOnlyDictionary<string, IItem>.Keys => Keys;
-
-		ICollection IDictionary.Keys => (ICollection)Keys;
-
-		IEnumerable<IItem> IReadOnlyDictionary<string, IItem>.Values => Values;
-
-		ICollection IDictionary.Values => (ICollection)Values;
+		IEnumerable<IItem> IReadOnlyDictionary<string, IItem>.Values => Items.Values;
 
 		public virtual void OnDeserialization(object sender)
 		{
@@ -292,7 +262,7 @@ namespace asm.Collections
 
 		public bool Contains([NotNull] string key) { return Items.Contains(key); }
 
-		public bool Remove(string key) { return Items.Remove(key); }
+		public bool Remove([NotNull] string key) { return Items.Remove(key); }
 
 		public int IndexOf(IItem item) { return Items.IndexOf(item); }
 
@@ -300,7 +270,7 @@ namespace asm.Collections
 
 		public void CopyTo(IItem[] array, int arrayIndex) { Items.CopyTo(array, arrayIndex); }
 
-		public bool TryGetValue(string key, out IItem value) { return Items.TryGetValue(key, out value); }
+		public bool TryGetValue([NotNull] string key, out IItem value) { return Items.TryGetValue(key, out value); }
 
 		public IEnumerator<IItem> GetEnumerator() { return Items.GetEnumerator(); }
 
@@ -310,23 +280,11 @@ namespace asm.Collections
 			return Count;
 		}
 
-		void IDictionary<string, IItem>.Add(string key, IItem value) { Add(value); }
-		void ICollection<KeyValuePair<string, IItem>>.Add(KeyValuePair<string, IItem> pair) { Add(pair.Value); }
-		void IDictionary.Add(object key, object value) { Add((IItem)value); }
 		bool IList.Contains(object value) { return Contains((IItem)value); }
-
-		bool ICollection<KeyValuePair<string, IItem>>.Contains(KeyValuePair<string, IItem> pair) { return pair.Value != null && Contains(pair.Value); }
-
-		bool IDictionary.Contains(object key) { return Contains((string)key); }
-
-		bool IDictionary<string, IItem>.ContainsKey(string key) { return Contains(key); }
 
 		bool IReadOnlyDictionary<string, IItem>.ContainsKey([NotNull] string key) { return Contains(key); }
 
-		bool ICollection<KeyValuePair<string, IItem>>.Remove(KeyValuePair<string, IItem> pair) { return pair.Value != null && Remove(pair.Value); }
-
 		void IList.Remove(object value) { Remove((IItem)value); }
-		void IDictionary.Remove(object key) { Remove((string)key); }
 		int IList.IndexOf(object value) { return IndexOf((IItem)value); }
 
 		void IList.Insert(int index, object value) { Insert(index, (IItem)value); }
@@ -368,21 +326,10 @@ namespace asm.Collections
 			}
 		}
 
-		void ICollection<KeyValuePair<string, IItem>>.CopyTo(KeyValuePair<string, IItem>[] array, int arrayIndex)
-		{
-			ICollection<KeyValuePair<string, IItem>> collection = Items;
-			collection.CopyTo(array, arrayIndex);
-		}
-
 		bool IReadOnlyDictionary<string, IItem>.TryGetValue(string key, out IItem value) { return TryGetValue(key, out value); }
-
-		void IDictionary.Clear() { Clear(); }
 		void IList.Clear() { Clear(); }
-		void ICollection<KeyValuePair<string, IItem>>.Clear() { Clear(); }
 
-		IEnumerator<KeyValuePair<string, IItem>> IEnumerable<KeyValuePair<string, IItem>>.GetEnumerator() { return ((IDictionary<string, IItem>)Items).GetEnumerator(); }
-
-		IDictionaryEnumerator IDictionary.GetEnumerator() { return ((IDictionary)Items).GetEnumerator(); }
+		IEnumerator<KeyValuePair<string, IItem>> IEnumerable<KeyValuePair<string, IItem>>.GetEnumerator() { return ((IEnumerable<KeyValuePair<string, IItem>>)Items).GetEnumerator(); }
 
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 

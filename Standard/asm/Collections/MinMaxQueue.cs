@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	public sealed class MinMaxQueue<T> : IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
-		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
+		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
 	{
 		private readonly dynamic _queueOrStack;
 		private readonly ICollection _collection;

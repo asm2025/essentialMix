@@ -47,7 +47,7 @@ namespace asm.Helpers
 			{
 				using (Stream stream = File.OpenRead(fileName))
 				{
-					if (encoding == null) encoding = stream.DetectEncoding();
+					encoding ??= stream.DetectEncoding();
 
 					using (StreamReader reader = new StreamReader(stream, encoding, true))
 					{
@@ -102,7 +102,7 @@ namespace asm.Helpers
 			{
 				using (Stream stream = File.OpenRead(fileName))
 				{
-					if (encoding == null) encoding = stream.DetectEncoding();
+					encoding ??= stream.DetectEncoding();
 
 					using (StreamReader reader = new StreamReader(stream, encoding, true))
 					{
@@ -139,7 +139,7 @@ namespace asm.Helpers
 			{
 				using (Stream stream = File.OpenRead(fileName))
 				{
-					if (encoding == null) encoding = stream.DetectEncoding();
+					encoding ??= stream.DetectEncoding();
 
 					using (StreamReader reader = new StreamReader(stream, encoding, true))
 					{
@@ -165,7 +165,7 @@ namespace asm.Helpers
 			{
 				using (Stream stream = File.OpenRead(fileName))
 				{
-					if (encoding == null) encoding = stream.DetectEncoding();
+					encoding ??= stream.DetectEncoding();
 
 					using (StreamReader reader = new StreamReader(stream, encoding, true))
 					{
@@ -186,9 +186,16 @@ namespace asm.Helpers
 			if (string.IsNullOrWhiteSpace(value)) return null;
 
 			char[] invalid = includeChars?.Union(INVALID_FILE_NAME_CHAR).ToArray() ?? INVALID_FILE_NAME_CHAR;
-			return value.Aggregate(new StringBuilder(value.Length),
-				(builder, c) => builder.Append(invalid.Contains(c) ? replaceChar : c),
-				builder => builder.ToString());
+			StringBuilder builder = new StringBuilder(value.Length);
+			
+			foreach (char c in value)
+			{
+				builder.Append(invalid.Contains(c)
+											? replaceChar
+											: c);
+			}
+
+			return builder.ToString();
 		}
 
 		public static bool IsValidPathName(string value, params char[] moreInvalidChars)
@@ -235,7 +242,7 @@ namespace asm.Helpers
 
 				using (Stream stream = File.OpenRead(source))
 				{
-					if (encoding == null) encoding = stream.DetectEncoding();
+					encoding ??= stream.DetectEncoding();
 
 					using (StreamReader reader = new StreamReader(stream, encoding, true))
 					{
@@ -269,7 +276,7 @@ namespace asm.Helpers
 
 			using (Stream stream = File.OpenRead(fileName))
 			{
-				if (encoding == null) encoding = stream.DetectEncoding();
+				encoding ??= stream.DetectEncoding();
 
 				using (StreamReader reader = new StreamReader(stream, encoding, true))
 				{
@@ -313,7 +320,7 @@ namespace asm.Helpers
 
 			using (Stream stream = File.OpenRead(fileName))
 			{
-				if (encoding == null) encoding = stream.DetectEncoding();
+				encoding ??= stream.DetectEncoding();
 
 				using (StreamReader reader = new StreamReader(stream, encoding, true))
 				{
@@ -377,7 +384,7 @@ namespace asm.Helpers
 
 			using (Stream stream = File.OpenRead(fileName))
 			{
-				if (encoding == null) encoding = stream.DetectEncoding();
+				encoding ??= stream.DetectEncoding();
 
 				using (BinaryReader reader = new BinaryReader(stream, encoding))
 				{
@@ -530,6 +537,7 @@ namespace asm.Helpers
 				}
 				catch
 				{
+					// ignored
 				}
 			}
 		}
@@ -684,10 +692,13 @@ namespace asm.Helpers
 			return null;
 		}
 
+		[NotNull]
 		public static string GetRandomName() { return GetRandomName(true); }
 
+		[NotNull]
 		public static string GetRandomName(bool useTempDirectory) { return GetRandomName(null, useTempDirectory); }
 
+		[NotNull]
 		public static string GetRandomName(string extension) { return GetRandomName(extension, true); }
 
 		[NotNull]
@@ -746,6 +757,7 @@ namespace asm.Helpers
 			return newName;
 		}
 
+		[NotNull]
 		public static string GetRandomName(string basePath, string extension, string suffix) { return GetRandomName(basePath, extension, null, suffix); }
 
 		[NotNull]
@@ -820,10 +832,13 @@ namespace asm.Helpers
 			return newName;
 		}
 
+		[NotNull]
 		public static string GetRandomGuidName() { return GetRandomGuidName(true); }
 
+		[NotNull]
 		public static string GetRandomGuidName(bool useTempDirectory) { return GetRandomGuidName(null, useTempDirectory); }
 
+		[NotNull]
 		public static string GetRandomGuidName(string sExtension) { return GetRandomGuidName(sExtension, true); }
 
 		[NotNull]

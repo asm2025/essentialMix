@@ -19,7 +19,7 @@ namespace asm.Enumeration
 	// because having the enum type as a generic type parameter causes code explosion
 	// due to how .NET generics are handled with enums.
 	internal class EnumInfo<TInt, TIntProvider> : IEnumInfo, IEnumInfo<TInt, TIntProvider>
-		where TInt : struct, IComparable, IComparable<TInt>, IEquatable<TInt>, IConvertible
+		where TInt : struct, IComparable<TInt>, IComparable, IEquatable<TInt>, IConvertible
 		where TIntProvider : INumericProvider<TInt>, new()
 	{
 		private readonly EnumCache<TInt, TIntProvider> _cache;
@@ -224,7 +224,13 @@ namespace asm.Enumeration
 		public Enum CombineFlags(IEnumerable<Enum> flags)
 		{
 			TInt result = default(TInt);
-			if (flags != null) result = flags.Aggregate(result, (current, flag) => _cache.CombineFlags(current, ToInt(flag)));
+			
+			if (flags != null)
+			{
+				foreach (Enum flag in flags)
+					result = _cache.CombineFlags(result, ToInt(flag));
+			}
+
 			return ToEnum(result);
 		}
 
@@ -285,7 +291,7 @@ namespace asm.Enumeration
 
 	internal class EnumInfo<TEnum, TInt, TIntProvider> : IEnumInfo<TEnum>, IEnumInfo, IEnumInfo<TInt, TIntProvider>
 		where TEnum : struct, Enum, IComparable
-		where TInt : struct, IComparable, IComparable<TInt>, IEquatable<TInt>, IConvertible
+		where TInt : struct, IComparable<TInt>, IComparable, IEquatable<TInt>, IConvertible
 		where TIntProvider : INumericProvider<TInt>, new()
 	{
 		private readonly EnumCache<TInt, TIntProvider> _cache;
@@ -489,7 +495,13 @@ namespace asm.Enumeration
 		public TEnum CombineFlags(IEnumerable<TEnum> flags)
 		{
 			TInt result = default(TInt);
-			if (flags != null) result = flags.Aggregate(result, (current, flag) => _cache.CombineFlags(current, ToInt(flag)));
+			
+			if (flags != null)
+			{
+				foreach (TEnum flag in flags) 
+					result = _cache.CombineFlags(result, ToInt(flag));
+			}
+
 			return ToEnum(result);
 		}
 

@@ -165,7 +165,14 @@ namespace asm.Threading
 
 			foreach (IProperty property in executableBase.Arguments)
 			{
-				Arguments[property.Name] = property;
+				if (!Arguments.TryGetValue(property.Name, out IProperty argument))
+				{
+					Arguments.Add(property);
+					continue;
+				}
+
+				if (argument.ValueType.IsAssignableFrom(property.ValueType)) throw new InvalidCastException();
+				argument.Value = property.Value;
 			}
 		}
 

@@ -57,6 +57,7 @@ namespace asm.Helpers
 		[NotNull]
 		public static Task<TResult> RunAsync<TResult>([NotNull] Func<TResult> func, CancellationToken token = default(CancellationToken)) { return AsyncPattern(func, token); }
 
+		[NotNull]
 		public static Task RunAsync([NotNull] Action<CancellationTokenSource> action, TimeSpan timeout, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
@@ -81,6 +82,7 @@ namespace asm.Helpers
 			return task.ConfigureAwait();
 		}
 
+		[NotNull]
 		public static Task<TResult> RunAsync<TResult>([NotNull] Func<CancellationTokenSource, TResult> func, TimeSpan timeout, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
@@ -124,19 +126,20 @@ namespace asm.Helpers
 			if (actions.Any(e => e == null)) throw new NullReferenceException($"{nameof(actions)} contains a null reference.");
 			IEnumerable<Action> en = actions;
 			if (token.CanBeCanceled) en = en.TakeWhile(e => !token.IsCancellationRequested);
-			en.Aggregate(Task.CompletedTask, (current, local) => current.ContinueWith(t =>
-					{
-						if (token.IsCancellationRequested || t.IsCanceled) return Task.FromCanceled(token);
-						if (t.IsFaulted)
-						{
-							return continueOnError 
-										? Task.Run(local, token).ConfigureAwait()
-										: Task.FromException(t.Exception ?? new Exception("Unknown error."));
-						}
+			
+			Task result = Task.CompletedTask;
 
-						return Task.Run(local, token).ConfigureAwait();
-					}, TaskContinuationOptions.NotOnCanceled)
-					.Unwrap());
+			foreach (Action action in en)
+			{
+				result = result.ContinueWith(t => token.IsCancellationRequested || t.IsCanceled
+													? Task.FromCanceled(token)
+													: t.IsFaulted
+														? continueOnError
+															? Task.Run(action, token).ConfigureAwait()
+															: Task.FromException(t.Exception ?? new Exception("Unknown error."))
+														: Task.Run(action, token).ConfigureAwait(), TaskContinuationOptions.NotOnCanceled)
+								.Unwrap();
+			}
 		}
 
 		public static Task<TResult> Sequence<TResult>([NotNull] Func<TResult, Task<TResult>>[] functions, bool continueOnError, CancellationToken token = default(CancellationToken))
@@ -162,16 +165,23 @@ namespace asm.Helpers
 
 			IEnumerable<Func<TResult, Task<TResult>>> fs = functions;
 			if (token.CanBeCanceled) fs = fs.TakeWhile(f => !token.IsCancellationRequested);
-			return fs.Aggregate(tcs.Task, (current, local) => current.ContinueWith(t => token.IsCancellationRequested || t.IsCanceled
-																						? Task.FromCanceled<TResult>(token)
-																						: t.IsFaulted
-																							? continueOnError
-																								? local(defaultValue).ConfigureAwait()
-																								: Task.FromException<TResult>(t.Exception ?? new Exception("Unknown error."))
-																							: evaluator?.Invoke(t.Result) == true
-																								? Task.FromResult(t.Result)
-																								: local(t.Result).ConfigureAwait(), TaskContinuationOptions.NotOnCanceled)
-					.Unwrap());
+			Task<TResult> result = tcs.Task;
+
+			foreach (Func<TResult, Task<TResult>> func in fs)
+			{
+				result = result.ContinueWith(t => token.IsCancellationRequested || t.IsCanceled
+													? Task.FromCanceled<TResult>(token)
+													: t.IsFaulted
+														? continueOnError
+															? func(defaultValue).ConfigureAwait()
+															: Task.FromException<TResult>(t.Exception ?? new Exception("Unknown error."))
+														: evaluator?.Invoke(t.Result) == true
+															? Task.FromResult(t.Result)
+															: func(t.Result).ConfigureAwait(), TaskContinuationOptions.NotOnCanceled)
+								.Unwrap();
+			}
+
+			return result;
 		}
 	}
 }

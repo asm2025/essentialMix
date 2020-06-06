@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Specialized;
 using System.ComponentModel;
 
 namespace asm.Collections
 {
-	public interface IBrowsable : IItem, IComparable<IBrowsable>, IEquatable<IBrowsable>, IObservableKeyedCollection<string, IItem>
+	public interface IBrowsable : IItem, IComparable<IBrowsable>, IEquatable<IBrowsable>, INotifyCollectionChanged
 	{
 		Browsable.ColumnsCollection Columns { get; }
 

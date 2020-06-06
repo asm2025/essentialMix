@@ -15,8 +15,8 @@ namespace asm.Comparers
 		public virtual int Compare(T x, T y)
 		{
 			if (ReferenceEquals(x, y)) return 0;
-			if (x == null) return 1;
-			if (y == null) return -1;
+			if (ReferenceEquals(x, null)) return 1;
+			if (ReferenceEquals(y, null)) return -1;
 			return GetHashCode(x) - GetHashCode(y);
 		}
 
@@ -27,8 +27,8 @@ namespace asm.Comparers
 		public int Compare(object x, object y)
 		{
 			if (ReferenceEquals(x, y)) return 0;
-			if (x == null) return 1;
-			if (y == null) return -1;
+			if (ReferenceEquals(x, null)) return 1;
+			if (ReferenceEquals(y, null)) return -1;
 			return GetHashCode(x) - GetHashCode(y);
 		}
 

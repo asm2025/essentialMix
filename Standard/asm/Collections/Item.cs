@@ -10,7 +10,7 @@ namespace asm.Collections
 	public class Item : Property, IItem
 	{
 		[Serializable]
-		public class SubItemsCollection : ObservableKeyedCollection<string, SubItem>
+		public class SubItemsCollection : ObservableKeyedCollectionBase<string, SubItem>
 		{
 			[NonSerialized] 
 			private SerializationInfo _siInfo;
@@ -57,27 +57,13 @@ namespace asm.Collections
 				base.SetItem(index, item);
 			}
 
-			public override bool Remove(SubItem item)
-			{
-				if (item == null) throw new ArgumentNullException(nameof(item));
-				if (item.IsFixed || !base.Remove(item)) return false;
-				item.Owner = null;
-				return true;
-			}
-
-			public override bool Remove(string key)
-			{
-				SubItem item = base[key];
-				if (item == null || item.IsFixed || !base.Remove(key)) return false;
-				item.Owner = null;
-				return true;
-			}
-
-			public override void RemoveAt(int index)
+			/// <inheritdoc />
+			protected override void RemoveItem(int index)
 			{
 				SubItem item = base[index];
 				if (item.IsFixed) return;
-				base.RemoveAt(index);
+				base.RemoveItem(index);
+				item.Owner = null;
 			}
 
 			protected override void ClearItems()
@@ -156,7 +142,7 @@ namespace asm.Collections
 
 		public bool IsContainer { get; }
 
-		public IBrowsable Parent { get; internal set; }
+		public Browsable Parent { get; internal set; }
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		[NotNull]

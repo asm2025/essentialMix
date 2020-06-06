@@ -64,7 +64,7 @@ namespace asm.Collections
 
 	[DebuggerDisplay("{Key} [{Value}], Count = {Count}")]
 	[Serializable]
-	public class Tree<TKey, TValue> : KeyedCollection<TKey, Tree<TKey, TValue>>
+	public class Tree<TKey, TValue> : KeyedCollectionBase<TKey, Tree<TKey, TValue>>
 	{
 		/// <inheritdoc />
 		public Tree() 
@@ -98,7 +98,7 @@ namespace asm.Collections
 		public Tree<TKey, TValue> Parent { get; private set; }
 
 		[NotNull]
-		public KeyedCollection<TKey, Tree<TKey, TValue>> Children => this;
+		public KeyedCollectionBase<TKey, Tree<TKey, TValue>> Children => this;
 
 		public TKey Key { get; set; }
 		

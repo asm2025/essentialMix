@@ -9,7 +9,7 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	[Serializable]
-	public abstract class ObservableKeyedCollection<TKey, TValue> : KeyedCollection<TKey, TValue>, IObservableKeyedCollection<TKey, TValue>
+	public abstract class ObservableKeyedCollectionBase<TKey, TValue> : KeyedCollectionBase<TKey, TValue>, INotifyPropertyChanged, INotifyCollectionChanged
 	{
 		private const string PROPERTY_NAME_ITEMS = "Item[]";
 
@@ -18,15 +18,15 @@ namespace asm.Collections
 		[NonSerialized]
 		private uint _updateRefCount;
 
-		protected ObservableKeyedCollection() { }
+		protected ObservableKeyedCollectionBase() { }
 
-		protected ObservableKeyedCollection(IEqualityComparer<TKey> comparer) : base(comparer) { }
+		protected ObservableKeyedCollectionBase(IEqualityComparer<TKey> comparer) : base(comparer) { }
 
-		protected ObservableKeyedCollection([NotNull] IEnumerable<TValue> collection) : base(collection) { }
+		protected ObservableKeyedCollectionBase([NotNull] IEnumerable<TValue> collection) : base(collection) { }
 
-		protected ObservableKeyedCollection([NotNull] IEnumerable<TValue> collection, IEqualityComparer<TKey> comparer) : base(collection, comparer) { }
+		protected ObservableKeyedCollectionBase([NotNull] IEnumerable<TValue> collection, IEqualityComparer<TKey> comparer) : base(collection, comparer) { }
 
-		protected ObservableKeyedCollection(SerializationInfo info, StreamingContext context) : base(info, context) { }
+		protected ObservableKeyedCollectionBase(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
 		protected override void InsertItem(int index, TValue item)
 		{

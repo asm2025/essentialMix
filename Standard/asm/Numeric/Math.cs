@@ -524,7 +524,14 @@ namespace asm.Numeric
 				case 2:
 					return GCD(numbers[0], numbers[1]);
 				default:
-					return numbers.Aggregate(GCD);
+					byte gcd = numbers[0];
+
+					for (int i = 1; i < numbers.Length; i++)
+					{
+						gcd = GCD(gcd, numbers[i]);
+					}
+
+					return gcd;
 			}
 		}
 
@@ -544,7 +551,14 @@ namespace asm.Numeric
 				case 2:
 					return GCD(numbers[0], numbers[1]);
 				default:
-					return numbers.Aggregate(GCD);
+					short gcd = numbers[0];
+
+					for (int i = 1; i < numbers.Length; i++)
+					{
+						gcd = GCD(gcd, numbers[i]);
+					}
+
+					return gcd;
 			}
 		}
 
@@ -564,7 +578,14 @@ namespace asm.Numeric
 				case 2:
 					return GCD(numbers[0], numbers[1]);
 				default:
-					return numbers.Aggregate(GCD);
+					ushort gcd = numbers[0];
+
+					for (int i = 1; i < numbers.Length; i++)
+					{
+						gcd = GCD(gcd, numbers[i]);
+					}
+
+					return gcd;
 			}
 		}
 
@@ -584,7 +605,14 @@ namespace asm.Numeric
 				case 2:
 					return GCD(numbers[0], numbers[1]);
 				default:
-					return numbers.Aggregate(GCD);
+					int gcd = numbers[0];
+
+					for (int i = 1; i < numbers.Length; i++)
+					{
+						gcd = GCD(gcd, numbers[i]);
+					}
+
+					return gcd;
 			}
 		}
 
@@ -604,7 +632,14 @@ namespace asm.Numeric
 				case 2:
 					return GCD(numbers[0], numbers[1]);
 				default:
-					return numbers.Aggregate(GCD);
+					uint gcd = numbers[0];
+
+					for (int i = 1; i < numbers.Length; i++)
+					{
+						gcd = GCD(gcd, numbers[i]);
+					}
+
+					return gcd;
 			}
 		}
 
@@ -624,7 +659,14 @@ namespace asm.Numeric
 				case 2:
 					return GCD(numbers[0], numbers[1]);
 				default:
-					return numbers.Aggregate(GCD);
+					long gcd = numbers[0];
+
+					for (int i = 1; i < numbers.Length; i++)
+					{
+						gcd = GCD(gcd, numbers[i]);
+					}
+
+					return gcd;
 			}
 		}
 
@@ -644,7 +686,14 @@ namespace asm.Numeric
 				case 2:
 					return GCD(numbers[0], numbers[1]);
 				default:
-					return numbers.Aggregate(GCD);
+					ulong gcd = numbers[0];
+
+					for (int i = 1; i < numbers.Length; i++)
+					{
+						gcd = GCD(gcd, numbers[i]);
+					}
+
+					return gcd;
 			}
 		}
 

@@ -24,16 +24,16 @@ namespace asm.Comparers
 		public virtual int Compare(T x, T y)
 		{
 			if (ReferenceEquals(x, y)) return 0;
-			if (x == null) return 1;
-			if (y == null) return -1;
+			if (ReferenceEquals(x, null)) return 1;
+			if (ReferenceEquals(y, null)) return -1;
 			return Comparer.Compare(x, y);
 		}
 
 		public virtual bool Equals(T x, T y)
 		{
 			if (ReferenceEquals(x, y)) return true;
-			if (x == null) return false;
-			return y != null && EqualityComparer.Equals(x, y);
+			if (ReferenceEquals(x, null)) return false;
+			return !ReferenceEquals(y, null) && EqualityComparer.Equals(x, y);
 		}
 
 		public virtual int GetHashCode(T obj) { return obj.GetHashCode(); }

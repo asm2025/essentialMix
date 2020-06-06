@@ -8,7 +8,7 @@ namespace asm.Collections
 {
 	[Serializable]
 	public class NumericRangeCollection<T> : Collection<NumericRange<T>>, IComparable<NumericRangeCollection<T>>, IComparable, IEquatable<NumericRangeCollection<T>>
-		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
+		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
 	{
 		public NumericRangeCollection()
 		{

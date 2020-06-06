@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.CompilerServices;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Collections
@@ -28,7 +28,7 @@ namespace Microsoft.Collections
 
 		public int GetHashCode(HashSet<T> obj)
 		{
-			return obj.Aggregate(0, (current, t) => current ^ (_comparer.GetHashCode(t) & 0x7FFFFFFF));
+			return RuntimeHelpers.GetHashCode(obj);
 		}
 
 		// Equals method for the comparer itself. 

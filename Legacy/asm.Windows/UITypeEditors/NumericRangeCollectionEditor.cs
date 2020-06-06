@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 namespace asm.Windows.UITypeEditors
 {
 	public class NumericRangeCollectionEditor<T> : CollectionEditor
-		where T : struct, IComparable, IFormattable, IConvertible, IComparable<T>, IEquatable<T>
+		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible, IFormattable
 	{
 		public NumericRangeCollectionEditor() 
 			: base(typeof(T))

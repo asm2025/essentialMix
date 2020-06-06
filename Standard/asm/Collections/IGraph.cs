@@ -5,7 +5,7 @@ using asm.Patterns.Collections;
 namespace asm.Collections
 {
 	public interface IGraph<T> : IDictionary<T, ISet<T>>
-		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
+		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
 	{
 		void AddEdge(T x, T y);
 

@@ -19,7 +19,12 @@ namespace asm.Media.Youtube.Internal
 
 		public string Decipher(string input)
 		{
-			return CipherOperations.Aggregate(input, (current, operation) => operation.Decipher(current));
+			string result = input;
+
+			foreach (ICipherOperation operation in CipherOperations) 
+				result = operation.Decipher(result);
+
+			return result;
 		}
 	}
 }

@@ -103,7 +103,7 @@ namespace MimeTypes
 					{
 						Key = className
 					};
-					root[className] = node;
+					root.Add(node);
 				}
 
 				StreamReader reader = null;

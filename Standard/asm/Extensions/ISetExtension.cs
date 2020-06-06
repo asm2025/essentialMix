@@ -1,9 +1,11 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using asm.Collections;
 using asm.Collections.Concurrent;
+using asm.Helpers;
 using JetBrains.Annotations;
 
 namespace asm.Extensions
@@ -49,5 +51,108 @@ namespace asm.Extensions
 
 		[NotNull]
 		public static IReadOnlySet<T> AsReadOnly<T>([NotNull] this ISet<T> thisValue) { return new ReadOnlySet<T>(thisValue); }
+
+		public static T PickRandom<T>([NotNull] this ISet<T> thisValue)
+		{
+			if (thisValue.Count == 0) throw new InvalidOperationException("Set is empty.");
+
+			int max;
+			int n;
+
+			if (thisValue is ICollection collection)
+			{
+				lock (collection.SyncRoot)
+				{
+					max = thisValue.Count - 1;
+					n = RNGRandomHelper.Next(0, max);
+					return thisValue.ElementAt(n);
+				}
+			}
+
+			lock (thisValue)
+			{
+				max = thisValue.Count - 1;
+				n = RNGRandomHelper.Next(0, max);
+				return thisValue.ElementAt(n);
+			}
+		}
+
+		public static T PopRandom<T>([NotNull] this ISet<T> thisValue)
+		{
+			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
+
+			int max;
+			int n;
+			T result;
+
+			if (thisValue is ICollection collection)
+			{
+				lock (collection.SyncRoot)
+				{
+					max = thisValue.Count - 1;
+					n = RNGRandomHelper.Next(0, max);
+					result = thisValue.ElementAt(n);
+					thisValue.Remove(result);
+					return result;
+				}
+			}
+
+			lock (thisValue)
+			{
+				max = thisValue.Count - 1;
+				n = RNGRandomHelper.Next(0, max);
+				result = thisValue.ElementAt(n);
+				thisValue.Remove(result);
+				return result;
+			}
+		}
+
+		public static T PopFirst<T>([NotNull] this ISet<T> thisValue)
+		{
+			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
+
+			T result;
+
+			if (thisValue is ICollection collection && collection.IsSynchronized)
+			{
+				lock (collection.SyncRoot)
+				{
+					result = thisValue.First();
+					thisValue.Remove(result);
+					return result;
+				}
+			}
+
+			lock (thisValue)
+			{
+				result = thisValue.First();
+				thisValue.Remove(result);
+				return result;
+			}
+		}
+
+		public static T PopLast<T>([NotNull] this ISet<T> thisValue)
+		{
+			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
+
+			T result;
+
+			if (thisValue is ICollection collection && collection.IsSynchronized)
+			{
+				lock (collection.SyncRoot)
+				{
+					result = thisValue.Last();
+					thisValue.Remove(result);
+					return result;
+				}
+			}
+
+			lock (thisValue)
+			{
+				result = thisValue.Last();
+				thisValue.Remove(result);
+				return result;
+			}
+		}
 	}
 }

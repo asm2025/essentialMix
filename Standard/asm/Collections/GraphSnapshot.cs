@@ -8,7 +8,7 @@ namespace asm.Collections
 {
 	[Serializable]
 	public class GraphSnapshot<T> : Dictionary<T, T>
-		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
+		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
 	{
 		/// <inheritdoc />
 		public GraphSnapshot() 

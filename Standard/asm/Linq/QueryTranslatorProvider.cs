@@ -60,7 +60,12 @@ namespace asm.Linq
 		{
 			// Run all visitors in order
 			IEnumerable<ExpressionVisitor> visitors = new ExpressionVisitor[] { this }.Concat(_visitors);
-			return visitors.Aggregate(expression, (expr, visitor) => visitor.Visit(expr));
+			Expression result = expression;
+			
+			foreach (ExpressionVisitor visitor in visitors) 
+				result = visitor.Visit(result);
+
+			return result;
 		}
 
 		protected override Expression VisitConstant(ConstantExpression node)

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using asm.Collections;
 using JetBrains.Annotations;
 using Microsoft.CSharp.RuntimeBinder;
 using asm.Helpers;
@@ -25,6 +26,13 @@ namespace asm.Extensions
 		private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, MethodInfo>> __explicitInterfaceCache = new ConcurrentDictionary<Type, ConcurrentDictionary<string, MethodInfo>>();
 		private static readonly ConcurrentDictionary<KeyValuePair<Type, Type>, bool> __castCache = new ConcurrentDictionary<KeyValuePair<Type, Type>, bool>();
 		private static readonly ConcurrentDictionary<KeyValuePair<Type, Type>, bool> __implicitCastCache = new ConcurrentDictionary<KeyValuePair<Type, Type>, bool>();
+
+		private static readonly IReadOnlySet<Type> __findInterfaceExceptionBreak = new ReadOnlySet<Type>(new HashSet<Type>
+		{
+			typeof(NotSupportedException),
+			typeof(ArgumentException),
+			typeof(NullReferenceException),
+		});
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static TypeCode AsTypeCode([NotNull] this Type thisValue, bool resolveGenerics = false)
@@ -134,8 +142,7 @@ namespace asm.Extensions
 		}
 
 		[ItemNotNull]
-		public static IEnumerable<PropertyInfo> GetProperties([NotNull] this Type thisValue, [NotNull] Predicate<PropertyInfo> selector,
-															BindingFlags bindingAttributes = BindingFlags.Default, Type returnType = null)
+		public static IEnumerable<PropertyInfo> GetProperties([NotNull] this Type thisValue, [NotNull] Predicate<PropertyInfo> selector, BindingFlags bindingAttributes = BindingFlags.Default, Type returnType = null)
 		{
 			Type type = thisValue;
 			if (returnType == null && !bindingAttributes.HasFlag(BindingFlags.IgnoreReturn)) bindingAttributes |= BindingFlags.IgnoreReturn;
@@ -327,20 +334,9 @@ namespace asm.Extensions
 				{
 					interfaceType = type.GetInterface(name, ignoreCase);
 				}
-				catch (NotSupportedException)
+				catch (Exception e)
 				{
-					break;
-				}
-				catch (ArgumentException)
-				{
-					break;
-				}
-				catch (NullReferenceException)
-				{
-					break;
-				}
-				catch
-				{
+					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
 					// ignored
 				}
 			}
@@ -391,8 +387,17 @@ namespace asm.Extensions
 				: thisValue.GetInterfaces(x => x.IsAssignableTo(type), declaredOnly).FirstOrDefault();
 		}
 
-		public static bool Implements<T>([NotNull] this Type thisValue, bool declaredOnly = false) { return Implements(thisValue, typeof(T), declaredOnly); }
-		public static bool Implements([NotNull] this Type thisValue, [NotNull] Type type, bool declaredOnly = false)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool Implements<T>([NotNull] this Type thisValue) { return Implements(thisValue, typeof(T)); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool Implements([NotNull] this Type thisValue, [NotNull] Type type)
+		{
+			if (!type.IsInterface) throw new ArgumentException("Type is not an interface.", nameof(type));
+			return type.IsAssignableFrom(thisValue);
+		}
+
+		public static bool Implements<T>([NotNull] this Type thisValue, bool declaredOnly) { return Implements(thisValue, typeof(T), declaredOnly); }
+		public static bool Implements([NotNull] this Type thisValue, [NotNull] Type type, bool declaredOnly)
 		{
 			if (!type.IsInterface) throw new ArgumentException("Type is not an interface.", nameof(type));
 
@@ -410,7 +415,7 @@ namespace asm.Extensions
 			return interfaceType != null;
 		}
 
-		public static bool Implements(this Type thisValue, [NotNull] IEnumerable<Type> types, bool declaredOnly = false)
+		public static bool Implements([NotNull] this Type thisValue, [NotNull] IEnumerable<Type> types, bool declaredOnly = false)
 		{
 			if (types == null) throw new ArgumentNullException(nameof(types));
 
@@ -428,15 +433,15 @@ namespace asm.Extensions
 			}
 		}
 
-		public static bool Implements(this Type thisValue, [NotNull] params Type[] types) { return Implements(thisValue, false, types); }
+		public static bool Implements([NotNull] this Type thisValue, [NotNull] params Type[] types) { return Implements(thisValue, false, types); }
 
-		public static bool Implements(this Type thisValue, bool declaredOnly, [NotNull] params Type[] types)
+		public static bool Implements([NotNull] this Type thisValue, bool declaredOnly, [NotNull] params Type[] types)
 		{
 			if (types == null) throw new ArgumentNullException(nameof(types));
 			return types.Length > 0 && GetInterfaces(thisValue, types.Contains, declaredOnly).Count() == types.Length;
 		}
 
-		public static bool ImplementsAny(this Type thisValue, [NotNull] IEnumerable<Type> types, bool declaredOnly = false)
+		public static bool ImplementsAny([NotNull] this Type thisValue, [NotNull] IEnumerable<Type> types, bool declaredOnly = false)
 		{
 			if (types == null) throw new ArgumentNullException(nameof(types));
 
@@ -454,9 +459,9 @@ namespace asm.Extensions
 			}
 		}
 
-		public static bool ImplementsAny(this Type thisValue, [NotNull] params Type[] types) { return ImplementsAny(thisValue, false, types); }
+		public static bool ImplementsAny([NotNull] this Type thisValue, [NotNull] params Type[] types) { return ImplementsAny(thisValue, false, types); }
 
-		public static bool ImplementsAny(this Type thisValue, bool declaredOnly, [NotNull] params Type[] types)
+		public static bool ImplementsAny([NotNull] this Type thisValue, bool declaredOnly, [NotNull] params Type[] types)
 		{
 			if (types == null) throw new ArgumentNullException(nameof(types));
 			return types.Length > 0 && GetInterfaces(thisValue, types.Contains, declaredOnly).Any();
@@ -477,20 +482,9 @@ namespace asm.Extensions
 					nested = type.GetNestedType(name, bindingAttributes);
 					if (!nested.Is(baseType)) nested = null;
 				}
-				catch (NotSupportedException)
+				catch (Exception e)
 				{
-					break;
-				}
-				catch (ArgumentException)
-				{
-					break;
-				}
-				catch (NullReferenceException)
-				{
-					break;
-				}
-				catch
-				{
+					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
 					// ignored
 				}
 			}
@@ -536,20 +530,9 @@ namespace asm.Extensions
 					info = type.GetField(name, bindingAttributes);
 					if (info != null && !info.FieldType.Is(baseType)) info = null;
 				}
-				catch (NotSupportedException)
+				catch (Exception e)
 				{
-					break;
-				}
-				catch (ArgumentException)
-				{
-					break;
-				}
-				catch (NullReferenceException)
-				{
-					break;
-				}
-				catch
-				{
+					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
 					// ignored
 				}
 			}
@@ -595,20 +578,9 @@ namespace asm.Extensions
 				{
 					info = type.GetEvent(name, bindingAttributes);
 				}
-				catch (NotSupportedException)
+				catch (Exception e)
 				{
-					break;
-				}
-				catch (ArgumentException)
-				{
-					break;
-				}
-				catch (NullReferenceException)
-				{
-					break;
-				}
-				catch
-				{
+					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
 					// ignored
 				}
 			}
@@ -661,20 +633,9 @@ namespace asm.Extensions
 					field = type.GetField(prop, BF_FIND_EVENT_FIELD);
 					if (field != null) break;
 				}
-				catch (NotSupportedException)
+				catch (Exception e)
 				{
-					break;
-				}
-				catch (ArgumentException)
-				{
-					break;
-				}
-				catch (NullReferenceException)
-				{
-					break;
-				}
-				catch
-				{
+					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
 					// ignored
 				}
 			}
@@ -703,20 +664,9 @@ namespace asm.Extensions
 					info = type.GetProperty(name, bindingAttributes, binder, returnType, paramTypes, modifiers);
 					if (info != null && returnType != null && !info.PropertyType.Is(returnType)) info = null;
 				}
-				catch (NotSupportedException)
+				catch (Exception e)
 				{
-					break;
-				}
-				catch (ArgumentException)
-				{
-					break;
-				}
-				catch (NullReferenceException)
-				{
-					break;
-				}
-				catch
-				{
+					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
 					// ignored
 				}
 			}
@@ -743,20 +693,9 @@ namespace asm.Extensions
 				{
 					info = type.GetConstructor(bindingAttributes, binder, callConvention, types ?? Type.EmptyTypes, modifiers);
 				}
-				catch (NotSupportedException)
+				catch (Exception e)
 				{
-					break;
-				}
-				catch (ArgumentException)
-				{
-					break;
-				}
-				catch (NullReferenceException)
-				{
-					break;
-				}
-				catch
-				{
+					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
 					// ignored
 				}
 			}
@@ -850,20 +789,9 @@ namespace asm.Extensions
 					info = type.GetMethod(name, bindingAttributes, binder, callConvention, paramTypes, modifiers);
 					if (info != null && returnType != null && !info.ReturnType.Is(returnType)) info = null;
 				}
-				catch (NotSupportedException)
+				catch (Exception e)
 				{
-					break;
-				}
-				catch (ArgumentException)
-				{
-					break;
-				}
-				catch (NullReferenceException)
-				{
-					break;
-				}
-				catch
-				{
+					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
 					// ignored
 				}
 			}
@@ -978,17 +906,10 @@ namespace asm.Extensions
 							if (members.Length > 1) throw new AmbiguousMatchException();
 							info = members[0];
 						}
-						catch (NotSupportedException)
+						catch (Exception e)
 						{
-							break;
-						}
-						catch (ArgumentException)
-						{
-							break;
-						}
-						catch (NullReferenceException)
-						{
-							break;
+							if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
+							// ignored
 						}
 					}
 					while (info == null && !declaredOnly && (type = type.BaseType) != null);
@@ -1020,14 +941,14 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsPrimitive(this Type thisValue)
+		public static bool IsPrimitive([NotNull] this Type thisValue)
 		{
 			thisValue = ResolveType(thisValue);
 			return thisValue != null && (thisValue.IsValueType && (thisValue.IsPrimitive || thisValue.IsEnum) || thisValue.IsAssignableTo(typeof(string)) || IsPointer(thisValue));
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsPrimitiveOrStruct(this Type thisValue)
+		public static bool IsPrimitiveOrStruct([NotNull] this Type thisValue)
 		{
 			thisValue = ResolveType(thisValue);
 			return thisValue != null && (thisValue.IsValueType || IsPrimitive(thisValue));
@@ -1037,7 +958,7 @@ namespace asm.Extensions
 		public static bool IsStruct([NotNull] this Type thisValue) { return thisValue.IsValueType && !thisValue.IsEnum; }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsPointer(this Type thisValue) { return thisValue != null && (thisValue.IsPointer || Is(thisValue, typeof(Pointer))); }
+		public static bool IsPointer([NotNull] this Type thisValue) { return thisValue.IsPointer || Is(thisValue, typeof(Pointer)); }
 
 		public static bool HasConversionOperator([NotNull] this Type thisValue, [NotNull] Type to)
 		{
@@ -1200,7 +1121,7 @@ namespace asm.Extensions
 		public static bool Is<T>([NotNull] this Type thisValue) { return Is(thisValue, typeof(T)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool Is(this Type thisValue, Type type) { return thisValue != null && type != null && type.IsAssignableFrom(thisValue); }
+		public static bool Is(this Type thisValue, [NotNull] Type type) { return thisValue != null && type.IsAssignableFrom(thisValue); }
 
 		public static bool IsAssignableFrom<T>([NotNull] this Type thisValue, bool declaredOnly = false) { return IsAssignableFrom(thisValue, typeof(T), declaredOnly); }
 		public static bool IsAssignableFrom([NotNull] this Type thisValue, [NotNull] Type value, bool declaredOnly = false)
@@ -1356,8 +1277,8 @@ namespace asm.Extensions
 						: Nullable.GetUnderlyingType(thisValue);
 		}
 
-		public static Type ResolveGenericType(this Type thisValue, bool declaredOnly = false) { return ResolveGenericTypeInternal(thisValue, null, declaredOnly); }
-		public static Type ResolveGenericType(this Type thisValue, [NotNull] Type genericType, bool declaredOnly = false)
+		public static Type ResolveGenericType([NotNull] this Type thisValue, bool declaredOnly = false) { return ResolveGenericTypeInternal(thisValue, null, declaredOnly); }
+		public static Type ResolveGenericType([NotNull] this Type thisValue, [NotNull] Type genericType, bool declaredOnly = false)
 		{
 			if (!genericType.IsGenericType) throw new ArgumentException("Argument is not a generic type.", nameof(genericType));
 			return ResolveGenericTypeInternal(thisValue, genericType, declaredOnly);

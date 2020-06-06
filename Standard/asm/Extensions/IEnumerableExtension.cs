@@ -1212,7 +1212,7 @@ namespace asm.Extensions
 		[NotNull]
 		[ItemNotNull]
 		public static IEnumerable<IEnumerable<T>> CombinationSum<T>([NotNull] this IEnumerable<T> thisValue, T target)
-			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
+			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
 		{
 			// https://leetcode.com/problems/combination-sum/
 			// https://leetcode.com/problems/permutations/discuss/18239/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partioning

@@ -5,7 +5,7 @@ using asm.Comparers;
 namespace asm.Collections
 {
 	public class NumericRangeComparer<T> : GenericComparer<NumericRange<T>>
-		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
+		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
 	{
 		public new static NumericRangeComparer<T> Default { get; } = new NumericRangeComparer<T>();
 

@@ -40,6 +40,8 @@ namespace asm.Extensions
 
 		public static T PickRandom<T>([NotNull] this IList<T> thisValue)
 		{
+			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
+
 			int max;
 			int n;
 
@@ -48,8 +50,6 @@ namespace asm.Extensions
 				lock (collection.SyncRoot)
 				{
 					max = thisValue.Count - 1;
-					if (max < 0)
-						throw new InvalidOperationException("List is empty.");
 					n = RNGRandomHelper.Next(0, max);
 					return thisValue[n];
 				}
@@ -269,7 +269,7 @@ namespace asm.Extensions
 
 			int si = sourceIndex, di = destinationIndex;
 
-			if (typeof(T) is ICloneable)
+			if (typeof(T).Implements<ICloneable>())
 			{
 				while (si < length && di < destination.Count)
 				{

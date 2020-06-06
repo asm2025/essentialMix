@@ -6,10 +6,6 @@ namespace asm.Collections
 {
 	public class DictionaryEnumerator : Enumerator, IDictionaryEnumerator, IEnumerator<DictionaryEntry>
 	{
-		public DictionaryEnumerator()
-		{
-		}
-
 		public DictionaryEnumerator([NotNull] IDictionary dictionary)
 			: base(dictionary)
 		{
@@ -33,10 +29,6 @@ namespace asm.Collections
 
 	public class DictionaryEnumerator<TKey, TValue> : DictionaryEnumerator, IEnumerator<KeyValuePair<TKey, TValue>>
 	{
-		public DictionaryEnumerator()
-		{
-		}
-
 		public DictionaryEnumerator([NotNull] IDictionary<TKey, TValue> dictionary)
 			: base(dictionary)
 		{
