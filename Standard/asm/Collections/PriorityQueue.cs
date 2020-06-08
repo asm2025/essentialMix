@@ -14,13 +14,13 @@ namespace asm.Collections
 
 		/// <inheritdoc />
 		public PriorityQueue([NotNull] Func<T, TPriority> priority)
-			: this(0, Comparer<T>.Default, priority)
+			: this(0, null, priority)
 		{
 		}
 
 		/// <inheritdoc />
 		public PriorityQueue(int capacity, [NotNull] Func<T, TPriority> priority)
-			: this(capacity, Comparer<T>.Default, priority)
+			: this(capacity, null, priority)
 		{
 		}
 
@@ -39,7 +39,7 @@ namespace asm.Collections
 
 		/// <inheritdoc />
 		public PriorityQueue([NotNull] IEnumerable<T> collection, [NotNull] Func<T, TPriority> priority)
-			: this(collection, Comparer<T>.Default, priority)
+			: this(collection, null, priority)
 		{
 		}
 
@@ -113,13 +113,13 @@ namespace asm.Collections
 	{
 		/// <inheritdoc />
 		public PriorityQueue()
-			: this(0, Comparer<T>.Default)
+			: this(0, null)
 		{
 		}
 
 		/// <inheritdoc />
 		public PriorityQueue(int capacity)
-			: this(capacity, Comparer<T>.Default)
+			: this(capacity, null)
 		{
 		}
 
@@ -137,7 +137,7 @@ namespace asm.Collections
 
 		/// <inheritdoc />
 		public PriorityQueue([NotNull] IEnumerable<T> collection)
-			: this(collection, Comparer<T>.Default)
+			: this(collection, null)
 		{
 		}
 

@@ -1951,13 +1951,13 @@ namespace asm.Collections
 		
 		/// <inheritdoc />
 		protected ArrayBinaryTree()
-			: this(0, Comparer<T>.Default)
+			: this(0, null)
 		{
 		}
 
 		/// <inheritdoc />
 		protected ArrayBinaryTree(int capacity)
-			: this(capacity, Comparer<T>.Default)
+			: this(capacity, null)
 		{
 		}
 
@@ -2000,6 +2000,8 @@ namespace asm.Collections
 
 		[NotNull]
 		public IComparer<T> Comparer { get; private set; }
+
+		public string Label { get; set; }
 
 		[field: ContractPublicPropertyName("Count")]
 		public int Count { get; protected set; }

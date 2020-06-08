@@ -40,13 +40,13 @@ namespace asm.Collections
 	{
 		/// <inheritdoc />
 		protected Heap() 
-			: this(0, Comparer<T>.Default)
+			: this(0, null)
 		{
 		}
 
 		/// <inheritdoc />
 		protected Heap(int capacity)
-			: this(capacity, Comparer<T>.Default)
+			: this(capacity, null)
 		{
 		}
 
@@ -64,7 +64,7 @@ namespace asm.Collections
 
 		/// <inheritdoc />
 		protected Heap([NotNull] IEnumerable<T> collection)
-			: this(collection, Comparer<T>.Default)
+			: this(collection, null)
 		{
 		}
 
@@ -183,16 +183,16 @@ namespace asm.Collections
 
 	public static class Heap
 	{
-		public static void Heapify<T>([NotNull] IList<T> values) { Heapify(values, 0, -1, false, Comparer<T>.Default); }
-		public static void Heapify<T>([NotNull] IList<T> values, bool descending) { Heapify(values, 0, -1, descending, Comparer<T>.Default); }
+		public static void Heapify<T>([NotNull] IList<T> values) { Heapify(values, 0, -1, false, null); }
+		public static void Heapify<T>([NotNull] IList<T> values, bool descending) { Heapify(values, 0, -1, descending, null); }
 		public static void Heapify<T>([NotNull] IList<T> values, IComparer<T> comparer) { Heapify(values, 0, -1, false, comparer); }
 		public static void Heapify<T>([NotNull] IList<T> values, bool descending, IComparer<T> comparer) { Heapify(values, 0, -1, descending, comparer); }
-		public static void Heapify<T>([NotNull] IList<T> values, int index) { Heapify(values, index, -1, false, Comparer<T>.Default); }
-		public static void Heapify<T>([NotNull] IList<T> values, int index, bool descending) { Heapify(values, index, -1, descending, Comparer<T>.Default); }
+		public static void Heapify<T>([NotNull] IList<T> values, int index) { Heapify(values, index, -1, false, null); }
+		public static void Heapify<T>([NotNull] IList<T> values, int index, bool descending) { Heapify(values, index, -1, descending, null); }
 		public static void Heapify<T>([NotNull] IList<T> values, int index, IComparer<T> comparer) { Heapify(values, index, -1, false, comparer); }
 		public static void Heapify<T>([NotNull] IList<T> values, int index, bool descending, IComparer<T> comparer) { Heapify(values, index, -1, descending, comparer); }
-		public static void Heapify<T>([NotNull] IList<T> values, int index, int count) { Heapify(values, index, count, false, Comparer<T>.Default); }
-		public static void Heapify<T>([NotNull] IList<T> values, int index, int count, bool descending) { Heapify(values, index, count, descending, Comparer<T>.Default); }
+		public static void Heapify<T>([NotNull] IList<T> values, int index, int count) { Heapify(values, index, count, false, null); }
+		public static void Heapify<T>([NotNull] IList<T> values, int index, int count, bool descending) { Heapify(values, index, count, descending, null); }
 		public static void Heapify<T>([NotNull] IList<T> values, int index, int count, IComparer<T> comparer) { Heapify(values, index, count, false, comparer); }
 		public static void Heapify<T>([NotNull] IList<T> values, int index, int count, bool descending, IComparer<T> comparer)
 		{

@@ -17,15 +17,16 @@ namespace Microsoft.Collections
 {
 	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
-	public class List<T> : IList<T>, IReadOnlyList<T>, IList
+	public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	{
 		[Serializable]
 		internal class SynchronizedList : IList<T>
 		{
-			private List<T> _list;
+			private readonly ListBase<T> _list;
+
 			private object _root;
 
-			internal SynchronizedList(List<T> list)
+			internal SynchronizedList(ListBase<T> list)
 			{
 				_list = list;
 				_root = ((ICollection)list).SyncRoot;
@@ -155,16 +156,28 @@ namespace Microsoft.Collections
 		[Serializable]
 		public struct Enumerator : IEnumerator<T>, IEnumerator
 		{
-			private List<T> _list;
-			private int _index;
-			private int _version;
+			private readonly ListBase<T> _list;
+			private readonly int _version;
 
-			internal Enumerator([NotNull] List<T> list)
+			private int _index;
+
+			internal Enumerator([NotNull] ListBase<T> list)
 			{
 				_list = list;
-				_index = 0;
 				_version = list._version;
+				_index = 0;
 				Current = default(T);
+			}
+
+			public T Current { get; private set; }
+
+			object IEnumerator.Current
+			{
+				get
+				{
+					if (_index.InRangeRx(0, _list.Count)) throw new InvalidOperationException();
+					return Current;
+				}
 			}
 
 			public void Dispose()
@@ -173,7 +186,7 @@ namespace Microsoft.Collections
 
 			public bool MoveNext()
 			{
-				List<T> localList = _list;
+				ListBase<T> localList = _list;
 
 				if (_version == localList._version && _index < localList.Count)
 				{
@@ -192,17 +205,6 @@ namespace Microsoft.Collections
 				return false;
 			}
 
-			public T Current { get; private set; }
-
-			object IEnumerator.Current
-			{
-				get
-				{
-					if (_index.InRangeRx(0, _list.Count)) throw new InvalidOperationException();
-					return Current;
-				}
-			}
-
 			void IEnumerator.Reset()
 			{
 				if (_version != _list._version) throw new VersionChangedException();
@@ -219,7 +221,7 @@ namespace Microsoft.Collections
 		// Constructs a List. The list is initially empty and has a capacity
 		// of zero. Upon adding the first element to the list the capacity is
 		// increased to 16, and then increased in multiples of two as required.
-		public List()
+		public ListBase()
 			: this(0)
 		{
 		}
@@ -227,7 +229,7 @@ namespace Microsoft.Collections
 		// Constructs a List with a given initial capacity. The list is
 		// initially empty, but will have room for the given number of elements
 		// before any reallocation is required.
-		public List(int capacity)
+		public ListBase(int capacity)
 		{
 			if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
 			Items = capacity == 0
@@ -238,7 +240,7 @@ namespace Microsoft.Collections
 		// Constructs a List, copying the contents of the given collection. The
 		// size and capacity of the new list will both be equal to the size of the
 		// given collection.
-		public List([NotNull] IEnumerable<T> collection)
+		public ListBase([NotNull] IEnumerable<T> collection)
 		{
 			Items = Array.Empty<T>();
 			InsertRange(0, collection);
@@ -282,15 +284,7 @@ namespace Microsoft.Collections
 				if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 				return Items[index];
 			}
-			set
-			{
-				if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-				T item = Items[index];
-				OnUpdating(index, item);
-				Items[index] = value;
-				_version++;
-				OnUpdated(index, value);
-			}
+			set => Insert(index, value, false);
 		}
 
 		object IList.this[int index]
@@ -299,7 +293,7 @@ namespace Microsoft.Collections
 			set
 			{
 				if (!ObjectHelper.IsCompatible<T>(value)) throw new ArgumentException("Incompatible value.", nameof(value));
-				this[index] = (T)value;
+				Insert(index, (T)value, false);
 			}
 		}
 
@@ -337,46 +331,42 @@ namespace Microsoft.Collections
 		// before inserting the new element.
 		public void Insert(int index, T item)
 		{
+			Insert(index, item, true);
 			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			OnInserting(index, item);
 			if (Count == Items.Length) EnsureCapacity(Count + 1);
 			if (index < Count) Array.Copy(Items, index, Items, index + 1, Count - index);
 			Items[index] = item;
 			Count++;
 			_version++;
-			OnInserted(index, item);
 		}
 
 		void IList.Insert(int index, object item)
 		{
 			if (!ObjectHelper.IsCompatible<T>(item)) throw new ArgumentException("Incompatible value.", nameof(item));
-			Insert(index, (T)item);
+			Insert(index, (T)item, true);
 		}
 
 		// Adds the given object to the end of this list. The size of the list is
 		// increased by one. If required, the capacity of the list is doubled
 		// before adding the new element.
-		public void Add(T item) { Insert(Count, item); }
+		public void Add(T item) { Insert(Count, item, true); }
 
 		int IList.Add(object item)
 		{
 			if (!ObjectHelper.IsCompatible<T>(item)) throw new ArgumentException("Incompatible value.", nameof(item));
-			Insert(Count, (T)item);
+			Insert(Count, (T)item, true);
 			return Count - 1;
 		}
 
 		// Removes the element at the given index. The size of the list is
 		// decreased by one.
-		public void RemoveAt(int index)
+		public virtual void RemoveAt(int index)
 		{
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			T item = Items[index];
-			OnRemoving(index, item);
-			Count--;
-			if (index < Count) Array.Copy(Items, index + 1, Items, index, Count - index);
+			if (index < Count - 1) Array.Copy(Items, index + 1, Items, index, Count - (index + 1));
 			Items[Count] = default(T);
+			Count--;
 			_version++;
-			OnRemoved(index, item);
 		}
 
 		// Removes the element at the given index. The size of the list is
@@ -396,14 +386,12 @@ namespace Microsoft.Collections
 		}
 
 		// Clears the contents of List.
-		public void Clear()
+		public virtual void Clear()
 		{
 			if (Count == 0) return;
-			OnClearing();
 			Array.Clear(Items, 0, Count); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
 			Count = 0;
 			_version++;
-			OnCleared();
 		}
 
 		// Adds the elements of the given collection to the end of this list. If
@@ -427,7 +415,6 @@ namespace Microsoft.Collections
 			{
 				int count = c.Count;
 				if (count == 0) return;
-				OnInserting(index, c);
 				EnsureCapacity(Count + count);
 				if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
 
@@ -446,7 +433,7 @@ namespace Microsoft.Collections
 
 				Count += count;
 				_version++;
-				OnInserted(index, count);
+				RangeInserted(index, count);
 			}
 			else
 			{
@@ -457,7 +444,7 @@ namespace Microsoft.Collections
 				{
 					while (en.MoveNext())
 					{
-						Insert(index++, en.Current);
+						Insert(index++, en.Current, true);
 					}
 				}
 			}
@@ -468,12 +455,11 @@ namespace Microsoft.Collections
 		{
 			Count.ValidateRange(index, ref count);
 			if (count == 0) return;
-			OnRemoving(index, count);
-			Count -= count;
+			RangeRemoving(index, count);
 			if (index < Count) Array.Copy(Items, index + count, Items, index, Count - index);
-			Array.Clear(Items, Count, count);
+			Array.Clear(Items, Count - count, count);
+			Count -= count;
 			_version++;
-			OnRemoved(index, count);
 		}
 
 		// This method removes all items which matches the predicate.
@@ -491,19 +477,6 @@ namespace Microsoft.Collections
 			RemoveRange(freeIndex, result);
 			return result;
 		}
-
-		protected virtual void OnInserting(int index, T item) { }
-		protected virtual void OnInserted(int index, T item) { }
-		protected virtual void OnInserting(int index, [NotNull] IEnumerable<T> item) { }
-		protected virtual void OnInserted(int index, int count) { }
-		protected virtual void OnUpdating(int index, T item) { }
-		protected virtual void OnUpdated(int index, T item) { }
-		protected virtual void OnRemoving(int index, T item) { }
-		protected virtual void OnRemoved(int index, T item) { }
-		protected virtual void OnRemoving(int index, int count) { }
-		protected virtual void OnRemoved(int index, int count) { }
-		protected virtual void OnClearing() { }
-		protected virtual void OnCleared() { }
 
 		public IEnumerator<T> GetEnumerator()
 		{
@@ -892,6 +865,12 @@ namespace Microsoft.Collections
 			return true;
 		}
 
+		[NotNull]
+		public static IList<T> Synchronized(ListBase<T> list)
+		{
+			return new SynchronizedList(list);
+		}
+
 		// Ensures that the capacity of this list is at least the given minimum
 		// value. If the current capacity of the list is less than min, the
 		// capacity is increased to twice the current capacity or to min,
@@ -902,10 +881,26 @@ namespace Microsoft.Collections
 			Capacity = (Items.Length == 0 ? Constants.DEFAULT_CAPACITY : Items.Length * 2).NotBelow(min);
 		}
 
-		[NotNull]
-		public static IList<T> Synchronized(List<T> list)
+		protected virtual void Insert(int index, T item, bool add)
 		{
-			return new SynchronizedList(list);
+			if (add)
+			{
+				if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+				if (Count == Items.Length) EnsureCapacity(Count + 1);
+				if (index < Count) Array.Copy(Items, index, Items, index + 1, Count - index);
+				Count++;
+			}
+			else
+			{
+				if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			}
+
+			Items[index] = item;
+			_version++;
 		}
+
+		protected virtual void RangeInserted(int index, int count) { }
+
+		protected virtual void RangeRemoving(int index, int count) { }
 	}
 }

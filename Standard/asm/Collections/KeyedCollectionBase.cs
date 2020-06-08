@@ -114,20 +114,20 @@ namespace asm.Collections
 		public virtual void MoveItem(int index, int newIndex)
 		{
 			TValue value = Items[index];
-			OnMoving(index, newIndex, value);
 			base.RemoveItem(index);
 			base.InsertItem(newIndex, value);
-			OnMoved(index, newIndex, value);
 		}
 
 		public int IndexOfKey(TKey key)
 		{
-			int index = -1;
-			if (Items.Count < 1) return index;
+			if (Dictionary == null) return -1;
 
-			for (int i = 0; i < Items.Count; i++)
+			int index = -1, i = -1;
+
+			foreach (TKey k in Dictionary.Keys)
 			{
-				if (!Comparer.Equals(key, GetKeyForItem(Items[i]))) continue;
+				i++;
+				if (!Comparer.Equals(key, k)) continue;
 				index = i;
 				break;
 			}
@@ -141,46 +141,5 @@ namespace asm.Collections
 			value = default(TValue);
 			return false;
 		}
-
-		protected override void InsertItem(int index, TValue item)
-		{
-			OnInserting(index, item);
-			base.InsertItem(index, item);
-			OnInserted(index, item);
-		}
-
-		protected override void SetItem(int index, TValue item)
-		{
-			OnUpdating(index, item);
-			base.SetItem(index, item);
-			OnUpdated(index, item);
-		}
-
-		protected override void RemoveItem(int index)
-		{
-			TValue value = Items[index];
-			OnRemoving(index, value);
-			base.RemoveItem(index);
-			OnRemoved(index, value);
-		}
-
-		protected override void ClearItems()
-		{
-			if (Count == 0) return;
-			OnClearing();
-			base.ClearItems();
-			OnCleared();
-		}
-
-		protected virtual void OnInserting(int index, TValue item) { }
-		protected virtual void OnInserted(int index, TValue item) { }
-		protected virtual void OnUpdating(int index, TValue item) { }
-		protected virtual void OnUpdated(int index, TValue item) { }
-		protected virtual void OnRemoving(int index, TValue item) { }
-		protected virtual void OnRemoved(int index, TValue item) { }
-		protected virtual void OnMoving(int index, int newIndex, TValue item) { }
-		protected virtual void OnMoved(int index, int newIndex, TValue item) { }
-		protected virtual void OnClearing() { }
-		protected virtual void OnCleared() { }
 	}
 }

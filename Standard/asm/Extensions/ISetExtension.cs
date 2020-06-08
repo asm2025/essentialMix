@@ -28,7 +28,7 @@ namespace asm.Extensions
 					return hashSet.Comparer;
 				case ConcurrentSet<T> concurrentSet:
 					return concurrentSet.Comparer;
-				case Microsoft.Collections.HashSet<T> hashSetBase:
+				case Microsoft.Collections.HashSetBase<T> hashSetBase:
 					return hashSetBase.Comparer;
 			}
 

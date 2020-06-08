@@ -22,13 +22,13 @@ namespace asm.Collections
 
 		/// <inheritdoc />
 		public OrderedSet()
-			: this(0, EqualityComparer<T>.Default)
+			: this(0, null)
 		{
 		}
 
 		/// <inheritdoc />
 		public OrderedSet(int capacity)
-			: this(capacity, EqualityComparer<T>.Default)
+			: this(capacity, null)
 		{
 		}
 
@@ -40,7 +40,7 @@ namespace asm.Collections
 
 		/// <inheritdoc />
 		public OrderedSet([NotNull] IEnumerable<T> collection)
-			: this(collection, EqualityComparer<T>.Default)
+			: this(collection, null)
 		{
 		}
 

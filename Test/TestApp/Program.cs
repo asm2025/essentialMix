@@ -1281,8 +1281,26 @@ namespace TestApp
 			string[] values = {
 				"Car",
 				"Care",
+				"calcification",
+				"campylobacter",
+				"cartilaginous",
+				"catecholamine",
+				"carpetbagging",
+				"carbonization",
+				"catastrophism",
+				"carboxylation",
+				"cardiovascular",
+				"cardiomyopathy",
+				"capitalization",
+				"carcinomatosis",
+				"cardiothoracic",
+				"carcinosarcoma",
+				"cartelizations",
+				"caprifications",
+				"candlesnuffers",
+				"canthaxanthins",
 				"Can",
-				"Canada"
+				"Canvas"
 			};
 			Trie<char> trie = new Trie<char>(CharComparer.InvariantCultureIgnoreCase);
 
@@ -1343,6 +1361,7 @@ namespace TestApp
 
 			prefix = "ca";
 			results = 0;
+			Console.WriteLine($"Cool {"removed".BrightGreen()}.");
 			Console.WriteLine();
 			Console.WriteLine($"Test find '{prefix.BrightCyan().Underline()}'...");
 

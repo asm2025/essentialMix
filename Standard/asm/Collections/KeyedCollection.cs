@@ -34,7 +34,6 @@ namespace asm.Collections
 		public KeyedCollection([NotNull] Func<TValue, TKey> getKey, [NotNull] IEnumerable<TValue> collection, IEqualityComparer<TKey> comparer)
 			: base(comparer ?? EqualityComparer<TKey>.Default)
 		{
-			if (collection == null) throw new ArgumentNullException(nameof(collection));
 			GetKey = getKey;
 		
 			foreach (TValue value in collection) 

@@ -29,10 +29,10 @@ namespace asm.Collections
 		 */
 		[DebuggerDisplay("{Value}, Count = {Count}")]
 		[Serializable]
-		protected sealed class Node : KeyedCollection<T, Node>, IComparable<Node>, IComparable, IEquatable<Node>
+		protected sealed class Node : KeyedDictionaryBase<T, Node>, IComparable<Node>, IComparable, IEquatable<Node>
 		{
 			public Node(T value, IEqualityComparer<T> comparer)
-				: base(e => e.Value, comparer)
+				: base(comparer)
 			{
 				Value = value;
 			}
@@ -87,6 +87,9 @@ namespace asm.Collections
 				if (endOfToken && !node.EndOfToken) node.EndOfToken = true;
 				return node;
 			}
+
+			/// <inheritdoc />
+			protected override T GetKeyForItem(Node item) { return item.Value; }
 
 			public static implicit operator T([NotNull] Node node) { return node.Value; }
 
@@ -149,7 +152,7 @@ namespace asm.Collections
 
 		public bool Remove(T value)
 		{
-			return Root.Remove(value);
+			return Root.RemoveByKey(value);
 		}
 
 		public bool Remove([NotNull] IEnumerable<T> token)
@@ -239,19 +242,26 @@ namespace asm.Collections
 				// last: keeps track of the original prefix's length.
 				// tmp: temp list to build the new tokens.
 				// max: the maximum number of results.
+
+				// base case
 				if (results.Count >= max) return;
 
 				using (IEnumerator<Node> enumerator = node.Values.GetEnumerator())
 				{
+					// 2. restriction: move next (has items) and results < max
 					while (enumerator.MoveNext() && results.Count < max)
 					{
+						// 1. choice / decision
 						Node child = enumerator.Current;
 						if (child == null) break;
 						prefix.Add(child.Value);
 
+						// 3. the goal: results of matching words
 						// did we reach a complete token yet?
 						if (child.EndOfToken) results.Add(new List<T>(prefix));
+						// recursive call
 						Backtrack(child, prefix, prefix.Count, results, max);
+						// and the backtrack: remove the last added letter(s) to navigate for more
 						prefix.RemoveRange(last, prefix.Count - last);
 					}
 				}

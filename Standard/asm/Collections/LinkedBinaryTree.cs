@@ -1917,7 +1917,7 @@ namespace asm.Collections
 
 		/// <inheritdoc />
 		protected LinkedBinaryTree()
-			: this(Comparer<T>.Default)
+			: this((IComparer<T>)null)
 		{
 		}
 
@@ -1927,7 +1927,7 @@ namespace asm.Collections
 		}
 
 		protected LinkedBinaryTree([NotNull] IEnumerable<T> collection)
-			: this(collection, Comparer<T>.Default)
+			: this(collection, null)
 		{
 		}
 
@@ -1961,6 +1961,8 @@ namespace asm.Collections
 
 		[NotNull]
 		public IComparer<T> Comparer { get; private set; }
+
+		public string Label { get; set; }
 
 		public TNode Root { get; protected set; }
 

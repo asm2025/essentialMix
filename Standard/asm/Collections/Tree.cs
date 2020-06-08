@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using JetBrains.Annotations;
+using Microsoft.Collections;
 
 namespace asm.Collections
 {
 	[DebuggerDisplay("{Value}, Count = {Count}")]
 	[Serializable]
-	public class Tree<T> : Microsoft.Collections.List<Tree<T>>
+	public class Tree<T> : ListBase<Tree<T>>
 	{
 		/// <inheritdoc />
 		public Tree() 
@@ -26,45 +27,15 @@ namespace asm.Collections
 			: base(collection)
 		{
 		}
-
-		public Tree<T> Parent { get; private set; }
 		
 		public T Value { get; set; }
-
-		public bool IsRoot => Parent == null;
 		
 		public bool IsLeaf => Count == 0;
-
-		/// <inheritdoc />
-		protected override void OnInserted(int index, [NotNull] Tree<T> item)
-		{
-			base.OnInserted(index, item);
-			item.Parent = this;
-		}
-
-		/// <inheritdoc />
-		protected override void OnRemoved(int index, [NotNull] Tree<T> item)
-		{
-			base.OnRemoved(index, item);
-			if (ReferenceEquals(this, item.Parent)) item.Parent = null;
-		}
-
-		/// <inheritdoc />
-		protected override void OnRemoving(int index, int count)
-		{
-			for (int i = index; i < count; i++)
-			{
-				Tree<T> item = Items[i];
-				if (ReferenceEquals(this, item.Parent)) item.Parent = null;
-			}
-
-			base.OnRemoving(index, count);
-		}
 	}
 
 	[DebuggerDisplay("{Key} [{Value}], Count = {Count}")]
 	[Serializable]
-	public class Tree<TKey, TValue> : KeyedCollectionBase<TKey, Tree<TKey, TValue>>
+	public class Tree<TKey, TValue> : KeyedDictionaryBase<TKey, Tree<TKey, TValue>>
 	{
 		/// <inheritdoc />
 		public Tree() 
@@ -95,44 +66,16 @@ namespace asm.Collections
 		{
 		}
 
-		public Tree<TKey, TValue> Parent { get; private set; }
-
 		[NotNull]
-		public KeyedCollectionBase<TKey, Tree<TKey, TValue>> Children => this;
+		public KeyedDictionaryBase<TKey, Tree<TKey, TValue>> Children => this;
 
 		public TKey Key { get; set; }
 		
 		public TValue Value { get; set; }
-
-		public bool IsRoot => Parent == null;
 		
 		public bool IsLeaf => Count == 0;
 
 		/// <inheritdoc />
 		protected override TKey GetKeyForItem(Tree<TKey, TValue> item) { return item.Key; }
-
-		/// <inheritdoc />
-		protected override void OnInserted(int index, [NotNull] Tree<TKey, TValue> item)
-		{
-			item.Parent = this;
-			base.OnInserted(index, item);
-		}
-
-		/// <inheritdoc />
-		protected override void OnRemoved(int index, [NotNull] Tree<TKey, TValue> item)
-		{
-			base.OnRemoved(index, item);
-			if (ReferenceEquals(this, item.Parent)) item.Parent = null;
-		}
-
-		/// <inheritdoc />
-		protected override void OnClearing()
-		{
-			foreach (Tree<TKey, TValue> item in Items)
-			{
-				if (ReferenceEquals(this, item.Parent)) item.Parent = null;
-			}
-			base.OnClearing();
-		}
 	}
 }

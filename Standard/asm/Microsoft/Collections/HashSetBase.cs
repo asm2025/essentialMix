@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Security;
 using System.Security.Permissions;
@@ -20,17 +19,17 @@ namespace Microsoft.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	[HostProtection(MayLeakOnAbort = true)]
-	public abstract class HashSet<T> : ISet<T>, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
+	public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
 	{
 		[Serializable]
 		[HostProtection(MayLeakOnAbort = true)]
 		public struct Enumerator : IEnumerator<T>, IEnumerator
 		{
-			private HashSet<T> _set;
+			private HashSetBase<T> _set;
 			private int _index;
 			private int _version;
 
-			internal Enumerator([NotNull] HashSet<T> set)
+			internal Enumerator([NotNull] HashSetBase<T> set)
 			{
 				_set = set;
 				_index = 0;
@@ -122,32 +121,31 @@ namespace Microsoft.Collections
 		// temporary variable needed during deserialization
 		private SerializationInfo _siInfo;
 
-		protected HashSet()
-			: this(EqualityComparer<T>.Default)
+		protected HashSetBase()
+			: this((IEqualityComparer<T>)null)
 		{
 		}
 
-		protected HashSet(int capacity)
-			: this(capacity, EqualityComparer<T>.Default)
+		protected HashSetBase(int capacity)
+			: this(capacity, null)
 		{
 		}
 
-		protected HashSet(IEqualityComparer<T> comparer)
+		protected HashSetBase(IEqualityComparer<T> comparer)
 		{
 			Comparer = comparer ?? EqualityComparer<T>.Default;
 			_freeList = -1;
 		}
 
-		protected HashSet([NotNull] IEnumerable<T> collection)
-			: this(collection, EqualityComparer<T>.Default)
+		protected HashSetBase([NotNull] IEnumerable<T> collection)
+			: this(collection, null)
 		{
 		}
 
-		protected HashSet(int capacity, IEqualityComparer<T> comparer)
+		protected HashSetBase(int capacity, IEqualityComparer<T> comparer)
 			: this(comparer)
 		{
 			if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
-			Contract.EndContractBlock();
 			if (capacity > 0) Initialize(capacity);
 		}
 
@@ -158,11 +156,9 @@ namespace Microsoft.Collections
 		/// </summary>
 		/// <param name="collection"></param>
 		/// <param name="comparer"></param>
-		protected HashSet([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
+		protected HashSetBase([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
 			: this(comparer)
 		{
-			Contract.EndContractBlock();
-
 			if (collection is ISet<T> otherAsHashSet && AreEqualityComparersEqual(this, otherAsHashSet))
 			{
 				CopyFrom(otherAsHashSet);
@@ -179,7 +175,7 @@ namespace Microsoft.Collections
 			}
 		}
 
-		protected HashSet(SerializationInfo info, StreamingContext context)
+		protected HashSetBase(SerializationInfo info, StreamingContext context)
 		{
 			// We can't do anything with the keys and values until the entire graph has been 
 			// deserialized and we have a reasonable estimate that GetHashCode is not going to 
@@ -280,9 +276,8 @@ namespace Microsoft.Collections
 		/// </summary>
 		/// <param name="item">item to remove</param>
 		/// <returns>true if removed; false if not (i.e. if the item wasn't in the HashSet)</returns>
-		public bool Remove(T item)
+		public virtual bool Remove(T item)
 		{
-			if (!OnRemoving(item)) return false;
 			if (_buckets == null) return false;
 			
 			int hashCode = InternalGetHashCode(item);
@@ -321,7 +316,6 @@ namespace Microsoft.Collections
 					_freeList = i;
 				}
 
-				OnRemoved(item);
 				return true;
 			}
 
@@ -333,10 +327,9 @@ namespace Microsoft.Collections
 		///     Remove all items from this set. This clears the elements but not the underlying
 		///     buckets and slots array. Follow this call by TrimExcess to release these.
 		/// </summary>
-		public void Clear()
+		public virtual void Clear()
 		{
 			if (_lastIndex <= 0) return;
-			if (!OnClearing()) return;
 			// clear the elements so that the gc can reclaim the references.
 			// clear only up to _lastIndex for _slots 
 			Array.Clear(_slots, 0, _lastIndex);
@@ -345,7 +338,6 @@ namespace Microsoft.Collections
 			Count = 0;
 			_freeList = -1;
 			_version++;
-			OnCleared();
 		}
 
 		/// <summary>
@@ -355,8 +347,6 @@ namespace Microsoft.Collections
 		/// <returns></returns>
 		public int RemoveWhere([NotNull] Predicate<T> match)
 		{
-			Contract.EndContractBlock();
-
 			int numRemoved = 0;
 
 			for (int i = 0; i < _lastIndex; i++)
@@ -406,7 +396,6 @@ namespace Microsoft.Collections
 		public void CopyTo([NotNull] T[] array, int arrayIndex, int count)
 		{
 			if (array == null) throw new ArgumentNullException(nameof(array));
-			Contract.EndContractBlock();
 			Count.ValidateRange(arrayIndex, ref count);
 
 			int numCopied = 0;
@@ -428,8 +417,6 @@ namespace Microsoft.Collections
 		/// <param name="other">enumerable with items to add</param>
 		public void UnionWith(IEnumerable<T> other)
 		{
-			Contract.EndContractBlock();
-
 			foreach (T item in other) 
 				AddIfNotPresent(item);
 		}
@@ -447,8 +434,6 @@ namespace Microsoft.Collections
 		/// <param name="other">enumerable with items to add </param>
 		public void IntersectWith(IEnumerable<T> other)
 		{
-			Contract.EndContractBlock();
-
 			// intersection of anything with empty set is empty set, so return if count is 0
 			if (Count == 0) return;
 
@@ -480,8 +465,6 @@ namespace Microsoft.Collections
 		/// <param name="other">enumerable with items to remove</param>
 		public void ExceptWith(IEnumerable<T> other)
 		{
-			Contract.EndContractBlock();
-
 			// this is already the empty set; return
 			if (Count == 0) return;
 
@@ -503,8 +486,6 @@ namespace Microsoft.Collections
 		/// <param name="other">enumerable with items to XOR</param>
 		public void SymmetricExceptWith(IEnumerable<T> other)
 		{
-			Contract.EndContractBlock();
-
 			// if set is empty, then symmetric difference is other
 			if (Count == 0)
 			{
@@ -542,8 +523,6 @@ namespace Microsoft.Collections
 		/// <returns>true if this is a subset of other; false if not</returns>
 		public bool IsSubsetOf(IEnumerable<T> other)
 		{
-			Contract.EndContractBlock();
-
 			// The empty set is a subset of any set
 			if (Count == 0) return true;
 
@@ -576,8 +555,6 @@ namespace Microsoft.Collections
 		/// <returns>true if this is a proper subset of other; false if not</returns>
 		public bool IsProperSubsetOf(IEnumerable<T> other)
 		{
-			Contract.EndContractBlock();
-
 			if (other is ICollection<T> otherAsCollection)
 			{
 				// the empty set is a proper subset of anything but the empty set
@@ -609,8 +586,6 @@ namespace Microsoft.Collections
 		/// <returns>true if this is a superset of other; false if not</returns>
 		public bool IsSupersetOf(IEnumerable<T> other)
 		{
-			Contract.EndContractBlock();
-
 			// try to fall out early based on counts
 			if (!(other is ICollection<T> otherAsCollection)) return ContainsAllElements(other);
 			// if other is the empty set then this is a superset
@@ -641,8 +616,6 @@ namespace Microsoft.Collections
 		/// <returns>true if this is a proper superset of other; false if not</returns>
 		public bool IsProperSupersetOf(IEnumerable<T> other)
 		{
-			Contract.EndContractBlock();
-
 			// the empty set isn't a proper superset of any set.
 			if (Count == 0) return false;
 
@@ -674,8 +647,14 @@ namespace Microsoft.Collections
 		/// <returns>true if these have at least one common element; false if disjoint</returns>
 		public bool Overlaps(IEnumerable<T> other)
 		{
-			Contract.EndContractBlock();
-			return Count != 0 && other.Any(Contains);
+			if (Count == 0) return false;
+
+			foreach (T item in other)
+			{
+				if (Contains(item)) return true;
+			}
+
+			return false;
 		}
 
 		/// <summary>
@@ -686,8 +665,6 @@ namespace Microsoft.Collections
 		/// <returns></returns>
 		public bool SetEquals(IEnumerable<T> other)
 		{
-			Contract.EndContractBlock();
-
 			switch (other)
 			{
 				// faster if other is a hashset and we're using same equality comparer
@@ -793,13 +770,6 @@ namespace Microsoft.Collections
 			}
 		}
 
-		protected virtual bool OnInserting(T item) { return true; }
-		protected virtual void OnInserted(T item) { }
-		protected virtual bool OnRemoving(T item) { return true; }
-		protected virtual void OnRemoved(T item) { }
-		protected virtual bool OnClearing() { return true; }
-		protected virtual void OnCleared() { }
-
 		/// <summary>
 		///     Copies this to an array. Used for DebugView
 		/// </summary>
@@ -826,7 +796,7 @@ namespace Microsoft.Collections
 				return;
 			}
 
-			if (source is HashSet<T> hashSetBase)
+			if (source is HashSetBase<T> hashSetBase)
 			{
 				int capacity = source.Count;
 				int threshold = asmMath.ExpandPrime(count + 1);
@@ -936,9 +906,8 @@ namespace Microsoft.Collections
 		/// </summary>
 		/// <param name="value">value to find</param>
 		/// <returns></returns>
-		protected bool AddIfNotPresent(T value)
+		protected virtual bool AddIfNotPresent(T value)
 		{
-			if (!OnInserting(value)) return false;
 			if (_buckets == null) Initialize(0);
 
 			int hashCode = InternalGetHashCode(value);
@@ -975,7 +944,6 @@ namespace Microsoft.Collections
 			_buckets[bucket] = index + 1;
 			Count++;
 			_version++;
-			OnInserted(value);
 			return true;
 		}
 
@@ -1000,7 +968,12 @@ namespace Microsoft.Collections
 		/// <returns></returns>
 		private bool ContainsAllElements([NotNull] IEnumerable<T> other)
 		{
-			return other.All(Contains);
+			foreach (T item in other)
+			{
+				if (!Contains(item)) return false;
+			}
+
+			return true;
 		}
 
 		/// <summary>
@@ -1015,7 +988,12 @@ namespace Microsoft.Collections
 		/// <returns></returns>
 		private bool IsSubsetOfHashSetWithSameEc([NotNull] ISet<T> other)
 		{
-			return this.All(other.Contains);
+			foreach (T item in this)
+			{
+				if (!other.Contains(item)) return false;
+			}
+			
+			return true;
 		}
 
 		/// <summary>
@@ -1267,7 +1245,7 @@ namespace Microsoft.Collections
 			if (Count == 0)
 			{
 				int numElementsInOther = 0;
-				if (other.Any()) numElementsInOther++;
+				if (other.FastCount() > -1) numElementsInOther++;
 				result.UniqueCount = 0;
 				result.UnfoundCount = numElementsInOther;
 				return result;
@@ -1328,13 +1306,6 @@ namespace Microsoft.Collections
 						? 0
 						: Comparer.GetHashCode(item) & LOWER31_BIT_MASK;
 		}
-
-		/// <summary>
-		///     Used for deep equality of HashSet testing
-		/// </summary>
-		/// <returns></returns>
-		[NotNull]
-		public static IEqualityComparer<HashSet<T>> CreateSetComparer() { return new HashSetEqualityComparer<T>(); }
 
 		/// <summary>
 		///     Internal method used for HashSetEqualityComparer. Compares set1 and set2 according
