@@ -28,6 +28,8 @@ namespace TestApp
 		{
 			Console.OutputEncoding = Encoding.UTF8;
 
+			//TestDomainName();
+
 			//TestSortAlgorithm();
 			//TestSortAlgorithms();
 
@@ -60,9 +62,57 @@ namespace TestApp
 			//TestThreadQueue();
 
 			//TestTrie();
-			TestTrieSimilarWordsRemoval();
+			//TestTrieSimilarWordsRemoval();
 
+			TestUndirectedGraphAdd();
+			
 			ConsoleHelper.Pause();
+		}
+
+		private static void TestDomainName()
+		{
+			string[] domains =
+			{
+				"https://stackoverflow.com/questions/4643227/top-level-domain-from-url-in-c-sharp",
+				"https://stackoverflow.com/questions/3121957/how-can-i-do-a-case-insensitive-string-comparison",
+				"https://github.com/nager/Nager.PublicSuffix",
+				"https://docs.microsoft.com/en-us/dotnet/csharp/how-to/compare-strings",
+				"https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/boolean-logical-operators"
+			};
+			List<(string, string)> matchingDomains = new List<(string, string)>();
+			Title("Testing domain names...");
+
+			for (int i = 0; i < domains.Length - 1; i++)
+			{
+				string x = domains[i];
+
+				for (int j = i + 1; j < domains.Length; j++)
+				{
+					string y = domains[j];
+					Console.WriteLine("Testing:".BrightBlack());
+					Console.WriteLine(x);
+					Console.WriteLine(y);
+					bool matching = DomainNameComparer.Default.Equals(x, y);
+					Console.WriteLine(matching.ToYesNo());
+					if (!matching) continue;
+					matchingDomains.Add((x, y));
+				}
+			}
+
+			if (matchingDomains.Count == 0)
+			{
+				Console.WriteLine("No matching entries..!".BrightRed());
+				return;
+			}
+
+			Console.WriteLine($"Found {matchingDomains.Count.ToString().BrightGreen()} entries:");
+
+			foreach ((string, string) tuple in matchingDomains)
+			{
+				Console.WriteLine(tuple.Item1);
+				Console.WriteLine(tuple.Item2);
+				Console.WriteLine();
+			}
 		}
 
 		private static void TestSortAlgorithm()
@@ -442,6 +492,7 @@ namespace TestApp
 			Title("Testing BinarySearchTree.Add()...");
 
 			bool more;
+			BinarySearchTree<int> tree = new BinarySearchTree<int>();
 
 			do
 			{
@@ -452,7 +503,7 @@ namespace TestApp
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
-				BinarySearchTree<int> tree = new BinarySearchTree<int>();
+				tree.Clear();
 
 				foreach (int v in values)
 				{
@@ -477,6 +528,7 @@ namespace TestApp
 			Title("Testing BinarySearchTree.Remove()...");
 
 			bool more;
+			BinarySearchTree<int> tree = new BinarySearchTree<int>();
 
 			do
 			{
@@ -487,7 +539,8 @@ namespace TestApp
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
-				BinarySearchTree<int> tree = new BinarySearchTree<int>(values);
+				tree.Clear();
+				tree.Add(values);
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 				tree.Print(Orientation.Horizontal);
@@ -517,6 +570,7 @@ namespace TestApp
 			Title("Testing BinarySearchTree.Balance()...");
 
 			bool more;
+			BinarySearchTree<int> tree = new BinarySearchTree<int>();
 
 			do
 			{
@@ -527,7 +581,8 @@ namespace TestApp
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
-				BinarySearchTree<int> tree = new BinarySearchTree<int>(values);
+				tree.Clear();
+				tree.Add(values);
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 				tree.Print(Orientation.Horizontal);
@@ -564,6 +619,7 @@ namespace TestApp
 			Title("Testing AVLTree.Add()...");
 
 			bool more;
+			AVLTree<int> tree = new AVLTree<int>();
 
 			do
 			{
@@ -575,7 +631,7 @@ namespace TestApp
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
-				AVLTree<int> tree = new AVLTree<int>();
+				tree.Clear();
 
 				foreach (int v in values)
 				{
@@ -600,6 +656,7 @@ namespace TestApp
 			Title("Testing AVLTree.Remove()...");
 
 			bool more;
+			AVLTree<int> tree = new AVLTree<int>();
 
 			do
 			{
@@ -611,7 +668,8 @@ namespace TestApp
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
-				AVLTree<int> tree = new AVLTree<int>(values);
+				tree.Clear();
+				tree.Add(values);
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 				tree.Print(Orientation.Horizontal);
@@ -641,6 +699,7 @@ namespace TestApp
 			Title("Testing RedBlackTree.Add()...");
 
 			bool more;
+			RedBlackTree<int> tree = new RedBlackTree<int>();
 
 			do
 			{
@@ -652,7 +711,7 @@ namespace TestApp
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
-				RedBlackTree<int> tree = new RedBlackTree<int>();
+				tree.Clear();
 
 				foreach (int v in values)
 				{
@@ -677,6 +736,7 @@ namespace TestApp
 			Title("Testing RedBlackTree.Remove()...");
 
 			bool more;
+			RedBlackTree<int> tree = new RedBlackTree<int>();
 
 			do
 			{
@@ -688,7 +748,8 @@ namespace TestApp
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
-				RedBlackTree<int> tree = new RedBlackTree<int>(values);
+				tree.Clear();
+				tree.Add(values);
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
 				tree.Print();
 				tree.Print(Orientation.Horizontal);
@@ -718,6 +779,9 @@ namespace TestApp
 			Title("Testing all BinaryTrees...");
 
 			bool more;
+			BinarySearchTree<int> binarySearchTree = new BinarySearchTree<int>();
+			AVLTree<int> avlTree = new AVLTree<int>();
+			RedBlackTree<int> redBlackTree = new RedBlackTree<int>();
 
 			do
 			{
@@ -728,14 +792,11 @@ namespace TestApp
 				int[] values = GetRandomIntegers(len);
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
-				LinkedBinaryTree<int> tree = new BinarySearchTree<int>();
-				DoTheTest(tree, values);
+				DoTheTest(binarySearchTree, values);
 
-				tree = new AVLTree<int>();
-				DoTheTest(tree, values);
+				DoTheTest(avlTree, values);
 
-				RedBlackTree<int> rbTree = new RedBlackTree<int>();
-				DoTheTest(rbTree, values);
+				DoTheTest(redBlackTree, values);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -749,6 +810,7 @@ namespace TestApp
 			{
 				Console.WriteLine();
 				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
+				tree.Clear();
 				tree.Add(array);
 
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
@@ -1180,6 +1242,19 @@ namespace TestApp
 			}
 			while (more);
 
+			static void AddWords(Trie<char> trie, ISet<string> set)
+			{
+				int len = RNGRandomHelper.Next(10, 20);
+				Console.WriteLine($"Generating {len} words: ".BrightGreen());
+				string[] newValues = GetRandomStrings(len);
+
+				foreach (string value in newValues)
+				{
+					if (!set.Add(value)) continue;
+					trie.Add(value);
+				}
+			}
+
 			static void DoTheTest(Trie<char> trie, string token, ISet<string> values)
 			{
 				Console.WriteLine($"Test find '{token.BrightCyan().Underline()}'...");
@@ -1260,19 +1335,6 @@ namespace TestApp
 
 				Console.WriteLine();
 				Console.WriteLine("Isn't that cool? :))");
-			}
-
-			static void AddWords(Trie<char> trie, ISet<string> set)
-			{
-				int len = RNGRandomHelper.Next(10, 20);
-				Console.WriteLine($"Generating {len} words: ".BrightGreen());
-				string[] newValues = GetRandomStrings(len);
-
-				foreach (string value in newValues)
-				{
-					if (!set.Add(value)) continue;
-					trie.Add(value);
-				}
 			}
 		}
 
@@ -1371,6 +1433,86 @@ namespace TestApp
 			}
 		}
 
+		private static void TestUndirectedGraphAdd()
+		{
+			const int MAX_LIST = 26;
+
+			bool more;
+			UndirectedGraph<char> graph = new UndirectedGraph<char>();
+			ISet<char> values = new HashSet<char>();
+
+			do
+			{
+				Console.Clear();
+				Console.WriteLine();
+				if (values.Count == 0) AddChar(graph, values);
+
+				DoTheTest(graph, values);
+				
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				if (!more || values.Count >= MAX_LIST) continue;
+
+				Console.WriteLine();
+				Console.Write($"Would you like to add more character? {"[Y]".BrightGreen()} / {"any key".Dim()} ");
+				response = Console.ReadKey(true);
+				if (response.KeyChar != 'Y' && response.KeyChar != 'y') continue;
+				Console.WriteLine();
+				AddChar(graph, values);
+			}
+			while (more);
+
+			static void AddChar(UndirectedGraph<char> graph, ISet<char> set)
+			{
+				int len = RNGRandomHelper.Next(1, 12);
+				Console.WriteLine($"Generating {len} characters: ".BrightGreen());
+				char[] newValues = GetRandomChar(len);
+
+				foreach (char value in newValues)
+				{
+					if (!set.Add(value)) continue;
+					graph.Add(value);
+				}
+			}
+
+			static void DoTheTest(UndirectedGraph<char> graph, ISet<char> values)
+			{
+				Console.WriteLine("Test adding node...");
+				Console.WriteLine("characters list: ".BrightBlack() + string.Join(", ", values));
+				graph.Clear();
+				graph.Add(values);
+
+				if (graph.Count != values.Count)
+				{
+					Console.WriteLine("Something went wrong, not all nodes were added...!".BrightRed());
+					return;
+				}
+
+				if (graph.Count == 1)
+				{
+					Console.WriteLine("Huh, must add more nodes...!".BrightRed());
+					return;
+				}
+				
+				Console.WriteLine("All nodes are added...!".BrightGreen() + " Let's try adding some relationships...");
+
+				Queue<char> queue = new Queue<char>(values);
+				char from = queue.Dequeue();
+
+				while (queue.Count > 0)
+				{
+					char to = queue.Dequeue();
+					Console.WriteLine($"Adding {from.ToString().BrightCyan().Underline()} to {to.ToString().BrightCyan().Underline()}...");
+					graph.AddEdge(from, to);
+					from = to;
+				}
+
+				graph.Print();
+			}
+		}
+
 		private static void Title(string title)
 		{
 			Console.WriteLine();
@@ -1405,6 +1547,21 @@ namespace TestApp
 				values[i] = (i + 1) * RNGRandomHelper.NextDouble();
 			}
 	
+			return values;
+		}
+
+		[NotNull]
+		private static char[] GetRandomChar(int len = 0)
+		{
+			if (len < 1) len = RNGRandomHelper.Next(1, 12);
+	
+			char[] values = new char[len];
+
+			for (int i = 0; i < len; i++)
+			{
+				values[i] = (char)RNGRandomHelper.Next('a', 'z');
+			}
+
 			return values;
 		}
 
@@ -1448,7 +1605,6 @@ namespace TestApp
 
 public static class Extension
 {
-
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	[NotNull]
 	public static string ToYesNo(this bool thisValue)
@@ -1472,9 +1628,8 @@ public static class Extension
 	public static void Print<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, Orientation orientation, bool diagnosticInfo = true)
 		where TNode : LinkedBinaryNode<TNode, T>
 	{
-		string treeString = thisValue.ToString(orientation, diagnosticInfo);
 		Console.WriteLine();
-		Console.WriteLine(treeString);
+		thisValue.WriteTo(Console.Out, orientation, diagnosticInfo);
 	}
 
 	public static void Print<T>([NotNull] this ArrayBinaryTree<T> thisValue, bool diagnosticInfo = true)
@@ -1488,8 +1643,18 @@ public static class Extension
 
 	public static void Print<T>([NotNull] this ArrayBinaryTree<T> thisValue, Orientation orientation, bool diagnosticInfo = true)
 	{
-		string treeString = thisValue.ToString(orientation, diagnosticInfo);
 		Console.WriteLine();
-		Console.WriteLine(treeString);
+		thisValue.WriteTo(Console.Out, orientation, diagnosticInfo);
+	}
+
+	public static void Print<TNode, TEdge, T>([NotNull] this Graph<TNode, TEdge, T> thisValue)
+		where TNode : GraphNode<TNode, T>
+		where TEdge : GraphEdge<TNode, TEdge, T>
+	{
+		Console.WriteLine();
+		Console.WriteLine($"{"Order:".Yellow()} {thisValue.Order.ToString().Underline()}.");
+		Console.WriteLine($"{"Size:".Yellow()} {thisValue.Size.ToString().Underline()}.");
+		Console.WriteLine();
+		thisValue.WriteTo(Console.Out);
 	}
 }

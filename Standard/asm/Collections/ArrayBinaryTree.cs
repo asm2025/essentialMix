@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -59,7 +60,7 @@ namespace asm.Collections
 			private bool _started;
 			private bool _done;
 
-			internal Enumerator([NotNull] ArrayBinaryTree<T> tree, int index, TraverseMethod method, HorizontalFlow flow)
+			internal Enumerator([NotNull] ArrayBinaryTree<T> tree, int index, BinaryTreeTraverseMethod method, HorizontalFlow flow)
 			{
 				_tree = tree;
 				_version = _tree._version;
@@ -68,7 +69,7 @@ namespace asm.Collections
 
 				switch (method)
 				{
-					case TraverseMethod.LevelOrder:
+					case BinaryTreeTraverseMethod.LevelOrder:
 						_queueOrStack = new DynamicQueue<int>(DequeuePriority.FIFO);
 						_moveNext = flow switch
 						{
@@ -77,7 +78,7 @@ namespace asm.Collections
 							_ => throw new ArgumentOutOfRangeException(nameof(flow), flow, null)
 						};
 						break;
-					case TraverseMethod.PreOrder:
+					case BinaryTreeTraverseMethod.PreOrder:
 						_queueOrStack = new DynamicQueue<int>(DequeuePriority.LIFO);
 						_moveNext = flow switch
 						{
@@ -86,7 +87,7 @@ namespace asm.Collections
 							_ => throw new ArgumentOutOfRangeException(nameof(flow), flow, null)
 						};
 						break;
-					case TraverseMethod.InOrder:
+					case BinaryTreeTraverseMethod.InOrder:
 						_queueOrStack = new DynamicQueue<int>(DequeuePriority.LIFO);
 						_moveNext = flow switch
 						{
@@ -95,7 +96,7 @@ namespace asm.Collections
 							_ => throw new ArgumentOutOfRangeException(nameof(flow), flow, null)
 						};
 						break;
-					case TraverseMethod.PostOrder:
+					case BinaryTreeTraverseMethod.PostOrder:
 						_queueOrStack = new DynamicQueue<int>(DequeuePriority.LIFO);
 						_moveNext = flow switch
 						{
@@ -481,9 +482,9 @@ namespace asm.Collections
 		{
 			private readonly ArrayBinaryTree<T> _tree;
 			private readonly int _index;
-			private readonly TraverseMethod _method;
+			private readonly BinaryTreeTraverseMethod _method;
 
-			internal Iterator([NotNull] ArrayBinaryTree<T> tree, int index, TraverseMethod method)
+			internal Iterator([NotNull] ArrayBinaryTree<T> tree, int index, BinaryTreeTraverseMethod method)
 			{
 				_tree = tree;
 				_index = index;
@@ -496,7 +497,7 @@ namespace asm.Collections
 
 				switch (_method)
 				{
-					case TraverseMethod.LevelOrder:
+					case BinaryTreeTraverseMethod.LevelOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -509,7 +510,7 @@ namespace asm.Collections
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
 						}
 						break;
-					case TraverseMethod.PreOrder:
+					case BinaryTreeTraverseMethod.PreOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -522,7 +523,7 @@ namespace asm.Collections
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
 						}
 						break;
-					case TraverseMethod.InOrder:
+					case BinaryTreeTraverseMethod.InOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -535,7 +536,7 @@ namespace asm.Collections
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
 						}
 						break;
-					case TraverseMethod.PostOrder:
+					case BinaryTreeTraverseMethod.PostOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -807,7 +808,7 @@ namespace asm.Collections
 
 				switch (_method)
 				{
-					case TraverseMethod.LevelOrder:
+					case BinaryTreeTraverseMethod.LevelOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -820,7 +821,7 @@ namespace asm.Collections
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
 						}
 						break;
-					case TraverseMethod.PreOrder:
+					case BinaryTreeTraverseMethod.PreOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -833,7 +834,7 @@ namespace asm.Collections
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
 						}
 						break;
-					case TraverseMethod.InOrder:
+					case BinaryTreeTraverseMethod.InOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -846,7 +847,7 @@ namespace asm.Collections
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
 						}
 						break;
-					case TraverseMethod.PostOrder:
+					case BinaryTreeTraverseMethod.PostOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -1118,7 +1119,7 @@ namespace asm.Collections
 
 				switch (_method)
 				{
-					case TraverseMethod.LevelOrder:
+					case BinaryTreeTraverseMethod.LevelOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -1131,7 +1132,7 @@ namespace asm.Collections
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
 						}
 						break;
-					case TraverseMethod.PreOrder:
+					case BinaryTreeTraverseMethod.PreOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -1144,7 +1145,7 @@ namespace asm.Collections
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
 						}
 						break;
-					case TraverseMethod.InOrder:
+					case BinaryTreeTraverseMethod.InOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -1157,7 +1158,7 @@ namespace asm.Collections
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
 						}
 						break;
-					case TraverseMethod.PostOrder:
+					case BinaryTreeTraverseMethod.PostOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -1445,7 +1446,7 @@ namespace asm.Collections
 
 				switch (_method)
 				{
-					case TraverseMethod.LevelOrder:
+					case BinaryTreeTraverseMethod.LevelOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -1458,7 +1459,7 @@ namespace asm.Collections
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
 						}
 						break;
-					case TraverseMethod.PreOrder:
+					case BinaryTreeTraverseMethod.PreOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -1471,7 +1472,7 @@ namespace asm.Collections
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
 						}
 						break;
-					case TraverseMethod.InOrder:
+					case BinaryTreeTraverseMethod.InOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -1484,7 +1485,7 @@ namespace asm.Collections
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
 						}
 						break;
-					case TraverseMethod.PostOrder:
+					case BinaryTreeTraverseMethod.PostOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
@@ -1768,7 +1769,7 @@ namespace asm.Collections
 		}
 
 		/// <summary>
-		/// iterative approach with level awareness. This is a different way than <see cref="TraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
+		/// iterative approach with level awareness. This is a different way than <see cref="BinaryTreeTraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
 		/// </summary>
 		internal sealed class LevelIterator
 		{
@@ -2018,7 +2019,7 @@ namespace asm.Collections
 		[NotNull]
 		public IEnumerator<T> GetEnumerator()
 		{
-			return (IEnumerator<T>)Enumerate(0, TraverseMethod.InOrder, HorizontalFlow.LeftToRight);
+			return (IEnumerator<T>)Enumerate(0, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight);
 		}
 
 		public virtual bool Equals(ArrayBinaryTree<T> other)
@@ -2044,7 +2045,7 @@ namespace asm.Collections
 		/// <param name="flow">Left-to-right or right-to-left</param>
 		/// <returns></returns>
 		[NotNull]
-		public IEnumerable<T> Enumerate(int index, TraverseMethod method, HorizontalFlow flow)
+		public IEnumerable<T> Enumerate(int index, BinaryTreeTraverseMethod method, HorizontalFlow flow)
 		{
 			return index < 0
 						? Enumerable.Empty<T>()
@@ -2055,17 +2056,17 @@ namespace asm.Collections
 		[NotNull]
 		public IEnumerable<T> Enumerate(int index)
 		{
-			return Enumerate(index, TraverseMethod.InOrder, HorizontalFlow.LeftToRight);
+			return Enumerate(index, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight);
 		}
 
 		[NotNull]
 		public IEnumerable<T> Enumerate(int index, HorizontalFlow flow)
 		{
-			return Enumerate(index, TraverseMethod.InOrder, flow);
+			return Enumerate(index, BinaryTreeTraverseMethod.InOrder, flow);
 		}
 
 		[NotNull]
-		public IEnumerable<T> Enumerate(int index, TraverseMethod method)
+		public IEnumerable<T> Enumerate(int index, BinaryTreeTraverseMethod method)
 		{
 			return Enumerate(index, method, HorizontalFlow.LeftToRight);
 		}
@@ -2075,10 +2076,10 @@ namespace asm.Collections
 		/// Iterate over nodes with a callback action
 		/// </summary>
 		/// <param name="index">The starting node</param>
-		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
+		/// <param name="method">The traverse method <see cref="BinaryTreeTraverseMethod"/></param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
 		/// <param name="visitCallback">callback action to handle the node</param>
-		public void Iterate(int index, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<int> visitCallback)
+		public void Iterate(int index, BinaryTreeTraverseMethod method, HorizontalFlow flow, [NotNull] Action<int> visitCallback)
 		{
 			if (index < 0) return;
 			new Iterator(this, index, method).Iterate(flow, visitCallback);
@@ -2087,15 +2088,15 @@ namespace asm.Collections
 		#region Iterate overloads - visitCallback action
 		public void Iterate(int index, [NotNull] Action<int> visitCallback)
 		{
-			Iterate(index, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
+			Iterate(index, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
 		}
 
 		public void Iterate(int index, HorizontalFlow flow, [NotNull] Action<int> visitCallback)
 		{
-			Iterate(index, TraverseMethod.InOrder, flow, visitCallback);
+			Iterate(index, BinaryTreeTraverseMethod.InOrder, flow, visitCallback);
 		}
 
-		public void Iterate(int index, TraverseMethod method, [NotNull] Action<int> visitCallback)
+		public void Iterate(int index, BinaryTreeTraverseMethod method, [NotNull] Action<int> visitCallback)
 		{
 			Iterate(index, method, HorizontalFlow.LeftToRight, visitCallback);
 		}
@@ -2105,10 +2106,10 @@ namespace asm.Collections
 		/// Iterate over nodes with a callback function
 		/// </summary>
 		/// <param name="index">The starting node</param>
-		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
+		/// <param name="method">The traverse method <see cref="BinaryTreeTraverseMethod"/></param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
 		/// <param name="visitCallback">callback function to handle the node that can cancel the loop</param>
-		public void Iterate(int index, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<int, bool> visitCallback)
+		public void Iterate(int index, BinaryTreeTraverseMethod method, HorizontalFlow flow, [NotNull] Func<int, bool> visitCallback)
 		{
 			if (index < 0) return;
 			new Iterator(this, index, method).Iterate(flow, visitCallback);
@@ -2117,15 +2118,15 @@ namespace asm.Collections
 		#region Iterate overloads - visitCallback function
 		public void Iterate(int index, [NotNull] Func<int, bool> visitCallback)
 		{
-			Iterate(index, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
+			Iterate(index, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
 		}
 
 		public void Iterate(int index, HorizontalFlow flow, [NotNull] Func<int, bool> visitCallback)
 		{
-			Iterate(index, TraverseMethod.InOrder, flow, visitCallback);
+			Iterate(index, BinaryTreeTraverseMethod.InOrder, flow, visitCallback);
 		}
 
-		public void Iterate(int index, TraverseMethod method, [NotNull] Func<int, bool> visitCallback)
+		public void Iterate(int index, BinaryTreeTraverseMethod method, [NotNull] Func<int, bool> visitCallback)
 		{
 			Iterate(index, method, HorizontalFlow.LeftToRight, visitCallback);
 		}
@@ -2135,10 +2136,10 @@ namespace asm.Collections
 		/// Iterate over nodes with a callback action and depth parameter
 		/// </summary>
 		/// <param name="index">The starting node</param>
-		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
+		/// <param name="method">The traverse method <see cref="BinaryTreeTraverseMethod"/></param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
 		/// <param name="visitCallback">callback action to handle the node with depth awareness</param>
-		public void Iterate(int index, TraverseMethod method, HorizontalFlow flow, [NotNull] Action<int, int> visitCallback)
+		public void Iterate(int index, BinaryTreeTraverseMethod method, HorizontalFlow flow, [NotNull] Action<int, int> visitCallback)
 		{
 			if (index < 0) return;
 			new Iterator(this, index, method).Iterate(flow, visitCallback);
@@ -2147,15 +2148,15 @@ namespace asm.Collections
 		#region Iterate overloads - visitCallback with action + depth
 		public void Iterate(int index, [NotNull] Action<int, int> visitCallback)
 		{
-			Iterate(index, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
+			Iterate(index, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
 		}
 
 		public void Iterate(int index, HorizontalFlow flow, [NotNull] Action<int, int> visitCallback)
 		{
-			Iterate(index, TraverseMethod.InOrder, flow, visitCallback);
+			Iterate(index, BinaryTreeTraverseMethod.InOrder, flow, visitCallback);
 		}
 
-		public void Iterate(int index, TraverseMethod method, [NotNull] Action<int, int> visitCallback)
+		public void Iterate(int index, BinaryTreeTraverseMethod method, [NotNull] Action<int, int> visitCallback)
 		{
 			Iterate(index, method, HorizontalFlow.LeftToRight, visitCallback);
 		}
@@ -2165,10 +2166,10 @@ namespace asm.Collections
 		/// Iterate over nodes with a callback function and depth parameter
 		/// </summary>
 		/// <param name="index">The starting node</param>
-		/// <param name="method">The traverse method <see cref="TraverseMethod"/></param>
+		/// <param name="method">The traverse method <see cref="BinaryTreeTraverseMethod"/></param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
 		/// <param name="visitCallback">callback function to handle the node with depth awareness that can cancel the loop</param>
-		public void Iterate(int index, TraverseMethod method, HorizontalFlow flow, [NotNull] Func<int, int, bool> visitCallback)
+		public void Iterate(int index, BinaryTreeTraverseMethod method, HorizontalFlow flow, [NotNull] Func<int, int, bool> visitCallback)
 		{
 			if (index < 0) return;
 			new Iterator(this, index, method).Iterate(flow, visitCallback);
@@ -2177,15 +2178,15 @@ namespace asm.Collections
 		#region Iterate overloads - visitCallback function + depth
 		public void Iterate(int index, [NotNull] Func<int, int, bool> visitCallback)
 		{
-			Iterate(index, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
+			Iterate(index, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
 		}
 
 		public void Iterate(int index, HorizontalFlow flow, [NotNull] Func<int, int, bool> visitCallback)
 		{
-			Iterate(index, TraverseMethod.InOrder, flow, visitCallback);
+			Iterate(index, BinaryTreeTraverseMethod.InOrder, flow, visitCallback);
 		}
 
-		public void Iterate(int index, TraverseMethod method, [NotNull] Func<int, int, bool> visitCallback)
+		public void Iterate(int index, BinaryTreeTraverseMethod method, [NotNull] Func<int, int, bool> visitCallback)
 		{
 			Iterate(index, method, HorizontalFlow.LeftToRight, visitCallback);
 		}
@@ -2193,7 +2194,7 @@ namespace asm.Collections
 
 		/// <summary>
 		/// Iterate over nodes on a level by level basis with a callback function.
-		/// This is a different way than <see cref="TraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
+		/// This is a different way than <see cref="BinaryTreeTraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
 		/// </summary>
 		/// <param name="index">The starting node</param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
@@ -2213,7 +2214,7 @@ namespace asm.Collections
 
 		/// <summary>
 		/// Iterate over nodes on a level by level basis with a callback function.
-		/// This is a different way than <see cref="TraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
+		/// This is a different way than <see cref="BinaryTreeTraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
 		/// </summary>
 		/// <param name="index">The starting node</param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
@@ -2361,7 +2362,7 @@ namespace asm.Collections
 		}
 
 		[NotNull]
-		public T[] ToArray(TraverseMethod method = TraverseMethod.InOrder, HorizontalFlow flow = HorizontalFlow.LeftToRight)
+		public T[] ToArray(BinaryTreeTraverseMethod method = BinaryTreeTraverseMethod.InOrder, HorizontalFlow flow = HorizontalFlow.LeftToRight)
 		{
 			switch (Count)
 			{
@@ -2538,202 +2539,23 @@ namespace asm.Collections
 
 	public static class ArrayBinaryTreeExtension
 	{
-		#region This implementation works without parent node pointer
-		//public static string ToString<ArrayBinaryNode<T>, T>([NotNull] this ArrayBinaryTree<T> thisValue, Orientation orientation, bool diagnosticInfo = false)
-		//	where ArrayBinaryNode<T> : LinkedBinaryNode<ArrayBinaryNode<T>, T>
-		//{
-		//	if (thisValue.Root == null) return string.Empty;
-		//	return orientation switch
-		//	{
-		//		Orientation.Horizontal => Horizontally(thisValue, diagnosticInfo),
-		//		Orientation.Vertical => Vertically(thisValue, diagnosticInfo),
-		//		_ => throw new ArgumentOutOfRangeException(nameof(orientation), orientation, null)
-		//	};
-
-		//	static string Horizontally(ArrayBinaryTree<T> tree, bool diagnostic)
-		//	{
-		//		const string STR_BLANK = "    ";
-		//		const string STR_EXT = "│   ";
-		//		const string STR_CONNECTOR = "─── ";
-		//		const string STR_CONNECTOR_R = "└── ";
-		//		const string STR_CONNECTOR_L = "┌── ";
-
-		//		/*
-		//		 * Will use a little bit of a strange structure and InOrder traversal.
-		//		 * For each node, a list of all its parent is needed up to the root.
-		//		 * Because BinarySearchTree (or AVLTree) don't usually store a parent
-		//		 * node pointer, and apparently it's needed only in this situation, will
-		//		 * store this list unless a better alternative is found.
-		//		 */
-		//		StringBuilder sb = new StringBuilder();
-		//		Stack<string> connectors = new Stack<string>();
-
-		//		// Left-Root-Right (Stack)
-		//		Stack<(ArrayBinaryNode<T> Node, IList<ArrayBinaryNode<T>> Parents)> stack = new Stack<(ArrayBinaryNode<T> Node, IList<ArrayBinaryNode<T>> Parents)>();
-		//		int version = tree._version;
-		//		// Start at the root
-		//		(ArrayBinaryNode<T> Node, IList<ArrayBinaryNode<T>> Parents) current = (tree.Root, null);
-
-		//		while (current.Node != null || stack.Count > 0)
-		//		{
-		//			if (version != tree._version) throw new VersionChangedException();
-
-		//			if (current.Node != null)
-		//			{
-		//				stack.Push(current);
-
-		//				// Navigate left
-		//				if (current.Node.Left != null)
-		//				{
-		//					IList<ArrayBinaryNode<T>> parents = new List<ArrayBinaryNode<T>>(current.Parents ?? Enumerable.Empty<ArrayBinaryNode<T>>())
-		//					{
-		//						current.Node
-		//					};
-		//					current = (current.Node.Left, parents);
-		//				}
-		//				else
-		//				{
-		//					current = (null, null);
-		//				}
-		//			}
-		//			else
-		//			{
-		//				// visit the next queued node
-		//				current = stack.Pop();
-		//				connectors.Push(current.Node.ToString(current.Parents?.Count ?? 0, diagnostic));
-
-		//				ArrayBinaryNode<T> parent = null;
-		//				if (current.Parents != null && current.Parents.Count > 0) parent = current.Parents[current.Parents.Count - 1];
-
-		//				BinaryNodeType nodeType = current.Node.NodeType(parent);
-
-		//				switch (nodeType)
-		//				{
-		//					case BinaryNodeType.Root:
-		//						connectors.Push(STR_CONNECTOR);
-		//						break;
-		//					case BinaryNodeType.Left:
-		//						connectors.Push(STR_CONNECTOR_L);
-		//						break;
-		//					case BinaryNodeType.Right:
-		//						connectors.Push(STR_CONNECTOR_R);
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException();
-		//				}
-
-		//				if (current.Parents != null)
-		//				{
-		//					IList<ArrayBinaryNode<T>> parents = current.Parents;
-		//					ArrayBinaryNode<T> node = current.Node;
-
-		//					for (int i = parents.Count - 1; i >= 0; i--)
-		//					{
-		//						parent = parents[i];
-		//						ArrayBinaryNode<T> grandParent = i > 0
-		//												? parents[i - 1]
-		//												: null;
-		//						nodeType = node.NodeType(parent);
-		//						BinaryNodeType parentNodeType = grandParent == null
-		//															? BinaryNodeType.Root
-		//															: parent.NodeType(grandParent);
-
-		//						/*
-		//						 * if (node is left and its parent is right) or (node is right and its parent is left), add STR_EXT
-		//						 */
-		//						if (nodeType == BinaryNodeType.Left && parentNodeType == BinaryNodeType.Right ||
-		//							nodeType == BinaryNodeType.Right && parentNodeType == BinaryNodeType.Left)
-		//						{
-		//							connectors.Push(STR_EXT);
-		//						}
-		//						else
-		//						{
-		//							connectors.Push(STR_BLANK);
-		//						}
-
-		//						node = parent;
-		//					}
-		//				}
-
-		//				while (connectors.Count > 1) 
-		//					sb.Append(connectors.Pop());
-
-		//				sb.AppendLine(connectors.Pop());
-
-		//				// Navigate right
-		//				if (current.Node.Right != null)
-		//				{
-		//					IList<ArrayBinaryNode<T>> parents = new List<ArrayBinaryNode<T>>(current.Parents ?? Enumerable.Empty<ArrayBinaryNode<T>>())
-		//					{
-		//						current.Node
-		//					};
-		//					current = (current.Node.Right, parents);
-		//				}
-		//				else
-		//				{
-		//					current = (null, null);
-		//				}
-		//			}
-		//		}
-
-		//		return sb.ToString();
-		//	}
-
-		//	static string Vertically(ArrayBinaryTree<T> tree, bool diagnostic)
-		//	{
-		//		const char C_BLANK = ' ';
-		//		const char C_EXT = '─';
-		//		const char C_CONNECTOR_L = '┌';
-		//		const char C_CONNECTOR_R = '┐';
-
-		//		int distance = 0;
-		//		IDictionary<int, StringBuilder> lines = new Dictionary<int, StringBuilder>();
-		//		tree.Iterate(tree.Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, (node, parent, depth) =>
-		//		{
-		//			StringBuilder line = lines.GetOrAdd(depth);
-
-		//			if (line.Length > 0 && line[line.Length - 1] == C_CONNECTOR_L) line.Append(C_EXT, distance - line.Length);
-		//			else line.Append(C_BLANK, distance - line.Length);
-
-		//			if (depth > 0)
-		//			{
-		//				StringBuilder prevLine = lines.GetOrAdd(depth - 1);
-
-		//				if (ReferenceEquals(parent.Left /* parent is guaranteed not to be null because depth > 0 */, node))
-		//				{
-		//					prevLine.Append(C_BLANK, distance - prevLine.Length);
-		//					if (line.Length > 0) prevLine.Append(C_BLANK);
-		//					prevLine.Append(C_CONNECTOR_L);
-		//				}
-		//				else
-		//				{
-		//					prevLine.Append(C_BLANK);
-		//					prevLine.Append(C_EXT, distance - prevLine.Length + 1);
-		//					prevLine.Append(C_CONNECTOR_R);
-		//				}
-		//			}
-
-		//			if (line.Length > 0) line.Append(C_BLANK);
-		//			line.Append(node.ToString(depth, diagnostic));
-		//			distance = line.Length;
-		//		});
-
-		//		return string.Join(Environment.NewLine, lines.OrderBy(e => e.Key).Select(e => e.Value));
-		//	}
-		//}
-		#endregion
-
-		public static string ToString<T>([NotNull] this ArrayBinaryTree<T> thisValue, Orientation orientation, bool diagnosticInfo = false)
+		public static void WriteTo<T>([NotNull] this ArrayBinaryTree<T> thisValue, [NotNull] TextWriter writer, Orientation orientation, bool diagnosticInfo = false)
 		{
-			if (thisValue.Count == 0) return string.Empty;
-			return orientation switch
-			{
-				Orientation.Horizontal => Horizontally(thisValue, diagnosticInfo),
-				Orientation.Vertical => Vertically(thisValue, diagnosticInfo),
-				_ => throw new ArgumentOutOfRangeException(nameof(orientation), orientation, null)
-			};
+			if (thisValue.Count == 0) return;
 
-			static string Horizontally(ArrayBinaryTree<T> tree, bool diagnostic)
+			switch (orientation)
+			{
+				case Orientation.Horizontal:
+					Horizontally(thisValue, writer, diagnosticInfo);
+					break;
+				case Orientation.Vertical:
+					Vertically(thisValue, writer, diagnosticInfo);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(orientation), orientation, null);
+			}
+
+			static void Horizontally(ArrayBinaryTree<T> tree, TextWriter writer, bool diagnostic)
 			{
 				const string STR_BLANK = "    ";
 				const string STR_EXT = "│   ";
@@ -2741,10 +2563,9 @@ namespace asm.Collections
 				const string STR_CONNECTOR_L = "└── ";
 				const string STR_CONNECTOR_R = "┌── ";
 
-				StringBuilder sb = new StringBuilder();
 				Stack<string> connectors = new Stack<string>();
 				ArrayBinaryNode<T> node = new ArrayBinaryNode<T>(tree);
-				tree.Iterate(0, TraverseMethod.InOrder, HorizontalFlow.RightToLeft, (e, depth) =>
+				tree.Iterate(0, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.RightToLeft, (e, depth) =>
 				{
 					node.Index = e;
 					connectors.Push(diagnostic
@@ -2764,15 +2585,13 @@ namespace asm.Collections
 					}
 
 					while (connectors.Count > 1)
-						sb.Append(connectors.Pop());
+						writer.Write(connectors.Pop());
 
-					sb.AppendLine(connectors.Pop());
+					writer.WriteLine(connectors.Pop());
 				});
-
-				return sb.ToString();
 			}
 
-			static string Vertically(ArrayBinaryTree<T> tree, bool diagnostic)
+			static void Vertically(ArrayBinaryTree<T> tree, TextWriter writer, bool diagnostic)
 			{
 				const char C_BLANK = ' ';
 				const char C_EXT = '─';
@@ -2782,7 +2601,7 @@ namespace asm.Collections
 				int distance = 0;
 				ArrayBinaryNode<T> node = new ArrayBinaryNode<T>(tree);
 				IDictionary<int, StringBuilder> lines = new Dictionary<int, StringBuilder>();
-				tree.Iterate(0, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, (e, depth) =>
+				tree.Iterate(0, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, (e, depth) =>
 				{
 					StringBuilder line = lines.GetOrAdd(depth);
 					node.Index = e;
@@ -2815,8 +2634,11 @@ namespace asm.Collections
 					distance = line.Length;
 				});
 
-				return string.Join(Environment.NewLine, lines.OrderBy(e => e.Key)
-															.Select(e => e.Value));
+				foreach (StringBuilder sb in lines.OrderBy(e => e.Key)
+												.Select(e => e.Value))
+				{
+					writer.WriteLine(sb.ToString());
+				}
 			}
 		}
 	}

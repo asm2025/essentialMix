@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -59,7 +60,7 @@ namespace asm.Collections
 		{
 			if (Root == null || Root.IsLeaf) return 0;
 			int height = 0;
-			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e => height += 1 + Math.Max(e.Left == null ? -1 : 1, e.Right == null ? -1 : 1));
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e => height += 1 + Math.Max(e.Left == null ? -1 : 1, e.Right == null ? -1 : 1));
 			return height;
 		}
 
@@ -251,7 +252,7 @@ namespace asm.Collections
 			if (node == null) return true;
 
 			bool isValid = true;
-			Iterate(node, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e =>
+			Iterate(node, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e =>
 			{
 				if (e.IsLeft)
 				{
@@ -307,7 +308,7 @@ namespace asm.Collections
 
 			// find all unbalanced nodes
 			Queue<RedBlackNode<T>> unbalancedNodes = new Queue<RedBlackNode<T>>();
-			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e =>
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e =>
 			{
 				if (IsBalanced(e)) return;
 				unbalancedNodes.Enqueue(e);
@@ -609,17 +610,23 @@ namespace asm.Collections
 
 	public static class RedBlackTreeExtension
 	{
-		public static string ToString<T>([NotNull] this RedBlackTree<T> thisValue, Orientation orientation, bool diagnosticInfo = false)
+		public static void WriteTo<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] TextWriter writer, Orientation orientation, bool diagnosticInfo = false)
 		{
-			if (thisValue.Root == null) return string.Empty;
-			return orientation switch
-			{
-				Orientation.Horizontal => Horizontally(thisValue, diagnosticInfo),
-				Orientation.Vertical => Vertically(thisValue, diagnosticInfo),
-				_ => throw new ArgumentOutOfRangeException(nameof(orientation), orientation, null)
-			};
+			if (thisValue.Root == null) return;
 
-			static string Horizontally(RedBlackTree<T> tree, bool diagnostic)
+			switch (orientation)
+			{
+				case Orientation.Horizontal:
+					Horizontally(thisValue, writer, diagnosticInfo);
+					break;
+				case Orientation.Vertical:
+					Vertically(thisValue, writer, diagnosticInfo);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(orientation), orientation, null);
+			}
+
+			static void Horizontally(RedBlackTree<T> tree, TextWriter writer, bool diagnostic)
 			{
 				const string STR_BLANK = "    ";
 				const string STR_EXT = "│   ";
@@ -627,9 +634,8 @@ namespace asm.Collections
 				const string STR_CONNECTOR_L = "└── ";
 				const string STR_CONNECTOR_R = "┌── ";
 
-				StringBuilder sb = new StringBuilder();
 				Stack<string> connectors = new Stack<string>();
-				tree.Iterate(tree.Root, TraverseMethod.InOrder, HorizontalFlow.RightToLeft, (e, depth) =>
+				tree.Iterate(tree.Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.RightToLeft, (e, depth) =>
 				{
 					connectors.Push(diagnostic
 										? e.ToString(depth)
@@ -648,15 +654,13 @@ namespace asm.Collections
 					}
 
 					while (connectors.Count > 1)
-						sb.Append(connectors.Pop());
+						writer.Write(connectors.Pop());
 
-					sb.AppendLine(connectors.Pop());
+					writer.WriteLine(connectors.Pop());
 				});
-
-				return sb.ToString();
 			}
 
-			static string Vertically(RedBlackTree<T> tree, bool diagnostic)
+			static void Vertically(RedBlackTree<T> tree, TextWriter writer, bool diagnostic)
 			{
 				const char C_BLANK = ' ';
 				const char C_EXT = '─';
@@ -665,7 +669,7 @@ namespace asm.Collections
 
 				int distance = 0;
 				IDictionary<int, StringBuilder> lines = new Dictionary<int, StringBuilder>();
-				tree.Iterate(tree.Root, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, (e, depth) =>
+				tree.Iterate(tree.Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, (e, depth) =>
 				{
 					StringBuilder line = lines.GetOrAdd(depth);
 
@@ -697,8 +701,11 @@ namespace asm.Collections
 					distance = line.Length;
 				});
 
-				return string.Join(Environment.NewLine, lines.OrderBy(e => e.Key)
-															.Select(e => e.Value));
+				foreach (StringBuilder sb in lines.OrderBy(e => e.Key)
+												.Select(e => e.Value))
+				{
+					writer.WriteLine(sb.ToString());
+				}
 			}
 		}
 	}

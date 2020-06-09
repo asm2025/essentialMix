@@ -273,7 +273,7 @@ namespace asm.Collections
 
 			T previous = default(T);
 			bool isValid = true, started = false;
-			Iterate(node, TraverseMethod.InOrder, HorizontalFlow.LeftToRight, e =>
+			Iterate(node, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, e =>
 			{
 				if (!started)
 				{
@@ -368,7 +368,7 @@ namespace asm.Collections
 		{
 			base.FromLevelOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 			if (!AutoBalance) return;
 			Balance();
 		}
@@ -378,7 +378,7 @@ namespace asm.Collections
 		{
 			base.FromPreOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 			if (!AutoBalance) return;
 			Balance();
 		}
@@ -388,7 +388,7 @@ namespace asm.Collections
 		{
 			base.FromInOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 			if (!AutoBalance) return;
 			Balance();
 		}
@@ -398,7 +398,7 @@ namespace asm.Collections
 		{
 			base.FromPostOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 			if (!AutoBalance) return;
 			Balance();
 		}
@@ -408,7 +408,7 @@ namespace asm.Collections
 		{
 			base.FromInOrderAndLevelOrder(inOrderCollection, levelOrderCollection);
 			if (Root == null) return;
-			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 			if (!AutoBalance) return;
 			Balance();
 		}
@@ -418,7 +418,7 @@ namespace asm.Collections
 		{
 			base.FromInOrderAndPreOrder(inOrderCollection, preOrderCollection);
 			if (Root == null) return;
-			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 			if (!AutoBalance) return;
 			Balance();
 		}
@@ -428,7 +428,7 @@ namespace asm.Collections
 		{
 			base.FromInOrderAndPostOrder(inOrderCollection, postOrderCollection);
 			if (Root == null) return;
-			Iterate(Root, TraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 			if (!AutoBalance) return;
 			Balance();
 		}

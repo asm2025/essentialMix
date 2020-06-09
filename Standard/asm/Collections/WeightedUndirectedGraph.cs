@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Runtime.Serialization;
+﻿using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 
 namespace asm.Collections
 {
-	public abstract class WeightedUndirectedGraph<TNode, T> : WeightedGraph<TNode, T>
-		where TNode : WeightedUndirectedGraphNodeBase<TNode, T>
+	[Serializable]
+	public class WeightedUndirectedGraph<T> : WeightedGraph<GraphNode<T>, GraphWeightedEdge<T>, T>
 	{
 		/// <inheritdoc />
 		protected WeightedUndirectedGraph()
@@ -20,40 +20,40 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected WeightedUndirectedGraph([NotNull] IEnumerable<TNode> collection)
+		protected WeightedUndirectedGraph([NotNull] IEnumerable<T> collection)
 			: this(collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected WeightedUndirectedGraph([NotNull] IEnumerable<TNode> collection, IEqualityComparer<T> comparer)
+		protected WeightedUndirectedGraph([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
 			: base(collection, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected WeightedUndirectedGraph(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-		}
+		public sealed override int Size => Edges.Count / 2;
 
 		/// <inheritdoc />
-		protected override void Insert(T key, TNode value, bool add)
-		{
-			//TODO
-		}
+		public override void AddEdge(T from, T to) {  }
 
 		/// <inheritdoc />
-		public override bool RemoveByKey(T key)
-		{
-			//TODO
-			return true;
-		}
+		public override void RemoveEdge(T from, T to) {  }
 
 		/// <inheritdoc />
-		public override void Clear()
+		public override void RemoveEdges(T from) {  }
+
+		/// <inheritdoc />
+		public override void RemoveAllEdges(T value) {  }
+
+		/// <inheritdoc />
+		protected override GraphNode<T> NewNode([NotNull] T value) { return new GraphNode<T>(value); }
+
+		/// <inheritdoc />
+		protected override GraphWeightedEdge<T> NewEdge([NotNull] T value)
 		{
-			//TODO
+			if (!Nodes.TryGetValue(value, out GraphNode<T> node)) throw new KeyNotFoundException();
+			return new GraphWeightedEdge<T>(node);
 		}
 	}
 }

@@ -149,7 +149,7 @@ namespace asm.Collections
 			// nodes with one child are not supposed to appear more than once while scanning from left to right
 			bool isValid = true, nonNode = false;
 			ArrayBinaryNode<T> node = new ArrayBinaryNode<T>(this);
-			Iterate(0, TraverseMethod.LevelOrder, HorizontalFlow.LeftToRight, e =>
+			Iterate(0, BinaryTreeTraverseMethod.LevelOrder, HorizontalFlow.LeftToRight, e =>
 			{
 				node.Index = e;
 				

@@ -1,59 +1,58 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.Serialization;
 using JetBrains.Annotations;
 
 namespace asm.Collections
 {
-	public abstract class DirectedGraph<TNode, T> : Graph<TNode, T>
-		where TNode : DirectedGraphNodeBase<TNode, T>
+	public class DirectedGraph<T> : Graph<GraphNode<T>, GraphEdge<T>, T>
 	{
 		/// <inheritdoc />
-		protected DirectedGraph()
+		public DirectedGraph()
 			: this((IEqualityComparer<T>)null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected DirectedGraph(IEqualityComparer<T> comparer)
+		public DirectedGraph(IEqualityComparer<T> comparer)
 			: base(comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected DirectedGraph([NotNull] IEnumerable<TNode> collection)
+		public DirectedGraph([NotNull] IEnumerable<T> collection)
 			: this(collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected DirectedGraph([NotNull] IEnumerable<TNode> collection, IEqualityComparer<T> comparer)
+		public DirectedGraph([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
 			: base(collection, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected DirectedGraph(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-		}
+		public sealed override int Size => Edges.Count;
 
 		/// <inheritdoc />
-		protected override void Insert(T key, TNode value, bool add)
-		{
-			//TODO
-		}
+		public override void AddEdge(T from, T to) {  }
 
 		/// <inheritdoc />
-		public override bool RemoveByKey(T key)
-		{
-			//TODO
-			return true;
-		}
+		public override void RemoveEdge(T from, T to) {  }
 
 		/// <inheritdoc />
-		public override void Clear()
+		public override void RemoveEdges(T from) {  }
+
+		/// <inheritdoc />
+		public override void RemoveAllEdges(T value) {  }
+
+		protected override GraphNode<T> NewNode([NotNull] T value)
 		{
-			//TODO
+			return new GraphNode<T>(value);
+		}
+
+		protected override GraphEdge<T> NewEdge([NotNull] T value)
+		{
+			if (!Nodes.TryGetValue(value, out GraphNode<T> node)) throw new KeyNotFoundException();
+			return new GraphEdge<T>(node);
 		}
 	}
 }

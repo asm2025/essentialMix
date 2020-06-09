@@ -1,59 +1,115 @@
-﻿using System.Collections.Generic;
-using System.Runtime.Serialization;
+﻿using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 
 namespace asm.Collections
 {
-	public abstract class UndirectedGraph<TNode, T> : Graph<TNode, T>
-		where TNode : UndirectedGraphNodeBase<TNode, T>
+	[Serializable]
+	public class UndirectedGraph<T> : Graph<GraphNode<T>, GraphEdge<T>, T>
 	{
 		/// <inheritdoc />
-		protected UndirectedGraph()
+		public UndirectedGraph()
 			: this((IEqualityComparer<T>)null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected UndirectedGraph(IEqualityComparer<T> comparer)
+		public UndirectedGraph(IEqualityComparer<T> comparer)
 			: base(comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected UndirectedGraph([NotNull] IEnumerable<TNode> collection)
+		public UndirectedGraph([NotNull] IEnumerable<T> collection)
 			: this(collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected UndirectedGraph([NotNull] IEnumerable<TNode> collection, IEqualityComparer<T> comparer)
+		public UndirectedGraph([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
 			: base(collection, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected UndirectedGraph(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+		public sealed override int Size => Edges.Count / 2;
+
+		/// <inheritdoc />
+		public override void AddEdge([NotNull] T from, [NotNull] T to)
 		{
+			if (!Nodes.ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
+			if (!Nodes.ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
+
+			if (!Edges.TryGetValue(from, out KeyedDictionary<T, GraphEdge<T>> fromEdges))
+			{
+				fromEdges = NewEdges();
+				Edges.Add(from, fromEdges);
+			}
+
+			fromEdges.Add(NewEdge(to));
+
+			if (!Edges.TryGetValue(to, out KeyedDictionary<T, GraphEdge<T>> toEdges))
+			{
+				toEdges = NewEdges();
+				Edges.Add(to, toEdges);
+			}
+
+			toEdges.Add(NewEdge(from));
 		}
 
 		/// <inheritdoc />
-		protected override void Insert(T key, TNode value, bool add)
+		public override void RemoveEdge(T from, T to)
 		{
-			//TODO
+			if (Edges.TryGetValue(from, out KeyedDictionary<T, GraphEdge<T>> fromEdges))
+			{
+				fromEdges.RemoveByKey(to);
+				if (fromEdges.Count == 0) Edges.Remove(from);
+			}
+
+			if (Edges.TryGetValue(to, out KeyedDictionary<T, GraphEdge<T>> toEdges))
+			{
+				toEdges.RemoveByKey(from);
+				if (toEdges.Count == 0) Edges.Remove(to);
+			}
 		}
 
 		/// <inheritdoc />
-		public override bool RemoveByKey(T key)
+		public override void RemoveEdges(T from)
 		{
-			//TODO
-			return true;
+			Edges.Remove(from);
 		}
 
 		/// <inheritdoc />
-		public override void Clear()
+		public override void RemoveAllEdges(T value)
 		{
-			//TODO
+			Edges.Remove(value);
+			if (Edges.Count == 0) return;
+
+			List<T> empty = new List<T>();
+
+			foreach (KeyValuePair<T, KeyedDictionary<T, GraphEdge<T>>> pair in Edges)
+			{
+				pair.Value.RemoveByKey(value);
+				if (pair.Value.Count == 0) empty.Add(pair.Key);
+			}
+
+			if (empty.Count == 0) return;
+
+			foreach (T key in empty)
+			{
+				Edges.Remove(key);
+			}
+		}
+
+		protected override GraphNode<T> NewNode([NotNull] T value)
+		{
+			return new GraphNode<T>(value);
+		}
+
+		protected override GraphEdge<T> NewEdge([NotNull] T value)
+		{
+			if (!Nodes.TryGetValue(value, out GraphNode<T> node)) throw new KeyNotFoundException();
+			return new GraphEdge<T>(node);
 		}
 	}
 }
