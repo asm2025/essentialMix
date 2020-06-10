@@ -16,6 +16,7 @@ using asm.Patterns.Layout;
 using Bogus;
 using Bogus.DataSets;
 using Crayon;
+using EasyConsole;
 using JetBrains.Annotations;
 
 namespace TestApp
@@ -64,7 +65,7 @@ namespace TestApp
 			//TestTrie();
 			//TestTrieSimilarWordsRemoval();
 
-			TestUndirectedGraphAdd();
+			TestGraphAdd();
 			
 			ConsoleHelper.Pause();
 		}
@@ -1433,22 +1434,49 @@ namespace TestApp
 			}
 		}
 
-		private static void TestUndirectedGraphAdd()
+		private static void TestGraphAdd()
 		{
 			const int MAX_LIST = 26;
 
 			bool more;
-			UndirectedGraph<char> graph = new UndirectedGraph<char>();
+			Graph<GraphNode<char>, GraphEdge<char>, char> graph;
+			Graph<GraphNode<char>, GraphWeightedEdge<char>, char> weightedGraph;
 			ISet<char> values = new HashSet<char>();
+			Menu menu = new Menu()
+				.Add("Undirected graph", () =>
+				{
+					Console.WriteLine();
+					graph = new UndirectedGraph<char>();
+					if (values.Count == 0) AddChar(values);
+					DoTheTest(graph, values);
+				})
+				.Add("Directed graph", () =>
+				{
+					Console.WriteLine();
+					graph = new DirectedGraph<char>();
+					if (values.Count == 0) AddChar(values);
+					DoTheTest(graph, values);
+				})
+				.Add("Weighted undirected graph", () =>
+				{
+					Console.WriteLine();
+					weightedGraph = new WeightedUndirectedGraph<char>();
+					if (values.Count == 0) AddChar(values);
+					DoTheTest(weightedGraph, values);
+				})
+				.Add("Weighted directed graph", () =>
+				{
+					Console.WriteLine();
+					weightedGraph = new WeightedDirectedGraph<char>();
+					if (values.Count == 0) AddChar(values);
+					DoTheTest(weightedGraph, values);
+				});
 
 			do
 			{
 				Console.Clear();
-				Console.WriteLine();
-				if (values.Count == 0) AddChar(graph, values);
-
-				DoTheTest(graph, values);
-				
+				Title("Testing graph add()");
+				menu.Display();
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
@@ -1460,26 +1488,30 @@ namespace TestApp
 				response = Console.ReadKey(true);
 				if (response.KeyChar != 'Y' && response.KeyChar != 'y') continue;
 				Console.WriteLine();
-				AddChar(graph, values);
+				AddChar(values);
 			}
 			while (more);
 
-			static void AddChar(UndirectedGraph<char> graph, ISet<char> set)
+			static void AddChar(ISet<char> set)
 			{
 				int len = RNGRandomHelper.Next(1, 12);
 				Console.WriteLine($"Generating {len} characters: ".BrightGreen());
 				char[] newValues = GetRandomChar(len);
+				int count = 0;
 
 				foreach (char value in newValues)
 				{
 					if (!set.Add(value)) continue;
-					graph.Add(value);
+					count++;
 				}
+
+				Console.WriteLine($"Added {count} characters to the set".BrightGreen());
 			}
 
-			static void DoTheTest(UndirectedGraph<char> graph, ISet<char> values)
+			static void DoTheTest<TEdge>(Graph<GraphNode<char>, TEdge, char> graph, ISet<char> values)
+				where TEdge : GraphEdge<GraphNode<char>, TEdge, char>
 			{
-				Console.WriteLine("Test adding node...");
+				Console.WriteLine("Test adding nodes...");
 				Console.WriteLine("characters list: ".BrightBlack() + string.Join(", ", values));
 				graph.Clear();
 				graph.Add(values);
@@ -1500,12 +1532,22 @@ namespace TestApp
 
 				Queue<char> queue = new Queue<char>(values);
 				char from = queue.Dequeue();
+				int threshold = (int)Math.Floor(values.Count * 0.5d);
 
 				while (queue.Count > 0)
 				{
 					char to = queue.Dequeue();
+					if (graph.Comparer.Equals(from, to) || graph.ContainsEdge(from, to)) continue;
 					Console.WriteLine($"Adding {from.ToString().BrightCyan().Underline()} to {to.ToString().BrightCyan().Underline()}...");
 					graph.AddEdge(from, to);
+
+					if (threshold > 0 && queue.Count % 2 == 0)
+					{
+						queue.Enqueue(from);
+						queue.Enqueue(values.PickRandom());
+						threshold--;
+					}
+
 					from = to;
 				}
 
@@ -1652,7 +1694,7 @@ public static class Extension
 		where TEdge : GraphEdge<TNode, TEdge, T>
 	{
 		Console.WriteLine();
-		Console.WriteLine($"{"Order:".Yellow()} {thisValue.Order.ToString().Underline()}.");
+		Console.WriteLine($"{"Order:".Yellow()} {thisValue.Count.ToString().Underline()}.");
 		Console.WriteLine($"{"Size:".Yellow()} {thisValue.Size.ToString().Underline()}.");
 		Console.WriteLine();
 		thisValue.WriteTo(Console.Out);

@@ -4,8 +4,18 @@ using JetBrains.Annotations;
 
 namespace asm.Collections
 {
+	/// <summary>
+	/// <inheritdoc />
+	/// <para><see href="https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)">Weighted Undirected Graph</see></para>
+	/// </summary>
+	/// <inheritdoc/>
+	/// <typeparam name="TEdge"><inheritdoc/></typeparam>
+	/// <typeparam name="TWeight">The weight of the edge.</typeparam>
+	/// <typeparam name="T"><inheritdoc/></typeparam>
 	[Serializable]
-	public class WeightedUndirectedGraph<T> : WeightedGraph<GraphNode<T>, GraphWeightedEdge<T>, T>
+	public abstract class WeightedUndirectedGraph<TEdge, TWeight, T> : UndirectedGraph<TEdge, T>
+		where TEdge : GraphWeightedEdge<GraphNode<T>, TEdge, TWeight, T>
+		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
 		/// <inheritdoc />
 		protected WeightedUndirectedGraph()
@@ -30,24 +40,72 @@ namespace asm.Collections
 			: base(collection, comparer)
 		{
 		}
+	}
+
+	/// <inheritdoc/>
+	[Serializable]
+	public class WeightedUndirectedGraph<TWeight, T> : WeightedUndirectedGraph<GraphWeightedEdge<TWeight, T>, TWeight, T>
+		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
+	{
+		/// <inheritdoc />
+		public WeightedUndirectedGraph()
+			: this((IEqualityComparer<T>)null)
+		{
+		}
 
 		/// <inheritdoc />
-		public sealed override int Size => Edges.Count / 2;
+		public WeightedUndirectedGraph(IEqualityComparer<T> comparer)
+			: base(comparer)
+		{
+		}
 
 		/// <inheritdoc />
-		public override void AddEdge(T from, T to) {  }
+		public WeightedUndirectedGraph([NotNull] IEnumerable<T> collection)
+			: this(collection, null)
+		{
+		}
 
 		/// <inheritdoc />
-		public override void RemoveEdge(T from, T to) {  }
+		public WeightedUndirectedGraph([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
+			: base(collection, comparer)
+		{
+		}
 
 		/// <inheritdoc />
-		public override void RemoveEdges(T from) {  }
+		protected override GraphWeightedEdge<TWeight, T> NewEdge([NotNull] T value)
+		{
+			if (!Nodes.TryGetValue(value, out GraphNode<T> node)) throw new KeyNotFoundException();
+			return new GraphWeightedEdge<TWeight, T>(node);
+		}
+	}
+
+	/// <inheritdoc/>
+	[Serializable]
+	public class WeightedUndirectedGraph<T> : WeightedUndirectedGraph<GraphWeightedEdge<T>, int, T>
+	{
+		/// <inheritdoc />
+		public WeightedUndirectedGraph()
+			: this((IEqualityComparer<T>)null)
+		{
+		}
 
 		/// <inheritdoc />
-		public override void RemoveAllEdges(T value) {  }
+		public WeightedUndirectedGraph(IEqualityComparer<T> comparer)
+			: base(comparer)
+		{
+		}
 
 		/// <inheritdoc />
-		protected override GraphNode<T> NewNode([NotNull] T value) { return new GraphNode<T>(value); }
+		public WeightedUndirectedGraph([NotNull] IEnumerable<T> collection)
+			: this(collection, null)
+		{
+		}
+
+		/// <inheritdoc />
+		public WeightedUndirectedGraph([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
+			: base(collection, comparer)
+		{
+		}
 
 		/// <inheritdoc />
 		protected override GraphWeightedEdge<T> NewEdge([NotNull] T value)

@@ -8,22 +8,27 @@ namespace asm.Collections
 	[DebuggerDisplay("->{To} :{Weight}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class GraphWeightedEdge<TNode, TEdge, T> : GraphEdge<TNode, TEdge, T>
+	public abstract class GraphWeightedEdge<TNode, TEdge, TWeight, T> : GraphEdge<TNode, TEdge, T>
 		where TNode : GraphNode<TNode, T>
-		where TEdge : GraphWeightedEdge<TNode, TEdge, T>
+		where TEdge : GraphWeightedEdge<TNode, TEdge, TWeight, T>
+		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
 		protected GraphWeightedEdge([NotNull] TNode to)
 			: base(to)
 		{
 		}
 
-		public int Weight { get; set; }
+		public TWeight Weight { get; set; }
+
+		/// <inheritdoc />
+		public override string ToString() { return $"{To} :{Weight}"; }
 	}
 
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class GraphWeightedEdge<TEdge, T> : GraphWeightedEdge<GraphNode<T>, TEdge, T>
-		where TEdge : GraphWeightedEdge<GraphNode<T>, TEdge, T>
+	public abstract class GraphWeightedEdge<TEdge, TWeight, T> : GraphWeightedEdge<GraphNode<T>, TEdge, TWeight, T>
+		where TEdge : GraphWeightedEdge<GraphNode<T>, TEdge, TWeight, T>
+		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
 		protected GraphWeightedEdge([NotNull] GraphNode<T> to)
 			: base(to)
@@ -33,7 +38,18 @@ namespace asm.Collections
 
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public class GraphWeightedEdge<T> : GraphWeightedEdge<GraphWeightedEdge<T>, T>
+	public class GraphWeightedEdge<TWeight, T> : GraphWeightedEdge<GraphWeightedEdge<TWeight, T>, TWeight, T>
+		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
+	{
+		public GraphWeightedEdge([NotNull] GraphNode<T> to)
+			: base(to)
+		{
+		}
+	}
+
+	[Serializable]
+	[StructLayout(LayoutKind.Sequential)]
+	public class GraphWeightedEdge<T> : GraphWeightedEdge<GraphWeightedEdge<T>, int, T>
 	{
 		public GraphWeightedEdge([NotNull] GraphNode<T> to)
 			: base(to)

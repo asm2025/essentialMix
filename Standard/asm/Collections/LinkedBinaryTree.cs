@@ -20,7 +20,7 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	/// <summary>
-	/// <see href="https://en.wikipedia.org/wiki/Binary_tree">BinaryTree</see> using the linked representation.
+	/// <see href="https://en.wikipedia.org/wiki/Binary_tree">Binary tree</see> using the linked representation.
 	/// </summary>
 	/// <typeparam name="TNode">The node type. Must inherit from <see cref="LinkedBinaryNode{TNode, T}"/></typeparam>
 	/// <typeparam name="T">The element type of the tree</typeparam>
