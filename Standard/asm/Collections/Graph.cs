@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using asm.Exceptions.Collections;
+using asm.Patterns.Collections;
 using JetBrains.Annotations;
 
 namespace asm.Collections
@@ -25,6 +27,162 @@ namespace asm.Collections
 		where TNode : GraphNode<TNode, T>
 		where TEdge : GraphEdge<TNode, TEdge, T>
 	{
+		/// <summary>
+		/// a semi recursive approach to traverse the graph
+		/// </summary>
+		internal sealed class Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
+		{
+			private readonly Graph<TNode, TEdge, T> _graph;
+			private readonly int _version;
+			private readonly TNode _root;
+			private readonly DynamicQueue<TNode> _queueOrStack;
+			private readonly HashSet<T> _visited;
+			private readonly Func<bool> _moveNext;
+
+			private TNode _current;
+			private bool _started;
+			private bool _done;
+
+			internal Enumerator([NotNull] Graph<TNode, TEdge, T> graph, [NotNull] TNode root, GraphTraverseMethod method)
+			{
+				_graph = graph;
+				_version = _graph._version;
+				_root = root;
+				_visited = new HashSet<T>(graph.Comparer);
+
+				switch (method)
+				{
+					case GraphTraverseMethod.BreadthFirst:
+						_queueOrStack = new DynamicQueue<TNode>(DequeuePriority.FIFO);
+						_moveNext = BreadthFirst;
+						break;
+					case GraphTraverseMethod.DepthFirst:
+						_queueOrStack = new DynamicQueue<TNode>(DequeuePriority.LIFO);
+						_moveNext = DepthFirst;
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(nameof(method), method, null);
+				}
+			}
+
+			/// <inheritdoc />
+			[NotNull]
+			public T Current
+			{
+				get
+				{
+					if (_current == null) throw new InvalidOperationException();
+					return _current.Value;
+				}
+			}
+
+			/// <inheritdoc />
+			[NotNull]
+			object IEnumerator.Current => Current;
+
+			/// <inheritdoc />
+			public IEnumerator<T> GetEnumerator()
+			{
+				IEnumerator enumerator = this;
+				enumerator.Reset();
+				return this;
+			}
+
+			/// <inheritdoc />
+			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+			public bool MoveNext() { return _moveNext(); }
+
+			void IEnumerator.Reset()
+			{
+				_current = null;
+				_started = _done = false;
+				_queueOrStack.Clear();
+				_visited.Clear();
+			}
+
+			/// <inheritdoc />
+			public void Dispose()
+			{
+				_current = null;
+				_queueOrStack.Clear();
+			}
+
+			private bool BreadthFirst()
+			{
+				if (_version != _graph._version) throw new VersionChangedException();
+				if (_done) return false;
+
+				if (!_started)
+				{
+					_started = true;
+					// Start at the root
+					_queueOrStack.Enqueue(_root);
+				}
+
+				// visit the next queued node
+				do
+				{
+					_current = _queueOrStack.Count > 0
+									? _queueOrStack.Dequeue()
+									: null;
+				}
+				while (_current != null && _visited.Contains(_current.Value));
+
+				if (_current == null)
+				{
+					_done = true;
+					return false;
+				}
+
+				_visited.Add(_current.Value);
+				// Queue the next nodes
+				if (!_graph.Edges.TryGetValue(_current.Value, out KeyedDictionary<T, TEdge> edges)) return true;
+
+				foreach (TEdge edge in edges.Values) 
+					_queueOrStack.Enqueue(edge.To);
+
+				return true;
+			}
+
+			private bool DepthFirst()
+			{
+				if (_version != _graph._version) throw new VersionChangedException();
+				if (_done) return false;
+
+				if (!_started)
+				{
+					_started = true;
+					// Start at the root
+					_queueOrStack.Enqueue(_root);
+				}
+
+				// visit the next queued node
+				do
+				{
+					_current = _queueOrStack.Count > 0
+									? _queueOrStack.Dequeue()
+									: null;
+				}
+				while (_current != null && _visited.Contains(_current.Value));
+
+				if (_current == null)
+				{
+					_done = true;
+					return false;
+				}
+
+				_visited.Add(_current.Value);
+				// Queue the next nodes
+				if (!_graph.Edges.TryGetValue(_current.Value, out KeyedDictionary<T, TEdge> edges)) return true;
+
+				foreach (TEdge edge in edges.Values) 
+					_queueOrStack.Enqueue(edge.To);
+
+				return true;
+			}
+		}
+
 		/*
 		 * 1. Walk: traversing a graph where vertex and edges can be repeated.
 		 *		a. open walk: when starting and ending vertices are different.
@@ -35,226 +193,6 @@ namespace asm.Collections
 		 * 5. Cycle: traversing a graph where neither vertices nor edges are
 		 * repeated and starting and ending vertices are the same.
 		 */
-
-
-		///// <summary>
-		///// a semi recursive approach to traverse the graph
-		///// </summary>
-		//internal sealed class Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
-		//{
-		//	private readonly Graph<TNode, TEdge, T> _graph;
-		//	private readonly int _version;
-		//	private readonly TNode _root;
-		//	private readonly DynamicQueue<TNode> _queueOrStack;
-		//	private readonly HashSet<T> _visited;
-		//	private readonly Func<bool> _moveNext;
-
-		//	private TNode _current;
-		//	private bool _started;
-		//	private bool _done;
-
-		//	internal Enumerator([NotNull] Graph<TNode, TEdge, T> graph, [NotNull] TNode root, GraphTraverseMethod method, HorizontalFlow flow)
-		//	{
-		//		_graph = graph;
-		//		_version = _graph._version;
-		//		_root = root;
-		//		_visited = new HashSet<T>(graph.Comparer);
-
-		//		switch (method)
-		//		{
-		//			case GraphTraverseMethod.BreadthFirst:
-		//				_queueOrStack = new DynamicQueue<TNode>(DequeuePriority.FIFO);
-		//				_moveNext = flow switch
-		//				{
-		//					HorizontalFlow.LeftToRight => BreadthFirstLR,
-		//					HorizontalFlow.RightToLeft => BreadthFirstRL,
-		//					_ => throw new ArgumentOutOfRangeException(nameof(flow), flow, null)
-		//				};
-		//				break;
-		//			case GraphTraverseMethod.DepthFirst:
-		//				_queueOrStack = new DynamicQueue<TNode>(DequeuePriority.LIFO);
-		//				_moveNext = flow switch
-		//				{
-		//					HorizontalFlow.LeftToRight => DepthFirstLR,
-		//					HorizontalFlow.RightToLeft => DepthFirstRL,
-		//					_ => throw new ArgumentOutOfRangeException(nameof(flow), flow, null)
-		//				};
-		//				break;
-		//			default:
-		//				throw new ArgumentOutOfRangeException(nameof(method), method, null);
-		//		}
-		//	}
-
-		//	/// <inheritdoc />
-		//	[NotNull]
-		//	public T Current
-		//	{
-		//		get
-		//		{
-		//			if (_current == null) throw new InvalidOperationException();
-		//			return _current.Value;
-		//		}
-		//	}
-
-		//	/// <inheritdoc />
-		//	[NotNull]
-		//	object IEnumerator.Current => Current;
-
-		//	/// <inheritdoc />
-		//	public IEnumerator<T> GetEnumerator()
-		//	{
-		//		IEnumerator enumerator = this;
-		//		enumerator.Reset();
-		//		return this;
-		//	}
-
-		//	/// <inheritdoc />
-		//	IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-		//	public bool MoveNext() { return _moveNext(); }
-
-		//	void IEnumerator.Reset()
-		//	{
-		//		_current = null;
-		//		_started = _done = false;
-		//		_queueOrStack.Clear();
-		//		_visited.Clear();
-		//	}
-
-		//	/// <inheritdoc />
-		//	public void Dispose()
-		//	{
-		//		_current = null;
-		//		_queueOrStack.Clear();
-		//	}
-
-		//	private bool BreadthFirstLR()
-		//	{
-		//		if (_version != _graph._version) throw new VersionChangedException();
-
-		//		// Root-Left-Right (Queue)
-		//		if (_done) return false;
-
-		//		if (!_started)
-		//		{
-		//			_started = true;
-		//			// Start at the root
-		//			_queueOrStack.Enqueue(_root);
-		//		}
-
-		//		// visit the next queued node
-		//		_current = _queueOrStack.Count > 0
-		//						? _queueOrStack.Dequeue()
-		//						: null;
-
-		//		if (_current == null)
-		//		{
-		//			_done = true;
-		//			return false;
-		//		}
-
-		//		// Queue the next nodes
-		//		if (_current.Left != null) _queueOrStack.Enqueue(_current.Left);
-		//		if (_current.Right != null) _queueOrStack.Enqueue(_current.Right);
-		//		return true;
-		//	}
-
-		//	private bool BreadthFirstRL()
-		//	{
-		//		if (_version != _graph._version) throw new VersionChangedException();
-
-		//		// Root-Right-Left (Queue)
-		//		if (_done) return false;
-
-		//		if (!_started)
-		//		{
-		//			_started = true;
-		//			// Start at the root
-		//			_queueOrStack.Enqueue(_root);
-		//		}
-
-		//		// visit the next queued node
-		//		_current = _queueOrStack.Count > 0
-		//						? _queueOrStack.Dequeue()
-		//						: null;
-
-		//		if (_current == null)
-		//		{
-		//			_done = true;
-		//			return false;
-		//		}
-
-		//		// Queue the next nodes
-		//		if (_current.Right != null) _queueOrStack.Enqueue(_current.Right);
-		//		if (_current.Left != null) _queueOrStack.Enqueue(_current.Left);
-		//		return true;
-		//	}
-
-		//	private bool DepthFirstLR()
-		//	{
-		//		if (_version != _graph._version) throw new VersionChangedException();
-
-		//		// Root-Left-Right (Stack)
-		//		if (_done) return false;
-
-		//		if (!_started)
-		//		{
-		//			_started = true;
-		//			// Start at the root
-		//			_queueOrStack.Enqueue(_root);
-		//		}
-
-		//		// visit the next queued node
-		//		do
-		//		{
-		//			_current = _queueOrStack.Count > 0
-		//							? _queueOrStack.Dequeue()
-		//							: null;
-		//			if (_current != null) continue;
-		//			_done = true;
-		//			return false;
-		//		}
-		//		while (_visited.Contains(_current.Value));
-
-		//		_visited.Add(_current.Value);
-
-		//		// Queue the next nodes
-		//		if (_current.Right != null) _queueOrStack.Enqueue(_current.Right);
-		//		if (_current.Left != null) _queueOrStack.Enqueue(_current.Left);
-		//		return true;
-		//	}
-
-		//	private bool DepthFirstRL()
-		//	{
-		//		if (_version != _graph._version) throw new VersionChangedException();
-
-		//		// Root-Right-Left (Stack)
-		//		if (_done) return false;
-
-		//		if (!_started)
-		//		{
-		//			_started = true;
-		//			// Start at the root
-		//			_queueOrStack.Enqueue(_root);
-		//		}
-
-		//		// visit the next queued node
-		//		_current = _queueOrStack.Count > 0
-		//						? _queueOrStack.Dequeue()
-		//						: null;
-
-		//		if (_current == null)
-		//		{
-		//			_done = true;
-		//			return false;
-		//		}
-
-		//		// Queue the next nodes
-		//		if (_current.Left != null) _queueOrStack.Enqueue(_current.Left);
-		//		if (_current.Right != null) _queueOrStack.Enqueue(_current.Right);
-		//		return true;
-		//	}
-		//}
 
 		///// <summary>
 		///// iterative approach to traverse the tree
@@ -1567,6 +1505,19 @@ namespace asm.Collections
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
+		/// <summary>
+		/// Enumerate nodes' values in a semi recursive approach
+		/// </summary>
+		/// <param name="value">The starting node's value</param>
+		/// <param name="method">The traverse method</param>
+		/// <returns></returns>
+		[NotNull]
+		public IEnumerable<T> Enumerate([NotNull] T value, GraphTraverseMethod method)
+		{
+			if (!Nodes.TryGetValue(value, out TNode root)) throw new KeyNotFoundException();
+			return new Enumerator(this, root, method);
+		}
+
 		/// <inheritdoc />
 		public void Add(T value)
 		{
@@ -1615,6 +1566,36 @@ namespace asm.Collections
 		public bool ContainsEdge([NotNull] T from, [NotNull] T to)
 		{
 			return Edges.Count > 0 && Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> edges) && edges.ContainsKey(to);
+		}
+
+		/// <summary>
+		/// Gets the value with the maximum number of connections
+		/// </summary>
+		[NotNull]
+		public IEnumerable<T> Top(int count = 1)
+		{
+			return count < 0
+						? throw new ArgumentOutOfRangeException(nameof(count))
+						: count == 0
+							? Enumerable.Empty<T>()
+							: Edges.OrderByDescending(e => e.Value.Count)
+									.Take(count)
+									.Select(e => e.Key);
+		}
+
+		/// <summary>
+		/// Gets the value with the minimum number of connections
+		/// </summary>
+		[NotNull]
+		public IEnumerable<T> Bottom(int count = 1)
+		{
+			return count < 0
+						? throw new ArgumentOutOfRangeException(nameof(count))
+						: count == 0
+							? Enumerable.Empty<T>()
+							: Edges.OrderBy(e => e.Value.Count)
+									.Take(count)
+									.Select(e => e.Key);
 		}
 
 		/// <inheritdoc />

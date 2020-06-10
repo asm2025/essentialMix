@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using JetBrains.Annotations;
 
 namespace asm.Collections
 {
+	[DebuggerDisplay("Count = {Count}")]
 	public sealed class DynamicQueue<T> : IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
 	{
 		private readonly dynamic _queueOrStack;

@@ -12,6 +12,7 @@ using asm.Comparers;
 using asm.Exceptions;
 using asm.Extensions;
 using asm.Helpers;
+using asm.Patterns.Collections;
 using asm.Patterns.Layout;
 using Bogus;
 using Bogus.DataSets;
@@ -1531,8 +1532,8 @@ namespace TestApp
 				Console.WriteLine("All nodes are added...!".BrightGreen() + " Let's try adding some relationships...");
 
 				Queue<char> queue = new Queue<char>(values);
-				char from = queue.Dequeue();
 				int threshold = (int)Math.Floor(values.Count * 0.5d);
+				char from = queue.Dequeue();
 
 				while (queue.Count > 0)
 				{
@@ -1552,6 +1553,12 @@ namespace TestApp
 				}
 
 				graph.Print();
+				Console.WriteLine();
+				Console.WriteLine("Cool, let's try enumerating it.");
+				char value = graph.Top().First();
+				Console.WriteLine($"Picking a value wit maximum relations: '{value.ToString().BrightCyan().Underline()}'...");
+				Console.WriteLine("Breadth First: " + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.BreadthFirst)));
+				Console.WriteLine("Depth First: " + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.DepthFirst)));
 			}
 		}
 
