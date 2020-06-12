@@ -66,7 +66,7 @@ namespace TestApp
 			//TestTrie();
 			//TestTrieSimilarWordsRemoval();
 
-			TestGraphAdd();
+			TestGraph();
 			
 			ConsoleHelper.Pause();
 		}
@@ -1459,13 +1459,13 @@ namespace TestApp
 			}
 		}
 
-		private static void TestGraphAdd()
+		private static void TestGraph()
 		{
 			const int MAX_LIST = 26;
 
 			bool more;
 			GraphList<GraphVertex<char>, GraphEdge<char>, char> graph;
-			GraphList<GraphVertex<char>, GraphWeightedEdge<char>, char> weightedGraph;
+			WeightedGraphList<GraphWeightedEdge<char>, int, char> weightedGraph;
 			ISet<char> values = new HashSet<char>();
 			Menu menu = new Menu()
 				.Add("Undirected graph", () =>
@@ -1482,6 +1482,13 @@ namespace TestApp
 					if (values.Count == 0) AddChar(values);
 					DoTheTest(graph, values);
 				})
+				.Add("Mixed graph", () =>
+				{
+					Console.WriteLine();
+					graph = new MixedGraphList<char>();
+					if (values.Count == 0) AddChar(values);
+					DoTheTest(graph, values);
+				})
 				.Add("Weighted undirected graph", () =>
 				{
 					Console.WriteLine();
@@ -1493,6 +1500,13 @@ namespace TestApp
 				{
 					Console.WriteLine();
 					weightedGraph = new WeightedDirectedGraphList<char>();
+					if (values.Count == 0) AddChar(values);
+					DoTheTest(weightedGraph, values);
+				})
+				.Add("Weighted mixed graph", () =>
+				{
+					Console.WriteLine();
+					weightedGraph = new WeightedMixedGraphList<char>();
 					if (values.Count == 0) AddChar(values);
 					DoTheTest(weightedGraph, values);
 				});
@@ -1559,20 +1573,13 @@ namespace TestApp
 				Queue<char> queue = new Queue<char>(values);
 				int threshold = (int)Math.Floor(values.Count * 0.5d);
 				char from = queue.Dequeue();
-				Action<char, char> addEdge;
-
-				switch (graph)
+				Action<char, char> addEdge = graph switch
 				{
-					case WeightedUndirectedGraphList<char> weightedUndirectedGraph:
-						addEdge = (f, t) => weightedUndirectedGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue));
-						break;
-					case WeightedDirectedGraphList<char> weightedDirectedGraph:
-						addEdge = (f, t) => weightedDirectedGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue));
-						break;
-					default:
-						addEdge = graph.AddEdge;
-						break;
-				}
+					MixedGraphList<TEdge, char> mGraph => (f, t) => mGraph.AddEdge(f, t, __fakeGenerator.Value.Random.Bool()),
+					WeightedMixedGraphList<GraphWeightedEdge<char>, int, char> wmGraph => (f, t) => wmGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue), __fakeGenerator.Value.Random.Bool()),
+					WeightedGraphList<GraphWeightedEdge<char>, int, char> wGraph => (f, t) => wGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue)),
+					_ => graph.AddEdge
+				};
 
 				while (queue.Count > 0)
 				{
@@ -1581,7 +1588,7 @@ namespace TestApp
 					Console.WriteLine($"Adding {from.ToString().BrightCyan().Underline()} to {to.ToString().BrightCyan().Underline()}...");
 					addEdge(from, to);
 
-					if (threshold > 0 && queue.Count % 2 == 0)
+					if (threshold > 0 && __fakeGenerator.Value.Random.Bool())
 					{
 						queue.Enqueue(from);
 						queue.Enqueue(values.PickRandom());
@@ -1596,30 +1603,61 @@ namespace TestApp
 				Console.WriteLine("Cool, let's try enumerating it.");
 				char value = graph.Top().First();
 				Console.WriteLine($"Picking a value with maximum connections: '{value.ToString().BrightCyan().Underline()}'...");
-				Console.WriteLine("Breadth First: " + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.BreadthFirst)));
-				Console.WriteLine("Depth First: " + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.DepthFirst)));
+				DoTheTestWithValue(graph, value);
 				ConsoleKeyInfo response;
 
 				do
 				{
 					Console.WriteLine();
-					Console.Write("Type in a character to traverse from it or ESCAPE key to exit this test. ");
+					Console.Write("Type in a character to traverse from it or " + "ESCAPE".BrightRed() + " key to exit this test. ");
 					response = Console.ReadKey();
 					Console.WriteLine();
 					if (response.Key == ConsoleKey.Escape) continue;
+					value = response.KeyChar;
 
-					if (!graph.ContainsEdge(response.KeyChar))
+					if (!graph.ContainsEdge(value))
 					{
-						Console.Write($"Character '{response.KeyChar}' is not found!");
+						Console.Write($"Character '{value}' is not found!");
 						continue;
 					}
 
-					Console.WriteLine("Breadth First: " + string.Join(", ", graph.Enumerate(response.KeyChar, GraphTraverseMethod.BreadthFirst)));
-					Console.WriteLine("Depth First: " + string.Join(", ", graph.Enumerate(response.KeyChar, GraphTraverseMethod.DepthFirst)));
+					DoTheTestWithValue(graph, value);
 				}
 				while (response.Key != ConsoleKey.Escape);
 
 				Console.WriteLine();
+			}
+
+			static void DoTheTestWithValue<TEdge>(GraphList<GraphVertex<char>, TEdge, char> graph, char value)
+				where TEdge : GraphEdge<GraphVertex<char>, TEdge, char>
+			{
+				Console.WriteLine("Breadth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.BreadthFirst)));
+				Console.WriteLine("Depth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.DepthFirst)));
+				Console.WriteLine("OutDegree: ".Yellow() + graph.OutDegree(value));
+
+				switch (graph)
+				{
+					case DirectedGraphList<TEdge, char> directedGraph:
+						Console.WriteLine("InDegree: ".Yellow() + directedGraph.InDegree(value));
+						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", directedGraph.TopologicalSort())); }
+						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
+						break;
+					case MixedGraphList<TEdge, char> mixedGraph:
+						Console.WriteLine("InDegree: ".Yellow() + mixedGraph.InDegree(value));
+						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", mixedGraph.TopologicalSort())); }
+						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
+						break;
+					case WeightedDirectedGraphList<GraphWeightedEdge<int, char>, int, char> weightedDirectedGraph:
+						Console.WriteLine("InDegree: ".Yellow() + weightedDirectedGraph.InDegree(value));
+						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", weightedDirectedGraph.TopologicalSort())); }
+						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
+						break;
+					case WeightedMixedGraphList<GraphWeightedEdge<int, char>, int, char> weightedMixedGraph:
+						Console.WriteLine("InDegree: ".Yellow() + weightedMixedGraph.InDegree(value));
+						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", weightedMixedGraph.TopologicalSort())); }
+						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
+						break;
+				}
 			}
 		}
 

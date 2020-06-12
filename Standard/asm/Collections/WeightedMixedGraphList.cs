@@ -8,40 +8,44 @@ namespace asm.Collections
 {
 	/// <summary>
 	/// <inheritdoc />
-	/// <para>Weighted Directed Graph</para>
+	/// <para><see href="https://en.wikipedia.org/wiki/Mixed_graph">Weighted Mixed Graph</see></para>
 	/// </summary>
 	/// <inheritdoc/>
 	[Serializable]
-	public abstract class WeightedDirectedGraphList<TEdge, TWeight, T> : WeightedGraphList<TEdge, TWeight, T>
+	public abstract class WeightedMixedGraphList<TEdge, TWeight, T> : WeightedGraphList<TEdge, TWeight, T>
 		where TEdge : GraphWeightedEdge<GraphVertex<T>, TEdge, TWeight, T>
 		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
 		/// <inheritdoc />
-		protected WeightedDirectedGraphList()
+		protected WeightedMixedGraphList()
 			: this((IEqualityComparer<T>)null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected WeightedDirectedGraphList(IEqualityComparer<T> comparer)
+		protected WeightedMixedGraphList(IEqualityComparer<T> comparer)
 			: base(comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected WeightedDirectedGraphList([NotNull] IEnumerable<T> collection)
+		protected WeightedMixedGraphList([NotNull] IEnumerable<T> collection)
 			: this(collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected WeightedDirectedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
+		protected WeightedMixedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
 			: base(collection, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public override void AddEdge(T from, T to, TWeight weight)
+		public override void AddEdge(T from, T to) { AddEdge(from, to, default(TWeight), false); }
+		/// <inheritdoc />
+		public override void AddEdge(T from, T to, TWeight weight) { AddEdge(from, to, weight, false); }
+		public void AddEdge([NotNull] T from, [NotNull] T to, bool undirected) { AddEdge(from, to, default(TWeight), undirected); }
+		public void AddEdge([NotNull] T from, [NotNull] T to, TWeight weight, bool undirected)
 		{
 			if (!Vertices.ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
 			if (!Vertices.ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
@@ -62,23 +66,61 @@ namespace asm.Collections
 				fromEdge.Weight = weight;
 				fromEdges.Add(fromEdge);
 			}
+
+			// short-circuit - loop edge
+			if (!undirected || Comparer.Equals(from, to)) return;
+
+			if (!Edges.TryGetValue(to, out KeyedDictionary<T, TEdge> toEdges))
+			{
+				toEdges = NewEdgesContainer();
+				Edges.Add(to, toEdges);
+			}
+
+			if (toEdges.TryGetValue(to, out TEdge toEdge))
+			{
+				if (toEdge.Weight.CompareTo(weight) > 0) toEdge.Weight = weight;
+			}
+			else
+			{
+				toEdge = NewEdge(from);
+				toEdge.Weight = weight;
+				toEdges.Add(toEdge);
+			}
 		}
 
 		/// <inheritdoc />
-		public override void RemoveEdge(T from, T to)
+		public override void RemoveEdge(T from, T to) { RemoveEdge(from, to, false); }
+		public void RemoveEdge([NotNull] T from, [NotNull] T to, bool undirected)
 		{
-			if (!Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges)) return;
-			fromEdges.RemoveByKey(to);
-			if (fromEdges.Count == 0) Edges.Remove(from);
+			if (Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges))
+			{
+				fromEdges.RemoveByKey(to);
+				if (fromEdges.Count == 0) Edges.Remove(from);
+			}
+
+			if (!undirected) return;
+
+			if (Edges.TryGetValue(to, out KeyedDictionary<T, TEdge> toEdges))
+			{
+				toEdges.RemoveByKey(to);
+				if (toEdges.Count == 0) Edges.Remove(to);
+			}
 		}
 
 		/// <inheritdoc />
-		public override void SetWeight(T from, T to, TWeight weight)
+		public override void SetWeight(T from, T to, TWeight weight) { SetWeight(from, to, weight, false); }
+		public void SetWeight([NotNull] T from, [NotNull] T to, TWeight weight, bool undirected)
 		{
 			if (Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges)
 				&& fromEdges.TryGetValue(to, out TEdge fromEdge))
 			{
 				fromEdge.Weight = weight;
+			}
+
+			if (undirected && Edges.TryGetValue(to, out KeyedDictionary<T, TEdge> toEdges)
+				&& toEdges.TryGetValue(from, out TEdge toEdge))
+			{
+				toEdge.Weight = weight;
 			}
 		}
 
@@ -132,7 +174,7 @@ namespace asm.Collections
 
 					foreach (TEdge edge in edges)
 					{
-						if (visited.Contains(edge.To.Value)) continue;
+						if (visited.Contains(edge.To.Value) || IsLoop(value, edge)) continue;
 						stack.Push(edge.To.Value);
 					}
 
@@ -171,7 +213,7 @@ namespace asm.Collections
 					{
 						foreach (TEdge edge in edges)
 						{
-							if (visited.Contains(edge.To.Value)) continue;
+							if (visited.Contains(edge.To.Value) || IsLoop(value, edge)) continue;
 
 							// cycle detected
 							if (visiting.Contains(edge.To.Value))
@@ -208,29 +250,29 @@ namespace asm.Collections
 
 	/// <inheritdoc/>
 	[Serializable]
-	public class WeightedDirectedGraphList<TWeight, T> : WeightedDirectedGraphList<GraphWeightedEdge<TWeight, T>, TWeight, T>
+	public class WeightedMixedGraphList<TWeight, T> : WeightedMixedGraphList<GraphWeightedEdge<TWeight, T>, TWeight, T>
 		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
 		/// <inheritdoc />
-		public WeightedDirectedGraphList()
+		public WeightedMixedGraphList()
 			: this((IEqualityComparer<T>)null)
 		{
 		}
 
 		/// <inheritdoc />
-		public WeightedDirectedGraphList(IEqualityComparer<T> comparer)
+		public WeightedMixedGraphList(IEqualityComparer<T> comparer)
 			: base(comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public WeightedDirectedGraphList([NotNull] IEnumerable<T> collection)
+		public WeightedMixedGraphList([NotNull] IEnumerable<T> collection)
 			: this(collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public WeightedDirectedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
+		public WeightedMixedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
 			: base(collection, comparer)
 		{
 		}
@@ -245,28 +287,28 @@ namespace asm.Collections
 
 	/// <inheritdoc/>
 	[Serializable]
-	public class WeightedDirectedGraphList<T> : WeightedDirectedGraphList<GraphWeightedEdge<T>, int, T>
+	public class WeightedMixedGraphList<T> : WeightedMixedGraphList<GraphWeightedEdge<T>, int, T>
 	{
 		/// <inheritdoc />
-		public WeightedDirectedGraphList()
+		public WeightedMixedGraphList()
 			: this((IEqualityComparer<T>)null)
 		{
 		}
 
 		/// <inheritdoc />
-		public WeightedDirectedGraphList(IEqualityComparer<T> comparer)
+		public WeightedMixedGraphList(IEqualityComparer<T> comparer)
 			: base(comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public WeightedDirectedGraphList([NotNull] IEnumerable<T> collection)
+		public WeightedMixedGraphList([NotNull] IEnumerable<T> collection)
 			: this(collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public WeightedDirectedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
+		public WeightedMixedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
 			: base(collection, comparer)
 		{
 		}

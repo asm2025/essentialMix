@@ -1535,7 +1535,7 @@ namespace asm.Collections
 			}
 		}
 
-		public abstract void AddEdge(T from, T to);
+		public abstract void AddEdge([NotNull] T from, [NotNull] T to);
 
 		/// <inheritdoc />
 		public bool Remove(T value)
@@ -1547,10 +1547,32 @@ namespace asm.Collections
 		}
 
 		public abstract void RemoveEdge([NotNull] T from, [NotNull] T to);
-		
-		public abstract void RemoveEdges([NotNull] T value);
-		
-		public abstract void RemoveAllEdges([NotNull] T value);
+
+		public void RemoveEdges([NotNull] T value)
+		{
+			Edges.Remove(value);
+		}
+
+		public void RemoveAllEdges([NotNull] T value)
+		{
+			Edges.Remove(value);
+			if (Edges.Count == 0) return;
+
+			List<T> empty = new List<T>();
+
+			foreach (KeyValuePair<T, KeyedDictionary<T, TEdge>> pair in Edges)
+			{
+				pair.Value.RemoveByKey(value);
+				if (pair.Value.Count == 0) empty.Add(pair.Key);
+			}
+
+			if (empty.Count == 0) return;
+
+			foreach (T key in empty)
+			{
+				Edges.Remove(key);
+			}
+		}
 
 		public void ClearEdges() { Edges.Clear(); }
 
@@ -1572,6 +1594,13 @@ namespace asm.Collections
 		public bool ContainsEdge([NotNull] T value)
 		{
 			return Edges.Count > 0 && Edges.ContainsKey(value);
+		}
+
+		public int OutDegree([NotNull] T value)
+		{
+			return Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges)
+						? edges.Count
+						: 0;
 		}
 
 		public bool IsLoop([NotNull] T value, [NotNull] TEdge edge)

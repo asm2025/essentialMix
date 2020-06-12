@@ -6,14 +6,11 @@ namespace asm.Collections
 {
 	/// <summary>
 	/// <inheritdoc />
-	/// <para><see href="https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)">Weighted Undirected Graph</see></para>
+	/// <para>Weighted Undirected Graph</para>
 	/// </summary>
 	/// <inheritdoc/>
-	/// <typeparam name="TEdge"><inheritdoc/></typeparam>
-	/// <typeparam name="TWeight">The weight of the edge.</typeparam>
-	/// <typeparam name="T"><inheritdoc/></typeparam>
 	[Serializable]
-	public abstract class WeightedUndirectedGraphList<TEdge, TWeight, T> : UndirectedGraphList<TEdge, T>
+	public abstract class WeightedUndirectedGraphList<TEdge, TWeight, T> : WeightedGraphList<TEdge, TWeight, T>
 		where TEdge : GraphWeightedEdge<GraphVertex<T>, TEdge, TWeight, T>
 		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
@@ -42,8 +39,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public override void AddEdge(T from, T to) { AddEdge(from, to, default(TWeight)); }
-		public void AddEdge([NotNull] T from, [NotNull] T to, TWeight weight)
+		public override void AddEdge(T from, T to, TWeight weight)
 		{
 			if (!Vertices.ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
 			if (!Vertices.ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
@@ -86,22 +82,41 @@ namespace asm.Collections
 			}
 		}
 
-		public void SetWeight([NotNull] T from, [NotNull] T to, TWeight weight)
+		/// <inheritdoc />
+		public override void RemoveEdge(T from, T to)
 		{
-			if (!Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges)
-				|| !fromEdges.TryGetValue(to, out TEdge fromEdge))
+			if (Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges))
 			{
-				throw new KeyNotFoundException(nameof(from) + " value is not found.");
+				fromEdges.RemoveByKey(to);
+				if (fromEdges.Count == 0) Edges.Remove(from);
 			}
 
-			if (!Edges.TryGetValue(to, out KeyedDictionary<T, TEdge> toEdges)
-				|| !toEdges.TryGetValue(from, out TEdge toEdge))
+			if (Edges.TryGetValue(to, out KeyedDictionary<T, TEdge> toEdges))
 			{
-				throw new KeyNotFoundException(nameof(to) + " value is not found.");
+				toEdges.RemoveByKey(from);
+				if (toEdges.Count == 0) Edges.Remove(to);
+			}
+		}
+
+		public override void SetWeight(T from, T to, TWeight weight)
+		{
+			if (Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges)
+				&& fromEdges.TryGetValue(to, out TEdge fromEdge))
+			{
+				fromEdge.Weight = weight;
 			}
 
-			fromEdge.Weight = weight;
-			toEdge.Weight = weight;
+			if (Edges.TryGetValue(to, out KeyedDictionary<T, TEdge> toEdges)
+				&& toEdges.TryGetValue(from, out TEdge toEdge))
+			{
+				toEdge.Weight = weight;
+			}
+		}
+
+		/// <inheritdoc />
+		protected override GraphVertex<T> NewVertex([NotNull] T value)
+		{
+			return new GraphVertex<T>(value);
 		}
 	}
 

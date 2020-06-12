@@ -38,7 +38,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public override void AddEdge([NotNull] T from, [NotNull] T to)
+		public override void AddEdge(T from, T to)
 		{
 			if (!Vertices.ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
 			if (!Vertices.ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
@@ -79,42 +79,6 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public override void RemoveEdges(T value)
-		{
-			Edges.Remove(value);
-		}
-
-		/// <inheritdoc />
-		public override void RemoveAllEdges(T value)
-		{
-			Edges.Remove(value);
-			if (Edges.Count == 0) return;
-
-			List<T> empty = new List<T>();
-
-			foreach (KeyValuePair<T, KeyedDictionary<T, TEdge>> pair in Edges)
-			{
-				pair.Value.RemoveByKey(value);
-				if (pair.Value.Count == 0) empty.Add(pair.Key);
-			}
-
-			if (empty.Count == 0) return;
-
-			foreach (T key in empty)
-			{
-				Edges.Remove(key);
-			}
-		}
-
-		public int Degree([NotNull] T value)
-		{
-			if (!Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges)) return 0;
-			int degree = edges.Count;
-			// if edges has a loop edge (edge to the same vertex), add 1.
-			if (edges.ContainsKey(value)) degree++;
-			return degree;
-		}
-
 		protected override GraphVertex<T> NewVertex([NotNull] T value)
 		{
 			return new GraphVertex<T>(value);
@@ -150,6 +114,7 @@ namespace asm.Collections
 		{
 		}
 
+		/// <inheritdoc />
 		protected override GraphEdge<T> NewEdge([NotNull] T value)
 		{
 			if (!Vertices.TryGetValue(value, out GraphVertex<T> vertex)) throw new KeyNotFoundException();

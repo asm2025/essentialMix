@@ -8,39 +8,40 @@ namespace asm.Collections
 {
 	/// <summary>
 	/// <inheritdoc />
-	/// <para><see href="https://en.wikipedia.org/wiki/Directed_graph">Directed Graph</see></para>
+	/// <para><see href="https://en.wikipedia.org/wiki/Mixed_graph">Mixed Graph</see></para>
 	/// </summary>
 	/// <inheritdoc/>
 	[Serializable]
-	public abstract class DirectedGraphList<TEdge, T> : GraphList<GraphVertex<T>, TEdge, T>
+	public abstract class MixedGraphList<TEdge, T> : GraphList<GraphVertex<T>, TEdge, T>
 		where TEdge : GraphEdge<GraphVertex<T>, TEdge, T>
 	{
 		/// <inheritdoc />
-		protected DirectedGraphList()
+		protected MixedGraphList()
 			: this((IEqualityComparer<T>)null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected DirectedGraphList(IEqualityComparer<T> comparer)
+		protected MixedGraphList(IEqualityComparer<T> comparer)
 			: base(comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected DirectedGraphList([NotNull] IEnumerable<T> collection)
+		protected MixedGraphList([NotNull] IEnumerable<T> collection)
 			: this(collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected DirectedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
+		protected MixedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
 			: base(collection, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public override void AddEdge(T from, T to)
+		public override void AddEdge(T from, T to) { AddEdge(from, to, false); }
+		public virtual void AddEdge([NotNull] T from, [NotNull] T to, bool undirected)
 		{
 			if (!Vertices.ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
 			if (!Vertices.ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
@@ -52,14 +53,39 @@ namespace asm.Collections
 			}
 
 			fromEdges.Add(NewEdge(to));
+			// short-circuit - loop edge
+			if (!undirected || Comparer.Equals(from, to)) return;
+
+			if (!Edges.TryGetValue(to, out KeyedDictionary<T, TEdge> toEdges))
+			{
+				toEdges = NewEdgesContainer();
+				Edges.Add(to, toEdges);
+			}
+			else if (toEdges.ContainsKey(from))
+			{
+				return;
+			}
+
+			toEdges.Add(NewEdge(from));
 		}
 
 		/// <inheritdoc />
-		public override void RemoveEdge(T from, T to)
+		public override void RemoveEdge(T from, T to) { RemoveEdge(from, to, false); }
+		public void RemoveEdge([NotNull] T from, [NotNull] T to, bool undirected)
 		{
-			if (!Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges)) return;
-			fromEdges.RemoveByKey(to);
-			if (fromEdges.Count == 0) Edges.Remove(from);
+			if (Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges))
+			{
+				fromEdges.RemoveByKey(to);
+				if (fromEdges.Count == 0) Edges.Remove(from);
+			}
+
+			if (!undirected) return;
+
+			if (Edges.TryGetValue(to, out KeyedDictionary<T, TEdge> toEdges))
+			{
+				toEdges.RemoveByKey(to);
+				if (toEdges.Count == 0) Edges.Remove(to);
+			}
 		}
 
 		public int InDegree([NotNull] T value)
@@ -112,7 +138,7 @@ namespace asm.Collections
 
 					foreach (TEdge edge in edges)
 					{
-						if (visited.Contains(edge.To.Value)) continue;
+						if (visited.Contains(edge.To.Value) || IsLoop(value, edge)) continue;
 						stack.Push(edge.To.Value);
 					}
 
@@ -151,7 +177,7 @@ namespace asm.Collections
 					{
 						foreach (TEdge edge in edges)
 						{
-							if (visited.Contains(edge.To.Value)) continue;
+							if (visited.Contains(edge.To.Value) || IsLoop(value, edge)) continue;
 
 							// cycle detected
 							if (visiting.Contains(edge.To.Value))
@@ -185,31 +211,32 @@ namespace asm.Collections
 			return new GraphVertex<T>(value);
 		}
 	}
-	
-	/// <inheritdoc/>
+
+
+	/// <inheritdoc />
 	[Serializable]
-	public class DirectedGraphList<T> : DirectedGraphList<GraphEdge<T>, T>
+	public class MixedGraphList<T> : MixedGraphList<GraphEdge<T>, T>
 	{
 		/// <inheritdoc />
-		public DirectedGraphList()
+		public MixedGraphList()
 			: this((IEqualityComparer<T>)null)
 		{
 		}
 
 		/// <inheritdoc />
-		public DirectedGraphList(IEqualityComparer<T> comparer)
+		public MixedGraphList(IEqualityComparer<T> comparer)
 			: base(comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public DirectedGraphList([NotNull] IEnumerable<T> collection)
+		public MixedGraphList([NotNull] IEnumerable<T> collection)
 			: this(collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public DirectedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
+		public MixedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
 			: base(collection, comparer)
 		{
 		}
