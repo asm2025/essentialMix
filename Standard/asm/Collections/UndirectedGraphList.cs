@@ -10,29 +10,29 @@ namespace asm.Collections
 	/// </summary>
 	/// <inheritdoc/>
 	[Serializable]
-	public abstract class UndirectedGraph<TEdge, T> : Graph<GraphNode<T>, TEdge, T>
-		where TEdge : GraphEdge<GraphNode<T>, TEdge, T>
+	public abstract class UndirectedGraphList<TEdge, T> : GraphList<GraphVertex<T>, TEdge, T>
+		where TEdge : GraphEdge<GraphVertex<T>, TEdge, T>
 	{
 		/// <inheritdoc />
-		protected UndirectedGraph()
+		protected UndirectedGraphList()
 			: this((IEqualityComparer<T>)null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected UndirectedGraph(IEqualityComparer<T> comparer)
+		protected UndirectedGraphList(IEqualityComparer<T> comparer)
 			: base(comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected UndirectedGraph([NotNull] IEnumerable<T> collection)
+		protected UndirectedGraphList([NotNull] IEnumerable<T> collection)
 			: this(collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected UndirectedGraph([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
+		protected UndirectedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
 			: base(collection, comparer)
 		{
 		}
@@ -40,20 +40,22 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public override void AddEdge([NotNull] T from, [NotNull] T to)
 		{
-			if (!Nodes.ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
-			if (!Nodes.ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
+			if (!Vertices.ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
+			if (!Vertices.ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
 
 			if (!Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges))
 			{
-				fromEdges = NewEdges();
+				fromEdges = NewEdgesContainer();
 				Edges.Add(from, fromEdges);
 			}
 
 			fromEdges.Add(NewEdge(to));
+			// short-circuit - loop edge
+			if (Comparer.Equals(from, to)) return;
 
 			if (!Edges.TryGetValue(to, out KeyedDictionary<T, TEdge> toEdges))
 			{
-				toEdges = NewEdges();
+				toEdges = NewEdgesContainer();
 				Edges.Add(to, toEdges);
 			}
 
@@ -77,9 +79,9 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public override void RemoveEdges(T from)
+		public override void RemoveEdges(T value)
 		{
-			Edges.Remove(from);
+			Edges.Remove(value);
 		}
 
 		/// <inheritdoc />
@@ -104,45 +106,54 @@ namespace asm.Collections
 			}
 		}
 
-		protected override GraphNode<T> NewNode([NotNull] T value)
+		public int Degree([NotNull] T value)
 		{
-			return new GraphNode<T>(value);
+			if (!Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges)) return 0;
+			int degree = edges.Count;
+			// if edges has a loop edge (edge to the same vertex), add 1.
+			if (edges.ContainsKey(value)) degree++;
+			return degree;
+		}
+
+		protected override GraphVertex<T> NewVertex([NotNull] T value)
+		{
+			return new GraphVertex<T>(value);
 		}
 	}
 
 
 	/// <inheritdoc />
 	[Serializable]
-	public class UndirectedGraph<T> : UndirectedGraph<GraphEdge<T>, T>
+	public class UndirectedGraphList<T> : UndirectedGraphList<GraphEdge<T>, T>
 	{
 		/// <inheritdoc />
-		public UndirectedGraph()
+		public UndirectedGraphList()
 			: this((IEqualityComparer<T>)null)
 		{
 		}
 
 		/// <inheritdoc />
-		public UndirectedGraph(IEqualityComparer<T> comparer)
+		public UndirectedGraphList(IEqualityComparer<T> comparer)
 			: base(comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public UndirectedGraph([NotNull] IEnumerable<T> collection)
+		public UndirectedGraphList([NotNull] IEnumerable<T> collection)
 			: this(collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public UndirectedGraph([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
+		public UndirectedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
 			: base(collection, comparer)
 		{
 		}
 
 		protected override GraphEdge<T> NewEdge([NotNull] T value)
 		{
-			if (!Nodes.TryGetValue(value, out GraphNode<T> node)) throw new KeyNotFoundException();
-			return new GraphEdge<T>(node);
+			if (!Vertices.TryGetValue(value, out GraphVertex<T> vertex)) throw new KeyNotFoundException();
+			return new GraphEdge<T>(vertex);
 		}
 	}
 }

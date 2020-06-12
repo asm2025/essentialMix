@@ -5,20 +5,20 @@ using JetBrains.Annotations;
 
 namespace asm.Collections
 {
-	[DebuggerDisplay("->{To}")]
+	[DebuggerDisplay("{To}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class GraphEdge<TNode, TEdge, T>
-		where TNode : GraphNode<TNode, T>
-		where TEdge : GraphEdge<TNode, TEdge, T>
+	public abstract class GraphEdge<TVertex, TEdge, T>
+		where TVertex : GraphVertex<TVertex, T>
+		where TEdge : GraphEdge<TVertex, TEdge, T>
 	{
-		protected GraphEdge([NotNull] TNode to)
+		protected GraphEdge([NotNull] TVertex to)
 		{
 			To = to;
 		}
 
 		[NotNull]
-		public TNode To { get; }
+		public TVertex To { get; }
 
 		/// <inheritdoc />
 		[NotNull]
@@ -27,10 +27,10 @@ namespace asm.Collections
 
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class GraphEdge<TNode, T> : GraphEdge<TNode, GraphEdge<TNode, T>, T>
-		where TNode : GraphNode<TNode, T>
+	public abstract class GraphEdge<TEdge, T> : GraphEdge<GraphVertex<T>, TEdge, T>
+		where TEdge : GraphEdge<GraphVertex<T>, TEdge, T>
 	{
-		protected GraphEdge([NotNull] TNode to)
+		protected GraphEdge([NotNull] GraphVertex<T> to)
 			: base(to)
 		{
 		}
@@ -38,9 +38,9 @@ namespace asm.Collections
 
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public class GraphEdge<T> : GraphEdge<GraphNode<T>, GraphEdge<T>, T>
+	public class GraphEdge<T> : GraphEdge<GraphEdge<T>, T>
 	{
-		public GraphEdge([NotNull] GraphNode<T> to)
+		public GraphEdge([NotNull] GraphVertex<T> to)
 			: base(to)
 		{
 		}

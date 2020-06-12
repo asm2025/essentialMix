@@ -8,10 +8,10 @@ namespace asm.Collections
 	[DebuggerDisplay("{Value}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class GraphNode<TNode, T>
-		where TNode : GraphNode<TNode, T>
+	public abstract class GraphVertex<TVertex, T>
+		where TVertex : GraphVertex<TVertex, T>
 	{
-		protected GraphNode([NotNull] T value)
+		protected GraphVertex([NotNull] T value)
 		{
 			Value = value;
 		}
@@ -24,14 +24,14 @@ namespace asm.Collections
 		public override string ToString() { return Convert.ToString(Value); }
 
 		[NotNull]
-		public static implicit operator T([NotNull] GraphNode<TNode, T> node) { return node.Value; }
+		public static implicit operator T([NotNull] GraphVertex<TVertex, T> vertex) { return vertex.Value; }
 	}
 
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public class GraphNode<T> : GraphNode<GraphNode<T>, T>
+	public class GraphVertex<T> : GraphVertex<GraphVertex<T>, T>
 	{
-		public GraphNode([NotNull] T value)
+		public GraphVertex([NotNull] T value)
 			: base(value)
 		{
 		}

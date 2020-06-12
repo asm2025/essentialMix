@@ -13,37 +13,37 @@ namespace asm.Collections
 	/// <summary>
 	/// <see href="https://en.wikipedia.org/wiki/Graph_(abstract_data_type)">Graph (abstract data type)</see> using the <see cref="IDictionary{TKey,TValue}">adjacency list</see> representation.
 	/// </summary>
-	/// <typeparam name="TNode">The node type. Must inherit from <see cref="GraphNode{TNode,T}"/></typeparam>
-	/// <typeparam name="TEdge">The edge type. Must inherit from <see cref="GraphEdge{TNode, TEdge,T}"/></typeparam>
+	/// <typeparam name="TVertex">The vertex type. Must inherit from <see cref="GraphVertex{TVertex,T}"/></typeparam>
+	/// <typeparam name="TEdge">The edge type. Must inherit from <see cref="GraphEdge{TVertex, TEdge,T}"/></typeparam>
 	/// <typeparam name="T">The element type of the tree</typeparam>
 	// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
 	// https://www.researchgate.net/publication/2349751_Design_And_Implementation_Of_A_Generic_Graph_Container_In_Java
 	// https://www.lri.fr/~filliatr/ftp/publis/ocamlgraph-tfp-8.pdf
 	// https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.30.1944&rep=rep1&type=pdf
 	// https://gist.github.com/kevinmorio/f7102c5094aa748503f9
-	[DebuggerDisplay("{Label} Count = {Count}")]
+	[DebuggerDisplay("Label = '{Label}', Count = {Count}")]
 	[Serializable]
-	public abstract class Graph<TNode, TEdge, T> : ICollection<T>, ICollection
-		where TNode : GraphNode<TNode, T>
-		where TEdge : GraphEdge<TNode, TEdge, T>
+	public abstract class GraphList<TVertex, TEdge, T> : ICollection<T>, ICollection
+		where TVertex : GraphVertex<TVertex, T>
+		where TEdge : GraphEdge<TVertex, TEdge, T>
 	{
 		/// <summary>
 		/// a semi recursive approach to traverse the graph
 		/// </summary>
 		internal sealed class Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
 		{
-			private readonly Graph<TNode, TEdge, T> _graph;
+			private readonly GraphList<TVertex, TEdge, T> _graph;
 			private readonly int _version;
-			private readonly TNode _root;
-			private readonly DynamicQueue<TNode> _queueOrStack;
+			private readonly TVertex _root;
+			private readonly DynamicQueue<TVertex> _queueOrStack;
 			private readonly HashSet<T> _visited;
 			private readonly Func<bool> _moveNext;
 
-			private TNode _current;
+			private TVertex _current;
 			private bool _started;
 			private bool _done;
 
-			internal Enumerator([NotNull] Graph<TNode, TEdge, T> graph, [NotNull] TNode root, GraphTraverseMethod method)
+			internal Enumerator([NotNull] GraphList<TVertex, TEdge, T> graph, [NotNull] TVertex root, GraphTraverseMethod method)
 			{
 				_graph = graph;
 				_version = _graph._version;
@@ -53,11 +53,11 @@ namespace asm.Collections
 				switch (method)
 				{
 					case GraphTraverseMethod.BreadthFirst:
-						_queueOrStack = new DynamicQueue<TNode>(DequeuePriority.FIFO);
+						_queueOrStack = new DynamicQueue<TVertex>(DequeuePriority.FIFO);
 						_moveNext = BreadthFirst;
 						break;
 					case GraphTraverseMethod.DepthFirst:
-						_queueOrStack = new DynamicQueue<TNode>(DequeuePriority.LIFO);
+						_queueOrStack = new DynamicQueue<TVertex>(DequeuePriority.LIFO);
 						_moveNext = DepthFirst;
 						break;
 					default:
@@ -120,7 +120,7 @@ namespace asm.Collections
 					_queueOrStack.Enqueue(_root);
 				}
 
-				// visit the next queued node
+				// visit the next queued vertex
 				do
 				{
 					_current = _queueOrStack.Count > 0
@@ -136,7 +136,7 @@ namespace asm.Collections
 				}
 
 				_visited.Add(_current.Value);
-				// Queue the next nodes
+				// Queue the next vertices
 				if (!_graph.Edges.TryGetValue(_current.Value, out KeyedDictionary<T, TEdge> edges)) return true;
 
 				foreach (TEdge edge in edges.Values) 
@@ -157,7 +157,7 @@ namespace asm.Collections
 					_queueOrStack.Enqueue(_root);
 				}
 
-				// visit the next queued node
+				// visit the next queued vertex
 				do
 				{
 					_current = _queueOrStack.Count > 0
@@ -173,7 +173,7 @@ namespace asm.Collections
 				}
 
 				_visited.Add(_current.Value);
-				// Queue the next nodes
+				// Queue the next vertices
 				if (!_graph.Edges.TryGetValue(_current.Value, out KeyedDictionary<T, TEdge> edges)) return true;
 
 				foreach (TEdge edge in edges.Values) 
@@ -199,18 +199,18 @@ namespace asm.Collections
 		///// </summary>
 		//internal sealed class Iterator
 		//{
-		//	private readonly LinkedBinaryTree<TNode, T> _tree;
-		//	private readonly TNode _root;
+		//	private readonly LinkedBinaryTree<TVertex, T> _tree;
+		//	private readonly TVertex _root;
 		//	private readonly BinaryTreeTraverseMethod _method;
 
-		//	internal Iterator([NotNull] LinkedBinaryTree<TNode, T> tree, [NotNull] TNode root, BinaryTreeTraverseMethod method)
+		//	internal Iterator([NotNull] LinkedBinaryTree<TVertex, T> tree, [NotNull] TVertex root, BinaryTreeTraverseMethod method)
 		//	{
 		//		_tree = tree;
 		//		_root = root;
 		//		_method = method;
 		//	}
 
-		//	public void Iterate(HorizontalFlow flow, [NotNull] Action<TNode> visitCallback)
+		//	public void Iterate(HorizontalFlow flow, [NotNull] Action<TVertex> visitCallback)
 		//	{
 		//		int version = _tree._version;
 
@@ -275,7 +275,7 @@ namespace asm.Collections
 		//		void LevelOrderLR()
 		//		{
 		//			// Root-Left-Right (Queue)
-		//			Queue<TNode> queue = new Queue<TNode>();
+		//			Queue<TVertex> queue = new Queue<TVertex>();
 
 		//			// Start at the root
 		//			queue.Enqueue(_root);
@@ -284,11 +284,11 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				TNode current = queue.Dequeue();
+		//				// visit the next queued vertex
+		//				TVertex current = queue.Dequeue();
 		//				visitCallback(current);
 
-		//				// Queue the next nodes
+		//				// Queue the next vertices
 		//				if (current.Left != null) queue.Enqueue(current.Left);
 		//				if (current.Right != null) queue.Enqueue(current.Right);
 		//			}
@@ -297,7 +297,7 @@ namespace asm.Collections
 		//		void LevelOrderRL()
 		//		{
 		//			// Root-Right-Left (Queue)
-		//			Queue<TNode> queue = new Queue<TNode>();
+		//			Queue<TVertex> queue = new Queue<TVertex>();
 
 		//			// Start at the root
 		//			queue.Enqueue(_root);
@@ -306,11 +306,11 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				TNode current = queue.Dequeue();
+		//				// visit the next queued vertex
+		//				TVertex current = queue.Dequeue();
 		//				visitCallback(current);
 
-		//				// Queue the next nodes
+		//				// Queue the next vertices
 		//				if (current.Right != null) queue.Enqueue(current.Right);
 		//				if (current.Left != null) queue.Enqueue(current.Left);
 		//			}
@@ -319,7 +319,7 @@ namespace asm.Collections
 		//		void PreOrderLR()
 		//		{
 		//			// Root-Left-Right (Stack)
-		//			Stack<TNode> stack = new Stack<TNode>();
+		//			Stack<TVertex> stack = new Stack<TVertex>();
 
 		//			// Start at the root
 		//			stack.Push(_root);
@@ -328,8 +328,8 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				TNode current = stack.Pop();
+		//				// visit the next queued vertex
+		//				TVertex current = stack.Pop();
 		//				visitCallback(current);
 
 		//				/*
@@ -337,7 +337,7 @@ namespace asm.Collections
 		//				* It means whatever we want to
 		//				* appear first, we must add last.
 		//				*/
-		//				// Queue the next nodes
+		//				// Queue the next vertices
 		//				if (current.Right != null) stack.Push(current.Right);
 		//				if (current.Left != null) stack.Push(current.Left);
 		//			}
@@ -346,7 +346,7 @@ namespace asm.Collections
 		//		void PreOrderRL()
 		//		{
 		//			// Root-Right-Left (Stack)
-		//			Stack<TNode> stack = new Stack<TNode>();
+		//			Stack<TVertex> stack = new Stack<TVertex>();
 
 		//			// Start at the root
 		//			stack.Push(_root);
@@ -355,8 +355,8 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				TNode current = stack.Pop();
+		//				// visit the next queued vertex
+		//				TVertex current = stack.Pop();
 		//				visitCallback(current);
 
 		//				/*
@@ -364,7 +364,7 @@ namespace asm.Collections
 		//				* It means whatever we want to
 		//				* appear first, we must add last.
 		//				*/
-		//				// Queue the next nodes
+		//				// Queue the next vertices
 		//				if (current.Left != null) stack.Push(current.Left);
 		//				if (current.Right != null) stack.Push(current.Right);
 		//			}
@@ -373,10 +373,10 @@ namespace asm.Collections
 		//		void InOrderLR()
 		//		{
 		//			// Left-Root-Right (Stack)
-		//			Stack<TNode> stack = new Stack<TNode>();
+		//			Stack<TVertex> stack = new Stack<TVertex>();
 
 		//			// Start at the root
-		//			TNode current = _root;
+		//			TVertex current = _root;
 
 		//			while (current != null || stack.Count > 0)
 		//			{
@@ -390,7 +390,7 @@ namespace asm.Collections
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = stack.Pop();
 		//					visitCallback(current);
 
@@ -403,10 +403,10 @@ namespace asm.Collections
 		//		void InOrderRL()
 		//		{
 		//			// Right-Root-Left (Stack)
-		//			Stack<TNode> stack = new Stack<TNode>();
+		//			Stack<TVertex> stack = new Stack<TVertex>();
 
 		//			// Start at the root
-		//			TNode current = _root;
+		//			TVertex current = _root;
 
 		//			while (current != null || stack.Count > 0)
 		//			{
@@ -420,7 +420,7 @@ namespace asm.Collections
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = stack.Pop();
 		//					visitCallback(current);
 
@@ -433,10 +433,10 @@ namespace asm.Collections
 		//		void PostOrderLR()
 		//		{
 		//			// Left-Right-Root (Stack)
-		//			Stack<TNode> stack = new Stack<TNode>();
-		//			TNode lastVisited = null;
+		//			Stack<TVertex> stack = new Stack<TVertex>();
+		//			TVertex lastVisited = null;
 		//			// Start at the root
-		//			TNode current = _root;
+		//			TVertex current = _root;
 
 		//			while (current != null || stack.Count > 0)
 		//			{
@@ -450,11 +450,11 @@ namespace asm.Collections
 		//					continue;
 		//				}
 
-		//				TNode peek = stack.Peek();
+		//				TVertex peek = stack.Peek();
 		//				/*
 		//				 * At this point we are either coming from
-		//				 * either the root node or the left branch.
-		//				 * Is there a right node?
+		//				 * either the root vertex or the left branch.
+		//				 * Is there a right vertex?
 		//				 * if yes, then navigate right.
 		//				 */
 		//				if (peek.Right != null && lastVisited != peek.Right)
@@ -464,7 +464,7 @@ namespace asm.Collections
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = peek;
 		//					lastVisited = stack.Pop();
 		//					visitCallback(current);
@@ -476,10 +476,10 @@ namespace asm.Collections
 		//		void PostOrderRL()
 		//		{
 		//			// Right-Left-Root (Stack)
-		//			Stack<TNode> stack = new Stack<TNode>();
-		//			TNode lastVisited = null;
+		//			Stack<TVertex> stack = new Stack<TVertex>();
+		//			TVertex lastVisited = null;
 		//			// Start at the root
-		//			TNode current = _root;
+		//			TVertex current = _root;
 
 		//			while (current != null || stack.Count > 0)
 		//			{
@@ -493,11 +493,11 @@ namespace asm.Collections
 		//					continue;
 		//				}
 
-		//				TNode peek = stack.Peek();
+		//				TVertex peek = stack.Peek();
 		//				/*
 		//				 * At this point we are either coming from
-		//				 * either the root node or the right branch.
-		//				 * Is there a left node?
+		//				 * either the root vertex or the right branch.
+		//				 * Is there a left vertex?
 		//				 * if yes, then navigate left.
 		//				 */
 		//				if (peek.Left != null && lastVisited != peek.Left)
@@ -507,7 +507,7 @@ namespace asm.Collections
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = peek;
 		//					lastVisited = stack.Pop();
 		//					visitCallback(current);
@@ -517,7 +517,7 @@ namespace asm.Collections
 		//		}
 		//	}
 
-		//	public void Iterate(HorizontalFlow flow, [NotNull] Func<TNode, bool> visitCallback)
+		//	public void Iterate(HorizontalFlow flow, [NotNull] Func<TVertex, bool> visitCallback)
 		//	{
 		//		int version = _tree._version;
 
@@ -582,7 +582,7 @@ namespace asm.Collections
 		//		void LevelOrderLR()
 		//		{
 		//			// Root-Left-Right (Queue)
-		//			Queue<TNode> queue = new Queue<TNode>();
+		//			Queue<TVertex> queue = new Queue<TVertex>();
 
 		//			// Start at the root
 		//			queue.Enqueue(_root);
@@ -591,11 +591,11 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				TNode current = queue.Dequeue();
+		//				// visit the next queued vertex
+		//				TVertex current = queue.Dequeue();
 		//				if (!visitCallback(current)) break;
 
-		//				// Queue the next nodes
+		//				// Queue the next vertices
 		//				if (current.Left != null) queue.Enqueue(current.Left);
 		//				if (current.Right != null) queue.Enqueue(current.Right);
 		//			}
@@ -604,7 +604,7 @@ namespace asm.Collections
 		//		void LevelOrderRL()
 		//		{
 		//			// Root-Right-Left (Queue)
-		//			Queue<TNode> queue = new Queue<TNode>();
+		//			Queue<TVertex> queue = new Queue<TVertex>();
 
 		//			// Start at the root
 		//			queue.Enqueue(_root);
@@ -613,11 +613,11 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				TNode current = queue.Dequeue();
+		//				// visit the next queued vertex
+		//				TVertex current = queue.Dequeue();
 		//				if (!visitCallback(current)) break;
 
-		//				// Queue the next nodes
+		//				// Queue the next vertices
 		//				if (current.Right != null) queue.Enqueue(current.Right);
 		//				if (current.Left != null) queue.Enqueue(current.Left);
 		//			}
@@ -626,7 +626,7 @@ namespace asm.Collections
 		//		void PreOrderLR()
 		//		{
 		//			// Root-Left-Right (Stack)
-		//			Stack<TNode> stack = new Stack<TNode>();
+		//			Stack<TVertex> stack = new Stack<TVertex>();
 
 		//			// Start at the root
 		//			stack.Push(_root);
@@ -635,8 +635,8 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				TNode current = stack.Pop();
+		//				// visit the next queued vertex
+		//				TVertex current = stack.Pop();
 		//				if (!visitCallback(current)) break;
 
 		//				/*
@@ -644,7 +644,7 @@ namespace asm.Collections
 		//				* It means whatever we want to
 		//				* appear first, we must add last.
 		//				*/
-		//				// Queue the next nodes
+		//				// Queue the next vertices
 		//				if (current.Right != null) stack.Push(current.Right);
 		//				if (current.Left != null) stack.Push(current.Left);
 		//			}
@@ -653,7 +653,7 @@ namespace asm.Collections
 		//		void PreOrderRL()
 		//		{
 		//			// Root-Right-Left (Stack)
-		//			Stack<TNode> stack = new Stack<TNode>();
+		//			Stack<TVertex> stack = new Stack<TVertex>();
 
 		//			// Start at the root
 		//			stack.Push(_root);
@@ -662,8 +662,8 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				TNode current = stack.Pop();
+		//				// visit the next queued vertex
+		//				TVertex current = stack.Pop();
 		//				if (!visitCallback(current)) break;
 
 		//				/*
@@ -671,7 +671,7 @@ namespace asm.Collections
 		//				* It means whatever we want to
 		//				* appear first, we must add last.
 		//				*/
-		//				// Queue the next nodes
+		//				// Queue the next vertices
 		//				if (current.Left != null) stack.Push(current.Left);
 		//				if (current.Right != null) stack.Push(current.Right);
 		//			}
@@ -680,10 +680,10 @@ namespace asm.Collections
 		//		void InOrderLR()
 		//		{
 		//			// Left-Root-Right (Stack)
-		//			Stack<TNode> stack = new Stack<TNode>();
+		//			Stack<TVertex> stack = new Stack<TVertex>();
 
 		//			// Start at the root
-		//			TNode current = _root;
+		//			TVertex current = _root;
 
 		//			while (current != null || stack.Count > 0)
 		//			{
@@ -697,7 +697,7 @@ namespace asm.Collections
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = stack.Pop();
 		//					if (!visitCallback(current)) break;
 
@@ -710,10 +710,10 @@ namespace asm.Collections
 		//		void InOrderRL()
 		//		{
 		//			// Right-Root-Left (Stack)
-		//			Stack<TNode> stack = new Stack<TNode>();
+		//			Stack<TVertex> stack = new Stack<TVertex>();
 
 		//			// Start at the root
-		//			TNode current = _root;
+		//			TVertex current = _root;
 
 		//			while (current != null || stack.Count > 0)
 		//			{
@@ -727,7 +727,7 @@ namespace asm.Collections
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = stack.Pop();
 		//					if (!visitCallback(current)) break;
 
@@ -740,10 +740,10 @@ namespace asm.Collections
 		//		void PostOrderLR()
 		//		{
 		//			// Left-Right-Root (Stack)
-		//			Stack<TNode> stack = new Stack<TNode>();
-		//			TNode lastVisited = null;
+		//			Stack<TVertex> stack = new Stack<TVertex>();
+		//			TVertex lastVisited = null;
 		//			// Start at the root
-		//			TNode current = _root;
+		//			TVertex current = _root;
 
 		//			while (current != null || stack.Count > 0)
 		//			{
@@ -757,11 +757,11 @@ namespace asm.Collections
 		//					continue;
 		//				}
 
-		//				TNode peek = stack.Peek();
+		//				TVertex peek = stack.Peek();
 		//				/*
 		//				 * At this point we are either coming from
-		//				 * either the root node or the left branch.
-		//				 * Is there a right node?
+		//				 * either the root vertex or the left branch.
+		//				 * Is there a right vertex?
 		//				 * if yes, then navigate right.
 		//				 */
 		//				if (peek.Right != null && lastVisited != peek.Right)
@@ -771,7 +771,7 @@ namespace asm.Collections
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = peek;
 		//					lastVisited = stack.Pop();
 		//					if (!visitCallback(current)) break;
@@ -783,10 +783,10 @@ namespace asm.Collections
 		//		void PostOrderRL()
 		//		{
 		//			// Right-Left-Root (Stack)
-		//			Stack<TNode> stack = new Stack<TNode>();
-		//			TNode lastVisited = null;
+		//			Stack<TVertex> stack = new Stack<TVertex>();
+		//			TVertex lastVisited = null;
 		//			// Start at the root
-		//			TNode current = _root;
+		//			TVertex current = _root;
 
 		//			while (current != null || stack.Count > 0)
 		//			{
@@ -800,11 +800,11 @@ namespace asm.Collections
 		//					continue;
 		//				}
 
-		//				TNode peek = stack.Peek();
+		//				TVertex peek = stack.Peek();
 		//				/*
 		//				 * At this point we are either coming from
-		//				 * either the root node or the right branch.
-		//				 * Is there a left node?
+		//				 * either the root vertex or the right branch.
+		//				 * Is there a left vertex?
 		//				 * if yes, then navigate left.
 		//				 */
 		//				if (peek.Left != null && lastVisited != peek.Left)
@@ -814,7 +814,7 @@ namespace asm.Collections
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = peek;
 		//					lastVisited = stack.Pop();
 		//					if (!visitCallback(current)) break;
@@ -824,7 +824,7 @@ namespace asm.Collections
 		//		}
 		//	}
 
-		//	public void Iterate(HorizontalFlow flow, [NotNull] Action<TNode, int> visitCallback)
+		//	public void Iterate(HorizontalFlow flow, [NotNull] Action<TVertex, int> visitCallback)
 		//	{
 		//		int version = _tree._version;
 
@@ -889,7 +889,7 @@ namespace asm.Collections
 		//		void LevelOrderLR()
 		//		{
 		//			// Root-Left-Right (Queue)
-		//			Queue<(int Depth, TNode Node)> queue = new Queue<(int Depth, TNode Node)>();
+		//			Queue<(int Depth, TVertex Vertex)> queue = new Queue<(int Depth, TVertex Vertex)>();
 
 		//			// Start at the root
 		//			queue.Enqueue((0, _root));
@@ -898,20 +898,20 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				(int depth, TNode node) = queue.Dequeue();
-		//				visitCallback(node, depth);
+		//				// visit the next queued vertex
+		//				(int depth, TVertex vertex) = queue.Dequeue();
+		//				visitCallback(vertex, depth);
 
-		//				// Queue the next nodes
-		//				if (node.Left != null) queue.Enqueue((depth + 1, node.Left));
-		//				if (node.Right != null) queue.Enqueue((depth + 1, node.Right));
+		//				// Queue the next vertices
+		//				if (vertex.Left != null) queue.Enqueue((depth + 1, vertex.Left));
+		//				if (vertex.Right != null) queue.Enqueue((depth + 1, vertex.Right));
 		//			}
 		//		}
 
 		//		void LevelOrderRL()
 		//		{
 		//			// Root-Right-Left (Queue)
-		//			Queue<(int Depth, TNode Node)> queue = new Queue<(int Depth, TNode Node)>();
+		//			Queue<(int Depth, TVertex Vertex)> queue = new Queue<(int Depth, TVertex Vertex)>();
 
 		//			// Start at the root
 		//			queue.Enqueue((0, _root));
@@ -920,20 +920,20 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				(int depth, TNode node) = queue.Dequeue();
-		//				visitCallback(node, depth);
+		//				// visit the next queued vertex
+		//				(int depth, TVertex vertex) = queue.Dequeue();
+		//				visitCallback(vertex, depth);
 
-		//				// Queue the next nodes
-		//				if (node.Right != null) queue.Enqueue((depth + 1, node.Right));
-		//				if (node.Left != null) queue.Enqueue((depth + 1, node.Left));
+		//				// Queue the next vertices
+		//				if (vertex.Right != null) queue.Enqueue((depth + 1, vertex.Right));
+		//				if (vertex.Left != null) queue.Enqueue((depth + 1, vertex.Left));
 		//			}
 		//		}
 
 		//		void PreOrderLR()
 		//		{
 		//			// Root-Left-Right (Stack)
-		//			Stack<(int Depth, TNode Node)> stack = new Stack<(int Depth, TNode Node)>();
+		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
 
 		//			// Start at the root
 		//			stack.Push((0, _root));
@@ -942,25 +942,25 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				(int depth, TNode node) = stack.Pop();
-		//				visitCallback(node, depth);
+		//				// visit the next queued vertex
+		//				(int depth, TVertex vertex) = stack.Pop();
+		//				visitCallback(vertex, depth);
 
 		//				/*
 		//				* The stack works backwards (LIFO).
 		//				* It means whatever we want to
 		//				* appear first, we must add last.
 		//				*/
-		//				// Queue the next nodes
-		//				if (node.Right != null) stack.Push((depth + 1, node.Right));
-		//				if (node.Left != null) stack.Push((depth + 1, node.Left));
+		//				// Queue the next vertices
+		//				if (vertex.Right != null) stack.Push((depth + 1, vertex.Right));
+		//				if (vertex.Left != null) stack.Push((depth + 1, vertex.Left));
 		//			}
 		//		}
 
 		//		void PreOrderRL()
 		//		{
 		//			// Root-Right-Left (Stack)
-		//			Stack<(int Depth, TNode Node)> stack = new Stack<(int Depth, TNode Node)>();
+		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
 
 		//			// Start at the root
 		//			stack.Push((0, _root));
@@ -969,47 +969,47 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				(int depth, TNode node) = stack.Pop();
-		//				visitCallback(node, depth);
+		//				// visit the next queued vertex
+		//				(int depth, TVertex vertex) = stack.Pop();
+		//				visitCallback(vertex, depth);
 
 		//				/*
 		//				* The stack works backwards (LIFO).
 		//				* It means whatever we want to
 		//				* appear first, we must add last.
 		//				*/
-		//				// Queue the next nodes
-		//				if (node.Left != null) stack.Push((depth + 1, node.Left));
-		//				if (node.Right != null) stack.Push((depth + 1, node.Right));
+		//				// Queue the next vertices
+		//				if (vertex.Left != null) stack.Push((depth + 1, vertex.Left));
+		//				if (vertex.Right != null) stack.Push((depth + 1, vertex.Right));
 		//			}
 		//		}
 
 		//		void InOrderLR()
 		//		{
 		//			// Left-Root-Right (Stack)
-		//			Stack<(int Depth, TNode Node)> stack = new Stack<(int Depth, TNode Node)>();
+		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
 
 		//			// Start at the root
-		//			(int Depth, TNode Node) current = (0, _root);
+		//			(int Depth, TVertex Vertex) current = (0, _root);
 
-		//			while (current.Node != null || stack.Count > 0)
+		//			while (current.Vertex != null || stack.Count > 0)
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				if (current.Node != null)
+		//				if (current.Vertex != null)
 		//				{
 		//					stack.Push(current);
 		//					// Navigate left
-		//					current = (current.Depth + 1, current.Node.Left);
+		//					current = (current.Depth + 1, current.Vertex.Left);
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = stack.Pop();
-		//					visitCallback(current.Node, current.Depth);
+		//					visitCallback(current.Vertex, current.Depth);
 
 		//					// Navigate right
-		//					current = (current.Depth + 1, current.Node.Right);
+		//					current = (current.Depth + 1, current.Vertex.Right);
 		//				}
 		//			}
 		//		}
@@ -1017,29 +1017,29 @@ namespace asm.Collections
 		//		void InOrderRL()
 		//		{
 		//			// Right-Root-Left (Stack)
-		//			Stack<(int Depth, TNode Node)> stack = new Stack<(int Depth, TNode Node)>();
+		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
 
 		//			// Start at the root
-		//			(int Depth, TNode Node) current = (0, _root);
+		//			(int Depth, TVertex Vertex) current = (0, _root);
 
-		//			while (current.Node != null || stack.Count > 0)
+		//			while (current.Vertex != null || stack.Count > 0)
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				if (current.Node != null)
+		//				if (current.Vertex != null)
 		//				{
 		//					stack.Push(current);
 		//					// Navigate right
-		//					current = (current.Depth + 1, current.Node.Right);
+		//					current = (current.Depth + 1, current.Vertex.Right);
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = stack.Pop();
-		//					visitCallback(current.Node, current.Depth);
+		//					visitCallback(current.Vertex, current.Depth);
 
 		//					// Navigate left
-		//					current = (current.Depth + 1, current.Node.Left);
+		//					current = (current.Depth + 1, current.Vertex.Left);
 		//				}
 		//			}
 		//		}
@@ -1047,41 +1047,41 @@ namespace asm.Collections
 		//		void PostOrderLR()
 		//		{
 		//			// Left-Right-Root (Stack)
-		//			Stack<(int Depth, TNode Node)> stack = new Stack<(int Depth, TNode Node)>();
-		//			TNode lastVisited = null;
+		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
+		//			TVertex lastVisited = null;
 		//			// Start at the root
-		//			(int Depth, TNode Node) current = (0, _root);
+		//			(int Depth, TVertex Vertex) current = (0, _root);
 
-		//			while (current.Node != null || stack.Count > 0)
+		//			while (current.Vertex != null || stack.Count > 0)
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				if (current.Node != null)
+		//				if (current.Vertex != null)
 		//				{
 		//					stack.Push(current);
 		//					// Navigate left
-		//					current = (current.Depth + 1, current.Node.Left);
+		//					current = (current.Depth + 1, current.Vertex.Left);
 		//					continue;
 		//				}
 
-		//				(int Depth, TNode Node) peek = stack.Peek();
+		//				(int Depth, TVertex Vertex) peek = stack.Peek();
 		//				/*
 		//				 * At this point we are either coming from
-		//				 * either the root node or the left branch.
-		//				 * Is there a right TNode
+		//				 * either the root vertex or the left branch.
+		//				 * Is there a right TVertex
 		//				 * if yes, then navigate right.
 		//				 */
-		//				if (peek.Node.Right != null && lastVisited != peek.Node.Right)
+		//				if (peek.Vertex.Right != null && lastVisited != peek.Vertex.Right)
 		//				{
 		//					// Navigate right
-		//					current = (peek.Depth + 1, peek.Node.Right);
+		//					current = (peek.Depth + 1, peek.Vertex.Right);
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = peek;
-		//					lastVisited = stack.Pop().Node;
-		//					visitCallback(current.Node, current.Depth);
+		//					lastVisited = stack.Pop().Vertex;
+		//					visitCallback(current.Vertex, current.Depth);
 		//					current = (-1, null);
 		//				}
 		//			}
@@ -1090,48 +1090,48 @@ namespace asm.Collections
 		//		void PostOrderRL()
 		//		{
 		//			// Right-Left-Root (Stack)
-		//			Stack<(int Depth, TNode Node)> stack = new Stack<(int Depth, TNode Node)>();
-		//			TNode lastVisited = null;
+		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
+		//			TVertex lastVisited = null;
 		//			// Start at the root
-		//			(int Depth, TNode Node) current = (0, _root);
+		//			(int Depth, TVertex Vertex) current = (0, _root);
 
-		//			while (current.Node != null || stack.Count > 0)
+		//			while (current.Vertex != null || stack.Count > 0)
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				if (current.Node != null)
+		//				if (current.Vertex != null)
 		//				{
 		//					stack.Push(current);
 		//					// Navigate right
-		//					current = (current.Depth + 1, current.Node.Right);
+		//					current = (current.Depth + 1, current.Vertex.Right);
 		//					continue;
 		//				}
 
-		//				(int Depth, TNode Node) peek = stack.Peek();
+		//				(int Depth, TVertex Vertex) peek = stack.Peek();
 		//				/*
 		//				 * At this point we are either coming from
-		//				 * either the root node or the right branch.
-		//				 * Is there a left TNode
+		//				 * either the root vertex or the right branch.
+		//				 * Is there a left TVertex
 		//				 * if yes, then navigate left.
 		//				 */
-		//				if (peek.Node.Left != null && lastVisited != peek.Node.Left)
+		//				if (peek.Vertex.Left != null && lastVisited != peek.Vertex.Left)
 		//				{
 		//					// Navigate left
-		//					current = (peek.Depth + 1, peek.Node.Left);
+		//					current = (peek.Depth + 1, peek.Vertex.Left);
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = peek;
-		//					lastVisited = stack.Pop().Node;
-		//					visitCallback(current.Node, current.Depth);
+		//					lastVisited = stack.Pop().Vertex;
+		//					visitCallback(current.Vertex, current.Depth);
 		//					current = (-1, null);
 		//				}
 		//			}
 		//		}
 		//	}
 
-		//	public void Iterate(HorizontalFlow flow, [NotNull] Func<TNode, int, bool> visitCallback)
+		//	public void Iterate(HorizontalFlow flow, [NotNull] Func<TVertex, int, bool> visitCallback)
 		//	{
 		//		int version = _tree._version;
 
@@ -1196,7 +1196,7 @@ namespace asm.Collections
 		//		void LevelOrderLR()
 		//		{
 		//			// Root-Left-Right (Queue)
-		//			Queue<(int Depth, TNode Node)> queue = new Queue<(int Depth, TNode Node)>();
+		//			Queue<(int Depth, TVertex Vertex)> queue = new Queue<(int Depth, TVertex Vertex)>();
 
 		//			// Start at the root
 		//			queue.Enqueue((0, _root));
@@ -1205,20 +1205,20 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				(int depth, TNode node) = queue.Dequeue();
-		//				if (!visitCallback(node, depth)) break;
+		//				// visit the next queued vertex
+		//				(int depth, TVertex vertex) = queue.Dequeue();
+		//				if (!visitCallback(vertex, depth)) break;
 
-		//				// Queue the next nodes
-		//				if (node.Left != null) queue.Enqueue((depth + 1, node.Left));
-		//				if (node.Right != null) queue.Enqueue((depth + 1, node.Right));
+		//				// Queue the next vertices
+		//				if (vertex.Left != null) queue.Enqueue((depth + 1, vertex.Left));
+		//				if (vertex.Right != null) queue.Enqueue((depth + 1, vertex.Right));
 		//			}
 		//		}
 
 		//		void LevelOrderRL()
 		//		{
 		//			// Root-Right-Left (Queue)
-		//			Queue<(int Depth, TNode Node)> queue = new Queue<(int Depth, TNode Node)>();
+		//			Queue<(int Depth, TVertex Vertex)> queue = new Queue<(int Depth, TVertex Vertex)>();
 
 		//			// Start at the root
 		//			queue.Enqueue((0, _root));
@@ -1227,20 +1227,20 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				(int depth, TNode node) = queue.Dequeue();
-		//				if (!visitCallback(node, depth)) break;
+		//				// visit the next queued vertex
+		//				(int depth, TVertex vertex) = queue.Dequeue();
+		//				if (!visitCallback(vertex, depth)) break;
 
-		//				// Queue the next nodes
-		//				if (node.Right != null) queue.Enqueue((depth + 1, node.Right));
-		//				if (node.Left != null) queue.Enqueue((depth + 1, node.Left));
+		//				// Queue the next vertices
+		//				if (vertex.Right != null) queue.Enqueue((depth + 1, vertex.Right));
+		//				if (vertex.Left != null) queue.Enqueue((depth + 1, vertex.Left));
 		//			}
 		//		}
 
 		//		void PreOrderLR()
 		//		{
 		//			// Root-Left-Right (Stack)
-		//			Stack<(int Depth, TNode Node)> stack = new Stack<(int Depth, TNode Node)>();
+		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
 
 		//			// Start at the root
 		//			stack.Push((0, _root));
@@ -1249,25 +1249,25 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				(int depth, TNode node) = stack.Pop();
-		//				if (!visitCallback(node, depth)) break;
+		//				// visit the next queued vertex
+		//				(int depth, TVertex vertex) = stack.Pop();
+		//				if (!visitCallback(vertex, depth)) break;
 
 		//				/*
 		//				* The stack works backwards (LIFO).
 		//				* It means whatever we want to
 		//				* appear first, we must add last.
 		//				*/
-		//				// Queue the next nodes
-		//				if (node.Right != null) stack.Push((depth + 1, node.Right));
-		//				if (node.Left != null) stack.Push((depth + 1, node.Left));
+		//				// Queue the next vertices
+		//				if (vertex.Right != null) stack.Push((depth + 1, vertex.Right));
+		//				if (vertex.Left != null) stack.Push((depth + 1, vertex.Left));
 		//			}
 		//		}
 
 		//		void PreOrderRL()
 		//		{
 		//			// Root-Right-Left (Stack)
-		//			Stack<(int Depth, TNode Node)> stack = new Stack<(int Depth, TNode Node)>();
+		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
 
 		//			// Start at the root
 		//			stack.Push((0, _root));
@@ -1276,47 +1276,47 @@ namespace asm.Collections
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				// visit the next queued node
-		//				(int depth, TNode node) = stack.Pop();
-		//				if (!visitCallback(node, depth)) break;
+		//				// visit the next queued vertex
+		//				(int depth, TVertex vertex) = stack.Pop();
+		//				if (!visitCallback(vertex, depth)) break;
 
 		//				/*
 		//				* The stack works backwards (LIFO).
 		//				* It means whatever we want to
 		//				* appear first, we must add last.
 		//				*/
-		//				// Queue the next nodes
-		//				if (node.Left != null) stack.Push((depth + 1, node.Left));
-		//				if (node.Right != null) stack.Push((depth + 1, node.Right));
+		//				// Queue the next vertices
+		//				if (vertex.Left != null) stack.Push((depth + 1, vertex.Left));
+		//				if (vertex.Right != null) stack.Push((depth + 1, vertex.Right));
 		//			}		
 		//		}
 
 		//		void InOrderLR()
 		//		{
 		//			// Left-Root-Right (Stack)
-		//			Stack<(int Depth, TNode Node)> stack = new Stack<(int Depth, TNode Node)>();
+		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
 
 		//			// Start at the root
-		//			(int Depth, TNode Node) current = (0, _root);
+		//			(int Depth, TVertex Vertex) current = (0, _root);
 
-		//			while (current.Node != null || stack.Count > 0)
+		//			while (current.Vertex != null || stack.Count > 0)
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				if (current.Node != null)
+		//				if (current.Vertex != null)
 		//				{
 		//					stack.Push(current);
 		//					// Navigate left
-		//					current = (current.Depth + 1, current.Node.Left);
+		//					current = (current.Depth + 1, current.Vertex.Left);
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = stack.Pop();
-		//					if (!visitCallback(current.Node, current.Depth)) break;
+		//					if (!visitCallback(current.Vertex, current.Depth)) break;
 
 		//					// Navigate right
-		//					current = (current.Depth + 1, current.Node.Right);
+		//					current = (current.Depth + 1, current.Vertex.Right);
 		//				}
 		//			}
 		//		}
@@ -1324,29 +1324,29 @@ namespace asm.Collections
 		//		void InOrderRL()
 		//		{
 		//			// Right-Root-Left (Stack)
-		//			Stack<(int Depth, TNode Node)> stack = new Stack<(int Depth, TNode Node)>();
+		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
 
 		//			// Start at the root
-		//			(int Depth, TNode Node) current = (0, _root);
+		//			(int Depth, TVertex Vertex) current = (0, _root);
 
-		//			while (current.Node != null || stack.Count > 0)
+		//			while (current.Vertex != null || stack.Count > 0)
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				if (current.Node != null)
+		//				if (current.Vertex != null)
 		//				{
 		//					stack.Push(current);
 		//					// Navigate right
-		//					current = (current.Depth + 1, current.Node.Right);
+		//					current = (current.Depth + 1, current.Vertex.Right);
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = stack.Pop();
-		//					if (!visitCallback(current.Node, current.Depth)) break;
+		//					if (!visitCallback(current.Vertex, current.Depth)) break;
 
 		//					// Navigate left
-		//					current = (current.Depth + 1, current.Node.Left);
+		//					current = (current.Depth + 1, current.Vertex.Left);
 		//				}
 		//			}
 		//		}
@@ -1354,41 +1354,41 @@ namespace asm.Collections
 		//		void PostOrderLR()
 		//		{
 		//			// Left-Right-Root (Stack)
-		//			Stack<(int Depth, TNode Node)> stack = new Stack<(int Depth, TNode Node)>();
-		//			TNode lastVisited = null;
+		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
+		//			TVertex lastVisited = null;
 		//			// Start at the root
-		//			(int Depth, TNode Node) current = (0, _root);
+		//			(int Depth, TVertex Vertex) current = (0, _root);
 
-		//			while (current.Node != null || stack.Count > 0)
+		//			while (current.Vertex != null || stack.Count > 0)
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				if (current.Node != null)
+		//				if (current.Vertex != null)
 		//				{
 		//					stack.Push(current);
 		//					// Navigate left
-		//					current = (current.Depth + 1, current.Node.Left);
+		//					current = (current.Depth + 1, current.Vertex.Left);
 		//					continue;
 		//				}
 
-		//				(int Depth, TNode Node) peek = stack.Peek();
+		//				(int Depth, TVertex Vertex) peek = stack.Peek();
 		//				/*
 		//				 * At this point we are either coming from
-		//				 * either the root node or the left branch.
-		//				 * Is there a right TNode
+		//				 * either the root vertex or the left branch.
+		//				 * Is there a right TVertex
 		//				 * if yes, then navigate right.
 		//				 */
-		//				if (peek.Node.Right != null && lastVisited != peek.Node.Right)
+		//				if (peek.Vertex.Right != null && lastVisited != peek.Vertex.Right)
 		//				{
 		//					// Navigate right
-		//					current = (peek.Depth + 1, peek.Node.Right);
+		//					current = (peek.Depth + 1, peek.Vertex.Right);
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = peek;
-		//					lastVisited = stack.Pop().Node;
-		//					if (!visitCallback(current.Node, current.Depth)) break;
+		//					lastVisited = stack.Pop().Vertex;
+		//					if (!visitCallback(current.Vertex, current.Depth)) break;
 		//					current = (-1, null);
 		//				}
 		//			}
@@ -1397,41 +1397,41 @@ namespace asm.Collections
 		//		void PostOrderRL()
 		//		{
 		//			// Right-Left-Root (Stack)
-		//			Stack<(int Depth, TNode Node)> stack = new Stack<(int Depth, TNode Node)>();
-		//			TNode lastVisited = null;
+		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
+		//			TVertex lastVisited = null;
 		//			// Start at the root
-		//			(int Depth, TNode Node) current = (0, _root);
+		//			(int Depth, TVertex Vertex) current = (0, _root);
 
-		//			while (current.Node != null || stack.Count > 0)
+		//			while (current.Vertex != null || stack.Count > 0)
 		//			{
 		//				if (version != _tree._version) throw new VersionChangedException();
 
-		//				if (current.Node != null)
+		//				if (current.Vertex != null)
 		//				{
 		//					stack.Push(current);
 		//					// Navigate right
-		//					current = (current.Depth + 1, current.Node.Right);
+		//					current = (current.Depth + 1, current.Vertex.Right);
 		//					continue;
 		//				}
 
-		//				(int Depth, TNode Node) peek = stack.Peek();
+		//				(int Depth, TVertex Vertex) peek = stack.Peek();
 		//				/*
 		//				 * At this point we are either coming from
-		//				 * either the root node or the right branch.
-		//				 * Is there a left TNode
+		//				 * either the root vertex or the right branch.
+		//				 * Is there a left TVertex
 		//				 * if yes, then navigate left.
 		//				 */
-		//				if (peek.Node.Left != null && lastVisited != peek.Node.Left)
+		//				if (peek.Vertex.Left != null && lastVisited != peek.Vertex.Left)
 		//				{
 		//					// Navigate left
-		//					current = (peek.Depth + 1, peek.Node.Left);
+		//					current = (peek.Depth + 1, peek.Vertex.Left);
 		//				}
 		//				else
 		//				{
-		//					// visit the next queued node
+		//					// visit the next queued vertex
 		//					current = peek;
-		//					lastVisited = stack.Pop().Node;
-		//					if (!visitCallback(current.Node, current.Depth)) break;
+		//					lastVisited = stack.Pop().Vertex;
+		//					if (!visitCallback(current.Vertex, current.Depth)) break;
 		//					current = (-1, null);
 		//				}
 		//			}
@@ -1445,27 +1445,27 @@ namespace asm.Collections
 		protected internal int _version;
 
 		/// <inheritdoc />
-		protected Graph()
+		protected GraphList()
 			: this((IEqualityComparer<T>)null)
 		{
 		}
 
-		protected Graph(IEqualityComparer<T> comparer)
+		protected GraphList(IEqualityComparer<T> comparer)
 		{
 			Comparer = comparer ?? EqualityComparer<T>.Default;
-			Nodes = new KeyedDictionary<T, TNode>(e => e.Value, Comparer);
+			Vertices = new KeyedDictionary<T, TVertex>(e => e.Value, Comparer);
 			Edges = new Dictionary<T, KeyedDictionary<T, TEdge>>(Comparer);
-			_collectionRef = Nodes;
+			_collectionRef = Vertices;
 		}
 
 		/// <inheritdoc />
-		protected Graph([NotNull] IEnumerable<T> collection)
+		protected GraphList([NotNull] IEnumerable<T> collection)
 			: this(collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected Graph([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
+		protected GraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
 			: this(comparer)
 		{
 			Add(collection);
@@ -1477,12 +1477,13 @@ namespace asm.Collections
 		/// <inheritdoc cref="ICollection{T}" />
 		/// <para>Graph's count is also its order.</para>
 		/// </summary>
-		public int Count => Nodes.Count;
+		public int Count => Vertices.Count;
 
-		public int Size => Edges.Count;
+		// todo
+		public int Size => -1;
 
 		/// <inheritdoc />
-		public bool IsReadOnly => Nodes.IsReadOnly;
+		public bool IsReadOnly => Vertices.IsReadOnly;
 		
 		[NotNull]
 		public IEqualityComparer<T> Comparer { get; }
@@ -1494,27 +1495,27 @@ namespace asm.Collections
 		public object SyncRoot => _collectionRef.SyncRoot;
 
 		[NotNull]
-		protected internal KeyedDictionary<T, TNode> Nodes { get; }
+		protected internal KeyedDictionary<T, TVertex> Vertices { get; }
 
 		[NotNull]
 		protected internal IDictionary<T, KeyedDictionary<T, TEdge>> Edges { get; }
 
 		/// <inheritdoc />
-		public IEnumerator<T> GetEnumerator() { return Nodes.Keys.GetEnumerator(); }
+		public IEnumerator<T> GetEnumerator() { return Vertices.Keys.GetEnumerator(); }
 
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
 		/// <summary>
-		/// Enumerate nodes' values in a semi recursive approach
+		/// Enumerate vertices' values in a semi recursive approach
 		/// </summary>
-		/// <param name="value">The starting node's value</param>
+		/// <param name="value">The starting vertex's value</param>
 		/// <param name="method">The traverse method</param>
 		/// <returns></returns>
 		[NotNull]
 		public IEnumerable<T> Enumerate([NotNull] T value, GraphTraverseMethod method)
 		{
-			if (!Nodes.TryGetValue(value, out TNode root)) throw new KeyNotFoundException();
+			if (!Vertices.TryGetValue(value, out TVertex root)) throw new KeyNotFoundException();
 			return new Enumerator(this, root, method);
 		}
 
@@ -1522,8 +1523,8 @@ namespace asm.Collections
 		public void Add(T value)
 		{
 			if (ReferenceEquals(value, null)) throw new ArgumentNullException(nameof(value));
-			if (Nodes.ContainsKey(value)) throw new DuplicateKeyException();
-			Nodes.Add(NewNode(value));
+			if (Vertices.ContainsKey(value)) throw new DuplicateKeyException();
+			Vertices.Add(NewVertex(value));
 		}
 
 		public void Add([NotNull] IEnumerable<T> collection)
@@ -1540,14 +1541,14 @@ namespace asm.Collections
 		public bool Remove(T value)
 		{
 			if (ReferenceEquals(value, null)) throw new ArgumentNullException(nameof(value));
-			if (!Nodes.RemoveByKey(value)) return false;
+			if (!Vertices.RemoveByKey(value)) return false;
 			RemoveAllEdges(value);
 			return true;
 		}
 
 		public abstract void RemoveEdge([NotNull] T from, [NotNull] T to);
 		
-		public abstract void RemoveEdges([NotNull] T from);
+		public abstract void RemoveEdges([NotNull] T value);
 		
 		public abstract void RemoveAllEdges([NotNull] T value);
 
@@ -1556,16 +1557,36 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public void Clear()
 		{
-			Nodes.Clear();
+			Vertices.Clear();
 			Edges.Clear();
 		}
 
 		/// <inheritdoc />
-		public bool Contains(T value) { return !ReferenceEquals(value, null) && Nodes.ContainsKey(value); }
+		public bool Contains(T value) { return !ReferenceEquals(value, null) && Vertices.ContainsKey(value); }
 
 		public bool ContainsEdge([NotNull] T from, [NotNull] T to)
 		{
 			return Edges.Count > 0 && Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> edges) && edges.ContainsKey(to);
+		}
+
+		public bool ContainsEdge([NotNull] T value)
+		{
+			return Edges.Count > 0 && Edges.ContainsKey(value);
+		}
+
+		public bool IsLoop([NotNull] T value, [NotNull] TEdge edge)
+		{
+			return Comparer.Equals(value, edge.To.Value);
+		}
+
+		public bool IsInternal([NotNull] T value)
+		{
+			return Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges) && edges.Count > 1;
+		}
+
+		public bool IsExternal([NotNull] T value)
+		{
+			return Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges) && edges.Count < 2;
 		}
 
 		/// <summary>
@@ -1599,35 +1620,35 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public void CopyTo(T[] array, int arrayIndex) { Nodes.Keys.CopyTo(array, arrayIndex); }
+		public void CopyTo(T[] array, int arrayIndex) { Vertices.Keys.CopyTo(array, arrayIndex); }
 
 		/// <inheritdoc />
-		public void CopyTo(Array array, int index) { ((ICollection)Nodes.Keys).CopyTo(array, index); }
+		public void CopyTo(Array array, int index) { ((ICollection)Vertices.Keys).CopyTo(array, index); }
 
 		[NotNull]
-		protected abstract TNode NewNode(T value);
+		protected abstract TVertex NewVertex(T value);
 
 		[NotNull]
 		protected abstract TEdge NewEdge(T value);
 
 		[NotNull]
-		protected KeyedDictionary<T, TEdge> NewEdges() { return new KeyedDictionary<T, TEdge>(e => e.To.Value, Comparer); }
+		protected KeyedDictionary<T, TEdge> NewEdgesContainer() { return new KeyedDictionary<T, TEdge>(e => e.To.Value, Comparer); }
 	}
 
 	public static class GraphExtension
 	{
-		public static void WriteTo<TNode, TEdge, T>([NotNull] this Graph<TNode, TEdge, T> thisValue, [NotNull] TextWriter writer)
-			where TNode : GraphNode<TNode, T>
-			where TEdge : GraphEdge<TNode, TEdge, T>
+		public static void WriteTo<TVertex, TEdge, T>([NotNull] this GraphList<TVertex, TEdge, T> thisValue, [NotNull] TextWriter writer)
+			where TVertex : GraphVertex<TVertex, T>
+			where TEdge : GraphEdge<TVertex, TEdge, T>
 		{
 			if (thisValue.Edges.Count == 0) return;
 
 			IDictionary<T, KeyedDictionary<T, TEdge>> allEdges = thisValue.Edges;
 
-			foreach (TNode node in thisValue.Nodes.Values)
+			foreach (TVertex vertex in thisValue.Vertices.Values)
 			{
-				if (!allEdges.TryGetValue(node.Value, out KeyedDictionary<T, TEdge> nodeEdges)) continue;
-				writer.WriteLine($"{node}->[{string.Join(", ", nodeEdges.Values)}]");
+				if (!allEdges.TryGetValue(vertex.Value, out KeyedDictionary<T, TEdge> vertexEdges)) continue;
+				writer.WriteLine($"{vertex}->[{string.Join(", ", vertexEdges.Values)}]");
 			}
 		}
 	}

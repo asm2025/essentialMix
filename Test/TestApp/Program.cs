@@ -162,7 +162,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 
@@ -302,7 +303,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 
@@ -484,7 +486,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 		}
@@ -520,7 +523,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 		}
@@ -562,7 +566,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 		}
@@ -611,7 +616,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 		}
@@ -648,7 +654,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 		}
@@ -691,7 +698,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 		}
@@ -728,7 +736,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 		}
@@ -771,7 +780,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 		}
@@ -803,7 +813,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 
@@ -884,7 +895,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 
@@ -927,7 +939,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 
@@ -970,7 +983,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 
@@ -1011,17 +1025,24 @@ namespace TestApp
 				int[] values = GetRandomIntegers(len);
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
-				PriorityQueue<int> intQueue = new PriorityQueue<int>();
+				PriorityQueue<int, int> intQueue = new MinPriorityQueue<int>();
+				DoTheTest(intQueue, values);
+
+				intQueue = new MaxPriorityQueue<int>();
 				DoTheTest(intQueue, values);
 
 				Student[] students = GetRandomStudents(len);
-				PriorityQueue<double, Student> studentQueue = new PriorityQueue<double, Student>(e => e.Grade * -1);
+				PriorityQueue<double, Student> studentQueue = new MinPriorityQueue<double, Student>(e => e.Grade);
+				DoTheTest(studentQueue, students);
+
+				studentQueue = new MaxPriorityQueue<double, Student>(e => e.Grade);
 				DoTheTest(studentQueue, students);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 
@@ -1069,13 +1090,14 @@ namespace TestApp
 				DoTheTest(heap, values, k);
 
 				Student[] students = GetRandomStudents(len);
-				PriorityQueue<double, Student> studentQueue = new PriorityQueue<double, Student>(e => e.Grade * -1);
+				PriorityQueue<double, Student> studentQueue = new MaxPriorityQueue<double, Student>(e => e.Grade);
 				DoTheTest2(studentQueue, students, k);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 
@@ -1207,7 +1229,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				if (response.KeyChar != 'Y' && response.KeyChar != 'y') modes.Clear();
+				Console.WriteLine();
+				if (response.Key != ConsoleKey.Y) modes.Clear();
 			}
 		}
 
@@ -1232,13 +1255,14 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 				if (!more || values.Count >= MAX_LIST) continue;
 
-				Console.WriteLine();
 				Console.Write($"Would you like to add more words? {"[Y]".BrightGreen()} / {"any key".Dim()} ");
 				response = Console.ReadKey(true);
-				if (response.KeyChar != 'Y' && response.KeyChar != 'y') continue;
+				Console.WriteLine();
+				if (response.Key != ConsoleKey.Y) continue;
 				Console.WriteLine();
 				AddWords(trie, values);
 			}
@@ -1440,35 +1464,35 @@ namespace TestApp
 			const int MAX_LIST = 26;
 
 			bool more;
-			Graph<GraphNode<char>, GraphEdge<char>, char> graph;
-			Graph<GraphNode<char>, GraphWeightedEdge<char>, char> weightedGraph;
+			GraphList<GraphVertex<char>, GraphEdge<char>, char> graph;
+			GraphList<GraphVertex<char>, GraphWeightedEdge<char>, char> weightedGraph;
 			ISet<char> values = new HashSet<char>();
 			Menu menu = new Menu()
 				.Add("Undirected graph", () =>
 				{
 					Console.WriteLine();
-					graph = new UndirectedGraph<char>();
+					graph = new UndirectedGraphList<char>();
 					if (values.Count == 0) AddChar(values);
 					DoTheTest(graph, values);
 				})
 				.Add("Directed graph", () =>
 				{
 					Console.WriteLine();
-					graph = new DirectedGraph<char>();
+					graph = new DirectedGraphList<char>();
 					if (values.Count == 0) AddChar(values);
 					DoTheTest(graph, values);
 				})
 				.Add("Weighted undirected graph", () =>
 				{
 					Console.WriteLine();
-					weightedGraph = new WeightedUndirectedGraph<char>();
+					weightedGraph = new WeightedUndirectedGraphList<char>();
 					if (values.Count == 0) AddChar(values);
 					DoTheTest(weightedGraph, values);
 				})
 				.Add("Weighted directed graph", () =>
 				{
 					Console.WriteLine();
-					weightedGraph = new WeightedDirectedGraph<char>();
+					weightedGraph = new WeightedDirectedGraphList<char>();
 					if (values.Count == 0) AddChar(values);
 					DoTheTest(weightedGraph, values);
 				});
@@ -1481,13 +1505,14 @@ namespace TestApp
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
-				more = response.KeyChar == 'Y' || response.KeyChar == 'y';
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 				if (!more || values.Count >= MAX_LIST) continue;
 
-				Console.WriteLine();
 				Console.Write($"Would you like to add more character? {"[Y]".BrightGreen()} / {"any key".Dim()} ");
 				response = Console.ReadKey(true);
-				if (response.KeyChar != 'Y' && response.KeyChar != 'y') continue;
+				Console.WriteLine();
+				if (response.Key != ConsoleKey.Y) continue;
 				Console.WriteLine();
 				AddChar(values);
 			}
@@ -1509,8 +1534,8 @@ namespace TestApp
 				Console.WriteLine($"Added {count} characters to the set".BrightGreen());
 			}
 
-			static void DoTheTest<TEdge>(Graph<GraphNode<char>, TEdge, char> graph, ISet<char> values)
-				where TEdge : GraphEdge<GraphNode<char>, TEdge, char>
+			static void DoTheTest<TEdge>(GraphList<GraphVertex<char>, TEdge, char> graph, ISet<char> values)
+				where TEdge : GraphEdge<GraphVertex<char>, TEdge, char>
 			{
 				Console.WriteLine("Test adding nodes...");
 				Console.WriteLine("characters list: ".BrightBlack() + string.Join(", ", values));
@@ -1534,13 +1559,27 @@ namespace TestApp
 				Queue<char> queue = new Queue<char>(values);
 				int threshold = (int)Math.Floor(values.Count * 0.5d);
 				char from = queue.Dequeue();
+				Action<char, char> addEdge;
+
+				switch (graph)
+				{
+					case WeightedUndirectedGraphList<char> weightedUndirectedGraph:
+						addEdge = (f, t) => weightedUndirectedGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue));
+						break;
+					case WeightedDirectedGraphList<char> weightedDirectedGraph:
+						addEdge = (f, t) => weightedDirectedGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue));
+						break;
+					default:
+						addEdge = graph.AddEdge;
+						break;
+				}
 
 				while (queue.Count > 0)
 				{
 					char to = queue.Dequeue();
-					if (graph.Comparer.Equals(from, to) || graph.ContainsEdge(from, to)) continue;
+					if (graph.ContainsEdge(from, to)) continue;
 					Console.WriteLine($"Adding {from.ToString().BrightCyan().Underline()} to {to.ToString().BrightCyan().Underline()}...");
-					graph.AddEdge(from, to);
+					addEdge(from, to);
 
 					if (threshold > 0 && queue.Count % 2 == 0)
 					{
@@ -1556,9 +1595,31 @@ namespace TestApp
 				Console.WriteLine();
 				Console.WriteLine("Cool, let's try enumerating it.");
 				char value = graph.Top().First();
-				Console.WriteLine($"Picking a value wit maximum relations: '{value.ToString().BrightCyan().Underline()}'...");
+				Console.WriteLine($"Picking a value with maximum connections: '{value.ToString().BrightCyan().Underline()}'...");
 				Console.WriteLine("Breadth First: " + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.BreadthFirst)));
 				Console.WriteLine("Depth First: " + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.DepthFirst)));
+				ConsoleKeyInfo response;
+
+				do
+				{
+					Console.WriteLine();
+					Console.Write("Type in a character to traverse from it or ESCAPE key to exit this test. ");
+					response = Console.ReadKey();
+					Console.WriteLine();
+					if (response.Key == ConsoleKey.Escape) continue;
+
+					if (!graph.ContainsEdge(response.KeyChar))
+					{
+						Console.Write($"Character '{response.KeyChar}' is not found!");
+						continue;
+					}
+
+					Console.WriteLine("Breadth First: " + string.Join(", ", graph.Enumerate(response.KeyChar, GraphTraverseMethod.BreadthFirst)));
+					Console.WriteLine("Depth First: " + string.Join(", ", graph.Enumerate(response.KeyChar, GraphTraverseMethod.DepthFirst)));
+				}
+				while (response.Key != ConsoleKey.Escape);
+
+				Console.WriteLine();
 			}
 		}
 
@@ -1696,9 +1757,9 @@ public static class Extension
 		thisValue.WriteTo(Console.Out, orientation, diagnosticInfo);
 	}
 
-	public static void Print<TNode, TEdge, T>([NotNull] this Graph<TNode, TEdge, T> thisValue)
-		where TNode : GraphNode<TNode, T>
-		where TEdge : GraphEdge<TNode, TEdge, T>
+	public static void Print<TVertex, TEdge, T>([NotNull] this GraphList<TVertex, TEdge, T> thisValue)
+		where TVertex : GraphVertex<TVertex, T>
+		where TEdge : GraphEdge<TVertex, TEdge, T>
 	{
 		Console.WriteLine();
 		Console.WriteLine($"{"Order:".Yellow()} {thisValue.Count.ToString().Underline()}.");

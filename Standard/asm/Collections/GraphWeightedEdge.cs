@@ -8,12 +8,12 @@ namespace asm.Collections
 	[DebuggerDisplay("->{To} :{Weight}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class GraphWeightedEdge<TNode, TEdge, TWeight, T> : GraphEdge<TNode, TEdge, T>
-		where TNode : GraphNode<TNode, T>
-		where TEdge : GraphWeightedEdge<TNode, TEdge, TWeight, T>
+	public abstract class GraphWeightedEdge<TVertex, TEdge, TWeight, T> : GraphEdge<TVertex, TEdge, T>
+		where TVertex : GraphVertex<TVertex, T>
+		where TEdge : GraphWeightedEdge<TVertex, TEdge, TWeight, T>
 		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
-		protected GraphWeightedEdge([NotNull] TNode to)
+		protected GraphWeightedEdge([NotNull] TVertex to)
 			: base(to)
 		{
 		}
@@ -26,11 +26,11 @@ namespace asm.Collections
 
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class GraphWeightedEdge<TEdge, TWeight, T> : GraphWeightedEdge<GraphNode<T>, TEdge, TWeight, T>
-		where TEdge : GraphWeightedEdge<GraphNode<T>, TEdge, TWeight, T>
+	public abstract class GraphWeightedEdge<TEdge, TWeight, T> : GraphWeightedEdge<GraphVertex<T>, TEdge, TWeight, T>
+		where TEdge : GraphWeightedEdge<GraphVertex<T>, TEdge, TWeight, T>
 		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
-		protected GraphWeightedEdge([NotNull] GraphNode<T> to)
+		protected GraphWeightedEdge([NotNull] GraphVertex<T> to)
 			: base(to)
 		{
 		}
@@ -41,7 +41,7 @@ namespace asm.Collections
 	public class GraphWeightedEdge<TWeight, T> : GraphWeightedEdge<GraphWeightedEdge<TWeight, T>, TWeight, T>
 		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
-		public GraphWeightedEdge([NotNull] GraphNode<T> to)
+		public GraphWeightedEdge([NotNull] GraphVertex<T> to)
 			: base(to)
 		{
 		}
@@ -51,7 +51,7 @@ namespace asm.Collections
 	[StructLayout(LayoutKind.Sequential)]
 	public class GraphWeightedEdge<T> : GraphWeightedEdge<GraphWeightedEdge<T>, int, T>
 	{
-		public GraphWeightedEdge([NotNull] GraphNode<T> to)
+		public GraphWeightedEdge([NotNull] GraphVertex<T> to)
 			: base(to)
 		{
 		}
