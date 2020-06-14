@@ -104,16 +104,19 @@ namespace asm.Collections
 			if (Count == 0) return Enumerable.Empty<T>();
 
 			int version = _version;
-			// detect cycles
-			ICollection<T> cycle = FindCycle();
-			if (cycle != null && cycle.Count > 0) throw new Exception($"Cycle detected [{string.Join(", ", cycle)}]");
-
 			Stack<T> result = new Stack<T>(Count);
 			Stack<T> stack = new Stack<T>();
+			// for detecting cycles if any
+			LinkedList<T> cycle = new LinkedList<T>();
+			HashSet<T> visiting = new HashSet<T>(Comparer);
+			// keep track of visited vertices
 			HashSet<T> visited = new HashSet<T>(Comparer);
 
 			foreach (T key in Edges.Keys)
 			{
+				if (version != _version) throw new VersionChangedException();
+				if (visited.Contains(key)) continue;
+				int deque = 0;
 				stack.Push(key);
 
 				while (stack.Count > 0)
@@ -122,22 +125,41 @@ namespace asm.Collections
 
 					T value = stack.Pop();
 					if (visited.Contains(value)) continue;
+					visiting.Add(value);
+					deque++;
+					cycle.AddLast(value);
+					result.Push(value);
 
-					if (!Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges))
+					if (Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges))
 					{
-						result.Push(value);
-						visited.Add(value);
+						foreach (TEdge edge in edges.Values.OrderBy(e => e.Weight))
+						{
+							if (visited.Contains(edge.To.Value)) continue;
+
+							// cycle detected
+							if (visiting.Contains(edge.To.Value))
+							{
+								cycle.AddLast(edge.To.Value);
+
+								while (!Comparer.Equals(edge.To.Value, cycle.First.Value))
+									cycle.RemoveFirst();
+
+								throw new Exception($"Cycle detected [{string.Join(", ", cycle)}]");
+							}
+
+							stack.Push(edge.To.Value);
+						}
+
 						continue;
 					}
 
-					foreach (TEdge edge in edges.Values.OrderBy(e => e.Weight))
+					while (deque-- > 0)
 					{
-						if (visited.Contains(edge.To.Value)) continue;
-						stack.Push(edge.To.Value);
+						T d = cycle.Last.Value;
+						cycle.RemoveLast();
+						visiting.Remove(d);
+						visited.Add(d);
 					}
-
-					result.Push(value);
-					visited.Add(value);
 				}
 			}
 

@@ -38,7 +38,7 @@ namespace TestApp
 			//TestLinkedQueue();
 			//TestMinMaxQueue();
 
-			TestLinkedList();
+			//TestLinkedList();
 
 			//TestBinaryTreeFromTraversal();
 			
@@ -68,7 +68,7 @@ namespace TestApp
 			//TestTrie();
 			//TestTrieSimilarWordsRemoval();
 
-			//TestGraph();
+			TestGraph();
 			
 			ConsoleHelper.Pause();
 		}
@@ -1635,9 +1635,12 @@ namespace TestApp
 				}
 				
 				Console.WriteLine("All nodes are added...!".BrightGreen() + " Let's try adding some relationships...");
-
+				Console.Write($"Would you like to add a bit of randomization? {"[Y]".BrightGreen()} / {"any key".Dim()}. This may cause cycles. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				int threshold = response.Key != ConsoleKey.Y ? 0 : (int)Math.Floor(values.Count * 0.5d);
+				
 				Queue<char> queue = new Queue<char>(values);
-				int threshold = (int)Math.Floor(values.Count * 0.5d);
 				char from = queue.Dequeue();
 				Action<char, char> addEdge = graph switch
 				{
@@ -1670,7 +1673,6 @@ namespace TestApp
 				char value = graph.Top().First();
 				Console.WriteLine($"Picking a value with maximum connections: '{value.ToString().BrightCyan().Underline()}'...");
 				DoTheTestWithValue(graph, value);
-				ConsoleKeyInfo response;
 
 				do
 				{
@@ -1713,12 +1715,12 @@ namespace TestApp
 						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", mixedGraph.TopologicalSort())); }
 						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
 						break;
-					case WeightedDirectedGraphList<GraphWeightedEdge<int, char>, int, char> weightedDirectedGraph:
+					case WeightedDirectedGraphList<GraphWeightedEdge<char>, int, char> weightedDirectedGraph:
 						Console.WriteLine("InDegree: ".Yellow() + weightedDirectedGraph.InDegree(value));
 						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", weightedDirectedGraph.TopologicalSort())); }
 						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
 						break;
-					case WeightedMixedGraphList<GraphWeightedEdge<int, char>, int, char> weightedMixedGraph:
+					case WeightedMixedGraphList<GraphWeightedEdge<char>, int, char> weightedMixedGraph:
 						Console.WriteLine("InDegree: ".Yellow() + weightedMixedGraph.InDegree(value));
 						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", weightedMixedGraph.TopologicalSort())); }
 						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
