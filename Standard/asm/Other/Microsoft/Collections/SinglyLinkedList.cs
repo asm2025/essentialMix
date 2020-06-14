@@ -13,8 +13,8 @@ using JetBrains.Annotations;
 namespace asm.Other.Microsoft.Collections
 {
 	// based on https://github.com/microsoft/referencesource/blob/master/System/compmod/system/collections/generic/linkedlist.cs
-	[ComVisible(false)]
 	[DebuggerDisplay("Count = {Count}")]
+	[ComVisible(false)]
 	public class SinglyLinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
 	{
 		private const string VALUES = "Values";
@@ -490,13 +490,14 @@ namespace asm.Other.Microsoft.Collections
 					if (_tail == _head) _tail = newNode;
 					_head = newNode;
 					_head._next ??= _head;
-					if (_tail == _head) _tail._next = _head;
+					_tail._next = _head;
 				}
 			}
 			else
 			{
 				newNode._next = node._next;
 				node._next = newNode;
+				if (_tail == node) _tail = newNode;
 			}
 
 			_version++;

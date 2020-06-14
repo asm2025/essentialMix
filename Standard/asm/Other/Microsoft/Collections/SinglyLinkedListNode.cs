@@ -1,9 +1,11 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace asm.Other.Microsoft.Collections
 {
 	// based on https://referencesource.microsoft.com/#system/compmod/system/collections/generic/linkedlist.cs
 	// Note following class is not serializable since we customized the serialization of SinglyLinkedList. 
+	[DebuggerDisplay("{Value}")]
 	[ComVisible(false)]
 	public sealed class SinglyLinkedListNode<T>
 	{

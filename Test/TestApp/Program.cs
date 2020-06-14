@@ -12,6 +12,7 @@ using asm.Comparers;
 using asm.Exceptions;
 using asm.Extensions;
 using asm.Helpers;
+using asm.Other.Microsoft.Collections;
 using asm.Patterns.Layout;
 using Bogus;
 using Bogus.DataSets;
@@ -36,6 +37,8 @@ namespace TestApp
 
 			//TestLinkedQueue();
 			//TestMinMaxQueue();
+
+			TestLinkedList();
 
 			//TestBinaryTreeFromTraversal();
 			
@@ -65,7 +68,7 @@ namespace TestApp
 			//TestTrie();
 			//TestTrieSimilarWordsRemoval();
 
-			TestGraph();
+			//TestGraph();
 			
 			ConsoleHelper.Pause();
 		}
@@ -389,7 +392,6 @@ namespace TestApp
 				Console.WriteLine($"Dequeue Value: {queue.Dequeue()}, Min: {queue.Minimum}, Max: {queue.Maximum}");
 			}
 
-
 			Console.WriteLine();
 			Console.WriteLine();
 			Console.WriteLine("As Stack:");
@@ -407,6 +409,72 @@ namespace TestApp
 			{
 				Console.WriteLine($"Dequeue Value: {queue.Dequeue()}, Min: {queue.Minimum}, Max: {queue.Maximum}");
 			}
+		}
+
+		private static void TestLinkedList()
+		{
+			Title("Testing SingleLinkedList...");
+
+			int len = RNGRandomHelper.Next(5, 20);
+			int[] values = GetRandomIntegers(len);
+			Console.WriteLine("Array: " + string.Join(", ", values));
+
+			SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
+
+			Console.WriteLine("Test adding...");
+
+			foreach (int v in values) 
+				linkedList.AddLast(v);
+
+			if (linkedList.Count != values.Length)
+			{
+				Console.WriteLine("Something went wrong, Count isn't right...!".BrightRed());
+				return;
+			}
+
+			Console.WriteLine("List: " + string.Join(", ", linkedList));
+
+			int value = values.PickRandom();
+			Console.WriteLine($"Test removing {value.ToString().BrightCyan().Underline()}...");
+			linkedList.Remove(value);
+
+			if (linkedList.Count != values.Length - 1)
+			{
+				Console.WriteLine("Something went wrong, Count isn't right...!".BrightRed());
+				return;
+			}
+
+			Console.WriteLine("List: " + string.Join(", ", linkedList));
+
+			int x;
+			
+			do
+			{
+				// find a random value that wasn't removed from the list
+				x = values.PickRandom();
+			}
+			while (x == value);
+
+			Console.WriteLine("find a random value that wasn't removed from the list.");
+			SinglyLinkedListNode<int> node = linkedList.Find(x);
+
+			if (node == null)
+			{
+				Console.WriteLine("Didn't find shit...!".BrightRed());
+				return;
+			}
+
+			Console.WriteLine($"Test adding {value.ToString().BrightCyan().Underline()} {"after".BrightBlue().Underline()} {x.ToString().BrightCyan().Underline()}...");
+			linkedList.AddAfter(node, value);
+			Console.WriteLine("List: " + string.Join(", ", linkedList));
+
+			Console.WriteLine($"Test adding {value.ToString().BrightCyan().Underline()} {"before".BrightBlue().Underline()} {x.ToString().BrightCyan().Underline()}...");
+			linkedList.AddBefore(node, value);
+			Console.WriteLine("List: " + string.Join(", ", linkedList));
+
+			Console.WriteLine($"Test adding {value.ToString().BrightCyan().Underline()} to the beginning of the list...");
+			linkedList.AddFirst(value);
+			Console.WriteLine("List: " + string.Join(", ", linkedList));
 		}
 
 		private static void TestBinaryTreeFromTraversal()
