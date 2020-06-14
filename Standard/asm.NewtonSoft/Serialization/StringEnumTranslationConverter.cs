@@ -26,25 +26,25 @@ namespace asm.Newtonsoft.Serialization
 		}
 
 		/// <inheritdoc />
-		public StringEnumTranslationConverter(NamingStrategy namingStrategy, bool allowIntegerValues = true)
+		public StringEnumTranslationConverter([NotNull] NamingStrategy namingStrategy, bool allowIntegerValues = true)
 			: base(namingStrategy, allowIntegerValues)
 		{
 		}
 
 		/// <inheritdoc />
-		public StringEnumTranslationConverter(Type namingStrategyType)
+		public StringEnumTranslationConverter([NotNull] Type namingStrategyType)
 			: base(namingStrategyType)
 		{
 		}
 
 		/// <inheritdoc />
-		public StringEnumTranslationConverter(Type namingStrategyType, object[] namingStrategyParameters)
+		public StringEnumTranslationConverter([NotNull] Type namingStrategyType, [NotNull] object[] namingStrategyParameters)
 			: base(namingStrategyType, namingStrategyParameters)
 		{
 		}
 
 		/// <inheritdoc />
-		public StringEnumTranslationConverter(Type namingStrategyType, object[] namingStrategyParameters, bool allowIntegerValues)
+		public StringEnumTranslationConverter([NotNull] Type namingStrategyType, [NotNull] object[] namingStrategyParameters, bool allowIntegerValues)
 			: base(namingStrategyType, namingStrategyParameters, allowIntegerValues)
 		{
 		}
@@ -67,11 +67,11 @@ namespace asm.Newtonsoft.Serialization
 		public CultureInfo Culture { get; set; } = CultureInfo.CurrentCulture;
 
 		/// <inheritdoc />
-		public override void WriteJson(JsonWriter writer, object value, NewtonsoftJsonSerializer jsonSerializer)
+		public override void WriteJson([NotNull] JsonWriter writer, object value, [NotNull] NewtonsoftJsonSerializer jsonSerializer)
 		{
 			Type type = value.AsType();
 
-			if (type == null || !IsTypeIncluded(type))
+			if (!IsTypeIncluded(type))
 			{
 				base.WriteJson(writer, value, jsonSerializer);
 				return;

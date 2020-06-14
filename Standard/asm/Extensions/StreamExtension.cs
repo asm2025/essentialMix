@@ -148,10 +148,13 @@ namespace asm.Extensions
 			return value;
 		}
 
+		[NotNull]
 		public static FileStream SaveToTempStream([NotNull] this Stream thisValue) { return SaveToTempStream(thisValue, null, null, 0); }
 
+		[NotNull]
 		public static FileStream SaveToTempStream([NotNull] this Stream thisValue, string basePath) { return SaveToTempStream(thisValue, basePath, null, 0); }
 
+		[NotNull]
 		public static FileStream SaveToTempStream([NotNull] this Stream thisValue, string basePath, string prefix) { return SaveToTempStream(thisValue, basePath, prefix, 0); }
 
 		[NotNull]

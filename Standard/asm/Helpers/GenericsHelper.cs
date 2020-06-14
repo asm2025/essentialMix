@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using asm.Extensions;
-using asm.Internal;
+using asm.Other.MarcGravell;
 using JetBrains.Annotations;
 
 namespace asm.Helpers

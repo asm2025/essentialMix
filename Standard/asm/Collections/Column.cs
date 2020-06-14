@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Runtime.Serialization;
 using JetBrains.Annotations;
 
 namespace asm.Collections
@@ -11,27 +10,18 @@ namespace asm.Collections
 	{
 		private ushort _order;
 
-		protected Column(string name, Type type)
+		protected Column([NotNull] string name, [NotNull] Type type)
 			: this(name, type, null) { }
 
-		protected Column(string name, Type type, string text)
+		protected Column([NotNull] string name, [NotNull] Type type, string text)
 			: base(name, type, text) { }
 
-		protected Column(string name, Type type, bool isFixed) : base(name, type, isFixed)
+		protected Column([NotNull] string name, [NotNull] Type type, bool isFixed) : base(name, type, isFixed)
 		{
 		}
 
 		protected Column([NotNull] string name, [NotNull] Type type, string text, bool isFixed) : base(name, type, text, isFixed)
 		{
-		}
-
-		protected Column([NotNull] SerializationInfo info, StreamingContext context)
-			: base(info, context) { _order = info.GetUInt16("Order"); }
-
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			base.GetObjectData(info, context);
-			info.AddValue("Order", _order);
 		}
 
 		public ushort Order

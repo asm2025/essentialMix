@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using asm.Collections;
-using asm.Collections.Concurrent;
 using asm.Helpers;
+using asm.Other.Microsoft.Collections;
 using JetBrains.Annotations;
 
 namespace asm.Extensions
@@ -26,9 +26,7 @@ namespace asm.Extensions
 			{
 				case HashSet<T> hashSet:
 					return hashSet.Comparer;
-				case ConcurrentSet<T> concurrentSet:
-					return concurrentSet.Comparer;
-				case Microsoft.Collections.HashSetBase<T> hashSetBase:
+				case HashSetBase<T> hashSetBase:
 					return hashSetBase.Comparer;
 			}
 

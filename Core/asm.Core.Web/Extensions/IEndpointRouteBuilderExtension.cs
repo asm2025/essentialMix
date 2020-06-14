@@ -54,7 +54,7 @@ namespace asm.Core.Web.Extensions
 		{
 			prefix = UriHelper.Trim(prefix);
 			if (!string.IsNullOrEmpty(prefix)) prefix += "/";
-			if (prefix == null) prefix = string.Empty;
+			prefix ??= string.Empty;
 			thisValue.MapControllerRoute("areas",
 								prefix + "{area:exists}/{controller}/{action}/{id?}",
 								new

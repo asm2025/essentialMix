@@ -15,7 +15,7 @@ namespace asm.Collections
 		public TSource Source { get; }
 
 		[NotNull]
-		public virtual System.ComponentModel.AttributeCollection GetAttributes() { return TypeDescriptor.GetAttributes(Source, true); }
+		public virtual AttributeCollection GetAttributes() { return TypeDescriptor.GetAttributes(Source, true); }
 
 		public virtual string GetClassName() { return TypeDescriptor.GetClassName(Source, true); }
 

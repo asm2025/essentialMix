@@ -1,0 +1,3 @@
+The work in this folder tree "Linq" and its subfolders are not mine.
+It's based on the excellent work of Joseph Albahari.
+http://www.albahari.com/nutshell/predicatebuilder.aspx

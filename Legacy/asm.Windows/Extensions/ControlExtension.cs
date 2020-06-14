@@ -16,10 +16,10 @@ namespace asm.Windows.Extensions
 			{
 				if (thisValue.Controls.Count == 0) return;
 				ISet<Control> controls = new HashSet<Control>(ignore ?? Array.Empty<Control>());
-				EnableControlsInternal(thisValue, value, controls);
+				EnableControlsLocal(thisValue, value, controls);
 			});
 
-			void EnableControlsInternal(Control control, bool v, ISet<Control> controls)
+			static void EnableControlsLocal(Control control, bool v, ISet<Control> controls)
 			{
 				control.InvokeIf(() =>
 				{
@@ -28,7 +28,7 @@ namespace asm.Windows.Extensions
 						if (!controls.Contains(ctl)) ctl.Enabled = v;
 
 						foreach (Control ctl2 in ctl.Controls)
-							EnableControlsInternal(ctl2, v, controls);
+							EnableControlsLocal(ctl2, v, controls);
 					}
 				});
 			}

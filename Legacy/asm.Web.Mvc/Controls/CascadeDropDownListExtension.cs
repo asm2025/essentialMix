@@ -242,6 +242,7 @@ function initCascadeDropDownFor{0}() {{
 		*/
 		#endregion
 
+		[NotNull]
 		public static MvcHtmlString CascadingDropDownList<TModel, TProperty>([NotNull] this HtmlHelper<TModel> thisValue, [NotNull] string name, [NotNull] Expression<Func<TModel, TProperty>> triggeredByProperty, CascadeDropDownListSettings settings = null, object htmlAttributes = null)
 		{
 			string triggeredByPropId = thisValue.GetElementIdFromExpression(triggeredByProperty)?.Trim();
@@ -252,7 +253,7 @@ function initCascadeDropDownFor{0}() {{
 		[NotNull]
 		public static MvcHtmlString CascadingDropDownList([NotNull] this HtmlHelper thisValue, [NotNull] string name, [NotNull] string triggeredByProperty, CascadeDropDownListSettings settings = null, object htmlAttributes = null)
 		{
-			if (settings == null) settings = new CascadeDropDownListSettings();
+			settings ??= new CascadeDropDownListSettings();
 			settings.SelectedValue = GetPropStringValue(thisValue.ViewData.Model, name);
 			return CascadingDropDownListInternal(thisValue, name, triggeredByProperty, settings, Helpers.HtmlHelper.ToHtmlAttributes(htmlAttributes));
 		}
@@ -266,7 +267,7 @@ function initCascadeDropDownFor{0}() {{
 			string triggeredByPropId = thisValue.GetElementIdFromExpression(triggeredByProperty)?.Trim();
 			if (string.IsNullOrEmpty(triggeredByPropId)) throw new ArgumentException("Triggered by property id is missing.", nameof(triggeredByProperty));
 
-			if (settings == null) settings = new CascadeDropDownListSettings();
+			settings ??= new CascadeDropDownListSettings();
 			if (string.IsNullOrWhiteSpace(settings.Id)) settings.Id = thisValue.GetElementIdFromExpression(expression);
 			settings.SelectedValue = GetPropStringValue(thisValue.ViewData.Model, expression);
 
@@ -279,7 +280,7 @@ function initCascadeDropDownFor{0}() {{
 			string dropDownElementName = thisValue.GetElementNameFromExpression(expression)?.Trim();
 			if (string.IsNullOrEmpty(dropDownElementName)) throw new ArgumentException("Drop down element name is missing.", nameof(expression));
 
-			if (settings == null) settings = new CascadeDropDownListSettings();
+			settings ??= new CascadeDropDownListSettings();
 			if (string.IsNullOrWhiteSpace(settings.Id)) settings.Id = thisValue.GetElementIdFromExpression(expression);
 			settings.SelectedValue = GetPropStringValue(thisValue.ViewData.Model, expression);
 
@@ -289,7 +290,7 @@ function initCascadeDropDownFor{0}() {{
 		[NotNull]
 		public static MvcHtmlString CascadingDropDownList([NotNull] this HtmlHelper thisValue, [NotNull] string name, [NotNull] string triggeredByProperty, CascadeDropDownListSettings settings = null, RouteValueDictionary htmlAttributes = null)
 		{
-			if (settings == null) settings = new CascadeDropDownListSettings();
+			settings ??= new CascadeDropDownListSettings();
 			settings.SelectedValue = GetPropStringValue(thisValue.ViewData.Model, name);
 			return CascadingDropDownListInternal(thisValue, name, triggeredByProperty, settings, htmlAttributes);
 		}
@@ -299,8 +300,8 @@ function initCascadeDropDownFor{0}() {{
 		{
 			name = name.Trim();
 			if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
-			if (settings == null) settings = new CascadeDropDownListSettings();
-			if (htmlAttributes == null) htmlAttributes = new RouteValueDictionary();
+			settings ??= new CascadeDropDownListSettings();
+			htmlAttributes ??= new RouteValueDictionary();
 			
 			string cascadeDdElementId = settings.Id?.Trim();
 			if (string.IsNullOrEmpty(cascadeDdElementId)) cascadeDdElementId = GetDropDownElementId(htmlAttributes);

@@ -17,13 +17,13 @@ namespace asm.Collections
 		protected KeyedCollectionBase<TKey, TValue> Collection { get; }
 
 		/// <inheritdoc />
-		IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() { return Collection.GetEnumerator(); }
+		public IEnumerator<TValue> GetEnumerator() { return Collection.GetEnumerator(); }
 
 		/// <inheritdoc />
-		IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() { return (IEnumerator<KeyValuePair<TKey, TValue>>)Collection.GetEnumerator(); }
+		IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() { return ((IReadOnlyKeyedCollection<TKey, TValue>)Collection).GetEnumerator(); }
 
 		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() { return ((IEnumerable)Collection).GetEnumerator(); }
+		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
 		/// <inheritdoc />
 		int IReadOnlyCollection<KeyValuePair<TKey, TValue>>.Count => Collection.Count;

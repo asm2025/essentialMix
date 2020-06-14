@@ -136,7 +136,7 @@ namespace asm.Data.Xml
 
 		private void Add(object o)
 		{
-			if (_content == null) _content = new List<object>();
+			_content ??= new List<object>();
 			_content.Add(o);
 		}
 

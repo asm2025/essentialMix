@@ -18,7 +18,7 @@ namespace asm.Data.Helpers
 			switch (obj)
 			{
 				case null:
-					return Empty();
+					return Enumerable.Empty<TColumn>();
 				case DataTable dt:
 					if (columnFilter != null && !typeof(TColumn).Is<DataColumn>()) throw new ArgumentException($"Column filter must receive an argument of type '{nameof(DataColumn)}' or a type derived from it.");
 					return DataColumns(dt);
@@ -26,8 +26,6 @@ namespace asm.Data.Helpers
 					if (columnFilter != null && !typeof(TColumn).Is<PropertyInfo>()) throw new ArgumentException($"Column filter must receive an argument of type '{nameof(PropertyInfo)}' or a type derived from it.");
 					return Properties();
 			}
-
-			IEnumerable<TColumn> Empty() { yield break; }
 
 			IEnumerable<TColumn> DataColumns(DataTable dt)
 			{

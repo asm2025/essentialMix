@@ -127,6 +127,7 @@ namespace asm.Windows.Controls
 		///     Required method for Designer support - do not modify
 		///     the contents of this method with the code editor.
 		/// </summary>
+		// ReSharper disable once MemberCanBeMadeStatic.Local
 		private void InitializeComponent()
 		{
 		}

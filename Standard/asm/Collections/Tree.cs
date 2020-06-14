@@ -1,36 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.Serialization;
+using asm.Other.Microsoft.Collections;
 using JetBrains.Annotations;
-using Microsoft.Collections;
 
 namespace asm.Collections
 {
 	[DebuggerDisplay("{Value}, Count = {Count}")]
 	[Serializable]
-	public class Tree<T> : ListBase<Tree<T>>
+	public class Tree<T> : KeyedDictionaryBase<T, Tree<T>>
 	{
 		/// <inheritdoc />
-		public Tree() 
+		public Tree([NotNull] T value) 
+			: this(value, (IEqualityComparer<T>)null)
 		{
 		}
 
 		/// <inheritdoc />
-		public Tree(int capacity)
-			: base(capacity)
+		public Tree([NotNull] T value, IEqualityComparer<T> comparer)
+			: base(comparer)
+		{
+			Value = value;
+		}
+
+		/// <inheritdoc />
+		public Tree([NotNull] T value, [NotNull] IEnumerable<Tree<T>> collection)
+			: this(value, collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public Tree([NotNull] IEnumerable<Tree<T>> collection)
-			: base(collection)
+		public Tree([NotNull] T value, [NotNull] IEnumerable<Tree<T>> collection, IEqualityComparer<T> comparer)
+			: base(collection, comparer)
 		{
+			Value = value;
 		}
-		
+
 		public T Value { get; set; }
 		
 		public bool IsLeaf => Count == 0;
+
+		/// <inheritdoc />
+		protected override T GetKeyForItem(Tree<T> item) { return Value; }
 	}
 
 	[DebuggerDisplay("{Key} [{Value}], Count = {Count}")]
@@ -38,36 +49,30 @@ namespace asm.Collections
 	public class Tree<TKey, TValue> : KeyedDictionaryBase<TKey, Tree<TKey, TValue>>
 	{
 		/// <inheritdoc />
-		public Tree() 
+		public Tree([NotNull] TKey key) 
+			: this(key, (IEqualityComparer<TKey>)null)
 		{
 		}
 
 		/// <inheritdoc />
-		public Tree(IEqualityComparer<TKey> comparer)
+		public Tree([NotNull] TKey key, IEqualityComparer<TKey> comparer)
 			: base(comparer)
 		{
+			Key = key;
 		}
 
 		/// <inheritdoc />
-		public Tree([NotNull] IEnumerable<Tree<TKey, TValue>> collection)
-			: base(collection)
+		public Tree([NotNull] TKey key, [NotNull] IEnumerable<Tree<TKey, TValue>> collection)
+			: this(key, collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public Tree([NotNull] IEnumerable<Tree<TKey, TValue>> collection, IEqualityComparer<TKey> comparer)
+		public Tree([NotNull] TKey key, [NotNull] IEnumerable<Tree<TKey, TValue>> collection, IEqualityComparer<TKey> comparer)
 			: base(collection, comparer)
 		{
+			Key = key;
 		}
-
-		/// <inheritdoc />
-		protected Tree(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-		}
-
-		[NotNull]
-		public KeyedDictionaryBase<TKey, Tree<TKey, TValue>> Children => this;
 
 		public TKey Key { get; set; }
 		

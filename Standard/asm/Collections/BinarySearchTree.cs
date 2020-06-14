@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using asm.Exceptions.Collections;
 using asm.Extensions;
-using asm.Patterns.Collections;
 using asm.Patterns.Layout;
 using JetBrains.Annotations;
 
@@ -38,12 +36,6 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public BinarySearchTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
 			: base(collection, comparer)
-		{
-		}
-
-		/// <inheritdoc />
-		protected BinarySearchTree(SerializationInfo info, StreamingContext context)
-			: base(info, context)
 		{
 		}
 

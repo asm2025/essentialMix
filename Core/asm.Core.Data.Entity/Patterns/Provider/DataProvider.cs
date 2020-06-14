@@ -76,10 +76,10 @@ namespace asm.Core.Data.Entity.Patterns.Provider
 		}
 
 		/// <inheritdoc />
-		public virtual string GetQueryStatement(IQueryable query) { return query.ToString(); }
+		public virtual string GetQueryStatement(IQueryable query) { return query.ToString() ?? string.Empty; }
 
 		/// <inheritdoc />
-		public virtual string GetQueryStatement<T>(IQueryable<T> query) { return query.ToString(); }
+		public virtual string GetQueryStatement<T>(IQueryable<T> query) { return query.ToString() ?? string.Empty; }
 
 		/// <inheritdoc />
 		public virtual string GetQueryDebugStatement(IQueryable query) { return GetQueryStatement(query); }

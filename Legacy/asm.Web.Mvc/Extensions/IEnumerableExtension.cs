@@ -16,7 +16,7 @@ namespace asm.Web.Mvc.Extensions
 			if (startIndex < 0) throw new ArgumentOutOfRangeException(nameof(startIndex));
 
 			ICollection<SelectListItem> newCollection;
-			int n = -1, i = startIndex - 1;
+			int i = startIndex - 1;
 
 			switch (thisValue)
 			{
@@ -47,7 +47,7 @@ namespace asm.Web.Mvc.Extensions
 					count += startIndex;
 					newCollection = new List<SelectListItem>(count);
 
-					for (i = startIndex; n < 0 && i < count; i++)
+					for (i = startIndex; i < count; i++)
 					{
 						TSource x = list[i];
 						SelectListItem item = new SelectListItem

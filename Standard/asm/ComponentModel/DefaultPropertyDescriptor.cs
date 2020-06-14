@@ -27,7 +27,7 @@ namespace asm.ComponentModel
 		{
 			get
 			{
-				if (_isReadOnly == null) _isReadOnly = Property.GetSetMethod() == null;
+				_isReadOnly ??= Property.GetSetMethod() == null;
 				return _isReadOnly.Value;
 			}
 		}

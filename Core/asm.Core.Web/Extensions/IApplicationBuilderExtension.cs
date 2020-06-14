@@ -29,19 +29,17 @@ namespace asm.Core.Web.Extensions
 		[NotNull]
 		public static IApplicationBuilder UseDefaultExceptionDelegate([NotNull] this IApplicationBuilder thisValue, Func<HttpContext, Exception, ILogger, Task> onError, ILogger logger = null)
 		{
-			if (onError == null)
+			onError ??= async (context, exception, log) =>
 			{
-				onError = async (context, exception, log) =>
-				{
-					log?.LogError(exception, exception.Message);
-					context.Response.ContentType = "text/html";
-					await context.Response.WriteAsync(new ResponseStatus
-					{
-						StatusCode = (HttpStatusCode)context.Response.StatusCode,
-						Exception = exception
-					}.ToString().Replace(Environment.NewLine, $"{Environment.NewLine}<br />"));
-				};
-			}
+				log?.LogError(exception, exception.Message);
+				context.Response.ContentType = "text/html";
+				await context.Response.WriteAsync(new ResponseStatus
+													{
+														StatusCode = (HttpStatusCode)context.Response.StatusCode,
+														Exception = exception
+													}.ToString()
+													.Replace(Environment.NewLine, $"{Environment.NewLine}<br />"));
+			};
 
 			thisValue.UseExceptionHandler(app =>
 			{

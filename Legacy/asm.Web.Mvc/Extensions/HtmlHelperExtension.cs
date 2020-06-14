@@ -301,8 +301,6 @@ namespace asm.Web.Mvc.Extensions
 		public static MvcHtmlString Breadcrumb([NotNull] this HtmlHelper thisValue, string defaultRouteName = "Home")
 		{
 			ViewContext context = RootContext(thisValue);
-			if (context == null) return MvcHtmlString.Empty;
-
 			TagBuilder rootDiv = new TagBuilder(HtmlTextWriterTag.Ol.ToString());
 			rootDiv.AddCssClass("breadcrumb");
 

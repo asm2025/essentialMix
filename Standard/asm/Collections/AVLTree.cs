@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using JetBrains.Annotations;
@@ -34,12 +33,6 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public AVLTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
 			: base(collection, comparer)
-		{
-		}
-
-		/// <inheritdoc />
-		public AVLTree(SerializationInfo info, StreamingContext context)
-			: base(info, context)
 		{
 		}
 

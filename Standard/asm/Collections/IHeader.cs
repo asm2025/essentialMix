@@ -1,11 +1,10 @@
 using System;
 using System.ComponentModel;
-using System.Runtime.Serialization;
 using JetBrains.Annotations;
 
 namespace asm.Collections
 {
-	public interface IHeader : IFixable, IComparable<IHeader>, IComparable, IEquatable<IHeader>, INotifyPropertyChanged, ICloneable, ISerializable
+	public interface IHeader : IFixable, IComparable<IHeader>, IComparable, IEquatable<IHeader>, INotifyPropertyChanged, ICloneable
 	{
 		[NotNull]
 		string Name { get; set; }

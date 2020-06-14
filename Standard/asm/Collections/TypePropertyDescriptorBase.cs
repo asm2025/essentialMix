@@ -20,17 +20,17 @@ namespace asm.Collections
 		{
 		}
 
-		protected TypePropertyDescriptorBase([NotNull] MemberDescriptor descr) 
-			: base(descr)
+		protected TypePropertyDescriptorBase([NotNull] MemberDescriptor descriptor) 
+			: base(descriptor)
 		{
 		}
 
-		protected TypePropertyDescriptorBase([NotNull] MemberDescriptor descr, Attribute[] attrs) 
-			: base(descr, attrs)
+		protected TypePropertyDescriptorBase([NotNull] MemberDescriptor descriptor, Attribute[] attrs) 
+			: base(descriptor, attrs)
 		{
 		}
 
-		public override System.ComponentModel.AttributeCollection Attributes { get; } = new System.ComponentModel.AttributeCollection();
+		public override AttributeCollection Attributes { get; } = new AttributeCollection();
 		public override string Name => _name ??= GetName();
 
 		public override string DisplayName => _displayName ??= GetDisplayName();

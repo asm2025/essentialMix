@@ -52,6 +52,7 @@ namespace asm.Extensions
 						.FirstOrDefault() ?? defaultCancellationTokenSource;
 		}
 
+		[NotNull]
 		public static Task WhenCanceled(this CancellationToken thisValue)
 		{
 			CancellationTokenAwaiter awaiter = new CancellationTokenAwaiter(thisValue);

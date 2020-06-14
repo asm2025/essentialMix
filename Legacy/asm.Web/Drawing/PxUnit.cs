@@ -82,7 +82,7 @@ namespace asm.Web.Drawing
 			}
 			else
 			{
-				if (culture == null) culture = CultureInfo.CurrentUICulture;
+				culture ??= CultureInfo.CurrentUICulture;
 
 				string str = value.Trim().ToLower(culture);
 				int length = str.Length;

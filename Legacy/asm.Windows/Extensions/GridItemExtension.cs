@@ -32,9 +32,9 @@ namespace asm.Windows.Extensions
 
 		public static void Expand([NotNull] this GridItem thisValue)
 		{
-			ExpandItems(thisValue);
+			ExpandLocal(thisValue);
 
-			void ExpandItems(GridItem item)
+			static void ExpandLocal(GridItem item)
 			{
 				GridItemCollection items = item.GridItems;
 				if (items == null || items.Count == 0) return;
@@ -42,7 +42,7 @@ namespace asm.Windows.Extensions
 				foreach (GridItem gridItem in items)
 				{
 					if (gridItem.Expandable) gridItem.Expanded = true;
-					ExpandItems(gridItem);
+					ExpandLocal(gridItem);
 				}
 			}
 		}

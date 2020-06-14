@@ -130,7 +130,7 @@ namespace asm.Collections
 						continue;
 					}
 
-					foreach (TEdge edge in edges)
+					foreach (TEdge edge in edges.Values.OrderBy(e => e.Weight))
 					{
 						if (visited.Contains(edge.To.Value)) continue;
 						stack.Push(edge.To.Value);
@@ -142,61 +142,6 @@ namespace asm.Collections
 			}
 
 			return result;
-		}
-
-		public ICollection<T> FindCycle() { return FindCycle(Edges.Keys); }
-		protected ICollection<T> FindCycle([NotNull] ICollection<T> vertices)
-		{
-			if (vertices.Count == 0) return null;
-			
-			Stack<T> stack = new Stack<T>();
-			Queue<T> cycle = new Queue<T>();
-			HashSet<T> visiting = new HashSet<T>(Comparer);
-			HashSet<T> visited = new HashSet<T>(Comparer);
-			int version = _version;
-
-			foreach (T vertex in vertices)
-			{
-				if (version != _version) throw new VersionChangedException();
-				stack.Push(vertex);
-
-				while (stack.Count > 0)
-				{
-					T value = stack.Pop();
-					if (visited.Contains(value)) continue;
-					visiting.Add(value);
-					cycle.Enqueue(value);
-
-					if (Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges))
-					{
-						foreach (TEdge edge in edges)
-						{
-							if (visited.Contains(edge.To.Value)) continue;
-
-							// cycle detected
-							if (visiting.Contains(edge.To.Value))
-							{
-								cycle.Enqueue(edge.To.Value);
-
-								while (!Comparer.Equals(cycle.Peek(), edge.To.Value))
-									cycle.Dequeue();
-
-								return cycle.ToArray();
-							}
-
-							stack.Push(edge.To.Value);
-						}
-
-						continue;
-					}
-
-					visiting.Remove(value);
-					cycle.Dequeue();
-					visited.Add(value);
-				}
-			}
-
-			return null;
 		}
 
 		/// <inheritdoc />

@@ -1,14 +1,13 @@
 using System;
-using System.Collections.Generic;
 
 namespace asm.Collections
 {
-	public interface IRangeDictionary<TKey, TValue> : IReadOnlyRangeDictionary<TKey, TValue>,
-		IDictionary<(TKey Minimum, TKey Maximum), TValue>,
-		ICollection<KeyValuePair<(TKey Minimum, TKey Maximum), TValue>>
+	public interface IRangeDictionary<TKey, TValue> : IReadOnlyRangeDictionary<TKey, TValue>
 		where TKey : IComparable
 	{
+#pragma warning disable 109
 		new TValue this[TKey key] { get; set; }
+#pragma warning restore 109
 
 		void Add(TKey minimum, TKey maximum, TValue value);
 

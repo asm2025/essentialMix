@@ -35,7 +35,7 @@ namespace asm.Data.Extensions
 		public static T DeserializeDataContract<T>([NotNull] this TextReader thisValue, T defaultValue, bool verifyObjectName = false, DataContractSerializerSettings settings = null, XmlReaderSettings xmlOptions = null, XmlParserContext xmlContext = null)
 		{
 			XmlReaderSettings opt = xmlOptions ?? XmlReaderHelper.CreateSettings();
-			XmlParserContext context = xmlContext ?? XmlReaderHelper.CreateParserContext();
+			XmlParserContext context = xmlContext ?? XmlReaderHelper.CreateParserContext(opt.NameTable);
 
 			using (XmlReader reader = XmlReader.Create(thisValue, opt, context))
 			{

@@ -1,4 +1,7 @@
-﻿# Usage
+﻿This is based on the insightful book of Joseph Albahari, C# 6 in a Nutshell
+http://www.albahari.com/threading/
+
+# Usage
 *Important:*
 * If you are going to use the DataFlowQueue, you'll need to install System.Threading.Tasks.Dataflow on the main project.
 * If you are going to use the SemaphoreQueueOptions with the SemaphoreQueue and set the SemaphoreQueueOptions.Security, you'll need to install System.Security.AccessControl on the main project.

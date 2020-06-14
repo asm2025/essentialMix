@@ -60,7 +60,7 @@ namespace asm.Core.Web.Middleware
 		public ExceptionHandler(RequestDelegate next, IOptions<ExceptionHandlerOptions> options, ILogger logger)
 			: base(next, options, logger)
 		{
-			if (Options.Value.ExceptionHandler == null) Options.Value.ExceptionHandler = Next;
+			Options.Value.ExceptionHandler ??= Next;
 		}
 
 		/// <inheritdoc />
@@ -75,7 +75,7 @@ namespace asm.Core.Web.Middleware
 			catch (Exception e)
 			{
 				string errorMessage = e.CollectMessages();
-				Logger?.LogError(errorMessage);
+				Logger.LogError(errorMessage);
 				if (context.Response.HasStarted) throw;
 
 				PathString originalPath = context.Request.Path;
@@ -117,7 +117,7 @@ namespace asm.Core.Web.Middleware
 				catch (Exception ex)
 				{
 					errorMessage = ex.CollectMessages();
-					Logger?.LogError(errorMessage);
+					Logger.LogError(errorMessage);
 				}
 				finally
 				{

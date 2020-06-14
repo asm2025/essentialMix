@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel;
-using System.Runtime.Serialization;
 using asm.Extensions;
 using JetBrains.Annotations;
 
@@ -12,33 +11,10 @@ namespace asm.Collections
 		[Serializable]
 		public class SubItemsCollection : ObservableKeyedCollectionBase<string, SubItem>
 		{
-			[NonSerialized] 
-			private SerializationInfo _siInfo;
-
-			protected SubItemsCollection(SerializationInfo info, StreamingContext context)
-				: base(info, context)
-			{
-				_siInfo = info;
-			}
-
 			internal SubItemsCollection([NotNull] Item owner)
 				: base(StringComparer.OrdinalIgnoreCase)
 			{
 				Owner = owner ?? throw new ArgumentNullException(nameof(owner));
-			}
-
-			public override void GetObjectData(SerializationInfo info, StreamingContext context)
-			{
-				base.GetObjectData(info, context);
-				info.AddValue("Owner", Owner, typeof(Item));
-			}
-
-			public override void OnDeserialization(object sender)
-			{
-				base.OnDeserialization(sender);
-				if (_siInfo == null) return;
-				Owner = (Item)_siInfo.GetValue("Owner", typeof(Item)) ?? throw new SerializationException("Invalid owner type.");
-				_siInfo = null;
 			}
 
 			/// <inheritdoc />
@@ -112,21 +88,6 @@ namespace asm.Collections
 			IsContainer = GetType().Is(typeof(IBrowsable));
 		}
 
-		protected Item([NotNull] SerializationInfo info, StreamingContext context) 
-			: base(info, context)
-		{
-			IsContainer = GetType().Is(typeof(IBrowsable));
-			_selected = info.GetBoolean("Selected");
-			_subItems = (SubItemsCollection)info.GetValue("SubItems", typeof(SubItemsCollection));
-		}
-
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			base.GetObjectData(info, context);
-			info.AddValue("Selected", _selected);
-			info.AddValue("SubItems", _subItems, typeof(SubItemsCollection));
-		}
-
 		public override object Clone() { return this.CloneMemberwise(); }
 
 		public virtual bool Selected
@@ -183,12 +144,6 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public Item([NotNull] string name, string text, T value, bool isFixed, bool isReadOnly)
 			: base(name, text, value, typeof(T), isFixed, isReadOnly)
-		{
-		}
-
-		/// <inheritdoc />
-		protected Item([NotNull] SerializationInfo info, StreamingContext context)
-			: base(info, context)
 		{
 		}
 

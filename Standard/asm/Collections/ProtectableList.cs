@@ -10,7 +10,6 @@ namespace asm.Collections
 	[Serializable]
 	public class ProtectableList : IList, IProtectable
 	{
-		/// <inheritdoc />
 		public ProtectableList([NotNull] IList source)
 		{
 			Source = source;

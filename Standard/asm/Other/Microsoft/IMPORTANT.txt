@@ -1,0 +1,5 @@
+The work in this folder tree "Microsoft" and its subfolders are not mine.
+I needed the functionality to be in abstract form but there is no need to
+reinvent the wheel since someone already has done it. I cann't change the
+code so I've built or compiled these classes together based on Microsoft's
+https://referencesource.microsoft.com/

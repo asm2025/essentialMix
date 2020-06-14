@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using asm.Comparers;
-using asm.Internal;
+using asm.Other.JonSkeet.MiscUtil.Collections;
+using asm.Other.MarcGravell;
 
 namespace asm.Extensions
 {
@@ -27,7 +28,7 @@ namespace asm.Extensions
 		[NotNull]
 		public static IEqualityComparer<T> AsEqualityComparer<T>([NotNull] this IComparer<T> thisValue)
 		{
-			return new ComparerEquality<T>(thisValue);
+			return new ComparerForEquality<T>(thisValue);
 		}
 			
 		/// <summary>

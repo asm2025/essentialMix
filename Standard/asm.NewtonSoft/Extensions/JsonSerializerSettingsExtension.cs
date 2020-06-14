@@ -10,6 +10,7 @@ namespace asm.Newtonsoft.Extensions
 {
 	public static class JsonSerializerSettingsExtension
 	{
+		[NotNull]
 		public static JsonSerializerSettings AddConverters([NotNull] this JsonSerializerSettings thisValue, JsonSerializerSettingsConverters convertersToAdd = JsonSerializerSettingsConverters.Default)
 		{
 			IList<JsonConverter> converters = thisValue.Converters;
@@ -30,7 +31,7 @@ namespace asm.Newtonsoft.Extensions
 			if (convertersToAdd.HasFlag(JsonSerializerSettingsConverters.KeyValuePair)) converters.Add(new KeyValuePairConverter());
 			if (convertersToAdd.HasFlag(JsonSerializerSettingsConverters.Regex)) converters.Add(new RegexConverter());
 
-			if (convertersToAdd.HasFlag(JsonSerializerSettingsConverters.StringEnumTranslation)) converters.Add(new StringEnumTranslationConverter { Culture = thisValue.Culture ?? CultureInfoHelper.Default });
+			if (convertersToAdd.HasFlag(JsonSerializerSettingsConverters.StringEnumTranslation)) converters.Add(new StringEnumTranslationConverter { Culture = thisValue.Culture });
 			else if (convertersToAdd.HasFlag(JsonSerializerSettingsConverters.StringEnum)) converters.Add(new StringEnumConverter());
 			
 			if (convertersToAdd.HasFlag(JsonSerializerSettingsConverters.Version)) converters.Add(new VersionConverter());

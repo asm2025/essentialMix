@@ -114,6 +114,23 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
+		public override int GetSize()
+		{
+			int sum = 0;
+
+			foreach (KeyValuePair<T, KeyedDictionary<T, TEdge>> pair in Edges)
+			{
+				foreach (TEdge edge in pair.Value.Values)
+				{
+					if (IsLoop(pair.Key, edge)) sum += 2;
+					else sum++;
+				}
+			}
+
+			return sum / 2;
+		}
+
+		/// <inheritdoc />
 		protected override GraphVertex<T> NewVertex([NotNull] T value)
 		{
 			return new GraphVertex<T>(value);

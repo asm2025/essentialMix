@@ -7,7 +7,7 @@ using System.Threading;
 using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Helpers;
-using asm.Internal;
+using asm.Other.MarcGravell;
 
 namespace asm.Collections
 {

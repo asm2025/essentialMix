@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading;
@@ -26,7 +27,7 @@ namespace asm.Core.Web.Http.ModelBinding
 
 		private int _recursionCount;
 
-		public HyperModelBinder([NotNull] Type type, [NotNull]IJsonSerializer serializer, int maxRecursionLimit = 100)
+		public HyperModelBinder([NotNull] Type type, [NotNull] IJsonSerializer serializer, int maxRecursionLimit = 100)
 		{
 			TargetType = type;
 			_serializer = serializer;
@@ -38,16 +39,20 @@ namespace asm.Core.Web.Http.ModelBinding
 		protected int MaxRecursionLimit { get; }
 
 		/// <inheritdoc />
+		[NotNull]
 		public virtual Task BindModelAsync([NotNull] ModelBindingContext bindingContext)
 		{
-			if (!TargetType.IsAssignableFrom(bindingContext.ModelType)) throw new TypeInitializationException(bindingContext.ModelType.FullName, new InvalidCastException($"Type {TargetType.FullName} is not assignable from type {bindingContext.ModelType.FullName}"));
+			if (!TargetType.IsAssignableFrom(bindingContext.ModelType)) throw new TypeInitializationException(bindingContext.ModelType.FullName, null);
 
-			IDictionary<string, string> values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+			CancellationToken token = bindingContext.HttpContext.RequestAborted;
+			if (token.IsCancellationRequested) return Task.FromCanceled(token);
+
+			Dictionary<string, string> values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 			
 			try
 			{
 				HttpRequest request = bindingContext.HttpContext.Request;
-				string contentType = request?.ContentType?.ToLowerInvariant();
+				string contentType = request.ContentType.ToLowerInvariant();
 				
 				/*
 				bindingContext.ValueProvider
@@ -55,7 +60,6 @@ namespace asm.Core.Web.Http.ModelBinding
 				FormData/Body
 				Query string
 				*/
-
 				// Try to fetch the value of the argument by name
 				ValueProviderResult valueProviderResult = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
 
@@ -66,57 +70,21 @@ namespace asm.Core.Web.Http.ModelBinding
 					switch (contentType)
 					{
 						case "application/x-www-form-urlencoded":
-						{
-							// Form data
-							string formData = valueProviderResult.FirstValue.ToNullIfEmpty();
-
-							if (!string.IsNullOrEmpty(formData))
-							{
-								string[] elements = formData.Split('=', '&');
-
-								for (int i = 0; i < elements.Length; i += 2)
-								{
-									string key = elements[i];
-									string value = i < elements.Length - 1
-														? elements[i + 1]
-														: null;
-
-									if (!string.IsNullOrEmpty(value)) values[key] = value;
-									else if (!values.ContainsKey(key)) values.Add(key, null);
-								}
-							}
+							HandleFromData(valueProviderResult.FirstValue.ToNullIfEmpty());
 							break;
-						}
 						case "application/json":
 						case "text/json":
-						{
-							// JSON data
-							string jsonData = valueProviderResult.FirstValue.ToNullIfEmpty();
-
-							if (!string.IsNullOrEmpty(jsonData))
-							{
-								jsonData = WebUtility.UrlDecode(jsonData);
-								_serializer.Populate(jsonData, values);
-							}
+							HandleJson(valueProviderResult.FirstValue.ToNullIfEmpty());
 							break;
-						}
 						case "application/xml":
 						case "text/xml":
-						{
-							// Xml data
-							string xmlData = valueProviderResult.FirstValue.ToNullIfEmpty();
-
-							if (!string.IsNullOrEmpty(xmlData))
-							{
-								xmlData = WebUtility.UrlDecode(xmlData);
-								XDocument xml = XmlHelper.XParse(xmlData, true);
-								AddXProperties(values, xml?.Root);
-							}
+							HandleXml(valueProviderResult.FirstValue.ToNullIfEmpty());
 							break;
-						}
 					}
 				}
 
+				if (token.IsCancellationRequested) return Task.FromCanceled(token);
+				
 				RouteData routeData = bindingContext.HttpContext.GetRouteData();
 
 				if (routeData != null)
@@ -132,80 +100,23 @@ namespace asm.Core.Web.Http.ModelBinding
 				switch (contentType)
 				{
 					case "application/x-www-form-urlencoded":
-						// Form data
-						string formData = ReadRequestBody(request, bindingContext.HttpContext.RequestAborted)?.TrimStart('?');
-
-						if (!string.IsNullOrEmpty(formData))
-						{
-							string[] elements = formData.Split('=', '&');
-
-							for (int i = 0; i < elements.Length; i += 2)
-							{
-								string key = elements[i];
-								string value = i < elements.Length - 1
-													? elements[i + 1]
-													: null;
-
-								if (!string.IsNullOrEmpty(value)) values[key] = value;
-								else if (!values.ContainsKey(key)) values.Add(key, null);
-							}
-						}
+						HandleFromData(ReadRequestBodyLocal(request)?.TrimStart('?'));
 						break;
 					case "application/json":
 					case "text/json":
-						// JSON data
-						string jsonData = ReadRequestBody(request, bindingContext.HttpContext.RequestAborted)?.Trim();
-
-						if (!string.IsNullOrEmpty(jsonData))
-						{
-							jsonData = WebUtility.UrlDecode(jsonData);
-							_serializer.Populate(jsonData, values);
-						}
+						HandleJson(ReadRequestBodyLocal(request)?.TrimStart('?'));
 						break;
 					case "application/xml":
 					case "text/xml":
-						// Xml data
-						string xmlData = ReadRequestBody(request, bindingContext.HttpContext.RequestAborted)?.Trim();
-
-						if (!string.IsNullOrEmpty(xmlData))
-						{
-							xmlData = WebUtility.UrlDecode(xmlData);
-							XDocument xml = XmlHelper.XParse(xmlData, true);
-							AddXProperties(values, xml?.Root);
-						}
+						HandleXml(ReadRequestBodyLocal(request));
 						break;
 				}
 
 				// Query string
-				if (request?.Query != null && request.Query.Count > 0)
-				{
-					foreach ((string key, StringValues value) in request.Query)
-					{
-						string data = value.Count == 0 ? null : WebUtility.UrlDecode(value[0]?.Trim());
-
-						if (!string.IsNullOrEmpty(data))
-						{
-							if (data.StartsWith('{') || data.StartsWith('['))
-							{
-								_serializer.Populate(data, values);
-							}
-							else if (data.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase))
-							{
-								XDocument xml = XmlHelper.XParse(data);
-								AddXProperties(values, xml?.Root);
-							}
-							else
-								values[key] = data;
-						}
-						else if (!values.ContainsKey(key))
-						{
-							values.Add(key, null);
-						}
-					}
-				}
+				HandleQueryString(request.Query);
 
 				//Initiate primary object
-				object obj = Activator.CreateInstance(bindingContext.ModelType);
+				object obj = Activator.CreateInstance(bindingContext.ModelType) ?? throw new TypeInitializationException(bindingContext.ModelType.FullName, null);
 
 				//First call for processing primary object
 				SetPropertyValues(values, obj);
@@ -221,7 +132,7 @@ namespace asm.Core.Web.Http.ModelBinding
 				return Task.FromException(ex);
 			}
 
-			string ReadRequestBody(HttpRequest request, CancellationToken token)
+			string ReadRequestBodyLocal(HttpRequest request)
 			{
 				if (token.IsCancellationRequested) return null;
 
@@ -237,6 +148,63 @@ namespace asm.Core.Web.Http.ModelBinding
 				{
 					return reader.ReadToEnd();
 				}
+			}
+
+			void HandleQueryString(IQueryCollection query)
+			{
+				if (token.IsCancellationRequested || query == null || query.Count == 0) return;
+
+				foreach ((string key, StringValues value) in query)
+				{
+					string data = value.FirstOrDefault();
+
+					if (!string.IsNullOrEmpty(data))
+					{
+						if (data.StartsWithOrdinal("%7B") || data.StartsWithOrdinal("%5B"))
+							HandleJson(data);
+						else if (data.StartsWithOrdinal("%3C%3Fxml"))
+							HandleXml(data);
+						else
+							values[key] = data;
+					}
+					else if (!values.ContainsKey(key))
+					{
+						values.Add(key, null);
+					}
+				}
+			}
+
+			void HandleFromData(string formData)
+			{
+				if (token.IsCancellationRequested || string.IsNullOrEmpty(formData)) return;
+
+				string[] elements = formData.Split('=', '&');
+
+				for (int i = 0; i < elements.Length; i += 2)
+				{
+					string key = elements[i];
+					string value = i < elements.Length - 1
+										? elements[i + 1]
+										: null;
+
+					if (!string.IsNullOrEmpty(value)) values[key] = value;
+					else if (!values.ContainsKey(key)) values.Add(key, null);
+				}
+			}
+
+			void HandleJson(string jsonData)
+			{
+				if (token.IsCancellationRequested || string.IsNullOrEmpty(jsonData)) return;
+				jsonData = WebUtility.UrlDecode(jsonData);
+				_serializer.Populate(jsonData, values);
+			}
+
+			void HandleXml(string xmlData)
+			{
+				if (token.IsCancellationRequested || string.IsNullOrEmpty(xmlData)) return;
+				xmlData = WebUtility.UrlDecode(xmlData);
+				XDocument xml = XmlHelper.XParse(xmlData, true);
+				AddXProperties(values, xml?.Root);
 			}
 		}
 
@@ -315,7 +283,7 @@ namespace asm.Core.Web.Http.ModelBinding
 			else
 			{
 				//Dynamically create instances for nested object and call to process it
-				childObj = Activator.CreateInstance(property.PropertyType);
+				childObj = Activator.CreateInstance(property.PropertyType) ?? throw new TypeInitializationException(property.PropertyType.FullName, null);
 				SetPropertyValues(values, childObj, source, property);
 			}
 		}

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Runtime.Serialization;
 using JetBrains.Annotations;
 
 namespace asm.Collections
 {
-	public interface ISimpleItem : IComparable<ISimpleItem>, IComparable, IEquatable<ISimpleItem>, INotifyPropertyChanged, ICloneable, ISerializable
+	public interface ISimpleItem : IComparable<ISimpleItem>, IComparable, IEquatable<ISimpleItem>, INotifyPropertyChanged, ICloneable
 	{
 		[Localizable(true)]
 		string Text { get; set; }

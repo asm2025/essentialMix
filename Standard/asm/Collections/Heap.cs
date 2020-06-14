@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using asm.Extensions;
-using asm.Patterns.Collections;
 using asm.Patterns.Layout;
 using JetBrains.Annotations;
 

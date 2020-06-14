@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using asm.Extensions;
-using asm.Internal;
+using asm.Other.MarcGravell;
 using JetBrains.Annotations;
 
 namespace asm.Collections

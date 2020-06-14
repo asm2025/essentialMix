@@ -25,6 +25,7 @@ namespace asm.Core.Web.Mvc
 		protected HttpResponseMessage Response => _response;
 
 		/// <inheritdoc />
+		[NotNull]
 		public override Task ExecuteResultAsync([NotNull] ActionContext context)
 		{
 			HttpResponse response = context.HttpContext.Response;

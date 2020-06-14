@@ -99,7 +99,7 @@ namespace asm.Web.Api.Http
 			{
 				using (Stream output = File.OpenWrite(destinationFileName))
 				{
-					input.CopyTo(output);
+					await input.CopyToAsync(output);
 				}
 			}
 

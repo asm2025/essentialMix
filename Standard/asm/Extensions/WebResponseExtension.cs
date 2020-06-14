@@ -97,7 +97,7 @@ namespace asm.Extensions
 
 		public static string ReadToEnd([NotNull] this WebResponse thisValue, IOSettings settings)
 		{
-			if (settings == null) settings = new IOSettings();
+			settings ??= new IOSettings();
 
 			string result;
 
@@ -125,7 +125,7 @@ namespace asm.Extensions
 		public static async Task<string> ReadToEndAsync([NotNull] this WebResponse thisValue, IOSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			if (settings == null) settings = new IOSettings();
+			settings ??= new IOSettings();
 
 			string result;
 

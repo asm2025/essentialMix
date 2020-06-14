@@ -195,7 +195,7 @@ namespace asm.Extensions
 
 		public static IEnumerable<Process> ExtractAndRunResources([NotNull] this Assembly thisValue, RunSettings settings, string directoryPath, string resourceLocation, [NotNull] params string[] resourceNames)
 		{
-			if (settings == null) settings = RunSettings.Default;
+			settings ??= RunSettings.Default;
 
 			foreach (string resource in ExtractEmbeddedResources(thisValue, directoryPath, resourceLocation, true, resourceNames))
 			{

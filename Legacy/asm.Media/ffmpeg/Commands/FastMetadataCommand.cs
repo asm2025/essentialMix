@@ -43,7 +43,7 @@ namespace asm.Media.ffmpeg.Commands
 
 				if (match.Success)
 				{
-					if (Metadata == null) Metadata = new Metadata();
+					Metadata ??= new Metadata();
 
 					if (!TimeSpan.TryParse(match.Groups["duration"].Value, out TimeSpan timeSpan)) timeSpan = TimeSpan.Zero;
 					Metadata.Duration = timeSpan;
@@ -57,7 +57,7 @@ namespace asm.Media.ffmpeg.Commands
 
 				if (frames.Count > 0)
 				{
-					if (Metadata == null) Metadata = new Metadata();
+					Metadata ??= new Metadata();
 
 					int f = 0;
 
@@ -74,7 +74,7 @@ namespace asm.Media.ffmpeg.Commands
 
 				if (streams.Count > 0)
 				{
-					if (Metadata == null) Metadata = new Metadata();
+					Metadata ??= new Metadata();
 					Metadata.StreamCount = streams.Count;
 				}
 
@@ -82,7 +82,7 @@ namespace asm.Media.ffmpeg.Commands
 
 				if (match.Success)
 				{
-					if (Metadata.Video == null) Metadata.Video = new Metadata.VideoMetadata();
+					Metadata.Video ??= new Metadata.VideoMetadata();
 					Metadata.Video.Codec = match.Groups["vcodec"].Value;
 					Metadata.Video.ColorModel = match.Groups["colors"].Value;
 					Metadata.Video.SAR = match.Groups["sar"].Value;
@@ -102,7 +102,7 @@ namespace asm.Media.ffmpeg.Commands
 
 				if (match.Success)
 				{
-					if (Metadata.Audio == null) Metadata.Audio = new Metadata.AudioMetadata();
+					Metadata.Audio ??= new Metadata.AudioMetadata();
 					Metadata.Audio.Codec = match.Groups["acodec"].Value;
 					Metadata.Audio.SampleRate = match.Groups["rate"].Value.To(0);
 					Metadata.Audio.ChannelOutput = match.Groups["channels"].Value;

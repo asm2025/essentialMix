@@ -67,7 +67,7 @@ namespace asm.Core.Swagger.Filters
 				}
 			}
 
-			IEnumerable<ParameterDescriptor> Enumerate(ActionDescriptor descriptor)
+			static IEnumerable<ParameterDescriptor> Enumerate(ActionDescriptor descriptor)
 			{
 				foreach (ParameterDescriptor parameter in descriptor.Parameters.Where(p => p.BindingInfo.BindingSource.IsFromRequest && !p.BindingInfo.BindingSource.Id.IsSame("Path")))
 				{

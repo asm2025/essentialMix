@@ -44,26 +44,31 @@ namespace asm.Extensions
 			return SystemInfo.Get(request).Any();
 		}
 
+		[NotNull]
 		public static Task<bool> WaitForExitAsync([NotNull] this Process thisValue, CancellationToken token = default(CancellationToken))
 		{
 			return WaitForExitAsync(thisValue, TimeSpanHelper.INFINITE, false, token);
 		}
 
+		[NotNull]
 		public static Task<bool> WaitForExitAsync([NotNull] this Process thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken))
 		{
 			return WaitForExitAsync(thisValue, timeout.TotalIntMilliseconds(), false, token);
 		}
 
+		[NotNull]
 		public static Task<bool> WaitForExitAsync([NotNull] this Process thisValue, TimeSpan timeout, bool exitContext, CancellationToken token = default(CancellationToken))
 		{
 			return WaitForExitAsync(thisValue, timeout.TotalIntMilliseconds(), exitContext, token);
 		}
 
+		[NotNull]
 		public static Task<bool> WaitForExitAsync([NotNull] this Process thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken))
 		{
 			return WaitForExitAsync(thisValue, millisecondsTimeout, false, token);
 		}
 
+		[NotNull]
 		public static Task<bool> WaitForExitAsync([NotNull] this Process thisValue, int millisecondsTimeout, bool exitContext, CancellationToken token = default(CancellationToken))
 		{
 			if (!IsAwaitable(thisValue)) return Task.FromResult(true);

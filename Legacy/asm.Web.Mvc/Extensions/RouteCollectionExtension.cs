@@ -11,7 +11,7 @@ namespace asm.Web.Mvc.Extensions
 		{
 			prefix = prefix?.Trim('/', ' ');
 			if (!string.IsNullOrEmpty(prefix)) prefix += "/";
-			if (prefix == null) prefix = string.Empty;
+			prefix ??= string.Empty;
 
 			thisValue.MapMvcAttributeRoutes();
 

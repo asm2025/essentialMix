@@ -5,12 +5,11 @@ using System.Linq;
 using System.Threading;
 using JetBrains.Annotations;
 using asm.Collections;
-using asm.ComponentModel.DataAnnotations;
-using asm.Enumeration;
 using asm.Exceptions;
 using asm.Extensions;
-using asm.Numeric;
-using AttributeCollection = asm.Collections.AttributeCollection;
+using asm.Other.TylerBrinkley.Enumeration;
+using asm.Other.TylerBrinkley.Enumeration.Numeric;
+using AttributeCollection = asm.Other.TylerBrinkley.Collections.AttributeCollection;
 
 namespace asm.Helpers
 {
@@ -46,7 +45,7 @@ namespace asm.Helpers
 		/// <returns>The underlying type of <paramref name="enumType" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static Type GetUnderlyingType(Type enumType) { return GetInfo(enumType).UnderlyingType; }
+		public static Type GetUnderlyingType([NotNull] Type enumType) { return GetInfo(enumType).UnderlyingType; }
 
 		/// <summary>
 		///     Retrieves <paramref name="enumType" />'s underlying type's <see cref="TypeCode" />.
@@ -55,7 +54,7 @@ namespace asm.Helpers
 		/// <returns><paramref name="enumType" />'s underlying type's <see cref="TypeCode" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static TypeCode GetTypeCode(Type enumType) { return GetInfo(enumType).TypeCode; }
+		public static TypeCode GetTypeCode([NotNull] Type enumType) { return GetInfo(enumType).TypeCode; }
 
 		/// <summary>
 		///     Retrieves <paramref name="enumType" />'s member count.
@@ -64,7 +63,7 @@ namespace asm.Helpers
 		/// <returns><paramref name="enumType" />'s member count.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static int GetCount(Type enumType) { return GetInfo(enumType).GetCount(); }
+		public static int GetCount([NotNull] Type enumType) { return GetInfo(enumType).GetCount(); }
 
 		/// <summary>
 		///     Retrieves <paramref name="enumType" />'s member count.
@@ -79,7 +78,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="selection" /> is an invalid value.
 		/// </exception>
-		public static int GetCount(Type enumType, EnumMemberSelection selection) { return GetInfo(enumType).GetCount(selection); }
+		public static int GetCount([NotNull] Type enumType, EnumMemberSelection selection) { return GetInfo(enumType).GetCount(selection); }
 
 		/// <summary>
 		///     Retrieves <paramref name="enumType" />'s members in increasing value order.
@@ -88,7 +87,7 @@ namespace asm.Helpers
 		/// <returns><paramref name="enumType" />'s members in increasing value order.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static IEnumerable<EnumMember> GetMembers(Type enumType) { return GetInfo(enumType).GetMembers(); }
+		public static IEnumerable<EnumMember> GetMembers([NotNull] Type enumType) { return GetInfo(enumType).GetMembers(); }
 
 		/// <summary>
 		///     Retrieves <paramref name="enumType" />'s members in increasing value order.
@@ -103,7 +102,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="selection" /> is an invalid value.
 		/// </exception>
-		public static IEnumerable<EnumMember> GetMembers(Type enumType, EnumMemberSelection selection) { return GetInfo(enumType).GetMembers(selection); }
+		public static IEnumerable<EnumMember> GetMembers([NotNull] Type enumType, EnumMemberSelection selection) { return GetInfo(enumType).GetMembers(selection); }
 
 		/// <summary>
 		///     Retrieves <paramref name="enumType" />'s members' names in increasing value order.
@@ -112,7 +111,7 @@ namespace asm.Helpers
 		/// <returns><paramref name="enumType" />'s members' names in increasing value order.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static IEnumerable<string> GetNames(Type enumType) { return GetInfo(enumType).GetNames(); }
+		public static IEnumerable<string> GetNames([NotNull] Type enumType) { return GetInfo(enumType).GetNames(); }
 
 		/// <summary>
 		///     Retrieves <paramref name="enumType" />'s members' names in increasing value order.
@@ -127,7 +126,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="selection" /> is an invalid value.
 		/// </exception>
-		public static IEnumerable<string> GetNames(Type enumType, EnumMemberSelection selection) { return GetInfo(enumType).GetNames(selection); }
+		public static IEnumerable<string> GetNames([NotNull] Type enumType, EnumMemberSelection selection) { return GetInfo(enumType).GetNames(selection); }
 
 		/// <summary>
 		///     Retrieves <paramref name="enumType" />'s members' display names in increasing value order.
@@ -136,7 +135,7 @@ namespace asm.Helpers
 		/// <returns><paramref name="enumType" />'s members' display names in increasing value order.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static IEnumerable<string> GetDisplayNames(Type enumType) { return GetInfo(enumType).GetDisplayNames(); }
+		public static IEnumerable<string> GetDisplayNames([NotNull] Type enumType) { return GetInfo(enumType).GetDisplayNames(); }
 
 		/// <summary>
 		///     Retrieves <paramref name="enumType" />'s members' display names in increasing value order.
@@ -151,7 +150,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="selection" /> is an invalid value.
 		/// </exception>
-		public static IEnumerable<string> GetDisplayNames(Type enumType, EnumMemberSelection selection) { return GetInfo(enumType).GetDisplayNames(selection); }
+		public static IEnumerable<string> GetDisplayNames([NotNull] Type enumType, EnumMemberSelection selection) { return GetInfo(enumType).GetDisplayNames(selection); }
 
 		/// <summary>
 		///     Retrieves <paramref name="enumType" />'s members' values in increasing value order.
@@ -160,7 +159,7 @@ namespace asm.Helpers
 		/// <returns><paramref name="enumType" />'s members' values in increasing value order.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static IEnumerable<Enum> GetValues(Type enumType) { return GetInfo(enumType).GetValues(); }
+		public static IEnumerable<Enum> GetValues([NotNull] Type enumType) { return GetInfo(enumType).GetValues(); }
 
 		/// <summary>
 		///     Retrieves <paramref name="enumType" />'s members' values in increasing value order.
@@ -175,9 +174,9 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="selection" /> is an invalid value.
 		/// </exception>
-		public static IEnumerable<Enum> GetValues(Type enumType, EnumMemberSelection selection) { return GetInfo(enumType).GetValues(selection); }
+		public static IEnumerable<Enum> GetValues([NotNull] Type enumType, EnumMemberSelection selection) { return GetInfo(enumType).GetValues(selection); }
 
-		public static void GetBoundaries(Type enumType, out Enum minimum, out Enum maximum)
+		public static void GetBoundaries([NotNull] Type enumType, out Enum minimum, out Enum maximum)
 		{
 			Enum[] values = GetValues(enumType).ToArray();
 
@@ -212,7 +211,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> is not a valid type.
 		/// </exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, object value) { return ToObject(enumType, value, EnumValidation.None); }
+		public static Enum ToObject([NotNull] Type enumType, object value) { return ToObject(enumType, value, EnumValidation.None); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -239,7 +238,7 @@ namespace asm.Helpers
 		///     the result is invalid with the specified <paramref name="validation" />.
 		/// </exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, object value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
+		public static Enum ToObject([NotNull] Type enumType, object value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -252,7 +251,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> or <paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, sbyte value) { return GetInfo(enumType).ToObject(value); }
+		public static Enum ToObject([NotNull] Type enumType, sbyte value) { return GetInfo(enumType).ToObject(value); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -272,7 +271,7 @@ namespace asm.Helpers
 		///     the result is invalid with the specified <paramref name="validation" />.
 		/// </exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, sbyte value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
+		public static Enum ToObject([NotNull] Type enumType, sbyte value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -285,7 +284,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, byte value) { return GetInfo(enumType).ToObject(value); }
+		public static Enum ToObject([NotNull] Type enumType, byte value) { return GetInfo(enumType).ToObject(value); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -305,7 +304,7 @@ namespace asm.Helpers
 		///     the result is invalid with the specified <paramref name="validation" />.
 		/// </exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, byte value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
+		public static Enum ToObject([NotNull] Type enumType, byte value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -318,7 +317,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, short value) { return GetInfo(enumType).ToObject(value); }
+		public static Enum ToObject([NotNull] Type enumType, short value) { return GetInfo(enumType).ToObject(value); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -338,7 +337,7 @@ namespace asm.Helpers
 		///     the result is invalid with the specified <paramref name="validation" />.
 		/// </exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, short value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
+		public static Enum ToObject([NotNull] Type enumType, short value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -351,7 +350,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, ushort value) { return GetInfo(enumType).ToObject(value); }
+		public static Enum ToObject([NotNull] Type enumType, ushort value) { return GetInfo(enumType).ToObject(value); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -371,7 +370,7 @@ namespace asm.Helpers
 		///     the result is invalid with the specified <paramref name="validation" />.
 		/// </exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, ushort value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
+		public static Enum ToObject([NotNull] Type enumType, ushort value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -384,7 +383,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, int value) { return GetInfo(enumType).ToObject(value); }
+		public static Enum ToObject([NotNull] Type enumType, int value) { return GetInfo(enumType).ToObject(value); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -404,7 +403,7 @@ namespace asm.Helpers
 		///     the result is invalid with the specified <paramref name="validation" />.
 		/// </exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, int value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
+		public static Enum ToObject([NotNull] Type enumType, int value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -417,7 +416,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, uint value) { return GetInfo(enumType).ToObject(value); }
+		public static Enum ToObject([NotNull] Type enumType, uint value) { return GetInfo(enumType).ToObject(value); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -437,7 +436,7 @@ namespace asm.Helpers
 		///     the result is invalid with the specified <paramref name="validation" />.
 		/// </exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, uint value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
+		public static Enum ToObject([NotNull] Type enumType, uint value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -450,7 +449,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, long value) { return GetInfo(enumType).ToObject(value); }
+		public static Enum ToObject([NotNull] Type enumType, long value) { return GetInfo(enumType).ToObject(value); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -470,7 +469,7 @@ namespace asm.Helpers
 		///     the result is invalid with the specified <paramref name="validation" />.
 		/// </exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, long value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
+		public static Enum ToObject([NotNull] Type enumType, long value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -483,7 +482,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, ulong value) { return GetInfo(enumType).ToObject(value); }
+		public static Enum ToObject([NotNull] Type enumType, ulong value) { return GetInfo(enumType).ToObject(value); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while checking
@@ -503,7 +502,7 @@ namespace asm.Helpers
 		///     the result is invalid with the specified <paramref name="validation" />.
 		/// </exception>
 		/// <exception cref="OverflowException"><paramref name="value" /> is outside the underlying type's value range.</exception>
-		public static Enum ToObject(Type enumType, ulong value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
+		public static Enum ToObject([NotNull] Type enumType, ulong value, EnumValidation validation) { return GetInfo(enumType).ToObject(value, validation); }
 
 		/// <summary>
 		///     Tries to convert the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while
@@ -524,7 +523,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static bool TryToObject(Type enumType, object value, out Enum result) { return TryToObject(enumType, value, EnumValidation.None, out result); }
+		public static bool TryToObject([NotNull] Type enumType, object value, out Enum result) { return TryToObject(enumType, value, EnumValidation.None, out result); }
 
 		/// <summary>
 		///     Tries to convert the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while
@@ -551,7 +550,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="validation" /> is an invalid value.
 		/// </exception>
-		public static bool TryToObject(Type enumType, object value, EnumValidation validation, out Enum result)
+		public static bool TryToObject([NotNull] Type enumType, object value, EnumValidation validation, out Enum result)
 		{
 			return GetInfo(enumType).TryToObject(value, out result, validation);
 		}
@@ -570,7 +569,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static bool TryToObject(Type enumType, sbyte value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
+		public static bool TryToObject([NotNull] Type enumType, sbyte value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
 
 		/// <summary>
 		///     Tries to convert the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while
@@ -592,7 +591,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="validation" /> is an invalid value.
 		/// </exception>
-		public static bool TryToObject(Type enumType, sbyte value, EnumValidation validation, out Enum result)
+		public static bool TryToObject([NotNull] Type enumType, sbyte value, EnumValidation validation, out Enum result)
 		{
 			return GetInfo(enumType).TryToObject(value, out result, validation);
 		}
@@ -611,7 +610,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static bool TryToObject(Type enumType, byte value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
+		public static bool TryToObject([NotNull] Type enumType, byte value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
 
 		/// <summary>
 		///     Tries to convert the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while
@@ -633,7 +632,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="validation" /> is an invalid value.
 		/// </exception>
-		public static bool TryToObject(Type enumType, byte value, EnumValidation validation, out Enum result)
+		public static bool TryToObject([NotNull] Type enumType, byte value, EnumValidation validation, out Enum result)
 		{
 			return GetInfo(enumType).TryToObject(value, out result, validation);
 		}
@@ -652,7 +651,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static bool TryToObject(Type enumType, short value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
+		public static bool TryToObject([NotNull] Type enumType, short value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
 
 		/// <summary>
 		///     Tries to convert the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while
@@ -674,7 +673,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="validation" /> is an invalid value.
 		/// </exception>
-		public static bool TryToObject(Type enumType, short value, EnumValidation validation, out Enum result)
+		public static bool TryToObject([NotNull] Type enumType, short value, EnumValidation validation, out Enum result)
 		{
 			return GetInfo(enumType).TryToObject(value, out result, validation);
 		}
@@ -693,7 +692,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static bool TryToObject(Type enumType, ushort value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
+		public static bool TryToObject([NotNull] Type enumType, ushort value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
 
 		/// <summary>
 		///     Tries to convert the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while
@@ -715,7 +714,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="validation" /> is an invalid value.
 		/// </exception>
-		public static bool TryToObject(Type enumType, ushort value, EnumValidation validation, out Enum result)
+		public static bool TryToObject([NotNull] Type enumType, ushort value, EnumValidation validation, out Enum result)
 		{
 			return GetInfo(enumType).TryToObject(value, out result, validation);
 		}
@@ -734,7 +733,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static bool TryToObject(Type enumType, int value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
+		public static bool TryToObject([NotNull] Type enumType, int value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
 
 		/// <summary>
 		///     Tries to convert the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while
@@ -756,7 +755,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="validation" /> is an invalid value.
 		/// </exception>
-		public static bool TryToObject(Type enumType, int value, EnumValidation validation, out Enum result)
+		public static bool TryToObject([NotNull] Type enumType, int value, EnumValidation validation, out Enum result)
 		{
 			return GetInfo(enumType).TryToObject(value, out result, validation);
 		}
@@ -775,7 +774,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static bool TryToObject(Type enumType, uint value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
+		public static bool TryToObject([NotNull] Type enumType, uint value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
 
 		/// <summary>
 		///     Tries to convert the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while
@@ -797,7 +796,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="validation" /> is an invalid value.
 		/// </exception>
-		public static bool TryToObject(Type enumType, uint value, EnumValidation validation, out Enum result)
+		public static bool TryToObject([NotNull] Type enumType, uint value, EnumValidation validation, out Enum result)
 		{
 			return GetInfo(enumType).TryToObject(value, out result, validation);
 		}
@@ -816,7 +815,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static bool TryToObject(Type enumType, long value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
+		public static bool TryToObject([NotNull] Type enumType, long value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
 
 		/// <summary>
 		///     Tries to convert the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while
@@ -838,7 +837,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="validation" /> is an invalid value.
 		/// </exception>
-		public static bool TryToObject(Type enumType, long value, EnumValidation validation, out Enum result)
+		public static bool TryToObject([NotNull] Type enumType, long value, EnumValidation validation, out Enum result)
 		{
 			return GetInfo(enumType).TryToObject(value, out result, validation);
 		}
@@ -857,7 +856,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static bool TryToObject(Type enumType, ulong value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
+		public static bool TryToObject([NotNull] Type enumType, ulong value, out Enum result) { return GetInfo(enumType).TryToObject(value, out result); }
 
 		/// <summary>
 		///     Tries to convert the specified <paramref name="value" /> to a value of type <paramref name="enumType" /> while
@@ -879,7 +878,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="validation" /> is an invalid value.
 		/// </exception>
-		public static bool TryToObject(Type enumType, ulong value, EnumValidation validation, out Enum result)
+		public static bool TryToObject([NotNull] Type enumType, ulong value, EnumValidation validation, out Enum result)
 		{
 			return GetInfo(enumType).TryToObject(value, out result, validation);
 		}
@@ -902,7 +901,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="value" /> is of an invalid type.
 		/// </exception>
-		public static bool IsValid(Type enumType, object value) { return IsValid(enumType, value, EnumValidation.Default); }
+		public static bool IsValid([NotNull] Type enumType, object value) { return IsValid(enumType, value, EnumValidation.Default); }
 
 		/// <summary>
 		///     Indicates if <paramref name="value" /> is valid. If <paramref name="enumType" /> is a standard enum it returns
@@ -925,7 +924,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="validation" /> is an invalid value.
 		/// </exception>
-		public static bool IsValid(Type enumType, object value, EnumValidation validation)
+		public static bool IsValid([NotNull] Type enumType, object value, EnumValidation validation)
 		{
 			return GetInfo(enumType).IsValid(value, validation);
 		}
@@ -942,7 +941,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="value" /> is of an invalid type.
 		/// </exception>
-		public static bool IsDefined(Type enumType, Enum value) { return GetInfo(enumType).IsDefined(value); }
+		public static bool IsDefined([NotNull] Type enumType, Enum value) { return GetInfo(enumType).IsDefined(value); }
 
 		/// <summary>
 		///     Validates that <paramref name="value" /> is valid. If it's not it throws an <see cref="ArgumentException" /> with
@@ -960,7 +959,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="value" /> is invalid.
 		/// </exception>
-		public static Enum Validate(Type enumType, object value, string paramName) { return Validate(enumType, value, paramName, EnumValidation.Default); }
+		public static Enum Validate([NotNull] Type enumType, object value, string paramName) { return Validate(enumType, value, paramName, EnumValidation.Default); }
 
 		/// <summary>
 		///     Validates that <paramref name="value" /> is valid. If it's not it throws an <see cref="ArgumentException" /> with
@@ -981,7 +980,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="value" /> is invalid.
 		/// </exception>
-		public static Enum Validate(Type enumType, object value, string paramName, EnumValidation validation) { return GetInfo(enumType).Validate(value, paramName, validation); }
+		public static Enum Validate([NotNull] Type enumType, object value, string paramName, EnumValidation validation) { return GetInfo(enumType).Validate(value, paramName, validation); }
 
 		/// <summary>
 		///     Converts the specified <paramref name="value" /> to its string representation.
@@ -995,7 +994,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="value" /> is of an invalid type.
 		/// </exception>
-		public static string AsString(Type enumType, Enum value)
+		public static string AsString([NotNull] Type enumType, Enum value)
 		{
 			return GetInfo(enumType).AsString(value);
 		}
@@ -1015,7 +1014,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> is of an invalid type.
 		/// </exception>
 		/// <exception cref="FormatException"><paramref name="format" /> is an invalid value.</exception>
-		public static string AsString(Type enumType, Enum value, string format)
+		public static string AsString([NotNull] Type enumType, Enum value, string format)
 		{
 			return GetInfo(enumType).AsString(value, format);
 		}
@@ -1034,7 +1033,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="format" /> is an invalid value.
 		/// </exception>
-		public static string AsString(Type enumType, Enum value, EnumFormat format)
+		public static string AsString([NotNull] Type enumType, Enum value, EnumFormat format)
 		{
 			return GetInfo(enumType).AsString(value, format);
 		}
@@ -1053,7 +1052,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="format0" /> or <paramref name="format1" /> is an invalid value.
 		/// </exception>
-		public static string AsString(Type enumType, Enum value, EnumFormat format0, EnumFormat format1)
+		public static string AsString([NotNull] Type enumType, Enum value, EnumFormat format0, EnumFormat format1)
 		{
 			return GetInfo(enumType).AsString(value, format0, format1);
 		}
@@ -1073,7 +1072,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="format0" />, <paramref name="format1" />, or <paramref name="format2" /> is an invalid value.
 		/// </exception>
-		public static string AsString(Type enumType, Enum value, EnumFormat format0, EnumFormat format1, EnumFormat format2)
+		public static string AsString([NotNull] Type enumType, Enum value, EnumFormat format0, EnumFormat format1, EnumFormat format2)
 		{
 			return GetInfo(enumType).AsString(value, format0, format1, format2);
 		}
@@ -1092,7 +1091,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="formats" /> contains an invalid value.
 		/// </exception>
-		public static string AsString(Type enumType, Enum value, params EnumFormat[] formats)
+		public static string AsString([NotNull] Type enumType, Enum value, params EnumFormat[] formats)
 		{
 			return GetInfo(enumType).AsString(value, formats);
 		}
@@ -1115,7 +1114,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> is of an invalid type.
 		/// </exception>
 		/// <exception cref="FormatException"><paramref name="format" /> is an invalid value.</exception>
-		public static string Format(Type enumType, Enum value, string format)
+		public static string Format([NotNull] Type enumType, Enum value, string format)
 		{
 			return GetInfo(enumType).Format(value, format);
 		}
@@ -1139,7 +1138,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="formats" /> contains an invalid value.
 		/// </exception>
-		public static string Format(Type enumType, Enum value, params EnumFormat[] formats)
+		public static string Format([NotNull] Type enumType, Enum value, params EnumFormat[] formats)
 		{
 			return GetInfo(enumType).Format(value, formats);
 		}
@@ -1156,7 +1155,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="value" /> is of an invalid type.
 		/// </exception>
-		public static object GetUnderlyingValue(Type enumType, Enum value)
+		public static object GetUnderlyingValue([NotNull] Type enumType, Enum value)
 		{
 			return GetInfo(enumType).GetUnderlyingValue(value);
 		}
@@ -1177,7 +1176,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> cannot fit within <see cref="sbyte" />'s value range
 		///     without overflowing.
 		/// </exception>
-		public static sbyte ToSByte(Type enumType, Enum value) { return GetInfo(enumType).ToSByte(value); }
+		public static sbyte ToSByte([NotNull] Type enumType, Enum value) { return GetInfo(enumType).ToSByte(value); }
 
 		/// <summary>
 		///     Converts <paramref name="value" /> to a <see cref="byte" />.
@@ -1195,7 +1194,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> cannot fit within <see cref="byte" />'s value range
 		///     without overflowing.
 		/// </exception>
-		public static byte ToByte(Type enumType, Enum value) { return GetInfo(enumType).ToByte(value); }
+		public static byte ToByte([NotNull] Type enumType, Enum value) { return GetInfo(enumType).ToByte(value); }
 
 		/// <summary>
 		///     Converts <paramref name="value" /> to an <see cref="short" />.
@@ -1213,7 +1212,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> cannot fit within <see cref="short" />'s value range
 		///     without overflowing.
 		/// </exception>
-		public static short ToInt16(Type enumType, Enum value) { return GetInfo(enumType).ToInt16(value); }
+		public static short ToInt16([NotNull] Type enumType, Enum value) { return GetInfo(enumType).ToInt16(value); }
 
 		/// <summary>
 		///     Converts <paramref name="value" /> to a <see cref="ushort" />.
@@ -1231,7 +1230,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> cannot fit within <see cref="ushort" />'s value range
 		///     without overflowing.
 		/// </exception>
-		public static ushort ToUInt16(Type enumType, Enum value) { return GetInfo(enumType).ToUInt16(value); }
+		public static ushort ToUInt16([NotNull] Type enumType, Enum value) { return GetInfo(enumType).ToUInt16(value); }
 
 		/// <summary>
 		///     Converts <paramref name="value" /> to an <see cref="int" />.
@@ -1249,7 +1248,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> cannot fit within <see cref="int" />'s value range
 		///     without overflowing.
 		/// </exception>
-		public static int ToInt32(Type enumType, Enum value) { return GetInfo(enumType).ToInt32(value); }
+		public static int ToInt32([NotNull] Type enumType, Enum value) { return GetInfo(enumType).ToInt32(value); }
 
 		/// <summary>
 		///     Converts <paramref name="value" /> to a <see cref="uint" />.
@@ -1267,7 +1266,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> cannot fit within <see cref="uint" />'s value range
 		///     without overflowing.
 		/// </exception>
-		public static uint ToUInt32(Type enumType, Enum value) { return GetInfo(enumType).ToUInt32(value); }
+		public static uint ToUInt32([NotNull] Type enumType, Enum value) { return GetInfo(enumType).ToUInt32(value); }
 
 		/// <summary>
 		///     Converts <paramref name="value" /> to an <see cref="long" />.
@@ -1285,7 +1284,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> cannot fit within <see cref="long" />'s value range
 		///     without overflowing.
 		/// </exception>
-		public static long ToInt64(Type enumType, Enum value) { return GetInfo(enumType).ToInt64(value); }
+		public static long ToInt64([NotNull] Type enumType, Enum value) { return GetInfo(enumType).ToInt64(value); }
 
 		/// <summary>
 		///     Converts <paramref name="value" /> to a <see cref="ulong" />.
@@ -1303,7 +1302,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> cannot fit within <see cref="ulong" />'s value range
 		///     without overflowing.
 		/// </exception>
-		public static ulong ToUInt64(Type enumType, Enum value) { return GetInfo(enumType).ToUInt64(value); }
+		public static ulong ToUInt64([NotNull] Type enumType, Enum value) { return GetInfo(enumType).ToUInt64(value); }
 
 		/// <summary>
 		///     Indicates if <paramref name="value" /> equals <paramref name="other" />.
@@ -1321,7 +1320,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="value" /> or <paramref name="other" /> is of an invalid type.
 		/// </exception>
-		public static bool Equals(Type enumType, Enum value, Enum other)
+		public static bool Equals([NotNull] Type enumType, Enum value, Enum other)
 		{
 			return GetInfo(enumType).Equals(value, other);
 		}
@@ -1346,7 +1345,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="value" /> or <paramref name="other" /> is of an invalid type.
 		/// </exception>
-		public static int CompareTo(Type enumType, Enum value, Enum other) { return GetInfo(enumType).Compare(value, other); }
+		public static int CompareTo([NotNull] Type enumType, Enum value, Enum other) { return GetInfo(enumType).Compare(value, other); }
 
 		/// <summary>
 		///     Retrieves <paramref name="value" />'s enum member name if defined otherwise <c>null</c>.
@@ -1360,7 +1359,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="value" /> is of an invalid type.
 		/// </exception>
-		public static string GetName(Type enumType, Enum value)
+		public static string GetName([NotNull] Type enumType, Enum value)
 		{
 			return GetInfo(enumType).GetName(value);
 		}
@@ -1377,7 +1376,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="value" /> is of an invalid type.
 		/// </exception>
-		public static AttributeCollection GetAttributes(Type enumType, Enum value)
+		public static AttributeCollection GetAttributes([NotNull] Type enumType, Enum value)
 		{
 			return GetInfo(enumType).GetAttributes(value);
 		}
@@ -1394,7 +1393,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="value" /> is of an invalid type.
 		/// </exception>
-		public static EnumMember GetMember(Type enumType, Enum value)
+		public static EnumMember GetMember([NotNull] Type enumType, Enum value)
 		{
 			return GetInfo(enumType).GetMember(value);
 		}
@@ -1408,7 +1407,7 @@ namespace asm.Helpers
 		/// <returns>Enum member with the specified <paramref name="name" /> if defined otherwise <c>null</c>.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> or <paramref name="name" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static EnumMember GetMember(Type enumType, string name) { return GetInfo(enumType).GetMember(name); }
+		public static EnumMember GetMember([NotNull] Type enumType, string name) { return GetInfo(enumType).GetMember(name); }
 
 		/// <summary>
 		///     Retrieves the enum member with the specified <paramref name="name" /> if defined otherwise <c>null</c>.
@@ -1420,7 +1419,7 @@ namespace asm.Helpers
 		/// <returns>Enum member with the specified <paramref name="name" /> if defined otherwise <c>null</c>.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> or <paramref name="name" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static EnumMember GetMember(Type enumType, string name, bool ignoreCase) { return GetInfo(enumType).GetMember(name, ignoreCase); }
+		public static EnumMember GetMember([NotNull] Type enumType, string name, bool ignoreCase) { return GetInfo(enumType).GetMember(name, ignoreCase); }
 
 		/// <summary>
 		///     Retrieves an enum member whose string representation using the specified <paramref name="formats" /> is
@@ -1436,7 +1435,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="formats" /> contains an invalid value.
 		/// </exception>
-		public static EnumMember GetMember(Type enumType, string value, params EnumFormat[] formats) { return GetInfo(enumType).GetMember(value, false, formats); }
+		public static EnumMember GetMember([NotNull] Type enumType, string value, params EnumFormat[] formats) { return GetInfo(enumType).GetMember(value, false, formats); }
 
 		/// <summary>
 		///     Retrieves an enum member whose string representation using the specified <paramref name="formats" /> is
@@ -1454,7 +1453,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="formats" /> contains an invalid value.
 		/// </exception>
-		public static EnumMember GetMember(Type enumType, string value, bool ignoreCase, params EnumFormat[] formats)
+		public static EnumMember GetMember([NotNull] Type enumType, string value, bool ignoreCase, params EnumFormat[] formats)
 		{
 			return GetInfo(enumType).GetMember(value, ignoreCase, formats);
 		}
@@ -1476,7 +1475,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> is outside the range of <paramref name="enumType" />'s
 		///     underlying type.
 		/// </exception>
-		public static Enum Parse(Type enumType, string value) { return Parse(enumType, value, false, null); }
+		public static Enum Parse([NotNull] Type enumType, string value) { return Parse(enumType, value, false, null); }
 
 		/// <summary>
 		///     Converts the string representation of one or more members or values of <paramref name="enumType" /> to its
@@ -1499,7 +1498,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> is outside the range of the underlying type of
 		///     <paramref name="enumType" />.
 		/// </exception>
-		public static Enum Parse(Type enumType, string value, params EnumFormat[] formats) { return Parse(enumType, value, false, formats); }
+		public static Enum Parse([NotNull] Type enumType, string value, params EnumFormat[] formats) { return Parse(enumType, value, false, formats); }
 
 		/// <summary>
 		///     Converts the string representation of one or more member names or values of <paramref name="enumType" /> to its
@@ -1520,7 +1519,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> is outside the range of the underlying type of
 		///     <paramref name="enumType" />.
 		/// </exception>
-		public static Enum Parse(Type enumType, string value, bool ignoreCase) { return Parse(enumType, value, ignoreCase, null); }
+		public static Enum Parse([NotNull] Type enumType, string value, bool ignoreCase) { return Parse(enumType, value, ignoreCase, null); }
 
 		/// <summary>
 		///     Converts the string representation of one or more members or values of <paramref name="enumType" /> to its
@@ -1545,7 +1544,7 @@ namespace asm.Helpers
 		///     <paramref name="value" /> is outside the range of the underlying type of
 		///     <paramref name="enumType" />.
 		/// </exception>
-		public static Enum Parse(Type enumType, string value, bool ignoreCase, params EnumFormat[] formats)
+		public static Enum Parse([NotNull] Type enumType, string value, bool ignoreCase, params EnumFormat[] formats)
 		{
 			return GetInfo(enumType).Parse(value, ignoreCase, formats);
 		}
@@ -1564,7 +1563,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static bool TryParse(Type enumType, string value, out Enum result) { return TryParse(enumType, value, false, out result, null); }
+		public static bool TryParse([NotNull] Type enumType, string value, out Enum result) { return TryParse(enumType, value, false, out result, null); }
 
 		/// <summary>
 		///     Tries to convert the string representation of one or more members or values of <paramref name="enumType" /> to its
@@ -1585,7 +1584,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="formats" /> contains an invalid value.
 		/// </exception>
-		public static bool TryParse(Type enumType, string value, out Enum result, params EnumFormat[] formats) { return TryParse(enumType, value, false, out result, formats); }
+		public static bool TryParse([NotNull] Type enumType, string value, out Enum result, params EnumFormat[] formats) { return TryParse(enumType, value, false, out result, formats); }
 
 		/// <summary>
 		///     Tries to convert the string representation of one or more member names or values of <paramref name="enumType" /> to
@@ -1603,7 +1602,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType" /> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType" /> is not an enum type.</exception>
-		public static bool TryParse(Type enumType, string value, bool ignoreCase, out Enum result) { return TryParse(enumType, value, ignoreCase, out result, null); }
+		public static bool TryParse([NotNull] Type enumType, string value, bool ignoreCase, out Enum result) { return TryParse(enumType, value, ignoreCase, out result, null); }
 
 		/// <summary>
 		///     Tries to convert the string representation of one or more members or values of <paramref name="enumType" /> to its
@@ -1627,7 +1626,7 @@ namespace asm.Helpers
 		///     -or-
 		///     <paramref name="formats" /> contains an invalid value.
 		/// </exception>
-		public static bool TryParse(Type enumType, string value, bool ignoreCase, out Enum result, params EnumFormat[] formats)
+		public static bool TryParse([NotNull] Type enumType, string value, bool ignoreCase, out Enum result, params EnumFormat[] formats)
 		{
 			return GetInfo(enumType).TryParse(value, ignoreCase, out result, formats);
 		}
@@ -1639,7 +1638,7 @@ namespace asm.Helpers
 		/// <returns>Indication if <paramref name="enumType"/> is marked with the <see cref="FlagsAttribute"/>.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType"/> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type.</exception>
-		public static bool IsFlagEnum(Type enumType) { return GetInfo(enumType).IsFlagEnum; }
+		public static bool IsFlagEnum([NotNull] Type enumType) { return GetInfo(enumType).IsFlagEnum; }
 
 		/// <summary>
 		/// Retrieves all the flags defined by <paramref name="enumType"/>.
@@ -1648,7 +1647,7 @@ namespace asm.Helpers
 		/// <returns>All the flags defined by <paramref name="enumType"/>.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType"/> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type.</exception>
-		public static Enum GetAllFlags(Type enumType) { return GetInfo(enumType).AllFlags; }
+		public static Enum GetAllFlags([NotNull] Type enumType) { return GetInfo(enumType).AllFlags; }
 
 		/// <summary>
 		/// Indicates whether <paramref name="value"/> is a valid flag combination of <paramref name="enumType"/>'s defined flags.
@@ -1660,7 +1659,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 
 		/// <paramref name="value"/> is of an invalid type.</exception>
-		public static bool IsValidFlagCombination(Type enumType, Enum value)
+		public static bool IsValidFlagCombination([NotNull] Type enumType, Enum value)
 			{
 			return GetInfo(enumType).IsValidFlagCombination(value);
 			}
@@ -1677,7 +1676,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> is of an invalid type.</exception>
-		public static string FormatFlags(Type enumType, Enum value) { return FormatFlags(enumType, value, null, null); }
+		public static string FormatFlags([NotNull] Type enumType, Enum value) { return FormatFlags(enumType, value, null, null); }
 
 		/// <summary>
 		/// Retrieves <paramref name="value"/>'s flags formatted with <paramref name="formats"/> and delimited with commas
@@ -1696,7 +1695,7 @@ namespace asm.Helpers
 		/// <paramref name="value"/> is of an invalid type
 		/// -or-
 		/// <paramref name="formats"/> contains an invalid value.</exception>
-		public static string FormatFlags(Type enumType, Enum value, params EnumFormat[] formats) { return FormatFlags(enumType, value, null, formats); }
+		public static string FormatFlags([NotNull] Type enumType, Enum value, params EnumFormat[] formats) { return FormatFlags(enumType, value, null, formats); }
 
 		/// <summary>
 		/// Retrieves the names of <paramref name="value"/>'s flags delimited with <paramref name="delimiter"/> or if empty returns the name of the zero flag if defined otherwise "0".
@@ -1711,7 +1710,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> is of an invalid type.</exception>
-		public static string FormatFlags(Type enumType, Enum value, string delimiter) { return FormatFlags(enumType, value, delimiter, null); }
+		public static string FormatFlags([NotNull] Type enumType, Enum value, string delimiter) { return FormatFlags(enumType, value, delimiter, null); }
 
 		/// <summary>
 		/// Retrieves <paramref name="value"/>'s flags formatted with <paramref name="formats"/> and delimited with <paramref name="delimiter"/>
@@ -1731,7 +1730,7 @@ namespace asm.Helpers
 		/// <paramref name="value"/> is of an invalid type
 		/// -or-
 		/// <paramref name="formats"/> contains an invalid value.</exception>
-		public static string FormatFlags(Type enumType, Enum value, string delimiter, params EnumFormat[] formats)
+		public static string FormatFlags([NotNull] Type enumType, Enum value, string delimiter, params EnumFormat[] formats)
 		{
 			return GetInfo(enumType).FormatFlags(value, delimiter, formats);
 		}
@@ -1746,7 +1745,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> is of an invalid type.</exception>
-		public static IEnumerable<Enum> GetFlags(Type enumType, Enum value)
+		public static IEnumerable<Enum> GetFlags([NotNull] Type enumType, Enum value)
 		{
 			return GetInfo(enumType).GetFlags(value);
 		}
@@ -1761,7 +1760,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> is of an invalid type.</exception>
-		public static IEnumerable<EnumMember> GetFlagMembers(Type enumType, Enum value)
+		public static IEnumerable<EnumMember> GetFlagMembers([NotNull] Type enumType, Enum value)
 		{
 			return GetInfo(enumType).GetFlagMembers(value);
 		}
@@ -1773,7 +1772,7 @@ namespace asm.Helpers
 		/// <returns>The flag count of <paramref name="enumType"/>.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType"/> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type.</exception>
-		public static int GetFlagCount(Type enumType) { return GetInfo(enumType).GetFlagCount(); }
+		public static int GetFlagCount([NotNull] Type enumType) { return GetInfo(enumType).GetFlagCount(); }
 
 		/// <summary>
 		/// Retrieves the flag count of <paramref name="value"/>.
@@ -1785,7 +1784,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> is of an invalid type.</exception>
-		public static int GetFlagCount(Type enumType, Enum value)
+		public static int GetFlagCount([NotNull] Type enumType, Enum value)
 			{
 			return GetInfo(enumType).GetFlagCount(value);
 			}
@@ -1801,7 +1800,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> or <paramref name="otherFlags"/> is of an invalid type.</exception>
-		public static int GetFlagCount(Type enumType, Enum value, Enum otherFlags)
+		public static int GetFlagCount([NotNull] Type enumType, Enum value, Enum otherFlags)
 		{
 			return GetInfo(enumType).GetFlagCount(value, otherFlags);
 		}
@@ -1816,7 +1815,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> is of an invalid type.</exception>
-		public static bool HasAnyFlags(Type enumType, Enum value)
+		public static bool HasAnyFlags([NotNull] Type enumType, Enum value)
 		{
 			return GetInfo(enumType).HasAnyFlags(value);
 		}
@@ -1832,7 +1831,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> or <paramref name="otherFlags"/> is of an invalid type.</exception>
-		public static bool HasAnyFlags(Type enumType, Enum value, Enum otherFlags)
+		public static bool HasAnyFlags([NotNull] Type enumType, Enum value, Enum otherFlags)
 		{
 			return GetInfo(enumType).HasAnyFlags(value, otherFlags);
 		}
@@ -1847,7 +1846,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> is of an invalid type.</exception>
-		public static bool HasAllFlags(Type enumType, Enum value)
+		public static bool HasAllFlags([NotNull] Type enumType, Enum value)
 		{
 			return GetInfo(enumType).HasAllFlags(value);
 		}
@@ -1863,7 +1862,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> or <paramref name="otherFlags"/> is of an invalid type.</exception>
-		public static bool HasAllFlags(Type enumType, Enum value, Enum otherFlags)
+		public static bool HasAllFlags([NotNull] Type enumType, Enum value, Enum otherFlags)
 		{
 			return GetInfo(enumType).HasAllFlags(value, otherFlags);
 		}
@@ -1878,7 +1877,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> is of an invalid type.</exception>
-		public static Enum ToggleFlags(Type enumType, Enum value)
+		public static Enum ToggleFlags([NotNull] Type enumType, Enum value)
 		{
 			return GetInfo(enumType).ToggleFlags(value);
 		}
@@ -1894,7 +1893,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> or <paramref name="otherFlags"/> is of an invalid type.</exception>
-		public static Enum ToggleFlags(Type enumType, Enum value, Enum otherFlags)
+		public static Enum ToggleFlags([NotNull] Type enumType, Enum value, Enum otherFlags)
 		{
 			return GetInfo(enumType).ToggleFlags(value, otherFlags);
 		}
@@ -1910,7 +1909,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> or <paramref name="otherFlags"/> is of an invalid type.</exception>
-		public static Enum CommonFlags(Type enumType, Enum value, Enum otherFlags)
+		public static Enum CommonFlags([NotNull] Type enumType, Enum value, Enum otherFlags)
 		{
 			return GetInfo(enumType).CommonFlags(value, otherFlags);
 		}
@@ -1926,7 +1925,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> or <paramref name="otherFlags"/> is of an invalid type.</exception>
-		public static Enum CombineFlags(Type enumType, Enum value, Enum otherFlags)
+		public static Enum CombineFlags([NotNull] Type enumType, Enum value, Enum otherFlags)
 		{
 			return GetInfo(enumType).CombineFlags(value, otherFlags);
 		}
@@ -1941,7 +1940,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="flags"/> contains a value that is of an invalid type.</exception>
-		public static Enum CombineFlags(Type enumType, params Enum[] flags) { return CombineFlags(enumType, (IEnumerable<Enum>)flags); }
+		public static Enum CombineFlags([NotNull] Type enumType, params Enum[] flags) { return CombineFlags(enumType, (IEnumerable<Enum>)flags); }
 
 		/// <summary>
 		/// Combines all of the flags of <paramref name="flags"/>.
@@ -1953,7 +1952,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="flags"/> contains a value that is of an invalid type.</exception>
-		public static Enum CombineFlags(Type enumType, IEnumerable<Enum> flags)
+		public static Enum CombineFlags([NotNull] Type enumType, IEnumerable<Enum> flags)
 		{
 			return GetInfo(enumType).CombineFlags(flags);
 		}
@@ -1969,7 +1968,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> or <paramref name="otherFlags"/> is of an invalid type.</exception>
-		public static Enum RemoveFlags(Type enumType, Enum value, Enum otherFlags)
+		public static Enum RemoveFlags([NotNull] Type enumType, Enum value, Enum otherFlags)
 		{
 			return GetInfo(enumType).RemoveFlags(value, otherFlags);
 		}
@@ -1985,7 +1984,7 @@ namespace asm.Helpers
 		/// -or-
 		/// <paramref name="value"/> doesn't represent a member name or value of <paramref name="enumType"/>.</exception>
 		/// <exception cref="OverflowException"><paramref name="value"/> is outside the range of <paramref name="enumType"/>'s underlying type.</exception>
-		public static Enum ParseFlags(Type enumType, string value) { return ParseFlags(enumType, value, false, null, null); }
+		public static Enum ParseFlags([NotNull] Type enumType, string value) { return ParseFlags(enumType, value, false, null, null); }
 
 		/// <summary>
 		/// Converts the string representation of one or more members or values of <paramref name="enumType"/> to its respective value of type <paramref name="enumType"/>
@@ -2002,7 +2001,7 @@ namespace asm.Helpers
 		/// -or-
 		/// <paramref name="formats"/> contains an invalid value.</exception>
 		/// <exception cref="OverflowException"><paramref name="value"/> is outside the range of the underlying type of <paramref name="enumType"/>.</exception>
-		public static Enum ParseFlags(Type enumType, string value, params EnumFormat[] formats) { return ParseFlags(enumType, value, false, null, formats); }
+		public static Enum ParseFlags([NotNull] Type enumType, string value, params EnumFormat[] formats) { return ParseFlags(enumType, value, false, null, formats); }
 
 		/// <summary>
 		/// Converts the string representation of one or more member names or values of <paramref name="enumType"/> to its respective value of type <paramref name="enumType"/>.
@@ -2017,7 +2016,7 @@ namespace asm.Helpers
 		/// -or-
 		/// <paramref name="value"/> doesn't represent a member name or value of <paramref name="enumType"/>.</exception>
 		/// <exception cref="OverflowException"><paramref name="value"/> is outside the range of the underlying type of <paramref name="enumType"/>.</exception>
-		public static Enum ParseFlags(Type enumType, string value, bool ignoreCase) { return ParseFlags(enumType, value, ignoreCase, null, null); }
+		public static Enum ParseFlags([NotNull] Type enumType, string value, bool ignoreCase) { return ParseFlags(enumType, value, ignoreCase, null, null); }
 
 		/// <summary>
 		/// Converts the string representation of one or more members or values of <paramref name="enumType"/> to its respective value of type <paramref name="enumType"/>
@@ -2035,7 +2034,7 @@ namespace asm.Helpers
 		/// -or-
 		/// <paramref name="formats"/> contains an invalid value.</exception>
 		/// <exception cref="OverflowException"><paramref name="value"/> is outside the range of the underlying type of <paramref name="enumType"/>.</exception>
-		public static Enum ParseFlags(Type enumType, string value, bool ignoreCase, params EnumFormat[] formats)
+		public static Enum ParseFlags([NotNull] Type enumType, string value, bool ignoreCase, params EnumFormat[] formats)
 		{
 			return ParseFlags(enumType, value, ignoreCase, null, formats);
 		}
@@ -2052,7 +2051,7 @@ namespace asm.Helpers
 		/// -or-
 		/// <paramref name="value"/> doesn't represent a member name or value of <paramref name="enumType"/>.</exception>
 		/// <exception cref="OverflowException"><paramref name="value"/> is outside the range of <paramref name="enumType"/>'s underlying type.</exception>
-		public static Enum ParseFlags(Type enumType, string value, string delimiter) { return ParseFlags(enumType, value, false, delimiter, null); }
+		public static Enum ParseFlags([NotNull] Type enumType, string value, string delimiter) { return ParseFlags(enumType, value, false, delimiter, null); }
 
 		/// <summary>
 		/// Converts the string representation of one or more members or values of <paramref name="enumType"/> delimited with <paramref name="delimiter"/> to its respective value of type <paramref name="enumType"/>
@@ -2070,7 +2069,7 @@ namespace asm.Helpers
 		/// -or-
 		/// <paramref name="formats"/> contains an invalid value.</exception>
 		/// <exception cref="OverflowException"><paramref name="value"/> is outside the range of the underlying type of <paramref name="enumType"/>.</exception>
-		public static Enum ParseFlags(Type enumType, string value, string delimiter, params EnumFormat[] formats)
+		public static Enum ParseFlags([NotNull] Type enumType, string value, string delimiter, params EnumFormat[] formats)
 		{
 			return ParseFlags(enumType, value, false, delimiter, formats);
 		}
@@ -2089,7 +2088,7 @@ namespace asm.Helpers
 		/// -or-
 		/// <paramref name="value"/> doesn't represent a member name or value of <paramref name="enumType"/>.</exception>
 		/// <exception cref="OverflowException"><paramref name="value"/> is outside the range of the underlying type of <paramref name="enumType"/>.</exception>
-		public static Enum ParseFlags(Type enumType, string value, bool ignoreCase, string delimiter) { return ParseFlags(enumType, value, ignoreCase, delimiter, null); }
+		public static Enum ParseFlags([NotNull] Type enumType, string value, bool ignoreCase, string delimiter) { return ParseFlags(enumType, value, ignoreCase, delimiter, null); }
 
 		/// <summary>
 		/// Converts the string representation of one or more members or values of <paramref name="enumType"/> delimited with <paramref name="delimiter"/> to its respective value of type <paramref name="enumType"/>
@@ -2108,7 +2107,7 @@ namespace asm.Helpers
 		/// -or-
 		/// <paramref name="formats"/> contains an invalid value.</exception>
 		/// <exception cref="OverflowException"><paramref name="value"/> is outside the range of the underlying type of <paramref name="enumType"/>.</exception>
-		public static Enum ParseFlags(Type enumType, string value, bool ignoreCase, string delimiter, params EnumFormat[] formats)
+		public static Enum ParseFlags([NotNull] Type enumType, string value, bool ignoreCase, string delimiter, params EnumFormat[] formats)
 		{
 			return GetInfo(enumType).ParseFlags(value, ignoreCase, delimiter, formats);
 		}
@@ -2123,7 +2122,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType"/> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type.</exception>
-		public static bool TryParseFlags(Type enumType, string value, out Enum result) { return TryParseFlags(enumType, value, false, null, out result, null); }
+		public static bool TryParseFlags([NotNull] Type enumType, string value, out Enum result) { return TryParseFlags(enumType, value, false, null, out result, null); }
 
 		/// <summary>
 		/// Tries to convert the string representation of one or more members or values of <paramref name="enumType"/> to its respective value of type <paramref name="enumType"/>
@@ -2138,7 +2137,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="formats"/> contains an invalid value.</exception>
-		public static bool TryParseFlags(Type enumType, string value, out Enum result, params EnumFormat[] formats)
+		public static bool TryParseFlags([NotNull] Type enumType, string value, out Enum result, params EnumFormat[] formats)
 		{
 			return TryParseFlags(enumType, value, false, null, out result, formats);
 		}
@@ -2154,7 +2153,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType"/> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type.</exception>
-		public static bool TryParseFlags(Type enumType, string value, bool ignoreCase, out Enum result)
+		public static bool TryParseFlags([NotNull] Type enumType, string value, bool ignoreCase, out Enum result)
 		{
 			return TryParseFlags(enumType, value, ignoreCase, null, out result, null);
 		}
@@ -2174,7 +2173,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="formats"/> contains an invalid value.</exception>
-		public static bool TryParseFlags(Type enumType, string value, bool ignoreCase, out Enum result, params EnumFormat[] formats)
+		public static bool TryParseFlags([NotNull] Type enumType, string value, bool ignoreCase, out Enum result, params EnumFormat[] formats)
 		{
 			return TryParseFlags(enumType, value, ignoreCase, null, out result, formats);
 		}
@@ -2190,7 +2189,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType"/> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type.</exception>
-		public static bool TryParseFlags(Type enumType, string value, string delimiter, out Enum result)
+		public static bool TryParseFlags([NotNull] Type enumType, string value, string delimiter, out Enum result)
 		{
 			return TryParseFlags(enumType, value, false, delimiter, out result, null);
 		}
@@ -2209,7 +2208,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="formats"/> contains an invalid value.</exception>
-		public static bool TryParseFlags(Type enumType, string value, string delimiter, out Enum result, params EnumFormat[] formats)
+		public static bool TryParseFlags([NotNull] Type enumType, string value, string delimiter, out Enum result, params EnumFormat[] formats)
 		{
 			return TryParseFlags(enumType, value, false, delimiter, out result, formats);
 		}
@@ -2226,7 +2225,7 @@ namespace asm.Helpers
 		/// <returns>Indication whether the conversion succeeded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="enumType"/> is <c>null</c>.</exception>
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type.</exception>
-		public static bool TryParseFlags(Type enumType, string value, bool ignoreCase, string delimiter, out Enum result)
+		public static bool TryParseFlags([NotNull] Type enumType, string value, bool ignoreCase, string delimiter, out Enum result)
 		{
 			return TryParseFlags(enumType, value, ignoreCase, delimiter, out result, null);
 		}
@@ -2247,7 +2246,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="formats"/> contains an invalid value.</exception>
-		public static bool TryParseFlags(Type enumType, string value, bool ignoreCase, string delimiter, out Enum result, params EnumFormat[] formats)
+		public static bool TryParseFlags([NotNull] Type enumType, string value, bool ignoreCase, string delimiter, out Enum result, params EnumFormat[] formats)
 		{
 			return GetInfo(enumType).TryParseFlags(value, ignoreCase, delimiter, out result, formats);
 		}
@@ -2268,7 +2267,7 @@ namespace asm.Helpers
 		/// <exception cref="ArgumentNullException"><paramref name="member"/> is <c>null</c>.</exception>
 		public static IEnumerable<EnumMember> GetFlagMembers([NotNull] this EnumMember member) { return member.GetFlagMembers(); }
 
-		internal static IEnumInfo GetInfo(Type enumType)
+		internal static IEnumInfo GetInfo([NotNull] Type enumType)
 		{
 			return __enumInfo.GetOrAdd(enumType, e =>
 												{
@@ -2356,7 +2355,8 @@ namespace asm.Helpers
 			return __customEnumMemberFormatters[(int)format - S_STARTING_CUSTOM_ENUM_FORMAT_VALUE](member);
 		}
 
-		internal static Type GetNumericProviderType(Type underlyingType)
+		[NotNull]
+		internal static Type GetNumericProviderType([NotNull] Type underlyingType)
 		{
 			switch (underlyingType.AsTypeCode())
 			{
@@ -2494,6 +2494,7 @@ namespace asm.Helpers
 
 		public static (TEnum Minimum, TEnum Maximum) GetBoundaries() { return GetValues().FirstAndLast(); }
 
+		[NotNull]
 		public static EnumRange<TEnum> GetRange()
 		{
 			return new EnumRange<TEnum>();

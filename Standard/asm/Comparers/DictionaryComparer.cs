@@ -59,7 +59,7 @@ namespace asm.Comparers
 			if (ReferenceEquals(x, y)) return true;
 			if (x == null || y == null) return false;
 			if (x.Count != y.Count) return false;
-			if (keysToExclude == null) keysToExclude = Array.Empty<TKey>();
+			keysToExclude ??= Array.Empty<TKey>();
 
 			IEnumerable<TKey> keys = x.Keys.Union(y.Keys, Comparer.KeyComparer);
 			

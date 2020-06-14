@@ -37,7 +37,7 @@ namespace asm.Core.Web.Mvc.Formatters.Text
 			{
 				request.EnableBuffering();
 				await request.Body.DrainAsync(context.HttpContext.RequestAborted);
-				if (context.HttpContext.RequestAborted.IsCancellationRequested) return InputFormatterResult.NoValue();
+				if (context.HttpContext.RequestAborted.IsCancellationRequested) return await InputFormatterResult.NoValueAsync();
 				request.Body.Seek(0L, SeekOrigin.Begin);
 			}
 
@@ -46,14 +46,12 @@ namespace asm.Core.Web.Mvc.Formatters.Text
 				try
 				{
 					object model = await reader.ReadToEndAsync();
-					return model != null || context.TreatEmptyInputAsDefaultValue
-								? InputFormatterResult.Success(model)
-								: InputFormatterResult.NoValue();
+					return await InputFormatterResult.SuccessAsync(model);
 				}
 				catch (Exception e)
 				{
 					ExceptionDispatchInfo.Capture(e).Throw();
-					return InputFormatterResult.Failure();
+					return await InputFormatterResult.FailureAsync();
 				}
 			}
 		}

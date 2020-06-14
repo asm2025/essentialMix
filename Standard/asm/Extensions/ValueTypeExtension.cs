@@ -10,7 +10,7 @@ using JetBrains.Annotations;
 using asm.Collections;
 using asm.Helpers;
 using asm.Numeric;
-using asm.Text;
+using asm.Other.JonSkeet.MiscUtil.Text;
 using SysMath = System.Math;
 
 namespace asm.Extensions
@@ -107,7 +107,7 @@ namespace asm.Extensions
 			if (!startIndex.InRangeRx(0, thisValue)) throw new ArgumentOutOfRangeException(nameof(startIndex));
 			if (count == -1) count = thisValue - startIndex;
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-			if (startIndex + count > thisValue) count = thisValue.Subtract(startIndex);
+			if (thisValue - startIndex < count) count = thisValue - startIndex;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -116,7 +116,7 @@ namespace asm.Extensions
 			if (!startIndex.InRangeRx(0, thisValue)) throw new ArgumentOutOfRangeException(nameof(startIndex));
 			if (count == -1) count = thisValue - startIndex;
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-			if (startIndex + count > thisValue) count = thisValue.Subtract(startIndex);
+			if (thisValue - startIndex < count) count = thisValue - startIndex;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -127,7 +127,7 @@ namespace asm.Extensions
 		{
 			if (!startIndex.InRangeRx(0, thisValue)) throw new ArgumentOutOfRangeException(nameof(startIndex));
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-			if (startIndex + count > thisValue) throw new ArgumentOutOfRangeException(nameof(count));
+			if (thisValue - startIndex < count) throw new ArgumentOutOfRangeException(nameof(count));
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -138,7 +138,7 @@ namespace asm.Extensions
 		{
 			if (!startIndex.InRangeRx(0, thisValue)) throw new ArgumentOutOfRangeException(nameof(startIndex));
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-			if (startIndex + count > thisValue) throw new ArgumentOutOfRangeException(nameof(count));
+			if (thisValue - startIndex < count) throw new ArgumentOutOfRangeException(nameof(count));
 		}
 
 		[NotNull]

@@ -49,7 +49,7 @@ namespace asm.Extensions
 			try
 			{
 				string[] multiParts = body.Contains(WebRequestHelper.DIVIDER) ? Regex.Split(body, WebRequestHelper.DIVIDER) : new[] { body };
-				if (encoding == null) encoding = EncodingHelper.Default;
+				encoding ??= EncodingHelper.Default;
 
 				using (MemoryStream ms = new MemoryStream())
 				{
@@ -446,7 +446,7 @@ namespace asm.Extensions
 		public static async Task<WebResponse> GetResponseAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			if (token.IsCancellationRequested) return null;
-			if (settings == null) return thisValue.GetResponse();
+			if (settings == null) return await thisValue.GetResponseAsync();
 
 			WebResponse response = null;
 			int retries = 0;

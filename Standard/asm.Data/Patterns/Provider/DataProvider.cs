@@ -49,6 +49,7 @@ namespace asm.Data.Patterns.Provider
 			return Factory.CreateSelectDataAdapter(selectCommand, missingSchemaAction, missingMappingAction);
 		}
 
+		[NotNull]
 		public virtual string FormatValue(DataRow row, DataColumn column) { return FormatValue(row[column.ColumnName], column.DataType); }
 
 		[NotNull]

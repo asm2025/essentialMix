@@ -12,7 +12,6 @@ using asm.Comparers;
 using asm.Exceptions;
 using asm.Extensions;
 using asm.Helpers;
-using asm.Patterns.Collections;
 using asm.Patterns.Layout;
 using Bogus;
 using Bogus.DataSets;
@@ -269,7 +268,6 @@ namespace TestApp
 						sortStrings(str, 0, -1, stringComparer, false);
 						time[i] = watch.Elapsed.TotalMilliseconds;
 						watch.Stop();
-						if (i < time.Length - 1) ints = (int[])numbers.Clone();
 					}
 
 					stringResults[algorithm] = time.Average();
@@ -1801,7 +1799,7 @@ public static class Extension
 	{
 		Console.WriteLine();
 		Console.WriteLine($"{"Order:".Yellow()} {thisValue.Count.ToString().Underline()}.");
-		Console.WriteLine($"{"Size:".Yellow()} {thisValue.Size.ToString().Underline()}.");
+		Console.WriteLine($"{"Size:".Yellow()} {thisValue.GetSize().ToString().Underline()}.");
 		Console.WriteLine();
 		thisValue.WriteTo(Console.Out);
 	}

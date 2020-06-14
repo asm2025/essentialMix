@@ -21,6 +21,7 @@ namespace asm.Core.Web.Mvc.Formatters.Text
 		}
 
 		/// <inheritdoc />
+		[NotNull]
 		public override Task WriteResponseBodyAsync([NotNull] OutputFormatterWriteContext context, [NotNull] Encoding selectedEncoding)
 		{
 			if (context == null) throw new ArgumentNullException(nameof (context));

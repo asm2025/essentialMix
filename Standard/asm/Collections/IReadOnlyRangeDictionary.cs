@@ -3,9 +3,7 @@ using System.Collections.Generic;
 
 namespace asm.Collections
 {
-	public interface IReadOnlyRangeDictionary<TKey, TValue> : IReadOnlyDictionary<(TKey Minimum, TKey Maximum), TValue>,
-		IReadOnlyCollection<KeyValuePair<(TKey Minimum, TKey Maximum), TValue>>,
-		IEnumerable<KeyValuePair<(TKey Minimum, TKey Maximum), TValue>>
+	public interface IReadOnlyRangeDictionary<TKey, TValue> : IReadOnlyDictionary<(TKey Minimum, TKey Maximum), TValue>
 		where TKey : IComparable
 	{
 		RangeDictionaryComparer<TKey> Comparer { get; }

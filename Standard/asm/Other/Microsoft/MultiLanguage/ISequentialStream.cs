@@ -1,0 +1,18 @@
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+namespace asm.Other.Microsoft.MultiLanguage
+{
+	[ComImport]
+	[Guid("0C733A30-2A1C-11CE-ADE5-00AA0044773D")]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	internal interface ISequentialStream
+	{
+		[MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
+		void RemoteRead(IntPtr pv, uint cb, ref uint pcbRead);
+
+		[MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
+		void RemoteWrite([In] ref byte pv, [In] uint cb, ref uint pcbWritten);
+	}
+}

@@ -9,6 +9,7 @@ using asm.Cryptography.Symmetric;
 using asm.Extensions;
 using asm.Helpers;
 using asm.Numeric;
+using asm.Other.Moitah;
 using JetBrains.Annotations;
 using RSACng = asm.Cryptography.Asymmetric.RSACng;
 
@@ -45,7 +46,7 @@ namespace asm.Cryptography
 			* +---------+-------+------+
 			*/
 			if (string.IsNullOrEmpty(text)) return text;
-			if (settings == null) settings = new Settings.Settings();
+			settings ??= new Settings.Settings();
 
 			ushort saltSize = ByteHelper.GetByteSize(settings.SaltSize);
 			byte[] bytes = settings.Encoding.GetBytes(text);
@@ -54,7 +55,7 @@ namespace asm.Cryptography
 			];
 			int n = 0;
 			BitConverter.GetBytes(saltSize).CopyTo(finalBytes, n);
-			n += Constants.SHORT_SIZE;
+			n = Constants.SHORT_SIZE;
 
 			if (saltSize > 0)
 			{
@@ -120,7 +121,7 @@ namespace asm.Cryptography
 		{
 			if (publicKeyXml.Length == 0) throw new ArgumentNullException(nameof(publicKeyXml));
 			if (string.IsNullOrEmpty(value)) return value;
-			if (settings == null) settings = new RSASettings();
+			settings ??= new RSASettings();
 			byte[] data = settings.Encoding.GetBytes(value);
 			byte[] encrypted = AsymmetricEncrypt(publicKeyXml, data, settings);
 			return encrypted == null ? null : Convert.ToBase64String(encrypted);
@@ -131,7 +132,7 @@ namespace asm.Cryptography
 			if (publicKeyXml.Length == 0) throw new ArgumentNullException(nameof(publicKeyXml));
 			if (data.Length == 0) return null;
 			IAsymmetricAlgorithm asymmetric = null;
-			if (settings == null) settings = new RSASettings();
+			settings ??= new RSASettings();
 
 			try
 			{
@@ -159,7 +160,7 @@ namespace asm.Cryptography
 		{
 			if (privateKeyXml.Length == 0) throw new ArgumentNullException(nameof(privateKeyXml));
 			if (string.IsNullOrEmpty(value)) return value;
-			if (settings == null) settings = new RSASettings();
+			settings ??= new RSASettings();
 			byte[] encrypted = Convert.FromBase64String(value);
 			byte[] data = AsymmetricDecrypt(privateKeyXml, encrypted, settings);
 			return data == null ? null : settings.Encoding.GetString(data).TrimEnd('\0');
@@ -171,7 +172,7 @@ namespace asm.Cryptography
 			if (data.Length == 0) return null;
 
 			IAsymmetricAlgorithm asymmetric = null;
-			if (settings == null) settings = new RSASettings();
+			settings ??= new RSASettings();
 
 			try
 			{
@@ -202,7 +203,7 @@ namespace asm.Cryptography
 			if (string.IsNullOrEmpty(value)) return value;
 
 			byte[] key = Convert.FromBase64String(base64Key);
-			if (settings == null) settings = new SymmetricSettings();
+			settings ??= new SymmetricSettings();
 			byte[] data = settings.Encoding.GetBytes(value);
 			byte[] encrypted = SymmetricEncrypt(key, data, settings);
 			return encrypted == null ? null : Convert.ToBase64String(encrypted);
@@ -247,7 +248,7 @@ namespace asm.Cryptography
 			if (string.IsNullOrEmpty(value)) return value;
 
 			byte[] key = Convert.FromBase64String(base64Key);
-			if (settings == null) settings = new SymmetricSettings();
+			settings ??= new SymmetricSettings();
 			byte[] encrypted = Convert.FromBase64String(value);
 			byte[] data = SymmetricDecrypt(key, encrypted, settings);
 			return data == null ? null : settings.Encoding.GetString(data).TrimEnd('\0');
@@ -291,7 +292,7 @@ namespace asm.Cryptography
 		{
 			if (publicKeyXml.Length == 0) throw new ArgumentNullException(nameof(publicKeyXml));
 			if (string.IsNullOrEmpty(value)) return value;
-			if (settings == null) settings = new HyperSettings();
+			settings ??= new HyperSettings();
 
 			byte[] data = settings.Encoding.GetBytes(value);
 			byte[] encrypted = HyperEncrypt(publicKeyXml, data, settings);
@@ -328,7 +329,7 @@ namespace asm.Cryptography
 
 			// Key
 			BitConverter.GetBytes(encryptedKey.Length).CopyTo(finalBytes, n);
-			n += Constants.INT_SIZE;
+			n = Constants.INT_SIZE;
 			encryptedKey.CopyTo(finalBytes, n);
 			n += encryptedKey.Length;
 
@@ -341,7 +342,7 @@ namespace asm.Cryptography
 		{
 			if (privateKeyXml.Length == 0) throw new ArgumentNullException(nameof(privateKeyXml));
 			if (string.IsNullOrEmpty(value)) return value;
-			if (settings == null) settings = new HyperSettings();
+			settings ??= new HyperSettings();
 
 			byte[] encrypted = Convert.FromBase64String(value);
 			byte[] data = HyperDecrypt(privateKeyXml, encrypted, settings);
@@ -356,7 +357,7 @@ namespace asm.Cryptography
 			// Key
 			int n = 0;
 			int size = BitConverter.ToInt32(data, n);
-			n += Constants.INT_SIZE;
+			n = Constants.INT_SIZE;
 			if (n + size > data.Length) return null;
 
 			byte[] encryptedKey = data.GetRange(n, size);
@@ -402,7 +403,7 @@ namespace asm.Cryptography
 		[NotNull]
 		public static INumericEncoder CreateNumericEncoder(NumericSettings settings = null)
 		{
-			if (settings == null) settings = new NumericSettings();
+			settings ??= new NumericSettings();
 			return new NumericEncoder(settings.Mode, settings.Encoding);
 		}
 
@@ -424,7 +425,7 @@ namespace asm.Cryptography
 		public static byte[] GenerateSymmetricKey(SymmetricSettings settings = null)
 		{
 			byte[] keyBytes;
-			if (settings == null) settings = new SymmetricSettings();
+			settings ??= new SymmetricSettings();
 
 			using (ISymmetricAlgorithm symmetric = CreateSymmetricAlgorithm(settings))
 			{
@@ -441,7 +442,7 @@ namespace asm.Cryptography
 		[NotNull]
 		public static IAsymmetricAlgorithm CreateAsymmetricAlgorithm(RSASettings settings = null)
 		{
-			if (settings == null) settings = new RSASettings();
+			settings ??= new RSASettings();
 			IRSAAlgorithm algorithm = new RSACng(settings.Encoding)
 									{
 										KeySize = settings.KeySize,
@@ -455,7 +456,7 @@ namespace asm.Cryptography
 		[NotNull]
 		public static ISymmetricAlgorithm CreateSymmetricAlgorithm(SymmetricSettings settings = null)
 		{
-			if (settings == null) settings = new SymmetricSettings();
+			settings ??= new SymmetricSettings();
 			ISymmetricAlgorithm algorithm = new AESCryptoServiceProvider(settings.Encoding)
 											{
 												KeySize = settings.KeySize,

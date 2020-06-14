@@ -91,8 +91,8 @@ namespace asm.Helpers
 				foreach (Assembly referencedAssembly in GetReferencedAssemblies(domainAssembly, assemblyNames))
 					yield return referencedAssembly;
 			}
-	
-			IEnumerable<Assembly> GetReferencedAssemblies(Assembly assembly, ISet<string> set)
+
+			static IEnumerable<Assembly> GetReferencedAssemblies(Assembly assembly, ISet<string> set)
 			{
 				if (!set.Add(assembly.FullName)) yield break;
 				yield return assembly;

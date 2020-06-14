@@ -33,16 +33,20 @@ namespace asm.Data.Extensions
 			return thisValue.CreateXmlDeclaration(version.ToString("F1"), (encoding ?? EncodingHelper.Default).WebName, standAlone ? "yes" : "no");
 		}
 
+		[NotNull]
 		public static XmlDeclaration AppendDeclaration([NotNull] this XmlDocument thisValue, [NotNull] XDeclaration declaration)
 		{
 			if (declaration == null) throw new ArgumentNullException(nameof(declaration));
 			return AppendDeclaration(thisValue, string.IsNullOrEmpty(declaration.Encoding) ? EncodingHelper.Default : Encoding.GetEncoding(declaration.Encoding), declaration.Standalone.IsSame("yes"), string.IsNullOrEmpty(declaration.Version) ? 1.0f : float.Parse(declaration.Version));
 		}
 
+		[NotNull]
 		public static XmlDeclaration AppendDeclaration([NotNull] this XmlDocument thisValue) { return AppendDeclaration(thisValue, EncodingHelper.Default, true, 1.0f); }
 
+		[NotNull]
 		public static XmlDeclaration AppendDeclaration([NotNull] this XmlDocument thisValue, Encoding encoding) { return AppendDeclaration(thisValue, encoding, true, 1.0f); }
 
+		[NotNull]
 		public static XmlDeclaration AppendDeclaration([NotNull] this XmlDocument thisValue, Encoding encoding, bool standAlone)
 		{
 			return AppendDeclaration(thisValue, encoding, standAlone, 1.0f);
@@ -168,7 +172,7 @@ namespace asm.Data.Extensions
 				thisValue.Load(reader);
 		}
 
-		public static void SaveFile([NotNull] this XmlDocument thisValue, string filename) { SaveFile(thisValue, filename, EncodingHelper.Default); }
+		public static void SaveFile([NotNull] this XmlDocument thisValue, [NotNull] string filename) { SaveFile(thisValue, filename, EncodingHelper.Default); }
 		public static void SaveFile([NotNull] this XmlDocument thisValue, [NotNull] string filename, Encoding encoding) { SaveFile(thisValue, filename, XmlWriterHelper.CreateSettings(encoding: encoding)); }
 		public static void SaveFile([NotNull] this XmlDocument thisValue, [NotNull] string filename, XmlWriterSettings settings)
 		{

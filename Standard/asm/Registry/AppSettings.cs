@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Security;
 using System.Security.Permissions;
 using System.Text;
@@ -58,12 +57,6 @@ namespace asm.Registry
 
 		public AppSettings([NotNull] IEnumerable<IProperty> collection, IEqualityComparer<string> comparer)
 			: base(collection, comparer)
-		{
-			Init();
-		}
-
-		public AppSettings(SerializationInfo info, StreamingContext context)
-			: base(info, context)
 		{
 			Init();
 		}

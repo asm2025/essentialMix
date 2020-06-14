@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace asm.Patterns.DateTime
 {
-	public struct TimeRange : IComparable<TimeRange>, IComparable, IEquatable<TimeRange>
+	public readonly struct TimeRange : IComparable<TimeRange>, IComparable, IEquatable<TimeRange>
 	{
 		public TimeRange(TimeSpan start, TimeSpan end)
 		{

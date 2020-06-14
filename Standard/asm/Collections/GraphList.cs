@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using asm.Exceptions.Collections;
-using asm.Patterns.Collections;
 using JetBrains.Annotations;
 
 namespace asm.Collections
@@ -95,6 +94,7 @@ namespace asm.Collections
 
 			void IEnumerator.Reset()
 			{
+				if (_version != _graph._version) throw new VersionChangedException();
 				_current = null;
 				_started = _done = false;
 				_queueOrStack.Clear();
@@ -1479,9 +1479,6 @@ namespace asm.Collections
 		/// </summary>
 		public int Count => Vertices.Count;
 
-		// todo
-		public int Size => -1;
-
 		/// <inheritdoc />
 		public bool IsReadOnly => Vertices.IsReadOnly;
 		
@@ -1601,6 +1598,63 @@ namespace asm.Collections
 			return Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges)
 						? edges.Count
 						: 0;
+		}
+
+		public virtual int GetSize() { return Edges.Values.Sum(e => e.Count); }
+
+		public ICollection<T> FindCycle(bool ignoreLoop = false) { return FindCycle(Edges.Keys, ignoreLoop); }
+		protected ICollection<T> FindCycle([NotNull] ICollection<T> vertices, bool ignoreLoop = false)
+		{
+			if (vertices.Count == 0) return null;
+			
+			Stack<T> stack = new Stack<T>();
+			Queue<T> cycle = new Queue<T>();
+			HashSet<T> visiting = new HashSet<T>(Comparer);
+			HashSet<T> visited = new HashSet<T>(Comparer);
+			int version = _version;
+
+			foreach (T vertex in vertices)
+			{
+				if (version != _version) throw new VersionChangedException();
+				stack.Push(vertex);
+
+				while (stack.Count > 0)
+				{
+					T value = stack.Pop();
+					if (visited.Contains(value)) continue;
+					visiting.Add(value);
+					cycle.Enqueue(value);
+
+					if (Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges))
+					{
+						foreach (TEdge edge in edges)
+						{
+							if (visited.Contains(edge.To.Value) || ignoreLoop && IsLoop(value, edge)) continue;
+
+							// cycle detected
+							if (visiting.Contains(edge.To.Value))
+							{
+								cycle.Enqueue(edge.To.Value);
+
+								while (!Comparer.Equals(cycle.Peek(), edge.To.Value))
+									cycle.Dequeue();
+
+								return cycle.ToArray();
+							}
+
+							stack.Push(edge.To.Value);
+						}
+
+						continue;
+					}
+
+					visiting.Remove(value);
+					cycle.Dequeue();
+					visited.Add(value);
+				}
+			}
+
+			return null;
 		}
 
 		public bool IsLoop([NotNull] T value, [NotNull] TEdge edge)

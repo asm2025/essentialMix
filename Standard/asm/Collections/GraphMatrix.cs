@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-
-namespace asm.Collections
+﻿namespace asm.Collections
 {
 	// todo
 	//[DebuggerDisplay("{Label} Count = {Count}")]

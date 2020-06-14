@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using asm.Extensions;
-using asm.Internal.MultiLanguage;
+using asm.Other.Microsoft.MultiLanguage;
 using JetBrains.Annotations;
 
 namespace asm.Helpers

@@ -864,6 +864,7 @@ namespace asm.Extensions
 			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder ConcatFormat([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable enumerable, string format, char group)
 		{
 			if (string.IsNullOrEmpty(format)) return Join(thisValue, enumerable, group);
@@ -889,6 +890,7 @@ namespace asm.Extensions
 			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder ConcatFormat([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable enumerable, string format, string group)
 		{
 			if (string.IsNullOrEmpty(format)) return Join(thisValue, enumerable, group);
@@ -941,6 +943,7 @@ namespace asm.Extensions
 			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder ConcatFormat<T>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<T> enumerable, string format, char group)
 		{
 			if (string.IsNullOrEmpty(format)) return Join(thisValue, enumerable, group);
@@ -967,6 +970,7 @@ namespace asm.Extensions
 			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder ConcatFormat<T>([NotNull] this StringBuilder thisValue, [NotNull] IEnumerable<T> enumerable, string format, string group)
 		{
 			if (string.IsNullOrEmpty(format)) return Join(thisValue, enumerable, group);
@@ -1019,6 +1023,7 @@ namespace asm.Extensions
 			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder Join([NotNull] this StringBuilder thisValue, char separator, [NotNull] params object[] objects) { return Join(thisValue, objects, separator); }
 
 		[NotNull]
@@ -1045,6 +1050,7 @@ namespace asm.Extensions
 			return thisValue;
 		}
 
+		[NotNull]
 		public static StringBuilder Join([NotNull] this StringBuilder thisValue, string separator, [NotNull] params object[] objects)
 		{
 			return Join(thisValue, objects, separator);

@@ -5,6 +5,10 @@ using JetBrains.Annotations;
 
 namespace asm.Collections.Concurrent.ProducerConsumer
 {
+	/*
+	 * This is based on the insightful book of Joseph Albahari, C# 6 in a Nutshell
+	 * http://www.albahari.com/threading/
+	 */
 	public interface IProducerConsumer<in T> : IDisposable
 	{
 		bool CompleteMarked { get; }

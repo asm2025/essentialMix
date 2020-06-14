@@ -12,6 +12,7 @@ namespace asm.Threading
 
 		public SerialQueue() { }
 
+		[NotNull]
 		public Task Enqueue([NotNull] Action action)
 		{
 			Task<object> task;

@@ -43,7 +43,7 @@ namespace asm.Web.Extensions
 			}
 			else
 			{
-				if (key == null) key = name;
+				key ??= name;
 				thisValue[key] = value;
 			}
 

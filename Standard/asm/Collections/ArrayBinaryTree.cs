@@ -9,7 +9,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using asm.Exceptions.Collections;
 using asm.Extensions;
-using asm.Patterns.Collections;
 using asm.Patterns.Layout;
 using JetBrains.Annotations;
 
@@ -48,7 +47,7 @@ namespace asm.Collections
 		/// <summary>
 		/// a semi recursive approach to traverse the tree
 		/// </summary>
-		internal sealed class Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
+		public sealed class Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
 		{
 			private readonly ArrayBinaryTree<T> _tree;
 			private readonly int _version;
@@ -66,6 +65,7 @@ namespace asm.Collections
 				_version = _tree._version;
 				_index = index;
 				_current = new ArrayBinaryNode<T>(tree);
+				_done = _tree.Count == 0 || !_index.InRangeRx(0, _tree.Count);
 
 				switch (method)
 				{
@@ -111,7 +111,14 @@ namespace asm.Collections
 			}
 
 			/// <inheritdoc />
-			public T Current => _current.Value;
+			public T Current
+			{
+				get
+				{
+					if (_current.Index < 0) throw new InvalidOperationException();
+					return _current.Value;
+				}
+			}
 
 			/// <inheritdoc />
 			object IEnumerator.Current => Current;
@@ -131,9 +138,11 @@ namespace asm.Collections
 
 			void IEnumerator.Reset()
 			{
+				if (_version != _tree._version) throw new VersionChangedException();
 				_current.Index = -1;
-				_started = _done = false;
+				_started = false;
 				_queueOrStack.Clear();
+				_done = _tree.Count == 0 || !_index.InRangeRx(0, _tree.Count);
 			}
 
 			/// <inheritdoc />
@@ -478,7 +487,7 @@ namespace asm.Collections
 		/// <summary>
 		/// iterative approach to traverse the tree
 		/// </summary>
-		internal sealed class Iterator
+		public sealed class Iterator
 		{
 			private readonly ArrayBinaryTree<T> _tree;
 			private readonly int _index;
@@ -493,6 +502,8 @@ namespace asm.Collections
 
 			public void Iterate(HorizontalFlow flow, [NotNull] Action<int> visitCallback)
 			{
+				if (!_index.InRangeRx(0, _tree.Count)) return;
+
 				int version = _tree._version;
 
 				switch (_method)
@@ -804,6 +815,8 @@ namespace asm.Collections
 
 			public void Iterate(HorizontalFlow flow, [NotNull] Func<int, bool> visitCallback)
 			{
+				if (!_index.InRangeRx(0, _tree.Count)) return;
+
 				int version = _tree._version;
 
 				switch (_method)
@@ -1115,6 +1128,8 @@ namespace asm.Collections
 
 			public void Iterate(HorizontalFlow flow, [NotNull] Action<int, int> visitCallback)
 			{
+				if (!_index.InRangeRx(0, _tree.Count)) return;
+
 				int version = _tree._version;
 
 				switch (_method)
@@ -1442,6 +1457,8 @@ namespace asm.Collections
 
 			public void Iterate(HorizontalFlow flow, [NotNull] Func<int, int, bool> visitCallback)
 			{
+				if (!_index.InRangeRx(0, _tree.Count)) return;
+
 				int version = _tree._version;
 
 				switch (_method)
@@ -1771,7 +1788,7 @@ namespace asm.Collections
 		/// <summary>
 		/// iterative approach with level awareness. This is a different way than <see cref="BinaryTreeTraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
 		/// </summary>
-		internal sealed class LevelIterator
+		public sealed class LevelIterator
 		{
 			private readonly ArrayBinaryTree<T> _tree;
 			private readonly int _index;
@@ -1787,6 +1804,8 @@ namespace asm.Collections
 
 			public void Iterate(HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<int>> levelCallback)
 			{
+				if (!_index.InRangeRx(0, _tree.Count)) return;
+
 				int version = _tree._version;
 
 				switch (flow)
@@ -1868,6 +1887,8 @@ namespace asm.Collections
 
 			public void Iterate(HorizontalFlow flow, [NotNull] Func<int, IReadOnlyCollection<int>, bool> levelCallback)
 			{
+				if (!_index.InRangeRx(0, _tree.Count)) return;
+
 				int version = _tree._version;
 
 				switch (flow)
@@ -2019,7 +2040,7 @@ namespace asm.Collections
 		[NotNull]
 		public IEnumerator<T> GetEnumerator()
 		{
-			return (IEnumerator<T>)Enumerate(0, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight);
+			return Enumerate(0, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight);
 		}
 
 		public virtual bool Equals(ArrayBinaryTree<T> other)
@@ -2045,28 +2066,26 @@ namespace asm.Collections
 		/// <param name="flow">Left-to-right or right-to-left</param>
 		/// <returns></returns>
 		[NotNull]
-		public IEnumerable<T> Enumerate(int index, BinaryTreeTraverseMethod method, HorizontalFlow flow)
+		public Enumerator Enumerate(int index, BinaryTreeTraverseMethod method, HorizontalFlow flow)
 		{
-			return index < 0
-						? Enumerable.Empty<T>()
-						: new Enumerator(this, index, method, flow);
+			return new Enumerator(this, index, method, flow);
 		}
 
 		#region Enumerate overloads
 		[NotNull]
-		public IEnumerable<T> Enumerate(int index)
+		public Enumerator Enumerate(int index)
 		{
 			return Enumerate(index, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight);
 		}
 
 		[NotNull]
-		public IEnumerable<T> Enumerate(int index, HorizontalFlow flow)
+		public Enumerator Enumerate(int index, HorizontalFlow flow)
 		{
 			return Enumerate(index, BinaryTreeTraverseMethod.InOrder, flow);
 		}
 
 		[NotNull]
-		public IEnumerable<T> Enumerate(int index, BinaryTreeTraverseMethod method)
+		public Enumerator Enumerate(int index, BinaryTreeTraverseMethod method)
 		{
 			return Enumerate(index, method, HorizontalFlow.LeftToRight);
 		}

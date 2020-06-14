@@ -33,8 +33,10 @@ namespace asm.Cryptography.Encoders
 						: Encode(Encoding.GetBytes(value));
 		}
 
+		[NotNull]
 		public string Encode(byte[] buffer) { return Encode(buffer, 0, buffer.Length); }
 
+		[NotNull]
 		public string Encode(byte[] buffer, int startIndex, int count)
 		{
 			buffer = ArrayHelper.ValidateAndGetRange(buffer, ref startIndex, ref count);

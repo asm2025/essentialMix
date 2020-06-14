@@ -1,0 +1,10 @@
+The work in this folder tree "MarcGravell" and its subfolders are not mine.
+I needed the functionality but there is no need to reinvent the wheel since 
+someone already has done it.
+https://blog.marcgravell.com/2008/11/dynamic-operators.html
+
+Apparently, this has been helpful to others as well
+https://jonskeet.uk/csharp/miscutil/usage/genericoperators.html
+Note: these classes were written by Marc Gravell. I claim no credit for their brilliance! Jon.
+
+This is the base of any Operator<T>.[Method], Range, GenericsExtensions related methods and some other classes.

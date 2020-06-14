@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 using JetBrains.Annotations;
 
 namespace asm.Collections
@@ -25,8 +24,6 @@ namespace asm.Collections
 		protected ObservableKeyedCollectionBase([NotNull] IEnumerable<TValue> collection) : base(collection) { }
 
 		protected ObservableKeyedCollectionBase([NotNull] IEnumerable<TValue> collection, IEqualityComparer<TKey> comparer) : base(collection, comparer) { }
-
-		protected ObservableKeyedCollectionBase(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
 		protected override void InsertItem(int index, TValue item)
 		{

@@ -74,7 +74,7 @@ namespace asm.Internal
 			base.Dispose(disposing);
 		}
 
-		private void Copy(char* sourcePtr, char* targetPtr)
+		private static void Copy(char* sourcePtr, char* targetPtr)
 		{
 			while ((*targetPtr++ = *sourcePtr++) != 0) { }
 		}

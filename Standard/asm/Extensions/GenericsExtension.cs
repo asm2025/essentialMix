@@ -18,7 +18,7 @@ using asm.Collections;
 using asm.Comparers;
 using asm.Delegation;
 using asm.Helpers;
-using asm.Internal;
+using asm.Other.MarcGravell;
 using asm.Patterns.Object;
 using asm.Reflection;
 
@@ -1559,8 +1559,7 @@ namespace asm.Extensions
 		public static string ToRangeString<T>(this T thisValue, T maximum, IComparer<T> comparer = null)
 			where T : struct, IComparable
 		{
-			if (comparer == null)
-				comparer = Comparer<T>.Default;
+			comparer ??= Comparer<T>.Default;
 
 			switch (comparer.Compare(thisValue, maximum))
 			{
@@ -1782,8 +1781,7 @@ namespace asm.Extensions
 
 			static void EnumeratePropertyDescriptorsInternal(ISet<string> keys, object sourceInternal, string rootInternal, PropertyInfoType propertyInfoTypeInternal, Func<object, string, PropertyDescriptor, bool> onPropertyInternal, Func<object, string, FieldInfo, bool> onFieldInternal)
 			{
-				if (rootInternal == null)
-					rootInternal = string.Empty;
+				rootInternal ??= string.Empty;
 				if (!string.IsNullOrEmpty(rootInternal))
 					rootInternal += ".";
 
@@ -1837,8 +1835,7 @@ namespace asm.Extensions
 
 			static void EnumeratePropertiesInternal(ISet<string> keys, object sourceInternal, string rootInternal, PropertyInfoType propertyInfoTypeInternal, Func<object, string, PropertyInfo, bool> onPropertyInternal, Func<object, string, FieldInfo, bool> onFieldInternal)
 			{
-				if (rootInternal == null)
-					rootInternal = string.Empty;
+				rootInternal ??= string.Empty;
 				if (!string.IsNullOrEmpty(rootInternal))
 					rootInternal += ".";
 

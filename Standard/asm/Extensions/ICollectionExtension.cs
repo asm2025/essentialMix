@@ -53,8 +53,6 @@ namespace asm.Extensions
 			thisValue.Count.ValidateRange(startIndex, ref count);
 			if (count == 0 || thisValue.Count == 0) return;
 
-			if (count == 0) return;
-
 			T[] items = thisValue.GetRange(startIndex, count);
 
 			foreach (T item in items)
@@ -135,7 +133,7 @@ namespace asm.Extensions
 		{
 			if (thisValue.Count != other?.Count) return false;
 			if (thisValue.Count == 0) return true;
-			if (comparer == null) comparer = EqualityComparer<T>.Default;
+			comparer ??= EqualityComparer<T>.Default;
 			return Enumerable.SequenceEqual(thisValue, other, comparer);
 		}
 

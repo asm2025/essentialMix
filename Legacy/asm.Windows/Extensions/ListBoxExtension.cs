@@ -55,15 +55,12 @@ namespace asm.Windows.Extensions
 
 			StringBuilder sb = new StringBuilder();
 
-			if (onAppend == null)
+			onAppend ??= (builder, item) =>
 			{
-				onAppend = (builder, item) =>
-				{
-					string t = Convert.ToString(item);
-					if (string.IsNullOrEmpty(t)) return;
-					builder.AppendLine(t);
-				};
-			}
+				string t = Convert.ToString(item);
+				if (string.IsNullOrEmpty(t)) return;
+				builder.AppendLine(t);
+			};
 
 			if (thisValue.SelectedIndices.Count == 0)
 			{

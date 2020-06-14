@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace asm.Numeric
 {
-	public struct Fraction<T>
+	public readonly struct Fraction<T>
 		where T : struct, IComparable
 	{
 		public Fraction(T numerator, T denominator)

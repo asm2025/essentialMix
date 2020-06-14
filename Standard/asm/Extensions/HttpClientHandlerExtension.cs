@@ -11,7 +11,7 @@ namespace asm.Extensions
 		public static T Configure<T>([NotNull] this T thisValue, IOHttpRequestSettings settings = null)
 			where T : HttpClientHandler
 		{
-			if (settings == null) settings = new IOHttpRequestSettings();
+			settings ??= new IOHttpRequestSettings();
 			thisValue.AllowAutoRedirect = settings.AllowAutoRedirect;
 			thisValue.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
 			thisValue.UseDefaultCredentials = settings.Credentials == null;

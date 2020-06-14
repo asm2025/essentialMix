@@ -51,7 +51,7 @@ namespace MimeTypes
 			string csvLocation = Path.Combine(Directory.GetCurrentDirectory(), DATA_DIR);
 			if (File.Exists(OUTPUT_FILE)) File.Delete(OUTPUT_FILE);
 
-			Tree<string, string> mimes = new Tree<string, string>(StringComparer.OrdinalIgnoreCase);
+			Tree<string, string> mimes = new Tree<string, string>(string.Empty, StringComparer.OrdinalIgnoreCase);
 
 			foreach (string file in Directory.EnumerateFiles(csvLocation, "*.csv"))
 			{
@@ -99,10 +99,7 @@ namespace MimeTypes
 
 				if (!root.TryGetValue(className, out Tree<string, string> node))
 				{
-					node = new Tree<string, string>(root.Comparer)
-					{
-						Key = className
-					};
+					node = new Tree<string, string>(className, root.Comparer);
 					root.Add(node);
 				}
 
@@ -125,9 +122,8 @@ namespace MimeTypes
 						{
 							if (!node.TryGetValue(fullKey, out Tree<string, string> item))
 							{
-								item = new Tree<string, string>(node.Comparer)
+								item = new Tree<string, string>(fullKey, node.Comparer)
 								{
-									Key = fullKey,
 									Value = value
 								};
 
@@ -145,11 +141,7 @@ namespace MimeTypes
 
 								if (!current.TryGetValue(key, out Tree<string, string> item))
 								{
-									item = new Tree<string, string>(current.Comparer)
-									{
-										Key = key
-									};
-
+									item = new Tree<string, string>(key, current.Comparer);
 									current.Add(item);
 								}
 

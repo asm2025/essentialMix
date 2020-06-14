@@ -6,7 +6,6 @@ namespace asm.Caching
 	[Serializable, DataContract]
 	public class CacheObject : ICacheObject
     {
-		/// <inheritdoc />
 		public CacheObject()
 		{
 		}

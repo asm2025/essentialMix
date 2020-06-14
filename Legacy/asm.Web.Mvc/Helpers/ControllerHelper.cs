@@ -26,9 +26,9 @@ namespace asm.Web.Mvc.Helpers
 			if (!__controllerType.IsAssignableFrom(type)) throw new TypeAccessException($"Type '{type}' is not a '{__controllerType}'.");
 			
 			Controller controller = (Controller)Activator.CreateInstance(type);
-			if (routeData == null) routeData = new RouteData();
+			routeData ??= new RouteData();
 
-			if (!routeData.Values.Any(v => StringExtension.IsSame(v.Key, "controller")))
+			if (!routeData.Values.Any(v => v.Key.IsSame("controller")))
 				routeData.Values.Add("controller", controller.GetType().Name.ToLower().Replace("controller", string.Empty));
 
 			if (HttpContext.Current == null)

@@ -161,7 +161,7 @@ namespace asm.Collections
 			const int MAX_INITIAL_ELEMENT_COUNTS_CAPACITY = 1024;
 
 			CountingSet<TKey> elementCounts = new CountingSet<TKey>(comparer, Math.Min(remaining, MAX_INITIAL_ELEMENT_COUNTS_CAPACITY));
-			elementCounts.Increment(elements.Current);
+			elementCounts.Increment(elements.Current ?? throw new InvalidOperationException());
 
 			while (elements.MoveNext())
 			{
@@ -171,7 +171,7 @@ namespace asm.Collections
 					return null;
 				}
 
-				elementCounts.Increment(elements.Current);
+				elementCounts.Increment(elements.Current ?? throw new InvalidOperationException());
 			}
 
 			return remaining > 0

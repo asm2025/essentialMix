@@ -2,18 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Security;
-using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using asm.Exceptions.Collections;
 using asm.Extensions;
-using asm.Patterns.Collections;
 using asm.Patterns.Layout;
 using JetBrains.Annotations;
 
@@ -49,13 +44,13 @@ namespace asm.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[ComVisible(false)]
 	[Serializable]
-	public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
+	public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, IReadOnlyCollection<T>
 		where TNode : LinkedBinaryNode<TNode, T>
 	{
 		/// <summary>
 		/// a semi recursive approach to traverse the tree
 		/// </summary>
-		internal sealed class Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
+		public sealed class Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
 		{
 			private readonly LinkedBinaryTree<TNode, T> _tree;
 			private readonly int _version;
@@ -67,11 +62,12 @@ namespace asm.Collections
 			private bool _started;
 			private bool _done;
 
-			internal Enumerator([NotNull] LinkedBinaryTree<TNode, T> tree, [NotNull] TNode root, BinaryTreeTraverseMethod method, HorizontalFlow flow)
+			internal Enumerator([NotNull] LinkedBinaryTree<TNode, T> tree, TNode root, BinaryTreeTraverseMethod method, HorizontalFlow flow)
 			{
 				_tree = tree;
 				_version = _tree._version;
 				_root = root;
+				_done = _tree.Count == 0 || _root == null;
 
 				switch (method)
 				{
@@ -144,9 +140,11 @@ namespace asm.Collections
 
 			void IEnumerator.Reset()
 			{
+				if (_version != _tree._version) throw new VersionChangedException();
 				_current = null;
-				_started = _done = false;
+				_started = false;
 				_queueOrStack.Clear();
+				_done = _tree.Count == 0 || _root == null;
 			}
 
 			/// <inheritdoc />
@@ -494,13 +492,13 @@ namespace asm.Collections
 		/// <summary>
 		/// iterative approach to traverse the tree
 		/// </summary>
-		internal sealed class Iterator
+		public sealed class Iterator
 		{
 			private readonly LinkedBinaryTree<TNode, T> _tree;
 			private readonly TNode _root;
 			private readonly BinaryTreeTraverseMethod _method;
 
-			internal Iterator([NotNull] LinkedBinaryTree<TNode, T> tree, [NotNull] TNode root, BinaryTreeTraverseMethod method)
+			internal Iterator([NotNull] LinkedBinaryTree<TNode, T> tree, TNode root, BinaryTreeTraverseMethod method)
 			{
 				_tree = tree;
 				_root = root;
@@ -509,6 +507,8 @@ namespace asm.Collections
 
 			public void Iterate(HorizontalFlow flow, [NotNull] Action<TNode> visitCallback)
 			{
+				if (_tree.Count == 0 || _root == null) return;
+
 				int version = _tree._version;
 
 				switch (_method)
@@ -816,6 +816,8 @@ namespace asm.Collections
 
 			public void Iterate(HorizontalFlow flow, [NotNull] Func<TNode, bool> visitCallback)
 			{
+				if (_tree.Count == 0 || _root == null) return;
+
 				int version = _tree._version;
 
 				switch (_method)
@@ -1123,6 +1125,8 @@ namespace asm.Collections
 
 			public void Iterate(HorizontalFlow flow, [NotNull] Action<TNode, int> visitCallback)
 			{
+				if (_tree.Count == 0 || _root == null) return;
+
 				int version = _tree._version;
 
 				switch (_method)
@@ -1430,6 +1434,8 @@ namespace asm.Collections
 
 			public void Iterate(HorizontalFlow flow, [NotNull] Func<TNode, int, bool> visitCallback)
 			{
+				if (_tree.Count == 0 || _root == null) return;
+
 				int version = _tree._version;
 
 				switch (_method)
@@ -1739,7 +1745,7 @@ namespace asm.Collections
 		/// <summary>
 		/// iterative approach with level awareness. This is a different way than <see cref="BinaryTreeTraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
 		/// </summary>
-		internal sealed class LevelIterator
+		public sealed class LevelIterator
 		{
 			private readonly LinkedBinaryTree<TNode, T> _tree;
 			private readonly TNode _root;
@@ -1747,7 +1753,7 @@ namespace asm.Collections
 
 			private int _level = -1;
 
-			internal LevelIterator([NotNull] LinkedBinaryTree<TNode, T> tree, [NotNull] TNode root)
+			internal LevelIterator([NotNull] LinkedBinaryTree<TNode, T> tree, TNode root)
 			{
 				_tree = tree;
 				_root = root;
@@ -1755,6 +1761,8 @@ namespace asm.Collections
 
 			public void Iterate(HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
 			{
+				if (_tree.Count == 0 || _root == null) return;
+
 				int version = _tree._version;
 
 				switch (flow)
@@ -1834,6 +1842,8 @@ namespace asm.Collections
 
 			public void Iterate(HorizontalFlow flow, [NotNull] Func<int, IReadOnlyCollection<TNode>, bool> levelCallback)
 			{
+				if (_tree.Count == 0 || _root == null) return;
+
 				int version = _tree._version;
 
 				switch (flow)
@@ -1912,7 +1922,6 @@ namespace asm.Collections
 			}
 		}
 
-		private SerializationInfo siInfo; //A temporary variable which we need during deserialization.        
 		private object _syncRoot;
 		protected internal int _version;
 
@@ -1936,12 +1945,6 @@ namespace asm.Collections
 			: this(comparer)
 		{
 			Add(collection);
-		}
-
-		protected LinkedBinaryTree(SerializationInfo info, StreamingContext context)
-		{
-			siInfo = info;
-			Comparer = Comparer<T>.Default;
 		}
 
 		/// <inheritdoc />
@@ -1973,31 +1976,8 @@ namespace asm.Collections
 
 		public bool IsFull => Root == null || Root.IsFull;
 
-		public void OnDeserialization(object sender)
-		{
-			if (siInfo == null) return; //Somebody had a dependency on this Dictionary and fixed us up before the ObjectManager got to it.
-			Comparer = (IComparer<T>)siInfo.GetValue(nameof(Comparer), typeof(IComparer<T>));
-			Root = (TNode)siInfo.GetValue(nameof(Root), typeof(TNode));
-			Count = siInfo.GetInt32(nameof(Count));
-			siInfo = null;
-		}
-
-		[SuppressMessage("Microsoft.Security", "CA2123:OverrideLinkDemandsShouldBeIdenticalToBase", Justification = "System.dll is still using pre-v4 security model and needs this demand")]
-		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
-		[SecurityCritical]
-		public void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			// Customized serialization for LinkedList.
-			// We need to do this because it will be too expensive to Serialize each node.
-			// This will give us the flexibility to change internal implementation freely in future.
-			if (info == null) throw new ArgumentNullException(nameof(info));
-			siInfo.AddValue(nameof(Comparer), Comparer, typeof(IComparer<T>));
-			siInfo.AddValue(nameof(Root), Root, typeof(TNode));
-			siInfo.AddValue(nameof(Count), Count);
-		}
-
 		/// <inheritdoc />
-		public IEnumerator<T> GetEnumerator() { return (IEnumerator<T>)Enumerate(Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight); }
+		public IEnumerator<T> GetEnumerator() { return Enumerate(Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight); }
 
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
@@ -2033,28 +2013,26 @@ namespace asm.Collections
 		/// <param name="flow">Left-to-right or right-to-left</param>
 		/// <returns></returns>
 		[NotNull]
-		public IEnumerable<T> Enumerate(TNode root, BinaryTreeTraverseMethod method, HorizontalFlow flow)
+		public Enumerator Enumerate(TNode root, BinaryTreeTraverseMethod method, HorizontalFlow flow)
 		{
-			return root == null
-						? Enumerable.Empty<T>()
-						: new Enumerator(this, root, method, flow);
+			return new Enumerator(this, root, method, flow);
 		}
 
 		#region Enumerate overloads
 		[NotNull]
-		public IEnumerable<T> Enumerate(TNode root)
+		public Enumerator Enumerate(TNode root)
 		{
 			return Enumerate(root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight);
 		}
 
 		[NotNull]
-		public IEnumerable<T> Enumerate(TNode root, HorizontalFlow flow)
+		public Enumerator Enumerate(TNode root, HorizontalFlow flow)
 		{
 			return Enumerate(root, BinaryTreeTraverseMethod.InOrder, flow);
 		}
 
 		[NotNull]
-		public IEnumerable<T> Enumerate(TNode root, BinaryTreeTraverseMethod method)
+		public Enumerator Enumerate(TNode root, BinaryTreeTraverseMethod method)
 		{
 			return Enumerate(root, method, HorizontalFlow.LeftToRight);
 		}
@@ -3008,12 +2986,6 @@ namespace asm.Collections
 		/// <inheritdoc />
 		protected LinkedBinaryTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
 			: base(collection, comparer)
-		{
-		}
-
-		/// <inheritdoc />
-		protected LinkedBinaryTree(SerializationInfo info, StreamingContext context)
-			: base(info, context)
 		{
 		}
 

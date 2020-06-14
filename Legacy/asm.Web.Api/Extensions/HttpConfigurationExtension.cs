@@ -27,7 +27,7 @@ namespace asm.Web.Api.Extensions
 		{
 			prefix = UriHelper.Trim(prefix);
 			if (!string.IsNullOrEmpty(prefix)) prefix += "/";
-			if (prefix == null) prefix = string.Empty;
+			prefix ??= string.Empty;
 
 			thisValue.MapHttpAttributeRoutes();
 

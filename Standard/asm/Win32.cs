@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using asm.Network;
+using JetBrains.Annotations;
 
 namespace asm
 {
@@ -1245,6 +1246,7 @@ namespace asm
 
 			public SMALL_RECT(SMALL_RECT r) : this(r.Left, r.Top, r.Right, r.Bottom) { }
 
+			[NotNull]
 			public override string ToString() { return string.Format(CultureInfo.CurrentCulture, "{{Left={0},Top={1},Right={2},Bottom={3}}}", Left, Top, Right, Bottom); }
 
 			public short X

@@ -73,14 +73,12 @@ namespace asm.Data.Extensions
 		public static XNode SelectSingleNode([NotNull] this XElement thisValue, [NotNull] string xpath)
 		{
 			XNodeLister list = SelectNodes(thisValue, xpath);
-			if (list == null) return null;
 			return list.Count == 0 ? null : list[0];
 		}
 
 		public static XNode SelectSingleNode([NotNull] this XElement thisValue, [NotNull] string xpath, XmlNamespaceManager nsmgr)
 		{
 			XNodeLister list = SelectNodes(thisValue, xpath);
-			if (list == null) return null;
 			return list.Count == 0 ? null : list[0];
 		}
 

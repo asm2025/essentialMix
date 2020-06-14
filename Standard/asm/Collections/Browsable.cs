@@ -2,45 +2,21 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Runtime.Serialization;
 using asm.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Collections
 {
 	[Serializable]
-	public class Browsable : Item, IBrowsable, IReadOnlyKeyedCollection<string, IItem>, IReadOnlyList<IItem>, IReadOnlyCollection<IItem>, IList<IItem>, IList, ISerializable, IDeserializationCallback
+	public class Browsable : Item, IBrowsable, IReadOnlyKeyedCollection<string, IItem>, IReadOnlyList<IItem>, IReadOnlyCollection<IItem>, IList<IItem>, IList
 	{
 		[Serializable]
 		public class ColumnsCollection : ObservableKeyedCollectionBase<string, Column>
 		{
-			[NonSerialized] 
-			private SerializationInfo _siInfo;
-
-			protected ColumnsCollection(SerializationInfo info, StreamingContext context)
-				: base(info, context)
-			{
-				_siInfo = info;
-			}
-
 			internal ColumnsCollection([NotNull] IBrowsable owner)
 				: base(StringComparer.OrdinalIgnoreCase)
 			{
 				Owner = owner ?? throw new ArgumentNullException(nameof(owner));
-			}
-
-			public override void GetObjectData(SerializationInfo info, StreamingContext context)
-			{
-				base.GetObjectData(info, context);
-				info.AddValue("Owner", Owner, typeof(IBrowsable));
-			}
-
-			public override void OnDeserialization(object sender)
-			{
-				base.OnDeserialization(sender);
-				if (_siInfo == null) return;
-				Owner = (IBrowsable)_siInfo.GetValue("Owner", typeof(IBrowsable)) ?? throw new SerializationException("Invalid owner type.");
-				_siInfo = null;
 			}
 
 			/// <inheritdoc />
@@ -66,33 +42,10 @@ namespace asm.Collections
 		[Serializable]
 		public class ItemsCollection : ObservableKeyedCollectionBase<string, IItem>
 		{
-			[NonSerialized] 
-			private SerializationInfo _siInfo;
-
-			protected ItemsCollection(SerializationInfo info, StreamingContext context)
-				: base(info, context)
-			{
-				_siInfo = info;
-			}
-
 			internal ItemsCollection([NotNull] Browsable owner)
 				: base(StringComparer.OrdinalIgnoreCase)
 			{
 				Owner = owner ?? throw new ArgumentNullException(nameof(owner));
-			}
-
-			public override void GetObjectData(SerializationInfo info, StreamingContext context)
-			{
-				base.GetObjectData(info, context);
-				info.AddValue("Owner", Owner, typeof(Browsable));
-			}
-
-			public override void OnDeserialization(object sender)
-			{
-				base.OnDeserialization(sender);
-				if (_siInfo == null) return;
-				Owner = (Browsable)_siInfo.GetValue("Owner", typeof(Browsable)) ?? throw new SerializationException("Invalid owner type.");
-				_siInfo = null;
 			}
 
 			/// <inheritdoc />
@@ -121,9 +74,6 @@ namespace asm.Collections
 
 			public Browsable Owner { get; private set; }
 		}
-
-		[NonSerialized] 
-		private SerializationInfo _siInfo;
 
 		private ColumnsCollection _columns;
 		private ItemsCollection _items;
@@ -156,19 +106,6 @@ namespace asm.Collections
 		public Browsable([NotNull] string name, string text, object value, Type type, bool isFixed, bool isReadOnly)
 			: base(name, text, value, type, isFixed, isReadOnly)
 		{
-		}
-
-		protected Browsable([NotNull] SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-			_siInfo = info;
-		}
-
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			base.GetObjectData(info, context);
-			info.AddValue("Columns", _columns, typeof(ColumnsCollection));
-			info.AddValue("Items", _items, typeof(ItemsCollection));
 		}
 
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
@@ -222,14 +159,6 @@ namespace asm.Collections
 		IEnumerable<string> IReadOnlyDictionary<string, IItem>.Keys => Items.Keys;
 
 		IEnumerable<IItem> IReadOnlyDictionary<string, IItem>.Values => Items.Values;
-
-		public virtual void OnDeserialization(object sender)
-		{
-			if (_siInfo == null) return;
-			_columns = (ColumnsCollection)_siInfo.GetValue("Columns", typeof(ColumnsCollection));
-			_items = (ItemsCollection)_siInfo.GetValue("Items", typeof(ItemsCollection));
-			_siInfo = null;
-		}
 
 		public virtual int CompareTo(IBrowsable other) { return BrowsableComparer.Default.Compare(this, other); }
 
@@ -366,12 +295,6 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public Browsable([NotNull] string name, string text, T value, bool isFixed, bool isReadOnly)
 			: base(name, text, value, typeof(T), isFixed, isReadOnly)
-		{
-		}
-
-		/// <inheritdoc />
-		protected Browsable([NotNull] SerializationInfo info, StreamingContext context)
-			: base(info, context)
 		{
 		}
 

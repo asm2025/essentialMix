@@ -24,17 +24,17 @@ namespace asm.Data.Extensions
 		}
 
 		[NotNull]
-		public static XmlParserContext CreateParserContext([NotNull] this NameTable thisValue, bool ignoreWhitespace, [NotNull] Encoding encoding)
+		public static XmlParserContext CreateParserContext([NotNull] this NameTable thisValue, bool ignoreWhitespace, Encoding encoding)
 		{
 			return CreateParserContext(thisValue, ignoreWhitespace, null, encoding);
 		}
 
 		[NotNull]
-		public static XmlParserContext CreateParserContext([NotNull] this NameTable thisValue, bool ignoreWhitespace, XmlNamespaceManager manager, [NotNull] Encoding encoding)
+		public static XmlParserContext CreateParserContext([NotNull] this NameTable thisValue, bool ignoreWhitespace, XmlNamespaceManager manager, Encoding encoding)
 		{
 			return new XmlParserContext(thisValue, manager ?? GetNamespaceManager(thisValue), null, ignoreWhitespace
 																										? XmlSpace.None
-																										: XmlSpace.Preserve, encoding.GetWebEncoding());
+																										: XmlSpace.Preserve, (encoding ?? Encoding.UTF8).GetWebEncoding());
 		}
 
 		public static int Append([NotNull] this NameTable thisValue, params string[] namespaceURI) { return GetNamespaceManager(thisValue)?.Append(namespaceURI) ?? 0; }

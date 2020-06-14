@@ -93,7 +93,7 @@ namespace asm.Extensions
 		public static Type GetUnderlyingType<T>(this T thisValue)
 			where T : struct, Enum, IComparable
 		{
-			return thisValue.AsType(true)?.GetUnderlyingType();
+			return thisValue.AsType(true).GetUnderlyingType();
 		}
 
 		public static TypeCode GetUnderlyingTypeCode<T>(this T thisValue)

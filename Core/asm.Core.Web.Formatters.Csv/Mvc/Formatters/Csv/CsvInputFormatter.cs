@@ -52,7 +52,7 @@ namespace asm.Core.Web.Formatters.Csv.Mvc.Formatters.Csv
 			{
 				request.EnableBuffering();
 				await request.Body.DrainAsync(context.HttpContext.RequestAborted);
-				if (context.HttpContext.RequestAborted.IsCancellationRequested) return InputFormatterResult.NoValue();
+				if (context.HttpContext.RequestAborted.IsCancellationRequested) return await InputFormatterResult.NoValueAsync();
 				request.Body.Seek(0L, SeekOrigin.Begin);
 			}
 
@@ -72,19 +72,19 @@ namespace asm.Core.Web.Formatters.Csv.Mvc.Formatters.Csv
 							modelType = modelType.ResolveGenericType();
 							IEnumerable<object> models = csvReader.GetRecords(modelType);
 							return models != null || context.TreatEmptyInputAsDefaultValue
-										? InputFormatterResult.Success(models)
-										: InputFormatterResult.NoValue();
+										? await InputFormatterResult.SuccessAsync(models)
+										: await InputFormatterResult.NoValueAsync();
 						}
 
 						object model = csvReader.GetRecord(modelType);
 						return model != null || context.TreatEmptyInputAsDefaultValue
-									? InputFormatterResult.Success(model)
-									: InputFormatterResult.NoValue();
+									? await InputFormatterResult.SuccessAsync(model)
+									: await InputFormatterResult.NoValueAsync();
 					}
 					catch (Exception e)
 					{
 						ExceptionDispatchInfo.Capture(e).Throw();
-						return InputFormatterResult.Failure();
+						return await InputFormatterResult.FailureAsync();
 					}
 				}
 			}

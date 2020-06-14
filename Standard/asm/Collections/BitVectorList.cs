@@ -7,12 +7,13 @@ using System.Numerics;
 using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Numeric;
-using Math = System.Math;
+using asm.Other.Microsoft.Collections;
+using SysMath = System.Math;
 
 namespace asm.Collections
 {
 	[Serializable]
-	public class BitVectorList : List<BitVector>, IList<byte>, IReadOnlyList<byte>
+	public class BitVectorList : ListBase<BitVector>, IList<byte>, IReadOnlyList<byte>
 	{
 		private const BitVectorMode MODE_DEF = BitVectorMode.Hexadecimal;
 
@@ -77,39 +78,6 @@ namespace asm.Collections
 			AddRange(data, startIndex, count);
 		}
 
-		public static explicit operator BitVectorList(byte[] value)
-		{
-			return value == null
-						? null
-						: new BitVectorList(value);
-		}
-
-		[NotNull]
-		public static explicit operator byte[](BitVectorList value) { return value?.ToByteArray() ?? Array.Empty<byte>(); }
-
-		public static explicit operator BitVectorList(bool[] value)
-		{
-			return value == null
-						? null
-						: new BitVectorList(value);
-		}
-
-		[NotNull]
-		public static explicit operator bool[](BitVectorList value)
-		{
-			if (value == null || value.Count == 0) return Array.Empty<bool>();
-
-			bool[] bits = new bool[value.Count * 8];
-
-			for (int i = 0; i < value.Count; i++)
-				Array.Copy((bool[])value[i], 0, bits, i * 8, 8);
-
-			return bits;
-		}
-
-		[NotNull]
-		public static explicit operator string (BitVectorList value) { return value?.ToString() ?? string.Empty; }
-
 		public new BitVector this[int index]
 		{
 			get => base[index];
@@ -120,6 +88,7 @@ namespace asm.Collections
 			}
 		}
 
+		[NotNull]
 		public override string ToString() { return _toString ??= ToString(this); }
 
 		[NotNull]
@@ -128,71 +97,31 @@ namespace asm.Collections
 		[NotNull]
 		public string ToString(BitVectorMode mode, char separator = '\0') { return ToString(this, mode, separator); }
 
-		public new void Add(BitVector item)
+		/// <inheritdoc />
+		protected override void Insert(int index, BitVector item, bool add)
 		{
-			base.Add(item);
+			base.Insert(index, item, add);
 			_toString = null;
 		}
 
-		public new void Insert(int index, BitVector item)
+		/// <inheritdoc />
+		protected override void RangeInserted(int index, int count)
 		{
-			base.Insert(index, item);
+			base.RangeInserted(index, count);
 			_toString = null;
 		}
 
-		public new void InsertRange(int index, [NotNull] IEnumerable<BitVector> collection)
-		{
-			base.InsertRange(index, collection);
-			_toString = null;
-		}
-
-		public new bool Remove(BitVector item)
-		{
-			if (!base.Remove(item)) return false;
-			_toString = null;
-			return true;
-		}
-
-		public new void RemoveAt(int index)
+		/// <inheritdoc />
+		public override void RemoveAt(int index)
 		{
 			base.RemoveAt(index);
 			_toString = null;
 		}
 
-		public new int RemoveAll([NotNull] Predicate<BitVector> match)
-		{
-			int n = base.RemoveAll(match);
-			_toString = null;
-			return n;
-		}
-
-		public new void RemoveRange(int index, int count)
-		{
-			base.RemoveRange(index, count);
-			_toString = null;
-		}
-
-		public new void Reverse(int index, int count)
-		{
-			base.Reverse(index, count);
-			_toString = null;
-		}
-
-		public new void Clear()
+		/// <inheritdoc />
+		public override void Clear()
 		{
 			base.Clear();
-			_toString = null;
-		}
-
-		public new void Sort(int index, int count, IComparer<BitVector> comparer)
-		{
-			base.Sort(index, count, comparer);
-			_toString = null;
-		}
-
-		public new void Sort([NotNull] Comparison<BitVector> comparison)
-		{
-			base.Sort(comparison);
 			_toString = null;
 		}
 
@@ -334,7 +263,7 @@ namespace asm.Collections
 			int index = 0;
 			int c = 0;
 			byte v = 0;
-			List<BitVector> bitVectors = new List<BitVector>((int)Math.Ceiling(count / 8.0d));
+			List<BitVector> bitVectors = new List<BitVector>((int)SysMath.Ceiling(count / 8.0d));
 
 			foreach (bool b in enumerable.Skip(startIndex).Take(count).Reverse())
 			{
@@ -520,5 +449,38 @@ namespace asm.Collections
 						Mode = mode
 					};
 		}
+
+		public static explicit operator BitVectorList(byte[] value)
+		{
+			return value == null
+						? null
+						: new BitVectorList(value);
+		}
+
+		[NotNull]
+		public static explicit operator byte[](BitVectorList value) { return value?.ToByteArray() ?? Array.Empty<byte>(); }
+
+		public static explicit operator BitVectorList(bool[] value)
+		{
+			return value == null
+						? null
+						: new BitVectorList(value);
+		}
+
+		[NotNull]
+		public static explicit operator bool[](BitVectorList value)
+		{
+			if (value == null || value.Count == 0) return Array.Empty<bool>();
+
+			bool[] bits = new bool[value.Count * 8];
+
+			for (int i = 0; i < value.Count; i++)
+				Array.Copy((bool[])value[i], 0, bits, i * 8, 8);
+
+			return bits;
+		}
+
+		[NotNull]
+		public static explicit operator string (BitVectorList value) { return value?.ToString() ?? string.Empty; }
 	}
 }

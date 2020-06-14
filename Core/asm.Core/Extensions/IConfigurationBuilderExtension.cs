@@ -26,11 +26,13 @@ namespace asm.Core.Extensions
 			return thisValue;
 		}
 
+		[NotNull]
 		public static IConfigurationBuilder AddConfigurationFiles([NotNull] this IConfigurationBuilder thisValue, [NotNull] IHostEnvironment environment)
 		{
 			return AddConfigurationFiles(thisValue, environment.ContentRootPath, environment.EnvironmentName);
 		}
 
+		[NotNull]
 		public static IConfigurationBuilder AddConfigurationFiles([NotNull] this IConfigurationBuilder thisValue, string environmentName) { return AddConfigurationFiles(thisValue, null, environmentName); }
 		[NotNull]
 		public static IConfigurationBuilder AddConfigurationFiles([NotNull] this IConfigurationBuilder thisValue, string path, string environmentName)
@@ -65,8 +67,8 @@ namespace asm.Core.Extensions
 
 			if (string.IsNullOrEmpty(path)) path = Directory.GetCurrentDirectory();
 
-			string fileBase = Path.GetFileNameWithoutExtension(fileName).ToNullIfEmpty() ?? string.Empty;
-			string fileExtension = Path.GetExtension(fileName)?.Trim('.', ' ').ToLowerInvariant().ToNullIfEmpty() ?? string.Empty;
+			string fileBase = Path.GetFileNameWithoutExtension(fileName).ToNullIfEmpty();
+			string fileExtension = Path.GetExtension(fileName).Trim('.', ' ').ToLowerInvariant().ToNullIfEmpty();
 			Func<string, bool, bool, IConfigurationBuilder> addFunc;
 			
 			switch (fileExtension)
@@ -82,17 +84,30 @@ namespace asm.Core.Extensions
 					break;
 			}
 
+			string configFileName = $"{fileBase}.{fileExtension}";
+			string configEnvironmentFileName = $"{fileBase}.{environmentName}.{fileExtension}";
+
 			if (!string.IsNullOrEmpty(path))
 			{
 				string parentPath = Directory.GetParent(path)?.FullName;
-				string sharedFile = Path.Combine(parentPath, $"{fileBase}.{fileExtension}");
-				if (File.Exists(sharedFile)) addFunc(sharedFile, optional, true);
-				sharedFile = Path.Combine(parentPath, $"{fileBase}.{environmentName}.{fileExtension}");
-				if (File.Exists(sharedFile)) addFunc(sharedFile, true, true);
+
+				if (!string.IsNullOrEmpty(parentPath))
+				{
+					string sharedFile = Path.Combine(parentPath, configFileName);
+					if (File.Exists(sharedFile)) addFunc(sharedFile, optional, true);
+					sharedFile = Path.Combine(parentPath, configEnvironmentFileName);
+					if (File.Exists(sharedFile)) addFunc(sharedFile, true, true);
+				}
+
+				addFunc(Path.Combine(path, configFileName), optional, true);
+				addFunc(Path.Combine(path, configEnvironmentFileName), true, true);
+			}
+			else
+			{
+				addFunc(configFileName, optional, true);
+				addFunc(configEnvironmentFileName, true, true);
 			}
 
-			addFunc(Path.Combine(path, $"{fileBase}.{fileExtension}"), optional, true);
-			addFunc(Path.Combine(path, $"{fileBase}.{environmentName}.{fileExtension}"), true, true);
 			return thisValue;
 		}
 

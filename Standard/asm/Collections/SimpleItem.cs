@@ -1,11 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
-using System.Security;
-using System.Security.Permissions;
 using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Comparers;
@@ -24,17 +20,17 @@ namespace asm.Collections
 		private object _tag;
 
 		public SimpleItem()
-			: this(null, null, null)
+			: this(null, null, typeof(object))
 		{
 		}
 
 		public SimpleItem(object value)
-			: this(null, value, null)
+			: this(null, value, typeof(object))
 		{
 		}
 
 		public SimpleItem(string text, object value)
-			: this(text, value, null)
+			: this(text, value, typeof(object))
 		{
 		}
 
@@ -45,32 +41,6 @@ namespace asm.Collections
 			_defaultValue = ValueType.Default();
 			_text = text.IfNullOrEmpty(() => Convert.ToString(_value ?? _defaultValue));
 			_enabled = true;
-		}
-
-		protected SimpleItem([NotNull] SerializationInfo info, StreamingContext context)
-		{
-			if (info == null) throw new ArgumentNullException(nameof(info));
-			ValueType = (Type)info.GetValue("ValueType", typeof(Type)) ?? throw new SerializationException("Invalid value type.");
-			_value = info.GetValue("Value", ValueType);
-			_defaultValue = info.GetValue("DefaultValue", ValueType);
-			_text = info.GetString("Text").IfNullOrEmpty(() => Convert.ToString(_value ?? _defaultValue));
-			_selected = info.GetBoolean("Selected");
-			_enabled = info.GetBoolean("Enabled");
-			_tag = info.GetValue("Tag", typeof(object));
-		}
-
-		[SuppressMessage("Microsoft.Security", "CA2123:OverrideLinkDemandsShouldBeIdenticalToBase", Justification = "System.dll is still using pre-v4 security model and needs this demand")]
-		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
-		[SecurityCritical]
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			info.AddValue("ValueType", ValueType, typeof(Type));
-			info.AddValue("Value", _value, ValueType);
-			info.AddValue("DefaultValue", _defaultValue, ValueType);
-			info.AddValue("Text", _text);
-			info.AddValue("Enabled", _enabled);
-			info.AddValue("Selected", _selected);
-			info.AddValue("Tag", _tag, typeof(object));
 		}
 
 		public override string ToString() { return _text; }
@@ -179,6 +149,7 @@ namespace asm.Collections
 					}
 					catch
 					{
+						// ignored
 					}
 				}
 
@@ -189,6 +160,7 @@ namespace asm.Collections
 				}
 				catch
 				{
+					// ignored
 				}
 			}
 
@@ -213,12 +185,6 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public SimpleItem(string text, T value)
 			: base(text, value, typeof(T))
-		{
-		}
-
-		/// <inheritdoc />
-		protected SimpleItem([NotNull] SerializationInfo info, StreamingContext context)
-			: base(info, context)
 		{
 		}
 

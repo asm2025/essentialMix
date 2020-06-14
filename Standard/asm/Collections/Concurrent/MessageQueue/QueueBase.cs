@@ -10,6 +10,10 @@ using JetBrains.Annotations;
 
 namespace asm.Collections.Concurrent.MessageQueue
 {
+	/*
+	 * This is based on the insightful book of Joseph Albahari, C# 6 in a Nutshell
+	 * http://www.albahari.com/threading/
+	 */
 	public abstract class QueueBase<T> : Disposable, IQueue<T>, ICollection
 	{
 		private readonly System.Collections.Generic.Queue<T> _queue = new System.Collections.Generic.Queue<T>();

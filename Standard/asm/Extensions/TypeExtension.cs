@@ -12,7 +12,6 @@ using asm.Collections;
 using JetBrains.Annotations;
 using Microsoft.CSharp.RuntimeBinder;
 using asm.Helpers;
-using asm.Patterns.Collections;
 using asm.Reflection;
 using Binder = System.Reflection.Binder;
 using CSharpBinder = Microsoft.CSharp.RuntimeBinder.Binder;

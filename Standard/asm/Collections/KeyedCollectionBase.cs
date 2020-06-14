@@ -1,22 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Security;
-using System.Security.Permissions;
-using asm.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Collections
 {
 	[Serializable]
-	public abstract class KeyedCollectionBase<TKey, TValue> : System.Collections.ObjectModel.KeyedCollection<TKey, TValue>, IReadOnlyKeyedCollection<TKey, TValue>, IReadOnlyList<TValue>, IReadOnlyCollection<TValue>, IList<TValue>, IList, ISerializable, IDeserializationCallback
+	public abstract class KeyedCollectionBase<TKey, TValue> : System.Collections.ObjectModel.KeyedCollection<TKey, TValue>, IReadOnlyKeyedCollection<TKey, TValue>, IReadOnlyList<TValue>, IReadOnlyCollection<TValue>, IList<TValue>, IList
 	{
-		[NonSerialized]
-		private SerializationInfo _siInfo;
-
 		protected KeyedCollectionBase()
 			: this(null, 0)
 		{
@@ -47,11 +39,6 @@ namespace asm.Collections
 				Add(value);
 		}
 
-		protected KeyedCollectionBase(SerializationInfo info, StreamingContext context)
-		{
-			_siInfo = info;
-		}
-
 		public bool IsFixedSize => false;
 
 		public bool IsReadOnly => false;
@@ -59,46 +46,6 @@ namespace asm.Collections
 		public IEnumerable<TKey> Keys => Dictionary?.Keys ?? Array.Empty<TKey>();
 
 		public IEnumerable<TValue> Values => Items;
-
-		[SuppressMessage("Microsoft.Security", "CA2123:OverrideLinkDemandsShouldBeIdenticalToBase", Justification = "System.dll is still using pre-v4 security model and needs this demand")]
-		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
-		[SecurityCritical]
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null) throw new ArgumentNullException(nameof(info));
-			info.AddValue("Comparer", Comparer, typeof(IEqualityComparer<TKey>));
-			info.AddValue("Count", Count);
-			if (Count == 0) return;
-			TValue[] array = new TValue[Count];
-			Items.CopyTo(array, 0);
-			info.AddValue("Values", array, typeof(TValue[]));
-		}
-
-		public virtual void OnDeserialization(object sender)
-		{
-			if (_siInfo == null) return;
-
-			IEqualityComparer<TKey> comparer = (IEqualityComparer<TKey>)_siInfo.GetValue("Comparer", typeof(IEqualityComparer<TKey>));
-			if (comparer != null) this.SetFieldValue("comparer", comparer);
-
-			int count = _siInfo.GetInt32("Count");
-
-			if (count > 0)
-			{
-				TValue[] array = (TValue[])_siInfo.GetValue("Values", typeof(TValue[]));
-
-				if (array != null)
-				{
-					foreach (TValue value in array)
-					{
-						Dictionary.Add(GetKeyForItem(value), value);
-						Items.Add(value);
-					}
-				}
-			}
-
-			_siInfo = null;
-		}
 
 		IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
 		{

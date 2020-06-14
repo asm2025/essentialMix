@@ -3,6 +3,7 @@ using System.IO;
 using asm.Extensions;
 using asm.Helpers;
 using asm.Media.Youtube.Exceptions;
+using asm.Other.Moitah;
 using asm.Patterns.Object;
 using JetBrains.Annotations;
 

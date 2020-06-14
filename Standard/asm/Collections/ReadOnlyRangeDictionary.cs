@@ -2,28 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Security;
-using System.Security.Permissions;
-using asm.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Collections
 {
 	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
-	public class ReadOnlyRangeDictionary<TKey, TValue> : IReadOnlyRangeDictionary<TKey, TValue>,
-		ICollection,
-		IEnumerable,
-		IDeserializationCallback,
-		ISerializable
+	public class ReadOnlyRangeDictionary<TKey, TValue> : IReadOnlyRangeDictionary<TKey, TValue>, ICollection, IEnumerable
 		where TKey : IComparable
 	{
-		[NonSerialized]
-		private SerializationInfo _siInfo;
-
 		/// <inheritdoc />
 		public ReadOnlyRangeDictionary()
 			: this(0, null)
@@ -48,43 +36,6 @@ namespace asm.Collections
 			Dictionary = dictionary != null
 							? new Dictionary<(TKey, TKey), TValue>(dictionary, Comparer)
 							: new Dictionary<(TKey, TKey), TValue>(capacity, Comparer);
-		}
-
-		protected ReadOnlyRangeDictionary(SerializationInfo info, StreamingContext context)
-		{
-			_siInfo = info;
-		}
-
-		/// <inheritdoc />
-		[SuppressMessage("Microsoft.Security", "CA2123:OverrideLinkDemandsShouldBeIdenticalToBase", Justification = "System.dll is still using pre-v4 security model and needs this demand")]
-		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
-		[SecurityCritical]
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null) throw new ArgumentNullException(nameof(info));
-			KeyValuePair<(TKey Minimum, TKey Maximum), TValue>[] array = Dictionary.ToArray();
-			if (array.Length == 0) return;
-			info.AddValue("Elements", array, typeof(KeyValuePair<(TKey Minimum, TKey Maximum), TValue>[]));
-		}
-
-		/// <inheritdoc />
-		public virtual void OnDeserialization(object sender)
-		{
-			if (_siInfo == null) return;
-
-			KeyValuePair<(TKey Minimum, TKey Maximum), TValue>[] array = (KeyValuePair<(TKey Minimum, TKey Maximum), TValue>[])_siInfo.GetValue("Elements", typeof(KeyValuePair<(TKey Minimum, TKey Maximum), TValue>[]));
-
-			if (array != null && array.Length > 0)
-			{
-				Dictionary = new Dictionary<(TKey Minimum, TKey Maximum), TValue>(array.Length, Comparer);
-				Dictionary.AddRange(array);
-			}
-			else
-			{
-				Dictionary = new Dictionary<(TKey Minimum, TKey Maximum), TValue>(Comparer);
-			}
-
-			_siInfo = null;
 		}
 
 		/// <inheritdoc />

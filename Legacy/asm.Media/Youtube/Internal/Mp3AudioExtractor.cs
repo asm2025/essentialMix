@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using asm.Extensions;
 using asm.Helpers;
+using asm.Other.Moitah;
 using asm.Patterns.Object;
 using JetBrains.Annotations;
 

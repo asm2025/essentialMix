@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using asm.Other.Microsoft.Collections;
 using JetBrains.Annotations;
 
 namespace asm.Collections

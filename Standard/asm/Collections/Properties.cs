@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using asm.Extensions;
 using asm.Comparers;
 using JetBrains.Annotations;
@@ -10,9 +9,6 @@ namespace asm.Collections
 	[Serializable]
 	public class Properties : ObservableKeyedCollectionBase<string, IProperty>, IProperties
 	{
-		[NonSerialized] 
-		private SerializationInfo _siInfo;
-
 		public Properties()
 			: base(StringComparer.OrdinalIgnoreCase)
 		{
@@ -28,33 +24,6 @@ namespace asm.Collections
 
 		public Properties([NotNull] IEnumerable<IProperty> collection, IEqualityComparer<string> comparer) : base(collection, comparer)
 		{
-		}
-
-		protected Properties(SerializationInfo info, StreamingContext context) : base(info, context)
-		{
-			_siInfo = info;
-		}
-
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			base.GetObjectData(info, context);
-
-			foreach (IProperty property in this)
-				info.AddValue(property.Name, property.Value, property.ValueType);
-		}
-
-		public override void OnDeserialization(object sender)
-		{
-			base.OnDeserialization(sender);
-			if (_siInfo == null) return;
-
-			foreach (string key in Keys)
-			{
-				IProperty property = this[key];
-				property.Value = _siInfo.GetValue(property.Name, property.ValueType);
-			}
-
-			_siInfo = null;
 		}
 
 		/// <inheritdoc />

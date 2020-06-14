@@ -148,9 +148,9 @@ namespace asm.Media.Helpers
 		public static IEnumerable<ConversionOptions> FindVideoSizeConversions(VideoSizeEnum videoSize, VideoSizeEnum? maxVideoSize = null, ConversionSearchRestriction? restriction = null, ConversionPreset? preset = null)
 		{
 			if (videoSize < VideoSizeEnum.SQCIF) yield break;
-			if (!maxVideoSize.HasValue) maxVideoSize = MaximumVideoSize();
-			if (!restriction.HasValue) restriction = CONVERSION_SEARCH_RESTRICTION;
-			if (!preset.HasValue) preset = CONVERSION_PRESET;
+			maxVideoSize ??= MaximumVideoSize();
+			restriction ??= CONVERSION_SEARCH_RESTRICTION;
+			preset ??= CONVERSION_PRESET;
 
 			// for more info on video size, check out: https://en.wikipedia.org/wiki/Graphics_display_resolution
 			foreach (VideoSize size in SIZES.Values.Where(e => e.Enabled && e.Value <= maxVideoSize))
@@ -194,9 +194,9 @@ namespace asm.Media.Helpers
 		public static IEnumerable<ConversionOptions[]> FindVideoSize2PassConversions(VideoSizeEnum videoSize, VideoSizeEnum? maxVideoSize = null, ConversionSearchRestriction? restriction = null, ConversionPreset? preset = null)
 		{
 			if (videoSize < VideoSizeEnum.SQCIF) yield break;
-			if (!maxVideoSize.HasValue) maxVideoSize = MaximumVideoSize();
-			if (!restriction.HasValue) restriction = CONVERSION_SEARCH_RESTRICTION;
-			if (!preset.HasValue) preset = CONVERSION_PRESET;
+			maxVideoSize ??= MaximumVideoSize();
+			restriction ??= CONVERSION_SEARCH_RESTRICTION;
+			preset ??= CONVERSION_PRESET;
 
 			// for more info on video size, check out: https://en.wikipedia.org/wiki/Graphics_display_resolution
 			foreach (VideoSize size in SIZES.Values.Where(e => e.Enabled && e.Value <= maxVideoSize))

@@ -12,6 +12,7 @@ namespace asm.Web.Api.Extensions
 {
 	public static class ApiControllerExtension
 	{
+		[NotNull]
 		public static IHttpActionResult RedirectToLocal([NotNull] this ApiController thisValue, string returnUrl, ActionData logOffActionData, ActionData defaultUrlData)
 		{
 			Regex logOffUrlExpression = logOffActionData == null ? null : UriHelper.CreateBadRedirectExpression(logOffActionData.CreateUrl(thisValue.Url));

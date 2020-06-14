@@ -12,7 +12,7 @@ namespace asm.Web.Mvc.Extensions
 		public static SelectListItem ToListItem<T>(this T thisValue, bool selected = false, bool? disabled = null)
 			where T : struct, Enum, IComparable
 		{
-			if (!disabled.HasValue) disabled = thisValue.HasAttribute<T, DisabledAttribute>();
+			disabled ??= thisValue.HasAttribute<T, DisabledAttribute>();
 			return new SelectListItem
 			{
 				Value = thisValue.ToString(),

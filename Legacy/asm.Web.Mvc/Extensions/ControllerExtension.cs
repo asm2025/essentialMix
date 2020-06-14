@@ -10,6 +10,7 @@ namespace asm.Web.Mvc.Extensions
 {
 	public static class ControllerExtension
 	{
+		[NotNull]
 		public static ActionResult RedirectToLocal([NotNull] this Controller thisValue, string returnUrl, ControllerActionData logOffActionData, ControllerActionData defaultUrlData)
 		{
 			Regex logOffUrlExpression = logOffActionData == null ? null : UriHelper.CreateBadRedirectExpression(logOffActionData.CreateUrl(thisValue.Url));

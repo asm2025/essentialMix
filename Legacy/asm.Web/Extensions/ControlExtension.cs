@@ -69,9 +69,9 @@ namespace asm.Web.Extensions
 		}
 
 		public static void ClientScriptBlock([NotNull] this Control thisValue, string script) { ClientScriptBlock(thisValue, script, true); }
-		public static void ClientScriptBlock([NotNull] this Control thisValue, string script, bool startup) { ClientScriptBlock(thisValue, null, script, startup); }
-		public static void ClientScriptBlock([NotNull] this Control thisValue, string key, string script) { ClientScriptBlock(thisValue, key, script, true); }
-		public static void ClientScriptBlock([NotNull] this Control thisValue, string key, string script, bool startup) { ClientScriptBlock(thisValue, key, script, startup, true); }
+		public static void ClientScriptBlock([NotNull] this Control thisValue, [NotNull] string script, bool startup) { ClientScriptBlock(thisValue, null, script, startup); }
+		public static void ClientScriptBlock([NotNull] this Control thisValue, string key, [NotNull] string script) { ClientScriptBlock(thisValue, key, script, true); }
+		public static void ClientScriptBlock([NotNull] this Control thisValue, string key, [NotNull] string script, bool startup) { ClientScriptBlock(thisValue, key, script, startup, true); }
 		public static void ClientScriptBlock([NotNull] this Control thisValue, string key, [NotNull] string script, bool startup, bool addScriptTags) { ClientScriptBlock(thisValue, null, key, script, startup, addScriptTags); }
 		public static void ClientScriptBlock([NotNull] this Control thisValue, Type type, string key, [NotNull] string script, bool startup, bool addScriptTags)
 		{
@@ -204,7 +204,7 @@ namespace asm.Web.Extensions
 			else page.Header.StyleSheet.CreateStyleRule(style, null, selector);
 		}
 
-		public static void CssHeaderInclude([NotNull] this Control thisValue, string virtualPath) { CssHeaderInclude(thisValue, virtualPath, null); }
+		public static void CssHeaderInclude([NotNull] this Control thisValue, [NotNull] string virtualPath) { CssHeaderInclude(thisValue, virtualPath, null); }
 		public static void CssHeaderInclude([NotNull] this Control thisValue, [NotNull] string virtualPath, string key) { CssHeaderInclude(thisValue, virtualPath, key, null); }
 		public static void CssHeaderInclude([NotNull] this Control thisValue, [NotNull] string virtualPath, string key, string media)
 		{
@@ -308,6 +308,7 @@ namespace asm.Web.Extensions
 			return sb.ToString();
 		}
 
+		[NotNull]
 		public static string GetPostBackReference([NotNull] this Control thisValue) { return GetPostBackReference(thisValue, (string)null); }
 
 		[NotNull]

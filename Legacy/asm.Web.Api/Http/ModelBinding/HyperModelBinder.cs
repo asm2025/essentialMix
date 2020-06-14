@@ -30,7 +30,6 @@ namespace asm.Web.Api.Http.ModelBinding
 		{
 		}
 
-		/// <inheritdoc />
 		public HyperModelBinder([NotNull] Type type, int maxRecursionLimit)
 		{
 			TargetType = type;
@@ -64,90 +63,30 @@ namespace asm.Web.Api.Http.ModelBinding
 					foreach (KeyValuePair<string, object> pair in routeData.Values)
 					{
 						Type type = pair.Value?.GetType();
-						if (!type.IsPrimitive()) continue;
+						if (type != null && !type.IsPrimitive()) continue;
 						values[pair.Key] = Convert.ToString(pair.Value);
 					}
 				}
 
-				string contentType = request?.Content?.Headers?.ContentType?.MediaType?.ToLowerInvariant();
+				string contentType = request.Content.Headers.ContentType.MediaType.ToLowerInvariant();
 
 				switch (contentType)
 				{
 					case "application/x-www-form-urlencoded":
-						// Form data
-						string formData = request.Content.ReadAsStringAsync().Result?.TrimStart('?');
-
-						if (!string.IsNullOrEmpty(formData))
-						{
-							string[] elements = formData.Split('=', '&');
-
-							for (int i = 0; i < elements.Length; i += 2)
-							{
-								string key = elements[i];
-								string value = i < elements.Length - 1
-													? elements[i + 1]
-													: null;
-
-								if (!string.IsNullOrEmpty(value)) values[key] = value;
-								else if (!values.ContainsKey(key)) values.Add(key, null);
-							}
-						}
+						HandleFormData(request.Content.ReadAsStringAsync().GetAwaiter().GetResult().TrimStart('?'));
 						break;
 					case "application/json":
 					case "text/json":
-						// JSON data
-						string jsonData = request.Content.ReadAsStringAsync().Result?.Trim();
-
-						if (!string.IsNullOrEmpty(jsonData))
-						{
-							jsonData = WebUtility.UrlDecode(jsonData);
-							JObject bodyJson = JObject.Parse(jsonData, jsonLoadSettings);
-							AddJsonProperties(values, bodyJson);
-						}
+						HandleJson(request.Content.ReadAsStringAsync().GetAwaiter().GetResult().Trim());
 						break;
 					case "application/xml":
 					case "text/xml":
-						// Xml data
-						string xmlData = request.Content.ReadAsStringAsync().Result?.Trim();
-
-						if (!string.IsNullOrEmpty(xmlData))
-						{
-							xmlData = WebUtility.UrlDecode(xmlData);
-							XDocument xml = XmlHelper.XParse(xmlData, true);
-							AddXProperties(values, xml?.Root);
-						}
+						HandleXml(request.Content.ReadAsStringAsync().GetAwaiter().GetResult().Trim());
 						break;
 				}
 
 				// Query string
-				if (request != null /* It won't be null but for the compiler sake! */ 
-					&& !string.IsNullOrEmpty(request.RequestUri.Query))
-				{
-					foreach (KeyValuePair<string, string> pair in request.GetQueryNameValuePairs())
-					{
-						string data = pair.Value == null ? null : WebUtility.UrlDecode(pair.Value.Trim());
-
-						if (!string.IsNullOrEmpty(data))
-						{
-							if (data.StartsWith('{') || data.StartsWith('['))
-							{
-								JObject bodyJson = JObject.Parse(data, jsonLoadSettings);
-								AddJsonProperties(values, bodyJson);
-							}
-							else if (data.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase))
-							{
-								XDocument xml = XmlHelper.XParse(data);
-								AddXProperties(values, xml?.Root);
-							}
-							else
-								values[pair.Key] = data;
-						}
-						else if (!values.ContainsKey(pair.Key))
-						{
-							values.Add(pair.Key, null);
-						}
-					}
-				}
+				HandleQuery(request);
 
 				//Initiate primary object
 				object obj = Activator.CreateInstance(bindingContext.ModelType);
@@ -163,6 +102,70 @@ namespace asm.Web.Api.Http.ModelBinding
 			{
 				bindingContext.ModelState.AddModelError(bindingContext.ModelName, ex.CollectMessages());
 				return false;
+			}
+
+			void HandleQuery(HttpRequestMessage request)
+			{
+				if (string.IsNullOrEmpty(request.RequestUri.Query)) return;
+
+				foreach (KeyValuePair<string, string> pair in request.GetQueryNameValuePairs())
+				{
+					string data = pair.Value == null ? null : WebUtility.UrlDecode(pair.Value.Trim());
+
+					if (!string.IsNullOrEmpty(data))
+					{
+						if (data.StartsWith('{') || data.StartsWith('['))
+						{
+							JObject bodyJson = JObject.Parse(data, jsonLoadSettings);
+							AddJsonProperties(values, bodyJson);
+						}
+						else if (data.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase))
+						{
+							XDocument xml = XmlHelper.XParse(data);
+							AddXProperties(values, xml?.Root);
+						}
+						else
+							values[pair.Key] = data;
+					}
+					else if (!values.ContainsKey(pair.Key))
+					{
+						values.Add(pair.Key, null);
+					}
+				}
+			}
+			
+			void HandleFormData(string formData)
+			{
+				if (string.IsNullOrEmpty(formData)) return;
+
+				string[] elements = formData.Split('=', '&');
+
+				for (int i = 0; i < elements.Length; i += 2)
+				{
+					string key = elements[i];
+					string value = i < elements.Length - 1
+										? elements[i + 1]
+										: null;
+
+					if (!string.IsNullOrEmpty(value)) values[key] = value;
+					else if (!values.ContainsKey(key)) values.Add(key, null);
+				}
+			}
+
+			void HandleJson(string jsonData)
+			{
+				if (string.IsNullOrEmpty(jsonData)) return;
+				jsonData = WebUtility.UrlDecode(jsonData);
+				JObject bodyJson = JObject.Parse(jsonData, jsonLoadSettings);
+				AddJsonProperties(values, bodyJson);
+			}
+
+			void HandleXml(string xmlData)
+			{
+				if (string.IsNullOrEmpty(xmlData)) return;
+				xmlData = WebUtility.UrlDecode(xmlData);
+				XDocument xml = XmlHelper.XParse(xmlData, true);
+				AddXProperties(values, xml?.Root);
 			}
 		}
 

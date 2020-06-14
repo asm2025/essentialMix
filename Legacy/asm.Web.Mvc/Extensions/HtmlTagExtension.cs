@@ -6,12 +6,16 @@ namespace asm.Web.Mvc.Extensions
 {
 	public static class HtmlTagExtension
 	{
+		[NotNull]
 		public static HtmlTag Checked([NotNull] this HtmlTag thisValue, bool value) { return thisValue.ToggleAttribute("checked", value); }
 
+		[NotNull]
 		public static HtmlTag Disabled([NotNull] this HtmlTag thisValue, bool value) { return thisValue.ToggleAttribute("disabled", value); }
 
+		[NotNull]
 		public static HtmlTag Selected([NotNull] this HtmlTag thisValue, bool value) { return thisValue.ToggleAttribute("selected", value); }
 
+		[NotNull]
 		public static HtmlTag Readonly([NotNull] this HtmlTag thisValue, bool value) { return thisValue.ToggleAttribute("readonly", value); }
 
 		[NotNull]

@@ -47,13 +47,10 @@ namespace asm.Collections
 		private void OriginalDataProduced(object sender, T item)
 		{
 			if (_dataHasEnded) throw new InvalidOperationException("EndOfData already occurred");
-
-			if (DataProduced != null)
-			{
-				// only get excited if somebody is listening
-				if (_buffer == null) _buffer = new List<T>();
-				_buffer.Add(item);
-			}
+			if (DataProduced == null) return;
+			// only get excited if somebody is listening
+			_buffer ??= new List<T>();
+			_buffer.Add(item);
 		}
 
 		private void EndOfOriginalData(object sender, EventArgs args)

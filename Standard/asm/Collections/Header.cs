@@ -1,10 +1,6 @@
 using System;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
-using System.Security;
-using System.Security.Permissions;
 using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Comparers;
@@ -36,31 +32,6 @@ namespace asm.Collections
 			_text = text.IfNullOrEmpty(() => _name);
 			_enabled = true;
 			IsFixed = isFixed;
-		}
-
-		protected Header([NotNull] SerializationInfo info, StreamingContext context)
-		{
-			if (info == null) throw new ArgumentNullException(nameof(info));
-			ValueType = (Type)info.GetValue("ValueType", typeof(Type)) ?? throw new SerializationException("Invalid value type.");
-			_name = info.GetString("Name").ToNullIfEmpty() ?? throw new SerializationException("Invalid header name.");
-			_text = info.GetString("Text").IfNullOrEmpty(_name);
-			_enabled = info.GetBoolean("Enabled");
-			_tag = info.GetValue("Tag", typeof(object));
-			IsFixed = info.GetBoolean("IsFixed");
-		}
-
-		[SuppressMessage("Microsoft.Security", "CA2123:OverrideLinkDemandsShouldBeIdenticalToBase", Justification = "System.dll is still using pre-v4 security model and needs this demand")]
-		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
-		[SecurityCritical]
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null) throw new ArgumentNullException(nameof(info));
-			info.AddValue("ValueType", ValueType, typeof(Type));
-			info.AddValue("Name", Name);
-			info.AddValue("Text", _text);
-			info.AddValue("Enabled", _enabled);
-			info.AddValue("Tag", _tag, typeof(object));
-			info.AddValue("IsFixed", IsFixed);
 		}
 
 		public override string ToString() { return _text.IfNullOrEmpty(() => _name); }

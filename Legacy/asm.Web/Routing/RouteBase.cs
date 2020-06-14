@@ -300,7 +300,7 @@ namespace asm.Web.Routing
 				return yprec - xprec;
 			}
 
-			int[] GetRouteValues(RouteBase route)
+			static int[] GetRouteValues(RouteBase route)
 			{
 				return new[]
 				{
@@ -428,7 +428,7 @@ namespace asm.Web.Routing
 
 					if (!string.IsNullOrEmpty(tmp))
 					{
-						if (settings == null) settings = JsonHelper.CreateLoadSettings();
+						settings ??= JsonHelper.CreateLoadSettings();
 						route.Constraints = JObject.Parse(tmp, settings);
 					}
 				}

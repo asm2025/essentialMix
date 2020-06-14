@@ -2,7 +2,6 @@ using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 using asm.Data.Extensions;
-using asm.Helpers;
 using JetBrains.Annotations;
 
 namespace asm.Data.Helpers
@@ -76,13 +75,13 @@ namespace asm.Data.Helpers
 		}
 
 		[NotNull]
-		public static XmlParserContext CreateParserContext() { return CreateParserContext(true, null, null, null); }
+		public static XmlParserContext CreateParserContext([NotNull] XmlNameTable nt) { return CreateParserContext(true, nt, null, null); }
 
 		[NotNull]
-		public static XmlParserContext CreateParserContext(bool ignoreWhitespace) { return CreateParserContext(ignoreWhitespace, null, null, null); }
+		public static XmlParserContext CreateParserContext([NotNull] XmlNameTable nt, bool ignoreWhitespace) { return CreateParserContext(ignoreWhitespace, nt, null, null); }
 
 		[NotNull]
-		public static XmlParserContext CreateParserContext(bool ignoreWhitespace, Encoding encoding) { return CreateParserContext(ignoreWhitespace, null, null, encoding); }
+		public static XmlParserContext CreateParserContext([NotNull] XmlNameTable nt, bool ignoreWhitespace, Encoding encoding) { return CreateParserContext(ignoreWhitespace, nt, null, encoding); }
 
 		[NotNull]
 		public static XmlParserContext CreateParserContext(bool ignoreWhitespace, [NotNull] XmlNameTable nt, Encoding encoding)
@@ -93,7 +92,7 @@ namespace asm.Data.Helpers
 		[NotNull]
 		public static XmlParserContext CreateParserContext(bool ignoreWhitespace, [NotNull] XmlNameTable nt, XmlNamespaceManager manager, Encoding encoding)
 		{
-			return nt.CreateParserContext(ignoreWhitespace, manager, encoding ?? EncodingHelper.Default);
+			return nt.CreateParserContext(ignoreWhitespace, manager, encoding ?? Encoding.UTF8);
 		}
 	}
 }

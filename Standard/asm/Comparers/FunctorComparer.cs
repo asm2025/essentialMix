@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime;
+using asm.Other.JonSkeet.MiscUtil.Collections;
 using JetBrains.Annotations;
 
 namespace asm.Comparers
 {
+	// https://github.com/StevenThuriot/FunctorComparer
 	public sealed class FunctorComparer<T> : GenericComparer<T>
 	{
 		public new static FunctorComparer<T> Default { get; } = new FunctorComparer<T>((x, y) => Comparer<T>.Default.Compare(x, y));

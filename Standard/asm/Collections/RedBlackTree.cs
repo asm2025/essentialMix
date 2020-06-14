@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using asm.Exceptions.Collections;
 using asm.Extensions;
-using asm.Patterns.Collections;
 using asm.Patterns.Layout;
 using JetBrains.Annotations;
 
@@ -40,12 +38,6 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public RedBlackTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
 			: base(collection, comparer)
-		{
-		}
-
-		/// <inheritdoc />
-		internal RedBlackTree(SerializationInfo info, StreamingContext context)
-			: base(info, context)
 		{
 		}
 

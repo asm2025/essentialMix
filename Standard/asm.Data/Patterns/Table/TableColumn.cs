@@ -15,7 +15,6 @@ namespace asm.Data.Patterns.Table
 	{
 		private string _text;
 
-		/// <inheritdoc />
 		public TableColumn([NotNull] string name, [NotNull] Type dataType)
 		{
 			name = name.Trim();
@@ -120,7 +119,7 @@ namespace asm.Data.Patterns.Table
 		{
 			newName = newName?.Trim();
 			if (string.IsNullOrEmpty(newName)) newName = null;
-			if (newName == null) newName = Name;
+			newName ??= Name;
 			if (newDataType == null) newDataType = DataType;
 			TableColumn column = new TableColumn(newName, newDataType)
 			{

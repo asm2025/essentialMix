@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using asm.Collections;
-using asm.Comparers;
 using asm.Helpers;
-using asm.Internal;
+using asm.Other.JonSkeet.MiscUtil.Collections;
+using asm.Other.MarcGravell;
 using asm.Threading;
 
 namespace asm.Extensions
@@ -91,7 +91,7 @@ namespace asm.Extensions
 		[NotNull]
 		public static ILookup<TKey, TElement> ToLookup<TSource, TKey, TElement>([NotNull] this IDataProducer<TSource> thisValue, [NotNull] Func<TSource, TKey> keySelector, [NotNull] Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> keyComparer)
 		{
-			if (keyComparer == null) keyComparer = EqualityComparer<TKey>.Default;
+			keyComparer ??= EqualityComparer<TKey>.Default;
 			EditableLookup<TKey, TElement> lookup = new EditableLookup<TKey, TElement>(keyComparer);
 			thisValue.DataProduced += (sender, value) => lookup.Add(keySelector(value), elementSelector(value));
 			thisValue.EndOfData += (sender, args) => lookup.TrimExcess();
@@ -100,10 +100,16 @@ namespace asm.Extensions
 
 		[NotNull]
 		public static IDictionary<TKey, TSource> ToDictionary<TSource, TKey>([NotNull] this IDataProducer<TSource> thisValue, [NotNull] Func<TSource, TKey> keySelector)
-		{ return ToDictionary(thisValue, keySelector, t => t, EqualityComparer<TKey>.Default); }
+		{
+			return ToDictionary(thisValue, keySelector, t => t, EqualityComparer<TKey>.Default);
+		}
+
 		[NotNull]
-		public static IDictionary<TKey, TSource> ToDictionary<TSource, TKey>([NotNull] this IDataProducer<TSource> thisValue, [NotNull] Func<TSource, TKey> keySelector, [NotNull] IEqualityComparer<TKey> keyComparer)
-		{ return ToDictionary(thisValue, keySelector, t => t, keyComparer); }
+		public static IDictionary<TKey, TSource> ToDictionary<TSource, TKey>([NotNull] this IDataProducer<TSource> thisValue, [NotNull] Func<TSource, TKey> keySelector,
+			[NotNull] IEqualityComparer<TKey> keyComparer)
+		{
+			return ToDictionary(thisValue, keySelector, t => t, keyComparer);
+		}
 		[NotNull]
 		public static IDictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>([NotNull] this IDataProducer<TSource> thisValue, [NotNull] Func<TSource, TKey> keySelector, [NotNull] Func<TSource, TElement> elementSelector)
 		{
@@ -121,7 +127,7 @@ namespace asm.Extensions
 		[NotNull]
 		public static IDictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>([NotNull] this IDataProducer<TSource> thisValue, [NotNull] Func<TSource, TKey> keySelector, [NotNull] Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> keyComparer)
 		{
-			if (keyComparer == null) keyComparer = EqualityComparer<TKey>.Default;
+			keyComparer ??= EqualityComparer<TKey>.Default;
 
 			Dictionary<TKey, TElement> dict = new Dictionary<TKey, TElement>(keyComparer);
 			thisValue.DataProduced += (sender, value) => dict.Add(keySelector(value), elementSelector(value));
@@ -277,7 +283,7 @@ namespace asm.Extensions
 		[NotNull]
 		public static IDataProducer<TResult> GroupBy<TSource, TKey, TElement, TResult>([NotNull] this IDataProducer<TSource> thisValue, [NotNull] Func<TSource, TKey> keySelector, [NotNull] Func<TSource, TElement> elementSelector, [NotNull] Func<TKey, IDataProducer<TElement>, TResult> resultSelector, IEqualityComparer<TKey> comparer)
 		{
-			if (comparer == null) comparer = EqualityComparer<TKey>.Default;
+			comparer ??= EqualityComparer<TKey>.Default;
 
 			DataProducer<TResult> ret = new DataProducer<TResult>();
 			Dictionary<TKey, DataProducer<TElement>> dictionary = new Dictionary<TKey, DataProducer<TElement>>(comparer);
@@ -819,7 +825,7 @@ namespace asm.Extensions
         [NotNull]
 		public static IDataProducer<TSource> Distinct<TSource>([NotNull] this IDataProducer<TSource> thisValue, IEqualityComparer<TSource> comparer)
         {
-			if (comparer == null) comparer = EqualityComparer<TSource>.Default;
+			comparer ??= EqualityComparer<TSource>.Default;
 
             DataProducer<TSource> ret = new DataProducer<TSource>();
             HashSet<TSource> set = new HashSet<TSource>(comparer);
@@ -1550,7 +1556,7 @@ namespace asm.Extensions
 		[NotNull]
 		public static IFuture<bool> Contains<TSource>([NotNull] this IDataProducer<TSource> thisValue, TSource value, IEqualityComparer<TSource> comparer)
 		{
-			if (comparer == null) comparer = EqualityComparer<TSource>.Default;
+			comparer ??= EqualityComparer<TSource>.Default;
 			return thisValue.Any(element => comparer.Equals(value, element));
 		}
 

@@ -13,6 +13,7 @@ namespace asm.Core.Web.Extensions
 		[NotNull]
 		public static string ControllerName([NotNull] this ControllerBase thisValue) { return ControllerBaseHelper.ControllerName(thisValue.GetType()); }
 
+		[NotNull]
 		public static IActionResult RedirectToLocal([NotNull] this ControllerBase thisValue, string returnUrl, ControllerActionData logOffActionData, ControllerActionData defaultUrlData)
 		{
 			Regex logOffUrlExpression = logOffActionData == null ? null : UriHelper.CreateBadRedirectExpression(logOffActionData.CreateUrl(thisValue.Url));

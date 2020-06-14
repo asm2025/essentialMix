@@ -1,15 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using JetBrains.Annotations;
 
 namespace asm.Collections
 {
 	[Serializable]
-	public class RangeDictionary<TKey, TValue> : ReadOnlyRangeDictionary<TKey, TValue>,
-		IRangeDictionary<TKey, TValue>,
-		IDictionary
+	public class RangeDictionary<TKey, TValue> : ReadOnlyRangeDictionary<TKey, TValue>, IRangeDictionary<TKey, TValue>, IDictionary<(TKey Minimum, TKey Maximum), TValue>, IDictionary
 		where TKey : IComparable
 	{
 		/// <inheritdoc />
@@ -33,12 +30,6 @@ namespace asm.Collections
 		/// <inheritdoc />
 		protected RangeDictionary(int capacity, IDictionary<(TKey Minimum, TKey Maximum), TValue> dictionary)
 			: base(capacity, dictionary)
-		{
-		}
-
-		/// <inheritdoc />
-		protected RangeDictionary(SerializationInfo info, StreamingContext context)
-			: base(info, context)
 		{
 		}
 

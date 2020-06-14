@@ -1,0 +1,9 @@
+The work in this folder is based on Enums.NET source which I cloned a long time ago.
+I needed the functionality but I had to modify the source in a lot of places and make
+some radical changes. After some years, in v3.0 Changes, I see TylerBrinkley made similar 
+changes to deprecate of the NonGenericEnums, NonGenericFlagEnums, UnsafeEnums, and UnsafeFlagEnums :)
+However, it is of valuable help for the majority of code that I used to make the EnumHelper.
+https://github.com/TylerBrinkley/Enums.NET
+
+Inspired by the excellent work of JonSkeet
+https://github.com/jskeet/unconstrained-melody

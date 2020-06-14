@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Runtime.Serialization;
 using asm.Extensions;
 using asm.Exceptions.Collections;
 using JetBrains.Annotations;
@@ -46,24 +45,6 @@ namespace asm.Collections
 			_value = value;
 			_defaultValue = ValueType.Default();
 			IsReadOnly = isReadOnly;
-		}
-
-		protected Property([NotNull] SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-			_value = info.GetValue("Value", ValueType);
-			_defaultValue = info.GetValue("DefaultValue", ValueType);
-			_scope = (Scope)info.GetValue("Scope", typeof(Scope));
-			IsReadOnly = info.GetBoolean("IsReadOnly");
-		}
-
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			base.GetObjectData(info, context);
-			info.AddValue("Value", _value, ValueType);
-			info.AddValue("DefaultValue", _defaultValue, ValueType);
-			info.AddValue("Scope", _scope, typeof(Scope));
-			info.AddValue("IsReadOnly", IsReadOnly);
 		}
 
 		public override object Clone() { return this.CloneMemberwise(); }
@@ -143,12 +124,6 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public Property([NotNull] string name, string text, T value, bool isFixed, bool isReadOnly)
 			: base(name, text, value, typeof(T), isFixed, isReadOnly)
-		{
-		}
-
-		/// <inheritdoc />
-		protected Property([NotNull] SerializationInfo info, StreamingContext context) 
-			: base(info, context)
 		{
 		}
 

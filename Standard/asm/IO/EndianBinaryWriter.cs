@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Text;
 using asm.Helpers;
+using asm.Other.JonSkeet.MiscUtil.Text;
 using asm.Patterns.Object;
-using asm.Text;
 using JetBrains.Annotations;
 
 namespace asm.IO

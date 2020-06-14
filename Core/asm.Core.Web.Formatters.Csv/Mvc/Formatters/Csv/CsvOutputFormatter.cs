@@ -33,6 +33,7 @@ namespace asm.Core.Web.Formatters.Csv.Mvc.Formatters.Csv
 		public CsvConfiguration Configuration { get; }
 
 		/// <inheritdoc />
+		[NotNull]
 		public override Task WriteResponseBodyAsync([NotNull] OutputFormatterWriteContext context, [NotNull] Encoding selectedEncoding)
 		{
 			if (context == null) throw new ArgumentNullException(nameof (context));

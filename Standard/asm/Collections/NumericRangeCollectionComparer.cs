@@ -42,7 +42,7 @@ namespace asm.Collections
 			result.AddRange(obj);
 			if (result.Count <= 1) return result;
 
-			if (comparer == null) comparer = NumericRangeComparer<T>.Default;
+			comparer ??= NumericRangeComparer<T>.Default;
 			result.Sort(comparer);
 
 			for (int i = result.Count - 1; i >= 0 && result.Count > 1; --i)

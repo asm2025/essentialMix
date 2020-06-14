@@ -11,7 +11,7 @@ namespace asm.Web.Mvc.Extensions
 		{
 			prefix = prefix?.Trim('/', ' ');
 			if (!string.IsNullOrEmpty(prefix)) prefix += "/";
-			if (prefix == null) prefix = string.Empty;
+			prefix ??= string.Empty;
 			thisValue.MapRoute(thisValue.AreaName + "_default",
 							prefix + thisValue.AreaName + "/{controller}/{action}/{id}",
 							defaults ?? new { area = thisValue.AreaName, controller = "Home", action = "Index", id = UrlParameter.Optional },

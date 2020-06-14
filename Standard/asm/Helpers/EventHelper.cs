@@ -23,6 +23,7 @@ namespace asm.Helpers
 			return watcher.Wait(settings.Timeout.TotalIntMilliseconds());
 		}
 
+		[NotNull]
 		public static Task<bool> WaitForEventAsync<TSource>([NotNull] WaitForEventSettings<TSource> settings, CancellationToken token = default(CancellationToken))
 		{
 			return WaitForEventAsync<TSource, EventArgs>(settings, token);

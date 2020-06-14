@@ -49,7 +49,7 @@ namespace asm.Core.Web
 				{
 					if (string.IsNullOrEmpty(headerValue.Value) || headerValue.Value.Length < 2) continue;
 					ci = CultureInfoHelper.Get(headerValue.Value.Substring(0, 2));
-					if (ci != null) break;
+					break;
 				}
 			}
 

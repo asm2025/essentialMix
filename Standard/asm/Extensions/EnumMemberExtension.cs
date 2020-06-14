@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using asm.Other.TylerBrinkley.Enumeration;
 using JetBrains.Annotations;
-using asm.Enumeration;
 
 namespace asm.Extensions
 {

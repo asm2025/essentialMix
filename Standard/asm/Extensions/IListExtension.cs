@@ -6,8 +6,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using asm.Collections;
 using JetBrains.Annotations;
-using asm.Comparers;
 using asm.Helpers;
+using asm.Other.JonSkeet.MiscUtil.Collections;
 
 namespace asm.Extensions
 {

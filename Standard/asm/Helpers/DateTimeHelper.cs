@@ -108,7 +108,7 @@ namespace asm.Helpers
 				return false;
 			}
 
-			if (culture == null) culture = CultureInfoHelper.Default;
+			culture ??= CultureInfoHelper.Default;
 			return DateTime.TryParseExact(dateStr, culture.DateTimeFormat.ShortDatePattern, culture, DateTimeStyles.AllowWhiteSpaces, out date)
 							|| DateTime.TryParse(dateStr, culture, DateTimeStyles.AllowWhiteSpaces, out date)
 							|| DateTime.TryParse(dateStr, out date);
@@ -117,7 +117,6 @@ namespace asm.Helpers
 		public static DateTime? TryParseDate(string dateStr)
 		{
 			if (string.IsNullOrEmpty(dateStr)) return null;
-
 			return TryParseDate(dateStr, out DateTime date) ? date : (DateTime?)null;
 		}
 
@@ -129,7 +128,7 @@ namespace asm.Helpers
 		[NotNull]
 		public static string FormatShortDate(DateTime date, CultureInfo culture = null)
 		{
-			if (culture == null) culture = CultureInfoHelper.Default;
+			culture ??= CultureInfoHelper.Default;
 			return date.ToString(culture.DateTimeFormat.ShortDatePattern, culture);
 		}
 

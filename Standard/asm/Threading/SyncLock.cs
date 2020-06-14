@@ -68,7 +68,7 @@ namespace asm.Threading
 		public SyncLock(string name, int timeout)
 		{
 			if (timeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(timeout), "Invalid timeout specified");
-			if (name == null) name = "Anonymous Lock";
+			name ??= "Anonymous Lock";
 			Name = name;
 			Timeout = timeout;
 		}

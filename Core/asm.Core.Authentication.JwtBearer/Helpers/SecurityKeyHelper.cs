@@ -17,7 +17,7 @@ namespace asm.Core.Authentication.JwtBearer.Helpers
 			if (size < 8) size = 8;
 			int m = size % 8;
 			if (m > 0) size -= m;
-			if (encoding == null) encoding = DefaultEncoding;
+			encoding ??= DefaultEncoding;
 			byte[] bytes = encoding.GetBytes(key);
 			byte[] buffer = new byte[size / 8];
 			Array.Copy(bytes, buffer, Math.Min(bytes.Length, buffer.Length));

@@ -73,7 +73,7 @@ namespace asm.Newtonsoft
 			if (jObject["params"] is JObject jParams) jObject = new JObject(jParams.Children());
 			AddJsonProperties(dictionary, jObject);
 
-			void AddJsonProperties(IDictionary<string, string> values, JToken root)
+			static void AddJsonProperties(IDictionary<string, string> values, JToken root)
 			{
 				if (root.Type == JTokenType.Property)
 				{

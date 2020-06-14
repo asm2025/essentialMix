@@ -9,6 +9,10 @@ using JetBrains.Annotations;
 
 namespace asm.Collections.Concurrent.ProducerConsumer
 {
+	/*
+	 * This is based on the insightful book of Joseph Albahari, C# 6 in a Nutshell
+	 * http://www.albahari.com/threading/
+	 */
 	public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T>
 	{
 		private CancellationTokenSource _cts;

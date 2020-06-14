@@ -254,7 +254,7 @@ namespace asm.Extensions
 
 			return predicate == null ? expressions : expressions.Where(e => predicate(e));
 
-			IEnumerable<Expression> EnumerateLocal(Expression expression, Action<Type> onNewRootType)
+			static IEnumerable<Expression> EnumerateLocal(Expression expression, Action<Type> onNewRootType)
 			{
 				if (expression == null)
 					yield break;

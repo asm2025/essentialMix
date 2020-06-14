@@ -43,7 +43,6 @@ namespace asm.Media.ffmpeg.Commands
 				if (string.IsNullOrEmpty(json)) return;
 
 				JObject jObject = JObject.Parse(json);
-				if (jObject == null) return;
 
 				if (jObject["format"] is JObject jFormat)
 				{
@@ -72,13 +71,13 @@ namespace asm.Media.ffmpeg.Commands
 					if (dictionary.ContainsKey("width") || dictionary.ContainsKey("display_aspect_ratio"))
 					{
 						// this is a video stream.
-						if (_metadata.Video == null) _metadata.Video = new Metadata.VideoMetadata();
+						_metadata.Video ??= new Metadata.VideoMetadata();
 						_metadata.Video.StreamMetadata = jStream;
 					}
 					else
 					{
-						if (_metadata.Audio == null) _metadata.Audio = new Metadata.AudioMetadata();
-						if (_metadata.Audio.StreamMetadata == null) _metadata.Audio.StreamMetadata = new List<dynamic>();
+						_metadata.Audio ??= new Metadata.AudioMetadata();
+						_metadata.Audio.StreamMetadata ??= new List<dynamic>();
 						_metadata.Audio.StreamMetadata.Add(jStream);
 					}
 				}

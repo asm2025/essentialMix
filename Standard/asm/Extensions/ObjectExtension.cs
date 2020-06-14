@@ -34,7 +34,7 @@ namespace asm.Extensions
 
 		public static bool Is<TType>(this object thisValue) { return thisValue is TType; }
 
-		public static bool Is(this object thisValue, Type type) { return thisValue.AsType().Is(type); }
+		public static bool Is(this object thisValue, [NotNull] Type type) { return thisValue.AsType().Is(type); }
 
 		[NotNull]
 		public static string GetObjectText([NotNull] this object thisValue, bool includeSubObjects = false)
@@ -66,6 +66,7 @@ namespace asm.Extensions
 			}
 			catch
 			{
+				// ignored
 			}
 
 			return sb.ToString();
@@ -583,7 +584,7 @@ namespace asm.Extensions
 						: Enum.ToObject(type, thisValue);
 		}
 
-		public static string ObjectName(this object thisValue) { return thisValue.AsType()?.FullName; }
+		public static string ObjectName(this object thisValue) { return thisValue.AsType().FullName; }
 
 		private static bool ValidateParametersAndValues(ParameterInfo[] parameters, object[] values)
 		{

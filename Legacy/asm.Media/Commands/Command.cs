@@ -70,8 +70,7 @@ namespace asm.Media.Commands
 
 		public static string EnsureDependencies([NotNull] Command command)
 		{
-			if (_workingDir == null) 
-				_workingDir = PathHelper.AddDirectorySeparator(AssemblyHelper.GetEntryAssembly()?.GetDirectoryPath() ?? Directory.GetCurrentDirectory());
+			_workingDir ??= PathHelper.AddDirectorySeparator(AssemblyHelper.GetEntryAssembly()?.GetDirectoryPath() ?? Directory.GetCurrentDirectory());
 
 			if (string.IsNullOrEmpty(command.ExecutableName)) return null;
 
