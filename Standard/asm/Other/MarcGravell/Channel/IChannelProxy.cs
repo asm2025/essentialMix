@@ -1,6 +1,6 @@
 using System;
 
-namespace asm.Threading.Channel
+namespace asm.Other.MarcGravell.Channel
 {
 	internal interface IChannelProxy : IDisposable
 	{

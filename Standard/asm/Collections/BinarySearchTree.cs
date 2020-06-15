@@ -302,29 +302,29 @@ namespace asm.Collections
 		{
 			if (Root == null || Root.IsLeaf) return;
 
-			Queue<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)> unbalancedNodes = new Queue<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)>();
+			Queue<LinkedBinaryNode<T>> unbalancedNodes = new Queue<LinkedBinaryNode<T>>();
 
 			// find all unbalanced nodes, will use a post order traversal
 			// Left-Right-Root (Stack)
-			Stack<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)> stack = new Stack<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)>();
+			Stack<LinkedBinaryNode<T>> stack = new Stack<LinkedBinaryNode<T>>();
 			LinkedBinaryNode<T> lastVisited = null;
 			// Start at the root
-			(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent) current = (Root, null);
+			LinkedBinaryNode<T> current = Root;
 			int version = _version;
 
-			while (current.Node != null || stack.Count > 0)
+			while (current != null || stack.Count > 0)
 			{
 				if (version != _version) throw new VersionChangedException();
 
-				if (current.Node != null)
+				if (current != null)
 				{
 					stack.Push(current);
 					// Navigate left
-					current = (current.Node.Left, current.Node);
+					current = current.Left;
 					continue;
 				}
 
-				LinkedBinaryNode<T> peek = stack.Peek().Node;
+				LinkedBinaryNode<T> peek = stack.Peek();
 				/*
 				* At this point we are either coming from
 				* either the root node or the left branch.
@@ -334,15 +334,15 @@ namespace asm.Collections
 				if (peek.Right != null && lastVisited != peek.Right)
 				{
 					// Navigate right
-					current = (peek.Right, peek);
+					current = peek.Right;
 				}
 				else
 				{
 					// visit the next queued node
 					current = stack.Pop();
-					lastVisited = current.Node;
-					if (!IsBalanced(current.Node)) unbalancedNodes.Enqueue(current);
-					current = (null, null);
+					lastVisited = current;
+					if (!IsBalanced(current)) unbalancedNodes.Enqueue(current);
+					current = null;
 				}
 			}
 
@@ -350,8 +350,8 @@ namespace asm.Collections
 			{
 				current = unbalancedNodes.Dequeue();
 				// check again if status changed
-				if (IsBalanced(current.Node)) continue;
-				Balance(current.Node, current.Parent);
+				if (IsBalanced(current)) continue;
+				Balance(current);
 			}
 		}
 
@@ -425,7 +425,7 @@ namespace asm.Collections
 			Balance();
 		}
 
-		protected void Balance(LinkedBinaryNode<T> node, LinkedBinaryNode<T> parent)
+		protected void Balance(LinkedBinaryNode<T> node)
 		{
 			/*
 			 * There are 4 cases for unbalanced nodes
@@ -471,15 +471,16 @@ namespace asm.Collections
 			 */
 			if (node == null || IsBalanced(node)) return;
 
-			Queue<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)> queue = new Queue<(LinkedBinaryNode<T> Node, LinkedBinaryNode<T> Parent)>();
-			queue.Enqueue((node, parent));
+			Queue<LinkedBinaryNode<T>> queue = new Queue<LinkedBinaryNode<T>>();
+			queue.Enqueue(node);
 
 			while (queue.Count > 0)
 			{
-				(node, parent) = queue.Dequeue();
+				node = queue.Dequeue();
 				if (Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR) continue;
-
+				
 				bool changed = false;
+				LinkedBinaryNode<T> parent = node.Parent;
 
 				if (node.BalanceFactor > 1) // left heavy
 				{
@@ -548,9 +549,9 @@ namespace asm.Collections
 				}
 
 				if (!changed) continue;
-				if (!IsBalanced(node)) queue.Enqueue((node, parent));
-				if (node.Left != null && !IsBalanced(node.Left)) queue.Enqueue((node.Left, node));
-				if (node.Right != null && !IsBalanced(node.Right)) queue.Enqueue((node.Right, node));
+				if (!IsBalanced(node)) queue.Enqueue(node);
+				if (node.Left != null && !IsBalanced(node.Left)) queue.Enqueue(node.Left);
+				if (node.Right != null && !IsBalanced(node.Right)) queue.Enqueue(node.Right);
 			}
 		}
 	}

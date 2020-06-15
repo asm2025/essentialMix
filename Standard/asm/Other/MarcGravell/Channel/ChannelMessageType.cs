@@ -1,4 +1,4 @@
-namespace asm.Threading.Channel
+namespace asm.Other.MarcGravell.Channel
 {
 	public enum ChannelMessageType : byte
 	{

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Patterns.Layout;
@@ -597,108 +594,6 @@ namespace asm.Collections
 			_version++;
 			// Return new root
 			return newRoot;
-		}
-	}
-
-	public static class RedBlackTreeExtension
-	{
-		public static void WriteTo<T>([NotNull] this RedBlackTree<T> thisValue, [NotNull] TextWriter writer, Orientation orientation, bool diagnosticInfo = false)
-		{
-			if (thisValue.Root == null) return;
-
-			switch (orientation)
-			{
-				case Orientation.Horizontal:
-					Horizontally(thisValue, writer, diagnosticInfo);
-					break;
-				case Orientation.Vertical:
-					Vertically(thisValue, writer, diagnosticInfo);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(orientation), orientation, null);
-			}
-
-			static void Horizontally(RedBlackTree<T> tree, TextWriter writer, bool diagnostic)
-			{
-				const string STR_BLANK = "    ";
-				const string STR_EXT = "│   ";
-				const string STR_CONNECTOR = "─── ";
-				const string STR_CONNECTOR_L = "└── ";
-				const string STR_CONNECTOR_R = "┌── ";
-
-				Stack<string> connectors = new Stack<string>();
-				tree.Iterate(tree.Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.RightToLeft, (e, depth) =>
-				{
-					connectors.Push(diagnostic
-										? e.ToString(depth)
-										: e.ToString());
-
-					if (e.IsRight) connectors.Push(STR_CONNECTOR_R);
-					else if (e.IsLeft) connectors.Push(STR_CONNECTOR_L);
-					else connectors.Push(STR_CONNECTOR);
-
-					while (e.Parent != null)
-					{
-						if (e.IsLeft && e.Parent.IsRight || e.IsRight && e.Parent.IsLeft) connectors.Push(STR_EXT);
-						else connectors.Push(STR_BLANK);
-
-						e = e.Parent;
-					}
-
-					while (connectors.Count > 1)
-						writer.Write(connectors.Pop());
-
-					writer.WriteLine(connectors.Pop());
-				});
-			}
-
-			static void Vertically(RedBlackTree<T> tree, TextWriter writer, bool diagnostic)
-			{
-				const char C_BLANK = ' ';
-				const char C_EXT = '─';
-				const char C_CONNECTOR_L = '┌';
-				const char C_CONNECTOR_R = '┐';
-
-				int distance = 0;
-				IDictionary<int, StringBuilder> lines = new Dictionary<int, StringBuilder>();
-				tree.Iterate(tree.Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, (e, depth) =>
-				{
-					StringBuilder line = lines.GetOrAdd(depth);
-
-					if (line.Length > 0 && line[line.Length - 1] == C_CONNECTOR_L) line.Append(C_EXT, distance - line.Length);
-					else line.Append(C_BLANK, distance - line.Length);
-
-					if (depth > 0)
-					{
-						StringBuilder prevLine = lines.GetOrAdd(depth - 1);
-
-						if (e.IsLeft)
-						{
-							prevLine.Append(C_BLANK, distance - prevLine.Length);
-							if (line.Length > 0) prevLine.Append(C_BLANK);
-							prevLine.Append(C_CONNECTOR_L);
-						}
-						else
-						{
-							prevLine.Append(C_BLANK);
-							prevLine.Append(C_EXT, distance - prevLine.Length + 1);
-							prevLine.Append(C_CONNECTOR_R);
-						}
-					}
-
-					if (line.Length > 0) line.Append(C_BLANK);
-					line.Append(diagnostic
-									? e.ToString(depth)
-									: e.ToString());
-					distance = line.Length;
-				});
-
-				foreach (StringBuilder sb in lines.OrderBy(e => e.Key)
-												.Select(e => e.Value))
-				{
-					writer.WriteLine(sb.ToString());
-				}
-			}
 		}
 	}
 }

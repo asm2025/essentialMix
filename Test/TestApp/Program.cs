@@ -32,6 +32,8 @@ namespace TestApp
 
 			//TestDomainName();
 
+			TestThreadQueue();
+
 			//TestSortAlgorithm();
 			//TestSortAlgorithms();
 
@@ -63,12 +65,10 @@ namespace TestApp
 
 			//TestHeapElementAt();
 
-			//TestThreadQueue();
-
 			//TestTrie();
 			//TestTrieSimilarWordsRemoval();
 
-			TestGraph();
+			//TestGraph();
 			
 			ConsoleHelper.Pause();
 		}
@@ -1200,9 +1200,12 @@ namespace TestApp
 			// change this to true to use 1 thread only for debugging
 			const bool LIMIT_THREADS = false;
 
-			int len = RNGRandomHelper.Next(1000, 5000);
+			int len = RNGRandomHelper.Next(1000, 10000);
 			int[] values = GetRandomIntegers(len);
 			int timeout = RNGRandomHelper.Next(0, 1);
+			string timeoutString = timeout > 0
+										? $"{timeout} minute(s)"
+										: "None";
 			int maximumThreads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
 			Func<int, TaskResult> exec = e =>
 			{
@@ -1210,13 +1213,26 @@ namespace TestApp
 				return TaskResult.Success;
 			};
 			Queue<ThreadQueueMode> modes = new Queue<ThreadQueueMode>(EnumHelper<ThreadQueueMode>.GetValues());
+			Stopwatch clock = new Stopwatch();
+
+#if DEBUG
+			// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
+			int threads = LIMIT_THREADS
+							? 1
+							: maximumThreads;
+#else
+					// Otherwise, use the default (Best to be TaskHelper.ProcessDefault which = Environment.ProcessorCount)
+					int threads = MaximumThreads;
+#endif
+
+			if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
 
 			while (modes.Count > 0)
 			{
 				Console.Clear();
 				Console.WriteLine();
 				ThreadQueueMode mode = modes.Dequeue();
-				Title($"Testing Thread queue [{mode.ToString().BrightCyan().Underline()}]...");
+				Title($"Testing multi-thread queue in '{mode.ToString().BrightCyan()}' mode...");
 
 				// if there is a timeout, will use a CancellationTokenSource.
 				using (CancellationTokenSource cts = timeout > 0
@@ -1224,19 +1240,6 @@ namespace TestApp
 														: null)
 				{
 					CancellationToken token = cts?.Token ?? CancellationToken.None;
-
-#if DEBUG
-					// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
-					int threads = LIMIT_THREADS
-									? 1
-									: maximumThreads;
-#else
-					// Otherwise, use the default (Best to be TaskHelper.ProcessDefault which = Environment.ProcessorCount)
-					int threads = MaximumThreads;
-#endif
-
-					if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
-
 					ProducerConsumerQueueOptions<int> options = mode == ThreadQueueMode.ThresholdTaskGroup
 																	? new ProducerConsumerThresholdQueueOptions<int>(threads, exec)
 																	{
@@ -1244,8 +1247,6 @@ namespace TestApp
 																		Threshold = TimeSpan.FromSeconds(1)
 																	}
 																	: new ProducerConsumerQueueOptions<int>(threads, exec);
-					Console.WriteLine($"{len.ToString().BrightYellow()} values, {options.Threads.ToString().BrightYellow()} threads, {timeout.ToString().BrightYellow()} minute(s) timeout");
-					Console.WriteLine();
 			
 					// Create a generic queue producer
 					using (IProducerConsumer<int> queue = ProducerConsumerQueue.Create(mode, options, token))
@@ -1253,13 +1254,19 @@ namespace TestApp
 						queue.WorkStarted += (sender, args) =>
 						{
 							Console.WriteLine();
-							Console.WriteLine($"Starting {mode}...".BrightGreen());
+							Console.WriteLine($"Starting multi-thread test. mode: '{mode.ToString().BrightCyan()}', values: {values.Length.ToString().BrightCyan()}, threads: {options.Threads.ToString().BrightCyan()}, timeout: {timeoutString.BrightCyan()}...");
+							if (mode == ThreadQueueMode.ThresholdTaskGroup) Console.WriteLine($"in {mode} mode, {threads.ToString().BrightCyan()} tasks will be issued every {((ProducerConsumerThresholdQueueOptions<int>)options).Threshold.TotalSeconds.ToString("N0").BrightCyan()} second(s).");
+							Console.WriteLine();
+							Console.WriteLine();
+							clock.Restart();
 						};
 
 						queue.WorkCompleted += (sender, args) =>
 						{
+							TimeSpan elapsed = clock.Elapsed;
 							Console.WriteLine();
-							Console.WriteLine("Finished.".BrightRed());
+							Console.WriteLine();
+							Console.WriteLine($"Finished test. mode: '{mode.ToString().BrightCyan()}', values: {values.Length.ToString().BrightCyan()}, threads: {options.Threads.ToString().BrightCyan()}, timeout: {timeoutString.BrightCyan()}, elapsed: {elapsed.ToString("c").BrightCyan()}...");
 							Console.WriteLine();
 						};
 
@@ -1267,9 +1274,6 @@ namespace TestApp
 						{
 							queue.Enqueue(value);
 						}
-
-						// call this to allow other threads to kick in
-						Thread.Sleep(0);
 
 						/*
 						 * when the queue is being disposed, it will wait until the queued items are processed.
@@ -1298,6 +1302,8 @@ namespace TestApp
 				Console.WriteLine();
 				if (response.Key != ConsoleKey.Y) modes.Clear();
 			}
+
+			clock.Stop();
 		}
 
 		private static void TestTrie()

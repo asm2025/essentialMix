@@ -181,8 +181,8 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			}
 			finally
 			{
-				_manualResetEventSlim.Set();
 				OnWorkCompleted(EventArgs.Empty);
+				_manualResetEventSlim.Set();
 			}
 		}
 	}

@@ -24,20 +24,6 @@ namespace asm.Extensions
 
 		public static bool IsCancellationRequested(this CancellationToken? thisValue) { return thisValue != null && thisValue.Value.IsCancellationRequested; }
 
-		public static Task AsManualResetAwaitable(this CancellationToken thisValue)
-		{
-			AsyncManualResetEvent ev = new AsyncManualResetEvent();
-			if (thisValue.CanBeCanceled) thisValue.Register(() => ev.Set());
-			return ev.CompleteAsync();
-		}
-
-		public static Task AsTaskResetAwaitable(this CancellationToken thisValue)
-		{
-			AsyncTaskResetEvent ev = new AsyncTaskResetEvent();
-			if (thisValue.CanBeCanceled) thisValue.Register(() => ev.Set());
-			return ev.CompleteAsync();
-		}
-
 		public static CancellationTokenSource GetSource(this CancellationToken thisValue, CancellationTokenSource defaultCancellationTokenSource = null)
 		{
 			if (SOURCE_FIELD == null) return defaultCancellationTokenSource;

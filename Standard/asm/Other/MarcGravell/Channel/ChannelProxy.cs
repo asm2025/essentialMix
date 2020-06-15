@@ -1,10 +1,10 @@
 using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using asm.Patterns.Object;
+using JetBrains.Annotations;
 
-namespace asm.Threading.Channel
+namespace asm.Other.MarcGravell.Channel
 {
 	/// <summary>
 	/// Wraps a reference to an object that potentially lives in another domain.

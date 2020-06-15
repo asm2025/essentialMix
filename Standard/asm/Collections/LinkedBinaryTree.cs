@@ -3073,124 +3073,33 @@ namespace asm.Collections
 				const string STR_BLANK = "    ";
 				const string STR_EXT = "│   ";
 				const string STR_CONNECTOR = "─── ";
-				const string STR_CONNECTOR_R = "└── ";
-				const string STR_CONNECTOR_L = "┌── ";
+				const string STR_CONNECTOR_L = "└── ";
+				const string STR_CONNECTOR_R = "┌── ";
 
-				/*
-				 * Will use a little bit of a strange structure and InOrder traversal.
-				 * For each node, a list of all its parent is needed up to the root.
-				 * Because BinarySearchTree (or AVLTree) don't usually store a parent
-				 * node pointer, and apparently it's needed only in this situation, will
-				 * store this list unless a better alternative is found.
-				 */
 				Stack<string> connectors = new Stack<string>();
-				// Left-Root-Right (Stack)
-				Stack<(TNode Node, IList<TNode> Parents)> stack = new Stack<(TNode Node, IList<TNode> Parents)>();
-				int version = tree._version;
-				// Start at the root
-				(TNode Node, IList<TNode> Parents) current = (tree.Root, null);
-
-				while (current.Node != null || stack.Count > 0)
+				tree.Iterate(tree.Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.RightToLeft, (e, depth) =>
 				{
-					if (version != tree._version) throw new VersionChangedException();
+					connectors.Push(diagnostic
+										? e.ToString(depth)
+										: e.ToString());
 
-					if (current.Node != null)
+					if (e.IsRight) connectors.Push(STR_CONNECTOR_R);
+					else if (e.IsLeft) connectors.Push(STR_CONNECTOR_L);
+					else connectors.Push(STR_CONNECTOR);
+
+					while (e.Parent != null)
 					{
-						stack.Push(current);
+						if (e.IsLeft && e.Parent.IsRight || e.IsRight && e.Parent.IsLeft) connectors.Push(STR_EXT);
+						else connectors.Push(STR_BLANK);
 
-						// Navigate left
-						if (current.Node.Left != null)
-						{
-							IList<TNode> parents = new List<TNode>(current.Parents ?? Enumerable.Empty<TNode>())
-							{
-								current.Node
-							};
-							current = (current.Node.Left, parents);
-						}
-						else
-						{
-							current = (null, null);
-						}
+						e = e.Parent;
 					}
-					else
-					{
-						// visit the next queued node
-						current = stack.Pop();
-						connectors.Push(diagnostic
-											? current.Node.ToString(current.Parents?.Count ?? 0)
-											: current.Node.ToString());
 
-						TNode parent = null;
-						if (current.Parents != null && current.Parents.Count > 0) parent = current.Parents[current.Parents.Count - 1];
+					while (connectors.Count > 1)
+						writer.Write(connectors.Pop());
 
-						BinaryNodeType type = current.Node.NodeType(parent);
-
-						switch (type)
-						{
-							case BinaryNodeType.Root:
-								connectors.Push(STR_CONNECTOR);
-								break;
-							case BinaryNodeType.Left:
-								connectors.Push(STR_CONNECTOR_L);
-								break;
-							case BinaryNodeType.Right:
-								connectors.Push(STR_CONNECTOR_R);
-								break;
-							default:
-								throw new ArgumentOutOfRangeException();
-						}
-
-						if (current.Parents != null)
-						{
-							IList<TNode> parents = current.Parents;
-							TNode node = current.Node;
-
-							for (int i = parents.Count - 1; i >= 0; i--)
-							{
-								parent = parents[i];
-								TNode grandParent = i > 0
-														? parents[i - 1]
-														: null;
-								type = node.NodeType(parent);
-								BinaryNodeType parentType = grandParent == null
-																	? BinaryNodeType.Root
-																	: parent.NodeType(grandParent);
-
-								// if (node is left and its parent is right) or (node is right and its parent is left), add STR_EXT
-								if (type == BinaryNodeType.Left && parentType == BinaryNodeType.Right ||
-									type == BinaryNodeType.Right && parentType == BinaryNodeType.Left)
-								{
-									connectors.Push(STR_EXT);
-								}
-								else
-								{
-									connectors.Push(STR_BLANK);
-								}
-
-								node = parent;
-							}
-						}
-
-						while (connectors.Count > 1)
-							writer.Write(connectors.Pop());
-
-						writer.WriteLine(connectors.Pop());
-
-						// Navigate right
-						if (current.Node.Right != null)
-						{
-							IList<TNode> parents = new List<TNode>(current.Parents ?? Enumerable.Empty<TNode>())
-							{
-								current.Node
-							};
-							current = (current.Node.Right, parents);
-						}
-						else
-						{
-							current = (null, null);
-						}
-					}
-				}
+					writer.WriteLine(connectors.Pop());
+				});
 			}
 
 			static void Vertically(LinkedBinaryTree<TNode, T> tree, TextWriter writer, bool diagnostic)
@@ -3200,69 +3109,42 @@ namespace asm.Collections
 				const char C_CONNECTOR_L = '┌';
 				const char C_CONNECTOR_R = '┐';
 
-				/*
-				 * Will use an InOrder traversal.
-				 * For each node, its parent is required with its BinaryNodeType. i.e. Root, Left, Right
-				 */
 				int distance = 0;
 				IDictionary<int, StringBuilder> lines = new Dictionary<int, StringBuilder>();
-				// Left-Root-Right (Stack)
-				Stack<(TNode Node, BinaryNodeType Type, int Depth)> stack = new Stack<(TNode Node, BinaryNodeType Type, int Depth)>();
-				// Start at the root
-				(TNode Node, BinaryNodeType Type, int Depth) current = (tree.Root, BinaryNodeType.Root, 0);
-				int version = tree._version;
-
-				while (current.Node != null || stack.Count > 0)
+				tree.Iterate(tree.Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, (e, depth) =>
 				{
-					if (version != tree._version) throw new VersionChangedException();
+					StringBuilder line = lines.GetOrAdd(depth);
 
-					if (current.Node != null)
+					if (line.Length > 0 && line[line.Length - 1] == C_CONNECTOR_L) line.Append(C_EXT, distance - line.Length);
+					else line.Append(C_BLANK, distance - line.Length);
+
+					if (depth > 0)
 					{
-						stack.Push(current);
-						// Navigate left
-						current = (current.Node.Left, BinaryNodeType.Left, current.Depth + 1);
-					}
-					else
-					{
-						// visit the next queued node
-						current = stack.Pop();
+						StringBuilder prevLine = lines.GetOrAdd(depth - 1);
 
-						StringBuilder line = lines.GetOrAdd(current.Depth);
-
-						if (line.Length > 0 && line[line.Length - 1] == C_CONNECTOR_L) line.Append(C_EXT, distance - line.Length);
-						else line.Append(C_BLANK, distance - line.Length);
-						
-						if (current.Depth > 0)
+						if (e.IsLeft)
 						{
-							StringBuilder prevLine = lines.GetOrAdd(current.Depth - 1);
-
-							if (current.Type == BinaryNodeType.Left)
-							{
-								prevLine.Append(C_BLANK, distance - prevLine.Length);
-								if (line.Length > 0) prevLine.Append(C_BLANK);
-								prevLine.Append(C_CONNECTOR_L);
-							}
-							else
-							{
-								prevLine.Append(C_BLANK);
-								prevLine.Append(C_EXT, distance - prevLine.Length + 1);
-								prevLine.Append(C_CONNECTOR_R);
-							}
+							prevLine.Append(C_BLANK, distance - prevLine.Length);
+							if (line.Length > 0) prevLine.Append(C_BLANK);
+							prevLine.Append(C_CONNECTOR_L);
 						}
-
-						if (line.Length > 0) line.Append(C_BLANK);
-						line.Append(diagnostic
-										? current.Node.ToString(current.Depth)
-										: current.Node.ToString());
-						distance = line.Length;
-
-						// Navigate right
-						current = (current.Node.Right, BinaryNodeType.Right, current.Depth + 1);
+						else
+						{
+							prevLine.Append(C_BLANK);
+							prevLine.Append(C_EXT, distance - prevLine.Length + 1);
+							prevLine.Append(C_CONNECTOR_R);
+						}
 					}
-				}
+
+					if (line.Length > 0) line.Append(C_BLANK);
+					line.Append(diagnostic
+									? e.ToString(depth)
+									: e.ToString());
+					distance = line.Length;
+				});
 
 				foreach (StringBuilder sb in lines.OrderBy(e => e.Key)
-														.Select(e => e.Value))
+												.Select(e => e.Value))
 				{
 					writer.WriteLine(sb.ToString());
 				}

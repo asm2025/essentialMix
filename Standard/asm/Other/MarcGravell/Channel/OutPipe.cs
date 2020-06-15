@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Runtime.InteropServices;
+using asm.Threading;
 using JetBrains.Annotations;
 
-namespace asm.Threading.Channel
+namespace asm.Other.MarcGravell.Channel
 {
 	internal class OutPipe : MutexFreePipe
 	{

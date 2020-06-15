@@ -12,6 +12,18 @@ namespace asm.Collections
 
 	public static class BinaryNodeTypeExtension
 	{
+		public static BinaryNodeType NodeType<TNode, T>([NotNull] this LinkedBinaryNode<TNode, T> thisValue)
+			where TNode : LinkedBinaryNode<TNode, T>
+		{
+			return thisValue.IsRoot
+						? BinaryNodeType.Root
+						: thisValue.IsLeft
+							? BinaryNodeType.Left
+							: thisValue.IsRight
+								? BinaryNodeType.Right
+								: BinaryNodeType.None;
+		}
+
 		public static BinaryNodeType NodeType<TNode, T>([NotNull] this LinkedBinaryNode<TNode, T> thisValue, LinkedBinaryNode<TNode, T> parent)
 			where TNode : LinkedBinaryNode<TNode, T>
 		{

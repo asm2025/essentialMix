@@ -8,11 +8,11 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 using asm.Extensions;
-using JetBrains.Annotations;
 using asm.Helpers;
 using asm.Patterns.Object;
+using JetBrains.Annotations;
 
-namespace asm.Threading.Channel
+namespace asm.Other.MarcGravell.Channel
 {
 	public sealed class Channel : Disposable, IDisposable
 	{

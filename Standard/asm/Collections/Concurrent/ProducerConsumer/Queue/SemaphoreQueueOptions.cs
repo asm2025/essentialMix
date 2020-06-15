@@ -18,6 +18,9 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 		{
 		}
 
+		/// <summary>
+		/// To create a named semaphore with access control security, see this <see href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.semaphore.openexisting">example</see>
+		/// </summary>
 		public SemaphoreSecurity Security { get; set; }
 	}
 }

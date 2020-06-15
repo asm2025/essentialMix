@@ -170,8 +170,8 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 				if (!CompleteMarked || _countdown.CurrentCount > 1) return;
 			}
 
-			_countdown.SignalAll();
 			OnWorkCompleted(EventArgs.Empty);
+			_countdown.SignalAll();
 		}
 	}
 }

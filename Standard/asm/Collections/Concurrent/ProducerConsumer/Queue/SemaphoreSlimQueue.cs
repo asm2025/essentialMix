@@ -10,22 +10,17 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 	{
 		private readonly object _lock = new object();
 		private readonly Queue<T> _queue = new Queue<T>();
+		private readonly List<Thread> _running = new List<Thread>();
 
 		private ManualResetEventSlim _manualResetEventSlim;
 		private SemaphoreSlim _semaphore;
 		private Thread _worker;
-		
-		private int _running;
-		private int _workCompleted;
 
 		public SemaphoreSlimQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
 			_manualResetEventSlim = new ManualResetEventSlim(false);
-			
-			// the additional + 1 is for the Consume thread
-			int threads = Threads + 1;
-			_semaphore = new SemaphoreSlim(threads);
+			_semaphore = new SemaphoreSlim(Threads);
 			(_worker = new Thread(Consume)
 			{
 				IsBackground = IsBackground,
@@ -49,7 +44,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			{
 				lock (_lock)
 				{
-					return _queue.Count + _running;
+					return _queue.Count + RunningCount();
 				}
 			}
 		}
@@ -125,44 +120,37 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 		{
 			if (IsDisposed) return;
 
-			bool entered = false;
 			_manualResetEventSlim.Reset();
 			OnWorkStarted(EventArgs.Empty);
 
 			try
 			{
-				_semaphore.Wait(Token);
-				entered = true;
-
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					T item = default(T);
-					bool hasItem = false;
+					T item;
 
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !hasItem)
+					lock(_lock)
 					{
-						lock(_lock)
+						if (_queue.Count == 0)
 						{
-							if (_queue.Count == 0)
-							{
-								Monitor.Wait(_lock, TimeSpanHelper.MINIMUM_SCHEDULE);
-								Thread.Sleep(1);
-							}
-
-							if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) return;
-							item = _queue.Dequeue();
-							hasItem = true;
+							Monitor.Wait(_lock, TimeSpanHelper.MINIMUM_SCHEDULE);
+							Thread.Sleep(1);
 						}
+
+						if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) return;
+						item = _queue.Dequeue();
 					}
 
-					if (!hasItem) continue;
 					if (IsDisposed || Token.IsCancellationRequested) return;
 
-					new Thread(() => Run(item))
+					Thread thread = new Thread(() => Run(item))
 					{
 						IsBackground = IsBackground,
 						Priority = Priority
-					}.Start();
+					};
+
+					AddRunning(thread);
+					thread.Start();
 				}
 
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
@@ -177,11 +165,14 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 
 					if (IsDisposed || Token.IsCancellationRequested) return;
 
-					new Thread(() => Run(item))
+					Thread thread = new Thread(() => Run(item))
 					{
 						IsBackground = IsBackground,
 						Priority = Priority
-					}.Start();
+					};
+
+					AddRunning(thread);
+					thread.Start();
 				}
 			}
 			catch (OperationCanceledException)
@@ -190,7 +181,18 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			}
 			finally
 			{
-				if (entered) _semaphore.Release();
+				Thread[] threads;
+
+				lock(_running)
+				{
+					threads = _running.ToArray();
+				}
+
+				foreach (Thread thread in threads) 
+					thread.Join();
+
+				OnWorkCompleted(EventArgs.Empty);
+				_manualResetEventSlim.Set();
 			}
 		}
 
@@ -203,7 +205,6 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			try
 			{
 				_semaphore.Wait(Token);
-				Interlocked.Increment(ref _running);
 				entered = true;
 				if (IsDisposed || Token.IsCancellationRequested) return;
 				base.Run(item);
@@ -214,24 +215,33 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			}
 			finally
 			{
-				if (entered)
-				{
-					_semaphore.Release();
-					Interlocked.Decrement(ref _running);
-				}
-
-				SignalAndCheck();
+				RemoveRunning(Thread.CurrentThread);
+				if (entered) _semaphore.Release();
 			}
 		}
 
-		private void SignalAndCheck()
+		private void AddRunning(Thread thread)
 		{
-			// don't change the order of this
-			if (IsDisposed || !CompleteMarked || Count > 0 || Interlocked.CompareExchange(ref _workCompleted, 1, 0) > 0) return;
-			Interlocked.Increment(ref _workCompleted);
-			Thread.Sleep(50);
-			OnWorkCompleted(EventArgs.Empty);
-			_manualResetEventSlim.Set();
+			lock (_running)
+			{
+				_running.Add(thread);
+			}
+		}
+
+		private void RemoveRunning(Thread thread)
+		{
+			lock (_running)
+			{
+				_running.Add(thread);
+			}
+		}
+
+		private int RunningCount()
+		{
+			lock (_running)
+			{
+				return _running.Count;
+			}
 		}
 	}
 }

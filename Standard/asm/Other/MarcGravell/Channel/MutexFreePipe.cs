@@ -1,11 +1,12 @@
 using System;
 using System.IO.MemoryMappedFiles;
 using System.Threading;
-using JetBrains.Annotations;
 using asm.Helpers;
 using asm.Patterns.Object;
+using asm.Threading;
+using JetBrains.Annotations;
 
-namespace asm.Threading.Channel
+namespace asm.Other.MarcGravell.Channel
 {
 	internal abstract class MutexFreePipe : Disposable, IDisposable
 	{

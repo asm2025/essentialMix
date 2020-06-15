@@ -139,26 +139,20 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					T item = default(T);
-					bool hasItem = false;
+					T item;
 
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !hasItem)
+					lock (_lock)
 					{
-						lock (_lock)
+						if (_queue.Count == 0)
 						{
-							if (_queue.Count == 0)
-							{
-								Monitor.Wait(_lock, TimeSpanHelper.MINIMUM_SCHEDULE);
-								Thread.Sleep(1);
-							}
-
-							if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
-							item = _queue.Dequeue();
-							hasItem = true;
+							Monitor.Wait(_lock, TimeSpanHelper.MINIMUM_SCHEDULE);
+							Thread.Sleep(1);
 						}
+
+						if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
+						item = _queue.Dequeue();
 					}
 
-					if (!hasItem) continue;
 					if (IsDisposed || Token.IsCancellationRequested) return;
 					Run(item);
 				}
@@ -193,8 +187,8 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 				if (!CompleteMarked || _countdown.CurrentCount > 1) return;
 			}
 
-			_countdown.SignalAll();
 			OnWorkCompleted(EventArgs.Empty);
+			_countdown.SignalAll();
 		}
 	}
 }

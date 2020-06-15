@@ -2,9 +2,10 @@ using System;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 using System.Threading;
+using asm.Threading;
 using JetBrains.Annotations;
 
-namespace asm.Threading.Channel
+namespace asm.Other.MarcGravell.Channel
 {
 	internal class InPipe : MutexFreePipe
 	{
