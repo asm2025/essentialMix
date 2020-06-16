@@ -207,6 +207,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 				ThreadQueueMode.Task => new TaskQueue<T>(options, token),
 				ThreadQueueMode.DataFlow => new DataFlowQueue<T>(options, token),
 				ThreadQueueMode.WaitAndPulse => new WaitAndPulseQueue<T>(options, token),
+				ThreadQueueMode.Event => new EventQueue<T>(options, token),
 				ThreadQueueMode.BlockingCollection => new BlockingCollectionQueue<T>(options, token),
 				ThreadQueueMode.TaskGroup => new TaskGroupQueue<T>(options, token),
 				ThreadQueueMode.SemaphoreSlim => new SemaphoreSlimQueue<T>(options, token),

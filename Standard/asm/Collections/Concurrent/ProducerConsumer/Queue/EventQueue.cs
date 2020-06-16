@@ -7,18 +7,19 @@ using JetBrains.Annotations;
 
 namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 {
-	public sealed class WaitAndPulseQueue<T> : ProducerConsumerThreadQueue<T>
+	public sealed class EventQueue<T> : ProducerConsumerThreadQueue<T>
 	{
-		private readonly object _lock = new object();
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 		private readonly Thread[] _workers;
 
+		private AutoResetEvent _autoReset;
 		private CountdownEvent _countdown;
 		private bool _workStarted;
 
-		public WaitAndPulseQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+		public EventQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
+			_autoReset = new AutoResetEvent(false);
 			_countdown = new CountdownEvent(Threads + 1);
 			_workers = new Thread[Threads];
 		}
@@ -29,6 +30,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			base.Dispose(disposing);
 			if (!disposing) return;
 			StopInternal(WaitOnDispose);
+			ObjectHelper.Dispose(ref _autoReset);
 			ObjectHelper.Dispose(ref _countdown);
 		}
 
@@ -64,25 +66,18 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			}
 
 			_queue.Enqueue(item);
-
-			lock (_lock) 
-				Monitor.Pulse(_lock);
+			_autoReset.Set();
 		}
 
 		protected override void CompleteInternal()
 		{
 			CompleteMarked = true;
-
-			lock (_lock) 
-				Monitor.PulseAll(_lock);
+			_autoReset.Set();
 		}
 
 		protected override void ClearInternal()
 		{
 			_queue.Clear();
-
-			lock (_lock) 
-				Monitor.PulseAll(_lock);
 		}
 
 		protected override bool WaitInternal(int millisecondsTimeout)
@@ -131,11 +126,8 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.IsEmpty)
-					{
-						lock (_lock)
-							Monitor.Wait(_lock, TimeSpanHelper.MINIMUM_SCHEDULE);
-					}
+					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.IsEmpty) 
+						_autoReset.WaitOne(TimeSpanHelper.MINIMUM_SCHEDULE, Token);
 
 					if (IsDisposed || Token.IsCancellationRequested) return;
 					if (CompleteMarked || !_queue.TryDequeue(out item)) break;
@@ -148,23 +140,6 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			finally
 			{
 				SignalAndCheck();
-			}
-		}
-
-		protected override void Run(T item)
-		{
-			if (IsDisposed || Token.IsCancellationRequested) return;
-
-			try
-			{
-				base.Run(item);
-			}
-			finally
-			{
-				lock(_lock)
-				{
-					Monitor.Pulse(_lock);
-				}
 			}
 		}
 

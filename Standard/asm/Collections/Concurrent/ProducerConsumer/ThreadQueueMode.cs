@@ -5,6 +5,7 @@
 		Task,
 		DataFlow,
 		WaitAndPulse,
+		Event,
 		BlockingCollection,
 		TaskGroup,
 		SemaphoreSlim,
