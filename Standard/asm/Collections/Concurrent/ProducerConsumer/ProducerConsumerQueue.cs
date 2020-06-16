@@ -17,6 +17,8 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 	{
 		private CancellationTokenSource _cts;
 
+		private volatile bool _completeMarked;
+
 		protected ProducerConsumerQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 		{
 			Threads = options.Threads;
@@ -52,7 +54,11 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 
 		public abstract bool IsBusy { get; }
 
-		public bool CompleteMarked { get; protected set; }
+		public bool CompleteMarked
+		{
+			get => _completeMarked;
+			protected set => _completeMarked = value;
+		}
 
 		public int SleepAfterEnqueue { get; set; } = TimeSpanHelper.INFINITE;
 

@@ -9,8 +9,6 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 {
 	public sealed class BlockingCollectionQueue<T> : ProducerConsumerThreadQueue<T>
 	{
-		private readonly object _lock = new object();
-		private readonly object _threadsLock = new object();
 		private readonly Thread[] _workers;
 
 		private BlockingCollection<T> _queue;
@@ -45,7 +43,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 
 			if (!_workStarted)
 			{
-				lock(_threadsLock)
+				lock(_workers)
 				{
 					if (!_workStarted)
 					{
@@ -59,37 +57,25 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 										Priority = Priority
 									}).Start();
 						}
+
+						Thread.Sleep(0);
+						OnWorkStarted(EventArgs.Empty);
 					}
 				}
-
-				OnWorkStarted(EventArgs.Empty);
-				Thread.Sleep(0);
 			}
 
-			lock (_lock)
-			{
-				_queue.Add(item, Token);
-				Monitor.Pulse(_lock);
-			}
+			_queue.Add(item, Token);
 		}
 
 		protected override void CompleteInternal()
 		{
-			lock (_lock)
-			{
-				CompleteMarked = true;
-				_queue.CompleteAdding();
-				Monitor.PulseAll(_lock);
-			}
+			CompleteMarked = true;
+			_queue.CompleteAdding();
 		}
 
 		protected override void ClearInternal()
 		{
-			lock (_lock)
-			{
-				_queue.Clear();
-				Monitor.PulseAll(_lock);
-			}
+			_queue.Clear();
 		}
 
 		protected override bool WaitInternal(int millisecondsTimeout)
@@ -137,20 +123,14 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !_queue.IsCompleted)
 				{
-					while (_queue.TryTake(out T item, TimeSpanHelper.MINIMUM_SCHEDULE, Token) && !IsDisposed && !Token.IsCancellationRequested)
-					{
+					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.MINIMUM_SCHEDULE, Token))
 						Run(item);
-						if (IsDisposed || Token.IsCancellationRequested) break;
-					}
 				}
 
 				if (IsDisposed || Token.IsCancellationRequested) return;
 
-				while (_queue.TryTake(out T item, TimeSpanHelper.MINIMUM_SCHEDULE, Token) && !IsDisposed && !Token.IsCancellationRequested)
-				{
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.MINIMUM_SCHEDULE, Token))
 					Run(item);
-					if (IsDisposed || Token.IsCancellationRequested) break;
-				}
 			}
 			catch (ObjectDisposedException) { }
 			catch (OperationCanceledException) { }
@@ -163,15 +143,19 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 		private void SignalAndCheck()
 		{
 			if (IsDisposed) return;
+			Monitor.Enter(_countdown);
 
-			lock (_threadsLock)
+			try
 			{
 				_countdown.SignalOne();
 				if (!CompleteMarked || _countdown.CurrentCount > 1) return;
+				OnWorkCompleted(EventArgs.Empty);
 			}
-
-			OnWorkCompleted(EventArgs.Empty);
-			_countdown.SignalAll();
+			finally
+			{
+				if (_countdown.CurrentCount < 2) _countdown.SignalAll();
+				Monitor.Exit(_countdown);
+			}
 		}
 	}
 }

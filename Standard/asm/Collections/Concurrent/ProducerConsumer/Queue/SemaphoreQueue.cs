@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using asm.Extensions;
@@ -9,8 +10,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 {
 	public sealed class SemaphoreQueue<T> : NamedProducerConsumerThreadQueue<T>
 	{
-		private readonly object _lock = new object();
-		private readonly Queue<T> _queue = new Queue<T>();
+		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 		private readonly List<Thread> _running = new List<Thread>();
 
 		private ManualResetEventSlim _manualResetEventSlim;
@@ -65,46 +65,24 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _manualResetEventSlim);
 		}
 
-		public override int Count
-		{
-			get
-			{
-				lock(_lock)
-				{
-					return _queue.Count + RunningCount();
-				}
-			}
-		}
+		public override int Count => _queue.Count + RunningCount();
 
 		public override bool IsBusy => Count > 0;
 
 		protected override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested) return;
-
-			lock (_lock)
-			{
-				_queue.Enqueue(item);
-				Monitor.Pulse(_lock);
-			}
+			_queue.Enqueue(item);
 		}
 
 		protected override void CompleteInternal()
 		{
-			lock (_lock)
-			{
-				CompleteMarked = true;
-				Monitor.PulseAll(_lock);
-			}
+			CompleteMarked = true;
 		}
 
 		protected override void ClearInternal()
 		{
-			lock (_lock)
-			{
-				_queue.Clear();
-				Monitor.PulseAll(_lock);
-			}
+			_queue.Clear();
 		}
 
 		protected override bool WaitInternal(int millisecondsTimeout)
@@ -152,53 +130,30 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 
 			try
 			{
-				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
+				T item;
+
+				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.TryDequeue(out item))
 				{
-					T item;
-
-					lock (_lock)
-					{
-						if (_queue.Count == 0)
-						{
-							Monitor.Wait(_lock, TimeSpanHelper.MINIMUM_SCHEDULE);
-							Thread.Sleep(1);
-						}
-
-						if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
-						item = _queue.Dequeue();
-					}
-
-					if (IsDisposed || Token.IsCancellationRequested) return;
-
-					Thread thread = new Thread(() => Run(item))
+					T value = item;
+					Thread thread = new Thread(() => Run(value))
 					{
 						IsBackground = IsBackground,
 						Priority = Priority
 					};
-
 					AddRunning(thread);
 					thread.Start();
 				}
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
+				Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
+
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item))
 				{
-					T item;
-
-					lock (_lock)
-					{
-						if (_queue.Count == 0) return;
-						item = _queue.Dequeue();
-					}
-
-					// don't change the order of this
-					if (IsDisposed || Token.IsCancellationRequested) return;
-
-					Thread thread = new Thread(() => Run(item))
+					T value = item;
+					Thread thread = new Thread(() => Run(value))
 					{
 						IsBackground = IsBackground,
 						Priority = Priority
 					};
-
 					AddRunning(thread);
 					thread.Start();
 				}
@@ -213,11 +168,16 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 
 				lock(_running)
 				{
-					threads = _running.ToArray();
+					threads = _running.Count > 0
+								? _running.ToArray()
+								: null;
 				}
 
-				foreach (Thread thread in threads) 
-					thread.Join();
+				if (threads != null)
+				{
+					foreach (Thread thread in threads) 
+						thread.Join();
+				}
 
 				OnWorkCompleted(EventArgs.Empty);
 				_manualResetEventSlim.Set();
@@ -250,26 +210,20 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 
 		private void AddRunning(Thread thread)
 		{
-			lock (_running)
-			{
+			lock(_running) 
 				_running.Add(thread);
-			}
 		}
 
 		private void RemoveRunning(Thread thread)
 		{
-			lock (_running)
-			{
-				_running.Add(thread);
-			}
+			lock(_running) 
+				_running.Remove(thread);
 		}
 
 		private int RunningCount()
 		{
-			lock (_running)
-			{
+			lock(_running) 
 				return _running.Count;
-			}
 		}
 	}
 }

@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using asm.Extensions;
@@ -10,8 +10,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 {
 	public sealed class TaskGroupQueue<T> : ProducerConsumerThreadQueue<T>
 	{
-		private readonly object _lock = new object();
-		private readonly Queue<T> _queue = new Queue<T>();
+		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 		private ManualResetEventSlim _manualResetEventSlim;
 		private Thread _worker;
 
@@ -35,46 +34,24 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _manualResetEventSlim);
 		}
 
-		public override int Count
-		{
-			get
-			{
-				lock (_lock)
-				{
-					return _queue.Count;
-				}
-			}
-		}
+		public override int Count => _queue.Count;
 
 		public override bool IsBusy => Count > 0;
 
 		protected override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested) return;
-
-			lock (_lock)
-			{
-				_queue.Enqueue(item);
-				Monitor.Pulse(_lock);
-			}
+			_queue.Enqueue(item);
 		}
 
 		protected override void CompleteInternal()
 		{
-			lock (_lock)
-			{
-				CompleteMarked = true;
-				Monitor.PulseAll(_lock);
-			}
+			CompleteMarked = true;
 		}
 
 		protected override void ClearInternal()
 		{
-			lock (_lock)
-			{
-				_queue.Clear();
-				Monitor.PulseAll(_lock);
-			}
+			_queue.Clear();
 		}
 
 		protected override bool WaitInternal(int millisecondsTimeout)
@@ -122,55 +99,52 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 
 			try
 			{
-				int n = 0;
+				int count = 0;
+				T[] items = new T[Threads];
 				Task[] tasks = new Task[Threads];
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					n = 0;
+					if (!ReadItems(items, ref count) || count < items.Length) break;
 
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && n < tasks.Length)
+					for (int i = 0; !IsDisposed && !Token.IsCancellationRequested && i < items.Length; i++)
 					{
-						lock (_lock)
-						{
-							if (_queue.Count == 0)
-							{
-								Monitor.Wait(_lock, TimeSpanHelper.MINIMUM_SCHEDULE);
-								Thread.Sleep(1);
-							}
-
-							if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
-
-							while (_queue.Count > 0 && n < tasks.Length && !IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
-							{
-								T item = _queue.Dequeue();
-								tasks[n++] = Task.Run(() => Run(item), Token).ConfigureAwait();
-							}
-						}
+						T item = items[i];
+						tasks[i] = Task.Run(() => Run(item), Token).ConfigureAwait();
 					}
 
-					if (n < tasks.Length) break;
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitSilently(Token)) return;
+					count = 0;
+					Array.Clear(tasks, 0, tasks.Length);
 				}
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
+				if (count == items.Length) count = 0;
+				Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
+
+				while (!IsDisposed && !Token.IsCancellationRequested)
 				{
-					lock (_lock)
+					if (!ReadItems(items, ref count) || count < items.Length) break;
+
+					for (int i = 0; !IsDisposed && !Token.IsCancellationRequested && i < items.Length; i++)
 					{
-						while (_queue.Count > 0 && n < tasks.Length && !IsDisposed && !Token.IsCancellationRequested)
-						{
-							T item = _queue.Dequeue();
-							tasks[n++] = Task.Run(() => Run(item), Token).ConfigureAwait();
-						}
+						T item = items[i];
+						tasks[i] = Task.Run(() => Run(item), Token).ConfigureAwait();
 					}
 
-					if (n < tasks.Length) break;
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitSilently(Token)) return;
-					n = 0;
+					count = 0;
+					Array.Clear(tasks, 0, tasks.Length);
 				}
 
-				if (n < 1 || IsDisposed || Token.IsCancellationRequested) return;
-				Array.Resize(ref tasks, ++n);
+				if (count < 1 || IsDisposed || Token.IsCancellationRequested) return;
+				Array.Resize(ref tasks, ++count);
+
+				for (int i = 0; !IsDisposed && !Token.IsCancellationRequested && i < tasks.Length; i++)
+				{
+					T item = items[i];
+					tasks[i] = Task.Run(() => Run(item), Token).ConfigureAwait();
+				}
+
 				tasks.WaitSilently(Token);
 			}
 			finally
@@ -178,6 +152,24 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 				OnWorkCompleted(EventArgs.Empty);
 				_manualResetEventSlim.Set();
 			}
+		}
+
+		private bool ReadItems([NotNull] T[] items, ref int offset)
+		{
+			if (IsDisposed || Token.IsCancellationRequested) return false;
+			int count = items.Length - offset;
+			if (count < 1) return false;
+
+			int read = 0;
+
+			while (count > 0 && _queue.TryDequeue(out T item))
+			{
+				items[offset++] = item;
+				count--;
+				read++;
+			}
+
+			return !IsDisposed && !Token.IsCancellationRequested && read > 0;
 		}
 	}
 }

@@ -10,7 +10,6 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 {
 	public sealed class DataFlowQueue<T> : ProducerConsumerThreadQueue<T>
 	{
-		private readonly object _lock = new object();
 		private ManualResetEventSlim _manualResetEventSlim;
 		private BufferBlock<T> _queue;
 		private ActionBlock<T> _processor;
@@ -58,49 +57,27 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _manualResetEventSlim);
 		}
 
-		public override int Count
-		{
-			get
-			{
-				lock(_lock)
-				{
-					return _queue.Count + _processor.InputCount;
-				}
-			}
-		}
+		public override int Count => _queue.Count + _processor.InputCount;
 
 		public override bool IsBusy => Count > 0;
 
 		protected override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested) return;
-
-			lock (_lock)
-			{
-				_queue.SendAsync(item, Token);
-				Monitor.Pulse(_lock);
-			}
+			_queue.SendAsync(item, Token);
 		}
 
 		protected override void CompleteInternal()
 		{
-			lock(_lock)
-			{
-				CompleteMarked = true;
-				_queue.Complete();
-				_queue.Completion.ContinueWith(_ => _processor.Complete());
-				Monitor.PulseAll(_lock);
-			}
+			CompleteMarked = true;
+			_queue.Completion.ContinueWith(_ => _processor.Complete());
+			_queue.Complete();
 		}
 
 		protected override void ClearInternal()
 		{
-			lock (_lock)
-			{
-				_queue.Complete();
-				_processor.Complete();
-				Monitor.PulseAll(_lock);
-			}
+			_queue.Complete();
+			_processor.Complete();
 		}
 
 		protected override bool WaitInternal(int millisecondsTimeout)

@@ -7,14 +7,8 @@ namespace asm.Extensions
 	{
 		public static void Clear<T>([NotNull] this IProducerConsumerCollection<T> thisValue)
 		{
-			lock (thisValue)
+			while (thisValue.Count > 0 && thisValue.TryTake(out _))
 			{
-				if (thisValue.Count == 0) return;
-
-				while (thisValue.TryTake(out _))
-				{
-					
-				}
 			}
 		}
 	}

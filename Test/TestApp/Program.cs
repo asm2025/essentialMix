@@ -1200,7 +1200,7 @@ namespace TestApp
 			// change this to true to use 1 thread only for debugging
 			const bool LIMIT_THREADS = false;
 
-			int len = RNGRandomHelper.Next(1000, 10000);
+			int len = RNGRandomHelper.Next(100, 1000);
 			int[] values = GetRandomIntegers(len);
 			int timeout = RNGRandomHelper.Next(0, 1);
 			string timeoutString = timeout > 0

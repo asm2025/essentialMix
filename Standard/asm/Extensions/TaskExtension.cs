@@ -244,22 +244,18 @@ namespace asm.Extensions
 				throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 
 			// Short-circuit #1: already cancelled
-			if (token.IsCancellationRequested)
-				return false;
+			if (token.IsCancellationRequested) return false;
 
 			// Short-circuit #2: task already completed/faulted
 			int i = 0;
 
 			foreach (Task task in thisValue)
 			{
-				if (task.IsCanceled || task.IsFaulted)
-					return false;
-				if (task.IsCompleted)
-					i++;
+				if (task.IsCanceled || task.IsFaulted) return false;
+				if (task.IsCompleted) i++;
 			}
 
-			if (i == thisValue.Length)
-				return true;
+			if (i == thisValue.Length) return true;
 
 			try
 			{

@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using asm.Extensions;
@@ -10,12 +10,10 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 {
 	public sealed class TaskQueue<T> : ProducerConsumerQueue<T>
 	{
-		private readonly object _lock = new object();
-		private readonly object _threadsLock = new object();
-		private readonly Queue<T> _queue = new Queue<T>();
+		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 		private readonly Task[] _workers;
+		
 		private CountdownEvent _countdown;
-
 		private bool _workStarted;
 
 		public TaskQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
@@ -34,16 +32,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _countdown);
 		}
 
-		public override int Count
-		{
-			get
-			{
-				lock(_lock)
-				{
-					return _queue.Count;
-				}
-			}
-		}
+		public override int Count => _queue.Count;
 
 		public override bool IsBusy => _countdown.CurrentCount > 1;
 
@@ -53,7 +42,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 
 			if (!_workStarted)
 			{
-				lock(_threadsLock)
+				lock(_workers)
 				{
 					if (!_workStarted)
 					{
@@ -61,36 +50,24 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 
 						for (int i = 0; i < _workers.Length; i++) 
 							_workers[i] = Task.Run(Consume, Token).ConfigureAwait();
+
+						Thread.Sleep(0);
+						OnWorkStarted(EventArgs.Empty);
 					}
 				}
-
-				OnWorkStarted(EventArgs.Empty);
-				Thread.Sleep(0);
 			}
 
-			lock (_lock)
-			{
-				_queue.Enqueue(item);
-				Monitor.Pulse(_lock);
-			}
+			_queue.Enqueue(item);
 		}
 
 		protected override void CompleteInternal()
 		{
-			lock(_lock)
-			{
-				CompleteMarked = true;
-				Monitor.PulseAll(_lock);
-			}
+			CompleteMarked = true;
 		}
 
 		protected override void ClearInternal()
 		{
-			lock (_lock)
-			{
-				_queue.Clear();
-				Monitor.PulseAll(_lock);
-			}
+			_queue.Clear();
 		}
 
 		protected override bool WaitInternal(int millisecondsTimeout)
@@ -137,39 +114,15 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 
 			try
 			{
-				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
-				{
-					T item;
+				T item;
 
-					lock (_lock)
-					{
-						if (_queue.Count == 0)
-						{
-							Monitor.Wait(_lock, TimeSpanHelper.MINIMUM_SCHEDULE);
-							Thread.Sleep(1);
-						}
-
-						if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
-						item = _queue.Dequeue();
-					}
-
-					if (IsDisposed || Token.IsCancellationRequested) return;
+				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.TryDequeue(out item))
 					Run(item);
-				}
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
-				{
-					T item;
+				Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
 
-					lock (_lock)
-					{
-						if (_queue.Count == 0) return;
-						item = _queue.Dequeue();
-					}
-
-					if (IsDisposed || Token.IsCancellationRequested) return;
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item))
 					Run(item);
-				}
 			}
 			finally
 			{
@@ -180,15 +133,19 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 		private void SignalAndCheck()
 		{
 			if (IsDisposed) return;
+			Monitor.Enter(_countdown);
 
-			lock (_threadsLock)
+			try
 			{
 				_countdown.SignalOne();
 				if (!CompleteMarked || _countdown.CurrentCount > 1) return;
+				OnWorkCompleted(EventArgs.Empty);
 			}
-
-			OnWorkCompleted(EventArgs.Empty);
-			_countdown.SignalAll();
+			finally
+			{
+				if (_countdown.CurrentCount < 2) _countdown.SignalAll();
+				Monitor.Exit(_countdown);
+			}
 		}
 	}
 }

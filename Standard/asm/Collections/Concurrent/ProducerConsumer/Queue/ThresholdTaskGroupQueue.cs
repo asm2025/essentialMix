@@ -19,7 +19,6 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 			: base(options, token)
 		{
 			_manualResetEventSlim = new ManualResetEventSlim(false);
-
 			(_worker = new Thread(Consume)
 			{
 				IsBackground = IsBackground,
