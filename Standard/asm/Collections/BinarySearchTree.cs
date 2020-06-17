@@ -205,8 +205,8 @@ namespace asm.Collections
 				// adjust the left-most child nodes
 				leftmost.Left = node.Left;
 				leftmost.Right = node.Right;
-				stack.Push(leftmost.Left);
-				stack.Push(leftmost.Right);
+				if (leftmost.Left != null) stack.Push(leftmost.Left);
+				if (leftmost.Right != null) stack.Push(leftmost.Right);
 				child = leftmost;
 			}
 

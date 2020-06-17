@@ -55,6 +55,7 @@ namespace TestApp
 			//TestRedBlackTreeRemove();
 
 			//TestAllBinaryTrees();
+			TestAllBinaryTreesPerformance();
 
 			//TestTreeEquality();
 			
@@ -70,7 +71,7 @@ namespace TestApp
 
 			//TestGraph();
 
-			TestSkipList();
+			//TestSkipList();
 
 			ConsoleHelper.Pause();
 		}
@@ -145,18 +146,18 @@ namespace TestApp
 				Console.Write("Numbers");
 				watch.Restart();
 				sortNumbers(numbers, 0, -1, numbersComparer, false);
-				double numericResults = watch.Elapsed.TotalMilliseconds;
+				long numericResults = watch.ElapsedMilliseconds;
 				watch.Stop();
-				Console.WriteLine($" => {numericResults.ToString("F6").BrightGreen()}");
+				Console.WriteLine($" => {numericResults.ToString().BrightGreen()}");
 				Console.WriteLine("Result: " + string.Join(", ", numbers));
 				Console.WriteLine();
 
 				Console.Write("Strings");
 				watch.Restart();
 				sortStrings(strings, 0, -1, stringComparer, false);
-				double stringResults = watch.Elapsed.TotalMilliseconds;
+				long stringResults = watch.ElapsedMilliseconds;
 				watch.Stop();
-				Console.WriteLine($" => {stringResults.ToString("F6").BrightGreen()}");
+				Console.WriteLine($" => {stringResults.ToString().BrightGreen()}");
 				Console.WriteLine("Result: " + string.Join(", ", strings.Select(e => e.SingleQuote())));
 				Console.WriteLine();
 
@@ -226,7 +227,7 @@ namespace TestApp
 			IComparer<string> stringComparer = StringComparer.Ordinal;
 			IDictionary<string, double> numericResults = new Dictionary<string, double>();
 			IDictionary<string, double> stringResults = new Dictionary<string, double>();
-			double[] time = new double[TRIES];
+			long[] time = new long[TRIES];
 			string sectionSeparator = new string('*', 80).BrightMagenta();
 			bool more;
 
@@ -253,7 +254,7 @@ namespace TestApp
 					{
 						watch.Restart();
 						sortNumbers(ints, 0, -1, numbersComparer, false);
-						time[i] = watch.Elapsed.TotalMilliseconds;
+						time[i] = watch.ElapsedMilliseconds;
 						watch.Stop();
 						if (i < time.Length - 1) ints = (int[])numbers.Clone();
 					}
@@ -271,7 +272,7 @@ namespace TestApp
 					{
 						watch.Restart();
 						sortStrings(str, 0, -1, stringComparer, false);
-						time[i] = watch.Elapsed.TotalMilliseconds;
+						time[i] = watch.ElapsedMilliseconds;
 						watch.Stop();
 					}
 
@@ -917,6 +918,83 @@ namespace TestApp
 			}
 		}
 
+		private static void TestAllBinaryTreesPerformance()
+		{
+			Title("Testing all BinaryTrees performance...");
+			Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
+
+			bool more;
+			Stopwatch clock = new Stopwatch();
+			BinarySearchTree<int> binarySearchTree = new BinarySearchTree<int>();
+			AVLTree<int> avlTree = new AVLTree<int>();
+			RedBlackTree<int> redBlackTree = new RedBlackTree<int>();
+
+			do
+			{
+				Console.Clear();
+				Console.WriteLine();
+
+				int len = RNGRandomHelper.Next(100000, 200000);
+				HashSet<int> values = new HashSet<int>(GetRandomIntegers(len));
+				Console.WriteLine($"Array has {values.Count} items.");
+
+				DoTheTest(binarySearchTree, values, clock);
+				clock.Stop();
+
+				DoTheTest(avlTree, values, clock);
+				clock.Stop();
+
+				DoTheTest(redBlackTree, values, clock);
+				clock.Stop();
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+			
+			clock.Stop();
+
+			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, HashSet<int> set, Stopwatch clock)
+				where TNode : LinkedBinaryNode<TNode, int>
+			{
+				Console.WriteLine();
+				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
+				tree.Clear();
+				clock.Restart();
+				tree.Add(set);
+				if (!tree.AutoBalance) tree.Balance();
+				Console.WriteLine($"Added {set.Count} items in {clock.ElapsedMilliseconds} ms.");
+				tree.PrintProps();
+
+				Console.WriteLine("Test search...".BrightYellow());
+				clock.Restart();
+
+				foreach (int v in set)
+				{
+					if (tree.Contains(v)) continue;
+					Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
+					Console.ReadKey();
+					return;
+				}
+				Console.WriteLine($"Found {set.Count} items in {clock.ElapsedMilliseconds} ms.");
+
+				Console.WriteLine("Test removing...".BrightRed());
+				clock.Restart();
+
+				foreach (int v in set)
+				{
+					if (tree.Remove(v)) continue;
+					Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
+					Console.ReadKey();
+					return;
+				}
+				Console.WriteLine($"Removed {set.Count} items in {clock.ElapsedMilliseconds} ms.");
+			}
+		}
+
 		private static void TestTreeEquality()
 		{
 			Title("Testing tree equality...");
@@ -1225,7 +1303,7 @@ namespace TestApp
 							: maximumThreads;
 #else
 					// Otherwise, use the default (Best to be TaskHelper.ProcessDefault which = Environment.ProcessorCount)
-					int threads = MaximumThreads;
+					int threads = maximumThreads;
 #endif
 
 			if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
@@ -1266,10 +1344,10 @@ namespace TestApp
 
 						queue.WorkCompleted += (sender, args) =>
 						{
-							TimeSpan elapsed = clock.Elapsed;
+							long elapsed = clock.ElapsedMilliseconds;
 							Console.WriteLine();
 							Console.WriteLine();
-							Console.WriteLine($"Finished test. mode: '{mode.ToString().BrightCyan()}', values: {values.Length.ToString().BrightCyan()}, threads: {options.Threads.ToString().BrightCyan()}, timeout: {timeoutString.BrightCyan()}, elapsed: {elapsed.ToString("c").BrightCyan()}...");
+							Console.WriteLine($"Finished test. mode: '{mode.ToString().BrightCyan()}', values: {values.Length.ToString().BrightCyan()}, threads: {options.Threads.ToString().BrightCyan()}, timeout: {timeoutString.BrightCyan()}, elapsed: {elapsed.ToString().BrightCyan()} ms.");
 							Console.WriteLine();
 						};
 
@@ -1749,8 +1827,8 @@ namespace TestApp
 				int[] values = GetRandomIntegers(len);
 				Console.WriteLine($"Array[{values.Length}]: ".BrightBlack() + string.Join(", ", values));
 
-				int level = RNGRandomHelper.Next(1, 16);
-				SkipList<int> skipList = new SkipList<int>(level);
+				byte levels = (byte)RNGRandomHelper.Next(1, 16);
+				SkipList<int> skipList = new SkipList<int>(levels);
 
 				foreach (int v in values) 
 					skipList.Add(v);
@@ -1778,6 +1856,17 @@ namespace TestApp
 				}
 
 				Console.WriteLine($"Removed. now the list has {skipList.Count} items: [{string.Join(", ", skipList)}].");
+
+				Console.WriteLine();
+				Console.WriteLine();
+				Console.WriteLine("Test to clear the list...");
+				skipList.Clear();
+
+				if (skipList.Count != 0)
+				{
+					Console.WriteLine($"Something went wrong, the count is {skipList.Count}...!".BrightRed());
+					return;
+				}
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -1889,14 +1978,20 @@ public static class Extension
 					: "No".BrightRed();
 	}
 
-	public static void Print<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, bool diagnosticInfo = true)
+	public static void PrintProps<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue)
 		where TNode : LinkedBinaryNode<TNode, T>
 	{
 		Console.WriteLine();
 		Console.WriteLine($"{"Dimensions:".Yellow()} {thisValue.Count.ToString().Underline()} x {thisValue.GetHeight().ToString().Underline()}.");
-		Console.WriteLine($"{"Balanced:".Yellow()} {thisValue.IsBalanced().ToYesNo()}");
+		Console.WriteLine($"{"Balanced:".Yellow()} {thisValue.IsBalanced().ToYesNo()}, {"Height:".Yellow()} {thisValue.GetHeight()}");
 		Console.WriteLine($"{"Valid:".Yellow()} {thisValue.Validate().ToYesNo()}");
 		Console.WriteLine($"{"Minimum:".Yellow()} {thisValue.Minimum()} {"Maximum:".Yellow()} {thisValue.Maximum()}");
+	}
+
+	public static void Print<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, bool diagnosticInfo = true)
+		where TNode : LinkedBinaryNode<TNode, T>
+	{
+		PrintProps(thisValue);
 		thisValue.Print(Orientation.Vertical, diagnosticInfo);
 	}
 

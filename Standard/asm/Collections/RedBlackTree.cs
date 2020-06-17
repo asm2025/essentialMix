@@ -49,7 +49,7 @@ namespace asm.Collections
 		{
 			if (Root == null || Root.IsLeaf) return 0;
 			int height = 0;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e => height += 1 + Math.Max(e.Left == null ? -1 : 1, e.Right == null ? -1 : 1));
+			IterateLevels(Root, HorizontalFlow.LeftToRight, (i, _) => height++);
 			return height;
 		}
 
@@ -147,6 +147,7 @@ namespace asm.Collections
 			Balance(node);
 		}
 
+		// BUG: seems to miss things up after remove occasionally. Root left and right becomes null
 		public override bool Remove(T value)
 		{
 			// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
@@ -368,6 +369,7 @@ namespace asm.Collections
 			Balance();
 		}
 
+		// BUG: seems to miss things up after remove occasionally
 		private void Balance(RedBlackNode<T> node)
 		{
 			// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/

@@ -152,8 +152,8 @@ namespace asm.Collections
 				// adjust the left-most child nodes
 				leftmost.Left = node.Left;
 				leftmost.Right = node.Right;
-				stack.Push(leftmost.Left);
-				stack.Push(leftmost.Right);
+				if (leftmost.Left != null) stack.Push(leftmost.Left);
+				if (leftmost.Right != null) stack.Push(leftmost.Right);
 				child = leftmost;
 			}
 
@@ -189,13 +189,14 @@ namespace asm.Collections
 			Count--;
 			_version++;
 
-			while (unbalancedNodes.Count > 0)
-			{
-				node = unbalancedNodes.Dequeue();
-				// check again if status changed
-				if (IsBalanced(node)) continue;
-				Balance(node);
-			}
+			// BUG: seems to miss things up after remove occasionally. Root left and right becomes null
+			//while (unbalancedNodes.Count > 0)
+			//{
+			//	node = unbalancedNodes.Dequeue();
+			//	// check again if status changed
+			//	if (IsBalanced(node)) continue;
+			//	Balance(node);
+			//}
 
 			return true;
 		}

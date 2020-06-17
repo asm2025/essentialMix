@@ -2186,7 +2186,7 @@ namespace asm.Collections
 		/// <param name="root">The starting node</param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
 		/// <param name="levelCallback">callback action to handle the nodes of the level.</param>
-		public void Iterate(TNode root, HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
+		public void IterateLevels(TNode root, HorizontalFlow flow, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
 		{
 			if (root == null) return;
 			new LevelIterator(this, root).Iterate(flow, levelCallback);
@@ -2195,7 +2195,7 @@ namespace asm.Collections
 		#region LevelIterate overloads - visitCallback function
 		public void Iterate(TNode root, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
 		{
-			Iterate(root, HorizontalFlow.LeftToRight, levelCallback);
+			IterateLevels(root, HorizontalFlow.LeftToRight, levelCallback);
 		}
 		#endregion
 
@@ -2230,7 +2230,7 @@ namespace asm.Collections
 			TNode node = null;
 			Iterate(Root, method, HorizontalFlow.LeftToRight, e =>
 			{
-				if (Comparer.Compare(e.Value, value) != 0) return true;
+				if (!Comparer.IsEqual(e.Value, value)) return true; // continue the search
 				node = e;
 				return false;
 			});
@@ -2246,7 +2246,13 @@ namespace asm.Collections
 		public TNode Find(T value, int level)
 		{
 			if (level < 0) throw new ArgumentOutOfRangeException(nameof(level));
-			return GeNodesAtLevel(level)?.FirstOrDefault(e => Comparer.IsEqual(e.Value, value));
+			
+			foreach (TNode e in GeNodesAtLevel(level))
+			{
+				if (Comparer.IsEqual(e.Value, value)) return e;
+			}
+
+			return null;
 		}
 
 		/// <summary>
