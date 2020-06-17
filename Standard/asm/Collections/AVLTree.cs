@@ -189,14 +189,13 @@ namespace asm.Collections
 			Count--;
 			_version++;
 
-			// BUG: seems to miss things up after remove occasionally. Root left and right becomes null
-			//while (unbalancedNodes.Count > 0)
-			//{
-			//	node = unbalancedNodes.Dequeue();
-			//	// check again if status changed
-			//	if (IsBalanced(node)) continue;
-			//	Balance(node);
-			//}
+			while (unbalancedNodes.Count > 0)
+			{
+				node = unbalancedNodes.Dequeue();
+				// check again if status changed
+				if (IsBalanced(node)) continue;
+				Balance(node);
+			}
 
 			return true;
 		}

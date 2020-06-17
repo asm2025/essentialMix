@@ -963,35 +963,72 @@ namespace TestApp
 				Console.WriteLine();
 				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
 				tree.Clear();
+
 				clock.Restart();
-				tree.Add(set);
+				int count = tree.Count;
+				Debug.Assert(count == 0, "Values are not cleared correctly!");
+				Console.WriteLine($"Original values: {set.Count.ToString().BrightYellow()}...");
+
+				foreach (int v in set)
+				{
+					tree.Add(v);
+					count++;
+					Debug.Assert(count == tree.Count, $"Values are not added correctly! {count} != {tree.Count}.");
+				}
+
 				if (!tree.AutoBalance) tree.Balance();
-				Console.WriteLine($"Added {set.Count} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Added {count} items of {set.Count} in {clock.ElapsedMilliseconds} ms.");
 				tree.PrintProps();
 
 				Console.WriteLine("Test search...".BrightYellow());
+				int found = 0;
 				clock.Restart();
 
 				foreach (int v in set)
 				{
-					if (tree.Contains(v)) continue;
+					if (tree.Contains(v))
+					{
+						found++;
+						continue;
+					}
+
 					Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
-					Console.ReadKey();
-					return;
+					ConsoleHelper.Pause();
+					Console.WriteLine();
+					tree.Iterate(tree.Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, e =>
+					{
+						if (e.Value == v) Console.WriteLine("Found it!!");
+						return e.Value != v;
+					});
+					//return;
 				}
-				Console.WriteLine($"Found {set.Count} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine("Test removing...".BrightRed());
+				int removed = 0;
 				clock.Restart();
 
 				foreach (int v in set)
 				{
-					if (tree.Remove(v)) continue;
+					if (tree.Remove(v))
+					{
+						removed++;
+						Debug.Assert(count - removed == tree.Count, $"Values are not removed correctly! {count} != {tree.Count}.");
+						continue;
+					}
+					
 					Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
-					Console.ReadKey();
-					return;
+					tree.Iterate(tree.Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, e =>
+					{
+						if (e.Value == v) Console.WriteLine("Found it!!");
+						return e.Value != v;
+					});
+
+					ConsoleHelper.Pause();
+					Console.WriteLine();
+					//return;
 				}
-				Console.WriteLine($"Removed {set.Count} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Removed {removed} of {count} items in {clock.ElapsedMilliseconds} ms.");
 			}
 		}
 

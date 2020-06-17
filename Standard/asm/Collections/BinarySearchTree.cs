@@ -47,15 +47,12 @@ namespace asm.Collections
 		{
 			LinkedBinaryNode<T> parent = null, next = Root;
 
-			while (next != null)
+			while (next != null && !Comparer.IsEqual(next.Value, value))
 			{
 				parent = next;
-				int cmp = Comparer.Compare(value, next.Value);
-				next = cmp == 0
-							? null
-							: cmp < 0
-								? next.Left
-								: next.Right;
+				next = Comparer.IsLessThan(value, next.Value)
+							? next.Left
+							: next.Right;
 			}
 
 			return parent;

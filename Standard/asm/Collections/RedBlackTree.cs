@@ -57,15 +57,12 @@ namespace asm.Collections
 		{
 			RedBlackNode<T> parent = null, next = Root;
 
-			while (next != null)
+			while (next != null && !Comparer.IsEqual(next.Value, value))
 			{
 				parent = next;
-				int cmp = Comparer.Compare(value, next.Value);
-				next = cmp == 0
-							? null
-							: cmp < 0
-								? next.Left
-								: next.Right;
+				next = Comparer.IsLessThan(value, next.Value)
+							? next.Left
+							: next.Right;
 			}
 
 			return parent;
@@ -147,7 +144,6 @@ namespace asm.Collections
 			Balance(node);
 		}
 
-		// BUG: seems to miss things up after remove occasionally. Root left and right becomes null
 		public override bool Remove(T value)
 		{
 			// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
@@ -369,7 +365,6 @@ namespace asm.Collections
 			Balance();
 		}
 
-		// BUG: seems to miss things up after remove occasionally
 		private void Balance(RedBlackNode<T> node)
 		{
 			// https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/

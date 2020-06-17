@@ -2212,7 +2212,7 @@ namespace asm.Collections
 		/// <returns>The found node or null if no match is found</returns>
 		public TNode Find(T value)
 		{
-			TNode current = FindNearestParent(value);
+			TNode current = FindNearestParent(value) ?? Root /* in case root is the required node */;
 			if (current == null || Comparer.IsEqual(current.Value, value)) return current;
 			if (current.Left != null && Comparer.IsEqual(current.Left.Value, value)) return current.Left;
 			if (current.Right != null && Comparer.IsEqual(current.Right.Value, value)) return current.Right;
