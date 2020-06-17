@@ -32,7 +32,7 @@ namespace TestApp
 
 			//TestDomainName();
 
-			TestThreadQueue();
+			//TestThreadQueue();
 
 			//TestSortAlgorithm();
 			//TestSortAlgorithms();
@@ -69,7 +69,9 @@ namespace TestApp
 			//TestTrieSimilarWordsRemoval();
 
 			//TestGraph();
-			
+
+			TestSkipList();
+
 			ConsoleHelper.Pause();
 		}
 
@@ -1143,7 +1145,8 @@ namespace TestApp
 			do
 			{
 				Console.Clear();
-				Console.WriteLine();
+				Title("Testing Heap ElementAt...");
+
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
 				int k = RNGRandomHelper.Next(1, values.Length);
@@ -1468,10 +1471,8 @@ namespace TestApp
 			Console.WriteLine("Adding similar words...");
 			Console.WriteLine("Words list: ".BrightBlack() + string.Join(", ", values));
 
-			foreach (string value in values)
-			{
+			foreach (string value in values) 
 				trie.Add(value);
-			}
 
 			int results = 0;
 			string prefix = "car";
@@ -1733,6 +1734,58 @@ namespace TestApp
 						break;
 				}
 			}
+		}
+
+		private static void TestSkipList()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing SkipList...");
+
+				int len = RNGRandomHelper.Next(3, 50);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine($"Array[{values.Length}]: ".BrightBlack() + string.Join(", ", values));
+
+				int level = RNGRandomHelper.Next(1, 16);
+				SkipList<int> skipList = new SkipList<int>(level);
+
+				foreach (int v in values) 
+					skipList.Add(v);
+
+				Console.WriteLine();
+				Console.WriteLine();
+				Console.WriteLine($"SkipList [{skipList.Count}, levels = {skipList.MaximumLevel}]:");
+				skipList.WriteTo(Console.Out);
+
+				int value = values.PickRandom();
+				Console.WriteLine();
+				Console.WriteLine();
+				Console.WriteLine($"Test to find a random value in the list, Does it contain {value.ToString().BrightCyan()}? {skipList.Contains(value).ToYesNo()}");
+				int rnd = RNGRandomHelper.Next();
+				Console.WriteLine($"Does it contain {rnd.ToString().BrightCyan()}? {skipList.Contains(rnd).ToYesNo()}");
+
+				Console.WriteLine();
+				Console.WriteLine();
+				Console.WriteLine("Test to remove this same value from the list...");
+
+				if (!skipList.Remove(value))
+				{
+					Console.WriteLine("Didn't remove a shit...!".BrightRed());
+					return;
+				}
+
+				Console.WriteLine($"Removed. now the list has {skipList.Count} items: [{string.Join(", ", skipList)}].");
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
 		}
 
 		private static void Title(string title)

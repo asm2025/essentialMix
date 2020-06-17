@@ -117,7 +117,7 @@ namespace asm.Collections
 			{
 				get
 				{
-					if (_current == null) throw new InvalidOperationException();
+					if (!_started || _current == null) throw new InvalidOperationException();
 					return _current.Value;
 				}
 			}
@@ -1922,8 +1922,9 @@ namespace asm.Collections
 			}
 		}
 
-		private object _syncRoot;
 		protected internal int _version;
+
+		private object _syncRoot;
 
 		/// <inheritdoc />
 		protected LinkedBinaryTree()
@@ -1947,22 +1948,6 @@ namespace asm.Collections
 			Add(collection);
 		}
 
-		/// <inheritdoc />
-		bool ICollection.IsSynchronized => false;
-
-		/// <inheritdoc />
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				if (_syncRoot == null) Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
-				return _syncRoot;
-			}
-		}
-
-		/// <inheritdoc />
-		bool ICollection<T>.IsReadOnly => false;
-
 		[NotNull]
 		public IComparer<T> Comparer { get; private set; }
 
@@ -1975,6 +1960,22 @@ namespace asm.Collections
 		public abstract bool AutoBalance { get; }
 
 		public bool IsFull => Root == null || Root.IsFull;
+
+		/// <inheritdoc />
+		bool ICollection<T>.IsReadOnly => false;
+
+		/// <inheritdoc />
+		bool ICollection.IsSynchronized => false;
+
+		/// <inheritdoc />
+		object ICollection.SyncRoot
+		{
+			get
+			{
+				if (_syncRoot == null) Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
+				return _syncRoot;
+			}
+		}
 
 		/// <inheritdoc />
 		public IEnumerator<T> GetEnumerator() { return Enumerate(Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight); }
@@ -2412,7 +2413,7 @@ namespace asm.Collections
 			*/
 			array.Length.ValidateRange(index, Count);
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
-			Type sourceType = typeof(TNode);
+			Type sourceType = typeof(T);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
 			if (Count == 0) return;

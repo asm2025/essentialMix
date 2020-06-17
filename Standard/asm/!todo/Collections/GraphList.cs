@@ -29,7 +29,7 @@ namespace asm.Collections
 		/// <summary>
 		/// a semi recursive approach to traverse the graph
 		/// </summary>
-		internal sealed class Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
+		public sealed class Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
 		{
 			private readonly GraphList<TVertex, TEdge, T> _graph;
 			private readonly int _version;
@@ -70,7 +70,7 @@ namespace asm.Collections
 			{
 				get
 				{
-					if (_current == null) throw new InvalidOperationException();
+					if (!_started || _current == null) throw new InvalidOperationException();
 					return _current.Value;
 				}
 			}
@@ -197,7 +197,7 @@ namespace asm.Collections
 		///// <summary>
 		///// iterative approach to traverse the tree
 		///// </summary>
-		//internal sealed class Iterator
+		//public sealed class Iterator
 		//{
 		//	private readonly LinkedBinaryTree<TVertex, T> _tree;
 		//	private readonly TVertex _root;
@@ -1478,18 +1478,18 @@ namespace asm.Collections
 		/// <para>Graph's count is also its order.</para>
 		/// </summary>
 		public int Count => Vertices.Count;
-
-		/// <inheritdoc />
-		public bool IsReadOnly => Vertices.IsReadOnly;
 		
 		[NotNull]
 		public IEqualityComparer<T> Comparer { get; }
 
 		/// <inheritdoc />
-		public bool IsSynchronized => _collectionRef.IsSynchronized;
+		bool ICollection<T>.IsReadOnly => Vertices.IsReadOnly;
 
 		/// <inheritdoc />
-		public object SyncRoot => _collectionRef.SyncRoot;
+		bool ICollection.IsSynchronized => _collectionRef.IsSynchronized;
+
+		/// <inheritdoc />
+		object ICollection.SyncRoot => _collectionRef.SyncRoot;
 
 		[NotNull]
 		protected internal KeyedDictionary<T, TVertex> Vertices { get; }
@@ -1510,7 +1510,7 @@ namespace asm.Collections
 		/// <param name="method">The traverse method</param>
 		/// <returns></returns>
 		[NotNull]
-		public IEnumerable<T> Enumerate([NotNull] T value, GraphTraverseMethod method)
+		public Enumerator Enumerate([NotNull] T value, GraphTraverseMethod method)
 		{
 			if (!Vertices.TryGetValue(value, out TVertex root)) throw new KeyNotFoundException();
 			return new Enumerator(this, root, method);

@@ -21,6 +21,7 @@ namespace asm.Collections.Concurrent.MessageQueue
 		private ManualResetEventSlim _manualResetEventSlim = new ManualResetEventSlim(false);
 		private Thread _worker;
 		private CancellationTokenSource _cts;
+		private object _syncRoot;
 
 		protected QueueBase([NotNull] Action<T> callback, CancellationToken token = default(CancellationToken))
 			: this(callback, false, ThreadPriority.Normal, token)
@@ -62,7 +63,14 @@ namespace asm.Collections.Concurrent.MessageQueue
 
 		public Action<T> Callback { get; }
 
-		public object SyncRoot { get; } = new object();
+		public object SyncRoot
+		{
+			get
+			{
+				if (_syncRoot == null) Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
+				return _syncRoot;
+			}
+		}
 
 		public bool IsSynchronized => true;
 
