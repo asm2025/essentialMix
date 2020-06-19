@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "asm": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

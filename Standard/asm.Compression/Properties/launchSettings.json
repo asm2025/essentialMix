@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "asm.Compression": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

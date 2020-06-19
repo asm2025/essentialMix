@@ -57,6 +57,8 @@ namespace TestApp
 			//TestAllBinaryTrees();
 			TestAllBinaryTreesPerformance();
 
+			//TestSortedSetPerformance();
+
 			//TestTreeEquality();
 			
 			//TestHeapAdd();
@@ -542,8 +544,7 @@ namespace TestApp
 						break;
 				}
 
-				tree.Print();
-				tree.Print(Orientation.Horizontal);
+				tree.PrintWithProps();
 				i++;
 
 				if (i >= NUM_TESTS)
@@ -573,7 +574,7 @@ namespace TestApp
 				Console.Clear();
 				Console.WriteLine();
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = GetRandomIntegers(true, len);
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
@@ -582,12 +583,11 @@ namespace TestApp
 				foreach (int v in values)
 				{
 					tree.Add(v);
-					//tree.Print();
+					//tree.PrintWithProps();
 				}
 
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
-				tree.Print();
-				tree.Print(Orientation.Horizontal);
+				tree.PrintWithProps();
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -610,18 +610,48 @@ namespace TestApp
 				Console.Clear();
 				Console.WriteLine();
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = GetRandomIntegers(true, len);
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
 				tree.Clear();
 				tree.Add(values);
+				Debug.Assert(tree.Count == values.Length, $"Values are not added correctly! {values.Length} != {tree.Count}.");
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
-				tree.Print();
-				tree.Print(Orientation.Horizontal);
+				tree.PrintWithProps();
 
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine("Test finding a random value...");
 				int value = values.PickRandom();
+				Console.WriteLine($"will look for {value.ToString().BrightCyan().Underline()}.");
+
+				if (!tree.Contains(value))
+				{
+					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					return;
+				}
+
+				Console.WriteLine("Found.");
+				
+				int found = 0;
+				Console.WriteLine("Test finding all values...");
+
+				foreach (int v in values)
+				{
+					if (tree.Contains(v))
+					{
+						found++;
+						continue;
+					}
+
+					Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
+					ConsoleHelper.Pause();
+					Console.WriteLine();
+				}
+				Console.WriteLine($"Found {found} of {values.Length} items.");
+
+				Console.WriteLine();
+				Console.WriteLine("Test removing a random value...");
+				value = values.PickRandom();
 				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
 
 				if (!tree.Remove(value))
@@ -630,7 +660,27 @@ namespace TestApp
 					return;
 				}
 
-				tree.Print();
+				tree.PrintWithProps();
+
+				int removed = 1;
+				Console.WriteLine();
+				Console.WriteLine("Test removing all values...");
+
+				foreach (int v in values)
+				{
+					if (v == value) continue;
+
+					if (tree.Remove(v))
+					{
+						removed++;
+						Debug.Assert(values.Length - removed == tree.Count, $"Values are not removed correctly! {values.Length - removed} != {tree.Count}.");
+						continue;
+					}
+
+					Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
+					ConsoleHelper.Pause();
+					Console.WriteLine();
+				}
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -653,15 +703,14 @@ namespace TestApp
 				Console.Clear();
 				Console.WriteLine();
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = GetRandomIntegers(true, len);
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
 				Console.WriteLine("Test adding...".BrightGreen());
 				tree.Clear();
 				tree.Add(values);
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
-				tree.Print();
-				tree.Print(Orientation.Horizontal);
+				tree.PrintWithProps();
 
 				Console.WriteLine("Test removing...".BrightRed());
 				int value = values.PickRandom();
@@ -673,13 +722,13 @@ namespace TestApp
 					return;
 				}
 
-				tree.Print();
+				tree.PrintWithProps();
 
 				if (!tree.IsBalanced())
 				{
 					Console.WriteLine("Test balancing...".BrightGreen());
 					tree.Balance();
-					tree.Print();
+					tree.PrintWithProps();
 				}
 
 				Console.WriteLine();
@@ -691,193 +740,352 @@ namespace TestApp
 			while (more);
 		}
 
-		private static void TestAVLTreeAdd()
+		//private static void TestAVLTreeAdd()
+		//{
+		//	Title("Testing AVLTree.Add()...");
+
+		//	bool more;
+		//	AVLTree<int> tree = new AVLTree<int>();
+
+		//	do
+		//	{
+		//		Console.Clear();
+		//		Console.WriteLine();
+
+		//		int len = RNGRandomHelper.Next(1, 12);
+		//		int[] values = GetRandomIntegers(true, len);
+		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+		//		Console.WriteLine("Test adding...".BrightGreen());
+		//		tree.Clear();
+
+		//		foreach (int v in values)
+		//		{
+		//			tree.Add(v);
+		//			//tree.PrintWithProps();
+		//		}
+
+		//		Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+		//		tree.PrintWithProps();
+
+		//		Console.WriteLine();
+		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		ConsoleKeyInfo response = Console.ReadKey(true);
+		//		Console.WriteLine();
+		//		more = response.Key == ConsoleKey.Y;
+		//	}
+		//	while (more);
+		//}
+
+		//private static void TestAVLTreeRemove()
+		//{
+		//	Title("Testing AVLTree.Remove()...");
+
+		//	bool more;
+		//	AVLTree<int> tree = new AVLTree<int>();
+
+		//	do
+		//	{
+		//		Console.Clear();
+		//		Console.WriteLine();
+
+		//		int len = RNGRandomHelper.Next(1, 12);
+		//		int[] values = GetRandomIntegers(true, len);
+		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+		//		Console.WriteLine("Test adding...".BrightGreen());
+		//		tree.Clear();
+		//		tree.Add(values);
+		//		Debug.Assert(tree.Count == values.Length, $"Values are not added correctly! {values.Length} != {tree.Count}.");
+		//		Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+		//		tree.PrintWithProps();
+
+		//		Console.WriteLine("Test finding a random value...");
+		//		int value = values.PickRandom();
+		//		Console.WriteLine($"will look for {value.ToString().BrightCyan().Underline()}.");
+		//
+		//		if (!tree.Contains(value))
+		//		{
+		//			Console.WriteLine("Didn't find a shit...!".BrightRed());
+		//			return;
+		//		}
+		//
+		//		Console.WriteLine("Found.");
+		//		
+		//		int found = 0;
+		//		Console.WriteLine("Test finding all values...");
+		//
+		//		foreach (int v in values)
+		//		{
+		//			if (tree.Contains(v))
+		//			{
+		//				found++;
+		//				continue;
+		//			}
+		//
+		//			Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
+		//			ConsoleHelper.Pause();
+		//			Console.WriteLine();
+		//		}
+		//		Console.WriteLine($"Found {found} of {values.Length} items.");
+
+		//		Console.WriteLine("Test removing...".BrightRed());
+		//		int value = values.PickRandom();
+		//		Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
+
+		//		if (!tree.Remove(value))
+		//		{
+		//			Console.WriteLine("Didn't remove a shit...!".BrightRed());
+		//			return;
+		//		}
+
+		//		tree.PrintWithProps();
+
+		//		int removed = 1;
+		//		Console.WriteLine();
+		//		Console.WriteLine("Test removing all values...");
+		//
+		//		foreach (int v in values)
+		//		{
+		//			if (v == value) continue;
+		//
+		//			if (tree.Remove(v))
+		//			{
+		//				removed++;
+		//				Debug.Assert(values.Length - removed == tree.Count, $"Values are not removed correctly! {values.Length - removed} != {tree.Count}.");
+		//				continue;
+		//			}
+		//			Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
+		//			ConsoleHelper.Pause();
+		//			Console.WriteLine();
+		//		}
+
+		//		Console.WriteLine();
+		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		ConsoleKeyInfo response = Console.ReadKey(true);
+		//		Console.WriteLine();
+		//		more = response.Key == ConsoleKey.Y;
+		//	}
+		//	while (more);
+		//}
+
+		//private static void TestRedBlackTreeAdd()
+		//{
+		//	Title("Testing RedBlackTree.Add()...");
+
+		//	bool more;
+		//	RedBlackTree<int> tree = new RedBlackTree<int>();
+
+		//	do
+		//	{
+		//		Console.Clear();
+		//		Console.WriteLine();
+
+		//		int len = RNGRandomHelper.Next(1, 12);
+		//		int[] values = GetRandomIntegers(true, len);
+		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+		//		Console.WriteLine("Test adding...".BrightGreen());
+		//		tree.Clear();
+
+		//		foreach (int v in values)
+		//		{
+		//			tree.Add(v);
+		//			//tree.PrintWithProps();
+		//		}
+
+		//		Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+		//		tree.PrintWithProps();
+
+		//		Console.WriteLine();
+		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		ConsoleKeyInfo response = Console.ReadKey(true);
+		//		Console.WriteLine();
+		//		more = response.Key == ConsoleKey.Y;
+		//	}
+		//	while (more);
+		//}
+
+		//private static void TestRedBlackTreeRemove()
+		//{
+		//	Title("Testing RedBlackTree.Remove()...");
+
+		//	bool more;
+		//	RedBlackTree<int> tree = new RedBlackTree<int>();
+
+		//	do
+		//	{
+		//		Console.Clear();
+		//		Console.WriteLine();
+
+		//		int len = RNGRandomHelper.Next(1, 12);
+		//		int[] values = GetRandomIntegers(true, len);
+		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+		//		Console.WriteLine("Test adding...".BrightGreen());
+		//		tree.Clear();
+		//		tree.Add(values);
+		//		Debug.Assert(tree.Count == values.Length, $"Values are not added correctly! {values.Length} != {tree.Count}.");
+		//		Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+		//		tree.PrintWithProps();
+
+		//		Console.WriteLine("Test finding a random value...");
+		//		int value = values.PickRandom();
+		//		Console.WriteLine($"will look for {value.ToString().BrightCyan().Underline()}.");
+		//
+		//		if (!tree.Contains(value))
+		//		{
+		//			Console.WriteLine("Didn't find a shit...!".BrightRed());
+		//			return;
+		//		}
+		//
+		//		Console.WriteLine("Found.");
+		//		
+		//		int found = 0;
+		//		Console.WriteLine("Test finding all values...");
+		//
+		//		foreach (int v in values)
+		//		{
+		//			if (tree.Contains(v))
+		//			{
+		//				found++;
+		//				continue;
+		//			}
+		//
+		//			Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
+		//			ConsoleHelper.Pause();
+		//			Console.WriteLine();
+		//		}
+		//		Console.WriteLine($"Found {found} of {values.Length} items.");
+
+		//		Console.WriteLine();
+		//		Console.WriteLine("Test removing...".BrightRed());
+		//		int value = values.PickRandom();
+		//		Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
+
+		//		if (!tree.Remove(value))
+		//		{
+		//			Console.WriteLine("Didn't remove a shit...!".BrightRed());
+		//			return;
+		//		}
+
+		//		tree.PrintWithProps();
+
+		//		int removed = 1;
+		//		Console.WriteLine();
+		//		Console.WriteLine("Test removing all values...");
+		//
+		//		foreach (int v in values)
+		//		{
+		//			if (v == value) continue;
+		//
+		//			if (tree.Remove(v))
+		//			{
+		//				removed++;
+		//				Debug.Assert(values.Length - removed == tree.Count, $"Values are not removed correctly! {values.Length - removed} != {tree.Count}.");
+		//				continue;
+		//			}
+		//			Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
+		//			ConsoleHelper.Pause();
+		//			Console.WriteLine();
+		//		}
+
+		//		Console.WriteLine();
+		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		ConsoleKeyInfo response = Console.ReadKey(true);
+		//		Console.WriteLine();
+		//		more = response.Key == ConsoleKey.Y;
+		//	}
+		//	while (more);
+		//}
+
+		//private static void TestAllBinaryTrees()
+		//{
+		//	Title("Testing all BinaryTrees...");
+
+		//	bool more;
+		//	BinarySearchTree<int> binarySearchTree = new BinarySearchTree<int>();
+		//	AVLTree<int> avlTree = new AVLTree<int>();
+		//	RedBlackTree<int> redBlackTree = new RedBlackTree<int>();
+
+		//	do
+		//	{
+		//		Console.Clear();
+		//		Console.WriteLine();
+
+		//		int len = RNGRandomHelper.Next(1, 12);
+		//		int[] values = GetRandomIntegers(true, len);
+		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+		//		DoTheTest(binarySearchTree, values);
+
+		//		DoTheTest(avlTree, values);
+
+		//		DoTheTest(redBlackTree, values);
+
+		//		Console.WriteLine();
+		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		ConsoleKeyInfo response = Console.ReadKey(true);
+		//		Console.WriteLine();
+		//		more = response.Key == ConsoleKey.Y;
+		//	}
+		//	while (more);
+
+		//	static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, int[] array)
+		//		where TNode : LinkedBinaryNode<TNode, int>
+		//	{
+		//		Console.WriteLine();
+		//		Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
+		//		tree.Clear();
+		//		tree.Add(array);
+
+		//		Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+		//		tree.PrintWithProps();
+
+		//		Console.WriteLine("Test removing...".BrightRed());
+		//		int value = array.PickRandom();
+		//		Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
+
+		//		if (!tree.Remove(value))
+		//		{
+		//			Console.WriteLine("Didn't remove a shit...!".BrightRed());
+		//			return;
+		//		}
+
+		//		tree.PrintWithProps();
+		//		if (tree.AutoBalance || tree.IsBalanced()) return;
+
+		//		Console.WriteLine("Test balancing...".BrightGreen());
+		//		tree.Balance();
+		//		tree.PrintWithProps();
+		//	}
+		//}
+
+		private static void TestAllBinaryTreesPerformance()
 		{
-			Title("Testing AVLTree.Add()...");
-
 			bool more;
-			AVLTree<int> tree = new AVLTree<int>();
-
-			do
-			{
-				Console.Clear();
-				Console.WriteLine();
-
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-
-				Console.WriteLine("Test adding...".BrightGreen());
-				tree.Clear();
-
-				foreach (int v in values)
-				{
-					tree.Add(v);
-					//tree.Print();
-				}
-
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
-				tree.Print();
-				tree.Print(Orientation.Horizontal);
-
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
-		}
-
-		private static void TestAVLTreeRemove()
-		{
-			Title("Testing AVLTree.Remove()...");
-
-			bool more;
-			AVLTree<int> tree = new AVLTree<int>();
-
-			do
-			{
-				Console.Clear();
-				Console.WriteLine();
-
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-
-				Console.WriteLine("Test adding...".BrightGreen());
-				tree.Clear();
-				tree.Add(values);
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
-				tree.Print();
-				tree.Print(Orientation.Horizontal);
-
-				Console.WriteLine("Test removing...".BrightRed());
-				int value = values.PickRandom();
-				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
-
-				if (!tree.Remove(value))
-				{
-					Console.WriteLine("Didn't remove a shit...!".BrightRed());
-					return;
-				}
-
-				tree.Print();
-
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
-		}
-
-		private static void TestRedBlackTreeAdd()
-		{
-			Title("Testing RedBlackTree.Add()...");
-
-			bool more;
-			RedBlackTree<int> tree = new RedBlackTree<int>();
-
-			do
-			{
-				Console.Clear();
-				Console.WriteLine();
-
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-
-				Console.WriteLine("Test adding...".BrightGreen());
-				tree.Clear();
-
-				foreach (int v in values)
-				{
-					tree.Add(v);
-					//tree.Print();
-				}
-
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
-				tree.Print();
-				tree.Print(Orientation.Horizontal);
-
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
-		}
-
-		private static void TestRedBlackTreeRemove()
-		{
-			Title("Testing RedBlackTree.Remove()...");
-
-			bool more;
-			RedBlackTree<int> tree = new RedBlackTree<int>();
-
-			do
-			{
-				Console.Clear();
-				Console.WriteLine();
-
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-
-				Console.WriteLine("Test adding...".BrightGreen());
-				tree.Clear();
-				tree.Add(values);
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
-				tree.Print();
-				tree.Print(Orientation.Horizontal);
-
-				Console.WriteLine("Test removing...".BrightRed());
-				int value = values.PickRandom();
-				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
-
-				if (!tree.Remove(value))
-				{
-					Console.WriteLine("Didn't remove a shit...!".BrightRed());
-					return;
-				}
-
-				tree.Print();
-
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
-		}
-
-		private static void TestAllBinaryTrees()
-		{
-			Title("Testing all BinaryTrees...");
-
-			bool more;
+			Stopwatch clock = new Stopwatch();
 			BinarySearchTree<int> binarySearchTree = new BinarySearchTree<int>();
-			AVLTree<int> avlTree = new AVLTree<int>();
-			RedBlackTree<int> redBlackTree = new RedBlackTree<int>();
+			//AVLTree<int> avlTree = new AVLTree<int>();
+			//RedBlackTree<int> redBlackTree = new RedBlackTree<int>();
+			int[] values = GetRandomIntegers(true, 200000);
 
 			do
 			{
 				Console.Clear();
+				Title("Testing all BinaryTrees performance...");
+				Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
 				Console.WriteLine();
+				Console.WriteLine($"Array has {values.Length} items.");
 
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				DoTheTest(binarySearchTree, values, clock);
+				clock.Stop();
 
-				DoTheTest(binarySearchTree, values);
+				//DoTheTest(avlTree, values, clock);
+				//clock.Stop();
 
-				DoTheTest(avlTree, values);
-
-				DoTheTest(redBlackTree, values);
+				//DoTheTest(redBlackTree, values, clock);
+				//clock.Stop();
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -887,64 +1095,109 @@ namespace TestApp
 			}
 			while (more);
 
-			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, int[] array)
+			clock.Stop();
+
+			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, int[] values, Stopwatch clock)
 				where TNode : LinkedBinaryNode<TNode, int>
 			{
 				Console.WriteLine();
 				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
 				tree.Clear();
-				tree.Add(array);
 
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
-				tree.Print();
-				tree.Print(Orientation.Horizontal);
+				int count = tree.Count;
+				Debug.Assert(count == 0, "Values are not cleared correctly!");
+				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				clock.Restart();
 
-				Console.WriteLine("Test removing...".BrightRed());
-				int value = array.PickRandom();
-				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
-
-				if (!tree.Remove(value))
+				foreach (int v in values)
 				{
-					Console.WriteLine("Didn't remove a shit...!".BrightRed());
-					return;
+					tree.Add(v);
+					count++;
+					Debug.Assert(count == tree.Count, $"Values are not added correctly! {count} != {tree.Count}.");
 				}
 
-				tree.Print();
-				if (tree.AutoBalance || tree.IsBalanced()) return;
+				//if (!tree.AutoBalance) tree.Balance();
+				Console.WriteLine($"Added {count} items of {values.Length} in {clock.ElapsedMilliseconds} ms.");
+				tree.PrintProps();
 
-				Console.WriteLine("Test balancing...".BrightGreen());
-				tree.Balance();
-				tree.Print();
+				Console.WriteLine("Test search...".BrightYellow());
+				int found = 0;
+				int missed = 0;
+				clock.Restart();
+
+				foreach (int v in values)
+				{
+					if (tree.Contains(v))
+					{
+						found++;
+						continue;
+					}
+
+					missed++;
+					Console.WriteLine(missed <= 3
+										? $"Find missed a value: {v} :((".BrightRed()
+										: "FIND MISSED A LOT :((".BrightRed());
+					ConsoleHelper.Pause();
+					Console.WriteLine();
+					if (missed > 3) return;
+					tree.Iterate(tree.Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, e =>
+					{
+						if (e.Node.Value == v) Console.WriteLine("Found it!!");
+						return e.Node.Value != v;
+					});
+					//return;
+				}
+				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
+
+				Console.WriteLine("Test removing...".BrightRed());
+				int removed = 0;
+				missed = 0;
+				clock.Restart();
+
+				foreach (int v in values)
+				{
+					if (tree.Remove(v))
+					{
+						removed++;
+						Debug.Assert(count - removed == tree.Count, "Values are not removed correctly!");
+						continue;
+					}
+
+					missed++;
+					Console.WriteLine(missed <= 3
+										? $"Remove missed a value: {v} :((".BrightRed()
+										: "REMOVE MISSED A LOT. :((".BrightRed());
+					ConsoleHelper.Pause();
+					Console.WriteLine();
+					if (missed > 3) return;
+					tree.Iterate(tree.Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, e =>
+					{
+						if (e.Node.Value == v) Console.WriteLine("Found it!!");
+						return e.Node.Value != v;
+					});
+					//return;
+				}
+				Console.WriteLine($"Removed {removed} of {count} items in {clock.ElapsedMilliseconds} ms.");
 			}
 		}
 
-		private static void TestAllBinaryTreesPerformance()
+		private static void TestSortedSetPerformance()
 		{
-			Title("Testing all BinaryTrees performance...");
-			Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
-
 			bool more;
 			Stopwatch clock = new Stopwatch();
-			BinarySearchTree<int> binarySearchTree = new BinarySearchTree<int>();
-			AVLTree<int> avlTree = new AVLTree<int>();
-			RedBlackTree<int> redBlackTree = new RedBlackTree<int>();
+			// this is a RedBlackTree implementation by Microsoft, just testing it.
+			SortedSet<int> sortedSet = new SortedSet<int>();
+			int[] values = GetRandomIntegers(true, 200000);
 
 			do
 			{
 				Console.Clear();
+				Title("Testing SortedSet performance...");
+				Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
 				Console.WriteLine();
+				Console.WriteLine($"Array has {values.Length} items.");
 
-				int len = RNGRandomHelper.Next(100000, 200000);
-				HashSet<int> values = new HashSet<int>(GetRandomIntegers(len));
-				Console.WriteLine($"Array has {values.Count} items.");
-
-				DoTheTest(binarySearchTree, values, clock);
-				clock.Stop();
-
-				DoTheTest(avlTree, values, clock);
-				clock.Stop();
-
-				DoTheTest(redBlackTree, values, clock);
+				DoTheTest(sortedSet, values, clock);
 				clock.Stop();
 
 				Console.WriteLine();
@@ -957,36 +1210,36 @@ namespace TestApp
 			
 			clock.Stop();
 
-			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, HashSet<int> set, Stopwatch clock)
-				where TNode : LinkedBinaryNode<TNode, int>
+			static void DoTheTest<T>(SortedSet<T> sortedSet, T[] values, Stopwatch clock)
 			{
 				Console.WriteLine();
-				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
-				tree.Clear();
+				Console.WriteLine($"Testing {sortedSet.GetType().Name}...".BrightGreen());
+				sortedSet.Clear();
 
-				clock.Restart();
-				int count = tree.Count;
+				int count = sortedSet.Count;
 				Debug.Assert(count == 0, "Values are not cleared correctly!");
-				Console.WriteLine($"Original values: {set.Count.ToString().BrightYellow()}...");
+				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				clock.Restart();
 
-				foreach (int v in set)
+				foreach (T v in values)
 				{
-					tree.Add(v);
+					sortedSet.Add(v);
 					count++;
-					Debug.Assert(count == tree.Count, $"Values are not added correctly! {count} != {tree.Count}.");
+					Debug.Assert(count == sortedSet.Count, $"Values are not added correctly! {count} != {sortedSet.Count}.");
 				}
 
-				if (!tree.AutoBalance) tree.Balance();
-				Console.WriteLine($"Added {count} items of {set.Count} in {clock.ElapsedMilliseconds} ms.");
-				tree.PrintProps();
+				Console.WriteLine($"Added {count} items of {values.Length} in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine();
+				Console.WriteLine($"{"Count:".Yellow()} {sortedSet.Count.ToString().Underline()}.");
+				Console.WriteLine($"{"Minimum:".Yellow()} {sortedSet.Min} {"Maximum:".Yellow()} {sortedSet.Max}");
 
 				Console.WriteLine("Test search...".BrightYellow());
 				int found = 0;
 				clock.Restart();
 
-				foreach (int v in set)
+				foreach (T v in values)
 				{
-					if (tree.Contains(v))
+					if (sortedSet.Contains(v))
 					{
 						found++;
 						continue;
@@ -994,12 +1247,6 @@ namespace TestApp
 
 					Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
 					ConsoleHelper.Pause();
-					Console.WriteLine();
-					tree.Iterate(tree.Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, e =>
-					{
-						if (e.Value == v) Console.WriteLine("Found it!!");
-						return e.Value != v;
-					});
 					//return;
 				}
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
@@ -1008,22 +1255,16 @@ namespace TestApp
 				int removed = 0;
 				clock.Restart();
 
-				foreach (int v in set)
+				foreach (T v in values)
 				{
-					if (tree.Remove(v))
+					if (sortedSet.Remove(v))
 					{
 						removed++;
-						Debug.Assert(count - removed == tree.Count, $"Values are not removed correctly! {count} != {tree.Count}.");
+						Debug.Assert(count - removed == sortedSet.Count, $"Values are not removed correctly! {count} != {sortedSet.Count}.");
 						continue;
 					}
 					
 					Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
-					tree.Iterate(tree.Root, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, e =>
-					{
-						if (e.Value == v) Console.WriteLine("Found it!!");
-						return e.Value != v;
-					});
-
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 					//return;
@@ -1032,72 +1273,72 @@ namespace TestApp
 			}
 		}
 
-		private static void TestTreeEquality()
-		{
-			Title("Testing tree equality...");
+		//private static void TestTreeEquality()
+		//{
+		//	Title("Testing tree equality...");
 
-			bool more;
+		//	bool more;
 
-			do
-			{
-				Console.Clear();
-				Console.WriteLine();
+		//	do
+		//	{
+		//		Console.Clear();
+		//		Console.WriteLine();
 
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+		//		int len = RNGRandomHelper.Next(1, 12);
+		//		int[] values = GetRandomIntegers(true, len);
+		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
-				Console.WriteLine();
-				Console.WriteLine("Testing BinarySearchTree: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine();
-				LinkedBinaryTree<int> tree1 = new BinarySearchTree<int>();
-				LinkedBinaryTree<int> tree2 = new BinarySearchTree<int>();
-				DoTheTest(tree1, tree2, values);
+		//		Console.WriteLine();
+		//		Console.WriteLine("Testing BinarySearchTree: ".BrightBlack() + string.Join(", ", values));
+		//		Console.WriteLine();
+		//		LinkedBinaryTree<int> tree1 = new BinarySearchTree<int>();
+		//		LinkedBinaryTree<int> tree2 = new BinarySearchTree<int>();
+		//		DoTheTest(tree1, tree2, values);
 
-				Console.WriteLine();
-				Console.WriteLine("Testing BinarySearchTree and AVLTree: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine();
-				tree1.Clear();
-				tree2 = new AVLTree<int>();
-				DoTheTest(tree1, tree2, values);
+		//		Console.WriteLine();
+		//		Console.WriteLine("Testing BinarySearchTree and AVLTree: ".BrightBlack() + string.Join(", ", values));
+		//		Console.WriteLine();
+		//		tree1.Clear();
+		//		tree2 = new AVLTree<int>();
+		//		DoTheTest(tree1, tree2, values);
 
-				Console.WriteLine();
-				Console.WriteLine("Testing AVLTree: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine();
-				tree1 = new AVLTree<int>();
-				tree2 = new AVLTree<int>();
-				DoTheTest(tree1, tree2, values);
+		//		Console.WriteLine();
+		//		Console.WriteLine("Testing AVLTree: ".BrightBlack() + string.Join(", ", values));
+		//		Console.WriteLine();
+		//		tree1 = new AVLTree<int>();
+		//		tree2 = new AVLTree<int>();
+		//		DoTheTest(tree1, tree2, values);
 
-				Console.WriteLine();
-				Console.WriteLine("Testing RedBlackTree: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine();
-				RedBlackTree<int> rbTree1 = new RedBlackTree<int>();
-				RedBlackTree<int> rbTree2 = new RedBlackTree<int>();
-				DoTheTest(rbTree1, rbTree2, values);
+		//		Console.WriteLine();
+		//		Console.WriteLine("Testing RedBlackTree: ".BrightBlack() + string.Join(", ", values));
+		//		Console.WriteLine();
+		//		RedBlackTree<int> rbTree1 = new RedBlackTree<int>();
+		//		RedBlackTree<int> rbTree2 = new RedBlackTree<int>();
+		//		DoTheTest(rbTree1, rbTree2, values);
 
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
+		//		Console.WriteLine();
+		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		ConsoleKeyInfo response = Console.ReadKey(true);
+		//		Console.WriteLine();
+		//		more = response.Key == ConsoleKey.Y;
+		//	}
+		//	while (more);
 
-			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree1, LinkedBinaryTree<TNode, int> tree2, int[] array)
-				where TNode : LinkedBinaryNode<TNode, int>
-			{
-				Console.WriteLine();
-				Console.WriteLine($"Testing {tree1.GetType().Name} and {tree1.GetType().Name}...".BrightGreen());
-				tree1.Add(array);
-				tree2.Add(array);
+		//	static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree1, LinkedBinaryTree<TNode, int> tree2, int[] array)
+		//		where TNode : LinkedBinaryNode<TNode, int>
+		//	{
+		//		Console.WriteLine();
+		//		Console.WriteLine($"Testing {tree1.GetType().Name} and {tree1.GetType().Name}...".BrightGreen());
+		//		tree1.Add(array);
+		//		tree2.Add(array);
 
-				Console.WriteLine("InOrder1: ".BrightBlack() + string.Join(", ", tree1));
-				Console.WriteLine("InOrder2: ".BrightBlack() + string.Join(", ", tree2));
-				tree1.Print();
-				tree2.Print();
-				Console.WriteLine($"tree1 == tree2? {tree1.Equals(tree2).ToYesNo()}");
-			}
-		}
+		//		Console.WriteLine("InOrder1: ".BrightBlack() + string.Join(", ", tree1));
+		//		Console.WriteLine("InOrder2: ".BrightBlack() + string.Join(", ", tree2));
+		//		tree1.PrintWithProps();
+		//		tree2.PrintWithProps();
+		//		Console.WriteLine($"tree1 == tree2? {tree1.Equals(tree2).ToYesNo()}");
+		//	}
+		//}
 
 		private static void TestHeapAdd()
 		{
@@ -1134,7 +1375,7 @@ namespace TestApp
 				foreach (T value in array)
 				{
 					heap.Add(value);
-					//heap.Print();
+					//heap.PrintWithProps();
 				}
 
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
@@ -1854,47 +2095,72 @@ namespace TestApp
 		private static void TestSkipList()
 		{
 			bool more;
+			Stopwatch clock = new Stopwatch();
+			SkipList<int> skipList = new SkipList<int>();
+			int[] values = Enumerable.Range(1, 200_000).ToArray();
 
 			do
 			{
 				Console.Clear();
 				Title("Testing SkipList...");
+				Console.WriteLine($"Array has {values.Length} items.");
+				skipList.Clear();
 
-				int len = RNGRandomHelper.Next(3, 50);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine($"Array[{values.Length}]: ".BrightBlack() + string.Join(", ", values));
+				int count = skipList.Count;
+				Debug.Assert(count == 0, "Values are not cleared correctly!");
+				clock.Restart();
 
-				byte levels = (byte)RNGRandomHelper.Next(1, 16);
-				SkipList<int> skipList = new SkipList<int>(levels);
-
-				foreach (int v in values) 
-					skipList.Add(v);
-
-				Console.WriteLine();
-				Console.WriteLine();
-				Console.WriteLine($"SkipList [{skipList.Count}, levels = {skipList.MaximumLevel}]:");
-				skipList.WriteTo(Console.Out);
-
-				int value = values.PickRandom();
-				Console.WriteLine();
-				Console.WriteLine();
-				Console.WriteLine($"Test to find a random value in the list, Does it contain {value.ToString().BrightCyan()}? {skipList.Contains(value).ToYesNo()}");
-				int rnd = RNGRandomHelper.Next();
-				Console.WriteLine($"Does it contain {rnd.ToString().BrightCyan()}? {skipList.Contains(rnd).ToYesNo()}");
-
-				Console.WriteLine();
-				Console.WriteLine();
-				Console.WriteLine("Test to remove this same value from the list...");
-
-				if (!skipList.Remove(value))
+				foreach (int v in values)
 				{
-					Console.WriteLine("Didn't remove a shit...!".BrightRed());
-					return;
+					skipList.Add(v);
+					count++;
+					Debug.Assert(count == skipList.Count, $"Values are not added correctly! {count} != {skipList.Count}.");
 				}
 
-				Console.WriteLine($"Removed. now the list has {skipList.Count} items: [{string.Join(", ", skipList)}].");
+				Console.WriteLine();
+				Console.WriteLine($"Added {count} items of {values.Length} in {clock.ElapsedMilliseconds} ms. Count = {skipList.Count}, Level = {skipList.Level}.");
+				//skipList.WriteTo(Console.Out);
+
+				Console.WriteLine("Test search...".BrightYellow());
+				int found = 0;
+				clock.Restart();
+
+				foreach (int v in values)
+				{
+					if (skipList.Contains(v))
+					{
+						found++;
+						continue;
+					}
+
+					Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
+					ConsoleHelper.Pause();
+					Console.WriteLine();
+					//return;
+				}
+				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine();
+				Console.WriteLine("Test removing...".BrightRed());
+				int removed = 0;
+				clock.Restart();
+
+				foreach (int v in values)
+				{
+					if (skipList.Remove(v))
+					{
+						removed++;
+						Debug.Assert(count - removed == skipList.Count, $"Values are not removed correctly! {count} != {skipList.Count}.");
+						continue;
+					}
+					
+					Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
+					ConsoleHelper.Pause();
+					Console.WriteLine();
+					//return;
+				}
+				Console.WriteLine($"Removed {removed} of {count} items in {clock.ElapsedMilliseconds} ms.");
+
 				Console.WriteLine();
 				Console.WriteLine("Test to clear the list...");
 				skipList.Clear();
@@ -1902,7 +2168,9 @@ namespace TestApp
 				if (skipList.Count != 0)
 				{
 					Console.WriteLine($"Something went wrong, the count is {skipList.Count}...!".BrightRed());
-					return;
+					ConsoleHelper.Pause();
+					Console.WriteLine();
+					//return;
 				}
 
 				Console.WriteLine();
@@ -1912,6 +2180,8 @@ namespace TestApp
 				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
+			
+			clock.Stop();
 		}
 
 		private static void Title(string title)
@@ -1922,32 +2192,25 @@ namespace TestApp
 		}
 
 		[NotNull]
-		private static int[] GetRandomIntegers(int len = 0)
+		private static int[] GetRandomIntegers(int len = 0) { return GetRandomIntegers(false, len); }
+		[NotNull]
+		private static int[] GetRandomIntegers(bool unique, int len = 0)
 		{
 			if (len < 1) len = RNGRandomHelper.Next(1, 12);
-	
+
 			int[] values = new int[len];
 
-			for (int i = 0; i < len; i++)
+			if (unique)
 			{
-				values[i] = RNGRandomHelper.Next(1, short.MaxValue);
+				values = Enumerable.Range(1, len).ToArray();
+				values.Shuffle();
+			}
+			else
+			{
+				for (int i = 0; i < len; i++)
+					values[i] = RNGRandomHelper.Next(1, short.MaxValue);
 			}
 
-			return values;
-		}
-
-		[NotNull]
-		private static double[] GetRandomDoubles(int len = 0)
-		{
-			if (len < 1) len = RNGRandomHelper.Next(1, 12);
-
-			double[] values = new double[len];
-
-			for (int i = 0; i < len; i++)
-			{
-				values[i] = (i + 1) * RNGRandomHelper.NextDouble();
-			}
-	
 			return values;
 		}
 
@@ -2025,18 +2288,18 @@ public static class Extension
 		Console.WriteLine($"{"Minimum:".Yellow()} {thisValue.Minimum()} {"Maximum:".Yellow()} {thisValue.Maximum()}");
 	}
 
-	public static void Print<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, bool diagnosticInfo = true)
+	public static void PrintWithProps<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue)
 		where TNode : LinkedBinaryNode<TNode, T>
 	{
 		PrintProps(thisValue);
-		thisValue.Print(Orientation.Vertical, diagnosticInfo);
+		thisValue.Print();
 	}
 
-	public static void Print<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, Orientation orientation, bool diagnosticInfo = true)
+	public static void Print<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue)
 		where TNode : LinkedBinaryNode<TNode, T>
 	{
 		Console.WriteLine();
-		thisValue.WriteTo(Console.Out, orientation, diagnosticInfo);
+		thisValue.WriteTo(Console.Out);
 	}
 
 	public static void Print<T>([NotNull] this ArrayBinaryTree<T> thisValue, bool diagnosticInfo = true)

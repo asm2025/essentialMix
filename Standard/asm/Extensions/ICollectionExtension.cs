@@ -11,15 +11,6 @@ namespace asm.Extensions
 {
 	public static class ICollectionExtension
 	{
-		public static void Add([NotNull] this ICollection thisValue, [NotNull] params object[] values) { AddRange(thisValue, values); }
-		public static void Add<T>([NotNull] this ICollection<T> thisValue, [NotNull] params T[] values) { AddRange(thisValue, values); }
-
-		public static void AddRange([NotNull] this ICollection thisValue, [NotNull] IEnumerable values)
-		{
-			foreach (object item in values)
-				thisValue.Add(item);
-		}
-
 		public static void AddRange<T>([NotNull] this ICollection<T> thisValue, [NotNull] IEnumerable<T> values)
 		{
 			foreach (T item in values)

@@ -60,19 +60,19 @@ namespace asm.Helpers
 		private static readonly ConcurrentDictionary<Type, (object Minimum, object Maximum)> __typeBoundsCache =
 			new ConcurrentDictionary<Type, (object Minimum, object Maximum)>
 			{
-				{ typeof(bool), (false, true) },
-				{ typeof(char), (char.MinValue, char.MaxValue) },
-				{ typeof(sbyte), (sbyte.MinValue, sbyte.MaxValue) },
-				{ typeof(byte), (byte.MinValue, byte.MaxValue) },
-				{ typeof(short), (short.MinValue, short.MaxValue) },
-				{ typeof(ushort), (ushort.MinValue, ushort.MaxValue) },
-				{ typeof(int), (int.MinValue, int.MaxValue) },
-				{ typeof(uint), (uint.MinValue, uint.MaxValue) },
-				{ typeof(long), (long.MinValue, long.MaxValue) },
-				{ typeof(ulong), (ulong.MinValue, ulong.MaxValue) },
-				{ typeof(float), (float.MinValue, float.MaxValue) },
-				{ typeof(double), (double.MinValue, double.MaxValue) },
-				{ typeof(decimal), (decimal.MinValue, decimal.MaxValue) },
+				[typeof(bool)] = (false, true),
+				[typeof(char)] = (char.MinValue, char.MaxValue),
+				[typeof(sbyte)] = (sbyte.MinValue, sbyte.MaxValue),
+				[typeof(byte)] = (byte.MinValue, byte.MaxValue),
+				[typeof(short)] = (short.MinValue, short.MaxValue),
+				[typeof(ushort)] = (ushort.MinValue, ushort.MaxValue),
+				[typeof(int)] = (int.MinValue, int.MaxValue),
+				[typeof(uint)] = (uint.MinValue, uint.MaxValue),
+				[typeof(long)] = (long.MinValue, long.MaxValue),
+				[typeof(ulong)] = (ulong.MinValue, ulong.MaxValue),
+				[typeof(float)] = (float.MinValue, float.MaxValue),
+				[typeof(double)] = (double.MinValue, double.MaxValue),
+				[typeof(decimal)] = (decimal.MinValue, decimal.MaxValue)
 			};
 
 		public static (T Miniumum, T Maximum) Bounds<T>()
@@ -88,7 +88,7 @@ namespace asm.Helpers
 				{
 					EnumHelper.GetBoundaries(type, out Enum minimum, out Enum maximum);
 					(T Miniumum, T Maximum) bounds = ((T)(object)minimum, (T)(object)maximum);
-					__typeBoundsCache.Add(type, bounds);
+					__typeBoundsCache.TryAdd(type, bounds);
 					return bounds;
 				}
 

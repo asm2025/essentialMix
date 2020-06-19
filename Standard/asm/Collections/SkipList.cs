@@ -27,17 +27,12 @@ namespace asm.Collections
 	 * https://www.sanfoundry.com/java-program-implement-skip-list/
 	 * https://stackoverflow.com/questions/12067045/random-level-function-in-skip-list
 	*/
-	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerDisplay("Count = {Count}, Level = {Level}")]
 	[Serializable]
 	public sealed class SkipList<T> : ICollection<T>, ICollection
 	{
-		private const byte MAX_LEVEL_MIN = 1;
-		private const byte MAX_LEVEL_MAX = byte.MaxValue;
-		private const byte MAX_LEVEL_DEF = 3;
-
-		private const float PRIORITY_MIN = 0.1f;
-		private const float PRIORITY_MAX = 1.0f;
-		private const float PRIORITY_DEF = 0.5f;
+		private const int MAX_LEVEL = 32;
+		private const double PROBABILITY = 0.5d;
 
 		[DebuggerDisplay("{Value}")]
 		internal class Node
@@ -45,7 +40,7 @@ namespace asm.Collections
 			[NotNull]
 			internal Node[] Forward;
 
-			public Node(T value, byte level)
+			public Node(T value, int level)
 			{
 				Value = value;
 				Forward = new Node[level + 1];
@@ -63,16 +58,16 @@ namespace asm.Collections
 			private readonly SkipList<T> _list;
 			private readonly int _version;
 			private readonly Node _root;
-			private readonly byte _level;
+			private readonly int _level;
 
 			private Node _current;
 			private bool _started;
 			private bool _done;
 
-			internal Enumerator([NotNull] SkipList<T> list, [NotNull] Node root, byte level)
+			internal Enumerator([NotNull] SkipList<T> list, [NotNull] Node root, int level)
 				: this()
 			{
-				if (!level.InRange(byte.MinValue, list.Level)) throw new ArgumentOutOfRangeException(nameof(level));
+				if (!level.InRange(0, list.Level)) throw new ArgumentOutOfRangeException(nameof(level));
 				_list = list;
 				_version = _list._version;
 				_root = root;
@@ -144,50 +139,14 @@ namespace asm.Collections
 		private object _syncRoot;
 
 		public SkipList()
-			: this(MAX_LEVEL_DEF, PRIORITY_DEF, null)
-		{
-		}
-
-		public SkipList(byte maximumLevel)
-			: this(maximumLevel, PRIORITY_DEF, null)
-		{
-		}
-
-		public SkipList(float probability)
-			: this(MAX_LEVEL_DEF, probability, null)
+			: this(null)
 		{
 		}
 
 		public SkipList(IComparer<T> comparer)
-			: this(MAX_LEVEL_DEF, PRIORITY_DEF, comparer)
 		{
-		}
-
-		public SkipList(byte maximumLevel, float probability)
-			: this(maximumLevel, probability, null)
-		{
-		}
-
-		public SkipList(byte maximumLevel, IComparer<T> comparer)
-			: this(maximumLevel, PRIORITY_DEF, comparer)
-		{
-		}
-
-		public SkipList(float probability, IComparer<T> comparer)
-			: this(MAX_LEVEL_DEF, probability, comparer)
-		{
-		}
-
-		public SkipList(byte maximumLevel, float probability, IComparer<T> comparer)
-		{
-			// todo what's a good maximum level?
-			if (!maximumLevel.InRange(MAX_LEVEL_MIN, MAX_LEVEL_MAX)) throw new ArgumentOutOfRangeException(nameof(maximumLevel));
-			// todo what's a good probability value?
-			if (!probability.InRange(PRIORITY_MIN, PRIORITY_MAX)) throw new ArgumentOutOfRangeException(nameof(probability));
 			Comparer = comparer ?? Comparer<T>.Default;
-			MaximumLevel = maximumLevel;
-			Probability = probability;
-			Header = new Node(default(T), MaximumLevel);
+			Header = new Node(default(T), MAX_LEVEL);
 		}
 
 		//public SkipList([NotNull] IEnumerable<T> collection)
@@ -196,16 +155,14 @@ namespace asm.Collections
 		//}
 
 		//public SkipList([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
-		//	: this(collection.FastCount(), PRIORITY_DEF, comparer)
+		//	: this(collection.FastCount(), PROBABILITY, comparer)
 		//{
 		//	Add(collection);
 		//}
 
 		[NotNull]
 		public IComparer<T> Comparer { get; }
-		public byte Level { get; private set; }
-		public byte MaximumLevel { get; }
-		public float Probability { get; }
+		public int Level { get; private set; }
 		[NotNull]
 		internal Node Header { get; private set; }
 
@@ -237,7 +194,7 @@ namespace asm.Collections
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 		
-		public Enumerator Enumerate(byte level)
+		public Enumerator Enumerate(int level)
 		{
 			return new Enumerator(this, Header, level);
 		}
@@ -248,7 +205,7 @@ namespace asm.Collections
 			if (ReferenceEquals(value, null)) throw new ArgumentNullException(nameof(value));
 
 			// create update array and initialize it
-			Node[] update = new Node[MaximumLevel + 1];
+			Node[] update = new Node[MAX_LEVEL + 1];
 			Node node = GetNode(value, update);
 
 			/*
@@ -259,7 +216,7 @@ namespace asm.Collections
 			if (node != null && Comparer.IsEqual(node.Value, value)) return;
 			
 			// Generate a random level for node
-			byte rLevel = RandomLevel();
+			int rLevel = RandomLevel();
 
 			/*
 			* if random level is greater than list's current level (node with
@@ -268,7 +225,7 @@ namespace asm.Collections
 			*/
 			if (rLevel > Level)
 			{
-				for (int i = Level + 1; i < rLevel + 1; i++)
+				for (int i = Level + 1; i <= rLevel; i++)
 					update[i] = Header;
 
 				// Update the list current level
@@ -281,7 +238,7 @@ namespace asm.Collections
 			// insert node by rearranging pointers
 			for (int i = 0; i <= rLevel; i++)
 			{
-				if (update[i] == null) continue;
+				//if (update[i] == null) continue;
 				newNode.Forward[i] = update[i].Forward[i];
 				update[i].Forward[i] = newNode;
 			}
@@ -297,7 +254,7 @@ namespace asm.Collections
 			if (Count == 0) return true;
 
 			// create update array and initialize it
-			Node[] update = new Node[MaximumLevel + 1];
+			Node[] update = new Node[MAX_LEVEL + 1];
 			Node node = GetNode(value, update);
 			if (node == null || !Comparer.IsEqual(node.Value, value)) return false;
 
@@ -383,14 +340,18 @@ namespace asm.Collections
 			}
 		}
 
-		private byte RandomLevel()
+		private int RandomLevel()
 		{
 			/*
 			 * System.Random should provide a random variable whose probability distribution is (approximately)
 			 * a discrete uniform distribution. So don't use RNGRandomHelper.
 			 */
-			byte lvl = (byte)(Math.Log(1.0f -(float)_random.NextDouble()) / Math.Log(1.0f - Probability));
-			return Math.Min(lvl, MaximumLevel);
+			int lvl = 0;
+
+			while (_random.NextDouble() < PROBABILITY && lvl < MAX_LEVEL)
+				lvl++;
+
+			return lvl;
 		}
 
 		private Node GetNode([NotNull] T value, Node[] update = null)
@@ -421,7 +382,7 @@ namespace asm.Collections
 	{
 		public static void WriteTo<T>([NotNull] this SkipList<T> thisValue, [NotNull] TextWriter writer)
 		{
-			for (byte i = 0; i <= thisValue.Level; i++)
+			for (int i = 0; i <= thisValue.Level; i++)
 			{
 				writer.Write($"Level {i}: ");
 

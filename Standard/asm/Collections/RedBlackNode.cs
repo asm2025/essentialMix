@@ -18,12 +18,6 @@ namespace asm.Collections
 		/// </summary>
 		public bool Color { get; internal set; } = true;
 
-		public bool HasRedParent => Parent != null && Parent.Color;
-
-		public bool HasRedLeft => Left != null && Left.Color;
-
-		public bool HasRedRight => Right != null && Right.Color;
-
 		/// <inheritdoc />
 		protected internal override string ToString(int depth)
 		{

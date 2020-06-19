@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using asm.Exceptions.Collections;
@@ -2619,7 +2618,7 @@ namespace asm.Collections
 
 				int distance = 0;
 				ArrayBinaryNode<T> node = new ArrayBinaryNode<T>(tree);
-				IDictionary<int, StringBuilder> lines = new Dictionary<int, StringBuilder>();
+				IDictionary<int, StringBuilder> lines = new SortedDictionary<int, StringBuilder>();
 				tree.Iterate(0, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, (e, depth) =>
 				{
 					StringBuilder line = lines.GetOrAdd(depth);
@@ -2653,8 +2652,8 @@ namespace asm.Collections
 					distance = line.Length;
 				});
 
-				foreach (StringBuilder sb in lines.OrderBy(e => e.Key)
-												.Select(e => e.Value))
+				// todo test
+				foreach (StringBuilder sb in lines.Values)
 				{
 					writer.WriteLine(sb.ToString());
 				}

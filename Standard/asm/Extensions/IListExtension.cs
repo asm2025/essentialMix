@@ -1177,7 +1177,19 @@ namespace asm.Extensions
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static void Shuffle<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1)
+		{
+			// Fisher-Yates shuffle
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+
+			for (int i = count - 1; i > index; i--)
+			{
+				int pick = (int)Math.Floor((i + 1) * RandomHelper.NextDouble());
+				FastSwap(thisValue, i, pick);
+			}
+		}
+
 		public static void Swap<T>([NotNull] this IList<T> thisValue, int index1, int index2)
 		{
 			if (!index1.InRangeRx(0, thisValue.Count)) throw new ArgumentOutOfRangeException(nameof(index1));
