@@ -4,7 +4,7 @@ using asm.Patterns.Object;
 namespace asm
 {
 	// bug: something wrong with this timer. The second time it's called causes a NullReferenceException
-	public class MMTimer : Disposable, IDisposable
+	public class MMTimer : Disposable
 	{
 		private uint _id;
 
@@ -44,9 +44,8 @@ namespace asm
 		/// <inheritdoc />
 		protected override void Dispose(bool disposing)
 		{
+			if (disposing) Stop();
 			base.Dispose(disposing);
-			if (!disposing) return;
-			Stop();
 		}
 
 		protected virtual void OnTick(EventArgs e)

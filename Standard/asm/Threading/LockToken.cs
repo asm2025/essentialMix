@@ -1,4 +1,3 @@
-using System;
 using asm.Helpers;
 using asm.Patterns.Object;
 
@@ -12,7 +11,7 @@ namespace asm.Threading
 	/// is not thread-safe - LockTokens should not be shared between
 	/// threads.
 	/// </summary>
-	public class LockToken : Disposable, IDisposable
+	public class LockToken : Disposable
 	{
 		/// <summary>
 		/// The lock this token has been created by.

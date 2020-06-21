@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Patterns.Layout;
 using JetBrains.Annotations;
@@ -18,6 +17,7 @@ namespace asm.Collections
 
 		/// <inheritdoc />
 		public BinarySearchTree() 
+			: this((IComparer<T>)null)
 		{
 		}
 
@@ -29,7 +29,7 @@ namespace asm.Collections
 
 		/// <inheritdoc />
 		public BinarySearchTree([NotNull] IEnumerable<T> collection)
-			: base(collection)
+			: this(collection, null)
 		{
 		}
 
@@ -221,52 +221,40 @@ namespace asm.Collections
 				if (!started)
 				{
 					started = true;
-					previous = e.Node.Value;
+					previous = e.Value;
 					return true;
 				}
 
-				isValid = Comparer.IsLessThan(previous, e.Node.Value);
+				isValid = Comparer.IsLessThan(previous, e.Value);
 				return isValid;
 			});
 			return isValid;
 		}
 
 		/// <inheritdoc />
-		public override bool IsBalanced(LinkedBinaryNode<T> node)
+		public override bool IsBalanced()
 		{
-			return node == null
-					|| node.IsLeaf
-					|| Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR
-					&& (node.Left == null 
-						|| node.Left.IsLeaf 
-						|| Math.Abs(node.Left.BalanceFactor) <= BALANCE_FACTOR)
-					&& (node.Right == null 
-						|| node.Right.IsLeaf 
-						|| Math.Abs(node.Right.BalanceFactor) <= BALANCE_FACTOR);
-		}
-
-		/// <summary>
-		/// <inheritdoc />
-		/// <para><see href="https://en.wikipedia.org/wiki/AVL_tree">AVLTree</see> balance implementation.</para>
-		/// </summary>
-		public override void Balance()
-		{
-			if (Root == null || Root.IsLeaf) return;
-
-			Queue<LinkedBinaryNodeInfo> unbalancedNodes = new Queue<LinkedBinaryNodeInfo>();
-
-			// find all unbalanced nodes, will use a post order traversal
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e =>
+			if (Root == null || Root.IsLeaf) return true;
+			
+			bool balanced = true;
+			Iterate(Root, BinaryTreeTraverseMethod.LevelOrder, HorizontalFlow.LeftToRight, e =>
 			{
-				if (!IsBalanced(e.Node)) unbalancedNodes.Enqueue(e);
+				balanced &= IsBalancedLocal(e);
+				return balanced;
 			});
+			return balanced;
 
-			while (unbalancedNodes.Count > 0)
+			static bool IsBalancedLocal(LinkedBinaryNode<T> node)
 			{
-				LinkedBinaryNodeInfo current = unbalancedNodes.Dequeue();
-				// check again if status changed
-				if (IsBalanced(current.Node)) continue;
-				Balance(current);
+				return node == null
+						|| node.IsLeaf
+						|| Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR
+						&& (node.Left == null 
+							|| node.Left.IsLeaf 
+							|| Math.Abs(node.Left.BalanceFactor) <= BALANCE_FACTOR)
+						&& (node.Right == null 
+							|| node.Right.IsLeaf 
+							|| Math.Abs(node.Right.BalanceFactor) <= BALANCE_FACTOR);
 			}
 		}
 
@@ -275,9 +263,7 @@ namespace asm.Collections
 		{
 			base.FromLevelOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e => SetHeight(e.Node));
-			if (!AutoBalance) return;
-			Balance();
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -285,9 +271,7 @@ namespace asm.Collections
 		{
 			base.FromPreOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e => SetHeight(e.Node));
-			if (!AutoBalance) return;
-			Balance();
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -295,9 +279,7 @@ namespace asm.Collections
 		{
 			base.FromInOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e => SetHeight(e.Node));
-			if (!AutoBalance) return;
-			Balance();
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -305,9 +287,7 @@ namespace asm.Collections
 		{
 			base.FromPostOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e => SetHeight(e.Node));
-			if (!AutoBalance) return;
-			Balance();
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -315,9 +295,7 @@ namespace asm.Collections
 		{
 			base.FromInOrderAndLevelOrder(inOrderCollection, levelOrderCollection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e => SetHeight(e.Node));
-			if (!AutoBalance) return;
-			Balance();
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -325,9 +303,7 @@ namespace asm.Collections
 		{
 			base.FromInOrderAndPreOrder(inOrderCollection, preOrderCollection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e => SetHeight(e.Node));
-			if (!AutoBalance) return;
-			Balance();
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -335,94 +311,7 @@ namespace asm.Collections
 		{
 			base.FromInOrderAndPostOrder(inOrderCollection, postOrderCollection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, e => SetHeight(e.Node));
-			if (!AutoBalance) return;
-			Balance();
-		}
-
-		// BUG: not stable at large numbers of nodes 5000+
-		protected void Balance(LinkedBinaryNodeInfo nodeInfo)
-		{
-			/*
-			 * There are 4 cases for unbalanced nodes
-			 * 1. Left-Left Case: y is left child of z and x is left child of y
-			 *
-			 *	       z                                      y 
-			 *	      / \                                   /   \
-			 *	     y   T4      Right Rotate(z) ->        x      z
-			 *	    / \                                  /  \    /  \ 
-			 *	   x   T3                               T1  T2  T3  T4
-			 *	  / \
-			 *	T1   T2
-			 *
-			 * 2. Left-Right Case: y is left child of z and x is right child of y
-			 *
-			 *	     z                               z                           x
-			 *	    / \                            /   \                        /  \ 
-			 *	   y   T4  Left Rotate(y) ->      x    T4  Right Rotate(z) -> y     z
-			 *	  / \                            /  \                        / \   / \
-			 *	T1   x                          y   T3                     T1  T2 T3  T4
-			 *	    / \                        / \
-			 *	  T2   T3                    T1   T2
-			 *
-			 * 3. Right-Right Case: y is right child of z and x is right child of y
-			 *
-			 *	  z                                y
-			 *	 /  \                            /   \ 
-			 *	T1   y     Left Rotate(z)       z      x
-			 *	    /  \   - - - - - - - ->    / \    / \
-			 *	   T2   x                     T1  T2 T3  T4
-			 *	       / \
-			 *	     T3  T4
-			 *
-			 * 4. Right-Left Case: y is right child of z and x is left child of y
-			 *
-			 *	   z                            z                            x
-			 *	  / \                          / \                          /  \ 
-			 *	T1   y   Right Rotate (y)    T1   x      Left Rotate(z)   z      y
-			 *	    / \  - - - - - - - - ->      / \   - - - - - - - ->  / \    / \
-			 *	   x   T4                       T2  y                   T1  T2 T3  T4
-			 *	  / \                              / \
-			 *	T2   T3                           T3  T4
-			 */
-			if (IsBalanced(nodeInfo.Node)) return;
-
-			Queue<LinkedBinaryNodeInfo> queue = new Queue<LinkedBinaryNodeInfo>();
-			queue.Enqueue(nodeInfo);
-
-			while (queue.Count > 0)
-			{
-				nodeInfo = queue.Dequeue();
-				if (Math.Abs(nodeInfo.Node.BalanceFactor) <= BALANCE_FACTOR) continue;
-
-				bool changed = false;
-
-				if (nodeInfo.Node.BalanceFactor > 1) // left heavy
-				{
-					if (nodeInfo.Node.Left.BalanceFactor < 0)
-					{
-						// duplicate values means nodes will never be balanced!
-						if (Comparer.IsEqual(nodeInfo.Node.Value, nodeInfo.Node.Left.Value)) throw new DuplicateKeyException();
-						RotateLeft(NodeInfo(nodeInfo.Node.Left, nodeInfo));
-					}
-
-					nodeInfo = RotateRight(nodeInfo);
-					changed = true;
-				}
-				else if (nodeInfo.Node.BalanceFactor < 1) // right heavy
-				{
-					if (nodeInfo.Node.Right.BalanceFactor > 0) RotateRight(NodeInfo(nodeInfo.Node.Right, nodeInfo));
-					// duplicate values means nodes will never be balanced!
-					if (Comparer.IsEqual(nodeInfo.Node.Value, nodeInfo.Node.Right.Value)) throw new DuplicateKeyException();
-					nodeInfo = RotateLeft(nodeInfo);
-					changed = true;
-				}
-
-				if (!changed) continue;
-				if (Math.Abs(nodeInfo.Node.BalanceFactor) > BALANCE_FACTOR) queue.Enqueue(nodeInfo);
-				if (nodeInfo.Node.Left != null && Math.Abs(nodeInfo.Node.Left.BalanceFactor) > BALANCE_FACTOR) queue.Enqueue(NodeInfo(nodeInfo.Node.Left, nodeInfo));
-				if (nodeInfo.Node.Right != null && Math.Abs(nodeInfo.Node.Right.BalanceFactor) > BALANCE_FACTOR) queue.Enqueue(NodeInfo(nodeInfo.Node.Right, nodeInfo));
-			}
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
 		}
 	}
 }

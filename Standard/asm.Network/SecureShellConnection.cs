@@ -8,7 +8,7 @@ using Renci.SshNet;
 
 namespace asm.Network
 {
-	public class SecureShellConnection : Disposable, IDisposable
+	public class SecureShellConnection : Disposable
 	{
 		private const int PORT_DEF = 22;
 		private const int TIMEOUT_DEF = 30000;

@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using asm.Collections;
 using asm.Extensions;
 using JetBrains.Annotations;
@@ -23,7 +22,6 @@ namespace asm.Other.JonSkeet.MiscUtil.Collections
 	/// unless TrimToSize is called.
 	/// </summary>
 	[DebuggerDisplay("Count = {Count}")]
-	[ComVisible(true)]
 	[Serializable]
 	public class RandomAccessQueue : ICollection, IEnumerable, ICloneable
 	{
@@ -260,12 +258,13 @@ namespace asm.Other.JonSkeet.MiscUtil.Collections
 		{
 			if (array.Rank != 1) throw new RankException();
 			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
+			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, Count);
+			
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
 			Type sourceType = typeof(IItem);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
-			if (Count == 0) return;
 			CopyTo(objects, arrayIndex);
 		}
 
@@ -563,7 +562,6 @@ namespace asm.Other.JonSkeet.MiscUtil.Collections
 	/// unless TrimToSize is called.
 	/// </summary>
 	[DebuggerDisplay("Count = {Count}")]
-	[ComVisible(true)]
 	[Serializable]
 	public class RandomAccessQueue<T> : IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>, ICloneable
 	{
@@ -778,6 +776,7 @@ namespace asm.Other.JonSkeet.MiscUtil.Collections
 		{
 			if (array.Rank != 1) throw new RankException();
 			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
+			if (Count == 0) return;
 
 			if (array is T[] tArray)
 			{
@@ -792,11 +791,11 @@ namespace asm.Other.JonSkeet.MiscUtil.Collections
 			 * we can't figure out if we can successfully copy the element beforehand.
 			 */
 			array.Length.ValidateRange(arrayIndex, Count);
+
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
 			Type sourceType = typeof(T);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
-			if (Count == 0) return;
 
 			try
 			{

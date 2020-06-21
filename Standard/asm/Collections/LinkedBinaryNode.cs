@@ -105,30 +105,6 @@ namespace asm.Collections
 			other.Value = Value;
 			Value = tmp;
 		}
-	
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public BinaryNodeParentType ParentType(TNode parent)
-		{
-			return parent == null
-						? BinaryNodeParentType.Root
-						: ReferenceEquals(parent._nodes[LEFT], this)
-							? BinaryNodeParentType.Left
-							: ReferenceEquals(parent._nodes[RIGHT], this)
-								? BinaryNodeParentType.Right
-								: BinaryNodeParentType.None;
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public BinaryNodeChildType ChildType(TNode child)
-		{
-			return child == null
-						? BinaryNodeChildType.None
-						: ReferenceEquals(_nodes[LEFT], child)
-							? BinaryNodeChildType.Left
-							: ReferenceEquals(_nodes[RIGHT], child)
-								? BinaryNodeChildType.Right
-								: BinaryNodeChildType.None;
-		}
 
 		public static implicit operator T([NotNull] LinkedBinaryNode<TNode, T> node) { return node.Value; }
 	}

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using asm.Other.Microsoft.Collections;
 using JetBrains.Annotations;
 
@@ -13,7 +12,6 @@ namespace asm.Collections
 	/// <typeparam name="T">The element type of the tree</typeparam>
 	// Udemy - Code With Mosh - Data Structures & Algorithms part 2
 	// https://www.geeksforgeeks.org/types-of-tries/?ref=leftbar-rightbar
-	[ComVisible(false)]
 	[Serializable]
 	public class Trie<T>
 		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible

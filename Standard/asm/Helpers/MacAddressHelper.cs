@@ -18,7 +18,8 @@ namespace asm.Helpers
 
 			foreach (KeyValuePair<string, Regex[]> pair in FormatRegularExpressions)
 			{
-				allFormatRegularExpressions.Add(pair.Value);
+				foreach (Regex regex in pair.Value)
+					allFormatRegularExpressions.Add(regex);
 			}
 
 			AllFormatRegularExpressions = allFormatRegularExpressions.ToArray();

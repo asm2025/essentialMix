@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
 using System.Security.Permissions;
+using asm.Exceptions;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using JetBrains.Annotations;
@@ -14,6 +15,7 @@ namespace asm.Other.Microsoft.Collections
 {
 	// based on https://github.com/microsoft/referencesource/blob/master/System/compmod/system/collections/generic/linkedlist.cs
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(asm_Mscorlib_CollectionDebugView<>))]
 	[ComVisible(false)]
 	public class SinglyLinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
 	{
@@ -405,6 +407,7 @@ namespace asm.Other.Microsoft.Collections
 
 		public void CopyTo(T[] array, int index)
 		{
+			if (Count == 0) return;
 			array.Length.ValidateRange(index, Count);
 
 			SinglyLinkedListNode<T> node = _head;
@@ -421,6 +424,7 @@ namespace asm.Other.Microsoft.Collections
 		{
 			if (array.Rank != 1) throw new RankException();
 			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
+			if (Count == 0) return;
 
 			if (array is T[] tArray)
 			{
@@ -435,6 +439,7 @@ namespace asm.Other.Microsoft.Collections
 			// we can't figure out if we can successfully copy the element beforehand.
 			//
 			array.Length.ValidateRange(index, Count);
+
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
 			Type sourceType = typeof(T);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
@@ -462,14 +467,15 @@ namespace asm.Other.Microsoft.Collections
 		{
 			SinglyLinkedListNode<T> previous = null, next = _head;
 
-			while (next != null && next != node)
+			do
 			{
+				if (next == node) return previous;
 				previous = next;
-				// don't use next._next because it could be the header again
-				next = next.Next;
+				next = next._next;
 			}
+			while (next != _head);
 
-			return previous;
+			return null;
 		}
 
 		private void InsertNodeAfterInternal(SinglyLinkedListNode<T> node, [NotNull] SinglyLinkedListNode<T> newNode)
@@ -509,14 +515,21 @@ namespace asm.Other.Microsoft.Collections
 			Debug.Assert(node._list == this, "Deleting the node from another list!");
 			Debug.Assert(_head != null, "This method shouldn't be called on empty list!");
 
-			SinglyLinkedListNode<T> previous = GetPreviousNode(node);
-
-			if (previous == null)
+			if (_head == node)
 			{
-				_head = _tail = null;
+				if (_head._next == _head)
+				{
+					_head = _tail = null;
+				}
+				else
+				{
+					_head = _head._next;
+					_tail._next = _head;
+				}
 			}
 			else
 			{
+				SinglyLinkedListNode<T> previous = GetPreviousNode(node) ?? throw new NotFoundException();
 				previous._next = node._next;
 				if (_tail == node) _tail = previous;
 			}

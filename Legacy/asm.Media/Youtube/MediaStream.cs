@@ -44,8 +44,8 @@ namespace asm.Media.Youtube
 
 		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(disposing);
 			if (disposing) ObjectHelper.Dispose(ref _innerStream);
+			base.Dispose(disposing);
 		}
 
 		public MediaStreamInfo Info { get; }

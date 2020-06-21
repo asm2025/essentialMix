@@ -10,7 +10,6 @@ using JetBrains.Annotations;
 
 namespace asm.Windows.Controls
 {
-	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[DefaultEvent("MaskInputRejected")]
 	[DefaultBindingProperty("Text")]

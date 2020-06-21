@@ -1,12 +1,10 @@
 using System;
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 
 namespace asm.Events
 {
 	[Serializable]
-	[ComVisible(true)]
 	public class HttpRequestExceptionEventArgs : ExceptionEventArgs
 	{
 		/// <inheritdoc />

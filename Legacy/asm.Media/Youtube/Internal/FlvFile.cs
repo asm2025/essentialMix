@@ -9,7 +9,7 @@ using JetBrains.Annotations;
 
 namespace asm.Media.Youtube.Internal
 {
-	internal class FlvFile : Disposable, IDisposable
+	internal class FlvFile : Disposable
 	{
 		private readonly long _fileLength;
 		private readonly string _outputPath;

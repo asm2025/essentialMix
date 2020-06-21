@@ -254,7 +254,6 @@ namespace asm.Data.Extensions
 
 		public static void CopyTo([NotNull] this DataSet thisValue, [NotNull] DataSet target, bool overwrite = false)
 		{
-			if (target == null) throw new ArgumentNullException(nameof(target));
 			if (thisValue.Tables.Count == 0) return;
 			if (overwrite) target.Tables.Remove(t => thisValue.Tables.Contains(t.TableName));
 			target.Merge(thisValue, true, MissingSchemaAction.AddWithKey);
@@ -262,7 +261,6 @@ namespace asm.Data.Extensions
 
 		public static void CopyFrom([NotNull] this DataSet thisValue, [NotNull] DataSet source, bool overwrite = false)
 		{
-			if (source == null) throw new ArgumentNullException(nameof(source));
 			if (source.Tables.Count == 0) return;
 			if (overwrite) thisValue.Tables.Remove(t => source.Tables.Contains(t.TableName));
 			thisValue.Merge(thisValue, true, MissingSchemaAction.AddWithKey);

@@ -5,16 +5,19 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Threading;
+
 using asm.Comparers;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Helpers;
+
 using JetBrains.Annotations;
 
 namespace asm.Other.Microsoft.Collections
 {
 	// based on https://github.com/microsoft/referencesource/blob/master/mscorlib/system/collections/generic/list.cs
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(asm_Mscorlib_CollectionDebugView<>))]
 	[Serializable]
 	public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	{
@@ -46,7 +49,7 @@ namespace asm.Other.Microsoft.Collections
 			{
 				get
 				{
-					lock(_root)
+					lock (_root)
 					{
 						return ((ICollection<T>)_list).IsReadOnly;
 					}
@@ -406,45 +409,51 @@ namespace asm.Other.Microsoft.Collections
 		// required, the capacity of the list is increased to twice the previous
 		// capacity or the new size, whichever is larger.  Ranges may be added
 		// to the end of the list by setting index to the List's size.
-		public void InsertRange(int index, [NotNull] IEnumerable<T> collection)
+		public void InsertRange(int index, [NotNull] IEnumerable<T> enumerable)
 		{
 			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 
-			if (collection is ICollection<T> c)
+			switch (enumerable)
 			{
-				int count = c.Count;
-				if (count == 0) return;
-				EnsureCapacity(Count + count);
-				if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
-
-				// If we're inserting a List into itself, we want to be able to deal with that.
-				if (ReferenceEquals(this, c))
+				case ICollection<T> collection:
 				{
-					// Copy first part of _items to insert location
-					Array.Copy(Items, 0, Items, index, index);
-					// Copy last part of _items back to inserted location
-					Array.Copy(Items, index + count, Items, index * 2, Count - index);
-				}
-				else
-				{
-					c.CopyTo(Items, index);
-				}
+					int count = collection.Count;
+					if (count == 0) return;
+					EnsureCapacity(Count + count);
+					if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
 
-				Count += count;
-				_version++;
-				RangeInserted(index, count);
-			}
-			else
-			{
-				int count = collection.FastCount();
-				if (count > 0) EnsureCapacity(Count + count);
-
-				using (IEnumerator<T> en = collection.GetEnumerator())
-				{
-					while (en.MoveNext())
+					// If we're inserting a List into itself, we want to be able to deal with that.
+					if (ReferenceEquals(this, collection))
 					{
-						Insert(index++, en.Current, true);
+						// Copy first part of _items to insert location
+						Array.Copy(Items, 0, Items, index, index);
+						// Copy last part of _items back to inserted location
+						Array.Copy(Items, index + count, Items, index * 2, Count - index);
 					}
+					else
+					{
+						collection.CopyTo(Items, index);
+					}
+
+					Count += count;
+					_version++;
+					RangeInserted(index, count);
+					break;
+				}
+				default:
+				{
+					int count = enumerable.FastCount();
+					if (count > 0) EnsureCapacity(Count + count);
+
+					using (IEnumerator<T> en = enumerable.GetEnumerator())
+					{
+						while (en.MoveNext())
+						{
+							Insert(index++, en.Current, true);
+						}
+					}
+
+					break;
 				}
 			}
 		}
@@ -694,8 +703,10 @@ namespace asm.Other.Microsoft.Collections
 		public void CopyTo(T[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
 		public void CopyTo([NotNull] T[] array, int arrayIndex, int count)
 		{
-			Count.ValidateRange(arrayIndex, ref count);
+			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, ref count);
+			if (count == 0) return;
+			Count.ValidateRange(arrayIndex, ref count);
 			// Delegate rest of error checking to Array.Copy.
 			Array.Copy(Items, 0, array, arrayIndex, count);
 		}
@@ -706,6 +717,7 @@ namespace asm.Other.Microsoft.Collections
 		{
 			if (array.Rank != 1) throw new RankException();
 			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
+			if (Count == 0) return;
 
 			if (array is T[] tArray)
 			{
@@ -720,11 +732,11 @@ namespace asm.Other.Microsoft.Collections
 			 * we can't figure out if we can successfully copy the element beforehand.
 			 */
 			array.Length.ValidateRange(arrayIndex, Count);
+
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
 			Type sourceType = typeof(T);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
-			if (Count == 0) return;
 
 			try
 			{

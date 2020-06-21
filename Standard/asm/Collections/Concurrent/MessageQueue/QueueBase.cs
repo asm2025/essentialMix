@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,10 +15,9 @@ namespace asm.Collections.Concurrent.MessageQueue
 	 * This is based on the insightful book of Joseph Albahari, C# 6 in a Nutshell
 	 * http://www.albahari.com/threading/
 	 */
-	public abstract class QueueBase<T> : Disposable, IQueue<T>, ICollection
+	public abstract class QueueBase<T> : Disposable, IQueue<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable, IDisposable
 	{
-		private readonly System.Collections.Generic.Queue<T> _queue = new System.Collections.Generic.Queue<T>();
-
+		private BlockingCollection<T> _queue;
 		private ManualResetEventSlim _manualResetEventSlim = new ManualResetEventSlim(false);
 		private Thread _worker;
 		private CancellationTokenSource _cts;
@@ -41,11 +41,12 @@ namespace asm.Collections.Concurrent.MessageQueue
 			_cts = new CancellationTokenSource();
 			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed());
 			Token = _cts.Token;
+			_queue = new BlockingCollection<T>();
 			(_worker = new Thread(Consume)
-			{
-				IsBackground = IsBackground,
-				Priority = Priority
-			}).Start();
+					{
+						IsBackground = IsBackground,
+						Priority = Priority
+					}).Start();
 		}
 
 		protected override void Dispose(bool disposing)
@@ -53,11 +54,10 @@ namespace asm.Collections.Concurrent.MessageQueue
 			if (disposing)
 			{
 				StopInternal(WaitForQueuedItems);
-				ObjectHelper.Dispose(ref _worker);
+				ObjectHelper.Dispose(ref _queue);
 				ObjectHelper.Dispose(ref _manualResetEventSlim);
 				ObjectHelper.Dispose(ref _cts);
 			}
-
 			base.Dispose(disposing);
 		}
 
@@ -72,18 +72,9 @@ namespace asm.Collections.Concurrent.MessageQueue
 			}
 		}
 
-		public bool IsSynchronized => true;
+		bool ICollection.IsSynchronized => false;
 
-		public virtual int Count
-		{
-			get
-			{
-				lock (SyncRoot)
-				{
-					return _queue.Count;
-				}
-			}
-		}
+		public virtual int Count => _queue.Count;
 
 		public bool WaitForQueuedItems { get; set; } = true;
 
@@ -93,32 +84,24 @@ namespace asm.Collections.Concurrent.MessageQueue
 
 		public CancellationToken Token { get; }
 
-		public bool IsBusy { get; protected set; }
+		public bool IsBusy => !_manualResetEventSlim.IsSet;
 
-		public bool CompleteMarked { get; protected set; }
+		public bool CompleteMarked => _queue.IsAddingCompleted;
 
-		public IEnumerator<T> GetEnumerator()
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
-			ThrowIfDisposed();
-
-			System.Collections.Generic.Queue<T>.Enumerator enumerator;
-			
-			lock (SyncRoot)
-			{
-				enumerator = _queue.GetEnumerator();
-			}
-
-			return enumerator;
+			return ((IEnumerable<T>)_queue).GetEnumerator();
 		}
 
-		public void CopyTo([NotNull] T[] array, int index)
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			ThrowIfDisposed();
+			return ((IEnumerable)_queue).GetEnumerator();
+		}
 
-			lock (SyncRoot)
-			{
-				_queue.CopyTo(array, index);
-			}
+		/// <inheritdoc />
+		void ICollection.CopyTo(Array array, int index)
+		{
+			((ICollection)_queue).CopyTo(array, index);
 		}
 
 		public void Stop()
@@ -187,29 +170,18 @@ namespace asm.Collections.Concurrent.MessageQueue
 
 		protected virtual void EnqueueInternal(T item)
 		{
-			lock (SyncRoot)
-			{
-				_queue.Enqueue(item);
-				Monitor.Pulse(SyncRoot);
-			}
+			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+			_queue.Add(item, Token);
 		}
 
 		protected virtual void CompleteInternal()
 		{
-			lock (SyncRoot)
-			{
-				CompleteMarked = true;
-				Monitor.PulseAll(SyncRoot);
-			}
+			_queue.CompleteAdding();
 		}
 
 		protected virtual void ClearInternal()
 		{
-			lock (SyncRoot)
-			{
-				_queue.Clear();
-				Monitor.PulseAll(SyncRoot);
-			}
+			_queue.Clear();
 		}
 
 		protected virtual bool WaitInternal(int millisecondsTimeout)
@@ -245,98 +217,34 @@ namespace asm.Collections.Concurrent.MessageQueue
 			// Wait for the consumer's thread to finish.
 			if (waitForQueue) WaitInternal(TimeSpanHelper.INFINITE);
 			ClearInternal();
+			ObjectHelper.Dispose(ref _worker);
 		}
 
 		protected void Cancel() { _cts.CancelIfNotDisposed(); }
 
-		void ICollection.CopyTo(Array array, int index)
-		{
-			if (array.Rank != 1) throw new RankException();
-			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
-
-			if (array is T[] tArray)
-			{
-				CopyTo(tArray, index);
-				return;
-			}
-
-			/*
-			 * Catch the obvious case assignment will fail.
-			 * We can find all possible problems by doing the check though.
-			 * For example, if the element type of the Array is derived from T,
-			 * we can't figure out if we can successfully copy the element beforehand.
-			 */
-			array.Length.ValidateRange(index, Count);
-			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
-			Type sourceType = typeof(IItem);
-			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
-			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
-			if (Count == 0) return;
-
-			try
-			{
-				foreach (T item in this)
-				{
-					objects[index++] = item;
-				}
-			}
-			catch (ArrayTypeMismatchException)
-			{
-				throw new ArgumentException("Invalid array type", nameof(array));
-			}
-		}
-
-		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
 		private void Consume()
 		{
-			if (IsDisposed || IsBusy) return;
-			IsBusy = true;
+			if (IsDisposed) return;
+
+			_manualResetEventSlim.Reset();
 
 			try
 			{
-				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
+				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !_queue.IsCompleted)
 				{
-					T item = default(T);
-
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
-					{
-						lock (SyncRoot)
-						{
-							if (_queue.Count == 0)
-							{
-								Monitor.Wait(SyncRoot, TimeSpanHelper.MINIMUM_SCHEDULE);
-								Thread.Sleep(1);
-							}
-
-							if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
-							item = _queue.Dequeue();
-						}
-
-						if (item != null) break;
-					}
-					
-					if (IsDisposed || Token.IsCancellationRequested) return;
-					Callback(item);
+					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.MINIMUM_SCHEDULE, Token))
+						Callback(item);
 				}
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
-				{
-					T item;
-					
-					lock (SyncRoot)
-					{
-						if (_queue.Count == 0) return;
-						item = _queue.Dequeue();
-					}
+				if (IsDisposed || Token.IsCancellationRequested) return;
 
-					if (IsDisposed || Token.IsCancellationRequested) return;
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.MINIMUM_SCHEDULE, Token))
 					Callback(item);
-				}
 			}
+			catch (ObjectDisposedException) { }
+			catch (OperationCanceledException) { }
 			finally
 			{
-				IsBusy = false;
 				_manualResetEventSlim.Set();
 			}
 		}

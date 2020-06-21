@@ -22,7 +22,7 @@ namespace asm.Other.MarcGravell.Channel
 		/// <inheritdoc />
 		protected override void Dispose(bool disposing)
 		{
-			NewMessageSignal.Set();
+			if (disposing) NewMessageSignal.Set();
 			base.Dispose(disposing);
 		}
 

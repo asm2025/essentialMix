@@ -14,7 +14,7 @@ using JetBrains.Annotations;
 
 namespace asm.Other.MarcGravell.Channel
 {
-	public sealed class Channel : Disposable, IDisposable
+	public sealed class Channel : Disposable
 	{
 		private enum FastTypeCode : byte
 		{

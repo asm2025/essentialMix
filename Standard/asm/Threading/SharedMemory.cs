@@ -9,7 +9,7 @@ using asm.Patterns.Object;
 namespace asm.Threading
 {
 	//https://blogs.msdn.microsoft.com/salvapatuel/2009/06/08/working-with-memory-mapped-files-in-net-4/
-	public sealed class SharedMemory<T> : Disposable, IDisposable
+	public sealed class SharedMemory<T> : Disposable
 		where T : struct
 	{
 		private readonly string _lockName;
@@ -153,14 +153,18 @@ namespace asm.Threading
 
 		protected override void Dispose(bool disposing)
 		{
+			if (disposing)
+			{
+				ObjectHelper.Dispose(ref _accessor);
+				ObjectHelper.Dispose(ref _mmf);
+				if (_mutex != null)
+				{
+					_mutex.ReleaseMutex();
+					_mutex.Close();
+					ObjectHelper.Dispose(ref _mutex);
+				}
+			}
 			base.Dispose(disposing);
-			if (!disposing) return;
-			ObjectHelper.Dispose(ref _accessor);
-			ObjectHelper.Dispose(ref _mmf);
-			if (_mutex == null) return;
-			_mutex.ReleaseMutex();
-			_mutex.Close();
-			ObjectHelper.Dispose(ref _mutex);
 		}
 	}
 }

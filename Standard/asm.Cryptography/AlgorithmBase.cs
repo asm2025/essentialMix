@@ -1,11 +1,9 @@
-using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using asm.Helpers;
 using asm.Patterns.Object;
 
 namespace asm.Cryptography
 {
-	[ComVisible(true)]
 	public abstract class AlgorithmBase : Disposable, IAlgorithmBase
 	{
 		private object _algorithm;

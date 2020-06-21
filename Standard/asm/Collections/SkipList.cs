@@ -294,8 +294,8 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public void CopyTo(T[] array, int arrayIndex)
 		{
-			array.Length.ValidateRange(arrayIndex, Count);
 			if (Count == 0) return;
+			array.Length.ValidateRange(arrayIndex, Count);
 
 			int lo = arrayIndex, hi = lo + Count;
 
@@ -325,11 +325,12 @@ namespace asm.Collections
 			* we can't figure out if we can successfully copy the element beforehand.
 			*/
 			array.Length.ValidateRange(index, Count);
+			if (Count == 0) return;
+
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
 			Type sourceType = typeof(T);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
-			if (Count == 0) return;
 
 			int lo = index, hi = lo + Count;
 

@@ -5,7 +5,7 @@ using asm.Patterns.Object;
 
 namespace asm.Threading
 {
-	public class SafeMemoryMappedFile : Disposable, IDisposable
+	public class SafeMemoryMappedFile : Disposable
 	{
 		private MemoryMappedFile _mmFile;
 		private MemoryMappedViewAccessor _accessor;

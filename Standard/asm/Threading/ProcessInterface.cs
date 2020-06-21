@@ -10,7 +10,7 @@ using asm.Patterns.Object;
 
 namespace asm.Threading
 {
-	public sealed class ProcessInterface : Disposable, IDisposable
+	public sealed class ProcessInterface : Disposable
 	{
 		private ManualResetEventSlim _manualResetEventSlim;
 		private Process _inputProcess;

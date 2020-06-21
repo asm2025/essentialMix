@@ -1,12 +1,10 @@
 using System;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using JetBrains.Annotations;
 using asm.Helpers;
 
 namespace asm.Patterns.Random
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class RNGRandom : RandomNumberGenerator
 	{

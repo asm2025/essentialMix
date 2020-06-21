@@ -1372,37 +1372,85 @@ namespace asm.Extensions
 
 		public static IEnumerable Traverse([NotNull] this IEnumerable thisValue, [NotNull] Func<object, IEnumerable> getChildren, DequeuePriority dequeuePriority = DequeuePriority.FIFO)
 		{
-			DynamicQueue<IEnumerable> queue = new DynamicQueue<IEnumerable>(dequeuePriority);
-			queue.Enqueue(thisValue);
-
-			while (queue.Count > 0)
+			switch (dequeuePriority)
 			{
-				IEnumerable enumerable = queue.Dequeue();
+				case DequeuePriority.FIFO:
+					Queue<IEnumerable> queue = new Queue<IEnumerable>();
 
-				foreach (object child in enumerable)
-				{
-					yield return child;
-					IEnumerable children = getChildren(child);
-					if (children != null) queue.Enqueue(children);
-				}
+					queue.Enqueue(thisValue);
+
+					while (queue.Count > 0)
+					{
+						IEnumerable enumerable = queue.Dequeue();
+
+						foreach (object child in enumerable)
+						{
+							yield return child;
+							IEnumerable children = getChildren(child);
+							if (children != null) queue.Enqueue(children);
+						}
+					}
+					break;
+				case DequeuePriority.LIFO:
+					Stack<IEnumerable> stack = new Stack<IEnumerable>();
+
+					stack.Push(thisValue);
+
+					while (stack.Count > 0)
+					{
+						IEnumerable enumerable = stack.Pop();
+
+						foreach (object child in enumerable)
+						{
+							yield return child;
+							IEnumerable children = getChildren(child);
+							if (children != null) stack.Push(children);
+						}
+					}
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(dequeuePriority), dequeuePriority, null);
 			}
 		}
 
 		public static IEnumerable<T> Traverse<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] Func<T, IEnumerable<T>> getChildren, DequeuePriority dequeuePriority = DequeuePriority.FIFO)
 		{
-			DynamicQueue<IEnumerable<T>> queue = new DynamicQueue<IEnumerable<T>>(dequeuePriority);
-			queue.Enqueue(thisValue);
-
-			while (queue.Count > 0)
+			switch (dequeuePriority)
 			{
-				IEnumerable<T> enumerable = queue.Dequeue();
+				case DequeuePriority.FIFO:
+					Queue<IEnumerable<T>> queue = new Queue<IEnumerable<T>>();
+					queue.Enqueue(thisValue);
 
-				foreach (T child in enumerable)
-				{
-					yield return child;
-					IEnumerable<T> children = getChildren(child);
-					if (children != null) queue.Enqueue(children);
-				}
+					while (queue.Count > 0)
+					{
+						IEnumerable<T> enumerable = queue.Dequeue();
+
+						foreach (T child in enumerable)
+						{
+							yield return child;
+							IEnumerable<T> children = getChildren(child);
+							if (children != null) queue.Enqueue(children);
+						}
+					}
+					break;
+				case DequeuePriority.LIFO:
+					Stack<IEnumerable<T>> stack = new Stack<IEnumerable<T>>();
+					stack.Push(thisValue);
+
+					while (stack.Count > 0)
+					{
+						IEnumerable<T> enumerable = stack.Pop();
+
+						foreach (T child in enumerable)
+						{
+							yield return child;
+							IEnumerable<T> children = getChildren(child);
+							if (children != null) stack.Push(children);
+						}
+					}
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(dequeuePriority), dequeuePriority, null);
 			}
 		}
 

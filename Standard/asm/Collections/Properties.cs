@@ -37,7 +37,12 @@ namespace asm.Collections
 		protected override void ClearItems()
 		{
 			if (Count == 0) return;
-			this.RemoveAll(item => !item.IsFixed);
+
+			for (int i = Items.Count - 1; i >= 0; i--)
+			{
+				if (Items[i].IsFixed) continue;
+				RemoveAt(i);
+			}
 		}
 
 		[NotNull]
@@ -47,7 +52,7 @@ namespace asm.Collections
 		{
 			if (Count == 0) return;
 
-			foreach (IProperty property in this)
+			foreach (IProperty property in Items)
 			{
 				if (property.IsReadOnly) continue;
 				property.Reset();

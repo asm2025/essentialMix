@@ -41,8 +41,9 @@ namespace asm.Extensions
 
 		public static void RemoveRange<T>([NotNull] this ICollection<T> thisValue, int startIndex, int count)
 		{
+			if (thisValue.Count == 0) return;
 			thisValue.Count.ValidateRange(startIndex, ref count);
-			if (count == 0 || thisValue.Count == 0) return;
+			if (count == 0) return;
 
 			T[] items = thisValue.GetRange(startIndex, count);
 

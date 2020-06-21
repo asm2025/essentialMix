@@ -17,6 +17,7 @@
 //	{
 //		/// <inheritdoc />
 //		public RedBlackTree() 
+//			: this((IComparer<T>)null)
 //		{
 //		}
 
@@ -28,7 +29,7 @@
 
 //		/// <inheritdoc />
 //		public RedBlackTree([NotNull] IEnumerable<T> collection)
-//			: base(collection)
+//			: this(collection, null)
 //		{
 //		}
 

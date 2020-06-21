@@ -12,23 +12,13 @@ namespace asm.Extensions
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
 			if (count == 0) return;
 			if (thisValue.CurrentCount == 0) return;
-
-			lock (thisValue)
-			{
-				if (thisValue.CurrentCount == 0) return;
-				thisValue.Signal(count.NotAbove(thisValue.CurrentCount));
-			}
+			thisValue.Signal(count.NotAbove(thisValue.CurrentCount));
 		}
 
 		public static void SignalAll([NotNull] this CountdownEvent thisValue)
 		{
 			if (thisValue.CurrentCount == 0) return;
-
-			lock (thisValue)
-			{
-				if (thisValue.CurrentCount == 0) return;
-				thisValue.Signal(thisValue.CurrentCount);
-			}
+			thisValue.Signal(thisValue.CurrentCount);
 		}
 	}
 }

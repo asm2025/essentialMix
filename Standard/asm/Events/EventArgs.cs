@@ -1,10 +1,8 @@
 using System;
-using System.Runtime.InteropServices;
 
 namespace asm.Events
 {
 	[Serializable]
-	[ComVisible(true)]
 	public class EventArgs<T> : ReadOnlyEventArgs<T>
 	{
 		/// <inheritdoc />

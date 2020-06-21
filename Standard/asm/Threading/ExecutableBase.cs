@@ -12,7 +12,7 @@ using asm.Patterns.Object;
 
 namespace asm.Threading
 {
-	public abstract class ExecutableBase : Disposable, IDisposable
+	public abstract class ExecutableBase : Disposable
 	{
 		private string _executableName;
 		private Properties _arguments = new Properties();

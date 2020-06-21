@@ -17,6 +17,7 @@ namespace asm.Other.Microsoft.Collections
 {
 	// based on https://github.com/microsoft/referencesource/blob/master/mscorlib/system/collections/generic/dictionary.cs
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(asm_Mscorlib_DictionaryDebugView<,>))]
 	[Serializable]
 	[ComVisible(false)]
 	public abstract class DictionaryBase<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>, ISerializable, IDeserializationCallback
@@ -30,6 +31,7 @@ namespace asm.Other.Microsoft.Collections
 		}
 
 		[DebuggerDisplay("Count = {Count}")]
+		[DebuggerTypeProxy(typeof(asm_Mscorlib_DictionaryKeyCollectionDebugView<,>))]
 		[Serializable]
 		public sealed class KeyCollection : ICollection<TKey>, ICollection, IReadOnlyCollection<TKey>
 		{
@@ -163,6 +165,7 @@ namespace asm.Other.Microsoft.Collections
 		}
 
 		[DebuggerDisplay("Count = {Count}")]
+		[DebuggerTypeProxy(typeof(asm_Mscorlib_DictionaryValueCollectionDebugView<,>))]
 		[Serializable]
 		public sealed class ValueCollection : ICollection<TValue>, ICollection, IReadOnlyCollection<TValue>
 		{

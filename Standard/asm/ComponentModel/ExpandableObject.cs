@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel;
 using asm.Patterns.Object;
 using JetBrains.Annotations;
@@ -19,7 +18,7 @@ namespace asm.ComponentModel
 	///  <seealso cref="T:asm.Disposable" />
 	///  <seealso cref="T:System.IDisposable" />
 	[TypeConverter(typeof(ExpandableObjectConverter<ExpandableObject>))]
-	public abstract class ExpandableObject : Disposable, IDisposable
+	public abstract class ExpandableObject : Disposable
 	{
 		private ExpandablePropertiesTypeDescriptionProvider _provider;
 
@@ -37,14 +36,12 @@ namespace asm.ComponentModel
 		/// <inheritdoc />
 		protected override void Dispose(bool disposing)
 		{
-			base.Dispose(disposing);
-			if (!disposing) return;
-
-			if (_provider != null)
+			if (disposing && _provider != null)
 			{
 				TypeDescriptor.RemoveProvider(_provider, this);
 				_provider = null;
 			}
+			base.Dispose(disposing);
 		}
 	}
 }

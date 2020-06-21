@@ -4,7 +4,7 @@ using asm.Patterns.Object;
 namespace asm.Collections
 {
 	[Serializable]
-	public class SimpleMonitor : Disposable, IDisposable
+	public class SimpleMonitor : Disposable
 	{
 		private int _busyCount;
 

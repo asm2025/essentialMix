@@ -37,7 +37,6 @@ namespace asm.Collections.Concurrent.ProducerConsumer
 				StopInternal(!WaitOnDispose);
 				ObjectHelper.Dispose(ref _cts);
 			}
-
 			base.Dispose(disposing);
 		}
 

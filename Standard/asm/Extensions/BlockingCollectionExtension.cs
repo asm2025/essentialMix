@@ -7,13 +7,10 @@ namespace asm.Extensions
 	{
 		public static void Clear<T>([NotNull] this BlockingCollection<T> thisValue)
 		{
-			lock(thisValue)
-			{
-				if (thisValue.Count == 0) return;
+			if (thisValue.Count == 0) return;
 
-				foreach (T _ in thisValue.GetConsumingEnumerable())
-				{
-				}
+			foreach (T _ in thisValue.GetConsumingEnumerable())
+			{
 			}
 		}
 	}

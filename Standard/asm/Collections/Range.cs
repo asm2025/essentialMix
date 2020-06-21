@@ -347,6 +347,7 @@ namespace asm.Collections
 		{
 			if (array.Rank != 1) throw new RankException();
 			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
+			if (Count == 0) return;
 
 			if (array is T[] tArray)
 			{
@@ -361,11 +362,11 @@ namespace asm.Collections
 			 * we can't figure out if we can successfully copy the element beforehand.
 			 */
 			array.Length.ValidateRange(index, Count);
+
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
 			Type sourceType = typeof(T);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
-			if (Count == 0) return;
 
 			try
 			{

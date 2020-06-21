@@ -53,13 +53,7 @@ namespace asm.Windows.Controls
 				ObjectHelper.Dispose(ref _writer);
 			}
 
-			try
-			{
-				base.Dispose(disposing);
-			}
-			catch (InvalidOperationException)
-			{
-			}
+			base.Dispose(disposing);
 		}
 
 		protected override void OnHandleCreated(EventArgs e)

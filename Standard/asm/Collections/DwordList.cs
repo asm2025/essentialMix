@@ -74,10 +74,10 @@ namespace asm.Collections
 		public void CopyTo([NotNull] byte[] array, int arrayIndex) { CopyTo(0, array, arrayIndex, Count); }
 		public void CopyTo(int index, [NotNull] byte[] array, int arrayIndex, int count)
 		{
-			if (array == null) throw new ArgumentNullException(nameof(array));
-			Count.ValidateRange(index, ref count);
+			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, ref count);
-			if (count == 0 || Count == 0) return;
+			if (count == 0) return;
+			Count.ValidateRange(index, ref count);
 
 			int lastIndex = index + count - 1;
 

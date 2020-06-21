@@ -14,7 +14,7 @@ namespace asm.IO
 	/// the EndianBitConverter it is constructed with. No data is buffered in the
 	/// reader; the client may seek within the stream at will.
 	/// </summary>
-	public class EndianBinaryReader : Disposable, IDisposable
+	public class EndianBinaryReader : Disposable
 	{
 		/// <summary>
 		/// Decoder to use for string conversions.

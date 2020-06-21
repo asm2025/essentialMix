@@ -48,13 +48,15 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 		/// <inheritdoc />
 		protected override void Dispose(bool disposing)
 		{
+			if (disposing)
+			{
+				StopInternal(WaitOnDispose);
+				ObjectHelper.Dispose(ref _link);
+				ObjectHelper.Dispose(ref _processor);
+				ObjectHelper.Dispose(ref _queue);
+				ObjectHelper.Dispose(ref _manualResetEventSlim);
+			}
 			base.Dispose(disposing);
-			if (!disposing) return;
-			StopInternal(WaitOnDispose);
-			ObjectHelper.Dispose(ref _link);
-			ObjectHelper.Dispose(ref _processor);
-			ObjectHelper.Dispose(ref _queue);
-			ObjectHelper.Dispose(ref _manualResetEventSlim);
 		}
 
 		public override int Count => _queue.Count + _processor.InputCount;
@@ -63,7 +65,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 
 		protected override void EnqueueInternal(T item)
 		{
-			if (IsDisposed || Token.IsCancellationRequested) return;
+			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 			_queue.SendAsync(item, Token);
 		}
 

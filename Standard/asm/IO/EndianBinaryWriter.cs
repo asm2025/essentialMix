@@ -12,7 +12,7 @@ namespace asm.IO
 	/// Equivalent of System.IO.BinaryWriter, but with either endianness, depending on
 	/// the EndianBitConverter it is constructed with.
 	/// </summary>
-	public class EndianBinaryWriter : Disposable, IDisposable
+	public class EndianBinaryWriter : Disposable
 	{
 		/// <summary>
 		/// Buffer used for temporary storage during conversion from primitives

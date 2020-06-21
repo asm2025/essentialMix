@@ -7,7 +7,7 @@ using asm.Patterns.Object;
 
 namespace asm.Patterns.Design
 {
-	public class SingletonX : Disposable, IDisposable
+	public class SingletonX : Disposable
 	{
 		private Mutex _mutex;
 
@@ -45,14 +45,11 @@ namespace asm.Patterns.Design
 
 		protected override void Dispose(bool disposing)
 		{
-			if (disposing)
+			if (disposing && _mutex != null)
 			{
-				if (_mutex != null)
-				{
-					_mutex.ReleaseMutex();
-					_mutex.Close();
-					ObjectHelper.Dispose(ref _mutex);
-				}
+				_mutex.ReleaseMutex();
+				_mutex.Close();
+				ObjectHelper.Dispose(ref _mutex);
 			}
 			base.Dispose(disposing);
 		}

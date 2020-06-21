@@ -1,10 +1,8 @@
 using System;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace asm.Text
 {
-	[ComVisible(true)]
 	[Serializable]
 	public class UTF16Encoding : UnicodeEncoding
 	{

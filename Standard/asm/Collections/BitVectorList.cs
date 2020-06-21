@@ -247,28 +247,19 @@ namespace asm.Collections
 
 		public void AddRange([NotNull] IEnumerable<bool> enumerable, int startIndex = 0, int count = -1)
 		{
-			int collectionCount = enumerable.FastCount();
-
-			if (collectionCount > -1)
-			{
-				collectionCount.ValidateRange(startIndex, ref count);
-			}
-			else
-			{
-				if (startIndex < 0) throw new ArgumentOutOfRangeException(nameof(startIndex));
-			}
-
-			if (collectionCount == 0 || count == 0) return;
+			Lister<bool> lister = new Lister<bool>(enumerable);
+			lister.Count.ValidateRange(startIndex, ref count);
+			if (count == 0) return;
 
 			int index = 0;
 			int c = 0;
 			byte v = 0;
 			List<BitVector> bitVectors = new List<BitVector>((int)SysMath.Ceiling(count / 8.0d));
 
-			foreach (bool b in enumerable.Skip(startIndex).Take(count).Reverse())
+			for (int i = count - 1; i >= startIndex; i--)
 			{
 				v >>= 1;
-				if (b) v |= 0x80;
+				if (lister[i]) v |= 0x80;
 				c++;
 				if (c % 8 != 0) continue;
 				bitVectors.Add(new BitVector(v));
@@ -278,7 +269,6 @@ namespace asm.Collections
 
 			// right shift remaining bits
 			if (c % 8 != 0) v >>= 8 - c % 8;
-
 			// if last set of bits is less than 8 bits then it didn't get stored yet.
 			if (index < count) bitVectors.Add(new BitVector(v));
 			bitVectors.Reverse();
@@ -393,9 +383,9 @@ namespace asm.Collections
 		public void CopyTo(byte[] array, int arrayIndex) { CopyTo(0, array, arrayIndex, Count); }
 		public void CopyTo(int index, [NotNull] byte[] array, int arrayIndex, int count)
 		{
-			if (array == null) throw new ArgumentNullException(nameof(array));
-			Count.ValidateRange(index, ref count);
 			array.Length.ValidateRange(arrayIndex, ref count);
+			if (count == 0 || Count == 0) return;
+			Count.ValidateRange(index, ref count);
 			if (count == 0 || Count == 0) return;
 
 			int lastIndex = index + count - 1;

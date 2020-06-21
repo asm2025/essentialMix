@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 
 namespace asm.Other.MarcGravell.Channel
 {
-	internal abstract class MutexFreePipe : Disposable, IDisposable
+	internal abstract class MutexFreePipe : Disposable
 	{
 		protected const int MINIMUM_BUFFER_SIZE = 0x10000;
 		protected static readonly int MESSAGE_HEADER_LENGTH = Constants.INT_SIZE;
@@ -45,7 +45,6 @@ namespace asm.Other.MarcGravell.Channel
 				ObjectHelper.Dispose(ref Buffer);
 				ObjectHelper.Dispose(ref NewMessageSignal);
 			}
-
 			base.Dispose(disposing);
 		}
 	}

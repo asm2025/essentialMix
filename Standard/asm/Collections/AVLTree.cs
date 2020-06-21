@@ -1,203 +1,240 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using asm.Exceptions.Collections;
-//using asm.Extensions;
-//using JetBrains.Annotations;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using asm.Exceptions.Collections;
+using asm.Extensions;
+using JetBrains.Annotations;
 
-//namespace asm.Collections
-//{
-//	/// <summary>
-//	/// <inheritdoc />
-//	/// <para><see href="https://en.wikipedia.org/wiki/AVL_tree">AVLTree</see> implementation.</para>
-//	/// </summary>
-//	[Serializable]
-//	public sealed class AVLTree<T> : BinarySearchTree<T>
-//	{
-//		/// <inheritdoc />
-//		public AVLTree() 
-//		{
-//		}
+namespace asm.Collections
+{
+	/// <summary>
+	/// <inheritdoc />
+	/// <para><see href="https://en.wikipedia.org/wiki/AVL_tree">AVLTree</see> implementation.</para>
+	/// </summary>
+	[Serializable]
+	public sealed class AVLTree<T> : BinarySearchTree<T>
+	{
+		/// <inheritdoc />
+		public AVLTree()
+			: this((IComparer<T>)null)
+		{
+		}
 
-//		/// <inheritdoc />
-//		public AVLTree(IComparer<T> comparer)
-//			: base(comparer)
-//		{
-//		}
+		/// <inheritdoc />
+		public AVLTree(IComparer<T> comparer)
+			: base(comparer)
+		{
+		}
 
-//		/// <inheritdoc />
-//		public AVLTree([NotNull] IEnumerable<T> collection)
-//			: base(collection)
-//		{
-//		}
+		/// <inheritdoc />
+		public AVLTree([NotNull] IEnumerable<T> collection)
+			: this(collection, null)
+		{
+		}
 
-//		/// <inheritdoc />
-//		public AVLTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
-//			: base(collection, comparer)
-//		{
-//		}
+		/// <inheritdoc />
+		public AVLTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
+			: base(collection, comparer)
+		{
+		}
 
-//		/// <inheritdoc />
-//		public override bool AutoBalance { get; } = true;
+		/// <inheritdoc />
+		public override bool AutoBalance { get; } = true;
 
-//		/// <inheritdoc />
-//		public override void Add(T value)
-//		{
-//			if (Root == null)
-//			{
-//				// no parent means there is no root currently
-//				Root = NewNode(value);
-//				Count++;
-//				SetHeight(Root);
-//				_version++;
-//				return;
-//			}
+		/// <inheritdoc />
+		public override void Add(T value)
+		{
+			if (Root == null)
+			{
+				// no parent means there is no root currently
+				Root = NewNode(value);
+				Count++;
+				_version++;
+				return;
+			}
 
-//			// find a parent
-//			LinkedBinaryNode<T> parent = Root, next = Root;
-//			Stack<LinkedBinaryNode<T>> stack = new Stack<LinkedBinaryNode<T>>();
+			LinkedBinaryNode<T> parent = Root, next = Root;
+			// the deque has the same effect as the recursive call but only it's iterative now
+			Deque<LinkedBinaryNode<T>> deque = new Deque<LinkedBinaryNode<T>>();
 
-//			while (next != null)
-//			{
-//				stack.Push(next);
-//				parent = next;
-//				next = Comparer.IsLessThan(value, next.Value)
-//							? next.Left
-//							: next.Right;
-//			}
+			// find a parent
+			// as a general role: whenever a node's left or right changes, it will be pushed to the deque to get updated
+			while (next != null)
+			{
+				parent = next;
+				deque.Push(parent);
+				next = Comparer.IsLessThan(value, next.Value)
+							? next.Left
+							: next.Right;
+			}
 
-//			// duplicate values can make life miserable for us here because it will never be balanced!
-//			if (Comparer.IsEqual(value, parent.Value)) throw new DuplicateKeyException();
+			// duplicate values can make life miserable for us here because it will never be balanced!
+			if (Comparer.IsEqual(value, parent.Value)) throw new DuplicateKeyException();
 
-//			LinkedBinaryNode<T> node = NewNode(value);
+			LinkedBinaryNode<T> node = NewNode(value);
 
-//			if (Comparer.IsLessThan(value, parent.Value)) parent.Left = node;
-//			else parent.Right = node;
+			if (Comparer.IsLessThan(value, parent.Value)) parent.Left = node;
+			else parent.Right = node;
 
-//			Queue<LinkedBinaryNode<T>> unbalancedNodes = new Queue<LinkedBinaryNode<T>>();
+			UpdateAndBalance(deque);
+			Count++;
+			_version++;
+		}
 
-//			// update parents and find unbalanced parents in the changed nodes along the way
-//			// this has the same effect as the recursive call but only it's iterative now
-//			while (stack.Count > 0)
-//			{
-//				node = stack.Pop();
-//				SetHeight(node);
-//				if (IsBalanced(node)) continue;
-//				unbalancedNodes.Enqueue(node);
-//			}
+		/// <inheritdoc />
+		public override bool Remove(T value)
+		{
+			// Udemy - Master the Coding Interview Data Structures + Algorithms - Andrei Neagoie
+			if (Root == null) return false;
 
-//			Count++;
-//			_version++;
+			LinkedBinaryNode<T> parent = null, node = null, next = Root;
+			// the deque has the same effect as the recursive call but only it's iterative now
+			Deque<LinkedBinaryNode<T>> stack = new Deque<LinkedBinaryNode<T>>();
 
-//			while (unbalancedNodes.Count > 0)
-//			{
-//				node = unbalancedNodes.Dequeue();
-//				// check again if status changed
-//				if (IsBalanced(node)) continue;
-//				Balance(node);
-//			}
-//		}
+			// find the node
+			// as a general role: whenever a node's left or right changes, it will be pushed to the deque to get updated
+			while (next != null)
+			{
+				int cmp = Comparer.Compare(value, next.Value);
 
-//		/// <inheritdoc />
-//		public override bool Remove(T value)
-//		{
-//			if (Root == null) return false;
+				if (cmp == 0)
+				{
+					node = next;
+					break;
+				}
 
-//			// find the node
-//			int cmp;
-//			LinkedBinaryNode<T> parent = null, node = Root;
-//			Stack<LinkedBinaryNode<T>> stack = new Stack<LinkedBinaryNode<T>>();
+				parent = next;
+				stack.Push(parent);
+				next = cmp < 0
+							? next.Left
+							: next.Right;
+			}
 
-//			while (node != null && (cmp = Comparer.Compare(value, node.Value)) != 0)
-//			{
-//				stack.Push(node);
-//				parent = node;
-//				node = cmp < 0
-//							? node.Left
-//							: node.Right;
-//			}
+			if (node == null) return false;
 
-//			if (node == null || !Comparer.IsEqual(value, node.Value)) return false;
+			LinkedBinaryNode<T> child;
 
-//			LinkedBinaryNode<T> child;
+			// case 1: node has no right child
+			if (node.Right == null)
+			{
+				child = node.Left;
+			}
+			// case 2: node has a right child which doesn't have a left child
+			else if (node.Right.Left == null)
+			{
+				// move the left to the right child's left
+				node.Right.Left = node.Left;
+				stack.Push(node.Right);
+				child = node.Right;
+			}
+			// case 3: node has a right child that has a left child
+			else
+			{
+				// find the right child's left most child
+				LinkedBinaryNode<T> leftMostParent = parent;
+				LinkedBinaryNode<T> leftmost = node.Right;
 
-//			// case 1: node has no right child
-//			if (node.Right == null)
-//			{
-//				child = node.Left;
-//			}
-//			// case 2: node has a right child which doesn't have a left child
-//			else if (node.Right.Left == null)
-//			{
-//				// move the left to the right child's left
-//				node.Right.Left = node.Left;
-//				stack.Push(node.Right);
-//				child = node.Right;
-//			}
-//			// case 3: node has a right child that has a left child
-//			else
-//			{
-//				// find the right child's left most child
-//				LinkedBinaryNode<T> leftMostParent = parent;
-//				LinkedBinaryNode<T> leftmost = node.Right;
+				while (leftmost.Left != null)
+				{
+					leftMostParent = leftmost;
+					stack.Push(leftMostParent);
+					leftmost = leftMostParent.Left;
+				}
 
-//				while (leftmost.Left != null)
-//				{
-//					leftMostParent = leftmost;
-//					stack.Push(leftmost.Left);
-//					leftmost = leftMostParent.Left;
-//				}
+				// move the left-most right to the parent's left
+				if (leftMostParent != null) leftMostParent.Left = leftmost.Right;
+				// adjust the left-most child nodes
+				leftmost.Left = node.Left;
+				leftmost.Right = node.Right;
+				// add this to be last
+				stack.Enqueue(leftmost);
+				child = leftmost;
+			}
 
-//				// move the left-most right to the parent's left
-//				if (leftMostParent != null) leftMostParent.Left = leftmost.Right;
-//				// adjust the left-most child nodes
-//				leftmost.Left = node.Left;
-//				leftmost.Right = node.Right;
-//				if (leftmost.Left != null) stack.Push(leftmost.Left);
-//				if (leftmost.Right != null) stack.Push(leftmost.Right);
-//				child = leftmost;
-//			}
+			if (parent == null)
+			{
+				Root = child;
+			}
+			else if (Comparer.IsLessThan(node.Value, parent.Value))
+			{
+				// if node < parent, move the left to the parent's left
+				parent.Left = child;
+			}
+			else
+			{
+				// else, move the left to the parent's right
+				parent.Right = child;
+			}
 
-//			if (parent == null)
-//			{
-//				Root = child;
-//				if (child != null) stack.Push(child);
-//			}
-//			else if (Comparer.IsLessThan(node.Value, parent.Value))
-//			{
-//				// if node < parent, move the left to the parent's left
-//				parent.Left = child;
-//				stack.Push(parent);
-//			}
-//			else
-//			{
-//				// else, move the left to the parent's right
-//				parent.Right = child;
-//				stack.Push(parent);
-//			}
+			UpdateAndBalance(stack);
+			Count--;
+			_version++;
+			return true;
+		}
 
-//			Queue<LinkedBinaryNode<T>> unbalancedNodes = new Queue<LinkedBinaryNode<T>>();
+		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		private LinkedBinaryNode<T> Balance([NotNull] LinkedBinaryNode<T> node)
+		{
+			// shouldn't be called unless Math.Abs(node.BalanceFactor) > BALANCE_FACTOR
+			if (node.BalanceFactor > 1) // left heavy
+			{
+				if (node.Left.BalanceFactor < 0)
+				{
+					// LR case
+					node.Left = RotateLeft(node.Left);
+					SetHeight(node);
+				}
 
-//			// update nodes
-//			while (stack.Count > 0)
-//			{
-//				node = stack.Pop();
-//				SetHeight(node);
-//				if (IsBalanced(node)) continue;
-//				unbalancedNodes.Enqueue(node);
-//			}
+				// LL case
+				return RotateRight(node);
+			}
 
-//			Count--;
-//			_version++;
+			if (node.BalanceFactor < 1) // right heavy
+			{
+				if (node.Right.BalanceFactor > 0)
+				{
+					// RL case
+					node.Right = RotateRight(node.Right);
+					SetHeight(node);
+				}
 
-//			while (unbalancedNodes.Count > 0)
-//			{
-//				node = unbalancedNodes.Dequeue();
-//				// check again if status changed
-//				if (IsBalanced(node)) continue;
-//				Balance(node);
-//			}
+				// RR case
+				return RotateLeft(node);
+			}
 
-//			return true;
-//		}
-//	}
-//}
+			return node;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		private void UpdateAndBalance([NotNull] Deque<LinkedBinaryNode<T>> deque)
+		{
+			// update parents
+			while (deque.Count > 0)
+			{
+				LinkedBinaryNode<T> node = deque.Pop();
+				SetHeight(node);
+				// check the balance
+				if (Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR) continue;
+				
+				LinkedBinaryNode<T> parent = deque.Count > 0
+												? deque.PeekStack()
+												: null;
+				bool isLeft = parent != null && ReferenceEquals(parent.Left, node);
+				node = Balance(node);
+				
+				if (parent == null)
+				{
+					Root = node;
+				}
+				else
+				{
+					if (isLeft) parent.Left = node;
+					else parent.Right = node;
+
+					SetHeight(parent);
+				}
+			}
+		}
+	}
+}

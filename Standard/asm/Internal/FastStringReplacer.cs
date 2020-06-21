@@ -5,7 +5,7 @@ using asm.Patterns.Object;
 
 namespace asm.Internal
 {
-	internal unsafe class FastStringReplacer : Disposable, IDisposable
+	internal unsafe class FastStringReplacer : Disposable
 	{
 		public int FoundIndexes;
 		private readonly char* _oldValue;
@@ -70,7 +70,6 @@ namespace asm.Internal
 				if (_input != null) Marshal.FreeHGlobal(new IntPtr(_input));
 				if (_oldValue != null) Marshal.FreeHGlobal(new IntPtr(_oldValue));
 			}
-
 			base.Dispose(disposing);
 		}
 

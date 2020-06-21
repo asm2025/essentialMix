@@ -11,7 +11,7 @@ using asm.Patterns.Object;
 
 namespace asm.Web
 {
-	public class HttpService : Disposable, IDisposable
+	public class HttpService : Disposable
 	{
 		private static HttpService _instance;
 
@@ -23,10 +23,8 @@ namespace asm.Web
 
 		protected override void Dispose(bool disposing)
 		{
-			if (disposing)
-			{
-				ObjectHelper.Dispose(ref _client);
-			}
+			if (disposing) ObjectHelper.Dispose(ref _client);
+			base.Dispose(disposing);
 		}
 
 		[NotNull]

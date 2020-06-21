@@ -27,7 +27,7 @@ namespace asm.Threading
 	/// This is a modified version of Microsoft's internal class AsyncStreamReader
 	/// http://www.dotnetframework.org/default.aspx/DotNET/DotNET/8@0/untmp/whidbey/REDBITS/ndp/fx/src/Services/Monitoring/system/Diagnosticts/AsyncStreamReader@cs/1/AsyncStreamReader@cs
 	/// </summary>
-	public sealed class AsyncStreamReader : Disposable, IDisposable
+	public sealed class AsyncStreamReader : Disposable
 	{
 		internal const int BUFFER_DEFAULT = StreamHelper.BUFFER_DEFAULT;  // Byte buffer size
 		private const int BUFFER_MIN = StreamHelper.BUFFER_MIN;
@@ -77,9 +77,12 @@ namespace asm.Threading
 
 		protected override void Dispose(bool disposing)
 		{
-			if (!disposing) return;
-			ObjectHelper.Dispose(ref _baseStream);
-			ObjectHelper.Dispose(ref _eofEvent);
+			if (disposing)
+			{
+				ObjectHelper.Dispose(ref _baseStream);
+				ObjectHelper.Dispose(ref _eofEvent);
+			}
+			base.Dispose(disposing);
 		}
 
 		public Encoding CurrentEncoding { get; }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using asm.Collections;
@@ -333,8 +332,6 @@ namespace asm.Extensions
 			return range;
 		}
 
-		public static void Add([NotNull] this IList thisValue, [NotNull] params object[] values) { AddRange(thisValue, values); }
-
 		public static void AddRange([NotNull] this IList thisValue, [NotNull] IEnumerable values)
 		{
 			if (values == null)
@@ -342,46 +339,6 @@ namespace asm.Extensions
 
 			foreach (object value in values)
 				thisValue.Add(value);
-		}
-
-		public static void RemoveAt([NotNull] this IList thisValue, [NotNull] params int[] indices)
-		{
-			if (thisValue.Count == 0 || indices.Length == 0)
-				return;
-
-			Array.Sort(indices);
-
-			foreach (int i in indices.Reverse())
-			{
-				if (!i.InRangeRx(0, thisValue.Count))
-				{
-					if (i > 0)
-						continue;
-					break;
-				}
-
-				thisValue.RemoveAt(i);
-			}
-		}
-
-		public static void RemoveAt<T>([NotNull] this IList<T> thisValue, [NotNull] params int[] indices)
-		{
-			if (thisValue.Count == 0 || indices.Length == 0)
-				return;
-
-			Array.Sort(indices);
-
-			foreach (int i in indices.Reverse())
-			{
-				if (!i.InRangeRx(0, thisValue.Count))
-				{
-					if (i > 0)
-						continue;
-					break;
-				}
-
-				thisValue.RemoveAt(i);
-			}
 		}
 
 		public static void RemoveRange([NotNull] this IList thisValue, int startIndex, int count)

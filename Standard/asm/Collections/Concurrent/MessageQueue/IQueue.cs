@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
 namespace asm.Collections.Concurrent.MessageQueue
 {
-	public interface IQueue<T> : IEnumerable<T>, IEnumerable, IReadOnlyCollection<T>, IDisposable
+	public interface IQueue<in T>
 	{
 		[NotNull]
 		Action<T> Callback { get; }

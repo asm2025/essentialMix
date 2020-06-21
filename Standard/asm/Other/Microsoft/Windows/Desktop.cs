@@ -14,7 +14,7 @@ namespace asm.Other.Microsoft.Windows
 	/// <summary>
 	/// Encapsulates the Desktop API.
 	/// </summary>
-	public class Desktop : Disposable, IDisposable, ICloneable
+	public class Desktop : Disposable, ICloneable
 	{
 		public struct Window
 		{

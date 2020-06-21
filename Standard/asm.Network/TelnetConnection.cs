@@ -11,7 +11,7 @@ using JetBrains.Annotations;
 
 namespace asm.Network
 {
-	public class TelnetConnection : Disposable, IDisposable
+	public class TelnetConnection : Disposable
 	{
 		private const int PORT_DEF = 23;
 		private const int TIMEOUT_DEF = 30000;

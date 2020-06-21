@@ -81,11 +81,7 @@ namespace asm.Web.Api.Controllers
 
 		protected override void Dispose(bool disposing)
 		{
-			if (disposing)
-			{
-				ObjectHelper.Dispose(ref _userManager);
-			}
-
+			if (disposing) ObjectHelper.Dispose(ref _userManager);
 			base.Dispose(disposing);
 		}
 

@@ -71,7 +71,6 @@ namespace asm.Patterns.FileSystem
 				Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
 				ObjectHelper.Dispose(ref _watcher);
 			}
-
 			base.Dispose(disposing);
 		}
 

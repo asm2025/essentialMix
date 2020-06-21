@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using asm.Helpers;
 using JetBrains.Annotations;
@@ -14,7 +13,6 @@ namespace asm.Cryptography.Hash
 	/// It's purpose is error detection after decompression. 
 	/// It serves that purpose well since it is fast and since errors in the compressed data are amplified by the decompressor.
 	/// </summary>
-	[ComVisible(true)]
 	public class Adler32Algorithm : HashAlgorithm
 	{
 		/// <summary>

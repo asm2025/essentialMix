@@ -4,25 +4,27 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
-using System.Runtime.InteropServices;
 using System.Threading;
+
 using asm.Comparers;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Helpers;
+using asm.Other.Microsoft.Collections;
+
 using JetBrains.Annotations;
 
-namespace asm.Other.StephenCleary.Collections
+namespace asm.Collections
 {
 	/// <summary>
 	/// A double-ended queue (deque), which provides O(1) indexed access, O(1) removals from the front and back, amortized
 	/// O(1) insertions to the front and back, and O(N) insertions and removals anywhere else (with the operations getting
 	/// slower as the index approaches the middle).
-	/// https://github.com/StephenCleary/Deque/blob/master/src/Nito.Collections.Deque/Deque.cs
+	/// <para>Based on <see href="https://github.com/StephenCleary/Deque/blob/master/src/Nito.Collections.Deque/Deque.cs">Stephen Cleary's Deque</see></para>
 	/// </summary>
 	/// <typeparam name="T">The type of elements contained in the deque.</typeparam>
 	[DebuggerDisplay("Count = {Count}")]
-	[ComVisible(false)]
+	[DebuggerTypeProxy(typeof(asm_Mscorlib_CollectionDebugView<>))]
 	[Serializable]
 	public class Deque<T> : IList<T>, IList, IReadOnlyList<T>, IReadOnlyCollection<T>, ICollection, IEnumerable
 	{
@@ -40,6 +42,7 @@ namespace asm.Other.StephenCleary.Collections
 				_root = _list.SyncRoot;
 			}
 
+			/// <inheritdoc />
 			public T this[int index]
 			{
 				get
@@ -58,6 +61,7 @@ namespace asm.Other.StephenCleary.Collections
 				}
 			}
 
+			/// <inheritdoc />
 			public int Count
 			{
 				get
@@ -69,6 +73,7 @@ namespace asm.Other.StephenCleary.Collections
 				}
 			}
 
+			/// <inheritdoc />
 			public bool IsReadOnly
 			{
 				get
@@ -80,6 +85,7 @@ namespace asm.Other.StephenCleary.Collections
 				}
 			}
 
+			/// <inheritdoc />
 			public void Insert(int index, T item)
 			{
 				lock (_root)
@@ -88,14 +94,16 @@ namespace asm.Other.StephenCleary.Collections
 				}
 			}
 
+			/// <inheritdoc />
 			public void Add(T item)
 			{
 				lock (_root)
 				{
-					_deque.Add(item);
+					_deque.Insert(_deque.Count, item);
 				}
 			}
 
+			/// <inheritdoc />
 			public void RemoveAt(int index)
 			{
 				lock (_root)
@@ -104,6 +112,7 @@ namespace asm.Other.StephenCleary.Collections
 				}
 			}
 
+			/// <inheritdoc />
 			public bool Remove(T item)
 			{
 				lock (_root)
@@ -112,6 +121,7 @@ namespace asm.Other.StephenCleary.Collections
 				}
 			}
 
+			/// <inheritdoc />
 			public void Clear()
 			{
 				lock (_root)
@@ -120,6 +130,7 @@ namespace asm.Other.StephenCleary.Collections
 				}
 			}
 
+			/// <inheritdoc />
 			public int IndexOf(T item)
 			{
 				lock (_root)
@@ -128,6 +139,7 @@ namespace asm.Other.StephenCleary.Collections
 				}
 			}
 
+			/// <inheritdoc />
 			public bool Contains(T item)
 			{
 				lock (_root)
@@ -136,6 +148,7 @@ namespace asm.Other.StephenCleary.Collections
 				}
 			}
 
+			/// <inheritdoc />
 			public void CopyTo(T[] array, int arrayIndex)
 			{
 				lock (_root)
@@ -144,6 +157,7 @@ namespace asm.Other.StephenCleary.Collections
 				}
 			}
 
+			/// <inheritdoc />
 			IEnumerator IEnumerable.GetEnumerator()
 			{
 				lock (_root)
@@ -152,6 +166,7 @@ namespace asm.Other.StephenCleary.Collections
 				}
 			}
 
+			/// <inheritdoc />
 			public IEnumerator<T> GetEnumerator()
 			{
 				lock (_root)
@@ -162,7 +177,7 @@ namespace asm.Other.StephenCleary.Collections
 		}
 
 		[Serializable]
-		public struct Enumerator : IEnumerator<T>, IEnumerator
+		public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
 		{
 			private readonly Deque<T> _deque;
 			private readonly int _version;
@@ -177,10 +192,10 @@ namespace asm.Other.StephenCleary.Collections
 				Current = default(T);
 			}
 
-			public void Dispose()
-			{
-			}
+			/// <inheritdoc />
+			public void Dispose() { }
 
+			/// <inheritdoc />
 			public bool MoveNext()
 			{
 				if (_version == _deque._version && _index < _deque.Count)
@@ -200,8 +215,10 @@ namespace asm.Other.StephenCleary.Collections
 				return false;
 			}
 
+			/// <inheritdoc />
 			public T Current { get; private set; }
 
+			/// <inheritdoc />
 			object IEnumerator.Current
 			{
 				get
@@ -211,6 +228,7 @@ namespace asm.Other.StephenCleary.Collections
 				}
 			}
 
+			/// <inheritdoc />
 			void IEnumerator.Reset()
 			{
 				if (_version != _deque._version) throw new VersionChangedException();
@@ -279,9 +297,11 @@ namespace asm.Other.StephenCleary.Collections
 			}
 		}
 
+		/// <inheritdoc cref="ICollection{T}" />
 		[field: ContractPublicPropertyName("Count")]
 		public int Count { get; private set; }
 
+		/// <inheritdoc cref="IList{T}" />
 		public T this[int index]
 		{
 			get => Items[IndexToBufferIndex(index, true)];
@@ -293,6 +313,7 @@ namespace asm.Other.StephenCleary.Collections
 			}
 		}
 
+		/// <inheritdoc />
 		object IList.this[int index]
 		{
 			get => this[index];
@@ -303,15 +324,19 @@ namespace asm.Other.StephenCleary.Collections
 			}
 		}
 
+		/// <inheritdoc />
 		bool IList.IsFixedSize => false;
 
+		/// <inheritdoc />
 		bool IList.IsReadOnly => false;
 
 		/// <inheritdoc />
 		bool ICollection<T>.IsReadOnly => false;
 
+		/// <inheritdoc />
 		bool ICollection.IsSynchronized => false;
 
+		/// <inheritdoc />
 		object ICollection.SyncRoot
 		{
 			get
@@ -332,9 +357,16 @@ namespace asm.Other.StephenCleary.Collections
 		/// </summary>
 		protected int Offset { get; private set; }
 
-		[NotNull] 
+		/// <inheritdoc />
+		public IEnumerator<T> GetEnumerator() { return new Enumerator(this); }
+
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+		[NotNull]
 		public ReadOnlyCollection<T> AsReadOnly() { return new ReadOnlyCollection<T>(this); }
 
+		/// <inheritdoc />
 		public void Insert(int index, T item)
 		{
 			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
@@ -359,26 +391,26 @@ namespace asm.Other.StephenCleary.Collections
 			_version++;
 		}
 
+		/// <inheritdoc />
 		void IList.Insert(int index, object value)
 		{
 			if (!ObjectHelper.IsCompatible<T>(value)) throw new InvalidCastException();
 			Insert(index, (T)value);
 		}
 
-		public void Add(T item) { Insert(Count, item); }
+		/// <inheritdoc />
+		void ICollection<T>.Add(T item) { Insert(Count, item); }
 
+		/// <inheritdoc />
 		int IList.Add(object value)
 		{
 			if (value == null && !typeof(T).IsClass) throw new ArgumentNullException(nameof(value), "Value cannot be null.");
 			if (!ObjectHelper.IsCompatible<T>(value)) throw new ArgumentException("Value is of incorrect type.", nameof(value));
-			AddToBack((T)value);
+			Insert(Count, (T)value);
 			return Count - 1;
 		}
 
-		public void AddToFront(T item) { Insert(0, item); }
-
-		public void AddToBack(T item) { Insert(Count, item); }
-
+		/// <inheritdoc cref="IList{T}" />
 		public void RemoveAt(int index)
 		{
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
@@ -395,6 +427,7 @@ namespace asm.Other.StephenCleary.Collections
 			}
 		}
 
+		/// <inheritdoc />
 		public bool Remove(T item)
 		{
 			int index = IndexOf(item);
@@ -403,40 +436,47 @@ namespace asm.Other.StephenCleary.Collections
 			return true;
 		}
 
+		/// <inheritdoc />
 		void IList.Remove(object value)
 		{
 			if (!ObjectHelper.IsCompatible<T>(value)) return;
 			Remove((T)value);
 		}
 
-		/// <summary>
-		/// Removes and returns the last element of this deque.
-		/// </summary>
-		/// <returns>The former last element.</returns>
-		/// <exception cref="InvalidOperationException">The deque is empty.</exception>
-		public T RemoveFromBack()
+		public void Enqueue(T item) { Insert(Count, item); }
+
+		public T Dequeue()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			T item = Items[IndexToBufferIndex(Count - 1)];
-			RemoveAt(Count - 1);
+			T item = Items[Offset];
+			RemoveAt(Offset);
 			return item;
 		}
 
-		/// <summary>
-		/// Removes and returns the first element of this deque.
-		/// </summary>
-		/// <returns>The former first element.</returns>
-		/// <exception cref="InvalidOperationException">The deque is empty.</exception>
-		public T RemoveFromFront()
+		public void Push(T item) { Insert(Count, item); }
+
+		public T Pop()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			RemoveAt(0);
-			return Items[PostIncrement(1)];
+			int ndx = IndexToBufferIndex(Count - 1);
+			T item = Items[ndx];
+			RemoveAt(ndx);
+			return item;
 		}
 
-		/// <summary>
-		/// Removes all items from this deque.
-		/// </summary>
+		public T PeekQueue()
+		{
+			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			return Items[IndexToBufferIndex(0)];
+		}
+
+		public T PeekStack()
+		{
+			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			return Items[IndexToBufferIndex(Count - 1)];
+		}
+
+		/// <inheritdoc cref="ICollection{T}" />
 		public void Clear()
 		{
 			Offset = 0;
@@ -447,37 +487,50 @@ namespace asm.Other.StephenCleary.Collections
 		/// Inserts a collection of elements into this deque.
 		/// </summary>
 		/// <param name="index">The index at which the collection is inserted.</param>
-		/// <param name="collection">The collection of elements to insert.</param>
+		/// <param name="enumerable">The collection of elements to insert.</param>
 		/// <exception cref="ArgumentOutOfRangeException">
 		/// <paramref name="index" /> is not a valid index to an insertion point for
 		/// the source.
 		/// </exception>
-		public void InsertRange(int index, [NotNull] IEnumerable<T> collection)
+		public void InsertRange(int index, [NotNull] IEnumerable<T> enumerable)
 		{
-			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			int count = collection.FastCount();
-			if (count == 0) return;
-			if (count > 0) EnsureCapacity(checked(Count + count));
+			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 
-			if (collection is ICollection<T> c)
+			switch (enumerable)
 			{
-				MakeGapAt(index, c.Count);
+				case ICollection<T> collection:
+					if (collection.Count == 0) return;
+					EnsureCapacity(checked(Count + collection.Count));
+					MakeGapAt(index, collection.Count);
 
-				foreach (T item in collection)
-					Items[IndexToBufferIndex(index++)] = item;
+					foreach (T item in enumerable)
+						Items[IndexToBufferIndex(index++)] = item;
 
-				Count += c.Count;
-				_version++;
-				return;
+					Count += collection.Count;
+					_version++;
+					break;
+				case IReadOnlyCollection<T> readOnlyCollection:
+					if (readOnlyCollection.Count == 0) return;
+					EnsureCapacity(checked(Count + readOnlyCollection.Count));
+					MakeGapAt(index, readOnlyCollection.Count);
+
+					foreach (T item in enumerable)
+						Items[IndexToBufferIndex(index++)] = item;
+
+					Count += readOnlyCollection.Count;
+					_version++;
+					break;
+				default:
+					using (IEnumerator<T> enumerator = enumerable.GetEnumerator())
+					{
+						while (enumerator.MoveNext())
+						{
+							Insert(index++, enumerator.Current);
+						}
+					}
+					break;
 			}
 
-			using (IEnumerator<T> enumerator = collection.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					Insert(index++, enumerator.Current);
-				}
-			}
 		}
 
 		/// <summary>
@@ -486,8 +539,7 @@ namespace asm.Other.StephenCleary.Collections
 		/// <param name="index">The index into the deque at which the range begins.</param>
 		/// <param name="count">The number of elements to remove.</param>
 		/// <exception cref="ArgumentOutOfRangeException">
-		/// Either <paramref name="index" /> or <paramref name="count" /> is less
-		/// than 0.
+		/// Either <paramref name="index" /> or <paramref name="count" /> is less than 0.
 		/// </exception>
 		/// <exception cref="ArgumentException">
 		/// The range [<paramref name="index" />, <paramref name="index" /> +
@@ -501,8 +553,11 @@ namespace asm.Other.StephenCleary.Collections
 			Count -= count;
 		}
 
-		// This method removes all items which matches the predicate.
-		// The complexity is O(n).   
+		/// <summary>
+		/// Removes all items which matches the predicate.
+		/// </summary>
+		/// <param name="match"></param>
+		/// <returns></returns>
 		public int RemoveAll([NotNull] Predicate<T> match)
 		{
 			int freeIndex = 0;   // the first free slot in items array
@@ -517,22 +572,6 @@ namespace asm.Other.StephenCleary.Collections
 			return result;
 		}
 
-		/// <summary>
-		/// Returns an enumerator that iterates through the collection.
-		/// </summary>
-		/// <returns>
-		/// A <see cref="T:System.Collections.Generic.IEnumerator`1" /> that can be used to iterate through the collection.
-		/// </returns>
-		public IEnumerator<T> GetEnumerator() { return new Enumerator(this); }
-
-		/// <summary>
-		/// Returns an enumerator that iterates through a collection.
-		/// </summary>
-		/// <returns>
-		/// An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.
-		/// </returns>
-		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
 		public int BinarySearch([NotNull] T item)
 		{
 			return BinarySearch(0, Count, item, null);
@@ -543,65 +582,62 @@ namespace asm.Other.StephenCleary.Collections
 			return BinarySearch(0, Count, item, comparer);
 		}
 
-		// Searches a section of the list for a given element using a binary search
-		// algorithm. Elements of the list are compared to the search value using
-		// the given IComparer interface. If comparer is null, elements of
-		// the list are compared to the search value using the IComparable
-		// interface, which in that case must be implemented by all elements of the
-		// list and the given search value. This method assumes that the given
-		// section of the list is already sorted; if this is not the case, the
-		// result will be incorrect.
-		//
-		// The method returns the index of the given value in the list. If the
-		// list does not contain the given value, the method returns a negative
-		// integer. The bitwise complement operator (~) can be applied to a
-		// negative result to produce the index of the first element (if any) that
-		// is larger than the given search value. This is also the index at which
-		// the search value should be inserted into the list in order for the list
-		// to remain sorted.
-		// 
-		// The method uses the Array.BinarySearch method to perform the
-		// search.
-		// 
+		/// <summary>
+		/// Searches a section of the list for a given element using a binary search
+		/// algorithm. Elements of the list are compared to the search value using
+		/// the given IComparer interface. If comparer is null, elements of
+		/// the list are compared to the search value using the IComparable
+		/// interface, which in that case must be implemented by all elements of the
+		/// list and the given search value. This method assumes that the given
+		/// section of the list is already sorted; if this is not the case, the
+		/// result will be incorrect.
+		///
+		/// The method returns the index of the given value in the list. If the
+		/// list does not contain the given value, the method returns a negative
+		/// integer. The bitwise complement operator (~) can be applied to a
+		/// negative result to produce the index of the first element (if any) that
+		/// is larger than the given search value. This is also the index at which
+		/// the search value should be inserted into the list in order for the list
+		/// to remain sorted.
+		/// 
+		/// The method uses the Array.BinarySearch method to perform the search.
+		/// </summary>
 		public int BinarySearch(int index, int count, [NotNull] T item, IComparer<T> comparer)
 		{
 			Count.ValidateRange(index, ref count);
 			return Array.BinarySearch(Items, index, count, item, comparer);
 		}
 
-		// Returns the index of the first occurrence of a given value in a range of
-		// this list. The list is searched forwards from beginning to end.
-		// The elements of the list are compared to the given value using the
-		// Object.Equals method.
-		// 
-		// This method uses the Array.IndexOf method to perform the
-		// search.
+		/// <inheritdoc />
 		public int IndexOf(T item) { return IndexOf(item, 0, -1); }
 
-		// Returns the index of the first occurrence of a given value in a range of
-		// this list. The list is searched forwards, starting at index
-		// index and ending at count number of elements. The
-		// elements of the list are compared to the given value using the
-		// Object.Equals method.
-		// 
-		// This method uses the Array.IndexOf method to perform the
-		// search.
+		/// <summary>
+		/// Returns the index of the first occurrence of a given value in a range of
+		/// this list. The list is searched forwards, starting at index
+		/// index and ending at count number of elements. The
+		/// elements of the list are compared to the given value using the
+		/// Object.Equals method.
+		/// 
+		/// This method uses the Array.IndexOf method to perform the search.
+		/// </summary>
 		public int IndexOf(T item, int index) { return IndexOf(item, index, -1); }
 
-		// Returns the index of the first occurrence of a given value in a range of
-		// this list. The list is searched forwards, starting at index
-		// index and up to count number of elements. The
-		// elements of the list are compared to the given value using the
-		// Object.Equals method.
-		// 
-		// This method uses the Array.IndexOf method to perform the
-		// search.
+		/// <summary>
+		/// Returns the index of the first occurrence of a given value in a range of
+		/// this list. The list is searched forwards, starting at index
+		/// index and up to count number of elements. The
+		/// elements of the list are compared to the given value using the
+		/// Object.Equals method.
+		/// 
+		/// This method uses the Array.IndexOf method to perform the search.
+		/// </summary>
 		public int IndexOf(T item, int index, int count)
 		{
 			Count.ValidateRange(index, ref count);
 			return Array.IndexOf(Items, item, index, count);
 		}
 
+		/// <inheritdoc />
 		int IList.IndexOf(object value)
 		{
 			return ObjectHelper.IsCompatible<T>(value)
@@ -609,39 +645,42 @@ namespace asm.Other.StephenCleary.Collections
 						: -1;
 		}
 
-		// Returns the index of the last occurrence of a given value in a range of
-		// this list. The list is searched backwards, starting at the end 
-		// and ending at the first element in the list. The elements of the list 
-		// are compared to the given value using the Object.Equals method.
-		// 
-		// This method uses the Array.LastIndexOf method to perform the
-		// search.
+		/// <summary>
+		/// Returns the index of the last occurrence of a given value in a range of
+		/// this list. The list is searched backwards, starting at the end 
+		/// and ending at the first element in the list. The elements of the list 
+		/// are compared to the given value using the Object.Equals method.
+		/// 
+		/// This method uses the Array.LastIndexOf method to perform the search.
+		/// </summary>
 		public int LastIndexOf(T item)
 		{
 			return LastIndexOf(item, 0, -1);
 		}
 
-		// Returns the index of the last occurrence of a given value in a range of
-		// this list. The list is searched backwards, starting at index
-		// index and ending at the first element in the list. The 
-		// elements of the list are compared to the given value using the 
-		// Object.Equals method.
-		// 
-		// This method uses the Array.LastIndexOf method to perform the
-		// search.
+		/// <summary>
+		/// Returns the index of the last occurrence of a given value in a range of
+		/// this list. The list is searched backwards, starting at index
+		/// index and ending at the first element in the list. The 
+		/// elements of the list are compared to the given value using the 
+		/// Object.Equals method.
+		/// 
+		/// This method uses the Array.LastIndexOf method to perform the search.
+		/// </summary>
 		public int LastIndexOf(T item, int index)
 		{
 			return LastIndexOf(item, index, -1);
 		}
 
-		// Returns the index of the last occurrence of a given value in a range of
-		// this list. The list is searched backwards, starting at index
-		// index and up to count elements. The elements of
-		// the list are compared to the given value using the Object.Equals
-		// method.
-		// 
-		// This method uses the Array.LastIndexOf method to perform the
-		// search.
+		/// <summary>
+		/// Returns the index of the last occurrence of a given value in a range of
+		/// this list. The list is searched backwards, starting at index
+		/// index and up to count elements. The elements of
+		/// the list are compared to the given value using the Object.Equals
+		/// method.
+		/// 
+		/// This method uses the Array.LastIndexOf method to perform the search.
+		/// </summary>
 		public int LastIndexOf(T item, int index, int count)
 		{
 			Count.ValidateRange(index, ref count);
@@ -663,6 +702,7 @@ namespace asm.Other.StephenCleary.Collections
 			return IndexOf(item, 0, -1) > -1;
 		}
 
+		/// <inheritdoc />
 		bool IList.Contains(object value) { return ObjectHelper.IsCompatible<T>(value) && Contains((T)value); }
 
 		public T Find([NotNull] Predicate<T> match)
@@ -756,14 +796,15 @@ namespace asm.Other.StephenCleary.Collections
 			}
 		}
 
-		// Copies this List into array, which must be of a 
-		// compatible array type.  
-		public void CopyTo([NotNull] T[] array) { CopyTo(array, 0); }
+		public void CopyTo([NotNull] T[] array) { CopyTo(array, 0, -1); }
+		/// <inheritdoc />
 		public void CopyTo(T[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
 		public void CopyTo([NotNull] T[] array, int arrayIndex, int count)
 		{
-			Count.ValidateRange(arrayIndex, ref count);
+			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, ref count);
+			if (count == 0) return;
+			Count.ValidateRange(arrayIndex, ref count);
 
 			if (Offset > Capacity - Count)
 			{
@@ -779,10 +820,12 @@ namespace asm.Other.StephenCleary.Collections
 			}
 		}
 
+		/// <inheritdoc />
 		void ICollection.CopyTo(Array array, int arrayIndex)
 		{
 			if (array.Rank != 1) throw new RankException();
 			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
+			if (Count == 0) return;
 
 			if (array is T[] tArray)
 			{
@@ -797,6 +840,7 @@ namespace asm.Other.StephenCleary.Collections
 			 * we can't figure out if we can successfully copy the element beforehand.
 			 */
 			array.Length.ValidateRange(arrayIndex, Count);
+
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
 			Type sourceType = typeof(T);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
@@ -864,16 +908,16 @@ namespace asm.Other.StephenCleary.Collections
 			if (version != _version) throw new VersionChangedException();
 		}
 
-		// Reverses the elements in this list.
 		public void Reverse() { Reverse(0, Count); }
 
-		// Reverses the elements in a range of this list. Following a call to this
-		// method, an element in the range given by index and count
-		// which was previously located at index i will now be located at
-		// index index + (index + count - i - 1).
-		// 
-		// This method uses the Array.Reverse method to reverse the
-		// elements.
+		/// <summary>
+		/// Reverses the elements in a range of this list. Following a call to this
+		/// method, an element in the range given by index and count
+		/// which was previously located at index i will now be located at
+		/// index index + (index + count - i - 1).
+		/// 
+		/// This method uses the Array.Reverse method to reverse the elements.
+		/// </summary>
 		public void Reverse(int index, int count)
 		{
 			Count.ValidateRange(index, ref count);
@@ -907,21 +951,19 @@ namespace asm.Other.StephenCleary.Collections
 			Sort(0, Count, comparer);
 		}
 
-		// Sorts the elements in this list.  Uses the default comparer and 
-		// Array.Sort.
 		public void Sort() { Sort(0, Count, null); }
 
-		// Sorts the elements in this list.  Uses Array.Sort with the
-		// provided comparer.
 		public void Sort(IComparer<T> comparer) { Sort(0, Count, comparer); }
 
-		// Sorts the elements in a section of this list. The sort compares the
-		// elements to each other using the given IComparer interface. If
-		// comparer is null, the elements are compared to each other using
-		// the IComparable interface, which in that case must be implemented by all
-		// elements of the list.
-		// 
-		// This method uses the Array.Sort method to sort the elements.
+		/// <summary>
+		/// Sorts the elements in a section of this list. The sort compares the
+		/// elements to each other using the given IComparer interface. If
+		/// comparer is null, the elements are compared to each other using
+		/// the IComparable interface, which in that case must be implemented by all
+		/// elements of the list.
+		/// 
+		/// This method uses the Array.Sort method to sort the elements.
+		/// </summary>
 		public void Sort(int index, int count, IComparer<T> comparer)
 		{
 			Count.ValidateRange(index, ref count);
@@ -951,14 +993,16 @@ namespace asm.Other.StephenCleary.Collections
 			_version++;
 		}
 
-		// Sets the capacity of this list to the size of the list. This method can
-		// be used to minimize a list's memory overhead once it is known that no
-		// new elements will be added to the list. To completely clear a list and
-		// release all memory referenced by the list, execute the following
-		// statements:
-		// 
-		// list.Clear();
-		// list.TrimExcess();
+		/// <summary>
+		/// Sets the capacity of this list to the size of the list. This method can
+		/// be used to minimize a list's memory overhead once it is known that no
+		/// new elements will be added to the list. To completely clear a list and
+		/// release all memory referenced by the list, execute the following
+		/// statements:
+		/// 
+		/// list.Clear();
+		/// list.TrimExcess();
+		/// </summary>
 		public void TrimExcess()
 		{
 			int threshold = (int)(Items.Length * 0.9);

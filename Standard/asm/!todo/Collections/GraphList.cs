@@ -29,12 +29,13 @@ namespace asm.Collections
 		/// <summary>
 		/// a semi recursive approach to traverse the graph
 		/// </summary>
-		public sealed class Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
+		public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
 		{
 			private readonly GraphList<TVertex, TEdge, T> _graph;
 			private readonly int _version;
 			private readonly TVertex _root;
-			private readonly DynamicQueue<TVertex> _queueOrStack;
+			private readonly Queue<TVertex> _queue;
+			private readonly Stack<TVertex> _stack;
 			private readonly HashSet<T> _visited;
 			private readonly Func<bool> _moveNext;
 
@@ -43,6 +44,7 @@ namespace asm.Collections
 			private bool _done;
 
 			internal Enumerator([NotNull] GraphList<TVertex, TEdge, T> graph, [NotNull] TVertex root, GraphTraverseMethod method)
+				: this()
 			{
 				_graph = graph;
 				_version = _graph._version;
@@ -52,11 +54,11 @@ namespace asm.Collections
 				switch (method)
 				{
 					case GraphTraverseMethod.BreadthFirst:
-						_queueOrStack = new DynamicQueue<TVertex>(DequeuePriority.FIFO);
+						_queue = new Queue<TVertex>();
 						_moveNext = BreadthFirst;
 						break;
 					case GraphTraverseMethod.DepthFirst:
-						_queueOrStack = new DynamicQueue<TVertex>(DequeuePriority.LIFO);
+						_stack = new Stack<TVertex>();
 						_moveNext = DepthFirst;
 						break;
 					default:
@@ -79,17 +81,6 @@ namespace asm.Collections
 			[NotNull]
 			object IEnumerator.Current => Current;
 
-			/// <inheritdoc />
-			public IEnumerator<T> GetEnumerator()
-			{
-				IEnumerator enumerator = this;
-				enumerator.Reset();
-				return this;
-			}
-
-			/// <inheritdoc />
-			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
 			public bool MoveNext() { return _moveNext(); }
 
 			void IEnumerator.Reset()
@@ -97,16 +88,13 @@ namespace asm.Collections
 				if (_version != _graph._version) throw new VersionChangedException();
 				_current = null;
 				_started = _done = false;
-				_queueOrStack.Clear();
+				_queue?.Clear();
+				_stack?.Clear();
 				_visited.Clear();
 			}
 
 			/// <inheritdoc />
-			public void Dispose()
-			{
-				_current = null;
-				_queueOrStack.Clear();
-			}
+			public void Dispose() { }
 
 			private bool BreadthFirst()
 			{
@@ -117,14 +105,14 @@ namespace asm.Collections
 				{
 					_started = true;
 					// Start at the root
-					_queueOrStack.Enqueue(_root);
+					_queue.Enqueue(_root);
 				}
 
 				// visit the next queued vertex
 				do
 				{
-					_current = _queueOrStack.Count > 0
-									? _queueOrStack.Dequeue()
+					_current = _queue.Count > 0
+									? _queue.Dequeue()
 									: null;
 				}
 				while (_current != null && _visited.Contains(_current.Value));
@@ -140,7 +128,7 @@ namespace asm.Collections
 				if (!_graph.Edges.TryGetValue(_current.Value, out KeyedDictionary<T, TEdge> edges)) return true;
 
 				foreach (TEdge edge in edges.Values) 
-					_queueOrStack.Enqueue(edge.To);
+					_queue.Enqueue(edge.To);
 
 				return true;
 			}
@@ -154,14 +142,14 @@ namespace asm.Collections
 				{
 					_started = true;
 					// Start at the root
-					_queueOrStack.Enqueue(_root);
+					_stack.Push(_root);
 				}
 
 				// visit the next queued vertex
 				do
 				{
-					_current = _queueOrStack.Count > 0
-									? _queueOrStack.Dequeue()
+					_current = _stack.Count > 0
+									? _stack.Pop()
 									: null;
 				}
 				while (_current != null && _visited.Contains(_current.Value));
@@ -177,7 +165,7 @@ namespace asm.Collections
 				if (!_graph.Edges.TryGetValue(_current.Value, out KeyedDictionary<T, TEdge> edges)) return true;
 
 				foreach (TEdge edge in edges.Values) 
-					_queueOrStack.Enqueue(edge.To);
+					_stack.Push(edge.To);
 
 				return true;
 			}
@@ -1509,7 +1497,6 @@ namespace asm.Collections
 		/// <param name="value">The starting vertex's value</param>
 		/// <param name="method">The traverse method</param>
 		/// <returns></returns>
-		[NotNull]
 		public Enumerator Enumerate([NotNull] T value, GraphTraverseMethod method)
 		{
 			if (!Vertices.TryGetValue(value, out TVertex root)) throw new KeyNotFoundException();

@@ -1,13 +1,11 @@
 using System;
 using System.ComponentModel;
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 
 namespace asm.Events
 {
 	[Serializable]
-	[ComVisible(true)]
 	public class HttpResponseMessageEventArgs : CancelEventArgs
 	{
 		/// <inheritdoc />

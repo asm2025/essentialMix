@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using asm.Extensions;
 using asm.Helpers;
@@ -8,7 +7,6 @@ using JetBrains.Annotations;
 namespace asm
 {
 	[Serializable]
-	[ComVisible(true)]
 	public sealed class Version : ICloneable, IComparable, IComparable<Version>, IEquatable<Version>
 	{
 		private static readonly Regex __rgxComponents = new Regex(@"^v?(?<major>\d+)(?:\.(?<minor>\d+)(?:\.(?<build>\d+))?(?:\.(?<revision>\d+))?)?(?:\s?(?:service pack\s|sp)(?<sp>\d+))?$", RegexHelper.OPTIONS_I);

@@ -24,15 +24,6 @@ namespace asm.Collections
 		public ObservableList(int capacity)
 			: base(capacity) { }
 
-		public ObservableList(ICollection<T> collection)
-			: base(collection?.Count ?? 0)
-		{
-			if (collection == null || collection.Count == 0) return;
-
-			foreach (T item in collection)
-				base.Add(item);
-		}
-
 		public ObservableList([NotNull] IEnumerable<T> collection)
 			: base(collection)
 		{

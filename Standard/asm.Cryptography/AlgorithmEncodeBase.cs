@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using System.Text;
 using JetBrains.Annotations;
 using asm.Helpers;
@@ -6,7 +5,6 @@ using asm.Text;
 
 namespace asm.Cryptography
 {
-	[ComVisible(true)]
 	public abstract class AlgorithmEncodeBase<T> : AlgorithmBase<T>, IEncoding
 	{
 		protected AlgorithmEncodeBase([NotNull] T algorithm)

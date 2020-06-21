@@ -9,7 +9,7 @@ using asm.Patterns.Object;
 namespace asm.Threading
 {
 	// based on TwoWaySignaling
-	public sealed class Synchronized<T> : Disposable, IDisposable
+	public sealed class Synchronized<T> : Disposable
 	{
 		private readonly object _lock = new object();
 		private readonly object _threadsLock = new object();

@@ -44,7 +44,6 @@ namespace asm.Patterns
 				ObjectHelper.Dispose(ref _manualResetEventSlim);
 				ObjectHelper.Dispose(ref _cts);
 			}
-
 			base.Dispose(disposing);
 		}
 

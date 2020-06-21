@@ -26,10 +26,12 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 		/// <inheritdoc />
 		protected override void Dispose(bool disposing)
 		{
+			if (disposing)
+			{
+				StopInternal(WaitOnDispose);
+				ObjectHelper.Dispose(ref _countdown);
+			}
 			base.Dispose(disposing);
-			if (!disposing) return;
-			StopInternal(WaitOnDispose);
-			ObjectHelper.Dispose(ref _countdown);
 		}
 
 		public override int Count => _queue.Count;
@@ -58,6 +60,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 						}
 
 						Thread.Sleep(0);
+						if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 						OnWorkStarted(EventArgs.Empty);
 					}
 				}

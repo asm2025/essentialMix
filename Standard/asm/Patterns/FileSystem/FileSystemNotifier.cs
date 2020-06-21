@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,16 +13,13 @@ namespace asm.Patterns.FileSystem
 	{
 		private enum EventType
 		{
-			None,
 			Created,
 			Renamed,
 			Deleted,
 			Changed
 		}
 
-		private readonly object _lock = new object();
-		private readonly Queue<(EventType Type, FileSystemEventArgs Args)> _queue = new Queue<(EventType Type, FileSystemEventArgs Args)>();
-
+		private BlockingCollection<(EventType Type, FileSystemEventArgs Args)> _queue;
 		private ManualResetEventSlim _manualResetEventSlim = new ManualResetEventSlim(false);
 		private Thread _worker;
 		private CancellationTokenSource _cts;
@@ -48,6 +45,7 @@ namespace asm.Patterns.FileSystem
 			_cts = new CancellationTokenSource();
 			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed());
 			Token = _cts.Token;
+			_queue = new BlockingCollection<(EventType Type, FileSystemEventArgs Args)>();
 			(_worker = new Thread(Consume)
 					{
 						IsBackground = IsBackground,
@@ -55,7 +53,20 @@ namespace asm.Patterns.FileSystem
 					}).Start();
 		}
 
-		public int Count => CountInternal;
+		/// <inheritdoc />
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				StopInternal(WaitForQueuedItems);
+				ObjectHelper.Dispose(ref _queue);
+				ObjectHelper.Dispose(ref _manualResetEventSlim);
+				ObjectHelper.Dispose(ref _cts);
+			}
+			base.Dispose(disposing);
+		}
+
+		public int Count => _queue.Count;
 
 		public bool WaitForQueuedItems { get; set; } = true;
 
@@ -65,36 +76,9 @@ namespace asm.Patterns.FileSystem
 
 		public CancellationToken Token { get; }
 
-		public bool IsBusy => IsBusyInternal;
+		public bool IsBusy => !_manualResetEventSlim.IsSet;
 
-		public bool CompleteMarked { get; protected set; }
-
-		protected virtual int CountInternal
-		{
-			get
-			{
-				lock (_lock)
-				{
-					return _queue.Count;
-				}
-			}
-		}
-
-		protected virtual bool IsBusyInternal { get; private set; }
-
-		/// <inheritdoc />
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing)
-			{
-				StopInternal(WaitForQueuedItems);
-				ObjectHelper.Dispose(ref _worker);
-				ObjectHelper.Dispose(ref _manualResetEventSlim);
-				ObjectHelper.Dispose(ref _cts);
-			}
-
-			base.Dispose(disposing);
-		}
+		public bool CompleteMarked => _queue.IsAddingCompleted;
 
 		public void Complete()
 		{
@@ -155,26 +139,18 @@ namespace asm.Patterns.FileSystem
 
 		protected virtual void CompleteInternal()
 		{
-			lock (_lock)
-			{
-				CompleteMarked = true;
-				Monitor.PulseAll(_lock);
-			}
+			_queue.CompleteAdding();
 		}
 
 		protected virtual void ClearInternal()
 		{
-			lock (_lock)
-			{
-				_queue.Clear();
-				Monitor.PulseAll(_lock);
-			}
+			_queue.Clear();
 		}
 
 		protected virtual bool WaitInternal(int millisecondsTimeout)
 		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (!IsBusyInternal) return true;
+			if (!IsBusy) return true;
 
 			try
 			{
@@ -200,15 +176,11 @@ namespace asm.Patterns.FileSystem
 
 		protected virtual void StopInternal(bool waitForQueue)
 		{
-			lock (_lock)
-			{
-				Cancel();
-				Monitor.PulseAll(_lock);
-			}
-
+			CompleteInternal();
 			// Wait for the consumer's thread to finish.
 			if (waitForQueue) WaitInternal(TimeSpanHelper.INFINITE);
 			ClearInternal();
+			ObjectHelper.Dispose(ref _worker);
 		}
 
 		protected void Cancel() { _cts.CancelIfNotDisposed(); }
@@ -243,103 +215,52 @@ namespace asm.Patterns.FileSystem
 		private void Enqueue(EventType type, FileSystemEventArgs args)
 		{
 			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
-
-			lock (_lock)
-			{
-				// the repeated check is intentional. The lock might take a while to be entered.
-				if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
-				_queue.Enqueue((type, args));
-				Monitor.Pulse(_lock);
-			}
+			_queue.Add((type, args), Token);
 		}
 
 		private void Consume()
 		{
+			if (IsDisposed) return;
+
 			_manualResetEventSlim.Reset();
-			if (IsDisposed || IsBusyInternal) return;
-			IsBusyInternal = true;
 
 			try
 			{
-				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
+				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !_queue.IsCompleted)
 				{
-					EventType type = EventType.None;
-					FileSystemEventArgs args = null;
-
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && type == EventType.None)
-					{
-						lock (_lock)
-						{
-							if (_queue.Count == 0)
-							{
-								Monitor.Wait(_lock, TimeSpanHelper.MINIMUM_SCHEDULE);
-								Thread.Sleep(1);
-							}
-
-							if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
-							(type, args) = _queue.Dequeue();
-						}
-					}
-					
-					if (type == EventType.None) continue;
-					if (IsDisposed || Token.IsCancellationRequested) return;
-
-					switch (type)
-					{
-						case EventType.Created:
-							base.OnCreated(args);
-							break;
-						case EventType.Renamed:
-							base.OnRenamed((RenamedEventArgs)args);
-							break;
-						case EventType.Deleted:
-							base.OnDeleted(args);
-							break;
-						case EventType.Changed:
-							base.OnChanged(args);
-							break;
-						default:
-							throw new ArgumentOutOfRangeException();
-					}
+					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out (EventType Type, FileSystemEventArgs Args) item, TimeSpanHelper.MINIMUM_SCHEDULE, Token))
+						Process(item.Type, item.Args);
 				}
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
-				{
-					EventType type;
-					FileSystemEventArgs args;
-					
-					lock (_lock)
-					{
-						if (_queue.Count == 0) return;
-						(type, args) = _queue.Dequeue();
-					}
+				if (IsDisposed || Token.IsCancellationRequested) return;
 
-					if (type == EventType.None) continue;
-					if (IsDisposed || Token.IsCancellationRequested) return;
-
-					switch (type)
-					{
-						case EventType.Created:
-							base.OnCreated(args);
-							break;
-						case EventType.Renamed:
-							base.OnRenamed((RenamedEventArgs)args);
-							break;
-						case EventType.Deleted:
-							base.OnDeleted(args);
-							break;
-						case EventType.Changed:
-							base.OnChanged(args);
-							break;
-						default:
-							throw new ArgumentOutOfRangeException();
-					}
-				}
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out (EventType Type, FileSystemEventArgs Args) item, TimeSpanHelper.MINIMUM_SCHEDULE, Token))
+					Process(item.Type, item.Args);
 			}
+			catch (ObjectDisposedException) { }
+			catch (OperationCanceledException) { }
 			finally
 			{
-				IsBusyInternal = false;
 				_manualResetEventSlim.Set();
+			}
+		}
+
+		private void Process(EventType type, FileSystemEventArgs args)
+		{
+			switch (type)
+			{
+				case EventType.Created:
+					base.OnCreated(args);
+					break;
+				case EventType.Renamed:
+					base.OnRenamed((RenamedEventArgs)args);
+					break;
+				case EventType.Deleted:
+					base.OnDeleted(args);
+					break;
+				case EventType.Changed:
+					base.OnChanged(args);
+					break;
 			}
 		}
 	}

@@ -46,12 +46,13 @@ namespace asm.Collections
 		/// <summary>
 		/// a semi recursive approach to traverse the tree
 		/// </summary>
-		public sealed class Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
+		public struct Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
 		{
 			private readonly ArrayBinaryTree<T> _tree;
 			private readonly int _version;
 			private readonly int _index;
-			private readonly DynamicQueue<int> _queueOrStack;
+			private readonly Queue<int> _queue;
+			private readonly Stack<int> _stack;
 			private readonly Func<bool> _moveNext;
 
 			private ArrayBinaryNode<T> _current;
@@ -59,6 +60,7 @@ namespace asm.Collections
 			private bool _done;
 
 			internal Enumerator([NotNull] ArrayBinaryTree<T> tree, int index, BinaryTreeTraverseMethod method, HorizontalFlow flow)
+				: this()
 			{
 				_tree = tree;
 				_version = _tree._version;
@@ -69,7 +71,7 @@ namespace asm.Collections
 				switch (method)
 				{
 					case BinaryTreeTraverseMethod.LevelOrder:
-						_queueOrStack = new DynamicQueue<int>(DequeuePriority.FIFO);
+						_queue = new Queue<int>();
 						_moveNext = flow switch
 						{
 							HorizontalFlow.LeftToRight => LevelOrderLR,
@@ -78,7 +80,7 @@ namespace asm.Collections
 						};
 						break;
 					case BinaryTreeTraverseMethod.PreOrder:
-						_queueOrStack = new DynamicQueue<int>(DequeuePriority.LIFO);
+						_stack = new Stack<int>();
 						_moveNext = flow switch
 						{
 							HorizontalFlow.LeftToRight => PreOrderLR,
@@ -87,7 +89,7 @@ namespace asm.Collections
 						};
 						break;
 					case BinaryTreeTraverseMethod.InOrder:
-						_queueOrStack = new DynamicQueue<int>(DequeuePriority.LIFO);
+						_stack = new Stack<int>();
 						_moveNext = flow switch
 						{
 							HorizontalFlow.LeftToRight => InOrderLR,
@@ -96,7 +98,7 @@ namespace asm.Collections
 						};
 						break;
 					case BinaryTreeTraverseMethod.PostOrder:
-						_queueOrStack = new DynamicQueue<int>(DequeuePriority.LIFO);
+						_stack = new Stack<int>();
 						_moveNext = flow switch
 						{
 							HorizontalFlow.LeftToRight => PostOrderLR,
@@ -140,15 +142,13 @@ namespace asm.Collections
 				if (_version != _tree._version) throw new VersionChangedException();
 				_current.Index = -1;
 				_started = false;
-				_queueOrStack.Clear();
+				_queue?.Clear();
+				_stack?.Clear();
 				_done = _tree.Count == 0 || !_index.InRangeRx(0, _tree.Count);
 			}
 
 			/// <inheritdoc />
-			public void Dispose()
-			{
-				_queueOrStack.Clear();
-			}
+			public void Dispose() { }
 
 			private bool LevelOrderLR()
 			{
@@ -161,12 +161,12 @@ namespace asm.Collections
 				{
 					_started = true;
 					// Start at the root
-					_queueOrStack.Enqueue(_index);
+					_queue.Enqueue(_index);
 				}
 
 				// visit the next queued node
-				_current.Index = _queueOrStack.Count > 0
-								? _queueOrStack.Dequeue()
+				_current.Index = _queue.Count > 0
+								? _queue.Dequeue()
 								: -1;
 
 				if (_current.Index < 0)
@@ -176,8 +176,8 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if (_current.LeftIndex > -1) _queueOrStack.Enqueue(_current.LeftIndex);
-				if (_current.RightIndex > -1) _queueOrStack.Enqueue(_current.RightIndex);
+				if (_current.LeftIndex > -1) _queue.Enqueue(_current.LeftIndex);
+				if (_current.RightIndex > -1) _queue.Enqueue(_current.RightIndex);
 				return true;
 			}
 
@@ -192,12 +192,12 @@ namespace asm.Collections
 				{
 					_started = true;
 					// Start at the root
-					_queueOrStack.Enqueue(_index);
+					_queue.Enqueue(_index);
 				}
 
 				// visit the next queued node
-				_current.Index = _queueOrStack.Count > 0
-								? _queueOrStack.Dequeue()
+				_current.Index = _queue.Count > 0
+								? _queue.Dequeue()
 								: -1;
 
 				if (_current.Index < 0)
@@ -207,8 +207,8 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if (_current.RightIndex > -1) _queueOrStack.Enqueue(_current.RightIndex);
-				if (_current.LeftIndex > -1) _queueOrStack.Enqueue(_current.LeftIndex);
+				if (_current.RightIndex > -1) _queue.Enqueue(_current.RightIndex);
+				if (_current.LeftIndex > -1) _queue.Enqueue(_current.LeftIndex);
 				return true;
 			}
 
@@ -223,12 +223,12 @@ namespace asm.Collections
 				{
 					_started = true;
 					// Start at the root
-					_queueOrStack.Enqueue(_index);
+					_stack.Push(_index);
 				}
 
 				// visit the next queued node
-				_current.Index = _queueOrStack.Count > 0
-								? _queueOrStack.Dequeue()
+				_current.Index = _stack.Count > 0
+								? _stack.Pop()
 								: -1;
 
 				if (_current.Index < 0)
@@ -238,8 +238,8 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if (_current.RightIndex > -1) _queueOrStack.Enqueue(_current.RightIndex);
-				if (_current.LeftIndex > -1) _queueOrStack.Enqueue(_current.LeftIndex);
+				if (_current.RightIndex > -1) _stack.Push(_current.RightIndex);
+				if (_current.LeftIndex > -1) _stack.Push(_current.LeftIndex);
 				return true;
 			}
 
@@ -254,12 +254,12 @@ namespace asm.Collections
 				{
 					_started = true;
 					// Start at the root
-					_queueOrStack.Enqueue(_index);
+					_stack.Push(_index);
 				}
 
 				// visit the next queued node
-				_current.Index = _queueOrStack.Count > 0
-								? _queueOrStack.Dequeue()
+				_current.Index = _stack.Count > 0
+								? _stack.Pop()
 								: -1;
 
 				if (_current.Index < 0)
@@ -269,8 +269,8 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if (_current.LeftIndex > -1) _queueOrStack.Enqueue(_current.LeftIndex);
-				if (_current.RightIndex > -1) _queueOrStack.Enqueue(_current.RightIndex);
+				if (_current.LeftIndex > -1) _stack.Push(_current.LeftIndex);
+				if (_current.RightIndex > -1) _stack.Push(_current.RightIndex);
 				return true;
 			}
 
@@ -293,20 +293,20 @@ namespace asm.Collections
 					_current.Index = _current.RightIndex;
 				}
 
-				while (_current.Index > -1 || _queueOrStack.Count > 0)
+				while (_current.Index > -1 || _stack.Count > 0)
 				{
 					if (_version != _tree._version) throw new VersionChangedException();
 
 					if (_current.Index > -1)
 					{
-						_queueOrStack.Enqueue(_current.Index);
+						_stack.Push(_current.Index);
 						// Navigate left
 						_current.Index = _current.LeftIndex;
 					}
 					else
 					{
 						// visit the next queued node
-						_current.Index = _queueOrStack.Dequeue();
+						_current.Index = _stack.Pop();
 						break; // break from the loop to visit this node
 					}
 				}
@@ -334,20 +334,20 @@ namespace asm.Collections
 					_current.Index = _current.LeftIndex;
 				}
 
-				while (_current.Index > -1 || _queueOrStack.Count > 0)
+				while (_current.Index > -1 || _stack.Count > 0)
 				{
 					if (_version != _tree._version) throw new VersionChangedException();
 
 					if (_current.Index > -1)
 					{
-						_queueOrStack.Enqueue(_current.Index);
+						_stack.Push(_current.Index);
 						// Navigate right
 						_current.Index = _current.RightIndex;
 					}
 					else
 					{
 						// visit the next queued node
-						_current.Index = _queueOrStack.Dequeue();
+						_current.Index = _stack.Pop();
 						break; // break from the loop to visit this node
 					}
 				}
@@ -381,9 +381,9 @@ namespace asm.Collections
 						if (_version != _tree._version) throw new VersionChangedException();
 
 						// Navigate right
-						if (_current.RightIndex > -1) _queueOrStack.Enqueue(_current.RightIndex);
+						if (_current.RightIndex > -1) _stack.Push(_current.RightIndex);
 
-						_queueOrStack.Enqueue(_current.Index);
+						_stack.Push(_current.Index);
 
 						// Navigate left
 						_current.Index = _current.LeftIndex;
@@ -391,8 +391,8 @@ namespace asm.Collections
 
 					if (_version != _tree._version) throw new VersionChangedException();
 
-					_current.Index = _queueOrStack.Count > 0
-									? _queueOrStack.Dequeue()
+					_current.Index = _stack.Count > 0
+									? _stack.Pop()
 									: -1;
 
 					if (_current.Index < 0) continue;
@@ -401,12 +401,12 @@ namespace asm.Collections
 					* if Current has a right child and is not processed yet,
 					* then make sure right child is processed before root
 					*/
-					if (_current.RightIndex > -1 && _queueOrStack.Count > 0 && _current.RightIndex == _queueOrStack.Peek())
+					if (_current.RightIndex > -1 && _stack.Count > 0 && _current.RightIndex == _stack.Peek())
 					{
 						// remove right child from stack
-						_queueOrStack.Dequeue();
+						_stack.Pop();
 						// push Current back to stack
-						_queueOrStack.Enqueue(_current.Index);
+						_stack.Push(_current.Index);
 						// process right first
 						_current.Index = _current.RightIndex;
 						continue;
@@ -414,7 +414,7 @@ namespace asm.Collections
 		
 					if (_current.Index > -1)
 						break; // break from the loop to visit this node
-				} while (_queueOrStack.Count > 0);
+				} while (_stack.Count > 0);
 
 				_done = _current.Index < 0;
 				return !_done;
@@ -445,17 +445,17 @@ namespace asm.Collections
 						if (_version != _tree._version) throw new VersionChangedException();
 
 						// Navigate left
-						if (_current.LeftIndex > -1) _queueOrStack.Enqueue(_current.LeftIndex);
+						if (_current.LeftIndex > -1) _stack.Push(_current.LeftIndex);
 
-						_queueOrStack.Enqueue(_current.Index);
+						_stack.Push(_current.Index);
 
 						// Navigate right
 						_current.Index = _current.RightIndex;
 					}
 
 					if (_version != _tree._version) throw new VersionChangedException();
-					_current.Index = _queueOrStack.Count > 0
-									? _queueOrStack.Dequeue()
+					_current.Index = _stack.Count > 0
+									? _stack.Pop()
 									: -1;
 					if (_current.Index < 0) continue;
 
@@ -463,12 +463,12 @@ namespace asm.Collections
 					* if Current has a left child and is not processed yet,
 					* then make sure left child is processed before root
 					*/
-					if (_current.LeftIndex > -1 && _queueOrStack.Count > 0 && _current.LeftIndex == _queueOrStack.Peek())
+					if (_current.LeftIndex > -1 && _stack.Count > 0 && _current.LeftIndex == _stack.Peek())
 					{
 						// remove left child from stack
-						_queueOrStack.Dequeue();
+						_stack.Pop();
 						// push Current back to stack
-						_queueOrStack.Enqueue(_current.Index);
+						_stack.Push(_current.Index);
 						// process left first
 						_current.Index = _current.LeftIndex;
 						continue;
@@ -476,7 +476,7 @@ namespace asm.Collections
 
 					if (_current.Index > -1)
 						break; // break from the loop to visit this node
-				} while (_queueOrStack.Count > 0);
+				} while (_stack.Count > 0);
 
 				_done = _current.Index < 0;
 				return !_done;
@@ -486,7 +486,7 @@ namespace asm.Collections
 		/// <summary>
 		/// iterative approach to traverse the tree
 		/// </summary>
-		public sealed class Iterator
+		public struct Iterator
 		{
 			private readonly ArrayBinaryTree<T> _tree;
 			private readonly int _index;
@@ -503,18 +503,16 @@ namespace asm.Collections
 			{
 				if (!_index.InRangeRx(0, _tree.Count)) return;
 
-				int version = _tree._version;
-
 				switch (_method)
 				{
 					case BinaryTreeTraverseMethod.LevelOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
-								LevelOrderLR();
+								LevelOrderLR(visitCallback);
 								break;
 							case HorizontalFlow.RightToLeft:
-								LevelOrderRL();
+								LevelOrderRL(visitCallback);
 								break;
 							default:
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
@@ -524,10 +522,10 @@ namespace asm.Collections
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
-								PreOrderLR();
+								PreOrderLR(visitCallback);
 								break;
 							case HorizontalFlow.RightToLeft:
-								PreOrderRL();
+								PreOrderRL(visitCallback);
 								break;
 							default:
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
@@ -537,10 +535,10 @@ namespace asm.Collections
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
-								InOrderLR();
+								InOrderLR(visitCallback);
 								break;
 							case HorizontalFlow.RightToLeft:
-								InOrderRL();
+								InOrderRL(visitCallback);
 								break;
 							default:
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
@@ -550,10 +548,10 @@ namespace asm.Collections
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
-								PostOrderLR();
+								PostOrderLR(visitCallback);
 								break;
 							case HorizontalFlow.RightToLeft:
-								PostOrderRL();
+								PostOrderRL(visitCallback);
 								break;
 							default:
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
@@ -563,271 +561,280 @@ namespace asm.Collections
 						throw new ArgumentOutOfRangeException();
 				}
 
-				void LevelOrderLR()
+			}
+
+			#region Iterator Traversal for Action<int>
+			private void LevelOrderLR([NotNull] Action<int> visitCallback)
+			{
+				int version = _tree._version;
+				// Root-Left-Right (Queue)
+				Queue<int> queue = new Queue<int>();
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+
+				// Start at the root
+				queue.Enqueue(current.Index);
+
+				while (queue.Count > 0)
 				{
-					// Root-Left-Right (Queue)
-					Queue<int> queue = new Queue<int>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+					if (version != _tree._version) throw new VersionChangedException();
 
-					// Start at the root
-					queue.Enqueue(current.Index);
+					// visit the next queued node
+					current.Index = queue.Dequeue();
+					visitCallback(current.Index);
 
-					while (queue.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						// visit the next queued node
-						current.Index = queue.Dequeue();
-						visitCallback(current.Index);
-
-						// Queue the next nodes
-						if (current.LeftIndex > -1) queue.Enqueue(current.LeftIndex);
-						if (current.RightIndex > -1) queue.Enqueue(current.RightIndex);
-					}
+					// Queue the next nodes
+					if (current.LeftIndex > -1) queue.Enqueue(current.LeftIndex);
+					if (current.RightIndex > -1) queue.Enqueue(current.RightIndex);
 				}
+			}
 
-				void LevelOrderRL()
+			private void LevelOrderRL([NotNull] Action<int> visitCallback)
+			{
+				int version = _tree._version;
+				// Root-Right-Left (Queue)
+				Queue<int> queue = new Queue<int>();
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+
+				// Start at the root
+				queue.Enqueue(current.Index);
+
+				while (queue.Count > 0)
 				{
-					// Root-Right-Left (Queue)
-					Queue<int> queue = new Queue<int>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+					if (version != _tree._version) throw new VersionChangedException();
 
-					// Start at the root
-					queue.Enqueue(current.Index);
+					// visit the next queued node
+					current.Index = queue.Dequeue();
+					visitCallback(current.Index);
 
-					while (queue.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						// visit the next queued node
-						current.Index = queue.Dequeue();
-						visitCallback(current.Index);
-
-						// Queue the next nodes
-						if (current.RightIndex > -1) queue.Enqueue(current.RightIndex);
-						if (current.LeftIndex > -1) queue.Enqueue(current.LeftIndex);
-					}
+					// Queue the next nodes
+					if (current.RightIndex > -1) queue.Enqueue(current.RightIndex);
+					if (current.LeftIndex > -1) queue.Enqueue(current.LeftIndex);
 				}
+			}
 
-				void PreOrderLR()
+			private void PreOrderLR([NotNull] Action<int> visitCallback)
+			{
+				int version = _tree._version;
+				// Root-Left-Right (Stack)
+				Stack<int> stack = new Stack<int>();
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+
+				// Start at the root
+				stack.Push(current.Index);
+
+				while (stack.Count > 0)
 				{
-					// Root-Left-Right (Stack)
-					Stack<int> stack = new Stack<int>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+					if (version != _tree._version) throw new VersionChangedException();
 
-					// Start at the root
-					stack.Push(current.Index);
+					// visit the next queued node
+					current.Index = stack.Pop();
+					visitCallback(current.Index);
 
-					while (stack.Count > 0)
+					/*
+					* The stack works backwards (LIFO).
+					* It means whatever we want to
+					* appear first, we must add last.
+					*/
+					// Queue the next nodes
+					if (current.RightIndex > -1) stack.Push(current.RightIndex);
+					if (current.LeftIndex > -1) stack.Push(current.LeftIndex);
+				}
+			}
+
+			private void PreOrderRL([NotNull] Action<int> visitCallback)
+			{
+				int version = _tree._version;
+				// Root-Right-Left (Stack)
+				Stack<int> stack = new Stack<int>();
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+
+				// Start at the root
+				stack.Push(current.Index);
+
+				while (stack.Count > 0)
+				{
+					if (version != _tree._version) throw new VersionChangedException();
+
+					// visit the next queued node
+					current.Index = stack.Pop();
+					visitCallback(current.Index);
+
+					/*
+					* The stack works backwards (LIFO).
+					* It means whatever we want to
+					* appear first, we must add last.
+					*/
+					// Queue the next nodes
+					if (current.LeftIndex > -1) stack.Push(current.LeftIndex);
+					if (current.RightIndex > -1) stack.Push(current.RightIndex);
+				}
+			}
+
+			private void InOrderLR([NotNull] Action<int> visitCallback)
+			{
+				int version = _tree._version;
+				// Left-Root-Right (Stack)
+				Stack<int> stack = new Stack<int>();
+				// Start at the root
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+
+				while (current.Index > -1 || stack.Count > 0)
+				{
+					if (version != _tree._version) throw new VersionChangedException();
+
+					if (current.Index > -1)
 					{
-						if (version != _tree._version) throw new VersionChangedException();
-
+						stack.Push(current.Index);
+						// Navigate left
+						current.Index = current.LeftIndex;
+					}
+					else
+					{
 						// visit the next queued node
 						current.Index = stack.Pop();
 						visitCallback(current.Index);
 
-						/*
-						* The stack works backwards (LIFO).
-						* It means whatever we want to
-						* appear first, we must add last.
-						*/
-						// Queue the next nodes
-						if (current.RightIndex > -1) stack.Push(current.RightIndex);
-						if (current.LeftIndex > -1) stack.Push(current.LeftIndex);
-					}
-				}
-
-				void PreOrderRL()
-				{
-					// Root-Right-Left (Stack)
-					Stack<int> stack = new Stack<int>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-
-					// Start at the root
-					stack.Push(current.Index);
-
-					while (stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						// visit the next queued node
-						current.Index = stack.Pop();
-						visitCallback(current.Index);
-
-						/*
-						* The stack works backwards (LIFO).
-						* It means whatever we want to
-						* appear first, we must add last.
-						*/
-						// Queue the next nodes
-						if (current.LeftIndex > -1) stack.Push(current.LeftIndex);
-						if (current.RightIndex > -1) stack.Push(current.RightIndex);
-					}
-				}
-
-				void InOrderLR()
-				{
-					// Left-Root-Right (Stack)
-					Stack<int> stack = new Stack<int>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push(current.Index);
-							// Navigate left
-							current.Index = current.LeftIndex;
-						}
-						else
-						{
-							// visit the next queued node
-							current.Index = stack.Pop();
-							visitCallback(current.Index);
-
-							// Navigate right
-							current.Index = current.RightIndex;
-						}
-					}
-				}
-
-				void InOrderRL()
-				{
-					// Right-Root-Left (Stack)
-					Stack<int> stack = new Stack<int>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push(current.Index);
-							// Navigate right
-							current.Index = current.RightIndex;
-						}
-						else
-						{
-							// visit the next queued node
-							current.Index = stack.Pop();
-							visitCallback(current.Index);
-
-							// Navigate right
-							current.Index = current.LeftIndex;
-						}
-					}
-				}
-
-				void PostOrderLR()
-				{
-					// Left-Right-Root (Stack)
-					Stack<int> stack = new Stack<int>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-					int lastVisited = -1;
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push(current.Index);
-							// Navigate left
-							current.Index = current.LeftIndex;
-							continue;
-						}
-
-						int peek = stack.Peek();
-						int right = _tree.RightIndex(peek);
-						/*
-						 * At this point we are either coming from
-						 * either the root node or the left branch.
-						 * Is there a right node?
-						 * if yes, then navigate right.
-						 */
-						if (right > -1 && lastVisited != right)
-						{
-							// Navigate right
-							current.Index = right;
-						}
-						else
-						{
-							// visit the next queued node
-							current.Index = peek;
-							lastVisited = stack.Pop();
-							visitCallback(current.Index);
-							current.Index = -1;
-						}
-					}
-				}
-
-				void PostOrderRL()
-				{
-					// Right-Left-Root (Stack)
-					Stack<int> stack = new Stack<int>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-					int lastVisited = -1;
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push(current.Index);
-							// Navigate right
-							current.Index = current.RightIndex;
-							continue;
-						}
-
-						int peek = stack.Peek();
-						int left = _tree.LeftIndex(peek);
-						/*
-						 * At this point we are either coming from
-						 * either the root node or the right branch.
-						 * Is there a left node?
-						 * if yes, then navigate left.
-						 */
-						if (left > -1 && lastVisited != left)
-						{
-							// Navigate left
-							current.Index = left;
-						}
-						else
-						{
-							// visit the next queued node
-							current.Index = peek;
-							lastVisited = stack.Pop();
-							visitCallback(current.Index);
-							current.Index = -1;
-						}
+						// Navigate right
+						current.Index = current.RightIndex;
 					}
 				}
 			}
+
+			private void InOrderRL([NotNull] Action<int> visitCallback)
+			{
+				int version = _tree._version;
+				// Right-Root-Left (Stack)
+				Stack<int> stack = new Stack<int>();
+				// Start at the root
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+
+				while (current.Index > -1 || stack.Count > 0)
+				{
+					if (version != _tree._version) throw new VersionChangedException();
+
+					if (current.Index > -1)
+					{
+						stack.Push(current.Index);
+						// Navigate right
+						current.Index = current.RightIndex;
+					}
+					else
+					{
+						// visit the next queued node
+						current.Index = stack.Pop();
+						visitCallback(current.Index);
+
+						// Navigate right
+						current.Index = current.LeftIndex;
+					}
+				}
+			}
+
+			private void PostOrderLR([NotNull] Action<int> visitCallback)
+			{
+				int version = _tree._version;
+				// Left-Right-Root (Stack)
+				Stack<int> stack = new Stack<int>();
+				// Start at the root
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+				int lastVisited = -1;
+
+				while (current.Index > -1 || stack.Count > 0)
+				{
+					if (version != _tree._version) throw new VersionChangedException();
+
+					if (current.Index > -1)
+					{
+						stack.Push(current.Index);
+						// Navigate left
+						current.Index = current.LeftIndex;
+						continue;
+					}
+
+					int peek = stack.Peek();
+					int right = _tree.RightIndex(peek);
+					/*
+					 * At this point we are either coming from
+					 * either the root node or the left branch.
+					 * Is there a right node?
+					 * if yes, then navigate right.
+					 */
+					if (right > -1 && lastVisited != right)
+					{
+						// Navigate right
+						current.Index = right;
+					}
+					else
+					{
+						// visit the next queued node
+						current.Index = peek;
+						lastVisited = stack.Pop();
+						visitCallback(current.Index);
+						current.Index = -1;
+					}
+				}
+			}
+
+			private void PostOrderRL([NotNull] Action<int> visitCallback)
+			{
+				int version = _tree._version;
+				// Right-Left-Root (Stack)
+				Stack<int> stack = new Stack<int>();
+				// Start at the root
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+				int lastVisited = -1;
+
+				while (current.Index > -1 || stack.Count > 0)
+				{
+					if (version != _tree._version) throw new VersionChangedException();
+
+					if (current.Index > -1)
+					{
+						stack.Push(current.Index);
+						// Navigate right
+						current.Index = current.RightIndex;
+						continue;
+					}
+
+					int peek = stack.Peek();
+					int left = _tree.LeftIndex(peek);
+					/*
+					 * At this point we are either coming from
+					 * either the root node or the right branch.
+					 * Is there a left node?
+					 * if yes, then navigate left.
+					 */
+					if (left > -1 && lastVisited != left)
+					{
+						// Navigate left
+						current.Index = left;
+					}
+					else
+					{
+						// visit the next queued node
+						current.Index = peek;
+						lastVisited = stack.Pop();
+						visitCallback(current.Index);
+						current.Index = -1;
+					}
+				}
+			}
+			#endregion
 
 			public void Iterate(HorizontalFlow flow, [NotNull] Func<int, bool> visitCallback)
 			{
 				if (!_index.InRangeRx(0, _tree.Count)) return;
 
-				int version = _tree._version;
-
 				switch (_method)
 				{
 					case BinaryTreeTraverseMethod.LevelOrder:
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
-								LevelOrderLR();
+								LevelOrderLR(visitCallback);
 								break;
 							case HorizontalFlow.RightToLeft:
-								LevelOrderRL();
+								LevelOrderRL(visitCallback);
 								break;
 							default:
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
@@ -837,10 +844,10 @@ namespace asm.Collections
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
-								PreOrderLR();
+								PreOrderLR(visitCallback);
 								break;
 							case HorizontalFlow.RightToLeft:
-								PreOrderRL();
+								PreOrderRL(visitCallback);
 								break;
 							default:
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
@@ -850,10 +857,10 @@ namespace asm.Collections
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
-								InOrderLR();
+								InOrderLR(visitCallback);
 								break;
 							case HorizontalFlow.RightToLeft:
-								InOrderRL();
+								InOrderRL(visitCallback);
 								break;
 							default:
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
@@ -863,10 +870,10 @@ namespace asm.Collections
 						switch (flow)
 						{
 							case HorizontalFlow.LeftToRight:
-								PostOrderLR();
+								PostOrderLR(visitCallback);
 								break;
 							case HorizontalFlow.RightToLeft:
-								PostOrderRL();
+								PostOrderRL(visitCallback);
 								break;
 							default:
 								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
@@ -876,912 +883,265 @@ namespace asm.Collections
 						throw new ArgumentOutOfRangeException();
 				}
 
-				void LevelOrderLR()
+			}
+
+			#region Iterator Traversal for Func<int, bool>
+			private void LevelOrderLR([NotNull] Func<int, bool> visitCallback)
+			{
+				int version = _tree._version;
+				// Root-Left-Right (Queue)
+				Queue<int> queue = new Queue<int>();
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+
+				// Start at the root
+				queue.Enqueue(current.Index);
+
+				while (queue.Count > 0)
 				{
-					// Root-Left-Right (Queue)
-					Queue<int> queue = new Queue<int>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+					if (version != _tree._version) throw new VersionChangedException();
 
-					// Start at the root
-					queue.Enqueue(current.Index);
+					// visit the next queued node
+					current.Index = queue.Dequeue();
+					if (!visitCallback(current.Index)) break;
 
-					while (queue.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						// visit the next queued node
-						current.Index = queue.Dequeue();
-						if (!visitCallback(current.Index)) break;
-
-						// Queue the next nodes
-						if (current.LeftIndex > -1) queue.Enqueue(current.LeftIndex);
-						if (current.RightIndex > -1) queue.Enqueue(current.RightIndex);
-					}
+					// Queue the next nodes
+					if (current.LeftIndex > -1) queue.Enqueue(current.LeftIndex);
+					if (current.RightIndex > -1) queue.Enqueue(current.RightIndex);
 				}
+			}
 
-				void LevelOrderRL()
+			private void LevelOrderRL([NotNull] Func<int, bool> visitCallback)
+			{
+				int version = _tree._version;
+				// Root-Right-Left (Queue)
+				Queue<int> queue = new Queue<int>();
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+
+				// Start at the root
+				queue.Enqueue(current.Index);
+
+				while (queue.Count > 0)
 				{
-					// Root-Right-Left (Queue)
-					Queue<int> queue = new Queue<int>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+					if (version != _tree._version) throw new VersionChangedException();
 
-					// Start at the root
-					queue.Enqueue(current.Index);
+					// visit the next queued node
+					current.Index = queue.Dequeue();
+					if (!visitCallback(current.Index)) break;
 
-					while (queue.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						// visit the next queued node
-						current.Index = queue.Dequeue();
-						if (!visitCallback(current.Index)) break;
-
-						// Queue the next nodes
-						if (current.RightIndex > -1) queue.Enqueue(current.RightIndex);
-						if (current.LeftIndex > -1) queue.Enqueue(current.LeftIndex);
-					}
+					// Queue the next nodes
+					if (current.RightIndex > -1) queue.Enqueue(current.RightIndex);
+					if (current.LeftIndex > -1) queue.Enqueue(current.LeftIndex);
 				}
+			}
 
-				void PreOrderLR()
+			private void PreOrderLR([NotNull] Func<int, bool> visitCallback)
+			{
+				int version = _tree._version;
+				// Root-Left-Right (Stack)
+				Stack<int> stack = new Stack<int>();
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+
+				// Start at the root
+				stack.Push(current.Index);
+
+				while (stack.Count > 0)
 				{
-					// Root-Left-Right (Stack)
-					Stack<int> stack = new Stack<int>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+					if (version != _tree._version) throw new VersionChangedException();
 
-					// Start at the root
-					stack.Push(current.Index);
+					// visit the next queued node
+					current.Index = stack.Pop();
+					if (!visitCallback(current.Index)) break;
 
-					while (stack.Count > 0)
+					/*
+					* The stack works backwards (LIFO).
+					* It means whatever we want to
+					* appear first, we must add last.
+					*/
+					// Queue the next nodes
+					if (current.RightIndex > -1) stack.Push(current.RightIndex);
+					if (current.LeftIndex > -1) stack.Push(current.LeftIndex);
+				}
+			}
+
+			private void PreOrderRL([NotNull] Func<int, bool> visitCallback)
+			{
+				int version = _tree._version;
+				// Root-Right-Left (Stack)
+				Stack<int> stack = new Stack<int>();
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+
+				// Start at the root
+				stack.Push(current.Index);
+
+				while (stack.Count > 0)
+				{
+					if (version != _tree._version) throw new VersionChangedException();
+
+					// visit the next queued node
+					current.Index = stack.Pop();
+					if (!visitCallback(current.Index)) break;
+
+					/*
+					* The stack works backwards (LIFO).
+					* It means whatever we want to
+					* appear first, we must add last.
+					*/
+					// Queue the next nodes
+					if (current.LeftIndex > -1) stack.Push(current.LeftIndex);
+					if (current.RightIndex > -1) stack.Push(current.RightIndex);
+				}
+			}
+
+			private void InOrderLR([NotNull] Func<int, bool> visitCallback)
+			{
+				int version = _tree._version;
+				// Left-Root-Right (Stack)
+				Stack<int> stack = new Stack<int>();
+				// Start at the root
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+
+				while (current.Index > -1 || stack.Count > 0)
+				{
+					if (version != _tree._version) throw new VersionChangedException();
+
+					if (current.Index > -1)
 					{
-						if (version != _tree._version) throw new VersionChangedException();
-
+						stack.Push(current.Index);
+						// Navigate left
+						current.Index = current.LeftIndex;
+					}
+					else
+					{
 						// visit the next queued node
 						current.Index = stack.Pop();
 						if (!visitCallback(current.Index)) break;
 
-						/*
-						* The stack works backwards (LIFO).
-						* It means whatever we want to
-						* appear first, we must add last.
-						*/
-						// Queue the next nodes
-						if (current.RightIndex > -1) stack.Push(current.RightIndex);
-						if (current.LeftIndex > -1) stack.Push(current.LeftIndex);
+						// Navigate right
+						current.Index = current.RightIndex;
 					}
 				}
+			}
 
-				void PreOrderRL()
+			private void InOrderRL([NotNull] Func<int, bool> visitCallback)
+			{
+				int version = _tree._version;
+				// Right-Root-Left (Stack)
+				Stack<int> stack = new Stack<int>();
+				// Start at the root
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+
+				while (current.Index > -1 || stack.Count > 0)
 				{
-					// Root-Right-Left (Stack)
-					Stack<int> stack = new Stack<int>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+					if (version != _tree._version) throw new VersionChangedException();
 
-					// Start at the root
-					stack.Push(current.Index);
-
-					while (stack.Count > 0)
+					if (current.Index > -1)
 					{
-						if (version != _tree._version) throw new VersionChangedException();
-
+						stack.Push(current.Index);
+						// Navigate right
+						current.Index = current.RightIndex;
+					}
+					else
+					{
 						// visit the next queued node
 						current.Index = stack.Pop();
 						if (!visitCallback(current.Index)) break;
 
-						/*
-						* The stack works backwards (LIFO).
-						* It means whatever we want to
-						* appear first, we must add last.
-						*/
-						// Queue the next nodes
-						if (current.LeftIndex > -1) stack.Push(current.LeftIndex);
-						if (current.RightIndex > -1) stack.Push(current.RightIndex);
-					}
-				}
-
-				void InOrderLR()
-				{
-					// Left-Root-Right (Stack)
-					Stack<int> stack = new Stack<int>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push(current.Index);
-							// Navigate left
-							current.Index = current.LeftIndex;
-						}
-						else
-						{
-							// visit the next queued node
-							current.Index = stack.Pop();
-							if (!visitCallback(current.Index)) break;
-
-							// Navigate right
-							current.Index = current.RightIndex;
-						}
-					}
-				}
-
-				void InOrderRL()
-				{
-					// Right-Root-Left (Stack)
-					Stack<int> stack = new Stack<int>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push(current.Index);
-							// Navigate right
-							current.Index = current.RightIndex;
-						}
-						else
-						{
-							// visit the next queued node
-							current.Index = stack.Pop();
-							if (!visitCallback(current.Index)) break;
-
-							// Navigate right
-							current.Index = current.LeftIndex;
-						}
-					}
-				}
-
-				void PostOrderLR()
-				{
-					// Left-Right-Root (Stack)
-					Stack<int> stack = new Stack<int>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-					int lastVisited = -1;
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push(current.Index);
-							// Navigate left
-							current.Index = current.LeftIndex;
-							continue;
-						}
-
-						int peek = stack.Peek();
-						int right = _tree.RightIndex(peek);
-						/*
-						 * At this point we are either coming from
-						 * either the root node or the left branch.
-						 * Is there a right node?
-						 * if yes, then navigate right.
-						 */
-						if (right > -1 && lastVisited != right)
-						{
-							// Navigate right
-							current.Index = right;
-						}
-						else
-						{
-							// visit the next queued node
-							current.Index = peek;
-							lastVisited = stack.Pop();
-							if (!visitCallback(current.Index)) break;
-							current.Index = -1;
-						}
-					}
-				}
-
-				void PostOrderRL()
-				{
-					// Right-Left-Root (Stack)
-					Stack<int> stack = new Stack<int>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-					int lastVisited = -1;
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push(current.Index);
-							// Navigate right
-							current.Index = current.RightIndex;
-							continue;
-						}
-
-						int peek = stack.Peek();
-						int left = _tree.LeftIndex(peek);
-						/*
-						 * At this point we are either coming from
-						 * either the root node or the right branch.
-						 * Is there a left node?
-						 * if yes, then navigate left.
-						 */
-						if (left > -1 && lastVisited != left)
-						{
-							// Navigate left
-							current.Index = left;
-						}
-						else
-						{
-							// visit the next queued node
-							current.Index = peek;
-							lastVisited = stack.Pop();
-							if (!visitCallback(current.Index)) break;
-							current.Index = -1;
-						}
+						// Navigate right
+						current.Index = current.LeftIndex;
 					}
 				}
 			}
 
-			public void Iterate(HorizontalFlow flow, [NotNull] Action<int, int> visitCallback)
+			private void PostOrderLR([NotNull] Func<int, bool> visitCallback)
 			{
-				if (!_index.InRangeRx(0, _tree.Count)) return;
-
 				int version = _tree._version;
+				// Left-Right-Root (Stack)
+				Stack<int> stack = new Stack<int>();
+				// Start at the root
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+				int lastVisited = -1;
 
-				switch (_method)
+				while (current.Index > -1 || stack.Count > 0)
 				{
-					case BinaryTreeTraverseMethod.LevelOrder:
-						switch (flow)
-						{
-							case HorizontalFlow.LeftToRight:
-								LevelOrderLR();
-								break;
-							case HorizontalFlow.RightToLeft:
-								LevelOrderRL();
-								break;
-							default:
-								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-						}
-						break;
-					case BinaryTreeTraverseMethod.PreOrder:
-						switch (flow)
-						{
-							case HorizontalFlow.LeftToRight:
-								PreOrderLR();
-								break;
-							case HorizontalFlow.RightToLeft:
-								PreOrderRL();
-								break;
-							default:
-								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-						}
-						break;
-					case BinaryTreeTraverseMethod.InOrder:
-						switch (flow)
-						{
-							case HorizontalFlow.LeftToRight:
-								InOrderLR();
-								break;
-							case HorizontalFlow.RightToLeft:
-								InOrderRL();
-								break;
-							default:
-								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-						}
-						break;
-					case BinaryTreeTraverseMethod.PostOrder:
-						switch (flow)
-						{
-							case HorizontalFlow.LeftToRight:
-								PostOrderLR();
-								break;
-							case HorizontalFlow.RightToLeft:
-								PostOrderRL();
-								break;
-							default:
-								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-						}
-						break;
-					default:
-						throw new ArgumentOutOfRangeException();
-				}
+					if (version != _tree._version) throw new VersionChangedException();
 
-				void LevelOrderLR()
-				{
-					// Root-Left-Right (Queue)
-					Queue<(int Depth, int Index)> queue = new Queue<(int Depth, int Index)>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-
-					// Start at the root
-					queue.Enqueue((0, current.Index));
-
-					while (queue.Count > 0)
+					if (current.Index > -1)
 					{
-						if (version != _tree._version) throw new VersionChangedException();
+						stack.Push(current.Index);
+						// Navigate left
+						current.Index = current.LeftIndex;
+						continue;
+					}
 
+					int peek = stack.Peek();
+					int right = _tree.RightIndex(peek);
+					/*
+					 * At this point we are either coming from
+					 * either the root node or the left branch.
+					 * Is there a right node?
+					 * if yes, then navigate right.
+					 */
+					if (right > -1 && lastVisited != right)
+					{
+						// Navigate right
+						current.Index = right;
+					}
+					else
+					{
 						// visit the next queued node
-						int depth;
-						(depth, current.Index) = queue.Dequeue();
-						visitCallback(current.Index, depth);
-
-						// Queue the next nodes
-						if (current.LeftIndex > -1) queue.Enqueue((depth + 1, current.LeftIndex));
-						if (current.RightIndex > -1) queue.Enqueue((depth + 1, current.RightIndex));
-					}
-				}
-
-				void LevelOrderRL()
-				{
-					// Root-Right-Left (Queue)
-					Queue<(int Depth, int Index)> queue = new Queue<(int Depth, int Index)>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-
-					// Start at the root
-					queue.Enqueue((0, current.Index));
-
-					while (queue.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						// visit the next queued node
-						int depth;
-						(depth, current.Index) = queue.Dequeue();
-						visitCallback(current.Index, depth);
-
-						// Queue the next nodes
-						if (current.RightIndex > -1) queue.Enqueue((depth + 1, current.RightIndex));
-						if (current.LeftIndex > -1) queue.Enqueue((depth + 1, current.LeftIndex));
-					}
-				}
-
-				void PreOrderLR()
-				{
-					// Root-Left-Right (Stack)
-					Stack<(int Depth, int Index)> stack = new Stack<(int Depth, int Index)>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-
-					// Start at the root
-					stack.Push((0, current.Index));
-
-					while (stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						// visit the next queued node
-						int depth;
-						(depth, current.Index) = stack.Pop();
-						visitCallback(current.Index, depth);
-
-						/*
-						* The stack works backwards (LIFO).
-						* It means whatever we want to
-						* appear first, we must add last.
-						*/
-						// Queue the next nodes
-						if (current.RightIndex > -1) stack.Push((depth + 1, current.RightIndex));
-						if (current.LeftIndex > -1) stack.Push((depth + 1, current.LeftIndex));
-					}
-				}
-
-				void PreOrderRL()
-				{
-					// Root-Right-Left (Stack)
-					Stack<(int Depth, int Index)> stack = new Stack<(int Depth, int Index)>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-
-					// Start at the root
-					stack.Push((0, current.Index));
-
-					while (stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						// visit the next queued node
-						int depth;
-						(depth, current.Index) = stack.Pop();
-						visitCallback(current.Index, depth);
-
-						/*
-						* The stack works backwards (LIFO).
-						* It means whatever we want to
-						* appear first, we must add last.
-						*/
-						// Queue the next nodes
-						if (current.LeftIndex > -1) stack.Push((depth + 1, current.LeftIndex));
-						if (current.RightIndex > -1) stack.Push((depth + 1, current.RightIndex));
-					}
-				}
-
-				void InOrderLR()
-				{
-					// Left-Root-Right (Stack)
-					Stack<(int Depth, int Index)> stack = new Stack<(int Depth, int Index)>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-					int depth = 0;
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push((depth, current.Index));
-							// Navigate left
-							current.Index = current.LeftIndex;
-							if (current.Index > -1) depth++;
-						}
-						else
-						{
-							// visit the next queued node
-							(depth, current.Index) = stack.Pop();
-							visitCallback(current.Index, depth);
-
-							// Navigate right
-							current.Index = current.RightIndex;
-							if (current.Index > -1) depth++;
-						}
-					}
-				}
-
-				void InOrderRL()
-				{
-					// Right-Root-Left (Stack)
-					Stack<(int Depth, int Index)> stack = new Stack<(int Depth, int Index)>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-					int depth = 0;
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push((depth, current.Index));
-							// Navigate right
-							current.Index = current.RightIndex;
-							if (current.Index > -1) depth++;
-						}
-						else
-						{
-							// visit the next queued node
-							(depth, current.Index) = stack.Pop();
-							visitCallback(current.Index, depth);
-
-							// Navigate left
-							current.Index = current.LeftIndex;
-							if (current.Index > -1) depth++;
-						}
-					}
-				}
-
-				void PostOrderLR()
-				{
-					// Left-Right-Root (Stack)
-					Stack<(int Depth, int Index)> stack = new Stack<(int Depth, int Index)>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-					int lastVisited = -1;
-					int depth = 0;
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push((depth, current.Index));
-							// Navigate left
-							current.Index = current.LeftIndex;
-							if (current.Index > -1) depth++;
-							continue;
-						}
-
-						(int Depth, int Index) peek = stack.Peek();
-						int right = _tree.RightIndex(peek.Index);
-						/*
-						 * At this point we are either coming from
-						 * either the root node or the left branch.
-						 * Is there a right ArrayBinaryNode<T>
-						 * if yes, then navigate right.
-						 */
-						if (right > -1 && lastVisited != right)
-						{
-							// Navigate right
-							current.Index = right;
-							depth = peek.Depth + 1;
-						}
-						else
-						{
-							// visit the next queued node
-							current.Index = peek.Index;
-							(depth, lastVisited) = stack.Pop();
-							visitCallback(current.Index, depth);
-							current.Index = -1;
-						}
-					}
-				}
-
-				void PostOrderRL()
-				{
-					// Right-Left-Root (Stack)
-					Stack<(int Depth, int Index)> stack = new Stack<(int Depth, int Index)>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-					int depth = 0;
-					int lastVisited = -1;
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push((depth, current.Index));
-							// Navigate right
-							current.Index = current.RightIndex;
-							if (current.Index > -1) depth++;
-							continue;
-						}
-
-						(int Depth, int Index) peek = stack.Peek();
-						int left = _tree.LeftIndex(peek.Index);
-						/*
-						 * At this point we are either coming from
-						 * either the root node or the right branch.
-						 * Is there a left ArrayBinaryNode<T>
-						 * if yes, then navigate left.
-						 */
-						if (left > -1 && lastVisited != left)
-						{
-							// Navigate left
-							current.Index = left;
-							depth = peek.Depth + 1;
-						}
-						else
-						{
-							// visit the next queued node
-							current.Index = peek.Index;
-							(depth, lastVisited) = stack.Pop();
-							visitCallback(current.Index, depth);
-							current.Index = -1;
-						}
+						current.Index = peek;
+						lastVisited = stack.Pop();
+						if (!visitCallback(current.Index)) break;
+						current.Index = -1;
 					}
 				}
 			}
 
-			public void Iterate(HorizontalFlow flow, [NotNull] Func<int, int, bool> visitCallback)
+			private void PostOrderRL([NotNull] Func<int, bool> visitCallback)
 			{
-				if (!_index.InRangeRx(0, _tree.Count)) return;
-
 				int version = _tree._version;
+				// Right-Left-Root (Stack)
+				Stack<int> stack = new Stack<int>();
+				// Start at the root
+				ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
+				int lastVisited = -1;
 
-				switch (_method)
+				while (current.Index > -1 || stack.Count > 0)
 				{
-					case BinaryTreeTraverseMethod.LevelOrder:
-						switch (flow)
-						{
-							case HorizontalFlow.LeftToRight:
-								LevelOrderLR();
-								break;
-							case HorizontalFlow.RightToLeft:
-								LevelOrderRL();
-								break;
-							default:
-								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-						}
-						break;
-					case BinaryTreeTraverseMethod.PreOrder:
-						switch (flow)
-						{
-							case HorizontalFlow.LeftToRight:
-								PreOrderLR();
-								break;
-							case HorizontalFlow.RightToLeft:
-								PreOrderRL();
-								break;
-							default:
-								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-						}
-						break;
-					case BinaryTreeTraverseMethod.InOrder:
-						switch (flow)
-						{
-							case HorizontalFlow.LeftToRight:
-								InOrderLR();
-								break;
-							case HorizontalFlow.RightToLeft:
-								InOrderRL();
-								break;
-							default:
-								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-						}
-						break;
-					case BinaryTreeTraverseMethod.PostOrder:
-						switch (flow)
-						{
-							case HorizontalFlow.LeftToRight:
-								PostOrderLR();
-								break;
-							case HorizontalFlow.RightToLeft:
-								PostOrderRL();
-								break;
-							default:
-								throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-						}
-						break;
-					default:
-						throw new ArgumentOutOfRangeException();
-				}
+					if (version != _tree._version) throw new VersionChangedException();
 
-				void LevelOrderLR()
-				{
-					// Root-Left-Right (Queue)
-					Queue<(int Depth, int Index)> queue = new Queue<(int Depth, int Index)>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-
-					// Start at the root
-					queue.Enqueue((0, current.Index));
-
-					while (queue.Count > 0)
+					if (current.Index > -1)
 					{
-						if (version != _tree._version) throw new VersionChangedException();
+						stack.Push(current.Index);
+						// Navigate right
+						current.Index = current.RightIndex;
+						continue;
+					}
 
+					int peek = stack.Peek();
+					int left = _tree.LeftIndex(peek);
+					/*
+					 * At this point we are either coming from
+					 * either the root node or the right branch.
+					 * Is there a left node?
+					 * if yes, then navigate left.
+					 */
+					if (left > -1 && lastVisited != left)
+					{
+						// Navigate left
+						current.Index = left;
+					}
+					else
+					{
 						// visit the next queued node
-						int depth;
-						(depth, current.Index) = queue.Dequeue();
-						if (!visitCallback(current.Index, depth)) break;
-
-						// Queue the next nodes
-						if (current.LeftIndex > -1) queue.Enqueue((depth + 1, current.LeftIndex));
-						if (current.RightIndex > -1) queue.Enqueue((depth + 1, current.RightIndex));
-					}
-				}
-
-				void LevelOrderRL()
-				{
-					// Root-Right-Left (Queue)
-					Queue<(int Depth, int Index)> queue = new Queue<(int Depth, int Index)>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-
-					// Start at the root
-					queue.Enqueue((0, current.Index));
-
-					while (queue.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						// visit the next queued node
-						int depth;
-						(depth, current.Index) = queue.Dequeue();
-						if (!visitCallback(current.Index, depth)) break;
-
-						// Queue the next nodes
-						if (current.RightIndex > -1) queue.Enqueue((depth + 1, current.RightIndex));
-						if (current.LeftIndex > -1) queue.Enqueue((depth + 1, current.LeftIndex));
-					}
-				}
-
-				void PreOrderLR()
-				{
-					// Root-Left-Right (Stack)
-					Stack<(int Depth, int Index)> stack = new Stack<(int Depth, int Index)>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-
-					// Start at the root
-					stack.Push((0, current.Index));
-
-					while (stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						// visit the next queued node
-						int depth;
-						(depth, current.Index) = stack.Pop();
-						if (!visitCallback(current.Index, depth)) break;
-
-						/*
-						* The stack works backwards (LIFO).
-						* It means whatever we want to
-						* appear first, we must add last.
-						*/
-						// Queue the next nodes
-						if (current.RightIndex > -1) stack.Push((depth + 1, current.RightIndex));
-						if (current.LeftIndex > -1) stack.Push((depth + 1, current.LeftIndex));
-					}
-				}
-
-				void PreOrderRL()
-				{
-					// Root-Right-Left (Stack)
-					Stack<(int Depth, int Index)> stack = new Stack<(int Depth, int Index)>();
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-					int depth = 0;
-
-					// Start at the root
-					stack.Push((depth, current.Index));
-
-					while (stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						// visit the next queued node
-						(depth, current.Index) = stack.Pop();
-						if (!visitCallback(current.Index, depth)) break;
-
-						/*
-						* The stack works backwards (LIFO).
-						* It means whatever we want to
-						* appear first, we must add last.
-						*/
-						// Queue the next nodes
-						if (current.LeftIndex > -1) stack.Push((depth + 1, current.LeftIndex));
-						if (current.RightIndex > -1) stack.Push((depth + 1, current.RightIndex));
-					}		
-				}
-
-				void InOrderLR()
-				{
-					// Left-Root-Right (Stack)
-					Stack<(int Depth, int Index)> stack = new Stack<(int Depth, int Index)>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-					int depth = 0;
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push((depth, current.Index));
-							// Navigate left
-							current.Index = current.LeftIndex;
-							if (current.Index > -1) depth++;
-						}
-						else
-						{
-							// visit the next queued node
-							(depth, current.Index) = stack.Pop();
-							if (!visitCallback(current.Index, depth)) break;
-
-							// Navigate right
-							current.Index = current.RightIndex;
-							if (current.Index > -1) depth++;
-						}
-					}
-				}
-
-				void InOrderRL()
-				{
-					// Right-Root-Left (Stack)
-					Stack<(int Depth, int Index)> stack = new Stack<(int Depth, int Index)>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-					int depth = 0;
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push((depth, current.Index));
-							// Navigate right
-							current.Index = current.RightIndex;
-							if (current.Index > -1) depth++;
-						}
-						else
-						{
-							// visit the next queued node
-							(depth, current.Index) = stack.Pop();
-							if (!visitCallback(current.Index, depth)) break;
-
-							// Navigate left
-							current.Index = current.LeftIndex;
-							if (current.Index > -1) depth++;
-						}
-					}
-				}
-
-				void PostOrderLR()
-				{
-					// Left-Right-Root (Stack)
-					Stack<(int Depth, int Index)> stack = new Stack<(int Depth, int Index)>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-					int lastVisited = -1;
-					int depth = 0;
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push((depth, current.Index));
-							// Navigate left
-							current.Index = current.LeftIndex;
-							if (current.Index > -1) depth++;
-							continue;
-						}
-
-						(int Depth, int Index) peek = stack.Peek();
-						int right = _tree.RightIndex(peek.Index);
-						/*
-						 * At this point we are either coming from
-						 * either the root node or the left branch.
-						 * Is there a right ArrayBinaryNode<T>
-						 * if yes, then navigate right.
-						 */
-						if (right > -1 && lastVisited != right)
-						{
-							// Navigate right
-							current.Index = right;
-							depth = peek.Depth + 1;
-						}
-						else
-						{
-							// visit the next queued node
-							current.Index = peek.Index;
-							(depth, lastVisited) = stack.Pop();
-							if (!visitCallback(current.Index, depth)) break;
-							current.Index = -1;
-						}
-					}
-				}
-
-				void PostOrderRL()
-				{
-					// Right-Left-Root (Stack)
-					Stack<(int Depth, int Index)> stack = new Stack<(int Depth, int Index)>();
-					// Start at the root
-					ArrayBinaryNode<T> current = new ArrayBinaryNode<T>(_tree, _index);
-					int depth = 0;
-					int lastVisited = -1;
-
-					while (current.Index > -1 || stack.Count > 0)
-					{
-						if (version != _tree._version) throw new VersionChangedException();
-
-						if (current.Index > -1)
-						{
-							stack.Push((depth, current.Index));
-							// Navigate right
-							current.Index = current.RightIndex;
-							if (current.Index > -1) depth++;
-							continue;
-						}
-
-						(int Depth, int Index) peek = stack.Peek();
-						int left = _tree.LeftIndex(peek.Index);
-						/*
-						 * At this point we are either coming from
-						 * either the root node or the right branch.
-						 * Is there a left ArrayBinaryNode<T>
-						 * if yes, then navigate left.
-						 */
-						if (left > -1 && lastVisited != left)
-						{
-							// Navigate left
-							current.Index = left;
-							depth = peek.Depth + 1;
-						}
-						else
-						{
-							// visit the next queued node
-							current.Index = peek.Index;
-							(depth, lastVisited) = stack.Pop();
-							if (!visitCallback(current.Index, depth)) break;
-							current.Index = -1;
-						}
+						current.Index = peek;
+						lastVisited = stack.Pop();
+						if (!visitCallback(current.Index)) break;
+						current.Index = -1;
 					}
 				}
 			}
+			#endregion
 		}
 
 		/// <summary>
@@ -2064,26 +1424,22 @@ namespace asm.Collections
 		/// <param name="method">The traverse method</param>
 		/// <param name="flow">Left-to-right or right-to-left</param>
 		/// <returns></returns>
-		[NotNull]
 		public Enumerator Enumerate(int index, BinaryTreeTraverseMethod method, HorizontalFlow flow)
 		{
 			return new Enumerator(this, index, method, flow);
 		}
 
 		#region Enumerate overloads
-		[NotNull]
 		public Enumerator Enumerate(int index)
 		{
 			return Enumerate(index, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight);
 		}
 
-		[NotNull]
 		public Enumerator Enumerate(int index, HorizontalFlow flow)
 		{
 			return Enumerate(index, BinaryTreeTraverseMethod.InOrder, flow);
 		}
 
-		[NotNull]
 		public Enumerator Enumerate(int index, BinaryTreeTraverseMethod method)
 		{
 			return Enumerate(index, method, HorizontalFlow.LeftToRight);
@@ -2145,66 +1501,6 @@ namespace asm.Collections
 		}
 
 		public void Iterate(int index, BinaryTreeTraverseMethod method, [NotNull] Func<int, bool> visitCallback)
-		{
-			Iterate(index, method, HorizontalFlow.LeftToRight, visitCallback);
-		}
-		#endregion
-
-		/// <summary>
-		/// Iterate over nodes with a callback action and depth parameter
-		/// </summary>
-		/// <param name="index">The starting node</param>
-		/// <param name="method">The traverse method <see cref="BinaryTreeTraverseMethod"/></param>
-		/// <param name="flow">Left-to-right or right-to-left</param>
-		/// <param name="visitCallback">callback action to handle the node with depth awareness</param>
-		public void Iterate(int index, BinaryTreeTraverseMethod method, HorizontalFlow flow, [NotNull] Action<int, int> visitCallback)
-		{
-			if (index < 0) return;
-			new Iterator(this, index, method).Iterate(flow, visitCallback);
-		}
-
-		#region Iterate overloads - visitCallback with action + depth
-		public void Iterate(int index, [NotNull] Action<int, int> visitCallback)
-		{
-			Iterate(index, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
-		}
-
-		public void Iterate(int index, HorizontalFlow flow, [NotNull] Action<int, int> visitCallback)
-		{
-			Iterate(index, BinaryTreeTraverseMethod.InOrder, flow, visitCallback);
-		}
-
-		public void Iterate(int index, BinaryTreeTraverseMethod method, [NotNull] Action<int, int> visitCallback)
-		{
-			Iterate(index, method, HorizontalFlow.LeftToRight, visitCallback);
-		}
-		#endregion
-
-		/// <summary>
-		/// Iterate over nodes with a callback function and depth parameter
-		/// </summary>
-		/// <param name="index">The starting node</param>
-		/// <param name="method">The traverse method <see cref="BinaryTreeTraverseMethod"/></param>
-		/// <param name="flow">Left-to-right or right-to-left</param>
-		/// <param name="visitCallback">callback function to handle the node with depth awareness that can cancel the loop</param>
-		public void Iterate(int index, BinaryTreeTraverseMethod method, HorizontalFlow flow, [NotNull] Func<int, int, bool> visitCallback)
-		{
-			if (index < 0) return;
-			new Iterator(this, index, method).Iterate(flow, visitCallback);
-		}
-
-		#region Iterate overloads - visitCallback function + depth
-		public void Iterate(int index, [NotNull] Func<int, int, bool> visitCallback)
-		{
-			Iterate(index, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, visitCallback);
-		}
-
-		public void Iterate(int index, HorizontalFlow flow, [NotNull] Func<int, int, bool> visitCallback)
-		{
-			Iterate(index, BinaryTreeTraverseMethod.InOrder, flow, visitCallback);
-		}
-
-		public void Iterate(int index, BinaryTreeTraverseMethod method, [NotNull] Func<int, int, bool> visitCallback)
 		{
 			Iterate(index, method, HorizontalFlow.LeftToRight, visitCallback);
 		}
@@ -2373,8 +1669,10 @@ namespace asm.Collections
 		public void CopyTo([NotNull] T[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
 		public void CopyTo([NotNull] T[] array, int arrayIndex, int count)
 		{
-			Count.ValidateRange(arrayIndex, ref count);
+			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, ref count);
+			if (count == 0) return;
+			Count.ValidateRange(arrayIndex, ref count);
 			// Delegate rest of error checking to Array.Copy.
 			Array.Copy(Items, 0, array, arrayIndex, count);
 		}
@@ -2557,106 +1855,58 @@ namespace asm.Collections
 
 	public static class ArrayBinaryTreeExtension
 	{
-		public static void WriteTo<T>([NotNull] this ArrayBinaryTree<T> thisValue, [NotNull] TextWriter writer, Orientation orientation, bool diagnosticInfo = false)
+		public static void WriteTo<T>([NotNull] this ArrayBinaryTree<T> thisValue, [NotNull] TextWriter writer)
 		{
+			const string STR_BLANK = "   ";
+			const string STR_EXT = "│  ";
+			const string STR_CONNECTOR_L = "└─ ";
+			const string STR_NULL = "<null>";
+
 			if (thisValue.Count == 0) return;
 
-			switch (orientation)
+			StringBuilder indent = new StringBuilder();
+			LinkedList<(Queue<int> Nodes, int Depth)> nodesStack = new LinkedList<(Queue<int> Nodes, int Depth)>();
+			ArrayBinaryNode<T> node = new ArrayBinaryNode<T>(thisValue);
+			Queue<int> rootQueue = new Queue<int>(1);
+			rootQueue.Enqueue(0);
+			nodesStack.AddFirst((rootQueue, 0));
+
+			while (nodesStack.Count > 0)
 			{
-				case Orientation.Horizontal:
-					Horizontally(thisValue, writer, diagnosticInfo);
-					break;
-				case Orientation.Vertical:
-					Vertically(thisValue, writer, diagnosticInfo);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(orientation), orientation, null);
-			}
+				(Queue<int> nodes, int depth) = nodesStack.Last.Value;
 
-			static void Horizontally(ArrayBinaryTree<T> tree, TextWriter writer, bool diagnostic)
-			{
-				const string STR_BLANK = "    ";
-				const string STR_EXT = "│   ";
-				const string STR_CONNECTOR = "─── ";
-				const string STR_CONNECTOR_L = "└── ";
-				const string STR_CONNECTOR_R = "┌── ";
-
-				Stack<string> connectors = new Stack<string>();
-				ArrayBinaryNode<T> node = new ArrayBinaryNode<T>(tree);
-				tree.Iterate(0, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.RightToLeft, (e, depth) =>
+				if (nodes.Count == 0)
 				{
-					node.Index = e;
-					connectors.Push(diagnostic
-										? node.ToString(depth)
-										: node.ToString());
-
-					if (node.IsRight) connectors.Push(STR_CONNECTOR_R);
-					else if (node.IsLeft) connectors.Push(STR_CONNECTOR_L);
-					else connectors.Push(STR_CONNECTOR);
-
-					while (node.ParentIndex > -1)
-					{
-						if (node.IsLeft && node.ParentIsRight || node.IsRight && node.ParentIsLeft) connectors.Push(STR_EXT);
-						else connectors.Push(STR_BLANK);
-
-						node.Index = node.ParentIndex;
-					}
-
-					while (connectors.Count > 1)
-						writer.Write(connectors.Pop());
-
-					writer.WriteLine(connectors.Pop());
-				});
-			}
-
-			static void Vertically(ArrayBinaryTree<T> tree, TextWriter writer, bool diagnostic)
-			{
-				const char C_BLANK = ' ';
-				const char C_EXT = '─';
-				const char C_CONNECTOR_L = '┌';
-				const char C_CONNECTOR_R = '┐';
-
-				int distance = 0;
-				ArrayBinaryNode<T> node = new ArrayBinaryNode<T>(tree);
-				IDictionary<int, StringBuilder> lines = new SortedDictionary<int, StringBuilder>();
-				tree.Iterate(0, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, (e, depth) =>
-				{
-					StringBuilder line = lines.GetOrAdd(depth);
-					node.Index = e;
-
-					if (line.Length > 0 && line[line.Length - 1] == C_CONNECTOR_L) line.Append(C_EXT, distance - line.Length);
-					else line.Append(C_BLANK, distance - line.Length);
-
-					if (depth > 0)
-					{
-						StringBuilder prevLine = lines.GetOrAdd(depth - 1);
-
-						if (node.IsLeft)
-						{
-							prevLine.Append(C_BLANK, distance - prevLine.Length);
-							if (line.Length > 0) prevLine.Append(C_BLANK);
-							prevLine.Append(C_CONNECTOR_L);
-						}
-						else
-						{
-							prevLine.Append(C_BLANK);
-							prevLine.Append(C_EXT, distance - prevLine.Length + 1);
-							prevLine.Append(C_CONNECTOR_R);
-						}
-					}
-
-					if (line.Length > 0) line.Append(C_BLANK);
-					line.Append(diagnostic
-									? node.ToString(depth)
-									: node.ToString());
-					distance = line.Length;
-				});
-
-				// todo test
-				foreach (StringBuilder sb in lines.Values)
-				{
-					writer.WriteLine(sb.ToString());
+					nodesStack.RemoveLast();
+					continue;
 				}
+
+				node.Index = nodes.Dequeue();
+				indent.Length = 0;
+
+				foreach ((Queue<int> Nodes, int Depth) tuple in nodesStack)
+				{
+					if (tuple == nodesStack.Last.Value) break;
+					indent.Append(tuple.Nodes.Count > 0
+									? STR_EXT
+									: STR_BLANK);
+				}
+
+				writer.Write(indent + STR_CONNECTOR_L);
+
+				if (node.Index < 0)
+				{
+					writer.WriteLine(STR_NULL);
+					continue;
+				}
+
+				writer.WriteLine(node.ToString(depth));
+				if (node.IsLeaf) continue;
+
+				Queue<int> queue = new Queue<int>(2);
+				queue.Enqueue(node.LeftIndex);
+				queue.Enqueue(node.RightIndex);
+				nodesStack.AddLast((queue, depth + 1));
 			}
 		}
 	}

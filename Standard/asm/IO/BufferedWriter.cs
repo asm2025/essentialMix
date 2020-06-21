@@ -62,9 +62,8 @@ namespace asm.IO
 		/// <inheritdoc />
 		protected override void Dispose(bool disposing)
 		{
+			if (disposing) ObjectHelper.Dispose(ref _timer);
 			base.Dispose(disposing);
-			if (!disposing) return;
-			ObjectHelper.Dispose(ref _timer);
 		}
 
 		public virtual int BufferSize
