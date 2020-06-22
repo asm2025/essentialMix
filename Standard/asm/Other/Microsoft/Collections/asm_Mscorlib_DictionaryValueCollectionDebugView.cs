@@ -9,6 +9,7 @@ namespace asm.Other.Microsoft.Collections
 	 * assembly. So we need to use different names for collection debug view for
 	 * collections in this solution assemblies.
 	 */
+	[DebuggerNonUserCode]
 	internal sealed class asm_Mscorlib_DictionaryValueCollectionDebugView<TKey, TValue>
 	{
 		private readonly ICollection<TValue> _collection;

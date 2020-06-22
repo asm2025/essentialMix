@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
-
 using asm.Comparers;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Helpers;
 using asm.Other.Microsoft.Collections;
-
 using JetBrains.Annotations;
 
 namespace asm.Collections
@@ -237,6 +237,7 @@ namespace asm.Collections
 			}
 		}
 
+		private int _offset;
 		private int _version;
 
 		[NonSerialized]
@@ -246,7 +247,7 @@ namespace asm.Collections
 		/// Initializes a new instance of the <see cref="Deque{T}" /> class.
 		/// </summary>
 		public Deque()
-			: this(0)
+			: this(Constants.DEFAULT_CAPACITY)
 		{
 		}
 
@@ -262,17 +263,6 @@ namespace asm.Collections
 						: new T[capacity];
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Deque{T}" /> class with the elements from the specified
-		/// collection.
-		/// </summary>
-		/// <param name="collection">The collection. May not be <c>null</c>.</param>
-		public Deque([NotNull] IEnumerable<T> collection)
-		{
-			Items = Array.Empty<T>();
-			InsertRange(0, collection);
-		}
-
 		public int Capacity
 		{
 			get => Items.Length;
@@ -284,7 +274,7 @@ namespace asm.Collections
 				if (value > 0)
 				{
 					T[] newItems = new T[value];
-					CopyTo(newItems);
+					CopyTo(newItems, 0);
 					Items = newItems;
 				}
 				else
@@ -292,7 +282,7 @@ namespace asm.Collections
 					Items = Array.Empty<T>();
 				}
 
-				Offset = 0;
+				_offset = 0;
 				_version++;
 			}
 		}
@@ -304,11 +294,15 @@ namespace asm.Collections
 		/// <inheritdoc cref="IList{T}" />
 		public T this[int index]
 		{
-			get => Items[IndexToBufferIndex(index, true)];
+			get
+			{
+				if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+				return Items[IndexToBufferIndex(index)];
+			}
 			set
 			{
-				index = IndexToBufferIndex(index, true);
-				Items[index] = value;
+				if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+				Items[IndexToBufferIndex(index)] = value;
 				_version++;
 			}
 		}
@@ -352,11 +346,6 @@ namespace asm.Collections
 		[NotNull]
 		protected T[] Items { get; private set; }
 
-		/// <summary>
-		/// The offset into <see cref="Items" /> where the view begins.
-		/// </summary>
-		protected int Offset { get; private set; }
-
 		/// <inheritdoc />
 		public IEnumerator<T> GetEnumerator() { return new Enumerator(this); }
 
@@ -373,21 +362,11 @@ namespace asm.Collections
 			MakeGapAt(index, 1);
 
 			if (index == 0)
-			{
 				Items[PreDecrement(1)] = item;
-				Count++;
-			}
-			else if (index == Count)
-			{
-				Items[IndexToBufferIndex(Count)] = item;
-				Count++;
-			}
 			else
-			{
 				Items[IndexToBufferIndex(index)] = item;
-				Count++;
-			}
 
+			Count++;
 			_version++;
 		}
 
@@ -414,17 +393,7 @@ namespace asm.Collections
 		public void RemoveAt(int index)
 		{
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-
-			if (index == 0 || index == Count - 1)
-			{
-				Count--;
-				_version++;
-			}
-			else
-			{
-				RemoveGapAt(index, 1);
-				Count--;
-			}
+			RemoveAtInternal(index);
 		}
 
 		/// <inheritdoc />
@@ -445,23 +414,22 @@ namespace asm.Collections
 
 		public void Enqueue(T item) { Insert(Count, item); }
 
+		public void Enqueue([NotNull] IEnumerable<T> enumerable) { InsertRange(Count, enumerable); }
+
 		public T Dequeue()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			T item = Items[Offset];
-			RemoveAt(Offset);
-			return item;
+			return RemoveAtInternal(0);
 		}
 
 		public void Push(T item) { Insert(Count, item); }
 
+		public void Push([NotNull] IEnumerable<T> enumerable) { InsertRange(Count, enumerable.Reverse()); }
+
 		public T Pop()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			int ndx = IndexToBufferIndex(Count - 1);
-			T item = Items[ndx];
-			RemoveAt(ndx);
-			return item;
+			return RemoveAtInternal(Count - 1);
 		}
 
 		public T PeekQueue()
@@ -479,58 +447,9 @@ namespace asm.Collections
 		/// <inheritdoc cref="ICollection{T}" />
 		public void Clear()
 		{
-			Offset = 0;
+			_offset = 0;
 			Count = 0;
-		}
-
-		/// <summary>
-		/// Inserts a collection of elements into this deque.
-		/// </summary>
-		/// <param name="index">The index at which the collection is inserted.</param>
-		/// <param name="enumerable">The collection of elements to insert.</param>
-		/// <exception cref="ArgumentOutOfRangeException">
-		/// <paramref name="index" /> is not a valid index to an insertion point for
-		/// the source.
-		/// </exception>
-		public void InsertRange(int index, [NotNull] IEnumerable<T> enumerable)
-		{
-			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-
-			switch (enumerable)
-			{
-				case ICollection<T> collection:
-					if (collection.Count == 0) return;
-					EnsureCapacity(checked(Count + collection.Count));
-					MakeGapAt(index, collection.Count);
-
-					foreach (T item in enumerable)
-						Items[IndexToBufferIndex(index++)] = item;
-
-					Count += collection.Count;
-					_version++;
-					break;
-				case IReadOnlyCollection<T> readOnlyCollection:
-					if (readOnlyCollection.Count == 0) return;
-					EnsureCapacity(checked(Count + readOnlyCollection.Count));
-					MakeGapAt(index, readOnlyCollection.Count);
-
-					foreach (T item in enumerable)
-						Items[IndexToBufferIndex(index++)] = item;
-
-					Count += readOnlyCollection.Count;
-					_version++;
-					break;
-				default:
-					using (IEnumerator<T> enumerator = enumerable.GetEnumerator())
-					{
-						while (enumerator.MoveNext())
-						{
-							Insert(index++, enumerator.Current);
-						}
-					}
-					break;
-			}
-
+			_version++;
 		}
 
 		/// <summary>
@@ -634,7 +553,15 @@ namespace asm.Collections
 		public int IndexOf(T item, int index, int count)
 		{
 			Count.ValidateRange(index, ref count);
-			return Array.IndexOf(Items, item, index, count);
+
+			IEqualityComparer<T> comparer = EqualityComparer<T>.Default;
+
+			for (int i = index; i < count; i++)
+			{
+				if (comparer.Equals(item, Items[IndexToBufferIndex(i)])) return i;
+			}
+
+			return -1;
 		}
 
 		/// <inheritdoc />
@@ -796,27 +723,23 @@ namespace asm.Collections
 			}
 		}
 
-		public void CopyTo([NotNull] T[] array) { CopyTo(array, 0, -1); }
 		/// <inheritdoc />
-		public void CopyTo(T[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
-		public void CopyTo([NotNull] T[] array, int arrayIndex, int count)
+		public void CopyTo(T[] array, int arrayIndex)
 		{
 			if (Count == 0) return;
-			array.Length.ValidateRange(arrayIndex, ref count);
-			if (count == 0) return;
-			Count.ValidateRange(arrayIndex, ref count);
+			array.Length.ValidateRange(arrayIndex, Count);
 
-			if (Offset > Capacity - Count)
+			if (_offset > Capacity - Count)
 			{
 				// The existing buffer is split, so we have to copy it in parts
-				int length = Capacity - Offset;
-				Array.Copy(Items, Offset, array, arrayIndex, length);
+				int length = Capacity - _offset;
+				Array.Copy(Items, _offset, array, arrayIndex, length);
 				Array.Copy(Items, 0, array, arrayIndex + length, Count - length);
 			}
 			else
 			{
 				// The existing buffer is whole
-				Array.Copy(Items, Offset, array, arrayIndex, Count);
+				Array.Copy(Items, _offset, array, arrayIndex, Count);
 			}
 		}
 
@@ -846,17 +769,17 @@ namespace asm.Collections
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[])) throw new ArgumentException("Invalid array type", nameof(array));
 
-			if (Offset > Capacity - Count)
+			if (_offset > Capacity - Count)
 			{
 				// The existing buffer is split, so we have to copy it in parts
-				int length = Capacity - Offset;
-				Array.Copy(Items, Offset, array, arrayIndex, length);
+				int length = Capacity - _offset;
+				Array.Copy(Items, _offset, array, arrayIndex, length);
 				Array.Copy(Items, 0, array, arrayIndex + length, Count - length);
 			}
 			else
 			{
 				// The existing buffer is whole
-				Array.Copy(Items, Offset, array, arrayIndex, Count);
+				Array.Copy(Items, _offset, array, arrayIndex, Count);
 			}
 		}
 
@@ -867,7 +790,7 @@ namespace asm.Collections
 		public T[] ToArray()
 		{
 			T[] result = new T[Count];
-			CopyTo(result);
+			CopyTo(result, 0);
 			return result;
 		}
 
@@ -923,7 +846,7 @@ namespace asm.Collections
 			Count.ValidateRange(index, ref count);
 			if (Count < 2 || count < 2) return;
 
-			if (Offset > Capacity - Count)
+			if (_offset > Capacity - Count)
 			{
 				int split = count / 2;
 
@@ -969,7 +892,7 @@ namespace asm.Collections
 			Count.ValidateRange(index, ref count);
 			if (count < 2) return;
 
-			if (Offset > Capacity - Count)
+			if (_offset > Capacity - Count)
 			{
 				// will just do a bubble sort
 				int last = index + count;
@@ -1020,47 +943,110 @@ namespace asm.Collections
 			return true;
 		}
 
+		protected void InsertRange(int index, [NotNull] IEnumerable<T> enumerable)
+		{
+			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+
+			switch (enumerable)
+			{
+				case IReadOnlyCollection<T> readOnlyCollection:
+					if (readOnlyCollection.Count == 0) return;
+					EnsureCapacity(checked(Count + readOnlyCollection.Count));
+					MakeGapAt(index, readOnlyCollection.Count);
+
+					foreach (T item in enumerable)
+						Items[IndexToBufferIndex(index++)] = item;
+
+					Count += readOnlyCollection.Count;
+					_version++;
+					break;
+				case ICollection<T> collection:
+					if (collection.Count == 0) return;
+					EnsureCapacity(checked(Count + collection.Count));
+					MakeGapAt(index, collection.Count);
+
+					foreach (T item in enumerable)
+						Items[IndexToBufferIndex(index++)] = item;
+
+					Count += collection.Count;
+					_version++;
+					break;
+				default:
+					using (IEnumerator<T> enumerator = enumerable.GetEnumerator())
+					{
+						while (enumerator.MoveNext())
+						{
+							Insert(index++, enumerator.Current);
+						}
+					}
+					break;
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		protected void EnsureCapacity(int min)
 		{
 			if (Items.Length >= min) return;
 			Capacity = (Items.Length == 0 ? Constants.DEFAULT_CAPACITY : Items.Length * 2).NotBelow(min);
 		}
 
-		protected int IndexToBufferIndex(int index, bool validate = false)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		protected int IndexToBufferIndex(int index)
 		{
-			int n = (index + Offset) % Capacity;
-			if (validate && !n.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			return n;
+			return (index + _offset) % Capacity;
 		}
 
-		/// <summary>
-		/// Increments <see cref="Offset" /> by <paramref name="value" /> using modulo-<see cref="Capacity" /> arithmetic.
-		/// </summary>
-		/// <param name="value">The value by which to increase <see cref="Offset" />. May not be negative.</param>
-		/// <returns>The value of <see cref="Offset" /> after it was incremented.</returns>
-		private int PostIncrement(int value)
+		private T RemoveAtInternal(int index)
 		{
-			int ret = Offset;
-			Offset += value;
-			Offset %= Capacity;
+			T item;
+
+			if (index == 0)
+			{
+				item = Items[PostIncrement(1)];
+			}
+			else if (index == Count - 1)
+			{
+				item = Items[IndexToBufferIndex(Count - 1)];
+			}
+			else
+			{
+				item = Items[IndexToBufferIndex(index)];
+				RemoveGapAt(index, 1);
+			}
+
+			Count--;
 			_version++;
-			return ret;
+			return item;
 		}
 
 		/// <summary>
-		/// Decrements <see cref="Offset" /> by <paramref name="value" /> using modulo-<see cref="Capacity" /> arithmetic.
+		/// Decrements <see cref="_offset" /> by <paramref name="size" /> using modulo-<see cref="Capacity" /> arithmetic.
 		/// </summary>
-		/// <param name="value">
-		/// The value by which to reduce <see cref="Offset" />. May not be negative or greater than
+		/// <param name="size">
+		/// The value by which to reduce <see cref="_offset" />. May not be negative or greater than
 		/// <see cref="Capacity" />.
 		/// </param>
-		/// <returns>The value of <see cref="Offset" /> before it was decremented.</returns>
-		private int PreDecrement(int value)
+		/// <returns>The value of <see cref="_offset" /> before it was decremented.</returns>
+		private int PreDecrement(int size)
 		{
-			Offset -= value;
-			if (Offset < 0) Offset += Capacity;
+			_offset -= size;
+			if (_offset < 0) _offset += Capacity;
 			_version++;
-			return Offset;
+			return _offset;
+		}
+
+		/// <summary>
+		/// Increments <see cref="_offset" /> by <paramref name="size" /> using modulo-<see cref="Capacity" /> arithmetic.
+		/// </summary>
+		/// <param name="size">The value by which to increase <see cref="_offset" />. May not be negative.</param>
+		/// <returns>The value of <see cref="_offset" /> after it was incremented.</returns>
+		private int PostIncrement(int size)
+		{
+			int ret = _offset;
+			_offset += size;
+			_offset %= Capacity;
+			_version++;
+			return ret;
 		}
 
 		/// <summary>
@@ -1075,29 +1061,32 @@ namespace asm.Collections
 			if (Count + size >= Capacity) EnsureCapacity(Count + size);
 			if (!index.InRangeEx(0, Count)) return;
 
-			// Make room in the existing list
 			if (index < Count / 2)
 			{
-				// Inserting into the first half of the list
-				// Move lower items down: [0, index) -> [Capacity - size, Capacity - size + index)
-				// This clears out the low "index" number of items, moving them by [size] places down;
-				// after rotation, there will be a [size]-sized hole at "index".
+				/*
+				* Inserting into the first half of the list.
+				* Move lower items down: [0, index) -> [Capacity - size, Capacity - size + index)
+				* This clears out the low "index" number of items, moving them "size" place down;
+				* after rotation, there will be a "size"-sized hole at "index".
+				*/
 				int writeIndex = Capacity - size;
 
 				for (int i = 0; i < index; ++i)
 					Items[IndexToBufferIndex(writeIndex + i)] = Items[IndexToBufferIndex(i)];
 
 				// Rotate to the new view
-				PreDecrement(1);
+				PreDecrement(size);
 			}
 			else
 			{
-				// Inserting into the second half of the list
-				// Move higher items up: [index, count) -> [index + size, size + count)
+				/*
+				* Inserting into the second half of the list.
+				* Move higher items up: [index, count) -> [index + 1, 1 + count)
+				*/
 				int copyCount = Count - index;
-				int writeIndex = index + 1;
+				int writeIndex = index + size;
 
-				for (int i = copyCount - 1; i > -1; --i)
+				for (int i = copyCount - 1; i >= 0; --i)
 					Items[IndexToBufferIndex(writeIndex + i)] = Items[IndexToBufferIndex(index + i)];
 
 				_version++;
@@ -1136,7 +1125,7 @@ namespace asm.Collections
 				int copyCount = index;
 				int writeIndex = size;
 
-				for (int i = copyCount - 1; i != -1; --i)
+				for (int i = copyCount - 1; i >= 0; --i)
 					Items[IndexToBufferIndex(writeIndex + i)] = Items[IndexToBufferIndex(i)];
 
 				// Rotate to new view

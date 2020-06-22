@@ -9,6 +9,7 @@ namespace asm.Other.Microsoft.Collections
 	 * assembly. So we need to use different names for collection debug view for
 	 * collections in this solution assemblies.
 	 */
+	[DebuggerNonUserCode]
 	internal class asm_Mscorlib_HashSetDebugView<T>
 	{
 		private readonly HashSetBase<T> set;

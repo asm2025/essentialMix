@@ -1,27 +1,27 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using asm.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Collections
 {
 	[DebuggerDisplay("{Count}")]
-	public class Lister<T> : Enumerator<T>, IReadOnlyList<T>
+	public class Collector<T> : Enumerator<T>, IReadOnlyCollection<T>
 	{
-		private readonly IReadOnlyList<T> _readOnlyList;
+		private readonly IReadOnlyCollection<T> _readOnlyCollection;
 		
-		private IList<T> _list;
+		private ICollection<T> _collection;
 
-		protected Lister()
+		protected Collector()
 			: this(Array.Empty<T>())
 		{
 		}
 
-		public Lister([NotNull] IEnumerable<T> enumerable)
+		public Collector([NotNull] IEnumerable<T> enumerable)
 			: base(enumerable)
 		{
 			IsIterable = true;
@@ -29,48 +29,47 @@ namespace asm.Collections
 			switch (enumerable)
 			{
 				case List<T> list:
-					_readOnlyList = list;
+					_readOnlyCollection = list;
 					Done = true;
 					break;
 				case IReadOnlyList<T> readOnlyList:
-					_readOnlyList = readOnlyList;
+					_readOnlyCollection = readOnlyList;
 					Done = true;
 					break;
 				case IList<T> list:
-					_list = list;
-					_readOnlyList = new ReadOnlyList<T>(_list);
+					_collection = list;
+					_readOnlyCollection = new ReadOnlyCollection<T>(list);
+					Done = true;
+					break;
+				case IReadOnlyCollection<T> readOnlyCollection:
+					_readOnlyCollection = readOnlyCollection;
 					Done = true;
 					break;
 				default:
-					if (Enumerable is IList<T> enumerableList)
+					if (Enumerable is ICollection<T> enumerableCollection)
 					{
-						_list = enumerableList;
+						_collection = enumerableCollection;
 						Done = true;
 					}
 					else
 					{
-						_list = new List<T>();
+						_collection = new List<T>();
 					}
-					_readOnlyList = new ReadOnlyList<T>(_list);
+					_readOnlyCollection = new ReadOnlyCollection<T>(_collection as IList<T> ?? _collection.ToList());
 					break;
 			}
 		}
-
-		public override T Current => Item(Index);
-
-		[IndexerName("ItemOf")]
-		public T this[int i] => Item(i);
 
 		public virtual int Count
 		{
 			get
 			{
-				if (Done) return _readOnlyList.Count;
+				if (Done) return _readOnlyCollection.Count;
 				int n = Index;
 				MoveTo(int.MaxValue);
 				Reset();
 				Index = n;
-				return _readOnlyList.Count;
+				return _readOnlyCollection.Count;
 			}
 		}
 
@@ -79,13 +78,7 @@ namespace asm.Collections
 		public bool HasOne => Count == 1;
 
 		[NotNull]
-		protected IList<T> List => _list ??= new List<T>();
-
-		public virtual T Item(int index)
-		{
-			if (_readOnlyList.Count <= index) MoveTo(index);
-			return _readOnlyList[index];
-		}
+		protected ICollection<T> Collection => _collection ??= new Collection<T>();
 
 		public override bool MoveNext()
 		{
@@ -94,11 +87,11 @@ namespace asm.Collections
 
 			if (Index < 0)
 			{
-				if (_readOnlyList.Count > 0) Index = 0;
+				if (_readOnlyCollection.Count > 0) Index = 0;
 				return Index == 0;
 			}
 
-			if (Index >= _readOnlyList.Count - 1) return false;
+			if (Index >= _readOnlyCollection.Count - 1) return false;
 			Index++;
 			return true;
 		}
@@ -108,7 +101,7 @@ namespace asm.Collections
 			if (!Done)
 			{
 				Impl = null;
-				List.Clear();
+				Collection.Clear();
 				base.Reset();
 				return;
 			}
@@ -124,7 +117,7 @@ namespace asm.Collections
 
 			int n = 0;
 
-			while (!Done && List.Count <= index)
+			while (!Done && Collection.Count <= index)
 			{
 				if (!Impl.MoveNext())
 				{
@@ -132,7 +125,7 @@ namespace asm.Collections
 					return n;
 				}
 
-				List.Add(Impl.Current);
+				Collection.Add(Impl.Current);
 
 				if (Index < 0) Index = 0;
 				else Index++;
@@ -144,14 +137,14 @@ namespace asm.Collections
 		}
 	}
 
-	public class Lister : Lister<object>
+	public class Collector : Collector<object>
 	{
-		protected Lister()
+		protected Collector()
 			: this(Array.Empty<object>())
 		{
 		}
 
-		public Lister([NotNull] IEnumerable enumerable)
+		public Collector([NotNull] IEnumerable enumerable)
 			: base(enumerable.Cast<object>())
 		{
 		}

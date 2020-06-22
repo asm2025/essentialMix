@@ -43,6 +43,7 @@ namespace TestApp
 			//TestLinkedList();
 
 			TestDeque();
+			TestLinkedDeque();
 
 			//TestBinaryTreeFromTraversal();
 			
@@ -652,7 +653,7 @@ namespace TestApp
 		{
 			bool more;
 			Stopwatch clock = new Stopwatch();
-			int[] values = Enumerable.Range(1, 20).ToArray(); //GetRandomIntegers(true, 200000);
+			int[] values = GetRandomIntegers(true, 100/*200000*/);
 			Deque<int> deque = new Deque<int>();
 
 			do
@@ -664,131 +665,16 @@ namespace TestApp
 				Console.WriteLine($"Array has {values.Length} items.");
 				Console.WriteLine("Test queue functionality...");
 
-				#region Queue test
+				// Queue test
 				Title("Testing Deque as a Queue...");
-				deque.Clear();
-				int count = deque.Count;
-				Debug.Assert(count == 0, "Values are not cleared correctly!");
-				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
-				clock.Restart();
+				DoTheTest(deque, values, deque.Enqueue, deque.Dequeue, clock);
+				Title("End testing Deque as a Queue...");
+				ConsoleHelper.Pause();
 
-				foreach (int v in values)
-				{
-					deque.Enqueue(v);
-					count++;
-				}
-
-				Console.WriteLine($"Added {count} items of {values.Length} in {clock.ElapsedMilliseconds} ms.");
-
-				if (deque.Count != values.Length)
-				{
-					Console.WriteLine("Something went wrong, Count isn't right...!".BrightRed());
-					return;
-				}
-
-				Console.WriteLine("Test search...".BrightYellow());
-				int found = 0;
-				int missed = 0;
-				clock.Restart();
-
-				foreach (int v in values)
-				{
-					if (deque.Contains(v))
-					{
-						found++;
-						continue;
-					}
-
-					missed++;
-					Console.WriteLine(missed <= 3
-										? $"Find missed a value: {v} :((".BrightRed()
-										: "FIND MISSED A LOT :((".BrightRed());
-					if (missed > 3) return;
-					//return;
-				}
-				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
-
-				Console.WriteLine("Test removing...".BrightRed());
-				int removed = 0;
-				count = deque.Count;
-				clock.Restart();
-
-				while (deque.Count > 0 && count > 0)
-				{
-					Console.Write(deque.Dequeue());
-					count--;
-					removed++;
-					if (deque.Count > 0) Console.Write(", ");
-				}
-
-				Debug.Assert(count == 0 && deque.Count == 0, $"Values are not cleared correctly! {count} != {deque.Count}.");
-				Console.WriteLine();
-				Console.WriteLine();
-				Console.WriteLine($"Removed {removed} of {count} items in {clock.ElapsedMilliseconds} ms.");
-				#endregion
-
-				#region Stack test
+				// Stack test
 				Title("Testing Deque as a Stack...");
-				deque.Clear();
-				count = deque.Count;
-				Debug.Assert(count == 0, "Values are not cleared correctly!");
-				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
-				clock.Restart();
-
-				foreach (int v in values)
-				{
-					deque.Push(v);
-					count++;
-				}
-
-				Console.WriteLine($"Added {count} items of {values.Length} in {clock.ElapsedMilliseconds} ms.");
-
-				if (deque.Count != values.Length)
-				{
-					Console.WriteLine("Something went wrong, Count isn't right...!".BrightRed());
-					return;
-				}
-
-				Console.WriteLine("Test search...".BrightYellow());
-				found = 0;
-				missed = 0;
-				clock.Restart();
-
-				foreach (int v in values)
-				{
-					if (deque.Contains(v))
-					{
-						found++;
-						continue;
-					}
-
-					missed++;
-					Console.WriteLine(missed <= 3
-										? $"Find missed a value: {v} :((".BrightRed()
-										: "FIND MISSED A LOT :((".BrightRed());
-					if (missed > 3) return;
-					//return;
-				}
-				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
-
-				Console.WriteLine("Test removing...".BrightRed());
-				removed = 0;
-				count = deque.Count;
-				clock.Restart();
-
-				while (deque.Count > 0 && count > 0)
-				{
-					Console.Write(deque.Pop());
-					count--;
-					removed++;
-					if (deque.Count > 0) Console.Write(", ");
-				}
-
-				Debug.Assert(count == 0 && deque.Count == 0, $"Values are not cleared correctly! {count} != {deque.Count}.");
-				Console.WriteLine();
-				Console.WriteLine();
-				Console.WriteLine($"Removed {removed} of {count} items in {clock.ElapsedMilliseconds} ms.");
-				#endregion
+				DoTheTest(deque, values, deque.Push, deque.Pop, clock);
+				Title("End testing Deque as a Stack...");
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -799,6 +685,184 @@ namespace TestApp
 			while (more);
 
 			clock.Stop();
+
+			static void DoTheTest(Deque<int> deque, int[] values, Action<int> add, Func<int> remove, Stopwatch clock)
+			{
+				const int MAX_SEARCH = 1000;
+
+				deque.Clear();
+				int count = deque.Count;
+				Debug.Assert(count == 0, "Values are not cleared correctly!");
+				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				clock.Restart();
+
+				foreach (int v in values)
+				{
+					add(v);
+					count++;
+				}
+
+				Console.WriteLine($"Added {count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+
+				if (deque.Count != values.Length)
+				{
+					Console.WriteLine("Something went wrong, Count isn't right...!".BrightRed());
+					return;
+				}
+
+				Console.WriteLine("Test search...".BrightYellow());
+				int found = 0;
+				int missed = 0;
+				count = deque.Count % MAX_SEARCH;
+				clock.Restart();
+
+				// will just test for items not more than MAX_SEARCH
+				for (int i = 0; i < count; i++)
+				{
+					int v = values[i];
+
+					if (deque.Contains(v))
+					{
+						found++;
+						continue;
+					}
+
+					missed++;
+					Console.WriteLine(missed <= 3
+										? $"Find missed a value: {v} :((".BrightRed()
+										: "FIND MISSED A LOT :((".BrightRed());
+					if (missed > 3) return;
+					//return;
+				}
+
+				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
+
+				Console.WriteLine("Test removing...".BrightRed());
+				int removed = 0;
+				count = deque.Count;
+				clock.Restart();
+
+				while (deque.Count > 0 && count > 0)
+				{
+					Console.Write(remove());
+					count--;
+					removed++;
+					if (deque.Count > 0) Console.Write(", ");
+				}
+
+				Debug.Assert(count == 0 && deque.Count == 0, $"Values are not cleared correctly! {count} != {deque.Count}.");
+				Console.WriteLine();
+				Console.WriteLine();
+				Console.WriteLine($"Removed {removed} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+			}
+		}
+
+		private static void TestLinkedDeque()
+		{
+			bool more;
+			Stopwatch clock = new Stopwatch();
+			int[] values = GetRandomIntegers(true, 100/*200000*/);
+			LinkedDeque<int> deque = new LinkedDeque<int>();
+
+			do
+			{
+				Console.Clear();
+				Title("Testing Deque...");
+				Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
+				Console.WriteLine();
+				Console.WriteLine($"Array has {values.Length} items.");
+				Console.WriteLine("Test queue functionality...");
+
+				// Queue test
+				Title("Testing Deque as a Queue...");
+				DoTheTest(deque, values, deque.Enqueue, deque.Dequeue, clock);
+				Title("End testing Deque as a Queue...");
+				ConsoleHelper.Pause();
+
+				// Stack test
+				Title("Testing Deque as a Stack...");
+				DoTheTest(deque, values, deque.Push, deque.Pop, clock);
+				Title("End testing Deque as a Stack...");
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			clock.Stop();
+
+			static void DoTheTest(LinkedDeque<int> deque, int[] values, Action<int> add, Func<int> remove, Stopwatch clock)
+			{
+				const int MAX_SEARCH = 1000;
+
+				deque.Clear();
+				int count = deque.Count;
+				Debug.Assert(count == 0, "Values are not cleared correctly!");
+				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				clock.Restart();
+
+				foreach (int v in values)
+				{
+					add(v);
+					count++;
+				}
+
+				Console.WriteLine($"Added {count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+
+				if (deque.Count != values.Length)
+				{
+					Console.WriteLine("Something went wrong, Count isn't right...!".BrightRed());
+					return;
+				}
+
+				Console.WriteLine("Test search...".BrightYellow());
+				int found = 0;
+				int missed = 0;
+				count = deque.Count % MAX_SEARCH;
+				clock.Restart();
+
+				// will just test for items not more than MAX_SEARCH
+				for (int i = 0; i < count; i++)
+				{
+					int v = values[i];
+
+					if (deque.Contains(v))
+					{
+						found++;
+						continue;
+					}
+
+					missed++;
+					Console.WriteLine(missed <= 3
+										? $"Find missed a value: {v} :((".BrightRed()
+										: "FIND MISSED A LOT :((".BrightRed());
+					if (missed > 3) return;
+					//return;
+				}
+
+				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
+
+				Console.WriteLine("Test removing...".BrightRed());
+				int removed = 0;
+				count = deque.Count;
+				clock.Restart();
+
+				while (deque.Count > 0 && count > 0)
+				{
+					Console.Write(remove());
+					count--;
+					removed++;
+					if (deque.Count > 0) Console.Write(", ");
+				}
+
+				Debug.Assert(count == 0 && deque.Count == 0, $"Values are not cleared correctly! {count} != {deque.Count}.");
+				Console.WriteLine();
+				Console.WriteLine();
+				Console.WriteLine($"Removed {removed} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+			}
 		}
 
 		private static void TestBinaryTreeFromTraversal()

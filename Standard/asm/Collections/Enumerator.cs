@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using asm.Helpers;
 using asm.Patterns.Object;
@@ -9,26 +10,25 @@ namespace asm.Collections
 {
 	public class Enumerator : Disposable, IEnumerator, IEnumerable
 	{
-		private readonly IEnumerable _enumerable;
 		private IEnumerator _impl;
 
 		public Enumerator() { IsIterable = false; }
 
 		public Enumerator([NotNull] IEnumerable enumerable)
 		{
-			_enumerable = enumerable;
+			Enumerable = enumerable;
 
 			switch (enumerable)
 			{
-				case ICollection collection:
-					IsIterable = collection.Count > 0;
-					return;
 				case IReadOnlyCollection<object> readOnlyCollection:
 					IsIterable = readOnlyCollection.Count > 0;
 					return;
+				case ICollection collection:
+					IsIterable = collection.Count > 0;
+					return;
 			}
 
-			IEnumerator im = _enumerable.GetEnumerator();
+			IEnumerator im = Enumerable.GetEnumerator();
 			IsIterable = im.MoveNext();
 			ObjectHelper.Dispose(ref im);
 		}
@@ -38,10 +38,14 @@ namespace asm.Collections
 		public virtual int Position => Index;
 
 		public bool IsIterable { get; protected set; }
+
+		protected IEnumerable Enumerable { get; }
+
 		protected int Index { get; set; } = -1;
+
 		protected bool Done { get; set; }
 
-		protected virtual IEnumerator Impl => _impl ??= _enumerable?.GetEnumerator();
+		protected virtual IEnumerator Impl => _impl ??= Enumerable?.GetEnumerator();
 
 		/// <inheritdoc />
 		public IEnumerator GetEnumerator()
@@ -87,27 +91,28 @@ namespace asm.Collections
 
 	public class Enumerator<T> : Disposable, IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable
 	{
-		private readonly IEnumerable<T> _enumerable;
 		private IEnumerator<T> _impl;
 
 		public Enumerator() { IsIterable = false; }
 
 		public Enumerator([NotNull] IEnumerable<T> enumerable)
 		{
-			_enumerable = enumerable;
-
 			switch (enumerable)
 			{
-				case ICollection<T> collection:
-					IsIterable = collection.Count > 0;
-					return;
 				case IReadOnlyCollection<T> readOnlyCollection:
+					Enumerable = readOnlyCollection;
 					IsIterable = readOnlyCollection.Count > 0;
-					return;
+					break;
+				case ICollection<T> collection:
+					Enumerable = collection;
+					IsIterable = collection.Count > 0;
+					break;
+				default:
+					IList<T> list = enumerable.ToList();
+					Enumerable = list;
+					IsIterable = list.Count > 0;
+					break;
 			}
-
-			using (IEnumerator<T> im = _enumerable.GetEnumerator())
-				IsIterable = im.MoveNext();
 		}
 
 		public virtual T Current => Impl.Current;
@@ -117,12 +122,16 @@ namespace asm.Collections
 		public virtual int Position { get => Index; set => Index = value; }
 
 		public bool IsIterable { get; protected set; }
+
+		public IEnumerable<T> Enumerable { get; }
+
 		protected int Index { get; set; } = -1;
+
 		protected bool Done { get; set; }
 
 		protected virtual IEnumerator<T> Impl
 		{
-			get { return _impl ??= _enumerable?.GetEnumerator(); }
+			get { return _impl ??= Enumerable?.GetEnumerator(); }
 			set => _impl = value;
 		}
 
