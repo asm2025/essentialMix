@@ -12,6 +12,8 @@
 //	/// <para><see href="https://en.wikipedia.org/wiki/Red%E2%80%93black_tree">RedBlackTree (RBT)</see> implementation using the linked representation.</para>
 //	/// </summary>
 //	/// <typeparam name="T">The element type of the tree</typeparam>
+
+//	[DebuggerTypeProxy(typeof(asm_RedBlackTreeDebugView<>))]
 //	[Serializable]
 //	public sealed class RedBlackTree<T> : LinkedBinaryTree<RedBlackNode<T>, T>
 //	{

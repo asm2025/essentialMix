@@ -41,6 +41,7 @@ namespace asm.Collections
 	 * DFS [PostOrder]:  BAEDCHGKJIF => Left-Right-Root (Stack)
 	 */
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(asm_LinkedBinaryTreeDebugView<,>))]
 	[Serializable]
 	public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, IReadOnlyCollection<T>
 		where TNode : LinkedBinaryNode<TNode, T>
@@ -2332,6 +2333,7 @@ namespace asm.Collections
 	}
 
 	/// <inheritdoc />
+	[DebuggerTypeProxy(typeof(asm_LinkedBinaryTreeDebugView<>))]
 	[Serializable]
 	public abstract class LinkedBinaryTree<T> : LinkedBinaryTree<LinkedBinaryNode<T>, T>
 	{

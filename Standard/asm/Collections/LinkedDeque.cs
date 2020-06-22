@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using asm.Exceptions;
 using asm.Other.Microsoft.Collections;
 using JetBrains.Annotations;
 
@@ -153,10 +154,10 @@ namespace asm.Collections
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
 		/// <inheritdoc />
-		public void Add(T item) { Items.AddLast(item); }
+		public void Add(T value) { Items.AddLast(value); }
 
 		/// <inheritdoc />
-		public bool Remove(T item) { return Items.Remove(item); }
+		public bool Remove(T value) { return Items.Remove(value); }
 
 		public void Enqueue(T item) { Items.AddLast(item); }
 
@@ -166,6 +167,30 @@ namespace asm.Collections
 				Items.AddLast(item);
 		}
 
+		public void EnqueueBefore(T key, T value)
+		{
+			LinkedListNode<T> node = Items.Find(key) ?? throw new NotFoundException();
+			EnqueueBefore(node, value);
+		}
+
+		public void EnqueueBefore([NotNull] LinkedListNode<T> node, T value)
+		{
+			Items.AddBefore(node, value);
+		}
+
+		public void EnqueueAfter(T key, T value)
+		{
+			LinkedListNode<T> node = Items.Find(key) ?? throw new NotFoundException();
+			EnqueueAfter(node, value);
+		}
+
+		public void EnqueueAfter([NotNull] LinkedListNode<T> node, T value)
+		{
+			Items.AddAfter(node, value);
+		}
+
+		public void EnqueueLast(T value) { Items.AddLast(value); }
+
 		public T Dequeue()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
@@ -174,13 +199,37 @@ namespace asm.Collections
 			return value;
 		}
 
-		public void Push(T item) { Items.AddLast(item); }
+		public void Push(T value) { Items.AddLast(value); }
 
 		public void Push([NotNull] IEnumerable<T> enumerable)
 		{
 			foreach (T item in enumerable.Reverse()) 
 				Items.AddLast(item);
 		}
+
+		public void PushBefore(T key, T value)
+		{
+			LinkedListNode<T> node = Items.Find(key) ?? throw new NotFoundException();
+			PushBefore(node, value);
+		}
+
+		public void PushBefore([NotNull] LinkedListNode<T> node, T value)
+		{
+			Items.AddAfter(node, value);
+		}
+
+		public void PushAfter(T key, T value)
+		{
+			LinkedListNode<T> node = Items.Find(key) ?? throw new NotFoundException();
+			PushAfter(node, value);
+		}
+
+		public void PushAfter([NotNull] LinkedListNode<T> node, T value)
+		{
+			Items.AddBefore(node, value);
+		}
+
+		public void PushLast(T value) { Items.AddFirst(value); }
 
 		public T Pop()
 		{
@@ -206,7 +255,54 @@ namespace asm.Collections
 		public void Clear() { Items.Clear(); }
 
 		/// <inheritdoc />
-		public bool Contains(T item) { return Items.Contains(item); }
+		public bool Contains(T value) { return Items.Contains(value); }
+
+		public LinkedListNode<T> Find(T value)
+		{
+			return Items.Find(value);
+		}
+
+		public LinkedListNode<T> FindNext([NotNull] LinkedListNode<T> node)
+		{
+			if (node.List != Items) throw new InvalidOperationException("Node does not belong to the collection.");
+
+			T value = node.Value;
+			LinkedListNode<T> search = null, next = node.Next;
+
+			if (value != null)
+			{
+				EqualityComparer<T> comparer = EqualityComparer<T>.Default;
+
+				while (next != null)
+				{
+					if (comparer.Equals(value, next.Value))
+					{
+						search = next;
+						break;
+					}
+					next = next.Next;
+				}
+			}
+			else
+			{
+				while (next != null)
+				{
+					if (next.Value == null)
+					{
+						search = next;
+						break;
+					}
+					next = next.Next;
+				}
+			}
+
+			return search;
+		}
+
+		public LinkedListNode<T> FindLast(T value)
+		{
+			return Items.FindLast(value);
+		}
 
 		/// <inheritdoc />
 		public void CopyTo(T[] array, int arrayIndex) { Items.CopyTo(array, arrayIndex); }

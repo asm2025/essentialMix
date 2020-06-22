@@ -42,8 +42,8 @@ namespace TestApp
 			//TestSinglyLinkedList();
 			//TestLinkedList();
 
-			TestDeque();
-			TestLinkedDeque();
+			//TestDeque();
+			//TestLinkedDeque();
 
 			//TestBinaryTreeFromTraversal();
 			
@@ -58,6 +58,7 @@ namespace TestApp
 			//TestRedBlackTreeRemove();
 
 			//TestAllBinaryTrees();
+			TestAllBinaryTreesFunctionality();
 			//TestAllBinaryTreesPerformance();
 
 			//TestSortedSetPerformance();
@@ -653,7 +654,7 @@ namespace TestApp
 		{
 			bool more;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, 100/*200000*/);
+			int[] values = GetRandomIntegers(true, 100000/*200000*/);
 			Deque<int> deque = new Deque<int>();
 
 			do
@@ -761,7 +762,7 @@ namespace TestApp
 		{
 			bool more;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, 100/*200000*/);
+			int[] values = GetRandomIntegers(true, 100000/*200000*/);
 			LinkedDeque<int> deque = new LinkedDeque<int>();
 
 			do
@@ -1418,6 +1419,114 @@ namespace TestApp
 		//	}
 		//}
 
+		private static void TestAllBinaryTreesFunctionality()
+		{
+			bool more;
+			Stopwatch clock = new Stopwatch();
+			BinarySearchTree<int> binarySearchTree = new BinarySearchTree<int>();
+			AVLTree<int> avlTree = new AVLTree<int>();
+			//RedBlackTree<int> redBlackTree = new RedBlackTree<int>();
+			int[] values = GetRandomIntegers(true, 30);
+
+			do
+			{
+				Console.Clear();
+				Title("Testing all BinaryTrees performance...");
+				Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
+
+				//DoTheTest(binarySearchTree, values, clock);
+				//clock.Stop();
+				//ConsoleHelper.Pause();
+
+				DoTheTest(avlTree, values, clock);
+				clock.Stop();
+				ConsoleHelper.Pause();
+
+				//DoTheTest(redBlackTree, values, clock);
+				//clock.Stop();
+				//ConsoleHelper.Pause();
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			clock.Stop();
+
+			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, int[] values, Stopwatch clock)
+				where TNode : LinkedBinaryNode<TNode, int>
+			{
+				Console.WriteLine();
+				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
+				tree.Clear();
+
+				Debug.Assert(tree.Count == 0, "Values are not cleared correctly!");
+				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				Console.WriteLine();
+				Console.WriteLine($"Array: {string.Join(", ", values)}");
+				
+				clock.Restart();
+				tree.Add(values);
+				Console.WriteLine($"Added {tree.Count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+				tree.PrintProps();
+
+				Console.WriteLine("Test search...".BrightYellow());
+				int found = 0;
+				int missed = 0;
+				clock.Restart();
+
+				foreach (int v in values)
+				{
+					if (tree.Contains(v))
+					{
+						found++;
+						continue;
+					}
+
+					missed++;
+					Console.WriteLine(missed <= 3
+										? $"Find missed a value: {v} :((".BrightRed()
+										: "FIND MISSED A LOT :((".BrightRed());
+					if (missed > 3) return;
+					//return;
+				}
+				Console.WriteLine($"Found {found} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+
+				tree.Print();
+
+				Console.WriteLine("Test removing...".BrightRed());
+				int removed = 0;
+				missed = 0;
+				clock.Restart();
+
+				foreach (int v in values)
+				{
+					Console.WriteLine($"Removing {v}:");
+
+					if (tree.Remove(v))
+					{
+						removed++;
+						tree.Print();
+						Console.WriteLine("Tree Count = " + tree.Count);
+						continue;
+					}
+
+					missed++;
+					Console.WriteLine(missed <= 3
+										? $"Remove missed a value: {v} :((".BrightRed()
+										: "REMOVE MISSED A LOT. :((".BrightRed());
+					Console.WriteLine("Does it contain the value? " + tree.Contains(v).ToYesNo());
+					tree.Print();
+					if (missed > 3) return;
+					//return;
+				}
+				Console.WriteLine($"Removed {removed} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+			}
+		}
+
 		private static void TestAllBinaryTreesPerformance()
 		{
 			bool more;
@@ -1425,7 +1534,7 @@ namespace TestApp
 			BinarySearchTree<int> binarySearchTree = new BinarySearchTree<int>();
 			AVLTree<int> avlTree = new AVLTree<int>();
 			//RedBlackTree<int> redBlackTree = new RedBlackTree<int>();
-			int[] values = GetRandomIntegers(true, 15/*200000*/);
+			int[] values = GetRandomIntegers(true, 20/*200000*/);
 
 			do
 			{
@@ -1435,8 +1544,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.WriteLine($"Array has {values.Length} items.");
 
-				//DoTheTest(binarySearchTree, values, clock);
-				//clock.Stop();
+				DoTheTest(binarySearchTree, values, clock);
+				clock.Stop();
 
 				DoTheTest(avlTree, values, clock);
 				clock.Stop();
@@ -1460,19 +1569,12 @@ namespace TestApp
 				Console.WriteLine();
 				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
 				tree.Clear();
-
-				int count = tree.Count;
-				Debug.Assert(count == 0, "Values are not cleared correctly!");
+				Debug.Assert(tree.Count == 0, "Values are not cleared correctly!");
 				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+
 				clock.Restart();
-
-				foreach (int v in values)
-				{
-					tree.Add(v);
-					count++;
-				}
-
-				Console.WriteLine($"Added {count} items of {values.Length} in {clock.ElapsedMilliseconds} ms.");
+				tree.Add(values);
+				Console.WriteLine($"Added {tree.Count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 				tree.PrintProps();
 
 				Console.WriteLine("Test search...".BrightYellow());
@@ -1495,10 +1597,7 @@ namespace TestApp
 					if (missed > 3) return;
 					//return;
 				}
-				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
-
-				// todo tmp
-				tree.Print();
+				Console.WriteLine($"Found {found} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine("Test removing...".BrightRed());
 				int removed = 0;
@@ -1510,8 +1609,6 @@ namespace TestApp
 					if (tree.Remove(v))
 					{
 						removed++;
-						// todo tmp
-						tree.Print();
 						continue;
 					}
 
@@ -1519,13 +1616,10 @@ namespace TestApp
 					Console.WriteLine(missed <= 3
 										? $"Remove missed a value: {v} :((".BrightRed()
 										: "REMOVE MISSED A LOT. :((".BrightRed());
-					Console.WriteLine("Does it contain the value? " + tree.Contains(v).ToYesNo());
-					// todo tmp
-					tree.Print();
 					if (missed > 3) return;
 					//return;
 				}
-				Console.WriteLine($"Removed {removed} of {count} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Removed {removed} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 			}
 		}
 

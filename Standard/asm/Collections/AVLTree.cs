@@ -55,7 +55,7 @@ namespace asm.Collections
 
 			LinkedBinaryNode<T> parent = Root, next = Root;
 			// the deque has the same effect as the recursive call but only it's iterative now
-			Deque<LinkedBinaryNode<T>> deque = new Deque<LinkedBinaryNode<T>>();
+			LinkedDeque<LinkedBinaryNode<T>> deque = new LinkedDeque<LinkedBinaryNode<T>>();
 
 			// find a parent
 			// as a general role: whenever a node's left or right changes, it will be pushed to the deque to get updated
@@ -89,7 +89,7 @@ namespace asm.Collections
 
 			LinkedBinaryNode<T> parent = null, node = null, next = Root;
 			// the deque has the same effect as the recursive call but only it's iterative now
-			Deque<LinkedBinaryNode<T>> stack = new Deque<LinkedBinaryNode<T>>();
+			LinkedDeque<LinkedBinaryNode<T>> deque = new LinkedDeque<LinkedBinaryNode<T>>();
 
 			// find the node
 			// as a general role: whenever a node's left or right changes, it will be pushed to the deque to get updated
@@ -104,7 +104,7 @@ namespace asm.Collections
 				}
 
 				parent = next;
-				stack.Push(parent);
+				deque.Push(parent);
 				next = cmp < 0
 							? next.Left
 							: next.Right;
@@ -112,61 +112,80 @@ namespace asm.Collections
 
 			if (node == null) return false;
 
-			LinkedBinaryNode<T> child;
-
 			// case 1: node has no right child
 			if (node.Right == null)
 			{
-				child = node.Left;
+				if (parent == null)
+				{
+					Root = node.Left;
+				}
+				else
+				{
+					if (Comparer.IsLessThan(node.Value, parent.Value))
+						parent.Left = node.Left;
+					else
+						parent.Right = node.Left;
+				}
 			}
 			// case 2: node has a right child which doesn't have a left child
 			else if (node.Right.Left == null)
 			{
 				// move the left to the right child's left
 				node.Right.Left = node.Left;
-				stack.Push(node.Right);
-				child = node.Right;
+				deque.Push(node.Right);
+
+				if (parent == null)
+				{
+					Root = node.Right;
+				}
+				else
+				{
+					if (Comparer.IsLessThan(node.Value, parent.Value))
+						parent.Left = node.Right;
+					else
+						parent.Right = node.Right;
+				}
 			}
 			// case 3: node has a right child that has a left child
 			else
 			{
 				// find the right child's left most child
-				LinkedBinaryNode<T> leftMostParent = parent;
-				LinkedBinaryNode<T> leftmost = node.Right;
+				LinkedBinaryNode<T> leftMostParent = node.Right;
+				LinkedBinaryNode<T> leftmost = leftMostParent.Left;
+				deque.Push(leftMostParent);
 
 				while (leftmost.Left != null)
 				{
 					leftMostParent = leftmost;
-					stack.Push(leftMostParent);
-					leftmost = leftMostParent.Left;
+					deque.Push(leftMostParent);
+					leftmost = leftmost.Left;
 				}
 
 				// move the left-most right to the parent's left
-				if (leftMostParent != null) leftMostParent.Left = leftmost.Right;
+				leftMostParent.Left = leftmost.Right;
 				// adjust the left-most child nodes
 				leftmost.Left = node.Left;
+				// don't add the node to itself
 				leftmost.Right = node.Right;
-				// add this to be last
-				stack.Enqueue(leftmost);
-				child = leftmost;
+
+				if (parent == null)
+				{
+					Root = leftmost;
+					// add this to be the last to be updated
+					deque.PushLast(leftmost);
+				}
+				else
+				{
+					if (Comparer.IsLessThan(node.Value, parent.Value))
+						parent.Left = leftmost;
+					else
+						parent.Right = leftmost;
+
+					deque.PushBefore(parent, leftmost);
+				}
 			}
 
-			if (parent == null)
-			{
-				Root = child;
-			}
-			else if (Comparer.IsLessThan(node.Value, parent.Value))
-			{
-				// if node < parent, move the left to the parent's left
-				parent.Left = child;
-			}
-			else
-			{
-				// else, move the left to the parent's right
-				parent.Right = child;
-			}
-
-			UpdateAndBalance(stack);
+			UpdateAndBalance(deque);
 			Count--;
 			_version++;
 			return true;
@@ -207,7 +226,7 @@ namespace asm.Collections
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		private void UpdateAndBalance([NotNull] Deque<LinkedBinaryNode<T>> deque)
+		private void UpdateAndBalance([NotNull] LinkedDeque<LinkedBinaryNode<T>> deque)
 		{
 			// update parents
 			while (deque.Count > 0)

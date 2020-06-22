@@ -109,6 +109,7 @@ namespace asm.Collections
 		public static implicit operator T([NotNull] LinkedBinaryNode<TNode, T> node) { return node.Value; }
 	}
 
+	[DebuggerDisplay("{Value} :H{Height}B{BalanceFactor}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class LinkedBinaryNode<T> : LinkedBinaryNode<LinkedBinaryNode<T>, T>

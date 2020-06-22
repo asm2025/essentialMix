@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 
 namespace asm.Collections
 {
+	[DebuggerDisplay("{Value} :C{ColorC}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class RedBlackNode<T> : LinkedBinaryNode<RedBlackNode<T>, T>
@@ -18,12 +21,18 @@ namespace asm.Collections
 		/// </summary>
 		public bool Color { get; internal set; } = true;
 
+		private char ColorC =>
+			Color
+				? 'R'
+				: 'B';
+
 		/// <inheritdoc />
 		protected internal override string ToString(int depth)
 		{
-			return $"{Value} {(Color ? 'R' : 'B')}";
+			return $"{Value} {ColorC}";
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public void SwapColor([NotNull] RedBlackNode<T> other)
 		{
 			bool tmp = other.Color;

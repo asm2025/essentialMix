@@ -416,6 +416,20 @@ namespace asm.Collections
 
 		public void Enqueue([NotNull] IEnumerable<T> enumerable) { InsertRange(Count, enumerable); }
 
+		public void EnqueueBefore(int index, T value)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			Insert(index, value);
+		}
+
+		public void EnqueueAfter(int index, T value)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			Insert(++index, value);
+		}
+
+		public void EnqueueLast(T item) { Insert(0, item); }
+
 		public T Dequeue()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
@@ -425,6 +439,22 @@ namespace asm.Collections
 		public void Push(T item) { Insert(Count, item); }
 
 		public void Push([NotNull] IEnumerable<T> enumerable) { InsertRange(Count, enumerable.Reverse()); }
+
+		public void PushBefore(int index, T value)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			Insert(++index, value);
+		}
+
+		public void PushAfter(int index, T value)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			Insert(index, value);
+		}
+
+		public void PushLast(T item) { Insert(0, item); }
+
+		public void PushLast([NotNull] IEnumerable<T> enumerable) { InsertRange(0, enumerable.Reverse()); }
 
 		public T Pop()
 		{
