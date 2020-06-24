@@ -12,7 +12,7 @@ namespace asm.Extensions
 		[NotNull]
 		public static Type[] Types([NotNull] this IReadOnlyList<object> thisValue)
 		{
-			return thisValue.IsNullOrEmpty() ? Type.EmptyTypes : thisValue.Select(item => item.AsType()).ToArray();
+			return thisValue.Count == 0 ? Type.EmptyTypes : thisValue.Select(item => item.AsType()).ToArray();
 		}
 
 		public static T GetRandom<T>([NotNull] this IReadOnlyList<T> thisValue)

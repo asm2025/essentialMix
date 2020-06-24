@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Exceptions.Collections;
 
@@ -83,9 +82,17 @@ namespace asm.Collections
 				{
 					case LimitType.RemoveFirst:
 						if (Count - Limit == 0)
+						{
 							Source.Remove(Source.Cast<object>().First());
+						}
 						else
-							Source.RemoveRange(0, Count - Limit);
+						{
+							int max = Count - Limit;
+
+							for (int i = max; i >= 0; i--) 
+								Source.RemoveAt(i);
+						}
+
 						break;
 					case LimitType.SkipAdding:
 						return -1;

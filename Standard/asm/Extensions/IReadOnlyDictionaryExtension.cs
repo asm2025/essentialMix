@@ -14,34 +14,6 @@ namespace asm.Extensions
 			return new DictionaryEnumerator<TKey, TValue>(thisValue);
 		}
 
-		public static void CloneTo<TKey, TValue>([NotNull] this IReadOnlyDictionary<TKey, TValue> thisValue, [NotNull] IDictionary<TKey, TValue> destination)
-		{
-			if (thisValue.Count == 0) return;
-
-			bool keyClonable = typeof(TKey) is ICloneable;
-			bool valueClonable = typeof(TValue) is ICloneable;
-
-			if (keyClonable && valueClonable)
-			{
-				foreach (KeyValuePair<TKey, TValue> pair in thisValue)
-					destination.Add((TKey)((ICloneable)pair.Key).Clone(), (TValue)((ICloneable)pair.Value)?.Clone());
-			}
-			else if (keyClonable)
-			{
-				foreach (KeyValuePair<TKey, TValue> pair in thisValue)
-					destination.Add((TKey)((ICloneable)pair.Key).Clone(), pair.Value);
-			}
-			else if (valueClonable)
-			{
-				foreach (KeyValuePair<TKey, TValue> pair in thisValue)
-					destination.Add(pair.Key, (TValue)((ICloneable)pair.Value)?.Clone());
-			}
-			else
-			{
-				thisValue.CopyTo(destination);
-			}
-		}
-
 		[NotNull]
 		public static string ToString<TKey, TValue>([NotNull] this IReadOnlyDictionary<TKey, TValue> thisValue, char group) { return ToString(thisValue, "=", group.ToString()); }
 

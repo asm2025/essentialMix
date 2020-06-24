@@ -2,13 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using asm.Collections;
-using asm.Comparers;
 using asm.Helpers;
 using asm.Threading;
 
@@ -66,396 +63,6 @@ namespace asm.Extensions
 					count = -1;
 					return false;
 			}
-		}
-
-		public static int IndexOf<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] Func<T, bool> comparison, int startIndex = 0, int count = -1)
-		{
-			if (startIndex < 0) throw new ArgumentOutOfRangeException(nameof(startIndex));
-
-			int n = -1, i = startIndex - 1;
-
-			switch (thisValue)
-			{
-				case ISet<T> set:
-					set.Count.ValidateRange(startIndex, ref count);
-					if (set.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					foreach (T x in set.Skip(startIndex))
-					{
-						i++;
-						if (i > count) break;
-						if (!comparison(x)) continue;
-						n = i;
-						break;
-					}
-
-					return n;
-				case IList<T> list:
-					list.Count.ValidateRange(startIndex, ref count);
-					if (list.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					for (i = startIndex; n < 0 && i < count; i++)
-					{
-						if (!comparison(list[i])) continue;
-						n = i;
-					}
-
-					return n;
-				case ICollection<T> collection:
-					collection.Count.ValidateRange(startIndex, ref count);
-					if (collection.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					foreach (T x in collection.Skip(startIndex))
-					{
-						i++;
-						if (i > count) break;
-						if (!comparison(x)) continue;
-						n = i;
-						break;
-					}
-
-					return n;
-				case IReadOnlyCollection<T> readOnlyCollection:
-					readOnlyCollection.Count.ValidateRange(startIndex, ref count);
-					if (readOnlyCollection.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					foreach (T x in readOnlyCollection.Skip(startIndex))
-					{
-						i++;
-						if (i > count) break;
-						if (!comparison(x)) continue;
-						n = i;
-						break;
-					}
-
-					return n;
-			}
-
-			if (count > 0)
-			{
-				count += startIndex;
-
-				foreach (T x in thisValue.Skip(startIndex))
-				{
-					i++;
-					if (i > count) break;
-					if (!comparison(x)) continue;
-					n = i;
-					break;
-				}
-			}
-			else
-			{
-				foreach (T x in thisValue.Skip(startIndex))
-				{
-					i++;
-					if (!comparison(x)) continue;
-					n = i;
-					break;
-				}
-			}
-
-			return n;
-		}
-
-		public static int IndexOf([NotNull] this IEnumerable<string> thisValue, [NotNull] Regex regex, int startIndex = 0, int count = -1)
-		{
-			if (startIndex < 0) throw new ArgumentOutOfRangeException(nameof(startIndex));
-
-			int n = -1, i = startIndex - 1;
-
-			switch (thisValue)
-			{
-				case ISet<string> set:
-					set.Count.ValidateRange(startIndex, ref count);
-					if (set.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					foreach (string x in set.Skip(startIndex))
-					{
-						i++;
-						if (i > count) break;
-						if (!regex.IsMatch(x)) continue;
-						n = i;
-						break;
-					}
-
-					return n;
-				case IList<string> list:
-					list.Count.ValidateRange(startIndex, ref count);
-					if (list.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					for (i = startIndex; n < 0 && i < count; i++)
-					{
-						if (!regex.IsMatch(list[i])) continue;
-						n = i;
-					}
-
-					return n;
-				case ICollection<string> collection:
-					collection.Count.ValidateRange(startIndex, ref count);
-					if (collection.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					foreach (string x in collection.Skip(startIndex))
-					{
-						i++;
-						if (i > count) break;
-						if (!regex.IsMatch(x)) continue;
-						n = i;
-						break;
-					}
-
-					return n;
-				case IReadOnlyCollection<string> readOnlyCollection:
-					readOnlyCollection.Count.ValidateRange(startIndex, ref count);
-					if (readOnlyCollection.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					foreach (string x in readOnlyCollection.Skip(startIndex))
-					{
-						i++;
-						if (i > count) break;
-						if (!regex.IsMatch(x)) continue;
-						n = i;
-						break;
-					}
-
-					return n;
-			}
-
-			if (count > 0)
-			{
-				count += startIndex;
-
-				foreach (string x in thisValue.Skip(startIndex))
-				{
-					i++;
-					if (i > count) break;
-					if (!regex.IsMatch(x)) continue;
-					n = i;
-					break;
-				}
-			}
-			else
-			{
-				foreach (string x in thisValue.Skip(startIndex))
-				{
-					i++;
-					if (!regex.IsMatch(x)) continue;
-					n = i;
-					break;
-				}
-			}
-
-			return n;
-		}
-
-		public static int IndexOf<T>([NotNull] this IEnumerable<T> thisValue, T value, IEqualityComparer<T> comparer = null, int startIndex = 0, int count = -1)
-		{
-			if (startIndex < 0) throw new ArgumentOutOfRangeException(nameof(startIndex));
-
-			Type type = typeof(T);
-			if (!type.IsValueType && value == null) return -1;
-
-			if (comparer == null)
-			{
-				PropertyInfo info = type.FindProperty("Comparer", Constants.BF_PUBLIC_INSTANCE | BindingFlags.DeclaredOnly | BindingFlags.GetProperty, null, typeof(IEqualityComparer<T>));
-				comparer = (IEqualityComparer<T>)info?.GetValue(thisValue);
-			}
-
-			comparer ??= EqualityComparer<T>.Default;
-
-			int n = -1, i = startIndex - 1;
-
-			switch (thisValue)
-			{
-				case ISet<T> set:
-					set.Count.ValidateRange(startIndex, ref count);
-					if (set.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					foreach (T x in set.Skip(startIndex))
-					{
-						i++;
-						if (i > count) break;
-						if (!comparer.Equals(x, value)) continue;
-						n = i;
-						break;
-					}
-
-					return n;
-				case IList<T> list:
-					list.Count.ValidateRange(startIndex, ref count);
-					if (list.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					for (i = startIndex; n < 0 && i < count; i++)
-					{
-						if (!comparer.Equals(list[i], value)) continue;
-						n = i;
-					}
-
-					return n;
-				case ICollection<T> collection:
-					collection.Count.ValidateRange(startIndex, ref count);
-					if (collection.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					foreach (T x in collection.Skip(startIndex))
-					{
-						i++;
-						if (i > count) break;
-						if (!comparer.Equals(x, value)) continue;
-						n = i;
-						break;
-					}
-
-					return n;
-				case IReadOnlyCollection<T> readOnlyCollection:
-					readOnlyCollection.Count.ValidateRange(startIndex, ref count);
-					if (readOnlyCollection.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					foreach (T x in readOnlyCollection.Skip(startIndex))
-					{
-						i++;
-						if (i > count) break;
-						if (!comparer.Equals(x, value)) continue;
-						n = i;
-						break;
-					}
-
-					return n;
-			}
-
-			if (count > 0)
-			{
-				count += startIndex;
-
-				foreach (T x in thisValue.Skip(startIndex))
-				{
-					i++;
-					if (i > count) break;
-					if (!comparer.Equals(x, value)) continue;
-					n = i;
-					break;
-				}
-			}
-			else
-			{
-				foreach (T x in thisValue.Skip(startIndex))
-				{
-					i++;
-					if (!comparer.Equals(x, value)) continue;
-					n = i;
-					break;
-				}
-			}
-
-			return n;
-		}
-
-		public static int IndexOf<T>([NotNull] this IEnumerable<T> thisValue, T value, [NotNull] EqualityComparison<T> comparison, int startIndex = 0, int count = -1)
-		{
-			if (startIndex < 0) throw new ArgumentOutOfRangeException(nameof(startIndex));
-
-			Type type = typeof(T);
-			if (!type.IsValueType && value == null) return -1;
-
-			int n = -1, i = startIndex - 1;
-
-			switch (thisValue)
-			{
-				case ISet<T> set:
-					set.Count.ValidateRange(startIndex, ref count);
-					if (set.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					foreach (T x in set.Skip(startIndex))
-					{
-						i++;
-						if (i > count) break;
-						if (!comparison(x, value)) continue;
-						n = i;
-						break;
-					}
-
-					return n;
-				case IList<T> list:
-					list.Count.ValidateRange(startIndex, ref count);
-					if (list.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					for (i = startIndex; n < 0 && i < count; i++)
-					{
-						if (!comparison(list[i], value)) continue;
-						n = i;
-					}
-
-					return n;
-				case ICollection<T> collection:
-					collection.Count.ValidateRange(startIndex, ref count);
-					if (collection.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					foreach (T x in collection.Skip(startIndex))
-					{
-						i++;
-						if (i > count) break;
-						if (!comparison(x, value)) continue;
-						n = i;
-						break;
-					}
-
-					return n;
-				case IReadOnlyCollection<T> readOnlyCollection:
-					readOnlyCollection.Count.ValidateRange(startIndex, ref count);
-					if (readOnlyCollection.Count == 0 || count == 0) return -1;
-					count += startIndex;
-
-					foreach (T x in readOnlyCollection.Skip(startIndex))
-					{
-						i++;
-						if (i > count) break;
-						if (!comparison(x, value)) continue;
-						n = i;
-						break;
-					}
-
-					return n;
-			}
-
-			if (count > 0)
-			{
-				count += startIndex;
-
-				foreach (T x in thisValue.Skip(startIndex))
-				{
-					i++;
-					if (i > count) break;
-					if (!comparison(x, value)) continue;
-					n = i;
-					break;
-				}
-			}
-			else
-			{
-				foreach (T x in thisValue.Skip(startIndex))
-				{
-					i++;
-					if (!comparison(x, value)) continue;
-					n = i;
-					break;
-				}
-			}
-
-			return n;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -535,22 +142,9 @@ namespace asm.Extensions
 		public static Enumerator<T> Enumerate<T>([NotNull] this IEnumerable<T> thisValue) { return new Enumerator<T>(thisValue); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static void CopyTo<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] ICollection<T> destination)
-		{
-			destination.CopyFrom(thisValue);
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static void CloneTo<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] ICollection<T> destination)
 		{
 			destination.CloneFrom(thisValue);
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static void Clear<T>([NotNull] this IEnumerable<T> thisValue)
-		{
-			if (!(thisValue is ICollection<T> collection)) throw new NotSupportedException();
-			collection.Clear();
 		}
 
 		[NotNull]
@@ -570,6 +164,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Format<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] string format, string separator)
 		{
 			StringBuilder sb = new StringBuilder();
@@ -578,6 +173,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Format<TKey, TValue>([NotNull] this IEnumerable<KeyValuePair<TKey, TValue>> thisValue, [NotNull] string format)
 		{
 			StringBuilder sb = new StringBuilder();
@@ -586,6 +182,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Format<TKey, TValue>([NotNull] this IEnumerable<KeyValuePair<TKey, TValue>> thisValue, [NotNull] string format, char group)
 		{
 			StringBuilder sb = new StringBuilder();
@@ -594,6 +191,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Format<TKey, TValue>([NotNull] this IEnumerable<KeyValuePair<TKey, TValue>> thisValue, [NotNull] string format, char separator, char group)
 		{
 			StringBuilder sb = new StringBuilder();
@@ -602,6 +200,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Format<TKey, TValue>([NotNull] this IEnumerable<KeyValuePair<TKey, TValue>> thisValue, [NotNull] string format, [NotNull] string group)
 		{
 			StringBuilder sb = new StringBuilder();
@@ -610,6 +209,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Format<TKey, TValue>([NotNull] this IEnumerable<KeyValuePair<TKey, TValue>> thisValue, [NotNull] string format, [NotNull] string separator, [NotNull] string group)
 		{
 			StringBuilder sb = new StringBuilder();
@@ -618,10 +218,11 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string ToString<T>([NotNull] this IEnumerable<T> thisValue, char separator) { return ToString(thisValue, separator.ToString()); }
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string ToString<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] string separator)
 		{
 			return separator.Length == 0
@@ -630,6 +231,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static Type[] Types([NotNull] this IEnumerable thisValue)
 		{
 			return thisValue.Cast<object>()
@@ -640,93 +242,13 @@ namespace asm.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsDynamic<T>([NotNull] this IEnumerable<T> thisValue) { return thisValue is ICollection<T> collection && !collection.IsReadOnly; }
 
-		public static bool IsFixedSize([NotNull] this IEnumerable thisValue)
-		{
-			return thisValue switch
-			{
-				IList list => list.IsFixedSize,
-				IDictionary dictionary => dictionary.IsFixedSize,
-				_ => false
-			};
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsWritable<T>([NotNull] this IEnumerable<T> thisValue) { return thisValue is ICollection<T> collection && !collection.IsReadOnly; }
-
-		public static bool HasMoreThan([NotNull] this IEnumerable thisValue, int count = 0)
-		{
-			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-
-			int n = FastCount(thisValue);
-			
-			if (n < 0)
-			{
-				int hi = count + 1;
-				IEnumerator enumerator = thisValue.GetEnumerator();
-
-				while (enumerator.MoveNext())
-				{
-					++n;
-					if (n >= hi) break;
-				}
-			}
-
-			return n >= count;
-		}
-
-		public static bool HasMoreThan<T>([NotNull] this IEnumerable<T> thisValue, int count = 0)
-		{
-			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-
-			int n = FastCount(thisValue);
-			
-			if (n < 0)
-			{
-				int hi = count + 1;
-				n = thisValue.Count(e => ++n < hi);
-			}
-
-			return n >= count;
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsNullOrEmpty(this IEnumerable thisValue) { return thisValue == null || !HasMoreThan(thisValue); }
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsNullOrEmpty<T>(this IEnumerable<T> thisValue) { return thisValue == null || !HasMoreThan(thisValue); }
-
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string ToString<T>([NotNull] this IEnumerable<T> thisValue)
 		{
 			StringBuilder sb = new StringBuilder();
 			sb.Concat(thisValue);
 			return sb.ToString();
-		}
-
-		public static bool All([NotNull] this IEnumerable thisValue, [NotNull] Func<object, int, bool> predicate)
-		{
-			using (Enumerator enumerator = Enumerate(thisValue))
-			{
-				while (enumerator.MoveNext())
-				{
-					if (!predicate(enumerator.Current, enumerator.Position)) return false;
-				}
-			}
-
-			return true;
-		}
-
-		public static bool All<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] Func<T, int, bool> predicate)
-		{
-			using (Enumerator<T> enumerator = Enumerate(thisValue))
-			{
-				while (enumerator.MoveNext())
-				{
-					if (!predicate(enumerator.Current, enumerator.Position)) return false;
-				}
-			}
-
-			return true;
 		}
 
 		public static void ForEach([NotNull] this IEnumerable thisValue, [NotNull] Action<object> action)
@@ -1085,13 +607,6 @@ namespace asm.Extensions
 		[ItemNotNull]
 		public static IEnumerable<IEnumerable<T>> Permutations<T>([NotNull] this IEnumerable<T> thisValue)
 		{
-			// recursive approach. this works but not possible to debug
-			//ICollection<T> collection = thisValue as ICollection<T> ?? thisValue.ToArray();
-			//return collection.Count > 1
-			//			? collection.SelectMany(s => Permutations(collection.Take(collection.IndexOf(s))
-			//																.Concat(collection.Skip(collection.IndexOf(s) + 1))), (s, p) => p.Prepend(s))
-			//			: new[] { collection };
-
 			// https://leetcode.com/problems/permutations/
 			// https://leetcode.com/problems/permutations/discuss/18239/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partioning
 			IReadOnlyCollection<T> values = thisValue as IReadOnlyCollection<T> ?? new List<T>(thisValue);
@@ -1247,11 +762,6 @@ namespace asm.Extensions
 				}
 			}
 		}
-
-		// todo
-		// https://leetcode.com/problems/permutations/discuss/18239/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partioning
-		// https://leetcode.com/problems/permutations/discuss/18284/Backtrack-Summary%3A-General-Solution-for-10-Questions!!!!!!!!-Python-(Combination-Sum-Subsets-Permutation-Palindrome)
-		// https://leetcode.com/problems/next-permutation/discuss/13867/C%2B%2B-from-Wikipedia
 
 		public static IEnumerable<TSource> Distinct<TSource, TKey>([NotNull] this IEnumerable<TSource> thisValue, [NotNull] Func<TSource, TKey> selector)
 		{
@@ -1466,27 +976,27 @@ namespace asm.Extensions
 			return thisValue as IReadOnlySet<T> ?? ToHashSet(thisValue, comparer).AsReadOnly();
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[ItemNotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<T> SkipNull<T>([NotNull] this IEnumerable<T> thisValue)
 		{
 			foreach (T item in thisValue.Where(e => !e.IsNull()))
 				yield return item;
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<string> SkipNullOrEmpty([NotNull] this IEnumerable<string> thisValue) { return thisValue.Where(e => !string.IsNullOrEmpty(e)); }
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<string> SkipNullOrWhitespace([NotNull] this IEnumerable<string> thisValue)
 		{
 			return thisValue.Where(e => !string.IsNullOrWhiteSpace(e));
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<string> SkipNullOrEmptyTrim([NotNull] this IEnumerable<string> thisValue)
 		{
 			return thisValue.Where(e => !string.IsNullOrWhiteSpace(e))

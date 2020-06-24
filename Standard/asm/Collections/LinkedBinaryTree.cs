@@ -70,10 +70,12 @@ namespace asm.Collections
 				_root = root;
 				_done = _tree.Count == 0 || _root == null;
 
+				int capacity = GetCapacityForQueueing(_tree);
+
 				switch (method)
 				{
 					case BinaryTreeTraverseMethod.LevelOrder:
-						_queue = new Queue<TNode>();
+						_queue = new Queue<TNode>(capacity);
 						_moveNext = flow switch
 						{
 							HorizontalFlow.LeftToRight => LevelOrderLR,
@@ -82,7 +84,7 @@ namespace asm.Collections
 						};
 						break;
 					case BinaryTreeTraverseMethod.PreOrder:
-						_stack = new Stack<TNode>();
+						_stack = new Stack<TNode>(capacity);
 						_moveNext = flow switch
 						{
 							HorizontalFlow.LeftToRight => PreOrderLR,
@@ -91,7 +93,7 @@ namespace asm.Collections
 						};
 						break;
 					case BinaryTreeTraverseMethod.InOrder:
-						_stack = new Stack<TNode>();
+						_stack = new Stack<TNode>(capacity);
 						_moveNext = flow switch
 						{
 							HorizontalFlow.LeftToRight => InOrderLR,
@@ -100,7 +102,7 @@ namespace asm.Collections
 						};
 						break;
 					case BinaryTreeTraverseMethod.PostOrder:
-						_stack = new Stack<TNode>();
+						_stack = new Stack<TNode>(capacity);
 						_moveNext = flow switch
 						{
 							HorizontalFlow.LeftToRight => PostOrderLR,
@@ -554,7 +556,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Root-Left-Right (Queue)
-				Queue<TNode> queue = new Queue<TNode>();
+				Queue<TNode> queue = new Queue<TNode>(GetCapacityForQueueing(_tree));
 
 				// Start at the root
 				queue.Enqueue(_root);
@@ -577,7 +579,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Root-Right-Left (Queue)
-				Queue<TNode> queue = new Queue<TNode>();
+				Queue<TNode> queue = new Queue<TNode>(GetCapacityForQueueing(_tree));
 
 				// Start at the root
 				queue.Enqueue(_root);
@@ -600,7 +602,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Root-Left-Right (Stack)
-				Stack<TNode> stack = new Stack<TNode>();
+				Stack<TNode> stack = new Stack<TNode>(GetCapacityForQueueing(_tree));
 
 				// Start at the root
 				stack.Push(_root);
@@ -628,7 +630,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Root-Right-Left (Stack)
-				Stack<TNode> stack = new Stack<TNode>();
+				Stack<TNode> stack = new Stack<TNode>(GetCapacityForQueueing(_tree));
 
 				// Start at the root
 				stack.Push(_root);
@@ -656,7 +658,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Left-Root-Right (Stack)
-				Stack<TNode> stack = new Stack<TNode>();
+				Stack<TNode> stack = new Stack<TNode>(GetCapacityForQueueing(_tree));
 
 				// Start at the root
 				TNode current = _root;
@@ -687,7 +689,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Right-Root-Left (Stack)
-				Stack<TNode> stack = new Stack<TNode>();
+				Stack<TNode> stack = new Stack<TNode>(GetCapacityForQueueing(_tree));
 
 				// Start at the root
 				TNode current = _root;
@@ -718,7 +720,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Left-Right-Root (Stack)
-				Stack<TNode> stack = new Stack<TNode>();
+				Stack<TNode> stack = new Stack<TNode>(GetCapacityForQueueing(_tree));
 				TNode lastVisited = null;
 				// Start at the root
 				TNode current = _root;
@@ -762,7 +764,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Right-Left-Root (Stack)
-				Stack<TNode> stack = new Stack<TNode>();
+				Stack<TNode> stack = new Stack<TNode>(GetCapacityForQueueing(_tree));
 				TNode lastVisited = null;
 				// Start at the root
 				TNode current = _root;
@@ -872,7 +874,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Root-Left-Right (Queue)
-				Queue<TNode> queue = new Queue<TNode>();
+				Queue<TNode> queue = new Queue<TNode>(GetCapacityForQueueing(_tree));
 
 				// Start at the root
 				queue.Enqueue(_root);
@@ -895,7 +897,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Root-Right-Left (Queue)
-				Queue<TNode> queue = new Queue<TNode>();
+				Queue<TNode> queue = new Queue<TNode>(GetCapacityForQueueing(_tree));
 
 				// Start at the root
 				queue.Enqueue(_root);
@@ -918,7 +920,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Root-Left-Right (Stack)
-				Stack<TNode> stack = new Stack<TNode>();
+				Stack<TNode> stack = new Stack<TNode>(GetCapacityForQueueing(_tree));
 
 				// Start at the root
 				stack.Push(_root);
@@ -946,7 +948,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Root-Right-Left (Stack)
-				Stack<TNode> stack = new Stack<TNode>();
+				Stack<TNode> stack = new Stack<TNode>(GetCapacityForQueueing(_tree));
 
 				// Start at the root
 				stack.Push(_root);
@@ -974,7 +976,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Left-Root-Right (Stack)
-				Stack<TNode> stack = new Stack<TNode>();
+				Stack<TNode> stack = new Stack<TNode>(GetCapacityForQueueing(_tree));
 
 				// Start at the root
 				TNode current = _root;
@@ -1005,7 +1007,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Right-Root-Left (Stack)
-				Stack<TNode> stack = new Stack<TNode>();
+				Stack<TNode> stack = new Stack<TNode>(GetCapacityForQueueing(_tree));
 
 				// Start at the root
 				TNode current = _root;
@@ -1036,7 +1038,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Left-Right-Root (Stack)
-				Stack<TNode> stack = new Stack<TNode>();
+				Stack<TNode> stack = new Stack<TNode>(GetCapacityForQueueing(_tree));
 				TNode lastVisited = null;
 				// Start at the root
 				TNode current = _root;
@@ -1080,7 +1082,7 @@ namespace asm.Collections
 			{
 				int version = _tree._version;
 				// Right-Left-Root (Stack)
-				Stack<TNode> stack = new Stack<TNode>();
+				Stack<TNode> stack = new Stack<TNode>(GetCapacityForQueueing(_tree));
 				TNode lastVisited = null;
 				// Start at the root
 				TNode current = _root;
@@ -1137,7 +1139,16 @@ namespace asm.Collections
 			{
 				_tree = tree;
 				_root = root;
-				_queue = new Queue<TNode>();
+
+				/*
+				 * capacity:
+				 * 1. Maximum number of nodes in the last level k = 2 ^ h where h = height of the tree.
+				 * 2. Maximum number of nodes will be when all levels are completely full.
+				 * 3. n should have an estimate value of n = 2 ^ (h + 1) - 1.
+				 * 4. h can be found by using: h = log2(n + 1) - 1.
+				 * 5. from 1, 3, and 4 k = 2 ^ log2(n + 1) - 1
+				 */
+				_queue = new Queue<TNode>((int)Math.Pow(2, Math.Log(_tree.Count + 1, 2) - 1));
 				_level = -1;
 			}
 
@@ -1244,7 +1255,6 @@ namespace asm.Collections
 			}
 
 			#region Iterator Traversal for Func<int, IReadOnlyCollection<TNode>, bool>
-
 			private void IterateLR(Func<int, IReadOnlyCollection<TNode>, bool> levelCallback)
 			{
 				int version = _tree._version;
@@ -2324,6 +2334,18 @@ namespace asm.Collections
 			}
 
 			return result;
+		}
+
+		protected static int GetCapacityForQueueing([NotNull] LinkedBinaryTree<TNode, T> tree)
+		{
+			/* The maximum height of a red-black tree is 2*lg(n+1) which is worse than
+			* avl tree. The binary search tree, if is skewed, could be worse. I'll take
+			* the red-black tree as the worst case for height.
+			* Taken from Microsoft's SortedSet comments.
+			*/
+			return tree.Count == 0
+						? 0
+						: 2 * (int)Math.Log(tree.Count + 1, 2);
 		}
 
 		private static void ThrowNotFormingATree(string collection1Name, string collection2Name)

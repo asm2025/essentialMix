@@ -55,11 +55,11 @@ namespace asm.Collections
 
 		public void CopyTo(Array array, int index) { Source.CopyTo(array, index); }
 
-		public int Count => ((IReadOnlyCollection<T>)Source).Count;
+		public int Count => ((ICollection)Source).Count;
 
 		public object SyncRoot => Source.SyncRoot;
 
-		public bool IsSynchronized => Source.IsFixedSize();
+		public bool IsSynchronized => Source.IsSynchronized;
 
 		public void ForEach([NotNull] Action<T> action) { Source.ForEach(action); }
 

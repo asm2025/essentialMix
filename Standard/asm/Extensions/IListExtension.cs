@@ -332,77 +332,6 @@ namespace asm.Extensions
 			return range;
 		}
 
-		public static void AddRange([NotNull] this IList thisValue, [NotNull] IEnumerable values)
-		{
-			if (values == null)
-				throw new ArgumentNullException(nameof(values));
-
-			foreach (object value in values)
-				thisValue.Add(value);
-		}
-
-		public static void RemoveRange([NotNull] this IList thisValue, int startIndex, int count)
-		{
-			thisValue.Count.ValidateRange(startIndex, ref count);
-			if (thisValue.Count == 0 || count == 0)
-				return;
-
-			int lastPos = startIndex + count;
-
-			for (int i = lastPos - 1; i >= startIndex; i--)
-				thisValue.RemoveAt(i);
-		}
-
-		public static void RemoveRange<T>([NotNull] this IList<T> thisValue, int startIndex, int count)
-		{
-			thisValue.Count.ValidateRange(startIndex, ref count);
-			if (thisValue.Count == 0 || count == 0)
-				return;
-
-			int lastPos = startIndex + count;
-
-			for (int i = lastPos - 1; i >= startIndex; i--)
-				thisValue.RemoveAt(i);
-		}
-
-		public static int RemoveAll([NotNull] this IList thisValue, [NotNull] Predicate<object> match)
-		{
-			int index = 0, remove = 0;
-
-			while (index < thisValue.Count)
-			{
-				if (!match(thisValue[index]))
-				{
-					index++;
-					continue;
-				}
-
-				thisValue.RemoveAt(index);
-				remove++;
-			}
-
-			return remove;
-		}
-
-		public static int RemoveAll<T>([NotNull] this IList<T> thisValue, [NotNull] Predicate<T> match)
-		{
-			int index = 0, remove = 0;
-
-			while (index < thisValue.Count)
-			{
-				if (!match(thisValue[index]))
-				{
-					index++;
-					continue;
-				}
-
-				thisValue.RemoveAt(index);
-				remove++;
-			}
-
-			return remove;
-		}
-
 		public static void CopyTo([NotNull] this IList thisValue, int sourceIndex, [NotNull] object[] destination) { CopyTo(thisValue, sourceIndex, destination, 0, destination.Length); }
 		public static void CopyTo([NotNull] this IList thisValue, int sourceIndex, [NotNull] object[] destination, int destinationIndex, int count)
 		{
@@ -559,6 +488,7 @@ namespace asm.Extensions
 			Sort(thisValue, index, count, itemComparer, descending);
 		}
 
+		#region Sort Algorithms
 		public static void SortBubble<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
 		{
 			// Udemy - Data Structures and Algorithms Deep Dive Using Java
@@ -696,7 +626,7 @@ namespace asm.Extensions
 						l++;
 						continue;
 					}
-					
+
 					T value = list[l2];
 
 					// Shift all the elements between element 1 and element 2 to the right by 1.
@@ -972,7 +902,7 @@ namespace asm.Extensions
 				// merge whole sequence in given order  
 				Merge(list, x, n, c, dir);
 			}
-			
+
 			static void Merge(IList<T> list, int x, int n, IComparer<T> c, int dir)
 			{
 				if (n < 2) return;
@@ -1133,10 +1063,11 @@ namespace asm.Extensions
 				} 
 			}
 		}
+		#endregion
 
 		public static void Shuffle<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1)
 		{
-			// Fisher-Yates shuffle
+			// Fisher-Yates shuffle algorithm
 			thisValue.Count.ValidateRange(index, ref count);
 			if (count < 2 || thisValue.Count < 2) return;
 

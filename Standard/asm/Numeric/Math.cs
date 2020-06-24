@@ -120,18 +120,24 @@ namespace asm.Numeric
 		public static bool IsPrime(int value) { return IsPrime((ulong)value); }
 		public static bool IsPrime(uint value) { return IsPrime((ulong)value); }
 		public static bool IsPrime(long value) { return IsPrime((ulong)value); }
-
 		public static bool IsPrime(ulong value)
 		{
 			if ((value & 1ul) == 0 || value < 2ul || value % 2ul == 0ul || value % 3ul == 0ul || value % 5ul == 0ul) return false;
-			if (__primes.IndexOf(value) > -1) return true;
+			if (__primes.Contains(value)) return true;
 
 			ulong uMax = (ulong)SysMath.Sqrt(value);
-			if (__primes.TakeWhile(prime => prime <= uMax).Any(prime => value % prime == 0ul)) return false;
 
-			for (ulong divisor = uMax; divisor <= uMax; divisor += 2ul)
-				if (value % divisor == 0ul)
+			foreach (ulong prime in __primes)
+			{
+				if (prime > uMax) break;
+				if (value % prime == 0ul) return false;
+			}
+
+			for (ulong i = uMax; i * i <= uMax; i++)
+			{
+				if (value % i == 0ul)
 					return false;
+			}
 
 			__primes.Add(value);
 			return true;

@@ -37,9 +37,16 @@ namespace asm.Extensions
 
 		public static bool IsEqual(this char thisValue, char other) { return CompareOrdinalIgnoreCase(thisValue, other) == 0; }
 
-		public static bool In(this char thisValue, IEnumerable<char> enumerable, IEqualityComparer<char> comparer = null, int startIndex = 0, int count = -1)
+		public static bool In(this char thisValue, [NotNull] IEnumerable<char> enumerable, IEqualityComparer<char> comparer = null)
 		{
-			return enumerable?.IndexOf(thisValue, comparer, startIndex, count) > -1;
+			comparer ??= EqualityComparer<char>.Default;
+
+			foreach (char c in enumerable)
+			{
+				if (comparer.Equals(c, thisValue)) return true;
+			}
+
+			return false;
 		}
 
 		public static bool IsAscii(this char thisValue) { return thisValue <= 127; }
@@ -132,7 +139,7 @@ namespace asm.Extensions
 
 		public static string ToString([NotNull] this IList<char> thisValue, int startIndex, int count, string prefix, string suffix)
 		{
-			if (thisValue.IsNullOrEmpty()) return null;
+			if (thisValue.Count == 0) return null;
 
 			bool hasPrefix = !string.IsNullOrEmpty(prefix);
 			bool hasSuffix = !string.IsNullOrEmpty(suffix);
@@ -146,13 +153,13 @@ namespace asm.Extensions
 			if (hasPrefix) m += prefix.Length;
 			if (hasSuffix) m += suffix.Length;
 			
-			StringBuilder sblist = new StringBuilder(m);
-			if (hasPrefix) sblist.Append(prefix);
+			StringBuilder sb = new StringBuilder(m);
+			if (hasPrefix) sb.Append(prefix);
 
-			for (int i = x; i < n; i++) sblist.Append(thisValue[i]);
+			for (int i = x; i < n; i++) sb.Append(thisValue[i]);
 
-			if (hasSuffix) sblist.Append(suffix);
-			return sblist.ToString();
+			if (hasSuffix) sb.Append(suffix);
+			return sb.ToString();
 		}
 
 		public static char ToUpper(this char thisValue) { return char.ToUpper(thisValue); }

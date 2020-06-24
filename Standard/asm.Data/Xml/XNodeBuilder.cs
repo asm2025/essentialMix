@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Linq;
-using asm.Extensions;
 using asm.Data.Helpers;
 using JetBrains.Annotations;
 
@@ -34,7 +33,7 @@ namespace asm.Data.Xml
 
 		public override void Close()
 		{
-			if (_content.IsNullOrEmpty()) return;
+			if (_content == null || _content.Count == 0) return;
 			if (_root == null) throw new InvalidOperationException("No container node was found to hold the contents");
 			_root.Add(_content);
 		}

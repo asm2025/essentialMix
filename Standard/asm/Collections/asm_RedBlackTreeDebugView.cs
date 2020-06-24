@@ -8,18 +8,17 @@ namespace asm.Collections
 	 * assembly. So we need to use different names for collection debug view for
 	 * collections in this solution assemblies.
 	 */
-	//[DebuggerNonUserCode]
-	//internal sealed class asm_RedBlackTreeDebugView<T>
-	//{
-	//	private readonly RedBlackTree<T> _tree;
+	[DebuggerNonUserCode]
+	internal sealed class asm_RedBlackTreeDebugView<T>
+	{
+		private readonly RedBlackTree<T> _tree;
 
-	//	public asm_RedBlackTreeDebugView([NotNull] RedBlackTree<T> tree)
-	//	{
-	//		_tree = tree;
-	//	}
+		public asm_RedBlackTreeDebugView([NotNull] RedBlackTree<T> tree)
+		{
+			_tree = tree;
+		}
 
-	//	[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-	//	[NotNull]
-	//	public RedBlackNode<T> Root => _tree.Root;
-	//}
+		[NotNull]
+		public RedBlackNode<T> Root => _tree.Root;
+	}
 }

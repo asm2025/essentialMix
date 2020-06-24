@@ -19,7 +19,6 @@ namespace asm.Collections
 			_tree = tree;
 		}
 
-		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		[NotNull]
 		public TNode Root => _tree.Root;
 	}
@@ -34,7 +33,6 @@ namespace asm.Collections
 			_tree = tree;
 		}
 
-		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		[NotNull]
 		public LinkedBinaryNode<T> Root => _tree.Root;
 	}

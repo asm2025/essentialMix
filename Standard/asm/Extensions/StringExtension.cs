@@ -78,23 +78,18 @@ namespace asm.Extensions
 			return thisValue.IndexOf(value, index, value.Length, comparison) == index;
 		}
 
-		public static bool In([NotNull] this string thisValue, [NotNull] params string[] list) { return In(thisValue, (IEqualityComparer<string>)null, list); }
-
-		public static bool In([NotNull] this string thisValue, [NotNull] Comparison<string> comparison, [NotNull] params string[] list)
-		{
-			return In(thisValue, comparison.Create(), list);
-		}
-
-		public static bool In([NotNull] this string thisValue, IEqualityComparer<string> comparer, [NotNull] params string[] list)
-		{
-			if (string.IsNullOrEmpty(thisValue) || list.Length == 0) return false;
-			comparer ??= StringComparer.Ordinal;
-			return list.Where(s => !string.IsNullOrEmpty(s)).Any(s => comparer.Equals(thisValue, s));
-		}
-
+		public static bool In([NotNull] this string thisValue, [NotNull] params string[] list) { return In(thisValue, list, null); }
+		public static bool In([NotNull] this string thisValue, IEqualityComparer<string> comparer, [NotNull] params string[] list) { return In(thisValue, list, comparer); }
 		public static bool In([NotNull] this string thisValue, [NotNull] IEnumerable<string> enumerable, IEqualityComparer<string> comparer = null, int startIndex = 0, int count = -1)
 		{
-			return enumerable.IndexOf(thisValue, comparer, startIndex, count) > -1;
+			comparer ??= StringComparer.Ordinal;
+
+			foreach (string s in enumerable)
+			{
+				if (comparer.Equals(s, thisValue)) return true;
+			}
+
+			return false;
 		}
 
 		public static string FirstNotNullOrEmptyOrDefault([NotNull] this IEnumerable<string> thisValue) { return thisValue.FirstOrDefault(e => !string.IsNullOrEmpty(e)); }
@@ -1891,7 +1886,13 @@ namespace asm.Extensions
 
 			using (CharEnumerator enumerator = Enumerate(thisValue, delimiter))
 			{
-				return enumerator.All(predicate);
+				int i = 0;
+				
+				foreach (string s in enumerator)
+				{
+					if (!predicate(s, i++)) return false;
+				}
+				return true;
 			}
 		}
 
@@ -1911,7 +1912,13 @@ namespace asm.Extensions
 
 			using (StringEnumerator enumerator = Enumerate(thisValue, delimiter, comparison))
 			{
-				return enumerator.All(predicate);
+				int i = 0;
+				
+				foreach (string s in enumerator)
+				{
+					if (!predicate(s, i++)) return false;
+				}
+				return true;
 			}
 		}
 

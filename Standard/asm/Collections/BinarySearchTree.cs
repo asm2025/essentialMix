@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using asm.Extensions;
 using asm.Patterns.Layout;
 using JetBrains.Annotations;
@@ -45,12 +46,13 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public override LinkedBinaryNode<T> FindNearestParent(T value)
 		{
+			int cmp;
 			LinkedBinaryNode<T> parent = null, next = Root;
 
-			while (next != null && !Comparer.IsEqual(next.Value, value))
+			while (next != null && (cmp = Comparer.Compare(value, next.Value)) != 0)
 			{
 				parent = next;
-				next = Comparer.IsLessThan(value, next.Value)
+				next = cmp < 0
 							? next.Left
 							: next.Right;
 			}
@@ -63,38 +65,38 @@ namespace asm.Collections
 		{
 			if (Root == null)
 			{
-				// no parent means there is no root currently
 				Root = NewNode(value);
 				Count++;
-				SetHeight(Root);
 				_version++;
 				return;
 			}
 
-			// find a parent
-			LinkedBinaryNode<T> parent = Root, next = Root;
+			LinkedBinaryNode<T> parent = null, next = Root;
+			// the stack has the same effect as the recursive call but only it's iterative now
 			Stack<LinkedBinaryNode<T>> stack = new Stack<LinkedBinaryNode<T>>();
+			int order = 0;
 
+			// find a parent. as a general rule: whenever a node's left or right changes, it will be pushed to get updated
 			while (next != null)
 			{
+				order = Comparer.Compare(value, next.Value);
 				parent = next;
 				stack.Push(parent);
-				next = Comparer.IsLessThan(value, next.Value)
+				next = order < 0
 							? next.Left
 							: next.Right;
 			}
 
+			Debug.Assert(parent != null, "No parent node found for the new node.");
+
 			LinkedBinaryNode<T> node = NewNode(value);
 
-			if (Comparer.IsLessThan(value, parent.Value)) parent.Left = node;
+			if (order < 0) parent.Left = node;
 			else parent.Right = node;
 
-			// update nodes
+			// update parents
 			while (stack.Count > 0)
-			{
-				parent = stack.Pop();
-				SetHeight(parent);
-			}
+				SetHeight(stack.Pop());
 
 			Count++;
 			_version++;
@@ -103,87 +105,116 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public override bool Remove(T value)
 		{
+			/*
+			 * Udemy courses sometimes contains garbage! the previous code was wrong or contains
+			 * at least 2 bugs! Avoid the following:
+			 * Buggy: Master the Coding Interview Data Structures + Algorithms - Andrei Neagoie.
+			 * Less than optimal: Mastering Data Structures & Algorithms using C and C++ - Abdul Bari
+			 *
+			 * This one is much better but with a small modification because it contains a bug as well
+			 * for not handling leaf nodes.
+			 * https://www.geeksforgeeks.org/binary-search-tree-set-3-iterative-delete/?ref=rp
+			 */
 			if (Root == null) return false;
 
-			// find the node
-			int cmp;
-			LinkedBinaryNode<T> parent = null, node = Root;
-			Stack<LinkedBinaryNode<T>> stack = new Stack<LinkedBinaryNode<T>>();
+			LinkedBinaryNode<T> parent = null, node = null, next = Root;
+			// will need to use a deque or a linked list instead of the stack because of swap in case 3
+			LinkedDeque<LinkedBinaryNode<T>> deque = new LinkedDeque<LinkedBinaryNode<T>>();
 
-			while (node != null && (cmp = Comparer.Compare(value, node.Value)) != 0)
+			// find the node. as a general rule: whenever a node's left or right changes, it will be pushed to get updated
+			while (next != null)
 			{
-				parent = node;
-				stack.Push(node);
-				node = cmp < 0
-							? node.Left
-							: node.Right;
-			}
+				int order = Comparer.Compare(value, next.Value);
 
-			if (node == null || !Comparer.IsEqual(value, node.Value)) return false;
-
-			LinkedBinaryNode<T> child;
-
-			// case 1: node has no right child
-			if (node.Right == null)
-			{
-				child = node.Left;
-			}
-			// case 2: node has a right child which doesn't have a left child
-			else if (node.Right.Left == null)
-			{
-				// move the left to the right child's left
-				node.Right.Left = node.Left;
-				stack.Push(node.Right);
-				child = node.Right;
-			}
-			// case 3: node has a right child that has a left child
-			else
-			{
-				// find the right child's left most child
-				LinkedBinaryNode<T> leftMostParent = parent;
-				LinkedBinaryNode<T> leftmost = node.Right;
-
-				while (leftmost.Left != null)
+				if (order == 0)
 				{
-					leftMostParent = leftmost;
-					stack.Push(leftMostParent);
-					leftmost = leftMostParent.Left;
+					node = next;
+					break;
 				}
 
-				stack.Push(leftmost);
-				// move the left-most right to the parent's left
-				if (leftMostParent != null) leftMostParent.Left = leftmost.Right;
-				// adjust the left-most child nodes
-				leftmost.Left = node.Left;
-				leftmost.Right = node.Right;
-				if (leftmost.Left != null) stack.Push(leftmost.Left);
-				if (leftmost.Right != null) stack.Push(leftmost.Right);
-				child = leftmost;
+				parent = next;
+				deque.Push(parent);
+				next = order < 0
+							? next.Left
+							: next.Right;
 			}
 
-			if (parent == null)
+			if (node == null) return false;
+
+			// case 1: node has no children
+			if (node.IsLeaf)
 			{
-				Root = child;
-				if (child != null) stack.Push(child);
+				if (parent == null)
+				{
+					Root = null;
+				}
+				else
+				{
+					if (ReferenceEquals(parent.Left, node))
+						parent.Left = null;
+					else
+						parent.Right = null;
+				}
 			}
-			else if (Comparer.IsLessThan(node.Value, parent.Value))
+			// case 2: node has one child
+			else if (node.HasOneChild)
 			{
-				// if node < parent, move the left to the parent's left
-				parent.Left = child;
-				stack.Push(parent);
+				LinkedBinaryNode<T> newNode = node.Left ?? node.Right;
+
+				if (parent == null)
+				{
+					Root = newNode;
+				}
+				else
+				{
+					if (ReferenceEquals(parent.Left, node))
+						parent.Left = newNode;
+					else
+						parent.Right = newNode;
+				}
 			}
+			// case 3: node has 2 children
 			else
 			{
-				// else, move the left to the parent's right
-				parent.Right = child;
-				stack.Push(parent);
+				// find the right child's left most child (successor)
+				LinkedBinaryNode<T> leftMostParent = null;
+				LinkedBinaryNode<T> successor = node.Right;
+
+				while (successor.Left != null)
+				{
+					leftMostParent = successor;
+					deque.Push(leftMostParent);
+					successor = successor.Left;
+				}
+
+				/*
+				 * if there is a left-most for the node's right node, then
+				 * move its right to its parent's left.
+				 */ 
+				if (leftMostParent != null)
+				{
+					leftMostParent.Left = successor.Right;
+
+					// insert the node because it will be swapped later with the successor
+					if (parent != null)
+						deque.PushBefore(parent, node);
+					else
+						deque.PushLast(node);
+				}
+				// Otherwise, move the successor's right to the node's right
+				else
+				{
+					node.Right = successor.Right;
+					deque.Push(node);
+				}
+
+				// swap the value with the successor
+				node.Swap(successor);
 			}
 
-			// update nodes
-			while (stack.Count > 0)
-			{
-				SetHeight(stack.Pop());
-			}
+			// update parents
+			while (deque.Count > 0)
+				SetHeight(deque.Pop());
 
 			Count--;
 			_version++;
@@ -312,6 +343,39 @@ namespace asm.Collections
 			base.FromInOrderAndPostOrder(inOrderCollection, postOrderCollection);
 			if (Root == null) return;
 			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+		}
+
+		[NotNull]
+		private LinkedBinaryNode<T> Balance([NotNull] LinkedBinaryNode<T> node)
+		{
+			// shouldn't be called unless Math.Abs(node.BalanceFactor) > BALANCE_FACTOR
+			if (node.BalanceFactor > 1) // left heavy
+			{
+				if (node.Left.BalanceFactor < 0)
+				{
+					// LR case
+					node.Left = RotateLeft(node.Left);
+					SetHeight(node);
+				}
+
+				// LL case
+				return RotateRight(node);
+			}
+
+			if (node.BalanceFactor < 1) // right heavy
+			{
+				if (node.Right.BalanceFactor > 0)
+				{
+					// RL case
+					node.Right = RotateRight(node.Right);
+					SetHeight(node);
+				}
+
+				// RR case
+				return RotateLeft(node);
+			}
+
+			return node;
 		}
 	}
 }
