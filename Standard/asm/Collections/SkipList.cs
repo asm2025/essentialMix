@@ -149,17 +149,6 @@ namespace asm.Collections
 			Header = new Node(default(T), MAX_LEVEL);
 		}
 
-		//public SkipList([NotNull] IEnumerable<T> collection)
-		//	: this(collection, null)
-		//{
-		//}
-
-		//public SkipList([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
-		//	: this(collection.FastCount(), PROBABILITY, comparer)
-		//{
-		//	Add(collection);
-		//}
-
 		[NotNull]
 		public IComparer<T> Comparer { get; }
 		public int Level { get; private set; }

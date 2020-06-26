@@ -10,17 +10,25 @@ namespace asm.Other.Microsoft.Collections
 	 * collections in this solution assemblies.
 	 */
 	[DebuggerNonUserCode]
-	internal sealed class asm_Mscorlib_StackDebugView<T>
+	internal sealed class Other_Mscorlib_DictionaryKeyCollectionDebugView<TKey, TValue>
 	{
-		private readonly Stack<T> _stack;
+		private readonly ICollection<TKey> _collection;
 
-		public asm_Mscorlib_StackDebugView([NotNull] Stack<T> stack)
+		public Other_Mscorlib_DictionaryKeyCollectionDebugView([NotNull] ICollection<TKey> collection)
 		{
-			_stack = stack;
+			_collection = collection;
 		}
 
 		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		[NotNull]
-		public T[] Items => _stack.ToArray();
+		public TKey[] Items
+		{
+			get
+			{
+				TKey[] items = new TKey[_collection.Count];
+				_collection.CopyTo(items, 0);
+				return items;
+			}
+		}
 	}
 }

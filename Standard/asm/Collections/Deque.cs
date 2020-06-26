@@ -24,7 +24,7 @@ namespace asm.Collections
 	/// </summary>
 	/// <typeparam name="T">The type of elements contained in the deque.</typeparam>
 	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(asm_Mscorlib_CollectionDebugView<>))]
+	[DebuggerTypeProxy(typeof(Other_Mscorlib_CollectionDebugView<>))]
 	[Serializable]
 	public class Deque<T> : IList<T>, IList, IReadOnlyList<T>, IReadOnlyCollection<T>, ICollection, IEnumerable
 	{

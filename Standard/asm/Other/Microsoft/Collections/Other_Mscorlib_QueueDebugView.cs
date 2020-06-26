@@ -10,25 +10,17 @@ namespace asm.Other.Microsoft.Collections
 	 * collections in this solution assemblies.
 	 */
 	[DebuggerNonUserCode]
-	internal sealed class asm_Mscorlib_DictionaryValueCollectionDebugView<TKey, TValue>
+	internal sealed class Other_Mscorlib_QueueDebugView<T>
 	{
-		private readonly ICollection<TValue> _collection;
+		private readonly Queue<T> _queue;
 
-		public asm_Mscorlib_DictionaryValueCollectionDebugView([NotNull] ICollection<TValue> collection)
+		public Other_Mscorlib_QueueDebugView([NotNull] Queue<T> queue)
 		{
-			_collection = collection;
+			_queue = queue;
 		}
 
 		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		[NotNull]
-		public TValue[] Items
-		{
-			get
-			{
-				TValue[] items = new TValue[_collection.Count];
-				_collection.CopyTo(items, 0);
-				return items;
-			}
-		}
+		public T[] Items => _queue.ToArray();
 	}
 }

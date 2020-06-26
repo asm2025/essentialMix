@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
+
 using JetBrains.Annotations;
 
-namespace asm.Collections
+namespace asm.Other.Microsoft.Collections
 {
 	/*
 	 * VS IDE can't differentiate between types with the same name from different
@@ -9,16 +10,17 @@ namespace asm.Collections
 	 * collections in this solution assemblies.
 	 */
 	[DebuggerNonUserCode]
-	internal sealed class asm_RedBlackTreeDebugView<T>
+	internal class Other_Mscorlib_HashSetDebugView<T>
 	{
-		private readonly RedBlackTree<T> _tree;
+		private readonly HashSetBase<T> set;
 
-		public asm_RedBlackTreeDebugView([NotNull] RedBlackTree<T> tree)
+		public Other_Mscorlib_HashSetDebugView(HashSetBase<T> set)
 		{
-			_tree = tree;
+			this.set = set;
 		}
 
+		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		[NotNull]
-		public RedBlackNode<T> Root => _tree.Root;
+		public T[] Items => set.ToArray();
 	}
 }

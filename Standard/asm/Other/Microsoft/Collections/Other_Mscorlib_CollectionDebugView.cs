@@ -11,11 +11,11 @@ namespace asm.Other.Microsoft.Collections
 	 * collections in this solution assemblies.
 	 */
 	[DebuggerNonUserCode]
-	internal sealed class asm_Mscorlib_CollectionDebugView<T>
+	internal sealed class Other_Mscorlib_CollectionDebugView<T>
 	{
 		private readonly ICollection<T> _collection;
 
-		public asm_Mscorlib_CollectionDebugView([NotNull] ICollection<T> collection)
+		public Other_Mscorlib_CollectionDebugView([NotNull] ICollection<T> collection)
 		{
 			_collection = collection;
 		}

@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-
 using asm.Exceptions.Collections;
 using asm.Extensions;
-using asm.Patterns.Layout;
-
 using JetBrains.Annotations;
 
 namespace asm.Collections
@@ -20,10 +17,24 @@ namespace asm.Collections
 	// Udemy - Mastering Data Structures & Algorithms using C and C++
 	// https://www.geeksforgeeks.org/red-black-tree-set-1-introduction-2/
 	// https://www.cs.usfca.edu/~galles/visualization/RedBlack.html
-	[DebuggerTypeProxy(typeof(asm_RedBlackTreeDebugView<>))]
+	[DebuggerTypeProxy(typeof(RedBlackTree<>.DebugView))]
 	[Serializable]
 	public sealed class RedBlackTree<T> : LinkedBinaryTree<RedBlackNode<T>, T>
 	{
+		[DebuggerNonUserCode]
+		internal new sealed class DebugView
+		{
+			private readonly RedBlackTree<T> _tree;
+
+			public DebugView([NotNull] RedBlackTree<T> tree)
+			{
+				_tree = tree;
+			}
+
+			[NotNull]
+			public RedBlackNode<T> Root => _tree.Root;
+		}
+
 		/// <inheritdoc />
 		public RedBlackTree()
 			: this((IComparer<T>)null)
@@ -59,7 +70,7 @@ namespace asm.Collections
 		{
 			if (Root == null || Root.IsLeaf) return 0;
 			int height = 0;
-			IterateLevels(Root, HorizontalFlow.LeftToRight, (i, _) => height++);
+			IterateLevels(Root, (i, _) => height++);
 			return height;
 		}
 
@@ -323,7 +334,7 @@ namespace asm.Collections
 
 			T previous = default(T);
 			bool isValid = true, started = false;
-			Iterate(node, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, e =>
+			Iterate(node, e =>
 			{
 				if (!started)
 				{

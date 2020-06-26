@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using JetBrains.Annotations;
 
@@ -10,23 +10,23 @@ namespace asm.Other.Microsoft.Collections
 	 * collections in this solution assemblies.
 	 */
 	[DebuggerNonUserCode]
-	internal sealed class asm_Mscorlib_DictionaryDebugView<TKey, TValue>
+	internal sealed class Other_Mscorlib_KeyedCollectionDebugView<TKey, TValue>
 	{
-		private readonly IDictionary<TKey, TValue> _dictionary;
+		private readonly KeyedCollection<TKey, TValue> _keyedCollection;
 
-		public asm_Mscorlib_DictionaryDebugView([NotNull] IDictionary<TKey, TValue> dictionary)
+		public Other_Mscorlib_KeyedCollectionDebugView([NotNull] KeyedCollection<TKey, TValue> keyedCollection)
 		{
-			_dictionary = dictionary;
+			_keyedCollection = keyedCollection;
 		}
 
 		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		[NotNull]
-		public KeyValuePair<TKey, TValue>[] Items
+		public TValue[] Items
 		{
 			get
 			{
-				KeyValuePair<TKey, TValue>[] items = new KeyValuePair<TKey, TValue>[_dictionary.Count];
-				_dictionary.CopyTo(items, 0);
+				TValue[] items = new TValue[_keyedCollection.Count];
+				_keyedCollection.CopyTo(items, 0);
 				return items;
 			}
 		}

@@ -8,6 +8,9 @@ namespace asm.Collections
 	public abstract class PriorityQueue<TPriority, T> : Heap<T>
 		where TPriority : struct, IComparable
 	{
+		[NotNull]
+		protected Func<T, TPriority> GetPriority;
+
 		/// <inheritdoc />
 		protected PriorityQueue([NotNull] Func<T, TPriority> priority)
 			: this(0, null, priority)
@@ -45,8 +48,5 @@ namespace asm.Collections
 		{
 			Add(collection);
 		}
-
-		[NotNull]
-		protected Func<T, TPriority> GetPriority { get; }
 	}
 }

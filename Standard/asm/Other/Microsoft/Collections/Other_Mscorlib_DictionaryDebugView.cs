@@ -10,23 +10,23 @@ namespace asm.Other.Microsoft.Collections
 	 * collections in this solution assemblies.
 	 */
 	[DebuggerNonUserCode]
-	internal sealed class asm_Mscorlib_DictionaryKeyCollectionDebugView<TKey, TValue>
+	internal sealed class Other_Mscorlib_DictionaryDebugView<TKey, TValue>
 	{
-		private readonly ICollection<TKey> _collection;
+		private readonly IDictionary<TKey, TValue> _dictionary;
 
-		public asm_Mscorlib_DictionaryKeyCollectionDebugView([NotNull] ICollection<TKey> collection)
+		public Other_Mscorlib_DictionaryDebugView([NotNull] IDictionary<TKey, TValue> dictionary)
 		{
-			_collection = collection;
+			_dictionary = dictionary;
 		}
 
 		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		[NotNull]
-		public TKey[] Items
+		public KeyValuePair<TKey, TValue>[] Items
 		{
 			get
 			{
-				TKey[] items = new TKey[_collection.Count];
-				_collection.CopyTo(items, 0);
+				KeyValuePair<TKey, TValue>[] items = new KeyValuePair<TKey, TValue>[_dictionary.Count];
+				_dictionary.CopyTo(items, 0);
 				return items;
 			}
 		}

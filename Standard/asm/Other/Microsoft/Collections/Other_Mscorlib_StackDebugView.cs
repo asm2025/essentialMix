@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using JetBrains.Annotations;
 
 namespace asm.Other.Microsoft.Collections
@@ -10,17 +10,17 @@ namespace asm.Other.Microsoft.Collections
 	 * collections in this solution assemblies.
 	 */
 	[DebuggerNonUserCode]
-	internal class asm_Mscorlib_HashSetDebugView<T>
+	internal sealed class Other_Mscorlib_StackDebugView<T>
 	{
-		private readonly HashSetBase<T> set;
+		private readonly Stack<T> _stack;
 
-		public asm_Mscorlib_HashSetDebugView(HashSetBase<T> set)
+		public Other_Mscorlib_StackDebugView([NotNull] Stack<T> stack)
 		{
-			this.set = set;
+			_stack = stack;
 		}
 
 		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		[NotNull]
-		public T[] Items => set.ToArray();
+		public T[] Items => _stack.ToArray();
 	}
 }

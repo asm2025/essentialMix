@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using asm.Extensions;
-using asm.Patterns.Layout;
 using JetBrains.Annotations;
 
 namespace asm.Collections
@@ -107,7 +106,7 @@ namespace asm.Collections
 		{
 			/*
 			 * Udemy courses sometimes contains garbage! the previous code was wrong or contains
-			 * at least 2 bugs! Avoid the following:
+			 * at least 2 bugs! Avoid the following implementations for BST or AVL trees:
 			 * Buggy: Master the Coding Interview Data Structures + Algorithms - Andrei Neagoie.
 			 * Less than optimal: Mastering Data Structures & Algorithms using C and C++ - Abdul Bari
 			 *
@@ -247,7 +246,7 @@ namespace asm.Collections
 
 			T previous = default(T);
 			bool isValid = true, started = false;
-			Iterate(node, BinaryTreeTraverseMethod.InOrder, HorizontalFlow.LeftToRight, e =>
+			Iterate(node, e =>
 			{
 				if (!started)
 				{
@@ -268,7 +267,7 @@ namespace asm.Collections
 			if (Root == null || Root.IsLeaf) return true;
 			
 			bool balanced = true;
-			Iterate(Root, BinaryTreeTraverseMethod.LevelOrder, HorizontalFlow.LeftToRight, e =>
+			Iterate(Root, BinaryTreeTraverseMethod.LevelOrder, e =>
 			{
 				balanced &= IsBalancedLocal(e);
 				return balanced;
@@ -294,7 +293,7 @@ namespace asm.Collections
 		{
 			base.FromLevelOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -302,7 +301,7 @@ namespace asm.Collections
 		{
 			base.FromPreOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -310,7 +309,7 @@ namespace asm.Collections
 		{
 			base.FromInOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -318,7 +317,7 @@ namespace asm.Collections
 		{
 			base.FromPostOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -326,7 +325,7 @@ namespace asm.Collections
 		{
 			base.FromInOrderAndLevelOrder(inOrderCollection, levelOrderCollection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -334,7 +333,7 @@ namespace asm.Collections
 		{
 			base.FromInOrderAndPreOrder(inOrderCollection, preOrderCollection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -342,7 +341,7 @@ namespace asm.Collections
 		{
 			base.FromInOrderAndPostOrder(inOrderCollection, postOrderCollection);
 			if (Root == null) return;
-			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, HorizontalFlow.LeftToRight, SetHeight);
+			Iterate(Root, BinaryTreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		[NotNull]

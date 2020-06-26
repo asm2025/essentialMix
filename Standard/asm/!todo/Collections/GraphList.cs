@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using asm.Exceptions.Collections;
 using JetBrains.Annotations;
 
@@ -22,48 +23,32 @@ namespace asm.Collections
 	// https://gist.github.com/kevinmorio/f7102c5094aa748503f9
 	[DebuggerDisplay("Label = '{Label}', Count = {Count}")]
 	[Serializable]
-	public abstract class GraphList<TVertex, TEdge, T> : ICollection<T>, ICollection
+	public abstract class GraphList<TVertex, TEdge, T> : ICollection<T>, ICollection, IReadOnlyCollection<T>
 		where TVertex : GraphVertex<TVertex, T>
 		where TEdge : GraphEdge<TVertex, TEdge, T>
 	{
-		/// <summary>
-		/// a semi recursive approach to traverse the graph
-		/// </summary>
-		public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
+		private struct BreadthFirstEnumerator : IGraphEnumeratorImpl<T>
 		{
 			private readonly GraphList<TVertex, TEdge, T> _graph;
 			private readonly int _version;
 			private readonly TVertex _root;
 			private readonly Queue<TVertex> _queue;
-			private readonly Stack<TVertex> _stack;
 			private readonly HashSet<T> _visited;
-			private readonly Func<bool> _moveNext;
 
 			private TVertex _current;
 			private bool _started;
 			private bool _done;
 
-			internal Enumerator([NotNull] GraphList<TVertex, TEdge, T> graph, [NotNull] TVertex root, GraphTraverseMethod method)
-				: this()
+			internal BreadthFirstEnumerator([NotNull] GraphList<TVertex, TEdge, T> graph, TVertex root)
 			{
 				_graph = graph;
 				_version = _graph._version;
 				_root = root;
-				_visited = new HashSet<T>(graph.Comparer);
-
-				switch (method)
-				{
-					case GraphTraverseMethod.BreadthFirst:
-						_queue = new Queue<TVertex>();
-						_moveNext = BreadthFirst;
-						break;
-					case GraphTraverseMethod.DepthFirst:
-						_stack = new Stack<TVertex>();
-						_moveNext = DepthFirst;
-						break;
-					default:
-						throw new ArgumentOutOfRangeException(nameof(method), method, null);
-				}
+				_current = null;
+				_started = false;
+				_done = _graph.Count == 0 || _root == null;
+				_visited = _done ? null : new HashSet<T>(graph.Comparer);
+				_queue = _done ? null : new Queue<TVertex>();
 			}
 
 			/// <inheritdoc />
@@ -81,22 +66,18 @@ namespace asm.Collections
 			[NotNull]
 			object IEnumerator.Current => Current;
 
-			public bool MoveNext() { return _moveNext(); }
-
-			void IEnumerator.Reset()
+			/// <inheritdoc />
+			public IEnumerator<T> GetEnumerator()
 			{
-				if (_version != _graph._version) throw new VersionChangedException();
-				_current = null;
-				_started = _done = false;
-				_queue?.Clear();
-				_stack?.Clear();
-				_visited.Clear();
+				IEnumerator enumerator = this;
+				enumerator.Reset();
+				return this;
 			}
 
 			/// <inheritdoc />
-			public void Dispose() { }
+			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-			private bool BreadthFirst()
+			public bool MoveNext()
 			{
 				if (_version != _graph._version) throw new VersionChangedException();
 				if (_done) return false;
@@ -124,16 +105,82 @@ namespace asm.Collections
 				}
 
 				_visited.Add(_current.Value);
-				// Queue the next vertices
-				if (!_graph.Edges.TryGetValue(_current.Value, out KeyedDictionary<T, TEdge> edges)) return true;
 
-				foreach (TEdge edge in edges.Values) 
-					_queue.Enqueue(edge.To);
+				// Queue the next vertices
+				if (_graph.Edges.TryGetValue(_current.Value, out KeyedDictionary<T, TEdge> edges))
+				{
+					foreach (TEdge edge in edges.Values) 
+						_queue.Enqueue(edge.To);
+				}
 
 				return true;
 			}
 
-			private bool DepthFirst()
+			void IEnumerator.Reset()
+			{
+				if (_version != _graph._version) throw new VersionChangedException();
+				_current = null;
+				_started = false;
+				_queue.Clear();
+				_visited.Clear();
+				_done = _graph.Count == 0 || _root == null;
+			}
+
+			/// <inheritdoc />
+			public void Dispose() { }
+		}
+
+		private struct DepthFirstEnumerator : IGraphEnumeratorImpl<T>
+		{
+			private readonly GraphList<TVertex, TEdge, T> _graph;
+			private readonly int _version;
+			private readonly TVertex _root;
+			private readonly Stack<TVertex> _stack;
+			private readonly HashSet<T> _visited;
+
+			private TVertex _current;
+			private bool _started;
+			private bool _done;
+
+			internal DepthFirstEnumerator([NotNull] GraphList<TVertex, TEdge, T> graph, TVertex root)
+			{
+				_graph = graph;
+				_version = _graph._version;
+				_root = root;
+				_current = null;
+				_started = false;
+				_done = _graph.Count == 0 || _root == null;
+				_visited = _done ? null : new HashSet<T>(graph.Comparer);
+				_stack = _done ? null : new Stack<TVertex>();
+			}
+
+			/// <inheritdoc />
+			[NotNull]
+			public T Current
+			{
+				get
+				{
+					if (!_started || _current == null) throw new InvalidOperationException();
+					return _current.Value;
+				}
+			}
+
+			/// <inheritdoc />
+			[NotNull]
+			object IEnumerator.Current => Current;
+
+			/// <inheritdoc />
+			public IEnumerator<T> GetEnumerator()
+			{
+				IEnumerator enumerator = this;
+				enumerator.Reset();
+				return this;
+			}
+
+			/// <inheritdoc />
+			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+			public bool MoveNext()
 			{
 				if (_version != _graph._version) throw new VersionChangedException();
 				if (_done) return false;
@@ -162,16 +209,31 @@ namespace asm.Collections
 
 				_visited.Add(_current.Value);
 				// Queue the next vertices
-				if (!_graph.Edges.TryGetValue(_current.Value, out KeyedDictionary<T, TEdge> edges)) return true;
-
-				foreach (TEdge edge in edges.Values) 
-					_stack.Push(edge.To);
+				if (_graph.Edges.TryGetValue(_current.Value, out KeyedDictionary<T, TEdge> edges))
+				{
+					foreach (TEdge edge in edges.Values)
+						_stack.Push(edge.To);
+				}
 
 				return true;
 			}
+
+			void IEnumerator.Reset()
+			{
+				if (_version != _graph._version) throw new VersionChangedException();
+				_current = null;
+				_started = false;
+				_stack.Clear();
+				_visited.Clear();
+				_done = _graph.Count == 0 || _root == null;
+			}
+
+			/// <inheritdoc />
+			public void Dispose() { }
 		}
 
 		/*
+		 * todo: implement iterators to do the following:
 		 * 1. Walk: traversing a graph where vertex and edges can be repeated.
 		 *		a. open walk: when starting and ending vertices are different.
 		 *		b. closed walk when starting and ending vertices are the same.
@@ -181,1251 +243,6 @@ namespace asm.Collections
 		 * 5. Cycle: traversing a graph where neither vertices nor edges are
 		 * repeated and starting and ending vertices are the same.
 		 */
-
-		///// <summary>
-		///// iterative approach to traverse the tree
-		///// </summary>
-		//public sealed class Iterator
-		//{
-		//	private readonly LinkedBinaryTree<TVertex, T> _tree;
-		//	private readonly TVertex _root;
-		//	private readonly BinaryTreeTraverseMethod _method;
-
-		//	internal Iterator([NotNull] LinkedBinaryTree<TVertex, T> tree, [NotNull] TVertex root, BinaryTreeTraverseMethod method)
-		//	{
-		//		_tree = tree;
-		//		_root = root;
-		//		_method = method;
-		//	}
-
-		//	public void Iterate(HorizontalFlow flow, [NotNull] Action<TVertex> visitCallback)
-		//	{
-		//		int version = _tree._version;
-
-		//		switch (_method)
-		//		{
-		//			case BinaryTreeTraverseMethod.LevelOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						LevelOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						LevelOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			case BinaryTreeTraverseMethod.PreOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						PreOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						PreOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			case BinaryTreeTraverseMethod.InOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						InOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						InOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			case BinaryTreeTraverseMethod.PostOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						PostOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						PostOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			default:
-		//				throw new ArgumentOutOfRangeException();
-		//		}
-
-		//		void LevelOrderLR()
-		//		{
-		//			// Root-Left-Right (Queue)
-		//			Queue<TVertex> queue = new Queue<TVertex>();
-
-		//			// Start at the root
-		//			queue.Enqueue(_root);
-
-		//			while (queue.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				TVertex current = queue.Dequeue();
-		//				visitCallback(current);
-
-		//				// Queue the next vertices
-		//				if (current.Left != null) queue.Enqueue(current.Left);
-		//				if (current.Right != null) queue.Enqueue(current.Right);
-		//			}
-		//		}
-
-		//		void LevelOrderRL()
-		//		{
-		//			// Root-Right-Left (Queue)
-		//			Queue<TVertex> queue = new Queue<TVertex>();
-
-		//			// Start at the root
-		//			queue.Enqueue(_root);
-
-		//			while (queue.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				TVertex current = queue.Dequeue();
-		//				visitCallback(current);
-
-		//				// Queue the next vertices
-		//				if (current.Right != null) queue.Enqueue(current.Right);
-		//				if (current.Left != null) queue.Enqueue(current.Left);
-		//			}
-		//		}
-
-		//		void PreOrderLR()
-		//		{
-		//			// Root-Left-Right (Stack)
-		//			Stack<TVertex> stack = new Stack<TVertex>();
-
-		//			// Start at the root
-		//			stack.Push(_root);
-
-		//			while (stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				TVertex current = stack.Pop();
-		//				visitCallback(current);
-
-		//				/*
-		//				* The stack works backwards (LIFO).
-		//				* It means whatever we want to
-		//				* appear first, we must add last.
-		//				*/
-		//				// Queue the next vertices
-		//				if (current.Right != null) stack.Push(current.Right);
-		//				if (current.Left != null) stack.Push(current.Left);
-		//			}
-		//		}
-
-		//		void PreOrderRL()
-		//		{
-		//			// Root-Right-Left (Stack)
-		//			Stack<TVertex> stack = new Stack<TVertex>();
-
-		//			// Start at the root
-		//			stack.Push(_root);
-
-		//			while (stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				TVertex current = stack.Pop();
-		//				visitCallback(current);
-
-		//				/*
-		//				* The stack works backwards (LIFO).
-		//				* It means whatever we want to
-		//				* appear first, we must add last.
-		//				*/
-		//				// Queue the next vertices
-		//				if (current.Left != null) stack.Push(current.Left);
-		//				if (current.Right != null) stack.Push(current.Right);
-		//			}
-		//		}
-
-		//		void InOrderLR()
-		//		{
-		//			// Left-Root-Right (Stack)
-		//			Stack<TVertex> stack = new Stack<TVertex>();
-
-		//			// Start at the root
-		//			TVertex current = _root;
-
-		//			while (current != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate left
-		//					current = current.Left;
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = stack.Pop();
-		//					visitCallback(current);
-
-		//					// Navigate right
-		//					current = current.Right;
-		//				}
-		//			}
-		//		}
-
-		//		void InOrderRL()
-		//		{
-		//			// Right-Root-Left (Stack)
-		//			Stack<TVertex> stack = new Stack<TVertex>();
-
-		//			// Start at the root
-		//			TVertex current = _root;
-
-		//			while (current != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate right
-		//					current = current.Right;
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = stack.Pop();
-		//					visitCallback(current);
-
-		//					// Navigate right
-		//					current = current.Left;
-		//				}
-		//			}
-		//		}
-
-		//		void PostOrderLR()
-		//		{
-		//			// Left-Right-Root (Stack)
-		//			Stack<TVertex> stack = new Stack<TVertex>();
-		//			TVertex lastVisited = null;
-		//			// Start at the root
-		//			TVertex current = _root;
-
-		//			while (current != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate left
-		//					current = current.Left;
-		//					continue;
-		//				}
-
-		//				TVertex peek = stack.Peek();
-		//				/*
-		//				 * At this point we are either coming from
-		//				 * either the root vertex or the left branch.
-		//				 * Is there a right vertex?
-		//				 * if yes, then navigate right.
-		//				 */
-		//				if (peek.Right != null && lastVisited != peek.Right)
-		//				{
-		//					// Navigate right
-		//					current = peek.Right;
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = peek;
-		//					lastVisited = stack.Pop();
-		//					visitCallback(current);
-		//					current = null;
-		//				}
-		//			}
-		//		}
-
-		//		void PostOrderRL()
-		//		{
-		//			// Right-Left-Root (Stack)
-		//			Stack<TVertex> stack = new Stack<TVertex>();
-		//			TVertex lastVisited = null;
-		//			// Start at the root
-		//			TVertex current = _root;
-
-		//			while (current != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate right
-		//					current = current.Right;
-		//					continue;
-		//				}
-
-		//				TVertex peek = stack.Peek();
-		//				/*
-		//				 * At this point we are either coming from
-		//				 * either the root vertex or the right branch.
-		//				 * Is there a left vertex?
-		//				 * if yes, then navigate left.
-		//				 */
-		//				if (peek.Left != null && lastVisited != peek.Left)
-		//				{
-		//					// Navigate left
-		//					current = peek.Left;
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = peek;
-		//					lastVisited = stack.Pop();
-		//					visitCallback(current);
-		//					current = null;
-		//				}
-		//			}
-		//		}
-		//	}
-
-		//	public void Iterate(HorizontalFlow flow, [NotNull] Func<TVertex, bool> visitCallback)
-		//	{
-		//		int version = _tree._version;
-
-		//		switch (_method)
-		//		{
-		//			case BinaryTreeTraverseMethod.LevelOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						LevelOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						LevelOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			case BinaryTreeTraverseMethod.PreOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						PreOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						PreOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			case BinaryTreeTraverseMethod.InOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						InOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						InOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			case BinaryTreeTraverseMethod.PostOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						PostOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						PostOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			default:
-		//				throw new ArgumentOutOfRangeException();
-		//		}
-
-		//		void LevelOrderLR()
-		//		{
-		//			// Root-Left-Right (Queue)
-		//			Queue<TVertex> queue = new Queue<TVertex>();
-
-		//			// Start at the root
-		//			queue.Enqueue(_root);
-
-		//			while (queue.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				TVertex current = queue.Dequeue();
-		//				if (!visitCallback(current)) break;
-
-		//				// Queue the next vertices
-		//				if (current.Left != null) queue.Enqueue(current.Left);
-		//				if (current.Right != null) queue.Enqueue(current.Right);
-		//			}
-		//		}
-
-		//		void LevelOrderRL()
-		//		{
-		//			// Root-Right-Left (Queue)
-		//			Queue<TVertex> queue = new Queue<TVertex>();
-
-		//			// Start at the root
-		//			queue.Enqueue(_root);
-
-		//			while (queue.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				TVertex current = queue.Dequeue();
-		//				if (!visitCallback(current)) break;
-
-		//				// Queue the next vertices
-		//				if (current.Right != null) queue.Enqueue(current.Right);
-		//				if (current.Left != null) queue.Enqueue(current.Left);
-		//			}
-		//		}
-
-		//		void PreOrderLR()
-		//		{
-		//			// Root-Left-Right (Stack)
-		//			Stack<TVertex> stack = new Stack<TVertex>();
-
-		//			// Start at the root
-		//			stack.Push(_root);
-
-		//			while (stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				TVertex current = stack.Pop();
-		//				if (!visitCallback(current)) break;
-
-		//				/*
-		//				* The stack works backwards (LIFO).
-		//				* It means whatever we want to
-		//				* appear first, we must add last.
-		//				*/
-		//				// Queue the next vertices
-		//				if (current.Right != null) stack.Push(current.Right);
-		//				if (current.Left != null) stack.Push(current.Left);
-		//			}
-		//		}
-
-		//		void PreOrderRL()
-		//		{
-		//			// Root-Right-Left (Stack)
-		//			Stack<TVertex> stack = new Stack<TVertex>();
-
-		//			// Start at the root
-		//			stack.Push(_root);
-
-		//			while (stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				TVertex current = stack.Pop();
-		//				if (!visitCallback(current)) break;
-
-		//				/*
-		//				* The stack works backwards (LIFO).
-		//				* It means whatever we want to
-		//				* appear first, we must add last.
-		//				*/
-		//				// Queue the next vertices
-		//				if (current.Left != null) stack.Push(current.Left);
-		//				if (current.Right != null) stack.Push(current.Right);
-		//			}
-		//		}
-
-		//		void InOrderLR()
-		//		{
-		//			// Left-Root-Right (Stack)
-		//			Stack<TVertex> stack = new Stack<TVertex>();
-
-		//			// Start at the root
-		//			TVertex current = _root;
-
-		//			while (current != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate left
-		//					current = current.Left;
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = stack.Pop();
-		//					if (!visitCallback(current)) break;
-
-		//					// Navigate right
-		//					current = current.Right;
-		//				}
-		//			}
-		//		}
-
-		//		void InOrderRL()
-		//		{
-		//			// Right-Root-Left (Stack)
-		//			Stack<TVertex> stack = new Stack<TVertex>();
-
-		//			// Start at the root
-		//			TVertex current = _root;
-
-		//			while (current != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate right
-		//					current = current.Right;
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = stack.Pop();
-		//					if (!visitCallback(current)) break;
-
-		//					// Navigate right
-		//					current = current.Left;
-		//				}
-		//			}
-		//		}
-
-		//		void PostOrderLR()
-		//		{
-		//			// Left-Right-Root (Stack)
-		//			Stack<TVertex> stack = new Stack<TVertex>();
-		//			TVertex lastVisited = null;
-		//			// Start at the root
-		//			TVertex current = _root;
-
-		//			while (current != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate left
-		//					current = current.Left;
-		//					continue;
-		//				}
-
-		//				TVertex peek = stack.Peek();
-		//				/*
-		//				 * At this point we are either coming from
-		//				 * either the root vertex or the left branch.
-		//				 * Is there a right vertex?
-		//				 * if yes, then navigate right.
-		//				 */
-		//				if (peek.Right != null && lastVisited != peek.Right)
-		//				{
-		//					// Navigate right
-		//					current = peek.Right;
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = peek;
-		//					lastVisited = stack.Pop();
-		//					if (!visitCallback(current)) break;
-		//					current = null;
-		//				}
-		//			}
-		//		}
-
-		//		void PostOrderRL()
-		//		{
-		//			// Right-Left-Root (Stack)
-		//			Stack<TVertex> stack = new Stack<TVertex>();
-		//			TVertex lastVisited = null;
-		//			// Start at the root
-		//			TVertex current = _root;
-
-		//			while (current != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate right
-		//					current = current.Right;
-		//					continue;
-		//				}
-
-		//				TVertex peek = stack.Peek();
-		//				/*
-		//				 * At this point we are either coming from
-		//				 * either the root vertex or the right branch.
-		//				 * Is there a left vertex?
-		//				 * if yes, then navigate left.
-		//				 */
-		//				if (peek.Left != null && lastVisited != peek.Left)
-		//				{
-		//					// Navigate left
-		//					current = peek.Left;
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = peek;
-		//					lastVisited = stack.Pop();
-		//					if (!visitCallback(current)) break;
-		//					current = null;
-		//				}
-		//			}
-		//		}
-		//	}
-
-		//	public void Iterate(HorizontalFlow flow, [NotNull] Action<TVertex, int> visitCallback)
-		//	{
-		//		int version = _tree._version;
-
-		//		switch (_method)
-		//		{
-		//			case BinaryTreeTraverseMethod.LevelOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						LevelOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						LevelOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			case BinaryTreeTraverseMethod.PreOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						PreOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						PreOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			case BinaryTreeTraverseMethod.InOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						InOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						InOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			case BinaryTreeTraverseMethod.PostOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						PostOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						PostOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			default:
-		//				throw new ArgumentOutOfRangeException();
-		//		}
-
-		//		void LevelOrderLR()
-		//		{
-		//			// Root-Left-Right (Queue)
-		//			Queue<(int Depth, TVertex Vertex)> queue = new Queue<(int Depth, TVertex Vertex)>();
-
-		//			// Start at the root
-		//			queue.Enqueue((0, _root));
-
-		//			while (queue.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				(int depth, TVertex vertex) = queue.Dequeue();
-		//				visitCallback(vertex, depth);
-
-		//				// Queue the next vertices
-		//				if (vertex.Left != null) queue.Enqueue((depth + 1, vertex.Left));
-		//				if (vertex.Right != null) queue.Enqueue((depth + 1, vertex.Right));
-		//			}
-		//		}
-
-		//		void LevelOrderRL()
-		//		{
-		//			// Root-Right-Left (Queue)
-		//			Queue<(int Depth, TVertex Vertex)> queue = new Queue<(int Depth, TVertex Vertex)>();
-
-		//			// Start at the root
-		//			queue.Enqueue((0, _root));
-
-		//			while (queue.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				(int depth, TVertex vertex) = queue.Dequeue();
-		//				visitCallback(vertex, depth);
-
-		//				// Queue the next vertices
-		//				if (vertex.Right != null) queue.Enqueue((depth + 1, vertex.Right));
-		//				if (vertex.Left != null) queue.Enqueue((depth + 1, vertex.Left));
-		//			}
-		//		}
-
-		//		void PreOrderLR()
-		//		{
-		//			// Root-Left-Right (Stack)
-		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
-
-		//			// Start at the root
-		//			stack.Push((0, _root));
-
-		//			while (stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				(int depth, TVertex vertex) = stack.Pop();
-		//				visitCallback(vertex, depth);
-
-		//				/*
-		//				* The stack works backwards (LIFO).
-		//				* It means whatever we want to
-		//				* appear first, we must add last.
-		//				*/
-		//				// Queue the next vertices
-		//				if (vertex.Right != null) stack.Push((depth + 1, vertex.Right));
-		//				if (vertex.Left != null) stack.Push((depth + 1, vertex.Left));
-		//			}
-		//		}
-
-		//		void PreOrderRL()
-		//		{
-		//			// Root-Right-Left (Stack)
-		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
-
-		//			// Start at the root
-		//			stack.Push((0, _root));
-
-		//			while (stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				(int depth, TVertex vertex) = stack.Pop();
-		//				visitCallback(vertex, depth);
-
-		//				/*
-		//				* The stack works backwards (LIFO).
-		//				* It means whatever we want to
-		//				* appear first, we must add last.
-		//				*/
-		//				// Queue the next vertices
-		//				if (vertex.Left != null) stack.Push((depth + 1, vertex.Left));
-		//				if (vertex.Right != null) stack.Push((depth + 1, vertex.Right));
-		//			}
-		//		}
-
-		//		void InOrderLR()
-		//		{
-		//			// Left-Root-Right (Stack)
-		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
-
-		//			// Start at the root
-		//			(int Depth, TVertex Vertex) current = (0, _root);
-
-		//			while (current.Vertex != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current.Vertex != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate left
-		//					current = (current.Depth + 1, current.Vertex.Left);
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = stack.Pop();
-		//					visitCallback(current.Vertex, current.Depth);
-
-		//					// Navigate right
-		//					current = (current.Depth + 1, current.Vertex.Right);
-		//				}
-		//			}
-		//		}
-
-		//		void InOrderRL()
-		//		{
-		//			// Right-Root-Left (Stack)
-		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
-
-		//			// Start at the root
-		//			(int Depth, TVertex Vertex) current = (0, _root);
-
-		//			while (current.Vertex != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current.Vertex != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate right
-		//					current = (current.Depth + 1, current.Vertex.Right);
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = stack.Pop();
-		//					visitCallback(current.Vertex, current.Depth);
-
-		//					// Navigate left
-		//					current = (current.Depth + 1, current.Vertex.Left);
-		//				}
-		//			}
-		//		}
-
-		//		void PostOrderLR()
-		//		{
-		//			// Left-Right-Root (Stack)
-		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
-		//			TVertex lastVisited = null;
-		//			// Start at the root
-		//			(int Depth, TVertex Vertex) current = (0, _root);
-
-		//			while (current.Vertex != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current.Vertex != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate left
-		//					current = (current.Depth + 1, current.Vertex.Left);
-		//					continue;
-		//				}
-
-		//				(int Depth, TVertex Vertex) peek = stack.Peek();
-		//				/*
-		//				 * At this point we are either coming from
-		//				 * either the root vertex or the left branch.
-		//				 * Is there a right TVertex
-		//				 * if yes, then navigate right.
-		//				 */
-		//				if (peek.Vertex.Right != null && lastVisited != peek.Vertex.Right)
-		//				{
-		//					// Navigate right
-		//					current = (peek.Depth + 1, peek.Vertex.Right);
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = peek;
-		//					lastVisited = stack.Pop().Vertex;
-		//					visitCallback(current.Vertex, current.Depth);
-		//					current = (-1, null);
-		//				}
-		//			}
-		//		}
-
-		//		void PostOrderRL()
-		//		{
-		//			// Right-Left-Root (Stack)
-		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
-		//			TVertex lastVisited = null;
-		//			// Start at the root
-		//			(int Depth, TVertex Vertex) current = (0, _root);
-
-		//			while (current.Vertex != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current.Vertex != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate right
-		//					current = (current.Depth + 1, current.Vertex.Right);
-		//					continue;
-		//				}
-
-		//				(int Depth, TVertex Vertex) peek = stack.Peek();
-		//				/*
-		//				 * At this point we are either coming from
-		//				 * either the root vertex or the right branch.
-		//				 * Is there a left TVertex
-		//				 * if yes, then navigate left.
-		//				 */
-		//				if (peek.Vertex.Left != null && lastVisited != peek.Vertex.Left)
-		//				{
-		//					// Navigate left
-		//					current = (peek.Depth + 1, peek.Vertex.Left);
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = peek;
-		//					lastVisited = stack.Pop().Vertex;
-		//					visitCallback(current.Vertex, current.Depth);
-		//					current = (-1, null);
-		//				}
-		//			}
-		//		}
-		//	}
-
-		//	public void Iterate(HorizontalFlow flow, [NotNull] Func<TVertex, int, bool> visitCallback)
-		//	{
-		//		int version = _tree._version;
-
-		//		switch (_method)
-		//		{
-		//			case BinaryTreeTraverseMethod.LevelOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						LevelOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						LevelOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			case BinaryTreeTraverseMethod.PreOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						PreOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						PreOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			case BinaryTreeTraverseMethod.InOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						InOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						InOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			case BinaryTreeTraverseMethod.PostOrder:
-		//				switch (flow)
-		//				{
-		//					case HorizontalFlow.LeftToRight:
-		//						PostOrderLR();
-		//						break;
-		//					case HorizontalFlow.RightToLeft:
-		//						PostOrderRL();
-		//						break;
-		//					default:
-		//						throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
-		//				}
-		//				break;
-		//			default:
-		//				throw new ArgumentOutOfRangeException();
-		//		}
-
-		//		void LevelOrderLR()
-		//		{
-		//			// Root-Left-Right (Queue)
-		//			Queue<(int Depth, TVertex Vertex)> queue = new Queue<(int Depth, TVertex Vertex)>();
-
-		//			// Start at the root
-		//			queue.Enqueue((0, _root));
-
-		//			while (queue.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				(int depth, TVertex vertex) = queue.Dequeue();
-		//				if (!visitCallback(vertex, depth)) break;
-
-		//				// Queue the next vertices
-		//				if (vertex.Left != null) queue.Enqueue((depth + 1, vertex.Left));
-		//				if (vertex.Right != null) queue.Enqueue((depth + 1, vertex.Right));
-		//			}
-		//		}
-
-		//		void LevelOrderRL()
-		//		{
-		//			// Root-Right-Left (Queue)
-		//			Queue<(int Depth, TVertex Vertex)> queue = new Queue<(int Depth, TVertex Vertex)>();
-
-		//			// Start at the root
-		//			queue.Enqueue((0, _root));
-
-		//			while (queue.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				(int depth, TVertex vertex) = queue.Dequeue();
-		//				if (!visitCallback(vertex, depth)) break;
-
-		//				// Queue the next vertices
-		//				if (vertex.Right != null) queue.Enqueue((depth + 1, vertex.Right));
-		//				if (vertex.Left != null) queue.Enqueue((depth + 1, vertex.Left));
-		//			}
-		//		}
-
-		//		void PreOrderLR()
-		//		{
-		//			// Root-Left-Right (Stack)
-		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
-
-		//			// Start at the root
-		//			stack.Push((0, _root));
-
-		//			while (stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				(int depth, TVertex vertex) = stack.Pop();
-		//				if (!visitCallback(vertex, depth)) break;
-
-		//				/*
-		//				* The stack works backwards (LIFO).
-		//				* It means whatever we want to
-		//				* appear first, we must add last.
-		//				*/
-		//				// Queue the next vertices
-		//				if (vertex.Right != null) stack.Push((depth + 1, vertex.Right));
-		//				if (vertex.Left != null) stack.Push((depth + 1, vertex.Left));
-		//			}
-		//		}
-
-		//		void PreOrderRL()
-		//		{
-		//			// Root-Right-Left (Stack)
-		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
-
-		//			// Start at the root
-		//			stack.Push((0, _root));
-
-		//			while (stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				// visit the next queued vertex
-		//				(int depth, TVertex vertex) = stack.Pop();
-		//				if (!visitCallback(vertex, depth)) break;
-
-		//				/*
-		//				* The stack works backwards (LIFO).
-		//				* It means whatever we want to
-		//				* appear first, we must add last.
-		//				*/
-		//				// Queue the next vertices
-		//				if (vertex.Left != null) stack.Push((depth + 1, vertex.Left));
-		//				if (vertex.Right != null) stack.Push((depth + 1, vertex.Right));
-		//			}		
-		//		}
-
-		//		void InOrderLR()
-		//		{
-		//			// Left-Root-Right (Stack)
-		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
-
-		//			// Start at the root
-		//			(int Depth, TVertex Vertex) current = (0, _root);
-
-		//			while (current.Vertex != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current.Vertex != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate left
-		//					current = (current.Depth + 1, current.Vertex.Left);
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = stack.Pop();
-		//					if (!visitCallback(current.Vertex, current.Depth)) break;
-
-		//					// Navigate right
-		//					current = (current.Depth + 1, current.Vertex.Right);
-		//				}
-		//			}
-		//		}
-
-		//		void InOrderRL()
-		//		{
-		//			// Right-Root-Left (Stack)
-		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
-
-		//			// Start at the root
-		//			(int Depth, TVertex Vertex) current = (0, _root);
-
-		//			while (current.Vertex != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current.Vertex != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate right
-		//					current = (current.Depth + 1, current.Vertex.Right);
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = stack.Pop();
-		//					if (!visitCallback(current.Vertex, current.Depth)) break;
-
-		//					// Navigate left
-		//					current = (current.Depth + 1, current.Vertex.Left);
-		//				}
-		//			}
-		//		}
-
-		//		void PostOrderLR()
-		//		{
-		//			// Left-Right-Root (Stack)
-		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
-		//			TVertex lastVisited = null;
-		//			// Start at the root
-		//			(int Depth, TVertex Vertex) current = (0, _root);
-
-		//			while (current.Vertex != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current.Vertex != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate left
-		//					current = (current.Depth + 1, current.Vertex.Left);
-		//					continue;
-		//				}
-
-		//				(int Depth, TVertex Vertex) peek = stack.Peek();
-		//				/*
-		//				 * At this point we are either coming from
-		//				 * either the root vertex or the left branch.
-		//				 * Is there a right TVertex
-		//				 * if yes, then navigate right.
-		//				 */
-		//				if (peek.Vertex.Right != null && lastVisited != peek.Vertex.Right)
-		//				{
-		//					// Navigate right
-		//					current = (peek.Depth + 1, peek.Vertex.Right);
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = peek;
-		//					lastVisited = stack.Pop().Vertex;
-		//					if (!visitCallback(current.Vertex, current.Depth)) break;
-		//					current = (-1, null);
-		//				}
-		//			}
-		//		}
-
-		//		void PostOrderRL()
-		//		{
-		//			// Right-Left-Root (Stack)
-		//			Stack<(int Depth, TVertex Vertex)> stack = new Stack<(int Depth, TVertex Vertex)>();
-		//			TVertex lastVisited = null;
-		//			// Start at the root
-		//			(int Depth, TVertex Vertex) current = (0, _root);
-
-		//			while (current.Vertex != null || stack.Count > 0)
-		//			{
-		//				if (version != _tree._version) throw new VersionChangedException();
-
-		//				if (current.Vertex != null)
-		//				{
-		//					stack.Push(current);
-		//					// Navigate right
-		//					current = (current.Depth + 1, current.Vertex.Right);
-		//					continue;
-		//				}
-
-		//				(int Depth, TVertex Vertex) peek = stack.Peek();
-		//				/*
-		//				 * At this point we are either coming from
-		//				 * either the root vertex or the right branch.
-		//				 * Is there a left TVertex
-		//				 * if yes, then navigate left.
-		//				 */
-		//				if (peek.Vertex.Left != null && lastVisited != peek.Vertex.Left)
-		//				{
-		//					// Navigate left
-		//					current = (peek.Depth + 1, peek.Vertex.Left);
-		//				}
-		//				else
-		//				{
-		//					// visit the next queued vertex
-		//					current = peek;
-		//					lastVisited = stack.Pop().Vertex;
-		//					if (!visitCallback(current.Vertex, current.Depth)) break;
-		//					current = (-1, null);
-		//				}
-		//			}
-		//		}
-		//	}
-		//}
 
 		[NotNull]
 		private readonly ICollection _collectionRef;
@@ -1494,13 +311,20 @@ namespace asm.Collections
 		/// <summary>
 		/// Enumerate vertices' values in a semi recursive approach
 		/// </summary>
-		/// <param name="value">The starting vertex's value</param>
+		/// <param name="from">The starting vertex's value</param>
 		/// <param name="method">The traverse method</param>
 		/// <returns></returns>
-		public Enumerator Enumerate([NotNull] T value, GraphTraverseMethod method)
+		[NotNull]
+		public IGraphEnumeratorImpl<T> Enumerate([NotNull] T from, GraphTraverseMethod method)
 		{
-			if (!Vertices.TryGetValue(value, out TVertex root)) throw new KeyNotFoundException();
-			return new Enumerator(this, root, method);
+			if (!Vertices.TryGetValue(from, out TVertex root)) throw new KeyNotFoundException();
+
+			return method switch
+			{
+				GraphTraverseMethod.BreadthFirst => new BreadthFirstEnumerator(this, root),
+				GraphTraverseMethod.DepthFirst => new DepthFirstEnumerator(this, root),
+				_ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
+			};
 		}
 
 		/// <inheritdoc />
@@ -1513,10 +337,8 @@ namespace asm.Collections
 
 		public void Add([NotNull] IEnumerable<T> collection)
 		{
-			foreach (T value in collection)
-			{
+			foreach (T value in collection) 
 				Add(value);
-			}
 		}
 
 		public abstract void AddEdge([NotNull] T from, [NotNull] T to);
@@ -1580,14 +402,22 @@ namespace asm.Collections
 			return Edges.Count > 0 && Edges.ContainsKey(value);
 		}
 
-		public int OutDegree([NotNull] T value)
+		public int Degree([NotNull] T value)
 		{
 			return Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges)
 						? edges.Count
 						: 0;
 		}
 
-		public virtual int GetSize() { return Edges.Values.Sum(e => e.Count); }
+		public virtual int GetSize()
+		{
+			int sum = 0;
+
+			foreach (KeyedDictionary<T, TEdge> e in Edges.Values) 
+				sum += e.Count;
+
+			return sum;
+		}
 
 		public ICollection<T> FindCycle(bool ignoreLoop = false) { return FindCycle(Edges.Keys, ignoreLoop); }
 		protected ICollection<T> FindCycle([NotNull] ICollection<T> vertices, bool ignoreLoop = false)
@@ -1644,16 +474,19 @@ namespace asm.Collections
 			return null;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public bool IsLoop([NotNull] T value, [NotNull] TEdge edge)
 		{
 			return Comparer.Equals(value, edge.To.Value);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public bool IsInternal([NotNull] T value)
 		{
 			return Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges) && edges.Count > 1;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public bool IsExternal([NotNull] T value)
 		{
 			return Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges) && edges.Count < 2;

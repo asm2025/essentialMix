@@ -49,7 +49,7 @@ namespace asm.Collections
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 
 			bool changed = false;
-			ArrayBinaryNode<T> node = new ArrayBinaryNode<T>(this, index);
+			Navigator node = NewNavigator(index);
 
 			/*
 			 * the parent value must be greater than its children.
@@ -73,7 +73,7 @@ namespace asm.Collections
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 
 			bool changed = false;
-			ArrayBinaryNode<T> node = new ArrayBinaryNode<T>(this, index);
+			Navigator node = NewNavigator(index);
 
 			/*
 			 * the parent value must be greater than its children.

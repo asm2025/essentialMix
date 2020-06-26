@@ -52,7 +52,7 @@ namespace asm.Collections
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 
 			bool changed = false;
-			ArrayBinaryNode<T> node = new ArrayBinaryNode<T>(this, index);
+			Navigator node = NewNavigator(index);
 
 			// the parent's value must be greater than its children so move the greater value up.
 			while (node.ParentIndex > -1 && GetPriority(Items[node.ParentIndex]).CompareTo(GetPriority(Items[node.Index])) < 0)
@@ -72,7 +72,7 @@ namespace asm.Collections
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 
 			bool changed = false;
-			ArrayBinaryNode<T> node = new ArrayBinaryNode<T>(this, index);
+			Navigator node = NewNavigator(index);
 
 			/*
 			 * the parent's value must be greater than its children.

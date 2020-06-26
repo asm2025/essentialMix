@@ -17,7 +17,7 @@ namespace asm.Other.Microsoft.Collections
 {
 	// based on https://github.com/microsoft/referencesource/blob/master/mscorlib/system/collections/generic/list.cs
 	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(asm_Mscorlib_CollectionDebugView<>))]
+	[DebuggerTypeProxy(typeof(Other_Mscorlib_CollectionDebugView<>))]
 	[Serializable]
 	public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	{

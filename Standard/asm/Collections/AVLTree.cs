@@ -112,7 +112,7 @@ namespace asm.Collections
 		{
 			/*
 			 * Udemy courses sometimes contains garbage! the previous code was wrong or contains
-			 * at least 2 bugs! Avoid the following:
+			 * at least 2 bugs! Avoid the following implementations for BST or AVL trees:
 			 * Buggy: Master the Coding Interview Data Structures + Algorithms - Andrei Neagoie.
 			 * Less than optimal: Mastering Data Structures & Algorithms using C and C++ - Abdul Bari
 			 *

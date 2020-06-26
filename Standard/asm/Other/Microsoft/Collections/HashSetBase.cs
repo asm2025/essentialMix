@@ -16,7 +16,7 @@ namespace asm.Other.Microsoft.Collections
 {
 	// based on https://github.com/microsoft/referencesource/blob/master/System.Core/System/Collections/Generic/HashSet.cs
 	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(asm_Mscorlib_HashSetDebugView<>))]
+	[DebuggerTypeProxy(typeof(Other_Mscorlib_HashSetDebugView<>))]
 	[Serializable]
 	[HostProtection(MayLeakOnAbort = true)]
 	public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback

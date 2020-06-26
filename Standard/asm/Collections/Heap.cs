@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using asm.Extensions;
-using asm.Patterns.Layout;
 using JetBrains.Annotations;
 
 namespace asm.Collections
@@ -89,7 +88,7 @@ namespace asm.Collections
 				Add(value);
 		}
 
-		public void Add(T value)
+		public override void Add(T value)
 		{
 			if (Count == Items.Length) EnsureCapacity(Count + 1);
 			Items[Count] = value;
@@ -99,39 +98,26 @@ namespace asm.Collections
 			BubbleUp(Count - 1);
 		}
 
-		public bool Remove() { return Remove(out _); }
-		public bool Remove(out T value)
+		public T Remove()
 		{
-			if (Count == 0)
-			{
-				value = default(T);
-				return false;
-			}
-
-			value = Items[0];
-			Items[0] = Count == 1
-							? default(T)
-							: Items[Count - 1];
+			if (Count == 0) throw new InvalidOperationException("Heap is empty.");
+			T value = Items[0];
+			Items[0] = Items[Count - 1];
 			Count--;
 			_version++;
 			if (Count > 1) BubbleDown(0);
-			return true;
+			return value;
 		}
 
-		public void Clear()
-		{
-			if (Count == 0) return;
-			Array.Clear(Items, 0, Count);
-			Count = 0;
-		}
+		/// <inheritdoc />
+		public override bool Remove(T value) { throw new NotSupportedException(); }
 
 		public T ElementAt(int k)
 		{
 			if (k < 1 || Count < k) throw new ArgumentOutOfRangeException(nameof(k));
 
-			for (int i = 0; i < k - 1 && Remove(); i++)
-			{
-			}
+			for (int i = 0; i < k - 1; i++) 
+				Remove();
 
 			return Value;
 		}
@@ -147,8 +133,8 @@ namespace asm.Collections
 
 			// nodes with one child are not supposed to appear more than once while scanning from left to right
 			bool isValid = true, nonNode = false;
-			ArrayBinaryNode<T> node = new ArrayBinaryNode<T>(this);
-			Iterate(0, BinaryTreeTraverseMethod.LevelOrder, HorizontalFlow.LeftToRight, e =>
+			Navigator node = NewNavigator();
+			Iterate(0, BinaryTreeTraverseMethod.LevelOrder, e =>
 			{
 				node.Index = e;
 				

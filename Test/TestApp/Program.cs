@@ -59,7 +59,7 @@ namespace TestApp
 
 			//TestAllBinaryTrees();
 			//TestAllBinaryTreesFunctionality();
-			TestAllBinaryTreesPerformance();
+			//TestAllBinaryTreesPerformance();
 
 			//TestSortedSetPerformance();
 
@@ -75,9 +75,11 @@ namespace TestApp
 			//TestTrie();
 			//TestTrieSimilarWordsRemoval();
 
-			//TestGraph();
+			TestGraph();
 
 			//TestSkipList();
+
+			//TestDisjointSet();
 
 			ConsoleHelper.Pause();
 		}
@@ -145,7 +147,7 @@ namespace TestApp
 			{
 				Console.Clear();
 				int[] numbers = GetRandomIntegers(RNGRandomHelper.Next(5, 20));
-				string[] strings = GetRandomStrings(RNGRandomHelper.Next(3, 10));
+				string[] strings = GetRandomStrings(RNGRandomHelper.Next(3, 10)).ToArray();
 				Console.WriteLine("Numbers: ".BrightCyan() + string.Join(", ", numbers));
 				Console.WriteLine("String: ".BrightCyan() + string.Join(", ", strings.Select(e => e.SingleQuote())));
 
@@ -241,7 +243,7 @@ namespace TestApp
 			{
 				Console.Clear();
 				int[] numbers = GetRandomIntegers(RNGRandomHelper.Next(5, 20));
-				string[] strings = GetRandomStrings(RNGRandomHelper.Next(3, 10));
+				string[] strings = GetRandomStrings(RNGRandomHelper.Next(3, 10)).ToArray();
 				Console.WriteLine("Numbers: ".BrightCyan() + string.Join(", ", numbers));
 				Console.WriteLine("String: ".BrightCyan() + string.Join(", ", strings.Select(e => e.SingleQuote())));
 				Console.WriteLine($"Taking an average of {TRIES.ToString().BrightCyan()} times for each algorithm.");
@@ -1882,12 +1884,12 @@ namespace TestApp
 				Console.WriteLine("Test removing...");
 				bool removeStarted = false;
 
-				while (heap.Remove(out T value))
+				while (heap.Count > 0)
 				{
 					if (!removeStarted) removeStarted = true;
 					else Console.Write(", ");
 
-					Console.Write(value);
+					Console.Write(heap.Remove());
 				}
 
 				Console.WriteLine();
@@ -1939,12 +1941,12 @@ namespace TestApp
 				Console.WriteLine("Test removing...");
 				bool removeStarted = false;
 
-				while (queue.Remove(out T value))
+				while (queue.Count > 0)
 				{
 					if (!removeStarted) removeStarted = true;
 					else Console.Write(", ");
 
-					Console.Write(value);
+					Console.Write(queue.Remove());
 				}
 
 				Console.WriteLine();
@@ -2159,7 +2161,7 @@ namespace TestApp
 			{
 				int len = RNGRandomHelper.Next(10, 20);
 				Console.WriteLine($"Generating {len} words: ".BrightGreen());
-				string[] newValues = GetRandomStrings(len);
+				ICollection<string> newValues = GetRandomStrings(true, len);
 
 				foreach (string value in newValues)
 				{
@@ -2351,48 +2353,48 @@ namespace TestApp
 			bool more;
 			GraphList<GraphVertex<char>, GraphEdge<char>, char> graph;
 			WeightedGraphList<GraphWeightedEdge<char>, int, char> weightedGraph;
-			ISet<char> values = new HashSet<char>();
+			List<char> values = new List<char>();
 			Menu menu = new Menu()
 				.Add("Undirected graph", () =>
 				{
 					Console.WriteLine();
 					graph = new UndirectedGraphList<char>();
-					if (values.Count == 0) AddChar(values);
+					if (values.Count == 0) AddValues(values);
 					DoTheTest(graph, values);
 				})
 				.Add("Directed graph", () =>
 				{
 					Console.WriteLine();
 					graph = new DirectedGraphList<char>();
-					if (values.Count == 0) AddChar(values);
+					if (values.Count == 0) AddValues(values);
 					DoTheTest(graph, values);
 				})
 				.Add("Mixed graph", () =>
 				{
 					Console.WriteLine();
 					graph = new MixedGraphList<char>();
-					if (values.Count == 0) AddChar(values);
+					if (values.Count == 0) AddValues(values);
 					DoTheTest(graph, values);
 				})
 				.Add("Weighted undirected graph", () =>
 				{
 					Console.WriteLine();
 					weightedGraph = new WeightedUndirectedGraphList<char>();
-					if (values.Count == 0) AddChar(values);
+					if (values.Count == 0) AddValues(values);
 					DoTheTest(weightedGraph, values);
 				})
 				.Add("Weighted directed graph", () =>
 				{
 					Console.WriteLine();
 					weightedGraph = new WeightedDirectedGraphList<char>();
-					if (values.Count == 0) AddChar(values);
+					if (values.Count == 0) AddValues(values);
 					DoTheTest(weightedGraph, values);
 				})
 				.Add("Weighted mixed graph", () =>
 				{
 					Console.WriteLine();
 					weightedGraph = new WeightedMixedGraphList<char>();
-					if (values.Count == 0) AddChar(values);
+					if (values.Count == 0) AddValues(values);
 					DoTheTest(weightedGraph, values);
 				});
 
@@ -2413,27 +2415,28 @@ namespace TestApp
 				Console.WriteLine();
 				if (response.Key != ConsoleKey.Y) continue;
 				Console.WriteLine();
-				AddChar(values);
+				AddValues(values);
 			}
 			while (more);
 
-			static void AddChar(ISet<char> set)
+			static void AddValues(List<char> list)
 			{
 				int len = RNGRandomHelper.Next(1, 12);
-				Console.WriteLine($"Generating {len} characters: ".BrightGreen());
-				char[] newValues = GetRandomChar(len);
+				Console.WriteLine("Generating new characters: ".BrightGreen());
+				char[] newValues = GetRandomChar(true, len);
 				int count = 0;
 
 				foreach (char value in newValues)
 				{
-					if (!set.Add(value)) continue;
+					if (list.Contains(value)) continue;
+					list.Add(value);
 					count++;
 				}
 
 				Console.WriteLine($"Added {count} characters to the set".BrightGreen());
 			}
 
-			static void DoTheTest<TEdge>(GraphList<GraphVertex<char>, TEdge, char> graph, ISet<char> values)
+			static bool DoTheTest<TEdge>(GraphList<GraphVertex<char>, TEdge, char> graph, List<char> values)
 				where TEdge : GraphEdge<GraphVertex<char>, TEdge, char>
 			{
 				Console.WriteLine("Test adding nodes...");
@@ -2444,17 +2447,18 @@ namespace TestApp
 				if (graph.Count != values.Count)
 				{
 					Console.WriteLine("Something went wrong, not all nodes were added...!".BrightRed());
-					return;
+					return false;
 				}
 
 				if (graph.Count == 1)
 				{
 					Console.WriteLine("Huh, must add more nodes...!".BrightRed());
-					return;
+					return true;
 				}
 				
 				Console.WriteLine("All nodes are added...!".BrightGreen() + " Let's try adding some relationships...");
-				Console.Write($"Would you like to add a bit of randomization? {"[Y]".BrightGreen()} / {"any key".Dim()}. This may cause cycles. ");
+				Console.Write($@"Would you like to add a bit of randomization? {"[Y]".BrightGreen()} / {"any key".Dim()}.
+This may cause cycles but also will make it much more fun for weighted shortest paths. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				int threshold = response.Key != ConsoleKey.Y ? 0 : (int)Math.Floor(values.Count * 0.5d);
@@ -2491,36 +2495,38 @@ namespace TestApp
 				Console.WriteLine("Cool, let's try enumerating it.");
 				char value = graph.Top().First();
 				Console.WriteLine($"Picking a value with maximum connections: '{value.ToString().BrightCyan().Underline()}'...");
-				DoTheTestWithValue(graph, value);
+				if (!DoTheTestWithValue(graph, values, value)) return false;
 
 				do
 				{
 					Console.WriteLine();
-					Console.Write("Type in a character to traverse from it or " + "ESCAPE".BrightRed() + " key to exit this test. ");
+					Console.Write($@"Type in {"a character".BrightGreen()} to traverse from,
+or press {"ESCAPE".BrightRed()} key to exit this test. ");
 					response = Console.ReadKey();
 					Console.WriteLine();
 					if (response.Key == ConsoleKey.Escape) continue;
-					value = response.KeyChar;
 
-					if (!graph.ContainsEdge(value))
+					if (!char.IsLetter(response.KeyChar) || !graph.ContainsEdge(response.KeyChar))
 					{
-						Console.Write($"Character '{value}' is not found!");
+						Console.WriteLine($"Character '{value}' is not found or not connected!");
 						continue;
 					}
 
-					DoTheTestWithValue(graph, value);
+					value = response.KeyChar;
+					if (!DoTheTestWithValue(graph, values, value)) return false;
 				}
 				while (response.Key != ConsoleKey.Escape);
 
 				Console.WriteLine();
+				return true;
 			}
 
-			static void DoTheTestWithValue<TEdge>(GraphList<GraphVertex<char>, TEdge, char> graph, char value)
+			static bool DoTheTestWithValue<TEdge>(GraphList<GraphVertex<char>, TEdge, char> graph, List<char> values, char value)
 				where TEdge : GraphEdge<GraphVertex<char>, TEdge, char>
 			{
 				Console.WriteLine("Breadth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.BreadthFirst)));
 				Console.WriteLine("Depth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.DepthFirst)));
-				Console.WriteLine("OutDegree: ".Yellow() + graph.OutDegree(value));
+				Console.WriteLine("Degree: ".Yellow() + graph.Degree(value));
 
 				switch (graph)
 				{
@@ -2545,6 +2551,32 @@ namespace TestApp
 						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
 						break;
 				}
+
+				if (graph is WeightedGraphList<GraphWeightedEdge<char>, int, char> wGraph)
+				{
+					char to = values.PickRandom();
+					ConsoleKeyInfo response;
+
+					do
+					{
+						Console.Write($@"Type in {"a character".BrightGreen()} to find the shortest path from '{value.ToString().BrightGreen()}' to it,
+press the {"RETURN".BrightGreen()} key to accept the current random value '{to.ToString().BrightGreen()}'
+or press {"ESCAPE".BrightRed()} key to exit this test. ");
+						response = Console.ReadKey();
+						Console.WriteLine();
+						if (response.Key == ConsoleKey.Escape) return false;
+						if (response.Key == ConsoleKey.Enter) continue;
+						if (!char.IsLetter(response.KeyChar) || !wGraph.ContainsEdge(response.KeyChar)) Console.WriteLine($"Character '{value}' is not found or not connected!");
+						to = response.KeyChar;
+						break;
+					}
+					while (response.Key != ConsoleKey.Enter);
+
+					Console.WriteLine($"{"Shortest Path:".Yellow()} from {value.ToString().BrightCyan()} to {to.ToString().BrightCyan()}");
+					Console.WriteLine(string.Join(" -> ", wGraph.GetShortestPath(value, to, ShortestPathAlgorithm.Dijkstra)));
+				}
+
+				return true;
 			}
 		}
 
@@ -2671,25 +2703,51 @@ namespace TestApp
 		}
 
 		[NotNull]
-		private static char[] GetRandomChar(int len = 0)
+		private static char[] GetRandomChar(int len = 0) { return GetRandomChar(false, len); }
+		[NotNull]
+		private static char[] GetRandomChar(bool unique, int len = 0)
 		{
 			if (len < 1) len = RNGRandomHelper.Next(1, 12);
-	
+			
 			char[] values = new char[len];
 
-			for (int i = 0; i < len; i++)
+			if (unique)
 			{
-				values[i] = (char)RNGRandomHelper.Next('a', 'z');
+				int i = 0;
+				HashSet<char> set = new HashSet<char>();
+
+				while (i < len)
+				{
+					char value = (char)RNGRandomHelper.Next('a', 'z');
+					if (!set.Add(value)) continue;
+					values[i++] = value;
+				}
+			}
+			else
+			{
+				for (int i = 0; i < len; i++)
+				{
+					values[i] = (char)RNGRandomHelper.Next('a', 'z');
+				}
 			}
 
 			return values;
 		}
 
 		[NotNull]
-		private static string[] GetRandomStrings(int len = 0)
+		private static ICollection<string> GetRandomStrings(int len = 0) { return GetRandomStrings(false, len); }
+		[NotNull]
+		private static ICollection<string> GetRandomStrings(bool unique, int len = 0)
 		{
 			if (len < 1) len = RNGRandomHelper.Next(1, 12);
-			return __fakeGenerator.Value.Random.WordsArray(len);
+			if (!unique) return __fakeGenerator.Value.Random.WordsArray(len);
+
+			HashSet<string> set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+			while (set.Count < len) 
+				set.Add(__fakeGenerator.Value.Random.Word());
+
+			return set;
 		}
 
 		private class Student
