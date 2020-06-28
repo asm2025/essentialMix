@@ -141,12 +141,6 @@ namespace asm.Extensions
 		[NotNull]
 		public static Enumerator<T> Enumerate<T>([NotNull] this IEnumerable<T> thisValue) { return new Enumerator<T>(thisValue); }
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static void CloneTo<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] ICollection<T> destination)
-		{
-			destination.CloneFrom(thisValue);
-		}
-
 		[NotNull]
 		public static string Format<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] string format)
 		{
@@ -477,15 +471,6 @@ namespace asm.Extensions
 			return BitConverter.IsLittleEndian
 						? thisValue.Reverse()
 						: thisValue;
-		}
-
-		public static IEnumerable<T> Prepend<T>(this IEnumerable<T> thisValue, T item)
-		{
-			yield return item;
-			if (thisValue == null) yield break;
-
-			foreach (T element in thisValue)
-				yield return element;
 		}
 
 		/// <summary>

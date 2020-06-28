@@ -7,10 +7,14 @@ namespace asm.Comparers
 		public static IGenericComparer<T> Default { get; } = new GenericComparer<T>();
 
 		public GenericComparer()
-			: this(null, null) { }
+			: this(null, null)
+		{
+		}
 
 		public GenericComparer(IComparer<T> comparer)
-			: this(comparer, null) { }
+			: this(comparer, null)
+		{
+		}
 
 		public GenericComparer(IComparer<T> comparer, IEqualityComparer<T> equalityComparer)
 		{
@@ -32,8 +36,8 @@ namespace asm.Comparers
 		public virtual bool Equals(T x, T y)
 		{
 			if (ReferenceEquals(x, y)) return true;
-			if (ReferenceEquals(x, null)) return false;
-			return !ReferenceEquals(y, null) && EqualityComparer.Equals(x, y);
+			if (ReferenceEquals(x, null) || ReferenceEquals(y, null)) return false;
+			return EqualityComparer.Equals(x, y);
 		}
 
 		public virtual int GetHashCode(T obj) { return obj.GetHashCode(); }

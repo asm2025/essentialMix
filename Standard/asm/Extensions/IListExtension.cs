@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using asm.Collections;
 using JetBrains.Annotations;
@@ -188,135 +187,18 @@ namespace asm.Extensions
 				thisValue[i] = func(i);
 		}
 
-		public static Array ToArray([NotNull] this IList thisValue)
-		{
-			MethodInfo method = thisValue.GetType().GetMethod("ToArray");
-			return (Array)method?.Invoke(thisValue, null);
-		}
-
-		public static void CloneTo([NotNull] this IList thisValue, [NotNull] IList destination, int sourceIndex, int length)
-		{
-			CloneTo(thisValue, destination, sourceIndex, 0, length);
-		}
-
-		public static void CloneTo([NotNull] this IList thisValue, [NotNull] IList destination, int sourceIndex, int destinationIndex, int length)
-		{
-			if (!sourceIndex.InRangeRx(0, thisValue.Count))
-				throw new ArgumentOutOfRangeException(nameof(sourceIndex));
-			if (length == -1)
-				length = thisValue.Count - sourceIndex;
-			if (length < 0)
-				throw new ArgumentOutOfRangeException(nameof(length));
-			if (sourceIndex + length > thisValue.Count)
-				length = thisValue.Count - sourceIndex;
-			if (!destinationIndex.InRange(0, destination.Count))
-				throw new ArgumentOutOfRangeException(nameof(destinationIndex));
-
-			if (thisValue.Count == 0)
-			{
-				if (destinationIndex > 0 && length <= destination.Count)
-					destination.Initialize((object)null, destinationIndex, length);
-				return;
-			}
-
-			int si = sourceIndex, di = destinationIndex;
-
-			while (si < length && di < destination.Count)
-			{
-				ICloneable cloneable = thisValue[si] as ICloneable;
-				destination[di] = cloneable?.Clone() ?? thisValue[si];
-				si++;
-				di++;
-			}
-
-			if (si >= length)
-				return;
-
-			for (int i = si; i < length; i++)
-			{
-				ICloneable cloneable = thisValue[si] as ICloneable;
-				destination.Add(cloneable?.Clone() ?? thisValue[si]);
-				si++;
-				di++;
-			}
-		}
-
-		public static void CloneTo<T>([NotNull] this IList<T> thisValue, [NotNull] IList<T> destination, int sourceIndex, int length)
-		{
-			CloneTo(thisValue, destination, sourceIndex, 0, length);
-		}
-
-		public static void CloneTo<T>([NotNull] this IList<T> thisValue, [NotNull] IList<T> destination, int sourceIndex, int destinationIndex, int length)
-		{
-			if (!sourceIndex.InRangeRx(0, thisValue.Count))
-				throw new ArgumentOutOfRangeException(nameof(sourceIndex));
-			if (length == -1)
-				length = thisValue.Count - sourceIndex;
-			if (length < 0)
-				throw new ArgumentOutOfRangeException(nameof(length));
-			if (sourceIndex + length > thisValue.Count)
-				length = thisValue.Count - sourceIndex;
-			if (!destinationIndex.InRange(0, destination.Count))
-				throw new ArgumentOutOfRangeException(nameof(destinationIndex));
-
-			if (thisValue.Count == 0)
-			{
-				if (destinationIndex > 0 && length <= destination.Count)
-					destination.Initialize(default(T), destinationIndex, length);
-				return;
-			}
-
-			int si = sourceIndex, di = destinationIndex;
-
-			if (typeof(T).Implements<ICloneable>())
-			{
-				while (si < length && di < destination.Count)
-				{
-					destination[di] = (T)((ICloneable)thisValue[si]).Clone();
-					si++;
-					di++;
-				}
-
-				if (si >= length)
-					return;
-
-				for (int i = si; i < length; i++)
-				{
-					destination.Add((T)((ICloneable)thisValue[si]).Clone());
-					si++;
-					di++;
-				}
-			}
-			else
-			{
-				while (si < length && di < destination.Count)
-				{
-					destination[di] = thisValue[si];
-					si++;
-					di++;
-				}
-
-				if (si >= length)
-					return;
-
-				for (int i = si; i < length; i++)
-				{
-					destination.Add(thisValue[si]);
-					si++;
-					di++;
-				}
-			}
-		}
-
 		[NotNull]
 		public static object[] GetRange([NotNull] this IList thisValue, int startIndex, int count)
 		{
 			thisValue.Count.ValidateRange(startIndex, ref count);
-			if (thisValue.Count == 0 || count == 0)
-				return Array.Empty<object>();
+			if (thisValue.Count == 0 || count == 0) return Array.Empty<object>();
 
+			int x = startIndex;
 			object[] range = new object[count];
-			CopyTo(thisValue, startIndex, range);
+
+			for (int i = startIndex; i < count; i++) 
+				range[x++] = thisValue[i];
+
 			return range;
 		}
 
@@ -324,42 +206,15 @@ namespace asm.Extensions
 		public static T[] GetRange<T>([NotNull] this IList<T> thisValue, int startIndex, int count)
 		{
 			thisValue.Count.ValidateRange(startIndex, ref count);
-			if (thisValue.Count == 0 || count == 0)
-				return Array.Empty<T>();
+			if (thisValue.Count == 0 || count == 0) return Array.Empty<T>();
 
+			int x = startIndex;
 			T[] range = new T[count];
-			CopyTo(thisValue, startIndex, range);
+
+			for (int i = startIndex; i < count; i++) 
+				range[x++] = thisValue[i];
+
 			return range;
-		}
-
-		public static void CopyTo([NotNull] this IList thisValue, int sourceIndex, [NotNull] object[] destination) { CopyTo(thisValue, sourceIndex, destination, 0, destination.Length); }
-		public static void CopyTo([NotNull] this IList thisValue, int sourceIndex, [NotNull] object[] destination, int destinationIndex, int count)
-		{
-			thisValue.Count.ValidateRange(sourceIndex, ref count);
-			destination.Length.ValidateRange(destinationIndex, ref count);
-			if (thisValue.Count == 0 || count == 0)
-				return;
-
-			int lastIndex = sourceIndex + count - 1;
-			int lastArrayIndex = destinationIndex + count - 1;
-
-			for (int i = sourceIndex, j = destinationIndex; i <= lastIndex && j <= lastArrayIndex; i++, j++)
-				destination[j] = thisValue[i];
-		}
-
-		public static void CopyTo<T>([NotNull] this IList<T> thisValue, int sourceIndex, [NotNull] T[] destination) { CopyTo(thisValue, sourceIndex, destination, 0, destination.Length); }
-		public static void CopyTo<T>([NotNull] this IList<T> thisValue, int sourceIndex, [NotNull] T[] destination, int destinationIndex, int count)
-		{
-			thisValue.Count.ValidateRange(sourceIndex, ref count);
-			destination.Length.ValidateRange(destinationIndex, ref count);
-			if (thisValue.Count == 0 || count == 0)
-				return;
-
-			int lastIndex = sourceIndex + count - 1;
-			int lastArrayIndex = destinationIndex + count - 1;
-
-			for (int i = sourceIndex, j = destinationIndex; i <= lastIndex && j <= lastArrayIndex; i++, j++)
-				destination[j] = thisValue[i];
 		}
 
 		public static void Reverse([NotNull] this IList thisValue, int index, int count)

@@ -331,7 +331,7 @@ namespace asm.Core.Authentication.JwtBearer
 			ISet<Claim> claimsSet = new HashSet<Claim>(ComparisonComparer.FromEqualityComparison<Claim>((a, b) => string.Equals(a?.Type, b?.Type, StringComparison.OrdinalIgnoreCase)));
 			claimsSet.Add(new Claim(JwtRegisteredClaimNames.Sub, subject));
 			claimsSet.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
-			if (claims != null) claimsSet.AddRange(claims);
+			claims?.ForEach(e => claimsSet.Add(e));
 			return new JwtSecurityToken(issuer, audience, claimsSet, notBefore, expires, signingCredentials);
 		}
 	}

@@ -24,6 +24,24 @@ namespace TestApp
 	internal class Program
 	{
 		private static readonly Lazy<Faker> __fakeGenerator = new Lazy<Faker>(() => new Faker(), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly string[] __sortAlgorithms = 
+		{
+			nameof(IListExtension.SortBubble),
+			nameof(IListExtension.SortSelection),
+			nameof(IListExtension.SortInsertion),
+			nameof(IListExtension.SortHeap),
+			nameof(IListExtension.SortMerge),
+			nameof(IListExtension.SortQuick),
+			nameof(IListExtension.SortShell),
+			nameof(IListExtension.SortComb),
+			nameof(IListExtension.SortTim),
+			nameof(IListExtension.SortCocktail),
+			nameof(IListExtension.SortBitonic),
+			nameof(IListExtension.SortPancake),
+			nameof(IListExtension.SortBinary),
+			nameof(IListExtension.SortGnome),
+			nameof(IListExtension.SortBrick)
+		};
 
 		private static void Main()
 		{
@@ -179,29 +197,6 @@ namespace TestApp
 				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
-
-			static Action<IList<T>, int, int, IComparer<T>, bool> GetAlgorithm<T>(string name)
-			{
-				return name switch
-				{
-					nameof(IListExtension.SortBubble) => IListExtension.SortBubble,
-					nameof(IListExtension.SortSelection) => IListExtension.SortSelection,
-					nameof(IListExtension.SortInsertion) => IListExtension.SortInsertion,
-					nameof(IListExtension.SortHeap) => IListExtension.SortHeap,
-					nameof(IListExtension.SortMerge) => IListExtension.SortMerge,
-					nameof(IListExtension.SortQuick) => IListExtension.SortQuick,
-					nameof(IListExtension.SortShell) => IListExtension.SortShell,
-					nameof(IListExtension.SortComb) => IListExtension.SortComb,
-					nameof(IListExtension.SortTim) => IListExtension.SortTim,
-					nameof(IListExtension.SortCocktail) => IListExtension.SortCocktail,
-					nameof(IListExtension.SortBitonic) => IListExtension.SortBitonic,
-					nameof(IListExtension.SortPancake) => IListExtension.SortPancake,
-					nameof(IListExtension.SortBinary) => IListExtension.SortBinary,
-					nameof(IListExtension.SortGnome) => IListExtension.SortGnome,
-					nameof(IListExtension.SortBrick) => IListExtension.SortBrick,
-					_ => throw new NotFoundException()
-				};
-			}
 		}
 
 		private static void TestSortAlgorithms()
@@ -211,24 +206,6 @@ namespace TestApp
 
 			Title("Testing Sort Algorithms...");
 
-			string[] sortAlgorithms = 
-			{
-				nameof(IListExtension.SortBubble),
-				nameof(IListExtension.SortSelection),
-				nameof(IListExtension.SortInsertion),
-				nameof(IListExtension.SortHeap),
-				nameof(IListExtension.SortMerge),
-				nameof(IListExtension.SortQuick),
-				nameof(IListExtension.SortShell),
-				nameof(IListExtension.SortComb),
-				nameof(IListExtension.SortTim),
-				nameof(IListExtension.SortCocktail),
-				nameof(IListExtension.SortBitonic),
-				nameof(IListExtension.SortPancake),
-				nameof(IListExtension.SortBinary),
-				nameof(IListExtension.SortGnome),
-				nameof(IListExtension.SortBrick)
-			};
 
 			Stopwatch watch = new Stopwatch();
 			IComparer<int> numbersComparer = Comparer<int>.Default;
@@ -248,7 +225,7 @@ namespace TestApp
 				Console.WriteLine("String: ".BrightCyan() + string.Join(", ", strings.Select(e => e.SingleQuote())));
 				Console.WriteLine($"Taking an average of {TRIES.ToString().BrightCyan()} times for each algorithm.");
 
-				foreach (string algorithm in sortAlgorithms)
+				foreach (string algorithm in __sortAlgorithms)
 				{
 					Action<IList<int>, int, int, IComparer<int>, bool> sortNumbers = GetAlgorithm<int>(algorithm);
 					Action<IList<string>, int, int, IComparer<string>, bool> sortStrings = GetAlgorithm<string>(algorithm);
@@ -319,29 +296,6 @@ namespace TestApp
 				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
-
-			static Action<IList<T>, int, int, IComparer<T>, bool> GetAlgorithm<T>(string name)
-			{
-				return name switch
-				{
-					nameof(IListExtension.SortBubble) => IListExtension.SortBubble,
-					nameof(IListExtension.SortSelection) => IListExtension.SortSelection,
-					nameof(IListExtension.SortInsertion) => IListExtension.SortInsertion,
-					nameof(IListExtension.SortHeap) => IListExtension.SortHeap,
-					nameof(IListExtension.SortMerge) => IListExtension.SortMerge,
-					nameof(IListExtension.SortQuick) => IListExtension.SortQuick,
-					nameof(IListExtension.SortShell) => IListExtension.SortShell,
-					nameof(IListExtension.SortComb) => IListExtension.SortComb,
-					nameof(IListExtension.SortTim) => IListExtension.SortTim,
-					nameof(IListExtension.SortCocktail) => IListExtension.SortCocktail,
-					nameof(IListExtension.SortBitonic) => IListExtension.SortBitonic,
-					nameof(IListExtension.SortPancake) => IListExtension.SortPancake,
-					nameof(IListExtension.SortBinary) => IListExtension.SortBinary,
-					nameof(IListExtension.SortGnome) => IListExtension.SortGnome,
-					nameof(IListExtension.SortBrick) => IListExtension.SortBrick,
-					_ => throw new NotFoundException()
-				};
-			}
 		}
 
 		private static void TestLinkedQueue()
@@ -388,7 +342,7 @@ namespace TestApp
 			Console.WriteLine("Array: " + string.Join(", ", values));
 
 			Console.WriteLine("As Queue:");
-			MinMaxQueue<int> queue = new MinMaxQueue<int>(DequeuePriority.FIFO);
+			MinMaxQueue<int> queue = new MinMaxQueue<int>();
 
 			foreach (int value in values)
 			{
@@ -406,19 +360,20 @@ namespace TestApp
 			Console.WriteLine();
 			Console.WriteLine();
 			Console.WriteLine("As Stack:");
-			queue = new MinMaxQueue<int>(DequeuePriority.LIFO);
+			
+			MinMaxStack<int> stack = new MinMaxStack<int>();
 
 			foreach (int value in values)
 			{
-				queue.Enqueue(value);
-				Console.WriteLine($"Adding Value: {value}, Min: {queue.Minimum}, Max: {queue.Maximum}");
+				stack.Push(value);
+				Console.WriteLine($"Adding Value: {value}, Min: {stack.Minimum}, Max: {stack.Maximum}");
 			}
 
 			Console.WriteLine();
 
-			while (queue.Count > 0)
+			while (stack.Count > 0)
 			{
-				Console.WriteLine($"Dequeue Value: {queue.Dequeue()}, Min: {queue.Minimum}, Max: {queue.Maximum}");
+				Console.WriteLine($"Dequeue Value: {stack.Pop()}, Min: {stack.Minimum}, Max: {stack.Maximum}");
 			}
 		}
 
@@ -2351,8 +2306,8 @@ namespace TestApp
 			const int MAX_LIST = 26;
 
 			bool more;
-			GraphList<GraphVertex<char>, GraphEdge<char>, char> graph;
-			WeightedGraphList<GraphWeightedEdge<char>, int, char> weightedGraph;
+			GraphList<char> graph;
+			WeightedGraphList<char, int> weightedGraph;
 			List<char> values = new List<char>();
 			Menu menu = new Menu()
 				.Add("Undirected graph", () =>
@@ -2379,21 +2334,21 @@ namespace TestApp
 				.Add("Weighted undirected graph", () =>
 				{
 					Console.WriteLine();
-					weightedGraph = new WeightedUndirectedGraphList<char>();
+					weightedGraph = new WeightedUndirectedGraphList<char, int>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(weightedGraph, values);
 				})
 				.Add("Weighted directed graph", () =>
 				{
 					Console.WriteLine();
-					weightedGraph = new WeightedDirectedGraphList<char>();
+					weightedGraph = new WeightedDirectedGraphList<char, int>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(weightedGraph, values);
 				})
 				.Add("Weighted mixed graph", () =>
 				{
 					Console.WriteLine();
-					weightedGraph = new WeightedMixedGraphList<char>();
+					weightedGraph = new WeightedMixedGraphList<char, int>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(weightedGraph, values);
 				});
@@ -2436,8 +2391,8 @@ namespace TestApp
 				Console.WriteLine($"Added {count} characters to the set".BrightGreen());
 			}
 
-			static bool DoTheTest<TEdge>(GraphList<GraphVertex<char>, TEdge, char> graph, List<char> values)
-				where TEdge : GraphEdge<GraphVertex<char>, TEdge, char>
+			static bool DoTheTest<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, List<char> values)
+				where TAdjacencyList : class, ICollection<TEdge>
 			{
 				Console.WriteLine("Test adding nodes...");
 				Console.WriteLine("characters list: ".BrightBlack() + string.Join(", ", values));
@@ -2467,9 +2422,9 @@ This may cause cycles but also will make it much more fun for weighted shortest 
 				char from = queue.Dequeue();
 				Action<char, char> addEdge = graph switch
 				{
-					MixedGraphList<TEdge, char> mGraph => (f, t) => mGraph.AddEdge(f, t, __fakeGenerator.Value.Random.Bool()),
-					WeightedMixedGraphList<GraphWeightedEdge<char>, int, char> wmGraph => (f, t) => wmGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue), __fakeGenerator.Value.Random.Bool()),
-					WeightedGraphList<GraphWeightedEdge<char>, int, char> wGraph => (f, t) => wGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue)),
+					MixedGraphList<char> mGraph => (f, t) => mGraph.AddEdge(f, t, __fakeGenerator.Value.Random.Bool()),
+					WeightedMixedGraphList<char, int> wmGraph => (f, t) => wmGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue), __fakeGenerator.Value.Random.Bool()),
+					WeightedGraphList<char, int> wGraph => (f, t) => wGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue)),
 					_ => graph.AddEdge
 				};
 
@@ -2506,7 +2461,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 					Console.WriteLine();
 					if (response.Key == ConsoleKey.Escape) continue;
 
-					if (!char.IsLetter(response.KeyChar) || !graph.ContainsEdge(response.KeyChar))
+					if (!char.IsLetter(response.KeyChar) || !graph.ContainsKey(response.KeyChar))
 					{
 						Console.WriteLine($"Character '{value}' is not found or not connected!");
 						continue;
@@ -2521,38 +2476,42 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				return true;
 			}
 
-			static bool DoTheTestWithValue<TEdge>(GraphList<GraphVertex<char>, TEdge, char> graph, List<char> values, char value)
-				where TEdge : GraphEdge<GraphVertex<char>, TEdge, char>
+			static bool DoTheTestWithValue<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, List<char> values, char value)
+				where TAdjacencyList : class, ICollection<TEdge>
 			{
 				Console.WriteLine("Breadth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.BreadthFirst)));
 				Console.WriteLine("Depth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.DepthFirst)));
 				Console.WriteLine("Degree: ".Yellow() + graph.Degree(value));
 
+				// detect a cycle
+				IEnumerable<char> cycle = graph.FindCycle();
+				if (cycle != null) Console.WriteLine("Found cycle: ".BrightRed() + string.Join(", ", cycle));
+
 				switch (graph)
 				{
-					case DirectedGraphList<TEdge, char> directedGraph:
+					case DirectedGraphList<char> directedGraph:
 						Console.WriteLine("InDegree: ".Yellow() + directedGraph.InDegree(value));
 						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", directedGraph.TopologicalSort())); }
 						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
 						break;
-					case MixedGraphList<TEdge, char> mixedGraph:
+					case MixedGraphList<char> mixedGraph:
 						Console.WriteLine("InDegree: ".Yellow() + mixedGraph.InDegree(value));
 						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", mixedGraph.TopologicalSort())); }
 						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
 						break;
-					case WeightedDirectedGraphList<GraphWeightedEdge<char>, int, char> weightedDirectedGraph:
+					case WeightedDirectedGraphList<char, int> weightedDirectedGraph:
 						Console.WriteLine("InDegree: ".Yellow() + weightedDirectedGraph.InDegree(value));
 						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", weightedDirectedGraph.TopologicalSort())); }
 						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
 						break;
-					case WeightedMixedGraphList<GraphWeightedEdge<char>, int, char> weightedMixedGraph:
+					case WeightedMixedGraphList<char, int> weightedMixedGraph:
 						Console.WriteLine("InDegree: ".Yellow() + weightedMixedGraph.InDegree(value));
 						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", weightedMixedGraph.TopologicalSort())); }
 						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
 						break;
 				}
 
-				if (graph is WeightedGraphList<GraphWeightedEdge<char>, int, char> wGraph)
+				if (graph is WeightedGraphList<char, int> wGraph)
 				{
 					char to = values.PickRandom();
 					ConsoleKeyInfo response;
@@ -2566,7 +2525,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 						Console.WriteLine();
 						if (response.Key == ConsoleKey.Escape) return false;
 						if (response.Key == ConsoleKey.Enter) continue;
-						if (!char.IsLetter(response.KeyChar) || !wGraph.ContainsEdge(response.KeyChar)) Console.WriteLine($"Character '{value}' is not found or not connected!");
+						if (!char.IsLetter(response.KeyChar) || !wGraph.ContainsKey(response.KeyChar)) Console.WriteLine($"Character '{value}' is not found or not connected!");
 						to = response.KeyChar;
 						break;
 					}
@@ -2677,6 +2636,30 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			Console.WriteLine();
 			Console.WriteLine(title.Bold().BrightBlack());
 			Console.WriteLine();
+		}
+
+		[NotNull]
+		private static Action<IList<T>, int, int, IComparer<T>, bool> GetAlgorithm<T>([NotNull] string name)
+		{
+			return name switch
+			{
+				nameof(IListExtension.SortBubble) => IListExtension.SortBubble,
+				nameof(IListExtension.SortSelection) => IListExtension.SortSelection,
+				nameof(IListExtension.SortInsertion) => IListExtension.SortInsertion,
+				nameof(IListExtension.SortHeap) => IListExtension.SortHeap,
+				nameof(IListExtension.SortMerge) => IListExtension.SortMerge,
+				nameof(IListExtension.SortQuick) => IListExtension.SortQuick,
+				nameof(IListExtension.SortShell) => IListExtension.SortShell,
+				nameof(IListExtension.SortComb) => IListExtension.SortComb,
+				nameof(IListExtension.SortTim) => IListExtension.SortTim,
+				nameof(IListExtension.SortCocktail) => IListExtension.SortCocktail,
+				nameof(IListExtension.SortBitonic) => IListExtension.SortBitonic,
+				nameof(IListExtension.SortPancake) => IListExtension.SortPancake,
+				nameof(IListExtension.SortBinary) => IListExtension.SortBinary,
+				nameof(IListExtension.SortGnome) => IListExtension.SortGnome,
+				nameof(IListExtension.SortBrick) => IListExtension.SortBrick,
+				_ => throw new NotFoundException()
+			};
 		}
 
 		[NotNull]
@@ -2836,26 +2819,23 @@ public static class Extension
 		thisValue.WriteTo(Console.Out);
 	}
 
-	public static void PrintProps<TVertex, TEdge, T>([NotNull] this GraphList<TVertex, TEdge, T> thisValue)
-		where TVertex : GraphVertex<TVertex, T>
-		where TEdge : GraphEdge<TVertex, TEdge, T>
+	public static void PrintProps<T, TAdjacencyList, TEdge>([NotNull] this GraphList<T, TAdjacencyList, TEdge> thisValue)
+		where TAdjacencyList : class, ICollection<TEdge>
 	{
 		Console.WriteLine();
 		Console.WriteLine($"{"Order:".Yellow()} {thisValue.Count.ToString().Underline()}.");
 		Console.WriteLine($"{"Size:".Yellow()} {thisValue.GetSize().ToString().Underline()}.");
 	}
 
-	public static void PrintWithProps<TVertex, TEdge, T>([NotNull] this GraphList<TVertex, TEdge, T> thisValue)
-		where TVertex : GraphVertex<TVertex, T>
-		where TEdge : GraphEdge<TVertex, TEdge, T>
+	public static void PrintWithProps<T, TAdjacencyList, TEdge>([NotNull] this GraphList<T, TAdjacencyList, TEdge> thisValue)
+		where TAdjacencyList : class, ICollection<TEdge>
 	{
 		PrintProps(thisValue);
 		thisValue.Print();
 	}
 
-	public static void Print<TVertex, TEdge, T>([NotNull] this GraphList<TVertex, TEdge, T> thisValue)
-		where TVertex : GraphVertex<TVertex, T>
-		where TEdge : GraphEdge<TVertex, TEdge, T>
+	public static void Print<T, TAdjacencyList, TEdge>([NotNull] this GraphList<T, TAdjacencyList, TEdge> thisValue)
+		where TAdjacencyList : class, ICollection<TEdge>
 	{
 		Console.WriteLine();
 		thisValue.WriteTo(Console.Out);

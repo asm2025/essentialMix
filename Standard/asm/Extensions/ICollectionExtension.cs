@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
@@ -11,70 +10,6 @@ namespace asm.Extensions
 {
 	public static class ICollectionExtension
 	{
-		public static void AddRange<T>([NotNull] this ICollection<T> thisValue, [NotNull] IEnumerable<T> values)
-		{
-			foreach (T item in values)
-				thisValue.Add(item);
-		}
-
-		public static void CopyFrom<T>([NotNull] this ICollection<T> thisValue, [NotNull] IEnumerable<T> values)
-		{
-			thisValue.Clear();
-			AddRange(thisValue, values);
-		}
-
-		public static void CloneFrom<T>([NotNull] this ICollection<T> thisValue, [NotNull] IEnumerable<T> values)
-		{
-			thisValue.Clear();
-
-			if (typeof(T) is ICloneable)
-			{
-				foreach (T value in values)
-					thisValue.Add((T)((ICloneable)value).Clone());
-			}
-			else
-			{
-				foreach (T value in values)
-					thisValue.Add(value);
-			}
-		}
-
-		public static void RemoveRange<T>([NotNull] this ICollection<T> thisValue, int startIndex, int count)
-		{
-			if (thisValue.Count == 0) return;
-			thisValue.Count.ValidateRange(startIndex, ref count);
-			if (count == 0) return;
-
-			T[] items = thisValue.GetRange(startIndex, count);
-
-			foreach (T item in items)
-				thisValue.Remove(item);
-		}
-
-		public static int RemoveAll<T>([NotNull] this ICollection<T> thisValue, [NotNull] Predicate<T> match)
-		{
-			ICollection<T> items = new Collection<T>();
-
-			foreach (T item in thisValue)
-			{
-				if (!match(item)) continue;
-				items.Add(item);
-			}
-
-			if (items.Count == 0) return 0;
-
-			foreach (T item in items)
-				thisValue.Remove(item);
-
-			return items.Count;
-		}
-
-		public static void MoveTo<T>([NotNull] this ICollection<T> thisValue, [NotNull] ICollection<T> destination)
-		{
-			destination.AddRange(thisValue);
-			thisValue.Clear();
-		}
-
 		[NotNull]
 		public static object[] GetRange([NotNull] this ICollection thisValue, int startIndex, int count)
 		{

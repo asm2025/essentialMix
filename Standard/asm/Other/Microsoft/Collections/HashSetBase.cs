@@ -21,6 +21,24 @@ namespace asm.Other.Microsoft.Collections
 	[HostProtection(MayLeakOnAbort = true)]
 	public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
 	{
+		// store lower 31 bits of hash code
+		private const int LOWER31_BIT_MASK = 0x7FFFFFFF;
+
+		// cutoff point, above which we won't do stackallocs. This corresponds to 100 integers.
+		private const int STACK_ALLOC_THRESHOLD = 100;
+
+		// when constructing a hashset from an existing collection, it may contain duplicates, 
+		// so this is used as the max acceptable excess ratio of capacity to count. Note that
+		// this is only used on the ctor and not to automatically shrink if the hashset has, e.g,
+		// a lot of adds followed by removes. Users must explicitly shrink by calling TrimExcess.
+		// This is set to 3 because capacity is acceptable as 2x rounded up to nearest prime.
+		private const int SHRINK_THRESHOLD = 3;
+		
+		private const string VERSION_NAME = "Version";
+		private const string COMPARER_NAME = "Comparer";
+		private const string CAPACITY_NAME = "Capacity";
+		private const string ELEMENTS_NAME = "Elements";
+
 		[Serializable]
 		[HostProtection(MayLeakOnAbort = true)]
 		public struct Enumerator : IEnumerator<T>, IEnumerator
@@ -93,29 +111,12 @@ namespace asm.Other.Microsoft.Collections
 			internal T Value;
 		}
 
-		// store lower 31 bits of hash code
-		private const int LOWER31_BIT_MASK = 0x7FFFFFFF;
-
-		// cutoff point, above which we won't do stackallocs. This corresponds to 100 integers.
-		private const int STACK_ALLOC_THRESHOLD = 100;
-
-		// when constructing a hashset from an existing collection, it may contain duplicates, 
-		// so this is used as the max acceptable excess ratio of capacity to count. Note that
-		// this is only used on the ctor and not to automatically shrink if the hashset has, e.g,
-		// a lot of adds followed by removes. Users must explicitly shrink by calling TrimExcess.
-		// This is set to 3 because capacity is acceptable as 2x rounded up to nearest prime.
-		private const int SHRINK_THRESHOLD = 3;
-		
-		private const string VERSION_NAME = "Version";
-		private const string COMPARER_NAME = "Comparer";
-		private const string CAPACITY_NAME = "Capacity";
-		private const string ELEMENTS_NAME = "Elements";
+		protected internal int _version;
 
 		private int[] _buckets;
 		private Slot[] _slots;
 		private int _lastIndex;
 		private int _freeList;
-		private int _version;
 
 		// temporary variable needed during deserialization
 		private SerializationInfo _siInfo;

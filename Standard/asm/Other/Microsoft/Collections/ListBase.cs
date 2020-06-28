@@ -215,7 +215,7 @@ namespace asm.Other.Microsoft.Collections
 			}
 		}
 
-		private int _version;
+		protected internal int _version;
 
 		[NonSerialized]
 		private object _syncRoot;

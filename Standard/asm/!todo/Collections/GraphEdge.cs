@@ -5,43 +5,49 @@ using JetBrains.Annotations;
 
 namespace asm.Collections
 {
-	[DebuggerDisplay("{To}")]
+	[DebuggerDisplay("{To} :{Weight}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class GraphEdge<TVertex, TEdge, T>
-		where TVertex : GraphVertex<TVertex, T>
-		where TEdge : GraphEdge<TVertex, TEdge, T>
+	public class GraphEdge<T, TWeight>
+		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
-		protected GraphEdge([NotNull] TVertex to)
+		public GraphEdge([NotNull] T to)
+			: this(to, default(TWeight))
+		{
+		}
+
+		public GraphEdge([NotNull] T to, TWeight weight)
 		{
 			To = to;
+			Weight = weight;
 		}
 
 		[NotNull]
-		public TVertex To { get; }
+		public T To { get; }
+
+		public TWeight Weight { get; set; }
 
 		/// <inheritdoc />
 		[NotNull]
-		public override string ToString() { return To.ToString(); }
+		public override string ToString() { return $"{To} :{Weight}"; }
+
+		[NotNull]
+		public static implicit operator T([NotNull] GraphEdge<T, TWeight> edge) { return edge.To; }
 	}
 
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class GraphEdge<TEdge, T> : GraphEdge<GraphVertex<T>, TEdge, T>
-		where TEdge : GraphEdge<GraphVertex<T>, TEdge, T>
+	public class GraphEdge<T> : GraphEdge<T, int>
 	{
-		protected GraphEdge([NotNull] GraphVertex<T> to)
+		/// <inheritdoc />
+		public GraphEdge([NotNull] T to)
 			: base(to)
 		{
 		}
-	}
 
-	[Serializable]
-	[StructLayout(LayoutKind.Sequential)]
-	public class GraphEdge<T> : GraphEdge<GraphEdge<T>, T>
-	{
-		public GraphEdge([NotNull] GraphVertex<T> to)
-			: base(to)
+		/// <inheritdoc />
+		public GraphEdge([NotNull] T to, int weight)
+			: base(to, weight)
 		{
 		}
 	}

@@ -124,12 +124,12 @@ namespace asm.Collections
 
 		[NotNull]
 		[NonSerialized]
-		private ICollection _collection;
+		private ICollection _collectionRef;
 
 		public LinkedDeque()
 		{
 			Items = new LinkedList<T>();
-			_collection = Items;
+			_collectionRef = Items;
 		}
 
 		/// <inheritdoc cref="ICollection{T}" />
@@ -139,10 +139,10 @@ namespace asm.Collections
 		bool ICollection<T>.IsReadOnly => false;
 
 		/// <inheritdoc />
-		public bool IsSynchronized => _collection.IsSynchronized;
+		public bool IsSynchronized => _collectionRef.IsSynchronized;
 
 		/// <inheritdoc />
-		object ICollection.SyncRoot => _collection.SyncRoot;
+		object ICollection.SyncRoot => _collectionRef.SyncRoot;
 
 		[NotNull]
 		protected LinkedList<T> Items { get; }
@@ -308,7 +308,7 @@ namespace asm.Collections
 		public void CopyTo(T[] array, int arrayIndex) { Items.CopyTo(array, arrayIndex); }
 
 		/// <inheritdoc />
-		public void CopyTo(Array array, int index) { _collection.CopyTo(array, index); }
+		public void CopyTo(Array array, int index) { _collectionRef.CopyTo(array, index); }
 
 		[NotNull]
 		public static ICollection<T> Synchronized(LinkedDeque<T> list)

@@ -7,11 +7,10 @@ using JetBrains.Annotations;
 
 namespace asm.Collections
 {
-	[Serializable]
-	public sealed class MinMaxQueue<T> : IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
+	public sealed class MinMaxStack<T> : IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
 		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
 	{
-		private readonly Queue<T> _queue;
+		private readonly Stack<T> _stack;
 		private readonly T _minimum;
 		private readonly T _maximum;
 		private readonly Stack<T> _minStack;
@@ -20,34 +19,34 @@ namespace asm.Collections
 		[NonSerialized]
 		private readonly ICollection _collectionRef;
 
-		public MinMaxQueue()
+		public MinMaxStack()
 			: this(0, null)
 		{
 		}
 
-		public MinMaxQueue(int capacity)
+		public MinMaxStack(int capacity)
 			: this(capacity, null)
 		{
 		}
 
-		public MinMaxQueue([NotNull] IEnumerable<T> collection)
+		public MinMaxStack([NotNull] IEnumerable<T> collection)
 			: this(0, collection)
 		{
 		}
 
-		private MinMaxQueue(int capacity, IEnumerable<T> collection)
+		private MinMaxStack(int capacity, IEnumerable<T> collection)
 		{
-			_queue = collection == null
-						? new Queue<T>(capacity)
-						: new Queue<T>(collection);
-			_collectionRef = _queue;
+			_stack = collection == null
+						? new Stack<T>(capacity)
+						: new Stack<T>(collection);
+			_collectionRef = _stack;
 			_minimum = TypeHelper.MinimumOf<T>();
 			_maximum = TypeHelper.MaximumOf<T>();
 			_minStack = new Stack<T>();
 			_maxStack = new Stack<T>();
 		}
 
-		public int Count => _queue.Count;
+		public int Count => _stack.Count;
 
 		public object SyncRoot => _collectionRef.SyncRoot;
 
@@ -63,32 +62,32 @@ namespace asm.Collections
 				? _minimum
 				: _maxStack.Peek();
 
-		public IEnumerator<T> GetEnumerator() { return _queue.GetEnumerator(); }
+		public IEnumerator<T> GetEnumerator() { return _stack.GetEnumerator(); }
 
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-		public void Enqueue(T item)
+		public void Push(T item)
 		{
 			if (item.IsLessThanOrEqual(Minimum)) _minStack.Push(item);
 			if (item.IsGreaterThanOrEqual(Maximum)) _maxStack.Push(item);
-			_queue.Enqueue(item);
+			_stack.Push(item);
 		}
 
-		public T Dequeue()
+		public T Pop()
 		{
-			T item = _queue.Dequeue();
+			T item = _stack.Pop();
 			if (item.IsEqual(Minimum)) _minStack.Pop();
 			if (item.IsEqual(Maximum)) _maxStack.Pop();
 			return item;
 		}
 
-		public T Peek() { return _queue.Peek(); }
+		public T Peek() { return _stack.Peek(); }
 
-		public void Clear() { _queue.Clear(); }
+		public void Clear() { _stack.Clear(); }
 		
-		public bool Contains(T item) { return _queue.Contains(item); }
+		public bool Contains(T item) { return _stack.Contains(item); }
 
-		public void CopyTo([NotNull] T[] array, int index) { _queue.CopyTo(array, index); }
+		public void CopyTo([NotNull] T[] array, int index) { _stack.CopyTo(array, index); }
 
 		void ICollection.CopyTo(Array array, int index)
 		{
@@ -96,8 +95,8 @@ namespace asm.Collections
 		}
 
 		[NotNull]
-		public T[] ToArray() { return _queue.ToArray(); }
+		public T[] ToArray() { return _stack.ToArray(); }
 
-		public void TrimExcess() { _queue.TrimExcess(); }
+		public void TrimExcess() { _stack.TrimExcess(); }
 	}
 }

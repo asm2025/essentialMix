@@ -9,6 +9,9 @@ namespace asm.Collections
 	[Serializable]
 	public class KeyedCollection<TKey, TValue> : System.Collections.ObjectModel.KeyedCollection<TKey, TValue>, IReadOnlyKeyedCollection<TKey, TValue>, IReadOnlyList<TValue>, IReadOnlyCollection<TValue>, IList<TValue>, IList
 	{
+		[NotNull]
+		protected readonly Func<TValue, TKey> GetKey;
+
 		public KeyedCollection([NotNull] Func<TValue, TKey> getKey)
 			: this(getKey, null, 0)
 		{
@@ -39,9 +42,6 @@ namespace asm.Collections
 			foreach (TValue value in collection) 
 				Add(value);
 		}
-
-		[NotNull]
-		public Func<TValue, TKey> GetKey { get; }
 
 		public bool IsFixedSize => false;
 

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
+using System.Linq;
+using System.Runtime.Serialization;
+using asm.Exceptions.Collections;
 
 namespace asm.Collections
 {
@@ -10,104 +12,100 @@ namespace asm.Collections
 	/// </summary>
 	/// <inheritdoc/>
 	[Serializable]
-	public abstract class WeightedUndirectedGraphList<TEdge, TWeight, T> : WeightedGraphList<TEdge, TWeight, T>
-		where TEdge : GraphWeightedEdge<GraphVertex<T>, TEdge, TWeight, T>
+	public class WeightedUndirectedGraphList<T, TWeight> : WeightedGraphList<T, TWeight>
 		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
 		/// <inheritdoc />
-		protected WeightedUndirectedGraphList()
-			: this((IEqualityComparer<T>)null)
+		public WeightedUndirectedGraphList()
+			: this(0, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected WeightedUndirectedGraphList(IEqualityComparer<T> comparer)
-			: base(comparer)
+		public WeightedUndirectedGraphList(int capacity)
+			: this(capacity, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected WeightedUndirectedGraphList([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
+		public WeightedUndirectedGraphList(IEqualityComparer<T> comparer)
+			: this(0, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected WeightedUndirectedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
-			: base(collection, comparer)
+		public WeightedUndirectedGraphList(int capacity, IEqualityComparer<T> comparer)
+			: base(capacity, comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		protected WeightedUndirectedGraphList(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
 		}
 
 		/// <inheritdoc />
 		public override void AddEdge(T from, T to, TWeight weight)
 		{
-			if (!Vertices.ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
-			if (!Vertices.ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
+			if (!ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
+			if (!ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
 
-			if (!Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges))
+			if (!TryGetValue(from, out KeyedCollection<T, GraphEdge<T, TWeight>> fromEdges) || fromEdges == null)
 			{
 				fromEdges = NewEdgesContainer();
-				Edges.Add(from, fromEdges);
+				this[from] = fromEdges;
 			}
 
-			if (fromEdges.TryGetValue(to, out TEdge fromEdge))
+			if (fromEdges.TryGetValue(to, out GraphEdge<T, TWeight> fromEdge))
 			{
 				if (fromEdge.Weight.CompareTo(weight) > 0) fromEdge.Weight = weight;
 			}
 			else
 			{
-				fromEdge = NewEdge(to);
-				fromEdge.Weight = weight;
+				fromEdge = new GraphEdge<T, TWeight>(to, weight);
 				fromEdges.Add(fromEdge);
 			}
 
 			// short-circuit - loop edge
 			if (Comparer.Equals(from, to)) return;
 
-			if (!Edges.TryGetValue(to, out KeyedDictionary<T, TEdge> toEdges))
+			if (!TryGetValue(to, out KeyedCollection<T, GraphEdge<T, TWeight>> toEdges) || toEdges == null)
 			{
 				toEdges = NewEdgesContainer();
-				Edges.Add(to, toEdges);
+				this[to] = toEdges;
 			}
 
-			if (toEdges.TryGetValue(to, out TEdge toEdge))
+			if (toEdges.TryGetValue(from, out GraphEdge<T, TWeight> toEdge))
 			{
 				if (toEdge.Weight.CompareTo(weight) > 0) toEdge.Weight = weight;
 			}
 			else
 			{
-				toEdge = NewEdge(from);
-				toEdge.Weight = weight;
+				toEdge = new GraphEdge<T, TWeight>(from, weight);
 				toEdges.Add(toEdge);
 			}
 		}
 
 		/// <inheritdoc />
-		public override void RemoveEdge(T from, T to)
+		public override bool RemoveEdge(T from, T to)
 		{
-			if (Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges))
-			{
-				fromEdges.RemoveByKey(to);
-				if (fromEdges.Count == 0) Edges.Remove(from);
-			}
-
-			if (Edges.TryGetValue(to, out KeyedDictionary<T, TEdge> toEdges))
-			{
-				toEdges.RemoveByKey(from);
-				if (toEdges.Count == 0) Edges.Remove(to);
-			}
+			bool removed = false;
+			if (TryGetValue(from, out KeyedCollection<T, GraphEdge<T, TWeight>> fromEdges) && fromEdges != null) removed |= fromEdges.Remove(to);
+			if (TryGetValue(to, out KeyedCollection<T, GraphEdge<T, TWeight>> toEdges) && toEdges != null) removed |= toEdges.Remove(from);
+			return removed;
 		}
 
 		public override void SetWeight(T from, T to, TWeight weight)
 		{
-			if (Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges)
-				&& fromEdges.TryGetValue(to, out TEdge fromEdge))
+			if (TryGetValue(from, out KeyedCollection<T, GraphEdge<T, TWeight>> fromEdges)
+				&& fromEdges != null && fromEdges.TryGetValue(to, out GraphEdge<T, TWeight> fromEdge))
 			{
 				fromEdge.Weight = weight;
 			}
 
-			if (Edges.TryGetValue(to, out KeyedDictionary<T, TEdge> toEdges)
-				&& toEdges.TryGetValue(from, out TEdge toEdge))
+			if (TryGetValue(to, out KeyedCollection<T, GraphEdge<T, TWeight>> toEdges)
+				&& toEdges != null && toEdges.TryGetValue(from, out GraphEdge<T, TWeight> toEdge))
 			{
 				toEdge.Weight = weight;
 			}
@@ -118,12 +116,14 @@ namespace asm.Collections
 		{
 			int sum = 0;
 
-			foreach (KeyValuePair<T, KeyedDictionary<T, TEdge>> pair in Edges)
+			foreach (KeyValuePair<T, KeyedCollection<T, GraphEdge<T, TWeight>>> pair in this)
 			{
-				foreach (TEdge edge in pair.Value.Values)
+				if (pair.Value == null) continue;
+
+				foreach (GraphEdge<T, TWeight> edge in pair.Value.Values)
 				{
-					if (IsLoop(pair.Key, edge)) sum += 2;
-					else sum++;
+					sum++;
+					if (IsLoop(pair.Key, edge)) sum++;
 				}
 			}
 
@@ -131,82 +131,52 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected override GraphVertex<T> NewVertex([NotNull] T value)
+		protected override IEnumerable<T> FindCycle(ICollection<T> vertices, bool ignoreLoop = false)
 		{
-			return new GraphVertex<T>(value);
-		}
-	}
+			// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
+			if (vertices.Count == 0) return null;
+			
+			bool conflictIsSet = false;
+			T conflictVertex = default(T);
+			HashSet<T> visitedSet = new HashSet<T>(Comparer);
+			int graphVersion = _version;
 
-	/// <inheritdoc/>
-	[Serializable]
-	public class WeightedUndirectedGraphList<TWeight, T> : WeightedUndirectedGraphList<GraphWeightedEdge<TWeight, T>, TWeight, T>
-		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
-	{
-		/// <inheritdoc />
-		public WeightedUndirectedGraphList()
-			: this((IEqualityComparer<T>)null)
-		{
-		}
+			foreach (T vertex in vertices)
+			{
+				if (graphVersion != _version) throw new VersionChangedException();
+				if (visitedSet.Contains(vertex) || !FindCycleLocal(vertex, vertex, visitedSet, graphVersion, ref conflictVertex, ref conflictIsSet)) continue;
+				return visitedSet.Append(conflictVertex);
+			}
 
-		/// <inheritdoc />
-		public WeightedUndirectedGraphList(IEqualityComparer<T> comparer)
-			: base(comparer)
-		{
-		}
+			return null;
 
-		/// <inheritdoc />
-		public WeightedUndirectedGraphList([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
-		{
-		}
+			bool FindCycleLocal(T vertex, T parent, HashSet<T> visited, int version, ref T conflict, ref bool conflictSet)
+			{
+				if (version != _version) throw new VersionChangedException();
+				if (visited.Contains(vertex)) return false;
+				visited.Add(vertex);
 
-		/// <inheritdoc />
-		public WeightedUndirectedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
-			: base(collection, comparer)
-		{
-		}
+				if (TryGetValue(vertex, out KeyedCollection<T, GraphEdge<T, TWeight>> edges) && edges != null)
+				{
+					foreach (GraphEdge<T, TWeight> edge in edges.Values.OrderBy(e => e.Weight))
+					{
+						if (IsLoop(parent, edge) || ignoreLoop && IsLoop(vertex, edge)) continue;
 
-		/// <inheritdoc />
-		protected override GraphWeightedEdge<TWeight, T> NewEdge([NotNull] T value)
-		{
-			if (!Vertices.TryGetValue(value, out GraphVertex<T> vertex)) throw new KeyNotFoundException();
-			return new GraphWeightedEdge<TWeight, T>(vertex);
-		}
-	}
+						if (visited.Contains(edge.To) /* cycle detected */ || FindCycleLocal(edge.To, vertex, visited, version, ref conflict, ref conflictSet))
+						{
+							if (!conflictSet)
+							{
+								conflictSet = true;
+								conflict = edge.To;
+							}
 
-	/// <inheritdoc/>
-	[Serializable]
-	public class WeightedUndirectedGraphList<T> : WeightedUndirectedGraphList<GraphWeightedEdge<T>, int, T>
-	{
-		/// <inheritdoc />
-		public WeightedUndirectedGraphList()
-			: this((IEqualityComparer<T>)null)
-		{
-		}
+							return true;
+						}
+					}
+				}
 
-		/// <inheritdoc />
-		public WeightedUndirectedGraphList(IEqualityComparer<T> comparer)
-			: base(comparer)
-		{
-		}
-
-		/// <inheritdoc />
-		public WeightedUndirectedGraphList([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
-		{
-		}
-
-		/// <inheritdoc />
-		public WeightedUndirectedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
-			: base(collection, comparer)
-		{
-		}
-
-		/// <inheritdoc />
-		protected override GraphWeightedEdge<T> NewEdge([NotNull] T value)
-		{
-			if (!Vertices.TryGetValue(value, out GraphVertex<T> vertex)) throw new KeyNotFoundException();
-			return new GraphWeightedEdge<T>(vertex);
+				return false;
+			}
 		}
 	}
 }

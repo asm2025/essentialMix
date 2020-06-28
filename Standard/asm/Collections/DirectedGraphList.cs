@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using asm.Exceptions.Collections;
 using JetBrains.Annotations;
 
@@ -12,67 +13,63 @@ namespace asm.Collections
 	/// </summary>
 	/// <inheritdoc/>
 	[Serializable]
-	public abstract class DirectedGraphList<TEdge, T> : GraphList<GraphVertex<T>, TEdge, T>
-		where TEdge : GraphEdge<GraphVertex<T>, TEdge, T>
+	public class DirectedGraphList<T> : GraphList<T>
 	{
 		/// <inheritdoc />
-		protected DirectedGraphList()
-			: this((IEqualityComparer<T>)null)
+		public DirectedGraphList()
+			: this(0, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected DirectedGraphList(IEqualityComparer<T> comparer)
-			: base(comparer)
+		public DirectedGraphList(int capacity)
+			: this(capacity, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected DirectedGraphList([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
+		public DirectedGraphList(IEqualityComparer<T> comparer)
+			: this(0, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected DirectedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
-			: base(collection, comparer)
+		public DirectedGraphList(int capacity, IEqualityComparer<T> comparer)
+			: base(capacity, comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		protected DirectedGraphList(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
 		}
 
 		/// <inheritdoc />
 		public override void AddEdge(T from, T to)
 		{
-			if (!Vertices.ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
-			if (!Vertices.ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
+			if (!ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
+			if (!ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
 
-			if (!Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges))
+			if (!TryGetValue(from, out HashSet<T> fromEdges) || fromEdges == null)
 			{
 				fromEdges = NewEdgesContainer();
-				Edges.Add(from, fromEdges);
+				this[from] = fromEdges;
 			}
 
-			fromEdges.Add(NewEdge(to));
+			fromEdges.Add(to);
 		}
 
 		/// <inheritdoc />
-		public override void RemoveEdge(T from, T to)
-		{
-			if (!Edges.TryGetValue(from, out KeyedDictionary<T, TEdge> fromEdges)) return;
-			fromEdges.RemoveByKey(to);
-			if (fromEdges.Count == 0) Edges.Remove(from);
-		}
+		public override bool RemoveEdge(T from, T to) { return TryGetValue(from, out HashSet<T> fromEdges) && fromEdges != null && fromEdges.Remove(to); }
 
 		public int InDegree([NotNull] T value)
 		{
 			int degree = 0;
 
-			foreach (KeyValuePair<T, KeyedDictionary<T, TEdge>> pair in Edges)
+			foreach (KeyValuePair<T, HashSet<T>> pair in this)
 			{
-				foreach (TEdge edge in pair.Value)
-				{
-					if (!Comparer.Equals(value, edge.To.Value)) continue;
-					degree++;
-				}
+				if (pair.Value != null && pair.Value.Contains(value)) degree++;
 			}
 
 			return degree;
@@ -81,111 +78,110 @@ namespace asm.Collections
 		[NotNull]
 		public IEnumerable<T> TopologicalSort()
 		{
+			// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
 			if (Count == 0) return Enumerable.Empty<T>();
 
-			int version = _version;
-			Stack<T> result = new Stack<T>(Count);
-			Stack<T> stack = new Stack<T>();
-			// for detecting cycles if any
-			LinkedList<T> cycle = new LinkedList<T>();
-			HashSet<T> visiting = new HashSet<T>(Comparer);
-			// keep track of visited vertices
-			HashSet<T> visited = new HashSet<T>(Comparer);
+			// for detecting cycles
+			bool conflictIsSet = false;
+			T conflictVertex = default(T);
+			HashSet<T> visitingSet = new HashSet<T>(Comparer);
+			HashSet<T> visitedSet = new HashSet<T>(Comparer);
+			Stack<T> resultStack = new Stack<T>(Count);
+			int graphVersion = _version;
 
-			foreach (T key in Edges.Keys)
+			foreach (T vertex in Keys)
 			{
-				if (version != _version) throw new VersionChangedException();
-				if (visited.Contains(key)) continue;
-				int deque = 0;
-				stack.Push(key);
-
-				while (stack.Count > 0)
-				{
-					if (version != _version) throw new VersionChangedException();
-
-					T value = stack.Pop();
-					if (visited.Contains(value)) continue;
-					visiting.Add(value);
-					deque++;
-					cycle.AddLast(value);
-					result.Push(value);
-
-					if (Edges.TryGetValue(value, out KeyedDictionary<T, TEdge> edges))
-					{
-						foreach (TEdge edge in edges)
-						{
-							if (visited.Contains(edge.To.Value)) continue;
-
-							// cycle detected
-							if (visiting.Contains(edge.To.Value))
-							{
-								cycle.AddLast(edge.To.Value);
-
-								while (!Comparer.Equals(edge.To.Value, cycle.First.Value))
-									cycle.RemoveFirst();
-
-								throw new Exception($"Cycle detected [{string.Join(", ", cycle)}]");
-							}
-
-							stack.Push(edge.To.Value);
-						}
-
-						continue;
-					}
-
-					while (deque-- > 0)
-					{
-						T d = cycle.Last.Value;
-						cycle.RemoveLast();
-						visiting.Remove(d);
-						visited.Add(d);
-					}
-				}
+				if (graphVersion != _version) throw new VersionChangedException();
+				if (TopologicalSortLocal(vertex, visitingSet, visitedSet, resultStack, graphVersion, ref conflictVertex, ref conflictIsSet)) continue;
+				// cycle detected
+				throw new Exception($"Cycle detected [{string.Join(", ", visitingSet.Append(conflictVertex))}]");
 			}
 
-			return result;
+			return resultStack.Reverse();
+
+			bool TopologicalSortLocal(T vertex, HashSet<T> visiting, HashSet<T> visited, Stack<T> result, int version, ref T conflict, ref bool conflictSet)
+			{
+				if (version != _version) throw new VersionChangedException();
+				if (visited.Contains(vertex)) return true;
+				visiting.Add(vertex);
+
+				if (TryGetValue(vertex, out HashSet<T> edges) && edges != null)
+				{
+					foreach (T edge in edges)
+					{
+						if (visited.Contains(edge) || IsLoop(vertex, edge)) continue;
+
+						if (visiting.Contains(edge) /* cycle detected */ || !TopologicalSortLocal(edge, visiting, visited, result, version, ref conflict, ref conflictSet))
+						{
+							if (!conflictSet)
+							{
+								conflictSet = true;
+								conflict = edge;
+							}
+
+							return false;
+						}
+					}
+				}
+
+				visiting.Remove(vertex);
+				visited.Add(vertex);
+				result.Push(vertex);
+				return true;
+			}
 		}
 
 		/// <inheritdoc />
-		protected override GraphVertex<T> NewVertex([NotNull] T value)
+		protected override IEnumerable<T> FindCycle(ICollection<T> vertices, bool ignoreLoop = false)
 		{
-			return new GraphVertex<T>(value);
-		}
-	}
-	
-	/// <inheritdoc/>
-	[Serializable]
-	public class DirectedGraphList<T> : DirectedGraphList<GraphEdge<T>, T>
-	{
-		/// <inheritdoc />
-		public DirectedGraphList()
-			: this((IEqualityComparer<T>)null)
-		{
-		}
+			// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
+			if (vertices.Count == 0) return null;
 
-		/// <inheritdoc />
-		public DirectedGraphList(IEqualityComparer<T> comparer)
-			: base(comparer)
-		{
-		}
+			bool conflictIsSet = false;
+			T conflictVertex = default(T);
+			HashSet<T> visitingSet = new HashSet<T>(Comparer);
+			HashSet<T> visitedSet = new HashSet<T>(Comparer);
+			int graphVersion = _version;
 
-		/// <inheritdoc />
-		public DirectedGraphList([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
-		{
-		}
+			foreach (T vertex in vertices)
+			{
+				if (graphVersion != _version) throw new VersionChangedException();
+				if (!FindCycleLocal(vertex, visitingSet, visitedSet, graphVersion, ref conflictVertex, ref conflictIsSet)) continue;
+				return visitingSet.Append(conflictVertex);
+			}
 
-		/// <inheritdoc />
-		public DirectedGraphList([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
-			: base(collection, comparer)
-		{
-		}
+			return null;
 
-		/// <inheritdoc />
-		protected override GraphEdge<T> NewEdge([NotNull] T value)
-		{
-			if (!Vertices.TryGetValue(value, out GraphVertex<T> vertex)) throw new KeyNotFoundException();
-			return new GraphEdge<T>(vertex);
+			bool FindCycleLocal(T vertex, HashSet<T> visiting, HashSet<T> visited, int version, ref T conflict, ref bool conflictSet)
+			{
+				if (version != _version) throw new VersionChangedException();
+				
+				if (visited.Contains(vertex)) return false;
+				visiting.Add(vertex);
+
+				if (TryGetValue(vertex, out HashSet<T> edges) && edges != null)
+				{
+					foreach (T edge in edges)
+					{
+						if (visited.Contains(edge) || ignoreLoop && IsLoop(vertex, edge)) continue;
+
+						if (visiting.Contains(edge) /* cycle detected */ || FindCycleLocal(edge, visiting, visited, version, ref conflict, ref conflictSet))
+						{
+							if (!conflictSet)
+							{
+								conflictSet = true;
+								conflict = edge;
+							}
+
+							return true;
+						}
+					}
+				}
+
+				visiting.Remove(vertex);
+				visited.Add(vertex);
+				return false;
+			}
 		}
 	}
 }

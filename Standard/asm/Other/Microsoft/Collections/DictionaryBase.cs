@@ -395,10 +395,11 @@ namespace asm.Other.Microsoft.Collections
 		private const string HASH_SIZE_NAME = "HashSize"; // Must save buckets.Length
 		private const string KEY_VALUE_PAIRS_NAME = "KeyValuePairs";
 
+		protected internal int _version;
+
 		private int[] _buckets;
 		private Entry[] _entries;
 		private int _count;
-		private int _version;
 		private int _freeList;
 		private int _freeCount;
 		private KeyCollection _keys;
@@ -726,7 +727,7 @@ namespace asm.Other.Microsoft.Collections
 			}
 		}
 
-		protected virtual void Insert([NotNull] TKey key, TValue value, bool add)
+		protected virtual void Insert([NotNull] TKey key, TValue collection, bool add)
 		{
 			if (_buckets == null) Initialize(0);
 			
@@ -737,7 +738,7 @@ namespace asm.Other.Microsoft.Collections
 			{
 				if (_entries[i].HashCode != hashCode || !Comparer.Equals(_entries[i].Key, key)) continue;
 				if (add) throw new DuplicateKeyException();
-				_entries[i].Value = value;
+				_entries[i].Value = collection;
 				_version++;
 				return;
 			}
@@ -765,7 +766,7 @@ namespace asm.Other.Microsoft.Collections
 			_entries[index].HashCode = hashCode;
 			_entries[index].Next = _buckets[targetBucket];
 			_entries[index].Key = key;
-			_entries[index].Value = value;
+			_entries[index].Value = collection;
 			_buckets[targetBucket] = index;
 			_version++;
 		}

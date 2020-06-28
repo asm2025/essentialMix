@@ -133,11 +133,12 @@ namespace asm.Other.Microsoft.Collections
 			}
 		}
 
+		protected internal int _version;
+
 		// This LinkedList is a singly-Linked circular list.
 		internal SinglyLinkedListNode<T> _head;
 		internal SinglyLinkedListNode<T> _tail;
 		internal int _count;
-		internal int _version;
 
 		private object _syncRoot;
 		private SerializationInfo siInfo; //A temporary variable which we need during deserialization.

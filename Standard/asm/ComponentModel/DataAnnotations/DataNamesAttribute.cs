@@ -13,7 +13,9 @@ namespace asm.ComponentModel.DataAnnotations
 
 		public DataNamesAttribute([NotNull] params string[] valueNames)
 		{
-			ValueNamesInternal.AddRange(valueNames.SkipNullOrEmptyTrim());
+			foreach (string valueName in valueNames.SkipNullOrEmptyTrim()) 
+				ValueNamesInternal.Add(valueName);
+
 			ValueNames = new ReadOnlySet<string>(ValueNamesInternal);
 		}
 

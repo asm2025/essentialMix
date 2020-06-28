@@ -68,5 +68,26 @@ namespace asm.Extensions
 				return result;
 			}
 		}
+
+		public static void RemoveAll<T>([NotNull] this LinkedList<T> thisValue, [NotNull] Predicate<T> predicate)
+		{
+			if (thisValue.Count == 0) return;
+
+			LinkedListNode<T> next = thisValue.First;
+
+			while (next != null)
+			{
+				if (predicate(next.Value))
+				{
+					LinkedListNode<T> remove = next;
+					next = next.Next;
+					thisValue.Remove(remove);
+				}
+				else
+				{
+					next = next.Next;
+				}
+			}
+		}
 	}
 }
