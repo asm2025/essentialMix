@@ -94,7 +94,7 @@ namespace TestApp
 
 			//TestSkipList();
 
-			TestDisjointSet();
+			//TestDisjointSet();
 
 			TestGraph();
 

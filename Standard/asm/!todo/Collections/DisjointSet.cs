@@ -59,6 +59,18 @@ namespace asm.Collections
 			Items = new Dictionary<T, Subset>(capacity, comparer);
 		}
 
+		public DisjointSet([NotNull] IEnumerable<T> enumerable)
+			: this(enumerable, null)
+		{
+		}
+
+		public DisjointSet([NotNull] IEnumerable<T> enumerable, IEqualityComparer<T> comparer)
+			: this(enumerable.FastCount().NotBelow(0), comparer)
+		{
+			foreach (T item in enumerable)
+				Add(item);
+		}
+
 		/// <inheritdoc cref="ICollection{T}" />
 		public int Count => Items.Count;
 

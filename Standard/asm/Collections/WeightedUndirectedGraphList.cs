@@ -264,12 +264,13 @@ namespace asm.Collections
 		private WeightedUndirectedGraphList<T, TWeight> KruskalSpanningTree()
 		{
 			// Udemy - Mastering Data Structures & Algorithms using C and C++ - Abdul Bari
+			// https://www.geeksforgeeks.org/kruskals-minimum-spanning-tree-algorithm-greedy-algo-2/
 			if (Count == 0) return null;
 
 			IComparer<(T From, GraphEdge<T, TWeight> Edge)> priorityComparer = ComparisonComparer.FromComparison<(T From, GraphEdge<T, TWeight> Edge)>((x, y) => x.Edge.Weight.CompareTo(y.Edge.Weight));
 			PriorityQueue<(T From, GraphEdge<T, TWeight> Edge)> queue = new MinPriorityQueue<(T From, GraphEdge<T, TWeight> Edge)>(priorityComparer);
 
-			// find the first minimum weight edge
+			// add all the edges to the queue
 			foreach (T vertex in Keys)
 			{
 				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
@@ -281,16 +282,18 @@ namespace asm.Collections
 
 			if (queue.Count == 0) return null;
 
+			DisjointSet<T> disjointSet = new DisjointSet<T>(Keys, Comparer);
 			WeightedUndirectedGraphList<T, TWeight> result = new WeightedUndirectedGraphList<T, TWeight>(Comparer);
 
-			//while (result.Count < Keys.Count && queue.Count > 0)
-			//{
-			//	(T From, GraphEdge<T, TWeight> Edge) tuple = queue.Remove();
-			//	// todo
-			//	if (!result.ContainsKey(tuple.From)) result.Add(tuple.From);
-			//	result.Add(tuple.Edge.To);
-			//	result.AddEdge(tuple.From, tuple.Edge.To, tuple.Edge.Weight);
-			//}
+			while (result.Count < Keys.Count && queue.Count > 0)
+			{
+				(T From, GraphEdge<T, TWeight> Edge) tuple = queue.Remove();
+				if (disjointSet.IsConnected(tuple.From, tuple.Edge.To)) continue;
+				disjointSet.Union(tuple.From, tuple.Edge.To);
+				if (!result.ContainsKey(tuple.From)) result.Add(tuple.From);
+				if (!result.ContainsKey(tuple.Edge.To)) result.Add(tuple.Edge.To);
+				result.AddEdge(tuple.From, tuple.Edge.To, tuple.Edge.Weight);
+			}
 
 			return result;
 		}
