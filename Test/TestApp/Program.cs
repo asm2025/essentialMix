@@ -86,19 +86,17 @@ namespace TestApp
 			
 			//TestHeapAdd();
 			//TestHeapRemove();
-			
 			//TestPriorityQueue();
-
 			//TestHeapElementAt();
 
 			//TestTrie();
 			//TestTrieSimilarWordsRemoval();
 
-			TestGraph();
-
 			//TestSkipList();
 
-			//TestDisjointSet();
+			TestDisjointSet();
+
+			TestGraph();
 
 			ConsoleHelper.Pause();
 		}
@@ -382,7 +380,7 @@ namespace TestApp
 		{
 			bool more;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, 200000);
+			int[] values = GetRandomIntegers(true, 200_000);
 			SinglyLinkedList<int> list = new SinglyLinkedList<int>();
 
 			do
@@ -498,7 +496,7 @@ namespace TestApp
 		{
 			bool more;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true,200000);
+			int[] values = GetRandomIntegers(true,200_000);
 			LinkedList<int> list = new LinkedList<int>();
 
 			do
@@ -612,7 +610,7 @@ namespace TestApp
 		{
 			bool more;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, 100000/*200000*/);
+			int[] values = GetRandomIntegers(true, 100_000/*200_000*/);
 			Deque<int> deque = new Deque<int>();
 
 			do
@@ -735,7 +733,7 @@ namespace TestApp
 		{
 			bool more;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, 100000/*200000*/);
+			int[] values = GetRandomIntegers(true, 100_000/*200_000*/);
 			LinkedDeque<int> deque = new LinkedDeque<int>();
 
 			do
@@ -1516,7 +1514,7 @@ namespace TestApp
 			BinarySearchTree<int> binarySearchTree = new BinarySearchTree<int>();
 			AVLTree<int> avlTree = new AVLTree<int>();
 			RedBlackTree<int> redBlackTree = new RedBlackTree<int>();
-			int[] values = GetRandomIntegers(true, 200000);
+			int[] values = GetRandomIntegers(true, 200_000);
 
 			do
 			{
@@ -1611,7 +1609,7 @@ namespace TestApp
 			Stopwatch clock = new Stopwatch();
 			// this is a RedBlackTree implementation by Microsoft, just testing it.
 			SortedSet<int> sortedSet = new SortedSet<int>();
-			int[] values = GetRandomIntegers(true, 200000);
+			int[] values = GetRandomIntegers(true, 200_000);
 
 			do
 			{
@@ -2497,13 +2495,23 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
 						break;
 					case WeightedUndirectedGraphList<char, int> weightedUndirectedGraph:
-						WeightedUndirectedGraphList<char, int> primSpanningTree = weightedUndirectedGraph.GetMinimumSpanningTree(SpanningTreeAlgorithm.Prim);
+						WeightedUndirectedGraphList<char, int> spanningTree = weightedUndirectedGraph.GetMinimumSpanningTree(SpanningTreeAlgorithm.Prim);
 
-						if (primSpanningTree != null)
+						if (spanningTree != null)
 						{
 							Console.WriteLine(LINE_SEPARATOR);
 							Console.WriteLine("Prim Spanning Tree: ".Yellow());
-							primSpanningTree.Print();
+							spanningTree.Print();
+							Console.WriteLine(LINE_SEPARATOR);
+						}
+						
+						spanningTree = weightedUndirectedGraph.GetMinimumSpanningTree(SpanningTreeAlgorithm.Kruskal);
+
+						if (spanningTree != null)
+						{
+							Console.WriteLine(LINE_SEPARATOR);
+							Console.WriteLine("Kruskal Spanning Tree: ".Yellow());
+							spanningTree.Print();
 							Console.WriteLine(LINE_SEPARATOR);
 						}
 						break;
@@ -2547,7 +2555,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			bool more;
 			Stopwatch clock = new Stopwatch();
 			SkipList<int> skipList = new SkipList<int>();
-			int[] values = Enumerable.Range(1, 200_000).ToArray();
+			int[] values = GetRandomIntegers(true, 200_000);
 
 			do
 			{
@@ -2618,6 +2626,111 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				if (skipList.Count != 0)
 				{
 					Console.WriteLine($"Something went wrong, the count is {skipList.Count}...!".BrightRed());
+					ConsoleHelper.Pause();
+					Console.WriteLine();
+					//return;
+				}
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+			
+			clock.Stop();
+		}
+		
+		private static void TestDisjointSet()
+		{
+			bool more;
+			Stopwatch clock = new Stopwatch();
+			DisjointSet<int> disjointSet = new DisjointSet<int>();
+			int[] values = GetRandomIntegers(true, 12/*200_000*/);
+
+			do
+			{
+				Console.Clear();
+				Title("Testing DisjointSet...");
+				Console.WriteLine($"Array has {values.Length} items.");
+				disjointSet.Clear();
+
+				clock.Restart();
+
+				foreach (int v in values)
+					disjointSet.Add(v);
+
+				Console.WriteLine($"Added {disjointSet.Count} items of {values.Length} in {clock.ElapsedMilliseconds} ms.");
+
+				Console.WriteLine("Test search...".BrightYellow());
+				int found = 0;
+				clock.Restart();
+
+				foreach (int v in values)
+				{
+					if (disjointSet.Contains(v))
+					{
+						found++;
+						continue;
+					}
+
+					Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
+					ConsoleHelper.Pause();
+					Console.WriteLine();
+					//return;
+				}
+				Console.WriteLine($"Found {found} of {disjointSet.Count} items in {clock.ElapsedMilliseconds} ms.");
+
+				
+				Console.WriteLine("Test find and union...".BrightYellow());
+
+				int threshold = (int)Math.Floor(disjointSet.Count / 0.5d);
+
+				for (int i = 0; i < threshold; i++)
+				{
+					int x = values.PickRandom(), y = values.PickRandom();
+					Console.WriteLine($"Find {x} and {y} subsets gives {disjointSet.Find(x)} and {disjointSet.Find(y)} respectively.");
+					bool connected = disjointSet.IsConnected(x, y);
+					Console.WriteLine($"Are they connected? {connected.ToYesNo()}");
+
+					if (!connected)
+					{
+						Console.WriteLine("Will union them.");
+						disjointSet.Union(x, y);
+						Console.WriteLine($"Now, are they connected? {disjointSet.IsConnected(x, y).ToYesNo()}");
+					}
+
+					Console.WriteLine();
+				}
+
+				Console.WriteLine();
+				Console.WriteLine("Test removing...".BrightRed());
+				int removed = 0;
+				clock.Restart();
+
+				foreach (int v in values)
+				{
+					if (disjointSet.Remove(v))
+					{
+						removed++;
+						continue;
+					}
+					
+					Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
+					ConsoleHelper.Pause();
+					Console.WriteLine();
+					//return;
+				}
+				Console.WriteLine($"Removed {removed} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+
+				Console.WriteLine();
+				Console.WriteLine("Test to clear the list...");
+				disjointSet.Clear();
+
+				if (disjointSet.Count != 0)
+				{
+					Console.WriteLine($"Something went wrong, the count is {disjointSet.Count}...!".BrightRed());
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 					//return;

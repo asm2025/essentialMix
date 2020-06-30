@@ -222,7 +222,6 @@ namespace asm.Collections
 				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
 				if (edges == null || edges.Count == 0) continue;
 
-				// add the edges to the queue
 				foreach (GraphEdge<T, TWeight> edge in edges)
 				{
 					if (minEdge != null && minEdge.Weight.CompareTo(edge.Weight) < 0) continue;
@@ -246,10 +245,12 @@ namespace asm.Collections
 			while (result.Count < Keys.Count && queue.Count > 0)
 			{
 				(T From, GraphEdge<T, TWeight> Edge) tuple = queue.Remove();
+				// this avoids to have a cycle
 				if (result.ContainsKey(tuple.Edge.To)) continue;
 				result.Add(tuple.Edge.To);
 				result.AddEdge(tuple.From, tuple.Edge.To, tuple.Edge.Weight);
 
+				// doing it this way guarantees the vertices are always connected
 				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[tuple.Edge.To];
 				if (edges == null || edges.Count == 0) continue;
 
@@ -262,12 +263,36 @@ namespace asm.Collections
 
 		private WeightedUndirectedGraphList<T, TWeight> KruskalSpanningTree()
 		{
-			//if (Count == 0) return Enumerable.Empty<T>();
+			// Udemy - Mastering Data Structures & Algorithms using C and C++ - Abdul Bari
+			if (Count == 0) return null;
 
-			//PriorityQueue<TWeight, GraphEdge<T, TWeight>> queue = new MinPriorityQueue<TWeight, GraphEdge<T, TWeight>>(e => e.Weight);
-			//T vertex = Keys.First();
-			//queue.Add();
-			return null;
+			IComparer<(T From, GraphEdge<T, TWeight> Edge)> priorityComparer = ComparisonComparer.FromComparison<(T From, GraphEdge<T, TWeight> Edge)>((x, y) => x.Edge.Weight.CompareTo(y.Edge.Weight));
+			PriorityQueue<(T From, GraphEdge<T, TWeight> Edge)> queue = new MinPriorityQueue<(T From, GraphEdge<T, TWeight> Edge)>(priorityComparer);
+
+			// find the first minimum weight edge
+			foreach (T vertex in Keys)
+			{
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
+				if (edges == null || edges.Count == 0) continue;
+
+				foreach (GraphEdge<T, TWeight> edge in edges)
+					queue.Add((vertex, edge));
+			}
+
+			if (queue.Count == 0) return null;
+
+			WeightedUndirectedGraphList<T, TWeight> result = new WeightedUndirectedGraphList<T, TWeight>(Comparer);
+
+			//while (result.Count < Keys.Count && queue.Count > 0)
+			//{
+			//	(T From, GraphEdge<T, TWeight> Edge) tuple = queue.Remove();
+			//	// todo
+			//	if (!result.ContainsKey(tuple.From)) result.Add(tuple.From);
+			//	result.Add(tuple.Edge.To);
+			//	result.AddEdge(tuple.From, tuple.Edge.To, tuple.Edge.Weight);
+			//}
+
+			return result;
 		}
 
 		private WeightedUndirectedGraphList<T, TWeight> BoruvkaSpanningTree()
