@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using asm.Exceptions.Collections;
+using asm.Other.JonSkeet.MiscUtil.Collections;
 
 namespace asm.Collections
 {
@@ -198,24 +199,49 @@ namespace asm.Collections
 
 		private WeightedUndirectedGraphList<T, TWeight> PrimSpanningTree()
 		{
-			// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
 			/*
-			 * The original implementation uses more storage than it should by duplicating the 'from' vertex in the edge object.
+			 * Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
+			 * The implementation in the course uses more storage than it should by duplicating the 'from' vertex in the edge object.
 			 * It's only needed temporarily to keep track of the 'from' or there might be a better solution coming later. We still
 			 * need to have a list of vertices because there might be some not-connected vertices in a forest.
 			 * Eliminating the duplicated entries is required to keep the graph as lean as possible.
+			 *
+			 * Udemy - Mastering Data Structures & Algorithms using C and C++ - Abdul Bari
+			 * Correction to 'Code With Mosh': We should select the first minimum edge not the first connected vertex
+			 *
+			 * Amazing how one course is just not enough to implement the algorithm properly!
 			 */
 			if (Count == 0) return null;
-			// find the first connected vertex
-			if (!GetFirstConnectedVertex(out T vertex, out KeyedCollection<T, GraphEdge<T, TWeight>> edges)) return null;
 
-			WeightedUndirectedGraphList<T, TWeight> result = new WeightedUndirectedGraphList<T, TWeight>(Comparer);
-			PriorityQueue<TWeight, (T From, GraphEdge<T, TWeight> Edge)> queue = new MinPriorityQueue<TWeight, (T From, GraphEdge<T, TWeight> Edge)>(e => e.Edge.Weight);
-			result.Add(vertex);
+			T minFrom = default(T);
+			GraphEdge<T, TWeight> minEdge = null;
 
-			// add the edges to the queue
-			foreach (GraphEdge<T, TWeight> edge in edges) 
-				queue.Add((vertex, edge));
+			// find the first minimum weight edge
+			foreach (T vertex in Keys)
+			{
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
+				if (edges == null || edges.Count == 0) continue;
+
+				// add the edges to the queue
+				foreach (GraphEdge<T, TWeight> edge in edges)
+				{
+					if (minEdge != null && minEdge.Weight.CompareTo(edge.Weight) < 0) continue;
+					minFrom = vertex;
+					minEdge = edge;
+				}
+			}
+
+			if (minEdge == null) return null;
+
+			IComparer<(T From, GraphEdge<T, TWeight> Edge)> priorityComparer = ComparisonComparer.FromComparison<(T From, GraphEdge<T, TWeight> Edge)>((x, y) => x.Edge.Weight.CompareTo(y.Edge.Weight));
+			PriorityQueue<(T From, GraphEdge<T, TWeight> Edge)> queue = new MinPriorityQueue<(T From, GraphEdge<T, TWeight> Edge)>(priorityComparer);
+			queue.Add((minFrom, minEdge));
+
+			WeightedUndirectedGraphList<T, TWeight> result = new WeightedUndirectedGraphList<T, TWeight>(Comparer)
+			{
+				// add the 1st vertex
+				queue.Value.From
+			};
 
 			while (result.Count < Keys.Count && queue.Count > 0)
 			{
@@ -223,10 +249,11 @@ namespace asm.Collections
 				if (result.ContainsKey(tuple.Edge.To)) continue;
 				result.Add(tuple.Edge.To);
 				result.AddEdge(tuple.From, tuple.Edge.To, tuple.Edge.Weight);
-				edges = this[tuple.Edge.To];
+
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[tuple.Edge.To];
 				if (edges == null || edges.Count == 0) continue;
 
-				foreach (GraphEdge<T, TWeight> edge in edges) 
+				foreach (GraphEdge<T, TWeight> edge in edges)
 					queue.Add((tuple.Edge.To, edge));
 			}
 

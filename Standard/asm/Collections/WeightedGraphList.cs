@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Helpers;
+using asm.Other.JonSkeet.MiscUtil.Collections;
 using JetBrains.Annotations;
 
 namespace asm.Collections
@@ -361,7 +362,7 @@ namespace asm.Collections
 			// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
 			Dictionary<T, T> history = new Dictionary<T, T>();
 			Dictionary<T, TWeight> weights = new Dictionary<T, TWeight>(Comparer);
-			PriorityQueue<TWeight, PathEntry> queue = new MinPriorityQueue<TWeight, PathEntry>(e => e.Priority);
+			PriorityQueue<PathEntry> queue = new MinPriorityQueue<PathEntry>(ComparisonComparer.FromComparison<PathEntry>((x, y) => x.Priority.CompareTo(y.Priority)));
 			HashSet<T> visited = new HashSet<T>(Comparer);
 			TWeight maxWeight = TypeHelper.MaximumOf<TWeight>();
 

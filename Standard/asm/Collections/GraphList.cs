@@ -123,25 +123,6 @@ namespace asm.Collections
 						: 0;
 		}
 
-		public bool GetFirstConnectedVertex(out T vertex,  out TAdjacencyList edges)
-		{
-			if (Values.Count > 0)
-			{
-				foreach (T key in Keys)
-				{
-					TAdjacencyList adjacencyList = this[key];
-					if (adjacencyList == null || adjacencyList.Count == 0) continue;
-					vertex = key;
-					edges = adjacencyList;
-					return true;
-				}
-			}
-
-			vertex = default(T);
-			edges = null;
-			return false;
-		}
-
 		public virtual int GetSize()
 		{
 			int sum = 0;

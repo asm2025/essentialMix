@@ -109,7 +109,10 @@ namespace asm.Collections
 			return value;
 		}
 
-		/// <inheritdoc />
+		/// <summary>
+		/// Will throw <see cref="NotSupportedException"/>
+		/// </summary>
+		[Obsolete]
 		public override bool Remove(T value) { throw new NotSupportedException(); }
 
 		public T ElementAt(int k)

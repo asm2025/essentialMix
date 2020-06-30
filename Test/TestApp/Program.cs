@@ -12,6 +12,7 @@ using asm.Comparers;
 using asm.Exceptions;
 using asm.Extensions;
 using asm.Helpers;
+using asm.Other.JonSkeet.MiscUtil.Collections;
 using asm.Other.Microsoft.Collections;
 using Bogus;
 using Bogus.DataSets;
@@ -1865,17 +1866,18 @@ namespace TestApp
 				int[] values = GetRandomIntegers(len);
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
-				PriorityQueue<int, int> intQueue = new MinPriorityQueue<int>();
+				PriorityQueue<int> intQueue = new MinPriorityQueue<int>();
 				DoTheTest(intQueue, values);
 
 				intQueue = new MaxPriorityQueue<int>();
 				DoTheTest(intQueue, values);
 
 				Student[] students = GetRandomStudents(len);
-				PriorityQueue<double, Student> studentQueue = new MinPriorityQueue<double, Student>(e => e.Grade);
+				IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
+				PriorityQueue<Student> studentQueue = new MinPriorityQueue<Student>(studentComparer);
 				DoTheTest(studentQueue, students);
 
-				studentQueue = new MaxPriorityQueue<double, Student>(e => e.Grade);
+				studentQueue = new MaxPriorityQueue<Student>(studentComparer);
 				DoTheTest(studentQueue, students);
 
 				Console.WriteLine();
@@ -1886,8 +1888,7 @@ namespace TestApp
 			}
 			while (more);
 
-			static void DoTheTest<TPriority, T>(PriorityQueue<TPriority, T> queue, T[] array)
-				where TPriority : struct, IComparable
+			static void DoTheTest<T>(PriorityQueue<T> queue, T[] array)
 			{
 				Console.WriteLine($"Test adding ({queue.GetType()})...".BrightGreen());
 				queue.Add(array);
@@ -1930,8 +1931,9 @@ namespace TestApp
 				DoTheTest(heap, values, k);
 
 				Student[] students = GetRandomStudents(len);
-				PriorityQueue<double, Student> studentQueue = new MaxPriorityQueue<double, Student>(e => e.Grade);
-				DoTheTest2(studentQueue, students, k);
+				IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
+				PriorityQueue<Student> studentQueue = new MaxPriorityQueue<Student>(studentComparer);
+				DoTheTest(studentQueue, students, k);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -1949,19 +1951,6 @@ namespace TestApp
 				heap.Print();
 				Console.WriteLine("Test get Kth element...");
 				Console.WriteLine($"heap {k} kth element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
-				Console.WriteLine();
-				Console.WriteLine();
-			}
-
-			static void DoTheTest2<TPriority, T>(PriorityQueue<TPriority, T> queue, T[] array, int k)
-				where TPriority : struct, IComparable
-			{
-				Console.WriteLine($"Test adding ({queue.GetType()})...".BrightGreen());
-				queue.Add(array);
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", queue));
-				queue.Print();
-				Console.WriteLine("Test get Kth element...");
-				Console.WriteLine($"heap {k} kth element = {queue.ElementAt(k).ToString().BrightCyan().Underline()}");
 				Console.WriteLine();
 				Console.WriteLine();
 			}

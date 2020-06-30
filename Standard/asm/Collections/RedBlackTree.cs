@@ -14,7 +14,7 @@ namespace asm.Collections
 	/// </summary>
 	/// <typeparam name="T">The element type of the tree</typeparam>
 	// https://referencesource.microsoft.com/#system/compmod/system/collections/generic/sortedset.cs
-	// Udemy - Mastering Data Structures & Algorithms using C and C++
+	// Udemy - Mastering Data Structures & Algorithms using C and C++ - Abdul Bari
 	// https://www.geeksforgeeks.org/red-black-tree-set-1-introduction-2/
 	// https://www.cs.usfca.edu/~galles/visualization/RedBlack.html
 	[DebuggerTypeProxy(typeof(RedBlackTree<>.DebugView))]

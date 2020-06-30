@@ -5,48 +5,59 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	[Serializable]
-	public abstract class PriorityQueue<TPriority, T> : Heap<T>
-		where TPriority : struct, IComparable
+	public abstract class PriorityQueue<T> : Heap<T>
 	{
-		[NotNull]
-		protected Func<T, TPriority> GetPriority;
-
 		/// <inheritdoc />
-		protected PriorityQueue([NotNull] Func<T, TPriority> priority)
-			: this(0, null, priority)
+		protected PriorityQueue()
+			: this(0, null, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected PriorityQueue(int capacity, [NotNull] Func<T, TPriority> priority)
-			: this(capacity, null, priority)
+		protected PriorityQueue(int capacity)
+			: this(capacity, null, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected PriorityQueue(IComparer<T> comparer, [NotNull] Func<T, TPriority> priority)
-			: this(0, comparer, priority)
+		protected PriorityQueue(IComparer<T> priorityComparer)
+			: this(0, null, priorityComparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected PriorityQueue(int capacity, IComparer<T> comparer, [NotNull] Func<T, TPriority> priority)
+		protected PriorityQueue(int capacity, IComparer<T> priorityComparer)
+			: this(capacity, null, priorityComparer)
+		{
+		}
+
+		/// <inheritdoc />
+		protected PriorityQueue(IComparer<T> comparer, IComparer<T> priorityComparer)
+			: this(0, comparer, priorityComparer)
+		{
+		}
+
+		/// <inheritdoc />
+		protected PriorityQueue(int capacity, IComparer<T> comparer, IComparer<T> priorityComparer)
 			: base(capacity, comparer)
 		{
-			GetPriority = priority;
+			PriorityComparer = priorityComparer ?? Comparer;
 		}
 
 		/// <inheritdoc />
-		protected PriorityQueue([NotNull] IEnumerable<T> collection, [NotNull] Func<T, TPriority> priority)
-			: this(collection, null, priority)
+		protected PriorityQueue([NotNull] IEnumerable<T> collection, IComparer<T> priorityComparer)
+			: this(collection, null, priorityComparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected PriorityQueue([NotNull] IEnumerable<T> collection, IComparer<T> comparer, [NotNull] Func<T, TPriority> priority)
-			: this(0, comparer, priority)
+		protected PriorityQueue([NotNull] IEnumerable<T> collection, IComparer<T> comparer, IComparer<T> priorityComparer)
+			: this(0, comparer, priorityComparer)
 		{
 			Add(collection);
 		}
+
+		[NotNull]
+		public IComparer<T> PriorityComparer { get; private set; }
 	}
 }

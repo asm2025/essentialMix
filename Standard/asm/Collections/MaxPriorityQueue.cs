@@ -6,44 +6,54 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	[Serializable]
-	public class MaxPriorityQueue<TPriority, T> : PriorityQueue<TPriority, T>
-		where TPriority : struct, IComparable
+	public class MaxPriorityQueue<T> : PriorityQueue<T>
 	{
 		/// <inheritdoc />
-		public MaxPriorityQueue([NotNull] Func<T, TPriority> priority)
-			: this(0, null, priority)
+		public MaxPriorityQueue()
+			: this(0, null, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public MaxPriorityQueue(int capacity, [NotNull] Func<T, TPriority> priority)
-			: this(capacity, null, priority)
+		public MaxPriorityQueue(int capacity)
+			: this(capacity, null, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public MaxPriorityQueue(IComparer<T> comparer, [NotNull] Func<T, TPriority> priority)
-			: this(0, comparer, priority)
+		public MaxPriorityQueue(IComparer<T> priorityComparer)
+			: this(0, null, priorityComparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public MaxPriorityQueue(int capacity, IComparer<T> comparer, [NotNull] Func<T, TPriority> priority)
-			: base(capacity, comparer, priority)
+		public MaxPriorityQueue(int capacity, IComparer<T> priorityComparer)
+			: this(capacity, null, priorityComparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public MaxPriorityQueue([NotNull] IEnumerable<T> collection, [NotNull] Func<T, TPriority> priority)
-			: this(collection, null, priority)
+		public MaxPriorityQueue(IComparer<T> comparer, IComparer<T> priorityComparer)
+			: this(0, comparer, priorityComparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public MaxPriorityQueue([NotNull] IEnumerable<T> collection, IComparer<T> comparer, [NotNull] Func<T, TPriority> priority)
-			: this(0, comparer, priority)
+		public MaxPriorityQueue(int capacity, IComparer<T> comparer, IComparer<T> priorityComparer)
+			: base(capacity, comparer, priorityComparer)
 		{
-			Add(collection);
+		}
+
+		/// <inheritdoc />
+		public MaxPriorityQueue([NotNull] IEnumerable<T> collection, IComparer<T> priorityComparer)
+			: this(collection, null, priorityComparer)
+		{
+		}
+
+		/// <inheritdoc />
+		public MaxPriorityQueue([NotNull] IEnumerable<T> collection, IComparer<T> comparer, IComparer<T> priorityComparer)
+			: base(collection, comparer, priorityComparer)
+		{
 		}
 
 		/// <inheritdoc />
@@ -55,7 +65,7 @@ namespace asm.Collections
 			Navigator node = NewNavigator(index);
 
 			// the parent's value must be greater than its children so move the greater value up.
-			while (node.ParentIndex > -1 && GetPriority(Items[node.ParentIndex]).CompareTo(GetPriority(Items[node.Index])) < 0)
+			while (node.ParentIndex > -1 && PriorityComparer.IsLessThan(Items[node.ParentIndex], Items[node.Index]))
 			{
 				Swap(node.Index, node.ParentIndex);
 				node.Index = node.ParentIndex;
@@ -83,8 +93,8 @@ namespace asm.Collections
 			while (node.LeftIndex > -1 || node.RightIndex > -1)
 			{
 				int childIndex = node.Index;
-				if (node.LeftIndex > -1 && GetPriority(Items[node.LeftIndex]).CompareTo(GetPriority(Items[childIndex])) > 0) childIndex = node.LeftIndex;
-				if (node.RightIndex > -1 && GetPriority(Items[node.RightIndex]).CompareTo(GetPriority(Items[childIndex])) > 0) childIndex = node.RightIndex;
+				if (node.LeftIndex > -1 && PriorityComparer.IsGreaterThan(Items[node.LeftIndex], Items[childIndex])) childIndex = node.LeftIndex;
+				if (node.RightIndex > -1 && PriorityComparer.IsGreaterThan(Items[node.RightIndex], Items[childIndex])) childIndex = node.RightIndex;
 				if (childIndex == node.Index) break;
 				Swap(node.Index, childIndex);
 				node.Index = childIndex;
@@ -93,48 +103,6 @@ namespace asm.Collections
 
 			if (!changed) return;
 			_version++;
-		}
-	}
-
-	[Serializable]
-	public class MaxPriorityQueue<T> : MaxPriorityQueue<T, T>
-		where T : struct, IComparable
-	{
-		/// <inheritdoc />
-		public MaxPriorityQueue()
-			: this(0, null)
-		{
-		}
-
-		/// <inheritdoc />
-		public MaxPriorityQueue(int capacity)
-			: this(capacity, null)
-		{
-		}
-
-		/// <inheritdoc />
-		public MaxPriorityQueue(IComparer<T> comparer)
-			: this(0, comparer)
-		{
-		}
-
-		/// <inheritdoc />
-		public MaxPriorityQueue(int capacity, IComparer<T> comparer)
-			: base(capacity, comparer, e => e)
-		{
-		}
-
-		/// <inheritdoc />
-		public MaxPriorityQueue([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
-		{
-		}
-
-		/// <inheritdoc />
-		public MaxPriorityQueue([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
-			: this(0, comparer)
-		{
-			Add(collection);
 		}
 	}
 }
