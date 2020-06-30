@@ -50,7 +50,9 @@ namespace asm.Collections
 			if (!ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
 			if (!ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
 
-			if (!TryGetValue(from, out HashSet<T> fromEdges) || fromEdges == null)
+			HashSet<T> fromEdges = this[from];
+
+			if (fromEdges == null)
 			{
 				fromEdges = NewEdgesContainer();
 				this[from] = fromEdges;
@@ -60,7 +62,9 @@ namespace asm.Collections
 			// short-circuit - loop edge
 			if (Comparer.Equals(from, to)) return;
 
-			if (!TryGetValue(to, out HashSet<T> toEdges) || toEdges == null)
+			HashSet<T> toEdges = this[to];
+
+			if (toEdges == null)
 			{
 				toEdges = NewEdgesContainer();
 				this[to] = toEdges;
@@ -123,7 +127,9 @@ namespace asm.Collections
 				if (visited.Contains(vertex)) return false;
 				visited.Add(vertex);
 
-				if (TryGetValue(vertex, out HashSet<T> edges) && edges != null)
+				HashSet<T> edges = this[vertex];
+
+				if (edges != null && edges.Count > 0)
 				{
 					foreach (T edge in edges)
 					{

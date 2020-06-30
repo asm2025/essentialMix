@@ -2479,6 +2479,8 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			static bool DoTheTestWithValue<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, List<char> values, char value)
 				where TAdjacencyList : class, ICollection<TEdge>
 			{
+				const string LINE_SEPARATOR = "*******************************************************************************";
+
 				Console.WriteLine("Breadth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.BreadthFirst)));
 				Console.WriteLine("Depth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.DepthFirst)));
 				Console.WriteLine("Degree: ".Yellow() + graph.Degree(value));
@@ -2487,6 +2489,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				IEnumerable<char> cycle = graph.FindCycle();
 				if (cycle != null) Console.WriteLine("Found cycle: ".BrightRed() + string.Join(", ", cycle));
 
+				// test specific graph type features
 				switch (graph)
 				{
 					case DirectedGraphList<char> directedGraph:
@@ -2503,6 +2506,17 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 						Console.WriteLine("InDegree: ".Yellow() + weightedDirectedGraph.InDegree(value));
 						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", weightedDirectedGraph.TopologicalSort())); }
 						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
+						break;
+					case WeightedUndirectedGraphList<char, int> weightedUndirectedGraph:
+						WeightedUndirectedGraphList<char, int> primSpanningTree = weightedUndirectedGraph.GetMinimumSpanningTree(SpanningTreeAlgorithm.Prim);
+
+						if (primSpanningTree != null)
+						{
+							Console.WriteLine(LINE_SEPARATOR);
+							Console.WriteLine("Prim Spanning Tree: ".Yellow());
+							primSpanningTree.Print();
+							Console.WriteLine(LINE_SEPARATOR);
+						}
 						break;
 					case WeightedMixedGraphList<char, int> weightedMixedGraph:
 						Console.WriteLine("InDegree: ".Yellow() + weightedMixedGraph.InDegree(value));

@@ -52,7 +52,9 @@ namespace asm.Collections
 			if (!ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
 			if (!ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
 
-			if (!TryGetValue(from, out KeyedCollection<T, GraphEdge<T, TWeight>> fromEdges) || fromEdges == null)
+			KeyedCollection<T, GraphEdge<T, TWeight>> fromEdges = this[from];
+
+			if (fromEdges == null)
 			{
 				fromEdges = NewEdgesContainer();
 				this[from] = fromEdges;
@@ -127,7 +129,9 @@ namespace asm.Collections
 				if (visited.Contains(vertex)) return true;
 				visiting.Add(vertex);
 
-				if (TryGetValue(vertex, out KeyedCollection<T, GraphEdge<T, TWeight>> edges) && edges != null)
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
+
+				if (edges != null && edges.Count > 0)
 				{
 					foreach (GraphEdge<T, TWeight> edge in edges.Values.OrderBy(e => e.Weight))
 					{
@@ -180,7 +184,9 @@ namespace asm.Collections
 				if (visited.Contains(vertex)) return false;
 				visiting.Add(vertex);
 
-				if (TryGetValue(vertex, out KeyedCollection<T, GraphEdge<T, TWeight>> edges) && edges != null)
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
+
+				if (edges != null && edges.Count > 0)
 				{
 					foreach (GraphEdge<T, TWeight> edge in edges.Values.OrderBy(e => e.Weight))
 					{

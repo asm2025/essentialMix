@@ -104,11 +104,11 @@ namespace asm.Collections
 				_visited.Add(_current);
 
 				// Queue the next vertices
-				if (_graph.TryGetValue(_current, out KeyedCollection<T, GraphEdge<T, TWeight>> edges) && edges != null)
-				{
-					foreach (GraphEdge<T, TWeight> edge in edges)
-						_queue.Enqueue(edge.To);
-				}
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = _graph[_current];
+				if (edges == null || edges.Count == 0) return true;
+
+				foreach (GraphEdge<T, TWeight> edge in edges)
+					_queue.Enqueue(edge.To);
 
 				return true;
 			}
@@ -209,11 +209,11 @@ namespace asm.Collections
 				_visited.Add(_current);
 				
 				// Queue the next vertices
-				if (_graph.TryGetValue(_current, out KeyedCollection<T, GraphEdge<T, TWeight>> edges) && edges != null)
-				{
-					foreach (GraphEdge<T, TWeight> edge in edges)
-						_stack.Push(edge.To);
-				}
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = _graph[_current];
+				if (edges == null || edges.Count == 0) return true;
+
+				foreach (GraphEdge<T, TWeight> edge in edges)
+					_stack.Push(edge.To);
 
 				return true;
 			}
@@ -331,25 +331,28 @@ namespace asm.Collections
 			return TryGetValue(from, out KeyedCollection<T, GraphEdge<T, TWeight>> edges) && edges != null && edges.Count > 0 && edges.ContainsKey(to);
 		}
 
-		/// <inheritdoc />
-		public override bool IsLoop(T value, GraphEdge<T, TWeight> edge)
-		{
-			return Comparer.Equals(value, edge.To);
-		}
-
 		[NotNull]
 		public IEnumerable<T> GetShortestPath([NotNull] T from, [NotNull] T to, ShortestPathAlgorithm algorithm)
 		{
 			if (!ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
 			if (!ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
 
-			switch (algorithm)
+			return algorithm switch
 			{
-				case ShortestPathAlgorithm.Dijkstra:
-					return DijkstraShortestPath(from, to);
-				default:
-					throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null);
-			}
+				ShortestPathAlgorithm.Dijkstra => DijkstraShortestPath(from, to),
+				ShortestPathAlgorithm.BellmanFord => BellmanFordShortestPath(from, to),
+				ShortestPathAlgorithm.AStar => AStarShortestPath(from, to),
+				ShortestPathAlgorithm.FloydWarshall => FloydWarshallShortestPath(from, to),
+				ShortestPathAlgorithm.Johnson => JohnsonShortestPath(from, to),
+				ShortestPathAlgorithm.Viterbi => ViterbiShortestPath(from, to),
+				_ => throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null)
+			};
+		}
+
+		/// <inheritdoc />
+		protected override bool IsLoop(T value, GraphEdge<T, TWeight> edge)
+		{
+			return Comparer.Equals(value, edge.To);
 		}
 
 		[NotNull]
@@ -372,7 +375,9 @@ namespace asm.Collections
 			{
 				T current = queue.Remove().Value;
 				visited.Add(current);
-				if (!TryGetValue(current, out KeyedCollection<T, GraphEdge<T, TWeight>> edges) || edges == null) continue;
+
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[current];
+				if (edges == null || edges.Count == 0) continue;
 
 				foreach (GraphEdge<T, TWeight> edge in edges)
 				{
@@ -399,6 +404,41 @@ namespace asm.Collections
 
 			stack.Push(to);
 			return stack;
+		}
+
+		[NotNull]
+		private IEnumerable<T> BellmanFordShortestPath([NotNull] T from, [NotNull] T to)
+		{
+			// todo
+			throw new NotImplementedException();
+		}
+
+		[NotNull]
+		private IEnumerable<T> AStarShortestPath([NotNull] T from, [NotNull] T to)
+		{
+			// todo
+			throw new NotImplementedException();
+		}
+
+		[NotNull]
+		private IEnumerable<T> FloydWarshallShortestPath([NotNull] T from, [NotNull] T to)
+		{
+			// todo
+			throw new NotImplementedException();
+		}
+
+		[NotNull]
+		private IEnumerable<T> JohnsonShortestPath([NotNull] T from, [NotNull] T to)
+		{
+			// todo
+			throw new NotImplementedException();
+		}
+
+		[NotNull]
+		private IEnumerable<T> ViterbiShortestPath([NotNull] T from, [NotNull] T to)
+		{
+			// todo
+			throw new NotImplementedException();
 		}
 	}
 }

@@ -9,66 +9,91 @@ namespace asm.Collections
 {
 	/// <summary>
 	/// <inheritdoc />
-	/// <para><see href="https://en.wikipedia.org/wiki/Mixed_graph">Mixed Graph</see></para>
+	/// <para><see href="https://en.wikipedia.org/wiki/Mixed_graph">Weighted Mixed Graph</see></para>
 	/// </summary>
 	/// <inheritdoc/>
 	[Serializable]
-	public class MixedGraphList<T> : GraphList<T>
+	public class WeightedMixedGraphList<T, TWeight> : WeightedGraphList<T, TWeight>
+		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
 		/// <inheritdoc />
-		public MixedGraphList()
+		public WeightedMixedGraphList() 
 			: this(0, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public MixedGraphList(int capacity)
+		public WeightedMixedGraphList(int capacity)
 			: this(capacity, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public MixedGraphList(IEqualityComparer<T> comparer)
+		public WeightedMixedGraphList(IEqualityComparer<T> comparer)
 			: this(0, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public MixedGraphList(int capacity, IEqualityComparer<T> comparer)
+		public WeightedMixedGraphList(int capacity, IEqualityComparer<T> comparer)
 			: base(capacity, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected MixedGraphList(SerializationInfo info, StreamingContext context)
+		protected WeightedMixedGraphList(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
 
 		/// <inheritdoc />
-		public override void AddEdge(T from, T to) { AddEdge(from, to, false); }
-		public virtual void AddEdge([NotNull] T from, [NotNull] T to, bool undirected)
+		public override void AddEdge(T from, T to) { AddEdge(from, to, default(TWeight), false); }
+		/// <inheritdoc />
+		public override void AddEdge(T from, T to, TWeight weight) { AddEdge(from, to, weight, false); }
+		public void AddEdge([NotNull] T from, [NotNull] T to, bool undirected) { AddEdge(from, to, default(TWeight), undirected); }
+		public void AddEdge([NotNull] T from, [NotNull] T to, TWeight weight, bool undirected)
 		{
 			if (!ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
 			if (!ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
 
-			if (!TryGetValue(from, out HashSet<T> fromEdges) || fromEdges == null)
+			KeyedCollection<T, GraphEdge<T, TWeight>> fromEdges = this[from];
+
+			if (fromEdges == null)
 			{
 				fromEdges = NewEdgesContainer();
 				this[from] = fromEdges;
 			}
 
-			fromEdges.Add(to);
+			if (fromEdges.TryGetValue(to, out GraphEdge<T, TWeight> fromEdge))
+			{
+				if (fromEdge.Weight.CompareTo(weight) > 0) fromEdge.Weight = weight;
+			}
+			else
+			{
+				fromEdge = new GraphEdge<T, TWeight>(to, weight);
+				fromEdges.Add(fromEdge);
+			}
+
 			// short-circuit - loop edge
 			if (!undirected || Comparer.Equals(from, to)) return;
 
-			if (!TryGetValue(to, out HashSet<T> toEdges) || toEdges == null)
+			KeyedCollection<T, GraphEdge<T, TWeight>> toEdges = this[to];
+
+			if (toEdges == null)
 			{
 				toEdges = NewEdgesContainer();
 				this[to] = toEdges;
 			}
 
-			toEdges.Add(from);
+			if (toEdges.TryGetValue(from, out GraphEdge<T, TWeight> toEdge))
+			{
+				if (toEdge.Weight.CompareTo(weight) > 0) toEdge.Weight = weight;
+			}
+			else
+			{
+				toEdge = new GraphEdge<T, TWeight>(from, weight);
+				toEdges.Add(toEdge);
+			}
 		}
 
 		/// <inheritdoc />
@@ -76,19 +101,42 @@ namespace asm.Collections
 		public bool RemoveEdge([NotNull] T from, [NotNull] T to, bool undirected)
 		{
 			bool removed = false;
-			if (TryGetValue(from, out HashSet<T> fromEdges) && fromEdges != null) removed |= fromEdges.Remove(to);
+			if (TryGetValue(from, out KeyedCollection<T, GraphEdge<T, TWeight>> fromEdges) && fromEdges != null) removed |= fromEdges.Remove(to);
 			if (!undirected) return removed;
-			if (TryGetValue(to, out HashSet<T> toEdges) && toEdges != null) removed |= toEdges.Remove(to);
+			if (TryGetValue(to, out KeyedCollection<T, GraphEdge<T, TWeight>> toEdges) & toEdges != null) removed |= toEdges.Remove(to);
 			return removed;
+		}
+
+		/// <inheritdoc />
+		public override void SetWeight(T from, T to, TWeight weight) { SetWeight(from, to, weight, false); }
+		public void SetWeight([NotNull] T from, [NotNull] T to, TWeight weight, bool undirected)
+		{
+			if (TryGetValue(from, out KeyedCollection<T, GraphEdge<T, TWeight>> fromEdges)
+				&& fromEdges != null && fromEdges.TryGetValue(to, out GraphEdge<T, TWeight> fromEdge))
+			{
+				fromEdge.Weight = weight;
+			}
+
+			if (undirected && TryGetValue(to, out KeyedCollection<T, GraphEdge<T, TWeight>> toEdges)
+				&& toEdges != null && toEdges.TryGetValue(from, out GraphEdge<T, TWeight> toEdge))
+			{
+				toEdge.Weight = weight;
+			}
 		}
 
 		public int InDegree([NotNull] T value)
 		{
 			int degree = 0;
 
-			foreach (KeyValuePair<T, HashSet<T>> pair in this)
+			foreach (KeyValuePair<T, KeyedCollection<T, GraphEdge<T, TWeight>>> pair in this)
 			{
-				if (pair.Value != null && pair.Value.Contains(value)) degree++;
+				if (pair.Value == null) continue;
+
+				foreach (GraphEdge<T, TWeight> edge in pair.Value)
+				{
+					if (!Comparer.Equals(value, edge.To)) continue;
+					degree++;
+				}
 			}
 
 			return degree;
@@ -124,18 +172,20 @@ namespace asm.Collections
 				visited.Add(vertex);
 				result.Push(vertex);
 
-				if (TryGetValue(vertex, out HashSet<T> edges) && edges != null)
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
+
+				if (edges != null && edges.Count > 0)
 				{
-					foreach (T edge in edges)
+					foreach (GraphEdge<T, TWeight> edge in edges.Values.OrderBy(e => e.Weight))
 					{
 						if (IsLoop(parent, edge) || IsLoop(vertex, edge)) continue;
 
-						if (visited.Contains(edge) /* cycle detected */ || !TopologicalSortLocal(edge, vertex, visited, result, version, ref conflict, ref conflictSet))
+						if (visited.Contains(edge.To) /* cycle detected */ || !TopologicalSortLocal(edge.To, vertex, visited, result, version, ref conflict, ref conflictSet))
 						{
 							if (!conflictSet)
 							{
 								conflictSet = true;
-								conflict = edge;
+								conflict = edge.To;
 							}
 
 							return false;
@@ -173,18 +223,20 @@ namespace asm.Collections
 				if (visited.Contains(vertex)) return false;
 				visited.Add(vertex);
 
-				if (TryGetValue(vertex, out HashSet<T> edges) && edges != null)
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
+
+				if (edges != null && edges.Count > 0)
 				{
-					foreach (T edge in edges)
+					foreach (GraphEdge<T, TWeight> edge in edges.Values.OrderBy(e => e.Weight))
 					{
 						if (IsLoop(parent, edge) || ignoreLoop && IsLoop(vertex, edge)) continue;
 
-						if (visited.Contains(edge) /* cycle detected */ || FindCycleLocal(edge, vertex, visited, version, ref conflict, ref conflictSet))
+						if (visited.Contains(edge.To) /* cycle detected */ || FindCycleLocal(edge.To, vertex, visited, version, ref conflict, ref conflictSet))
 						{
 							if (!conflictSet)
 							{
 								conflictSet = true;
-								conflict = edge;
+								conflict = edge.To;
 							}
 
 							return true;

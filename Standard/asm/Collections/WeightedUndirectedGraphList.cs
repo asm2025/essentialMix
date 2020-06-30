@@ -51,7 +51,9 @@ namespace asm.Collections
 			if (!ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
 			if (!ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
 
-			if (!TryGetValue(from, out KeyedCollection<T, GraphEdge<T, TWeight>> fromEdges) || fromEdges == null)
+			KeyedCollection<T, GraphEdge<T, TWeight>> fromEdges = this[from];
+
+			if (fromEdges == null)
 			{
 				fromEdges = NewEdgesContainer();
 				this[from] = fromEdges;
@@ -70,7 +72,9 @@ namespace asm.Collections
 			// short-circuit - loop edge
 			if (Comparer.Equals(from, to)) return;
 
-			if (!TryGetValue(to, out KeyedCollection<T, GraphEdge<T, TWeight>> toEdges) || toEdges == null)
+			KeyedCollection<T, GraphEdge<T, TWeight>> toEdges = this[to];
+
+			if (toEdges == null)
 			{
 				toEdges = NewEdgesContainer();
 				this[to] = toEdges;
@@ -130,6 +134,17 @@ namespace asm.Collections
 			return sum / 2;
 		}
 
+		public WeightedUndirectedGraphList<T, TWeight> GetMinimumSpanningTree(SpanningTreeAlgorithm algorithm)
+		{
+			return algorithm switch
+			{
+				SpanningTreeAlgorithm.Prim => PrimSpanningTree(),
+				SpanningTreeAlgorithm.Kruskal => KruskalSpanningTree(),
+				SpanningTreeAlgorithm.Boruvka => BoruvkaSpanningTree(),
+				_ => throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null)
+			};
+		}
+
 		/// <inheritdoc />
 		protected override IEnumerable<T> FindCycle(ICollection<T> vertices, bool ignoreLoop = false)
 		{
@@ -156,7 +171,9 @@ namespace asm.Collections
 				if (visited.Contains(vertex)) return false;
 				visited.Add(vertex);
 
-				if (TryGetValue(vertex, out KeyedCollection<T, GraphEdge<T, TWeight>> edges) && edges != null)
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
+
+				if (edges != null && edges.Count > 0)
 				{
 					foreach (GraphEdge<T, TWeight> edge in edges.Values.OrderBy(e => e.Weight))
 					{
@@ -177,6 +194,63 @@ namespace asm.Collections
 
 				return false;
 			}
+		}
+
+		private WeightedUndirectedGraphList<T, TWeight> PrimSpanningTree()
+		{
+			// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
+			/*
+			 * The original implementation uses more storage than it should by duplicating the 'from' vertex in the edge object.
+			 * It's only needed temporarily to keep track of the 'from' or there might be a better solution coming later. We still
+			 * need to have a list of vertices because there might be some not-connected vertices in a forest.
+			 * Eliminating the duplicated entries is required to keep the graph as lean as possible.
+			 */
+			if (Count == 0) return null;
+			// find the first connected vertex
+			if (!GetFirstConnectedVertex(out T vertex, out KeyedCollection<T, GraphEdge<T, TWeight>> edges)) return null;
+
+			WeightedUndirectedGraphList<T, TWeight> result = new WeightedUndirectedGraphList<T, TWeight>(Comparer);
+			PriorityQueue<TWeight, (T From, GraphEdge<T, TWeight> Edge)> queue = new MinPriorityQueue<TWeight, (T From, GraphEdge<T, TWeight> Edge)>(e => e.Edge.Weight);
+			result.Add(vertex);
+
+			// add the edges to the queue
+			foreach (GraphEdge<T, TWeight> edge in edges) 
+				queue.Add((vertex, edge));
+
+			while (result.Count < Keys.Count && queue.Count > 0)
+			{
+				(T From, GraphEdge<T, TWeight> Edge) tuple = queue.Remove();
+				if (result.ContainsKey(tuple.Edge.To)) continue;
+				result.Add(tuple.Edge.To);
+				result.AddEdge(tuple.From, tuple.Edge.To, tuple.Edge.Weight);
+				edges = this[tuple.Edge.To];
+				if (edges == null || edges.Count == 0) continue;
+
+				foreach (GraphEdge<T, TWeight> edge in edges) 
+					queue.Add((tuple.Edge.To, edge));
+			}
+
+			return result;
+		}
+
+		private WeightedUndirectedGraphList<T, TWeight> KruskalSpanningTree()
+		{
+			//if (Count == 0) return Enumerable.Empty<T>();
+
+			//PriorityQueue<TWeight, GraphEdge<T, TWeight>> queue = new MinPriorityQueue<TWeight, GraphEdge<T, TWeight>>(e => e.Weight);
+			//T vertex = Keys.First();
+			//queue.Add();
+			return null;
+		}
+
+		private WeightedUndirectedGraphList<T, TWeight> BoruvkaSpanningTree()
+		{
+			//if (Count == 0) return Enumerable.Empty<T>();
+
+			//PriorityQueue<TWeight, GraphEdge<T, TWeight>> queue = new MinPriorityQueue<TWeight, GraphEdge<T, TWeight>>(e => e.Weight);
+			//T vertex = Keys.First();
+			//queue.Add();
+			return null;
 		}
 	}
 }

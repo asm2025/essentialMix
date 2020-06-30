@@ -75,6 +75,11 @@ namespace asm.Collections
 		[NotNull]
 		public abstract IGraphEnumeratorImpl<T> Enumerate([NotNull] T from, GraphTraverseMethod method);
 
+		public void Add([NotNull] T vertex)
+		{
+			Add(vertex, null);
+		}
+
 		public void Add([NotNull] IEnumerable<T> collection)
 		{
 			foreach (T value in collection) 
@@ -83,9 +88,10 @@ namespace asm.Collections
 
 		public abstract void AddEdge([NotNull] T from, [NotNull] T to);
 
-		/// <inheritdoc />
+		/// <inheritdoc cref="IDictionary{TKey,TValue}" />
 		public override bool Remove(T key)
 		{
+			if (key == null) throw new ArgumentNullException(nameof(key));
 			if (!base.Remove(key)) return false;
 			RemoveAllEdges(key);
 			return true;
@@ -117,6 +123,25 @@ namespace asm.Collections
 						: 0;
 		}
 
+		public bool GetFirstConnectedVertex(out T vertex,  out TAdjacencyList edges)
+		{
+			if (Values.Count > 0)
+			{
+				foreach (T key in Keys)
+				{
+					TAdjacencyList adjacencyList = this[key];
+					if (adjacencyList == null || adjacencyList.Count == 0) continue;
+					vertex = key;
+					edges = adjacencyList;
+					return true;
+				}
+			}
+
+			vertex = default(T);
+			edges = null;
+			return false;
+		}
+
 		public virtual int GetSize()
 		{
 			int sum = 0;
@@ -133,7 +158,7 @@ namespace asm.Collections
 		public IEnumerable<T> FindCycle(bool ignoreLoop = false) { return FindCycle(Keys, ignoreLoop); }
 		protected abstract IEnumerable<T> FindCycle([NotNull] ICollection<T> vertices, bool ignoreLoop = false);
 
-		public abstract bool IsLoop([NotNull] T value, [NotNull] TEdge edge);
+		protected abstract bool IsLoop([NotNull] T value, [NotNull] TEdge edge);
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public bool IsInternal([NotNull] T value)
@@ -235,11 +260,11 @@ namespace asm.Collections
 				_visited.Add(_current);
 
 				// Queue the next vertices
-				if (_graph.TryGetValue(_current, out HashSet<T> vertices) && vertices != null)
-				{
-					foreach (T vertex in vertices)
-						_queue.Enqueue(vertex);
-				}
+				HashSet<T> edges = _graph[_current];
+				if (edges == null || edges.Count == 0) return true;
+
+				foreach (T edge in edges)
+					_queue.Enqueue(edge);
 
 				return true;
 			}
@@ -340,11 +365,11 @@ namespace asm.Collections
 				_visited.Add(_current);
 				
 				// Queue the next vertices
-				if (_graph.TryGetValue(_current, out HashSet<T> vertices) && vertices != null)
-				{
-					foreach (T vertex in vertices)
-						_stack.Push(vertex);
-				}
+				HashSet<T> edges = _graph[_current];
+				if (edges == null || edges.Count == 0) return true;
+
+				foreach (T edge in edges)
+					_stack.Push(edge);
 
 				return true;
 			}
@@ -434,7 +459,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public override bool IsLoop(T value, T edge)
+		protected override bool IsLoop(T value, T edge)
 		{
 			return Comparer.Equals(value, edge);
 		}
