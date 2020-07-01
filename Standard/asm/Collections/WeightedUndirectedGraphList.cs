@@ -141,7 +141,6 @@ namespace asm.Collections
 			{
 				SpanningTreeAlgorithm.Prim => PrimSpanningTree(),
 				SpanningTreeAlgorithm.Kruskal => KruskalSpanningTree(),
-				SpanningTreeAlgorithm.Boruvka => BoruvkaSpanningTree(),
 				_ => throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null)
 			};
 		}
@@ -296,16 +295,6 @@ namespace asm.Collections
 			}
 
 			return result;
-		}
-
-		private WeightedUndirectedGraphList<T, TWeight> BoruvkaSpanningTree()
-		{
-			//if (Count == 0) return Enumerable.Empty<T>();
-
-			//PriorityQueue<TWeight, GraphEdge<T, TWeight>> queue = new MinPriorityQueue<TWeight, GraphEdge<T, TWeight>>(e => e.Weight);
-			//T vertex = Keys.First();
-			//queue.Add();
-			return null;
 		}
 	}
 }

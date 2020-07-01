@@ -50,6 +50,8 @@ namespace TestApp
 
 			//TestDomainName();
 
+			//TestFibonacci();
+
 			//TestThreadQueue();
 
 			//TestSortAlgorithm();
@@ -147,6 +149,22 @@ namespace TestApp
 			}
 		}
 
+		private static void TestFibonacci()
+		{
+			bool more;
+			Console.Clear();
+			Console.WriteLine("Testing Fibonacci number: ");
+
+			do
+			{
+				Console.Write($"Type in {"a number".BrightGreen()} to calculate the Fibonacci number for or {"ESCAPE".BrightRed()} key to exit. ");
+				string response = Console.ReadLine();
+				more = !string.IsNullOrWhiteSpace(response);
+				if (more && uint.TryParse(response, out uint value)) Console.WriteLine(asm.Numeric.Math.Fibonacci(value));
+			}
+			while (more);
+		}
+		
 		private static void TestSortAlgorithm()
 		{
 			const string algorithm = nameof(IListExtension.SortHeap);
@@ -2399,8 +2417,8 @@ namespace TestApp
 				}
 				
 				Console.WriteLine("All nodes are added...!".BrightGreen() + " Let's try adding some relationships...");
-				Console.Write($@"Would you like to add a bit of randomization? {"[Y]".BrightGreen()} / {"any key".Dim()}.
-This may cause cycles but also will make it much more fun for weighted shortest paths. ");
+				Console.Write($@"{"Would you like to add a bit of randomization?".Yellow()} {"[Y]".BrightGreen()} / {"any key".Dim()}.
+This may cause cycles but will make it much more fun for finding shortest paths. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				int threshold = response.Key != ConsoleKey.Y ? 0 : (int)Math.Floor(values.Count * 0.5d);
@@ -2495,11 +2513,11 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
 						break;
 					case WeightedUndirectedGraphList<char, int> weightedUndirectedGraph:
+						Console.WriteLine(LINE_SEPARATOR);
 						WeightedUndirectedGraphList<char, int> spanningTree = weightedUndirectedGraph.GetMinimumSpanningTree(SpanningTreeAlgorithm.Prim);
 
 						if (spanningTree != null)
 						{
-							Console.WriteLine(LINE_SEPARATOR);
 							Console.WriteLine("Prim Spanning Tree: ".Yellow());
 							spanningTree.Print();
 							Console.WriteLine(LINE_SEPARATOR);
@@ -2509,7 +2527,6 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 						if (spanningTree != null)
 						{
-							Console.WriteLine(LINE_SEPARATOR);
 							Console.WriteLine("Kruskal Spanning Tree: ".Yellow());
 							spanningTree.Print();
 							Console.WriteLine(LINE_SEPARATOR);
@@ -2529,8 +2546,8 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 					do
 					{
-						Console.Write($@"Type in {"a character".BrightGreen()} to find the shortest path from '{value.ToString().BrightGreen()}' to it,
-press the {"RETURN".BrightGreen()} key to accept the current random value '{to.ToString().BrightGreen()}'
+						Console.Write($@"Current position is '{value.ToString().BrightGreen()}'. Type in {"a character".BrightGreen()} to find the shortest path to,
+(You can press the {"RETURN".BrightGreen()} key to accept the current random value '{to.ToString().BrightGreen()}'),
 or press {"ESCAPE".BrightRed()} key to exit this test. ");
 						response = Console.ReadKey();
 						Console.WriteLine();
@@ -2542,8 +2559,9 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 					}
 					while (response.Key != ConsoleKey.Enter);
 
-					Console.WriteLine($"{"Shortest Path:".Yellow()} from {value.ToString().BrightCyan()} to {to.ToString().BrightCyan()}");
-					Console.WriteLine(string.Join(" -> ", wGraph.GetShortestPath(value, to, ShortestPathAlgorithm.Dijkstra)));
+					Console.WriteLine();
+					Console.WriteLine($"{"Shortest Path".Yellow()} from '{value.ToString().BrightCyan()}' to '{to.ToString().BrightCyan()}'");
+					Console.WriteLine("Dijkstra: " + string.Join(" -> ", wGraph.GetShortestPath(value, to, ShortestPathAlgorithm.Dijkstra)));
 				}
 
 				return true;

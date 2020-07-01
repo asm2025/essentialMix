@@ -920,9 +920,15 @@ namespace asm.Extensions
 		}
 		#endregion
 
+		/// <summary>
+		/// Shuffles the list using Fisher-Yates shuffle algorithm
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="thisValue"></param>
+		/// <param name="index"></param>
+		/// <param name="count"></param>
 		public static void Shuffle<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1)
 		{
-			// Fisher-Yates shuffle algorithm
 			thisValue.Count.ValidateRange(index, ref count);
 			if (count < 2 || thisValue.Count < 2) return;
 
@@ -935,8 +941,8 @@ namespace asm.Extensions
 
 		public static void Swap<T>([NotNull] this IList<T> thisValue, int index1, int index2)
 		{
-			if (!index1.InRangeRx(0, thisValue.Count)) throw new ArgumentOutOfRangeException(nameof(index1));
-			if (!index2.InRangeRx(0, thisValue.Count)) throw new ArgumentOutOfRangeException(nameof(index2));
+			thisValue.Count.ValidateRange(index1);
+			thisValue.Count.ValidateRange(index2);
 			if (index1 == index2) return;
 
 			T tmp = thisValue[index1];
@@ -951,6 +957,38 @@ namespace asm.Extensions
 			T tmp = thisValue[index1];
 			thisValue[index1] = thisValue[index2];
 			thisValue[index2] = tmp;
+		}
+
+		public static void LeftShift<T>([NotNull] this IList<T> thisValue, int index, int count)
+		{
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count == 0) return;
+
+			for (int i = count - 1; i > index; i--)
+				thisValue[i - 1] = thisValue[i];
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static void FastLeftShift<T>([NotNull] this IList<T> thisValue, int index, int count)
+		{
+			for (int i = count - 1; i > index; i--)
+				thisValue[i - 1] = thisValue[i];
+		}
+
+		public static void RightShift<T>([NotNull] this IList<T> thisValue, int index, int count)
+		{
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count == 0) return;
+
+			for (int i = index; i < count - 1; i++)
+				thisValue[i + 1] = thisValue[i];
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static void FastRightShift<T>([NotNull] this IList<T> thisValue, int index, int count)
+		{
+			for (int i = index; i < count - 1; i++)
+				thisValue[i + 1] = thisValue[i];
 		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using asm.Extensions;
 using JetBrains.Annotations;
 using SysMath = System.Math;
@@ -9,8 +10,16 @@ namespace asm.Numeric
 {
 	public static class Math
 	{
-		private static readonly ISet<ulong> __primes = new SortedSet<ulong>
+		/*
+		 * used to cache results instead of calculating them every time.
+		 * this technique is used in dynamic programming (DP) which caches the
+		 * results in something called memoize.
+		 * see https://en.wikipedia.org/wiki/Memoization
+		 */
+		private static readonly Lazy<ISet<ulong>> __primes = new Lazy<ISet<ulong>>(() => new SortedSet<ulong>
 		{
+			// the first two values are (1) a prime roughly half way between the previous value and int.MaxValue
+			// and (2) the prime closest too, but not above, int.MaxValue.
 			7,
 			11,
 			17,
@@ -108,13 +117,13 @@ namespace asm.Numeric
 			402653189,
 			805306457,
 			1610612741,
-			// the first two values are (1) a prime roughly half way between the previous value and int.MaxValue
-			// and (2) the prime closest too, but not above, int.MaxValue.
 			1879048201,
 			2147483629,
 			int.MaxValue
-		};
-
+		}, LazyThreadSafetyMode.ExecutionAndPublication);
+		
+		public static bool IsPrime(sbyte value) { return IsPrime((ulong)value); }
+		public static bool IsPrime(byte value) { return IsPrime((ulong)value); }
 		public static bool IsPrime(short value) { return IsPrime((ulong)value); }
 		public static bool IsPrime(ushort value) { return IsPrime((ulong)value); }
 		public static bool IsPrime(int value) { return IsPrime((ulong)value); }
@@ -123,11 +132,11 @@ namespace asm.Numeric
 		public static bool IsPrime(ulong value)
 		{
 			if ((value & 1ul) == 0 || value < 2ul || value % 2ul == 0ul || value % 3ul == 0ul || value % 5ul == 0ul) return false;
-			if (__primes.Contains(value)) return true;
+			if (__primes.Value.Contains(value)) return true;
 
 			ulong uMax = (ulong)SysMath.Sqrt(value);
 
-			foreach (ulong prime in __primes)
+			foreach (ulong prime in __primes.Value)
 			{
 				if (prime > uMax) break;
 				if (value % prime == 0ul) return false;
@@ -139,7 +148,7 @@ namespace asm.Numeric
 					return false;
 			}
 
-			__primes.Add(value);
+			__primes.Value.Add(value);
 			return true;
 		}
 
@@ -148,7 +157,15 @@ namespace asm.Numeric
 		public static int CountPrimes(int minimum, int maximum) { return (int)CountPrimes((ulong)minimum, (ulong)maximum); }
 		public static long CountPrimes(uint minimum, uint maximum) { return CountPrimes(minimum, (ulong)maximum); }
 		public static long CountPrimes(long minimum, long maximum) { return CountPrimes((ulong)minimum, (ulong)maximum); }
-		public static long CountPrimes(ulong minimum, ulong maximum) { return GetPrimes(minimum, maximum).LongCount(); }
+		public static long CountPrimes(ulong minimum, ulong maximum)
+		{
+			long count = 0;
+
+			foreach (ulong _ in GetPrimes(minimum, maximum)) 
+				count++;
+
+			return count;
+		}
 
 		public static short ExpandPrime(short value, short skip = 1) { return (short)ExpandPrime((ulong)value, (ulong)skip); }
 		public static ushort ExpandPrime(ushort value, ushort skip = 1) { return (ushort)ExpandPrime(value, (ulong)skip); }
@@ -162,12 +179,11 @@ namespace asm.Numeric
 		public static int GetPrime(int value) { return (int)GetPrime((ulong)value); }
 		public static uint GetPrime(uint value) { return (uint)GetPrime((ulong)value); }
 		public static long GetPrime(long value) { return (long)GetPrime((ulong)value); }
-
 		public static ulong GetPrime(ulong value)
 		{
 			if (value < 2ul) return 2ul;
 
-			ulong prime = __primes.FirstOrDefault(arg => arg >= value);
+			ulong prime = __primes.Value.FirstOrDefault(arg => arg >= value);
 			if (prime > 0ul) return prime;
 
 			// Outside of our predefined table. Compute the hard way.
@@ -189,7 +205,7 @@ namespace asm.Numeric
 			ulong last = minimum;
 			bool anyInList = false;
 
-			foreach (ulong prime in __primes.Where(arg => arg.InRange(minimum, maximum)))
+			foreach (ulong prime in __primes.Value.Where(arg => arg.InRange(minimum, maximum)))
 			{
 				anyInList = true;
 				last = prime;
@@ -291,7 +307,6 @@ namespace asm.Numeric
 			double rx = (double)value / y;
 			return ((byte)(x * rx), value);
 		}
-
 		public static (short x, short y) AspectRatio(short x, short y, short value, bool resizeToX = true)
 		{
 			if (x == 0) throw new ArgumentOutOfRangeException(nameof(x));
@@ -307,7 +322,6 @@ namespace asm.Numeric
 			double rx = (double)value / y;
 			return ((short)(x * rx), value);
 		}
-
 		public static (ushort x, ushort y) AspectRatio(ushort x, ushort y, ushort value, bool resizeToX = true)
 		{
 			if (x == 0) throw new ArgumentOutOfRangeException(nameof(x));
@@ -323,7 +337,6 @@ namespace asm.Numeric
 			double rx = (double)value / y;
 			return ((ushort)(x * rx), value);
 		}
-
 		public static (int x, int y) AspectRatio(int x, int y, int value, bool resizeToX = true)
 		{
 			if (x == 0) throw new ArgumentOutOfRangeException(nameof(x));
@@ -339,7 +352,6 @@ namespace asm.Numeric
 			double rx = (double)value / y;
 			return ((int)(x * rx), value);
 		}
-
 		public static (uint x, uint y) AspectRatio(uint x, uint y, uint value, bool resizeToX = true)
 		{
 			if (x == 0) throw new ArgumentOutOfRangeException(nameof(x));
@@ -355,7 +367,6 @@ namespace asm.Numeric
 			double rx = (double)value / y;
 			return ((uint)(x * rx), value);
 		}
-
 		public static (long x, long y) AspectRatio(long x, long y, long value, bool resizeToX = true)
 		{
 			if (x == 0) throw new ArgumentOutOfRangeException(nameof(x));
@@ -371,7 +382,6 @@ namespace asm.Numeric
 			double rx = (double)value / y;
 			return ((long)(x * rx), value);
 		}
-
 		public static (ulong x, ulong y) AspectRatio(ulong x, ulong y, ulong value, bool resizeToX = true)
 		{
 			if (x == 0) throw new ArgumentOutOfRangeException(nameof(x));
@@ -405,7 +415,6 @@ namespace asm.Numeric
 
 			return (byte)(a | b);
 		}
-
 		/// <summary>
 		/// Greatest Common Divisor for a and b.
 		/// </summary>
@@ -423,7 +432,6 @@ namespace asm.Numeric
 
 			return (short)(a | b);
 		}
-
 		/// <summary>
 		/// Greatest Common Divisor for a and b.
 		/// </summary>
@@ -441,7 +449,6 @@ namespace asm.Numeric
 
 			return (ushort)(a | b);
 		}
-
 		/// <summary>
 		/// Greatest Common Divisor for a and b.
 		/// </summary>
@@ -459,7 +466,6 @@ namespace asm.Numeric
 
 			return a | b;
 		}
-
 		/// <summary>
 		/// Greatest Common Divisor for a and b.
 		/// </summary>
@@ -477,7 +483,6 @@ namespace asm.Numeric
 
 			return a | b;
 		}
-
 		/// <summary>
 		/// Greatest Common Divisor for a and b.
 		/// </summary>
@@ -495,7 +500,6 @@ namespace asm.Numeric
 
 			return a | b;
 		}
-
 		/// <summary>
 		/// Greatest Common Divisor for a and b.
 		/// </summary>
@@ -515,195 +519,6 @@ namespace asm.Numeric
 		}
 
 		/// <summary>
-		/// Greatest Common Divisor for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>byte</returns>
-		public static byte GCD([NotNull] params byte[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return GCD(numbers[0], numbers[1]);
-				default:
-					byte gcd = numbers[0];
-
-					for (int i = 1; i < numbers.Length; i++)
-					{
-						gcd = GCD(gcd, numbers[i]);
-					}
-
-					return gcd;
-			}
-		}
-
-		/// <summary>
-		/// Greatest Common Divisor for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>short</returns>
-		public static short GCD([NotNull] params short[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return GCD(numbers[0], numbers[1]);
-				default:
-					short gcd = numbers[0];
-
-					for (int i = 1; i < numbers.Length; i++)
-					{
-						gcd = GCD(gcd, numbers[i]);
-					}
-
-					return gcd;
-			}
-		}
-
-		/// <summary>
-		/// Greatest Common Divisor for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>ushort</returns>
-		public static ushort GCD([NotNull] params ushort[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return GCD(numbers[0], numbers[1]);
-				default:
-					ushort gcd = numbers[0];
-
-					for (int i = 1; i < numbers.Length; i++)
-					{
-						gcd = GCD(gcd, numbers[i]);
-					}
-
-					return gcd;
-			}
-		}
-
-		/// <summary>
-		/// Greatest Common Divisor for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>int</returns>
-		public static int GCD([NotNull] params int[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return GCD(numbers[0], numbers[1]);
-				default:
-					int gcd = numbers[0];
-
-					for (int i = 1; i < numbers.Length; i++)
-					{
-						gcd = GCD(gcd, numbers[i]);
-					}
-
-					return gcd;
-			}
-		}
-
-		/// <summary>
-		/// Greatest Common Divisor for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>uint</returns>
-		public static uint GCD([NotNull] params uint[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return GCD(numbers[0], numbers[1]);
-				default:
-					uint gcd = numbers[0];
-
-					for (int i = 1; i < numbers.Length; i++)
-					{
-						gcd = GCD(gcd, numbers[i]);
-					}
-
-					return gcd;
-			}
-		}
-
-		/// <summary>
-		/// Greatest Common Divisor for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>long</returns>
-		public static long GCD([NotNull] params long[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return GCD(numbers[0], numbers[1]);
-				default:
-					long gcd = numbers[0];
-
-					for (int i = 1; i < numbers.Length; i++)
-					{
-						gcd = GCD(gcd, numbers[i]);
-					}
-
-					return gcd;
-			}
-		}
-
-		/// <summary>
-		/// Greatest Common Divisor for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>ulong</returns>
-		public static ulong GCD([NotNull] params ulong[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return GCD(numbers[0], numbers[1]);
-				default:
-					ulong gcd = numbers[0];
-
-					for (int i = 1; i < numbers.Length; i++)
-					{
-						gcd = GCD(gcd, numbers[i]);
-					}
-
-					return gcd;
-			}
-		}
-
-		/// <summary>
 		/// Least Common Multiple for a and b.
 		/// </summary>
 		/// <param name="a">a</param>
@@ -719,7 +534,6 @@ namespace asm.Numeric
 						? (byte)0
 						: (byte)(a / gcd * b);
 		}
-
 		/// <summary>
 		/// Least Common Multiple for a and b.
 		/// </summary>
@@ -736,7 +550,6 @@ namespace asm.Numeric
 						? (short)0
 						: (short)(a / gcd * b);
 		}
-
 		/// <summary>
 		/// Least Common Multiple for a and b.
 		/// </summary>
@@ -753,7 +566,6 @@ namespace asm.Numeric
 						? (ushort)0
 						: (ushort)(a / gcd * b);
 		}
-
 		/// <summary>
 		/// Least Common Multiple for a and b.
 		/// </summary>
@@ -770,7 +582,6 @@ namespace asm.Numeric
 						? 0
 						: a / gcd * b;
 		}
-
 		/// <summary>
 		/// Least Common Multiple for a and b.
 		/// </summary>
@@ -787,7 +598,6 @@ namespace asm.Numeric
 						? 0
 						: a / gcd * b;
 		}
-
 		/// <summary>
 		/// Least Common Multiple for a and b.
 		/// </summary>
@@ -804,7 +614,6 @@ namespace asm.Numeric
 						? 0
 						: a / gcd * b;
 		}
-
 		/// <summary>
 		/// Least Common Multiple for a and b.
 		/// </summary>
@@ -820,146 +629,6 @@ namespace asm.Numeric
 			return gcd == 0
 						? 0
 						: a / gcd * b;
-		}
-
-		/// <summary>
-		/// Least Common Multiple for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>byte</returns>
-		public static byte LCM([NotNull] params byte[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return LCM(numbers[0], numbers[1]);
-				default:
-					return numbers.Aggregate(LCM);
-			}
-		}
-
-		/// <summary>
-		/// Least Common Multiple for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>short</returns>
-		public static short LCM([NotNull] params short[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return LCM(numbers[0], numbers[1]);
-				default:
-					return numbers.Aggregate(LCM);
-			}
-		}
-
-		/// <summary>
-		/// Least Common Multiple for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>ushort</returns>
-		public static ushort LCM([NotNull] params ushort[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return LCM(numbers[0], numbers[1]);
-				default:
-					return numbers.Aggregate(LCM);
-			}
-		}
-
-		/// <summary>
-		/// Least Common Multiple for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>int</returns>
-		public static int LCM([NotNull] params int[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return LCM(numbers[0], numbers[1]);
-				default:
-					return numbers.Aggregate(LCM);
-			}
-		}
-
-		/// <summary>
-		/// Least Common Multiple for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>uint</returns>
-		public static uint LCM([NotNull] params uint[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return LCM(numbers[0], numbers[1]);
-				default:
-					return numbers.Aggregate(LCM);
-			}
-		}
-
-		/// <summary>
-		/// Least Common Multiple for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>long</returns>
-		public static long LCM([NotNull] params long[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return LCM(numbers[0], numbers[1]);
-				default:
-					return numbers.Aggregate(LCM);
-			}
-		}
-
-		/// <summary>
-		/// Least Common Multiple for numbers.
-		/// </summary>
-		/// <param name="numbers">The numbers.</param>
-		/// <returns>ulong</returns>
-		public static ulong LCM([NotNull] params ulong[] numbers)
-		{
-			switch (numbers.Length)
-			{
-				case 0:
-					return 0;
-				case 1:
-					return numbers[0];
-				case 2:
-					return LCM(numbers[0], numbers[1]);
-				default:
-					return numbers.Aggregate(LCM);
-			}
 		}
 
 		public static Fraction<int> RationalApproximation(float value, float accuracy = (float)0.001)
@@ -996,7 +665,6 @@ namespace asm.Numeric
 
 			return new Fraction<int>((n * denominator + numerator) * sign, denominator);
 		}
-
 		/// <summary>
 		/// Returns two numbers that represent best approximation of a real number in fractions.
 		/// Farey Sequence: https://www.johndcook.com/blog/2010/10/20/best-rational-approximation/
@@ -1041,7 +709,6 @@ namespace asm.Numeric
 
 			return new Fraction<int>((n * denominator + numerator) * sign, denominator);
 		}
-
 		/// <summary>
 		/// Returns two numbers that represent best approximation of a real number in fractions.
 		/// Farey Sequence: https://www.johndcook.com/blog/2010/10/20/best-rational-approximation/
@@ -1086,7 +753,6 @@ namespace asm.Numeric
 
 			return new Fraction<int>((n * denominator + numerator) * sign, denominator);
 		}
-
 		/// <summary>
 		/// Returns two numbers that represent best approximation of a real number in fractions.
 		/// Farey Sequence: https://www.johndcook.com/blog/2010/10/20/best-rational-approximation/
@@ -1149,7 +815,6 @@ namespace asm.Numeric
 				}
 			}
 		}
-
 		/// <summary>
 		/// Returns two numbers that represent best approximation of a real number in fractions.
 		/// Farey Sequence: https://www.johndcook.com/blog/2010/10/20/best-rational-approximation/
@@ -1212,7 +877,6 @@ namespace asm.Numeric
 				}
 			}
 		}
-
 		/// <summary>
 		/// Returns two numbers that represent best approximation of a real number in fractions.
 		/// Farey Sequence: https://www.johndcook.com/blog/2010/10/20/best-rational-approximation/
@@ -1273,43 +937,6 @@ namespace asm.Numeric
 					// Middle is our best fraction
 					return new Fraction<int>((n * middle_d + middle_n) * sign, middle_d);
 				}
-			}
-		}
-
-		/// <summary>
-		/// Binary seek for the value where f() becomes false.
-		/// </summary>
-		private static void Seek(ref int a, ref int b, int ainc, int binc, [NotNull] Func<int, int, bool> f)
-		{
-			a += ainc;
-			b += binc;
-
-			if (f(a, b))
-			{
-				int weight = 1;
-
-				do
-				{
-					weight *= 2;
-					a += ainc * weight;
-					b += binc * weight;
-				}
-				while (f(a, b));
-
-				do
-				{
-					weight /= 2;
-
-					int adec = ainc * weight;
-					int bdec = binc * weight;
-
-					if (!f(a - adec, b - bdec))
-					{
-						a -= adec;
-						b -= bdec;
-					}
-				}
-				while (weight > 1);
 			}
 		}
 
@@ -1398,100 +1025,180 @@ namespace asm.Numeric
 			return new Fraction<long>(numerator, denominator);
 		}
 
-		public static sbyte Factorial(sbyte thisValue)
+		public static sbyte Factorial(sbyte value)
 		{
-			sbyte fact = 1;
+			sbyte result = 1;
 
-			for (sbyte i = 1; i <= thisValue; i++)
+			for (sbyte i = 1; i <= value; i++)
 			{
-				fact *= i;
+				result *= i;
 			}
 
-			return fact;
+			return result;
+		}
+		public static byte Factorial(byte value)
+		{
+			byte result = 1;
+
+			for (byte i = 1; i <= value; i++)
+			{
+				result *= i;
+			}
+
+			return result;
+		}
+		public static short Factorial(short value)
+		{
+			short result = 1;
+
+			for (short i = 1; i <= value; i++)
+			{
+				result *= i;
+			}
+
+			return result;
+		}
+		public static ushort Factorial(ushort value)
+		{
+			ushort result = 1;
+
+			for (ushort i = 1; i <= value; i++)
+			{
+				result *= i;
+			}
+
+			return result;
+		}
+		public static int Factorial(int value)
+		{
+			int result = 1;
+
+			for (int i = 1; i <= value; i++)
+			{
+				result *= i;
+			}
+
+			return result;
+		}
+		public static uint Factorial(uint value)
+		{
+			uint result = 1;
+
+			for (uint i = 1; i <= value; i++)
+			{
+				result *= i;
+			}
+
+			return result;
+		}
+		public static long Factorial(long value)
+		{
+			long result = 1;
+
+			for (long i = 1; i <= value; i++)
+			{
+				result *= i;
+			}
+
+			return result;
+		}
+		public static ulong Factorial(ulong value)
+		{
+			ulong result = 1;
+
+			for (ulong i = 1; i <= value; i++) 
+				result *= i;
+
+			return result;
 		}
 
-		public static byte Factorial(byte thisValue)
+		public static sbyte Fibonacci(sbyte value) { return (sbyte)Fibonacci((uint)value); }
+		public static byte Fibonacci(byte value) { return (byte)Fibonacci((uint)value); }
+		public static short Fibonacci(short value) { return (short)Fibonacci((uint)value); }
+		public static ushort Fibonacci(ushort value) { return (ushort)Fibonacci((uint)value); }
+		public static int Fibonacci(int value) { return (int)Fibonacci((uint)value); }
+		public static uint Fibonacci(uint value)
 		{
-			byte fact = 1;
+			// https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-006-introduction-to-algorithms-fall-2011/
+			// AlgoExpert - Become An Expert In Algorithms
+			// fibonacci(n) = fibonacci(n - 1) + fibonacci(n - 2) where n >= 0
+			if (value <= 2u) return 1u;
 
-			for (byte i = 1; i <= thisValue; i++)
+			// this can be done using Dynamic Programming as well by caching every calculated fib(n), fib(n - 1), fib(n - 2)
+			// int/unit will run faster than ulong version on 64 bit systems and uint in particular will be faster than smaller data types because of the alignment.
+			uint[] fib = { 0u, 1u };
+			uint result = 0u;
+			uint i = 3u;
+
+			while (i <= value)
 			{
-				fact *= i;
+				result = fib[0] + fib[1];
+				fib[0] = fib[1];
+				fib[1] = result;
+				i++;
 			}
 
-			return fact;
+			return result;
+		}
+		public static long Fibonacci(long value) { return (long)Fibonacci((ulong)value); }
+		public static ulong Fibonacci(ulong value)
+		{
+			// https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-006-introduction-to-algorithms-fall-2011/
+			// AlgoExpert - Become An Expert In Algorithms
+			// fibonacci(n) = fibonacci(n - 1) + fibonacci(n - 2) where n >= 0
+			if (value <= 2ul) return 1ul;
+
+			// this can be done using Dynamic Programming as well by caching every calculated fib(n), fib(n - 1), fib(n - 2)
+			ulong[] fib = { 0ul, 1ul };
+			ulong result = 0ul;
+			ulong i = 3ul;
+
+			while (i <= value)
+			{
+				result = fib[0] + fib[1];
+				fib[0] = fib[1];
+				fib[1] = result;
+				i++;
+			}
+
+			return result;
 		}
 
-		public static short Factorial(short thisValue)
+		/// <summary>
+		/// Binary seek for the value where f() becomes false.
+		/// </summary>
+		private static void Seek(ref int a, ref int b, int ainc, int binc, [NotNull] Func<int, int, bool> f)
 		{
-			short fact = 1;
+			a += ainc;
+			b += binc;
 
-			for (short i = 1; i <= thisValue; i++)
+			if (f(a, b))
 			{
-				fact *= i;
+				int weight = 1;
+
+				do
+				{
+					weight *= 2;
+					a += ainc * weight;
+					b += binc * weight;
+				}
+				while (f(a, b));
+
+				do
+				{
+					weight /= 2;
+
+					int adec = ainc * weight;
+					int bdec = binc * weight;
+
+					if (!f(a - adec, b - bdec))
+					{
+						a -= adec;
+						b -= bdec;
+					}
+				}
+				while (weight > 1);
 			}
-
-			return fact;
-		}
-
-		public static ushort Factorial(ushort thisValue)
-		{
-			ushort fact = 1;
-
-			for (ushort i = 1; i <= thisValue; i++)
-			{
-				fact *= i;
-			}
-
-			return fact;
-		}
-
-		public static int Factorial(int thisValue)
-		{
-			int fact = 1;
-
-			for (int i = 1; i <= thisValue; i++)
-			{
-				fact *= i;
-			}
-
-			return fact;
-		}
-
-		public static uint Factorial(uint thisValue)
-		{
-			uint fact = 1;
-
-			for (uint i = 1; i <= thisValue; i++)
-			{
-				fact *= i;
-			}
-
-			return fact;
-		}
-
-		public static long Factorial(long thisValue)
-		{
-			long fact = 1;
-
-			for (long i = 1; i <= thisValue; i++)
-			{
-				fact *= i;
-			}
-
-			return fact;
-		}
-
-		public static ulong Factorial(ulong thisValue)
-		{
-			ulong fact = 1;
-
-			for (ulong i = 1; i <= thisValue; i++)
-			{
-				fact *= i;
-			}
-
-			return fact;
 		}
 	}
 }

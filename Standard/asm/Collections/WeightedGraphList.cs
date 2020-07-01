@@ -342,7 +342,9 @@ namespace asm.Collections
 			{
 				ShortestPathAlgorithm.Dijkstra => DijkstraShortestPath(from, to),
 				ShortestPathAlgorithm.BellmanFord => BellmanFordShortestPath(from, to),
+				ShortestPathAlgorithm.BStar => BStarShortestPath(from, to),
 				ShortestPathAlgorithm.AStar => AStarShortestPath(from, to),
+				ShortestPathAlgorithm.DStar => DStarShortestPath(from, to),
 				ShortestPathAlgorithm.FloydWarshall => FloydWarshallShortestPath(from, to),
 				ShortestPathAlgorithm.Johnson => JohnsonShortestPath(from, to),
 				ShortestPathAlgorithm.Viterbi => ViterbiShortestPath(from, to),
@@ -415,7 +417,21 @@ namespace asm.Collections
 		}
 
 		[NotNull]
+		private IEnumerable<T> BStarShortestPath([NotNull] T from, [NotNull] T to)
+		{
+			// todo
+			throw new NotImplementedException();
+		}
+
+		[NotNull]
 		private IEnumerable<T> AStarShortestPath([NotNull] T from, [NotNull] T to)
+		{
+			// todo
+			throw new NotImplementedException();
+		}
+
+		[NotNull]
+		private IEnumerable<T> DStarShortestPath([NotNull] T from, [NotNull] T to)
 		{
 			// todo
 			throw new NotImplementedException();
