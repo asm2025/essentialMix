@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -167,7 +166,7 @@ namespace asm.Collections
 			public static implicit operator T(Navigator node) { return node.Value; }
 		}
 
-		private struct LevelOrderEnumerator : IBinaryTreeEnumeratorImpl<T>
+		private struct LevelOrderEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly ArrayBinaryTree<T> _tree;
 			private readonly int _version;
@@ -188,7 +187,7 @@ namespace asm.Collections
 				_rightToLeft = rightToLeft;
 				_current = tree.NewNavigator(index);
 				_started = false;
-				_done = _tree.Count == 0;
+				_done = !_index.InRangeRx(0, _tree.Count);
 			}
 
 			/// <inheritdoc />
@@ -260,14 +259,14 @@ namespace asm.Collections
 				_current.Index = -1;
 				_started = false;
 				_queue.Clear();
-				_done = _tree.Count == 0;
+				_done = !_index.InRangeRx(0, _tree.Count);
 			}
 
 			/// <inheritdoc />
 			public void Dispose() { }
 		}
 
-		private struct PreOrderEnumerator : IBinaryTreeEnumeratorImpl<T>
+		private struct PreOrderEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly ArrayBinaryTree<T> _tree;
 			private readonly int _version;
@@ -288,7 +287,7 @@ namespace asm.Collections
 				_rightToLeft = rightToLeft;
 				_current = tree.NewNavigator(index);
 				_started = false;
-				_done = _tree.Count == 0;
+				_done = !_index.InRangeRx(0, _tree.Count);
 			}
 
 			/// <inheritdoc />
@@ -361,14 +360,14 @@ namespace asm.Collections
 				_current.Index = -1;
 				_started = false;
 				_stack.Clear();
-				_done = _tree.Count == 0;
+				_done = !_index.InRangeRx(0, _tree.Count);
 			}
 
 			/// <inheritdoc />
 			public void Dispose() { }
 		}
 
-		private struct InOrderEnumerator : IBinaryTreeEnumeratorImpl<T>
+		private struct InOrderEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly ArrayBinaryTree<T> _tree;
 			private readonly int _version;
@@ -389,7 +388,7 @@ namespace asm.Collections
 				_rightToLeft = rightToLeft;
 				_current = tree.NewNavigator(index);
 				_started = false;
-				_done = _tree.Count == 0;
+				_done = !_index.InRangeRx(0, _tree.Count);
 			}
 
 			/// <inheritdoc />
@@ -469,14 +468,14 @@ namespace asm.Collections
 				_current.Index = -1;
 				_started = false;
 				_stack.Clear();
-				_done = _tree.Count == 0;
+				_done = !_index.InRangeRx(0, _tree.Count);
 			}
 
 			/// <inheritdoc />
 			public void Dispose() { }
 		}
 
-		private struct PostOrderEnumerator : IBinaryTreeEnumeratorImpl<T>
+		private struct PostOrderEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly ArrayBinaryTree<T> _tree;
 			private readonly int _version;
@@ -497,7 +496,7 @@ namespace asm.Collections
 				_rightToLeft = rightToLeft;
 				_current = tree.NewNavigator(index);
 				_started = false;
-				_done = _tree.Count == 0;
+				_done = !_index.InRangeRx(0, _tree.Count);
 			}
 
 			/// <inheritdoc />
@@ -616,7 +615,7 @@ namespace asm.Collections
 				_current.Index = -1;
 				_started = false;
 				_stack.Clear();
-				_done = _tree.Count == 0;
+				_done = !_index.InRangeRx(0, _tree.Count);
 			}
 
 			/// <inheritdoc />
@@ -677,12 +676,9 @@ namespace asm.Collections
 		}
 
 		[NotNull]
-		public IComparer<T> Comparer { get; private set; }
-
-		public string Label { get; set; }
+		public IComparer<T> Comparer { get; }
 
 		/// <inheritdoc cref="ICollection{T}" />
-		[field: ContractPublicPropertyName("Count")]
 		public int Count { get; protected set; }
 
 		[NotNull]
@@ -705,13 +701,13 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-		/// <inheritdoc />
 		public IEnumerator<T> GetEnumerator()
 		{
 			return Enumerate(0, BinaryTreeTraverseMethod.InOrder, false);
 		}
+
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
 		public Navigator NewNavigator(int index = -1)
 		{
@@ -724,9 +720,9 @@ namespace asm.Collections
 		/// <param name="index">The starting node</param>
 		/// <param name="method">The traverse method</param>
 		/// <param name="rightToLeft">Left-to-right or right-to-left</param>
-		/// <returns><see cref="IBinaryTreeEnumeratorImpl{T}"/></returns>
+		/// <returns><see cref="IEnumerableEnumerator{T}"/></returns>
 		[NotNull]
-		public IBinaryTreeEnumeratorImpl<T> Enumerate(int index, BinaryTreeTraverseMethod method, bool rightToLeft)
+		public IEnumerableEnumerator<T> Enumerate(int index, BinaryTreeTraverseMethod method, bool rightToLeft)
 		{
 			return method switch
 			{
@@ -740,19 +736,19 @@ namespace asm.Collections
 
 		#region Enumerate overloads
 		[NotNull]
-		public IBinaryTreeEnumeratorImpl<T> Enumerate(int index)
+		public IEnumerableEnumerator<T> Enumerate(int index)
 		{
 			return Enumerate(index, BinaryTreeTraverseMethod.InOrder, false);
 		}
 
 		[NotNull]
-		public IBinaryTreeEnumeratorImpl<T> Enumerate(int index, bool rightToLeft)
+		public IEnumerableEnumerator<T> Enumerate(int index, bool rightToLeft)
 		{
 			return Enumerate(index, BinaryTreeTraverseMethod.InOrder, rightToLeft);
 		}
 
 		[NotNull]
-		public IBinaryTreeEnumeratorImpl<T> Enumerate(int index, BinaryTreeTraverseMethod method)
+		public IEnumerableEnumerator<T> Enumerate(int index, BinaryTreeTraverseMethod method)
 		{
 			return Enumerate(index, method, false);
 		}
@@ -767,7 +763,7 @@ namespace asm.Collections
 		/// <param name="visitCallback">callback action to handle the node</param>
 		public void Iterate(int index, BinaryTreeTraverseMethod method, bool rightToLeft, [NotNull] Action<int> visitCallback)
 		{
-			if (Count == 0 || !index.InRangeRx(0, Count)) return;
+			if (!index.InRangeRx(0, Count)) return;
 
 			switch (method)
 			{
@@ -814,7 +810,7 @@ namespace asm.Collections
 		/// <param name="visitCallback">callback function to handle the node that can cancel the loop</param>
 		public void Iterate(int index, BinaryTreeTraverseMethod method, bool rightToLeft, [NotNull] Func<int, bool> visitCallback)
 		{
-			if (Count == 0 || !index.InRangeRx(0, Count)) return;
+			if (!index.InRangeRx(0, Count)) return;
 
 			switch (method)
 			{
@@ -975,6 +971,7 @@ namespace asm.Collections
 			return true;
 		}
 
+		/// <inheritdoc />
 		public bool Contains(T value) { return Find(value) > -1; }
 
 		public bool Exists([NotNull] Predicate<T> match) { return Count > 0 && Array.FindIndex(Items, 0, Count, match) > -1; }

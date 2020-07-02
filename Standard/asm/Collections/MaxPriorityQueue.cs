@@ -45,14 +45,14 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public MaxPriorityQueue([NotNull] IEnumerable<T> collection, IComparer<T> priorityComparer)
-			: this(collection, null, priorityComparer)
+		public MaxPriorityQueue([NotNull] IEnumerable<T> enumerable, IComparer<T> priorityComparer)
+			: this(enumerable, null, priorityComparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public MaxPriorityQueue([NotNull] IEnumerable<T> collection, IComparer<T> comparer, IComparer<T> priorityComparer)
-			: base(collection, comparer, priorityComparer)
+		public MaxPriorityQueue([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer, IComparer<T> priorityComparer)
+			: base(enumerable, comparer, priorityComparer)
 		{
 		}
 

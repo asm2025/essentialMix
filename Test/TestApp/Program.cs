@@ -97,8 +97,13 @@ namespace TestApp
 			//TestSkipList();
 
 			//TestDisjointSet();
+			
+			//TestBinomialHeapAdd();
+			TestBinomialHeapRemove();
+			//TestBinomialPriorityQueue();
+			//TestBinomialHeapElementAt();
 
-			TestGraph();
+			//TestGraph();
 
 			ConsoleHelper.Pause();
 		}
@@ -163,6 +168,117 @@ namespace TestApp
 				if (more && uint.TryParse(response, out uint value)) Console.WriteLine(asm.Numeric.Math.Fibonacci(value));
 			}
 			while (more);
+		}
+
+		private static void TestThreadQueue()
+		{
+			// change this to true to use 1 thread only for debugging
+			const bool LIMIT_THREADS = false;
+
+			int len = RNGRandomHelper.Next(100, 1000);
+			int[] values = GetRandomIntegers(len);
+			int timeout = RNGRandomHelper.Next(0, 1);
+			string timeoutString = timeout > 0
+										? $"{timeout} minute(s)"
+										: "None";
+			int maximumThreads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
+			Func<int, TaskResult> exec = e =>
+			{
+				Console.Write(", {0}", e);
+				return TaskResult.Success;
+			};
+			Queue<ThreadQueueMode> modes = new Queue<ThreadQueueMode>(EnumHelper<ThreadQueueMode>.GetValues());
+			Stopwatch clock = new Stopwatch();
+
+#if DEBUG
+			// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
+			int threads = LIMIT_THREADS
+							? 1
+							: maximumThreads;
+#else
+					// Otherwise, use the default (Best to be TaskHelper.ProcessDefault which = Environment.ProcessorCount)
+					int threads = maximumThreads;
+#endif
+
+			if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
+
+			while (modes.Count > 0)
+			{
+				Console.Clear();
+				Console.WriteLine();
+				ThreadQueueMode mode = modes.Dequeue();
+				Title($"Testing multi-thread queue in '{mode.ToString().BrightCyan()}' mode...");
+
+				// if there is a timeout, will use a CancellationTokenSource.
+				using (CancellationTokenSource cts = timeout > 0
+														? new CancellationTokenSource(TimeSpan.FromMinutes(timeout))
+														: null)
+				{
+					CancellationToken token = cts?.Token ?? CancellationToken.None;
+					ProducerConsumerQueueOptions<int> options = mode == ThreadQueueMode.ThresholdTaskGroup
+																	? new ProducerConsumerThresholdQueueOptions<int>(threads, exec)
+																	{
+																		// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
+																		Threshold = TimeSpan.FromSeconds(1)
+																	}
+																	: new ProducerConsumerQueueOptions<int>(threads, exec);
+			
+					// Create a generic queue producer
+					using (IProducerConsumer<int> queue = ProducerConsumerQueue.Create(mode, options, token))
+					{
+						queue.WorkStarted += (sender, args) =>
+						{
+							Console.WriteLine();
+							Console.WriteLine($"Starting multi-thread test. mode: '{mode.ToString().BrightCyan()}', values: {values.Length.ToString().BrightCyan()}, threads: {options.Threads.ToString().BrightCyan()}, timeout: {timeoutString.BrightCyan()}...");
+							if (mode == ThreadQueueMode.ThresholdTaskGroup) Console.WriteLine($"in {mode} mode, {threads.ToString().BrightCyan()} tasks will be issued every {((ProducerConsumerThresholdQueueOptions<int>)options).Threshold.TotalSeconds.ToString("N0").BrightCyan()} second(s).");
+							Console.WriteLine();
+							Console.WriteLine();
+							clock.Restart();
+						};
+
+						queue.WorkCompleted += (sender, args) =>
+						{
+							long elapsed = clock.ElapsedMilliseconds;
+							Console.WriteLine();
+							Console.WriteLine();
+							Console.WriteLine($"Finished test. mode: '{mode.ToString().BrightCyan()}', values: {values.Length.ToString().BrightCyan()}, threads: {options.Threads.ToString().BrightCyan()}, timeout: {timeoutString.BrightCyan()}, elapsed: {elapsed.ToString().BrightCyan()} ms.");
+							Console.WriteLine();
+						};
+
+						foreach (int value in values)
+						{
+							queue.Enqueue(value);
+						}
+
+						/*
+						 * when the queue is being disposed, it will wait until the queued items are processed.
+						 * this works when queue.WaitOnDispose is true , which it is by default.
+						 * alternatively, the following can be done to wait for all items to be processed:
+						 *
+						 * // Important: marks the completion of queued items, no further items can be queued
+						 * // after this point. the queue will not to wait for more items other than the already queued.
+						 * queue.Complete();
+						 * // wait for the queue to finish
+						 * queue.Wait();
+						 *
+						 * another way to go about it, is not to call queue.Complete(); if this queue will
+						 * wait indefinitely and maybe use a CancellationTokenSource.
+						 *
+						 * for now, the queue will wait for the items to be finished once reached the next
+						 * dispose curly bracket.
+						 */
+					}
+				}
+
+				if (modes.Count == 0) continue;
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				if (response.Key != ConsoleKey.Y) modes.Clear();
+			}
+
+			clock.Stop();
 		}
 		
 		private static void TestSortAlgorithm()
@@ -1713,70 +1829,70 @@ namespace TestApp
 			}
 		}
 
-		//private static void TestTreeEquality()
-		//{
-		//	bool more;
+		private static void TestTreeEquality()
+		{
+			bool more;
 
-		//	do
-		//	{
-		//		Console.Clear();
-		//		Title("Testing tree equality...");
-		
-		//		int len = RNGRandomHelper.Next(1, 12);
-		//		int[] values = GetRandomIntegers(true, len);
-		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+			do
+			{
+				Console.Clear();
+				Title("Testing tree equality...");
 
-		//		Console.WriteLine();
-		//		Console.WriteLine("Testing BinarySearchTree: ".BrightBlack() + string.Join(", ", values));
-		//		Console.WriteLine();
-		//		LinkedBinaryTree<int> tree1 = new BinarySearchTree<int>();
-		//		LinkedBinaryTree<int> tree2 = new BinarySearchTree<int>();
-		//		DoTheTest(tree1, tree2, values);
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(true, len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
-		//		Console.WriteLine();
-		//		Console.WriteLine("Testing BinarySearchTree and AVLTree: ".BrightBlack() + string.Join(", ", values));
-		//		Console.WriteLine();
-		//		tree1.Clear();
-		//		tree2 = new AVLTree<int>();
-		//		DoTheTest(tree1, tree2, values);
+				Console.WriteLine();
+				Console.WriteLine("Testing BinarySearchTree: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine();
+				LinkedBinaryTree<int> tree1 = new BinarySearchTree<int>();
+				LinkedBinaryTree<int> tree2 = new BinarySearchTree<int>();
+				DoTheTest(tree1, tree2, values);
 
-		//		Console.WriteLine();
-		//		Console.WriteLine("Testing AVLTree: ".BrightBlack() + string.Join(", ", values));
-		//		Console.WriteLine();
-		//		tree1 = new AVLTree<int>();
-		//		tree2 = new AVLTree<int>();
-		//		DoTheTest(tree1, tree2, values);
+				Console.WriteLine();
+				Console.WriteLine("Testing BinarySearchTree and AVLTree: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine();
+				tree1.Clear();
+				tree2 = new AVLTree<int>();
+				DoTheTest(tree1, tree2, values);
 
-		//		Console.WriteLine();
-		//		Console.WriteLine("Testing RedBlackTree: ".BrightBlack() + string.Join(", ", values));
-		//		Console.WriteLine();
-		//		RedBlackTree<int> rbTree1 = new RedBlackTree<int>();
-		//		RedBlackTree<int> rbTree2 = new RedBlackTree<int>();
-		//		DoTheTest(rbTree1, rbTree2, values);
+				Console.WriteLine();
+				Console.WriteLine("Testing AVLTree: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine();
+				tree1 = new AVLTree<int>();
+				tree2 = new AVLTree<int>();
+				DoTheTest(tree1, tree2, values);
 
-		//		Console.WriteLine();
-		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-		//		ConsoleKeyInfo response = Console.ReadKey(true);
-		//		Console.WriteLine();
-		//		more = response.Key == ConsoleKey.Y;
-		//	}
-		//	while (more);
+				Console.WriteLine();
+				Console.WriteLine("Testing RedBlackTree: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine();
+				RedBlackTree<int> rbTree1 = new RedBlackTree<int>();
+				RedBlackTree<int> rbTree2 = new RedBlackTree<int>();
+				DoTheTest(rbTree1, rbTree2, values);
 
-		//	static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree1, LinkedBinaryTree<TNode, int> tree2, int[] array)
-		//		where TNode : LinkedBinaryNode<TNode, int>
-		//	{
-		//		Console.WriteLine();
-		//		Console.WriteLine($"Testing {tree1.GetType().Name} and {tree1.GetType().Name}...".BrightGreen());
-		//		tree1.Add(array);
-		//		tree2.Add(array);
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
 
-		//		Console.WriteLine("InOrder1: ".BrightBlack() + string.Join(", ", tree1));
-		//		Console.WriteLine("InOrder2: ".BrightBlack() + string.Join(", ", tree2));
-		//		tree1.PrintWithProps();
-		//		tree2.PrintWithProps();
-		//		Console.WriteLine($"tree1 == tree2? {tree1.Equals(tree2).ToYesNo()}");
-		//	}
-		//}
+			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree1, LinkedBinaryTree<TNode, int> tree2, int[] array)
+				where TNode : LinkedBinaryNode<TNode, int>
+			{
+				Console.WriteLine();
+				Console.WriteLine($"Testing {tree1.GetType().Name} and {tree1.GetType().Name}...".BrightGreen());
+				tree1.Add(array);
+				tree2.Add(array);
+
+				Console.WriteLine("InOrder1: ".BrightBlack() + string.Join(", ", tree1));
+				Console.WriteLine("InOrder2: ".BrightBlack() + string.Join(", ", tree2));
+				tree1.PrintWithProps();
+				tree2.PrintWithProps();
+				Console.WriteLine($"tree1 == tree2? {tree1.Equals(tree2).ToYesNo()}");
+			}
+		}
 
 		private static void TestHeapAdd()
 		{
@@ -1970,117 +2086,6 @@ namespace TestApp
 				Console.WriteLine();
 				Console.WriteLine();
 			}
-		}
-
-		private static void TestThreadQueue()
-		{
-			// change this to true to use 1 thread only for debugging
-			const bool LIMIT_THREADS = false;
-
-			int len = RNGRandomHelper.Next(100, 1000);
-			int[] values = GetRandomIntegers(len);
-			int timeout = RNGRandomHelper.Next(0, 1);
-			string timeoutString = timeout > 0
-										? $"{timeout} minute(s)"
-										: "None";
-			int maximumThreads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
-			Func<int, TaskResult> exec = e =>
-			{
-				Console.Write(", {0}", e);
-				return TaskResult.Success;
-			};
-			Queue<ThreadQueueMode> modes = new Queue<ThreadQueueMode>(EnumHelper<ThreadQueueMode>.GetValues());
-			Stopwatch clock = new Stopwatch();
-
-#if DEBUG
-			// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
-			int threads = LIMIT_THREADS
-							? 1
-							: maximumThreads;
-#else
-					// Otherwise, use the default (Best to be TaskHelper.ProcessDefault which = Environment.ProcessorCount)
-					int threads = maximumThreads;
-#endif
-
-			if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
-
-			while (modes.Count > 0)
-			{
-				Console.Clear();
-				Console.WriteLine();
-				ThreadQueueMode mode = modes.Dequeue();
-				Title($"Testing multi-thread queue in '{mode.ToString().BrightCyan()}' mode...");
-
-				// if there is a timeout, will use a CancellationTokenSource.
-				using (CancellationTokenSource cts = timeout > 0
-														? new CancellationTokenSource(TimeSpan.FromMinutes(timeout))
-														: null)
-				{
-					CancellationToken token = cts?.Token ?? CancellationToken.None;
-					ProducerConsumerQueueOptions<int> options = mode == ThreadQueueMode.ThresholdTaskGroup
-																	? new ProducerConsumerThresholdQueueOptions<int>(threads, exec)
-																	{
-																		// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
-																		Threshold = TimeSpan.FromSeconds(1)
-																	}
-																	: new ProducerConsumerQueueOptions<int>(threads, exec);
-			
-					// Create a generic queue producer
-					using (IProducerConsumer<int> queue = ProducerConsumerQueue.Create(mode, options, token))
-					{
-						queue.WorkStarted += (sender, args) =>
-						{
-							Console.WriteLine();
-							Console.WriteLine($"Starting multi-thread test. mode: '{mode.ToString().BrightCyan()}', values: {values.Length.ToString().BrightCyan()}, threads: {options.Threads.ToString().BrightCyan()}, timeout: {timeoutString.BrightCyan()}...");
-							if (mode == ThreadQueueMode.ThresholdTaskGroup) Console.WriteLine($"in {mode} mode, {threads.ToString().BrightCyan()} tasks will be issued every {((ProducerConsumerThresholdQueueOptions<int>)options).Threshold.TotalSeconds.ToString("N0").BrightCyan()} second(s).");
-							Console.WriteLine();
-							Console.WriteLine();
-							clock.Restart();
-						};
-
-						queue.WorkCompleted += (sender, args) =>
-						{
-							long elapsed = clock.ElapsedMilliseconds;
-							Console.WriteLine();
-							Console.WriteLine();
-							Console.WriteLine($"Finished test. mode: '{mode.ToString().BrightCyan()}', values: {values.Length.ToString().BrightCyan()}, threads: {options.Threads.ToString().BrightCyan()}, timeout: {timeoutString.BrightCyan()}, elapsed: {elapsed.ToString().BrightCyan()} ms.");
-							Console.WriteLine();
-						};
-
-						foreach (int value in values)
-						{
-							queue.Enqueue(value);
-						}
-
-						/*
-						 * when the queue is being disposed, it will wait until the queued items are processed.
-						 * this works when queue.WaitOnDispose is true , which it is by default.
-						 * alternatively, the following can be done to wait for all items to be processed:
-						 *
-						 * // Important: marks the completion of queued items, no further items can be queued
-						 * // after this point. the queue will not to wait for more items other than the already queued.
-						 * queue.Complete();
-						 * // wait for the queue to finish
-						 * queue.Wait();
-						 *
-						 * another way to go about it, is not to call queue.Complete(); if this queue will
-						 * wait indefinitely and maybe use a CancellationTokenSource.
-						 *
-						 * for now, the queue will wait for the items to be finished once reached the next
-						 * dispose curly bracket.
-						 */
-					}
-				}
-
-				if (modes.Count == 0) continue;
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				if (response.Key != ConsoleKey.Y) modes.Clear();
-			}
-
-			clock.Stop();
 		}
 
 		private static void TestTrie()
@@ -2765,6 +2770,202 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			clock.Stop();
 		}
 
+		private static void TestBinomialHeapAdd()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing BinomialHeap.Add()...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				BinomialHeap<int> heap = new MaxBinomialHeap<int>();
+				DoTheTest(heap, values);
+
+				heap = new MinBinomialHeap<int>();
+				DoTheTest(heap, values);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<T>(BinomialHeap<T> heap, T[] array)
+			{
+				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+
+				foreach (T value in array)
+				{
+					heap.Add(value);
+					//heap.PrintWithProps();
+				}
+
+				Console.WriteLine("LevelOrder: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+			}
+		}
+
+		private static void TestBinomialHeapRemove()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing BinomialHeap.Remove()...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				BinomialHeap<int> heap = new MaxBinomialHeap<int>();
+				DoTheTest(heap, values);
+
+				heap = new MinBinomialHeap<int>();
+				DoTheTest(heap, values);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<T>(BinomialHeap<T> heap, T[] array)
+			{
+				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				heap.Add(array);
+				Console.WriteLine("LevelOrder: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+				Console.WriteLine("Test removing...");
+				bool removeStarted = false;
+
+				while (heap.Count > 0)
+				{
+					if (!removeStarted) removeStarted = true;
+					else Console.Write(", ");
+
+					Console.Write(heap.ExtractValue());
+				}
+
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
+		private static void TestBinomialPriorityQueue()
+		{
+			// todo
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing PriorityQueue...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				PriorityQueue<int> intQueue = new MinPriorityQueue<int>();
+				DoTheTest(intQueue, values);
+
+				intQueue = new MaxPriorityQueue<int>();
+				DoTheTest(intQueue, values);
+
+				Student[] students = GetRandomStudents(len);
+				IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
+				PriorityQueue<Student> studentQueue = new MinPriorityQueue<Student>(studentComparer);
+				DoTheTest(studentQueue, students);
+
+				studentQueue = new MaxPriorityQueue<Student>(studentComparer);
+				DoTheTest(studentQueue, students);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<T>(PriorityQueue<T> queue, T[] array)
+			{
+				Console.WriteLine($"Test adding ({queue.GetType()})...".BrightGreen());
+				queue.Add(array);
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", queue));
+				queue.Print();
+				Console.WriteLine("Test removing...");
+				bool removeStarted = false;
+
+				while (queue.Count > 0)
+				{
+					if (!removeStarted) removeStarted = true;
+					else Console.Write(", ");
+
+					Console.Write(queue.Remove());
+				}
+
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
+		private static void TestBinomialHeapElementAt()
+		{
+			// todo
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing Heap ElementAt...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				int k = RNGRandomHelper.Next(1, values.Length);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				Heap<int> heap = new MaxHeap<int>();
+				DoTheTest(heap, values, k);
+
+				heap = new MinHeap<int>();
+				DoTheTest(heap, values, k);
+
+				Student[] students = GetRandomStudents(len);
+				IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
+				PriorityQueue<Student> studentQueue = new MaxPriorityQueue<Student>(studentComparer);
+				DoTheTest(studentQueue, students, k);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<T>(Heap<T> heap, T[] array, int k)
+			{
+				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				heap.Add(array);
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+				Console.WriteLine("Test get Kth element...");
+				Console.WriteLine($"heap {k} kth element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
 		private static void Title(string title)
 		{
 			Console.WriteLine();
@@ -2970,6 +3171,12 @@ public static class Extension
 
 	public static void Print<T, TAdjacencyList, TEdge>([NotNull] this GraphList<T, TAdjacencyList, TEdge> thisValue)
 		where TAdjacencyList : class, ICollection<TEdge>
+	{
+		Console.WriteLine();
+		thisValue.WriteTo(Console.Out);
+	}
+
+	public static void Print<T>([NotNull] this BinomialHeap<T> thisValue)
 	{
 		Console.WriteLine();
 		thisValue.WriteTo(Console.Out);

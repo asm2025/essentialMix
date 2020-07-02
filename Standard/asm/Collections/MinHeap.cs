@@ -32,14 +32,14 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public MinHeap([NotNull] IEnumerable<T> collection)
-			: base(collection)
+		public MinHeap([NotNull] IEnumerable<T> enumerable)
+			: base(enumerable)
 		{
 		}
 
 		/// <inheritdoc />
-		public MinHeap([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
-			: base(collection, comparer)
+		public MinHeap([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
+			: base(enumerable, comparer)
 		{
 		}
 

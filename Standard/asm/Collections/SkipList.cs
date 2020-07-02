@@ -286,13 +286,8 @@ namespace asm.Collections
 			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, Count);
 
-			int lo = arrayIndex, hi = lo + Count;
-
-			foreach (T value in this)
-			{
-				array[lo++] = value;
-				if (lo >= hi) break;
-			}
+			foreach (T value in this) 
+				array[arrayIndex++] = value;
 		}
 
 		/// <inheritdoc />
@@ -321,13 +316,8 @@ namespace asm.Collections
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
 
-			int lo = index, hi = lo + Count;
-
-			foreach (T value in this)
-			{
-				objects[lo++] = value;
-				if (lo >= hi) break;
-			}
+			foreach (T value in this) 
+				objects[index++] = value;
 		}
 
 		private int RandomLevel()

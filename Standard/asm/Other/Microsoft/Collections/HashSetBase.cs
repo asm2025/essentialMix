@@ -137,8 +137,8 @@ namespace asm.Other.Microsoft.Collections
 			_freeList = -1;
 		}
 
-		protected HashSetBase([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
+		protected HashSetBase([NotNull] IEnumerable<T> enumerable)
+			: this(enumerable, null)
 		{
 		}
 
@@ -154,12 +154,12 @@ namespace asm.Other.Microsoft.Collections
 		///     Since resizes are relatively expensive (require rehashing), this attempts to minimize
 		///     the need to resize by setting the initial capacity based on size of collection.
 		/// </summary>
-		/// <param name="collection"></param>
+		/// <param name="enumerable"></param>
 		/// <param name="comparer"></param>
-		protected HashSetBase([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer)
+		protected HashSetBase([NotNull] IEnumerable<T> enumerable, IEqualityComparer<T> comparer)
 			: this(comparer)
 		{
-			if (collection is ISet<T> otherAsHashSet && AreEqualityComparersEqual(this, otherAsHashSet))
+			if (enumerable is ISet<T> otherAsHashSet && AreEqualityComparersEqual(this, otherAsHashSet))
 			{
 				CopyFrom(otherAsHashSet);
 			}
@@ -168,9 +168,9 @@ namespace asm.Other.Microsoft.Collections
 				// to avoid excess resizes, first set size based on collection's count. Collection
 				// may contain duplicates, so call TrimExcess if resulting hashset is larger than
 				// threshold
-				int suggestedCapacity = collection.FastCount().NotBelow(0);
+				int suggestedCapacity = enumerable.FastCount().NotBelow(0);
 				Initialize(suggestedCapacity);
-				UnionWith(collection);
+				UnionWith(enumerable);
 				if (Count > 0 && _slots.Length / Count > SHRINK_THRESHOLD) TrimExcess();
 			}
 		}

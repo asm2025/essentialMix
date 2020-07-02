@@ -48,14 +48,14 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public RedBlackTree([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
+		public RedBlackTree([NotNull] IEnumerable<T> enumerable)
+			: this(enumerable, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public RedBlackTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
-			: base(collection, comparer)
+		public RedBlackTree([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
+			: base(enumerable, comparer)
 		{
 		}
 

@@ -28,13 +28,13 @@ namespace asm.Collections
 		{
 		}
 
-		public ObservableHashSet([NotNull] IEnumerable<T> collection) 
-			: base(collection)
+		public ObservableHashSet([NotNull] IEnumerable<T> enumerable) 
+			: base(enumerable)
 		{
 		}
 
-		public ObservableHashSet([NotNull] IEnumerable<T> collection, IEqualityComparer<T> comparer) 
-			: base(collection, comparer)
+		public ObservableHashSet([NotNull] IEnumerable<T> enumerable, IEqualityComparer<T> comparer) 
+			: base(enumerable, comparer)
 		{
 		}
 

@@ -45,16 +45,16 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected PriorityQueue([NotNull] IEnumerable<T> collection, IComparer<T> priorityComparer)
-			: this(collection, null, priorityComparer)
+		protected PriorityQueue([NotNull] IEnumerable<T> enumerable, IComparer<T> priorityComparer)
+			: this(enumerable, null, priorityComparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected PriorityQueue([NotNull] IEnumerable<T> collection, IComparer<T> comparer, IComparer<T> priorityComparer)
+		protected PriorityQueue([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer, IComparer<T> priorityComparer)
 			: this(0, comparer, priorityComparer)
 		{
-			Add(collection);
+			Add(enumerable);
 		}
 
 		[NotNull]

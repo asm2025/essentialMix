@@ -28,13 +28,13 @@ namespace asm.Collections
 		{
 		}
 
-		public ObservableSortedSet([NotNull] IEnumerable<T> collection) 
-			: base(collection)
+		public ObservableSortedSet([NotNull] IEnumerable<T> enumerable) 
+			: base(enumerable)
 		{
 		}
 
-		public ObservableSortedSet([NotNull] IEnumerable<T> collection, [NotNull] IComparer<T> comparer) 
-			: base(collection, comparer)
+		public ObservableSortedSet([NotNull] IEnumerable<T> enumerable, [NotNull] IComparer<T> comparer) 
+			: base(enumerable, comparer)
 		{
 		}
 

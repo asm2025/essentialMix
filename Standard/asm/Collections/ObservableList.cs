@@ -24,8 +24,8 @@ namespace asm.Collections
 		public ObservableList(int capacity)
 			: base(capacity) { }
 
-		public ObservableList([NotNull] IEnumerable<T> collection)
-			: base(collection)
+		public ObservableList([NotNull] IEnumerable<T> enumerable)
+			: base(enumerable)
 		{
 		}
 

@@ -23,10 +23,10 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public LinkedQueue(DequeuePriority priority, [NotNull] IEnumerable<T> collection)
+		public LinkedQueue(DequeuePriority priority, [NotNull] IEnumerable<T> enumerable)
 			: this(priority)
 		{
-			foreach (T item in collection)
+			foreach (T item in enumerable)
 			{
 				Enqueue(item);
 			}

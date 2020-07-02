@@ -28,14 +28,14 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public BinarySearchTree([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
+		public BinarySearchTree([NotNull] IEnumerable<T> enumerable)
+			: this(enumerable, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public BinarySearchTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
-			: base(collection, comparer)
+		public BinarySearchTree([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
+			: base(enumerable, comparer)
 		{
 		}
 

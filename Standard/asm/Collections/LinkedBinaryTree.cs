@@ -59,7 +59,7 @@ namespace asm.Collections
 			public TNode Root => _tree.Root;
 		}
 
-		private struct LevelOrderEnumerator : IBinaryTreeEnumeratorImpl<T>
+		private struct LevelOrderEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly LinkedBinaryTree<TNode, T> _tree;
 			private readonly int _version;
@@ -80,7 +80,7 @@ namespace asm.Collections
 				_rightToLeft = rightToLeft;
 				_current = null;
 				_started = false;
-				_done = _tree.Count == 0 || _root == null;
+				_done = _root == null;
 			}
 
 			/// <inheritdoc />
@@ -152,14 +152,14 @@ namespace asm.Collections
 				_current = null;
 				_started = false;
 				_queue.Clear();
-				_done = _tree.Count == 0 || _root == null;
+				_done = _root == null;
 			}
 
 			/// <inheritdoc />
 			public void Dispose() { }
 		}
 
-		private struct PreOrderEnumerator : IBinaryTreeEnumeratorImpl<T>
+		private struct PreOrderEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly LinkedBinaryTree<TNode, T> _tree;
 			private readonly int _version;
@@ -180,7 +180,7 @@ namespace asm.Collections
 				_rightToLeft = rightToLeft;
 				_current = null;
 				_started = false;
-				_done = _tree.Count == 0 || _root == null;
+				_done = _root == null;
 			}
 
 			/// <inheritdoc />
@@ -253,14 +253,14 @@ namespace asm.Collections
 				_current = null;
 				_started = false;
 				_stack.Clear();
-				_done = _tree.Count == 0 || _root == null;
+				_done = _root == null;
 			}
 
 			/// <inheritdoc />
 			public void Dispose() { }
 		}
 
-		private struct InOrderEnumerator : IBinaryTreeEnumeratorImpl<T>
+		private struct InOrderEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly LinkedBinaryTree<TNode, T> _tree;
 			private readonly int _version;
@@ -281,7 +281,7 @@ namespace asm.Collections
 				_rightToLeft = rightToLeft;
 				_current = null;
 				_started = false;
-				_done = _tree.Count == 0 || _root == null;
+				_done = _root == null;
 			}
 
 			/// <inheritdoc />
@@ -361,14 +361,14 @@ namespace asm.Collections
 				_current = null;
 				_started = false;
 				_stack.Clear();
-				_done = _tree.Count == 0 || _root == null;
+				_done = _root == null;
 			}
 
 			/// <inheritdoc />
 			public void Dispose() { }
 		}
 		
-		private struct PostOrderEnumerator : IBinaryTreeEnumeratorImpl<T>
+		private struct PostOrderEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly LinkedBinaryTree<TNode, T> _tree;
 			private readonly int _version;
@@ -389,7 +389,7 @@ namespace asm.Collections
 				_rightToLeft = rightToLeft;
 				_current = null;
 				_started = false;
-				_done = _tree.Count == 0 || _root == null;
+				_done = _root == null;
 			}
 
 			/// <inheritdoc />
@@ -512,7 +512,7 @@ namespace asm.Collections
 				_current = null;
 				_started = false;
 				_stack.Clear();
-				_done = _tree.Count == 0 || _root == null;
+				_done = _root == null;
 			}
 
 			/// <inheritdoc />
@@ -534,21 +534,19 @@ namespace asm.Collections
 			Comparer = comparer ?? Comparer<T>.Default;
 		}
 
-		protected LinkedBinaryTree([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
+		protected LinkedBinaryTree([NotNull] IEnumerable<T> enumerable)
+			: this(enumerable, null)
 		{
 		}
 
-		protected LinkedBinaryTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
+		protected LinkedBinaryTree([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
 			: this(comparer)
 		{
-			Add(collection);
+			Add(enumerable);
 		}
 
 		[NotNull]
-		public IComparer<T> Comparer { get; private set; }
-
-		public string Label { get; set; }
+		public IComparer<T> Comparer { get; }
 
 		public TNode Root { get; protected set; }
 
@@ -588,7 +586,7 @@ namespace asm.Collections
 		/// <param name="rightToLeft">Left-to-right or right-to-left</param>
 		/// <returns></returns>
 		[NotNull]
-		public IBinaryTreeEnumeratorImpl<T> Enumerate(TNode root, BinaryTreeTraverseMethod method, bool rightToLeft)
+		public IEnumerableEnumerator<T> Enumerate(TNode root, BinaryTreeTraverseMethod method, bool rightToLeft)
 		{
 			return method switch
 			{
@@ -602,19 +600,19 @@ namespace asm.Collections
 
 		#region Enumerate overloads
 		[NotNull]
-		public IBinaryTreeEnumeratorImpl<T> Enumerate(TNode root)
+		public IEnumerableEnumerator<T> Enumerate(TNode root)
 		{
 			return Enumerate(root, BinaryTreeTraverseMethod.InOrder, false);
 		}
 
 		[NotNull]
-		public IBinaryTreeEnumeratorImpl<T> Enumerate(TNode root, bool rightToLeft)
+		public IEnumerableEnumerator<T> Enumerate(TNode root, bool rightToLeft)
 		{
 			return Enumerate(root, BinaryTreeTraverseMethod.InOrder, rightToLeft);
 		}
 
 		[NotNull]
-		public IBinaryTreeEnumeratorImpl<T> Enumerate(TNode root, BinaryTreeTraverseMethod method)
+		public IEnumerableEnumerator<T> Enumerate(TNode root, BinaryTreeTraverseMethod method)
 		{
 			return Enumerate(root, method, false);
 		}
@@ -629,7 +627,7 @@ namespace asm.Collections
 		/// <param name="visitCallback">callback action to handle the node</param>
 		public void Iterate(TNode root, BinaryTreeTraverseMethod method, bool rightToLeft, [NotNull] Action<TNode> visitCallback)
 		{
-			if (Count == 0 || root == null) return;
+			if (root == null) return;
 
 			switch (method)
 			{
@@ -676,7 +674,7 @@ namespace asm.Collections
 		/// <param name="visitCallback">callback function to handle the node that can cancel the loop</param>
 		public void Iterate(TNode root, BinaryTreeTraverseMethod method, bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback)
 		{
-			if (Count == 0 || root == null) return;
+			if (root == null) return;
 
 			switch (method)
 			{
@@ -724,7 +722,7 @@ namespace asm.Collections
 		public void IterateLevels(TNode root, bool rightToLeft, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
 		{
 			// Root-Left-Right (Queue)
-			if (Count == 0 || root == null) return;
+			if (root == null) return;
 
 			int version = _version;
 			int level = 0;
@@ -777,7 +775,7 @@ namespace asm.Collections
 		public void IterateLevels(TNode root, bool rightToLeft, [NotNull] Func<int, IReadOnlyCollection<TNode>, bool> levelCallback)
 		{
 			// Root-Left-Right (Queue)
-			if (Count == 0 || root == null) return;
+			if (root == null) return;
 
 			int version = _version;
 			int level = 0;
@@ -1088,13 +1086,7 @@ namespace asm.Collections
 		{
 			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, Count);
-
-			int lo = arrayIndex, hi = lo + Count;
-			Iterate(Root, e =>
-			{
-				array[lo++] = e.Value;
-				return lo < hi;
-			});
+			Iterate(Root, e => array[arrayIndex++] = e.Value);
 		}
 
 		/// <inheritdoc />
@@ -1123,12 +1115,7 @@ namespace asm.Collections
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
 			if (Count == 0) return;
-			int lo = index, hi = lo + Count;
-			Iterate(Root, e =>
-			{
-				objects[lo++] = e.Value;
-				return lo < hi;
-			});
+			Iterate(Root, e => objects[index++] = e.Value);
 		}
 
 		[NotNull]
@@ -1977,29 +1964,6 @@ namespace asm.Collections
 		}
 		#endregion
 
-		private bool FromSimpleList([NotNull] IReadOnlyList<T> list)
-		{
-			bool result;
-			Clear();
-
-			switch (list.Count)
-			{
-				case 0:
-					result = true;
-					break;
-				case 1:
-					Root = NewNode(list[0]);
-					Count++;
-					result = true;
-					break;
-				default:
-					result = false;
-					break;
-			}
-
-			return result;
-		}
-
 		protected static int GetCapacityForQueueing([NotNull] LinkedBinaryTree<TNode, T> tree)
 		{
 			/*
@@ -2026,6 +1990,29 @@ namespace asm.Collections
 			return tree.Count == 0
 						? 0
 						: (int)Math.Pow(2, Math.Log(tree.Count + 1, 2) - 1);
+		}
+
+		private bool FromSimpleList([NotNull] IReadOnlyList<T> list)
+		{
+			bool result;
+			Clear();
+
+			switch (list.Count)
+			{
+				case 0:
+					result = true;
+					break;
+				case 1:
+					Root = NewNode(list[0]);
+					Count++;
+					result = true;
+					break;
+				default:
+					result = false;
+					break;
+			}
+
+			return result;
 		}
 
 		private static void ThrowNotFormingATree(string collection1Name, string collection2Name)
@@ -2064,14 +2051,14 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected LinkedBinaryTree([NotNull] IEnumerable<T> collection)
-			: base(collection)
+		protected LinkedBinaryTree([NotNull] IEnumerable<T> enumerable)
+			: base(enumerable)
 		{
 		}
 
 		/// <inheritdoc />
-		protected LinkedBinaryTree([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
-			: base(collection, comparer)
+		protected LinkedBinaryTree([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
+			: base(enumerable, comparer)
 		{
 		}
 
@@ -2185,8 +2172,8 @@ namespace asm.Collections
 				if (node.IsLeaf) continue;
 
 				Queue<TNode> queue = new Queue<TNode>(2);
-				queue.Enqueue(node.Left);
-				queue.Enqueue(node.Right);
+				if (node.Left != null) queue.Enqueue(node.Left);
+				if (node.Right != null) queue.Enqueue(node.Right);
 				nodesStack.AddLast((queue, depth + 1));
 			}
 		}

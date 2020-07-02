@@ -16,13 +16,13 @@ namespace asm.Network
 		{
 		}
 
-		public IPAddressEntryObservableList(List<IPAddressEntry> collection) 
-			: base(collection)
+		public IPAddressEntryObservableList(List<IPAddressEntry> enumerable) 
+			: base(enumerable)
 		{
 		}
 
-		public IPAddressEntryObservableList([NotNull] IEnumerable<IPAddressEntry> collection) 
-			: base(collection)
+		public IPAddressEntryObservableList([NotNull] IEnumerable<IPAddressEntry> enumerable) 
+			: base(enumerable)
 		{
 		}
 

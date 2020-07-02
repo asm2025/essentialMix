@@ -18,7 +18,7 @@ namespace asm.Collections
 	/// <typeparam name="T">The element type of the tree.</typeparam>
 	/// <typeparam name="TAdjacencyList">The edges container type.</typeparam>
 	/// <typeparam name="TEdge">The edge type.</typeparam>
-	[DebuggerDisplay("Label = '{Label}', Count = {Count}")]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public abstract class GraphList<T, TAdjacencyList, TEdge> : DictionaryBase<T, TAdjacencyList>
 		where TAdjacencyList : class, ICollection<TEdge>
@@ -64,8 +64,6 @@ namespace asm.Collections
 		{
 		}
 
-		public string Label { get; set; }
-
 		/// <summary>
 		/// Enumerate vertices' values in a semi recursive approach
 		/// </summary>
@@ -80,9 +78,9 @@ namespace asm.Collections
 			Add(vertex, null);
 		}
 
-		public void Add([NotNull] IEnumerable<T> collection)
+		public void Add([NotNull] IEnumerable<T> enumerable)
 		{
-			foreach (T value in collection) 
+			foreach (T value in enumerable) 
 				Add(value, null);
 		}
 

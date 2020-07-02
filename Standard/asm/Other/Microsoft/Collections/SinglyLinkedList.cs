@@ -147,9 +147,9 @@ namespace asm.Other.Microsoft.Collections
 		{
 		}
 
-		public SinglyLinkedList([NotNull] IEnumerable<T> collection)
+		public SinglyLinkedList([NotNull] IEnumerable<T> enumerable)
 		{
-			foreach (T item in collection) 
+			foreach (T item in enumerable) 
 				AddLast(item);
 		}
 

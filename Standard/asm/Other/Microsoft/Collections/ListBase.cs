@@ -242,10 +242,10 @@ namespace asm.Other.Microsoft.Collections
 		// Constructs a List, copying the contents of the given collection. The
 		// size and capacity of the new list will both be equal to the size of the
 		// given collection.
-		public ListBase([NotNull] IEnumerable<T> collection)
+		public ListBase([NotNull] IEnumerable<T> enumerable)
 		{
 			Items = Array.Empty<T>();
-			InsertRange(0, collection);
+			InsertRange(0, enumerable);
 		}
 
 		// Gets and sets the capacity of this list.  The capacity is the size of
@@ -400,9 +400,9 @@ namespace asm.Other.Microsoft.Collections
 		// required, the capacity of the list is increased to twice the previous
 		// capacity or the new size, whichever is larger.
 		//
-		public void AddRange([NotNull] IEnumerable<T> collection)
+		public void AddRange([NotNull] IEnumerable<T> enumerable)
 		{
-			InsertRange(Count, collection);
+			InsertRange(Count, enumerable);
 		}
 
 		// Inserts the elements of the given collection at a given index. If

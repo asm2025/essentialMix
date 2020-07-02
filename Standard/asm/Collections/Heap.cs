@@ -61,16 +61,16 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected Heap([NotNull] IEnumerable<T> collection)
-			: this(collection, null)
+		protected Heap([NotNull] IEnumerable<T> enumerable)
+			: this(enumerable, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected Heap([NotNull] IEnumerable<T> collection, IComparer<T> comparer)
+		protected Heap([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
 			: this(0, comparer)
 		{
-			Add(collection);
+			Add(enumerable);
 		}
 
 		public T Value

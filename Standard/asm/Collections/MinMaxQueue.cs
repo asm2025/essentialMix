@@ -30,8 +30,8 @@ namespace asm.Collections
 		{
 		}
 
-		public MinMaxQueue([NotNull] IEnumerable<T> collection)
-			: this(0, collection)
+		public MinMaxQueue([NotNull] IEnumerable<T> enumerable)
+			: this(0, enumerable)
 		{
 		}
 

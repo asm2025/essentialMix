@@ -28,7 +28,7 @@ namespace asm.Collections
 			internal set => _nodes[LEFT] = value;
 		}
 
-		public virtual TNode Right
+		public TNode Right
 		{
 			get => _nodes[RIGHT];
 			internal set => _nodes[RIGHT] = value;
