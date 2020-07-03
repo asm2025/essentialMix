@@ -19,6 +19,7 @@ namespace asm.Collections
 	/// </summary>
 	/// <typeparam name="T">The element type of the heap</typeparam>
 	// https://www.growingwiththeweb.com/data-structures/binomial-heap/overview/
+	// IMPORTANT: this is just a proof of concept and not for production. the count property will need more work todo 
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(BinomialHeap<>.DebugView))]
 	[Serializable]
@@ -449,16 +450,22 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected BinomialHeap([NotNull] BinomialNode<T> head)
+		internal BinomialHeap([NotNull] BinomialNode<T> head)
 			: this(head, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected BinomialHeap([NotNull] BinomialNode<T> head, IComparer<T> comparer)
+		internal BinomialHeap([NotNull] BinomialNode<T> head, IComparer<T> comparer)
 			: this(comparer)
 		{
 			Head = head;
+			if (Head == null) return;
+			Count += Head.Degree + 1;
+			if (Head.IsLeaf) return;
+
+			foreach (BinomialNode<T> sibling in Head.Siblings())
+				Count += sibling.Degree + 1;
 		}
 
 		protected BinomialHeap([NotNull] IEnumerable<T> enumerable)
@@ -474,9 +481,10 @@ namespace asm.Collections
 
 		[NotNull]
 		public IComparer<T> Comparer { get; }
-
-		/// <inheritdoc cref="ICollection{T}" />
-		public int Count => Head == null ? 0 : 1;
+	
+		public int Count { get; protected internal set; }
+	
+		protected internal BinomialNode<T> Head { get; set; }
 
 		/// <inheritdoc />
 		bool ICollection<T>.IsReadOnly => false;
@@ -493,8 +501,6 @@ namespace asm.Collections
 				return _syncRoot;
 			}
 		}
-		
-		protected internal BinomialNode<T> Head { get; set; }
 
 		/// <inheritdoc />
 		public IEnumerator<T> GetEnumerator() { return Enumerate(Head); }
@@ -537,7 +543,7 @@ namespace asm.Collections
 		/// <param name="visitCallback">callback action to handle the node</param>
 		public void Iterate(BinomialNode<T> head, BinaryTreeTraverseMethod method, [NotNull] Action<BinomialNode<T>> visitCallback)
 		{
-			if (Count == 0 || head == null) return;
+			if (Count == 0) return;
 
 			switch (method)
 			{
@@ -601,11 +607,12 @@ namespace asm.Collections
 		}
 		#endregion
 
-		/// <inheritdoc />
 		public void Add(T value)
 		{
 			BinomialNode<T> node = new BinomialNode<T>(value);
-			Head = Union(NewHeap(node));
+			Head = Union(MakeHeap(node));
+			Count++;
+			_version++;
 		}
 
 		public void Add([NotNull] IEnumerable<T> enumerable)
@@ -614,7 +621,6 @@ namespace asm.Collections
 				Add(item);
 		}
 
-		/// <inheritdoc />
 		public bool Remove(T value)
 		{
 			BinomialNode<T> node = null, next = Head;
@@ -637,10 +643,10 @@ namespace asm.Collections
 			return RemoveRoot(node, GetPrevious(node));
 		}
 
-		/// <inheritdoc />
 		public void Clear()
 		{
 			Head = null;
+			Count = 0;
 			_version++;
 		}
 
@@ -666,13 +672,97 @@ namespace asm.Collections
 			BubbleUp(parents, node);
 		}
 
-		public abstract T Value();
+		public T Value()
+		{
+			if (Head == null) return default(T);
 
-		public abstract T ExtractValue();
+			BinomialNode<T> node = Head;
 
-		public abstract BinomialNode<T> Union([NotNull] BinomialHeap<T> heap);
+			foreach (BinomialNode<T> sibling in Head.Siblings())
+			{
+				if (Compare(sibling.Value, sibling.Value) < 0) node = sibling;
+			}
 
-		/// <inheritdoc />
+			return node.Value;
+		}
+
+		public T ExtractValue()
+		{
+			if (Head == null) return default(T);
+
+			BinomialNode<T> minimum = Head
+							, minPrev = null
+							, next = minimum.Sibling
+							, nextPrev = minimum;
+
+			while (next != null)
+			{
+				if (Compare(next.Value, minimum.Value) < 0)
+				{
+					minimum = next;
+					minPrev = nextPrev;
+				}
+
+				nextPrev = next;
+				next = next.Sibling;
+			}
+
+			RemoveRoot(minimum, minPrev);
+			return minimum.Value;
+		}
+
+		public T ElementAt(int k)
+		{
+			if (k < 1 || Count < k) throw new ArgumentOutOfRangeException(nameof(k));
+
+			for (int i = 0; i < k - 1; i++) 
+				ExtractValue();
+
+			return Value();
+		}
+
+		public BinomialNode<T> Union([NotNull] BinomialHeap<T> heap)
+		{
+			BinomialNode<T> newHead = Merge(heap);
+			Head = null;
+			heap.Head = null;
+
+			if (newHead != null)
+			{
+				BinomialNode<T> prev = null, current = newHead, next = newHead.Sibling;
+
+				while (next != null)
+				{
+					if (current.Degree != next.Degree || next.Sibling != null && next.Sibling.Degree == current.Degree)
+					{
+						prev = current;
+						current = next;
+					}
+					else
+					{
+						if (Compare(current.Value, next.Value) < 0)
+						{
+							current.Sibling = next.Sibling;
+							current.Link(next);
+						}
+						else
+						{
+							if (prev == null) newHead = next;
+							else prev.Sibling = next;
+
+							next.Link(current);
+							current = next;
+						}
+					}
+
+					next = current.Sibling;
+				}
+			}
+
+			_version++;
+			return newHead;
+		}
+
 		public bool Contains(T value)
 		{
 			if (Head == null) return false;
@@ -687,7 +777,6 @@ namespace asm.Collections
 			return found;
 		}
 
-		/// <inheritdoc />
 		public void CopyTo(T[] array, int arrayIndex)
 		{
 			if (Count == 0) return;
@@ -724,9 +813,23 @@ namespace asm.Collections
 			Iterate(Head, e => objects[index++] = e.Value);
 		}
 
-		protected abstract BinomialHeap<T> NewHeap([NotNull] BinomialNode<T> head);
+		protected abstract BinomialHeap<T> MakeHeap([NotNull] BinomialNode<T> head);
 
-		protected abstract BinomialNode<T> BubbleUp([NotNull] Stack<BinomialNode<T>> stack, [NotNull] BinomialNode<T> node, bool toRoot = false);
+		protected abstract int Compare(T x, T y);
+
+		[NotNull]
+		protected BinomialNode<T> BubbleUp([NotNull] Stack<BinomialNode<T>> stack, [NotNull] BinomialNode<T> node, bool toRoot = false)
+		{
+			BinomialNode<T> parent;
+
+			while (stack.Count > 0 && (parent = stack.Pop()) != null && (toRoot || Compare(node.Value, parent.Value) < 0))
+			{
+				node.Swap(parent);
+				node = parent;
+			}
+
+			return node;
+		}
 
 		protected BinomialNode<T> GetPrevious([NotNull] BinomialNode<T> node)
 		{
@@ -777,7 +880,8 @@ namespace asm.Collections
 				child = next;
 			}
 
-			if (newHead != null) Head = Union(NewHeap(newHead));
+			if (newHead != null) Head = Union(MakeHeap(newHead));
+			Count--;
 			_version++;
 			return true;
 		}
@@ -821,6 +925,7 @@ namespace asm.Collections
 			}
 
 			tail.Sibling = thisNext ?? otherNext;
+			_version++;
 			return head;
 		}
 
@@ -1076,14 +1181,14 @@ namespace asm.Collections
 			if (thisValue.Head == null) return;
 
 			StringBuilder indent = new StringBuilder();
-			LinkedList<Queue<BinomialNode<T>>> nodesStack = new LinkedList<Queue<BinomialNode<T>>>();
+			LinkedList<(Queue<BinomialNode<T>> Nodes, int Level)> nodesStack = new LinkedList<(Queue<BinomialNode<T>> Nodes, int Level)>();
 			Queue<BinomialNode<T>> rootQueue = new Queue<BinomialNode<T>>(1);
 			rootQueue.Enqueue(thisValue.Head);
-			nodesStack.AddFirst(rootQueue);
+			nodesStack.AddFirst((rootQueue, 0));
 
 			while (nodesStack.Count > 0)
 			{
-				Queue<BinomialNode<T>> nodes = nodesStack.Last.Value;
+				(Queue<BinomialNode<T>> nodes, int level) = nodesStack.Last.Value;
 
 				if (nodes.Count == 0)
 				{
@@ -1094,10 +1199,10 @@ namespace asm.Collections
 				BinomialNode<T> node = nodes.Dequeue();
 				indent.Length = 0;
 
-				foreach (Queue<BinomialNode<T>> nodesQueue in nodesStack)
+				foreach ((Queue<BinomialNode<T>> Nodes, int Level) tuple in nodesStack)
 				{
-					if (nodesQueue == nodesStack.Last.Value) break;
-					indent.Append(nodesQueue.Count > 0
+					if (tuple == nodesStack.Last.Value) break;
+					indent.Append(tuple.Nodes.Count > 0
 									? STR_EXT
 									: STR_BLANK);
 				}
@@ -1110,13 +1215,13 @@ namespace asm.Collections
 					continue;
 				}
 
-				writer.WriteLine(node.ToString());
+				writer.WriteLine(node.ToString(level));
 				if (node.IsLeaf) continue;
 
 				Queue<BinomialNode<T>> queue = new Queue<BinomialNode<T>>(2);
 				if (node.Sibling != null) queue.Enqueue(node.Sibling);
 				if (node.Child != null) queue.Enqueue(node.Child);
-				nodesStack.AddLast(queue);
+				nodesStack.AddLast((queue, level + 1));
 			}
 		}
 	}

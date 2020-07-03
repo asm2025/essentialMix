@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using asm.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Collections
@@ -58,6 +59,57 @@ namespace asm.Collections
 		}
 
 		[NotNull]
-		public IComparer<T> PriorityComparer { get; private set; }
+		public IComparer<T> PriorityComparer { get; }
+
+		/// <inheritdoc />
+		protected sealed override void BubbleUp(int index)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+
+			bool changed = false;
+			Navigator node = NewNavigator(index);
+
+			// the parent's value must be greater than its children so move the greater value up.
+			while (node.ParentIndex > -1 && Compare(Items[node.ParentIndex], Items[node.Index]) > 0)
+			{
+				Swap(node.Index, node.ParentIndex);
+				node.Index = node.ParentIndex;
+				changed = true;
+			}
+
+			if (!changed) return;
+			_version++;
+		}
+
+		/// <inheritdoc />
+		protected sealed override void BubbleDown(int index)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+
+			bool changed = false;
+			Navigator node = NewNavigator(index);
+
+			/*
+			 * the parent's value must be greater than its children.
+			 * move the smaller value down to either left or right.
+			 * to select which child to swap the value with, pick the
+			 * child with the greater value.
+			 */
+			while (node.LeftIndex > -1 || node.RightIndex > -1)
+			{
+				int childIndex = node.Index;
+				if (node.LeftIndex > -1 && Compare(Items[node.LeftIndex], Items[childIndex]) < 0) childIndex = node.LeftIndex;
+				if (node.RightIndex > -1 && Compare(Items[node.RightIndex], Items[childIndex]) < 0) childIndex = node.RightIndex;
+				if (childIndex == node.Index) break;
+				Swap(node.Index, childIndex);
+				node.Index = childIndex;
+				changed = true;
+			}
+
+			if (!changed) return;
+			_version++;
+		}
+
+		protected abstract int Compare(T x, T y);
 	}
 }

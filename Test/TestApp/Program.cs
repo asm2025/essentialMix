@@ -99,9 +99,9 @@ namespace TestApp
 			//TestDisjointSet();
 			
 			//TestBinomialHeapAdd();
-			TestBinomialHeapRemove();
+			//TestBinomialHeapRemove();
 			//TestBinomialPriorityQueue();
-			//TestBinomialHeapElementAt();
+			TestBinomialHeapElementAt();
 
 			//TestGraph();
 
@@ -2863,30 +2863,29 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 		private static void TestBinomialPriorityQueue()
 		{
-			// todo
 			bool more;
 
 			do
 			{
 				Console.Clear();
-				Title("Testing PriorityQueue...");
+				Title("Testing BinomialPriorityQueue...");
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
-				PriorityQueue<int> intQueue = new MinPriorityQueue<int>();
+				BinomialPriorityQueue<int> intQueue = new MinBinomialPriorityQueue<int>();
 				DoTheTest(intQueue, values);
 
-				intQueue = new MaxPriorityQueue<int>();
+				intQueue = new MaxBinomialPriorityQueue<int>();
 				DoTheTest(intQueue, values);
 
 				Student[] students = GetRandomStudents(len);
 				IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
-				PriorityQueue<Student> studentQueue = new MinPriorityQueue<Student>(studentComparer);
+				BinomialPriorityQueue<Student> studentQueue = new MinBinomialPriorityQueue<Student>(studentComparer);
 				DoTheTest(studentQueue, students);
 
-				studentQueue = new MaxPriorityQueue<Student>(studentComparer);
+				studentQueue = new MaxBinomialPriorityQueue<Student>(studentComparer);
 				DoTheTest(studentQueue, students);
 
 				Console.WriteLine();
@@ -2897,7 +2896,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			}
 			while (more);
 
-			static void DoTheTest<T>(PriorityQueue<T> queue, T[] array)
+			static void DoTheTest<T>(BinomialPriorityQueue<T> queue, T[] array)
 			{
 				Console.WriteLine($"Test adding ({queue.GetType()})...".BrightGreen());
 				queue.Add(array);
@@ -2911,7 +2910,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 					if (!removeStarted) removeStarted = true;
 					else Console.Write(", ");
 
-					Console.Write(queue.Remove());
+					Console.Write(queue.ExtractValue());
 				}
 
 				Console.WriteLine();
@@ -2921,28 +2920,27 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 		private static void TestBinomialHeapElementAt()
 		{
-			// todo
 			bool more;
 
 			do
 			{
 				Console.Clear();
-				Title("Testing Heap ElementAt...");
+				Title("Testing BinomialHeap ElementAt...");
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
 				int k = RNGRandomHelper.Next(1, values.Length);
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
-				Heap<int> heap = new MaxHeap<int>();
+				BinomialHeap<int> heap = new MaxBinomialHeap<int>();
 				DoTheTest(heap, values, k);
 
-				heap = new MinHeap<int>();
+				heap = new MinBinomialHeap<int>();
 				DoTheTest(heap, values, k);
 
 				Student[] students = GetRandomStudents(len);
 				IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
-				PriorityQueue<Student> studentQueue = new MaxPriorityQueue<Student>(studentComparer);
+				BinomialPriorityQueue<Student> studentQueue = new MaxBinomialPriorityQueue<Student>(studentComparer);
 				DoTheTest(studentQueue, students, k);
 
 				Console.WriteLine();
@@ -2953,7 +2951,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			}
 			while (more);
 
-			static void DoTheTest<T>(Heap<T> heap, T[] array, int k)
+			static void DoTheTest<T>(BinomialHeap<T> heap, T[] array, int k)
 			{
 				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
 				heap.Add(array);
@@ -3178,6 +3176,8 @@ public static class Extension
 
 	public static void Print<T>([NotNull] this BinomialHeap<T> thisValue)
 	{
+		Console.WriteLine();
+		Console.WriteLine("Count: " + thisValue.Count);
 		Console.WriteLine();
 		thisValue.WriteTo(Console.Out);
 	}

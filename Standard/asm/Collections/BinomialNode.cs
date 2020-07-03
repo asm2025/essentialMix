@@ -36,13 +36,19 @@ namespace asm.Collections
 
 		public T Value { get; set; }
 
-		public int Degree { get; internal set; } = 1;
+		public int Degree { get; internal set; }
 
 		public bool IsLeaf => Sibling == null && Child == null;
 
 		/// <inheritdoc />
 		[NotNull]
 		public override string ToString() { return Convert.ToString(Value); }
+
+		[NotNull]
+		internal string ToString(int level)
+		{
+			return $"{Value} :D{Degree}L{level}";
+		}
 
 		[ItemNotNull]
 		public IEnumerable<BinomialNode<T>> Siblings()
