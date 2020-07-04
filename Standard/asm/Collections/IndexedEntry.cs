@@ -68,7 +68,5 @@ namespace asm.Collections
 
 		[NotNull]
 		public static IndexedEntry<T> Create(bool isFirst, bool isLast, T value, int index) { return new IndexedEntry<T>(isFirst, isLast, value, index); }
-
-		public static implicit operator T([NotNull] IndexedEntry<T> value) { return value.Value; }
 	}
 }

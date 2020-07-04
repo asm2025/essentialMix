@@ -90,8 +90,6 @@ namespace asm.Collections
 			/// <inheritdoc />
 			protected override T GetKeyForItem(Node item) { return item.Value; }
 
-			public static implicit operator T([NotNull] Node node) { return node.Value; }
-
 			public static bool operator >(Node x, Node y)
 			{
 				return !ReferenceEquals(x, y) && !ReferenceEquals(x, null) && x.CompareTo(y) > 0;
@@ -129,10 +127,10 @@ namespace asm.Collections
 		public IEqualityComparer<T> Comparer { get; }
 
 		[NotNull]
-		protected Node Root => _root ??= NewNode(default(T));
+		protected Node Root => _root ??= MakeNode(default(T));
 
 		[NotNull]
-		protected Node NewNode(T value) { return new Node(value, Comparer); }
+		protected Node MakeNode(T value) { return new Node(value, Comparer); }
 
 		public void Add(T value)
 		{

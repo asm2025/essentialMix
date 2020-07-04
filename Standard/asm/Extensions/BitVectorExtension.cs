@@ -7,10 +7,10 @@ namespace asm.Extensions
 {
 	public static class BitVectorExtension
 	{
-		public static byte AsByte(this BitVector thisValue) { return thisValue; }
+		public static byte AsByte(this BitVector thisValue) { return thisValue.Data; }
 
 		[NotNull]
-		public static bool[] AsBools(this BitVector thisValue) { return (bool[])thisValue; }
+		public static bool[] AsBoolArray(this BitVector thisValue) { return (bool[])thisValue; }
 
 		[NotNull]
 		public static BitArray AsBitArray(this BitVector thisValue) { return (BitArray)thisValue; }

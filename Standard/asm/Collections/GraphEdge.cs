@@ -30,9 +30,6 @@ namespace asm.Collections
 		/// <inheritdoc />
 		[NotNull]
 		public override string ToString() { return $"{To} :{Weight}"; }
-
-		[NotNull]
-		public static implicit operator T([NotNull] GraphEdge<T, TWeight> edge) { return edge.To; }
 	}
 
 	[Serializable]

@@ -100,8 +100,8 @@ namespace TestApp
 			
 			//TestBinomialHeapAdd();
 			//TestBinomialHeapRemove();
-			//TestBinomialPriorityQueue();
 			TestBinomialHeapElementAt();
+			//TestBinomialHeapDecreaseKey();
 
 			//TestGraph();
 
@@ -2789,6 +2789,13 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				heap = new MinBinomialHeap<int>();
 				DoTheTest(heap, values);
 
+				Student[] students = GetRandomStudents(len);
+				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students);
+
+				studentHeap = new MinBinomialHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students);
+
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
@@ -2797,11 +2804,12 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			}
 			while (more);
 
-			static void DoTheTest<T>(BinomialHeap<T> heap, T[] array)
+			static void DoTheTest<TNode, TKey, TValue>(BinomialHeap<TNode, TKey, TValue> heap, TValue[] array)
+				where TNode : BinomialNode<TNode, TKey, TValue>
 			{
 				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
 
-				foreach (T value in array)
+				foreach (TValue value in array)
 				{
 					heap.Add(value);
 					//heap.PrintWithProps();
@@ -2831,6 +2839,13 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				heap = new MinBinomialHeap<int>();
 				DoTheTest(heap, values);
 
+				Student[] students = GetRandomStudents(len);
+				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students);
+
+				studentHeap = new MinBinomialHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students);
+
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
@@ -2839,7 +2854,8 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			}
 			while (more);
 
-			static void DoTheTest<T>(BinomialHeap<T> heap, T[] array)
+			static void DoTheTest<TNode, TKey, TValue>(BinomialHeap<TNode, TKey, TValue> heap, TValue[] array)
+				where TNode : BinomialNode<TNode, TKey, TValue>
 			{
 				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
 				heap.Add(array);
@@ -2861,63 +2877,6 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			}
 		}
 
-		private static void TestBinomialPriorityQueue()
-		{
-			bool more;
-
-			do
-			{
-				Console.Clear();
-				Title("Testing BinomialPriorityQueue...");
-
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-
-				BinomialPriorityQueue<int> intQueue = new MinBinomialPriorityQueue<int>();
-				DoTheTest(intQueue, values);
-
-				intQueue = new MaxBinomialPriorityQueue<int>();
-				DoTheTest(intQueue, values);
-
-				Student[] students = GetRandomStudents(len);
-				IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
-				BinomialPriorityQueue<Student> studentQueue = new MinBinomialPriorityQueue<Student>(studentComparer);
-				DoTheTest(studentQueue, students);
-
-				studentQueue = new MaxBinomialPriorityQueue<Student>(studentComparer);
-				DoTheTest(studentQueue, students);
-
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
-
-			static void DoTheTest<T>(BinomialPriorityQueue<T> queue, T[] array)
-			{
-				Console.WriteLine($"Test adding ({queue.GetType()})...".BrightGreen());
-				queue.Add(array);
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", queue));
-				queue.Print();
-				Console.WriteLine("Test removing...");
-				bool removeStarted = false;
-
-				while (queue.Count > 0)
-				{
-					if (!removeStarted) removeStarted = true;
-					else Console.Write(", ");
-
-					Console.Write(queue.ExtractValue());
-				}
-
-				Console.WriteLine();
-				Console.WriteLine();
-			}
-		}
-
 		private static void TestBinomialHeapElementAt()
 		{
 			bool more;
@@ -2931,6 +2890,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				int[] values = GetRandomIntegers(len);
 				int k = RNGRandomHelper.Next(1, values.Length);
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine("Array Sorted: ".BrightBlack() + string.Join(", ", values.OrderBy(e => e)));
 
 				BinomialHeap<int> heap = new MaxBinomialHeap<int>();
 				DoTheTest(heap, values, k);
@@ -2939,9 +2899,13 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				DoTheTest(heap, values, k);
 
 				Student[] students = GetRandomStudents(len);
-				IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
-				BinomialPriorityQueue<Student> studentQueue = new MaxBinomialPriorityQueue<Student>(studentComparer);
-				DoTheTest(studentQueue, students, k);
+				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine("Students Sorted: ".BrightBlack() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students, k);
+
+				studentHeap = new MinBinomialHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students, k);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -2951,14 +2915,71 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			}
 			while (more);
 
-			static void DoTheTest<T>(BinomialHeap<T> heap, T[] array, int k)
+			static void DoTheTest<TNode, TKey, TValue>(BinomialHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
+				where TNode : BinomialNode<TNode, TKey, TValue>
 			{
 				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
 				heap.Add(array);
 				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
 				Console.WriteLine("Test get Kth element...");
-				Console.WriteLine($"heap {k} kth element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+				Console.WriteLine($"heap {k}th element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
+		private static void TestBinomialHeapDecreaseKey()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing BinomialHeap DecreaseKey...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				BinomialHeap<int> heap = new MaxBinomialHeap<int>();
+				DoTheTest(heap, values, e => int.MaxValue);
+
+				heap = new MinBinomialHeap<int>();
+				DoTheTest(heap, values, e => int.MinValue);
+
+				Student[] students = GetRandomStudents(len);
+				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students, e => int.MaxValue);
+
+				studentHeap = new MinBinomialHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students, e => int.MinValue);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<TNode, TKey, TValue>(BinomialHeap<TNode, TKey, TValue> heap, TValue[] array, Func<TKey, TKey> newKeyValue)
+				where TNode : BinomialNode<TNode, TKey, TValue>
+			{
+				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				heap.Add(array);
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+
+				TValue value = heap.ExtractValue();
+				Console.WriteLine($"Test ExtractValue: {value}");
+				if (heap.Count == 0) return;
+
+				TNode node = heap.Find(array.PickRandom());
+
+				Console.WriteLine($"Test DecreaseKey: {node.Key}.");
+				heap.DecreaseKey(node, newKeyValue(node.Key));
+				Console.WriteLine($"Test ExtractValue again: {heap.ExtractValue()}");
 				Console.WriteLine();
 				Console.WriteLine();
 			}
@@ -3066,7 +3087,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			return set;
 		}
 
-		private class Student
+		private class Student : IComparable<Student>, IComparable, IEquatable<Student>
 		{
 			public string Name { get; set; }
 
@@ -3074,6 +3095,43 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 			/// <inheritdoc />
 			public override string ToString() { return $"{Name} > {Grade:F2}"; }
+
+			/// <inheritdoc />
+			public int CompareTo(Student other)
+			{
+				if (ReferenceEquals(this, other)) return 0;
+				if (ReferenceEquals(other, null)) return -1;
+				return string.Compare(Name, other.Name, StringComparison.OrdinalIgnoreCase);
+			}
+
+			/// <inheritdoc />
+			public int CompareTo(object obj) { return CompareTo(obj as Student); }
+
+			/// <inheritdoc />
+			public bool Equals(Student other)
+			{
+				if (ReferenceEquals(null, other)) return false;
+				if (ReferenceEquals(this, other)) return true;
+				return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) && Grade.Equals(other.Grade);
+			}
+
+			/// <inheritdoc />
+			public override bool Equals(object obj)
+			{
+				if (ReferenceEquals(null, obj)) return false;
+				if (ReferenceEquals(this, obj)) return true;
+				if (obj.GetType() != GetType()) return false;
+				return Equals((Student)obj);
+			}
+
+			/// <inheritdoc />
+			public override int GetHashCode()
+			{
+				return RuntimeHelpers.GetHashCode(this);
+			}
+
+			public static bool operator ==(Student left, Student right) { return Equals(left, right); }
+			public static bool operator !=(Student left, Student right) { return !Equals(left, right); }
 		}
 
 		[NotNull]
@@ -3174,7 +3232,8 @@ public static class Extension
 		thisValue.WriteTo(Console.Out);
 	}
 
-	public static void Print<T>([NotNull] this BinomialHeap<T> thisValue)
+	public static void Print<TNode, TKey, TValue>([NotNull] this BinomialHeap<TNode, TKey, TValue> thisValue)
+		where TNode : BinomialNode<TNode, TKey, TValue>
 	{
 		Console.WriteLine();
 		Console.WriteLine("Count: " + thisValue.Count);

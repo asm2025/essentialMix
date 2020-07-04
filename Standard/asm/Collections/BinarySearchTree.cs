@@ -64,7 +64,7 @@ namespace asm.Collections
 		{
 			if (Root == null)
 			{
-				Root = NewNode(value);
+				Root = MakeNode(value);
 				Count++;
 				_version++;
 				return;
@@ -88,7 +88,7 @@ namespace asm.Collections
 
 			Debug.Assert(parent != null, "No parent node found for the new node.");
 
-			LinkedBinaryNode<T> node = NewNode(value);
+			LinkedBinaryNode<T> node = MakeNode(value);
 
 			if (order < 0) parent.Left = node;
 			else parent.Right = node;

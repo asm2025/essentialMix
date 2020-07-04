@@ -172,7 +172,7 @@ namespace asm.Web.Drawing
 			return -1;
 		}
 
-		public int CompareTo(Unit other) { return CompareTo((PxUnit)other); }
+		public int CompareTo(Unit other) { return Value.CompareTo(other.Value); }
 
 		public int CompareTo(PxUnit other)
 		{
@@ -209,10 +209,6 @@ namespace asm.Web.Drawing
 		public static bool operator ==(PxUnit left, ValueType right) { return left.Value.Equals(Convert.ToDouble(right)); }
 
 		public static bool operator !=(PxUnit left, ValueType right) { return !left.Value.Equals(Convert.ToDouble(right)); }
-
-		public static implicit operator PxUnit(int n) { return Pixel(n); }
-
-		public static implicit operator PxUnit(Unit unit) { return FromUnit(unit); }
 
 		public static PxUnit FromUnit(Unit unit)
 		{

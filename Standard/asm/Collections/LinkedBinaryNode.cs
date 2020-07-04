@@ -105,8 +105,6 @@ namespace asm.Collections
 			other.Value = Value;
 			Value = tmp;
 		}
-
-		public static implicit operator T([NotNull] LinkedBinaryNode<TNode, T> node) { return node.Value; }
 	}
 
 	[DebuggerDisplay("{Value} :H{Height}B{BalanceFactor}")]

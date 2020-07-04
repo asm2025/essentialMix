@@ -968,7 +968,7 @@ namespace asm
 			public int nFont;
 			public COORD dwFontSize;
 
-			public static implicit operator ConsoleFont(CONSOLE_FONT_INFO f)
+			public static explicit operator ConsoleFont(CONSOLE_FONT_INFO f)
 			{
 				return new ConsoleFont
 				{
@@ -978,7 +978,7 @@ namespace asm
 				};
 			}
 
-			public static implicit operator CONSOLE_FONT_INFO(ConsoleFont f)
+			public static explicit operator CONSOLE_FONT_INFO(ConsoleFont f)
 			{
 				return new CONSOLE_FONT_INFO
 				{
@@ -1011,7 +1011,7 @@ namespace asm
 			public uint Index;
 			public short SizeX, SizeY;
 
-			public static implicit operator ConsoleFont(CONSOLE_FONT_INFO f)
+			public static explicit operator ConsoleFont(CONSOLE_FONT_INFO f)
 			{
 				return new ConsoleFont
 				{
@@ -1021,7 +1021,7 @@ namespace asm
 				};
 			}
 
-			public static implicit operator CONSOLE_FONT_INFO(ConsoleFont f)
+			public static explicit operator CONSOLE_FONT_INFO(ConsoleFont f)
 			{
 				return new CONSOLE_FONT_INFO
 				{
@@ -1045,9 +1045,9 @@ namespace asm
 
 			public COORD(POINT pt) : this((short)pt.X, (short)pt.Y) { }
 
-			public static implicit operator POINT(COORD c) { return new POINT(c.X, c.Y); }
+			public static explicit operator POINT(COORD c) { return new POINT(c.X, c.Y); }
 
-			public static implicit operator COORD(POINT p) { return new COORD((short)p.X, (short)p.Y); }
+			public static explicit operator COORD(POINT p) { return new COORD((short)p.X, (short)p.Y); }
 		}
 
 		[StructLayout(LayoutKind.Sequential)]

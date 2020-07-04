@@ -125,12 +125,6 @@ namespace asm.Numeric
 			_data = v;
 		}
 
-		public static explicit operator BitVector(byte value) { return new BitVector(value); }
-
-		public static implicit operator byte(BitVector value) { return value.Data; }
-
-		public static explicit operator BitVector([NotNull] bool[] value) { return new BitVector(value); }
-
 		[NotNull]
 		public static explicit operator bool[](BitVector value)
 		{
@@ -151,25 +145,20 @@ namespace asm.Numeric
 			return bit;
 		}
 
-		public static explicit operator BitVector(BitArray value)
+		public static explicit operator BitVector([NotNull] BitArray value)
 		{
-			return value == null
-						? new BitVector()
-						: new BitVector(value);
+			return new BitVector(value);
 		}
 
 		[NotNull]
 		public static explicit operator BitArray(BitVector value)
 		{
-			return new BitArray(new[]
-								{
-									(byte)value
-								});
+			return new BitArray(new[] { value.Data });
 		}
 
 		public static explicit operator BitVector(BitVector32 value) { return new BitVector(value); }
 
-		public static explicit operator BitVector32(BitVector value) { return new BitVector32(value); }
+		public static explicit operator BitVector32(BitVector value) { return new BitVector32(value.Data); }
 
 		public override bool Equals(object obj)
 		{

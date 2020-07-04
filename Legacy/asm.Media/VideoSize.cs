@@ -96,10 +96,6 @@ namespace asm.Media
 
 		public bool IsEmpty => Value == VideoSizeEnum.Empty || Width <= 0 && Height <= 0;
 
-		public static implicit operator VideoSizeEnum(VideoSize videoSize) { return videoSize?.Value ?? VideoSizeEnum.Empty; }
-
-		public static implicit operator int(VideoSize videoSize) { return videoSize?.BitRate ?? 0; }
-
 		public void SetWidthAndHeight(int width, int height)
 		{
 			_width = width;

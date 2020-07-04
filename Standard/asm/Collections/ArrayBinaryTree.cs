@@ -162,8 +162,6 @@ namespace asm.Collections
 			{
 				_index = ParentIndex = LeftIndex = RightIndex = -1;
 			}
-
-			public static implicit operator T(Navigator node) { return node.Value; }
 		}
 
 		private struct LevelOrderEnumerator : IEnumerableEnumerator<T>

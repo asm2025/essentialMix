@@ -16,7 +16,6 @@ namespace asm.Threading
 		{
 		}
 
-		/// <inheritdoc />
 		public Lockable(T value)
 		{
 			_value = value;

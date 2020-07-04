@@ -109,7 +109,7 @@ namespace asm.Media.Helpers
 		public static void SetEnabledSizes([NotNull] params VideoSizeEnum[] videoSizes)
 		{
 			foreach (VideoSize size in SIZES.Values)
-				size.Enabled = videoSizes.Contains(size);
+				size.Enabled = videoSizes.Contains(size.Value);
 		}
 
 		public static int GetBitrate([NotNull] Metadata metadata)

@@ -63,7 +63,7 @@ namespace asm.Collections
 		public override bool AutoBalance { get; } = true;
 
 		/// <inheritdoc />
-		protected internal override RedBlackNode<T> NewNode(T value) { return new RedBlackNode<T>(value); }
+		protected internal override RedBlackNode<T> MakeNode(T value) { return new RedBlackNode<T>(value); }
 
 		/// <inheritdoc />
 		public override int GetHeight()
@@ -95,7 +95,7 @@ namespace asm.Collections
 		{
 			if (Root == null)
 			{
-				Root = NewNode(value);
+				Root = MakeNode(value);
 				Root.Color = false;
 				Count++;
 				_version++;
@@ -143,7 +143,7 @@ namespace asm.Collections
 
 			Debug.Assert(parent != null, "No parent node found for the new node.");
 
-			RedBlackNode<T> node = NewNode(value);
+			RedBlackNode<T> node = MakeNode(value);
 
 			if (order < 0) parent.Left = node;
 			else parent.Right = node;

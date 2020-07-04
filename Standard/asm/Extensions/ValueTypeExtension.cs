@@ -805,10 +805,10 @@ namespace asm.Extensions
 		public static WordList AsWordList([NotNull] this byte[] thisValue) { return (WordList)thisValue; }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static BitVector AsBitVector(this byte thisValue) { return (BitVector)thisValue; }
+		public static BitVector AsBitVector(this byte thisValue) { return new BitVector(thisValue); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static BitVector AsBitVector([NotNull] this bool[] thisValue) { return (BitVector)thisValue; }
+		public static BitVector AsBitVector([NotNull] this bool[] thisValue) { return new BitVector(thisValue); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static UnionShort AsUnionShort(this short thisValue) { return (UnionShort)thisValue; }

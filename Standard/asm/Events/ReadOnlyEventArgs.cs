@@ -1,5 +1,4 @@
 using System;
-using JetBrains.Annotations;
 
 namespace asm.Events
 {
@@ -18,7 +17,5 @@ namespace asm.Events
 		}
 
 		public virtual T Value { get; }
-
-		public static implicit operator T([NotNull] ReadOnlyEventArgs<T> args) { return args.Value; }
 	}
 }

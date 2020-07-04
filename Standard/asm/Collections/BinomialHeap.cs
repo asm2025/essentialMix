@@ -17,51 +17,56 @@ namespace asm.Collections
 	/// It is implemented as a heap similar to a binary heap but using a special tree structure that is different
 	/// from the complete binary trees used by binary heaps.
 	/// </summary>
-	/// <typeparam name="T">The element type of the heap</typeparam>
+	/// <typeparam name="TNode">The node type. This is just for abstraction purposes and shouldn't be dealt with directly.</typeparam>
+	/// <typeparam name="TKey"></typeparam>
+	/// <typeparam name="TValue">The element type of the heap</typeparam>
 	// https://www.growingwiththeweb.com/data-structures/binomial-heap/overview/
-	// IMPORTANT: this is just a proof of concept and not for production. the count property will need more work todo 
+	// https://brilliant.org/wiki/binomial-heap/
+	// IMPORTANT: the count property will need more work todo make sure the count is right when using methods such as Union, merge, etc.
 	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(BinomialHeap<>.DebugView))]
+	[DebuggerTypeProxy(typeof(BinomialHeap<,,>.DebugView))]
 	[Serializable]
-	public abstract class BinomialHeap<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>
+	public abstract class BinomialHeap<TNode, TKey, TValue> : IReadOnlyCollection<TValue>, ICollection
+		where TNode : BinomialNode<TNode, TKey, TValue>
 	{
 		internal sealed class DebugView
 		{
-			private readonly BinomialHeap<T> _heap;
+			private readonly BinomialHeap<TNode, TKey, TValue> _heap;
 
-			public DebugView([NotNull] BinomialHeap<T> heap)
+			public DebugView([NotNull] BinomialHeap<TNode, TKey, TValue> heap)
 			{
 				_heap = heap;
 			}
 
 			[NotNull]
-			public BinomialNode<T> Head => _heap.Head;
+			public TNode Head => _heap.Head;
 		}
 
-		private struct LevelOrderEnumerator : IEnumerableEnumerator<T>
+		private struct Enumerator : IEnumerableEnumerator<TValue>
 		{
-			private readonly BinomialHeap<T> _heap;
+			private readonly BinomialHeap<TNode, TKey, TValue> _heap;
 			private readonly int _version;
-			private readonly BinomialNode<T> _head;
-			private readonly Queue<BinomialNode<T>> _queue;
+			private readonly TNode _root;
+			private readonly Queue<TNode> _queue;
 
-			private BinomialNode<T> _current;
+			private TNode _current;
 			private bool _started;
 			private bool _done;
 
-			internal LevelOrderEnumerator([NotNull] BinomialHeap<T> heap, BinomialNode<T> head)
+			internal Enumerator([NotNull] BinomialHeap<TNode, TKey, TValue> heap, TNode root)
 			{
 				_heap = heap;
 				_version = _heap._version;
-				_head = head;
-				_queue = new Queue<BinomialNode<T>>();
+				_root = root;
+				_queue = new Queue<TNode>();
 				_current = null;
 				_started = false;
-				_done = _heap.Count == 0 || _head == null;
+				_done = _heap.Count == 0 || _root == null;
 			}
 
 			/// <inheritdoc />
-			public T Current
+			[NotNull]
+			public TValue Current
 			{
 				get
 				{
@@ -71,10 +76,11 @@ namespace asm.Collections
 			}
 
 			/// <inheritdoc />
+			[NotNull]
 			object IEnumerator.Current => Current;
 
 			/// <inheritdoc />
-			public IEnumerator<T> GetEnumerator()
+			public IEnumerator<TValue> GetEnumerator()
 			{
 				IEnumerator enumerator = this;
 				enumerator.Reset();
@@ -93,8 +99,8 @@ namespace asm.Collections
 				if (!_started)
 				{
 					_started = true;
-					// Start at the head
-					_queue.Enqueue(_head);
+					// Start at the root
+					_queue.Enqueue(_root);
 				}
 
 				// visit the next queued node
@@ -121,313 +127,7 @@ namespace asm.Collections
 				_current = null;
 				_started = false;
 				_queue.Clear();
-				_done = _heap.Count == 0 || _head == null;
-			}
-
-			/// <inheritdoc />
-			public void Dispose() { }
-		}
-
-		private struct PreOrderEnumerator : IEnumerableEnumerator<T>
-		{
-			private readonly BinomialHeap<T> _heap;
-			private readonly int _version;
-			private readonly BinomialNode<T> _head;
-			private readonly Stack<BinomialNode<T>> _stack;
-
-			private BinomialNode<T> _current;
-			private bool _started;
-			private bool _done;
-
-			internal PreOrderEnumerator([NotNull] BinomialHeap<T> heap, BinomialNode<T> head)
-			{
-				_heap = heap;
-				_version = _heap._version;
-				_head = head;
-				_stack = new Stack<BinomialNode<T>>();
-				_current = null;
-				_started = false;
-				_done = _heap.Count == 0 || _head == null;
-			}
-
-			/// <inheritdoc />
-			public T Current
-			{
-				get
-				{
-					if (!_started || _current == null) throw new InvalidOperationException();
-					return _current.Value;
-				}
-			}
-
-			/// <inheritdoc />
-			object IEnumerator.Current => Current;
-
-			/// <inheritdoc />
-			public IEnumerator<T> GetEnumerator()
-			{
-				IEnumerator enumerator = this;
-				enumerator.Reset();
-				return this;
-			}
-
-			/// <inheritdoc />
-			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-			public bool MoveNext()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-
-				// Head-Sibling-Child (Stack)
-				if (_done) return false;
-
-				if (!_started)
-				{
-					_started = true;
-					// Start at the head
-					_stack.Push(_head);
-				}
-
-				// visit the next queued node
-				_current = _stack.Count > 0
-								? _stack.Pop()
-								: null;
-
-				if (_current == null)
-				{
-					_done = true;
-					return false;
-				}
-
-				// Queue the next nodes
-				if (_current.Sibling != null) _stack.Push(_current.Sibling);
-				if (_current.Child != null) _stack.Push(_current.Child);
-
-				return true;
-			}
-
-			void IEnumerator.Reset()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-				_current = null;
-				_started = false;
-				_stack.Clear();
-				_done = _heap.Count == 0 || _head == null;
-			}
-
-			/// <inheritdoc />
-			public void Dispose() { }
-		}
-
-		private struct InOrderEnumerator : IEnumerableEnumerator<T>
-		{
-			private readonly BinomialHeap<T> _heap;
-			private readonly int _version;
-			private readonly BinomialNode<T> _head;
-			private readonly Stack<BinomialNode<T>> _stack;
-
-			private BinomialNode<T> _current;
-			private bool _started;
-			private bool _done;
-
-			internal InOrderEnumerator([NotNull] BinomialHeap<T> heap, BinomialNode<T> head)
-			{
-				_heap = heap;
-				_version = _heap._version;
-				_head = head;
-				_stack = new Stack<BinomialNode<T>>();
-				_current = null;
-				_started = false;
-				_done = _heap.Count == 0 || _head == null;
-			}
-
-			/// <inheritdoc />
-			public T Current
-			{
-				get
-				{
-					if (!_started || _current == null) throw new InvalidOperationException();
-					return _current.Value;
-				}
-			}
-
-			/// <inheritdoc />
-			object IEnumerator.Current => Current;
-
-			/// <inheritdoc />
-			public IEnumerator<T> GetEnumerator()
-			{
-				IEnumerator enumerator = this;
-				enumerator.Reset();
-				return this;
-			}
-
-			/// <inheritdoc />
-			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-			public bool MoveNext()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-
-				// Sibling-Head-Child (Stack)
-				if (_done) return false;
-
-				if (!_started)
-				{
-					_started = true;
-					// Start at the head
-					_current = _head;
-				}
-				else
-				{
-					_current = _current?.Child;
-				}
-
-				while (_current != null || _stack.Count > 0)
-				{
-					if (_version != _heap._version) throw new VersionChangedException();
-
-					if (_current != null)
-					{
-						_stack.Push(_current);
-						_current = _current.Sibling;
-					}
-					else
-					{
-						// visit the next queued node
-						_current = _stack.Pop();
-						break; // break from the loop to visit this node
-					}
-				}
-
-				_done = _current == null;
-				return !_done;
-			}
-
-			void IEnumerator.Reset()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-				_current = null;
-				_started = false;
-				_stack.Clear();
-				_done = _heap.Count == 0 || _head == null;
-			}
-
-			/// <inheritdoc />
-			public void Dispose() { }
-		}
-		
-		private struct PostOrderEnumerator : IEnumerableEnumerator<T>
-		{
-			private readonly BinomialHeap<T> _heap;
-			private readonly int _version;
-			private readonly BinomialNode<T> _head;
-			private readonly Stack<BinomialNode<T>> _stack;
-
-			private BinomialNode<T> _current;
-			private bool _started;
-			private bool _done;
-
-			internal PostOrderEnumerator([NotNull] BinomialHeap<T> heap, BinomialNode<T> head)
-			{
-				_heap = heap;
-				_version = _heap._version;
-				_head = head;
-				_stack = new Stack<BinomialNode<T>>();
-				_current = null;
-				_started = false;
-				_done = _heap.Count == 0 || _head == null;
-			}
-
-			/// <inheritdoc />
-			public T Current
-			{
-				get
-				{
-					if (!_started || _current == null) throw new InvalidOperationException();
-					return _current.Value;
-				}
-			}
-
-			/// <inheritdoc />
-			object IEnumerator.Current => Current;
-
-			/// <inheritdoc />
-			public IEnumerator<T> GetEnumerator()
-			{
-				IEnumerator enumerator = this;
-				enumerator.Reset();
-				return this;
-			}
-
-			/// <inheritdoc />
-			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-			public bool MoveNext()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-
-				// Sibling-Child-Head (Stack)
-				if (_done) return false;
-
-				if (!_started)
-				{
-					_started = true;
-					// Start at the head
-					_current = _head;
-				}
-				else
-				{
-					_current = null;
-				}
-	
-				do
-				{
-					while (_current != null)
-					{
-						if (_version != _heap._version) throw new VersionChangedException();
-						if (_current.Child != null) _stack.Push(_current.Child);
-
-						_stack.Push(_current);
-						_current = _current.Sibling;
-					}
-
-					if (_version != _heap._version) throw new VersionChangedException();
-					_current = _stack.Count > 0
-									? _stack.Pop()
-									: null;
-					if (_current == null) continue;
-
-					/*
-						* if Current has a right child and is not processed yet,
-						* then make sure right child is processed before head
-						*/
-					if (_current.Child != null && _stack.Count > 0 && _current.Child == _stack.Peek())
-					{
-						// remove right child from stack
-						_stack.Pop();
-						// push Current back to stack
-						_stack.Push(_current);
-						// process right first
-						_current = _current.Child;
-						continue;
-					}
-
-					if (_current != null)
-						break; // break from the loop to visit this node
-				} while (_stack.Count > 0);
-
-				_done = _current == null;
-				return !_done;
-			}
-
-			void IEnumerator.Reset()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-				_current = null;
-				_started = false;
-				_stack.Clear();
-				_done = _heap.Count == 0 || _head == null;
+				_done = _heap.Count == 0 || _root == null;
 			}
 
 			/// <inheritdoc />
@@ -440,23 +140,23 @@ namespace asm.Collections
 
 		/// <inheritdoc />
 		protected BinomialHeap()
-			: this((IComparer<T>)null)
+			: this((IComparer<TKey>)null)
 		{
 		}
 
-		protected BinomialHeap(IComparer<T> comparer)
+		protected BinomialHeap(IComparer<TKey> comparer)
 		{
-			Comparer = comparer ?? Comparer<T>.Default;
+			Comparer = comparer ?? Comparer<TKey>.Default;
 		}
 
 		/// <inheritdoc />
-		internal BinomialHeap([NotNull] BinomialNode<T> head)
+		protected BinomialHeap([NotNull] TNode head)
 			: this(head, null)
 		{
 		}
 
 		/// <inheritdoc />
-		internal BinomialHeap([NotNull] BinomialNode<T> head, IComparer<T> comparer)
+		protected BinomialHeap([NotNull] TNode head, IComparer<TKey> comparer)
 			: this(comparer)
 		{
 			Head = head;
@@ -464,30 +164,30 @@ namespace asm.Collections
 			Count += Head.Degree + 1;
 			if (Head.IsLeaf) return;
 
-			foreach (BinomialNode<T> sibling in Head.Siblings())
+			foreach (TNode sibling in Head.Siblings())
 				Count += sibling.Degree + 1;
 		}
 
-		protected BinomialHeap([NotNull] IEnumerable<T> enumerable)
+		protected BinomialHeap([NotNull] IEnumerable<TValue> enumerable)
 			: this(enumerable, null)
 		{
 		}
 
-		protected BinomialHeap([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
+		protected BinomialHeap([NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
 			: this(comparer)
 		{
 			Add(enumerable);
 		}
 
 		[NotNull]
-		public IComparer<T> Comparer { get; }
-	
+		public IComparer<TKey> Comparer { get; }
+
+		[NotNull]
+		protected EqualityComparer<TValue> ValueComparer { get; } = EqualityComparer<TValue>.Default;
+
 		public int Count { get; protected internal set; }
 	
-		protected internal BinomialNode<T> Head { get; set; }
-
-		/// <inheritdoc />
-		bool ICollection<T>.IsReadOnly => false;
+		protected internal TNode Head { get; set; }
 
 		/// <inheritdoc />
 		bool ICollection.IsSynchronized => false;
@@ -503,7 +203,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public IEnumerator<T> GetEnumerator() { return Enumerate(Head); }
+		public IEnumerator<TValue> GetEnumerator() { return Enumerate(Head); }
 
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
@@ -512,134 +212,96 @@ namespace asm.Collections
 		/// Enumerate nodes' values in a semi recursive approach
 		/// </summary>
 		/// <param name="head">The starting node</param>
-		/// <param name="method">The traverse method</param>
 		/// <returns></returns>
 		[NotNull]
-		public IEnumerableEnumerator<T> Enumerate(BinomialNode<T> head, BinaryTreeTraverseMethod method)
+		public IEnumerableEnumerator<TValue> Enumerate(TNode head)
 		{
-			return method switch
-			{
-				BinaryTreeTraverseMethod.LevelOrder => new LevelOrderEnumerator(this, head),
-				BinaryTreeTraverseMethod.PreOrder => new PreOrderEnumerator(this, head),
-				BinaryTreeTraverseMethod.InOrder => new InOrderEnumerator(this, head),
-				BinaryTreeTraverseMethod.PostOrder => new PostOrderEnumerator(this, head),
-				_ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
-			};
+			return new Enumerator(this, head);
 		}
-
-		#region Enumerate overloads
-		[NotNull]
-		public IEnumerableEnumerator<T> Enumerate(BinomialNode<T> head)
-		{
-			return Enumerate(head, BinaryTreeTraverseMethod.LevelOrder);
-		}
-		#endregion
 
 		/// <summary>
 		/// Iterate over nodes with a callback action
 		/// </summary>
 		/// <param name="head">The starting node</param>
-		/// <param name="method">The traverse method <see cref="BinaryTreeTraverseMethod"/></param>
 		/// <param name="visitCallback">callback action to handle the node</param>
-		public void Iterate(BinomialNode<T> head, BinaryTreeTraverseMethod method, [NotNull] Action<BinomialNode<T>> visitCallback)
+		public void Iterate(TNode head, [NotNull] Action<TNode> visitCallback)
 		{
 			if (Count == 0) return;
 
-			switch (method)
+			int version = _version;
+			// Head-Sibling-Child (Queue)
+			Queue<TNode> queue = new Queue<TNode>();
+
+			// Start at the root
+			queue.Enqueue(head);
+
+			while (queue.Count > 0)
 			{
-				case BinaryTreeTraverseMethod.LevelOrder:
-					LevelOrder(head, visitCallback);
-					break;
-				case BinaryTreeTraverseMethod.PreOrder:
-					PreOrder(head, visitCallback);
-					break;
-				case BinaryTreeTraverseMethod.InOrder:
-					InOrder(head, visitCallback);
-					break;
-				case BinaryTreeTraverseMethod.PostOrder:
-					PostOrder(head, visitCallback);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
+				if (version != _version) throw new VersionChangedException();
+
+				// visit the next queued node
+				TNode current = queue.Dequeue();
+				visitCallback(current);
+
+				// Queue the next nodes
+				if (current.Sibling != null) queue.Enqueue(current.Sibling);
+				if (current.Child != null) queue.Enqueue(current.Child);
 			}
 		}
-
-		#region Iterate overloads - visitCallback action
-		public void Iterate(BinomialNode<T> head, [NotNull] Action<BinomialNode<T>> visitCallback)
-		{
-			Iterate(head, BinaryTreeTraverseMethod.LevelOrder, visitCallback);
-		}
-		#endregion
 
 		/// <summary>
 		/// Iterate over nodes with a callback function
 		/// </summary>
 		/// <param name="head">The starting node</param>
-		/// <param name="method">The traverse method <see cref="BinaryTreeTraverseMethod"/></param>
 		/// <param name="visitCallback">callback function to handle the node that can cancel the loop</param>
-		public void Iterate(BinomialNode<T> head, BinaryTreeTraverseMethod method, [NotNull] Func<BinomialNode<T>, bool> visitCallback)
+		public void Iterate(TNode head, [NotNull] Func<TNode, bool> visitCallback)
 		{
 			if (head == null) return;
 
-			switch (method)
+			int version = _version;
+			// Head-Sibling-Child (Queue)
+			Queue<TNode> queue = new Queue<TNode>();
+
+			// Start at the root
+			queue.Enqueue(head);
+
+			while (queue.Count > 0)
 			{
-				case BinaryTreeTraverseMethod.LevelOrder:
-					LevelOrder(head, visitCallback);
-					break;
-				case BinaryTreeTraverseMethod.PreOrder:
-					PreOrder(head, visitCallback);
-					break;
-				case BinaryTreeTraverseMethod.InOrder:
-					InOrder(head, visitCallback);
-					break;
-				case BinaryTreeTraverseMethod.PostOrder:
-					PostOrder(head, visitCallback);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
+				if (version != _version) throw new VersionChangedException();
+
+				// visit the next queued node
+				TNode current = queue.Dequeue();
+				if (!visitCallback(current)) break;
+
+				// Queue the next nodes
+				if (current.Sibling != null) queue.Enqueue(current.Sibling);
+				if (current.Child != null) queue.Enqueue(current.Child);
 			}
 		}
 
-		#region Iterate overloads - visitCallback function
-		public void Iterate(BinomialNode<T> head, [NotNull] Func<BinomialNode<T>, bool> visitCallback)
+		public void Add([NotNull] TValue value)
 		{
-			Iterate(head, BinaryTreeTraverseMethod.LevelOrder, visitCallback);
-		}
-		#endregion
-
-		public void Add(T value)
-		{
-			BinomialNode<T> node = new BinomialNode<T>(value);
+			TNode node = MakeNode(value);
 			Head = Union(MakeHeap(node));
 			Count++;
 			_version++;
 		}
 
-		public void Add([NotNull] IEnumerable<T> enumerable)
+		public void Add([NotNull] IEnumerable<TValue> enumerable)
 		{
-			foreach (T item in enumerable)
+			foreach (TValue item in enumerable)
 				Add(item);
 		}
 
-		public bool Remove(T value)
+		public bool Remove([NotNull] TValue value)
 		{
-			BinomialNode<T> node = null, next = Head;
-			Stack<BinomialNode<T>> stack = new Stack<BinomialNode<T>>();
+			TNode node = Find(value);
+			return node != null && Remove(node);
+		}
 
-			while (next != null)
-			{
-				if (Comparer.IsEqual(next.Value, value))
-				{
-					node = next;
-					break;
-				}
-
-				stack.Push(next);
-				next = next.Sibling;
-			}
-
-			if (node == null) return false;
-			node = BubbleUp(stack, node, true);
+		public bool Remove([NotNull] TNode node)
+		{
+			node = BubbleUp(node, true);
 			return RemoveRoot(node, GetPrevious(node));
 		}
 
@@ -650,86 +312,71 @@ namespace asm.Collections
 			_version++;
 		}
 
-		public void DecreaseKey([NotNull] T value, [NotNull] T newValue)
+		public void DecreaseKey([NotNull] TNode node, [NotNull] TKey newKey)
 		{
-			BinomialNode<T> node = null, next = Head;
-			Stack<BinomialNode<T>> parents = new Stack<BinomialNode<T>>();
-
-			while (next != null)
-			{
-				if (Comparer.IsEqual(next.Value, value))
-				{
-					node = next;
-					break;
-				}
-
-				parents.Push(next);
-				next = next.Sibling;
-			}
-
-			if (node == null) throw new KeyNotFoundException();
-			node.Value = newValue;
-			BubbleUp(parents, node);
+			node.Key = newKey;
+			BubbleUp(node);
 		}
 
-		public T Value()
+		public TValue Value()
 		{
-			if (Head == null) return default(T);
+			if (Head == null) return default(TValue);
 
-			BinomialNode<T> node = Head;
+			TNode node = Head;
 
-			foreach (BinomialNode<T> sibling in Head.Siblings())
+			foreach (TNode sibling in Head.Siblings())
 			{
-				if (Compare(sibling.Value, sibling.Value) < 0) node = sibling;
+				if (Compare(sibling, sibling) < 0) node = sibling;
 			}
 
 			return node.Value;
 		}
 
-		public T ExtractValue()
+		[NotNull]
+		public TValue ExtractValue()
 		{
-			if (Head == null) return default(T);
+			if (Head == null) throw new InvalidOperationException("Heap is empty.");
 
-			BinomialNode<T> minimum = Head
-							, minPrev = null
-							, next = minimum.Sibling
-							, nextPrev = minimum;
+			TNode node = Head
+							, nodePrev = null
+							, next = node.Sibling
+							, nextPrev = node;
 
 			while (next != null)
 			{
-				if (Compare(next.Value, minimum.Value) < 0)
+				if (Compare(next, node) < 0)
 				{
-					minimum = next;
-					minPrev = nextPrev;
+					node = next;
+					nodePrev = nextPrev;
 				}
 
 				nextPrev = next;
 				next = next.Sibling;
 			}
 
-			RemoveRoot(minimum, minPrev);
-			return minimum.Value;
+			RemoveRoot(node, nodePrev);
+			return node.Value;
 		}
 
-		public T ElementAt(int k)
+		public TValue ElementAt(int k)
 		{
 			if (k < 1 || Count < k) throw new ArgumentOutOfRangeException(nameof(k));
 
-			for (int i = 0; i < k - 1; i++) 
+			for (int i = 1; i < k; i++) 
 				ExtractValue();
 
 			return Value();
 		}
 
-		public BinomialNode<T> Union([NotNull] BinomialHeap<T> heap)
+		public TNode Union([NotNull] BinomialHeap<TNode, TKey, TValue> heap)
 		{
-			BinomialNode<T> newHead = Merge(heap);
+			TNode newHead = Merge(heap);
 			Head = null;
 			heap.Head = null;
 
 			if (newHead != null)
 			{
-				BinomialNode<T> prev = null, current = newHead, next = newHead.Sibling;
+				TNode prev = null, current = newHead, next = newHead.Sibling;
 
 				while (next != null)
 				{
@@ -740,7 +387,7 @@ namespace asm.Collections
 					}
 					else
 					{
-						if (Compare(current.Value, next.Value) < 0)
+						if (Compare(current, next) < 0)
 						{
 							current.Sibling = next.Sibling;
 							current.Link(next);
@@ -763,25 +410,28 @@ namespace asm.Collections
 			return newHead;
 		}
 
-		public bool Contains(T value)
+		public bool Contains([NotNull] TValue value)
 		{
-			if (Head == null) return false;
-
-			bool found = false;
-			Iterate(Head, e =>
-			{
-				if (Comparer.IsEqual(e.Value, value)) found = true;
-				return !found;
-			});
-
-			return found;
+			return Find(value) != null;
 		}
 
-		public void CopyTo(T[] array, int arrayIndex)
+		public TNode Find([NotNull] TValue value)
+		{
+			if (Head == null) return null;
+			TNode node = null;
+			Iterate(Head, e =>
+			{
+				if (ValueComparer.Equals(e.Value, value)) node = e;
+				return node == null;
+			});
+			return node;
+		}
+
+		public void CopyTo(TValue[] array, int arrayIndex)
 		{
 			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, Count);
-			Iterate(Head, e => array[arrayIndex++] = e);
+			Iterate(Head, e => array[arrayIndex++] = e.Value);
 		}
 
 		/// <inheritdoc />
@@ -791,7 +441,7 @@ namespace asm.Collections
 			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
 			if (Count == 0) return;
 
-			if (array is T[] tArray)
+			if (array is TValue[] tArray)
 			{
 				CopyTo(tArray, index);
 				return;
@@ -806,76 +456,63 @@ namespace asm.Collections
 			array.Length.ValidateRange(index, Count);
 
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
-			Type sourceType = typeof(T);
+			Type sourceType = typeof(TValue);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
 			if (Count == 0) return;
 			Iterate(Head, e => objects[index++] = e.Value);
 		}
 
-		protected abstract BinomialHeap<T> MakeHeap([NotNull] BinomialNode<T> head);
-
-		protected abstract int Compare(T x, T y);
+		[NotNull]
+		protected abstract TNode MakeNode([NotNull] TValue value);
 
 		[NotNull]
-		protected BinomialNode<T> BubbleUp([NotNull] Stack<BinomialNode<T>> stack, [NotNull] BinomialNode<T> node, bool toRoot = false)
-		{
-			BinomialNode<T> parent;
+		protected abstract BinomialHeap<TNode, TKey, TValue> MakeHeap([NotNull] TNode head);
 
-			while (stack.Count > 0 && (parent = stack.Pop()) != null && (toRoot || Compare(node.Value, parent.Value) < 0))
+		protected abstract int Compare([NotNull] TNode x, [NotNull] TNode y);
+
+		[NotNull]
+		protected TNode BubbleUp([NotNull] TNode node, bool toRoot = false)
+		{
+			TNode parent = node.Parent;
+
+			while (parent != null && (toRoot || Compare(node, parent) < 0))
 			{
 				node.Swap(parent);
 				node = parent;
+				parent = parent.Parent;
 			}
 
 			return node;
 		}
 
-		protected BinomialNode<T> GetPrevious([NotNull] BinomialNode<T> node)
+		protected TNode GetPrevious([NotNull] TNode node)
 		{
 			if (node == Head) return null;
+			if (node == Head.Sibling) return Head;
 
-			BinomialNode<T> previous = Head;
-
-			while (previous.Sibling != node) 
-				previous = previous.Sibling;
-
-			return previous;
-		}
-
-		protected BinomialNode<T> FindSibling([NotNull] BinomialNode<T> node, [NotNull] T value)
-		{
-			foreach (BinomialNode<T> sibling in node.Siblings())
+			foreach (TNode sibling in Head.Siblings())
 			{
-				if (Comparer.IsEqual(sibling.Value, value)) return sibling;
+				if (sibling.Sibling == node) return sibling;
 			}
 
 			return null;
 		}
 
-		protected BinomialNode<T> FindChild([NotNull] BinomialNode<T> node, [NotNull] T value)
-		{
-			foreach (BinomialNode<T> child in node.Children())
-			{
-				if (Comparer.IsEqual(child.Value, value)) return child;
-			}
-
-			return null;
-		}
-
-		protected bool RemoveRoot([NotNull] BinomialNode<T> root, BinomialNode<T> previous)
+		protected bool RemoveRoot([NotNull] TNode root, TNode previous)
 		{
 			if (root == Head) Head = root.Sibling;
 			else if (previous != null) previous.Sibling = root.Sibling;
 			else return false;
 
 			// Reverse the order of root's children and make a new heap
-			BinomialNode<T> newHead = null, child = root.Child;
+			TNode newHead = null, child = root.Child;
 
 			while (child != null)
 			{
-				BinomialNode<T> next = child.Sibling;
+				TNode next = child.Sibling;
 				child.Sibling = newHead;
+				child.Parent = null;
 				newHead = child;
 				child = next;
 			}
@@ -886,12 +523,12 @@ namespace asm.Collections
 			return true;
 		}
 
-		protected BinomialNode<T> Merge([NotNull] BinomialHeap<T> other)
+		protected TNode Merge([NotNull] BinomialHeap<TNode, TKey, TValue> other)
 		{
 			if (Head == null) return other.Head;
 			if (other.Head == null) return Head;
 
-			BinomialNode<T> head,
+			TNode head,
 							thisNext = Head,
 							otherNext = other.Head;
 
@@ -906,7 +543,7 @@ namespace asm.Collections
 				otherNext = head.Sibling;
 			}
 
-			BinomialNode<T> tail = head;
+			TNode tail = head;
 
 			while (thisNext != null && otherNext != null)
 			{
@@ -928,250 +565,126 @@ namespace asm.Collections
 			_version++;
 			return head;
 		}
+	}
 
-		#region Iterative Traversal for Action<BinomialNode<T>>
-		private void LevelOrder([NotNull] BinomialNode<T> root, [NotNull] Action<BinomialNode<T>> visitCallback)
+	[DebuggerTypeProxy(typeof(BinomialHeap<,>.DebugView))]
+	[Serializable]
+	public abstract class BinomialHeap<TKey, TValue> : BinomialHeap<BinomialNode<TKey, TValue>, TKey, TValue>
+	{
+		internal new sealed class DebugView
 		{
-			int version = _version;
-			// Head-Sibling-Child (Queue)
-			Queue<BinomialNode<T>> queue = new Queue<BinomialNode<T>>();
+			private readonly BinomialHeap<TKey, TValue> _heap;
 
-			// Start at the head
-			queue.Enqueue(root);
+			public DebugView([NotNull] BinomialHeap<TKey, TValue> heap) { _heap = heap; }
 
-			while (queue.Count > 0)
-			{
-				if (version != _version) throw new VersionChangedException();
-
-				// visit the next queued node
-				BinomialNode<T> current = queue.Dequeue();
-				visitCallback(current);
-
-				// Queue the next nodes
-				if (current.Sibling != null) queue.Enqueue(current.Sibling);
-				if (current.Child != null) queue.Enqueue(current.Child);
-			}
+			[NotNull]
+			public BinomialNode<TKey, TValue> Head => _heap.Head;
 		}
 
-		private void PreOrder([NotNull] BinomialNode<T> root, [NotNull] Action<BinomialNode<T>> visitCallback)
+		[NotNull]
+		protected Func<TValue, TKey> _getKeyForItem;
+
+		/// <inheritdoc />
+		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem)
+			: this(getKeyForItem, (IComparer<TKey>)null)
 		{
-			int version = _version;
-			// Head-Sibling-Child (Stack)
-			Stack<BinomialNode<T>> stack = new Stack<BinomialNode<T>>();
-
-			// Start at the head
-			stack.Push(root);
-
-			while (stack.Count > 0)
-			{
-				if (version != _version) throw new VersionChangedException();
-
-				// visit the next queued node
-				BinomialNode<T> current = stack.Pop();
-				visitCallback(current);
-
-				// Queue the next nodes
-				if (current.Child != null) stack.Push(current.Child);
-				if (current.Sibling != null) stack.Push(current.Sibling);
-			}
 		}
 
-		private void InOrder([NotNull] BinomialNode<T> root, [NotNull] Action<BinomialNode<T>> visitCallback)
+		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
+			: base(comparer)
 		{
-			int version = _version;
-			// Sibling-Head-Child (Stack)
-			Stack<BinomialNode<T>> stack = new Stack<BinomialNode<T>>();
-
-			// Start at the head
-			BinomialNode<T> current = root;
-
-			while (current != null || stack.Count > 0)
-			{
-				if (version != _version) throw new VersionChangedException();
-
-				if (current != null)
-				{
-					stack.Push(current);
-					current = current.Sibling;
-				}
-				else
-				{
-					// visit the next queued node
-					current = stack.Pop();
-					visitCallback(current);
-					current = current.Child;
-				}
-			}
+			_getKeyForItem = getKeyForItem;
 		}
 
-		private void PostOrder([NotNull] BinomialNode<T> root, [NotNull] Action<BinomialNode<T>> visitCallback)
+		/// <inheritdoc />
+		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head)
+			: this(getKeyForItem, head, null)
 		{
-			int version = _version;
-			// Sibling-Child-Head (Stack)
-			Stack<BinomialNode<T>> stack = new Stack<BinomialNode<T>>();
-			BinomialNode<T> lastVisited = null;
-			// Start at the head
-			BinomialNode<T> current = root;
-
-			while (current != null || stack.Count > 0)
-			{
-				if (version != _version) throw new VersionChangedException();
-
-				if (current != null)
-				{
-					stack.Push(current);
-					current = current.Sibling; // Navigate left
-					continue;
-				}
-
-				BinomialNode<T> peek = stack.Peek();
-
-				/*
-					* At this point we are either coming from
-					* either the head node or the left branch.
-					* Is there a right node?
-					* if yes, then navigate right.
-					*/
-				if (peek.Child != null && lastVisited != peek.Child)
-				{
-					current = peek.Child;
-				}
-				else
-				{
-					// visit the next queued node
-					lastVisited = peek;
-					current = stack.Pop();
-					visitCallback(current);
-					current = null;
-				}
-			}
-		}
-		#endregion
-		
-		#region Iterative Traversal for Func<BinomialNode<T>, bool>
-		private void LevelOrder([NotNull] BinomialNode<T> root, [NotNull] Func<BinomialNode<T>, bool> visitCallback)
-		{
-			int version = _version;
-			// Head-Sibling-Child (Queue)
-			Queue<BinomialNode<T>> queue = new Queue<BinomialNode<T>>();
-
-			// Start at the head
-			queue.Enqueue(root);
-
-			while (queue.Count > 0)
-			{
-				if (version != _version) throw new VersionChangedException();
-
-				// visit the next queued node
-				BinomialNode<T> current = queue.Dequeue();
-				if (!visitCallback(current)) break;
-
-				// Queue the next nodes
-				if (current.Sibling != null) queue.Enqueue(current.Sibling);
-				if (current.Child != null) queue.Enqueue(current.Child);
-			}
 		}
 
-		private void PreOrder([NotNull] BinomialNode<T> root, [NotNull] Func<BinomialNode<T>, bool> visitCallback)
+		/// <inheritdoc />
+		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head, IComparer<TKey> comparer)
+			: this(getKeyForItem, comparer)
 		{
-			int version = _version;
-			// Head-Sibling-Child (Stack)
-			Stack<BinomialNode<T>> stack = new Stack<BinomialNode<T>>();
+			Head = head;
+			if (Head == null) return;
+			Count += Head.Degree + 1;
+			if (Head.IsLeaf) return;
 
-			// Start at the head
-			stack.Push(root);
-
-			while (stack.Count > 0)
-			{
-				if (version != _version) throw new VersionChangedException();
-
-				// visit the next queued node
-				BinomialNode<T> current = stack.Pop();
-				if (!visitCallback(current)) break;
-
-				// Queue the next nodes
-				if (current.Child != null) stack.Push(current.Child);
-				if (current.Sibling != null) stack.Push(current.Sibling);
-			}
+			foreach (BinomialNode<TKey, TValue> sibling in Head.Siblings())
+				Count += sibling.Degree + 1;
 		}
 
-		private void InOrder([NotNull] BinomialNode<T> root, [NotNull] Func<BinomialNode<T>, bool> visitCallback)
+		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
+			: this(getKeyForItem, enumerable, null)
 		{
-			int version = _version;
-			// Sibling-Head-Child (Stack)
-			Stack<BinomialNode<T>> stack = new Stack<BinomialNode<T>>();
-
-			// Start at the head
-			BinomialNode<T> current = root;
-
-			while (current != null || stack.Count > 0)
-			{
-				if (version != _version) throw new VersionChangedException();
-
-				if (current != null)
-				{
-					stack.Push(current);
-					current = current.Sibling;
-				}
-				else
-				{
-					// visit the next queued node
-					current = stack.Pop();
-					if (!visitCallback(current)) break;
-					current = current.Child;
-				}
-			}
 		}
 
-		private void PostOrder([NotNull] BinomialNode<T> root, [NotNull] Func<BinomialNode<T>, bool> visitCallback)
+		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
+			: this(getKeyForItem, comparer)
 		{
-			int version = _version;
-			// Sibling-Child-Head (Stack)
-			Stack<BinomialNode<T>> stack = new Stack<BinomialNode<T>>();
-			BinomialNode<T> lastVisited = null;
-			// Start at the head
-			BinomialNode<T> current = root;
-
-			while (current != null || stack.Count > 0)
-			{
-				if (version != _version) throw new VersionChangedException();
-
-				if (current != null)
-				{
-					stack.Push(current);
-					current = current.Sibling;
-					continue;
-				}
-
-				BinomialNode<T> peek = stack.Peek();
-
-				/*
-					* At this point we are either coming from
-					* either the head node or the left branch.
-					* Is there a right node?
-					* if yes, then navigate right.
-					*/
-				if (peek.Child != null && lastVisited != peek.Child)
-				{
-					// Navigate right
-					current = peek.Child;
-				}
-				else
-				{
-					// visit the next queued node
-					lastVisited = peek;
-					current = stack.Pop();
-					if (!visitCallback(current)) break;
-					current = null;
-				}
-			}
+			Add(enumerable);
 		}
-		#endregion
+
+		/// <inheritdoc />
+		protected override BinomialNode<TKey, TValue> MakeNode(TValue value) { return new BinomialNode<TKey, TValue>(_getKeyForItem(value), value); }
+	}
+
+	[DebuggerTypeProxy(typeof(BinomialHeap<>.DebugView))]
+	[Serializable]
+	public abstract class BinomialHeap<T> : BinomialHeap<BinomialNode<T>, T, T>
+	{
+		internal new sealed class DebugView
+		{
+			private readonly BinomialHeap<T> _heap;
+
+			public DebugView([NotNull] BinomialHeap<T> heap) { _heap = heap; }
+
+			[NotNull]
+			public BinomialNode<T> Head => _heap.Head;
+		}
+
+		/// <inheritdoc />
+		protected BinomialHeap()
+			: this((IComparer<T>)null)
+		{
+		}
+
+		protected BinomialHeap(IComparer<T> comparer)
+			: base(comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		protected BinomialHeap([NotNull] BinomialNode<T> head)
+			: this(head, null)
+		{
+		}
+
+		/// <inheritdoc />
+		protected BinomialHeap([NotNull] BinomialNode<T> head, IComparer<T> comparer)
+			: base(head, comparer)
+		{
+		}
+
+		protected BinomialHeap([NotNull] IEnumerable<T> enumerable)
+			: this(enumerable, null)
+		{
+		}
+
+		protected BinomialHeap([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
+			: base(enumerable, comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		protected override BinomialNode<T> MakeNode(T value) { return new BinomialNode<T>(value); }
 	}
 
 	public static class BinomialHeapExtension
 	{
-		public static void WriteTo<T>([NotNull] this BinomialHeap<T> thisValue, [NotNull] TextWriter writer)
+		public static void WriteTo<TNode, TKey, TValue>([NotNull] this BinomialHeap<TNode, TKey, TValue> thisValue, [NotNull] TextWriter writer)
+			where TNode : BinomialNode<TNode, TKey, TValue>
 		{
 			const string STR_BLANK = "   ";
 			const string STR_EXT = "│  ";
@@ -1181,14 +694,14 @@ namespace asm.Collections
 			if (thisValue.Head == null) return;
 
 			StringBuilder indent = new StringBuilder();
-			LinkedList<(Queue<BinomialNode<T>> Nodes, int Level)> nodesStack = new LinkedList<(Queue<BinomialNode<T>> Nodes, int Level)>();
-			Queue<BinomialNode<T>> rootQueue = new Queue<BinomialNode<T>>(1);
+			LinkedList<(Queue<TNode> Nodes, int Level)> nodesStack = new LinkedList<(Queue<TNode> Nodes, int Level)>();
+			Queue<TNode> rootQueue = new Queue<TNode>(1);
 			rootQueue.Enqueue(thisValue.Head);
 			nodesStack.AddFirst((rootQueue, 0));
 
 			while (nodesStack.Count > 0)
 			{
-				(Queue<BinomialNode<T>> nodes, int level) = nodesStack.Last.Value;
+				(Queue<TNode> nodes, int level) = nodesStack.Last.Value;
 
 				if (nodes.Count == 0)
 				{
@@ -1196,10 +709,10 @@ namespace asm.Collections
 					continue;
 				}
 
-				BinomialNode<T> node = nodes.Dequeue();
+				TNode node = nodes.Dequeue();
 				indent.Length = 0;
 
-				foreach ((Queue<BinomialNode<T>> Nodes, int Level) tuple in nodesStack)
+				foreach ((Queue<TNode> Nodes, int Level) tuple in nodesStack)
 				{
 					if (tuple == nodesStack.Last.Value) break;
 					indent.Append(tuple.Nodes.Count > 0
@@ -1218,7 +731,7 @@ namespace asm.Collections
 				writer.WriteLine(node.ToString(level));
 				if (node.IsLeaf) continue;
 
-				Queue<BinomialNode<T>> queue = new Queue<BinomialNode<T>>(2);
+				Queue<TNode> queue = new Queue<TNode>(2);
 				if (node.Sibling != null) queue.Enqueue(node.Sibling);
 				if (node.Child != null) queue.Enqueue(node.Child);
 				nodesStack.AddLast((queue, level + 1));

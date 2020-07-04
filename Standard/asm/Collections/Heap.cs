@@ -112,14 +112,13 @@ namespace asm.Collections
 		/// <summary>
 		/// Will throw <see cref="NotSupportedException"/>
 		/// </summary>
-		[Obsolete]
 		public override bool Remove(T value) { throw new NotSupportedException(); }
 
 		public T ElementAt(int k)
 		{
 			if (k < 1 || Count < k) throw new ArgumentOutOfRangeException(nameof(k));
 
-			for (int i = 0; i < k - 1; i++) 
+			for (int i = 1; i < k; i++) 
 				Remove();
 
 			return Value;

@@ -44,13 +44,10 @@ namespace asm.Other.JonSkeet.MiscUtil.Collections
 		[NotNull]
 		protected SynchronizedList<IEqualityComparer<T>> EqualityComparers { get; } = new SynchronizedList<IEqualityComparer<T>>
 		{
-			new ProtectableList<IEqualityComparer<T>>(new List<IEqualityComparer<T>>
+			new List<IEqualityComparer<T>>(new List<IEqualityComparer<T>>
 			{
 				EqualityComparer<T>.Default
 			})
-			{
-				IsProtected = true
-			}
 		};
 
 		public virtual int Compare(T x, T y)

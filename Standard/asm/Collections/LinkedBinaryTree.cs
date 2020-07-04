@@ -1154,7 +1154,7 @@ namespace asm.Collections
 			if (FromSimpleList(list)) return;
 
 			int index = 0;
-			TNode node = NewNode(list[index++]);
+			TNode node = MakeNode(list[index++]);
 			Root = node;
 			Count++;
 
@@ -1171,7 +1171,7 @@ namespace asm.Collections
 				// add left node
 				if (comparer.IsLessThan(list[index], root.Value))
 				{
-					node = NewNode(list[index]);
+					node = MakeNode(list[index]);
 					root.Left = node;
 					Count++;
 					queue.Enqueue(node);
@@ -1181,7 +1181,7 @@ namespace asm.Collections
 				// add right node
 				if (index < list.Count && comparer.IsGreaterThanOrEqual(list[index], root.Value))
 				{
-					node = NewNode(list[index]);
+					node = MakeNode(list[index]);
 					root.Right = node;
 					Count++;
 					queue.Enqueue(node);
@@ -1208,7 +1208,7 @@ namespace asm.Collections
 			if (FromSimpleList(list)) return;
 
 			// first node of PreOrder will be root of tree
-			TNode node = NewNode(list[0]);
+			TNode node = MakeNode(list[0]);
 			Root = node;
 			Count++;
 
@@ -1231,10 +1231,10 @@ namespace asm.Collections
 				TNode root = null;
 
 				// Keep popping nodes while top of stack is greater.
-				while (stack.Count > 0 && comparer.IsGreaterThan(list[i], stack.Peek()))
+				while (stack.Count > 0 && comparer.IsGreaterThan(list[i], stack.Peek().Value))
 					root = stack.Pop();
 
-				node = NewNode(list[i]);
+				node = MakeNode(list[i]);
 
 				if (root != null)
 				{
@@ -1271,7 +1271,7 @@ namespace asm.Collections
 			int start = 0;
 			int end = list.Count - 1;
 			int index = IndexMid(start, end);
-			TNode node = NewNode(list[index]);
+			TNode node = MakeNode(list[index]);
 			Root = node;
 			Count++;
 
@@ -1290,7 +1290,7 @@ namespace asm.Collections
 				// add left node
 				if (nodeIndex > -1)
 				{
-					node = NewNode(list[nodeIndex]);
+					node = MakeNode(list[nodeIndex]);
 					tuple.Node.Left = node;
 					Count++;
 					queue.Enqueue((nodeIndex, start, end, node));
@@ -1304,7 +1304,7 @@ namespace asm.Collections
 				// add right node
 				if (nodeIndex > -1)
 				{
-					node = NewNode(list[nodeIndex]);
+					node = MakeNode(list[nodeIndex]);
 					tuple.Node.Right = node;
 					Count++;
 					queue.Enqueue((nodeIndex, start, end, node));
@@ -1335,7 +1335,7 @@ namespace asm.Collections
 			if (FromSimpleList(list)) return;
 
 			// last node of PostOrder will be root of tree
-			TNode node = NewNode(list[list.Count - 1]);
+			TNode node = MakeNode(list[list.Count - 1]);
 			Root = node;
 			Count++;
 
@@ -1363,10 +1363,10 @@ namespace asm.Collections
 				TNode root = null;
 
 				// Keep popping nodes while top of stack is greater.
-				while (stack.Count > 0 && comparer.IsLessThan(list[i], stack.Peek()))
+				while (stack.Count > 0 && comparer.IsLessThan(list[i], stack.Peek().Value))
 					root = stack.Pop();
 
-				node = NewNode(list[i]);
+				node = MakeNode(list[i]);
 
 				if (root != null)
 				{
@@ -1424,7 +1424,7 @@ namespace asm.Collections
 			}
 
 			int index = 0;
-			TNode node = NewNode(levelOrder[index++]);
+			TNode node = MakeNode(levelOrder[index++]);
 			Root = node;
 			Count++;
 
@@ -1443,7 +1443,7 @@ namespace asm.Collections
 				// add left node
 				if (levelIndex >= tuple.Start && levelIndex <= rootIndex - 1)
 				{
-					node = NewNode(inOrder[levelIndex]);
+					node = MakeNode(inOrder[levelIndex]);
 					tuple.Node.Left = node;
 					Count++;
 					queue.Enqueue((tuple.Start, rootIndex - 1, node));
@@ -1457,7 +1457,7 @@ namespace asm.Collections
 				// add right node
 				if (levelIndex >= rootIndex + 1 && levelIndex <= tuple.End)
 				{
-					node = NewNode(inOrder[levelIndex]);
+					node = MakeNode(inOrder[levelIndex]);
 					tuple.Node.Right = node;
 					Count++;
 					queue.Enqueue((rootIndex + 1, tuple.End, node));
@@ -1495,7 +1495,7 @@ namespace asm.Collections
 			 */
 			int preIndex = 0;
 			int inIndex = 0;
-			TNode node = NewNode(preOrder[preIndex++]);
+			TNode node = MakeNode(preOrder[preIndex++]);
 			Root = node;
 			Count++;
 
@@ -1522,7 +1522,7 @@ namespace asm.Collections
 					 * in inOrder, so next element in preOrder must be right child of
 					 * the removed node
 					 */
-					node = NewNode(preOrder[preIndex++]);
+					node = MakeNode(preOrder[preIndex++]);
 					root.Right = node;
 					Count++;
 					stack.Push(node);
@@ -1534,7 +1534,7 @@ namespace asm.Collections
 					 * in inOrder, so next element in preOrder must be left child
 					 * of this node
 					 */
-					node = NewNode(preOrder[preIndex++]);
+					node = MakeNode(preOrder[preIndex++]);
 					root.Left = node;
 					Count++;
 					stack.Push(node);
@@ -1575,7 +1575,7 @@ namespace asm.Collections
 
 			// Traverse postOrder in reverse
 			int postIndex = postOrder.Count - 1;
-			TNode node = NewNode(postOrder[postIndex--]);
+			TNode node = MakeNode(postOrder[postIndex--]);
 			Root = node;
 			Count++;
 
@@ -1596,7 +1596,7 @@ namespace asm.Collections
 				// add right node
 				if (index > rootIndex)
 				{
-					node = NewNode(inOrder[index]);
+					node = MakeNode(inOrder[index]);
 					root.Right = node;
 					Count++;
 					stack.Push(node);
@@ -1618,7 +1618,7 @@ namespace asm.Collections
 							root = stack.Pop();
 					}
 
-					node = NewNode(inOrder[index]);
+					node = MakeNode(inOrder[index]);
 					root.Left = node;
 					Count++;
 					stack.Push(node);
@@ -1628,7 +1628,7 @@ namespace asm.Collections
 		}
 
 		[NotNull]
-		protected internal abstract TNode NewNode(T value);
+		protected internal abstract TNode MakeNode(T value);
 
 		#region Iterative Traversal for Action<TNode>
 		private void LevelOrder([NotNull] TNode root, [NotNull] Action<TNode> visitCallback, bool rtl)
@@ -2003,7 +2003,7 @@ namespace asm.Collections
 					result = true;
 					break;
 				case 1:
-					Root = NewNode(list[0]);
+					Root = MakeNode(list[0]);
 					Count++;
 					result = true;
 					break;
@@ -2063,7 +2063,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected internal override LinkedBinaryNode<T> NewNode(T value) { return new LinkedBinaryNode<T>(value); }
+		protected internal override LinkedBinaryNode<T> MakeNode(T value) { return new LinkedBinaryNode<T>(value); }
 
 		/// <inheritdoc />
 		public override int GetHeight() { return Root?.Height ?? 0; }
