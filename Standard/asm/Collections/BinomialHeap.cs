@@ -322,11 +322,12 @@ namespace asm.Collections
 		{
 			if (Head == null) return default(TValue);
 
-			TNode node = Head;
+			TNode node = Head, next = Head.Sibling;
 
-			foreach (TNode sibling in Head.Siblings())
+			while (next != null)
 			{
-				if (Compare(sibling, sibling) < 0) node = sibling;
+				if (Compare(next, node) < 0) node = next;
+				next = next.Sibling;
 			}
 
 			return node.Value;
@@ -338,9 +339,9 @@ namespace asm.Collections
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
 
 			TNode node = Head
-							, nodePrev = null
-							, next = node.Sibling
-							, nextPrev = node;
+				, nodePrev = null
+				, next = node.Sibling
+				, nextPrev = node;
 
 			while (next != null)
 			{

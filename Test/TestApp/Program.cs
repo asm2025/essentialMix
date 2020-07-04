@@ -100,8 +100,8 @@ namespace TestApp
 			
 			//TestBinomialHeapAdd();
 			//TestBinomialHeapRemove();
-			TestBinomialHeapElementAt();
-			//TestBinomialHeapDecreaseKey();
+			//TestBinomialHeapElementAt();
+			TestBinomialHeapDecreaseKey();
 
 			//TestGraph();
 
@@ -2840,6 +2840,8 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				DoTheTest(heap, values);
 
 				Student[] students = GetRandomStudents(len);
+				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+
 				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students);
 
@@ -2901,6 +2903,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				Student[] students = GetRandomStudents(len);
 				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine("Students Sorted: ".BrightBlack() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+
 				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students, k);
 
@@ -2941,6 +2944,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine("Array sorted: ".BrightBlack() + string.Join(", ", values.OrderBy(e => e)));
 
 				BinomialHeap<int> heap = new MaxBinomialHeap<int>();
 				DoTheTest(heap, values, e => int.MaxValue);
@@ -2949,6 +2953,9 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				DoTheTest(heap, values, e => int.MinValue);
 
 				Student[] students = GetRandomStudents(len);
+				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine("Students Sorted: ".BrightBlack() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+
 				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students, e => int.MaxValue);
 
@@ -2972,14 +2979,21 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				heap.Print();
 
 				TValue value = heap.ExtractValue();
-				Console.WriteLine($"Test ExtractValue: {value}");
+				Console.WriteLine($"Test ExtractValue (1): {value}");
 				if (heap.Count == 0) return;
 
-				TNode node = heap.Find(array.PickRandom());
+				TNode node;
 
-				Console.WriteLine($"Test DecreaseKey: {node.Key}.");
+				do
+				{
+					node = heap.Find(array.PickRandom());
+				}
+				while (node == null);
+
+				Console.WriteLine($"Test DecreaseKey for node: {node}.");
 				heap.DecreaseKey(node, newKeyValue(node.Key));
-				Console.WriteLine($"Test ExtractValue again: {heap.ExtractValue()}");
+				Console.WriteLine($"Test ExtractValue (2): {heap.ExtractValue()}");
+				if (heap.Count > 0) Console.WriteLine($"Test ExtractValue (3): {heap.ExtractValue()}");
 				Console.WriteLine();
 				Console.WriteLine();
 			}

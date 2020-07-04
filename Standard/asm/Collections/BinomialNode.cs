@@ -104,9 +104,12 @@ namespace asm.Collections
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public void Swap([NotNull] TNode other)
 		{
-			TKey tmp = other.Key;
+			TKey otherKey = other.Key;
+			TValue otherValue = other.Value;
 			other.Key = Key;
-			Key = tmp;
+			other.Value = Value;
+			Key = otherKey;
+			Value = otherValue;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
