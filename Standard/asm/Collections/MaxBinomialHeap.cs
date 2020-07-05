@@ -20,13 +20,13 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public MaxBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head)
+		protected internal MaxBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head)
 			: this(getKeyForItem, head, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public MaxBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head, IComparer<TKey> comparer)
+		protected internal MaxBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head, IComparer<TKey> comparer)
 			: base(getKeyForItem, head, comparer)
 		{
 		}
@@ -47,9 +47,9 @@ namespace asm.Collections
 		protected override BinomialHeap<BinomialNode<TKey, TValue>, TKey, TValue> MakeHeap(BinomialNode<TKey, TValue> head) { return new MaxBinomialHeap<TKey, TValue>(_getKeyForItem, head, Comparer); }
 
 		/// <inheritdoc />
-		protected override int Compare(BinomialNode<TKey, TValue> x, BinomialNode<TKey, TValue> y)
+		protected override int Compare(TKey x, TKey y)
 		{
-			return Comparer.Compare(x.Key, y.Key) * - 1;
+			return Comparer.Compare(x, y) * - 1;
 		}
 	}
 
@@ -69,13 +69,13 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public MaxBinomialHeap([NotNull] BinomialNode<T> head)
+		protected internal MaxBinomialHeap([NotNull] BinomialNode<T> head)
 			: this(head, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public MaxBinomialHeap([NotNull] BinomialNode<T> head, IComparer<T> comparer)
+		protected internal MaxBinomialHeap([NotNull] BinomialNode<T> head, IComparer<T> comparer)
 			: base(head, comparer)
 		{
 		}
@@ -96,9 +96,9 @@ namespace asm.Collections
 		protected override BinomialHeap<BinomialNode<T>, T, T> MakeHeap(BinomialNode<T> head) { return new MaxBinomialHeap<T>(head, Comparer); }
 
 		/// <inheritdoc />
-		protected override int Compare(BinomialNode<T> x, BinomialNode<T> y)
+		protected override int Compare(T x, T y)
 		{
-			return Comparer.Compare(x.Value, y.Value) * - 1;
+			return Comparer.Compare(x, y) * - 1;
 		}
 	}
 }

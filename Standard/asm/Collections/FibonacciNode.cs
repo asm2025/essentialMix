@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -9,54 +10,75 @@ namespace asm.Collections
 {
 	// https://www.growingwiththeweb.com/data-structures/fibonacci-heap/overview/
 	// https://brilliant.org/wiki/fibonacci-heap/
-	[DebuggerDisplay("{Value} :D{Degree}")]
+	[DebuggerDisplay("{Key} = {Value} :D{Degree}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public sealed class FibonacciNode<T>
+	public abstract class FibonacciNode<TNode, TKey, TValue>
+		where TNode : FibonacciNode<TNode, TKey, TValue>
 	{
 		private const int PARENT = 0;
 		private const int CHILD = 1;
 		private const int PREVIOUS = 2;
 		private const int NEXT = 3;
 
-		private readonly FibonacciNode<T>[] _nodes = new FibonacciNode<T>[4];
+		// The previous/next nodes are not exactly a doubly linked list but rather a circular reference
+		private readonly TNode[] _nodes = new TNode[4];
 
-		public FibonacciNode(T value)
+		protected FibonacciNode([NotNull] TValue value)
 		{
 			Value = value;
-			_nodes[PREVIOUS] = this;
-			_nodes[NEXT] = this;
+			_nodes[PREVIOUS] = _nodes[NEXT] = (TNode)this;
 		}
 
-		public FibonacciNode<T> Parent
+		public TNode Parent
 		{
 			get => _nodes[PARENT];
-			internal set => _nodes[PARENT] = value;
+			internal set
+			{
+				if (ReferenceEquals(value, this)) throw new InvalidOperationException("Circular reference detected.");
+				_nodes[PARENT] = value;
+			}
 		}
 
-		public FibonacciNode<T> Child
+		public TNode Child
 		{
 			get => _nodes[CHILD];
-			internal set => _nodes[CHILD] = value;
+			internal set
+			{
+				if (ReferenceEquals(value, this)) throw new InvalidOperationException("Circular reference detected.");
+				_nodes[CHILD] = value;
+			}
 		}
 
-		public FibonacciNode<T> Previous
+		/// <summary>
+		/// The previous/next nodes are not exactly a doubly linked list but rather
+		/// a circular reference so will have to watch out for this.
+		/// </summary>
+		public TNode Previous
 		{
-			get => _nodes[PREVIOUS] == this
+			get => ReferenceEquals(_nodes[PREVIOUS], this)
 						? null
 						: _nodes[PREVIOUS];
-			internal set => _nodes[PREVIOUS] = value;
+			internal set => _nodes[PREVIOUS] = value ?? (TNode)this;
 		}
 
-		public FibonacciNode<T> Next
+		/// <summary>
+		/// The previous/next nodes are not exactly a doubly linked list but rather
+		/// a circular reference so will have to watch out for this.
+		/// </summary>
+		public TNode Next
 		{
-			get => _nodes[NEXT] == this
+			get => ReferenceEquals(_nodes[NEXT], this)
 						? null
 						: _nodes[NEXT];
-			internal set => _nodes[NEXT] = value;
+			internal set => _nodes[NEXT] = value ?? (TNode)this;
 		}
 
-		public T Value { get; set; }
+		[NotNull]
+		public abstract TKey Key { get; set; }
+
+		[NotNull]
+		public TValue Value { get; set; }
 
 		public int Degree { get; internal set; }
 
@@ -69,39 +91,41 @@ namespace asm.Collections
 		public override string ToString() { return Convert.ToString(Value); }
 
 		[NotNull]
-		internal string ToString(int level)
+		internal virtual string ToString(int level)
 		{
-			return $"{Value} :D{Degree}L{level}";
+			return $"{Key} = {Value} :D{Degree}L{level}";
 		}
 
 		[ItemNotNull]
-		public IEnumerable<FibonacciNode<T>> Backwards()
+		public IEnumerable<TNode> Backwards(TNode stopAt = null)
 		{
-			FibonacciNode<T> previous = _nodes[PREVIOUS];
+			TNode node = (TNode)this;
 
-			while (previous != this)
+			do
 			{
-				yield return previous;
-				previous = previous._nodes[PREVIOUS];
+				yield return node;
+				node = node._nodes[PREVIOUS];
 			}
+			while (node != stopAt && node != this);
 		}
 
 		[ItemNotNull]
-		public IEnumerable<FibonacciNode<T>> Forwards()
+		public IEnumerable<TNode> Forwards(TNode stopAt = null)
 		{
-			FibonacciNode<T> next = _nodes[NEXT];
+			TNode node = (TNode)this;
 
-			while (next != this)
+			do
 			{
-				yield return next;
-				next = next._nodes[NEXT];
+				yield return node;
+				node = node._nodes[NEXT];
 			}
+			while (node != stopAt && node != this);
 		}
 
 		[ItemNotNull]
-		public IEnumerable<FibonacciNode<T>> Ancestors()
+		public IEnumerable<TNode> Ancestors()
 		{
-			FibonacciNode<T> parent = _nodes[PARENT];
+			TNode parent = _nodes[PARENT];
 
 			while (parent != null)
 			{
@@ -111,9 +135,9 @@ namespace asm.Collections
 		}
 
 		[ItemNotNull]
-		public IEnumerable<FibonacciNode<T>> Children()
+		public IEnumerable<TNode> Children()
 		{
-			FibonacciNode<T> child = _nodes[CHILD];
+			TNode child = _nodes[CHILD];
 
 			while (child != null)
 			{
@@ -123,11 +147,62 @@ namespace asm.Collections
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public void Swap([NotNull] FibonacciNode<T> other)
+		public void Swap([NotNull] TNode other)
 		{
-			T tmp = other.Value;
+			TKey otherKey = other.Key;
+			TValue otherValue = other.Value;
+			other.Key = Key;
 			other.Value = Value;
-			Value = tmp;
+			Key = otherKey;
+			Value = otherValue;
+		}
+	}
+
+	[Serializable]
+	[StructLayout(LayoutKind.Sequential)]
+	public class FibonacciNode<TKey, TValue> : FibonacciNode<FibonacciNode<TKey, TValue>, TKey, TValue>
+	{
+		private TKey _key;
+
+		/// <inheritdoc />
+		public FibonacciNode([NotNull] TKey key, [NotNull] TValue value)
+			: base(value)
+		{
+			_key = key;
+		}
+
+		/// <inheritdoc />
+		public override TKey Key
+		{
+			get => _key;
+			set => _key = value;
+		}
+	}
+
+	[DebuggerDisplay("{Value} :D{Degree}")]
+	[Serializable]
+	[StructLayout(LayoutKind.Sequential)]
+	public sealed class FibonacciNode<T> : FibonacciNode<FibonacciNode<T>, T, T>
+	{
+		/// <inheritdoc />
+		public FibonacciNode([NotNull] T value)
+			: base(value)
+		{
+		}
+
+		/// <inheritdoc />
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public override T Key
+		{
+			get => Value;
+			set => Value = value;
+		}
+
+		internal override string ToString(int level)
+		{
+			return $"{Value} :D{Degree}L{level}";
 		}
 	}
 }

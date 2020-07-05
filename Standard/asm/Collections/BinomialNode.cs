@@ -30,19 +30,31 @@ namespace asm.Collections
 		public TNode Parent
 		{
 			get => _nodes[PARENT];
-			internal set => _nodes[PARENT] = value;
+			internal set
+			{
+				if (ReferenceEquals(value, this)) throw new InvalidOperationException("Circular reference detected.");
+				_nodes[PARENT] = value;
+			}
 		}
 
 		public TNode Child
 		{
 			get => _nodes[CHILD];
-			internal set => _nodes[CHILD] = value;
+			internal set
+			{
+				if (ReferenceEquals(value, this)) throw new InvalidOperationException("Circular reference detected.");
+				_nodes[CHILD] = value;
+			}
 		}
 
 		public TNode Sibling
 		{
 			get => _nodes[SIBLING];
-			internal set => _nodes[SIBLING] = value;
+			internal set
+			{
+				if (ReferenceEquals(value, this)) throw new InvalidOperationException("Circular reference detected.");
+				_nodes[SIBLING] = value;
+			}
 		}
 
 		[NotNull]

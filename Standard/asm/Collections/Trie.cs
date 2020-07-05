@@ -66,7 +66,7 @@ namespace asm.Collections
 			}
 
 			/// <inheritdoc />
-			public int CompareTo(object obj)
+			int IComparable.CompareTo(object obj)
 			{
 				return CompareTo(obj as Node);
 			}

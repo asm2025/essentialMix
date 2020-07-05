@@ -101,7 +101,12 @@ namespace TestApp
 			//TestBinomialHeapAdd();
 			//TestBinomialHeapRemove();
 			//TestBinomialHeapElementAt();
-			TestBinomialHeapDecreaseKey();
+			//TestBinomialHeapDecreaseKey();
+			
+			//TestFibonacciHeapAdd();
+			//TestFibonacciHeapRemove();
+			//TestFibonacciHeapElementAt();
+			TestFibonacciHeapDecreaseKey();
 
 			//TestGraph();
 
@@ -2079,10 +2084,9 @@ namespace TestApp
 			{
 				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
 				heap.Add(array);
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
-				Console.WriteLine("Test get Kth element...");
-				Console.WriteLine($"heap {k} kth element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+				Console.WriteLine($"Kth element at position {k} = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
 				Console.WriteLine();
 				Console.WriteLine();
 			}
@@ -2815,7 +2819,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 					//heap.PrintWithProps();
 				}
 
-				Console.WriteLine("LevelOrder: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
 			}
 		}
@@ -2861,7 +2865,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			{
 				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
 				heap.Add(array);
-				Console.WriteLine("LevelOrder: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
 				Console.WriteLine("Test removing...");
 				bool removeStarted = false;
@@ -2923,10 +2927,9 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			{
 				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
 				heap.Add(array);
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
-				Console.WriteLine("Test get Kth element...");
-				Console.WriteLine($"heap {k}th element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+				Console.WriteLine($"Kth element at position {k} element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
 				Console.WriteLine();
 				Console.WriteLine();
 			}
@@ -2975,7 +2978,235 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			{
 				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
 				heap.Add(array);
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+
+				TValue value = heap.ExtractValue();
+				Console.WriteLine($"Test ExtractValue (1): {value}");
+				if (heap.Count == 0) return;
+
+				TNode node;
+
+				do
+				{
+					node = heap.Find(array.PickRandom());
+				}
+				while (node == null);
+
+				Console.WriteLine($"Test DecreaseKey for node: {node}.");
+				heap.DecreaseKey(node, newKeyValue(node.Key));
+				Console.WriteLine($"Test ExtractValue (2): {heap.ExtractValue()}");
+				if (heap.Count > 0) Console.WriteLine($"Test ExtractValue (3): {heap.ExtractValue()}");
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
+		private static void TestFibonacciHeapAdd()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing FibonacciHeap.Add()...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				FibonacciHeap<int> heap = new MaxFibonacciHeap<int>();
+				DoTheTest(heap, values);
+
+				heap = new MinFibonacciHeap<int>();
+				DoTheTest(heap, values);
+
+				Student[] students = GetRandomStudents(len);
+				FibonacciHeap<double, Student> studentHeap = new MaxFibonacciHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students);
+
+				studentHeap = new MinFibonacciHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array)
+				where TNode : FibonacciNode<TNode, TKey, TValue>
+			{
+				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+
+				foreach (TValue value in array)
+				{
+					heap.Add(value);
+					//heap.PrintWithProps();
+				}
+
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+			}
+		}
+
+		private static void TestFibonacciHeapRemove()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing FibonacciHeap.Remove()...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				FibonacciHeap<int> heap = new MaxFibonacciHeap<int>();
+				DoTheTest(heap, values);
+
+				heap = new MinFibonacciHeap<int>();
+				DoTheTest(heap, values);
+
+				Student[] students = GetRandomStudents(len);
+				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+
+				FibonacciHeap<double, Student> studentHeap = new MaxFibonacciHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students);
+
+				studentHeap = new MinFibonacciHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array)
+				where TNode : FibonacciNode<TNode, TKey, TValue>
+			{
+				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				heap.Add(array);
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+				Console.WriteLine("Test removing...");
+				bool removeStarted = false;
+
+				while (heap.Count > 0)
+				{
+					if (!removeStarted) removeStarted = true;
+					else Console.Write(", ");
+
+					Console.Write(heap.ExtractValue());
+				}
+
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
+		private static void TestFibonacciHeapElementAt()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing FibonacciHeap ElementAt...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				int k = RNGRandomHelper.Next(1, values.Length);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine("Array Sorted: ".BrightBlack() + string.Join(", ", values.OrderBy(e => e)));
+
+				FibonacciHeap<int> heap = new MaxFibonacciHeap<int>();
+				DoTheTest(heap, values, k);
+
+				heap = new MinFibonacciHeap<int>();
+				DoTheTest(heap, values, k);
+
+				Student[] students = GetRandomStudents(len);
+				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine("Students Sorted: ".BrightBlack() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+
+				FibonacciHeap<double, Student> studentHeap = new MaxFibonacciHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students, k);
+
+				studentHeap = new MinFibonacciHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students, k);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
+				where TNode : FibonacciNode<TNode, TKey, TValue>
+			{
+				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				heap.Add(array);
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+				Console.WriteLine($"Kth element at position {k} element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
+		private static void TestFibonacciHeapDecreaseKey()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing FibonacciHeap DecreaseKey...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine("Array sorted: ".BrightBlack() + string.Join(", ", values.OrderBy(e => e)));
+
+				FibonacciHeap<int> heap = new MaxFibonacciHeap<int>();
+				DoTheTest(heap, values, e => int.MaxValue);
+
+				heap = new MinFibonacciHeap<int>();
+				DoTheTest(heap, values, e => int.MinValue);
+
+				Student[] students = GetRandomStudents(len);
+				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine("Students Sorted: ".BrightBlack() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+
+				FibonacciHeap<double, Student> studentHeap = new MaxFibonacciHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students, e => int.MaxValue);
+
+				studentHeap = new MinFibonacciHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students, e => int.MinValue);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array, Func<TKey, TKey> newKeyValue)
+				where TNode : FibonacciNode<TNode, TKey, TValue>
+			{
+				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				heap.Add(array);
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
 
 				TValue value = heap.ExtractValue();
@@ -3248,6 +3479,15 @@ public static class Extension
 
 	public static void Print<TNode, TKey, TValue>([NotNull] this BinomialHeap<TNode, TKey, TValue> thisValue)
 		where TNode : BinomialNode<TNode, TKey, TValue>
+	{
+		Console.WriteLine();
+		Console.WriteLine("Count: " + thisValue.Count);
+		Console.WriteLine();
+		thisValue.WriteTo(Console.Out);
+	}
+
+	public static void Print<TNode, TKey, TValue>([NotNull] this FibonacciHeap<TNode, TKey, TValue> thisValue)
+		where TNode : FibonacciNode<TNode, TKey, TValue>
 	{
 		Console.WriteLine();
 		Console.WriteLine("Count: " + thisValue.Count);
