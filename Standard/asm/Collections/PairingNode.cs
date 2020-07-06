@@ -8,31 +8,21 @@ using JetBrains.Annotations;
 
 namespace asm.Collections
 {
-	[DebuggerDisplay("{Key} = {Value} :D{Degree}")]
+	[DebuggerDisplay("{Key} = {Value}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class BinomialNode<TNode, TKey, TValue>
-		where TNode : BinomialNode<TNode, TKey, TValue>
+	public abstract class PairingNode<TNode, TKey, TValue>
+		where TNode : PairingNode<TNode, TKey, TValue>
 	{
-		private const int PARENT = 0;
-		private const int CHILD = 1;
-		private const int SIBLING = 2;
+		private const int CHILD = 0;
+		private const int SIBLING = 1;
+		private const int PREVIOUS = 2;
 
 		private readonly TNode[] _nodes = new TNode[3];
 
-		protected BinomialNode([NotNull] TValue value)
+		protected PairingNode([NotNull] TValue value)
 		{
 			Value = value;
-		}
-
-		public TNode Parent
-		{
-			get => _nodes[PARENT];
-			internal set
-			{
-				AssertNotCircularRef(value);
-				_nodes[PARENT] = value;
-			}
 		}
 
 		public TNode Child
@@ -55,13 +45,21 @@ namespace asm.Collections
 			}
 		}
 
+		public TNode Previous
+		{
+			get => _nodes[PREVIOUS];
+			internal set
+			{
+				AssertNotCircularRef(value);
+				_nodes[PREVIOUS] = value;
+			}
+		}
+
 		[NotNull]
 		public abstract TKey Key { get; set; }
 
 		[NotNull]
 		public TValue Value { get; set; }
-
-		public int Degree { get; internal set; }
 
 		public bool IsLeaf => _nodes[SIBLING] == null && _nodes[CHILD] == null;
 
@@ -72,19 +70,20 @@ namespace asm.Collections
 		[NotNull]
 		internal virtual string ToString(int level)
 		{
-			return $"{Key} = {Value} :D{Degree}L{level}";
+			return $"{Key} = {Value} :L{level}";
 		}
 
-		[ItemNotNull]
-		public IEnumerable<TNode> Ancestors()
+		public TNode LeftMostChild()
 		{
-			TNode parent = _nodes[PARENT];
+			TNode node = null, next = _nodes[CHILD];
 
-			while (parent != null)
+			while (next != null)
 			{
-				yield return parent;
-				parent = parent._nodes[PARENT];
+				node = next;
+				next = next._nodes[CHILD];
 			}
+
+			return node;
 		}
 
 		[ItemNotNull]
@@ -123,16 +122,7 @@ namespace asm.Collections
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		internal void Link([NotNull] TNode other)
-		{
-			other._nodes[PARENT] = (TNode)this;
-			other._nodes[SIBLING] = _nodes[CHILD];
-			_nodes[CHILD] = other;
-			Degree++;
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		private void AssertNotCircularRef(BinomialNode<TNode, TKey, TValue> node)
+		private void AssertNotCircularRef(PairingNode<TNode, TKey, TValue> node)
 		{
 			if (!ReferenceEquals(this, node)) return;
 			throw new InvalidOperationException("Circular reference detected.");
@@ -141,12 +131,12 @@ namespace asm.Collections
 
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public class BinomialNode<TKey, TValue> : BinomialNode<BinomialNode<TKey, TValue>, TKey, TValue>
+	public class PairingNode<TKey, TValue> : PairingNode<PairingNode<TKey, TValue>, TKey, TValue>
 	{
 		private TKey _key;
 
 		/// <inheritdoc />
-		public BinomialNode([NotNull] TKey key, [NotNull] TValue value)
+		public PairingNode([NotNull] TKey key, [NotNull] TValue value)
 			: base(value)
 		{
 			_key = key;
@@ -160,13 +150,13 @@ namespace asm.Collections
 		}
 	}
 
-	[DebuggerDisplay("{Value} :D{Degree}")]
+	[DebuggerDisplay("{Value}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public sealed class BinomialNode<T> : BinomialNode<BinomialNode<T>, T, T>
+	public sealed class PairingNode<T> : PairingNode<PairingNode<T>, T, T>
 	{
 		/// <inheritdoc />
-		public BinomialNode([NotNull] T value)
+		public PairingNode([NotNull] T value)
 			: base(value)
 		{
 		}
@@ -183,7 +173,7 @@ namespace asm.Collections
 
 		internal override string ToString(int level)
 		{
-			return $"{Value} :D{Degree}L{level}";
+			return $"{Value} :L{level}";
 		}
 	}
 }

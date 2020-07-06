@@ -8,8 +8,6 @@ using JetBrains.Annotations;
 
 namespace asm.Collections
 {
-	// https://www.growingwiththeweb.com/data-structures/fibonacci-heap/overview/
-	// https://brilliant.org/wiki/fibonacci-heap/
 	[DebuggerDisplay("{Key} = {Value} :D{Degree}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
@@ -35,7 +33,7 @@ namespace asm.Collections
 			get => _nodes[PARENT];
 			internal set
 			{
-				if (ReferenceEquals(value, this)) throw new InvalidOperationException("Circular reference detected.");
+				AssertNotCircularRef(value);
 				_nodes[PARENT] = value;
 			}
 		}
@@ -45,7 +43,7 @@ namespace asm.Collections
 			get => _nodes[CHILD];
 			internal set
 			{
-				if (ReferenceEquals(value, this)) throw new InvalidOperationException("Circular reference detected.");
+				AssertNotCircularRef(value);
 				_nodes[CHILD] = value;
 			}
 		}
@@ -155,6 +153,13 @@ namespace asm.Collections
 			other.Value = Value;
 			Key = otherKey;
 			Value = otherValue;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		private void AssertNotCircularRef(FibonacciNode<TNode, TKey, TValue> node)
+		{
+			if (!ReferenceEquals(this, node)) return;
+			throw new InvalidOperationException("Circular reference detected.");
 		}
 	}
 

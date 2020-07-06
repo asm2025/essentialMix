@@ -18,7 +18,9 @@ namespace asm.Collections
 	/// many other priority queue data structures including the binary heap and binomial heap.
 	/// </summary>
 	/// <typeparam name="TNode">The node type. This is just for abstraction purposes and shouldn't be dealt with directly.</typeparam>
-	/// <typeparam name="TKey"></typeparam>
+	/// <typeparam name="TKey">The key assigned to the element. It should have its value from the value at first but changing
+	/// this later will not affect the value itself, except for primitive value types. Changing the key will of course affect the
+	/// priority of the item.</typeparam>
 	/// <typeparam name="TValue">The element type of the heap</typeparam>
 	// https://stackoverflow.com/questions/19508526/what-is-the-intuition-behind-the-fibonacci-heap-data-structure
 	// https://cstheory.stackexchange.com/questions/46796/is-there-a-simple-intuitive-explanation-for-why-trees-in-fibonacci-heaps-have-t
@@ -157,23 +159,6 @@ namespace asm.Collections
 		protected FibonacciHeap(IComparer<TKey> comparer)
 		{
 			Comparer = comparer ?? Comparer<TKey>.Default;
-		}
-
-		/// <inheritdoc />
-		protected internal FibonacciHeap([NotNull] TNode head)
-			: this(head, null)
-		{
-		}
-
-		/// <inheritdoc />
-		protected internal FibonacciHeap([NotNull] TNode head, IComparer<TKey> comparer)
-			: this(comparer)
-		{
-			Head = head;
-			if (Head == null) return;
-
-			foreach (TNode node in Head.Forwards())
-				Count += node.Degree + 1;
 		}
 
 		protected FibonacciHeap([NotNull] IEnumerable<TValue> enumerable)
@@ -319,7 +304,7 @@ namespace asm.Collections
 
 		public bool Remove([NotNull] TValue value)
 		{
-			TNode node = Find(value);
+			TNode node = FindByValue(value);
 			return node != null && Remove(node);
 		}
 
@@ -353,6 +338,7 @@ namespace asm.Collections
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
 			if (Compare(node.Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
 			node.Key = newKey;
+			if (node == Head) return;
 
 			TNode parent = node.Parent;
 
@@ -417,10 +403,22 @@ namespace asm.Collections
 
 		public bool Contains([NotNull] TValue value)
 		{
-			return Find(value) != null;
+			return FindByValue(value) != null;
 		}
 
-		public TNode Find([NotNull] TValue value)
+		public TNode FindByKey([NotNull] TKey key)
+		{
+			if (Head == null) return null;
+			TNode node = null;
+			Iterate(Head, e =>
+			{
+				if (Comparer.IsEqual(e.Key, key)) node = e;
+				return node == null;
+			});
+			return node;
+		}
+
+		public TNode FindByValue([NotNull] TValue value)
 		{
 			if (Head == null) return null;
 			TNode node = null;
@@ -635,29 +633,6 @@ namespace asm.Collections
 			_getKeyForItem = getKeyForItem;
 		}
 
-		/// <inheritdoc />
-		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] FibonacciNode<TKey, TValue> head)
-			: this(getKeyForItem, head, null)
-		{
-		}
-
-		/// <inheritdoc />
-		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] FibonacciNode<TKey, TValue> head, IComparer<TKey> comparer)
-			: this(getKeyForItem, comparer)
-		{
-			Head = head;
-			if (Head == null) return;
-
-			FibonacciNode<TKey, TValue> next = Head;
-
-			do
-			{
-				Count += next.Degree + 1;
-				next = next.Next;
-			}
-			while (next != null && next != Head);
-		}
-
 		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
 			: this(getKeyForItem, enumerable, null)
 		{
@@ -698,18 +673,6 @@ namespace asm.Collections
 		{
 		}
 
-		/// <inheritdoc />
-		protected internal FibonacciHeap([NotNull] FibonacciNode<T> head)
-			: this(head, null)
-		{
-		}
-
-		/// <inheritdoc />
-		protected internal FibonacciHeap([NotNull] FibonacciNode<T> head, IComparer<T> comparer)
-			: base(head, comparer)
-		{
-		}
-
 		protected FibonacciHeap([NotNull] IEnumerable<T> enumerable)
 			: this(enumerable, null)
 		{
@@ -726,6 +689,7 @@ namespace asm.Collections
 
 	public static class FibonacciHeapExtension
 	{
+		// todo https://www.geeksforgeeks.org/left-child-right-sibling-representation-tree/
 		public static void WriteTo<TNode, TKey, TValue>([NotNull] this FibonacciHeap<TNode, TKey, TValue> thisValue, [NotNull] TextWriter writer)
 			where TNode : FibonacciNode<TNode, TKey, TValue>
 		{

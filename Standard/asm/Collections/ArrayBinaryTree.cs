@@ -1355,7 +1355,7 @@ namespace asm.Collections
 			// Even() => Math.Floor(1 + Math.Pow(-1, index) / 2) => produces 0 for odd and 1 for even numbers
 			return NormalizeIndex(index <= 0
 						? -1
-						: (index - (1 + index.F())) / 2);
+						: (index - (1 + index.Even())) / 2);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

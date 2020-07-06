@@ -12,30 +12,31 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	/// <summary>
-	/// <see href="https://en.wikipedia.org/wiki/Binomial_heap">Binomial heap</see> using the linked representation.
-	/// It is a data structure that acts as a priority queue but also allows pairs of heaps to be merged together.
-	/// It is implemented as a heap similar to a binary heap but using a special tree structure that is different
-	/// from the complete binary trees used by binary heaps.
+	/// <see href="https://en.wikipedia.org/wiki/Pairing_heap">Pairing heap</see> are heap-ordered multi-way tree structures, and can
+	/// be considered simplified Fibonacci heaps. They are considered a "robust choice" for implementing such algorithms as Prim's MST
+	/// algorithm because they have fast running time for their operations. They are modification of Pairing Heaps.
 	/// </summary>
 	/// <typeparam name="TNode">The node type. This is just for abstraction purposes and shouldn't be dealt with directly.</typeparam>
 	/// <typeparam name="TKey">The key assigned to the element. It should have its value from the value at first but changing
 	/// this later will not affect the value itself, except for primitive value types. Changing the key will of course affect the
 	/// priority of the item.</typeparam>
 	/// <typeparam name="TValue">The element type of the heap</typeparam>
-	// https://www.growingwiththeweb.com/data-structures/binomial-heap/overview/
-	// https://brilliant.org/wiki/binomial-heap/
-	// IMPORTANT: the count property will need more work todo make sure the count is right when using methods such as Union, merge, etc.
+	// https://en.wikipedia.org/wiki/Pairing_heap
+	// https://brilliant.org/wiki/pairing-heap/
+	// https://users.cs.fiu.edu/~weiss/dsaa_c++/code/PairingHeap.cpp <= actually nice one :)
+	// https://iq.opengenus.org/pairing-heap/
+	// https://www.sanfoundry.com/cpp-program-implement-pairing-heap/
 	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(BinomialHeap<,,>.DebugView))]
+	[DebuggerTypeProxy(typeof(PairingHeap<,,>.DebugView))]
 	[Serializable]
-	public abstract class BinomialHeap<TNode, TKey, TValue> : IReadOnlyCollection<TValue>, ICollection
-		where TNode : BinomialNode<TNode, TKey, TValue>
+	public abstract class PairingHeap<TNode, TKey, TValue> : IReadOnlyCollection<TValue>, ICollection
+		where TNode : PairingNode<TNode, TKey, TValue>
 	{
 		internal sealed class DebugView
 		{
-			private readonly BinomialHeap<TNode, TKey, TValue> _heap;
+			private readonly PairingHeap<TNode, TKey, TValue> _heap;
 
-			public DebugView([NotNull] BinomialHeap<TNode, TKey, TValue> heap)
+			public DebugView([NotNull] PairingHeap<TNode, TKey, TValue> heap)
 			{
 				_heap = heap;
 			}
@@ -46,7 +47,7 @@ namespace asm.Collections
 
 		private struct Enumerator : IEnumerableEnumerator<TValue>
 		{
-			private readonly BinomialHeap<TNode, TKey, TValue> _heap;
+			private readonly PairingHeap<TNode, TKey, TValue> _heap;
 			private readonly int _version;
 			private readonly TNode _root;
 			private readonly Queue<TNode> _queue;
@@ -55,7 +56,7 @@ namespace asm.Collections
 			private bool _started;
 			private bool _done;
 
-			internal Enumerator([NotNull] BinomialHeap<TNode, TKey, TValue> heap, TNode root)
+			internal Enumerator([NotNull] PairingHeap<TNode, TKey, TValue> heap, TNode root)
 			{
 				_heap = heap;
 				_version = _heap._version;
@@ -141,41 +142,22 @@ namespace asm.Collections
 		private object _syncRoot;
 
 		/// <inheritdoc />
-		protected BinomialHeap()
+		protected PairingHeap()
 			: this((IComparer<TKey>)null)
 		{
 		}
 
-		protected BinomialHeap(IComparer<TKey> comparer)
+		protected PairingHeap(IComparer<TKey> comparer)
 		{
 			Comparer = comparer ?? Comparer<TKey>.Default;
 		}
 
-		/// <inheritdoc />
-		internal BinomialHeap([NotNull] TNode head)
-			: this(head, null)
-		{
-		}
-
-		/// <inheritdoc />
-		internal BinomialHeap([NotNull] TNode head, IComparer<TKey> comparer)
-			: this(comparer)
-		{
-			Head = head;
-			if (Head == null) return;
-			Count += Head.Degree + 1;
-			if (Head.IsLeaf) return;
-
-			foreach (TNode sibling in Head.Siblings())
-				Count += sibling.Degree + 1;
-		}
-
-		protected BinomialHeap([NotNull] IEnumerable<TValue> enumerable)
+		protected PairingHeap([NotNull] IEnumerable<TValue> enumerable)
 			: this(enumerable, null)
 		{
 		}
 
-		protected BinomialHeap([NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
+		protected PairingHeap([NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
 			: this(comparer)
 		{
 			Add(enumerable);
@@ -284,7 +266,9 @@ namespace asm.Collections
 		public void Add([NotNull] TValue value)
 		{
 			TNode node = MakeNode(value);
-			Head = Union(MakeHeap(node));
+			Head = Head == null
+						? node
+						: Meld(Head, node);
 			Count++;
 			_version++;
 		}
@@ -303,8 +287,15 @@ namespace asm.Collections
 
 		public bool Remove([NotNull] TNode node)
 		{
-			node = BubbleUp(node, true);
-			return RemoveRoot(node, GetPrevious(node));
+			// https://www.geeksforgeeks.org/pairing-heap/
+			// https://brilliant.org/wiki/pairing-heap/
+			TNode mergedLeftMost = TwoPassMerge(node.LeftMostChild());
+			Head = node == Head
+						? mergedLeftMost
+						: Meld(Head, mergedLeftMost);
+			Count--;
+			_version++;
+			return true;
 		}
 
 		public void Clear()
@@ -320,48 +311,37 @@ namespace asm.Collections
 			if (Compare(node.Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
 			node.Key = newKey;
 			if (node == Head) return;
-			BubbleUp(node);
+			if (node.Sibling != null) node.Sibling.Previous = node.Previous;
+			
+			if (node.Previous != null)
+			{
+				if (node.Previous.Child == node) node.Previous.Child = node.Sibling;
+				else node.Previous.Sibling = node.Sibling;
+			}
+
+			node.Sibling = null;
+			Head = Meld(Head, node);
+			_version++;
 		}
 
 		public TValue Value()
 		{
-			if (Head == null) return default(TValue);
-
-			TNode node = Head, next = Head.Sibling;
-
-			while (next != null)
-			{
-				if (Compare(next.Key, node.Key) < 0) node = next;
-				next = next.Sibling;
-			}
-
-			return node.Value;
+			return Head == null
+						? default(TValue)
+						: Head.Value;
 		}
 
 		[NotNull]
 		public TValue ExtractValue()
 		{
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
-
-			TNode node = Head
-				, nodePrev = null
-				, next = node.Sibling
-				, nextPrev = node;
-
-			while (next != null)
-			{
-				if (Compare(next.Key, node.Key) < 0)
-				{
-					node = next;
-					nodePrev = nextPrev;
-				}
-
-				nextPrev = next;
-				next = next.Sibling;
-			}
-
-			RemoveRoot(node, nodePrev);
-			return node.Value;
+			TNode oldRoot = Head;
+			Head = Head.Child == null
+						? null
+						: TwoPassMerge(Head.Child);
+			Count--;
+			_version++;
+			return oldRoot.Value;
 		}
 
 		public TValue ElementAt(int k)
@@ -372,48 +352,6 @@ namespace asm.Collections
 				ExtractValue();
 
 			return Value();
-		}
-
-		public TNode Union([NotNull] BinomialHeap<TNode, TKey, TValue> heap)
-		{
-			TNode newHead = Merge(heap);
-			Head = null;
-			heap.Head = null;
-
-			if (newHead != null)
-			{
-				TNode prev = null, current = newHead, next = newHead.Sibling;
-
-				while (next != null)
-				{
-					if (current.Degree != next.Degree || next.Sibling != null && next.Sibling.Degree == current.Degree)
-					{
-						prev = current;
-						current = next;
-					}
-					else
-					{
-						if (Compare(current.Key, next.Key) < 0)
-						{
-							current.Sibling = next.Sibling;
-							current.Link(next);
-						}
-						else
-						{
-							if (prev == null) newHead = next;
-							else prev.Sibling = next;
-
-							next.Link(current);
-							current = next;
-						}
-					}
-
-					next = current.Sibling;
-				}
-			}
-
-			_version++;
-			return newHead;
 		}
 
 		public bool Contains([NotNull] TValue value)
@@ -484,226 +422,179 @@ namespace asm.Collections
 		[NotNull]
 		protected abstract TNode MakeNode([NotNull] TValue value);
 
-		[NotNull]
-		internal abstract BinomialHeap<TNode, TKey, TValue> MakeHeap([NotNull] TNode head);
-
 		protected abstract int Compare([NotNull] TKey x, [NotNull] TKey y);
 
-		[NotNull]
-		private TNode BubbleUp([NotNull] TNode node, bool toRoot = false)
+		/// <summary>
+		/// Maintains heap properties by comparing and linking a and b together to satisfy heap order.
+		/// </summary>
+		/// <param name="a">The first node. Usually the Head node.</param>
+		/// <param name="b">The second node.</param>
+		/// <returns>The merged node. The value returned should be assigned back to whichever node was passed as the first node parameter.</returns>
+		private TNode Meld(TNode a, TNode b)
 		{
-			TNode parent = node.Parent;
+			if (ReferenceEquals(a, b)) return a;
+			if (a == null) return b;
+			if (b == null) return a;
 
-			while (parent != null && (toRoot || Compare(node.Key, parent.Key) < 0))
+			if (Compare(b.Key, a.Key) < 0)
 			{
-				node.Swap(parent);
-				node = parent;
-				parent = parent.Parent;
+				b.Previous = a.Previous;
+				a.Previous = b;
+				a.Sibling = b.Child;
+				if (a.Sibling != null) a.Sibling.Previous = a;
+				b.Child = a;
+				return b;
 			}
 
-			return node;
+			b.Previous = a;
+			a.Sibling = b.Sibling;
+			if (a.Sibling != null) a.Sibling.Previous = a;
+			b.Sibling = a.Child;
+			if (b.Sibling != null) b.Sibling.Previous = b;
+			a.Child = b;
+			return a;
 		}
 
-		private TNode GetPrevious([NotNull] TNode node)
+		/// <summary>
+		/// Implements two-pass merging. It is usually used to delete the root node and combine the siblings.
+		/// </summary>
+		/// <param name="node"></param>
+		/// <returns>The new root node</returns>
+		private TNode TwoPassMerge(TNode node)
 		{
-			if (node == Head) return null;
-			if (node == Head.Sibling) return Head;
+			if (node?.Sibling == null) return node;
 
-			foreach (TNode sibling in Head.Siblings())
+			List<TNode> nodes = new List<TNode>();
+			TNode next = node;
+
+			do
 			{
-				if (sibling.Sibling == node) return sibling;
+				nodes.Add(next);
+				next.Previous.Sibling = null;
+				next = next.Sibling;
+			}
+			while (next != null);
+
+			nodes.Add(null);
+
+			int i = 0;
+			/*
+			 * Combine subtrees two at a time, going left to right.
+			 * The 1st item will keep the merge result.
+			 */
+			while (i + 1 < nodes.Count)
+			{
+				nodes[i] = Meld(nodes[i], nodes[i + 1]);
+				i += 2;
 			}
 
-			return null;
-		}
+			// i has the result of last merge.
+			i -= 2;
+			// If an odd number of nodes, get the last one.
+			if (i == nodes.Count - 3) nodes[i] = Meld(nodes[i], nodes[i + 2]);
 
-		private bool RemoveRoot([NotNull] TNode root, TNode previous)
-		{
-			if (root == Head) Head = root.Sibling;
-			else if (previous != null) previous.Sibling = root.Sibling;
-			else return false;
-
-			// Reverse the order of root's children and make a new heap
-			TNode newHead = null, child = root.Child;
-
-			while (child != null)
+			/*
+			 * Now go right to left, merging last node with next to last.
+			 * The result becomes the new last.
+			 */
+			while (i >= 2)
 			{
-				TNode next = child.Sibling;
-				child.Sibling = newHead;
-				child.Parent = null;
-				newHead = child;
-				child = next;
+				nodes[i - 2] = Meld(nodes[i - 2], nodes[i]);
+				i -= 2;
 			}
 
-			if (newHead != null) Head = Union(MakeHeap(newHead));
-			Count--;
-			_version++;
-			return true;
-		}
-
-		private TNode Merge([NotNull] BinomialHeap<TNode, TKey, TValue> other)
-		{
-			if (Head == null) return other.Head;
-			if (other.Head == null) return Head;
-
-			TNode head,
-							thisNext = Head,
-							otherNext = other.Head;
-
-			if (Head.Degree <= other.Head.Degree)
-			{
-				head = Head;
-				thisNext = head.Sibling;
-			}
-			else
-			{
-				head = other.Head;
-				otherNext = head.Sibling;
-			}
-
-			TNode tail = head;
-
-			while (thisNext != null && otherNext != null)
-			{
-				if (thisNext.Degree <= otherNext.Degree)
-				{
-					tail.Sibling = thisNext;
-					thisNext = thisNext.Sibling;
-				}
-				else
-				{
-					tail.Sibling = otherNext;
-					otherNext = otherNext.Sibling;
-				}
-
-				tail = tail.Sibling;
-			}
-
-			tail.Sibling = thisNext ?? otherNext;
-			_version++;
-			return head;
+			return nodes[0];
 		}
 	}
 
-	[DebuggerTypeProxy(typeof(BinomialHeap<,>.DebugView))]
+	[DebuggerTypeProxy(typeof(PairingHeap<,>.DebugView))]
 	[Serializable]
-	public abstract class BinomialHeap<TKey, TValue> : BinomialHeap<BinomialNode<TKey, TValue>, TKey, TValue>
+	public abstract class PairingHeap<TKey, TValue> : PairingHeap<PairingNode<TKey, TValue>, TKey, TValue>
 	{
 		internal new sealed class DebugView
 		{
-			private readonly BinomialHeap<TKey, TValue> _heap;
+			private readonly PairingHeap<TKey, TValue> _heap;
 
-			public DebugView([NotNull] BinomialHeap<TKey, TValue> heap) { _heap = heap; }
+			public DebugView([NotNull] PairingHeap<TKey, TValue> heap) { _heap = heap; }
 
 			[NotNull]
-			public BinomialNode<TKey, TValue> Head => _heap.Head;
+			public PairingNode<TKey, TValue> Head => _heap.Head;
 		}
 
 		[NotNull]
 		protected Func<TValue, TKey> _getKeyForItem;
 
 		/// <inheritdoc />
-		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem)
+		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem)
 			: this(getKeyForItem, (IComparer<TKey>)null)
 		{
 		}
 
-		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
+		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
 			: base(comparer)
 		{
 			_getKeyForItem = getKeyForItem;
 		}
 
-		/// <inheritdoc />
-		internal BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head)
-			: this(getKeyForItem, head, null)
-		{
-		}
-
-		/// <inheritdoc />
-		internal BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head, IComparer<TKey> comparer)
-			: this(getKeyForItem, comparer)
-		{
-			Head = head;
-			if (Head == null) return;
-			Count += Head.Degree + 1;
-			if (Head.IsLeaf) return;
-
-			foreach (BinomialNode<TKey, TValue> sibling in Head.Siblings())
-				Count += sibling.Degree + 1;
-		}
-
-		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
+		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
 			: this(getKeyForItem, enumerable, null)
 		{
 		}
 
-		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
+		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
 			: this(getKeyForItem, comparer)
 		{
 			Add(enumerable);
 		}
 
 		/// <inheritdoc />
-		protected override BinomialNode<TKey, TValue> MakeNode(TValue value) { return new BinomialNode<TKey, TValue>(_getKeyForItem(value), value); }
+		protected override PairingNode<TKey, TValue> MakeNode(TValue value) { return new PairingNode<TKey, TValue>(_getKeyForItem(value), value); }
 	}
 
-	[DebuggerTypeProxy(typeof(BinomialHeap<>.DebugView))]
+	[DebuggerTypeProxy(typeof(PairingHeap<>.DebugView))]
 	[Serializable]
-	public abstract class BinomialHeap<T> : BinomialHeap<BinomialNode<T>, T, T>
+	public abstract class PairingHeap<T> : PairingHeap<PairingNode<T>, T, T>
 	{
 		internal new sealed class DebugView
 		{
-			private readonly BinomialHeap<T> _heap;
+			private readonly PairingHeap<T> _heap;
 
-			public DebugView([NotNull] BinomialHeap<T> heap) { _heap = heap; }
+			public DebugView([NotNull] PairingHeap<T> heap) { _heap = heap; }
 
 			[NotNull]
-			public BinomialNode<T> Head => _heap.Head;
+			public PairingNode<T> Head => _heap.Head;
 		}
 
 		/// <inheritdoc />
-		protected BinomialHeap()
+		protected PairingHeap()
 			: this((IComparer<T>)null)
 		{
 		}
 
-		protected BinomialHeap(IComparer<T> comparer)
+		protected PairingHeap(IComparer<T> comparer)
 			: base(comparer)
 		{
 		}
 
-		/// <inheritdoc />
-		internal BinomialHeap([NotNull] BinomialNode<T> head)
-			: this(head, null)
-		{
-		}
-
-		/// <inheritdoc />
-		internal BinomialHeap([NotNull] BinomialNode<T> head, IComparer<T> comparer)
-			: base(head, comparer)
-		{
-		}
-
-		protected BinomialHeap([NotNull] IEnumerable<T> enumerable)
+		protected PairingHeap([NotNull] IEnumerable<T> enumerable)
 			: this(enumerable, null)
 		{
 		}
 
-		protected BinomialHeap([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
+		protected PairingHeap([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
 			: base(enumerable, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected override BinomialNode<T> MakeNode(T value) { return new BinomialNode<T>(value); }
+		protected override PairingNode<T> MakeNode(T value) { return new PairingNode<T>(value); }
 	}
 
-	public static class BinomialHeapExtension
+	public static class PairingHeapExtension
 	{
 		// todo https://www.geeksforgeeks.org/left-child-right-sibling-representation-tree/
-		public static void WriteTo<TNode, TKey, TValue>([NotNull] this BinomialHeap<TNode, TKey, TValue> thisValue, [NotNull] TextWriter writer)
-			where TNode : BinomialNode<TNode, TKey, TValue>
+		public static void WriteTo<TNode, TKey, TValue>([NotNull] this PairingHeap<TNode, TKey, TValue> thisValue, [NotNull] TextWriter writer)
+			where TNode : PairingNode<TNode, TKey, TValue>
 		{
 			const string STR_BLANK = "   ";
 			const string STR_EXT = "│  ";

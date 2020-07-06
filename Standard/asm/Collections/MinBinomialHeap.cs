@@ -20,13 +20,13 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public MinBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head)
+		internal MinBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head)
 			: this(getKeyForItem, head, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public MinBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head, IComparer<TKey> comparer)
+		internal MinBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head, IComparer<TKey> comparer)
 			: base(getKeyForItem, head, comparer)
 		{
 		}
@@ -44,7 +44,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected override BinomialHeap<BinomialNode<TKey, TValue>, TKey, TValue> MakeHeap(BinomialNode<TKey, TValue> head) { return new MinBinomialHeap<TKey, TValue>(_getKeyForItem, head, Comparer); }
+		internal override BinomialHeap<BinomialNode<TKey, TValue>, TKey, TValue> MakeHeap(BinomialNode<TKey, TValue> head) { return new MinBinomialHeap<TKey, TValue>(_getKeyForItem, head, Comparer); }
 
 		/// <inheritdoc />
 		protected override int Compare(TKey x, TKey y)
@@ -69,13 +69,13 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected internal MinBinomialHeap([NotNull] BinomialNode<T> head)
+		internal MinBinomialHeap([NotNull] BinomialNode<T> head)
 			: this(head, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected internal MinBinomialHeap([NotNull] BinomialNode<T> head, IComparer<T> comparer)
+		internal MinBinomialHeap([NotNull] BinomialNode<T> head, IComparer<T> comparer)
 			: base(head, comparer)
 		{
 		}
@@ -93,7 +93,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected override BinomialHeap<BinomialNode<T>, T, T> MakeHeap(BinomialNode<T> head) { return new MinBinomialHeap<T>(head, Comparer); }
+		internal override BinomialHeap<BinomialNode<T>, T, T> MakeHeap(BinomialNode<T> head) { return new MinBinomialHeap<T>(head, Comparer); }
 
 		/// <inheritdoc />
 		protected override int Compare(T x, T y)

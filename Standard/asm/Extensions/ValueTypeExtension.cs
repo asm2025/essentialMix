@@ -1349,35 +1349,35 @@ namespace asm.Extensions
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static sbyte F(this sbyte thisValue) { return (sbyte)(1 - (thisValue & 1)); }
+		public static sbyte Even(this sbyte thisValue) { return (sbyte)(1 - (thisValue & 1)); }
 
 		/// <summary>
 		/// returns 0 if thisValue is odd and 1 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static byte F(this byte thisValue) { return (byte)(1 - (thisValue & 1)); }
+		public static byte Even(this byte thisValue) { return (byte)(1 - (thisValue & 1)); }
 
 		/// <summary>
 		/// returns 0 if thisValue is odd and 1 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static short F(this short thisValue) { return (short)(1 - (thisValue & 1)); }
+		public static short Even(this short thisValue) { return (short)(1 - (thisValue & 1)); }
 
 		/// <summary>
 		/// returns 0 if thisValue is odd and 1 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static ushort F(this ushort thisValue) { return (ushort)(1 - (thisValue & 1)); }
+		public static ushort Even(this ushort thisValue) { return (ushort)(1 - (thisValue & 1)); }
 
 		/// <summary>
 		/// returns 0 if thisValue is odd and 1 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static int F(this int thisValue)
+		public static int Even(this int thisValue)
 		{
 			// also the following works too: SysMath.Floor(1 + SysMath.Pow(-1, SysMath.Abs(thisValue)) / 2)
 			return 1 - (thisValue & 1);
@@ -1388,76 +1388,196 @@ namespace asm.Extensions
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static uint F(this uint thisValue) { return 1 - (thisValue & 1); }
+		public static uint Even(this uint thisValue) { return 1 - (thisValue & 1); }
 
 		/// <summary>
 		/// returns 0 if thisValue is odd and 1 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static long F(this long thisValue) { return 1 - (thisValue & 1); }
+		public static long Even(this long thisValue) { return 1 - (thisValue & 1); }
 
 		/// <summary>
 		/// returns 0 if thisValue is odd and 1 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static ulong F(this ulong thisValue) { return 1 - (thisValue & 1); }
+		public static ulong Even(this ulong thisValue) { return 1 - (thisValue & 1); }
 
 		/// <summary>
 		/// returns 1 if thisValue is odd and 0 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static sbyte G(this sbyte thisValue) { return (sbyte)(thisValue & 1); }
+		public static sbyte Odd(this sbyte thisValue) { return (sbyte)(thisValue & 1); }
 
 		/// <summary>
 		/// returns 1 if thisValue is odd and 0 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static byte G(this byte thisValue) { return (byte)(thisValue & 1); }
+		public static byte Odd(this byte thisValue) { return (byte)(thisValue & 1); }
 
 		/// <summary>
 		/// returns 1 if thisValue is odd and 0 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static short G(this short thisValue) { return (short)(thisValue & 1); }
+		public static short Odd(this short thisValue) { return (short)(thisValue & 1); }
 
 		/// <summary>
 		/// returns 1 if thisValue is odd and 0 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static ushort G(this ushort thisValue) { return (ushort)(thisValue & 1); }
+		public static ushort Odd(this ushort thisValue) { return (ushort)(thisValue & 1); }
 
 		/// <summary>
 		/// returns 1 if thisValue is odd and 0 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static int G(this int thisValue) { return thisValue & 1; }
+		public static int Odd(this int thisValue) { return thisValue & 1; }
 
 		/// <summary>
 		/// returns 1 if thisValue is odd and 0 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static uint G(this uint thisValue) { return thisValue & 1; }
+		public static uint Odd(this uint thisValue) { return thisValue & 1; }
 
 		/// <summary>
 		/// returns 1 if thisValue is odd and 0 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static long G(this long thisValue) { return thisValue & 1; }
+		public static long Odd(this long thisValue) { return thisValue & 1; }
 
 		/// <summary>
 		/// returns 1 if thisValue is odd and 0 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static ulong G(this ulong thisValue) { return thisValue & 1; }
+		public static ulong Odd(this ulong thisValue) { return thisValue & 1; }
+
+		public static int Bits(this sbyte thisValue)
+		{
+			if (thisValue >= 0) return Bits((byte)thisValue);
+
+			int count = 0;
+
+			while (thisValue < -1)
+			{
+				count += thisValue & 1;
+				thisValue >>= 1;
+			}
+
+			return count;
+		}
+
+		public static int Bits(this byte thisValue)
+		{
+			// https://www.geeksforgeeks.org/count-set-bits-in-an-integer/
+			// Brian Kernighan’s Algorithm
+			int count = 0;
+
+			while (thisValue > 0)
+			{
+				thisValue &= (byte)(thisValue - 1);
+				count++;
+			}
+
+			return count;
+		}
+
+		public static int Bits(this short thisValue)
+		{
+			if (thisValue >= 0) return Bits((ushort)thisValue);
+
+			int count = 0;
+
+			while (thisValue < -1)
+			{
+				count += thisValue & 1;
+				thisValue >>= 1;
+			}
+
+			return count;
+		}
+
+		public static int Bits(this ushort thisValue)
+		{
+			// https://www.geeksforgeeks.org/count-set-bits-in-an-integer/
+			// Brian Kernighan’s Algorithm
+			int count = 0;
+
+			while (thisValue > 0)
+			{
+				thisValue &= (ushort)(thisValue - 1);
+				count++;
+			}
+
+			return count;
+		}
+
+		public static int Bits(this int thisValue)
+		{
+			if (thisValue >= 0) return Bits((uint)thisValue);
+
+			int count = 0;
+
+			while (thisValue < -1)
+			{
+				count += thisValue & 1;
+				thisValue >>= 1;
+			}
+
+			return count;
+		}
+
+		public static int Bits(this uint thisValue)
+		{
+			// https://www.geeksforgeeks.org/count-set-bits-in-an-integer/
+			// Brian Kernighan’s Algorithm
+			int count = 0;
+
+			while (thisValue > 0u)
+			{
+				thisValue &= thisValue - 1;
+				count++;
+			}
+
+			return count;
+		}
+
+		public static int Bits(this long thisValue)
+		{
+			if (thisValue >= 0) return Bits((ulong)thisValue);
+
+			int count = 0;
+
+			while (thisValue < -1)
+			{
+				count += (int)(thisValue & 1L);
+				thisValue >>= 1;
+			}
+
+			return count;
+		}
+
+		public static int Bits(this ulong thisValue)
+		{
+			// https://www.geeksforgeeks.org/count-set-bits-in-an-integer/
+			// Brian Kernighan’s Algorithm
+			int count = 0;
+
+			while (thisValue > 0ul)
+			{
+				thisValue &= thisValue - 1;
+				count++;
+			}
+
+			return count;
+		}
 	}
 }

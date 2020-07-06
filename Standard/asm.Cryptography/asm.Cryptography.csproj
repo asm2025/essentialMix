@@ -6,7 +6,7 @@
 		<LangVersion>8.0</LangVersion>
 		<Version>10.0.0.0</Version>
 		<Copyright>Copyright © 2008-2020</Copyright>
-		<FileVersion>20.7.4.1</FileVersion>
+		<FileVersion>20.7.6.0</FileVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
 		<PackageTags>utilities, tools, cryptography</PackageTags>

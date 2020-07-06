@@ -20,18 +20,6 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected internal MaxFibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] FibonacciNode<TKey, TValue> head)
-			: this(getKeyForItem, head, null)
-		{
-		}
-
-		/// <inheritdoc />
-		protected internal MaxFibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] FibonacciNode<TKey, TValue> head, IComparer<TKey> comparer)
-			: base(getKeyForItem, head, comparer)
-		{
-		}
-
-		/// <inheritdoc />
 		public MaxFibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
 			: this(getKeyForItem, enumerable, null)
 		{
@@ -62,18 +50,6 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public MaxFibonacciHeap(IComparer<T> comparer)
 			: base(comparer)
-		{
-		}
-
-		/// <inheritdoc />
-		protected internal MaxFibonacciHeap([NotNull] FibonacciNode<T> head)
-			: this(head, null)
-		{
-		}
-
-		/// <inheritdoc />
-		protected internal MaxFibonacciHeap([NotNull] FibonacciNode<T> head, IComparer<T> comparer)
-			: base(head, comparer)
 		{
 		}
 
