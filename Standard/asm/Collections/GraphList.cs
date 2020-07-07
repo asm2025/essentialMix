@@ -71,7 +71,7 @@ namespace asm.Collections
 		/// <param name="method">The traverse method</param>
 		/// <returns></returns>
 		[NotNull]
-		public abstract IGraphEnumeratorImpl<T> Enumerate([NotNull] T from, GraphTraverseMethod method);
+		public abstract IGraphEnumeratorImpl<T> Enumerate([NotNull] T from, BreadthDepthTraverse method);
 
 		public void Add([NotNull] T vertex)
 		{
@@ -400,13 +400,13 @@ namespace asm.Collections
 		/// <inheritdoc />
 		protected override HashSet<T> NewEdgesContainer() { return new HashSet<T>(Comparer); }
 	
-		public override IGraphEnumeratorImpl<T> Enumerate(T from, GraphTraverseMethod method)
+		public override IGraphEnumeratorImpl<T> Enumerate(T from, BreadthDepthTraverse method)
 		{
 			if (!ContainsKey(from)) throw new KeyNotFoundException();
 			return method switch
 			{
-				GraphTraverseMethod.BreadthFirst => new BreadthFirstEnumerator(this, from),
-				GraphTraverseMethod.DepthFirst => new DepthFirstEnumerator(this, from),
+				BreadthDepthTraverse.BreadthFirst => new BreadthFirstEnumerator(this, from),
+				BreadthDepthTraverse.DepthFirst => new DepthFirstEnumerator(this, from),
 				_ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
 			};
 		}

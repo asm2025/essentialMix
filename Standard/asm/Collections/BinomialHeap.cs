@@ -28,7 +28,7 @@ namespace asm.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(BinomialHeap<,,>.DebugView))]
 	[Serializable]
-	public abstract class BinomialHeap<TNode, TKey, TValue> : IReadOnlyCollection<TValue>, ICollection
+	public abstract class BinomialHeap<TNode, TKey, TValue> : IKeyedHeap<TNode, TKey, TValue>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
 		where TNode : BinomialNode<TNode, TKey, TValue>
 	{
 		internal sealed class DebugView
@@ -44,7 +44,7 @@ namespace asm.Collections
 			public TNode Head => _heap.Head;
 		}
 
-		private struct Enumerator : IEnumerableEnumerator<TValue>
+		private struct BreadthFirstEnumerator : IEnumerableEnumerator<TValue>
 		{
 			private readonly BinomialHeap<TNode, TKey, TValue> _heap;
 			private readonly int _version;
@@ -55,7 +55,7 @@ namespace asm.Collections
 			private bool _started;
 			private bool _done;
 
-			internal Enumerator([NotNull] BinomialHeap<TNode, TKey, TValue> heap, TNode root)
+			internal BreadthFirstEnumerator([NotNull] BinomialHeap<TNode, TKey, TValue> heap, TNode root)
 			{
 				_heap = heap;
 				_version = _heap._version;
@@ -181,15 +181,17 @@ namespace asm.Collections
 			Add(enumerable);
 		}
 
-		[NotNull]
 		public IComparer<TKey> Comparer { get; }
 
 		[NotNull]
 		protected EqualityComparer<TValue> ValueComparer { get; } = EqualityComparer<TValue>.Default;
 
 		public int Count { get; protected internal set; }
-	
+
 		protected internal TNode Head { get; set; }
+
+		/// <inheritdoc />
+		bool ICollection<TValue>.IsReadOnly => false;
 
 		/// <inheritdoc />
 		bool ICollection.IsSynchronized => false;
@@ -218,7 +220,7 @@ namespace asm.Collections
 		[NotNull]
 		public IEnumerableEnumerator<TValue> Enumerate(TNode root)
 		{
-			return new Enumerator(this, root);
+			return new BreadthFirstEnumerator(this, root);
 		}
 
 		/// <summary>
@@ -281,32 +283,49 @@ namespace asm.Collections
 			}
 		}
 
-		public void Add([NotNull] TValue value)
+		/// <inheritdoc />
+		public abstract TNode MakeNode(TValue value);
+
+		/// <inheritdoc />
+		public void Add(TValue value)
 		{
-			TNode node = MakeNode(value);
+			if (value == null) throw new ArgumentNullException(nameof(value));
+			Add(MakeNode(value));
+		}
+
+		/// <inheritdoc />
+		public void Add(TNode node)
+		{
+			node.Degree = 0;
+			node.Parent = node.Child = node.Sibling = null;
 			Head = Union(MakeHeap(node));
 			Count++;
 			_version++;
 		}
 
-		public void Add([NotNull] IEnumerable<TValue> enumerable)
+		/// <inheritdoc />
+		public void Add(IEnumerable<TValue> enumerable)
 		{
 			foreach (TValue item in enumerable)
 				Add(item);
 		}
 
-		public bool Remove([NotNull] TValue value)
+		/// <inheritdoc />
+		public bool Remove(TValue value)
 		{
-			TNode node = FindByValue(value);
+			if (value == null) throw new ArgumentNullException(nameof(value));
+			TNode node = Find(value);
 			return node != null && Remove(node);
 		}
 
-		public bool Remove([NotNull] TNode node)
+		/// <inheritdoc />
+		public bool Remove(TNode node)
 		{
 			node = BubbleUp(node, true);
 			return RemoveRoot(node, GetPrevious(node));
 		}
 
+		/// <inheritdoc />
 		public void Clear()
 		{
 			Head = null;
@@ -314,8 +333,10 @@ namespace asm.Collections
 			_version++;
 		}
 
-		public void DecreaseKey([NotNull] TNode node, [NotNull] TKey newKey)
+		/// <inheritdoc />
+		public void DecreaseKey(TNode node, TKey newKey)
 		{
+			// bug not working properly. sometimes extracting a different value instead of the expected!
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
 			if (Compare(node.Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
 			node.Key = newKey;
@@ -323,9 +344,10 @@ namespace asm.Collections
 			BubbleUp(node);
 		}
 
+		/// <inheritdoc />
 		public TValue Value()
 		{
-			if (Head == null) return default(TValue);
+			if (Head == null) throw new InvalidOperationException("Heap is empty.");
 
 			TNode node = Head, next = Head.Sibling;
 
@@ -338,7 +360,7 @@ namespace asm.Collections
 			return node.Value;
 		}
 
-		[NotNull]
+		/// <inheritdoc />
 		public TValue ExtractValue()
 		{
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
@@ -364,6 +386,7 @@ namespace asm.Collections
 			return node.Value;
 		}
 
+		/// <inheritdoc />
 		public TValue ElementAt(int k)
 		{
 			if (k < 1 || Count < k) throw new ArgumentOutOfRangeException(nameof(k));
@@ -416,24 +439,15 @@ namespace asm.Collections
 			return newHead;
 		}
 
-		public bool Contains([NotNull] TValue value)
+		/// <inheritdoc />
+		public bool Contains(TValue value)
 		{
-			return FindByValue(value) != null;
+			if (value == null) throw new ArgumentNullException(nameof(value));
+			return Find(value) != null;
 		}
 
-		public TNode FindByKey([NotNull] TKey key)
-		{
-			if (Head == null) return null;
-			TNode node = null;
-			Iterate(Head, e =>
-			{
-				if (Comparer.IsEqual(e.Key, key)) node = e;
-				return node == null;
-			});
-			return node;
-		}
-
-		public TNode FindByValue([NotNull] TValue value)
+		/// <inheritdoc />
+		public TNode Find(TValue value)
 		{
 			if (Head == null) return null;
 			TNode node = null;
@@ -445,6 +459,47 @@ namespace asm.Collections
 			return node;
 		}
 
+		/// <inheritdoc />
+		public TNode FindByKey(TKey key)
+		{
+			if (Head == null) return null;
+			TNode node = null;
+			Iterate(Head, e =>
+			{
+				if (Comparer.IsEqual(e.Key, key)) node = e;
+				return node == null;
+			});
+			return node;
+		}
+
+		public virtual bool Equals(BinomialHeap<TNode, TKey, TValue> other)
+		{
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
+			if (Count != other.Count || !ValueComparer.Equals(other.ValueComparer)) return false;
+
+			using (IEnumerator<TValue> thisEnumerator = GetEnumerator())
+			{
+				using (IEnumerator<TValue> otherEnumerator = other.GetEnumerator())
+				{
+					bool thisMoved = thisEnumerator.MoveNext();
+					bool otherMoved = otherEnumerator.MoveNext();
+					
+					while (thisMoved && otherMoved)
+					{
+						if (!ValueComparer.Equals(thisEnumerator.Current, otherEnumerator.Current)) return false;
+						thisMoved = thisEnumerator.MoveNext();
+						otherMoved = otherEnumerator.MoveNext();
+					}
+
+					if (thisMoved ^ otherMoved) return false;
+				}
+			}
+
+			return true;
+		}
+
+		/// <inheritdoc />
 		public void CopyTo(TValue[] array, int arrayIndex)
 		{
 			if (Count == 0) return;
@@ -480,9 +535,6 @@ namespace asm.Collections
 			if (Count == 0) return;
 			Iterate(Head, e => objects[index++] = e.Value);
 		}
-
-		[NotNull]
-		protected abstract TNode MakeNode([NotNull] TValue value);
 
 		[NotNull]
 		internal abstract BinomialHeap<TNode, TKey, TValue> MakeHeap([NotNull] TNode head);
@@ -645,7 +697,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected override BinomialNode<TKey, TValue> MakeNode(TValue value) { return new BinomialNode<TKey, TValue>(_getKeyForItem(value), value); }
+		public override BinomialNode<TKey, TValue> MakeNode(TValue value) { return new BinomialNode<TKey, TValue>(_getKeyForItem(value), value); }
 	}
 
 	[DebuggerTypeProxy(typeof(BinomialHeap<>.DebugView))]
@@ -696,18 +748,18 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected override BinomialNode<T> MakeNode(T value) { return new BinomialNode<T>(value); }
+		public override BinomialNode<T> MakeNode(T value) { return new BinomialNode<T>(value); }
 	}
 
 	public static class BinomialHeapExtension
 	{
-		// todo https://www.geeksforgeeks.org/left-child-right-sibling-representation-tree/
 		public static void WriteTo<TNode, TKey, TValue>([NotNull] this BinomialHeap<TNode, TKey, TValue> thisValue, [NotNull] TextWriter writer)
 			where TNode : BinomialNode<TNode, TKey, TValue>
 		{
 			const string STR_BLANK = "   ";
 			const string STR_EXT = "│  ";
 			const string STR_CONNECTOR_L = "└─ ";
+			const string STR_CONNECTOR_C = " ► ";
 			const string STR_NULL = "<null>";
 
 			if (thisValue.Head == null) return;
@@ -747,12 +799,29 @@ namespace asm.Collections
 					continue;
 				}
 
-				writer.WriteLine(node.ToString(level));
+				if (nodes.Count == 0 && node.Child != null)
+				{
+					writer.Write(node.ToString(level));
+
+					// this is a child. so will print the children list
+					foreach (TNode child in node.Children())
+					{
+						writer.Write(STR_CONNECTOR_C);
+						writer.Write(child.ToString());
+					}
+
+					writer.WriteLine();
+				}
+				else
+				{
+					writer.WriteLine(node.ToString(level));
+				}
+
 				if (node.IsLeaf) continue;
 
 				Queue<TNode> queue = new Queue<TNode>(2);
-				if (node.Sibling != null) queue.Enqueue(node.Sibling);
-				if (node.Child != null) queue.Enqueue(node.Child);
+				queue.Enqueue(node.Sibling);
+				queue.Enqueue(node.Child);
 				nodesStack.AddLast((queue, level + 1));
 			}
 		}

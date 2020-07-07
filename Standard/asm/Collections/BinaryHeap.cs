@@ -34,60 +34,46 @@ namespace asm.Collections
 	 */
 	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
-	public abstract class Heap<T> : ArrayBinaryTree<T>
+	public abstract class BinaryHeap<T> : ArrayBinaryTree<T>, IValueHeap<T>
 	{
 		/// <inheritdoc />
-		protected Heap() 
+		protected BinaryHeap() 
 			: this(0, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected Heap(int capacity)
+		protected BinaryHeap(int capacity)
 			: this(capacity, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected Heap(IComparer<T> comparer)
+		protected BinaryHeap(IComparer<T> comparer)
 			: this(0, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected Heap(int capacity, IComparer<T> comparer)
+		protected BinaryHeap(int capacity, IComparer<T> comparer)
 			: base(capacity, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected Heap([NotNull] IEnumerable<T> enumerable)
+		protected BinaryHeap([NotNull] IEnumerable<T> enumerable)
 			: this(enumerable, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected Heap([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
+		protected BinaryHeap([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
 			: this(0, comparer)
 		{
 			Add(enumerable);
 		}
 
-		public T Value
-		{
-			get
-			{
-				if (Count == 0) throw new InvalidOperationException("Heap is empty.");
-				return Items[0];
-			}
-		}
-
-		public void Add([NotNull] IEnumerable<T> values)
-		{
-			foreach (T value in values) 
-				Add(value);
-		}
-
+		/// <inheritdoc />
 		public override void Add(T value)
 		{
 			if (Count == Items.Length) EnsureCapacity(Count + 1);
@@ -98,7 +84,30 @@ namespace asm.Collections
 			BubbleUp(Count - 1);
 		}
 
-		public T Remove()
+		public void Add(IEnumerable<T> values)
+		{
+			foreach (T value in values) 
+				Add(value);
+		}
+
+		/// <summary>
+		/// Will throw <see cref="NotSupportedException"/>
+		/// </summary>
+		public override bool Remove(T value)
+		{
+			// todo maybe there is a way to remove a value but it might be costly
+			throw new NotSupportedException();
+		}
+
+		/// <inheritdoc />
+		public T Value()
+		{
+			if (Count == 0) throw new InvalidOperationException("Heap is empty.");
+			return Items[0];
+		}
+
+		/// <inheritdoc />
+		public T ExtractValue()
 		{
 			if (Count == 0) throw new InvalidOperationException("Heap is empty.");
 			T value = Items[0];
@@ -109,19 +118,15 @@ namespace asm.Collections
 			return value;
 		}
 
-		/// <summary>
-		/// Will throw <see cref="NotSupportedException"/>
-		/// </summary>
-		public override bool Remove(T value) { throw new NotSupportedException(); }
-
+		/// <inheritdoc />
 		public T ElementAt(int k)
 		{
 			if (k < 1 || Count < k) throw new ArgumentOutOfRangeException(nameof(k));
 
 			for (int i = 1; i < k; i++) 
-				Remove();
+				ExtractValue();
 
-			return Value;
+			return Value();
 		}
 
 		/// <inheritdoc />
@@ -136,7 +141,7 @@ namespace asm.Collections
 			// nodes with one child are not supposed to appear more than once while scanning from left to right
 			bool isValid = true, nonNode = false;
 			Navigator node = NewNavigator();
-			Iterate(0, BinaryTreeTraverseMethod.LevelOrder, e =>
+			Iterate(0, TreeTraverseMethod.LevelOrder, e =>
 			{
 				node.Index = e;
 				
@@ -163,12 +168,57 @@ namespace asm.Collections
 			return isValid;
 		}
 
-		protected abstract void BubbleUp(int index);
+		protected void BubbleUp(int index)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 
-		protected abstract void BubbleDown(int index);
+			bool changed = false;
+			Navigator node = NewNavigator(index);
+
+			// the parent's value must be greater than its children so move the greater value up.
+			while (node.ParentIndex > -1 && Compare(Items[node.ParentIndex], Items[node.Index]) > 0)
+			{
+				Swap(node.Index, node.ParentIndex);
+				node.Index = node.ParentIndex;
+				changed = true;
+			}
+
+			if (!changed) return;
+			_version++;
+		}
+
+		protected void BubbleDown(int index)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+
+			bool changed = false;
+			Navigator node = NewNavigator(index);
+
+			/*
+			 * the parent's value must be greater than its children.
+			 * move the smaller value down to either left or right.
+			 * to select which child to swap the value with, pick the
+			 * child with the greater value.
+			 */
+			while (node.LeftIndex > -1 || node.RightIndex > -1)
+			{
+				int childIndex = node.Index;
+				if (node.LeftIndex > -1 && Compare(Items[node.LeftIndex], Items[childIndex]) < 0) childIndex = node.LeftIndex;
+				if (node.RightIndex > -1 && Compare(Items[node.RightIndex], Items[childIndex]) < 0) childIndex = node.RightIndex;
+				if (childIndex == node.Index) break;
+				Swap(node.Index, childIndex);
+				node.Index = childIndex;
+				changed = true;
+			}
+
+			if (!changed) return;
+			_version++;
+		}
+
+		protected abstract int Compare(T x, T y);
 	}
 
-	public static class Heap
+	public static class BinaryHeap
 	{
 		public static void Heapify<T>([NotNull] IList<T> values) { Heapify(values, 0, -1, false, null); }
 		public static void Heapify<T>([NotNull] IList<T> values, bool descending) { Heapify(values, 0, -1, descending, null); }

@@ -9,7 +9,7 @@ namespace asm.Collections
 	[DebuggerDisplay("{Value}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class LinkedBinaryNode<TNode, T>
+	public abstract class LinkedBinaryNode<TNode, T> : INode<T>
 		where TNode : LinkedBinaryNode<TNode, T>
 	{
 		private const int LEFT = 0;

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using asm.Collections;
 
 namespace asm.Other.Microsoft.Collections
 {
@@ -7,7 +8,7 @@ namespace asm.Other.Microsoft.Collections
 	// Note following class is not serializable since we customized the serialization of SinglyLinkedList. 
 	[DebuggerDisplay("{Value}")]
 	[ComVisible(false)]
-	public sealed class SinglyLinkedListNode<T>
+	public sealed class SinglyLinkedListNode<T> : INode<T>
 	{
 		internal SinglyLinkedList<T> _list;
 		internal SinglyLinkedListNode<T> _next;

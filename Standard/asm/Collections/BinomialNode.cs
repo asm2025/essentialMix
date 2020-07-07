@@ -11,7 +11,7 @@ namespace asm.Collections
 	[DebuggerDisplay("{Key} = {Value} :D{Degree}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class BinomialNode<TNode, TKey, TValue>
+	public abstract class BinomialNode<TNode, TKey, TValue> : IKeyedNode<TKey, TValue>
 		where TNode : BinomialNode<TNode, TKey, TValue>
 	{
 		private const int PARENT = 0;

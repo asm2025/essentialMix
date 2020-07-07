@@ -232,18 +232,18 @@ namespace asm.Collections
 			if (minEdge == null) return null;
 
 			IComparer<(T From, GraphEdge<T, TWeight> Edge)> priorityComparer = ComparisonComparer.FromComparison<(T From, GraphEdge<T, TWeight> Edge)>((x, y) => x.Edge.Weight.CompareTo(y.Edge.Weight));
-			PriorityQueue<(T From, GraphEdge<T, TWeight> Edge)> queue = new MinPriorityQueue<(T From, GraphEdge<T, TWeight> Edge)>(priorityComparer);
+			BinaryHeap<(T From, GraphEdge<T, TWeight> Edge)> queue = new MinBinaryHeap<(T From, GraphEdge<T, TWeight> Edge)>(priorityComparer);
 			queue.Add((minFrom, minEdge));
 
 			WeightedUndirectedGraphList<T, TWeight> result = new WeightedUndirectedGraphList<T, TWeight>(Comparer)
 			{
 				// add the 1st vertex
-				queue.Value.From
+				queue.Value().From
 			};
 
 			while (result.Count < Keys.Count && queue.Count > 0)
 			{
-				(T From, GraphEdge<T, TWeight> Edge) tuple = queue.Remove();
+				(T From, GraphEdge<T, TWeight> Edge) tuple = queue.ExtractValue();
 				// this avoids to have a cycle
 				if (result.ContainsKey(tuple.Edge.To)) continue;
 				result.Add(tuple.Edge.To);
@@ -267,7 +267,7 @@ namespace asm.Collections
 			if (Count == 0) return null;
 
 			IComparer<(T From, GraphEdge<T, TWeight> Edge)> priorityComparer = ComparisonComparer.FromComparison<(T From, GraphEdge<T, TWeight> Edge)>((x, y) => x.Edge.Weight.CompareTo(y.Edge.Weight));
-			PriorityQueue<(T From, GraphEdge<T, TWeight> Edge)> queue = new MinPriorityQueue<(T From, GraphEdge<T, TWeight> Edge)>(priorityComparer);
+			BinaryHeap<(T From, GraphEdge<T, TWeight> Edge)> queue = new MinBinaryHeap<(T From, GraphEdge<T, TWeight> Edge)>(priorityComparer);
 
 			// add all the edges to the queue
 			foreach (T vertex in Keys)
@@ -286,7 +286,7 @@ namespace asm.Collections
 
 			while (result.Count < Keys.Count && queue.Count > 0)
 			{
-				(T From, GraphEdge<T, TWeight> Edge) tuple = queue.Remove();
+				(T From, GraphEdge<T, TWeight> Edge) tuple = queue.ExtractValue();
 				if (disjointSet.IsConnected(tuple.From, tuple.Edge.To)) continue;
 				disjointSet.Union(tuple.From, tuple.Edge.To);
 				if (!result.ContainsKey(tuple.From)) result.Add(tuple.From);

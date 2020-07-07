@@ -42,7 +42,7 @@ namespace asm.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Other_Mscorlib_CollectionDebugView<>))]
 	[Serializable]
-	public abstract class ArrayBinaryTree<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>
+	public abstract class ArrayBinaryTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 	{
 		/// <summary>
 		/// A node metadata used to navigate the tree and print it
@@ -701,7 +701,7 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public IEnumerator<T> GetEnumerator()
 		{
-			return Enumerate(0, BinaryTreeTraverseMethod.InOrder, false);
+			return Enumerate(0, TreeTraverseMethod.InOrder, false);
 		}
 
 		/// <inheritdoc />
@@ -720,14 +720,14 @@ namespace asm.Collections
 		/// <param name="rightToLeft">Left-to-right or right-to-left</param>
 		/// <returns><see cref="IEnumerableEnumerator{T}"/></returns>
 		[NotNull]
-		public IEnumerableEnumerator<T> Enumerate(int index, BinaryTreeTraverseMethod method, bool rightToLeft)
+		public IEnumerableEnumerator<T> Enumerate(int index, TreeTraverseMethod method, bool rightToLeft)
 		{
 			return method switch
 			{
-				BinaryTreeTraverseMethod.LevelOrder => new LevelOrderEnumerator(this, index, rightToLeft),
-				BinaryTreeTraverseMethod.PreOrder => new PreOrderEnumerator(this, index, rightToLeft),
-				BinaryTreeTraverseMethod.InOrder => new InOrderEnumerator(this, index, rightToLeft),
-				BinaryTreeTraverseMethod.PostOrder => new PostOrderEnumerator(this, index, rightToLeft),
+				TreeTraverseMethod.LevelOrder => new LevelOrderEnumerator(this, index, rightToLeft),
+				TreeTraverseMethod.PreOrder => new PreOrderEnumerator(this, index, rightToLeft),
+				TreeTraverseMethod.InOrder => new InOrderEnumerator(this, index, rightToLeft),
+				TreeTraverseMethod.PostOrder => new PostOrderEnumerator(this, index, rightToLeft),
 				_ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
 			};
 		}
@@ -736,17 +736,17 @@ namespace asm.Collections
 		[NotNull]
 		public IEnumerableEnumerator<T> Enumerate(int index)
 		{
-			return Enumerate(index, BinaryTreeTraverseMethod.InOrder, false);
+			return Enumerate(index, TreeTraverseMethod.InOrder, false);
 		}
 
 		[NotNull]
 		public IEnumerableEnumerator<T> Enumerate(int index, bool rightToLeft)
 		{
-			return Enumerate(index, BinaryTreeTraverseMethod.InOrder, rightToLeft);
+			return Enumerate(index, TreeTraverseMethod.InOrder, rightToLeft);
 		}
 
 		[NotNull]
-		public IEnumerableEnumerator<T> Enumerate(int index, BinaryTreeTraverseMethod method)
+		public IEnumerableEnumerator<T> Enumerate(int index, TreeTraverseMethod method)
 		{
 			return Enumerate(index, method, false);
 		}
@@ -756,25 +756,25 @@ namespace asm.Collections
 		/// Iterate over nodes with a callback action
 		/// </summary>
 		/// <param name="index">The starting node</param>
-		/// <param name="method">The traverse method <see cref="BinaryTreeTraverseMethod"/></param>
+		/// <param name="method">The traverse method <see cref="TreeTraverseMethod"/></param>
 		/// <param name="rightToLeft">Left-to-right or right-to-left</param>
 		/// <param name="visitCallback">callback action to handle the node</param>
-		public void Iterate(int index, BinaryTreeTraverseMethod method, bool rightToLeft, [NotNull] Action<int> visitCallback)
+		public void Iterate(int index, TreeTraverseMethod method, bool rightToLeft, [NotNull] Action<int> visitCallback)
 		{
 			if (!index.InRangeRx(0, Count)) return;
 
 			switch (method)
 			{
-				case BinaryTreeTraverseMethod.LevelOrder:
+				case TreeTraverseMethod.LevelOrder:
 					LevelOrder(index, visitCallback, rightToLeft);
 					break;
-				case BinaryTreeTraverseMethod.PreOrder:
+				case TreeTraverseMethod.PreOrder:
 					PreOrder(index, visitCallback, rightToLeft);
 					break;
-				case BinaryTreeTraverseMethod.InOrder:
+				case TreeTraverseMethod.InOrder:
 					InOrder(index, visitCallback, rightToLeft);
 					break;
-				case BinaryTreeTraverseMethod.PostOrder:
+				case TreeTraverseMethod.PostOrder:
 					PostOrder(index, visitCallback, rightToLeft);
 					break;
 				default:
@@ -785,15 +785,15 @@ namespace asm.Collections
 		#region Iterate overloads - visitCallback action
 		public void Iterate(int index, [NotNull] Action<int> visitCallback)
 		{
-			Iterate(index, BinaryTreeTraverseMethod.InOrder, false, visitCallback);
+			Iterate(index, TreeTraverseMethod.InOrder, false, visitCallback);
 		}
 
 		public void Iterate(int index, bool rightToLeft, [NotNull] Action<int> visitCallback)
 		{
-			Iterate(index, BinaryTreeTraverseMethod.InOrder, rightToLeft, visitCallback);
+			Iterate(index, TreeTraverseMethod.InOrder, rightToLeft, visitCallback);
 		}
 
-		public void Iterate(int index, BinaryTreeTraverseMethod method, [NotNull] Action<int> visitCallback)
+		public void Iterate(int index, TreeTraverseMethod method, [NotNull] Action<int> visitCallback)
 		{
 			Iterate(index, method, false, visitCallback);
 		}
@@ -803,25 +803,25 @@ namespace asm.Collections
 		/// Iterate over nodes with a callback function
 		/// </summary>
 		/// <param name="index">The starting node</param>
-		/// <param name="method">The traverse method <see cref="BinaryTreeTraverseMethod"/></param>
+		/// <param name="method">The traverse method <see cref="TreeTraverseMethod"/></param>
 		/// <param name="rightToLeft">Left-to-right or right-to-left</param>
 		/// <param name="visitCallback">callback function to handle the node that can cancel the loop</param>
-		public void Iterate(int index, BinaryTreeTraverseMethod method, bool rightToLeft, [NotNull] Func<int, bool> visitCallback)
+		public void Iterate(int index, TreeTraverseMethod method, bool rightToLeft, [NotNull] Func<int, bool> visitCallback)
 		{
 			if (!index.InRangeRx(0, Count)) return;
 
 			switch (method)
 			{
-				case BinaryTreeTraverseMethod.LevelOrder:
+				case TreeTraverseMethod.LevelOrder:
 					LevelOrder(index, visitCallback, rightToLeft);
 					break;
-				case BinaryTreeTraverseMethod.PreOrder:
+				case TreeTraverseMethod.PreOrder:
 					PreOrder(index, visitCallback, rightToLeft);
 					break;
-				case BinaryTreeTraverseMethod.InOrder:
+				case TreeTraverseMethod.InOrder:
 					InOrder(index, visitCallback, rightToLeft);
 					break;
-				case BinaryTreeTraverseMethod.PostOrder:
+				case TreeTraverseMethod.PostOrder:
 					PostOrder(index, visitCallback, rightToLeft);
 					break;
 				default:
@@ -832,15 +832,15 @@ namespace asm.Collections
 		#region Iterate overloads - visitCallback function
 		public void Iterate(int index, [NotNull] Func<int, bool> visitCallback)
 		{
-			Iterate(index, BinaryTreeTraverseMethod.InOrder, false, visitCallback);
+			Iterate(index, TreeTraverseMethod.InOrder, false, visitCallback);
 		}
 
 		public void Iterate(int index, bool rightToLeft, [NotNull] Func<int, bool> visitCallback)
 		{
-			Iterate(index, BinaryTreeTraverseMethod.InOrder, rightToLeft, visitCallback);
+			Iterate(index, TreeTraverseMethod.InOrder, rightToLeft, visitCallback);
 		}
 
-		public void Iterate(int index, BinaryTreeTraverseMethod method, [NotNull] Func<int, bool> visitCallback)
+		public void Iterate(int index, TreeTraverseMethod method, [NotNull] Func<int, bool> visitCallback)
 		{
 			Iterate(index, method, false, visitCallback);
 		}
@@ -848,7 +848,7 @@ namespace asm.Collections
 
 		/// <summary>
 		/// Iterate over nodes on a level by level basis with a callback function.
-		/// This is a different way than <see cref="BinaryTreeTraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
+		/// This is a different way than <see cref="TreeTraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
 		/// </summary>
 		/// <param name="index">The starting node</param>
 		/// <param name="rightToLeft">Left-to-right or right-to-left</param>
@@ -902,7 +902,7 @@ namespace asm.Collections
 
 		/// <summary>
 		/// Iterate over nodes on a level by level basis with a callback function.
-		/// This is a different way than <see cref="BinaryTreeTraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
+		/// This is a different way than <see cref="TreeTraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
 		/// </summary>
 		/// <param name="index">The starting node</param>
 		/// <param name="rightToLeft">Left-to-right or right-to-left</param>
@@ -990,9 +990,9 @@ namespace asm.Collections
 		/// Finds the node's index with the specified value
 		/// </summary>
 		/// <param name="value">The value to search for</param>
-		/// <param name="method">The <see cref="BinaryTreeTraverseMethod"/> to use in the search.</param>
+		/// <param name="method">The <see cref="TreeTraverseMethod"/> to use in the search.</param>
 		/// <returns>The found node's index or -1 if no match is found</returns>
-		public int Find(T value, BinaryTreeTraverseMethod method)
+		public int Find(T value, TreeTraverseMethod method)
 		{
 			if (Count == 0) return -1;
 			int index = -1;
@@ -1074,7 +1074,7 @@ namespace asm.Collections
 				yield return converter(Items[i]);
 		}
 
-		public virtual T Minimum()
+		public virtual T LeftMost()
 		{
 			/*
 			 * This tree might not be a valid binary search tree. So a traversal is needed to search the entire tree.
@@ -1096,7 +1096,7 @@ namespace asm.Collections
 						: default(T);
 		}
 
-		public virtual T Maximum()
+		public virtual T RightMost()
 		{
 			if (Count == 0) return default(T);
 
@@ -1111,56 +1111,6 @@ namespace asm.Collections
 			return index > -1
 						? Items[index]
 						: default(T);
-		}
-
-		public int Predecessor(T value)
-		{
-			if (Count == 0) return -1;
-
-			int node = -1;
-			Navigator navigator = NewNavigator(0);
-
-			// find the node with the specified value
-			// if value is greater, find the value in the right sub-tree
-			while (navigator.Index > -1 && Comparer.IsGreaterThan(value, navigator.Value))
-			{
-				node = navigator.Index;
-				navigator.Index = navigator.RightIndex;
-			}
-
-			// the maximum value in left subtree is the predecessor node
-			if (navigator.Index > -1 && Comparer.IsEqual(value, navigator.Value) && navigator.LeftIndex > -1)
-			{
-				navigator.Index = navigator.LeftIndex;
-				node = navigator.RightMost();
-			}
-
-			return node;
-		}
-
-		public int Successor(T value)
-		{
-			if (Count == 0) return -1;
-
-			int node = -1;
-			Navigator navigator = NewNavigator(0);
-
-			// find the node with the specified value
-			// if value is lesser, find the value in the left sub-tree
-			while (navigator.Index > -1 && Comparer.IsLessThan(value, navigator.Value))
-			{
-				node = navigator.Index;
-				navigator.Index = navigator.LeftIndex;
-			}
-
-			// the minimum value in right subtree is the successor node
-			if (navigator.Index > -1 && Comparer.IsEqual(value, navigator.Value) && navigator.RightIndex > -1)
-			{
-				navigator.Index = navigator.RightIndex;
-				node = navigator.LeftMost();
-			}
-
-			return node;
 		}
 
 		public int GetHeight()
@@ -1263,7 +1213,7 @@ namespace asm.Collections
 		}
 
 		[NotNull]
-		public T[] ToArray(BinaryTreeTraverseMethod method = BinaryTreeTraverseMethod.InOrder, bool rightToLeft = false)
+		public T[] ToArray(TreeTraverseMethod method = TreeTraverseMethod.InOrder, bool rightToLeft = false)
 		{
 			switch (Count)
 			{
@@ -1764,28 +1714,28 @@ namespace asm.Collections
 			if (thisValue.Count == 0) return;
 
 			StringBuilder indent = new StringBuilder();
-			LinkedList<(Queue<int> Nodes, int Depth)> nodesStack = new LinkedList<(Queue<int> Nodes, int Depth)>();
+			LinkedList<(Queue<int> Nodes, int Depth)> nodesList = new LinkedList<(Queue<int> Nodes, int Depth)>();
 			ArrayBinaryTree<T>.Navigator node = thisValue.NewNavigator();
 			Queue<int> rootQueue = new Queue<int>(1);
 			rootQueue.Enqueue(0);
-			nodesStack.AddFirst((rootQueue, 0));
+			nodesList.AddFirst((rootQueue, 0));
 
-			while (nodesStack.Count > 0)
+			while (nodesList.Count > 0)
 			{
-				(Queue<int> nodes, int depth) = nodesStack.Last.Value;
+				(Queue<int> nodes, int depth) = nodesList.Last.Value;
 
 				if (nodes.Count == 0)
 				{
-					nodesStack.RemoveLast();
+					nodesList.RemoveLast();
 					continue;
 				}
 
 				node.Index = nodes.Dequeue();
 				indent.Length = 0;
 
-				foreach ((Queue<int> Nodes, int Depth) tuple in nodesStack)
+				foreach ((Queue<int> Nodes, int Depth) tuple in nodesList)
 				{
-					if (tuple == nodesStack.Last.Value) break;
+					if (tuple == nodesList.Last.Value) break;
 					indent.Append(tuple.Nodes.Count > 0
 									? STR_EXT
 									: STR_BLANK);
@@ -1805,7 +1755,7 @@ namespace asm.Collections
 				Queue<int> queue = new Queue<int>(2);
 				queue.Enqueue(node.LeftIndex);
 				queue.Enqueue(node.RightIndex);
-				nodesStack.AddLast((queue, depth + 1));
+				nodesList.AddLast((queue, depth + 1));
 			}
 		}
 	}

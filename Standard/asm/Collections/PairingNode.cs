@@ -11,7 +11,7 @@ namespace asm.Collections
 	[DebuggerDisplay("{Key} = {Value}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class PairingNode<TNode, TKey, TValue>
+	public abstract class PairingNode<TNode, TKey, TValue> : IKeyedNode<TKey, TValue>
 		where TNode : PairingNode<TNode, TKey, TValue>
 	{
 		private const int CHILD = 0;

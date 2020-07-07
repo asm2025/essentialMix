@@ -586,14 +586,14 @@ namespace asm.Collections
 		/// <param name="rightToLeft">Left-to-right or right-to-left</param>
 		/// <returns></returns>
 		[NotNull]
-		public IEnumerableEnumerator<T> Enumerate(TNode root, BinaryTreeTraverseMethod method, bool rightToLeft)
+		public IEnumerableEnumerator<T> Enumerate(TNode root, TreeTraverseMethod method, bool rightToLeft)
 		{
 			return method switch
 			{
-				BinaryTreeTraverseMethod.LevelOrder => new LevelOrderEnumerator(this, root, rightToLeft),
-				BinaryTreeTraverseMethod.PreOrder => new PreOrderEnumerator(this, root, rightToLeft),
-				BinaryTreeTraverseMethod.InOrder => new InOrderEnumerator(this, root, rightToLeft),
-				BinaryTreeTraverseMethod.PostOrder => new PostOrderEnumerator(this, root, rightToLeft),
+				TreeTraverseMethod.LevelOrder => new LevelOrderEnumerator(this, root, rightToLeft),
+				TreeTraverseMethod.PreOrder => new PreOrderEnumerator(this, root, rightToLeft),
+				TreeTraverseMethod.InOrder => new InOrderEnumerator(this, root, rightToLeft),
+				TreeTraverseMethod.PostOrder => new PostOrderEnumerator(this, root, rightToLeft),
 				_ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
 			};
 		}
@@ -602,17 +602,17 @@ namespace asm.Collections
 		[NotNull]
 		public IEnumerableEnumerator<T> Enumerate(TNode root)
 		{
-			return Enumerate(root, BinaryTreeTraverseMethod.InOrder, false);
+			return Enumerate(root, TreeTraverseMethod.InOrder, false);
 		}
 
 		[NotNull]
 		public IEnumerableEnumerator<T> Enumerate(TNode root, bool rightToLeft)
 		{
-			return Enumerate(root, BinaryTreeTraverseMethod.InOrder, rightToLeft);
+			return Enumerate(root, TreeTraverseMethod.InOrder, rightToLeft);
 		}
 
 		[NotNull]
-		public IEnumerableEnumerator<T> Enumerate(TNode root, BinaryTreeTraverseMethod method)
+		public IEnumerableEnumerator<T> Enumerate(TNode root, TreeTraverseMethod method)
 		{
 			return Enumerate(root, method, false);
 		}
@@ -622,25 +622,25 @@ namespace asm.Collections
 		/// Iterate over nodes with a callback action
 		/// </summary>
 		/// <param name="root">The starting node</param>
-		/// <param name="method">The traverse method <see cref="BinaryTreeTraverseMethod"/></param>
+		/// <param name="method">The traverse method <see cref="TreeTraverseMethod"/></param>
 		/// <param name="rightToLeft">Left-to-right or right-to-left</param>
 		/// <param name="visitCallback">callback action to handle the node</param>
-		public void Iterate(TNode root, BinaryTreeTraverseMethod method, bool rightToLeft, [NotNull] Action<TNode> visitCallback)
+		public void Iterate(TNode root, TreeTraverseMethod method, bool rightToLeft, [NotNull] Action<TNode> visitCallback)
 		{
 			if (root == null) return;
 
 			switch (method)
 			{
-				case BinaryTreeTraverseMethod.LevelOrder:
+				case TreeTraverseMethod.LevelOrder:
 					LevelOrder(root, visitCallback, rightToLeft);
 					break;
-				case BinaryTreeTraverseMethod.PreOrder:
+				case TreeTraverseMethod.PreOrder:
 					PreOrder(root, visitCallback, rightToLeft);
 					break;
-				case BinaryTreeTraverseMethod.InOrder:
+				case TreeTraverseMethod.InOrder:
 					InOrder(root, visitCallback, rightToLeft);
 					break;
-				case BinaryTreeTraverseMethod.PostOrder:
+				case TreeTraverseMethod.PostOrder:
 					PostOrder(root, visitCallback, rightToLeft);
 					break;
 				default:
@@ -651,15 +651,15 @@ namespace asm.Collections
 		#region Iterate overloads - visitCallback action
 		public void Iterate(TNode root, [NotNull] Action<TNode> visitCallback)
 		{
-			Iterate(root, BinaryTreeTraverseMethod.InOrder, false, visitCallback);
+			Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback);
 		}
 
 		public void Iterate(TNode root, bool rightToLeft, [NotNull] Action<TNode> visitCallback)
 		{
-			Iterate(root, BinaryTreeTraverseMethod.InOrder, rightToLeft, visitCallback);
+			Iterate(root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback);
 		}
 
-		public void Iterate(TNode root, BinaryTreeTraverseMethod method, [NotNull] Action<TNode> visitCallback)
+		public void Iterate(TNode root, TreeTraverseMethod method, [NotNull] Action<TNode> visitCallback)
 		{
 			Iterate(root, method, false, visitCallback);
 		}
@@ -669,25 +669,25 @@ namespace asm.Collections
 		/// Iterate over nodes with a callback function
 		/// </summary>
 		/// <param name="root">The starting node</param>
-		/// <param name="method">The traverse method <see cref="BinaryTreeTraverseMethod"/></param>
+		/// <param name="method">The traverse method <see cref="TreeTraverseMethod"/></param>
 		/// <param name="rightToLeft">Left-to-right or right-to-left</param>
 		/// <param name="visitCallback">callback function to handle the node that can cancel the loop</param>
-		public void Iterate(TNode root, BinaryTreeTraverseMethod method, bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback)
+		public void Iterate(TNode root, TreeTraverseMethod method, bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback)
 		{
 			if (root == null) return;
 
 			switch (method)
 			{
-				case BinaryTreeTraverseMethod.LevelOrder:
+				case TreeTraverseMethod.LevelOrder:
 					LevelOrder(root, visitCallback, rightToLeft);
 					break;
-				case BinaryTreeTraverseMethod.PreOrder:
+				case TreeTraverseMethod.PreOrder:
 					PreOrder(root, visitCallback, rightToLeft);
 					break;
-				case BinaryTreeTraverseMethod.InOrder:
+				case TreeTraverseMethod.InOrder:
 					InOrder(root, visitCallback, rightToLeft);
 					break;
-				case BinaryTreeTraverseMethod.PostOrder:
+				case TreeTraverseMethod.PostOrder:
 					PostOrder(root, visitCallback, rightToLeft);
 					break;
 				default:
@@ -698,15 +698,15 @@ namespace asm.Collections
 		#region Iterate overloads - visitCallback function
 		public void Iterate(TNode root, [NotNull] Func<TNode, bool> visitCallback)
 		{
-			Iterate(root, BinaryTreeTraverseMethod.InOrder, false, visitCallback);
+			Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback);
 		}
 
 		public void Iterate(TNode root, bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback)
 		{
-			Iterate(root, BinaryTreeTraverseMethod.InOrder, rightToLeft, visitCallback);
+			Iterate(root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback);
 		}
 
-		public void Iterate(TNode root, BinaryTreeTraverseMethod method, [NotNull] Func<TNode, bool> visitCallback)
+		public void Iterate(TNode root, TreeTraverseMethod method, [NotNull] Func<TNode, bool> visitCallback)
 		{
 			Iterate(root, method, false, visitCallback);
 		}
@@ -714,7 +714,7 @@ namespace asm.Collections
 
 		/// <summary>
 		/// Iterate over nodes on a level by level basis with a callback function.
-		/// This is a different way than <see cref="BinaryTreeTraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
+		/// This is a different way than <see cref="TreeTraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
 		/// </summary>
 		/// <param name="root">The starting node</param>
 		/// <param name="rightToLeft">Left-to-right or right-to-left</param>
@@ -767,7 +767,7 @@ namespace asm.Collections
 
 		/// <summary>
 		/// Iterate over nodes on a level by level basis with a callback function.
-		/// This is a different way than <see cref="BinaryTreeTraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
+		/// This is a different way than <see cref="TreeTraverseMethod.LevelOrder"/> in that each level's nodes are brought as a collection.
 		/// </summary>
 		/// <param name="root">The starting node</param>
 		/// <param name="rightToLeft">Left-to-right or right-to-left</param>
@@ -848,7 +848,7 @@ namespace asm.Collections
 		{
 			if (Count == 0) return false;
 			bool found = false;
-			Iterate(Root, BinaryTreeTraverseMethod.LevelOrder, e =>
+			Iterate(Root, TreeTraverseMethod.LevelOrder, e =>
 			{
 				found = match(e.Value);
 				return !found;
@@ -874,9 +874,9 @@ namespace asm.Collections
 		/// Finds the node with the specified value
 		/// </summary>
 		/// <param name="value">The value to search for</param>
-		/// <param name="method">The <see cref="BinaryTreeTraverseMethod"/> to use in the search.</param>
+		/// <param name="method">The <see cref="TreeTraverseMethod"/> to use in the search.</param>
 		/// <returns>The found node or null if no match is found</returns>
-		public TNode Find(T value, BinaryTreeTraverseMethod method)
+		public TNode Find(T value, TreeTraverseMethod method)
 		{
 			if (Count == 0) return null;
 			TNode node = null;
@@ -955,7 +955,7 @@ namespace asm.Collections
 			
 			if (Root.Left != null)
 			{
-				Iterate(Root.Left, BinaryTreeTraverseMethod.PreOrder, e =>
+				Iterate(Root.Left, TreeTraverseMethod.PreOrder, e =>
 				{
 					if (Comparer.IsLessThan(minimum, e.Value)) return;
 					minimum = e.Value;
@@ -964,7 +964,7 @@ namespace asm.Collections
 			
 			if (Root.Right != null)
 			{
-				Iterate(Root.Right, BinaryTreeTraverseMethod.PreOrder, e =>
+				Iterate(Root.Right, TreeTraverseMethod.PreOrder, e =>
 				{
 					if (Comparer.IsLessThan(minimum, e.Value)) return;
 					minimum = e.Value;
@@ -988,7 +988,7 @@ namespace asm.Collections
 			
 			if (Root.Left != null)
 			{
-				Iterate(Root.Left, BinaryTreeTraverseMethod.PreOrder, e =>
+				Iterate(Root.Left, TreeTraverseMethod.PreOrder, e =>
 				{
 					if (Comparer.IsGreaterThan(maximum, e.Value)) return;
 					maximum = e.Value;
@@ -997,7 +997,7 @@ namespace asm.Collections
 			
 			if (Root.Right != null)
 			{
-				Iterate(Root.Right, BinaryTreeTraverseMethod.PreOrder, e =>
+				Iterate(Root.Right, TreeTraverseMethod.PreOrder, e =>
 				{
 					if (Comparer.IsGreaterThan(maximum, e.Value)) return;
 					maximum = e.Value;
@@ -1119,7 +1119,7 @@ namespace asm.Collections
 		}
 
 		[NotNull]
-		public T[] ToArray(BinaryTreeTraverseMethod method = BinaryTreeTraverseMethod.InOrder, bool rightToLeft = false)
+		public T[] ToArray(TreeTraverseMethod method = TreeTraverseMethod.InOrder, bool rightToLeft = false)
 		{
 			switch (Count)
 			{
@@ -2134,27 +2134,27 @@ namespace asm.Collections
 			if (thisValue.Root == null) return;
 
 			StringBuilder indent = new StringBuilder();
-			LinkedList<(Queue<TNode> Nodes, int Depth)> nodesStack = new LinkedList<(Queue<TNode> Nodes, int Depth)>();
+			LinkedList<(Queue<TNode> Nodes, int Depth)> nodesList = new LinkedList<(Queue<TNode> Nodes, int Depth)>();
 			Queue<TNode> rootQueue = new Queue<TNode>(1);
 			rootQueue.Enqueue(thisValue.Root);
-			nodesStack.AddFirst((rootQueue, 0));
+			nodesList.AddFirst((rootQueue, 0));
 
-			while (nodesStack.Count > 0)
+			while (nodesList.Count > 0)
 			{
-				(Queue<TNode> nodes, int depth) = nodesStack.Last.Value;
+				(Queue<TNode> nodes, int depth) = nodesList.Last.Value;
 
 				if (nodes.Count == 0)
 				{
-					nodesStack.RemoveLast();
+					nodesList.RemoveLast();
 					continue;
 				}
 
 				TNode node = nodes.Dequeue();
 				indent.Length = 0;
 
-				foreach ((Queue<TNode> Nodes, int Depth) tuple in nodesStack)
+				foreach ((Queue<TNode> Nodes, int Depth) tuple in nodesList)
 				{
-					if (tuple == nodesStack.Last.Value) break;
+					if (tuple == nodesList.Last.Value) break;
 					indent.Append(tuple.Nodes.Count > 0
 									? STR_EXT
 									: STR_BLANK);
@@ -2172,9 +2172,9 @@ namespace asm.Collections
 				if (node.IsLeaf) continue;
 
 				Queue<TNode> queue = new Queue<TNode>(2);
-				if (node.Left != null) queue.Enqueue(node.Left);
-				if (node.Right != null) queue.Enqueue(node.Right);
-				nodesStack.AddLast((queue, depth + 1));
+				queue.Enqueue(node.Left);
+				queue.Enqueue(node.Right);
+				nodesList.AddLast((queue, depth + 1));
 			}
 		}
 	}

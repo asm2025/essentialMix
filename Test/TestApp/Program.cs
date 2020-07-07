@@ -85,11 +85,6 @@ namespace TestApp
 			//TestSortedSetPerformance();
 
 			//TestTreeEquality();
-			
-			//TestHeapAdd();
-			//TestHeapRemove();
-			//TestPriorityQueue();
-			//TestHeapElementAt();
 
 			//TestTrie();
 			//TestTrieSimilarWordsRemoval();
@@ -97,6 +92,10 @@ namespace TestApp
 			//TestSkipList();
 
 			//TestDisjointSet();
+			
+			//TestBinaryHeapAdd();
+			//TestBinaryHeapRemove();
+			//TestBinaryHeapElementAt();
 			
 			//TestBinomialHeapAdd();
 			//TestBinomialHeapRemove();
@@ -111,7 +110,9 @@ namespace TestApp
 			//TestPairingHeapAdd();
 			//TestPairingHeapRemove();
 			//TestPairingHeapElementAt();
-			TestPairingHeapDecreaseKey();
+			//TestPairingHeapDecreaseKey();
+
+			TestAllHeapsPerformance();
 
 			//TestGraph();
 
@@ -1586,8 +1587,8 @@ namespace TestApp
 				Console.WriteLine();
 				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
 				tree.Clear();
-
 				Debug.Assert(tree.Count == 0, "Values are not cleared correctly!");
+
 				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
 				Console.WriteLine();
 				Console.WriteLine($"Array: {string.Join(", ", values)}");
@@ -1904,199 +1905,6 @@ namespace TestApp
 			}
 		}
 
-		private static void TestHeapAdd()
-		{
-			bool more;
-
-			do
-			{
-				Console.Clear();
-				Title("Testing Heap.Add()...");
-
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-
-				Heap<int> heap = new MaxHeap<int>();
-				DoTheTest(heap, values);
-
-				heap = new MinHeap<int>();
-				DoTheTest(heap, values);
-
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
-
-			static void DoTheTest<T>(Heap<T> heap, T[] array)
-			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
-
-				foreach (T value in array)
-				{
-					heap.Add(value);
-					//heap.PrintWithProps();
-				}
-
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
-				heap.Print();
-			}
-		}
-
-		private static void TestHeapRemove()
-		{
-			bool more;
-
-			do
-			{
-				Console.Clear();
-				Title("Testing Heap.Remove()...");
-
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-
-				Heap<int> heap = new MaxHeap<int>();
-				DoTheTest(heap, values);
-
-				heap = new MinHeap<int>();
-				DoTheTest(heap, values);
-
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
-
-			static void DoTheTest<T>(Heap<T> heap, T[] array)
-			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
-				heap.Add(array);
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
-				heap.Print();
-				Console.WriteLine("Test removing...");
-				bool removeStarted = false;
-
-				while (heap.Count > 0)
-				{
-					if (!removeStarted) removeStarted = true;
-					else Console.Write(", ");
-
-					Console.Write(heap.Remove());
-				}
-
-				Console.WriteLine();
-				Console.WriteLine();
-			}
-		}
-
-		private static void TestPriorityQueue()
-		{
-			bool more;
-
-			do
-			{
-				Console.Clear();
-				Title("Testing PriorityQueue...");
-
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-
-				PriorityQueue<int> intQueue = new MinPriorityQueue<int>();
-				DoTheTest(intQueue, values);
-
-				intQueue = new MaxPriorityQueue<int>();
-				DoTheTest(intQueue, values);
-
-				Student[] students = GetRandomStudents(len);
-				IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
-				PriorityQueue<Student> studentQueue = new MinPriorityQueue<Student>(studentComparer);
-				DoTheTest(studentQueue, students);
-
-				studentQueue = new MaxPriorityQueue<Student>(studentComparer);
-				DoTheTest(studentQueue, students);
-
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
-
-			static void DoTheTest<T>(PriorityQueue<T> queue, T[] array)
-			{
-				Console.WriteLine($"Test adding ({queue.GetType()})...".BrightGreen());
-				queue.Add(array);
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", queue));
-				queue.Print();
-				Console.WriteLine("Test removing...");
-				bool removeStarted = false;
-
-				while (queue.Count > 0)
-				{
-					if (!removeStarted) removeStarted = true;
-					else Console.Write(", ");
-
-					Console.Write(queue.Remove());
-				}
-
-				Console.WriteLine();
-				Console.WriteLine();
-			}
-		}
-
-		private static void TestHeapElementAt()
-		{
-			bool more;
-
-			do
-			{
-				Console.Clear();
-				Title("Testing Heap ElementAt...");
-
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				int k = RNGRandomHelper.Next(1, values.Length);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-
-				Heap<int> heap = new MaxHeap<int>();
-				DoTheTest(heap, values, k);
-
-				heap = new MinHeap<int>();
-				DoTheTest(heap, values, k);
-
-				Student[] students = GetRandomStudents(len);
-				IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
-				PriorityQueue<Student> studentQueue = new MaxPriorityQueue<Student>(studentComparer);
-				DoTheTest(studentQueue, students, k);
-
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
-
-			static void DoTheTest<T>(Heap<T> heap, T[] array, int k)
-			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
-				heap.Add(array);
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
-				heap.Print();
-				Console.WriteLine($"Kth element at position {k} = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
-				Console.WriteLine();
-				Console.WriteLine();
-			}
-		}
-
 		private static void TestTrie()
 		{
 			const int MAX_LIST = 100;
@@ -2320,268 +2128,6 @@ namespace TestApp
 			}
 		}
 
-		private static void TestGraph()
-		{
-			const int MAX_LIST = 26;
-
-			bool more;
-			GraphList<char> graph;
-			WeightedGraphList<char, int> weightedGraph;
-			List<char> values = new List<char>();
-			Menu menu = new Menu()
-				.Add("Undirected graph", () =>
-				{
-					Console.WriteLine();
-					graph = new UndirectedGraphList<char>();
-					if (values.Count == 0) AddValues(values);
-					DoTheTest(graph, values);
-				})
-				.Add("Directed graph", () =>
-				{
-					Console.WriteLine();
-					graph = new DirectedGraphList<char>();
-					if (values.Count == 0) AddValues(values);
-					DoTheTest(graph, values);
-				})
-				.Add("Mixed graph", () =>
-				{
-					Console.WriteLine();
-					graph = new MixedGraphList<char>();
-					if (values.Count == 0) AddValues(values);
-					DoTheTest(graph, values);
-				})
-				.Add("Weighted undirected graph", () =>
-				{
-					Console.WriteLine();
-					weightedGraph = new WeightedUndirectedGraphList<char, int>();
-					if (values.Count == 0) AddValues(values);
-					DoTheTest(weightedGraph, values);
-				})
-				.Add("Weighted directed graph", () =>
-				{
-					Console.WriteLine();
-					weightedGraph = new WeightedDirectedGraphList<char, int>();
-					if (values.Count == 0) AddValues(values);
-					DoTheTest(weightedGraph, values);
-				})
-				.Add("Weighted mixed graph", () =>
-				{
-					Console.WriteLine();
-					weightedGraph = new WeightedMixedGraphList<char, int>();
-					if (values.Count == 0) AddValues(values);
-					DoTheTest(weightedGraph, values);
-				});
-
-			do
-			{
-				Console.Clear();
-				Title("Testing graph add()");
-				menu.Display();
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-				if (!more || values.Count >= MAX_LIST) continue;
-
-				Console.Write($"Would you like to add more character? {"[Y]".BrightGreen()} / {"any key".Dim()} ");
-				response = Console.ReadKey(true);
-				Console.WriteLine();
-				if (response.Key != ConsoleKey.Y) continue;
-				Console.WriteLine();
-				AddValues(values);
-			}
-			while (more);
-
-			static void AddValues(List<char> list)
-			{
-				int len = RNGRandomHelper.Next(1, 12);
-				Console.WriteLine("Generating new characters: ".BrightGreen());
-				char[] newValues = GetRandomChar(true, len);
-				int count = 0;
-
-				foreach (char value in newValues)
-				{
-					if (list.Contains(value)) continue;
-					list.Add(value);
-					count++;
-				}
-
-				Console.WriteLine($"Added {count} characters to the set".BrightGreen());
-			}
-
-			static bool DoTheTest<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, List<char> values)
-				where TAdjacencyList : class, ICollection<TEdge>
-			{
-				Console.WriteLine("Test adding nodes...");
-				Console.WriteLine("characters list: ".BrightBlack() + string.Join(", ", values));
-				graph.Clear();
-				graph.Add(values);
-
-				if (graph.Count != values.Count)
-				{
-					Console.WriteLine("Something went wrong, not all nodes were added...!".BrightRed());
-					return false;
-				}
-
-				if (graph.Count == 1)
-				{
-					Console.WriteLine("Huh, must add more nodes...!".BrightRed());
-					return true;
-				}
-				
-				Console.WriteLine("All nodes are added...!".BrightGreen() + " Let's try adding some relationships...");
-				Console.Write($@"{"Would you like to add a bit of randomization?".Yellow()} {"[Y]".BrightGreen()} / {"any key".Dim()}.
-This may cause cycles but will make it much more fun for finding shortest paths. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				int threshold = response.Key != ConsoleKey.Y ? 0 : (int)Math.Floor(values.Count * 0.5d);
-				
-				Queue<char> queue = new Queue<char>(values);
-				char from = queue.Dequeue();
-				Action<char, char> addEdge = graph switch
-				{
-					MixedGraphList<char> mGraph => (f, t) => mGraph.AddEdge(f, t, __fakeGenerator.Value.Random.Bool()),
-					WeightedMixedGraphList<char, int> wmGraph => (f, t) => wmGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue), __fakeGenerator.Value.Random.Bool()),
-					WeightedGraphList<char, int> wGraph => (f, t) => wGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue)),
-					_ => graph.AddEdge
-				};
-
-				while (queue.Count > 0)
-				{
-					char to = queue.Dequeue();
-					if (graph.ContainsEdge(from, to)) continue;
-					Console.WriteLine($"Adding {from.ToString().BrightCyan().Underline()} to {to.ToString().BrightCyan().Underline()}...");
-					addEdge(from, to);
-
-					if (threshold > 0 && __fakeGenerator.Value.Random.Bool())
-					{
-						queue.Enqueue(from);
-						queue.Enqueue(values.PickRandom());
-						threshold--;
-					}
-
-					from = to;
-				}
-
-				graph.Print();
-				Console.WriteLine();
-				Console.WriteLine("Cool, let's try enumerating it.");
-				char value = graph.Top().First();
-				Console.WriteLine($"Picking a value with maximum connections: '{value.ToString().BrightCyan().Underline()}'...");
-				if (!DoTheTestWithValue(graph, values, value)) return false;
-
-				do
-				{
-					Console.WriteLine();
-					Console.Write($@"Type in {"a character".BrightGreen()} to traverse from,
-or press {"ESCAPE".BrightRed()} key to exit this test. ");
-					response = Console.ReadKey();
-					Console.WriteLine();
-					if (response.Key == ConsoleKey.Escape) continue;
-
-					if (!char.IsLetter(response.KeyChar) || !graph.ContainsKey(response.KeyChar))
-					{
-						Console.WriteLine($"Character '{value}' is not found or not connected!");
-						continue;
-					}
-
-					value = response.KeyChar;
-					if (!DoTheTestWithValue(graph, values, value)) return false;
-				}
-				while (response.Key != ConsoleKey.Escape);
-
-				Console.WriteLine();
-				return true;
-			}
-
-			static bool DoTheTestWithValue<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, List<char> values, char value)
-				where TAdjacencyList : class, ICollection<TEdge>
-			{
-				const string LINE_SEPARATOR = "*******************************************************************************";
-
-				Console.WriteLine("Breadth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.BreadthFirst)));
-				Console.WriteLine("Depth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, GraphTraverseMethod.DepthFirst)));
-				Console.WriteLine("Degree: ".Yellow() + graph.Degree(value));
-
-				// detect a cycle
-				IEnumerable<char> cycle = graph.FindCycle();
-				if (cycle != null) Console.WriteLine("Found cycle: ".BrightRed() + string.Join(", ", cycle));
-
-				// test specific graph type features
-				switch (graph)
-				{
-					case DirectedGraphList<char> directedGraph:
-						Console.WriteLine("InDegree: ".Yellow() + directedGraph.InDegree(value));
-						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", directedGraph.TopologicalSort())); }
-						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
-						break;
-					case MixedGraphList<char> mixedGraph:
-						Console.WriteLine("InDegree: ".Yellow() + mixedGraph.InDegree(value));
-						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", mixedGraph.TopologicalSort())); }
-						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
-						break;
-					case WeightedDirectedGraphList<char, int> weightedDirectedGraph:
-						Console.WriteLine("InDegree: ".Yellow() + weightedDirectedGraph.InDegree(value));
-						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", weightedDirectedGraph.TopologicalSort())); }
-						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
-						break;
-					case WeightedUndirectedGraphList<char, int> weightedUndirectedGraph:
-						Console.WriteLine(LINE_SEPARATOR);
-						WeightedUndirectedGraphList<char, int> spanningTree = weightedUndirectedGraph.GetMinimumSpanningTree(SpanningTreeAlgorithm.Prim);
-
-						if (spanningTree != null)
-						{
-							Console.WriteLine("Prim Spanning Tree: ".Yellow());
-							spanningTree.Print();
-							Console.WriteLine(LINE_SEPARATOR);
-						}
-						
-						spanningTree = weightedUndirectedGraph.GetMinimumSpanningTree(SpanningTreeAlgorithm.Kruskal);
-
-						if (spanningTree != null)
-						{
-							Console.WriteLine("Kruskal Spanning Tree: ".Yellow());
-							spanningTree.Print();
-							Console.WriteLine(LINE_SEPARATOR);
-						}
-						break;
-					case WeightedMixedGraphList<char, int> weightedMixedGraph:
-						Console.WriteLine("InDegree: ".Yellow() + weightedMixedGraph.InDegree(value));
-						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", weightedMixedGraph.TopologicalSort())); }
-						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
-						break;
-				}
-
-				if (graph is WeightedGraphList<char, int> wGraph)
-				{
-					char to = values.PickRandom();
-					ConsoleKeyInfo response;
-
-					do
-					{
-						Console.Write($@"Current position is '{value.ToString().BrightGreen()}'. Type in {"a character".BrightGreen()} to find the shortest path to,
-(You can press the {"RETURN".BrightGreen()} key to accept the current random value '{to.ToString().BrightGreen()}'),
-or press {"ESCAPE".BrightRed()} key to exit this test. ");
-						response = Console.ReadKey();
-						Console.WriteLine();
-						if (response.Key == ConsoleKey.Escape) return false;
-						if (response.Key == ConsoleKey.Enter) continue;
-						if (!char.IsLetter(response.KeyChar) || !wGraph.ContainsKey(response.KeyChar)) Console.WriteLine($"Character '{value}' is not found or not connected!");
-						to = response.KeyChar;
-						break;
-					}
-					while (response.Key != ConsoleKey.Enter);
-
-					Console.WriteLine();
-					Console.WriteLine($"{"Shortest Path".Yellow()} from '{value.ToString().BrightCyan()}' to '{to.ToString().BrightCyan()}'");
-					Console.WriteLine("Dijkstra: " + string.Join(" -> ", wGraph.GetShortestPath(value, to, ShortestPathAlgorithm.Dijkstra)));
-				}
-
-				return true;
-			}
-		}
-
 		private static void TestSkipList()
 		{
 			bool more;
@@ -2779,6 +2325,165 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			clock.Stop();
 		}
 
+		private static void TestBinaryHeapAdd()
+		{
+			bool more;
+			IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
+
+			do
+			{
+				Console.Clear();
+				Title("Testing Heap.Add()...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				BinaryHeap<int> heap = new MaxBinaryHeap<int>();
+				DoTheTest(heap, values);
+
+				heap = new MinBinaryHeap<int>();
+				DoTheTest(heap, values);
+
+				Student[] students = GetRandomStudents(len);
+				BinaryHeap<Student> studentsHeap = new MaxBinaryHeap<Student>(studentComparer);
+				DoTheTest(studentsHeap, students);
+
+				studentsHeap = new MinBinaryHeap<Student>(studentComparer);
+				DoTheTest(studentsHeap, students);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<T>(BinaryHeap<T> heap, T[] array)
+			{
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+
+				foreach (T value in array)
+				{
+					heap.Add(value);
+					//heap.PrintWithProps();
+				}
+
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+			}
+		}
+
+		private static void TestBinaryHeapRemove()
+		{
+			bool more;
+			IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
+
+			do
+			{
+				Console.Clear();
+				Title("Testing Heap.Remove()...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				BinaryHeap<int> heap = new MaxBinaryHeap<int>();
+				DoTheTest(heap, values);
+
+				heap = new MinBinaryHeap<int>();
+				DoTheTest(heap, values);
+
+				Student[] students = GetRandomStudents(len);
+				BinaryHeap<Student> studentsHeap = new MaxBinaryHeap<Student>(studentComparer);
+				DoTheTest(studentsHeap, students);
+
+				studentsHeap = new MinBinaryHeap<Student>(studentComparer);
+				DoTheTest(studentsHeap, students);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<T>(BinaryHeap<T> heap, T[] array)
+			{
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				heap.Add(array);
+				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+				Console.WriteLine("Test removing...");
+				bool removeStarted = false;
+
+				while (heap.Count > 0)
+				{
+					if (!removeStarted) removeStarted = true;
+					else Console.Write(", ");
+
+					Console.Write(heap.ExtractValue());
+				}
+
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
+		private static void TestBinaryHeapElementAt()
+		{
+			bool more;
+			IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
+
+			do
+			{
+				Console.Clear();
+				Title("Testing Heap ElementAt...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				int k = RNGRandomHelper.Next(1, values.Length);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+
+				BinaryHeap<int> heap = new MaxBinaryHeap<int>();
+				DoTheTest(heap, values, k);
+
+				heap = new MinBinaryHeap<int>();
+				DoTheTest(heap, values, k);
+
+				Student[] students = GetRandomStudents(len);
+				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+
+				BinaryHeap<Student> studentHeap = new MaxBinaryHeap<Student>(studentComparer);
+				DoTheTest(studentHeap, students, k);
+
+				studentHeap = new MinBinaryHeap<Student>(studentComparer);
+				DoTheTest(studentHeap, students, k);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<T>(BinaryHeap<T> heap, T[] array, int k)
+			{
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				heap.Add(array);
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+				Console.WriteLine($"Kth element at position {k} = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
 		private static void TestBinomialHeapAdd()
 		{
 			bool more;
@@ -2816,7 +2521,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			static void DoTheTest<TNode, TKey, TValue>(BinomialHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : BinomialNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 
 				foreach (TValue value in array)
 				{
@@ -2868,7 +2573,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			static void DoTheTest<TNode, TKey, TValue>(BinomialHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : BinomialNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 				heap.Add(array);
 				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
@@ -2930,7 +2635,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			static void DoTheTest<TNode, TKey, TValue>(BinomialHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
 				where TNode : BinomialNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 				heap.Add(array);
 				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
@@ -2981,7 +2686,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			static void DoTheTest<TNode, TKey, TValue>(BinomialHeap<TNode, TKey, TValue> heap, TValue[] array, Func<TKey, TKey> newKeyValue)
 				where TNode : BinomialNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 				heap.Add(array);
 				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
@@ -2994,7 +2699,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 				do
 				{
-					node = heap.FindByValue(array.PickRandom());
+					node = heap.Find(array.PickRandom());
 				}
 				while (node == null);
 
@@ -3044,7 +2749,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : FibonacciNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 
 				foreach (TValue value in array)
 				{
@@ -3096,7 +2801,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : FibonacciNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 				heap.Add(array);
 				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
@@ -3158,7 +2863,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
 				where TNode : FibonacciNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 				heap.Add(array);
 				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
@@ -3209,7 +2914,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array, Func<TKey, TKey> newKeyValue)
 				where TNode : FibonacciNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 				heap.Add(array);
 				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
@@ -3222,7 +2927,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 				do
 				{
-					node = heap.FindByValue(array.PickRandom());
+					node = heap.Find(array.PickRandom());
 				}
 				while (node == null);
 
@@ -3272,7 +2977,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : PairingNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 
 				foreach (TValue value in array)
 				{
@@ -3324,7 +3029,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : PairingNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 				heap.Add(array);
 				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
@@ -3386,7 +3091,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
 				where TNode : PairingNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 				heap.Add(array);
 				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
@@ -3411,20 +3116,20 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
 
 				PairingHeap<int> heap = new MaxPairingHeap<int>();
-				DoTheTest(heap, values, e => int.MaxValue);
+				DoTheTest(heap, values, int.MaxValue);
 
 				heap = new MinPairingHeap<int>();
-				DoTheTest(heap, values, e => int.MinValue);
+				DoTheTest(heap, values, int.MinValue);
 
 				Student[] students = GetRandomStudents(len);
 				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students, e => int.MaxValue);
+				DoTheTest(studentHeap, students, int.MaxValue);
 
 				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students, e => int.MinValue);
+				DoTheTest(studentHeap, students, int.MinValue);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -3434,10 +3139,10 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, Func<TKey, TKey> newKeyValue)
+			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKey)
 				where TNode : PairingNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType()})...".BrightGreen());
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 				heap.Add(array);
 				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
@@ -3450,16 +3155,457 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 				do
 				{
-					node = heap.FindByValue(array.PickRandom());
+					node = heap.Find(array.PickRandom());
 				}
 				while (node == null);
 
 				Console.WriteLine($"Test DecreaseKey for node: {node}.");
-				heap.DecreaseKey(node, newKeyValue(node.Key));
+				heap.DecreaseKey(node, newKey);
 				Console.WriteLine($"Test ExtractValue (2): {heap.ExtractValue()}");
 				if (heap.Count > 0) Console.WriteLine($"Test ExtractValue (3): {heap.ExtractValue()}");
 				Console.WriteLine();
 				Console.WriteLine();
+			}
+		}
+
+		private static void TestAllHeapsPerformance()
+		{
+			const int START = 10;
+			const int LEN = 100_000;
+
+			bool more;
+			Stopwatch clock = new Stopwatch();
+
+			int tests = 0;
+			int[] values = GetRandomIntegers(true, START);
+			Student[] students = GetRandomStudents(START);
+
+			do
+			{
+				Console.Clear();
+				Title("Testing All Heap types performance...");
+				Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
+				Console.WriteLine();
+
+				Console.WriteLine($"Array has {values.Length} items.");
+				Title("Testing IHeap<int> types performance...");
+
+				// BinaryHeap
+				DoHeapTest(new MinBinaryHeap<int>(), values, clock);
+				clock.Stop();
+				DoHeapTest(new MaxBinaryHeap<int>(), values, clock);
+				clock.Stop();
+
+				// BinomialHeap
+				DoHeapTest(new MinBinomialHeap<int>(), values, clock);
+				clock.Stop();
+				DoHeapTest(new MaxBinomialHeap<int>(), values, clock);
+				clock.Stop();
+
+				// FibonacciHeap
+				DoHeapTest(new MinFibonacciHeap<int>(), values, clock);
+				clock.Stop();
+				DoHeapTest(new MaxFibonacciHeap<int>(), values, clock);
+				clock.Stop();
+
+				// PairingHeap
+				DoHeapTest(new MinPairingHeap<int>(), values, clock);
+				clock.Stop();
+				DoHeapTest(new MaxPairingHeap<int>(), values, clock);
+				clock.Stop();
+
+				Title("Testing IKeyedHeap<TNode, TKey, TValue> types performance...");
+
+				// BinomialHeap
+				DoKeyedHeapTest(new MinBinomialHeap<double, Student>(e => e.Grade), students, int.MinValue, clock);
+				clock.Stop();
+				DoKeyedHeapTest(new MaxBinomialHeap<double, Student>(e => e.Grade), students, int.MaxValue, clock);
+				clock.Stop();
+
+				// FibonacciHeap
+				DoKeyedHeapTest(new MinFibonacciHeap<double, Student>(e => e.Grade), students, int.MinValue, clock);
+				clock.Stop();
+				DoKeyedHeapTest(new MaxFibonacciHeap<double, Student>(e => e.Grade), students, int.MaxValue, clock);
+				clock.Stop();
+
+				// PairingHeap
+				DoKeyedHeapTest(new MinPairingHeap<double, Student>(e => e.Grade), students, int.MinValue, clock);
+				clock.Stop();
+				DoKeyedHeapTest(new MaxPairingHeap<double, Student>(e => e.Grade), students, int.MaxValue, clock);
+				clock.Stop();
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+
+				if (more && tests < 1)
+				{
+					values = GetRandomIntegers(true, LEN);
+					students = GetRandomStudents(LEN);
+					tests++;
+				}
+			}
+			while (more);
+
+			clock.Stop();
+
+			static void DoHeapTest<T>(IHeap<T> heap, T[] values, Stopwatch clock)
+			{
+				Console.WriteLine();
+				Console.WriteLine($"Testing {heap.GetType().Name}...".BrightGreen());
+				heap.Clear();
+				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				Debug.Assert(heap.Count == 0, "Values are not cleared correctly!");
+
+				clock.Restart();
+				heap.Add(values);
+				Console.WriteLine($"Added {heap.Count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+
+				// The search is very slow! will skip it for now
+				//Console.WriteLine("Test search...".BrightYellow());
+				//int found = 0;
+				//int missed = 0;
+				//clock.Restart();
+
+				//foreach (T v in values)
+				//{
+				//	if (heap.Contains(v))
+				//	{
+				//		found++;
+				//		continue;
+				//	}
+
+				//	missed++;
+				//	Console.WriteLine(missed <= 3
+				//						? $"Find missed a value: {v} :((".BrightRed()
+				//						: "FIND MISSED A LOT :((".BrightRed());
+				//	if (missed > 3) return;
+				//	//return;
+				//}
+				//Console.WriteLine($"Found {found} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+
+				Console.WriteLine("Test removing...".BrightRed());
+				int removed = 0;
+				clock.Restart();
+
+				while (heap.Count > 0)
+				{
+					heap.ExtractValue();
+					removed++;
+				}
+				Console.WriteLine($"Removed {removed} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+				Debug.Assert(removed == values.Length, "Not all values are removed correctly!");
+			}
+
+			static void DoKeyedHeapTest<TNode, TKey, TValue>(IKeyedHeap<TNode, TKey, TValue> heap, TValue[] values, TKey newKey, Stopwatch clock)
+				where TNode : IKeyedNode<TKey, TValue>
+				where TValue : IEquatable<TValue>
+			{
+				const int MAX = 100;
+				const int THRESHOLD = 10;
+
+				DoHeapTest(heap, values, clock);
+				Debug.Assert(heap.Count == 0, "Values are not removed correctly!");
+
+				Console.WriteLine("Test DecreaseKey...");
+				int range = Math.Min(MAX, values.Length);
+				int threshold = Math.Min(THRESHOLD, values.Length - 1);
+				HashSet<TNode> set = new HashSet<TNode>();
+
+				clock.Restart();
+
+				for (int i = 0; i < range; i++)
+				{
+					if (set.Count < threshold)
+					{
+						TNode node = heap.MakeNode(values[i]);
+						heap.Add(node);
+						set.Add(node);
+						continue;
+					}
+
+					heap.Add(values[i]);
+				}
+
+				Console.WriteLine($"Added {heap.Count} of {range} items in {clock.ElapsedMilliseconds} ms.");
+				
+				clock.Stop();
+				Console.WriteLine($"Picked {set.Count} random items for the DecreaseKey test.");
+
+				bool succeeded = true;
+
+				while (succeeded && set.Count > 0)
+				{
+					TNode node = set.PopFirst();
+					heap.DecreaseKey(node, newKey);
+					TValue extracted = heap.ExtractValue();
+					succeeded = ReferenceEquals(node.Value, extracted);
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
+				}
+			}
+		}
+
+		private static void TestGraph()
+		{
+			const int MAX_LIST = 26;
+
+			bool more;
+			GraphList<char> graph;
+			WeightedGraphList<char, int> weightedGraph;
+			List<char> values = new List<char>();
+			Menu menu = new Menu()
+				.Add("Undirected graph", () =>
+				{
+					Console.WriteLine();
+					graph = new UndirectedGraphList<char>();
+					if (values.Count == 0) AddValues(values);
+					DoTheTest(graph, values);
+				})
+				.Add("Directed graph", () =>
+				{
+					Console.WriteLine();
+					graph = new DirectedGraphList<char>();
+					if (values.Count == 0) AddValues(values);
+					DoTheTest(graph, values);
+				})
+				.Add("Mixed graph", () =>
+				{
+					Console.WriteLine();
+					graph = new MixedGraphList<char>();
+					if (values.Count == 0) AddValues(values);
+					DoTheTest(graph, values);
+				})
+				.Add("Weighted undirected graph", () =>
+				{
+					Console.WriteLine();
+					weightedGraph = new WeightedUndirectedGraphList<char, int>();
+					if (values.Count == 0) AddValues(values);
+					DoTheTest(weightedGraph, values);
+				})
+				.Add("Weighted directed graph", () =>
+				{
+					Console.WriteLine();
+					weightedGraph = new WeightedDirectedGraphList<char, int>();
+					if (values.Count == 0) AddValues(values);
+					DoTheTest(weightedGraph, values);
+				})
+				.Add("Weighted mixed graph", () =>
+				{
+					Console.WriteLine();
+					weightedGraph = new WeightedMixedGraphList<char, int>();
+					if (values.Count == 0) AddValues(values);
+					DoTheTest(weightedGraph, values);
+				});
+
+			do
+			{
+				Console.Clear();
+				Title("Testing graph add()");
+				menu.Display();
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+				if (!more || values.Count >= MAX_LIST) continue;
+
+				Console.Write($"Would you like to add more character? {"[Y]".BrightGreen()} / {"any key".Dim()} ");
+				response = Console.ReadKey(true);
+				Console.WriteLine();
+				if (response.Key != ConsoleKey.Y) continue;
+				Console.WriteLine();
+				AddValues(values);
+			}
+			while (more);
+
+			static void AddValues(List<char> list)
+			{
+				int len = RNGRandomHelper.Next(1, 12);
+				Console.WriteLine("Generating new characters: ".BrightGreen());
+				char[] newValues = GetRandomChar(true, len);
+				int count = 0;
+
+				foreach (char value in newValues)
+				{
+					if (list.Contains(value)) continue;
+					list.Add(value);
+					count++;
+				}
+
+				Console.WriteLine($"Added {count} characters to the set".BrightGreen());
+			}
+
+			static bool DoTheTest<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, List<char> values)
+				where TAdjacencyList : class, ICollection<TEdge>
+			{
+				Console.WriteLine("Test adding nodes...");
+				Console.WriteLine("characters list: ".BrightBlack() + string.Join(", ", values));
+				graph.Clear();
+				graph.Add(values);
+
+				if (graph.Count != values.Count)
+				{
+					Console.WriteLine("Something went wrong, not all nodes were added...!".BrightRed());
+					return false;
+				}
+
+				if (graph.Count == 1)
+				{
+					Console.WriteLine("Huh, must add more nodes...!".BrightRed());
+					return true;
+				}
+				
+				Console.WriteLine("All nodes are added...!".BrightGreen() + " Let's try adding some relationships...");
+				Console.Write($@"{"Would you like to add a bit of randomization?".Yellow()} {"[Y]".BrightGreen()} / {"any key".Dim()}.
+This may cause cycles but will make it much more fun for finding shortest paths. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				int threshold = response.Key != ConsoleKey.Y ? 0 : (int)Math.Floor(values.Count * 0.5d);
+				
+				Queue<char> queue = new Queue<char>(values);
+				char from = queue.Dequeue();
+				Action<char, char> addEdge = graph switch
+				{
+					MixedGraphList<char> mGraph => (f, t) => mGraph.AddEdge(f, t, __fakeGenerator.Value.Random.Bool()),
+					WeightedMixedGraphList<char, int> wmGraph => (f, t) => wmGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue), __fakeGenerator.Value.Random.Bool()),
+					WeightedGraphList<char, int> wGraph => (f, t) => wGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue)),
+					_ => graph.AddEdge
+				};
+
+				while (queue.Count > 0)
+				{
+					char to = queue.Dequeue();
+					if (graph.ContainsEdge(from, to)) continue;
+					Console.WriteLine($"Adding {from.ToString().BrightCyan().Underline()} to {to.ToString().BrightCyan().Underline()}...");
+					addEdge(from, to);
+
+					if (threshold > 0 && __fakeGenerator.Value.Random.Bool())
+					{
+						queue.Enqueue(from);
+						queue.Enqueue(values.PickRandom());
+						threshold--;
+					}
+
+					from = to;
+				}
+
+				graph.Print();
+				Console.WriteLine();
+				Console.WriteLine("Cool, let's try enumerating it.");
+				char value = graph.Top().First();
+				Console.WriteLine($"Picking a value with maximum connections: '{value.ToString().BrightCyan().Underline()}'...");
+				if (!DoTheTestWithValue(graph, values, value)) return false;
+
+				do
+				{
+					Console.WriteLine();
+					Console.Write($@"Type in {"a character".BrightGreen()} to traverse from,
+or press {"ESCAPE".BrightRed()} key to exit this test. ");
+					response = Console.ReadKey();
+					Console.WriteLine();
+					if (response.Key == ConsoleKey.Escape) continue;
+
+					if (!char.IsLetter(response.KeyChar) || !graph.ContainsKey(response.KeyChar))
+					{
+						Console.WriteLine($"Character '{value}' is not found or not connected!");
+						continue;
+					}
+
+					value = response.KeyChar;
+					if (!DoTheTestWithValue(graph, values, value)) return false;
+				}
+				while (response.Key != ConsoleKey.Escape);
+
+				Console.WriteLine();
+				return true;
+			}
+
+			static bool DoTheTestWithValue<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, List<char> values, char value)
+				where TAdjacencyList : class, ICollection<TEdge>
+			{
+				const string LINE_SEPARATOR = "*******************************************************************************";
+
+				Console.WriteLine("Breadth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, BreadthDepthTraverse.BreadthFirst)));
+				Console.WriteLine("Depth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, BreadthDepthTraverse.DepthFirst)));
+				Console.WriteLine("Degree: ".Yellow() + graph.Degree(value));
+
+				// detect a cycle
+				IEnumerable<char> cycle = graph.FindCycle();
+				if (cycle != null) Console.WriteLine("Found cycle: ".BrightRed() + string.Join(", ", cycle));
+
+				// test specific graph type features
+				switch (graph)
+				{
+					case DirectedGraphList<char> directedGraph:
+						Console.WriteLine("InDegree: ".Yellow() + directedGraph.InDegree(value));
+						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", directedGraph.TopologicalSort())); }
+						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
+						break;
+					case MixedGraphList<char> mixedGraph:
+						Console.WriteLine("InDegree: ".Yellow() + mixedGraph.InDegree(value));
+						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", mixedGraph.TopologicalSort())); }
+						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
+						break;
+					case WeightedDirectedGraphList<char, int> weightedDirectedGraph:
+						Console.WriteLine("InDegree: ".Yellow() + weightedDirectedGraph.InDegree(value));
+						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", weightedDirectedGraph.TopologicalSort())); }
+						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
+						break;
+					case WeightedUndirectedGraphList<char, int> weightedUndirectedGraph:
+						Console.WriteLine(LINE_SEPARATOR);
+						WeightedUndirectedGraphList<char, int> spanningTree = weightedUndirectedGraph.GetMinimumSpanningTree(SpanningTreeAlgorithm.Prim);
+
+						if (spanningTree != null)
+						{
+							Console.WriteLine("Prim Spanning Tree: ".Yellow());
+							spanningTree.Print();
+							Console.WriteLine(LINE_SEPARATOR);
+						}
+						
+						spanningTree = weightedUndirectedGraph.GetMinimumSpanningTree(SpanningTreeAlgorithm.Kruskal);
+
+						if (spanningTree != null)
+						{
+							Console.WriteLine("Kruskal Spanning Tree: ".Yellow());
+							spanningTree.Print();
+							Console.WriteLine(LINE_SEPARATOR);
+						}
+						break;
+					case WeightedMixedGraphList<char, int> weightedMixedGraph:
+						Console.WriteLine("InDegree: ".Yellow() + weightedMixedGraph.InDegree(value));
+						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", weightedMixedGraph.TopologicalSort())); }
+						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
+						break;
+				}
+
+				if (graph is WeightedGraphList<char, int> wGraph)
+				{
+					char to = values.PickRandom();
+					ConsoleKeyInfo response;
+
+					do
+					{
+						Console.Write($@"Current position is '{value.ToString().BrightGreen()}'. Type in {"a character".BrightGreen()} to find the shortest path to,
+(You can press the {"RETURN".BrightGreen()} key to accept the current random value '{to.ToString().BrightGreen()}'),
+or press {"ESCAPE".BrightRed()} key to exit this test. ");
+						response = Console.ReadKey();
+						Console.WriteLine();
+						if (response.Key == ConsoleKey.Escape) return false;
+						if (response.Key == ConsoleKey.Enter) continue;
+						if (!char.IsLetter(response.KeyChar) || !wGraph.ContainsKey(response.KeyChar)) Console.WriteLine($"Character '{value}' is not found or not connected!");
+						to = response.KeyChar;
+						break;
+					}
+					while (response.Key != ConsoleKey.Enter);
+
+					Console.WriteLine();
+					Console.WriteLine($"{"Shortest Path".Yellow()} from '{value.ToString().BrightCyan()}' to '{to.ToString().BrightCyan()}'");
+					Console.WriteLine("Dijkstra: " + string.Join(" -> ", wGraph.GetShortestPath(value, to, ShortestPathAlgorithm.Dijkstra)));
+				}
+
+				return true;
 			}
 		}
 
@@ -3494,8 +3640,11 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			};
 		}
 
+		private static bool RandomBool() { return RandomHelper.Default.Next(1) == 1; }
+
 		[NotNull]
 		private static int[] GetRandomIntegers(int len = 0) { return GetRandomIntegers(false, len); }
+		
 		[NotNull]
 		private static int[] GetRandomIntegers(bool unique, int len = 0)
 		{
@@ -3519,6 +3668,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 		[NotNull]
 		private static char[] GetRandomChar(int len = 0) { return GetRandomChar(false, len); }
+		
 		[NotNull]
 		private static char[] GetRandomChar(bool unique, int len = 0)
 		{
@@ -3551,6 +3701,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 		[NotNull]
 		private static ICollection<string> GetRandomStrings(int len = 0) { return GetRandomStrings(false, len); }
+		
 		[NotNull]
 		private static ICollection<string> GetRandomStrings(bool unique, int len = 0)
 		{
@@ -3563,53 +3714,6 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 				set.Add(__fakeGenerator.Value.Random.Word());
 
 			return set;
-		}
-
-		private class Student : IComparable<Student>, IComparable, IEquatable<Student>
-		{
-			public string Name { get; set; }
-
-			public double Grade { get; set; }
-
-			/// <inheritdoc />
-			public override string ToString() { return $"{Name} > {Grade:F2}"; }
-
-			/// <inheritdoc />
-			public int CompareTo(Student other)
-			{
-				if (ReferenceEquals(this, other)) return 0;
-				if (ReferenceEquals(other, null)) return -1;
-				return string.Compare(Name, other.Name, StringComparison.OrdinalIgnoreCase);
-			}
-
-			/// <inheritdoc />
-			public int CompareTo(object obj) { return CompareTo(obj as Student); }
-
-			/// <inheritdoc />
-			public bool Equals(Student other)
-			{
-				if (ReferenceEquals(null, other)) return false;
-				if (ReferenceEquals(this, other)) return true;
-				return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) && Grade.Equals(other.Grade);
-			}
-
-			/// <inheritdoc />
-			public override bool Equals(object obj)
-			{
-				if (ReferenceEquals(null, obj)) return false;
-				if (ReferenceEquals(this, obj)) return true;
-				if (obj.GetType() != GetType()) return false;
-				return Equals((Student)obj);
-			}
-
-			/// <inheritdoc />
-			public override int GetHashCode()
-			{
-				return RuntimeHelpers.GetHashCode(this);
-			}
-
-			public static bool operator ==(Student left, Student right) { return Equals(left, right); }
-			public static bool operator !=(Student left, Student right) { return !Equals(left, right); }
 		}
 
 		[NotNull]
@@ -3629,6 +3733,37 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			}
 
 			return students;
+		}
+
+		private class Student : IComparable<Student>, IComparable, IEquatable<Student>
+		{
+			public string Name { get; set; }
+
+			public double Grade { get; set; }
+
+			/// <inheritdoc />
+			public override string ToString() { return $"{Name} [{Grade:F2}]"; }
+
+			/// <inheritdoc />
+			public int CompareTo(Student other)
+			{
+				if (ReferenceEquals(this, other)) return 0;
+				if (ReferenceEquals(other, null)) return -1;
+				int cmp = Grade.CompareTo(other.Grade);
+				if (cmp != 0) return cmp;
+				return string.Compare(Name, other.Name, StringComparison.OrdinalIgnoreCase);
+			}
+
+			/// <inheritdoc />
+			int IComparable.CompareTo(object obj) { return CompareTo(obj as Student); }
+
+			/// <inheritdoc />
+			public bool Equals(Student other)
+			{
+				if (ReferenceEquals(null, other)) return false;
+				if (ReferenceEquals(this, other)) return true;
+				return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) && Grade.Equals(other.Grade);
+			}
 		}
 	}
 }
@@ -3673,7 +3808,7 @@ public static class Extension
 		Console.WriteLine();
 		Console.WriteLine($"{"Dimensions:".Yellow()} {thisValue.Count.ToString().Underline()} x {thisValue.GetHeight().ToString().Underline()}.");
 		Console.WriteLine($"{"Valid:".Yellow()} {thisValue.Validate().ToYesNo()}");
-		Console.WriteLine($"{"Minimum:".Yellow()} {thisValue.Minimum()} {"Maximum:".Yellow()} {thisValue.Maximum()}");
+		Console.WriteLine($"{"LeftMost:".Yellow()} {thisValue.LeftMost()} {"RightMost:".Yellow()} {thisValue.RightMost()}");
 	}
 
 	public static void PrintWithProps<T>([NotNull] this ArrayBinaryTree<T> thisValue)

@@ -11,7 +11,7 @@ namespace asm.Collections
 	[DebuggerDisplay("{Key} = {Value} :D{Degree}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class FibonacciNode<TNode, TKey, TValue>
+	public abstract class FibonacciNode<TNode, TKey, TValue> : IKeyedNode<TKey, TValue>
 		where TNode : FibonacciNode<TNode, TKey, TValue>
 	{
 		private const int PARENT = 0;
@@ -97,27 +97,27 @@ namespace asm.Collections
 		[ItemNotNull]
 		public IEnumerable<TNode> Backwards(TNode stopAt = null)
 		{
-			TNode node = (TNode)this;
+			TNode node = _nodes[PREVIOUS];
+			stopAt ??= (TNode)this;
 
-			do
+			while (node != null && node != stopAt)
 			{
 				yield return node;
 				node = node._nodes[PREVIOUS];
 			}
-			while (node != stopAt && node != this);
 		}
 
 		[ItemNotNull]
 		public IEnumerable<TNode> Forwards(TNode stopAt = null)
 		{
-			TNode node = (TNode)this;
+			TNode node = _nodes[NEXT];
+			stopAt ??= (TNode)this;
 
-			do
+			while (node != null && node != stopAt)
 			{
 				yield return node;
 				node = node._nodes[NEXT];
 			}
-			while (node != stopAt && node != this);
 		}
 
 		[ItemNotNull]

@@ -22,7 +22,7 @@ namespace asm.Collections
 	/// situation).
 	/// </para>
 	/// </summary>
-	public enum BinaryTreeTraverseMethod
+	public enum TreeTraverseMethod
 	{
 		[Display(Name = "Breadth First (Level Order)")]
 		LevelOrder, // Root-Left-Right (Queue)

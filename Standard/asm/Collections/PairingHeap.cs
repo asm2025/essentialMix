@@ -29,7 +29,7 @@ namespace asm.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(PairingHeap<,,>.DebugView))]
 	[Serializable]
-	public abstract class PairingHeap<TNode, TKey, TValue> : IReadOnlyCollection<TValue>, ICollection
+	public abstract class PairingHeap<TNode, TKey, TValue> : IKeyedHeap<TNode, TKey, TValue>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
 		where TNode : PairingNode<TNode, TKey, TValue>
 	{
 		internal sealed class DebugView
@@ -45,7 +45,7 @@ namespace asm.Collections
 			public TNode Head => _heap.Head;
 		}
 
-		private struct Enumerator : IEnumerableEnumerator<TValue>
+		private struct BreadthFirstEnumerator : IEnumerableEnumerator<TValue>
 		{
 			private readonly PairingHeap<TNode, TKey, TValue> _heap;
 			private readonly int _version;
@@ -56,7 +56,7 @@ namespace asm.Collections
 			private bool _started;
 			private bool _done;
 
-			internal Enumerator([NotNull] PairingHeap<TNode, TKey, TValue> heap, TNode root)
+			internal BreadthFirstEnumerator([NotNull] PairingHeap<TNode, TKey, TValue> heap, TNode root)
 			{
 				_heap = heap;
 				_version = _heap._version;
@@ -163,7 +163,6 @@ namespace asm.Collections
 			Add(enumerable);
 		}
 
-		[NotNull]
 		public IComparer<TKey> Comparer { get; }
 
 		[NotNull]
@@ -172,6 +171,9 @@ namespace asm.Collections
 		public int Count { get; protected internal set; }
 	
 		protected internal TNode Head { get; set; }
+
+		/// <inheritdoc />
+		bool ICollection<TValue>.IsReadOnly => false;
 
 		/// <inheritdoc />
 		bool ICollection.IsSynchronized => false;
@@ -200,7 +202,7 @@ namespace asm.Collections
 		[NotNull]
 		public IEnumerableEnumerator<TValue> Enumerate(TNode root)
 		{
-			return new Enumerator(this, root);
+			return new BreadthFirstEnumerator(this, root);
 		}
 
 		/// <summary>
@@ -263,9 +265,20 @@ namespace asm.Collections
 			}
 		}
 
-		public void Add([NotNull] TValue value)
+		/// <inheritdoc />
+		public abstract TNode MakeNode(TValue value);
+
+		/// <inheritdoc />
+		public void Add(TValue value)
 		{
-			TNode node = MakeNode(value);
+			if (value == null) throw new ArgumentNullException(nameof(value));
+			Add(MakeNode(value));
+		}
+
+		/// <inheritdoc />
+		public void Add(TNode node)
+		{
+			node.Child = node.Sibling = node.Previous = null;
 			Head = Head == null
 						? node
 						: Meld(Head, node);
@@ -273,19 +286,23 @@ namespace asm.Collections
 			_version++;
 		}
 
-		public void Add([NotNull] IEnumerable<TValue> enumerable)
+		/// <inheritdoc />
+		public void Add(IEnumerable<TValue> enumerable)
 		{
 			foreach (TValue item in enumerable)
 				Add(item);
 		}
 
-		public bool Remove([NotNull] TValue value)
+		/// <inheritdoc />
+		public bool Remove(TValue value)
 		{
-			TNode node = FindByValue(value);
+			if (value == null) throw new ArgumentNullException(nameof(value));
+			TNode node = Find(value);
 			return node != null && Remove(node);
 		}
 
-		public bool Remove([NotNull] TNode node)
+		/// <inheritdoc />
+		public bool Remove(TNode node)
 		{
 			// https://www.geeksforgeeks.org/pairing-heap/
 			// https://brilliant.org/wiki/pairing-heap/
@@ -298,6 +315,7 @@ namespace asm.Collections
 			return true;
 		}
 
+		/// <inheritdoc />
 		public void Clear()
 		{
 			Head = null;
@@ -305,7 +323,8 @@ namespace asm.Collections
 			_version++;
 		}
 
-		public void DecreaseKey([NotNull] TNode node, [NotNull] TKey newKey)
+		/// <inheritdoc />
+		public void DecreaseKey(TNode node, TKey newKey)
 		{
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
 			if (Compare(node.Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
@@ -324,14 +343,14 @@ namespace asm.Collections
 			_version++;
 		}
 
+		/// <inheritdoc />
 		public TValue Value()
 		{
-			return Head == null
-						? default(TValue)
-						: Head.Value;
+			if (Head == null) throw new InvalidOperationException("Heap is empty.");
+			return Head.Value;
 		}
 
-		[NotNull]
+		/// <inheritdoc />
 		public TValue ExtractValue()
 		{
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
@@ -344,6 +363,7 @@ namespace asm.Collections
 			return oldRoot.Value;
 		}
 
+		/// <inheritdoc />
 		public TValue ElementAt(int k)
 		{
 			if (k < 1 || Count < k) throw new ArgumentOutOfRangeException(nameof(k));
@@ -354,24 +374,15 @@ namespace asm.Collections
 			return Value();
 		}
 
-		public bool Contains([NotNull] TValue value)
+		/// <inheritdoc />
+		public bool Contains(TValue value)
 		{
-			return FindByValue(value) != null;
+			if (value == null) throw new ArgumentNullException(nameof(value));
+			return Find(value) != null;
 		}
 
-		public TNode FindByKey([NotNull] TKey key)
-		{
-			if (Head == null) return null;
-			TNode node = null;
-			Iterate(Head, e =>
-			{
-				if (Comparer.IsEqual(e.Key, key)) node = e;
-				return node == null;
-			});
-			return node;
-		}
-
-		public TNode FindByValue([NotNull] TValue value)
+		/// <inheritdoc />
+		public TNode Find(TValue value)
 		{
 			if (Head == null) return null;
 			TNode node = null;
@@ -383,6 +394,47 @@ namespace asm.Collections
 			return node;
 		}
 
+		/// <inheritdoc />
+		public TNode FindByKey(TKey key)
+		{
+			if (Head == null) return null;
+			TNode node = null;
+			Iterate(Head, e =>
+			{
+				if (Comparer.IsEqual(e.Key, key)) node = e;
+				return node == null;
+			});
+			return node;
+		}
+
+		public virtual bool Equals(PairingHeap<TNode, TKey, TValue> other)
+		{
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
+			if (Count != other.Count || !ValueComparer.Equals(other.ValueComparer)) return false;
+
+			using (IEnumerator<TValue> thisEnumerator = GetEnumerator())
+			{
+				using (IEnumerator<TValue> otherEnumerator = other.GetEnumerator())
+				{
+					bool thisMoved = thisEnumerator.MoveNext();
+					bool otherMoved = otherEnumerator.MoveNext();
+					
+					while (thisMoved && otherMoved)
+					{
+						if (!ValueComparer.Equals(thisEnumerator.Current, otherEnumerator.Current)) return false;
+						thisMoved = thisEnumerator.MoveNext();
+						otherMoved = otherEnumerator.MoveNext();
+					}
+
+					if (thisMoved ^ otherMoved) return false;
+				}
+			}
+
+			return true;
+		}
+
+		/// <inheritdoc />
 		public void CopyTo(TValue[] array, int arrayIndex)
 		{
 			if (Count == 0) return;
@@ -418,9 +470,6 @@ namespace asm.Collections
 			if (Count == 0) return;
 			Iterate(Head, e => objects[index++] = e.Value);
 		}
-
-		[NotNull]
-		protected abstract TNode MakeNode([NotNull] TValue value);
 
 		protected abstract int Compare([NotNull] TKey x, [NotNull] TKey y);
 
@@ -548,7 +597,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected override PairingNode<TKey, TValue> MakeNode(TValue value) { return new PairingNode<TKey, TValue>(_getKeyForItem(value), value); }
+		public override PairingNode<TKey, TValue> MakeNode(TValue value) { return new PairingNode<TKey, TValue>(_getKeyForItem(value), value); }
 	}
 
 	[DebuggerTypeProxy(typeof(PairingHeap<>.DebugView))]
@@ -587,44 +636,44 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected override PairingNode<T> MakeNode(T value) { return new PairingNode<T>(value); }
+		public override PairingNode<T> MakeNode(T value) { return new PairingNode<T>(value); }
 	}
 
 	public static class PairingHeapExtension
 	{
-		// todo https://www.geeksforgeeks.org/left-child-right-sibling-representation-tree/
 		public static void WriteTo<TNode, TKey, TValue>([NotNull] this PairingHeap<TNode, TKey, TValue> thisValue, [NotNull] TextWriter writer)
 			where TNode : PairingNode<TNode, TKey, TValue>
 		{
 			const string STR_BLANK = "   ";
 			const string STR_EXT = "│  ";
 			const string STR_CONNECTOR_L = "└─ ";
+			const string STR_CONNECTOR_C = " ► ";
 			const string STR_NULL = "<null>";
 
 			if (thisValue.Head == null) return;
 
 			StringBuilder indent = new StringBuilder();
-			LinkedList<(Queue<TNode> Nodes, int Level)> nodesStack = new LinkedList<(Queue<TNode> Nodes, int Level)>();
+			LinkedList<(Queue<TNode> Nodes, int Level)> nodesList = new LinkedList<(Queue<TNode> Nodes, int Level)>();
 			Queue<TNode> rootQueue = new Queue<TNode>(1);
 			rootQueue.Enqueue(thisValue.Head);
-			nodesStack.AddFirst((rootQueue, 0));
+			nodesList.AddFirst((rootQueue, 0));
 
-			while (nodesStack.Count > 0)
+			while (nodesList.Count > 0)
 			{
-				(Queue<TNode> nodes, int level) = nodesStack.Last.Value;
+				(Queue<TNode> nodes, int level) = nodesList.Last.Value;
 
 				if (nodes.Count == 0)
 				{
-					nodesStack.RemoveLast();
+					nodesList.RemoveLast();
 					continue;
 				}
 
 				TNode node = nodes.Dequeue();
 				indent.Length = 0;
 
-				foreach ((Queue<TNode> Nodes, int Level) tuple in nodesStack)
+				foreach ((Queue<TNode> Nodes, int Level) tuple in nodesList)
 				{
-					if (tuple == nodesStack.Last.Value) break;
+					if (tuple == nodesList.Last.Value) break;
 					indent.Append(tuple.Nodes.Count > 0
 									? STR_EXT
 									: STR_BLANK);
@@ -638,13 +687,30 @@ namespace asm.Collections
 					continue;
 				}
 
-				writer.WriteLine(node.ToString(level));
+				if (nodes.Count == 0 && node.Child != null)
+				{
+					writer.Write(node.ToString(level));
+
+					// this is a child. so will print the children list
+					foreach (TNode child in node.Children())
+					{
+						writer.Write(STR_CONNECTOR_C);
+						writer.Write(child.ToString());
+					}
+
+					writer.WriteLine();
+				}
+				else
+				{
+					writer.WriteLine(node.ToString(level));
+				}
+
 				if (node.IsLeaf) continue;
 
 				Queue<TNode> queue = new Queue<TNode>(2);
-				if (node.Sibling != null) queue.Enqueue(node.Sibling);
-				if (node.Child != null) queue.Enqueue(node.Child);
-				nodesStack.AddLast((queue, level + 1));
+				queue.Enqueue(node.Sibling);
+				queue.Enqueue(node.Child);
+				nodesList.AddLast((queue, level + 1));
 			}
 		}
 	}

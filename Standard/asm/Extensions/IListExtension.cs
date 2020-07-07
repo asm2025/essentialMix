@@ -36,8 +36,9 @@ namespace asm.Extensions
 			}
 		}
 
-		public static T PickRandom<T>([NotNull] this IList<T> thisValue)
+		public static T PickRandom<T>([NotNull] this IList<T> thisValue, int startIndex = 0, int count = -1)
 		{
+			thisValue.Count.ValidateRange(startIndex, ref count);
 			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
 
 			int max;
@@ -47,22 +48,23 @@ namespace asm.Extensions
 			{
 				lock (collection.SyncRoot)
 				{
-					max = thisValue.Count - 1;
-					n = RNGRandomHelper.Next(0, max);
+					max = count - 1;
+					n = RNGRandomHelper.Next(startIndex, max);
 					return thisValue[n];
 				}
 			}
 
 			lock (thisValue)
 			{
-				max = thisValue.Count - 1;
-				n = RNGRandomHelper.Next(0, max);
+				max = count - 1;
+				n = RNGRandomHelper.Next(startIndex, max);
 				return thisValue[n];
 			}
 		}
 
-		public static T PopRandom<T>([NotNull] this IList<T> thisValue)
+		public static T PopRandom<T>([NotNull] this IList<T> thisValue, int startIndex = 0, int count = -1)
 		{
+			thisValue.Count.ValidateRange(startIndex, ref count);
 			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
 
 			int max;
@@ -73,8 +75,8 @@ namespace asm.Extensions
 			{
 				lock (collection.SyncRoot)
 				{
-					max = thisValue.Count - 1;
-					n = RNGRandomHelper.Next(0, max);
+					max = count - 1;
+					n = RNGRandomHelper.Next(startIndex, max);
 					result = thisValue[n];
 					thisValue.RemoveAt(n);
 					return result;
@@ -83,8 +85,8 @@ namespace asm.Extensions
 
 			lock (thisValue)
 			{
-				max = thisValue.Count - 1;
-				n = RNGRandomHelper.Next(0, max);
+				max = count - 1;
+				n = RNGRandomHelper.Next(startIndex, max);
 				result = thisValue[n];
 				thisValue.RemoveAt(n);
 				return result;
@@ -501,7 +503,7 @@ namespace asm.Extensions
 
 		public static void SortHeap<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
 		{
-			Heap.Sort(thisValue, index, count, comparer, descending);
+			BinaryHeap.Sort(thisValue, index, count, comparer, descending);
 		}
 
 		public static void SortQuick<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)

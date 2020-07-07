@@ -1,6 +1,6 @@
 ﻿namespace asm.Collections
 {
-	public enum GraphTraverseMethod
+	public enum BreadthDepthTraverse
 	{
 		BreadthFirst,
 		DepthFirst

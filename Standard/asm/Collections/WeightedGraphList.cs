@@ -280,13 +280,13 @@ namespace asm.Collections
 		/// <inheritdoc />
 		protected override KeyedCollection<T, GraphEdge<T, TWeight>> NewEdgesContainer() { return new KeyedCollection<T, GraphEdge<T, TWeight>>(e => e.To, Comparer); }
 	
-		public override IGraphEnumeratorImpl<T> Enumerate(T from, GraphTraverseMethod method)
+		public override IGraphEnumeratorImpl<T> Enumerate(T from, BreadthDepthTraverse method)
 		{
 			if (!ContainsKey(from)) throw new KeyNotFoundException();
 			return method switch
 			{
-				GraphTraverseMethod.BreadthFirst => new BreadthFirstEnumerator(this, from),
-				GraphTraverseMethod.DepthFirst => new DepthFirstEnumerator(this, from),
+				BreadthDepthTraverse.BreadthFirst => new BreadthFirstEnumerator(this, from),
+				BreadthDepthTraverse.DepthFirst => new DepthFirstEnumerator(this, from),
 				_ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
 			};
 		}
@@ -364,7 +364,7 @@ namespace asm.Collections
 			// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
 			Dictionary<T, T> history = new Dictionary<T, T>();
 			Dictionary<T, TWeight> weights = new Dictionary<T, TWeight>(Comparer);
-			PriorityQueue<PathEntry> queue = new MinPriorityQueue<PathEntry>(ComparisonComparer.FromComparison<PathEntry>((x, y) => x.Priority.CompareTo(y.Priority)));
+			BinaryHeap<PathEntry> queue = new MinBinaryHeap<PathEntry>(ComparisonComparer.FromComparison<PathEntry>((x, y) => x.Priority.CompareTo(y.Priority)));
 			HashSet<T> visited = new HashSet<T>(Comparer);
 			TWeight maxWeight = TypeHelper.MaximumOf<TWeight>();
 
@@ -376,7 +376,7 @@ namespace asm.Collections
 
 			while (queue.Count > 0)
 			{
-				T current = queue.Remove().Value;
+				T current = queue.ExtractValue().Value;
 				visited.Add(current);
 
 				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[current];

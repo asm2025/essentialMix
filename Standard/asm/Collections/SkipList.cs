@@ -35,7 +35,7 @@ namespace asm.Collections
 		private const double PROBABILITY = 0.5d;
 
 		[DebuggerDisplay("{Value}")]
-		internal class Node
+		internal class Node : INode<T>
 		{
 			[NotNull]
 			internal Node[] Forward;
