@@ -123,15 +123,6 @@ namespace asm.Collections
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		internal void Link([NotNull] TNode other)
-		{
-			other._nodes[PARENT] = (TNode)this;
-			other._nodes[SIBLING] = _nodes[CHILD];
-			_nodes[CHILD] = other;
-			Degree++;
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		private void AssertNotCircularRef(BinomialNode<TNode, TKey, TValue> node)
 		{
 			if (!ReferenceEquals(this, node)) return;

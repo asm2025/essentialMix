@@ -15,7 +15,7 @@ namespace asm.Collections
 	/// <summary>
 	/// <see href="https://en.wikipedia.org/wiki/Fibonacci_heap">Fibonacci heap</see> is a data structure for priority
 	/// queue operations, consisting of a collection of heap-ordered trees. It has a better amortized running time than
-	/// many other priority queue data structures including the binary heap and binomial heap.
+	/// many other priority queue data structures including the binary heap and Fibonacci heap.
 	/// </summary>
 	/// <typeparam name="TNode">The node type. This is just for abstraction purposes and shouldn't be dealt with directly.</typeparam>
 	/// <typeparam name="TKey">The key assigned to the element. It should have its value from the value at first but changing
@@ -120,6 +120,8 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes.
+				if (_current.Child != null) _queue.Enqueue(_current.Child);
+
 				if (_current.Next != null && !ReferenceEquals(_current.Next, _root))
 				{
 					/*
@@ -128,8 +130,6 @@ namespace asm.Collections
 					*/
 					_queue.Enqueue(_current.Next);
 				}
-
-				if (_current.Child != null) _queue.Enqueue(_current.Child);
 
 				return true;
 			}
@@ -140,6 +140,106 @@ namespace asm.Collections
 				_current = null;
 				_started = false;
 				_queue.Clear();
+				_done = _heap.Count == 0 || _root == null;
+			}
+
+			/// <inheritdoc />
+			public void Dispose() { }
+		}
+
+		private struct DepthFirstEnumerator : IEnumerableEnumerator<TValue>
+		{
+			private readonly FibonacciHeap<TNode, TKey, TValue> _heap;
+			private readonly int _version;
+			private readonly TNode _root;
+			private readonly Stack<TNode> _stack;
+
+			private TNode _current;
+			private bool _started;
+			private bool _done;
+
+			internal DepthFirstEnumerator([NotNull] FibonacciHeap<TNode, TKey, TValue> heap, TNode root)
+			{
+				_heap = heap;
+				_version = _heap._version;
+				_root = root;
+				_stack = new Stack<TNode>();
+				_current = null;
+				_started = false;
+				_done = _heap.Count == 0 || _root == null;
+			}
+
+			/// <inheritdoc />
+			[NotNull]
+			public TValue Current
+			{
+				get
+				{
+					if (!_started || _current == null) throw new InvalidOperationException();
+					return _current.Value;
+				}
+			}
+
+			/// <inheritdoc />
+			[NotNull]
+			object IEnumerator.Current => Current;
+
+			/// <inheritdoc />
+			public IEnumerator<TValue> GetEnumerator()
+			{
+				IEnumerator enumerator = this;
+				enumerator.Reset();
+				return this;
+			}
+
+			/// <inheritdoc />
+			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+			public bool MoveNext()
+			{
+				if (_version != _heap._version) throw new VersionChangedException();
+				// Head-Child-Sibling (Stack)
+				if (_done) return false;
+
+				if (!_started)
+				{
+					_started = true;
+					// Start at the root
+					_stack.Push(_root);
+				}
+
+				// visit the next queued node
+				_current = _stack.Count > 0
+								? _stack.Pop()
+								: null;
+
+				if (_current == null)
+				{
+					_done = true;
+					return false;
+				}
+
+				// Queue the next nodes
+				if (_current.Next != null && !ReferenceEquals(_current.Next, _root))
+				{
+					/*
+					* The previous/next nodes are not exactly a doubly linked list but rather
+					* a circular reference so will have to watch out for this.
+					*/
+					_stack.Push(_current.Next);
+				}
+
+				if (_current.Child != null) _stack.Push(_current.Child);
+
+				return true;
+			}
+
+			void IEnumerator.Reset()
+			{
+				if (_version != _heap._version) throw new VersionChangedException();
+				_current = null;
+				_started = false;
+				_stack.Clear();
 				_done = _heap.Count == 0 || _root == null;
 			}
 
@@ -208,88 +308,83 @@ namespace asm.Collections
 		/// Enumerate nodes' values in a semi recursive approach
 		/// </summary>
 		/// <param name="root">The starting node</param>
-		/// <returns></returns>
+		/// <param name="method">The technique to use when traversing</param>
+		/// <returns>An <see cref="IEnumerableEnumerator{TValue}"/></returns>
 		[NotNull]
-		public IEnumerableEnumerator<TValue> Enumerate(TNode root)
+		public IEnumerableEnumerator<TValue> Enumerate(TNode root, BreadthDepthTraverse method)
 		{
-			return new BreadthFirstEnumerator(this, root);
+			return method switch
+			{
+				BreadthDepthTraverse.BreadthFirst => new BreadthFirstEnumerator(this, root),
+				BreadthDepthTraverse.DepthFirst => new DepthFirstEnumerator(this, root),
+				_ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
+			};
 		}
+
+		#region Enumerate overloads
+		[NotNull]
+		public IEnumerableEnumerator<TValue> Enumerate(TNode root) { return Enumerate(root, BreadthDepthTraverse.BreadthFirst); }
+		#endregion
 
 		/// <summary>
 		/// Iterate over nodes with a callback action
 		/// </summary>
 		/// <param name="root">The starting node</param>
+		/// <param name="method">The technique to use when traversing</param>
 		/// <param name="visitCallback">callback action to handle the node</param>
-		public void Iterate(TNode root, [NotNull] Action<TNode> visitCallback)
+		public void Iterate(TNode root, BreadthDepthTraverse method, [NotNull] Action<TNode> visitCallback)
 		{
-			if (Count == 0) return;
+			if (Count == 0 || root == null) return;
 
-			int version = _version;
-			// Head-Next-Child (Queue)
-			Queue<TNode> queue = new Queue<TNode>();
-
-			// Start at the root
-			queue.Enqueue(root);
-
-			while (queue.Count > 0)
+			switch (method)
 			{
-				if (version != _version) throw new VersionChangedException();
-
-				// visit the next queued node
-				TNode current = queue.Dequeue();
-				visitCallback(current);
-
-				// Queue the next nodes
-				if (current.Next != null && !ReferenceEquals(current.Next, root))
-				{
-					/*
-					* The previous/next nodes are not exactly a doubly linked list but rather
-					* a circular reference so will have to watch out for this.
-					*/
-					queue.Enqueue(current.Next);
-				}
-
-				if (current.Child != null) queue.Enqueue(current.Child);
+				case BreadthDepthTraverse.BreadthFirst:
+					BreadthFirst(root, visitCallback);
+					break;
+				case BreadthDepthTraverse.DepthFirst:
+					DepthFirst(root, visitCallback);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(method), method, null);
 			}
 		}
+
+		#region Iterate overloads - visitCallback action
+		public void Iterate(TNode root, [NotNull] Action<TNode> visitCallback)
+		{
+			Iterate(root, BreadthDepthTraverse.BreadthFirst, visitCallback);
+		}
+		#endregion
 
 		/// <summary>
 		/// Iterate over nodes with a callback function
 		/// </summary>
 		/// <param name="root">The starting node</param>
+		/// <param name="method">The technique to use when traversing</param>
 		/// <param name="visitCallback">callback function to handle the node that can cancel the loop</param>
-		public void Iterate(TNode root, [NotNull] Func<TNode, bool> visitCallback)
+		public void Iterate(TNode root, BreadthDepthTraverse method, [NotNull] Func<TNode, bool> visitCallback)
 		{
-			if (root == null) return;
+			if (Count == 0 || root == null) return;
 
-			int version = _version;
-			// Head-Next-Child (Queue)
-			Queue<TNode> queue = new Queue<TNode>();
-
-			// Start at the root
-			queue.Enqueue(root);
-
-			while (queue.Count > 0)
+			switch (method)
 			{
-				if (version != _version) throw new VersionChangedException();
-
-				// visit the next queued node
-				TNode current = queue.Dequeue();
-				if (!visitCallback(current)) break;
-
-				// Queue the next nodes
-				if (current.Next != null && !ReferenceEquals(current.Next, root))
-				{
-					/*
-					* The previous/next nodes are not exactly a doubly linked list but rather
-					* a circular reference so will have to watch out for this.
-					*/
-					queue.Enqueue(current.Next);
-				}
-
-				if (current.Child != null) queue.Enqueue(current.Child);
+				case BreadthDepthTraverse.BreadthFirst:
+					BreadthFirst(root, visitCallback);
+					break;
+				case BreadthDepthTraverse.DepthFirst:
+					DepthFirst(root, visitCallback);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(method), method, null);
 			}
 		}
+
+		#region Iterate overloads - visitCallback action
+		public void Iterate(TNode root, [NotNull] Func<TNode, bool> visitCallback)
+		{
+			Iterate(root, BreadthDepthTraverse.BreadthFirst, visitCallback);
+		}
+		#endregion
 
 		/// <inheritdoc />
 		public abstract TNode MakeNode(TValue value);
@@ -627,7 +722,7 @@ namespace asm.Collections
 						aux[current.Degree] = tmp;
 					}
 
-					LinkHeaps(aux[current.Degree], current);
+					Link(aux[current.Degree], current);
 					aux[current.Degree] = null;
 					current.Degree++;
 				}
@@ -652,13 +747,141 @@ namespace asm.Collections
 		/// <summary>
 		/// Links two heaps of the same order together.
 		/// </summary>
-		private void LinkHeaps([NotNull] TNode max, [NotNull] TNode min)
+		private void Link([NotNull] TNode max, [NotNull] TNode min)
 		{
 			RemoveNodeFromList(max);
 			min.Child = Merge(max, min.Child);
 			max.Parent = min;
 			max.Marked = false;
 		}
+
+		#region Iterator Traversal for Action<TNode>
+		private void BreadthFirst([NotNull] TNode root, [NotNull] Action<TNode> visitCallback)
+		{
+			int version = _version;
+			// Head-Sibling-Child (Queue)
+			Queue<TNode> queue = new Queue<TNode>();
+
+			// Start at the root
+			queue.Enqueue(root);
+
+			while (queue.Count > 0)
+			{
+				if (version != _version) throw new VersionChangedException();
+
+				// visit the next queued node
+				TNode current = queue.Dequeue();
+				visitCallback(current);
+
+				// Queue the next nodes
+				if (current.Child != null) queue.Enqueue(current.Child);
+
+				if (current.Next != null && !ReferenceEquals(current.Next, root))
+				{
+					/*
+					* The previous/next nodes are not exactly a doubly linked list but rather
+					* a circular reference so will have to watch out for this.
+					*/
+					queue.Enqueue(current.Next);
+				}
+			}
+		}
+
+		private void DepthFirst([NotNull] TNode root, [NotNull] Action<TNode> visitCallback)
+		{
+			int version = _version;
+			// Head-Sibling-Child (Stack)
+			Stack<TNode> stack = new Stack<TNode>();
+
+			// Start at the root
+			stack.Push(root);
+
+			while (stack.Count > 0)
+			{
+				if (version != _version) throw new VersionChangedException();
+
+				// visit the next queued node
+				TNode current = stack.Pop();
+				visitCallback(current);
+
+				// Queue the next nodes
+				if (current.Next != null && !ReferenceEquals(current.Next, root))
+				{
+					/*
+					* The previous/next nodes are not exactly a doubly linked list but rather
+					* a circular reference so will have to watch out for this.
+					*/
+					stack.Push(current.Next);
+				}
+
+				if (current.Child != null) stack.Push(current.Child);
+			}
+		}
+		#endregion
+
+		#region Iterator Traversal for Func<TNode, bool>
+		private void BreadthFirst([NotNull] TNode root, [NotNull] Func<TNode, bool> visitCallback)
+		{
+			int version = _version;
+			// Head-Sibling-Child (Queue)
+			Queue<TNode> queue = new Queue<TNode>();
+
+			// Start at the root
+			queue.Enqueue(root);
+
+			while (queue.Count > 0)
+			{
+				if (version != _version) throw new VersionChangedException();
+
+				// visit the next queued node
+				TNode current = queue.Dequeue();
+				visitCallback(current);
+
+				// Queue the next nodes
+				if (current.Child != null) queue.Enqueue(current.Child);
+
+				if (current.Next != null && !ReferenceEquals(current.Next, root))
+				{
+					/*
+					* The previous/next nodes are not exactly a doubly linked list but rather
+					* a circular reference so will have to watch out for this.
+					*/
+					queue.Enqueue(current.Next);
+				}
+			}
+		}
+
+		private void DepthFirst([NotNull] TNode root, [NotNull] Func<TNode, bool> visitCallback)
+		{
+			int version = _version;
+			// Head-Sibling-Child (Stack)
+			Stack<TNode> stack = new Stack<TNode>();
+
+			// Start at the root
+			stack.Push(root);
+
+			while (stack.Count > 0)
+			{
+				if (version != _version) throw new VersionChangedException();
+
+				// visit the next queued node
+				TNode current = stack.Pop();
+				visitCallback(current);
+
+				// Queue the next nodes
+				if (current.Next != null && !ReferenceEquals(current.Next, root))
+				{
+					/*
+					* The previous/next nodes are not exactly a doubly linked list but rather
+					* a circular reference so will have to watch out for this.
+					*/
+					stack.Push(current.Next);
+				}
+
+				if (current.Child != null) stack.Push(current.Child);
+			}
+		}
+		#endregion
 	}
 
 	[DebuggerTypeProxy(typeof(FibonacciHeap<,>.DebugView))]
@@ -746,14 +969,13 @@ namespace asm.Collections
 
 	public static class FibonacciHeapExtension
 	{
-		// todo https://www.geeksforgeeks.org/left-child-right-sibling-representation-tree/
 		public static void WriteTo<TNode, TKey, TValue>([NotNull] this FibonacciHeap<TNode, TKey, TValue> thisValue, [NotNull] TextWriter writer)
 			where TNode : FibonacciNode<TNode, TKey, TValue>
 		{
 			const string STR_BLANK = "   ";
 			const string STR_EXT = "│  ";
-			const string STR_CONNECTOR_L = "└─ ";
-			const string STR_CONNECTOR_C = " ► ";
+			const string STR_CONNECTOR_C = "└─ ";
+			const string STR_CONNECTOR_S = "└▸ ";
 			const string STR_NULL = "<null>";
 
 			if (thisValue.Head == null) return;
@@ -785,7 +1007,15 @@ namespace asm.Collections
 									: STR_BLANK);
 				}
 
-				writer.Write(indent + STR_CONNECTOR_L);
+				if (nodes.Count == 1)
+				{
+					// this is a child.
+					writer.Write(indent + STR_CONNECTOR_C);
+				}
+				else
+				{
+					writer.Write(indent + STR_CONNECTOR_S);
+				}
 
 				if (node == null)
 				{
@@ -793,29 +1023,14 @@ namespace asm.Collections
 					continue;
 				}
 
-				if (nodes.Count == 0 && node.Child != null)
-				{
-					writer.Write(node.ToString(level));
-
-					// this is a child. so will print the children list
-					foreach (TNode child in node.Children())
-					{
-						writer.Write(STR_CONNECTOR_C);
-						writer.Write(child.ToString());
-					}
-
-					writer.WriteLine();
-				}
-				else
-				{
-					writer.WriteLine(node.ToString(level));
-				}
-
+				writer.WriteLine(node.ToString(level));
 				if (node.IsLeaf) continue;
 
 				Queue<TNode> queue = new Queue<TNode>(2);
 
 				// Queue the next nodes.
+				queue.Enqueue(node.Child);
+
 				if (!ReferenceEquals(node.Next, thisValue.Head))
 				{
 					/*
@@ -825,7 +1040,6 @@ namespace asm.Collections
 					queue.Enqueue(node.Next);
 				}
 
-				queue.Enqueue(node.Child);
 				nodesList.AddLast((queue, level + 1));
 			}
 		}

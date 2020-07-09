@@ -44,9 +44,6 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		internal override BinomialHeap<BinomialNode<TKey, TValue>, TKey, TValue> MakeHeap(BinomialNode<TKey, TValue> head) { return new MinBinomialHeap<TKey, TValue>(_getKeyForItem, head, Comparer); }
-
-		/// <inheritdoc />
 		protected override int Compare(TKey x, TKey y)
 		{
 			return Comparer.Compare(x, y);
@@ -69,18 +66,6 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		internal MinBinomialHeap([NotNull] BinomialNode<T> head)
-			: this(head, null)
-		{
-		}
-
-		/// <inheritdoc />
-		internal MinBinomialHeap([NotNull] BinomialNode<T> head, IComparer<T> comparer)
-			: base(head, comparer)
-		{
-		}
-
-		/// <inheritdoc />
 		public MinBinomialHeap([NotNull] IEnumerable<T> enumerable)
 			: this(enumerable, null)
 		{
@@ -91,9 +76,6 @@ namespace asm.Collections
 			: base(enumerable, comparer)
 		{
 		}
-
-		/// <inheritdoc />
-		internal override BinomialHeap<BinomialNode<T>, T, T> MakeHeap(BinomialNode<T> head) { return new MinBinomialHeap<T>(head, Comparer); }
 
 		/// <inheritdoc />
 		protected override int Compare(T x, T y)
