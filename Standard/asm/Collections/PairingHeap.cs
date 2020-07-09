@@ -118,7 +118,17 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if (_current.Child != null) _queue.Enqueue(_current.Child);
+				if (_current.Child != null)
+				{
+					_queue.Enqueue(_current.Child);
+
+					if (_current.Child.Sibling != null)
+					{
+						foreach (TNode sibling in _current.Child.Siblings())
+							_queue.Enqueue(sibling);
+					}
+				}
+
 				if (_current.Sibling != null) _queue.Enqueue(_current.Sibling);
 
 				return true;
@@ -488,54 +498,26 @@ namespace asm.Collections
 		public TNode Find(TValue value)
 		{
 			if (Head == null || ValueComparer.Equals(Head.Value, value)) return Head;
-			
-			// will search in the children first, then move on to the siblings
-			Queue<TNode> queue = new Queue<TNode>();
-			// Start at the root
-			queue.Enqueue(Head);
-
-			while (queue.Count > 0)
+			TNode node = null;
+			Iterate(Head, e =>
 			{
-				TNode node = queue.Dequeue();
-				if (ValueComparer.Equals(node.Value, value)) return node;
-				if (node.Sibling != null) queue.Enqueue(node.Sibling);
-				if (node.Child == null) continue;
-
-				foreach (TNode child in node.Children())
-				{
-					if (ValueComparer.Equals(child.Value, value)) return child;
-					if (child.Sibling != null) queue.Enqueue(child.Sibling);
-				}
-			}
-
-			return null;
+				if (ValueComparer.Equals(e.Value, value)) node = e;
+				return node == null;
+			});
+			return node;
 		}
 
 		/// <inheritdoc />
 		public TNode FindByKey(TKey key)
 		{
 			if (Head == null || Comparer.IsEqual(Head.Key, key)) return Head;
-			
-			// will search in the children first, then move on to the siblings
-			Queue<TNode> queue = new Queue<TNode>();
-			// Start at the root
-			queue.Enqueue(Head);
-
-			while (queue.Count > 0)
+			TNode node = null;
+			Iterate(Head, e =>
 			{
-				TNode node = queue.Dequeue();
-				if (Comparer.IsEqual(node.Key, key)) return node;
-				if (node.Sibling != null) queue.Enqueue(node.Sibling);
-				if (node.Child == null) continue;
-				
-				foreach (TNode child in node.Children())
-				{
-					if (Comparer.IsEqual(child.Key, key)) return child;
-					if (child.Sibling != null) queue.Enqueue(child.Sibling);
-				}
-			}
-
-			return null;
+				if (Comparer.IsEqual(e.Key, key)) node = e;
+				return node == null;
+			});
+			return node;
 		}
 
 		public virtual bool Equals(PairingHeap<TNode, TKey, TValue> other)
@@ -693,20 +675,30 @@ namespace asm.Collections
 			// Head-Sibling-Child (Queue)
 			Queue<TNode> queue = new Queue<TNode>();
 
-			// Start at the root
-			queue.Enqueue(root);
-
-			while (queue.Count > 0)
+			while (root != null)
 			{
 				if (version != _version) throw new VersionChangedException();
+				// Start at the root
+				queue.Enqueue(root);
 
-				// visit the next queued node
-				TNode current = queue.Dequeue();
-				visitCallback(current);
+				while (queue.Count > 0)
+				{
+					if (version != _version) throw new VersionChangedException();
 
-				// Queue the next nodes
-				if (current.Child != null) queue.Enqueue(current.Child);
-				if (current.Sibling != null) queue.Enqueue(current.Sibling);
+					// visit the next queued node
+					TNode current = queue.Dequeue();
+					visitCallback(current);
+					if (current.Child == null) continue;
+
+					// Queue the next nodes
+					queue.Enqueue(current.Child);
+					if (current.Child.Sibling == null) continue;
+
+					foreach (TNode sibling in current.Child.Siblings())
+						queue.Enqueue(sibling);
+				}
+
+				root = root.Sibling;
 			}
 		}
 
@@ -716,20 +708,29 @@ namespace asm.Collections
 			// Head-Sibling-Child (Stack)
 			Stack<TNode> stack = new Stack<TNode>();
 
-			// Start at the root
-			stack.Push(root);
-
-			while (stack.Count > 0)
+			while (root != null)
 			{
 				if (version != _version) throw new VersionChangedException();
+				// Start at the root
+				stack.Push(root);
 
-				// visit the next queued node
-				TNode current = stack.Pop();
-				visitCallback(current);
+				while (stack.Count > 0)
+				{
+					if (version != _version) throw new VersionChangedException();
 
-				// Queue the next nodes
-				if (current.Sibling != null) stack.Push(current.Sibling);
-				if (current.Child != null) stack.Push(current.Child);
+					// visit the next queued node
+					TNode current = stack.Pop();
+					visitCallback(current);
+
+					// Queue the next nodes
+					if (current.Child == null) continue;
+					if (current.Child.Sibling != null) stack.Push(current.Child.Sibling);
+
+					foreach (TNode child in current.Child.Children())
+						stack.Push(child);
+				}
+
+				root = root.Sibling;
 			}
 		}
 		#endregion
@@ -741,20 +742,30 @@ namespace asm.Collections
 			// Head-Sibling-Child (Queue)
 			Queue<TNode> queue = new Queue<TNode>();
 
-			// Start at the root
-			queue.Enqueue(root);
-
-			while (queue.Count > 0)
+			while (root != null)
 			{
 				if (version != _version) throw new VersionChangedException();
+				// Start at the root
+				queue.Enqueue(root);
 
-				// visit the next queued node
-				TNode current = queue.Dequeue();
-				if (!visitCallback(current)) return;
+				while (queue.Count > 0)
+				{
+					if (version != _version) throw new VersionChangedException();
 
-				// Queue the next nodes
-				if (current.Child != null) queue.Enqueue(current.Child);
-				if (current.Sibling != null) queue.Enqueue(current.Sibling);
+					// visit the next queued node
+					TNode current = queue.Dequeue();
+					if (!visitCallback(current)) return;
+					if (current.Child == null) continue;
+
+					// Queue the next nodes
+					queue.Enqueue(current.Child);
+					if (current.Child.Sibling == null) continue;
+
+					foreach (TNode sibling in current.Child.Siblings())
+						queue.Enqueue(sibling);
+				}
+
+				root = root.Sibling;
 			}
 		}
 
@@ -764,20 +775,29 @@ namespace asm.Collections
 			// Head-Child-Sibling (Stack)
 			Stack<TNode> stack = new Stack<TNode>();
 
-			// Start at the root
-			stack.Push(root);
-
-			while (stack.Count > 0)
+			while (root != null)
 			{
 				if (version != _version) throw new VersionChangedException();
+				// Start at the root
+				stack.Push(root);
 
-				// visit the next queued node
-				TNode current = stack.Pop();
-				if (!visitCallback(current)) return;
+				while (stack.Count > 0)
+				{
+					if (version != _version) throw new VersionChangedException();
 
-				// Queue the next nodes
-				if (current.Sibling != null) stack.Push(current.Sibling);
-				if (current.Child != null) stack.Push(current.Child);
+					// visit the next queued node
+					TNode current = stack.Pop();
+					if (!visitCallback(current)) return;
+
+					// Queue the next nodes
+					if (current.Child == null) continue;
+					if (current.Child.Sibling != null) stack.Push(current.Child.Sibling);
+
+					foreach (TNode child in current.Child.Children())
+						stack.Push(child);
+				}
+
+				root = root.Sibling;
 			}
 		}
 		#endregion

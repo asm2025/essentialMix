@@ -100,17 +100,17 @@ namespace TestApp
 			//TestBinomialHeapAdd();
 			//TestBinomialHeapRemove();
 			//TestBinomialHeapElementAt();
-			TestBinomialHeapDecreaseKey();
+			//TestBinomialHeapDecreaseKey();
+			
+			//TestPairingHeapAdd();
+			//TestPairingHeapRemove();
+			//TestPairingHeapElementAt();
+			TestPairingHeapDecreaseKey();
 			
 			//TestFibonacciHeapAdd();
 			//TestFibonacciHeapRemove();
 			//TestFibonacciHeapElementAt();
 			//TestFibonacciHeapDecreaseKey();
-			
-			//TestPairingHeapAdd();
-			//TestPairingHeapRemove();
-			//TestPairingHeapElementAt();
-			//TestPairingHeapDecreaseKey();
 
 			//TestAllHeapsPerformance();
 
@@ -2751,6 +2751,273 @@ namespace TestApp
 			}
 		}
 
+		private static void TestPairingHeapAdd()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing PairingHeap.Add()...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				PairingHeap<int> heap = new MaxPairingHeap<int>();
+				DoTheTest(heap, values);
+
+				heap = new MinPairingHeap<int>();
+				DoTheTest(heap, values);
+
+				Student[] students = GetRandomStudents(len);
+				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students);
+
+				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array)
+				where TNode : PairingNode<TNode, TKey, TValue>
+			{
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+
+				foreach (TValue value in array)
+				{
+					heap.Add(value);
+					//heap.PrintWithProps();
+				}
+
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+			}
+		}
+
+		private static void TestPairingHeapRemove()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing PairingHeap.Remove()...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				PairingHeap<int> heap = new MaxPairingHeap<int>();
+				DoTheTest(heap, values);
+
+				heap = new MinPairingHeap<int>();
+				DoTheTest(heap, values);
+
+				Student[] students = GetRandomStudents(len);
+				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+
+				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students);
+
+				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array)
+				where TNode : PairingNode<TNode, TKey, TValue>
+			{
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				heap.Add(array);
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+				Console.WriteLine("Test removing...");
+				bool removeStarted = false;
+
+				while (heap.Count > 0)
+				{
+					if (!removeStarted) removeStarted = true;
+					else Console.Write(", ");
+
+					Console.Write(heap.ExtractValue());
+				}
+
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
+		private static void TestPairingHeapElementAt()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing PairingHeap ElementAt...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				int k = RNGRandomHelper.Next(1, values.Length);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+
+				PairingHeap<int> heap = new MaxPairingHeap<int>();
+				DoTheTest(heap, values, k);
+
+				heap = new MinPairingHeap<int>();
+				DoTheTest(heap, values, k);
+
+				Student[] students = GetRandomStudents(len);
+				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+
+				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students, k);
+
+				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students, k);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
+				where TNode : PairingNode<TNode, TKey, TValue>
+			{
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				heap.Add(array);
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+				Console.WriteLine($"Kth element at position {k} element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
+
+		private static void TestPairingHeapDecreaseKey()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing PairingHeap DecreaseKey...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+
+				PairingHeap<int> heap = new MaxPairingHeap<int>();
+				DoTheValueTest(heap, values, int.MaxValue);
+
+				heap = new MinPairingHeap<int>();
+				DoTheValueTest(heap, values, int.MinValue);
+
+				Student[] students = GetRandomStudents(len);
+				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+
+				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MaxValue, e => e.Grade);
+
+				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MinValue, e => e.Grade);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheKeyTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue, Func<TValue, TKey> getKey)
+				where TNode : PairingNode<TNode, TKey, TValue>
+			{
+				Queue<TKey> queue = new Queue<TKey>();
+				DoTheTest(heap, array, queue);
+
+				bool succeeded = true;
+
+				while (succeeded && queue.Count > 0)
+				{
+					TKey key = queue.Dequeue();
+					TNode node = heap.FindByKey(key);
+					Debug.Assert(node != null, $"Node for key {key} is not found.");
+					heap.DecreaseKey(node, newKeyValue);
+					TValue extractedValue = heap.ExtractValue();
+					TKey extracted = getKey(extractedValue);
+					succeeded = heap.Comparer.IsEqual(extracted, key);
+					Console.WriteLine($"Extracted {extracted}, expected {key}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
+				}
+
+				Console.WriteLine();
+			}
+
+			static void DoTheValueTest<TNode, TValue>(PairingHeap<TNode, TValue, TValue> heap, TValue[] array, TValue newKeyValue)
+				where TNode : PairingNode<TNode, TValue, TValue>
+			{
+				Queue<TValue> queue = new Queue<TValue>();
+				DoTheTest(heap, array, queue);
+
+				bool succeeded = true;
+
+				while (succeeded && queue.Count > 0)
+				{
+					TValue key = queue.Dequeue();
+					TNode node = heap.Find(key);
+					Debug.Assert(node != null, $"Node for value {key} is not found.");
+					heap.DecreaseKey(node, newKeyValue);
+					TValue extracted = heap.ExtractValue();
+					succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
+					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
+				}
+
+				Console.WriteLine();
+			}
+
+			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, Queue<TKey> queue)
+				where TNode : PairingNode<TNode, TKey, TValue>
+			{
+				const int MAX = 10;
+
+				int max = Math.Min(MAX, array.Length);
+				queue.Clear();
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+
+				foreach (TValue v in array)
+				{
+					TNode node = heap.MakeNode(v);
+					if (queue.Count < max) queue.Enqueue(node.Key);
+					heap.Add(node);
+				}
+
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
+			}
+		}
+
 		private static void TestFibonacciHeapAdd()
 		{
 			bool more;
@@ -2985,240 +3252,6 @@ namespace TestApp
 			}
 		}
 
-		private static void TestPairingHeapAdd()
-		{
-			bool more;
-
-			do
-			{
-				Console.Clear();
-				Title("Testing PairingHeap.Add()...");
-
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-
-				PairingHeap<int> heap = new MaxPairingHeap<int>();
-				DoTheTest(heap, values);
-
-				heap = new MinPairingHeap<int>();
-				DoTheTest(heap, values);
-
-				Student[] students = GetRandomStudents(len);
-				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students);
-
-				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students);
-
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
-
-			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array)
-				where TNode : PairingNode<TNode, TKey, TValue>
-			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
-
-				foreach (TValue value in array)
-				{
-					heap.Add(value);
-					//heap.PrintWithProps();
-				}
-
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
-				heap.Print();
-			}
-		}
-
-		private static void TestPairingHeapRemove()
-		{
-			bool more;
-
-			do
-			{
-				Console.Clear();
-				Title("Testing PairingHeap.Remove()...");
-
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-
-				PairingHeap<int> heap = new MaxPairingHeap<int>();
-				DoTheTest(heap, values);
-
-				heap = new MinPairingHeap<int>();
-				DoTheTest(heap, values);
-
-				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-
-				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students);
-
-				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students);
-
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
-
-			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array)
-				where TNode : PairingNode<TNode, TKey, TValue>
-			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
-				heap.Add(array);
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
-				heap.Print();
-				Console.WriteLine("Test removing...");
-				bool removeStarted = false;
-
-				while (heap.Count > 0)
-				{
-					if (!removeStarted) removeStarted = true;
-					else Console.Write(", ");
-
-					Console.Write(heap.ExtractValue());
-				}
-
-				Console.WriteLine();
-				Console.WriteLine();
-			}
-		}
-
-		private static void TestPairingHeapElementAt()
-		{
-			bool more;
-
-			do
-			{
-				Console.Clear();
-				Title("Testing PairingHeap ElementAt...");
-
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				int k = RNGRandomHelper.Next(1, values.Length);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
-
-				PairingHeap<int> heap = new MaxPairingHeap<int>();
-				DoTheTest(heap, values, k);
-
-				heap = new MinPairingHeap<int>();
-				DoTheTest(heap, values, k);
-
-				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
-
-				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students, k);
-
-				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students, k);
-
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
-
-			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
-				where TNode : PairingNode<TNode, TKey, TValue>
-			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
-				heap.Add(array);
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
-				heap.Print();
-				Console.WriteLine($"Kth element at position {k} element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
-				Console.WriteLine();
-				Console.WriteLine();
-			}
-		}
-
-		private static void TestPairingHeapDecreaseKey()
-		{
-			bool more;
-
-			do
-			{
-				Console.Clear();
-				Title("Testing PairingHeap DecreaseKey...");
-
-				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
-
-				PairingHeap<int> heap = new MaxPairingHeap<int>();
-				DoTheTest(heap, values, int.MaxValue);
-
-				heap = new MinPairingHeap<int>();
-				DoTheTest(heap, values, int.MinValue);
-
-				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
-
-				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students, int.MaxValue);
-
-				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students, int.MinValue);
-
-				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-			}
-			while (more);
-
-			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue)
-				where TNode : PairingNode<TNode, TKey, TValue>
-			{
-				const int MAX = 10;
-
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
-
-				int max = Math.Min(MAX, array.Length);
-				Queue<TNode> nodes = new Queue<TNode>(max);
-
-				foreach (TValue v in array)
-				{
-					TNode node = heap.MakeNode(v);
-					heap.Add(node);
-					if (nodes.Count < max) nodes.Enqueue(node);
-				}
-
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
-				heap.Print();
-
-				bool succeeded = true;
-
-				while (succeeded && nodes.Count > 0)
-				{
-					TNode node = nodes.Dequeue();
-					heap.DecreaseKey(node, newKeyValue);
-					TValue extracted = heap.ExtractValue();
-					succeeded = ReferenceEquals(node.Value, extracted);
-					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
-				}
-
-				Console.WriteLine();
-			}
-		}
-
 		private static void TestAllHeapsPerformance()
 		{
 			const int START = 10;
@@ -3253,17 +3286,17 @@ namespace TestApp
 				DoHeapTest(new MaxBinomialHeap<int>(), values, clock);
 				clock.Stop();
 
-				// FibonacciHeap
-				DoHeapTest(new MinFibonacciHeap<int>(), values, clock);
-				clock.Stop();
-				DoHeapTest(new MaxFibonacciHeap<int>(), values, clock);
-				clock.Stop();
-
 				// PairingHeap
 				DoHeapTest(new MinPairingHeap<int>(), values, clock);
 				clock.Stop();
 				DoHeapTest(new MaxPairingHeap<int>(), values, clock);
 				clock.Stop();
+
+				//// FibonacciHeap
+				//DoHeapTest(new MinFibonacciHeap<int>(), values, clock);
+				//clock.Stop();
+				//DoHeapTest(new MaxFibonacciHeap<int>(), values, clock);
+				//clock.Stop();
 
 				Title("Testing IKeyedHeap<TNode, TKey, TValue> types performance...");
 
