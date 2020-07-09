@@ -105,14 +105,14 @@ namespace TestApp
 			//TestPairingHeapAdd();
 			//TestPairingHeapRemove();
 			//TestPairingHeapElementAt();
-			TestPairingHeapDecreaseKey();
+			//TestPairingHeapDecreaseKey();
 			
 			//TestFibonacciHeapAdd();
 			//TestFibonacciHeapRemove();
 			//TestFibonacciHeapElementAt();
 			//TestFibonacciHeapDecreaseKey();
 
-			//TestAllHeapsPerformance();
+			TestAllHeapsPerformance();
 
 			//TestGraph();
 
@@ -3263,6 +3263,7 @@ namespace TestApp
 			int tests = 0;
 			int[] values = GetRandomIntegers(true, START);
 			Student[] students = GetRandomStudents(START);
+			Func<Student, double> getKey = e => e.Grade;
 
 			do
 			{
@@ -3301,22 +3302,22 @@ namespace TestApp
 				Title("Testing IKeyedHeap<TNode, TKey, TValue> types performance...");
 
 				// BinomialHeap
-				DoKeyedHeapTest(new MinBinomialHeap<double, Student>(e => e.Grade), students, int.MinValue, clock);
+				DoHeapTest(new MinBinomialHeap<double, Student>(getKey), students, clock);
 				clock.Stop();
-				DoKeyedHeapTest(new MaxBinomialHeap<double, Student>(e => e.Grade), students, int.MaxValue, clock);
-				clock.Stop();
-
-				// FibonacciHeap
-				DoKeyedHeapTest(new MinFibonacciHeap<double, Student>(e => e.Grade), students, int.MinValue, clock);
-				clock.Stop();
-				DoKeyedHeapTest(new MaxFibonacciHeap<double, Student>(e => e.Grade), students, int.MaxValue, clock);
+				DoHeapTest(new MaxBinomialHeap<double, Student>(getKey), students, clock);
 				clock.Stop();
 
 				// PairingHeap
-				DoKeyedHeapTest(new MinPairingHeap<double, Student>(e => e.Grade), students, int.MinValue, clock);
+				DoHeapTest(new MinPairingHeap<double, Student>(getKey), students, clock);
 				clock.Stop();
-				DoKeyedHeapTest(new MaxPairingHeap<double, Student>(e => e.Grade), students, int.MaxValue, clock);
+				DoHeapTest(new MaxPairingHeap<double, Student>(getKey), students, clock);
 				clock.Stop();
+
+				//// FibonacciHeap
+				//DoHeapTest(new MinFibonacciHeap<double, Student>(e => e.Grade), students, int.MinValue, clock);
+				//clock.Stop();
+				//DoHeapTest(new MaxFibonacciHeap<double, Student>(e => e.Grade), students, int.MaxValue, clock);
+				//clock.Stop();
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -3347,29 +3348,6 @@ namespace TestApp
 				heap.Add(values);
 				Console.WriteLine($"Added {heap.Count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 
-				// The search is very slow! will skip it for now
-				//Console.WriteLine("Test search...".BrightYellow());
-				//int found = 0;
-				//int missed = 0;
-				//clock.Restart();
-
-				//foreach (T v in values)
-				//{
-				//	if (heap.Contains(v))
-				//	{
-				//		found++;
-				//		continue;
-				//	}
-
-				//	missed++;
-				//	Console.WriteLine(missed <= 3
-				//						? $"Find missed a value: {v} :((".BrightRed()
-				//						: "FIND MISSED A LOT :((".BrightRed());
-				//	if (missed > 3) return;
-				//	//return;
-				//}
-				//Console.WriteLine($"Found {found} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
-
 				Console.WriteLine("Test removing...".BrightRed());
 				int removed = 0;
 				clock.Restart();
@@ -3381,53 +3359,6 @@ namespace TestApp
 				}
 				Console.WriteLine($"Removed {removed} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 				Debug.Assert(removed == values.Length, "Not all values are removed correctly!");
-			}
-
-			static void DoKeyedHeapTest<TNode, TKey, TValue>(IKeyedHeap<TNode, TKey, TValue> heap, TValue[] values, TKey newKey, Stopwatch clock)
-				where TNode : IKeyedNode<TKey, TValue>
-				where TValue : IEquatable<TValue>
-			{
-				const int MAX = 100;
-				const int THRESHOLD = 10;
-
-				DoHeapTest(heap, values, clock);
-				Debug.Assert(heap.Count == 0, "Values are not removed correctly!");
-
-				Console.WriteLine("Test DecreaseKey...");
-				int range = Math.Min(MAX, values.Length);
-				int threshold = Math.Min(THRESHOLD, values.Length - 1);
-				HashSet<TNode> set = new HashSet<TNode>();
-
-				clock.Restart();
-
-				for (int i = 0; i < range; i++)
-				{
-					if (set.Count < threshold)
-					{
-						TNode node = heap.MakeNode(values[i]);
-						heap.Add(node);
-						set.Add(node);
-						continue;
-					}
-
-					heap.Add(values[i]);
-				}
-
-				Console.WriteLine($"Added {heap.Count} of {range} items in {clock.ElapsedMilliseconds} ms.");
-				
-				clock.Stop();
-				Console.WriteLine($"Picked {set.Count} random items for the DecreaseKey test.");
-
-				bool succeeded = true;
-
-				while (succeeded && set.Count > 0)
-				{
-					TNode node = set.PopFirst();
-					heap.DecreaseKey(node, newKey);
-					TValue extracted = heap.ExtractValue();
-					succeeded = ReferenceEquals(node.Value, extracted);
-					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
-				}
 			}
 		}
 
