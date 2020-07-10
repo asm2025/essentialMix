@@ -222,8 +222,18 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
+				if (_current.Child != null)
+				{
+					_stack.Push(_current.Child);
+
+					if (_current.Child.Sibling != null)
+					{
+						foreach (TNode sibling in _current.Child.Siblings())
+							_stack.Push(sibling);
+					}
+				}
+
 				if (_current.Sibling != null) _stack.Push(_current.Sibling);
-				if (_current.Child != null) _stack.Push(_current.Child);
 
 				return true;
 			}
@@ -393,8 +403,7 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public void Add(TNode node)
 		{
-			node.Degree = 0;
-			node.Parent = node.Child = node.Sibling = null;
+			node.Invalidate();
 			Head = Head == null
 						? node
 						: Union(Head, node);
@@ -782,9 +791,9 @@ namespace asm.Collections
 					// visit the next queued node
 					TNode current = stack.Pop();
 					visitCallback(current);
+					if (current.Child == null) continue;
 
 					// Queue the next nodes
-					if (current.Child == null) continue;
 					if (current.Child.Sibling != null) stack.Push(current.Child.Sibling);
 
 					foreach (TNode child in current.Child.Children())
@@ -849,9 +858,9 @@ namespace asm.Collections
 					// visit the next queued node
 					TNode current = stack.Pop();
 					if (!visitCallback(current)) return;
+					if (current.Child == null) continue;
 
 					// Queue the next nodes
-					if (current.Child == null) continue;
 					if (current.Child.Sibling != null) stack.Push(current.Child.Sibling);
 
 					foreach (TNode child in current.Child.Children())

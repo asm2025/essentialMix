@@ -16,8 +16,8 @@ namespace asm.Collections
 	{
 		private const int PARENT = 0;
 		private const int CHILD = 1;
-		private const int PREVIOUS = 2;
-		private const int NEXT = 3;
+		private const int NEXT = 2;
+		private const int PREVIOUS = 3;
 
 		// The previous/next nodes are not exactly a doubly linked list but rather a circular reference
 		private readonly TNode[] _nodes = new TNode[4];
@@ -54,10 +54,8 @@ namespace asm.Collections
 		/// </summary>
 		public TNode Previous
 		{
-			get => ReferenceEquals(_nodes[PREVIOUS], this)
-						? null
-						: _nodes[PREVIOUS];
-			internal set => _nodes[PREVIOUS] = value ?? (TNode)this;
+			get => _nodes[PREVIOUS];
+			internal set => _nodes[PREVIOUS] = value;
 		}
 
 		/// <summary>
@@ -66,10 +64,8 @@ namespace asm.Collections
 		/// </summary>
 		public TNode Next
 		{
-			get => ReferenceEquals(_nodes[NEXT], this)
-						? null
-						: _nodes[NEXT];
-			internal set => _nodes[NEXT] = value ?? (TNode)this;
+			get => _nodes[NEXT];
+			internal set => _nodes[NEXT] = value;
 		}
 
 		[NotNull]
@@ -98,9 +94,8 @@ namespace asm.Collections
 		public IEnumerable<TNode> Backwards(TNode stopAt = null)
 		{
 			TNode node = _nodes[PREVIOUS];
-			stopAt ??= (TNode)this;
 
-			while (node != null && node != stopAt)
+			while (node != this && node != stopAt)
 			{
 				yield return node;
 				node = node._nodes[PREVIOUS];
@@ -111,9 +106,8 @@ namespace asm.Collections
 		public IEnumerable<TNode> Forwards(TNode stopAt = null)
 		{
 			TNode node = _nodes[NEXT];
-			stopAt ??= (TNode)this;
 
-			while (node != null && node != stopAt)
+			while (node != this && node != stopAt)
 			{
 				yield return node;
 				node = node._nodes[NEXT];
@@ -153,6 +147,14 @@ namespace asm.Collections
 			other.Value = Value;
 			Key = otherKey;
 			Value = otherValue;
+		}
+
+		internal void Invalidate()
+		{
+			Degree = 0;
+			Marked = false;
+			_nodes[PARENT] = _nodes[CHILD] = null;
+			_nodes[PREVIOUS] = _nodes[NEXT] = (TNode)this;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

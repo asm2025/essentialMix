@@ -121,6 +121,11 @@ namespace asm.Collections
 			Value = otherValue;
 		}
 
+		internal void Invalidate()
+		{
+			Array.Clear(_nodes, 0, _nodes.Length);
+		}
+
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		private void AssertNotCircularRef(PairingNode<TNode, TKey, TValue> node)
 		{

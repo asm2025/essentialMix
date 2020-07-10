@@ -220,8 +220,18 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
+				if (_current.Child != null)
+				{
+					_stack.Push(_current.Child);
+
+					if (_current.Child.Sibling != null)
+					{
+						foreach (TNode sibling in _current.Child.Siblings())
+							_stack.Push(sibling);
+					}
+				}
+
 				if (_current.Sibling != null) _stack.Push(_current.Sibling);
-				if (_current.Child != null) _stack.Push(_current.Child);
 
 				return true;
 			}
@@ -391,7 +401,7 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public void Add(TNode node)
 		{
-			node.Child = node.Sibling = node.Previous = null;
+			node.Invalidate();
 			Head = Head == null
 						? node
 						: Meld(Head, node);

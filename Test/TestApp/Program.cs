@@ -110,9 +110,9 @@ namespace TestApp
 			//TestFibonacciHeapAdd();
 			//TestFibonacciHeapRemove();
 			//TestFibonacciHeapElementAt();
-			//TestFibonacciHeapDecreaseKey();
+			TestFibonacciHeapDecreaseKey();
 
-			TestAllHeapsPerformance();
+			//TestAllHeapsPerformance();
 
 			//TestGraph();
 
@@ -3194,20 +3194,20 @@ namespace TestApp
 				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
 
 				FibonacciHeap<int> heap = new MaxFibonacciHeap<int>();
-				DoTheTest(heap, values, int.MaxValue);
+				DoTheValueTest(heap, values, int.MaxValue);
 
 				heap = new MinFibonacciHeap<int>();
-				DoTheTest(heap, values, int.MinValue);
+				DoTheValueTest(heap, values, int.MinValue);
 
 				Student[] students = GetRandomStudents(len);
 				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				FibonacciHeap<double, Student> studentHeap = new MaxFibonacciHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students, int.MaxValue);
+				DoTheKeyTest(studentHeap, students, int.MaxValue, e => e.Grade);
 
 				studentHeap = new MinFibonacciHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students, int.MinValue);
+				DoTheKeyTest(studentHeap, students, int.MinValue, e => e.Grade);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -3217,38 +3217,71 @@ namespace TestApp
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue)
+			static void DoTheKeyTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue, Func<TValue, TKey> getKey)
 				where TNode : FibonacciNode<TNode, TKey, TValue>
 			{
-				const int MAX = 10;
-
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
-
-				int max = Math.Min(MAX, array.Length);
-				Queue<TNode> nodes = new Queue<TNode>(max);
-
-				foreach (TValue v in array)
-				{
-					TNode node = heap.MakeNode(v);
-					heap.Add(node);
-					if (nodes.Count < max) nodes.Enqueue(node);
-				}
-
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
-				heap.Print();
+				Queue<TKey> queue = new Queue<TKey>();
+				DoTheTest(heap, array, queue);
 
 				bool succeeded = true;
 
-				while (succeeded && nodes.Count > 0)
+				while (succeeded && queue.Count > 0)
 				{
-					TNode node = nodes.Dequeue();
+					TKey key = queue.Dequeue();
+					TNode node = heap.FindByKey(key);
+					Debug.Assert(node != null, $"Node for key {key} is not found.");
+					heap.DecreaseKey(node, newKeyValue);
+					TValue extractedValue = heap.ExtractValue();
+					TKey extracted = getKey(extractedValue);
+					succeeded = heap.Comparer.IsEqual(extracted, key);
+					Console.WriteLine($"Extracted {extracted}, expected {key}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
+				}
+
+				Console.WriteLine();
+			}
+
+			static void DoTheValueTest<TNode, TValue>(FibonacciHeap<TNode, TValue, TValue> heap, TValue[] array, TValue newKeyValue)
+				where TNode : FibonacciNode<TNode, TValue, TValue>
+			{
+				Queue<TValue> queue = new Queue<TValue>();
+				DoTheTest(heap, array, queue);
+
+				bool succeeded = true;
+
+				while (succeeded && queue.Count > 0)
+				{
+					TValue key = queue.Dequeue();
+					TNode node = heap.Find(key);
+					Debug.Assert(node != null, $"Node for value {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
 					TValue extracted = heap.ExtractValue();
-					succeeded = ReferenceEquals(node.Value, extracted);
+					succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
+					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
 				}
 
 				Console.WriteLine();
+			}
+
+			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array, Queue<TKey> queue)
+				where TNode : FibonacciNode<TNode, TKey, TValue>
+			{
+				const int MAX = 10;
+
+				int max = Math.Min(MAX, array.Length);
+				queue.Clear();
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+
+				foreach (TValue v in array)
+				{
+					TNode node = heap.MakeNode(v);
+					if (queue.Count < max) queue.Enqueue(node.Key);
+					heap.Add(node);
+				}
+
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
 			}
 		}
 
