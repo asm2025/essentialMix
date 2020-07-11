@@ -24,8 +24,6 @@ namespace asm.Collections
 	// https://en.wikipedia.org/wiki/Pairing_heap
 	// https://brilliant.org/wiki/pairing-heap/
 	// https://users.cs.fiu.edu/~weiss/dsaa_c++/code/PairingHeap.cpp <= actually nice one :)
-	// https://iq.opengenus.org/pairing-heap/
-	// https://www.sanfoundry.com/cpp-program-implement-pairing-heap/
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(PairingHeap<,,>.DebugView))]
 	[Serializable]
@@ -109,7 +107,7 @@ namespace asm.Collections
 				// visit the next queued node
 				_current = _queue.Count > 0
 								? _queue.Dequeue()
-								: null;
+								: _current?.Sibling;
 
 				if (_current == null)
 				{
@@ -118,18 +116,12 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if (_current.Child != null)
-				{
-					_queue.Enqueue(_current.Child);
+				if (_current.Child == null) return true;
+				_queue.Enqueue(_current.Child);
+				if (_current.Child.Sibling == null) return true;
 
-					if (_current.Child.Sibling != null)
-					{
-						foreach (TNode sibling in _current.Child.Siblings())
-							_queue.Enqueue(sibling);
-					}
-				}
-
-				if (_current.Sibling != null) _queue.Enqueue(_current.Sibling);
+				foreach (TNode sibling in _current.Child.Siblings())
+					_queue.Enqueue(sibling);
 
 				return true;
 			}
@@ -211,7 +203,7 @@ namespace asm.Collections
 				// visit the next queued node
 				_current = _stack.Count > 0
 								? _stack.Pop()
-								: null;
+								: _current?.Sibling;
 
 				if (_current == null)
 				{
@@ -220,18 +212,12 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if (_current.Child != null)
-				{
-					_stack.Push(_current.Child);
+				if (_current.Child == null) return true;
+				_stack.Push(_current.Child);
+				if (_current.Child.Sibling == null) return true;
 
-					if (_current.Child.Sibling != null)
-					{
-						foreach (TNode sibling in _current.Child.Siblings())
-							_stack.Push(sibling);
-					}
-				}
-
-				if (_current.Sibling != null) _stack.Push(_current.Sibling);
+				foreach (TNode sibling in _current.Child.Siblings())
+					_stack.Push(sibling);
 
 				return true;
 			}
@@ -430,7 +416,7 @@ namespace asm.Collections
 			// https://www.geeksforgeeks.org/pairing-heap/
 			// https://brilliant.org/wiki/pairing-heap/
 			TNode mergedLeftMost = TwoPassMerge(node.LeftMostChild());
-			Head = node == Head
+			Head = ReferenceEquals(node, Head)
 						? mergedLeftMost
 						: Meld(Head, mergedLeftMost);
 			Count--;
@@ -452,7 +438,7 @@ namespace asm.Collections
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
 			if (Compare(node.Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
 			node.Key = newKey;
-			if (node == Head) return;
+			if (ReferenceEquals(node, Head)) return;
 			if (node.Sibling != null) node.Sibling.Previous = node.Previous;
 			
 			if (node.Previous != null)
@@ -477,13 +463,13 @@ namespace asm.Collections
 		public TValue ExtractValue()
 		{
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
-			TNode oldRoot = Head;
+			TNode value = Head;
 			Head = Head.Child == null
 						? null
 						: TwoPassMerge(Head.Child);
 			Count--;
 			_version++;
-			return oldRoot.Value;
+			return value.Value;
 		}
 
 		/// <inheritdoc />
@@ -598,33 +584,34 @@ namespace asm.Collections
 
 		/// <summary>
 		/// Maintains heap properties by comparing and linking a and b together to satisfy heap order.
+		/// x.Sibling MUST be NULL on entry.
 		/// </summary>
-		/// <param name="a">The first node. Usually the Head node.</param>
-		/// <param name="b">The second node.</param>
+		/// <param name="x">The first node. Usually the Head node.</param>
+		/// <param name="y">The second node.</param>
 		/// <returns>The merged node. The value returned should be assigned back to whichever node was passed as the first node parameter.</returns>
-		private TNode Meld(TNode a, TNode b)
+		private TNode Meld(TNode x, TNode y)
 		{
-			if (ReferenceEquals(a, b)) return a;
-			if (a == null) return b;
-			if (b == null) return a;
+			if (ReferenceEquals(x, y)) return x;
+			if (x == null) return y;
+			if (y == null) return x;
 
-			if (Compare(b.Key, a.Key) < 0)
+			if (Compare(y.Key, x.Key) < 0)
 			{
-				b.Previous = a.Previous;
-				a.Previous = b;
-				a.Sibling = b.Child;
-				if (a.Sibling != null) a.Sibling.Previous = a;
-				b.Child = a;
-				return b;
+				y.Previous = x.Previous;
+				x.Previous = y;
+				x.Sibling = y.Child;
+				if (x.Sibling != null) x.Sibling.Previous = x;
+				y.Child = x;
+				return y;
 			}
 
-			b.Previous = a;
-			a.Sibling = b.Sibling;
-			if (a.Sibling != null) a.Sibling.Previous = a;
-			b.Sibling = a.Child;
-			if (b.Sibling != null) b.Sibling.Previous = b;
-			a.Child = b;
-			return a;
+			y.Previous = x;
+			x.Sibling = y.Sibling;
+			if (x.Sibling != null) x.Sibling.Previous = x;
+			y.Sibling = x.Child;
+			if (y.Sibling != null) y.Sibling.Previous = y;
+			x.Child = y;
+			return x;
 		}
 
 		/// <summary>
@@ -637,17 +624,15 @@ namespace asm.Collections
 			if (node?.Sibling == null) return node;
 
 			List<TNode> nodes = new List<TNode>();
-			TNode next = node;
 
 			do
 			{
-				nodes.Add(next);
-				next.Previous.Sibling = null;
-				next = next.Sibling;
+				nodes.Add(node);
+				// break links
+				node.Previous.Sibling = null;
+				node = node.Sibling;
 			}
-			while (next != null);
-
-			nodes.Add(null);
+			while (node != null);
 
 			int i = 0;
 			/*

@@ -129,11 +129,7 @@ namespace asm.Collections
 
 		protected bool Done { get; set; }
 
-		protected virtual IEnumerator<T> Impl
-		{
-			get { return _impl ??= Enumerable?.GetEnumerator(); }
-			set => _impl = value;
-		}
+		protected virtual IEnumerator<T> Impl { get { return _impl ??= Enumerable?.GetEnumerator(); } set => _impl = value; }
 
 		/// <inheritdoc />
 		public IEnumerator<T> GetEnumerator()

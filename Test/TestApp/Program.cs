@@ -24,6 +24,9 @@ namespace TestApp
 {
 	internal class Program
 	{
+		private const int START = 10;
+		private const int LEN = 200_000;
+
 		private static readonly Lazy<Faker> __fakeGenerator = new Lazy<Faker>(() => new Faker(), LazyThreadSafetyMode.PublicationOnly);
 		private static readonly string[] __sortAlgorithms = 
 		{
@@ -110,9 +113,9 @@ namespace TestApp
 			//TestFibonacciHeapAdd();
 			//TestFibonacciHeapRemove();
 			//TestFibonacciHeapElementAt();
-			TestFibonacciHeapDecreaseKey();
+			//TestFibonacciHeapDecreaseKey();
 
-			//TestAllHeapsPerformance();
+			TestAllHeapsPerformance();
 
 			//TestGraph();
 
@@ -192,7 +195,17 @@ namespace TestApp
 			string timeoutString = timeout > 0
 										? $"{timeout} minute(s)"
 										: "None";
-			int maximumThreads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
+			int threads;
+#if DEBUG
+			// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
+			threads = LIMIT_THREADS
+						? 1
+						: RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
+#else
+			// Otherwise, use the default (Best to be TaskHelper.ProcessDefault which = Environment.ProcessorCount)
+			threads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
+#endif
+
 			Func<int, TaskResult> exec = e =>
 			{
 				Console.Write(", {0}", e);
@@ -200,16 +213,6 @@ namespace TestApp
 			};
 			Queue<ThreadQueueMode> modes = new Queue<ThreadQueueMode>(EnumHelper<ThreadQueueMode>.GetValues());
 			Stopwatch clock = new Stopwatch();
-
-#if DEBUG
-			// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
-			int threads = LIMIT_THREADS
-							? 1
-							: maximumThreads;
-#else
-					// Otherwise, use the default (Best to be TaskHelper.ProcessDefault which = Environment.ProcessorCount)
-					int threads = maximumThreads;
-#endif
 
 			if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
 
@@ -524,8 +527,9 @@ namespace TestApp
 		private static void TestSinglyLinkedList()
 		{
 			bool more;
+			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, 200_000);
+			int[] values = GetRandomIntegers(true, START);
 			SinglyLinkedList<int> list = new SinglyLinkedList<int>();
 
 			do
@@ -631,6 +635,9 @@ namespace TestApp
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
+				if (!more || tests > 0) continue;
+				values = GetRandomIntegers(true, LEN);
+				tests++;
 			}
 			while (more);
 
@@ -640,8 +647,9 @@ namespace TestApp
 		private static void TestLinkedList()
 		{
 			bool more;
+			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true,200_000);
+			int[] values = GetRandomIntegers(true, START);
 			LinkedList<int> list = new LinkedList<int>();
 
 			do
@@ -745,6 +753,9 @@ namespace TestApp
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
+				if (!more || tests > 0) continue;
+				values = GetRandomIntegers(true, LEN);
+				tests++;
 			}
 			while (more);
 
@@ -754,8 +765,9 @@ namespace TestApp
 		private static void TestDeque()
 		{
 			bool more;
+			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, 100_000/*200_000*/);
+			int[] values = GetRandomIntegers(true, START);
 			Deque<int> deque = new Deque<int>();
 
 			do
@@ -787,6 +799,9 @@ namespace TestApp
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
+				if (!more || tests > 0) continue;
+				values = GetRandomIntegers(true, LEN);
+				tests++;
 			}
 			while (more);
 
@@ -877,8 +892,9 @@ namespace TestApp
 		private static void TestLinkedDeque()
 		{
 			bool more;
+			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, 100_000/*200_000*/);
+			int[] values = GetRandomIntegers(true, START);
 			LinkedDeque<int> deque = new LinkedDeque<int>();
 
 			do
@@ -910,6 +926,9 @@ namespace TestApp
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
+				if (!more || tests > 0) continue;
+				values = GetRandomIntegers(true, LEN);
+				tests++;
 			}
 			while (more);
 
@@ -1547,7 +1566,6 @@ namespace TestApp
 		private static void TestAllBinaryTreesFunctionality()
 		{
 			bool more;
-			Stopwatch clock = new Stopwatch();
 			BinarySearchTree<int> binarySearchTree = new BinarySearchTree<int>();
 			AVLTree<int> avlTree = new AVLTree<int>();
 			RedBlackTree<int> redBlackTree = new RedBlackTree<int>();
@@ -1557,18 +1575,14 @@ namespace TestApp
 			{
 				Console.Clear();
 				Title("Testing all BinaryTrees performance...");
-				Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
 
-				DoTheTest(binarySearchTree, values, clock);
-				clock.Stop();
+				DoTheTest(binarySearchTree, values);
 				ConsoleHelper.Pause();
 
-				DoTheTest(avlTree, values, clock);
-				clock.Stop();
+				DoTheTest(avlTree, values);
 				ConsoleHelper.Pause();
 
-				DoTheTest(redBlackTree, values, clock);
-				clock.Stop();
+				DoTheTest(redBlackTree, values);
 				ConsoleHelper.Pause();
 
 				Console.WriteLine();
@@ -1579,9 +1593,7 @@ namespace TestApp
 			}
 			while (more);
 
-			clock.Stop();
-
-			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, int[] values, Stopwatch clock)
+			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, int[] values)
 				where TNode : LinkedBinaryNode<TNode, int>
 			{
 				Console.WriteLine();
@@ -1593,15 +1605,13 @@ namespace TestApp
 				Console.WriteLine();
 				Console.WriteLine($"Array: {string.Join(", ", values)}");
 				
-				clock.Restart();
 				tree.Add(values);
-				Console.WriteLine($"Added {tree.Count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Added {tree.Count} of {values.Length} items.");
 				tree.PrintProps();
 
 				Console.WriteLine("Test search...".BrightYellow());
 				int found = 0;
 				int missed = 0;
-				clock.Restart();
 
 				foreach (int v in values)
 				{
@@ -1618,14 +1628,13 @@ namespace TestApp
 					if (missed > 3) return;
 					//return;
 				}
-				Console.WriteLine($"Found {found} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Found {found} of {values.Length} items.");
 
 				tree.Print();
 
 				Console.WriteLine("Test removing...".BrightRed());
 				int removed = 0;
 				missed = 0;
-				clock.Restart();
 
 				foreach (int v in values)
 				{
@@ -1648,18 +1657,19 @@ namespace TestApp
 					if (missed > 3) return;
 					//return;
 				}
-				Console.WriteLine($"Removed {removed} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Removed {removed} of {values.Length} items.");
 			}
 		}
 
 		private static void TestAllBinaryTreesPerformance()
 		{
 			bool more;
+			int tests = 0;
 			Stopwatch clock = new Stopwatch();
 			BinarySearchTree<int> binarySearchTree = new BinarySearchTree<int>();
 			AVLTree<int> avlTree = new AVLTree<int>();
 			RedBlackTree<int> redBlackTree = new RedBlackTree<int>();
-			int[] values = GetRandomIntegers(true, 200_000);
+			int[] values = GetRandomIntegers(true, START);
 
 			do
 			{
@@ -1683,6 +1693,9 @@ namespace TestApp
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
+				if (!more || tests > 0) continue;
+				values = GetRandomIntegers(true, LEN);
+				tests++;
 			}
 			while (more);
 
@@ -1751,10 +1764,11 @@ namespace TestApp
 		private static void TestSortedSetPerformance()
 		{
 			bool more;
+			int tests = 0;
 			Stopwatch clock = new Stopwatch();
 			// this is a RedBlackTree implementation by Microsoft, just testing it.
 			SortedSet<int> sortedSet = new SortedSet<int>();
-			int[] values = GetRandomIntegers(true, 200_000);
+			int[] values = GetRandomIntegers(true, START);
 
 			do
 			{
@@ -1772,6 +1786,9 @@ namespace TestApp
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
+				if (!more || tests > 0) continue;
+				values = GetRandomIntegers(true, LEN);
+				tests++;
 			}
 			while (more);
 			
@@ -3287,12 +3304,8 @@ namespace TestApp
 
 		private static void TestAllHeapsPerformance()
 		{
-			const int START = 10;
-			const int LEN = 100_000;
-
 			bool more;
 			Stopwatch clock = new Stopwatch();
-
 			int tests = 0;
 			int[] values = GetRandomIntegers(true, START);
 			Student[] students = GetRandomStudents(START);
@@ -3311,59 +3324,42 @@ namespace TestApp
 				// BinaryHeap
 				DoHeapTest(new MinBinaryHeap<int>(), values, clock);
 				clock.Stop();
-				DoHeapTest(new MaxBinaryHeap<int>(), values, clock);
-				clock.Stop();
 
 				// BinomialHeap
 				DoHeapTest(new MinBinomialHeap<int>(), values, clock);
-				clock.Stop();
-				DoHeapTest(new MaxBinomialHeap<int>(), values, clock);
 				clock.Stop();
 
 				// PairingHeap
 				DoHeapTest(new MinPairingHeap<int>(), values, clock);
 				clock.Stop();
-				DoHeapTest(new MaxPairingHeap<int>(), values, clock);
-				clock.Stop();
 
-				//// FibonacciHeap
-				//DoHeapTest(new MinFibonacciHeap<int>(), values, clock);
-				//clock.Stop();
-				//DoHeapTest(new MaxFibonacciHeap<int>(), values, clock);
-				//clock.Stop();
+				// FibonacciHeap
+				DoHeapTest(new MinFibonacciHeap<int>(), values, clock);
+				clock.Stop();
 
 				Title("Testing IKeyedHeap<TNode, TKey, TValue> types performance...");
 
 				// BinomialHeap
 				DoHeapTest(new MinBinomialHeap<double, Student>(getKey), students, clock);
 				clock.Stop();
-				DoHeapTest(new MaxBinomialHeap<double, Student>(getKey), students, clock);
-				clock.Stop();
 
 				// PairingHeap
 				DoHeapTest(new MinPairingHeap<double, Student>(getKey), students, clock);
 				clock.Stop();
-				DoHeapTest(new MaxPairingHeap<double, Student>(getKey), students, clock);
-				clock.Stop();
 
-				//// FibonacciHeap
-				//DoHeapTest(new MinFibonacciHeap<double, Student>(e => e.Grade), students, int.MinValue, clock);
-				//clock.Stop();
-				//DoHeapTest(new MaxFibonacciHeap<double, Student>(e => e.Grade), students, int.MaxValue, clock);
-				//clock.Stop();
+				// FibonacciHeap
+				DoHeapTest(new MinFibonacciHeap<double, Student>(getKey), students, clock);
+				clock.Stop();
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
-
-				if (more && tests < 1)
-				{
-					values = GetRandomIntegers(true, LEN);
-					students = GetRandomStudents(LEN);
-					tests++;
-				}
+				if (!more || tests > 0) continue;
+				values = GetRandomIntegers(true, LEN);
+				students = GetRandomStudents(LEN);
+				tests++;
 			}
 			while (more);
 

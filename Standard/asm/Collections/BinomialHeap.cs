@@ -25,9 +25,22 @@ namespace asm.Collections
 	/// priority of the item.</typeparam>
 	/// <typeparam name="TValue">The element type of the heap</typeparam>
 	// https://brilliant.org/wiki/binomial-heap/
-	// https://algorithmtutor.com/Data-Structures/Tree/Binomial-Heaps/ << good (after fixing a couple of bugs - extractMin and merge). OK, extractMin is garbage
+	/*
+	 * https://algorithmtutor.com/Data-Structures/Tree/Binomial-Heaps/ << good (after fixing a couple of bugs - extractMin and merge).
+	 * OK, extractMin has a weird implementation and I'm not sure it's working essentially!
+	 */
 	// https://gist.github.com/chinchila/81a4c9bfd852e775f2bdf68339d212a2 << good. actually this one is better and simpler.
 	// the rest, no matter what site it is, has some issues after test, not stable or utter garbage!
+	
+	/*
+	 * And then I found https://keithschwarz.com/interesting/code/?dir=binomial-heap from Keith Schwarz a.k.a templatetypedef
+	 * @stackOverflow. It contains some useful and dense explanation everywhere. He seems to be an interesting lecturer at Stanford as
+	 * well with a bunch of interesting code.
+	 * His implementation has a different style which does not use a degree or parent node pointer per each node, which is cool because it
+	 * enhances the structure in terms of space required to store the nodes. Unfortunately, It does not have a Head/Root node but rather a
+	 * trees list and does not implement a few essential functions such as remove a node or DecreaseKey!
+	 * So, Maybe will try it some other time.
+	 */
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(BinomialHeap<,,>.DebugView))]
 	[Serializable]
@@ -111,7 +124,7 @@ namespace asm.Collections
 				// visit the next queued node
 				_current = _queue.Count > 0
 								? _queue.Dequeue()
-								: null;
+								: _current?.Sibling;
 
 				if (_current == null)
 				{
@@ -120,18 +133,12 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if (_current.Child != null)
-				{
-					_queue.Enqueue(_current.Child);
+				if (_current.Child == null) return true;
+				_queue.Enqueue(_current.Child);
+				if (_current.Child.Sibling == null) return true;
 
-					if (_current.Child.Sibling != null)
-					{
-						foreach (TNode sibling in _current.Child.Siblings())
-							_queue.Enqueue(sibling);
-					}
-				}
-
-				if (_current.Sibling != null) _queue.Enqueue(_current.Sibling);
+				foreach (TNode sibling in _current.Child.Siblings())
+					_queue.Enqueue(sibling);
 
 				return true;
 			}
@@ -213,7 +220,7 @@ namespace asm.Collections
 				// visit the next queued node
 				_current = _stack.Count > 0
 								? _stack.Pop()
-								: null;
+								: _current?.Sibling;
 
 				if (_current == null)
 				{
@@ -222,18 +229,12 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if (_current.Child != null)
-				{
-					_stack.Push(_current.Child);
+				if (_current.Child == null) return true;
+				_stack.Push(_current.Child);
+				if (_current.Child.Sibling == null) return true;
 
-					if (_current.Child.Sibling != null)
-					{
-						foreach (TNode sibling in _current.Child.Siblings())
-							_stack.Push(sibling);
-					}
-				}
-
-				if (_current.Sibling != null) _stack.Push(_current.Sibling);
+				foreach (TNode sibling in _current.Child.Siblings())
+					_stack.Push(sibling);
 
 				return true;
 			}

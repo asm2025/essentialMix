@@ -162,7 +162,13 @@ namespace asm.Collections
 				// visit the next queued node
 				_current = _queue.Count > 0
 								? _queue.Dequeue()
-								: null;
+								/*
+								* The previous/next nodes are not exactly a doubly linked list but rather
+								* a circular reference so will have to watch out for this.
+								*/
+								: _current?.Next != null && !ReferenceEquals(_current.Next, _root)
+									? _current.Next
+									: null;
 				
 				if (_current == null)
 				{
@@ -171,22 +177,12 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes.
-				if (_current.Child != null)
-				{
-					_queue.Enqueue(_current.Child);
+				if (_current.Child == null) return true;
+				_queue.Enqueue(_current.Child);
+				if (_current.Child.Next == null) return true;
 
-					/*
-					* The previous/next nodes are not exactly a doubly linked list but rather
-					* a circular reference so will have to watch out for this.
-					*/
-					if (_current.Child.Next != null)
-					{
-						foreach (TNode forward in _current.Child.Forwards(_root))
-							_queue.Enqueue(forward);
-					}
-				}
-
-				if (_current.Next != null && !ReferenceEquals(_current.Next, _root)) _queue.Enqueue(_current.Next);
+				foreach (TNode forward in _current.Child.Forwards(_root))
+					_queue.Enqueue(forward);
 
 				return true;
 			}
@@ -268,7 +264,13 @@ namespace asm.Collections
 				// visit the next queued node
 				_current = _stack.Count > 0
 								? _stack.Pop()
-								: null;
+								/*
+								* The previous/next nodes are not exactly a doubly linked list but rather
+								* a circular reference so will have to watch out for this.
+								*/
+								: _current?.Next != null && !ReferenceEquals(_current.Next, _root)
+									? _current.Next
+									: null;
 
 				if (_current == null)
 				{
@@ -277,22 +279,12 @@ namespace asm.Collections
 				}
 
 				// Queue the next nodes
-				if (_current.Child != null)
-				{
-					_stack.Push(_current.Child);
+				if (_current.Child == null) return true;
+				_stack.Push(_current.Child);
+				if (_current.Child.Next == null) return true;
 
-					/*
-					* The previous/next nodes are not exactly a doubly linked list but rather
-					* a circular reference so will have to watch out for this.
-					*/
-					if (_current.Child.Next != null)
-					{
-						foreach (TNode forward in _current.Child.Forwards(_root))
-							_stack.Push(forward);
-					}
-				}
-
-				if (_current.Next != null && !ReferenceEquals(_current.Next, _root)) _stack.Push(_current.Next);
+				foreach (TNode forward in _current.Child.Forwards(_root))
+					_stack.Push(forward);
 
 				return true;
 			}
