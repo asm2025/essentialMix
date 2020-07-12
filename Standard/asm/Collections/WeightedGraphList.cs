@@ -7,7 +7,6 @@ using System.Runtime.Serialization;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Helpers;
-using asm.Other.JonSkeet.MiscUtil.Collections;
 using JetBrains.Annotations;
 
 namespace asm.Collections
@@ -23,7 +22,7 @@ namespace asm.Collections
 	public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollection<T, GraphEdge<T, TWeight>>, GraphEdge<T, TWeight>>
 		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
-		private struct BreadthFirstEnumerator : IGraphEnumeratorImpl<T>
+		private struct BreadthFirstEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly WeightedGraphList<T, TWeight> _graph;
 			private readonly int _version;
@@ -128,7 +127,7 @@ namespace asm.Collections
 			public void Dispose() { }
 		}
 
-		private struct DepthFirstEnumerator : IGraphEnumeratorImpl<T>
+		private struct DepthFirstEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly WeightedGraphList<T, TWeight> _graph;
 			private readonly int _version;
@@ -278,9 +277,15 @@ namespace asm.Collections
 		}
 		
 		/// <inheritdoc />
-		protected override KeyedCollection<T, GraphEdge<T, TWeight>> NewEdgesContainer() { return new KeyedCollection<T, GraphEdge<T, TWeight>>(e => e.To, Comparer); }
-	
-		public override IGraphEnumeratorImpl<T> Enumerate(T from, BreadthDepthTraverse method)
+		protected override KeyedCollection<T, GraphEdge<T, TWeight>> MakeContainer() { return new KeyedCollection<T, GraphEdge<T, TWeight>>(e => e.To, Comparer); }
+
+		[NotNull]
+		protected virtual IHeap<TValue> MakeQueue<TKey, TValue>([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer = null)
+		{
+			return new MinBinomialHeap<TKey, TValue>(getKeyForItem, comparer);
+		}
+
+		public override IEnumerableEnumerator<T> Enumerate(T from, BreadthDepthTraverse method)
 		{
 			if (!ContainsKey(from)) throw new KeyNotFoundException();
 			return method switch
@@ -333,21 +338,16 @@ namespace asm.Collections
 		}
 
 		[NotNull]
-		public IEnumerable<T> GetShortestPath([NotNull] T from, [NotNull] T to, ShortestPathAlgorithm algorithm)
+		public IEnumerable<T> SingleSourcePath([NotNull] T from, [NotNull] T to, SingleSourcePathAlgorithm algorithm)
 		{
 			if (!ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
 			if (!ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
 
+			IHeap<PathEntry> queue = MakeQueue<TWeight, PathEntry>(e => e.Priority);
 			return algorithm switch
 			{
-				ShortestPathAlgorithm.Dijkstra => DijkstraShortestPath(from, to),
-				ShortestPathAlgorithm.BellmanFord => BellmanFordShortestPath(from, to),
-				ShortestPathAlgorithm.BStar => BStarShortestPath(from, to),
-				ShortestPathAlgorithm.AStar => AStarShortestPath(from, to),
-				ShortestPathAlgorithm.DStar => DStarShortestPath(from, to),
-				ShortestPathAlgorithm.FloydWarshall => FloydWarshallShortestPath(from, to),
-				ShortestPathAlgorithm.Johnson => JohnsonShortestPath(from, to),
-				ShortestPathAlgorithm.Viterbi => ViterbiShortestPath(from, to),
+				SingleSourcePathAlgorithm.Dijkstra => DijkstraShortestPath(from, to, queue),
+				SingleSourcePathAlgorithm.BellmanFord => BellmanFordShortestPath(from, to, queue),
 				_ => throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null)
 			};
 		}
@@ -359,12 +359,11 @@ namespace asm.Collections
 		}
 
 		[NotNull]
-		private IEnumerable<T> DijkstraShortestPath([NotNull] T from, [NotNull] T to)
+		private IEnumerable<T> DijkstraShortestPath([NotNull] T from, [NotNull] T to, [NotNull] IHeap<PathEntry> queue)
 		{
 			// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
 			Dictionary<T, T> history = new Dictionary<T, T>();
 			Dictionary<T, TWeight> weights = new Dictionary<T, TWeight>(Comparer);
-			BinaryHeap<PathEntry> queue = new MinBinaryHeap<PathEntry>(ComparisonComparer.FromComparison<PathEntry>((x, y) => x.Priority.CompareTo(y.Priority)));
 			HashSet<T> visited = new HashSet<T>(Comparer);
 			TWeight maxWeight = TypeHelper.MaximumOf<TWeight>();
 
@@ -410,7 +409,7 @@ namespace asm.Collections
 		}
 
 		[NotNull]
-		private IEnumerable<T> BellmanFordShortestPath([NotNull] T from, [NotNull] T to)
+		private IEnumerable<T> BellmanFordShortestPath([NotNull] T from, [NotNull] T to, [NotNull] IHeap<PathEntry> queue)
 		{
 			// todo
 			throw new NotImplementedException();
@@ -457,5 +456,9 @@ namespace asm.Collections
 			// todo
 			throw new NotImplementedException();
 		}
+	}
+
+	public static class WeightedGraphList
+	{
 	}
 }

@@ -57,9 +57,9 @@ namespace asm.Collections
 		public override string ToString() { return Convert.ToString(Value); }
 
 		[NotNull]
-		protected internal virtual string ToString(int depth)
+		protected internal virtual string ToString(int level)
 		{
-			return $"{Value} :D{depth}";
+			return $"{Value} :L{level}";
 		}
 
 		public TNode Predecessor()
@@ -126,9 +126,9 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected internal override string ToString(int depth)
+		protected internal override string ToString(int level)
 		{
-			return $"{Value} :D{depth}H{Height}B{BalanceFactor}";
+			return $"{Value} :L{level}H{Height}B{BalanceFactor}";
 		}
 
 		public int Height { get; internal set; }

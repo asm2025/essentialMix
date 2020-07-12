@@ -573,7 +573,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public IEnumerator<T> GetEnumerator() { return Enumerate(Root); }
+		public IEnumerator<T> GetEnumerator() { return Enumerate(); }
 
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
@@ -600,9 +600,27 @@ namespace asm.Collections
 
 		#region Enumerate overloads
 		[NotNull]
+		public IEnumerableEnumerator<T> Enumerate()
+		{
+			return Enumerate(Root, TreeTraverseMethod.InOrder, false);
+		}
+
+		[NotNull]
 		public IEnumerableEnumerator<T> Enumerate(TNode root)
 		{
 			return Enumerate(root, TreeTraverseMethod.InOrder, false);
+		}
+
+		[NotNull]
+		public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method)
+		{
+			return Enumerate(Root, method, false);
+		}
+
+		[NotNull]
+		public IEnumerableEnumerator<T> Enumerate(bool rightToLeft)
+		{
+			return Enumerate(Root, TreeTraverseMethod.InOrder, rightToLeft);
 		}
 
 		[NotNull]
@@ -615,6 +633,12 @@ namespace asm.Collections
 		public IEnumerableEnumerator<T> Enumerate(TNode root, TreeTraverseMethod method)
 		{
 			return Enumerate(root, method, false);
+		}
+
+		[NotNull]
+		public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method, bool rightToLeft)
+		{
+			return Enumerate(Root, method, rightToLeft);
 		}
 		#endregion
 
@@ -649,9 +673,24 @@ namespace asm.Collections
 		}
 
 		#region Iterate overloads - visitCallback action
+		public void Iterate([NotNull] Action<TNode> visitCallback)
+		{
+			Iterate(Root, TreeTraverseMethod.InOrder, false, visitCallback);
+		}
+
 		public void Iterate(TNode root, [NotNull] Action<TNode> visitCallback)
 		{
 			Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback);
+		}
+
+		public void Iterate(TreeTraverseMethod method, [NotNull] Action<TNode> visitCallback)
+		{
+			Iterate(Root, method, false, visitCallback);
+		}
+
+		public void Iterate(bool rightToLeft, [NotNull] Action<TNode> visitCallback)
+		{
+			Iterate(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback);
 		}
 
 		public void Iterate(TNode root, bool rightToLeft, [NotNull] Action<TNode> visitCallback)
@@ -662,6 +701,11 @@ namespace asm.Collections
 		public void Iterate(TNode root, TreeTraverseMethod method, [NotNull] Action<TNode> visitCallback)
 		{
 			Iterate(root, method, false, visitCallback);
+		}
+
+		public void Iterate(TreeTraverseMethod method, bool rightToLeft, [NotNull] Action<TNode> visitCallback)
+		{
+			Iterate(Root, method, rightToLeft, visitCallback);
 		}
 		#endregion
 
@@ -696,6 +740,21 @@ namespace asm.Collections
 		}
 
 		#region Iterate overloads - visitCallback function
+		public void Iterate([NotNull] Func<TNode, bool> visitCallback)
+		{
+			Iterate(Root, TreeTraverseMethod.InOrder, false, visitCallback);
+		}
+
+		public void Iterate(TreeTraverseMethod method, [NotNull] Func<TNode, bool> visitCallback)
+		{
+			Iterate(Root, method, false, visitCallback);
+		}
+
+		public void Iterate(bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback)
+		{
+			Iterate(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback);
+		}
+
 		public void Iterate(TNode root, [NotNull] Func<TNode, bool> visitCallback)
 		{
 			Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback);
@@ -709,6 +768,11 @@ namespace asm.Collections
 		public void Iterate(TNode root, TreeTraverseMethod method, [NotNull] Func<TNode, bool> visitCallback)
 		{
 			Iterate(root, method, false, visitCallback);
+		}
+
+		public void Iterate(TreeTraverseMethod method, bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback)
+		{
+			Iterate(Root, method, rightToLeft, visitCallback);
 		}
 		#endregion
 
@@ -759,6 +823,16 @@ namespace asm.Collections
 		}
 
 		#region LevelIterate overloads - visitCallback function
+		public void IterateLevels([NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
+		{
+			IterateLevels(Root, false, levelCallback);
+		}
+
+		public void IterateLevels(bool rightToLeft, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
+		{
+			IterateLevels(Root, rightToLeft, levelCallback);
+		}
+
 		public void IterateLevels(TNode root, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
 		{
 			IterateLevels(root, false, levelCallback);
@@ -812,6 +886,16 @@ namespace asm.Collections
 		}
 
 		#region LevelIterate overloads - visitCallback function
+		public void IterateLevels([NotNull] Func<int, IReadOnlyCollection<TNode>, bool> levelCallback)
+		{
+			IterateLevels(Root, false, levelCallback);
+		}
+
+		public void IterateLevels(bool rightToLeft, [NotNull] Func<int, IReadOnlyCollection<TNode>, bool> levelCallback)
+		{
+			IterateLevels(Root, rightToLeft, levelCallback);
+		}
+
 		public void IterateLevels(TNode root, [NotNull] Func<int, IReadOnlyCollection<TNode>, bool> levelCallback)
 		{
 			IterateLevels(root, false, levelCallback);
@@ -848,7 +932,7 @@ namespace asm.Collections
 		{
 			if (Count == 0) return false;
 			bool found = false;
-			Iterate(Root, TreeTraverseMethod.LevelOrder, e =>
+			Iterate(TreeTraverseMethod.LevelOrder, e =>
 			{
 				found = match(e.Value);
 				return !found;
@@ -880,7 +964,7 @@ namespace asm.Collections
 		{
 			if (Count == 0) return null;
 			TNode node = null;
-			Iterate(Root, method, e =>
+			Iterate(method, e =>
 			{
 				if (!Comparer.IsEqual(e.Value, value)) return true; // continue the search
 				node = e;
@@ -1072,7 +1156,7 @@ namespace asm.Collections
 			if (Root == null) return null;
 
 			IReadOnlyCollection<TNode> collection = null;
-			IterateLevels(Root, false, (lvl, nodes) =>
+			IterateLevels((lvl, nodes) =>
 			{
 				if (lvl < level) return true;
 				if (lvl == level) collection = nodes;
@@ -1086,7 +1170,7 @@ namespace asm.Collections
 		{
 			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, Count);
-			Iterate(Root, e => array[arrayIndex++] = e.Value);
+			Iterate(e => array[arrayIndex++] = e.Value);
 		}
 
 		/// <inheritdoc />
@@ -1115,7 +1199,7 @@ namespace asm.Collections
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
 			if (Count == 0) return;
-			Iterate(Root, e => objects[index++] = e.Value);
+			Iterate(e => objects[index++] = e.Value);
 		}
 
 		[NotNull]
@@ -1130,7 +1214,7 @@ namespace asm.Collections
 				default:
 					int index = 0;
 					T[] array = new T[Count];
-					Iterate(Root, method, rightToLeft, e =>
+					Iterate(method, rightToLeft, e =>
 					{
 						array[index++] = e.Value;
 						return index < Count;

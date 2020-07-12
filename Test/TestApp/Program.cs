@@ -25,7 +25,7 @@ namespace TestApp
 	internal class Program
 	{
 		private const int START = 10;
-		private const int LEN = 200_000;
+		private const int LEN = 100_000;
 
 		private static readonly Lazy<Faker> __fakeGenerator = new Lazy<Faker>(() => new Faker(), LazyThreadSafetyMode.PublicationOnly);
 		private static readonly string[] __sortAlgorithms = 
@@ -99,7 +99,8 @@ namespace TestApp
 			//TestBinaryHeapAdd();
 			//TestBinaryHeapRemove();
 			//TestBinaryHeapElementAt();
-			
+			//TestBinaryHeapDecreaseKey();
+		
 			//TestBinomialHeapAdd();
 			//TestBinomialHeapRemove();
 			//TestBinomialHeapElementAt();
@@ -115,9 +116,9 @@ namespace TestApp
 			//TestFibonacciHeapElementAt();
 			//TestFibonacciHeapDecreaseKey();
 
-			TestAllHeapsPerformance();
+			//TestAllHeapsPerformance();
 
-			//TestGraph();
+			TestGraph();
 
 			ConsoleHelper.Pause();
 		}
@@ -2345,12 +2346,11 @@ namespace TestApp
 		private static void TestBinaryHeapAdd()
 		{
 			bool more;
-			IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
 
 			do
 			{
 				Console.Clear();
-				Title("Testing Heap.Add()...");
+				Title("Testing BinaryHeap.Add()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
@@ -2363,10 +2363,10 @@ namespace TestApp
 				DoTheTest(heap, values);
 
 				Student[] students = GetRandomStudents(len);
-				BinaryHeap<Student> studentsHeap = new MaxBinaryHeap<Student>(studentComparer);
+				BinaryHeap<double, Student> studentsHeap = new MaxBinaryHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentsHeap, students);
 
-				studentsHeap = new MinBinaryHeap<Student>(studentComparer);
+				studentsHeap = new MinBinaryHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentsHeap, students);
 
 				Console.WriteLine();
@@ -2377,17 +2377,18 @@ namespace TestApp
 			}
 			while (more);
 
-			static void DoTheTest<T>(BinaryHeap<T> heap, T[] array)
+			static void DoTheTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array)
+				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 			{
 				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 
-				foreach (T value in array)
+				foreach (TValue value in array)
 				{
 					heap.Add(value);
 					//heap.PrintWithProps();
 				}
 
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
 			}
 		}
@@ -2395,12 +2396,11 @@ namespace TestApp
 		private static void TestBinaryHeapRemove()
 		{
 			bool more;
-			IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
 
 			do
 			{
 				Console.Clear();
-				Title("Testing Heap.Remove()...");
+				Title("Testing BinaryHeap.Remove()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
@@ -2413,10 +2413,10 @@ namespace TestApp
 				DoTheTest(heap, values);
 
 				Student[] students = GetRandomStudents(len);
-				BinaryHeap<Student> studentsHeap = new MaxBinaryHeap<Student>(studentComparer);
+				BinaryHeap<double, Student> studentsHeap = new MaxBinaryHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentsHeap, students);
 
-				studentsHeap = new MinBinaryHeap<Student>(studentComparer);
+				studentsHeap = new MinBinaryHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentsHeap, students);
 
 				Console.WriteLine();
@@ -2427,11 +2427,12 @@ namespace TestApp
 			}
 			while (more);
 
-			static void DoTheTest<T>(BinaryHeap<T> heap, T[] array)
+			static void DoTheTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array)
+				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 			{
 				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 				heap.Add(array);
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
 				heap.Print();
 				Console.WriteLine("Test removing...");
 				bool removeStarted = false;
@@ -2452,12 +2453,11 @@ namespace TestApp
 		private static void TestBinaryHeapElementAt()
 		{
 			bool more;
-			IComparer<Student> studentComparer = ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade));
 
 			do
 			{
 				Console.Clear();
-				Title("Testing Heap ElementAt...");
+				Title("Testing BinaryHeap ElementAt...");
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
@@ -2475,10 +2475,10 @@ namespace TestApp
 				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
-				BinaryHeap<Student> studentHeap = new MaxBinaryHeap<Student>(studentComparer);
+				BinaryHeap<double, Student> studentHeap = new MaxBinaryHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students, k);
 
-				studentHeap = new MinBinaryHeap<Student>(studentComparer);
+				studentHeap = new MinBinaryHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students, k);
 
 				Console.WriteLine();
@@ -2489,7 +2489,8 @@ namespace TestApp
 			}
 			while (more);
 
-			static void DoTheTest<T>(BinaryHeap<T> heap, T[] array, int k)
+			static void DoTheTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
+				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 			{
 				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
 				heap.Add(array);
@@ -2498,6 +2499,112 @@ namespace TestApp
 				Console.WriteLine($"Kth element at position {k} = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
 				Console.WriteLine();
 				Console.WriteLine();
+			}
+		}
+
+		private static void TestBinaryHeapDecreaseKey()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing BinaryHeap DecreaseKey...");
+
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+
+				BinaryHeap<int> heap = new MaxBinaryHeap<int>();
+				DoTheValueTest(heap, values, int.MaxValue);
+
+				heap = new MinBinaryHeap<int>();
+				DoTheValueTest(heap, values, int.MinValue);
+
+				Student[] students = GetRandomStudents(len);
+				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+
+				BinaryHeap<double, Student> studentHeap = new MaxBinaryHeap<double, Student>(e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MaxValue, e => e.Grade);
+
+				studentHeap = new MinBinaryHeap<double, Student>(e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MinValue, e => e.Grade);
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheKeyTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue, Func<TValue, TKey> getKey)
+				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+			{
+				Queue<TKey> queue = new Queue<TKey>();
+				DoTheTest(heap, array, queue);
+
+				bool succeeded = true;
+
+				while (succeeded && queue.Count > 0)
+				{
+					TKey key = queue.Dequeue();
+					TNode node = heap.FindByKey(key);
+					Debug.Assert(node != null, $"Node for key {key} is not found.");
+					heap.DecreaseKey(node, newKeyValue);
+					TValue extractedValue = heap.ExtractValue();
+					TKey extracted = getKey(extractedValue);
+					succeeded = heap.Comparer.IsEqual(extracted, key);
+					Console.WriteLine($"Extracted {extracted}, expected {key}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
+				}
+
+				Console.WriteLine();
+			}
+
+			static void DoTheValueTest<TNode, TValue>(BinaryHeap<TNode, TValue, TValue> heap, TValue[] array, TValue newKeyValue)
+				where TNode : KeyedBinaryNode<TNode, TValue, TValue>
+			{
+				Queue<TValue> queue = new Queue<TValue>();
+				DoTheTest(heap, array, queue);
+
+				bool succeeded = true;
+
+				while (succeeded && queue.Count > 0)
+				{
+					TValue key = queue.Dequeue();
+					TNode node = heap.Find(key);
+					Debug.Assert(node != null, $"Node for value {key} is not found.");
+					heap.DecreaseKey(node, newKeyValue);
+					TValue extracted = heap.ExtractValue();
+					succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
+					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
+				}
+
+				Console.WriteLine();
+			}
+
+			static void DoTheTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array, Queue<TKey> queue)
+				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+			{
+				const int MAX = 10;
+
+				int max = Math.Min(MAX, array.Length);
+				queue.Clear();
+				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+
+				foreach (TValue v in array)
+				{
+					TNode node = heap.MakeNode(v);
+					if (queue.Count < max) queue.Enqueue(node.Key);
+					heap.Add(node);
+				}
+
+				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				heap.Print();
 			}
 		}
 
@@ -3338,6 +3445,10 @@ namespace TestApp
 				clock.Stop();
 
 				Title("Testing IKeyedHeap<TNode, TKey, TValue> types performance...");
+				
+				// BinaryHeap
+				DoHeapTest(new MinBinaryHeap<double, Student>(getKey), students, clock);
+				clock.Stop();
 
 				// BinomialHeap
 				DoHeapTest(new MinBinomialHeap<double, Student>(getKey), students, clock);
@@ -3646,7 +3757,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 					Console.WriteLine();
 					Console.WriteLine($"{"Shortest Path".Yellow()} from '{value.ToString().BrightCyan()}' to '{to.ToString().BrightCyan()}'");
-					Console.WriteLine("Dijkstra: " + string.Join(" -> ", wGraph.GetShortestPath(value, to, ShortestPathAlgorithm.Dijkstra)));
+					Console.WriteLine("Dijkstra: " + string.Join(" -> ", wGraph.SingleSourcePath(value, to, SingleSourcePathAlgorithm.Dijkstra)));
 				}
 
 				return true;
@@ -3884,6 +3995,13 @@ public static class Extension
 
 	public static void Print<T, TAdjacencyList, TEdge>([NotNull] this GraphList<T, TAdjacencyList, TEdge> thisValue)
 		where TAdjacencyList : class, ICollection<TEdge>
+	{
+		Console.WriteLine();
+		thisValue.WriteTo(Console.Out);
+	}
+
+	public static void Print<TNode, TKey, TValue>([NotNull] this BinaryHeap<TNode, TKey, TValue> thisValue)
+		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 	{
 		Console.WriteLine();
 		thisValue.WriteTo(Console.Out);

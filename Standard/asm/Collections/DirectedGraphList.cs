@@ -55,7 +55,7 @@ namespace asm.Collections
 
 			if (fromEdges == null)
 			{
-				fromEdges = NewEdgesContainer();
+				fromEdges = MakeContainer();
 				this[from] = fromEdges;
 			}
 

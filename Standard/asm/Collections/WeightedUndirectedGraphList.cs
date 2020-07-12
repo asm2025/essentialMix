@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
 using asm.Exceptions.Collections;
-using asm.Other.JonSkeet.MiscUtil.Collections;
+using JetBrains.Annotations;
 
 namespace asm.Collections
 {
@@ -16,6 +17,22 @@ namespace asm.Collections
 	public class WeightedUndirectedGraphList<T, TWeight> : WeightedGraphList<T, TWeight>
 		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
+
+		[DebuggerDisplay("{From} => {Edge.To} [{Edge.Weight}]")]
+		private struct EdgeEntry
+		{
+			public EdgeEntry([NotNull] T from, [NotNull] GraphEdge<T, TWeight> edge)
+			{
+				From = from;
+				Edge = edge;
+			}
+
+			[NotNull]
+			public readonly T From;
+			[NotNull]
+			public readonly GraphEdge<T, TWeight> Edge;
+		}
+
 		/// <inheritdoc />
 		public WeightedUndirectedGraphList()
 			: this(0, null)
@@ -56,7 +73,7 @@ namespace asm.Collections
 
 			if (fromEdges == null)
 			{
-				fromEdges = NewEdgesContainer();
+				fromEdges = MakeContainer();
 				this[from] = fromEdges;
 			}
 
@@ -77,7 +94,7 @@ namespace asm.Collections
 
 			if (toEdges == null)
 			{
-				toEdges = NewEdgesContainer();
+				toEdges = MakeContainer();
 				this[to] = toEdges;
 			}
 
@@ -137,10 +154,13 @@ namespace asm.Collections
 
 		public WeightedUndirectedGraphList<T, TWeight> GetMinimumSpanningTree(SpanningTreeAlgorithm algorithm)
 		{
+			if (Count == 0) return null;
+
+			IHeap<EdgeEntry> queue = MakeQueue<TWeight, EdgeEntry>(e => e.Edge.Weight);
 			return algorithm switch
 			{
-				SpanningTreeAlgorithm.Prim => PrimSpanningTree(),
-				SpanningTreeAlgorithm.Kruskal => KruskalSpanningTree(),
+				SpanningTreeAlgorithm.Prim => PrimSpanningTree(queue),
+				SpanningTreeAlgorithm.Kruskal => KruskalSpanningTree(queue),
 				_ => throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null)
 			};
 		}
@@ -196,7 +216,7 @@ namespace asm.Collections
 			}
 		}
 
-		private WeightedUndirectedGraphList<T, TWeight> PrimSpanningTree()
+		private WeightedUndirectedGraphList<T, TWeight> PrimSpanningTree([NotNull] IHeap<EdgeEntry> queue)
 		{
 			/*
 			 * Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
@@ -230,10 +250,7 @@ namespace asm.Collections
 			}
 
 			if (minEdge == null) return null;
-
-			IComparer<(T From, GraphEdge<T, TWeight> Edge)> priorityComparer = ComparisonComparer.FromComparison<(T From, GraphEdge<T, TWeight> Edge)>((x, y) => x.Edge.Weight.CompareTo(y.Edge.Weight));
-			BinaryHeap<(T From, GraphEdge<T, TWeight> Edge)> queue = new MinBinaryHeap<(T From, GraphEdge<T, TWeight> Edge)>(priorityComparer);
-			queue.Add((minFrom, minEdge));
+			queue.Add(new EdgeEntry(minFrom, minEdge));
 
 			WeightedUndirectedGraphList<T, TWeight> result = new WeightedUndirectedGraphList<T, TWeight>(Comparer)
 			{
@@ -243,31 +260,28 @@ namespace asm.Collections
 
 			while (result.Count < Keys.Count && queue.Count > 0)
 			{
-				(T From, GraphEdge<T, TWeight> Edge) tuple = queue.ExtractValue();
+				EdgeEntry edgeEntry = queue.ExtractValue();
 				// this avoids to have a cycle
-				if (result.ContainsKey(tuple.Edge.To)) continue;
-				result.Add(tuple.Edge.To);
-				result.AddEdge(tuple.From, tuple.Edge.To, tuple.Edge.Weight);
+				if (result.ContainsKey(edgeEntry.Edge.To)) continue;
+				result.Add(edgeEntry.Edge.To);
+				result.AddEdge(edgeEntry.From, edgeEntry.Edge.To, edgeEntry.Edge.Weight);
 
 				// doing it this way guarantees the vertices are always connected
-				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[tuple.Edge.To];
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[edgeEntry.Edge.To];
 				if (edges == null || edges.Count == 0) continue;
 
 				foreach (GraphEdge<T, TWeight> edge in edges)
-					queue.Add((tuple.Edge.To, edge));
+					queue.Add(new EdgeEntry(edgeEntry.Edge.To, edge));
 			}
 
 			return result;
 		}
 
-		private WeightedUndirectedGraphList<T, TWeight> KruskalSpanningTree()
+		private WeightedUndirectedGraphList<T, TWeight> KruskalSpanningTree([NotNull] IHeap<EdgeEntry> queue)
 		{
 			// Udemy - Mastering Data Structures & Algorithms using C and C++ - Abdul Bari
 			// https://www.geeksforgeeks.org/kruskals-minimum-spanning-tree-algorithm-greedy-algo-2/
 			if (Count == 0) return null;
-
-			IComparer<(T From, GraphEdge<T, TWeight> Edge)> priorityComparer = ComparisonComparer.FromComparison<(T From, GraphEdge<T, TWeight> Edge)>((x, y) => x.Edge.Weight.CompareTo(y.Edge.Weight));
-			BinaryHeap<(T From, GraphEdge<T, TWeight> Edge)> queue = new MinBinaryHeap<(T From, GraphEdge<T, TWeight> Edge)>(priorityComparer);
 
 			// add all the edges to the queue
 			foreach (T vertex in Keys)
@@ -276,7 +290,7 @@ namespace asm.Collections
 				if (edges == null || edges.Count == 0) continue;
 
 				foreach (GraphEdge<T, TWeight> edge in edges)
-					queue.Add((vertex, edge));
+					queue.Add(new EdgeEntry(vertex, edge));
 			}
 
 			if (queue.Count == 0) return null;
@@ -286,12 +300,12 @@ namespace asm.Collections
 
 			while (result.Count < Keys.Count && queue.Count > 0)
 			{
-				(T From, GraphEdge<T, TWeight> Edge) tuple = queue.ExtractValue();
-				if (disjointSet.IsConnected(tuple.From, tuple.Edge.To)) continue;
-				disjointSet.Union(tuple.From, tuple.Edge.To);
-				if (!result.ContainsKey(tuple.From)) result.Add(tuple.From);
-				if (!result.ContainsKey(tuple.Edge.To)) result.Add(tuple.Edge.To);
-				result.AddEdge(tuple.From, tuple.Edge.To, tuple.Edge.Weight);
+				EdgeEntry edgeEntry = queue.ExtractValue();
+				if (disjointSet.IsConnected(edgeEntry.From, edgeEntry.Edge.To)) continue;
+				disjointSet.Union(edgeEntry.From, edgeEntry.Edge.To);
+				if (!result.ContainsKey(edgeEntry.From)) result.Add(edgeEntry.From);
+				if (!result.ContainsKey(edgeEntry.Edge.To)) result.Add(edgeEntry.Edge.To);
+				result.AddEdge(edgeEntry.From, edgeEntry.Edge.To, edgeEntry.Edge.Weight);
 			}
 
 			return result;

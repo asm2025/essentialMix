@@ -70,7 +70,7 @@ namespace asm.Collections
 		{
 			if (Root == null || Root.IsLeaf) return 0;
 			int height = 0;
-			IterateLevels(Root, (i, _) => height++);
+			IterateLevels((i, _) => height++);
 			return height;
 		}
 

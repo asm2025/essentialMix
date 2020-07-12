@@ -27,7 +27,7 @@ namespace asm.Collections
 				: 'B';
 
 		/// <inheritdoc />
-		protected internal override string ToString(int depth)
+		protected internal override string ToString(int level)
 		{
 			return $"{Value} {ColorC}";
 		}

@@ -71,7 +71,7 @@ namespace asm.Collections
 		/// <param name="method">The traverse method</param>
 		/// <returns></returns>
 		[NotNull]
-		public abstract IGraphEnumeratorImpl<T> Enumerate([NotNull] T from, BreadthDepthTraverse method);
+		public abstract IEnumerableEnumerator<T> Enumerate([NotNull] T from, BreadthDepthTraverse method);
 
 		public void Add([NotNull] T vertex)
 		{
@@ -152,12 +152,15 @@ namespace asm.Collections
 		}
 
 		[NotNull]
-		protected abstract TAdjacencyList NewEdgesContainer();
+		protected abstract TAdjacencyList MakeContainer();
+
+		[NotNull]
+		protected virtual IHeap<TValue> MakeQueue<TValue>(IComparer<TValue> comparer = null) { return new MinBinomialHeap<TValue>(comparer); }
 	}
 
 	public abstract class GraphList<T> : GraphList<T, HashSet<T>, T>
 	{
-		private struct BreadthFirstEnumerator : IGraphEnumeratorImpl<T>
+		private struct BreadthFirstEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly GraphList<T> _graph;
 			private readonly int _version;
@@ -262,7 +265,7 @@ namespace asm.Collections
 			public void Dispose() { }
 		}
 
-		private struct DepthFirstEnumerator : IGraphEnumeratorImpl<T>
+		private struct DepthFirstEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly GraphList<T> _graph;
 			private readonly int _version;
@@ -398,9 +401,9 @@ namespace asm.Collections
 		}
 	
 		/// <inheritdoc />
-		protected override HashSet<T> NewEdgesContainer() { return new HashSet<T>(Comparer); }
-	
-		public override IGraphEnumeratorImpl<T> Enumerate(T from, BreadthDepthTraverse method)
+		protected override HashSet<T> MakeContainer() { return new HashSet<T>(Comparer); }
+
+		public override IEnumerableEnumerator<T> Enumerate(T from, BreadthDepthTraverse method)
 		{
 			if (!ContainsKey(from)) throw new KeyNotFoundException();
 			return method switch

@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Threading;
 using asm.Exceptions.Collections;
-using asm.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Collections
@@ -24,25 +22,10 @@ namespace asm.Collections
 	// https://en.wikipedia.org/wiki/Pairing_heap
 	// https://brilliant.org/wiki/pairing-heap/
 	// https://users.cs.fiu.edu/~weiss/dsaa_c++/code/PairingHeap.cpp <= actually nice one :)
-	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(PairingHeap<,,>.DebugView))]
 	[Serializable]
-	public abstract class PairingHeap<TNode, TKey, TValue> : IKeyedHeap<TNode, TKey, TValue>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
+	public abstract class PairingHeap<TNode, TKey, TValue> : RootedHeap<TNode, TKey, TValue>
 		where TNode : PairingNode<TNode, TKey, TValue>
 	{
-		internal sealed class DebugView
-		{
-			private readonly PairingHeap<TNode, TKey, TValue> _heap;
-
-			public DebugView([NotNull] PairingHeap<TNode, TKey, TValue> heap)
-			{
-				_heap = heap;
-			}
-
-			[NotNull]
-			public TNode Head => _heap.Head;
-		}
-
 		private struct BreadthFirstEnumerator : IEnumerableEnumerator<TValue>
 		{
 			private readonly PairingHeap<TNode, TKey, TValue> _heap;
@@ -235,10 +218,6 @@ namespace asm.Collections
 			public void Dispose() { }
 		}
 
-		protected internal int _version;
-
-		private object _syncRoot;
-
 		/// <inheritdoc />
 		protected PairingHeap()
 			: this((IComparer<TKey>)null)
@@ -246,8 +225,8 @@ namespace asm.Collections
 		}
 
 		protected PairingHeap(IComparer<TKey> comparer)
+			: base(comparer)
 		{
-			Comparer = comparer ?? Comparer<TKey>.Default;
 		}
 
 		protected PairingHeap([NotNull] IEnumerable<TValue> enumerable)
@@ -256,50 +235,12 @@ namespace asm.Collections
 		}
 
 		protected PairingHeap([NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: this(comparer)
+			: base(enumerable, comparer)
 		{
-			Add(enumerable);
-		}
-
-		public IComparer<TKey> Comparer { get; }
-
-		[NotNull]
-		protected EqualityComparer<TValue> ValueComparer { get; } = EqualityComparer<TValue>.Default;
-
-		public int Count { get; protected internal set; }
-	
-		protected internal TNode Head { get; set; }
-
-		/// <inheritdoc />
-		bool ICollection<TValue>.IsReadOnly => false;
-
-		/// <inheritdoc />
-		bool ICollection.IsSynchronized => false;
-
-		/// <inheritdoc />
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				if (_syncRoot == null) Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
-				return _syncRoot;
-			}
 		}
 
 		/// <inheritdoc />
-		public IEnumerator<TValue> GetEnumerator() { return Enumerate(Head); }
-
-		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-		/// <summary>
-		/// Enumerate nodes' values in a semi recursive approach
-		/// </summary>
-		/// <param name="root">The starting node</param>
-		/// <param name="method">The technique to use when traversing</param>
-		/// <returns>An <see cref="IEnumerableEnumerator{TValue}"/></returns>
-		[NotNull]
-		public IEnumerableEnumerator<TValue> Enumerate(TNode root, BreadthDepthTraverse method)
+		public sealed override IEnumerableEnumerator<TValue> Enumerate(TNode root, BreadthDepthTraverse method)
 		{
 			return method switch
 			{
@@ -309,18 +250,8 @@ namespace asm.Collections
 			};
 		}
 
-		#region Enumerate overloads
-		[NotNull]
-		public IEnumerableEnumerator<TValue> Enumerate(TNode root) { return Enumerate(root, BreadthDepthTraverse.BreadthFirst); }
-		#endregion
-
-		/// <summary>
-		/// Iterate over nodes with a callback action
-		/// </summary>
-		/// <param name="root">The starting node</param>
-		/// <param name="method">The technique to use when traversing</param>
-		/// <param name="visitCallback">callback action to handle the node</param>
-		public void Iterate(TNode root, BreadthDepthTraverse method, [NotNull] Action<TNode> visitCallback)
+		/// <inheritdoc />
+		public sealed override void Iterate(TNode root, BreadthDepthTraverse method, Action<TNode> visitCallback)
 		{
 			if (Count == 0 || root == null) return;
 
@@ -337,20 +268,8 @@ namespace asm.Collections
 			}
 		}
 
-		#region Iterate overloads - visitCallback action
-		public void Iterate(TNode root, [NotNull] Action<TNode> visitCallback)
-		{
-			Iterate(root, BreadthDepthTraverse.BreadthFirst, visitCallback);
-		}
-		#endregion
-
-		/// <summary>
-		/// Iterate over nodes with a callback function
-		/// </summary>
-		/// <param name="root">The starting node</param>
-		/// <param name="method">The technique to use when traversing</param>
-		/// <param name="visitCallback">callback function to handle the node that can cancel the loop</param>
-		public void Iterate(TNode root, BreadthDepthTraverse method, [NotNull] Func<TNode, bool> visitCallback)
+		/// <inheritdoc />
+		public sealed override void Iterate(TNode root, BreadthDepthTraverse method, Func<TNode, bool> visitCallback)
 		{
 			if (Count == 0 || root == null) return;
 
@@ -367,25 +286,8 @@ namespace asm.Collections
 			}
 		}
 
-		#region Iterate overloads - visitCallback action
-		public void Iterate(TNode root, [NotNull] Func<TNode, bool> visitCallback)
-		{
-			Iterate(root, BreadthDepthTraverse.BreadthFirst, visitCallback);
-		}
-		#endregion
-
 		/// <inheritdoc />
-		public abstract TNode MakeNode(TValue value);
-
-		/// <inheritdoc />
-		public void Add(TValue value)
-		{
-			if (value == null) throw new ArgumentNullException(nameof(value));
-			Add(MakeNode(value));
-		}
-
-		/// <inheritdoc />
-		public void Add(TNode node)
+		public sealed override void Add(TNode node)
 		{
 			node.Invalidate();
 			Head = Head == null
@@ -396,22 +298,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public void Add(IEnumerable<TValue> enumerable)
-		{
-			foreach (TValue item in enumerable)
-				Add(item);
-		}
-
-		/// <inheritdoc />
-		public bool Remove(TValue value)
-		{
-			if (value == null) throw new ArgumentNullException(nameof(value));
-			TNode node = Find(value);
-			return node != null && Remove(node);
-		}
-
-		/// <inheritdoc />
-		public bool Remove(TNode node)
+		public sealed override bool Remove(TNode node)
 		{
 			// https://www.geeksforgeeks.org/pairing-heap/
 			// https://brilliant.org/wiki/pairing-heap/
@@ -425,7 +312,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public void Clear()
+		public sealed override void Clear()
 		{
 			Head = null;
 			Count = 0;
@@ -433,7 +320,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public void DecreaseKey(TNode node, TKey newKey)
+		public sealed override void DecreaseKey(TNode node, TKey newKey)
 		{
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
 			if (Compare(node.Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
@@ -453,14 +340,14 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public TValue Value()
+		public sealed override TValue Value()
 		{
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
 			return Head.Value;
 		}
 
 		/// <inheritdoc />
-		public TValue ExtractValue()
+		public sealed override TValue ExtractValue()
 		{
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
 			TNode value = Head;
@@ -471,116 +358,6 @@ namespace asm.Collections
 			_version++;
 			return value.Value;
 		}
-
-		/// <inheritdoc />
-		public TValue ElementAt(int k)
-		{
-			if (k < 1 || Count < k) throw new ArgumentOutOfRangeException(nameof(k));
-
-			for (int i = 1; i < k; i++) 
-				ExtractValue();
-
-			return Value();
-		}
-
-		/// <inheritdoc />
-		public bool Contains(TValue value)
-		{
-			if (value == null) throw new ArgumentNullException(nameof(value));
-			return Find(value) != null;
-		}
-
-		/// <inheritdoc />
-		public TNode Find(TValue value)
-		{
-			if (Head == null || ValueComparer.Equals(Head.Value, value)) return Head;
-			TNode node = null;
-			Iterate(Head, e =>
-			{
-				if (ValueComparer.Equals(e.Value, value)) node = e;
-				return node == null;
-			});
-			return node;
-		}
-
-		/// <inheritdoc />
-		public TNode FindByKey(TKey key)
-		{
-			if (Head == null || Comparer.IsEqual(Head.Key, key)) return Head;
-			TNode node = null;
-			Iterate(Head, e =>
-			{
-				if (Comparer.IsEqual(e.Key, key)) node = e;
-				return node == null;
-			});
-			return node;
-		}
-
-		public virtual bool Equals(PairingHeap<TNode, TKey, TValue> other)
-		{
-			if (ReferenceEquals(null, other)) return false;
-			if (ReferenceEquals(this, other)) return true;
-			if (Count != other.Count || !ValueComparer.Equals(other.ValueComparer)) return false;
-
-			using (IEnumerator<TValue> thisEnumerator = GetEnumerator())
-			{
-				using (IEnumerator<TValue> otherEnumerator = other.GetEnumerator())
-				{
-					bool thisMoved = thisEnumerator.MoveNext();
-					bool otherMoved = otherEnumerator.MoveNext();
-					
-					while (thisMoved && otherMoved)
-					{
-						if (!ValueComparer.Equals(thisEnumerator.Current, otherEnumerator.Current)) return false;
-						thisMoved = thisEnumerator.MoveNext();
-						otherMoved = otherEnumerator.MoveNext();
-					}
-
-					if (thisMoved ^ otherMoved) return false;
-				}
-			}
-
-			return true;
-		}
-
-		/// <inheritdoc />
-		public void CopyTo(TValue[] array, int arrayIndex)
-		{
-			if (Count == 0) return;
-			array.Length.ValidateRange(arrayIndex, Count);
-			Iterate(Head, e => array[arrayIndex++] = e.Value);
-		}
-
-		/// <inheritdoc />
-		void ICollection.CopyTo(Array array, int index)
-		{
-			if (array.Rank != 1) throw new RankException();
-			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
-			if (Count == 0) return;
-
-			if (array is TValue[] tArray)
-			{
-				CopyTo(tArray, index);
-				return;
-			}
-
-			/*
-			* Catch the obvious case assignment will fail.
-			* We can find all possible problems by doing the check though.
-			* For example, if the element type of the Array is derived from T,
-			* we can't figure out if we can successfully copy the element beforehand.
-			*/
-			array.Length.ValidateRange(index, Count);
-
-			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
-			Type sourceType = typeof(TValue);
-			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
-			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
-			if (Count == 0) return;
-			Iterate(Head, e => objects[index++] = e.Value);
-		}
-
-		protected abstract int Compare([NotNull] TKey x, [NotNull] TKey y);
 
 		/// <summary>
 		/// Maintains heap properties by comparing and linking a and b together to satisfy heap order.
@@ -802,14 +579,13 @@ namespace asm.Collections
 	[Serializable]
 	public abstract class PairingHeap<TKey, TValue> : PairingHeap<PairingNode<TKey, TValue>, TKey, TValue>
 	{
-		internal new sealed class DebugView
+		internal sealed class DebugView : asm_RootedHeapDebugView<PairingNode<TKey, TValue>, TKey, TValue>
 		{
-			private readonly PairingHeap<TKey, TValue> _heap;
-
-			public DebugView([NotNull] PairingHeap<TKey, TValue> heap) { _heap = heap; }
-
-			[NotNull]
-			public PairingNode<TKey, TValue> Head => _heap.Head;
+			/// <inheritdoc />
+			public DebugView([NotNull] PairingHeap<TKey, TValue> heap)
+				: base(heap)
+			{
+			}
 		}
 
 		[NotNull]
@@ -846,14 +622,13 @@ namespace asm.Collections
 	[Serializable]
 	public abstract class PairingHeap<T> : PairingHeap<PairingNode<T>, T, T>
 	{
-		internal new sealed class DebugView
+		internal sealed class DebugView : asm_RootedHeapDebugView<PairingNode<T>, T, T>
 		{
-			private readonly PairingHeap<T> _heap;
-
-			public DebugView([NotNull] PairingHeap<T> heap) { _heap = heap; }
-
-			[NotNull]
-			public PairingNode<T> Head => _heap.Head;
+			/// <inheritdoc />
+			public DebugView([NotNull] PairingHeap<T> heap)
+				: base(heap)
+			{
+			}
 		}
 
 		/// <inheritdoc />

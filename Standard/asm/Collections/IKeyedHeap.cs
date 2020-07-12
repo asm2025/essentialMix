@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace asm.Collections
 {
-	public interface IKeyedHeap<TNode, TKey, TValue> : IHeap<TValue>
+	public interface IKeyedHeap<TNode, in TKey, TValue> : IHeap<TValue>
 		where TNode : IKeyedNode<TKey, TValue>
 	{
 		[NotNull]

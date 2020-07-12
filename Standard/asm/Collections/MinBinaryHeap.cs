@@ -5,6 +5,49 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	[Serializable]
+	public class MinBinaryHeap<TKey, TValue> : BinaryHeap<TKey, TValue>
+	{
+		/// <inheritdoc />
+		public MinBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem)
+			: base(getKeyForItem)
+		{
+		}
+
+		/// <inheritdoc />
+		public MinBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity)
+			: base(getKeyForItem, capacity)
+		{
+		}
+
+		/// <inheritdoc />
+		public MinBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
+			: base(getKeyForItem, comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		public MinBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity, IComparer<TKey> comparer)
+			: base(getKeyForItem, capacity, comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		public MinBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
+			: base(getKeyForItem, enumerable)
+		{
+		}
+
+		/// <inheritdoc />
+		public MinBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
+			: base(getKeyForItem, enumerable, comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		protected override int Compare(TKey x, TKey y) { return Comparer.Compare(x, y); }
+	}
+
+	[Serializable]
 	public class MinBinaryHeap<T> : BinaryHeap<T>
 	{
 		/// <inheritdoc />

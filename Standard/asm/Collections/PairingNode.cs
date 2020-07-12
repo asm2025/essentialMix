@@ -136,7 +136,7 @@ namespace asm.Collections
 
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public class PairingNode<TKey, TValue> : PairingNode<PairingNode<TKey, TValue>, TKey, TValue>
+	public sealed class PairingNode<TKey, TValue> : PairingNode<PairingNode<TKey, TValue>, TKey, TValue>
 	{
 		private TKey _key;
 

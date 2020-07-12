@@ -20,18 +20,6 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		internal MaxBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head)
-			: this(getKeyForItem, head, null)
-		{
-		}
-
-		/// <inheritdoc />
-		internal MaxBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] BinomialNode<TKey, TValue> head, IComparer<TKey> comparer)
-			: base(getKeyForItem, head, comparer)
-		{
-		}
-
-		/// <inheritdoc />
 		public MaxBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
 			: this(getKeyForItem, enumerable, null)
 		{

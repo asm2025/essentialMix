@@ -503,7 +503,38 @@ namespace asm.Extensions
 
 		public static void SortHeap<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
 		{
-			BinaryHeap.Sort(thisValue, index, count, comparer, descending);
+			// https://www.geeksforgeeks.org/iterative-heap-sort/
+			thisValue.Count.ValidateRange(index, ref count);
+			if (count < 2 || thisValue.Count < 2) return;
+			comparer ??= Comparer<T>.Default;
+			if (descending) comparer = comparer.Reverse();
+
+			// Build heap (rearrange array) starting from the last parent
+			for (int i = index + 1; i < count; i++)
+			{
+				// swap child and parent until parent is smaller
+				for (int child = i, parent = (child - 1) / 2;
+					parent >= index && comparer.IsGreaterThan(thisValue[child], thisValue[parent]);
+					child = parent, parent = (child - 1) / 2)
+				{
+					thisValue.FastSwap(child, parent);
+				}
+			}
+
+			for (int i = count - 1; i > index; i--)
+			{
+				// swap value of first indexed with last indexed
+				thisValue.FastSwap(index, i);
+				
+				// maintaining heap property after each swapping
+				for (int parent = 0, child = parent * 2 + 1; child < i; parent = child, child = parent * 2 + 1)
+				{
+					// if left is smaller than right point index to right
+					if (child < i - 1 && comparer.IsLessThan(thisValue[child], thisValue[child + 1])) child++;
+					// if parent is smaller than child, swap them
+					if (child < i && comparer.IsLessThan(thisValue[parent], thisValue[child])) thisValue.FastSwap(parent, child);
+				}
+			}
 		}
 
 		public static void SortQuick<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)

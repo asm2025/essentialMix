@@ -267,7 +267,7 @@ namespace asm.Collections
 			if (Root == null || Root.IsLeaf) return true;
 			
 			bool balanced = true;
-			Iterate(Root, TreeTraverseMethod.LevelOrder, e =>
+			Iterate(TreeTraverseMethod.LevelOrder, e =>
 			{
 				balanced &= IsBalancedLocal(e);
 				return balanced;
@@ -293,7 +293,7 @@ namespace asm.Collections
 		{
 			base.FromLevelOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, TreeTraverseMethod.PostOrder, SetHeight);
+			Iterate(TreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -301,7 +301,7 @@ namespace asm.Collections
 		{
 			base.FromPreOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, TreeTraverseMethod.PostOrder, SetHeight);
+			Iterate(TreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -309,7 +309,7 @@ namespace asm.Collections
 		{
 			base.FromInOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, TreeTraverseMethod.PostOrder, SetHeight);
+			Iterate(TreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -317,7 +317,7 @@ namespace asm.Collections
 		{
 			base.FromPostOrder(collection);
 			if (Root == null) return;
-			Iterate(Root, TreeTraverseMethod.PostOrder, SetHeight);
+			Iterate(TreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -325,7 +325,7 @@ namespace asm.Collections
 		{
 			base.FromInOrderAndLevelOrder(inOrderCollection, levelOrderCollection);
 			if (Root == null) return;
-			Iterate(Root, TreeTraverseMethod.PostOrder, SetHeight);
+			Iterate(TreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -333,7 +333,7 @@ namespace asm.Collections
 		{
 			base.FromInOrderAndPreOrder(inOrderCollection, preOrderCollection);
 			if (Root == null) return;
-			Iterate(Root, TreeTraverseMethod.PostOrder, SetHeight);
+			Iterate(TreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		/// <inheritdoc />
@@ -341,7 +341,7 @@ namespace asm.Collections
 		{
 			base.FromInOrderAndPostOrder(inOrderCollection, postOrderCollection);
 			if (Root == null) return;
-			Iterate(Root, TreeTraverseMethod.PostOrder, SetHeight);
+			Iterate(TreeTraverseMethod.PostOrder, SetHeight);
 		}
 
 		[NotNull]

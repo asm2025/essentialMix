@@ -138,7 +138,7 @@ namespace asm.Collections
 
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public class BinomialNode<TKey, TValue> : BinomialNode<BinomialNode<TKey, TValue>, TKey, TValue>
+	public sealed class BinomialNode<TKey, TValue> : BinomialNode<BinomialNode<TKey, TValue>, TKey, TValue>
 	{
 		private TKey _key;
 

@@ -1,18 +1,8 @@
 ﻿namespace asm.Collections
 {
 	// https://en.wikipedia.org/wiki/Shortest_path_problem
-	public enum ShortestPathAlgorithm
+	public enum SinglePairPathAlgorithm
 	{
-		/// <summary>
-		/// <see href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm">Dijkstra algorithm</see> solves the
-		/// single-source shortest path problem with non-negative edge weight.
-		/// </summary>
-		Dijkstra,
-		/// <summary>
-		/// <see href="https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm">Bellman–Ford algorithm</see>
-		/// solves the single-source problem if edge weights may be negative.
-		/// </summary>
-		BellmanFord,
 		/// <summary>
 		/// <see href="https://en.wikipedia.org/wiki/B*">B*</see> solves for single pair shortest path using a
 		/// best-first graph search algorithm to finds the least-cost path.
@@ -37,17 +27,5 @@
 		/// reached.
 		/// </summary>
 		DStar,
-		/// <summary>
-		/// Solves all pairs shortest paths. O(V^3)
-		/// </summary>
-		FloydWarshall,
-		/// <summary>
-		/// Solves all pairs shortest paths, and may be faster than Floyd–Warshall on sparse graphs.
-		/// </summary>
-		Johnson,
-		/// <summary>
-		/// Solves the shortest stochastic path problem with an additional probabilistic weight on each vertex.
-		/// </summary>
-		Viterbi
 	}
 }

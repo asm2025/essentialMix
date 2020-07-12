@@ -167,7 +167,7 @@ namespace asm.Collections
 
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public class FibonacciNode<TKey, TValue> : FibonacciNode<FibonacciNode<TKey, TValue>, TKey, TValue>
+	public sealed class FibonacciNode<TKey, TValue> : FibonacciNode<FibonacciNode<TKey, TValue>, TKey, TValue>
 	{
 		private TKey _key;
 
