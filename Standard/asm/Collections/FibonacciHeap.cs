@@ -352,12 +352,13 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override void Add(TNode node)
+		public sealed override TNode Add(TNode node)
 		{
 			node.Invalidate();
 			Head = Merge(Head, node);
 			Count++;
 			_version++;
+			return node;
 		}
 
 		/// <inheritdoc />
@@ -411,12 +412,12 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override TValue ExtractValue()
+		public sealed override TNode ExtractValue()
 		{
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
 
 			// Grab the min/maximum element so we know what to return.
-			TNode value = Head;
+			TNode head = Head;
 
 			/*
 			 * Now, we need to get rid of this element from the list of roots. There
@@ -425,7 +426,7 @@ namespace asm.Collections
 			 * Otherwise, if it's not null, then we write the elements next to the
 			 * Head element around it to remove it, then arbitrarily reassign the Head.
 			 */
-			if (value.Next == value)
+			if (head.Next == head)
 			{
 				// Case 1
 				Head = null;
@@ -443,29 +444,33 @@ namespace asm.Collections
 			 * since they're about to become roots. Because the elements are
 			 * stored in a circular list, the traversal is a bit complex.
 			 */
-			if (value.Child != null)
+			if (head.Child != null)
 			{
 				// Keep track of the first visited node.
-				TNode next = value.Child;
+				TNode next = head.Child;
 
 				do
 				{
 					next.Parent = null;
 					next = next.Next;
 				}
-				while (next != value.Child);
+				while (next != head.Child);
 			}
 
 			/*
 			 * Next, splice the children of the root node into the topmost list, 
 			 * then set Head to point somewhere in that list.
 			 */
-			Head = Merge(Head, value.Child);
+			Head = Merge(Head, head.Child);
 			Count--;
 			_version++;
 
 			// If there are no entries left, we're done.
-			if (Head == null) return value.Value;
+			if (Head == null)
+			{
+				head.Invalidate();
+				return head;
+			}
 
 			// the next code is sick to say the least!
 			/*
@@ -570,7 +575,8 @@ namespace asm.Collections
 				if (Compare(next.Key, Head.Key) <= 0) Head = next;
 			}
 
-			return value.Value;
+			head.Invalidate();
+			return head;
 		}
 
 		/// <summary>

@@ -304,8 +304,8 @@ namespace asm.Helpers
 		{
 			if (beginIp.Length != 4) throw new ArgumentException("byte array size mismatch", nameof(beginIp));
 			if (endIp.Length != 4) throw new ArgumentException("byte array size mismatch", nameof(endIp));
-			beginIp.Initialize(byte.MinValue);
-			endIp.Initialize(byte.MinValue);
+			beginIp.FastInitialize(byte.MinValue);
+			endIp.FastInitialize(byte.MinValue);
 			if (string.IsNullOrWhiteSpace(ipRange)) return false;
 
 			string[] x = ipRange.Split(2, '/');
@@ -353,8 +353,8 @@ namespace asm.Helpers
 		{
 			if (beginIp.Length != 4) throw new ArgumentException("byte array size mismatch", nameof(beginIp));
 			if (endIp.Length != 4) throw new ArgumentException("byte array size mismatch", nameof(endIp));
-			beginIp.Initialize(byte.MinValue);
-			endIp.Initialize(byte.MinValue);
+			beginIp.FastInitialize(byte.MinValue);
+			endIp.FastInitialize(byte.MinValue);
 			if (string.IsNullOrWhiteSpace(ipRange)) return false;
 
 			string[] ranges = ipRange.Split(2, '-');

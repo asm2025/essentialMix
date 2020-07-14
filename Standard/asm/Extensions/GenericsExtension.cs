@@ -422,7 +422,7 @@ namespace asm.Extensions
 		public static TypeCode AsTypeCode<T>(this T thisValue, bool resolveGenerics)
 		{
 			TypeCode? typeCode = thisValue as TypeCode?;
-			return typeCode ?? thisValue.AsType().AsTypeCode(resolveGenerics);
+			return typeCode ?? thisValue.AsType(resolveGenerics).AsTypeCode(resolveGenerics);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -1249,13 +1249,89 @@ namespace asm.Extensions
 			return true;
 		}
 
-		public static void Initialize<T>([NotNull] this T[] thisValue, T value, int startIndex = 0, int count = -1)
+		public static void FastInitialize<T>([NotNull] this T[] thisValue, T value)
+			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
 		{
-			if (thisValue.Length == 0)
-				return;
+			FastInitialize(thisValue, value, 0, thisValue.Length);
+		}
+
+		public static void FastInitialize<T>([NotNull] this T[] thisValue, T value, int startIndex)
+			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+		{
+			FastInitialize(thisValue, value, startIndex, thisValue.Length);
+		}
+
+		public static void FastInitialize<T>([NotNull] this T[] thisValue, T value, int startIndex, int count)
+			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+		{
+			const int BLOCK_SIZE = 32;
+
+			/*
+			 * The basic idea came from https://stackoverflow.com/questions/1897555/what-is-the-equivalent-of-memset-in-c/54278956#54278956
+			 * but the original code never worked! Nevertheless, the idea itself is great. It gives a very fast pace.
+			 */
+			int lo = startIndex, hi = Math.Min(BLOCK_SIZE, count);
+
+			while (lo < hi) 
+				thisValue[lo++] = value;
+
+			if (lo == startIndex + count) return;
+
+			int itemSize;
+	
+			switch (typeof(T).AsTypeCode())
+			{
+				case TypeCode.Boolean:
+					itemSize = sizeof(bool);
+					break;
+				case TypeCode.Byte:
+				case TypeCode.SByte:
+					itemSize = sizeof(byte);
+					break;
+				case TypeCode.Char:
+					itemSize = sizeof(char);
+					break;
+				case TypeCode.Int16:
+				case TypeCode.UInt16:
+					itemSize = sizeof(short);
+					break;
+				case TypeCode.Int32:
+				case TypeCode.UInt32:
+					itemSize = sizeof(int);
+					break;
+				case TypeCode.Int64:
+				case TypeCode.UInt64:
+					itemSize = sizeof(long);
+					break;
+				case TypeCode.Single:
+					itemSize = sizeof(float);
+					break;
+				case TypeCode.Double:
+					itemSize = sizeof(double);
+					break;
+				case TypeCode.Decimal:
+					itemSize = sizeof(decimal);
+					break;
+				default:
+					throw new NotSupportedException();
+			}
+
+			int block = BLOCK_SIZE;
+			// convert everything to byte size
+			startIndex *= itemSize;
+			lo *= itemSize;
+			hi = count * itemSize;
+	
+			for (; lo < hi; lo += block, block = Math.Min(block * 2, hi - lo))
+				Buffer.BlockCopy(thisValue, startIndex, thisValue, lo, block);
+		}
+
+		public static void Initialize<T>([NotNull] this T[] thisValue, T value, int startIndex = 0, int count = -1)
+			where T : struct, IComparable, IComparable<T>
+		{
+			if (thisValue.Length == 0) return;
 			thisValue.Length.ValidateRange(startIndex, ref count);
-			if (count == 0 || thisValue.Length == 0)
-				return;
+			if (count == 0 || thisValue.Length == 0) return;
 
 			int lastPos = startIndex + count;
 

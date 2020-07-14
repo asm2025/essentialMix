@@ -12,7 +12,6 @@ using asm.Comparers;
 using asm.Exceptions;
 using asm.Extensions;
 using asm.Helpers;
-using asm.Other.JonSkeet.MiscUtil.Collections;
 using asm.Other.Microsoft.Collections;
 using Bogus;
 using Bogus.DataSets;
@@ -25,7 +24,14 @@ namespace TestApp
 	internal class Program
 	{
 		private const int START = 10;
-		private const int LEN = 100_000;
+		private const int LEN = 1_000_000;
+
+		private static readonly string COMPILATION_TEXT = $@"
+This is C# (a compiled language), so the test needs to run at least
+once before considering results in order for the code to be compiled
+and run at full speed. The first time this test run, it will start 
+with just {START} items and the next time when you press '{"Y".BrightGreen()}', it will 
+work with {LEN} items.".Yellow();
 
 		private static readonly Lazy<Faker> __fakeGenerator = new Lazy<Faker>(() => new Faker(), LazyThreadSafetyMode.PublicationOnly);
 		private static readonly string[] __sortAlgorithms = 
@@ -115,6 +121,12 @@ namespace TestApp
 			//TestFibonacciHeapRemove();
 			//TestFibonacciHeapElementAt();
 			//TestFibonacciHeapDecreaseKey();
+			
+			// Garbage!!!
+			//TestIndexMinAdd();
+			//TestIndexMinRemove();
+			//TestIndexMinElementAt();
+			//TestIndexMinDecreaseKey();
 
 			//TestAllHeapsPerformance();
 
@@ -537,8 +549,7 @@ namespace TestApp
 			{
 				Console.Clear();
 				Title("Testing SingleLinkedList...");
-				Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
-				Console.WriteLine();
+				CompilationHint();
 				Console.WriteLine($"Array has {values.Length} items.");
 				Console.WriteLine("Test adding...");
 
@@ -657,8 +668,7 @@ namespace TestApp
 			{
 				Console.Clear();
 				Title("Testing LinkedList...");
-				Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
-				Console.WriteLine();
+				CompilationHint();
 				Console.WriteLine($"Array has {values.Length} items.");
 				Console.WriteLine("Test adding...");
 
@@ -775,8 +785,7 @@ namespace TestApp
 			{
 				Console.Clear();
 				Title("Testing Deque...");
-				Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
-				Console.WriteLine();
+				CompilationHint();
 				Console.WriteLine($"Array has {values.Length} items.");
 				Console.WriteLine("Test queue functionality...");
 
@@ -902,8 +911,7 @@ namespace TestApp
 			{
 				Console.Clear();
 				Title("Testing Deque...");
-				Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
-				Console.WriteLine();
+				CompilationHint();
 				Console.WriteLine($"Array has {values.Length} items.");
 				Console.WriteLine("Test queue functionality...");
 
@@ -1676,8 +1684,7 @@ namespace TestApp
 			{
 				Console.Clear();
 				Title("Testing all BinaryTrees performance...");
-				Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
-				Console.WriteLine();
+				CompilationHint();
 				Console.WriteLine($"Array has {values.Length} items.");
 
 				DoTheTest(binarySearchTree, values, clock);
@@ -1775,8 +1782,7 @@ namespace TestApp
 			{
 				Console.Clear();
 				Title("Testing SortedSet performance...");
-				Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
-				Console.WriteLine();
+				CompilationHint();
 				Console.WriteLine($"Array has {values.Length} items.");
 
 				DoTheTest(sortedSet, values, clock);
@@ -2554,8 +2560,7 @@ namespace TestApp
 					TNode node = heap.FindByKey(key);
 					Debug.Assert(node != null, $"Node for key {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
-					TValue extractedValue = heap.ExtractValue();
-					TKey extracted = getKey(extractedValue);
+					TKey extracted = heap.ExtractValue().Key;
 					succeeded = heap.Comparer.IsEqual(extracted, key);
 					Console.WriteLine($"Extracted {extracted}, expected {key}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
@@ -2578,7 +2583,7 @@ namespace TestApp
 					TNode node = heap.Find(key);
 					Debug.Assert(node != null, $"Node for value {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
-					TValue extracted = heap.ExtractValue();
+					TValue extracted = heap.ExtractValue().Key;
 					succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
 					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
@@ -2821,8 +2826,7 @@ namespace TestApp
 					TNode node = heap.FindByKey(key);
 					Debug.Assert(node != null, $"Node for key {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
-					TValue extractedValue = heap.ExtractValue();
-					TKey extracted = getKey(extractedValue);
+					TKey extracted = heap.ExtractValue().Key;
 					succeeded = heap.Comparer.IsEqual(extracted, key);
 					Console.WriteLine($"Extracted {extracted}, expected {key}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
@@ -2845,7 +2849,7 @@ namespace TestApp
 					TNode node = heap.Find(key);
 					Debug.Assert(node != null, $"Node for value {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
-					TValue extracted = heap.ExtractValue();
+					TValue extracted = heap.ExtractValue().Key;
 					succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
 					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
@@ -3088,8 +3092,7 @@ namespace TestApp
 					TNode node = heap.FindByKey(key);
 					Debug.Assert(node != null, $"Node for key {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
-					TValue extractedValue = heap.ExtractValue();
-					TKey extracted = getKey(extractedValue);
+					TKey extracted = heap.ExtractValue().Key;
 					succeeded = heap.Comparer.IsEqual(extracted, key);
 					Console.WriteLine($"Extracted {extracted}, expected {key}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
@@ -3112,7 +3115,7 @@ namespace TestApp
 					TNode node = heap.Find(key);
 					Debug.Assert(node != null, $"Node for value {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
-					TValue extracted = heap.ExtractValue();
+					TValue extracted = heap.ExtractValue().Key;
 					succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
 					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
@@ -3355,8 +3358,7 @@ namespace TestApp
 					TNode node = heap.FindByKey(key);
 					Debug.Assert(node != null, $"Node for key {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
-					TValue extractedValue = heap.ExtractValue();
-					TKey extracted = getKey(extractedValue);
+					TKey extracted = heap.ExtractValue().Key;
 					succeeded = heap.Comparer.IsEqual(extracted, key);
 					Console.WriteLine($"Extracted {extracted}, expected {key}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
@@ -3379,7 +3381,7 @@ namespace TestApp
 					TNode node = heap.Find(key);
 					Debug.Assert(node != null, $"Node for value {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
-					TValue extracted = heap.ExtractValue();
+					TValue extracted = heap.ExtractValue().Key;
 					succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
 					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
@@ -3409,6 +3411,275 @@ namespace TestApp
 			}
 		}
 
+		#region Not working
+		/*
+		 * something is off about this class!
+		 * I'm 100% sure there must be a bug in there because it can't be right to refer
+		 * to _pq[1] instead of _pq[0] while it uses freely the zero based offset!
+		 * I'm not sure if the original code works but the idea is cool. It might perform
+		 * better but it'll take time to adjust it. Maybe later.
+		 */
+		//private static void TestIndexMinAdd()
+		//{
+		//	bool more;
+
+		//	do
+		//	{
+		//		Console.Clear();
+		//		Title("Testing IndexMin.Add()...");
+
+		//		int len = RNGRandomHelper.Next(1, 12);
+		//		int[] values = GetRandomIntegers(len);
+		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+		//		IndexMin<int> heap = new MaxIndexMin<int>();
+		//		DoTheTest(heap, values);
+
+		//		heap = new MinIndexMin<int>();
+		//		DoTheTest(heap, values);
+
+		//		Student[] students = GetRandomStudents(len);
+		//		IndexMin<double, Student> studentsHeap = new MaxIndexMin<double, Student>(e => e.Grade);
+		//		DoTheTest(studentsHeap, students);
+
+		//		studentsHeap = new MinIndexMin<double, Student>(e => e.Grade);
+		//		DoTheTest(studentsHeap, students);
+
+		//		Console.WriteLine();
+		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		ConsoleKeyInfo response = Console.ReadKey(true);
+		//		Console.WriteLine();
+		//		more = response.Key == ConsoleKey.Y;
+		//	}
+		//	while (more);
+
+		//	static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array)
+		//		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+		//	{
+		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+
+		//		foreach (TValue value in array)
+		//		{
+		//			heap.Add(value);
+		//			//heap.PrintWithProps();
+		//		}
+
+		//		Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+		//	}
+		//}
+
+		//private static void TestIndexMinRemove()
+		//{
+		//	bool more;
+
+		//	do
+		//	{
+		//		Console.Clear();
+		//		Title("Testing IndexMin.Remove()...");
+
+		//		int len = RNGRandomHelper.Next(1, 12);
+		//		int[] values = GetRandomIntegers(len);
+		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+		//		IndexMin<int> heap = new MaxIndexMin<int>();
+		//		DoTheTest(heap, values);
+
+		//		heap = new MinIndexMin<int>();
+		//		DoTheTest(heap, values);
+
+		//		Student[] students = GetRandomStudents(len);
+		//		IndexMin<double, Student> studentsHeap = new MaxIndexMin<double, Student>(e => e.Grade);
+		//		DoTheTest(studentsHeap, students);
+
+		//		studentsHeap = new MinIndexMin<double, Student>(e => e.Grade);
+		//		DoTheTest(studentsHeap, students);
+
+		//		Console.WriteLine();
+		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		ConsoleKeyInfo response = Console.ReadKey(true);
+		//		Console.WriteLine();
+		//		more = response.Key == ConsoleKey.Y;
+		//	}
+		//	while (more);
+
+		//	static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array)
+		//		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+		//	{
+		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+		//		heap.Add(array);
+		//		Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+		//		Console.WriteLine("Test removing...");
+		//		bool removeStarted = false;
+
+		//		while (heap.Count > 0)
+		//		{
+		//			if (!removeStarted) removeStarted = true;
+		//			else Console.Write(", ");
+
+		//			Console.Write(heap.ExtractValue());
+		//		}
+
+		//		Console.WriteLine();
+		//		Console.WriteLine();
+		//	}
+		//}
+
+		//private static void TestIndexMinElementAt()
+		//{
+		//	bool more;
+
+		//	do
+		//	{
+		//		Console.Clear();
+		//		Title("Testing IndexMin ElementAt...");
+
+		//		int len = RNGRandomHelper.Next(1, 12);
+		//		int[] values = GetRandomIntegers(len);
+		//		int k = RNGRandomHelper.Next(1, values.Length);
+		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+		//		Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+
+		//		IndexMin<int> heap = new MaxIndexMin<int>();
+		//		DoTheTest(heap, values, k);
+
+		//		heap = new MinIndexMin<int>();
+		//		DoTheTest(heap, values, k);
+
+		//		Student[] students = GetRandomStudents(len);
+		//		Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+		//		Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+
+		//		IndexMin<double, Student> studentHeap = new MaxIndexMin<double, Student>(e => e.Grade);
+		//		DoTheTest(studentHeap, students, k);
+
+		//		studentHeap = new MinIndexMin<double, Student>(e => e.Grade);
+		//		DoTheTest(studentHeap, students, k);
+
+		//		Console.WriteLine();
+		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		ConsoleKeyInfo response = Console.ReadKey(true);
+		//		Console.WriteLine();
+		//		more = response.Key == ConsoleKey.Y;
+		//	}
+		//	while (more);
+
+		//	static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array, int k)
+		//		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+		//	{
+		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+		//		heap.Add(array);
+		//		Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+		//		Console.WriteLine($"Kth element at position {k} = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+		//		Console.WriteLine();
+		//		Console.WriteLine();
+		//	}
+		//}
+
+		//private static void TestIndexMinDecreaseKey()
+		//{
+		//	bool more;
+
+		//	do
+		//	{
+		//		Console.Clear();
+		//		Title("Testing IndexMin DecreaseKey...");
+
+		//		int len = RNGRandomHelper.Next(1, 12);
+		//		int[] values = GetRandomIntegers(len);
+		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+		//		Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+
+		//		IndexMin<int> heap = new MaxIndexMin<int>();
+		//		DoTheValueTest(heap, values, int.MaxValue);
+
+		//		heap = new MinIndexMin<int>();
+		//		DoTheValueTest(heap, values, int.MinValue);
+
+		//		Student[] students = GetRandomStudents(len);
+		//		Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+		//		Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+
+		//		IndexMin<double, Student> studentHeap = new MaxIndexMin<double, Student>(e => e.Grade);
+		//		DoTheKeyTest(studentHeap, students, int.MaxValue, e => e.Grade);
+
+		//		studentHeap = new MinIndexMin<double, Student>(e => e.Grade);
+		//		DoTheKeyTest(studentHeap, students, int.MinValue, e => e.Grade);
+
+		//		Console.WriteLine();
+		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		ConsoleKeyInfo response = Console.ReadKey(true);
+		//		Console.WriteLine();
+		//		more = response.Key == ConsoleKey.Y;
+		//	}
+		//	while (more);
+
+		//	static void DoTheKeyTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue, Func<TValue, TKey> getKey)
+		//		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+		//	{
+		//		Queue<TKey> queue = new Queue<TKey>();
+		//		DoTheTest(heap, array, queue);
+
+		//		bool succeeded = true;
+
+		//		while (succeeded && queue.Count > 0)
+		//		{
+		//			TKey key = queue.Dequeue();
+		//			TNode node = heap.FindByKey(key);
+		//			Debug.Assert(node != null, $"Node for key {key} is not found.");
+		//			heap.DecreaseKey(node, newKeyValue);
+		//			TKey extracted = heap.ExtractValue().Key;
+		//			succeeded = heap.Comparer.IsEqual(extracted, key);
+		//			Console.WriteLine($"Extracted {extracted}, expected {key}");
+		//			Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
+		//		}
+
+		//		Console.WriteLine();
+		//	}
+
+		//	static void DoTheValueTest<TNode, TValue>(IndexMin<TNode, TValue, TValue> heap, TValue[] array, TValue newKeyValue)
+		//		where TNode : KeyedBinaryNode<TNode, TValue, TValue>
+		//	{
+		//		Queue<TValue> queue = new Queue<TValue>();
+		//		DoTheTest(heap, array, queue);
+
+		//		bool succeeded = true;
+
+		//		while (succeeded && queue.Count > 0)
+		//		{
+		//			TValue key = queue.Dequeue();
+		//			TNode node = heap.Find(key);
+		//			Debug.Assert(node != null, $"Node for value {key} is not found.");
+		//			heap.DecreaseKey(node, newKeyValue);
+		//			TValue extracted = heap.ExtractValue().Key;
+		//			succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
+		//			Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
+		//			Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
+		//		}
+
+		//		Console.WriteLine();
+		//	}
+
+		//	static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array, Queue<TKey> queue)
+		//		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+		//	{
+		//		const int MAX = 10;
+
+		//		int max = Math.Min(MAX, array.Length);
+		//		queue.Clear();
+		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+
+		//		foreach (TValue v in array)
+		//		{
+		//			TNode node = heap.MakeNode(v);
+		//			if (queue.Count < max) queue.Enqueue(node.Key);
+		//			heap.Add(node);
+		//		}
+
+		//		Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+		//	}
+		//}
+		#endregion
+
 		private static void TestAllHeapsPerformance()
 		{
 			bool more;
@@ -3422,9 +3693,7 @@ namespace TestApp
 			{
 				Console.Clear();
 				Title("Testing All Heap types performance...");
-				Console.WriteLine("This is C#, so the test needs to run at least once before considering results in order for the code to be compiled and run at full speed.".Yellow());
-				Console.WriteLine();
-
+				CompilationHint();
 				Console.WriteLine($"Array has {values.Length} items.");
 				Title("Testing IHeap<int> types performance...");
 
@@ -3618,14 +3887,21 @@ This may cause cycles but will make it much more fun for finding shortest paths.
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				int threshold = response.Key != ConsoleKey.Y ? 0 : (int)Math.Floor(values.Count * 0.5d);
-				
+
+				Console.Write($"{"Can the edges have negative weights?".Yellow()} {"[Y]".BrightGreen()} / {"any key".Dim()}.");
+				response = Console.ReadKey(true);
+				Console.WriteLine();
+				int min = response.Key == ConsoleKey.Y
+							? (int)sbyte.MinValue
+							: byte.MinValue, max = sbyte.MaxValue;
+
 				Queue<char> queue = new Queue<char>(values);
 				char from = queue.Dequeue();
 				Action<char, char> addEdge = graph switch
 				{
 					MixedGraphList<char> mGraph => (f, t) => mGraph.AddEdge(f, t, __fakeGenerator.Value.Random.Bool()),
-					WeightedMixedGraphList<char, int> wmGraph => (f, t) => wmGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue), __fakeGenerator.Value.Random.Bool()),
-					WeightedGraphList<char, int> wGraph => (f, t) => wGraph.AddEdge(f, t, RNGRandomHelper.Next(byte.MaxValue)),
+					WeightedMixedGraphList<char, int> wmGraph => (f, t) => wmGraph.AddEdge(f, t, RNGRandomHelper.Next(min, max), __fakeGenerator.Value.Random.Bool()),
+					WeightedGraphList<char, int> wGraph => (f, t) => wGraph.AddEdge(f, t, RNGRandomHelper.Next(min, max)),
 					_ => graph.AddEdge
 				};
 
@@ -3757,7 +4033,14 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 					Console.WriteLine();
 					Console.WriteLine($"{"Shortest Path".Yellow()} from '{value.ToString().BrightCyan()}' to '{to.ToString().BrightCyan()}'");
-					Console.WriteLine("Dijkstra: " + string.Join(" -> ", wGraph.SingleSourcePath(value, to, SingleSourcePathAlgorithm.Dijkstra)));
+					
+					Console.Write("Dijkstra: ");
+					try { Console.WriteLine(string.Join(" -> ", wGraph.SingleSourcePath(value, to, SingleSourcePathAlgorithm.Dijkstra))); }
+					catch (Exception e) { Console.WriteLine(e.Message.BrightRed()); }
+					
+					Console.Write("Bellman-Ford: ");
+					try { Console.WriteLine(string.Join(" -> ", wGraph.SingleSourcePath(value, to, SingleSourcePathAlgorithm.BellmanFord))); }
+					catch (Exception e) { Console.WriteLine(e.Message.BrightRed()); }
 				}
 
 				return true;
@@ -3768,6 +4051,12 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 		{
 			Console.WriteLine();
 			Console.WriteLine(title.Bold().BrightBlack());
+			Console.WriteLine();
+		}
+
+		private static void CompilationHint()
+		{
+			Console.WriteLine(COMPILATION_TEXT);
 			Console.WriteLine();
 		}
 
@@ -3925,8 +4214,8 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 public static class Extension
 {
-	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	[NotNull]
+	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static string ToYesNo(this bool thisValue)
 	{
 		return thisValue

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
 using asm.Exceptions.Collections;
-using JetBrains.Annotations;
 
 namespace asm.Collections
 {
@@ -17,22 +15,6 @@ namespace asm.Collections
 	public class WeightedUndirectedGraphList<T, TWeight> : WeightedGraphList<T, TWeight>
 		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
-
-		[DebuggerDisplay("{From} => {Edge.To} [{Edge.Weight}]")]
-		private struct EdgeEntry
-		{
-			public EdgeEntry([NotNull] T from, [NotNull] GraphEdge<T, TWeight> edge)
-			{
-				From = from;
-				Edge = edge;
-			}
-
-			[NotNull]
-			public readonly T From;
-			[NotNull]
-			public readonly GraphEdge<T, TWeight> Edge;
-		}
-
 		/// <inheritdoc />
 		public WeightedUndirectedGraphList()
 			: this(0, null)
@@ -155,12 +137,10 @@ namespace asm.Collections
 		public WeightedUndirectedGraphList<T, TWeight> GetMinimumSpanningTree(SpanningTreeAlgorithm algorithm)
 		{
 			if (Count == 0) return null;
-
-			IHeap<EdgeEntry> queue = MakeQueue<TWeight, EdgeEntry>(e => e.Edge.Weight);
 			return algorithm switch
 			{
-				SpanningTreeAlgorithm.Prim => PrimSpanningTree(queue),
-				SpanningTreeAlgorithm.Kruskal => KruskalSpanningTree(queue),
+				SpanningTreeAlgorithm.Prim => PrimSpanningTree(),
+				SpanningTreeAlgorithm.Kruskal => KruskalSpanningTree(),
 				_ => throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null)
 			};
 		}
@@ -216,7 +196,7 @@ namespace asm.Collections
 			}
 		}
 
-		private WeightedUndirectedGraphList<T, TWeight> PrimSpanningTree([NotNull] IHeap<EdgeEntry> queue)
+		private WeightedUndirectedGraphList<T, TWeight> PrimSpanningTree()
 		{
 			/*
 			 * Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
@@ -229,59 +209,101 @@ namespace asm.Collections
 			 * Correction to 'Code With Mosh': We should select the first minimum edge not the first connected vertex
 			 *
 			 * Amazing how one course is just not enough to implement the algorithm properly!
+			 *
+			 * OK, this is better
+			 * http://keithschwarz.com/interesting/code/?dir=fibonacci-heap
 			 */
 			if (Count == 0) return null;
 
+			BinomialHeap<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>> queue = new MinBinomialHeap<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>>(e => e.Edge.Weight);
+			Dictionary<T, BinomialNode<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>>> entries = new Dictionary<T, BinomialNode<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>>>(Comparer);
+			WeightedUndirectedGraphList<T, TWeight> result = new WeightedUndirectedGraphList<T, TWeight>(Comparer);
+
 			T minFrom = default(T);
 			GraphEdge<T, TWeight> minEdge = null;
+			KeyedCollection<T, GraphEdge<T, TWeight>> minConnectedEdges = null;
 
 			// find the first minimum weight edge
 			foreach (T vertex in Keys)
 			{
 				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
 				if (edges == null || edges.Count == 0) continue;
-
+			
 				foreach (GraphEdge<T, TWeight> edge in edges)
 				{
-					if (minEdge != null && minEdge.Weight.CompareTo(edge.Weight) < 0) continue;
+					if (minEdge != null && minEdge.Weight.CompareTo(edge.Weight) < 1) continue;
 					minFrom = vertex;
 					minEdge = edge;
+					minConnectedEdges = edges;
 				}
 			}
 
 			if (minEdge == null) return null;
-			queue.Add(new EdgeEntry(minFrom, minEdge));
-
-			WeightedUndirectedGraphList<T, TWeight> result = new WeightedUndirectedGraphList<T, TWeight>(Comparer)
-			{
-				// add the 1st vertex
-				queue.Value().From
-			};
+			// add the starting node
+			result.Add(minFrom);
+			AddOutgoingEdges(minFrom, minConnectedEdges, queue, result, entries);
 
 			while (result.Count < Keys.Count && queue.Count > 0)
 			{
-				EdgeEntry edgeEntry = queue.ExtractValue();
-				// this avoids to have a cycle
-				if (result.ContainsKey(edgeEntry.Edge.To)) continue;
-				result.Add(edgeEntry.Edge.To);
-				result.AddEdge(edgeEntry.From, edgeEntry.Edge.To, edgeEntry.Edge.Weight);
+				BinomialNode<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>> edgeEntry = queue.ExtractValue();
+
+				if (!result.ContainsKey(edgeEntry.Value.Edge.To))
+				{
+					// this avoids to have a cycle
+					result.Add(edgeEntry.Value.Edge.To);
+					result.AddEdge(edgeEntry.Value.From, edgeEntry.Value.Edge.To, edgeEntry.Key);
+				}
 
 				// doing it this way guarantees the vertices are always connected
-				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[edgeEntry.Edge.To];
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[edgeEntry.Value.Edge.To];
 				if (edges == null || edges.Count == 0) continue;
-
-				foreach (GraphEdge<T, TWeight> edge in edges)
-					queue.Add(new EdgeEntry(edgeEntry.Edge.To, edge));
+				AddOutgoingEdges(edgeEntry.Value.Edge.To, edges, queue, result, entries);
 			}
 
 			return result;
+
+			static void AddOutgoingEdges(T from, KeyedCollection<T, GraphEdge<T, TWeight>> edges
+				, BinomialHeap<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>> queue
+				, WeightedUndirectedGraphList<T, TWeight> result
+				, Dictionary<T, BinomialNode<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>>> entries)
+			{
+				// Start off by scanning over all edges emanating from our node.
+				foreach (GraphEdge<T, TWeight> edge in edges)
+				{
+					/*
+					 * There are four possibilities for this edge:
+					 * 1. This endpoint has already been added to the graph.
+					 * 2. This endpoint is not in the graph and has never been in the queue.
+					 * 3. This endpoint is in the graph, but this is a better edge.
+					 * 4. This endpoint is in the graph, but there is a better edge to it.
+					 */
+					if (result.ContainsKey(edge.To)) continue; // case 1
+
+					if (!entries.ContainsKey(edge.To))
+					{
+						// case 2
+						BinomialNode<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>> node = queue.MakeNode(new EdgeEntry<T, GraphEdge<T, TWeight>>(from, edge));
+						queue.Add(node);
+						entries.Add(edge.To, node);
+					}
+					else if (entries[edge.To].Key.CompareTo(edge.Weight) > 0)
+					{
+						// case 3
+						queue.DecreaseKey(entries[edge.To], edge.Weight);
+					}
+
+					// case 4: do nothing
+				}
+			}
 		}
 
-		private WeightedUndirectedGraphList<T, TWeight> KruskalSpanningTree([NotNull] IHeap<EdgeEntry> queue)
+		private WeightedUndirectedGraphList<T, TWeight> KruskalSpanningTree()
 		{
 			// Udemy - Mastering Data Structures & Algorithms using C and C++ - Abdul Bari
 			// https://www.geeksforgeeks.org/kruskals-minimum-spanning-tree-algorithm-greedy-algo-2/
 			if (Count == 0) return null;
+
+			BinomialHeap<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>> queue = new MinBinomialHeap<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>>(e => e.Edge.Weight);
 
 			// add all the edges to the queue
 			foreach (T vertex in Keys)
@@ -290,7 +312,7 @@ namespace asm.Collections
 				if (edges == null || edges.Count == 0) continue;
 
 				foreach (GraphEdge<T, TWeight> edge in edges)
-					queue.Add(new EdgeEntry(vertex, edge));
+					queue.Add(new EdgeEntry<T, GraphEdge<T, TWeight>>(vertex, edge));
 			}
 
 			if (queue.Count == 0) return null;
@@ -300,12 +322,12 @@ namespace asm.Collections
 
 			while (result.Count < Keys.Count && queue.Count > 0)
 			{
-				EdgeEntry edgeEntry = queue.ExtractValue();
-				if (disjointSet.IsConnected(edgeEntry.From, edgeEntry.Edge.To)) continue;
-				disjointSet.Union(edgeEntry.From, edgeEntry.Edge.To);
-				if (!result.ContainsKey(edgeEntry.From)) result.Add(edgeEntry.From);
-				if (!result.ContainsKey(edgeEntry.Edge.To)) result.Add(edgeEntry.Edge.To);
-				result.AddEdge(edgeEntry.From, edgeEntry.Edge.To, edgeEntry.Edge.Weight);
+				BinomialNode<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>> edgeEntry = queue.ExtractValue();
+				if (disjointSet.IsConnected(edgeEntry.Value.From, edgeEntry.Value.Edge.To)) continue;
+				disjointSet.Union(edgeEntry.Value.From, edgeEntry.Value.Edge.To);
+				if (!result.ContainsKey(edgeEntry.Value.From)) result.Add(edgeEntry.Value.From);
+				if (!result.ContainsKey(edgeEntry.Value.Edge.To)) result.Add(edgeEntry.Value.Edge.To);
+				result.AddEdge(edgeEntry.Value.From, edgeEntry.Value.Edge.To, edgeEntry.Key);
 			}
 
 			return result;

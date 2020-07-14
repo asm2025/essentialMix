@@ -120,7 +120,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public abstract void Add(TNode node);
+		public abstract TNode Add(TNode node);
 
 		/// <inheritdoc />
 		public void Add(IEnumerable<TValue> enumerable)
@@ -150,7 +150,10 @@ namespace asm.Collections
 		public abstract TValue Value();
 
 		/// <inheritdoc />
-		public abstract TValue ExtractValue();
+		TValue IHeap<TValue>.ExtractValue() { return ExtractValue().Value; }
+
+		/// <inheritdoc />
+		public abstract TNode ExtractValue();
 
 		/// <inheritdoc />
 		public TValue ElementAt(int k)
@@ -194,6 +197,7 @@ namespace asm.Collections
 			if (GetType() != other.GetType() 
 				|| Count != other.Count 
 				|| !ValueComparer.Equals(other.ValueComparer)) return false;
+			if (Count == 0) return true;
 
 			using (IEnumerator<TValue> thisEnumerator = GetEnumerator())
 			{

@@ -158,6 +158,7 @@ namespace asm.Other.Microsoft.Collections
 		[Serializable]
 		public struct Enumerator : IEnumerator<T>, IEnumerator
 		{
+			[NonSerialized]
 			private readonly ListBase<T> _list;
 			private readonly int _version;
 
@@ -188,11 +189,9 @@ namespace asm.Other.Microsoft.Collections
 
 			public bool MoveNext()
 			{
-				ListBase<T> localList = _list;
-
-				if (_version == localList._version && _index < localList.Count)
+				if (_version == _list._version && _index < _list.Count)
 				{
-					Current = localList.Items[_index];
+					Current = _list.Items[_index];
 					_index++;
 					return true;
 				}

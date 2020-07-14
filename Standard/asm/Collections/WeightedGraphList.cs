@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.Serialization;
 using asm.Exceptions.Collections;
 using asm.Extensions;
@@ -22,6 +21,135 @@ namespace asm.Collections
 	public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollection<T, GraphEdge<T, TWeight>>, GraphEdge<T, TWeight>>
 		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 	{
+		[DebuggerDisplay("{Value}")]
+		protected class PathEntry
+		{
+			public PathEntry([NotNull] T value, TWeight weight)
+			{
+				Value = value;
+				Weight = weight;
+			}
+
+			[NotNull]
+			public readonly T Value;
+			public TWeight Weight;
+		}
+
+		private struct EdgeEnumerator : IEnumerableEnumerator<EdgeEntry<T, GraphEdge<T, TWeight>>>
+		{
+			private readonly WeightedGraphList<T, TWeight> _graph;
+			private readonly int _version;
+			private readonly Queue<T> _queue;
+			private readonly Queue<EdgeEntry<T, GraphEdge<T, TWeight>>> _edges;
+
+			private EdgeEntry<T, GraphEdge<T, TWeight>> _current;
+			private bool _started;
+			private bool _done;
+
+			internal EdgeEnumerator([NotNull] WeightedGraphList<T, TWeight> graph)
+			{
+				_graph = graph;
+				_version = graph._version;
+				_current = default(EdgeEntry<T, GraphEdge<T, TWeight>>);
+				_started = false;
+				_done = _graph.Count == 0;
+
+				if (_done)
+				{
+					_queue = null;
+					_edges = null;
+				}
+				else
+				{
+					_queue = new Queue<T>();
+					_edges = new Queue<EdgeEntry<T, GraphEdge<T, TWeight>>>();
+				}
+			}
+
+			/// <inheritdoc />
+			[NotNull]
+			public EdgeEntry<T, GraphEdge<T, TWeight>> Current
+			{
+				get
+				{
+					if (_current == null) throw new InvalidOperationException();
+					return _current;
+				}
+			}
+
+			/// <inheritdoc />
+			[NotNull]
+			object IEnumerator.Current => Current;
+
+			/// <inheritdoc />
+			public void Dispose() { }
+
+			/// <inheritdoc />
+			public IEnumerator<EdgeEntry<T, GraphEdge<T, TWeight>>> GetEnumerator()
+			{
+				IEnumerator enumerator = this;
+				enumerator.Reset();
+				return this;
+			}
+
+			/// <inheritdoc />
+			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+			public bool MoveNext()
+			{
+				if (_version != _graph._version) throw new VersionChangedException();
+				if (_done) return false;
+
+				if (!_started)
+				{
+					_started = true;
+
+					foreach (T vertex in _graph.Keys)
+						_queue.Enqueue(vertex);
+				}
+
+				// visit the next queued edge
+				if (_edges.Count > 0)
+				{
+					_current = _edges.Dequeue();
+					return true;
+				}
+
+				// no more vertices to explore
+				if (_queue.Count == 0)
+				{
+					_done = true;
+					return false;
+				}
+
+				// Queue the next edges
+				while (_queue.Count > 0)
+				{
+					T from = _queue.Dequeue();
+					KeyedCollection<T, GraphEdge<T, TWeight>> edges = _graph[from];
+					if (edges == null || edges.Count == 0) continue;
+
+					foreach (GraphEdge<T, TWeight> edge in edges)
+						_edges.Enqueue(new EdgeEntry<T, GraphEdge<T, TWeight>>(from, edge));
+
+					_current = _edges.Dequeue();
+					if (_edges.Count > 0) break;
+				}
+
+				return true;
+			}
+
+			void IEnumerator.Reset()
+			{
+				if (_version != _graph._version) throw new VersionChangedException();
+				_current = default(EdgeEntry<T, GraphEdge<T, TWeight>>);
+				_started = false;
+				_queue.Clear();
+				_edges.Clear();
+				_done = _graph.Count == 0;
+			}
+		}
+
 		private struct BreadthFirstEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly WeightedGraphList<T, TWeight> _graph;
@@ -232,20 +360,6 @@ namespace asm.Collections
 			public void Dispose() { }
 		}
 
-		[DebuggerDisplay("{Value}")]
-		private struct PathEntry
-		{
-			public PathEntry([NotNull] T value, TWeight priority)
-			{
-				Value = value;
-				Priority = priority;
-			}
-
-			[NotNull]
-			public readonly T Value;
-			public readonly TWeight Priority;
-		}
-
 		/// <inheritdoc />
 		protected WeightedGraphList() 
 			: this(0, null)
@@ -277,15 +391,12 @@ namespace asm.Collections
 		}
 		
 		/// <inheritdoc />
-		protected override KeyedCollection<T, GraphEdge<T, TWeight>> MakeContainer() { return new KeyedCollection<T, GraphEdge<T, TWeight>>(e => e.To, Comparer); }
+		protected sealed override KeyedCollection<T, GraphEdge<T, TWeight>> MakeContainer() { return new KeyedCollection<T, GraphEdge<T, TWeight>>(e => e.To, Comparer); }
 
-		[NotNull]
-		protected virtual IHeap<TValue> MakeQueue<TKey, TValue>([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer = null)
-		{
-			return new MinBinomialHeap<TKey, TValue>(getKeyForItem, comparer);
-		}
+		/// <inheritdoc />
+		public sealed override IEnumerableEnumerator<EdgeEntry<T, GraphEdge<T, TWeight>>> Enumerate() { return new EdgeEnumerator(this); }
 
-		public override IEnumerableEnumerator<T> Enumerate(T from, BreadthDepthTraverse method)
+		public sealed override IEnumerableEnumerator<T> Enumerate(T from, BreadthDepthTraverse method)
 		{
 			if (!ContainsKey(from)) throw new KeyNotFoundException();
 			return method switch
@@ -297,7 +408,49 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected override void Insert(T key, KeyedCollection<T, GraphEdge<T, TWeight>> collection, bool add)
+		public sealed override void Iterate(Action<T, GraphEdge<T, TWeight>> visitCallback)
+		{
+			if (Count == 0) return;
+
+			int version = _version;
+
+			foreach (T vertex in Keys)
+			{
+				if (version != _version) throw new VersionChangedException();
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
+				if (edges == null || edges.Count == 0) continue;
+
+				foreach (GraphEdge<T, TWeight> edge in edges)
+				{
+					if (version != _version) throw new VersionChangedException();
+					visitCallback(vertex, edge);
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public sealed override void Iterate(Func<T, GraphEdge<T, TWeight>, bool> visitCallback)
+		{
+			if (Count == 0) return;
+
+			int version = _version;
+
+			foreach (T vertex in Keys)
+			{
+				if (version != _version) throw new VersionChangedException();
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
+				if (edges == null || edges.Count == 0) continue;
+
+				foreach (GraphEdge<T, TWeight> edge in edges)
+				{
+					if (version != _version) throw new VersionChangedException();
+					if (!visitCallback(vertex, edge)) return;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		protected sealed override void Insert(T key, KeyedCollection<T, GraphEdge<T, TWeight>> collection, bool add)
 		{
 			if (collection != null && collection.Count > 0)
 			{
@@ -317,7 +470,7 @@ namespace asm.Collections
 		public abstract void AddEdge([NotNull] T from, [NotNull] T to, TWeight weight);
 
 		/// <inheritdoc />
-		public override void RemoveAllEdges(T value)
+		public sealed override void RemoveAllEdges(T value)
 		{
 			Remove(value);
 			if (Count == 0) return;
@@ -332,7 +485,7 @@ namespace asm.Collections
 		public abstract void SetWeight([NotNull] T from, [NotNull] T to, TWeight weight);
 
 		/// <inheritdoc />
-		public override bool ContainsEdge(T from, T to)
+		public sealed override bool ContainsEdge(T from, T to)
 		{
 			return TryGetValue(from, out KeyedCollection<T, GraphEdge<T, TWeight>> edges) && edges != null && edges.Count > 0 && edges.ContainsKey(to);
 		}
@@ -342,77 +495,169 @@ namespace asm.Collections
 		{
 			if (!ContainsKey(from)) throw new KeyNotFoundException(nameof(from) + " value is not found.");
 			if (!ContainsKey(to)) throw new KeyNotFoundException(nameof(to) + " value is not found.");
-
-			IHeap<PathEntry> queue = MakeQueue<TWeight, PathEntry>(e => e.Priority);
 			return algorithm switch
 			{
-				SingleSourcePathAlgorithm.Dijkstra => DijkstraShortestPath(from, to, queue),
-				SingleSourcePathAlgorithm.BellmanFord => BellmanFordShortestPath(from, to, queue),
+				SingleSourcePathAlgorithm.Dijkstra => DijkstraShortestPath(from, to),
+				SingleSourcePathAlgorithm.BellmanFord => BellmanFordShortestPath(from, to),
 				_ => throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null)
 			};
 		}
 
 		/// <inheritdoc />
-		protected override bool IsLoop(T value, GraphEdge<T, TWeight> edge)
+		protected sealed override bool IsLoop(T value, GraphEdge<T, TWeight> edge)
 		{
 			return Comparer.Equals(value, edge.To);
 		}
 
+		/// <summary>
+		/// Dijkstra’s algorithm, published in 1959 and named after its creator Dutch computer
+		/// scientist Edsger Dijkstra, can be applied on a weighted graph. The graph can either
+		/// be directed or undirected. One stipulation to using the algorithm is that the graph
+		/// needs to have a non-negative weight on every edge.
+		/// </summary>
+		/// <param name="from"></param>
+		/// <param name="to"></param>
+		/// <returns>vertices of the path in order.</returns>
 		[NotNull]
-		private IEnumerable<T> DijkstraShortestPath([NotNull] T from, [NotNull] T to, [NotNull] IHeap<PathEntry> queue)
+		private IEnumerable<T> DijkstraShortestPath([NotNull] T from, [NotNull] T to)
 		{
 			// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
-			Dictionary<T, T> history = new Dictionary<T, T>();
-			Dictionary<T, TWeight> weights = new Dictionary<T, TWeight>(Comparer);
-			HashSet<T> visited = new HashSet<T>(Comparer);
+			TWeight defWeight = default(TWeight);
 			TWeight maxWeight = TypeHelper.MaximumOf<TWeight>();
-
-			foreach (T vertex in Keys)
-				weights.Add(vertex, maxWeight);
-
-			weights[from] = default(TWeight);
-			queue.Add(new PathEntry(from, default(TWeight)));
+			Dictionary<T, T> history = new Dictionary<T, T>(Comparer);
+			BinomialHeap<TWeight, PathEntry> queue = new MinBinomialHeap<TWeight, PathEntry>(e => e.Weight);
+			// Map each vertex to its corresponding Entry.
+			Dictionary<T, BinomialNode<TWeight, PathEntry>> entries = new Dictionary<T, BinomialNode<TWeight, PathEntry>>(Comparer)
+			{
+				// start at the target vertex
+				{ from, queue.Add(queue.MakeNode(new PathEntry(from, defWeight))) }
+			};
 
 			while (queue.Count > 0)
 			{
-				T current = queue.ExtractValue().Value;
-				visited.Add(current);
+				// edges will be extracted in ascending weight order
+				BinomialNode<TWeight, PathEntry> current = queue.ExtractValue();
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[current.Value.Value];
+				if (edges == null || edges.Count == 0) continue;
 
-				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[current];
+				// Update the priorities of all of its edges.
+				foreach (GraphEdge<T, TWeight> edge in edges)
+				{
+					if (!history.ContainsKey(current.Value.Value)) history.Add(current.Value.Value, edge.To);
+					if (history.ContainsKey(edge.To)) continue;
+					// detect negative edges
+					if (defWeight.CompareTo(edge.Weight) > 0) throw new NotSupportedException("Negative edge detected.");
+					// Compute the cost of the path from the source to this node.
+					TWeight weight = current.Key.Add(edge.Weight);
+					BinomialNode<TWeight, PathEntry> node;
+
+					if (entries.ContainsKey(edge.To))
+					{
+						node = entries[edge.To];
+					}
+					else
+					{
+						// add the new entry to the queue
+						node = queue.Add(queue.MakeNode(new PathEntry(edge.To, maxWeight)));
+						entries.Add(edge.To, node);
+					}
+
+					if (weight.CompareTo(node.Key) >= 0) continue;
+					history[edge.To] = current.Value.Value;
+					queue.DecreaseKey(node, weight);
+				}
+			}
+
+			if (history.ContainsKey(from)) history.Remove(from);
+
+			Stack<T> stack = new Stack<T>(history.Count + 1);
+
+			do
+			{
+				stack.Push(to);
+			}
+			while (history.TryGetValue(to, out to));
+
+			return stack;
+		}
+
+		/// <summary>
+		/// Bellman-Ford algorithm computes the shortest paths from a source node to all other nodes in
+		/// the graph, Like Dijkstra's algorithm. However, unlike Dijkstra's algorithm, the Bellman-Ford
+		/// algorithm works correctly in graphs containing negative-cost edges.
+		/// </summary>
+		/// <param name="from"></param>
+		/// <param name="to"></param>
+		/// <returns>vertices of the path in order.</returns>
+		[NotNull]
+		private IEnumerable<T> BellmanFordShortestPath([NotNull] T from, [NotNull] T to)
+		{
+			// https://www.youtube.com/watch?v=FtN3BYH2Zes
+			// https://www.geeksforgeeks.org/bellman-ford-algorithm-dp-23/
+			TWeight defWeight = default(TWeight);
+			TWeight maxWeight = TypeHelper.MaximumOf<TWeight>();
+			Dictionary<T, TWeight> destTo = new Dictionary<T, TWeight>(Keys.Count, Comparer);
+			Dictionary<T, T> history = new Dictionary<T, T>(Comparer);
+			
+			// Step 1: Initialize distances from src to all other vertices as INFINITE
+			foreach (T vertex in Keys) 
+				destTo.Add(vertex, maxWeight);
+
+			destTo[from] = defWeight;
+
+			/*
+			 * Step 2: Relax all edges |V| - 1 times. A simple shortest
+			 * path from src to any other vertex can have at-most |V| - 1
+			 * edges. relaxation is making a change that reduces constraints.
+			 * When the Dijkstra algorithm examines an edge, it removes an edge
+			 * from the pool, thereby reducing the number of constraints.
+			 * In Bellman-Ford it means for vertices: u and v when they have an
+			 * edge (u, v), if (d[u] + c(u, v) < d[v]) then let d[v] = d[u] + c(u, v)
+			 */
+			foreach (T vertex in Keys)
+			{
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
 				if (edges == null || edges.Count == 0) continue;
 
 				foreach (GraphEdge<T, TWeight> edge in edges)
 				{
-					if (visited.Contains(edge.To)) continue;
-
-					TWeight weight = weights[current].Add(edge.Weight);
-					if (weight.CompareTo(weights[edge.To]) >= 0) continue;
-					weights[edge.To] = weight;
-					history[edge.To] = current;
-					queue.Add(new PathEntry(edge.To, weight));
+					if (destTo[vertex].CompareTo(maxWeight) == 0) continue;
+					TWeight newWeight = destTo[vertex].Add(edge.Weight);
+					if (newWeight.CompareTo(destTo[edge.To /* v */]) >= 0) continue;
+					destTo[edge.To] = newWeight;
+					history[edge.To] = vertex;
 				}
 			}
 
-			if (!visited.Contains(to)) return Enumerable.Empty<T>();
-
-			Stack<T> stack = new Stack<T>();
-
-			while (history.TryGetValue(to, out T previous))
+			/*
+			 * Step 3: check for negative-weight cycles. The above step guarantees shortest
+			 * distances if graph doesn't contain negative weight cycle. If we get a shorter
+			 * path, then there is a cycle.
+			 */
+			foreach (T u in Keys)
 			{
-				stack.Push(to);
-				history.Remove(to);
-				to = previous;
+				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[u];
+				if (edges == null || edges.Count == 0) continue;
+
+				foreach (GraphEdge<T, TWeight> edge in edges)
+				{
+					if (destTo[u].CompareTo(maxWeight) == 0) continue;
+					TWeight newWeight = destTo[u].Add(edge.Weight);
+					if (newWeight.CompareTo(destTo[edge.To /* v */]) >= 0) continue;
+					throw new Exception("Graph contains a negative weight cycle.");
+				}
 			}
 
-			stack.Push(to);
-			return stack;
-		}
+			// Step 4: The result
+			Stack<T> stack = new Stack<T>(history.Count + 1);
 
-		[NotNull]
-		private IEnumerable<T> BellmanFordShortestPath([NotNull] T from, [NotNull] T to, [NotNull] IHeap<PathEntry> queue)
-		{
-			// todo
-			throw new NotImplementedException();
+			do
+			{
+				stack.Push(to);
+			}
+			while (history.TryGetValue(to, out to));
+
+			return stack;
 		}
 
 		[NotNull]

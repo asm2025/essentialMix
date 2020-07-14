@@ -44,7 +44,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected override int Compare(TKey x, TKey y) { return Comparer.Compare(x, y); }
+		protected sealed override int Compare(TKey x, TKey y) { return Comparer.Compare(x, y); }
 	}
 
 	[Serializable]
@@ -86,6 +86,6 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected override int Compare(T x, T y) { return Comparer.Compare(x, y); }
+		protected sealed override int Compare(T x, T y) { return Comparer.Compare(x, y); }
 	}
 }

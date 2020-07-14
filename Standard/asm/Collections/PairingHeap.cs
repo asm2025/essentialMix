@@ -287,7 +287,7 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override void Add(TNode node)
+		public sealed override TNode Add(TNode node)
 		{
 			node.Invalidate();
 			Head = Head == null
@@ -295,6 +295,7 @@ namespace asm.Collections
 						: Meld(Head, node);
 			Count++;
 			_version++;
+			return node;
 		}
 
 		/// <inheritdoc />
@@ -347,16 +348,17 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override TValue ExtractValue()
+		public sealed override TNode ExtractValue()
 		{
 			if (Head == null) throw new InvalidOperationException("Heap is empty.");
-			TNode value = Head;
+			TNode node = Head;
 			Head = Head.Child == null
 						? null
 						: TwoPassMerge(Head.Child);
 			Count--;
 			_version++;
-			return value.Value;
+			node.Invalidate();
+			return node;
 		}
 
 		/// <summary>

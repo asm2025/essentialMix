@@ -1078,6 +1078,7 @@ namespace asm.Collections
 			if (other is null) return false;
 			if (ReferenceEquals(this, other)) return true;
 			if (GetType() != other.GetType() || Count != other.Count || !Comparer.Equals(other.Comparer)) return false;
+			if (Count == 0) return true;
 
 			for (int i = 0; i < Count; i++)
 			{
@@ -1092,7 +1093,7 @@ namespace asm.Collections
 		public bool Contains(TValue value)
 		{
 			if (value == null) throw new ArgumentNullException(nameof(value));
-			return FindIndex(value) > -1;
+			return IndexOf(value) > -1;
 		}
 
 		public bool Exists([NotNull] Predicate<TValue> match) { return Count > 0 && Array.FindIndex(Items, 0, Count, e => match(e.Value)) > -1; }
@@ -1102,14 +1103,14 @@ namespace asm.Collections
 		/// </summary>
 		/// <param name="value">The value to search for</param>
 		/// <returns>The found node's index or -1 if no match is found</returns>
-		public int FindIndex([NotNull] TValue value)
+		public int IndexOf([NotNull] TValue value)
 		{
 			return Count == 0
 						? -1
 						: Array.FindIndex(Items, 0, Count, e => ValueComparer.Equals(e.Value, value));
 		}
 
-		public int FindIndexByKey([NotNull] TKey key)
+		public int IndexOfByKey([NotNull] TKey key)
 		{
 			return Count == 0
 						? -1
@@ -1119,7 +1120,7 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public TNode Find(TValue value)
 		{
-			int index = FindIndex(value);
+			int index = IndexOf(value);
 			return index < 0
 						? null
 						: Items[index];
@@ -1128,24 +1129,10 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public TNode FindByKey(TKey key)
 		{
-			int index = FindIndexByKey(key);
+			int index = IndexOfByKey(key);
 			return index < 0
 						? null
 						: Items[index];
-		}
-
-		/// <summary>
-		/// Finds the closest parent node's index relative to the specified value
-		/// </summary>
-		/// <param name="key">The value to search for</param>
-		/// <returns>The found parent index or -1 if no match is found</returns>
-		public virtual int FindNearestParent([NotNull] TKey key)
-		{
-			if (Count == 0) return -1;
-			int index = FindIndexByKey(key);
-			return index < 0
-						? -1
-						: ParentIndex(index);
 		}
 
 		/// <inheritdoc />
@@ -1156,14 +1143,14 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public void Add(TNode node)
+		public TNode Add(TNode node)
 		{
 			if (Count == Items.Length) EnsureCapacity(Count + 1);
 			Items[Count] = node;
 			Count++;
 			_version++;
-			if (Count < 2) return;
-			BubbleUp(Count - 1);
+			if (Count > 1) BubbleUp(Count - 1);
+			return node;
 		}
 
 		public void Add(IEnumerable<TValue> values)
@@ -1176,7 +1163,7 @@ namespace asm.Collections
 		public bool Remove(TValue value)
 		{
 			if (value == null) throw new ArgumentNullException(nameof(value));
-			return RemoveNode(FindIndex(value));
+			return RemoveNode(IndexOf(value));
 		}
 
 		/// <inheritdoc />
@@ -1207,7 +1194,6 @@ namespace asm.Collections
 		{
 			if (Count == 0) throw new InvalidOperationException("Heap is empty.");
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			if (Compare(Items[index].Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
 			DecreaseKeyInternal(index, newKey);
 		}
 
@@ -1219,15 +1205,18 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public TValue ExtractValue()
+		TValue IHeap<TValue>.ExtractValue() { return ExtractValue().Value; }
+
+		/// <inheritdoc />
+		public TNode ExtractValue()
 		{
 			if (Count == 0) throw new InvalidOperationException("Heap is empty.");
-			TValue value = Items[0].Value;
+			TNode node = Items[0];
 			Items[0] = Items[Count - 1];
 			Count--;
 			_version++;
 			if (Count > 1) BubbleDown(0);
-			return value;
+			return node;
 		}
 
 		/// <inheritdoc />
@@ -1291,6 +1280,31 @@ namespace asm.Collections
 			return index > -1
 						? Items[index].Value
 						: default(TValue);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public int ParentIndex(int index)
+		{
+			// Even() => Math.Floor(1 + Math.Pow(-1, index) / 2) => produces 0 for odd and 1 for even numbers
+			return NormalizeIndex(index <= 0
+									? -1
+									: (index - (1 + index.Even())) / 2);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public int LeftIndex(int index)
+		{
+			return NormalizeIndex(index < 0
+									? -1
+									: index * 2 + 1);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public int RightIndex(int index)
+		{
+			return NormalizeIndex(index < 0
+									? -1
+									: index * 2 + 2);
 		}
 
 		public int GetHeight()
@@ -1379,7 +1393,6 @@ namespace asm.Collections
 			Type sourceType = typeof(TValue);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
-			if (Count == 0) return;
 			Iterate(e => objects[index++] = Items[e].Value);
 		}
 
@@ -1528,36 +1541,11 @@ namespace asm.Collections
 		protected abstract int Compare([NotNull] TKey x, [NotNull] TKey y);
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		protected internal void Swap(int first, int second)
+		protected internal void Swap(int x, int y)
 		{
-			TNode tmp = Items[first];
-			Items[first] = Items[second];
-			Items[second] = tmp;
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		protected internal int ParentIndex(int index)
-		{
-			// Even() => Math.Floor(1 + Math.Pow(-1, index) / 2) => produces 0 for odd and 1 for even numbers
-			return NormalizeIndex(index <= 0
-						? -1
-						: (index - (1 + index.Even())) / 2);
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		protected internal int LeftIndex(int index)
-		{
-			return NormalizeIndex(index < 0
-						? -1
-						: index * 2 + 1);
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		protected internal int RightIndex(int index)
-		{
-			return NormalizeIndex(index < 0
-						? -1
-						: index * 2 + 2);
+			TNode tmp = Items[x];
+			Items[x] = Items[y];
+			Items[y] = tmp;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -1570,6 +1558,7 @@ namespace asm.Collections
 
 		private void DecreaseKeyInternal(int index, [NotNull] TKey newKey)
 		{
+			if (Compare(Items[index].Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
 			Items[index].Key = newKey;
 			if (index == 0) return;
 			BubbleUp(index);

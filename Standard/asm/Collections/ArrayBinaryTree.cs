@@ -1040,6 +1040,7 @@ namespace asm.Collections
 			if (ReferenceEquals(null, other)) return false;
 			if (ReferenceEquals(this, other)) return true;
 			if (Count != other.Count || !Comparer.Equals(other.Comparer)) return false;
+			if (Count == 0) return true;
 
 			for (int i = 0; i < Count; i++)
 			{

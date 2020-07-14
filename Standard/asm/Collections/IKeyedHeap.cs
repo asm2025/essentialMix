@@ -11,10 +11,19 @@ namespace asm.Collections
 
 		[NotNull]
 		TNode MakeNode([NotNull] TValue value);
-		void Add([NotNull] TNode node);
+
+		[NotNull]
+		TNode Add([NotNull] TNode node);
+		
 		bool Remove([NotNull] TNode node);
+		
 		TNode Find([NotNull] TValue value);
+		
 		TNode FindByKey([NotNull] TKey key);
+		
 		void DecreaseKey([NotNull] TNode node, [NotNull] TKey newKey);
+		
+		[NotNull]
+		new TNode ExtractValue();
 	}
 }

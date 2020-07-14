@@ -73,6 +73,25 @@ namespace asm.Collections
 		[NotNull]
 		public abstract IEnumerableEnumerator<T> Enumerate([NotNull] T from, BreadthDepthTraverse method);
 
+		/// <summary>
+		/// Enumerate over all the connected vertices. i.e. vertices that has edges.
+		/// </summary>
+		/// <returns></returns>
+		[NotNull]
+		public abstract IEnumerableEnumerator<EdgeEntry<T, TEdge>> Enumerate();
+
+		/// <summary>
+		/// Iterate over all the connected vertices. i.e. vertices that has edges.
+		/// </summary>
+		/// <param name="visitCallback"></param>
+		public abstract void Iterate([NotNull] Action<T, TEdge> visitCallback);
+		
+		/// <summary>
+		/// Iterate over all the connected vertices. i.e. vertices that has edges.
+		/// </summary>
+		/// <param name="visitCallback"></param>
+		public abstract void Iterate([NotNull] Func<T, TEdge, bool> visitCallback);
+
 		public void Add([NotNull] T vertex)
 		{
 			Add(vertex, null);
@@ -153,13 +172,128 @@ namespace asm.Collections
 
 		[NotNull]
 		protected abstract TAdjacencyList MakeContainer();
-
-		[NotNull]
-		protected virtual IHeap<TValue> MakeQueue<TValue>(IComparer<TValue> comparer = null) { return new MinBinomialHeap<TValue>(comparer); }
 	}
 
 	public abstract class GraphList<T> : GraphList<T, HashSet<T>, T>
 	{
+		private struct EdgeEnumerator : IEnumerableEnumerator<EdgeEntry<T, T>>
+		{
+			private readonly GraphList<T> _graph;
+			private readonly int _version;
+			private readonly Queue<T> _queue;
+			private readonly Queue<EdgeEntry<T, T>> _edges;
+
+			private EdgeEntry<T, T> _current;
+			private bool _hasValue;
+			private bool _started;
+			private bool _done;
+
+			internal EdgeEnumerator([NotNull] GraphList<T> graph)
+			{
+				_graph = graph;
+				_version = graph._version;
+				_current = default(EdgeEntry<T, T>);
+				_started = _hasValue = false;
+				_done = _graph.Count == 0;
+
+				if (_done)
+				{
+					_queue = null;
+					_edges = null;
+				}
+				else
+				{
+					_queue = new Queue<T>();
+					_edges = new Queue<EdgeEntry<T, T>>();
+				}
+			}
+
+			/// <inheritdoc />
+			public EdgeEntry<T, T> Current
+			{
+				get
+				{
+					if (!_hasValue) throw new InvalidOperationException();
+					return _current;
+				}
+			}
+
+			/// <inheritdoc />
+			[NotNull]
+			object IEnumerator.Current => Current;
+
+			/// <inheritdoc />
+			public void Dispose() { }
+
+			/// <inheritdoc />
+			public IEnumerator<EdgeEntry<T, T>> GetEnumerator()
+			{
+				IEnumerator enumerator = this;
+				enumerator.Reset();
+				return this;
+			}
+
+			/// <inheritdoc />
+			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+			public bool MoveNext()
+			{
+				if (_version != _graph._version) throw new VersionChangedException();
+				if (_done) return false;
+
+				if (!_started)
+				{
+					_started = true;
+
+					foreach (T vertex in _graph.Keys)
+						_queue.Enqueue(vertex);
+				}
+
+				// visit the next queued edge
+				_hasValue = _edges.Count > 0;
+
+				if (_hasValue)
+				{
+					_current = _edges.Dequeue();
+					return true;
+				}
+
+				// no more vertices to explore
+				if (_queue.Count == 0)
+				{
+					_done = true;
+					return false;
+				}
+
+				// Queue the next edges
+				while (_queue.Count > 0)
+				{
+					T from = _queue.Dequeue();
+					HashSet<T> edges = _graph[from];
+					if (edges == null || edges.Count == 0) continue;
+
+					foreach (T edge in edges)
+						_edges.Enqueue(new EdgeEntry<T, T>(from, edge));
+
+					_hasValue = _edges.Count > 0;
+					_current = _edges.Dequeue();
+					if (_edges.Count > 0) break;
+				}
+
+				return true;
+			}
+
+			void IEnumerator.Reset()
+			{
+				if (_version != _graph._version) throw new VersionChangedException();
+				_current = default(EdgeEntry<T, T>);
+				_started = _hasValue = false;
+				_queue.Clear();
+				_edges.Clear();
+				_done = _graph.Count == 0;
+			}
+		}
+
 		private struct BreadthFirstEnumerator : IEnumerableEnumerator<T>
 		{
 			private readonly GraphList<T> _graph;
@@ -401,9 +535,12 @@ namespace asm.Collections
 		}
 	
 		/// <inheritdoc />
-		protected override HashSet<T> MakeContainer() { return new HashSet<T>(Comparer); }
+		protected sealed override HashSet<T> MakeContainer() { return new HashSet<T>(Comparer); }
 
-		public override IEnumerableEnumerator<T> Enumerate(T from, BreadthDepthTraverse method)
+		/// <inheritdoc />
+		public sealed override IEnumerableEnumerator<EdgeEntry<T, T>> Enumerate() { return new EdgeEnumerator(this); }
+
+		public sealed override IEnumerableEnumerator<T> Enumerate(T from, BreadthDepthTraverse method)
 		{
 			if (!ContainsKey(from)) throw new KeyNotFoundException();
 			return method switch
@@ -415,14 +552,56 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		protected override void Insert(T key, HashSet<T> collection, bool add)
+		public sealed override void Iterate(Action<T, T> visitCallback)
+		{
+			if (Count == 0) return;
+
+			int version = _version;
+
+			foreach (T vertex in Keys)
+			{
+				if (version != _version) throw new VersionChangedException();
+				HashSet<T> edges = this[vertex];
+				if (edges == null || edges.Count == 0) continue;
+
+				foreach (T edge in edges)
+				{
+					if (version != _version) throw new VersionChangedException();
+					visitCallback(vertex, edge);
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public sealed override void Iterate(Func<T, T, bool> visitCallback)
+		{
+			if (Count == 0) return;
+
+			int version = _version;
+
+			foreach (T vertex in Keys)
+			{
+				if (version != _version) throw new VersionChangedException();
+				HashSet<T> edges = this[vertex];
+				if (edges == null || edges.Count == 0) continue;
+
+				foreach (T edge in edges)
+				{
+					if (version != _version) throw new VersionChangedException();
+					if (!visitCallback(vertex, edge)) return;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		protected sealed override void Insert(T key, HashSet<T> collection, bool add)
 		{
 			if (collection != null && collection.Count > 0 && !collection.IsSubsetOf(Keys)) throw new KeyNotFoundException();
 			base.Insert(key, collection, add);
 		}
 
 		/// <inheritdoc />
-		public override void RemoveAllEdges(T value)
+		public sealed override void RemoveAllEdges(T value)
 		{
 			Remove(value);
 			if (Count == 0) return;
@@ -435,13 +614,13 @@ namespace asm.Collections
 		}
 
 		/// <inheritdoc />
-		public override bool ContainsEdge(T from, T to)
+		public sealed override bool ContainsEdge(T from, T to)
 		{
 			return TryGetValue(from, out HashSet<T> edges) && edges != null && edges.Contains(to);
 		}
 
 		/// <inheritdoc />
-		protected override bool IsLoop(T value, T edge)
+		protected sealed override bool IsLoop(T value, T edge)
 		{
 			return Comparer.Equals(value, edge);
 		}
