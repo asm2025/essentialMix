@@ -9,7 +9,7 @@ namespace asm.Collections
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public class GraphEdge<T, TWeight>
-		where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
+		where TWeight : struct, IComparable, IComparable<TWeight>, IEquatable<TWeight>, IConvertible, IFormattable
 	{
 		public GraphEdge([NotNull] T to)
 			: this(to, default(TWeight))

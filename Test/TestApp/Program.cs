@@ -80,7 +80,8 @@ work with {LEN} items.".Yellow();
 			//TestBinarySearchTreeAdd();
 			//TestBinarySearchTreeRemove();
 			//TestBinarySearchTreeBalance();
-			
+			TestBinarySearchTreeBranchSums();
+
 			//TestAVLTreeAdd();
 			//TestAVLTreeRemove();
 			
@@ -122,7 +123,7 @@ work with {LEN} items.".Yellow();
 			//TestFibonacciHeapElementAt();
 			//TestFibonacciHeapDecreaseKey();
 			
-			// Garbage!!!
+			// IndexMin not working yet!!!
 			//TestIndexMinAdd();
 			//TestIndexMinRemove();
 			//TestIndexMinElementAt();
@@ -130,7 +131,7 @@ work with {LEN} items.".Yellow();
 
 			//TestAllHeapsPerformance();
 
-			TestGraph();
+			//TestGraph();
 
 			ConsoleHelper.Pause();
 		}
@@ -1257,6 +1258,34 @@ work with {LEN} items.".Yellow();
 				}
 
 				tree.PrintWithProps();
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+		}
+
+		private static void TestBinarySearchTreeBranchSums()
+		{
+			bool more;
+			BinarySearchTree<int> tree = new BinarySearchTree<int>();
+
+			do
+			{
+				Console.Clear();
+				Title("Testing BinarySearchTree.Balance()...");
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(true, len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				Console.WriteLine("Test adding...".BrightGreen());
+				tree.Clear();
+				tree.Add(values);
+				tree.Print();
+				Console.WriteLine("Branch Sums: ".BrightBlack() + string.Join(", ", tree.BranchSums()));
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");

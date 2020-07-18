@@ -469,7 +469,7 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Negate<T>(this T thisValue)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<T>.Negate(thisValue);
 		}
@@ -481,7 +481,7 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Not<T>(this T thisValue)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 		{
 			return Operator<T>.Not(thisValue);
 		}
@@ -493,7 +493,7 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Or<T>(this T thisValue, T value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 		{
 			return Operator<T>.Or(thisValue, value);
 		}
@@ -505,7 +505,7 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T And<T>(this T thisValue, T value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 		{
 			return Operator<T>.And(thisValue, value);
 		}
@@ -517,7 +517,7 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T AndAlso<T>(this T thisValue, T value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 		{
 			return Operator<T>.AndAlso(thisValue, value);
 		}
@@ -529,7 +529,7 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Xor<T>(this T thisValue, T value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 		{
 			return Operator<T>.Xor(thisValue, value);
 		}
@@ -541,7 +541,7 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Increment<T>(this T thisValue)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<T>.Increment(thisValue);
 		}
@@ -553,7 +553,7 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Decrement<T>(this T thisValue)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<T>.Decrement(thisValue);
 		}
@@ -565,7 +565,7 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Add<T>(this T thisValue, T value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<T>.Add(thisValue, value);
 		}
@@ -577,8 +577,8 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T AddAlt<T, TArg2>(this T thisValue, TArg2 value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
-			where TArg2 : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+			where TArg2 : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<TArg2, T>.Add(thisValue, value);
 		}
@@ -590,7 +590,7 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Subtract<T>(this T thisValue, T value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<T>.Subtract(thisValue, value);
 		}
@@ -602,8 +602,8 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T SubtractAlt<T, TArg2>(this T thisValue, TArg2 value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
-			where TArg2 : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+			where TArg2 : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<TArg2, T>.Subtract(thisValue, value);
 		}
@@ -615,7 +615,7 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Multiply<T>(this T thisValue, T value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<T>.Multiply(thisValue, value);
 		}
@@ -627,7 +627,7 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T MultiplyAlt<T, TArg2>(this T thisValue, TArg2 value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<TArg2, T>.Multiply(thisValue, value);
 		}
@@ -639,7 +639,7 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Divide<T>(this T thisValue, T value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<T>.Divide(thisValue, value);
 		}
@@ -655,7 +655,7 @@ namespace asm.Extensions
 		/// </remarks>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T DivideInt32<T>(this T thisValue, int divisor)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<int, T>.Divide(thisValue, divisor);
 		}
@@ -671,7 +671,7 @@ namespace asm.Extensions
 		/// </remarks>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T DivideInt64<T>(this T thisValue, long divisor)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<long, T>.Divide(thisValue, divisor);
 		}
@@ -687,7 +687,7 @@ namespace asm.Extensions
 		/// </remarks>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T DivideFlt<T>(this T thisValue, float divisor)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<float, T>.Divide(thisValue, divisor);
 		}
@@ -703,7 +703,7 @@ namespace asm.Extensions
 		/// </remarks>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T DivideDbl<T>(this T thisValue, double divisor)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<double, T>.Divide(thisValue, divisor);
 		}
@@ -719,7 +719,7 @@ namespace asm.Extensions
 		/// </remarks>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T DivideDec<T>(this T thisValue, decimal divisor)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<decimal, T>.Divide(thisValue, divisor);
 		}
@@ -731,14 +731,14 @@ namespace asm.Extensions
 		/// </summary>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T DivideAlt<T, TArg2>(this T thisValue, TArg2 value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<TArg2, T>.Divide(thisValue, value);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Abs<T>(this T thisValue)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Operator<T>.Abs(thisValue);
 		}
@@ -752,14 +752,14 @@ namespace asm.Extensions
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsPositive<T>(this T thisValue)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Abs(thisValue).CompareTo(thisValue) == 0;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsNegative<T>(this T thisValue)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Abs(thisValue).CompareTo(thisValue) < 0;
 		}
@@ -780,7 +780,7 @@ namespace asm.Extensions
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool InDelta<T>(this T thisValue, T value, T delta)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return IsLessThanOrEqual(Abs(Subtract(thisValue, value)), delta);
 		}
@@ -857,7 +857,7 @@ namespace asm.Extensions
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Within<T>(this T thisValue, T minimum, T maximum)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable
 		{
 			if (minimum.CompareTo(maximum) > 0) throw new InvalidOperationException($"{nameof(minimum)} cannot be greater than {nameof(maximum)}.");
 			return thisValue.CompareTo(minimum) < 0
@@ -869,21 +869,21 @@ namespace asm.Extensions
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T WithinEx<T>(this T thisValue, T minimum, T maximum)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Within(thisValue, minimum.Increment(), maximum.Decrement());
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T WithinLx<T>(this T thisValue, T minimum, T maximum)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Within(thisValue, minimum.Increment(), maximum);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T WithinRx<T>(this T thisValue, T minimum, T maximum)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return Within(thisValue, minimum, maximum.Decrement());
 		}
@@ -1194,7 +1194,7 @@ namespace asm.Extensions
 
 		[NotNull]
 		public static string PadLeft<T>(this T thisValue, int totalWidth, char paddingChar = ' ')
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			// T : struct, thisValue cannot be null
 			return thisValue.ToString().PadLeft(totalWidth, paddingChar);
@@ -1202,7 +1202,7 @@ namespace asm.Extensions
 
 		[NotNull]
 		public static string PadRight<T>(this T thisValue, int totalWidth, char paddingChar = ' ')
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			// T : struct, thisValue cannot be null
 			return thisValue.ToString().PadRight(totalWidth, paddingChar);
@@ -1210,7 +1210,7 @@ namespace asm.Extensions
 
 		[NotNull]
 		public static string Format<T>(this T thisValue, bool bFractions = true, string suffix = null)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible, IFormattable
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return string.Format(GetFormat(bFractions, suffix), thisValue);
 		}
@@ -1219,19 +1219,19 @@ namespace asm.Extensions
 		public static bool IsNullOrEmpty<T>(this T[] thisValue) { return thisValue == null || thisValue.Length == 0; }
 
 		public static bool IsNullOrUninitialized<T>(this T[] thisValue)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return IsNullOrUninitialized(thisValue, 0, -1);
 		}
 
 		public static bool IsNullOrUninitialized<T>(this T[] thisValue, int arrayIndex)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return IsNullOrUninitialized(thisValue, arrayIndex, -1);
 		}
 
 		public static bool IsNullOrUninitialized<T>(this T[] thisValue, int arrayIndex, int count)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			if (thisValue == null || thisValue.Length == 0)
 				return true;
@@ -1250,19 +1250,19 @@ namespace asm.Extensions
 		}
 
 		public static void FastInitialize<T>([NotNull] this T[] thisValue, T value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 		{
 			FastInitialize(thisValue, value, 0, thisValue.Length);
 		}
 
 		public static void FastInitialize<T>([NotNull] this T[] thisValue, T value, int startIndex)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 		{
 			FastInitialize(thisValue, value, startIndex, thisValue.Length);
 		}
 
 		public static void FastInitialize<T>([NotNull] this T[] thisValue, T value, int startIndex, int count)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 		{
 			const int BLOCK_SIZE = 32;
 

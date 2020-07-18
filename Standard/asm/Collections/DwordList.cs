@@ -87,7 +87,7 @@ namespace asm.Collections
 
 		[NotNull]
 		public static DwordList From<T>([NotNull] IEnumerable<T> enumerable)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 		{
 			DwordList list = new DwordList();
 			list.AddRange(enumerable.Select(value => Convert.ToUInt32(value)));

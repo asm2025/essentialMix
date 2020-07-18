@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	public sealed class MinMaxStack<T> : IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
-		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 	{
 		private readonly Stack<T> _stack;
 		private readonly T _minimum;

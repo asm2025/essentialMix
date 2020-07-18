@@ -18,7 +18,7 @@ namespace asm.Other.TylerBrinkley.Enumeration
 	// because having the enum type as a generic type parameter causes code explosion
 	// due to how .NET generics are handled with enums.
 	internal class EnumInfo<TInt, TIntProvider> : IEnumInfo, IEnumInfo<TInt, TIntProvider>
-		where TInt : struct, IComparable<TInt>, IComparable, IEquatable<TInt>, IConvertible
+		where TInt : struct, IComparable, IComparable<TInt>, IEquatable<TInt>, IConvertible
 		where TIntProvider : INumericProvider<TInt>, new()
 	{
 		private readonly EnumCache<TInt, TIntProvider> _cache;
@@ -290,7 +290,7 @@ namespace asm.Other.TylerBrinkley.Enumeration
 
 	internal class EnumInfo<TEnum, TInt, TIntProvider> : IEnumInfo<TEnum>, IEnumInfo, IEnumInfo<TInt, TIntProvider>
 		where TEnum : struct, Enum, IComparable
-		where TInt : struct, IComparable<TInt>, IComparable, IEquatable<TInt>, IConvertible
+		where TInt : struct, IComparable, IComparable<TInt>, IEquatable<TInt>, IConvertible
 		where TIntProvider : INumericProvider<TInt>, new()
 	{
 		private readonly EnumCache<TInt, TIntProvider> _cache;

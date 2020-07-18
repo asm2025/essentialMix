@@ -27,7 +27,7 @@ using System.Globalization;
 namespace asm.Other.TylerBrinkley.Enumeration.Numeric
 {
 	internal interface INumericProvider<TInt>
-		where TInt : struct, IComparable<TInt>, IEquatable<TInt>
+		where TInt : struct, IComparable, IComparable<TInt>, IEquatable<TInt>, IConvertible
 	{
 		bool LessThan(TInt left, TInt right);
 

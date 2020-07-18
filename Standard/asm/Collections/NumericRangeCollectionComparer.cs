@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 namespace asm.Collections
 {
 	public class NumericRangeCollectionComparer<T> : GenericComparer<ICollection<NumericRange<T>>>
-		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 	{
 		public new static NumericRangeCollectionComparer<T> Default { get; } = new NumericRangeCollectionComparer<T>();
 

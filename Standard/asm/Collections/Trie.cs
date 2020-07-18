@@ -14,7 +14,7 @@ namespace asm.Collections
 	// https://www.geeksforgeeks.org/types-of-tries/?ref=leftbar-rightbar
 	[Serializable]
 	public class Trie<T>
-		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 	{
 		/*
 		 * For a few entries, this will perform good but this will be heavy on memory for

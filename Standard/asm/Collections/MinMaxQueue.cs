@@ -9,7 +9,7 @@ namespace asm.Collections
 {
 	[Serializable]
 	public sealed class MinMaxQueue<T> : IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
-		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 	{
 		private readonly Queue<T> _queue;
 		private readonly T _minimum;

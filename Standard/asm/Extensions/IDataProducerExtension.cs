@@ -354,7 +354,7 @@ namespace asm.Extensions
         /// <remarks>Null values are removed from the average</remarks>
         [NotNull]
 		public static IFuture<TResult> Average<TSource, TResult>([NotNull] this IDataProducer<TSource> thisValue, [NotNull] Func<TSource, TResult> selector)
-			where TResult : struct, IComparable<TResult>, IComparable, IEquatable<TResult>, IConvertible
+			where TResult : struct, IComparable, IComparable<TResult>, IEquatable<TResult>, IConvertible, IFormattable
 		{
             Future<TResult> ret = new Future<TResult>();
             TResult sum = Operator<TResult>.Zero;
@@ -388,7 +388,7 @@ namespace asm.Extensions
         /// <remarks>Null values are removed from the average</remarks>
         [NotNull]
 		public static IFuture<TSource> Average<TSource>([NotNull] this IDataProducer<TSource> thisValue)
-			where TSource : struct, IComparable<TSource>, IComparable, IEquatable<TSource>, IConvertible
+			where TSource : struct, IComparable, IComparable<TSource>, IEquatable<TSource>, IConvertible, IFormattable
 		{
             return Average(thisValue, x => x);
         }

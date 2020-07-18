@@ -2048,7 +2048,7 @@ namespace asm.Collections
 		}
 		#endregion
 
-		protected static int GetCapacityForQueueing([NotNull] LinkedBinaryTree<TNode, T> tree)
+		protected internal static int GetCapacityForQueueing([NotNull] LinkedBinaryTree<TNode, T> tree)
 		{
 			/*
 			 * The maximum height of a red-black tree is 2*lg(n+1) which is worse than
@@ -2061,7 +2061,7 @@ namespace asm.Collections
 						: 2 * (int)Math.Log(tree.Count + 1, 2);
 		}
 
-		protected static int GetCapacityForLevelQueueing([NotNull] LinkedBinaryTree<TNode, T> tree)
+		protected internal static int GetCapacityForLevelQueueing([NotNull] LinkedBinaryTree<TNode, T> tree)
 		{
 			/*
 			 * capacity:
@@ -2259,6 +2259,36 @@ namespace asm.Collections
 				queue.Enqueue(node.Left);
 				queue.Enqueue(node.Right);
 				nodesList.AddLast((queue, depth + 1));
+			}
+		}
+
+		[NotNull]
+		public static IReadOnlyList<T> BranchSums<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue)
+			where TNode : LinkedBinaryNode<TNode, T>
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+		{
+			// AlgoExpert - Become An Expert In Algorithms
+			if (thisValue.Root == null) return Array.Empty<T>();
+
+			T runningSum = default(T);
+			List<T> sumsList = new List<T>();
+			BranchSumsLocal(thisValue.Root, runningSum, sumsList);
+			return sumsList;
+
+			static void BranchSumsLocal(TNode root, T sum, List<T> sums)
+			{
+				// it's absolutely essential to add the new sum in a new variable
+				T newSum = sum.Add(root.Value);
+
+				if (root.IsLeaf)
+				{
+					sums.Add(newSum);
+					return;
+				}
+
+				// pass the new sum variable
+				if (root.Left != null) BranchSumsLocal(root.Left, newSum, sums);
+				if (root.Right != null) BranchSumsLocal(root.Right, newSum, sums);
 			}
 		}
 	}

@@ -95,7 +95,7 @@ namespace asm.Collections
 
 		[NotNull]
 		public static WordList From<T>([NotNull] IEnumerable<T> enumerable)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 		{
 			WordList list = new WordList();
 			list.AddRange(enumerable.Select(value => Convert.ToUInt16(value)));

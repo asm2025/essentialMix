@@ -7,7 +7,7 @@ namespace asm.Collections
 {
 	[Serializable]
 	public class NumericRangeList<T> : List<NumericRange<T>>, IComparable<NumericRangeList<T>>, IComparable, IEquatable<NumericRangeList<T>>
-		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 	{
 		public NumericRangeList()
 		{

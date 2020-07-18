@@ -10,7 +10,7 @@ namespace asm.Collections
 	[Serializable]
 	[TypeConverter(typeof(DisplayNameExpandableObjectConverter))]
 	public class NumericRange<T> : Range<T>
-		where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 	{
 		public NumericRange(T entry)
 			: base(entry)
@@ -137,7 +137,7 @@ namespace asm.Collections
 	public static class NumericRange
 	{
 		public static NumericRange<T> Parse<T>(string value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			IsWellFormattedRangeString(value, out NumericRange<T> parsed);
 			return parsed;
@@ -145,7 +145,7 @@ namespace asm.Collections
 
 		[NotNull]
 		public static ICollection<NumericRange<T>> ParseGroup<T>(string value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			value = value?.Trim();
 			if (string.IsNullOrEmpty(value)) return Array.Empty<NumericRange<T>>();
@@ -162,13 +162,13 @@ namespace asm.Collections
 		}
 
 		public static bool IsWellFormattedRangeString<T>(string value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return IsWellFormattedRangeString<T>(value, out _);
 		}
 
 		private static bool IsWellFormattedRangeString<T>(string value, out NumericRange<T> parsed)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			parsed = null;
 			if (string.IsNullOrEmpty(value)) return false;
@@ -190,13 +190,13 @@ namespace asm.Collections
 		}
 
 		public static bool IsWellFormattedRangeGroupString<T>(string value)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			return IsWellFormattedRangeGroupString<T>(value, null);
 		}
 
 		private static bool IsWellFormattedRangeGroupString<T>(string value, ICollection<NumericRange<T>> parsed)
-			where T : struct, IComparable<T>, IComparable, IEquatable<T>, IConvertible
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			if (string.IsNullOrEmpty(value)) return false;
 
