@@ -219,5 +219,82 @@ namespace asm.Helpers
 		public static IEnumerable<string> SkipNullOrEmptyTrim([NotNull] params string[] values) { return values.SkipNullOrEmptyTrim(); }
 		[NotNull]
 		public static IEnumerable<string> SkipNullOrWhitespace([NotNull] params string[] values) { return values.SkipNullOrWhitespace(); }
+
+		public static ICollection<string>[] GroupAnagrams(IEnumerable<string> words)
+		{
+			// AlgoExpert - Become An Expert In Algorithms
+			/*
+			 * Write a function that takes in an array of strings and returns a list of groups of anagrams.
+			 * Anagrams are strings made up of exactly the same letters, where order doesn't matter. For example,
+			 * "cinema" and "iceman" are anagrams; similarly, "foo" and "ofo" are anagrams. Note that the groups of
+			 * anagrams don't need to be ordered in any particular way.
+			 */
+			if (words == null) return null;
+
+			Dictionary<string, ICollection<string>> result = new Dictionary<string, ICollection<string>>(StringComparer.OrdinalIgnoreCase);
+
+			foreach (string word in words)
+			{
+				if (string.IsNullOrWhiteSpace(word)) continue;
+				
+				string sorted = string.Concat(word.OrderBy(e => e));
+
+				if (!result.TryGetValue(sorted, out ICollection<string> collection))
+				{
+					collection = new List<string>();
+					result.Add(sorted, collection);
+				}
+
+				collection.Add(word);
+			}
+
+			return result.Values.ToArray();
+		}
+
+		/// <summary>
+		/// Finds the minimum number of edit operations that need to be performed on the first
+		/// string to obtain the second string.
+		/// </summary>
+		/// <param name="first"></param>
+		/// <param name="second"></param>
+		/// <returns></returns>
+		public static int LevenshteinDistance([NotNull] string first, [NotNull] string second)
+		{
+			// https://www.eximiaco.tech/en/2019/11/17/computing-the-levenshtein-edit-distance-of-two-strings-using-c/
+			/*
+			 * Write a function that takes in two strings and returns the minimum number of
+			 * edit operations that need to be performed on the first string to obtain the
+			 * second string. There are three edit operations: insertion of a character,
+			 * deletion of a character, and substitution of a character for another.
+			 */
+			if (first.Length == 0) return second.Length;
+			if (second.Length == 0) return first.Length;
+
+			int current = 1;
+			int[,] rows = new int[2, second.Length + 1];
+
+			for (int i = 0; i <= second.Length; i++) 
+				rows[0, i] = i;
+
+			int previous = 0;
+
+			for (int i = 0; i < first.Length; i++)
+			{
+				rows[current, 0] = i + 1;
+
+				for (int j = 1; j <= second.Length; j++)
+				{
+					int cost = second[j - 1] == first[i]
+									? 0
+									: 1;
+					rows[current, j] = Math.Min(Math.Min(rows[previous, j] + 1, rows[current, j - 1] + 1), rows[previous, j - 1] + cost);
+				}
+
+				previous = (previous + 1) % 2;
+				current = (current + 1) % 2;
+			}
+
+			return rows[previous, second.Length];
+		}
 	}
 }

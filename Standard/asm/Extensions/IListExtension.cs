@@ -1001,7 +1001,6 @@ namespace asm.Extensions
 				thisValue[i - 1] = thisValue[i];
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static void FastLeftShift<T>([NotNull] this IList<T> thisValue, int index, int count)
 		{
 			for (int i = count - 1; i > index; i--)
@@ -1017,11 +1016,45 @@ namespace asm.Extensions
 				thisValue[i + 1] = thisValue[i];
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static void FastRightShift<T>([NotNull] this IList<T> thisValue, int index, int count)
 		{
 			for (int i = index; i < count - 1; i++)
 				thisValue[i + 1] = thisValue[i];
+		}
+
+		/// <summary>
+		/// This method takes a list of numbers and tries to find the maximum sum the can be obtained by summing
+		/// up the longest sequence of adjacent elements in the list.
+		/// </summary>
+		/// <typeparam name="T">The value type</typeparam>
+		/// <param name="thisValue">List of numbers</param>
+		/// <returns>The maximum sum that can be obtained by summing up the longest sequence of adjacent elements in the list.</returns>
+		public static T KadaneMaximumSum<T>([NotNull] this IList<T> thisValue)
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+		{
+			// AlgoExpert - Become An Expert In Algorithms
+			/*
+			 * Write a function that takes in a non-empty array of integers and returns the
+			 * maximum sum that can be obtained by summing up all the numbers in a non-empty
+			 * sub-array of the input array. A sub-array must only contain adjacent numbers.
+			 */
+			if (thisValue.Count == 0) return default(T);
+			if (thisValue.Count == 1) return thisValue[0];
+
+			T maxEndingHere = thisValue[0];
+			T maxSoFar = maxEndingHere;
+
+			for (int i = 1; i < thisValue.Count; i++)
+			{
+				T value = thisValue[i];
+				T newMaxEndingHere = maxEndingHere.Add(value);
+				maxEndingHere = newMaxEndingHere.CompareTo(value) > 0
+									? newMaxEndingHere
+									: value;
+				if (maxSoFar.CompareTo(maxEndingHere) < 0) maxSoFar = maxEndingHere;
+			}
+
+			return maxSoFar;
 		}
 	}
 }

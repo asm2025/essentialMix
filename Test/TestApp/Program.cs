@@ -60,6 +60,9 @@ work with {LEN} items.".Yellow();
 			//TestDomainName();
 
 			//TestFibonacci();
+			//TestGroupAnagrams();
+			//TestKadaneMaximum();
+			TestLevenshteinDistance();
 
 			//TestThreadQueue();
 
@@ -80,7 +83,9 @@ work with {LEN} items.".Yellow();
 			//TestBinarySearchTreeAdd();
 			//TestBinarySearchTreeRemove();
 			//TestBinarySearchTreeBalance();
-			TestBinarySearchTreeBranchSums();
+			//TestBinaryTreeFindClosest();
+			//TestBinaryTreeBranchSums();
+			//TestBinaryTreeInvert();
 
 			//TestAVLTreeAdd();
 			//TestAVLTreeRemove();
@@ -194,6 +199,129 @@ work with {LEN} items.".Yellow();
 				string response = Console.ReadLine();
 				more = !string.IsNullOrWhiteSpace(response);
 				if (more && uint.TryParse(response, out uint value)) Console.WriteLine(asm.Numeric.Math.Fibonacci(value));
+			}
+			while (more);
+		}
+
+		private static void TestGroupAnagrams()
+		{
+			string[][] allWords =
+			{
+				null, //null
+				new []{""}, //[]
+				new []{"test"}, // ["test"]
+				new []{"abc", "dabd", "bca", "cab", "ddba"}, //["abc", "bca", "cab"], ["dabd", "ddba"]
+				new []{"abc", "cba", "bca"}, //["abc", "cba", "bca"]
+				new []{"zxc", "asd", "weq", "sda", "qwe", "xcz"}, //["zxc", "xcz"], ["asd", "sda"], ["weq", "qwe"]
+				new []{"yo", "act", "flop", "tac", "cat", "oy", "olfp"}, //["yo", "oy"], ["flop", "olfp"], ["act", "tac", "cat"]
+				new []{"cinema", "a", "flop", "iceman", "meacyne", "lofp", "olfp"}, //["cinema", "iceman"], ["flop", "lofp", "olfp"], ["a"], ["meacyne"]
+				new []{"abc", "abe", "abf", "abg"}, //["abc"], ["abe"], ["abf"], ["abg"]
+			};
+			int i = -1;
+			bool more;
+			Console.Clear();
+			Console.WriteLine("Testing Group Anagrams: ");
+
+			do
+			{
+				Console.Clear();
+				Title("Testing group anagrams...");
+				i = (i + 1) % allWords.Length;
+				string[] words = allWords[i];
+				Console.Write("Words: ".BrightBlack());
+				
+				if (words == null) Console.WriteLine("<null>");
+				else if (words.Length == 0) Console.WriteLine("[]");
+				else Console.WriteLine("[" + string.Join(", ", words) + "]");
+				
+				ICollection<string>[] anagrams = StringHelper.GroupAnagrams(words);
+				Console.Write("Anagrams: ".BrightYellow());
+
+				if (anagrams == null) Console.WriteLine("<null>");
+				else if (anagrams.Length == 0) Console.WriteLine("[]");
+				else Console.WriteLine(string.Join(", ", anagrams.Select(e => "[" + string.Join(", ", e) + "]")));
+				
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+		}
+
+		private static void TestKadaneMaximum()
+		{
+			int[][] allNumbers =
+			{
+				new int[0], //0
+				new []{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, //55
+				new []{-1, -2, -3, -4, -5, -6, -7, -8, -9, -10}, //-1
+				new []{-10, -2, -9, -4, -8, -6, -7, -1, -3, -5}, //-1
+				new []{1, 2, 3, 4, 5, 6, -20, 7, 8, 9, 10}, //35
+				new []{1, 2, 3, 4, 5, 6, -22, 7, 8, 9, 10}, //34
+				new []{1, 2, -4, 3, 5, -9, 8, 1, 2}, //11
+				new []{3, 4, -6, 7, 8}, //16
+			};
+			int i = -1;
+			bool more;
+			Console.Clear();
+			Console.WriteLine("Testing Kadane algorithm: maximum sum that can be obtained by summing up adjacent numbers");
+
+			do
+			{
+				i = (i + 1) % allNumbers.Length;
+				int[] numbers = allNumbers[i];
+				Console.Write("Numbers: ".BrightBlack());
+				
+				if (numbers.Length == 0) Console.WriteLine("[]");
+				else Console.WriteLine("[" + string.Join(", ", numbers) + "]");
+				
+				Console.WriteLine("Sum: ".BrightYellow() + numbers.KadaneMaximumSum());
+				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+		}
+
+		private static void TestLevenshteinDistance()
+		{
+			(string First, string Second)[] allStrings =
+			{
+				(string.Empty, string.Empty), //0
+				(string.Empty, "abc"), //3
+				("abc", "abc"), //0
+				("abc", "abx"), //1
+				("abc", "abcx"), //1
+				("abc", "yabcx"), //2
+				("algoexpert", "algozexpert"), //1
+				("abcdefghij", "1234567890"), //10
+				("abcdefghij", "a234567890"), //9
+				("biting", "mitten"), //4
+				("cereal", "saturday"), //6
+				("cereal", "saturdzz"), //7
+				("abbbbbbbbb", "bbbbbbbbba"), //2
+				("abc", "yabd"), //2
+				("xabc", "abcx"), //2
+			};
+
+			int i = -1;
+			bool more;
+			Console.Clear();
+			Console.WriteLine("Testing Levenshtein distance: minimum number of edit operations (insert/delete/substitute) to change first string to obtain the second string.");
+
+			do
+			{
+				i = (i + 1) % allStrings.Length;
+				(string first, string second) = allStrings[i];
+				Console.WriteLine($"Strings: '{first}', '{second}'");
+				Console.WriteLine("Levenshtein Distance: ".BrightYellow() + StringHelper.LevenshteinDistance(first, second));
+				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
 		}
@@ -366,7 +494,6 @@ work with {LEN} items.".Yellow();
 			const int RESULT_COUNT = 5;
 
 			Title("Testing Sort Algorithms...");
-
 
 			Stopwatch watch = new Stopwatch();
 			IComparer<int> numbersComparer = Comparer<int>.Default;
@@ -1268,7 +1395,36 @@ work with {LEN} items.".Yellow();
 			while (more);
 		}
 
-		private static void TestBinarySearchTreeBranchSums()
+		private static void TestBinaryTreeFindClosest()
+		{
+			bool more;
+			Console.Clear();
+			Title("Testing BinaryTree FindClosest...");
+
+			BinarySearchTree<int> tree = new BinarySearchTree<int>();
+			int len = RNGRandomHelper.Next(1, 50);
+			int[] values = GetRandomIntegers(true, len);
+			int min = values.Min();
+			int max = values.Max();
+			tree.Clear();
+			tree.Add(values);
+			tree.Print();
+
+			do
+			{
+				int value = RNGRandomHelper.Next(min, max);
+				Console.WriteLine($"Closest value to {value.ToString().Yellow()} => {tree.FindClosestValue(value, -1)} ");
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+		}
+
+		private static void TestBinaryTreeBranchSums()
 		{
 			bool more;
 			BinarySearchTree<int> tree = new BinarySearchTree<int>();
@@ -1276,16 +1432,45 @@ work with {LEN} items.".Yellow();
 			do
 			{
 				Console.Clear();
-				Title("Testing BinarySearchTree.Balance()...");
+				Title("Testing BinaryTree BranchSums...");
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(true, len);
 				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
 
-				Console.WriteLine("Test adding...".BrightGreen());
 				tree.Clear();
 				tree.Add(values);
 				tree.Print();
 				Console.WriteLine("Branch Sums: ".BrightBlack() + string.Join(", ", tree.BranchSums()));
+
+				Console.WriteLine();
+				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+		}
+
+		private static void TestBinaryTreeInvert()
+		{
+			bool more;
+			BinarySearchTree<int> tree = new BinarySearchTree<int>();
+
+			do
+			{
+				Console.Clear();
+				Title("Testing BinaryTree Invert...");
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(true, len);
+				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+
+				tree.Clear();
+				tree.Add(values);
+				tree.Print();
+				Console.WriteLine("Inverted: ".BrightYellow());
+
+				tree.Invert();
+				tree.Print();
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -4121,13 +4306,22 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 		[NotNull]
 		private static int[] GetRandomIntegers(bool unique, int len = 0)
 		{
+			const double GAPS_THRESHOLD = 0.25d;
+
 			if (len < 1) len = RNGRandomHelper.Next(1, 12);
 
 			int[] values = new int[len];
 
 			if (unique)
 			{
+				int gaps = (int)(len * GAPS_THRESHOLD);
 				values = Enumerable.Range(1, len).ToArray();
+
+				int min = len + 1, max = min + gaps + 1;
+
+				for (int i = 0; i < gaps; i++)
+					values[RNGRandomHelper.Next(0, values.Length - 1)] = RNGRandomHelper.Next(min, max);
+
 				values.Shuffle();
 			}
 			else

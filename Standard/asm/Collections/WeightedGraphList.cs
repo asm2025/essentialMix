@@ -557,7 +557,14 @@ namespace asm.Collections
 					}
 					else
 					{
-						// add the new entry to the queue
+						/*
+						 * add the new entry to the queue.
+						 * IMPORTANT: the connected edges to this vertex will be added only here
+						 * and not before the start of the while loop because this way all the next
+						 * edges in the queue will be connected to this vertex. If these edges were
+						 * added previously, then we would have searched for the appropriate edge
+						 * again among the remaining edges which increases the time complexity.
+						 */
 						node = queue.Add(queue.MakeNode(new PathEntry(edge.To, maxWeight)));
 						entries.Add(edge.To, node);
 					}

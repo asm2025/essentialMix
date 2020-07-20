@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using asm.Exceptions.Collections;
 using asm.Extensions;
+using asm.Helpers;
 using JetBrains.Annotations;
 
 namespace asm.Collections
@@ -2268,6 +2269,15 @@ namespace asm.Collections
 			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 		{
 			// AlgoExpert - Become An Expert In Algorithms
+			/*
+			 * Write a function that takes in a Binary Tree and returns a list of its branch sums
+			 * (ordered from leftmost branch sum to rightmost branch sum). A branch sum is the sum
+			 * of all values in a Binary Tree branch. A Binary Tree branch is a path of nodes in a
+			 * tree that starts at the root node and ends at any leaf node. Each Binary Tree node has
+			 * a value stored in a property called "value" and two children nodes stored in properties
+			 * called "left" and "right," respectively. Children nodes can either be Binary Tree nodes
+			 * themselves or the None (null) value.
+			 */
 			if (thisValue.Root == null) return Array.Empty<T>();
 
 			T runningSum = default(T);
@@ -2289,6 +2299,71 @@ namespace asm.Collections
 				// pass the new sum variable
 				if (root.Left != null) BranchSumsLocal(root.Left, newSum, sums);
 				if (root.Right != null) BranchSumsLocal(root.Right, newSum, sums);
+			}
+		}
+
+		public static T FindClosestValue<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, T value, T defaultValue = default(T))
+			where TNode : LinkedBinaryNode<TNode, T>
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+		{
+			// AlgoExpert - Become An Expert In Algorithms
+			/*
+			 * Write a function that takes in a sorted array of integers as well as a target integer.
+			 * The function should use the Binary Search algorithm to find if the target number is contained
+			 * in the array and should return its index if it is, otherwise -1 (return defaultValue for generic types).
+			 */
+			if (thisValue.Root == null) return defaultValue;
+
+			T inf = TypeHelper.MaximumOf<T>();
+			T closest = inf;
+			TNode current = thisValue.Root;
+
+			while (current != null)
+			{
+				if (value.Subtract(closest).Abs().IsGreaterThan(value.Subtract(current.Value).Abs())) closest = current.Value;
+				current = value.IsLessThan(current.Value)
+							? current.Left
+							: value.IsGreaterThan(current.Value)
+								? current.Right
+								: null;
+			}
+
+			if (closest.Equals(inf)) closest = defaultValue;
+			return closest;
+		}
+
+		public static void Invert<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue)
+			where TNode : LinkedBinaryNode<TNode, T>
+		{
+			// AlgoExpert - Become An Expert In Algorithms
+			/*
+			 * Write a function that takes in a Binary Tree and inverts it. In other words, the function
+			 * should swap every left node in the tree for its corresponding (mirrored) right node. Each
+			 * Binary Tree node has a value stored in a property called "value" and two children nodes stored
+			 * in properties called "left" and "right," respectively. Children nodes can either be Binary Tree
+			 * nodes themselves or the None (null) value.
+			 */
+			if (thisValue.Root == null) return;
+
+			// LevelOrder traversal
+			// Root-Left-Right (Queue)
+			Queue<TNode> queue = new Queue<TNode>();
+			//Start at the root
+			queue.Enqueue(thisValue.Root);
+
+			while (queue.Count > 0)
+			{
+				TNode current = queue.Dequeue();
+				SwapChildren(current);
+				if (current.Left != null) queue.Enqueue(current.Left);
+				if (current.Right != null) queue.Enqueue(current.Right);
+			}
+
+			static void SwapChildren(TNode node)
+			{
+				TNode left = node.Left;
+				node.Left = node.Right;
+				node.Right = left;
 			}
 		}
 	}
