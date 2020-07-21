@@ -1,37 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using asm.Extensions;
 using asm.Patterns.Sorting;
 
 namespace asm.Patterns.Pagination
 {
 	[Serializable]
-	public struct SortablePagination : IPagination, ISortable
+	public class SortablePagination : Pagination, ISortable
 	{
-		private int? _page;
-		private int? _pageSize;
-		private long? _count;
-
-		/// <inheritdoc />
-		public int Page
-		{
-			get => _page ??= 1; 
-			set => _page = value.NotBelow(1);
-		}
-
-		/// <inheritdoc />
-		public int PageSize
-		{
-			get => _pageSize ??= Pagination.PAGE_SIZE;
-			set => _pageSize = value.IfLessThanOrEqual(0, Pagination.PAGE_SIZE);
-		}
-
-		public long Count
-		{
-			get => _count ??= 0L;
-			set => _count = value.NotBelow(0L);
-		}
-
 		/// <inheritdoc />
 		public IList<SortField> OrderBy { get; set; }
 	}

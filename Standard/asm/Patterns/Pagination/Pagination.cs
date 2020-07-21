@@ -4,7 +4,7 @@ using asm.Extensions;
 namespace asm.Patterns.Pagination
 {
 	[Serializable]
-	public struct Pagination : IPagination
+	public class Pagination : IPagination
 	{
 		public const int PAGE_SIZE = 10;
 

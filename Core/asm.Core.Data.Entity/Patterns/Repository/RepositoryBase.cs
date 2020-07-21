@@ -69,6 +69,27 @@ namespace asm.Core.Data.Entity.Patterns.Repository
 			return new ValueTask<IQueryable<TEntity>>(PrepareListQuery(settings));
 		}
 
+		protected override TEntity GetInternal(params object[] keys) { return PrepareGetQuery(keys).FirstOrDefault(); }
+
+		/// <inheritdoc />
+		protected override ValueTask<TEntity> GetAsyncInternal(object[] keys, CancellationToken token = default(CancellationToken))
+		{
+			token.ThrowIfCancellationRequested();
+			return new ValueTask<TEntity>(PrepareGetQuery(keys).FirstOrDefaultAsync(token));
+		}
+
+		/// <inheritdoc />
+
+		/// <inheritdoc />
+		protected override TEntity GetInternal(IGetSettings settings) { return PrepareGetQuery(settings).FirstOrDefault(); }
+
+		/// <inheritdoc />
+		protected override ValueTask<TEntity> GetAsyncInternal(IGetSettings settings, CancellationToken token = default(CancellationToken))
+		{
+			token.ThrowIfCancellationRequested();
+			return new ValueTask<TEntity>(PrepareGetQuery(settings).FirstOrDefaultAsync(token));
+		}
+
 		/// <inheritdoc />
 		public IQueryable<TEntity> SqlQuery([NotNull] string sql, [NotNull] params object[] parameters)
 		{
@@ -109,21 +130,26 @@ namespace asm.Core.Data.Entity.Patterns.Repository
 		}
 
 		[NotNull]
-		protected virtual IQueryable<TEntity> PrepareGetQuery([NotNull] IGetSettings settings)
+		protected virtual IQueryable<TEntity> PrepareGetQuery(object[] keys)
 		{
 			IQueryable<TEntity> query = DbSet;
+
+			if (!(keys?.Length > 0)) return query;
+			if (keys.Length != KeyProperties.Length) throw new ArgumentException("Wrong number of key values.", nameof(keys));
+			string filter = string.Join(" and ", KeyProperties.Select((p, i) => $"{p.Name} == @{i}"));
+			query = query.Where(filter, keys);
+			return query;
+		}
+
+		[NotNull]
+		protected virtual IQueryable<TEntity> PrepareGetQuery([NotNull] IGetSettings settings)
+		{
+			IQueryable<TEntity> query = PrepareGetQuery(settings.KeyValue);
 			
 			if (settings is IIncludeSettings includeSettings && includeSettings.Include?.Count > 0)
 			{
 				query = includeSettings.Include.SkipNullOrEmpty()
 										.Aggregate(query, (current, path) => current.Include(path));
-			}
-
-			if (settings.KeyValue?.Length > 0)
-			{
-				if (settings.KeyValue.Length != KeyProperties.Length) throw new ArgumentException("Wrong number of key values.", nameof(settings));
-				string filter = string.Join(" and ", KeyProperties.Select((p, i) => $"{p.Name} == @{i}"));
-				query = query.Where(filter, settings.KeyValue);
 			}
 
 			if (settings is IFilterSettings filterSettings && !string.IsNullOrEmpty(filterSettings.Filter.Expression))

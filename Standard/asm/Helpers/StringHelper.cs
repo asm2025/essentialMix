@@ -220,7 +220,12 @@ namespace asm.Helpers
 		[NotNull]
 		public static IEnumerable<string> SkipNullOrWhitespace([NotNull] params string[] values) { return values.SkipNullOrWhitespace(); }
 
-		public static ICollection<string>[] GroupAnagrams(IEnumerable<string> words)
+		/// <summary>
+		/// Groups <see href="https://en.wikipedia.org/wiki/Anagram">Anagrams</see> together.
+		/// </summary>
+		/// <param name="words">the strings representing possible anagrams</param>
+		/// <returns>Array of Anagrams grouped together.</returns>
+		public static IReadOnlyCollection<IReadOnlyList<string>> GroupAnagrams(IEnumerable<string> words)
 		{
 			// AlgoExpert - Become An Expert In Algorithms
 			/*
@@ -231,7 +236,7 @@ namespace asm.Helpers
 			 */
 			if (words == null) return null;
 
-			Dictionary<string, ICollection<string>> result = new Dictionary<string, ICollection<string>>(StringComparer.OrdinalIgnoreCase);
+			Dictionary<string, List<string>> result = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
 			foreach (string word in words)
 			{
@@ -239,21 +244,27 @@ namespace asm.Helpers
 				
 				string sorted = string.Concat(word.OrderBy(e => e));
 
-				if (!result.TryGetValue(sorted, out ICollection<string> collection))
+				if (!result.TryGetValue(sorted, out List<string> list))
 				{
-					collection = new List<string>();
-					result.Add(sorted, collection);
+					list = new List<string>();
+					result.Add(sorted, list);
 				}
 
-				collection.Add(word);
+				list.Add(word);
 			}
 
-			return result.Values.ToArray();
+			return result.Values;
 		}
 
 		/// <summary>
-		/// Finds the minimum number of edit operations that need to be performed on the first
-		/// string to obtain the second string.
+		/// Finds <see href="https://en.wikipedia.org/wiki/Levenshtein_distance">Levenshtein distance</see>, the minimum number of edit
+		/// operations that need to be performed on the first string to obtain the second string.
+		///
+		/// <para>
+		/// the objective is to find matches for short strings in many longer texts, in situations where a small number of differences
+		/// is to be expected. for instance, spell checkers, correction systems for optical character recognition, and software to assist
+		/// natural language translation based on translation memory.
+		/// </para>
 		/// </summary>
 		/// <param name="first"></param>
 		/// <param name="second"></param>

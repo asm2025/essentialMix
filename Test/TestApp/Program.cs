@@ -234,11 +234,11 @@ work with {LEN} items.".Yellow();
 				else if (words.Length == 0) Console.WriteLine("[]");
 				else Console.WriteLine("[" + string.Join(", ", words) + "]");
 				
-				ICollection<string>[] anagrams = StringHelper.GroupAnagrams(words);
+				IReadOnlyCollection<IReadOnlyList<string>> anagrams = StringHelper.GroupAnagrams(words);
 				Console.Write("Anagrams: ".BrightYellow());
 
 				if (anagrams == null) Console.WriteLine("<null>");
-				else if (anagrams.Length == 0) Console.WriteLine("[]");
+				else if (anagrams.Count == 0) Console.WriteLine("[]");
 				else Console.WriteLine(string.Join(", ", anagrams.Select(e => "[" + string.Join(", ", e) + "]")));
 				
 				Console.WriteLine();
@@ -310,7 +310,8 @@ work with {LEN} items.".Yellow();
 			int i = -1;
 			bool more;
 			Console.Clear();
-			Console.WriteLine("Testing Levenshtein distance: minimum number of edit operations (insert/delete/substitute) to change first string to obtain the second string.");
+			Console.WriteLine(@"Testing Levenshtein distance: minimum number of edit operations 
+(insert/delete/substitute) to change first string to obtain the second string.");
 
 			do
 			{

@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace asm.Patterns.Pagination
 {
 	[Serializable]
-	public struct Paginated<T> : IPaginated<T>
+	public class Paginated<T> : IPaginated<T>
 	{
 		public Paginated([NotNull] IEnumerable<T> result, [NotNull] IPagination pagination)
 		{

@@ -150,6 +150,40 @@ namespace asm.Data.Patterns.Repository
 		protected abstract ValueTask<IQueryable<TEntity>> ListAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
 
 		/// <inheritdoc />
+		public TEntity Get(params object[] keys)
+		{
+			ThrowIfDisposed();
+			return GetInternal(keys);
+		}
+
+		protected abstract TEntity GetInternal([NotNull] params object[] keys);
+
+		/// <inheritdoc />
+		public ValueTask<TEntity> GetAsync(params object[] keys)
+		{
+			ThrowIfDisposed();
+			return GetAsyncInternal(keys, CancellationToken.None);
+		}
+
+		/// <inheritdoc />
+		public ValueTask<TEntity> GetAsync(CancellationToken token, params object[] keys)
+		{
+			ThrowIfDisposed();
+			token.ThrowIfCancellationRequested();
+			return GetAsyncInternal(keys, token);
+		}
+
+		/// <inheritdoc />
+		public ValueTask<TEntity> GetAsync(object[] keys, CancellationToken token)
+		{
+			ThrowIfDisposed();
+			token.ThrowIfCancellationRequested();
+			return GetAsyncInternal(keys, token);
+		}
+
+		protected abstract ValueTask<TEntity> GetAsyncInternal([NotNull] object[] keys, CancellationToken token = default(CancellationToken));
+
+		/// <inheritdoc />
 		public TEntity Get(IGetSettings settings)
 		{
 			ThrowIfDisposed();

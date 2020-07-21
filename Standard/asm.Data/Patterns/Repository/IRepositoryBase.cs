@@ -32,6 +32,11 @@ namespace asm.Data.Patterns.Repository
 		IQueryable<TEntity> List(IPagination settings = null);
 		ValueTask<IQueryable<TEntity>> ListAsync(IPagination settings = null, CancellationToken token = default(CancellationToken));
 
+		TEntity Get([NotNull] params object[] keys);
+		ValueTask<TEntity> GetAsync([NotNull] params object[] keys);
+		ValueTask<TEntity> GetAsync(CancellationToken token, [NotNull] params object[] keys);
+		ValueTask<TEntity> GetAsync([NotNull] object[] keys, CancellationToken token);
+
 		TEntity Get([NotNull] IGetSettings settings);
 		ValueTask<TEntity> GetAsync([NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
 	}
