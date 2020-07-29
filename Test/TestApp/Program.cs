@@ -24,14 +24,16 @@ namespace TestApp
 	internal class Program
 	{
 		private const int START = 10;
-		private const int LEN = 1_000_000;
+		private const int SMALL = 10_000;
+		private const int MEDIUM = 100_000;
+		private const int HEAVY = 1_000_000;
 
 		private static readonly string COMPILATION_TEXT = $@"
 This is C# (a compiled language), so the test needs to run at least
 once before considering results in order for the code to be compiled
 and run at full speed. The first time this test run, it will start 
 with just {START} items and the next time when you press '{"Y".BrightGreen()}', it will 
-work with {LEN} items.".Yellow();
+work with {HEAVY} items.".Yellow();
 
 		private static readonly Lazy<Faker> __fakeGenerator = new Lazy<Faker>(() => new Faker(), LazyThreadSafetyMode.PublicationOnly);
 		private static readonly string[] __sortAlgorithms = 
@@ -50,7 +52,7 @@ work with {LEN} items.".Yellow();
 			nameof(IListExtension.SortPancake),
 			nameof(IListExtension.SortBinary),
 			nameof(IListExtension.SortGnome),
-			nameof(IListExtension.SortBrick)
+			nameof(IListExtension.SortBrick),
 		};
 
 		private static void Main()
@@ -62,7 +64,8 @@ work with {LEN} items.".Yellow();
 			//TestFibonacci();
 			//TestGroupAnagrams();
 			//TestKadaneMaximum();
-			TestLevenshteinDistance();
+			//TestLevenshteinDistance();
+			//TestDeepestPit();
 
 			//TestThreadQueue();
 
@@ -327,6 +330,52 @@ work with {LEN} items.".Yellow();
 			while (more);
 		}
 
+		private static void TestDeepestPit()
+		{
+			(string Label, int[] Array)[] allNumbers =
+			{
+				("Test case none: ", new int[0]), //-1
+				("Test case 1: ", new []{0, 1, 3, -2, 0, 1, 0, -3, 2, 3}), //4
+				("Test case 2: ", new []{0, 1, 3, -2, 0, 1, 0, 0, -3, 2, 3}), //3
+				("Test case 3: ", new []{0, 1, 3, -2, 0, 0, 1, 0, 0, -3, 2, 3}), //3
+				("Test case 4: ", new []{0, 1, 3, -2, 0, 0, 1, 0, -3, -1, 1, 2, 3}), //4
+				("Test case 5: ", new []{0, 1, 3, -2, 0, 0, 1, 0, -3, -1, -1, 1, 2, 3}), //2
+				("Monotonically decreasing: ", new []{0, -1, -2, -3, -4, -5, -6, -7, -8, -9}), //-1
+				("Monotonically increasing: ", new []{0, 1, 2, 3}), //-1
+				("All the same, zeros: ", new []{0, 0, 0, 0}), //-1
+				("Extreme no pit, monotonically increasing: ", new []{-100000000, 0, 100000000}), //-1
+				("Extreme depth 1 w/o pit: ", new []{100000000, 0, 0, 100000000}), //-1
+				("Extreme depth 1 w pit: ", new []{100000000, 0, 100000000}), //100000000
+				("Extreme depth 2 w pit: ", new []{100000000, -100000000, 0, 0, 100000000}), //100000000
+				("Extreme depth 3 w pit: ", new []{100000000, -100000000, 100000000, 0, 100000000}), //200000000
+				("Extreme depth 2 w false first pit: ", new []{100000000, -100000000, -100000000, 100000000, 0, 100000000}), //100000000
+				("Volcano shape: ", new []{0, 1, 2, 3, 10, 100, 90, 100, 3, 2, 1, 0}), //10
+				("Mountain shape: ", new []{0, 1, 2, 3, 10, 100, 3, 2, 1, 0}), //-1
+				("Plateau: ", new []{0, 1, 2, 3, 10, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 3, 2, 1, 0}), //-1
+			};
+			int i = -1;
+			bool more;
+			Console.Clear();
+			Console.WriteLine("Testing Deepest Pit: ");
+
+			do
+			{
+				i = (i + 1) % allNumbers.Length;
+				(string label, int[] numbers) = allNumbers[i];
+				Console.Write(label.BrightBlack());
+				
+				if (numbers.Length == 0) Console.WriteLine("[]");
+				else Console.WriteLine("[" + string.Join(", ", numbers) + "]");
+				
+				Console.WriteLine("Deepest Pit: ".BrightYellow() + numbers.DeepestPit());
+				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+		}
+
 		private static void TestThreadQueue()
 		{
 			// change this to true to use 1 thread only for debugging
@@ -440,7 +489,7 @@ work with {LEN} items.".Yellow();
 		
 		private static void TestSortAlgorithm()
 		{
-			const string algorithm = nameof(IListExtension.SortHeap);
+			const string algorithm = nameof(IListExtension.SortInsertion);
 
 			Action<IList<int>, int, int, IComparer<int>, bool> sortNumbers = GetAlgorithm<int>(algorithm);
 			Action<IList<string>, int, int, IComparer<string>, bool> sortStrings = GetAlgorithm<string>(algorithm);
@@ -491,31 +540,35 @@ work with {LEN} items.".Yellow();
 
 		private static void TestSortAlgorithms()
 		{
-			const int TRIES = 100;
-			const int RESULT_COUNT = 5;
+			const int RESULT_COUNT = 10;
 
 			Title("Testing Sort Algorithms...");
 
 			Stopwatch watch = new Stopwatch();
 			IComparer<int> numbersComparer = Comparer<int>.Default;
 			IComparer<string> stringComparer = StringComparer.Ordinal;
-			IDictionary<string, double> numericResults = new Dictionary<string, double>();
-			IDictionary<string, double> stringResults = new Dictionary<string, double>();
-			long[] time = new long[TRIES];
+			IDictionary<string, long> numericResults = new Dictionary<string, long>();
+			IDictionary<string, long> stringResults = new Dictionary<string, long>();
 			string sectionSeparator = new string('*', 80).BrightMagenta();
 			bool more;
+			int tests = 0;
+			int[] numbers = GetRandomIntegers(START);
+			string[] strings = GetRandomStrings(START).ToArray();
 
 			do
 			{
 				Console.Clear();
-				int[] numbers = GetRandomIntegers(RNGRandomHelper.Next(5, 20));
-				string[] strings = GetRandomStrings(RNGRandomHelper.Next(3, 10)).ToArray();
-				Console.WriteLine("Numbers: ".BrightCyan() + string.Join(", ", numbers));
-				Console.WriteLine("String: ".BrightCyan() + string.Join(", ", strings.Select(e => e.SingleQuote())));
-				Console.WriteLine($"Taking an average of {TRIES.ToString().BrightCyan()} times for each algorithm.");
+
+				if (tests == 0)
+				{
+					Console.WriteLine("Numbers: ".BrightCyan() + string.Join(", ", numbers));
+					Console.WriteLine("String: ".BrightCyan() + string.Join(", ", strings.Select(e => e.SingleQuote())));
+					CompilationHint();
+				}
 
 				foreach (string algorithm in __sortAlgorithms)
 				{
+					GC.Collect();
 					Action<IList<int>, int, int, IComparer<int>, bool> sortNumbers = GetAlgorithm<int>(algorithm);
 					Action<IList<string>, int, int, IComparer<string>, bool> sortStrings = GetAlgorithm<string>(algorithm);
 					Console.WriteLine(sectionSeparator);
@@ -523,36 +576,20 @@ work with {LEN} items.".Yellow();
 
 					Console.Write("Numbers");
 					int[] ints = (int[])numbers.Clone();
-
-					for (int i = 0; i < time.Length; i++)
-					{
-						watch.Restart();
-						sortNumbers(ints, 0, -1, numbersComparer, false);
-						time[i] = watch.ElapsedMilliseconds;
-						watch.Stop();
-						if (i < time.Length - 1) ints = (int[])numbers.Clone();
-					}
-
-					numericResults[algorithm] = time.Average();
-					Console.WriteLine($" => {numericResults[algorithm].ToString("F6").BrightGreen()}");
-					Console.WriteLine("Result: " + string.Join(", ", ints));
-					Console.WriteLine();
+					watch.Restart();
+					sortNumbers(ints, 0, -1, numbersComparer, false);
+					numericResults[algorithm] = watch.ElapsedTicks;
+					Console.WriteLine($" => {numericResults[algorithm].ToString().BrightGreen()}");
+					if (tests == 0) Console.WriteLine("Result: " + string.Join(", ", ints));
 
 					Console.Write("Strings");
 
 					string[] str = (string[])strings.Clone();
-
-					for (int i = 0; i < time.Length; i++)
-					{
-						watch.Restart();
-						sortStrings(str, 0, -1, stringComparer, false);
-						time[i] = watch.ElapsedMilliseconds;
-						watch.Stop();
-					}
-
-					stringResults[algorithm] = time.Average();
-					Console.WriteLine($" => {stringResults[algorithm].ToString("F6").BrightGreen()}");
-					Console.WriteLine("Result: " + string.Join(", ", str.Select(e => e.SingleQuote())));
+					watch.Restart();
+					sortStrings(str, 0, -1, stringComparer, false);
+					stringResults[algorithm] = watch.ElapsedTicks;
+					Console.WriteLine($" => {stringResults[algorithm].ToString().BrightGreen()}");
+					if (tests == 0) Console.WriteLine("Result: " + string.Join(", ", str.Select(e => e.SingleQuote())));
 					Console.WriteLine();
 				}
 
@@ -561,21 +598,21 @@ work with {LEN} items.".Yellow();
 				Console.WriteLine();
 				Console.WriteLine($"Fastest {RESULT_COUNT} numeric sort:".BrightGreen());
 			
-				foreach (KeyValuePair<string, double> pair in numericResults
+				foreach (KeyValuePair<string, long> pair in numericResults
 															.OrderBy(e => e.Value)
 															.Take(RESULT_COUNT))
 				{
-					Console.WriteLine($"{pair.Key} {pair.Value:F6}");
+					Console.WriteLine($"{pair.Key} {pair.Value}");
 				}
 
 				Console.WriteLine();
 				Console.WriteLine($"Fastest {RESULT_COUNT} string sort:".BrightGreen());
 
-				foreach (KeyValuePair<string, double> pair in stringResults
+				foreach (KeyValuePair<string, long> pair in stringResults
 															.OrderBy(e => e.Value)
 															.Take(RESULT_COUNT))
 				{
-					Console.WriteLine($"{pair.Key} {pair.Value:F6}");
+					Console.WriteLine($"{pair.Key} {pair.Value}");
 				}
 
 				Console.WriteLine();
@@ -583,6 +620,33 @@ work with {LEN} items.".Yellow();
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
+				if (!more || tests > 2) continue;
+
+				if (tests > 0)
+				{
+					Console.Write($"Would you like to increase the array size? {"[Y]".BrightGreen()} or {"any other key".Dim()} to exit. ");
+					response = Console.ReadKey(true);
+					Console.WriteLine();
+					if (response.Key != ConsoleKey.Y) continue;
+				}
+
+				switch (tests)
+				{
+					case 0:
+						numbers = GetRandomIntegers(SMALL);
+						strings = GetRandomStrings(SMALL).ToArray();
+						break;
+					case 1:
+						numbers = GetRandomIntegers(MEDIUM);
+						strings = GetRandomStrings(MEDIUM).ToArray();
+						break;
+					case 2:
+						numbers = GetRandomIntegers(HEAVY);
+						strings = GetRandomStrings(HEAVY).ToArray();
+						break;
+				}
+
+				tests++;
 			}
 			while (more);
 		}
@@ -777,7 +841,7 @@ work with {LEN} items.".Yellow();
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, LEN);
+				values = GetRandomIntegers(true, HEAVY);
 				tests++;
 			}
 			while (more);
@@ -894,7 +958,7 @@ work with {LEN} items.".Yellow();
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, LEN);
+				values = GetRandomIntegers(true, HEAVY);
 				tests++;
 			}
 			while (more);
@@ -939,7 +1003,7 @@ work with {LEN} items.".Yellow();
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, LEN);
+				values = GetRandomIntegers(true, HEAVY);
 				tests++;
 			}
 			while (more);
@@ -1065,7 +1129,7 @@ work with {LEN} items.".Yellow();
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, LEN);
+				values = GetRandomIntegers(true, HEAVY);
 				tests++;
 			}
 			while (more);
@@ -1917,7 +1981,7 @@ work with {LEN} items.".Yellow();
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, LEN);
+				values = GetRandomIntegers(true, HEAVY);
 				tests++;
 			}
 			while (more);
@@ -2009,7 +2073,7 @@ work with {LEN} items.".Yellow();
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, LEN);
+				values = GetRandomIntegers(true, HEAVY);
 				tests++;
 			}
 			while (more);
@@ -3952,8 +4016,8 @@ work with {LEN} items.".Yellow();
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, LEN);
-				students = GetRandomStudents(LEN);
+				values = GetRandomIntegers(true, HEAVY);
+				students = GetRandomStudents(HEAVY);
 				tests++;
 			}
 			while (more);

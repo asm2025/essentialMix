@@ -28,7 +28,6 @@ namespace asm.Globalization
 		{
 		}
 
-		/// <inheritdoc />
 		public CountryInfo([NotNull] RegionInfo region)
 		{
 			Region = region;

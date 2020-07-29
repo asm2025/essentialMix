@@ -6,6 +6,18 @@ namespace asm.Patterns.Sorting
 	[DebuggerDisplay("{Name} {Type}")]
 	public struct SortField
 	{
+		/// <inheritdoc />
+		public SortField([NotNull] string name)
+			: this(name, SortType.Ascending)
+		{
+		}
+
+		public SortField(string name, SortType type)
+		{
+			Name = name;
+			Type = type;
+		}
+
 		public string Name { get; set; }
 		public SortType Type { get; set; }
 

@@ -39,7 +39,6 @@ namespace asm.Globalization
 		{
 		}
 
-		/// <inheritdoc />
 		public Language([NotNull] CultureInfo culture, string displayName)
 		{
 			if (culture == null) throw new ArgumentNullException(nameof(culture));

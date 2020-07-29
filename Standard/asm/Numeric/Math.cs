@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using asm.Extensions;
 using JetBrains.Annotations;
@@ -1162,6 +1163,82 @@ namespace asm.Numeric
 			}
 
 			return result;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Min<T>(T value1, T value2)
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+		{
+			if (value1.CompareTo(value2) > 0) value1 = value2;
+			return value1;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Min<T>(T value1, T value2, T value3)
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+		{
+			if (value1.CompareTo(value2) > 0) value1 = value2;
+			if (value1.CompareTo(value3) > 0) value1 = value3;
+			return value1;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Min<T>(T value1, T value2, T value3, T value4)
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+		{
+			if (value1.CompareTo(value2) > 0) value1 = value2;
+			if (value1.CompareTo(value3) > 0) value1 = value3;
+			if (value1.CompareTo(value4) > 0) value1 = value4;
+			return value1;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Min<T>(T value1, T value2, T value3, T value4, T value5)
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+		{
+			if (value1.CompareTo(value2) > 0) value1 = value2;
+			if (value1.CompareTo(value3) > 0) value1 = value3;
+			if (value1.CompareTo(value4) > 0) value1 = value4;
+			if (value1.CompareTo(value5) > 0) value1 = value5;
+			return value1;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Max<T>(T value1, T value2)
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+		{
+			if (value1.CompareTo(value2) < 0) value1 = value2;
+			return value1;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Max<T>(T value1, T value2, T value3)
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+		{
+			if (value1.CompareTo(value2) < 0) value1 = value2;
+			if (value1.CompareTo(value3) < 0) value1 = value3;
+			return value1;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Max<T>(T value1, T value2, T value3, T value4)
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+		{
+			if (value1.CompareTo(value2) < 0) value1 = value2;
+			if (value1.CompareTo(value3) < 0) value1 = value3;
+			if (value1.CompareTo(value4) < 0) value1 = value4;
+			return value1;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Max<T>(T value1, T value2, T value3, T value4, T value5)
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+		{
+			if (value1.CompareTo(value2) < 0) value1 = value2;
+			if (value1.CompareTo(value3) < 0) value1 = value3;
+			if (value1.CompareTo(value4) < 0) value1 = value4;
+			if (value1.CompareTo(value5) < 0) value1 = value5;
+			return value1;
 		}
 
 		/// <summary>

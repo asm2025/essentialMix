@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -6,6 +6,7 @@ using asm.Collections;
 using JetBrains.Annotations;
 using asm.Helpers;
 using asm.Other.JonSkeet.MiscUtil.Collections;
+using asmMath = asm.Numeric.Math;
 
 namespace asm.Extensions
 {
@@ -539,6 +540,7 @@ namespace asm.Extensions
 
 		public static void SortQuick<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
 		{
+			// Fastest algorithm
 			// https://www.geeksforgeeks.org/iterative-quick-sort/
 			thisValue.Count.ValidateRange(index, ref count);
 			if (count < 2 || thisValue.Count < 2) return;
@@ -693,6 +695,8 @@ namespace asm.Extensions
 				* of the 2nd range (array in the original implementation).
 				*/
 				int l2 = m + 1;
+				if (l2 > r) return;
+
 				// if the direct merge is already sorted
 				if (c.IsLessThanOrEqual(list[m], list[l2])) return;
 
@@ -848,15 +852,6 @@ namespace asm.Extensions
 			}
 		}
 
-		/// <summary>
-		/// Fastest and most efficient sort algorithm of all
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="thisValue"></param>
-		/// <param name="index"></param>
-		/// <param name="count"></param>
-		/// <param name="comparer"></param>
-		/// <param name="descending"></param>
 		public static void SortBinary<T>([NotNull] this IList<T> thisValue, int index = 0, int count = -1, IComparer<T> comparer = null, bool descending = false)
 		{
 			// https://stackoverflow.com/questions/26454911/how-does-binary-insertion-sort-work
@@ -1055,6 +1050,55 @@ namespace asm.Extensions
 			}
 
 			return maxSoFar;
+		}
+
+		public static T DeepestPit<T>([NotNull] this IList<T> thisValue)
+			where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+		{
+			// https://medium.com/@spylogsster/deepest-pit-of-an-array-solution-ee7fd0b4d1c7
+			/*
+			 * A non-empty zero-indexed array A consisting of N integers is given.
+			 * A pit in this array is any triplet of integers (P, Q, R) such that:
+			 * 0 <= P < Q < R < N
+			 *
+			 * sequence [A[P], A[P+1], ..., A[Q]] is strictly decreasing:
+			 * i.e. A[P] > A[P + 1] > ... > A[Q]
+			 *
+			 * sequence A[Q], A[Q+1], ..., A[R] is strictly increasing:
+			 * i.e. A[Q] < A[Q + 1] < ... < A[R]
+			 *
+			 * Triplet (2, 3, 4) is one of pits in this array, because sequence [A[2], A[3]] is strictly
+			 * decreasing (3 > −2) and sequence [A[3], A[4]] is strictly increasing (−2 < 0). Its depth
+			 * is min{A[2] − A[3], A[4] − A[3]} = 2. Triplet (2, 3, 5) is another pit with depth 3.
+			 * Triplet (5, 7, 8) is yet another pit with depth 4. There is no pit in this array deeper
+			 * i.e. having depth greater than 4.
+			 *
+			 * Complexity:
+			 *  expected worst-case time complexity is O(N);
+			 *  expected worst-case space complexity is O(N), beyond input storage (not counting the
+			 *  storage required for input arguments)
+			 *
+			 * Elements of input arrays can be modified.
+			*/
+			T def = default(T), minus = def.Decrement(), deepest = minus;
+			if (thisValue.Count < 3) return deepest;
+
+			int p = 0, q = -1;
+
+			for (int i = 1; i < thisValue.Count; i++)
+			{
+				if (q < 0 && thisValue[i].CompareTo(thisValue[i - 1]) >= 0) q = i - 1;
+				if (q < 0 || thisValue[i].CompareTo(thisValue[i - 1]) > 0 && i + 1 != thisValue.Count) continue;
+				int r = thisValue[i].CompareTo(thisValue[i - 1]) <= 0
+							? i - 1
+							: i;
+				deepest = asmMath.Max(deepest, asmMath.Min(thisValue[p].Subtract(thisValue[q]), thisValue[r].Subtract(thisValue[q])));
+				p = i - 1;
+				q = -1;
+			}
+
+			if (deepest.Equals(def)) deepest = minus;
+			return deepest;
 		}
 	}
 }

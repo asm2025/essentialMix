@@ -363,12 +363,11 @@ namespace asm.Extensions
 				return null;
 
 			Type[] types = type.GetGenericArguments();
-			if (types.Length == 0 || types[0].Name == "VoidTaskResult")
-				return null;
+			if (types.Length == 0 || types[0].Name == "VoidTaskResult") return null;
 			return ((dynamic)thisValue).Result;
 		}
 
-		public static Task<TU> Upcast<T, TU>([NotNull] this Task<T> thisValue)
+		public static Task<TU> As<T, TU>([NotNull] this Task<T> thisValue)
 			where T : TU
 		{
 			TaskCompletionSource<TU> tcs = new TaskCompletionSource<TU>();
@@ -386,10 +385,13 @@ namespace asm.Extensions
 					}
 				}
 				else if (t.IsCanceled)
+				{
 					tcs.SetCanceled();
+				}
 				else
+				{
 					tcs.SetResult(t.Result);
-
+				}
 			}, TaskContinuationOptions.ExecuteSynchronously);
 			return tcs.Task;
 		}

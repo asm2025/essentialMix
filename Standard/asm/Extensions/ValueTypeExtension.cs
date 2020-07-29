@@ -1352,28 +1352,28 @@ namespace asm.Extensions
 		public static sbyte Even(this sbyte thisValue) { return (sbyte)(1 - (thisValue & 1)); }
 
 		/// <summary>
-		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// returns 0 if thisValue is even and 1 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static byte Even(this byte thisValue) { return (byte)(1 - (thisValue & 1)); }
 
 		/// <summary>
-		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// returns 0 if thisValue is even and 1 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static short Even(this short thisValue) { return (short)(1 - (thisValue & 1)); }
 
 		/// <summary>
-		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// returns 0 if thisValue is even and 1 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static ushort Even(this ushort thisValue) { return (ushort)(1 - (thisValue & 1)); }
 
 		/// <summary>
-		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// returns 0 if thisValue is even and 1 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -1384,21 +1384,21 @@ namespace asm.Extensions
 		}
 
 		/// <summary>
-		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// returns 0 if thisValue is even and 1 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static uint Even(this uint thisValue) { return 1 - (thisValue & 1); }
 
 		/// <summary>
-		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// returns 0 if thisValue is even and 1 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static long Even(this long thisValue) { return 1 - (thisValue & 1); }
 
 		/// <summary>
-		/// returns 0 if thisValue is odd and 1 if thisValue is even
+		/// returns 0 if thisValue is even and 1 if thisValue is even
 		/// </summary>
 		/// <param name="thisValue"></param>
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading;
@@ -63,10 +64,10 @@ namespace asm.Core.Data.Entity.Patterns.Repository
 		[NotNull]
 		protected override IQueryable<TEntity> ListInternal(IPagination settings = null) { return PrepareListQuery(settings); }
 
-		protected override ValueTask<IQueryable<TEntity>> ListAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken))
+		protected override ValueTask<List<TEntity>> ListAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			return new ValueTask<IQueryable<TEntity>>(PrepareListQuery(settings));
+			return new ValueTask<List<TEntity>>(PrepareListQuery(settings).ToListAsync(token));
 		}
 
 		protected override TEntity GetInternal(params object[] keys) { return PrepareGetQuery(keys).FirstOrDefault(); }

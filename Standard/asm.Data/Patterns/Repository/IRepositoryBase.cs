@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace asm.Data.Patterns.Repository
 		ValueTask<T> CreateAsync<T>(CancellationToken token = default(CancellationToken)) where T : TEntity;
 
 		IQueryable<TEntity> List(IPagination settings = null);
-		ValueTask<IQueryable<TEntity>> ListAsync(IPagination settings = null, CancellationToken token = default(CancellationToken));
+		ValueTask<List<TEntity>> ListAsync(IPagination settings = null, CancellationToken token = default(CancellationToken));
 
 		TEntity Get([NotNull] params object[] keys);
 		ValueTask<TEntity> GetAsync([NotNull] params object[] keys);
