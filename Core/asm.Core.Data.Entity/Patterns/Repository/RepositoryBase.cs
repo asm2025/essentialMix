@@ -104,10 +104,14 @@ namespace asm.Core.Data.Entity.Patterns.Repository
 		}
 
 		[NotNull]
-		protected virtual IQueryable<TEntity> PrepareListQuery(IPagination settings)
+		protected IQueryable<TEntity> PrepareListQuery(IPagination settings)
 		{
-			IQueryable<TEntity> query = DbSet;
-			
+			return PrepareListQuery(DbSet, settings);
+		}
+
+		[NotNull]
+		protected virtual IQueryable<TEntity> PrepareListQuery([NotNull] IQueryable<TEntity> query, IPagination settings)
+		{
 			if (settings is IIncludeSettings includeSettings && includeSettings.Include?.Count > 0)
 			{
 				query = includeSettings.Include.SkipNullOrEmpty()
@@ -131,12 +135,12 @@ namespace asm.Core.Data.Entity.Patterns.Repository
 		}
 
 		[NotNull]
-		protected virtual IQueryable<TEntity> PrepareGetQuery(object[] keys)
+		protected IQueryable<TEntity> PrepareGetQuery(object[] keys)
 		{
 			IQueryable<TEntity> query = DbSet;
-
 			if (!(keys?.Length > 0)) return query;
 			if (keys.Length != KeyProperties.Length) throw new ArgumentException("Wrong number of key values.", nameof(keys));
+
 			string filter = string.Join(" and ", KeyProperties.Select((p, i) => $"{p.Name} == @{i}"));
 			query = query.Where(filter, keys);
 			return query;
