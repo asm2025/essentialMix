@@ -140,14 +140,14 @@ namespace asm.Data.Patterns.Repository
 		protected abstract IQueryable<TEntity> ListInternal(IPagination settings = null);
 
 		/// <inheritdoc />
-		public ValueTask<List<TEntity>> ListAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
+		public ValueTask<IList<TEntity>> ListAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
 		{
 			ThrowIfDisposed();
 			token.ThrowIfCancellationRequested();
 			return ListAsyncInternal(settings, token);
 		}
 
-		protected abstract ValueTask<List<TEntity>> ListAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
+		protected abstract ValueTask<IList<TEntity>> ListAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
 
 		/// <inheritdoc />
 		public TEntity Get(params object[] keys)

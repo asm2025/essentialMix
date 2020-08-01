@@ -65,10 +65,11 @@ namespace asm.Data.Entity.Patterns.Repository
 		[NotNull]
 		protected override IQueryable<TEntity> ListInternal(IPagination settings = null) { return PrepareListQuery(settings); }
 
-		protected override ValueTask<List<TEntity>> ListAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken))
+		protected override ValueTask<IList<TEntity>> ListAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			return new ValueTask<List<TEntity>>(PrepareListQuery(settings).ToListAsync(token));
+			settings ??= new Pagination();
+			return new ValueTask<IList<TEntity>>(PrepareListQuery(settings).Paginate(settings).ToListAsync(token).As<List<TEntity>, IList<TEntity>>());
 		}
 
 		/// <inheritdoc />
