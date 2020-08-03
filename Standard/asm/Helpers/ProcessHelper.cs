@@ -58,7 +58,7 @@ namespace asm.Helpers
 
 						foreach (string subKey in subKeyNames)
 						{
-							if (subKey.IsSameOrdinal("new")) continue;
+							if (subKey.IsSame("new")) continue;
 							arrayList.Add(subKey);
 						}
 

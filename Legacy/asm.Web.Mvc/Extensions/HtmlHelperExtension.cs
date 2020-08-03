@@ -145,7 +145,7 @@ namespace asm.Web.Mvc.Extensions
 		{
 			ViewContext context = compareToRoot ? RootContext(thisValue) : thisValue.ViewContext;
 			string area = (string)context.RouteData.Values["area"];
-			return area.IsSameAsAnyOrdinal(areas);
+			return area.IsSameAsAny(areas);
 		}
 
 		public static T IfAnyArea<T>([NotNull] this HtmlHelper thisValue, [NotNull][AspMvcAction] string[] areas, T trueResponse, T falseResponse = default(T), bool compareToRoot = true)

@@ -41,7 +41,7 @@ namespace asm.Data.Extensions
 		public static bool Contains([NotNull] this IEnumerable<DataColumn> thisValue, [NotNull] string name)
 		{
 			if (name.Length == 0) throw new ArgumentNullException(nameof(name));
-			return thisValue.Any(c => c.ColumnName.IsSameOrdinal(name));
+			return thisValue.Any(c => c.ColumnName.IsSame(name));
 		}
 	}
 }

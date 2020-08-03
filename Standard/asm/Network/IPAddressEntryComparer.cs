@@ -18,7 +18,7 @@ namespace asm.Network
 			if (y == null) return 1;
 			if (x.IsEmpty && y.IsEmpty) return 0;
 			if (!x.IsEmpty) return -1;
-			return !y.IsEmpty ? 1 : x.Value.CompareOrdinal(y.Value);
+			return !y.IsEmpty ? 1 : x.Value.Compare(y.Value);
 		}
 
 		public override bool Equals(IPAddressEntry x, IPAddressEntry y)
@@ -27,7 +27,7 @@ namespace asm.Network
 			if (x == null || y == null) return false;
 			if (x.IsEmpty && y.IsEmpty) return true;
 			if (x.IsEmpty || y.IsEmpty) return false;
-			return x.Value.IsSameOrdinal(y.Value);
+			return x.Value.IsSame(y.Value);
 		}
 	}
 }

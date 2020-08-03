@@ -23,6 +23,7 @@ namespace asm.Extensions
 
 		private static readonly Regex RGX_PRINTF = new Regex(@"\%(\d*\$)?([\'\#\-\+ ]*)(\d*)(?:\.(\d+))?([hl])?([dioxXucsfeEgGpn%])", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string ToNullIfEmpty(this string thisValue)
 		{
 			thisValue = thisValue?.Trim();
@@ -30,50 +31,61 @@ namespace asm.Extensions
 			return thisValue;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool Contains([NotNull] this string thisValue, char value) { return thisValue.IndexOf(value, 0, thisValue.Length) > -1; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool Contains([NotNull] this string thisValue, char value, int startIndex)
 		{
 			return thisValue.IndexOf(value, startIndex, thisValue.Length - startIndex) > -1;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool Contains([NotNull] this string thisValue, char value, int startIndex, int count) { return thisValue.IndexOf(value, startIndex, count) > -1; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool Contains([NotNull] this string thisValue, [NotNull] string value, StringComparison comparison) { return thisValue.IndexOf(value, comparison) > -1; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool Contains([NotNull] this string thisValue, [NotNull] string value, int startIndex)
 		{
 			return thisValue.IndexOf(value, startIndex, StringComparison.Ordinal) > -1;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool Contains([NotNull] this string thisValue, [NotNull] string value, int startIndex, StringComparison comparison)
 		{
 			return thisValue.IndexOf(value, startIndex, comparison) > -1;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool Contains([NotNull] this string thisValue, [NotNull] string value, int startIndex, int count)
 		{
 			return thisValue.IndexOf(value, startIndex, count, StringComparison.Ordinal) > -1;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool Contains([NotNull] this string thisValue, [NotNull] string value, int startIndex, int count, StringComparison comparison)
 		{
 			return thisValue.IndexOf(value, startIndex, count, comparison) > -1;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool StartsWith([NotNull] this string thisValue, char value) { return thisValue.Length != 0 && thisValue[0] == value; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool StartsWith([NotNull] this string thisValue, string value, StringComparison comparison)
 		{
 			return thisValue.Length != 0 && !string.IsNullOrEmpty(value) && value.Length <= thisValue.Length && thisValue.IndexOf(value, 0, value.Length, comparison) == 0;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool EndsWith([NotNull] this string thisValue, char value) { return thisValue.Length != 0 && thisValue[thisValue.Length - 1] == value; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool EndsWith([NotNull] this string thisValue, string value, StringComparison comparison)
 		{
 			if (string.IsNullOrEmpty(thisValue) || string.IsNullOrEmpty(value) || value.Length > thisValue.Length) return false;
-
 			int index = thisValue.Length - value.Length;
 			return thisValue.IndexOf(value, index, value.Length, comparison) == index;
 		}
@@ -92,23 +104,34 @@ namespace asm.Extensions
 			return false;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string FirstNotNullOrEmptyOrDefault([NotNull] this IEnumerable<string> thisValue) { return thisValue.FirstOrDefault(e => !string.IsNullOrEmpty(e)); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string LastNotNullOrEmptyOrDefault([NotNull] this IEnumerable<string> thisValue) { return thisValue.LastOrDefault(e => !string.IsNullOrEmpty(e)); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string FirstNotNullOrEmpty([NotNull] this IEnumerable<string> thisValue) { return thisValue.First(e => !string.IsNullOrEmpty(e)); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string LastNotNullOrEmpty([NotNull] this IEnumerable<string> thisValue) { return thisValue.Last(e => !string.IsNullOrEmpty(e)); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string SingleNotNullOrEmptyOrDefault([NotNull] this IEnumerable<string> thisValue) { return thisValue.SingleOrDefault(e => !string.IsNullOrEmpty(e)); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string FirstNotNullOrWhiteSpaceOrDefault([NotNull] this IEnumerable<string> thisValue) { return thisValue.FirstOrDefault(e => !string.IsNullOrWhiteSpace(e)); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string LastNotNullOrWhiteSpaceOrDefault([NotNull] this IEnumerable<string> thisValue) { return thisValue.LastOrDefault(e => !string.IsNullOrWhiteSpace(e)); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string FirstNotNullOrWhiteSpace([NotNull] this IEnumerable<string> thisValue) { return thisValue.First(e => !string.IsNullOrWhiteSpace(e)); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string LastNotNullOrWhiteSpace([NotNull] this IEnumerable<string> thisValue) { return thisValue.Last(e => !string.IsNullOrWhiteSpace(e)); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string SingleNotNullOrWhiteSpaceOrDefault([NotNull] this IEnumerable<string> thisValue) { return thisValue.SingleOrDefault(e => !string.IsNullOrWhiteSpace(e)); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Format([NotNull] this string thisValue, [NotNull] params object[] objects)
 		{
 			return objects.IsNullOrEmpty()
@@ -204,23 +227,28 @@ namespace asm.Extensions
 					expression.IsMatch(thisValue, startIndex);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool InBounds([NotNull] this string thisValue, int index) { return thisValue.Length != 0 && index.InRangeRx(0, thisValue.Length); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool ContainsAny([NotNull] this string thisValue, [NotNull] params char[] value)
 		{
 			return thisValue.Length != 0 && ContainsAny(thisValue, 0, thisValue.Length, value);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool ContainsAny([NotNull] this string thisValue, int startIndex, [NotNull] params char[] value)
 		{
 			return thisValue.Length != 0 && ContainsAny(thisValue, startIndex, thisValue.Length - startIndex, value);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool ContainsAny([NotNull] this string thisValue, int startIndex, int count, [NotNull] params char[] value)
 		{
 			return IndexOfAny(thisValue, startIndex, count, value) > -1;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int IndexOfAny([NotNull] this string thisValue, [NotNull] params char[] value)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -228,6 +256,7 @@ namespace asm.Extensions
 						: IndexOfAny(thisValue, 0, thisValue.Length, value);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int IndexOfAny([NotNull] this string thisValue, int startIndex, [NotNull] params char[] value)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -286,209 +315,69 @@ namespace asm.Extensions
 			return -1;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsAscii(this string thisValue) { return !string.IsNullOrEmpty(thisValue) && thisValue.All(c => c.IsAscii()); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsDigits(this string thisValue) { return !string.IsNullOrEmpty(thisValue) && thisValue.All(c => c.IsDigit()); }
 
-		public static bool IsSame(this string thisValue, string value) { return IsSameOrdinal(thisValue, value); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool IsSame(this string thisValue, string value) { return string.Equals(thisValue, value, StringComparison.OrdinalIgnoreCase); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsSame([NotNull] this string thisValue, int indexA, [NotNull] string strB, int indexB, int length)
-		{
-			return IsSameOrdinal(thisValue, indexA, strB, indexB, length);
-		}
-
-		public static bool IsSameAsAny(this string thisValue, [NotNull] params string[] values) { return IsSameAsAnyOrdinal(thisValue, values); }
-
-		public static bool IsSameOrdinal(this string thisValue, string value) { return string.Equals(thisValue, value, StringComparison.OrdinalIgnoreCase); }
-
-		public static bool IsSameOrdinal([NotNull] this string thisValue, int indexA, [NotNull] string strB, int indexB, int length)
 		{
 			return string.Compare(thisValue, indexA, strB, indexB, length, StringComparison.OrdinalIgnoreCase) == 0;
 		}
 
-		public static bool IsSameAsAnyOrdinal(this string thisValue, [NotNull] params string[] values)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool IsSameAsAny(this string thisValue, [NotNull] params string[] values)
 		{
-			if (thisValue == null) return values.Any(e => e == null);
-			return thisValue.Length == 0 
-				? values.Any(e => e != null && e.Length == 0) 
-				: values.Any(value => string.Equals(thisValue, value, StringComparison.OrdinalIgnoreCase));
+			return thisValue == null
+						? values.Any(e => e == null)
+						: thisValue.Length == 0
+							? values.Any(e => e != null && e.Length == 0)
+							: values.Any(value => string.Equals(thisValue, value, StringComparison.OrdinalIgnoreCase));
 		}
 
-		public static bool IsSameCurrentCulture(this string thisValue, string value) { return string.Equals(thisValue, value, StringComparison.CurrentCultureIgnoreCase); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool IsLessThan(this string thisValue, string value) { return string.CompareOrdinal(thisValue, value) < 0; }
 
-		public static bool IsSameCurrentCulture([NotNull] this string thisValue, int indexA, [NotNull] string strB, int indexB, int length)
-		{
-			return string.Compare(thisValue, indexA, strB, indexB, length, StringComparison.CurrentCultureIgnoreCase) == 0;
-		}
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool IsLessThanOrEqual(this string thisValue, string value) { return string.CompareOrdinal(thisValue, value) <= 0; }
 
-		public static bool IsSameAsAnyCurrentCulture(this string thisValue, [NotNull] params string[] values) { return values.Any(value => string.Equals(thisValue, value, StringComparison.CurrentCultureIgnoreCase)); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool IsGreaterThan(this string thisValue, string value) { return string.CompareOrdinal(thisValue, value) > 0; }
 
-		public static bool IsSameInvariantCulture(this string thisValue, string value) { return string.Equals(thisValue, value, StringComparison.InvariantCultureIgnoreCase); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool IsGreaterThanOrEqual(this string thisValue, string value) { return string.CompareOrdinal(thisValue, value) >= 0; }
 
-		public static bool IsSameInvariantCulture([NotNull] this string thisValue, int indexA, [NotNull] string strB, int indexB, int length)
-		{
-			return string.Compare(thisValue, indexA, strB, indexB, length, StringComparison.InvariantCultureIgnoreCase) == 0;
-		}
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool IsEqual(this string thisValue, string value) { return string.Equals(thisValue, value); }
 
-		public static bool IsSameAsAnyInvariantCulture(this string thisValue, [NotNull] params string[] values) { return values.Any(value => string.Equals(thisValue, value, StringComparison.InvariantCultureIgnoreCase)); }
-
-		public static T IfSame<T>(this string thisValue, string value, T trueResponse, T falseResponse = default(T))
-		{
-			return IsSame(thisValue, value)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static T IfSameAsAny<T>(this string thisValue, [NotNull] string[] values, T trueResponse, T falseResponse = default(T))
-		{
-			return IsSameAsAny(thisValue, values)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static T IfSameOrdinal<T>(this string thisValue, string value, T trueResponse, T falseResponse = default(T))
-		{
-			return IsSameOrdinal(thisValue, value)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static T IfSameAsAnyOrdinal<T>(this string thisValue, [NotNull] string[] values, T trueResponse, T falseResponse = default(T))
-		{
-			return IsSameAsAnyOrdinal(thisValue, values)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static T IfSameCurrentCulture<T>(this string thisValue, string value, T trueResponse, T falseResponse = default(T))
-		{
-			return IsSameCurrentCulture(thisValue, value)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static T IfSameAsAnyCurrentCulture<T>(this string thisValue, [NotNull] string[] values, T trueResponse, T falseResponse = default(T))
-		{
-			return IsSameAsAnyCurrentCulture(thisValue, values)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static T IfSameInvariantCulture<T>(this string thisValue, string value, T trueResponse, T falseResponse = default(T))
-		{
-			return IsSameInvariantCulture(thisValue, value)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static T IfSameAsAnyInvariantCulture<T>(this string thisValue, [NotNull] string[] values, T trueResponse, T falseResponse = default(T))
-		{
-			return IsSameAsAnyInvariantCulture(thisValue, values)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static bool IsEqual(this string thisValue, string value) { return IsEqualOrdinal(thisValue, value); }
-
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsEqual(this string thisValue, string value, StringComparison comparison) { return string.Compare(thisValue, value, comparison) == 0; }
 
-		public static bool IsEqual(this string thisValue, string value, [NotNull] StringComparer comparer) { return comparer.Equals(thisValue, value); }
-
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsEqual([NotNull] this string thisValue, int indexA, [NotNull] string strB, int indexB, int length)
 		{
-			return IsEqualOrdinal(thisValue, indexA, strB, indexB, length);
+			return string.Compare(thisValue, indexA, strB, indexB, length) == 0;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsEqual([NotNull] this string thisValue, int indexA, [NotNull] string strB, int indexB, int length, StringComparison comparison)
 		{
 			return string.Compare(thisValue, indexA, strB, indexB, length, comparison) == 0;
 		}
 
-		public static bool IsEqualToAny(this string thisValue, [NotNull] params string[] values) { return IsEqualToAny(thisValue, values, StringComparison.Ordinal); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool IsEqualToAny(this string thisValue, [NotNull] params string[] values) { return IsEqualToAny(thisValue, StringComparison.Ordinal, values); }
 
-		public static bool IsEqualToAny(this string thisValue, [NotNull] string[] values, StringComparison comparison) { return values.Any(value => string.Equals(thisValue, value, comparison)); }
-		public static bool IsEqualToAny(this string thisValue, [NotNull] string[] values, [NotNull] StringComparer comparer) { return values.Any(value => comparer.Equals(thisValue, value)); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool IsEqualToAny(this string thisValue, StringComparison comparison, [NotNull] params string[] values) { return values.Any(value => string.Equals(thisValue, value, comparison)); }
 
-		public static bool IsEqualOrdinal(this string thisValue, string value) { return string.Equals(thisValue, value, StringComparison.Ordinal); }
-
-		public static bool IsEqualOrdinal([NotNull] this string thisValue, int indexA, [NotNull] string strB, int indexB, int length)
-		{
-			return string.Compare(thisValue, indexA, strB, indexB, length, StringComparison.Ordinal) == 0;
-		}
-
-		public static bool IsEqualCurrentCulture(this string thisValue, string value) { return string.Equals(thisValue, value, StringComparison.CurrentCulture); }
-
-		public static bool IsEqualCurrentCulture([NotNull] this string thisValue, int indexA, [NotNull] string strB, int indexB, int length)
-		{
-			return string.Compare(thisValue, indexA, strB, indexB, length, StringComparison.CurrentCulture) == 0;
-		}
-
-		public static bool IsEqualInvariantCulture(this string thisValue, string value) { return string.Equals(thisValue, value, StringComparison.InvariantCulture); }
-
-		public static bool IsEqualInvariantCulture([NotNull] this string thisValue, int indexA, [NotNull] string strB, int indexB, int length)
-		{
-			return string.Compare(thisValue, indexA, strB, indexB, length, StringComparison.InvariantCulture) == 0;
-		}
-
-		public static T IfEqual<T>(this string thisValue, string value, T trueResponse, T falseResponse = default(T))
-		{
-			return IsEqual(thisValue, value)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static T IfEqualOrdinal<T>(this string thisValue, string value, T trueResponse, T falseResponse = default(T))
-		{
-			return IsEqualOrdinal(thisValue, value)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static T IfEqualCurrentCulture<T>(this string thisValue, string value, T trueResponse, T falseResponse = default(T))
-		{
-			return IsEqualCurrentCulture(thisValue, value)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static T IfEqualInvariantCulture<T>(this string thisValue, string value, T trueResponse, T falseResponse = default(T))
-		{
-			return IsEqualInvariantCulture(thisValue, value)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static T IfEqualToAny<T>(this string thisValue, [NotNull] string[] values, T trueResponse, T falseResponse = default(T))
-		{
-			return IsEqualToAny(thisValue, values)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static T IfEqualToAny<T>(this string thisValue, [NotNull] string[] values, StringComparison comparison, T trueResponse, T falseResponse = default(T))
-		{
-			return IsEqualToAny(thisValue, values, comparison)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static T IfEqualToAny<T>(this string thisValue, [NotNull] string[] values, [NotNull] StringComparer comparer, T trueResponse, T falseResponse = default(T))
-		{
-			return IsEqualToAny(thisValue, values, comparer)
-						? trueResponse
-						: falseResponse;
-		}
-
-		public static bool ContainsAny(this string thisValue, bool ignoreCase, [NotNull] params string[] values) { return ContainsAnyOrdinal(thisValue, ignoreCase, values); }
-
-		public static bool ContainsOrdinal(this string thisValue, string value, bool ignoreCase = true)
-		{
-			if (thisValue == null && value == null) return true;
-			if (thisValue == null || value == null) return false;
-			return thisValue.Contains(value, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
-		}
-
-		public static bool ContainsAnyOrdinal(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool ContainsAny(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
 		{
 			if (thisValue == null) return values.Length == 0 || values.Any(e => e == null);
 			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e != null && e.Length == 0);
@@ -496,132 +385,49 @@ namespace asm.Extensions
 			return values.Any(value => thisValue.Contains(value, comparison));
 		}
 
-		public static bool ContainsCurrentCulture(this string thisValue, string value, bool ignoreCase = true)
-		{
-			if (thisValue == null && value == null) return true;
-			if (thisValue == null || value == null) return false;
-			return thisValue.Contains(value, ignoreCase ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture);
-		}
-
-		public static bool ContainsAnyCurrentCulture(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool StartsWithAny(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
 		{
 			if (thisValue == null) return values.Length == 0 || values.Any(e => e == null);
 			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e != null && e.Length == 0);
-			StringComparison comparison = ignoreCase ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture;
-			return values.Any(value => thisValue.Contains(value, comparison));
+			StringComparison comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+			return values.Any(value => thisValue.StartsWith(value, comparison));
 		}
 
-		public static bool ContainsInvariantCulture(this string thisValue, string value, bool ignoreCase = true)
-		{
-			if (thisValue == null && value == null) return true;
-			if (thisValue == null || value == null) return false;
-			return thisValue.Contains(value, ignoreCase ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture);
-		}
-
-		public static bool ContainsAnyInvariantCulture(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
-		{
-			if (thisValue == null) return values.Length == 0 || values.Any(e => e == null);
-			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e != null && e.Length == 0);
-			StringComparison comparison = ignoreCase ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture;
-			return values.Any(value => thisValue.Contains(value, comparison));
-		}
-
-		public static bool StartsWithAny(this string thisValue, bool ignoreCase, [NotNull] params string[] values) { return StartsWithAnyOrdinal(thisValue, ignoreCase, values); }
-
-		public static bool StartsWithOrdinal(this string thisValue, string value, bool ignoreCase = true)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool StartsWith(this string thisValue, string value, bool ignoreCase = false)
 		{
 			if (thisValue == null && value == null) return true;
 			if (thisValue == null || value == null) return false;
 			return thisValue.StartsWith(value, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 		}
 
-		public static bool StartsWithAnyOrdinal(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool EndsWithAny(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
 		{
 			if (thisValue == null) return values.Length == 0 || values.Any(e => e == null);
 			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e != null && e.Length == 0);
 			StringComparison comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-			return values.Any(value => thisValue.StartsWith(value, comparison));
+			return values.Any(value => thisValue.EndsWith(value, comparison));
 		}
 
-		public static bool StartsWithCurrentCulture(this string thisValue, string value, bool ignoreCase = true)
-		{
-			if (thisValue == null && value == null) return true;
-			if (thisValue == null || value == null) return false;
-			return thisValue.StartsWith(value, ignoreCase ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture);
-		}
-
-		public static bool StartsWithAnyCurrentCulture(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
-		{
-			if (thisValue == null) return values.Length == 0 || values.Any(e => e == null);
-			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e != null && e.Length == 0);
-			StringComparison comparison = ignoreCase ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture;
-			return values.Any(value => thisValue.StartsWith(value, comparison));
-		}
-
-		public static bool StartsWithInvariantCulture(this string thisValue, string value, bool ignoreCase = true)
-		{
-			if (thisValue == null && value == null) return true;
-			if (thisValue == null || value == null) return false;
-			return thisValue.StartsWith(value, ignoreCase ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture);
-		}
-
-		public static bool StartsWithAnyInvariantCulture(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
-		{
-			if (thisValue == null) return values.Length == 0 || values.Any(e => e == null);
-			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e != null && e.Length == 0);
-			StringComparison comparison = ignoreCase ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture;
-			return values.Any(value => thisValue.StartsWith(value, comparison));
-		}
-
-		public static bool EndsWithAny(this string thisValue, bool ignoreCase, [NotNull] params string[] values) { return EndsWithAnyOrdinal(thisValue, ignoreCase, values); }
-
-		public static bool EndsWithOrdinal(this string thisValue, string value, bool ignoreCase = true)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool EndsWithOrdinal(this string thisValue, string value, bool ignoreCase = false)
 		{
 			if (thisValue == null && value == null) return true;
 			if (thisValue == null || value == null) return false;
 			return thisValue.EndsWith(value, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 		}
 
-		public static bool EndsWithAnyOrdinal(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static string IfNullOrEmpty(this string thisValue, string trueResponse)
 		{
-			if (thisValue == null) return values.Length == 0 || values.Any(e => e == null);
-			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e != null && e.Length == 0);
-			StringComparison comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-			return values.Any(value => thisValue.EndsWith(value, comparison));
+			return string.IsNullOrEmpty(thisValue)
+						? trueResponse
+						: thisValue;
 		}
 
-		public static bool EndsWithCurrentCulture(this string thisValue, string value, bool ignoreCase = true)
-		{
-			if (thisValue == null && value == null) return true;
-			if (thisValue == null || value == null) return false;
-			return thisValue.EndsWith(value, ignoreCase ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture);
-		}
-
-		public static bool EndsWithAnyCurrentCulture(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
-		{
-			if (thisValue == null) return values.Length == 0 || values.Any(e => e == null);
-			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e != null && e.Length == 0);
-			StringComparison comparison = ignoreCase ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture;
-			return values.Any(value => thisValue.EndsWith(value, comparison));
-		}
-
-		public static bool EndsWithInvariantCulture(this string thisValue, string value, bool ignoreCase = true)
-		{
-			if (thisValue == null && value == null) return true;
-			if (thisValue == null || value == null) return false;
-			return thisValue.EndsWith(value, ignoreCase ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture);
-		}
-
-		public static bool EndsWithAnyInvariantCulture(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
-		{
-			if (thisValue == null) return values.Length == 0 || values.Any(e => e == null);
-			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e != null && e.Length == 0);
-			StringComparison comparison = ignoreCase ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture;
-			return values.Any(value => thisValue.EndsWith(value, comparison));
-		}
-
-		public static string IfNullOrEmpty(this string thisValue, string trueResponse) { return IfNullOrEmpty(thisValue, trueResponse, thisValue); }
-
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T IfNullOrEmpty<T>(this string thisValue, T trueResponse, T falseResponse = default(T))
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -629,6 +435,7 @@ namespace asm.Extensions
 						: falseResponse;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string IfNullOrEmpty(this string thisValue, [NotNull] Func<string> trueFunc, Func<string> falseFunc = null)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -638,8 +445,15 @@ namespace asm.Extensions
 							: falseFunc();
 		}
 
-		public static string IfNotNullOrEmpty([NotNull] this string thisValue, string trueResponse) { return IfNotNullOrEmpty(thisValue, trueResponse, thisValue); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static string IfNotNullOrEmpty([NotNull] this string thisValue, string trueResponse)
+		{
+			return thisValue.Length != 0
+						? trueResponse
+						: thisValue;
+		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T IfNotNullOrEmpty<T>([NotNull] this string thisValue, T trueResponse, T falseResponse = default(T))
 		{
 			return thisValue.Length != 0
@@ -647,6 +461,7 @@ namespace asm.Extensions
 						: falseResponse;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string IfNotNullOrEmpty([NotNull] this string thisValue, [NotNull] Func<string> trueFunc, Func<string> falseFunc = null)
 		{
 			return thisValue.Length != 0
@@ -656,8 +471,15 @@ namespace asm.Extensions
 							: falseFunc();
 		}
 
-		public static string IfNullOrWhiteSpace(this string thisValue, string trueResponse) { return IfNullOrWhiteSpace(thisValue, trueResponse, thisValue); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static string IfNullOrWhiteSpace(this string thisValue, string trueResponse)
+		{
+			return string.IsNullOrWhiteSpace(thisValue)
+						? trueResponse
+						: thisValue;
+		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T IfNullOrWhiteSpace<T>(this string thisValue, T trueResponse, T falseResponse = default(T))
 		{
 			return string.IsNullOrWhiteSpace(thisValue)
@@ -665,6 +487,7 @@ namespace asm.Extensions
 						: falseResponse;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string IfNullOrWhiteSpace(this string thisValue, [NotNull] Func<string> trueFunc, Func<string> falseFunc = null)
 		{
 			return string.IsNullOrWhiteSpace(thisValue)
@@ -674,15 +497,23 @@ namespace asm.Extensions
 							: falseFunc();
 		}
 
-		public static string IfNotNullOrWhiteSpace(this string thisValue, string trueResponse) { return IfNotNullOrWhiteSpace(thisValue, trueResponse, thisValue); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static string IfNotNullOrWhiteSpace(this string thisValue, string trueResponse)
+		{
+			return !string.IsNullOrWhiteSpace(thisValue)
+						? trueResponse
+						: thisValue;
+		}
 
-		public static T IfNotNullOrWhiteSpace<T>(this string thisValue, T trueResponse, T falseResponse = default)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T IfNotNullOrWhiteSpace<T>(this string thisValue, T trueResponse, T falseResponse = default(T))
 		{
 			return !string.IsNullOrWhiteSpace(thisValue)
 						? trueResponse
 						: falseResponse;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string IfNotNullOrWhiteSpace(this string thisValue, [NotNull] Func<string> trueFunc, Func<string> falseFunc = null)
 		{
 			return !string.IsNullOrWhiteSpace(thisValue)
@@ -692,40 +523,35 @@ namespace asm.Extensions
 							: falseFunc();
 		}
 
-		public static int Compare(this string thisValue, string value, [NotNull] StringComparer comparer) { return comparer.Compare(thisValue, value); }
-
-		public static int CompareOrdinal(this string thisValue, string value, bool ignoreCase = true)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static int Compare(this string thisValue, string value)
 		{
-			return Compare(thisValue, value, ignoreCase
-												? StringComparer.OrdinalIgnoreCase
-												: StringComparer.Ordinal);
+			return string.CompareOrdinal(thisValue, value);
 		}
 
-		public static int CompareCurrentCulture(this string thisValue, string value, bool ignoreCase = true)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static int CompareIgnoreCase(this string thisValue, string value)
 		{
-			return Compare(thisValue, value, ignoreCase
-												? StringComparer.CurrentCultureIgnoreCase
-												: StringComparer.CurrentCulture);
+			return string.Compare(thisValue, value, StringComparison.OrdinalIgnoreCase);
 		}
 
-		public static int CompareInvariantCulture(this string thisValue, string value, bool ignoreCase = true)
-		{
-			return Compare(thisValue, value, ignoreCase
-												? StringComparer.InvariantCultureIgnoreCase
-												: StringComparer.InvariantCulture);
-		}
-
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsLetterOrDigit(this string thisValue) { return !string.IsNullOrEmpty(thisValue) && thisValue.All(c => c.IsLetterOrDigit()); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsLetters(this string thisValue) { return !string.IsNullOrEmpty(thisValue) && thisValue.All(c => c.IsLetter()); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsLower(this string thisValue) { return !string.IsNullOrEmpty(thisValue) && thisValue.All(c => c.IsLower()); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsNumbers(this string thisValue) { return !string.IsNullOrEmpty(thisValue) && thisValue.All(c => c.IsNumber()); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsUpper(this string thisValue) { return !string.IsNullOrEmpty(thisValue) && thisValue.All(c => c.IsUpper()); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Left([NotNull] this string thisValue, int length = -1)
 		{
 			if (length == -1) length = thisValue.Length;
@@ -738,9 +564,11 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string LeftMax([NotNull] this string thisValue, int length = -1) { return Left(thisValue, length.NotAbove(thisValue.Length)); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Right([NotNull] this string thisValue, int length = -1)
 		{
 			if (length == -1) length = thisValue.Length;
@@ -753,10 +581,13 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string RightMax([NotNull] this string thisValue, int length = -1) { return Right(thisValue, length.NotAbove(thisValue.Length)); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsLike(this string thisValue, string pattern) { return IsLike(thisValue, pattern, RegexHelper.OPTIONS_I); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsLike(this string thisValue, string pattern, RegexOptions options)
 		{
 			if (thisValue == null && pattern == null) return true;
@@ -765,8 +596,10 @@ namespace asm.Extensions
 			return !string.IsNullOrEmpty(pat) && Regex.IsMatch(thisValue, pat, options);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsMatch(this string thisValue, string pattern) { return IsMatch(thisValue, pattern, RegexHelper.OPTIONS_I); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsMatch(this string thisValue, string pattern, RegexOptions options)
 		{
 			if (thisValue == null && pattern == null) return true;
@@ -774,6 +607,7 @@ namespace asm.Extensions
 			return Regex.IsMatch(thisValue, pattern, options);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsMatch([NotNull] this string thisValue, [NotNull] Regex expression, int startIndex = 0)
 		{
 			if (!startIndex.InRangeRx(0, thisValue.Length)) throw new ArgumentOutOfRangeException(nameof(startIndex));
@@ -781,9 +615,11 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static Match Match(this string thisValue, string pattern) { return Match(thisValue, pattern, RegexHelper.OPTIONS_I); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static Match Match(this string thisValue, string pattern, RegexOptions options)
 		{
 			if (thisValue == null || pattern == null) return System.Text.RegularExpressions.Match.Empty;
@@ -791,6 +627,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static Match Match([NotNull] this string thisValue, [NotNull] Regex expression, int startIndex = 0, int count = -1)
 		{
 			thisValue.Length.ValidateRange(startIndex, ref count);
@@ -798,8 +635,10 @@ namespace asm.Extensions
 			return expression.Match(thisValue, startIndex, count);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static MatchCollection Matches(this string thisValue, string pattern) { return Matches(thisValue, pattern, RegexHelper.OPTIONS_I); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static MatchCollection Matches(this string thisValue, string pattern, RegexOptions options)
 		{
 			return string.IsNullOrEmpty(thisValue) || string.IsNullOrEmpty(pattern)
@@ -808,6 +647,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static MatchCollection Matches([NotNull] this string thisValue, [NotNull] Regex expression, int startIndex)
 		{
 			if (!startIndex.InRangeRx(0, thisValue.Length)) throw new ArgumentOutOfRangeException(nameof(startIndex));
@@ -850,7 +690,7 @@ namespace asm.Extensions
 			return expression.Replace(thisValue, string.Empty, count, startIndex);
 		}
 
-		public static string RemovePrefix(this string thisValue, string value, bool ignoreCase = true)
+		public static string RemovePrefix(this string thisValue, string value, bool ignoreCase = false)
 		{
 			thisValue = thisValue?.Trim();
 			if (string.IsNullOrEmpty(thisValue)) return thisValue;
@@ -860,7 +700,7 @@ namespace asm.Extensions
 			return thisValue;
 		}
 
-		public static string RemoveSuffix(this string thisValue, string value, bool ignoreCase = true)
+		public static string RemoveSuffix(this string thisValue, string value, bool ignoreCase = false)
 		{
 			thisValue = thisValue?.Trim();
 			if (string.IsNullOrEmpty(thisValue)) return thisValue;
@@ -1060,6 +900,7 @@ namespace asm.Extensions
 			return sb.ToString();
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Separator(this string thisValue, char separator)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1067,6 +908,7 @@ namespace asm.Extensions
 						: string.Concat(thisValue, separator);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Separator(this string thisValue, string separator)
 		{
 			return string.IsNullOrEmpty(thisValue) || string.IsNullOrEmpty(separator)
@@ -1074,25 +916,29 @@ namespace asm.Extensions
 						: string.Concat(thisValue, separator);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Prefix(this string thisValue, char prefix)
 		{
 			if (string.IsNullOrEmpty(thisValue) || thisValue[0] == prefix) return thisValue;
 			return string.Concat(prefix, thisValue);
 		}
 
-		public static string Prefix(this string thisValue, string prefix, bool ignoreCase = true)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static string Prefix(this string thisValue, string prefix, bool ignoreCase = false)
 		{
-			if (string.IsNullOrEmpty(thisValue) || string.IsNullOrEmpty(prefix) || StartsWithOrdinal(thisValue, prefix, ignoreCase)) return thisValue;
+			if (string.IsNullOrEmpty(thisValue) || string.IsNullOrEmpty(prefix) || StartsWith(thisValue, prefix, ignoreCase)) return thisValue;
 			return string.Concat(prefix, thisValue);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Suffix(this string thisValue, char suffix)
 		{
 			if (string.IsNullOrEmpty(thisValue) || thisValue[thisValue.Length - 1] == suffix) return thisValue;
 			return string.Concat(suffix, thisValue);
 		}
 
-		public static string Suffix(this string thisValue, string suffix, bool ignoreCase = true)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static string Suffix(this string thisValue, string suffix, bool ignoreCase = false)
 		{
 			if (string.IsNullOrEmpty(thisValue) || string.IsNullOrEmpty(suffix) || EndsWithOrdinal(thisValue, suffix, ignoreCase)) return thisValue;
 			return string.Concat(suffix, thisValue);
@@ -1104,7 +950,9 @@ namespace asm.Extensions
 			bool lq, rq;
 
 			if (string.IsNullOrEmpty(thisValue))
+			{
 				lq = rq = true;
+			}
 			else
 			{
 				lq = thisValue[0] != '\"';
@@ -1120,7 +968,9 @@ namespace asm.Extensions
 			bool lq, rq;
 
 			if (string.IsNullOrEmpty(thisValue))
+			{
 				lq = rq = true;
+			}
 			else
 			{
 				lq = thisValue[0] != '\'';
@@ -1131,6 +981,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string[] Split([NotNull] this string thisValue, [NotNull] params char[] separator)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1139,6 +990,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string[] Split([NotNull] this string thisValue, StringSplitOptions options, [NotNull] params char[] separator)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1147,6 +999,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string[] Split([NotNull] this string thisValue, int count, [NotNull] params char[] separator)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1155,6 +1008,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string[] Split([NotNull] this string thisValue, int count, StringSplitOptions options, [NotNull] params char[] separator)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1163,6 +1017,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string[] Split([NotNull] this string thisValue, [NotNull] params string[] separator)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1171,6 +1026,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string[] Split([NotNull] this string thisValue, StringSplitOptions options, [NotNull] params string[] separator)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1179,6 +1035,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string[] Split([NotNull] this string thisValue, int count, StringSplitOptions options, [NotNull] params string[] separator)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1187,9 +1044,11 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string[] Split([NotNull] this string thisValue, [NotNull] string pattern) { return Split(thisValue, pattern, RegexHelper.OPTIONS_I); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string[] Split([NotNull] this string thisValue, [NotNull] string pattern, RegexOptions options)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1197,6 +1056,7 @@ namespace asm.Extensions
 						: Regex.Split(thisValue, pattern, options);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int ByteSize(this string thisValue, Encoding encoding = null)
 		{
 			if (string.IsNullOrEmpty(thisValue)) return 0;
@@ -1204,6 +1064,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static byte[] ToBytes(this string thisValue, Encoding encoding = null)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1211,6 +1072,7 @@ namespace asm.Extensions
 						: (encoding ?? EncodingHelper.Default).GetBytes(thisValue);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string ToTitleCase(this string thisValue, CultureInfo culture = null)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1218,6 +1080,7 @@ namespace asm.Extensions
 						: (culture ?? CultureInfoHelper.Default).TextInfo.ToTitleCase(thisValue);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string UnQuote(this string thisValue)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1248,6 +1111,7 @@ namespace asm.Extensions
 			return strings;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Escape(this string thisValue)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1256,6 +1120,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Unescape([NotNull] this string thisValue)
 		{
 			return string.IsNullOrEmpty(thisValue)
@@ -1943,18 +1808,22 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static CharEnumerator Enumerate([NotNull] this string thisValue, char delimiter) { return new CharEnumerator(thisValue, delimiter); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static StringEnumerator Enumerate([NotNull] this string thisValue, [NotNull] string delimiter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
 		{
 			return new StringEnumerator(thisValue, delimiter, comparison);
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static CharLister ToList([NotNull] this string thisValue, char delimiter) { return new CharLister(thisValue, delimiter); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static StringLister ToList([NotNull] this string thisValue, [NotNull] string delimiter, StringComparison comparison = StringComparison.Ordinal)
 		{
 			return new StringLister(thisValue, delimiter, comparison);

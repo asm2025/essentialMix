@@ -63,7 +63,7 @@ namespace asm.Windows.Html
 					case Tag tag:
 						Status oldStatus = new Status(status);
 
-						if (tag.Name.IsSameOrdinal("label"))
+						if (tag.Name.IsSame("label"))
 						{
 							Attribute attr = tag.AttrList.Find("ID");
 							string id = attr != null ? attr.Value : string.Empty;

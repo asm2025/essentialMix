@@ -160,9 +160,9 @@ namespace asm.Core.Web.Http.ModelBinding
 
 					if (!string.IsNullOrEmpty(data))
 					{
-						if (data.StartsWithOrdinal("%7B") || data.StartsWithOrdinal("%5B"))
+						if (StringExtension.StartsWith(data, "%7B") || StringExtension.StartsWith(data, "%5B"))
 							HandleJson(data);
-						else if (data.StartsWithOrdinal("%3C%3Fxml"))
+						else if (StringExtension.StartsWith(data, "%3C%3Fxml"))
 							HandleXml(data);
 						else
 							values[key] = data;

@@ -44,6 +44,6 @@ namespace asm.Windows.Html
 			return sb.ToString();
 		}
 
-		public Attribute Find(string name) { return string.IsNullOrEmpty(name) ? null : this.FirstOrDefault(a => a.Name.IsSameOrdinal(name)); }
+		public Attribute Find(string name) { return string.IsNullOrEmpty(name) ? null : this.FirstOrDefault(a => a.Name.IsSame(name)); }
 	}
 }

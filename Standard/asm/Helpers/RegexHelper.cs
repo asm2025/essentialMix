@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using asm.Extensions;
 using JetBrains.Annotations;
@@ -31,6 +32,7 @@ namespace asm.Helpers
 		public static readonly Regex ALL_ASTERISKS = new Regex(@"^[*.\\]+$", OPTIONS);
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string FromWildCards(string pattern)
 		{
 			pattern = pattern?.Trim();
