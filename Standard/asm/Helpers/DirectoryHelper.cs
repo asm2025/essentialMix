@@ -135,24 +135,11 @@ namespace asm.Helpers
 
 			int len = sb.Length;
 			string path;
-			byte[] buffer = new byte[bufferLen];
 
 			do
 			{
 				sb.Length = len;
-				RNGRandomHelper.Default.GetNonZeroBytes(buffer);
-
-				int l = RandomHelper.Next(buffer.Length / 2, buffer.Length).Previous(3);
-				string name = buffer.ToBase64String(0, l);
-
-				foreach (char c in name)
-				{
-					if (c == '=' || c == '+' || !FileHelper.IsValidNameChar(c))
-						sb.Append(StringHelper.CHARS[RandomHelper.Default.Next(0, StringHelper.CHARS.Length - 1)]);
-					else
-						sb.Append(c);
-				}
-
+				sb.Append(StringHelper.RandomKey((byte)RandomHelper.Next(bufferLen / 2, bufferLen)));
 				path = sb.ToString();
 			}
 			while (PathHelper.Exists(path));

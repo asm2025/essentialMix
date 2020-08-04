@@ -506,8 +506,14 @@ namespace asm.Extensions
 				thisValue[startIndex + 14]);
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static string ToBase64String([NotNull] this byte[] thisValue) { return ToBase64String(thisValue, 0, -1); }
+		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static string ToBase64String([NotNull] this byte[] thisValue, int startIndex) { return ToBase64String(thisValue, startIndex, -1); }
+		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string ToBase64String([NotNull] this byte[] thisValue, int startIndex, int count)
 		{
 			thisValue.Length.ValidateRange(startIndex, ref count);

@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Cryptography;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
@@ -14,18 +15,19 @@ namespace asm.Helpers
 {
 	public static class StringHelper
 	{
-		public static readonly char[] CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".ToCharArray();
 		private static readonly Regex NUMERIC_STRING = new Regex(@"\A\s*\d*\.?\d+\s*\z", RegexHelper.OPTIONS_I);
-		
-		private static char[] InvalidKeyChar { get; }
-		private static char[] SpecialChar { get; }
-		private static char[] SafeSpecialChar { get; }
+		// memoization container for Random method
+		private static readonly ConcurrentDictionary<RandomStringType, IList<Func<char>>> __randomStringType = new ConcurrentDictionary<RandomStringType, IList<Func<char>>>();
+
+		private static readonly char[] __invalidKeyChar;
+		private static readonly char[] __specialChar;
+		private static readonly char[] __safeSpecialChar;
 
 		static StringHelper()
 		{
 			List<char> chars = new List<char>(Path.GetInvalidFileNameChars());
-			chars.AddRange(new[] { '.', ' ', '%', '&', '=', '#', '$', '-'});
-			InvalidKeyChar = chars.Distinct().ToArray();
+			chars.AddRange(new[] { '.', ' ', '%', '&', '=', '#', '$', '+', '-'});
+			__invalidKeyChar = chars.Distinct().ToArray();
 
 			StringBuilder sb = new StringBuilder();
 
@@ -37,41 +39,43 @@ namespace asm.Helpers
 				sb.Append(c);
 			}
 
-			SpecialChar = sb.ToString().ToCharArray();
+			__specialChar = sb.ToString().ToCharArray();
 
 			HashSet<char> invalid = new HashSet<char>(Path.GetInvalidFileNameChars()) { ' ' };
-			SafeSpecialChar = SpecialChar.Where(c => !invalid.Contains(c)).ToArray();
+			__safeSpecialChar = __specialChar.Where(c => !invalid.Contains(c)).ToArray();
 		}
 
-		public static string ToKey(string value) { return WebUtility.UrlEncode(value.Replace('_', InvalidKeyChar)); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static string ToKey(string value) { return WebUtility.UrlEncode(value.Replace('_', __invalidKeyChar)); }
 
+		[NotNull]
 		public static string Random(int count, RandomStringType type = RandomStringType.Any)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
 			if (count == 0) return string.Empty;
 
-			List<Func<char>> types = new List<Func<char>>();
-			if (type.HasFlag(RandomStringType.SmallLetters)) types.Add(RandomSmallLetter);
-			if (type.HasFlag(RandomStringType.CapitalLetters)) types.Add(RandomCapitalLetter);
-			if (type.HasFlag(RandomStringType.Numbers)) types.Add(RandomNumber);
-
-			if (type.HasFlag(RandomStringType.SpecialCharacters))
+			IList<Func<char>> types = __randomStringType.GetOrAdd(type, t =>
 			{
-				if (type.HasFlag(RandomStringType.SafeCharacters))
-					types.Add(RandomSafeSpecialCharacter);
+				IList<Func<char>> list = new List<Func<char>>();
+				if (t.HasFlag(RandomStringType.SmallLetters)) list.Add(RandomSmallLetter);
+				if (t.HasFlag(RandomStringType.CapitalLetters)) list.Add(RandomCapitalLetter);
+				if (t.HasFlag(RandomStringType.Numbers)) list.Add(RandomNumber);
+				if (!t.HasFlag(RandomStringType.SpecialCharacters)) return list;
+
+				if (t.HasFlag(RandomStringType.SafeCharacters))
+					list.Add(RandomSafeSpecialCharacter);
 				else
-					types.Add(RandomSpecialCharacter);
-			}
+					list.Add(RandomSpecialCharacter);
 
-			if (types.Count == 0) return null;
+				return list;
+			});
 
-			int n = types.Count - 1;
+			if (types.Count == 0) throw new ArgumentOutOfRangeException(nameof(type));
+
 			StringBuilder sb = new StringBuilder(count);
 
-			for (int i = 0; i < count; i++)
-			{
-				sb.Append(types[RandomHelper.Default.Next(0, n)].Invoke());
-			}
+			for (int i = 0; i < count; i++) 
+				sb.Append(types.PickRandom()());
 
 			return sb.ToString();
 		}
@@ -81,28 +85,50 @@ namespace asm.Helpers
 		{
 			if (size == 0) size = (byte)RandomHelper.Next(1, byte.MaxValue);
 
-			byte[] data = new byte[size];
-			
-			using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider())
-				crypto.GetNonZeroBytes(data);
+			char start = 'A', end = 'Z';
+			StringBuilder sb = new StringBuilder(size);
+			sb.Append((char)RNGRandomHelper.Next(start, end));
 
-			StringBuilder result = new StringBuilder(size);
+			for (int i = 0; i < size - 1; i++)
+			{
+				int range = RNGRandomHelper.Next(0, 2);
 
-			foreach (byte b in data)
-				result.Append(CHARS[b % CHARS.Length]);
+				switch (range)
+				{
+					case 0:
+						start = 'A';
+						end = 'Z';
+						break;
+					case 1:
+						start = 'a';
+						end = 'z';
+						break;
+					default:
+						start = '0';
+						end = '9';
+						break;
+				}
 
-			return result.ToString();
+				sb.Append((char)RNGRandomHelper.Next(start, end));
+			}
+
+			return sb.ToString();
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static char RandomSmallLetter() { return (char)RandomHelper.Default.Next('a', 'z'); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static char RandomCapitalLetter() { return (char)RandomHelper.Default.Next('A', 'Z'); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static char RandomNumber() { return (char)RandomHelper.Default.Next('0', '9'); }
 
-		public static char RandomSpecialCharacter() { return SpecialChar[RandomHelper.Default.Next(SpecialChar.Length - 1)]; }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static char RandomSpecialCharacter() { return __specialChar[RandomHelper.Default.Next(__specialChar.Length - 1)]; }
 
-		public static char RandomSafeSpecialCharacter() { return SafeSpecialChar[RandomHelper.Default.Next(SpecialChar.Length - 1)]; }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static char RandomSafeSpecialCharacter() { return __safeSpecialChar[RandomHelper.Default.Next(__specialChar.Length - 1)]; }
 
 		public static string[][] SplitGroups(string value) { return SplitGroups(value, ','); }
 
@@ -190,34 +216,51 @@ namespace asm.Helpers
 			return values.ToArray();
 		}
 		
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsNumeric(string value) { return !string.IsNullOrEmpty(value) && NUMERIC_STRING.IsMatch(value); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int ToBase64Size(string value, Encoding encoding = null) { return ByteHelper.ToBase64Size(value.ByteSize(encoding)); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int FromBase64Size(string value, Encoding encoding = null) { return ByteHelper.FromBase64Size(value.ByteSize(encoding)); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string FirstNotNullOrEmptyOrDefault([NotNull] params string[] values) { return values.FirstNotNullOrEmptyOrDefault(); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string LastNotNullOrEmptyOrDefault([NotNull] params string[] values) { return values.LastNotNullOrEmptyOrDefault(); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string FirstNotNullOrEmpty([NotNull] params string[] values) { return values.FirstNotNullOrEmpty(); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string LastNotNullOrEmpty([NotNull] params string[] values) { return values.LastNotNullOrEmpty(); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string SingleNotNullOrEmptyOrDefault([NotNull] params string[] values) { return values.SingleNotNullOrEmptyOrDefault(); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string FirstNotNullOrWhiteSpaceOrDefault([NotNull] params string[] values) { return values.FirstNotNullOrWhiteSpaceOrDefault(); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string LastNotNullOrWhiteSpaceOrDefault([NotNull] params string[] values) { return values.LastNotNullOrWhiteSpaceOrDefault(); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string FirstNotNullOrWhiteSpace([NotNull] params string[] values) { return values.FirstNotNullOrWhiteSpace(); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string LastNotNullOrWhiteSpace([NotNull] params string[] values) { return values.LastNotNullOrWhiteSpace(); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string SingleNotNullOrWhiteSpaceOrDefault([NotNull] params string[] values) { return values.SingleNotNullOrWhiteSpaceOrDefault(); }
 		
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<string> SkipNull([NotNull] params string[] values) { return values.SkipNull(); }
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<string> SkipNullOrEmpty([NotNull] params string[] values) { return values.SkipNullOrEmpty(); }
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<string> SkipNullOrEmptyTrim([NotNull] params string[] values) { return values.SkipNullOrEmptyTrim(); }
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<string> SkipNullOrWhitespace([NotNull] params string[] values) { return values.SkipNullOrWhitespace(); }
 
 		/// <summary>
@@ -306,6 +349,20 @@ namespace asm.Helpers
 			}
 
 			return rows[previous, second.Length];
+		}
+
+		public static string Min(string first, string second)
+		{
+			return string.CompareOrdinal(first, second) <= 0
+						? first
+						: second;
+		}
+
+		public static string Max(string first, string second)
+		{
+			return string.CompareOrdinal(first, second) >= 0
+						? first
+						: second;
 		}
 	}
 }
