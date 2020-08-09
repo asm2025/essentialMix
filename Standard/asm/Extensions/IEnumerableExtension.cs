@@ -7,6 +7,7 @@ using System.Text;
 using JetBrains.Annotations;
 using asm.Collections;
 using asm.Helpers;
+using asm.Patterns.Pagination;
 using asm.Threading;
 
 namespace asm.Extensions
@@ -65,8 +66,8 @@ namespace asm.Extensions
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<T> CastTo<T>([NotNull] this IEnumerable thisValue)
 		{
 			Type type = typeof(T);
@@ -74,8 +75,8 @@ namespace asm.Extensions
 			return e ?? thisValue.Cast<object>().Select(source => (T)Convert.ChangeType(source, type));
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<T> CastTo<T>([NotNull] this IEnumerable thisValue, IFormatProvider provider)
 		{
 			Type type = typeof(T);
@@ -83,8 +84,8 @@ namespace asm.Extensions
 			return e ?? thisValue.Cast<object>().Select(source => (T)Convert.ChangeType(source, type, provider));
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<TTarget> CastTo<TSource, TTarget>([NotNull] this IEnumerable<TSource> thisValue)
 		{
 			Type type = typeof(TTarget);
@@ -92,8 +93,8 @@ namespace asm.Extensions
 			return e ?? thisValue.Select(source => (TTarget)Convert.ChangeType(source, type));
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<TTarget> CastTo<TSource, TTarget>([NotNull] this IEnumerable<TSource> thisValue, IFormatProvider provider)
 		{
 			Type type = typeof(TTarget);
@@ -101,44 +102,44 @@ namespace asm.Extensions
 			return e ?? thisValue.Select(source => (TTarget)Convert.ChangeType(source, type, provider));
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerator<T> CastEnumerator<T>([NotNull] this IEnumerable thisValue)
 		{
 			IEnumerable<T> e = thisValue as IEnumerable<T>;
 			return new Enumerator<T>(e ?? thisValue.Cast<T>());
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerator<TTarget> CastEnumerator<TSource, TTarget>([NotNull] this IEnumerable<TSource> thisValue)
 		{
 			IEnumerable<TTarget> e = thisValue as IEnumerable<TTarget>;
 			return new Enumerator<TTarget>(e ?? thisValue.Cast<TTarget>());
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IReadOnlyList<T> CastLister<T>([NotNull] this IEnumerable thisValue)
 		{
 			IEnumerable<T> e = thisValue as IEnumerable<T>;
 			return new Lister<T>(e ?? thisValue.Cast<T>());
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IReadOnlyList<TTarget> CastLister<TSource, TTarget>([NotNull] this IEnumerable<TSource> thisValue)
 		{
 			IEnumerable<TTarget> e = thisValue as IEnumerable<TTarget>;
 			return new Lister<TTarget>(e ?? thisValue.Cast<TTarget>());
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static Enumerator Enumerate([NotNull] this IEnumerable thisValue) { return new Enumerator(thisValue); }
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static Enumerator<T> Enumerate<T>([NotNull] this IEnumerable<T> thisValue) { return new Enumerator<T>(thisValue); }
 
 		[NotNull]
@@ -2016,6 +2017,16 @@ namespace asm.Extensions
 			foreach (T _ in thisValue)
 			{
 			}
+		}
+
+		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static IEnumerable<T> Paginate<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] IPagination settings)
+		{
+			if (settings.PageSize < 1) settings.PageSize = Pagination.PAGE_SIZE;
+			if (settings.Page < 1) settings.Page = 1;
+			int start = (settings.Page - 1) * settings.PageSize;
+			return thisValue.Skip(start).Take(settings.PageSize);
 		}
 	}
 }

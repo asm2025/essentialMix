@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using asm.Linq;
 using asm.Patterns.Pagination;
@@ -22,6 +23,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IQueryable<T> Paginate<T>([NotNull] this IQueryable<T> thisValue, [NotNull] IPagination settings)
 		{
 			if (settings.PageSize < 1) settings.PageSize = Pagination.PAGE_SIZE;
