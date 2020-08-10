@@ -22,7 +22,7 @@ namespace asm.Core.Swagger.Extensions
 			OpenApiInfo info = new OpenApiInfo
 			{
 				Title = configuration.GetValue(environment?.ApplicationName, "swagger:title", "title"),
-				Description = configuration.GetValue<string>(null, "swagger:description", "description"),
+				Description = configuration.GetValue(string.Empty, "swagger:description", "description")?.Replace("\n", "<br />"),
 				Version = configuration.GetValue("swagger:version", "v1"),
 				Contact = new OpenApiContact
 				{
