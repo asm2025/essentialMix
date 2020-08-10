@@ -19,7 +19,7 @@ namespace asm.Patterns.DateTime
 		public override string ToString() { return $"{Start:d} - {End:d}"; }
 
 		/// <inheritdoc />
-		public int CompareTo(object obj)
+		int IComparable.CompareTo(object obj)
 		{
 			return !(obj is DateTimeRange r)
 						? -1

@@ -188,5 +188,17 @@ namespace asm.Helpers
 			DateTime date = new DateTime(year, month, 1);
 			return RNGRandomHelper.Next(1, date.DaysOfMonth());
 		}
+
+		public static DateTimeRange GetRange(DateTime? fromDate, DateTime? toDate)
+		{
+			bool hasStart = fromDate.HasValue && fromDate > DateTime.MinValue && fromDate < DateTime.MaxValue;
+			bool hasEnd = toDate.HasValue && toDate > DateTime.MinValue && toDate < DateTime.MaxValue;
+			DateTime end = toDate ?? DateTime.Today;
+			if (end == DateTime.MinValue || end == DateTime.MaxValue) end = DateTime.Today;
+
+			DateTime start = fromDate ?? end;
+			if (!hasStart && !hasEnd || start == DateTime.MinValue || start == DateTime.MaxValue) start = (hasEnd ? end : DateTime.Today).PreviousMonth().Start;
+			return new DateTimeRange(start, end);
+		}
 	}
 }
