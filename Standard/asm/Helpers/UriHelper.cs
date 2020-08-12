@@ -440,15 +440,15 @@ namespace asm.Helpers
 			return request.GetStringAsync(settings, token);
 		}
 
-		public static Stream GetFile([NotNull] string url, [NotNull] string fileName, [NotNull] IODownloadFileWebRequestSettings settings)
+		public static FileStream DownloadFile([NotNull] string url, [NotNull] string fileName, [NotNull] IODownloadFileWebRequestSettings settings)
 		{
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
 			Uri uri = ToUri(url, UriKind.Absolute) ?? throw new ArgumentException("Url is invalid.", nameof(url));
-			return GetFile(uri, fileName, settings);
+			return DownloadFile(uri, fileName, settings);
 		}
 
-		public static Stream GetFile([NotNull] Uri url, string fileName, [NotNull] IODownloadFileWebRequestSettings settings)
+		public static FileStream DownloadFile([NotNull] Uri url, string fileName, [NotNull] IODownloadFileWebRequestSettings settings)
 		{
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
 
@@ -486,18 +486,23 @@ namespace asm.Helpers
 				}
 
 				if (len < 0.0d) progress = null;
-				fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+
+				FileMode mode = settings.Overwrite
+									? FileMode.Create
+									: FileMode.CreateNew;
+				fileStream = new FileStream(fileName, mode, FileAccess.Write);
 
 				int read;
 				byte[] buffer = new byte[settings.BufferSize];
 				responseStream = response.GetResponseStream() ?? throw new IOException("Could not get response stream.");
-
+				
 				while ((read = responseStream.Read(buffer)) > 0)
 				{
 					received += read;
 					fileStream.Write(buffer, 0, read);
-					progress?.Report((int)(received / len * 100.0d));
-					Thread.Sleep(1);
+					if (progress == null) continue;
+					progress.Report((int)(received / len * 100.0d));
+					Thread.Sleep(0);
 				}
 
 				fileStream.Position = 0;
@@ -520,16 +525,16 @@ namespace asm.Helpers
 			return fileStream;
 		}
 
-		public static async Task<Stream> GetFileAsync([NotNull] string url, [NotNull] string fileName, [NotNull] IODownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<FileStream> DownloadFileAsync([NotNull] string url, [NotNull] string fileName, [NotNull] IODownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
 			token.ThrowIfCancellationRequested();
 			Uri uri = ToUri(url, UriKind.Absolute) ?? throw new ArgumentException("Url is invalid.", nameof(url));
-			return await GetFileAsync(uri, fileName, settings, token).ConfigureAwait();
+			return await DownloadFileAsync(uri, fileName, settings, token).ConfigureAwait();
 		}
 
-		public static async Task<Stream> GetFileAsync([NotNull] Uri url, string fileName, [NotNull] IODownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<FileStream> DownloadFileAsync([NotNull] Uri url, string fileName, [NotNull] IODownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
@@ -569,7 +574,11 @@ namespace asm.Helpers
 				}
 
 				if (len < 0.0d) progress = null;
-				fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+
+				FileMode mode = settings.Overwrite
+									? FileMode.Create
+									: FileMode.CreateNew;
+				fileStream = new FileStream(fileName, mode, FileAccess.Write);
 
 				int read;
 				byte[] buffer = new byte[settings.BufferSize];
@@ -579,8 +588,9 @@ namespace asm.Helpers
 				{
 					received += read;
 					await fileStream.WriteAsync(buffer, 0, read, token);
-					progress?.Report((int)(received / len * 100.0d));
-					Thread.Sleep(1);
+					if (progress == null) continue;
+					progress.Report((int)(received / len * 100.0d));
+					Thread.Sleep(0);
 				}
 
 				token.ThrowIfCancellationRequested();

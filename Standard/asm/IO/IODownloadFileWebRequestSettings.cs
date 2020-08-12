@@ -18,6 +18,7 @@ namespace asm.IO
 		{
 			if (!(settings is IODownloadFileWebRequestSettings ioDownloadFileWebRequestSettings)) return;
 			Method = ioDownloadFileWebRequestSettings.Method;
+			Overwrite = ioDownloadFileWebRequestSettings.Overwrite;
 		}
 
 		public FileWebRequestMethod Method
@@ -36,5 +37,7 @@ namespace asm.IO
 				}
 			}
 		}
+
+		public bool Overwrite { get; set; }
 	}
 }

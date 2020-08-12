@@ -767,7 +767,7 @@ work with {HEAVY} items.".Yellow();
 				}
 
 				Console.WriteLine("Test find a random value...".BrightYellow());
-				int x = values.PickRandom();
+				int x = IListExtension.PickRandom(values);
 				SinglyLinkedListNode<int> node = list.Find(x);
 
 				if (node == null)
@@ -776,7 +776,7 @@ work with {HEAVY} items.".Yellow();
 					return;
 				}
 
-				int value = values.PickRandom();
+				int value = IListExtension.PickRandom(values);
 				Console.WriteLine($"Found. Now will add {value.ToString().BrightCyan().Underline()} after {x.ToString().BrightCyan().Underline()}...");
 				list.AddAfter(node, value);
 				Console.WriteLine("Node's next: " + node.Next.Value);
@@ -886,7 +886,7 @@ work with {HEAVY} items.".Yellow();
 				}
 
 				Console.WriteLine("Test find a random value...".BrightYellow());
-				int x = values.PickRandom();
+				int x = IListExtension.PickRandom(values);
 				LinkedListNode<int> node = list.Find(x);
 
 				if (node == null)
@@ -895,7 +895,7 @@ work with {HEAVY} items.".Yellow();
 					return;
 				}
 
-				int value = values.PickRandom();
+				int value = IListExtension.PickRandom(values);
 				Console.WriteLine($"Found. Now will add {value.ToString().BrightCyan().Underline()} after {x.ToString().BrightCyan().Underline()}...");
 				list.AddAfter(node, value);
 				Console.WriteLine("Node's next: " + node.Next?.Value);
@@ -1350,7 +1350,7 @@ work with {HEAVY} items.".Yellow();
 				tree.PrintWithProps();
 
 				Console.WriteLine("Test finding a random value...");
-				int value = values.PickRandom();
+				int value = IListExtension.PickRandom(values);
 				Console.WriteLine($"will look for {value.ToString().BrightCyan().Underline()}.");
 
 				if (!tree.Contains(value))
@@ -1380,7 +1380,7 @@ work with {HEAVY} items.".Yellow();
 
 				Console.WriteLine();
 				Console.WriteLine("Test removing a random value...");
-				value = values.PickRandom();
+				value = IListExtension.PickRandom(values);
 				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
 
 				if (!tree.Remove(value))
@@ -1440,7 +1440,7 @@ work with {HEAVY} items.".Yellow();
 				tree.PrintWithProps();
 
 				Console.WriteLine("Test removing...".BrightRed());
-				int value = values.PickRandom();
+				int value = IListExtension.PickRandom(values);
 				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
 
 				if (!tree.Remove(value))
@@ -1602,7 +1602,7 @@ work with {HEAVY} items.".Yellow();
 				tree.PrintWithProps();
 
 				Console.WriteLine("Test finding a random value...");
-				int value = values.PickRandom();
+				int value = IListExtension.PickRandom(values);
 				Console.WriteLine($"will look for {value.ToString().BrightCyan().Underline()}.");
 
 				if (!tree.Contains(value))
@@ -1631,7 +1631,7 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine($"Found {found} of {values.Length} items.");
 
 				Console.WriteLine("Test removing...".BrightRed());
-				value = values.PickRandom();
+				value = IListExtension.PickRandom(values);
 				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
 
 				if (!tree.Remove(value))
@@ -1727,7 +1727,7 @@ work with {HEAVY} items.".Yellow();
 
 				Console.WriteLine("Test finding a random value...");
 
-				int value = values.PickRandom();
+				int value = IListExtension.PickRandom(values);
 				Console.WriteLine($"will look for {value.ToString().BrightCyan().Underline()}.");
 
 				if (!tree.Contains(value))
@@ -1757,7 +1757,7 @@ work with {HEAVY} items.".Yellow();
 
 				Console.WriteLine();
 				Console.WriteLine("Test removing...".BrightRed());
-				value = values.PickRandom();
+				value = IListExtension.PickRandom(values);
 				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
 
 				if (!tree.Remove(value))
@@ -1838,7 +1838,7 @@ work with {HEAVY} items.".Yellow();
 				tree.PrintWithProps();
 
 				Console.WriteLine("Test removing...".BrightRed());
-				int value = array.PickRandom();
+				int value = IListExtension.PickRandom(array);
 				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
 
 				if (!tree.Remove(value))
@@ -2570,7 +2570,7 @@ work with {HEAVY} items.".Yellow();
 
 				for (int i = 0; i < threshold; i++)
 				{
-					int x = values.PickRandom(), y = values.PickRandom();
+					int x = IListExtension.PickRandom(values), y = IListExtension.PickRandom(values);
 					Console.WriteLine($"Find {x} and {y} subsets gives {disjointSet.Find(x)} and {disjointSet.Find(y)} respectively.");
 					bool connected = disjointSet.IsConnected(x, y);
 					Console.WriteLine($"Are they connected? {connected.ToYesNo()}");
@@ -4194,7 +4194,7 @@ This may cause cycles but will make it much more fun for finding shortest paths.
 					if (threshold > 0 && __fakeGenerator.Value.Random.Bool())
 					{
 						queue.Enqueue(from);
-						queue.Enqueue(values.PickRandom());
+						queue.Enqueue(IListExtension.PickRandom(values));
 						threshold--;
 					}
 
@@ -4292,7 +4292,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 				if (graph is WeightedGraphList<char, int> wGraph)
 				{
-					char to = values.PickRandom();
+					char to = IListExtension.PickRandom(values);
 					ConsoleKeyInfo response;
 
 					do

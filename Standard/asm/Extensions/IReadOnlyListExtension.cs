@@ -15,8 +15,11 @@ namespace asm.Extensions
 			return thisValue.Count == 0 ? Type.EmptyTypes : thisValue.Select(item => item.AsType()).ToArray();
 		}
 
-		public static T GetRandom<T>([NotNull] this IReadOnlyList<T> thisValue)
+		public static T PickRandom<T>([NotNull] this IReadOnlyList<T> thisValue, int startIndex = 0, int count = -1)
 		{
+			thisValue.Count.ValidateRange(startIndex, ref count);
+			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
+
 			int max;
 			int n;
 
@@ -24,17 +27,17 @@ namespace asm.Extensions
 			{
 				lock (collection.SyncRoot)
 				{
-					max = thisValue.Count - 1;
+					max = count - 1;
 					if (max < 0) throw new InvalidOperationException("List is empty.");
-					n = RNGRandomHelper.Next(0, max);
+					n = RNGRandomHelper.Next(startIndex, max);
 					return thisValue[n];
 				}
 			}
 
 			lock(thisValue)
 			{
-				max = thisValue.Count - 1;
-				n = RNGRandomHelper.Next(0, max);
+				max = count - 1;
+				n = RNGRandomHelper.Next(startIndex, max);
 				return thisValue[n];
 			}
 		}
