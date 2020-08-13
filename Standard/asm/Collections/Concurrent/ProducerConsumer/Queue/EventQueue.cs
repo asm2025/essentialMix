@@ -38,7 +38,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 
 		public override int Count => _queue.Count;
 
-		public override bool IsBusy => _countdown.CurrentCount > 1;
+		public override bool IsBusy => _countdown != null && _countdown.CurrentCount > 1;
 
 		protected override void EnqueueInternal(T item)
 		{

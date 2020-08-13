@@ -455,7 +455,9 @@ work with {HEAVY} items.".Yellow();
 						{
 							queue.Enqueue(value);
 						}
-
+						
+						queue.Complete();
+						
 						/*
 						 * when the queue is being disposed, it will wait until the queued items are processed.
 						 * this works when queue.WaitOnDispose is true , which it is by default.

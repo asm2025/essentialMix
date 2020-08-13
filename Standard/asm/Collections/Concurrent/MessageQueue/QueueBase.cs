@@ -84,7 +84,7 @@ namespace asm.Collections.Concurrent.MessageQueue
 
 		public CancellationToken Token { get; }
 
-		public bool IsBusy => !_manualResetEventSlim.IsSet;
+		public bool IsBusy => _manualResetEventSlim != null && !_manualResetEventSlim.IsSet;
 
 		public bool CompleteMarked => _queue.IsAddingCompleted;
 

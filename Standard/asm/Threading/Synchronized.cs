@@ -138,7 +138,7 @@ namespace asm.Threading
 		[NotNull]
 		private Func<T, bool> WorkerRoutine { get; }
 
-		private bool IsBusyInternal => _countdown.CurrentCount > 1;
+		private bool IsBusyInternal => _countdown != null && _countdown.CurrentCount > 1;
 
 		public void Start()
 		{
