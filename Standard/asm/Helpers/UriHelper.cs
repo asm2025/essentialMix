@@ -54,6 +54,12 @@ namespace asm.Helpers
 			{"Chrome 40.0.2214.93", "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.93 Safari/537.36"}
 		};
 
+		static UriHelper()
+		{
+			//Windows 7 fix
+			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+		}
+
 		public static Uri Combine([NotNull] Uri baseUri, string path) { return Combine(baseUri.ToString(), path); }
 		public static Uri Combine([NotNull] Uri baseUri, [NotNull] Uri path) { return Combine(baseUri.ToString(), path.ToString()); }
 		public static Uri Combine(string baseUri, [NotNull] Uri path) { return Combine(baseUri, path.ToString()); }
@@ -150,33 +156,25 @@ namespace asm.Helpers
 			return uri == null ? default(T) : BasicHttpWebRequest<T>(uri, settings);
 		}
 
-		public static WebRequest BasicHttpWebRequest([NotNull] Uri url, IOHttpRequestSettings settings) { return BasicHttpWebRequest<HttpWebRequest>(url, settings); }
+		[NotNull]
+		public static WebRequest BasicHttpWebRequest([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings) { return BasicHttpWebRequest<HttpWebRequest>(url, settings); }
 
-		public static T BasicHttpWebRequest<T>([NotNull] Uri url, IOHttpRequestSettings settings)
+		[NotNull]
+		public static T BasicHttpWebRequest<T>([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings)
 			where T : HttpWebRequest
 		{
-			T request;
-
-			try
-			{
-				request = (T)WebRequest.Create(url);
-				request.AllowAutoRedirect = settings.AllowAutoRedirect;
-				request.AllowWriteStreamBuffering = settings.AllowWriteStreamBuffering;
-				request.Timeout = settings.Timeout;
-				if (settings.Accept.Count > 0) request.Accept = settings.Accept.FirstOrDefault()?.MediaType;
-				request.CachePolicy = settings.CachePolicy;
-				request.UserAgent = settings.UserAgent;
-				request.UseDefaultCredentials = settings.Credentials == null;
-				request.Credentials = settings.Credentials ?? CredentialCache.DefaultNetworkCredentials;
-				request.Method = settings.Method.ToWebMethod();
-				request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
-				if (settings.Proxy != null) request.Proxy = settings.Proxy;
-			}
-			catch
-			{
-				request = null;
-			}
-
+			T request = (T)WebRequest.Create(url);
+			request.AllowAutoRedirect = settings.AllowAutoRedirect;
+			request.AllowWriteStreamBuffering = settings.AllowWriteStreamBuffering;
+			request.Timeout = settings.Timeout;
+			if (settings.Accept.Count > 0) request.Accept = settings.Accept.FirstOrDefault()?.MediaType;
+			request.CachePolicy = settings.CachePolicy;
+			request.UserAgent = settings.UserAgent;
+			request.UseDefaultCredentials = settings.Credentials == null;
+			request.Credentials = settings.Credentials ?? CredentialCache.DefaultNetworkCredentials;
+			request.Method = settings.Method.ToWebMethod();
+			request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+			if (settings.Proxy != null) request.Proxy = settings.Proxy;
 			return request;
 		}
 
@@ -186,27 +184,18 @@ namespace asm.Helpers
 			return uri == null ? null : BasicFtpRequest(uri, settings);
 		}
 
-		public static FtpWebRequest BasicFtpRequest([NotNull] Uri url, IOFTPRequestSettings settings)
+		[NotNull]
+		public static FtpWebRequest BasicFtpRequest([NotNull] Uri url, [NotNull] IOFTPRequestSettings settings)
 		{
-			FtpWebRequest request;
-
-			try
-			{
-				request = (FtpWebRequest)WebRequest.Create(url);
-				request.Timeout = settings.Timeout;
-				request.UsePassive = settings.UsePassive;
-				request.UseBinary = settings.UseBinary;
-				request.Method = settings.Method.ToWebMethod();
-				request.CachePolicy = settings.CachePolicy;
-				request.UseDefaultCredentials = settings.Credentials == null;
-				request.Credentials = settings.Credentials ?? CredentialCache.DefaultNetworkCredentials;
-				if (settings.Proxy != null) request.Proxy = settings.Proxy;
-			}
-			catch
-			{
-				request = null;
-			}
-
+			FtpWebRequest request = (FtpWebRequest)WebRequest.Create(url);
+			request.Timeout = settings.Timeout;
+			request.UsePassive = settings.UsePassive;
+			request.UseBinary = settings.UseBinary;
+			request.Method = settings.Method.ToWebMethod();
+			request.CachePolicy = settings.CachePolicy;
+			request.UseDefaultCredentials = settings.Credentials == null;
+			request.Credentials = settings.Credentials ?? CredentialCache.DefaultNetworkCredentials;
+			if (settings.Proxy != null) request.Proxy = settings.Proxy;
 			return request;
 		}
 
@@ -216,32 +205,24 @@ namespace asm.Helpers
 			return uri == null ? null : BasicFileWebRequest(uri, settings);
 		}
 
-		public static FileWebRequest BasicFileWebRequest([NotNull] Uri url, IOFileWebRequestSettings settings)
+		[NotNull]
+		public static FileWebRequest BasicFileWebRequest([NotNull] Uri url, [NotNull] IOFileWebRequestSettings settings)
 		{
-			FileWebRequest request;
-			
-			try
-			{
-				request = (FileWebRequest)WebRequest.Create(url);
-				request.Timeout = settings.Timeout;
-				request.CachePolicy = settings.CachePolicy;
-				request.UseDefaultCredentials = settings.Credentials == null;
-				request.Credentials = settings.Credentials ?? CredentialCache.DefaultNetworkCredentials;
-				if (settings.Proxy != null) request.Proxy = settings.Proxy;
+			FileWebRequest request = (FileWebRequest)WebRequest.Create(url);
+			request.Timeout = settings.Timeout;
+			request.CachePolicy = settings.CachePolicy;
+			request.UseDefaultCredentials = settings.Credentials == null;
+			request.Credentials = settings.Credentials ?? CredentialCache.DefaultNetworkCredentials;
+			if (settings.Proxy != null) request.Proxy = settings.Proxy;
 
-				switch (settings)
-				{
-					case IODownloadFileWebRequestSettings dnSettings:
-						request.Method = dnSettings.Method.ToWebMethod();
-						break;
-					case IOUploadFileWebRequestSettings upSettings:
-						request.Method = upSettings.Method.ToWebMethod();
-						break;
-				}
-			}
-			catch
+			switch (settings)
 			{
-				request = null;
+				case IODownloadFileWebRequestSettings dnSettings:
+					request.Method = dnSettings.Method.ToWebMethod();
+					break;
+				case IOUploadFileWebRequestSettings upSettings:
+					request.Method = upSettings.Method.ToWebMethod();
+					break;
 			}
 
 			return request;
@@ -307,9 +288,9 @@ namespace asm.Helpers
 			return request.GetTitle(settings);
 		}
 
-		public static string GetTitle([NotNull] Uri url, IOHttpRequestSettings settings)
+		public static string GetTitle([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings)
 		{
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = BasicHttpWebRequest(url, settings);
 			return request.GetTitle(settings);
 		}
 
@@ -323,10 +304,10 @@ namespace asm.Helpers
 		}
 
 		[NotNull]
-		public static Task<string> GetTitleAsync([NotNull] Uri url, IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
+		public static Task<string> GetTitleAsync([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = BasicHttpWebRequest(url, settings);
 			return request.GetTitleAsync(settings, token);
 		}
 
@@ -337,9 +318,9 @@ namespace asm.Helpers
 			return request.Peek(settings);
 		}
 
-		public static (string Title, string Buffer) Peek([NotNull] Uri url, IOHttpRequestSettings settings)
+		public static (string Title, string Buffer) Peek([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings)
 		{
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = BasicHttpWebRequest(url, settings);
 			return request.Peek(settings);
 		}
 
@@ -353,10 +334,10 @@ namespace asm.Helpers
 		}
 
 		[NotNull]
-		public static Task<(string Title, string Buffer)> PeekAsync([NotNull] Uri url, IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
+		public static Task<(string Title, string Buffer)> PeekAsync([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = BasicHttpWebRequest(url, settings);
 			return request.PeekAsync(settings, token);
 		}
 
@@ -372,12 +353,12 @@ namespace asm.Helpers
 		}
 
 		[NotNull]
-		public static UrlSearchResult Search([NotNull] Uri url, UrlSearchFlags flags, IOHttpRequestSettings settings) { return Search(url, null, flags, settings); }
+		public static UrlSearchResult Search([NotNull] Uri url, UrlSearchFlags flags, [NotNull] IOHttpRequestSettings settings) { return Search(url, null, flags, settings); }
 
 		[NotNull]
-		public static UrlSearchResult Search([NotNull] Uri url, string searchFor, UrlSearchFlags flags, IOHttpRequestSettings settings)
+		public static UrlSearchResult Search([NotNull] Uri url, string searchFor, UrlSearchFlags flags, [NotNull] IOHttpRequestSettings settings)
 		{
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = BasicHttpWebRequest(url, settings);
 			return request.Search(searchFor, flags, settings);
 		}
 
@@ -397,16 +378,16 @@ namespace asm.Helpers
 		}
 
 		[NotNull]
-		public static Task<UrlSearchResult> SearchAsync([NotNull] Uri url, UrlSearchFlags flags, IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
+		public static Task<UrlSearchResult> SearchAsync([NotNull] Uri url, UrlSearchFlags flags, [NotNull] IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			return SearchAsync(url, null, flags, settings, token);
 		}
 
 		[NotNull]
-		public static Task<UrlSearchResult> SearchAsync([NotNull] Uri url, string searchFor, UrlSearchFlags flags, IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
+		public static Task<UrlSearchResult> SearchAsync([NotNull] Uri url, string searchFor, UrlSearchFlags flags, [NotNull] IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = BasicHttpWebRequest(url, settings);
 			return request.SearchAsync(searchFor, flags, settings, token);
 		}
 
@@ -417,9 +398,9 @@ namespace asm.Helpers
 			return request.GetString(settings);
 		}
 
-		public static string GetString([NotNull] Uri url, IOHttpRequestSettings settings)
+		public static string GetString([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings)
 		{
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = BasicHttpWebRequest(url, settings);
 			return request.GetString(settings);
 		}
 
@@ -433,42 +414,49 @@ namespace asm.Helpers
 		}
 
 		[NotNull]
-		public static Task<string> GetStringAsync([NotNull] Uri url, IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
+		public static Task<string> GetStringAsync([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = BasicHttpWebRequest(url, settings);
 			return request.GetStringAsync(settings, token);
 		}
 
-		public static FileStream DownloadFile([NotNull] string url, [NotNull] string fileName, [NotNull] IODownloadFileWebRequestSettings settings)
+		public static FileStream DownloadFile([NotNull] string url, [NotNull] string fileName, [NotNull] IOHttpDownloadFileWebRequestSettings settings)
 		{
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
-			Uri uri = ToUri(url, UriKind.Absolute) ?? throw new ArgumentException("Url is invalid.", nameof(url));
+			Uri uri = ToUri(url, UriKind.Absolute);
 			return DownloadFile(uri, fileName, settings);
 		}
 
-		public static FileStream DownloadFile([NotNull] Uri url, string fileName, [NotNull] IODownloadFileWebRequestSettings settings)
+		public static FileStream DownloadFile([NotNull] Uri url, string fileName, [NotNull] IOHttpDownloadFileWebRequestSettings settings)
 		{
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
 
 			IProgress<int> progress = settings.Progress;
 			progress?.Report(0);
-
-			FileWebRequest request = BasicFileWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			
+			WebRequest request = BasicHttpWebRequest(url, settings);
+			WebHeaderCollection headers = request.Headers;
+			headers.Add(HttpRequestHeader.CacheControl, "no-cache");
+			headers.Add(HttpRequestHeader.CacheControl, "no-store");
+			headers.Add(HttpRequestHeader.CacheControl, "max-age=1");
+			headers.Add(HttpRequestHeader.CacheControl, "s-maxage=1");
+			headers.Add(HttpRequestHeader.Pragma, "no-cache");
+			headers.Add(HttpRequestHeader.Expires, "-1");
 			fileName = Path.GetFullPath(fileName);
 
 			string path = Path.GetDirectoryName(fileName) ?? throw new ArgumentException("Cannot get parent directory path.");
 			if (!DirectoryHelper.Ensure(path)) return null;
 
 			FileStream fileStream = null;
-			WebResponse response = null;
+			HttpWebResponse response = null;
 			Stream responseStream = null;
 			bool success = false;
 
 			try
 			{
-				response = request.GetResponse(settings);
+				response = (HttpWebResponse)request.GetResponse(settings);
 
 				if (response == null)
 				{
@@ -525,7 +513,7 @@ namespace asm.Helpers
 			return fileStream;
 		}
 
-		public static async Task<FileStream> DownloadFileAsync([NotNull] string url, [NotNull] string fileName, [NotNull] IODownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<FileStream> DownloadFileAsync([NotNull] string url, [NotNull] string fileName, [NotNull] IOHttpDownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
@@ -534,7 +522,7 @@ namespace asm.Helpers
 			return await DownloadFileAsync(uri, fileName, settings, token).ConfigureAwait();
 		}
 
-		public static async Task<FileStream> DownloadFileAsync([NotNull] Uri url, string fileName, [NotNull] IODownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<FileStream> DownloadFileAsync([NotNull] Uri url, string fileName, [NotNull] IOHttpDownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
@@ -542,7 +530,14 @@ namespace asm.Helpers
 			IProgress<int> progress = settings.Progress;
 			progress?.Report(0);
 
-			FileWebRequest request = BasicFileWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = BasicHttpWebRequest(url, settings);
+			WebHeaderCollection headers = request.Headers;
+			headers.Add(HttpRequestHeader.CacheControl, "no-cache");
+			headers.Add(HttpRequestHeader.CacheControl, "no-store");
+			headers.Add(HttpRequestHeader.CacheControl, "max-age=1");
+			headers.Add(HttpRequestHeader.CacheControl, "s-maxage=1");
+			headers.Add(HttpRequestHeader.Pragma, "no-cache");
+			headers.Add(HttpRequestHeader.Expires, "-1");
 			fileName = Path.GetFullPath(fileName);
 
 			string path = Path.GetDirectoryName(fileName) ?? throw new ArgumentException("Cannot get parent directory path.");
@@ -1086,7 +1081,7 @@ namespace asm.Helpers
 
 			if (contentLength <= 0L) contentLength = -1L;
 
-			FileWebRequest request = BasicFileWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			FileWebRequest request = BasicFileWebRequest(url, settings);
 			request.CopyHeaders(headers);
 			request.ContentLength = contentLength;
 			if (request.RequestUri.Scheme == Uri.UriSchemeFile) header = footer = null;

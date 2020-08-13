@@ -2,24 +2,24 @@ using System;
 
 namespace asm.IO
 {
-	public class IOFileWebRequestSettings : IORequestSettings
+	public class IOHttpFileWebRequestSettings : IOHttpRequestSettings
 	{
 		/// <inheritdoc />
-		public IOFileWebRequestSettings()
+		public IOHttpFileWebRequestSettings()
 		{
 		}
 
 		/// <inheritdoc />
-		public IOFileWebRequestSettings(IOSettings settings) 
+		public IOHttpFileWebRequestSettings(IOSettings settings) 
 			: base(settings)
 		{
 			switch (settings)
 			{
-				case IOFileWebRequestSettings ioFileWebRequestSettings:
-					Progress = ioFileWebRequestSettings.Progress;
-					break;
 				case IOHttpFileWebRequestSettings ioHttpFileWebRequestSettings:
 					Progress = ioHttpFileWebRequestSettings.Progress;
+					break;
+				case IOFileWebRequestSettings ioFileWebRequestSettings:
+					Progress = ioFileWebRequestSettings.Progress;
 					break;
 			}
 		}
