@@ -50,6 +50,7 @@ namespace asm.Collections.Concurrent.ProducerConsumer.Queue
 		{
 			if (disposing)
 			{
+				CompleteInternal();
 				StopInternal(WaitOnDispose);
 				ObjectHelper.Dispose(ref _link);
 				ObjectHelper.Dispose(ref _processor);

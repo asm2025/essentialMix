@@ -58,6 +58,7 @@ namespace asm.Patterns.FileSystem
 		{
 			if (disposing)
 			{
+				CompleteInternal();
 				StopInternal(WaitForQueuedItems);
 				ObjectHelper.Dispose(ref _queue);
 				ObjectHelper.Dispose(ref _manualResetEventSlim);

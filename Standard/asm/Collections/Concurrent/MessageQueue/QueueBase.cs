@@ -53,6 +53,7 @@ namespace asm.Collections.Concurrent.MessageQueue
 		{
 			if (disposing)
 			{
+				CompleteInternal();
 				StopInternal(WaitForQueuedItems);
 				ObjectHelper.Dispose(ref _queue);
 				ObjectHelper.Dispose(ref _manualResetEventSlim);

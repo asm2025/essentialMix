@@ -7,7 +7,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Version>10.0.0.0</Version>
 		<Copyright>Copyright © 2019</Copyright>
-		<FileVersion>20.8.13.2</FileVersion>
+		<FileVersion>20.8.13.4</FileVersion>
 		<Authors>asm</Authors>
 		<PackageTags>utilities, tools, extensions, helpers, core, mvc, web api</PackageTags>
 		<SignAssembly>true</SignAssembly>
@@ -28,7 +28,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.7" />
 	</ItemGroup>
 
 	<ItemGroup>
