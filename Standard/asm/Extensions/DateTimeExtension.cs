@@ -258,6 +258,18 @@ namespace asm.Extensions
 			return (start, start.AddDays(count).AddSeconds(-1));
 		}
 
+		public static (DateTime Start, DateTime End) PreviousWeeks(this DateTime thisValue, uint count)
+		{
+			DateTime start = thisValue.Date.AddDays(-(int)thisValue.DayOfWeek);
+			return (start.AddDays(-(count * 7)), start.AddSeconds(-1));
+		}
+
+		public static (DateTime Start, DateTime End) NextWeeks(this DateTime thisValue, uint count)
+		{
+			DateTime start = thisValue.Date.AddDays(-(int)thisValue.DayOfWeek + 7);
+			return (start, start.AddDays(count * 7).AddSeconds(-1));
+		}
+
 		public static (DateTime Start, DateTime End) PreviousMonths(this DateTime thisValue, int count)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
@@ -302,10 +314,11 @@ namespace asm.Extensions
 			return (thisStart, thisStart.AddYears(100).AddSeconds(-1));
 		}
 
-		public static (DateTime Start, DateTime End) PreviousWeek(this DateTime thisValue)
+		public static (DateTime Start, DateTime End) PreviousWeek(this DateTime thisValue, uint count = 1)
 		{
-			DateTime thisWeekStart = thisValue.Date.AddDays(-(int)thisValue.DayOfWeek);
-			return (thisWeekStart.AddDays(-7), thisWeekStart.AddSeconds(-1));
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
+			DateTime start = thisValue.Date.AddDays(-((int)thisValue.DayOfWeek + count * 7));
+			return (start, start.AddDays(7).AddSeconds(-1));
 		}
 
 		public static (DateTime Start, DateTime End) ThisWeek(this DateTime thisValue)
@@ -314,16 +327,18 @@ namespace asm.Extensions
 			return (start, start.AddDays(7).AddSeconds(-1));
 		}
 
-		public static (DateTime Start, DateTime End) NextWeek(this DateTime thisValue)
+		public static (DateTime Start, DateTime End) NextWeek(this DateTime thisValue, uint count = 1)
 		{
-			DateTime start = thisValue.Date.AddDays(-(int)thisValue.DayOfWeek).AddDays(7);
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
+			DateTime start = thisValue.Date.AddDays(-(int)thisValue.DayOfWeek + count * 7);
 			return (start, start.AddDays(7).AddSeconds(-1));
 		}
 
-		public static (DateTime Start, DateTime End) PreviousMonth(this DateTime thisValue)
+		public static (DateTime Start, DateTime End) PreviousMonth(this DateTime thisValue, ushort count = 1)
 		{
-			DateTime thisStart = new DateTime(thisValue.Year, thisValue.Month, 1);
-			return (thisStart.AddMonths(-1), thisStart.AddSeconds(-1));
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
+			DateTime thisStart = new DateTime(thisValue.Year, thisValue.Month, 1).AddMonths(-count);
+			return (thisStart, thisStart.AddMonths(1).AddSeconds(-1));
 		}
 
 		public static (DateTime Start, DateTime End) ThisMonth(this DateTime thisValue)
@@ -332,17 +347,19 @@ namespace asm.Extensions
 			return (start, start.AddMonths(1).AddSeconds(-1));
 		}
 
-		public static (DateTime Start, DateTime End) NextMonth(this DateTime thisValue)
+		public static (DateTime Start, DateTime End) NextMonth(this DateTime thisValue, ushort count = 1)
 		{
-			DateTime start = new DateTime(thisValue.Year, thisValue.Month, 1).AddMonths(1);
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
+			DateTime start = new DateTime(thisValue.Year, thisValue.Month, 1).AddMonths(count);
 			return (start, start.AddMonths(1).AddSeconds(-1));
 		}
 
-		public static (DateTime Start, DateTime End) PreviousQuarter(this DateTime thisValue)
+		public static (DateTime Start, DateTime End) PreviousQuarter(this DateTime thisValue, ushort count = 1)
 		{
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
 			int startMonth = (Quarter(thisValue) - 1) * 3 + 1;
-			DateTime baseDate = new DateTime(thisValue.Year, startMonth, 1);
-			return (baseDate.AddMonths(-3), baseDate.AddSeconds(-1));
+			DateTime start = new DateTime(thisValue.Year, startMonth, 1).AddMonths(-(3 * count));
+			return (start, start.AddMonths(3).AddSeconds(-1));
 		}
 
 		public static (DateTime Start, DateTime End) ThisQuarter(this DateTime thisValue)
@@ -352,18 +369,20 @@ namespace asm.Extensions
 			return (start, start.AddMonths(3).AddSeconds(-1));
 		}
 
-		public static (DateTime Start, DateTime End) NextQuarter(this DateTime thisValue)
+		public static (DateTime Start, DateTime End) NextQuarter(this DateTime thisValue, ushort count = 1)
 		{
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
 			int startMonth = (Quarter(thisValue) - 1) * 3 + 1;
-			DateTime start = new DateTime(thisValue.Year, startMonth, 1).AddMonths(3);
+			DateTime start = new DateTime(thisValue.Year, startMonth, 1).AddMonths(3 * count);
 			return (start, start.AddMonths(3).AddSeconds(-1));
 		}
 
-		public static (DateTime Start, DateTime End) PreviousSemiAnnual(this DateTime thisValue)
+		public static (DateTime Start, DateTime End) PreviousSemiAnnual(this DateTime thisValue, ushort count = 1)
 		{
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
 			int startMonth = (SemiAnnual(thisValue) - 1) * 6 + 1;
-			DateTime baseDate = new DateTime(thisValue.Year, startMonth, 1);
-			return (baseDate.AddMonths(-6), baseDate.AddSeconds(-1));
+			DateTime start = new DateTime(thisValue.Year, startMonth, 1).AddMonths(-(6 * count));
+			return (start, start.AddMonths(6).AddSeconds(-1));
 		}
 
 		public static (DateTime Start, DateTime End) ThisSemiAnnual(this DateTime thisValue)
@@ -373,16 +392,18 @@ namespace asm.Extensions
 			return (start, start.AddMonths(6).AddSeconds(-1));
 		}
 
-		public static (DateTime Start, DateTime End) NextSemiAnnual(this DateTime thisValue)
+		public static (DateTime Start, DateTime End) NextSemiAnnual(this DateTime thisValue, ushort count = 1)
 		{
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
 			int startMonth = (SemiAnnual(thisValue) - 1) * 6 + 1;
-			DateTime start = new DateTime(thisValue.Year, startMonth, 1).AddMonths(6);
+			DateTime start = new DateTime(thisValue.Year, startMonth, 1).AddMonths(6 * count);
 			return (start, start.AddMonths(6).AddSeconds(-1));
 		}
 
-		public static (DateTime Start, DateTime End) PreviousYear(this DateTime thisValue)
+		public static (DateTime Start, DateTime End) PreviousYear(this DateTime thisValue, ushort count = 1)
 		{
-			DateTime start = new DateTime(thisValue.Year - 1, 1, 1);
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
+			DateTime start = new DateTime(thisValue.Year - count, 1, 1);
 			return (start, start.AddYears(1).AddSeconds(-1));
 		}
 
@@ -392,16 +413,18 @@ namespace asm.Extensions
 			return (start, start.AddYears(1).AddSeconds(-1));
 		}
 
-		public static (DateTime Start, DateTime End) NextYear(this DateTime thisValue)
+		public static (DateTime Start, DateTime End) NextYear(this DateTime thisValue, ushort count = 1)
 		{
-			DateTime start = new DateTime(thisValue.Year + 1, 1, 1);
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
+			DateTime start = new DateTime(thisValue.Year + count, 1, 1);
 			return (start, start.AddYears(1).AddSeconds(-1));
 		}
 
-		public static (DateTime Start, DateTime End) PreviousCentury(this DateTime thisValue)
+		public static (DateTime Start, DateTime End) PreviousCentury(this DateTime thisValue, byte count = 1)
 		{
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
 			int century = Century(thisValue) - 2;
-			DateTime thisStart = new DateTime(century * 100, 1, 1);
+			DateTime thisStart = new DateTime(century * 100 * count, 1, 1);
 			return (thisStart, thisStart.AddYears(100).AddSeconds(-1));
 		}
 
@@ -412,10 +435,11 @@ namespace asm.Extensions
 			return (thisStart, thisStart.AddYears(100).AddSeconds(-1));
 		}
 
-		public static (DateTime Start, DateTime End) NextCentury(this DateTime thisValue)
+		public static (DateTime Start, DateTime End) NextCentury(this DateTime thisValue, byte count = 1)
 		{
+			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
 			int century = Century(thisValue);
-			DateTime thisStart = new DateTime(century * 100, 1, 1);
+			DateTime thisStart = new DateTime(century * 100 * count, 1, 1);
 			return (thisStart, thisStart.AddYears(100).AddSeconds(-1));
 		}
 
