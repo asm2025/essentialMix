@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Runtime.Serialization;
 using asm.Comparers;
 using asm.Extensions;
-using asm.Helpers;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -31,7 +30,7 @@ namespace asm.Newtonsoft.Helpers
 			value.NullValueHandling = NullValueHandling.Ignore;
 			value.PreserveReferencesHandling = referencesHandling;
 			value.ReferenceLoopHandling = loopHandling;
-			value.DateFormatString = DateTimeHelper.DATE_TIME_FORMAT;
+			value.DateFormatString = "O";
 
 			if (indent.HasValue)
 			{
