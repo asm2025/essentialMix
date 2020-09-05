@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
+using System.Threading;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -9,12 +10,17 @@ namespace asm.Logging.Helpers
 {
 	public static class LogFactoryHelper
 	{
+		private static readonly Lazy<ILoggerFactory> __consoleFactory = new Lazy<ILoggerFactory>(() => LoggerFactory.Create(builder => builder.AddConsole()), LazyThreadSafetyMode.PublicationOnly);
+
 		private static readonly Type __targetType = typeof(ILoggerFactory);
 		private static readonly ConcurrentDictionary<Type, Func<ILoggerFactory>> __templates = new ConcurrentDictionary<Type, Func<ILoggerFactory>>();
 		private static readonly ConcurrentDictionary<Type, ILoggerFactory> __instances = new ConcurrentDictionary<Type, ILoggerFactory>();
 
 		[NotNull]
 		public static ILoggerFactory Empty => NullLoggerFactory.Instance;
+
+		[NotNull]
+		public static ILoggerFactory ConsoleLoggerFactory => __consoleFactory.Value;
 
 		public static void Register<T>([NotNull] Expression<Func<T>> template)
 			where T : ILoggerFactory
