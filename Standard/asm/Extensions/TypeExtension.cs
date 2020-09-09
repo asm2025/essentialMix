@@ -427,7 +427,7 @@ namespace asm.Extensions
 				case IReadOnlyCollection<Type> readOnlyCollection:
 					return readOnlyCollection.Count > 0 && GetInterfaces(thisValue, readOnlyCollection.Contains, declaredOnly).Count() == readOnlyCollection.Count;
 				default:
-					ISet<Type> hashTypes = types.ToHashSet();
+					ISet<Type> hashTypes = types.AsHashSet();
 					return hashTypes.Count > 0 && GetInterfaces(thisValue, hashTypes.Contains, declaredOnly).Count() == hashTypes.Count;
 			}
 		}
@@ -453,7 +453,7 @@ namespace asm.Extensions
 				case IReadOnlyCollection<Type> readOnlyCollection:
 					return readOnlyCollection.Count > 0 && GetInterfaces(thisValue, readOnlyCollection.Contains, declaredOnly).Any();
 				default:
-					ISet<Type> hashTypes = types.ToHashSet();
+					ISet<Type> hashTypes = types.AsHashSet();
 					return hashTypes.Count > 0 && GetInterfaces(thisValue, hashTypes.Contains, declaredOnly).Any();
 			}
 		}
@@ -479,12 +479,11 @@ namespace asm.Extensions
 				try
 				{
 					nested = type.GetNestedType(name, bindingAttributes);
-					if (!nested.Is(baseType)) nested = null;
+					if (baseType != null && !nested.Is(baseType)) nested = null;
 				}
 				catch (Exception e)
 				{
 					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
-					// ignored
 				}
 			}
 			while (nested == null && !declaredOnly && (type = type.BaseType) != null);
@@ -527,7 +526,7 @@ namespace asm.Extensions
 				try
 				{
 					info = type.GetField(name, bindingAttributes);
-					if (info != null && !info.FieldType.Is(baseType)) info = null;
+					if (info != null && baseType != null && !info.FieldType.Is(baseType)) info = null;
 				}
 				catch (Exception e)
 				{
@@ -666,7 +665,6 @@ namespace asm.Extensions
 				catch (Exception e)
 				{
 					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
-					// ignored
 				}
 			}
 			while (info == null && !declaredOnly && (type = type.BaseType) != null);
@@ -791,7 +789,6 @@ namespace asm.Extensions
 				catch (Exception e)
 				{
 					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
-					// ignored
 				}
 			}
 			while (info == null && !declaredOnly && (type = type.BaseType) != null);

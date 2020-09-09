@@ -220,7 +220,7 @@ namespace asm.Collections
 
 			/// <inheritdoc />
 			[NotNull]
-			object IEnumerator.Current => Current;
+			object IEnumerator.Current => Current ?? throw new InvalidOperationException();
 
 			/// <inheritdoc />
 			public void Dispose() { }

@@ -927,15 +927,15 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
-		public static ISet<T> ToHashSet<T>([NotNull] this IEnumerable<T> thisValue, IEqualityComparer<T> comparer = null)
+		public static ISet<T> AsHashSet<T>([NotNull] this IEnumerable<T> thisValue, IEqualityComparer<T> comparer = null)
 		{
 			return thisValue as HashSet<T> ?? new HashSet<T>(thisValue, comparer ?? EqualityComparer<T>.Default);
 		}
 
 		[NotNull]
-		public static IReadOnlySet<T> ToReadOnlySet<T>([NotNull] this IEnumerable<T> thisValue, IEqualityComparer<T> comparer = null)
+		public static IReadOnlySet<T> AsReadOnlySet<T>([NotNull] this IEnumerable<T> thisValue, IEqualityComparer<T> comparer = null)
 		{
-			return thisValue as IReadOnlySet<T> ?? ToHashSet(thisValue, comparer).AsReadOnly();
+			return thisValue as IReadOnlySet<T> ?? AsHashSet(thisValue, comparer).AsReadOnly();
 		}
 
 		[ItemNotNull]

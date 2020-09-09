@@ -39,13 +39,13 @@ namespace asm.Extensions
 			, ExpressionType.Quote
 			, ExpressionType.Throw
 			, ExpressionType.UnaryPlus
-		}).ToReadOnlySet();
+		}).AsReadOnlySet();
 
 		private static readonly IReadOnlySet<ExpressionType> __simplifyExpressions = __convertExpressions.Union(new []
 		{
 			ExpressionType.Lambda
 			, ExpressionType.Invoke
-		}).ToReadOnlySet();
+		}).AsReadOnlySet();
 
 		private class ArgumentExtractor : ExpressionVisitor
 		{
@@ -136,8 +136,8 @@ namespace asm.Extensions
 		public static Expression RemoveUnary(this Expression thisValue) { return Simplify(thisValue, __unaryExpressions); }
 
 		public static Expression Simplify(this Expression thisValue) { return Simplify(thisValue, __simplifyExpressions); }
-		public static Expression Simplify(this Expression thisValue, [NotNull] params ExpressionType[] valuesToRemove) { return valuesToRemove.Length == 0 ? thisValue : Simplify(thisValue, valuesToRemove.ToReadOnlySet()); }
-		public static Expression Simplify(this Expression thisValue, [NotNull] IEnumerable<ExpressionType> valuesToRemove) { return Simplify(thisValue, valuesToRemove.ToReadOnlySet()); }
+		public static Expression Simplify(this Expression thisValue, [NotNull] params ExpressionType[] valuesToRemove) { return valuesToRemove.Length == 0 ? thisValue : Simplify(thisValue, valuesToRemove.AsReadOnlySet()); }
+		public static Expression Simplify(this Expression thisValue, [NotNull] IEnumerable<ExpressionType> valuesToRemove) { return Simplify(thisValue, valuesToRemove.AsReadOnlySet()); }
 		public static Expression Simplify(this Expression thisValue, [NotNull] IReadOnlySet<ExpressionType> valuesToRemove)
 		{
 			if (valuesToRemove.Count == 0) return thisValue;
