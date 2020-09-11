@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using JetBrains.Annotations;
 using asm.Helpers;
 using asm.Patterns.Sorting;
 using asm.Patterns.String;
+using JetBrains.Annotations;
 
-namespace asm.Model.Web
+namespace asm.Web
 {
 	[Serializable]
 	public class RequestParameters<T>

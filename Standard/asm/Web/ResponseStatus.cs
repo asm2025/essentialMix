@@ -4,7 +4,7 @@ using System.Text;
 using asm.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Model.Web
+namespace asm.Web
 {
 	public struct ResponseStatus
 	{

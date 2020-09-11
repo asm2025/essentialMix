@@ -3,7 +3,7 @@ using System.Net;
 using System.Security;
 using asm.Extensions;
 
-namespace asm.Model.Membership
+namespace asm.Patterns.Membership
 {
 	public class User : IUser
 	{

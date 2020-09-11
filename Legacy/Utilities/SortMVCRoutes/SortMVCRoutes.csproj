@@ -82,7 +82,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -100,10 +99,6 @@
     <None Include="Resources\MVCVS.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Standard\asm.Drawing\asm.Drawing.csproj">
-      <Project>{EA90A1AF-0FB2-4363-9B02-AB4B6889EFF5}</Project>
-      <Name>asm.Drawing</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\asm.Web\asm.Web.csproj">
       <Project>{93e1c15a-bb8f-49e3-a5f4-f31990ba545c}</Project>
       <Name>asm.Web</Name>

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using asm.Extensions;
-using asm.Model.Web;
+using asm.Web;
 
 namespace asm.Core.Web.Extensions
 {

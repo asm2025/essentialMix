@@ -27,7 +27,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
-		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.80" />
+		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.90" />
 	</ItemGroup>
 
 	<ItemGroup>

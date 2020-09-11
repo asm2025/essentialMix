@@ -1,4 +1,0 @@
-The work in this folder tree "StephenCleary" and its subfolders are not mine.
-I needed the functionality but there is no need to reinvent the wheel since 
-someone already has done it.
-https://blog.stephencleary.com/
