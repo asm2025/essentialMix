@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.AspNet.Identity;
-using asm.Helpers;
+using asm.Threading.Helpers;
 
 namespace asm.Web.Extensions
 {

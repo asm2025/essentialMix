@@ -101,7 +101,6 @@ namespace asm.ComponentModel
 			public Attribute[] Attributes;
 			public PropertyDescriptorCollection FilteredProperties;
 
-			/// <inheritdoc />
 			public FilterCache() { }
 
 			/// <summary>

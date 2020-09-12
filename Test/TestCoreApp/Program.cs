@@ -2,6 +2,7 @@
 using System.Text;
 using asm.Helpers;
 
+// ReSharper disable UnusedMember.Local
 namespace TestCoreApp
 {
 	internal class Program

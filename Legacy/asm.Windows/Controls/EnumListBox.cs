@@ -99,8 +99,7 @@ namespace asm.Windows.Controls
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			base.OnPaint(e);
-			//Height = ItemHeight * Items.Count + SystemInformation.HorizontalScrollBarHeight;
-			MessageBox.Show("Test");
+			Height = ItemHeight * Items.Count + SystemInformation.HorizontalScrollBarHeight;
 		}
 
 		protected override void OnSelectedIndexChanged(EventArgs e)

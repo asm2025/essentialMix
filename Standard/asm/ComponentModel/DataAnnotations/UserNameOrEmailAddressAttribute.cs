@@ -34,6 +34,7 @@ namespace asm.ComponentModel.DataAnnotations
 			}
 			catch
 			{
+				// ignored
 			}
 
 			return new Regex(RGX_USER_OR_EMAIL, RegexHelper.OPTIONS_I | RegexOptions.ExplicitCapture);

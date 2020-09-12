@@ -40,7 +40,7 @@ namespace asm.Web.Api.Http
 		public bool Rename { get; set; }
 
 		/// <inheritdoc />
-		public override Task<HttpResponseMessage> ExecuteAsync(CancellationToken token)
+		public override Task<HttpResponseMessage> ExecuteAsync(CancellationToken token = default(CancellationToken))
 		{
 			if (!Request.Content.IsMimeMultipartContent()) throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
 			return base.ExecuteAsync(token);

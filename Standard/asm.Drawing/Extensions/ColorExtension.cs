@@ -1,7 +1,7 @@
 using System;
 using System.Drawing;
-using asm.Extensions;
 using asm.Collections;
+using asm.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Drawing.Extensions

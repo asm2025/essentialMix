@@ -129,6 +129,10 @@
       <Project>{fd02815c-e2b4-4899-beb6-57aa9b7ecc36}</Project>
       <Name>asm.Data</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Standard\asm.Threading\asm.Threading.csproj">
+      <Project>{147ffae4-4340-4222-b232-15fde6b85f7f}</Project>
+      <Name>asm.Threading</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Standard\asm\asm.csproj">
       <Project>{ad2d9eec-efeb-4184-810c-ac2c5804e35e}</Project>
       <Name>asm</Name>

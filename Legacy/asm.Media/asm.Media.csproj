@@ -52,6 +52,9 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Common, Version=4.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Drawing.Common.4.7.0\lib\net461\System.Drawing.Common.dll</HintPath>
+    </Reference>
     <Reference Include="System.Net" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
@@ -92,45 +95,10 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Youtube\Internal\AacAudioExtractor.cs" />
-    <Compile Include="Youtube\AudioDownloader.cs" />
-    <Compile Include="Youtube\AudioEncoding.cs" />
-    <Compile Include="Youtube\AudioStreamInfo.cs" />
-    <Compile Include="Youtube\ChannelInfo.cs" />
-    <Compile Include="Youtube\ClosedCaption.cs" />
-    <Compile Include="Youtube\ClosedCaptionTrack.cs" />
-    <Compile Include="Youtube\ClosedCaptionTrackInfo.cs" />
-    <Compile Include="Youtube\Container.cs" />
-    <Compile Include="Youtube\Downloader.cs" />
-    <Compile Include="Youtube\Exceptions\AudioExtractionException.cs" />
-    <Compile Include="Youtube\Exceptions\ParseException.cs" />
-    <Compile Include="Youtube\Exceptions\VideoNotAvailableException.cs" />
-    <Compile Include="Youtube\Exceptions\VideoRequiresPurchaseException.cs" />
-    <Compile Include="Youtube\Internal\FlvFile.cs" />
-    <Compile Include="Youtube\Internal\IAudioExtractor.cs" />
-    <Compile Include="Youtube\Internal\CipherOperations\ICipherOperation.cs" />
-    <Compile Include="Youtube\Internal\CipherOperations\ReverseCipherOperation.cs" />
-    <Compile Include="Youtube\Internal\CipherOperations\SliceCipherOperation.cs" />
-    <Compile Include="Youtube\Internal\CipherOperations\SwapCipherOperation.cs" />
-    <Compile Include="Youtube\ItagDescriptor.cs" />
-    <Compile Include="Youtube\Internal\PlayerContext.cs" />
-    <Compile Include="Youtube\Internal\PlayerSource.cs" />
-    <Compile Include="Youtube\MediaStream.cs" />
-    <Compile Include="Youtube\MediaStreamInfo.cs" />
-    <Compile Include="Youtube\MixedStreamInfo.cs" />
-    <Compile Include="Youtube\Internal\Mp3AudioExtractor.cs" />
-    <Compile Include="Youtube\PlaylistInfo.cs" />
-    <Compile Include="Youtube\PlaylistType.cs" />
-    <Compile Include="Youtube\TagTypeEnum.cs" />
-    <Compile Include="Youtube\VideoDownloader.cs" />
-    <Compile Include="Youtube\VideoEncoding.cs" />
-    <Compile Include="Youtube\VideoInfo.cs" />
-    <Compile Include="Youtube\VideoInfoSnippet.cs" />
-    <Compile Include="Youtube\VideoStreamInfo.cs" />
-    <Compile Include="Youtube\YoutubeClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -144,6 +112,10 @@
     <ProjectReference Include="..\..\Standard\asm.Drawing\asm.Drawing.csproj">
       <Project>{EA90A1AF-0FB2-4363-9B02-AB4B6889EFF5}</Project>
       <Name>asm.Drawing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Standard\asm.Threading\asm.Threading.csproj">
+      <Project>{147ffae4-4340-4222-b232-15fde6b85f7f}</Project>
+      <Name>asm.Threading</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Standard\asm\asm.csproj">
       <Project>{ad2d9eec-efeb-4184-810c-ac2c5804e35e}</Project>

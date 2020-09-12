@@ -14,7 +14,6 @@ namespace asm
 
 		private string _scopeRoot;
 
-		/// <inheritdoc />
 		public SystemInfoRequest(SystemInfoType type)
 		{
 			Type = type;

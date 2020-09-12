@@ -79,7 +79,7 @@ namespace asm.Collections
 
 		public void Clear() { Source.Clear(); }
 
-		public bool Contains(T item) { return Source.Contains(item); }
+		public bool Contains(T item) { return Source.Contains(item!); }
 
 		public void CopyTo(T[] array, int arrayIndex) { Source.CopyTo(array, arrayIndex); }
 

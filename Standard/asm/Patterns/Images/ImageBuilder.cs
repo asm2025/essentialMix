@@ -17,7 +17,6 @@ namespace asm.Patterns.Images
 		{
 		}
 
-		/// <inheritdoc />
 		public ImageBuilder(string baseUri, string imageName)
 		{
 			BaseUri = baseUri;

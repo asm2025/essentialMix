@@ -11,7 +11,7 @@ namespace asm.Other.MarcGravell
 	/// </summary>
 	/// <seealso cref="Operator{T}" />
 	/// <seealso cref="Operator{TValue,TResult}" />
-	internal static class Operator<T>
+	public static class Operator<T>
 	{
 		static Operator()
 		{
@@ -206,7 +206,7 @@ namespace asm.Other.MarcGravell
 	/// </summary>
 	/// <seealso cref="Operator{T}" />
 	/// <seealso cref="Operator{TValue,TResult}" />
-	internal static class Operator<TValue, TResult>
+	public static class Operator<TValue, TResult>
 	{
 		static Operator()
 		{

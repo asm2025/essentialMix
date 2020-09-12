@@ -16,7 +16,6 @@ namespace asm.Cryptography.Settings
 		{
 		}
 
-		/// <inheritdoc />
 		public Settings(Encoding encoding)
 		{
 			_encoding = encoding ?? Encoding.Unicode;

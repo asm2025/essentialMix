@@ -5,19 +5,20 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Threading;
-
+using asm;
+using asm.Collections.DebugView;
 using asm.Comparers;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Helpers;
-
 using JetBrains.Annotations;
 
-namespace asm.Other.Microsoft.Collections
+// ReSharper disable once CheckNamespace
+namespace Other.Microsoft.Collections
 {
 	// based on https://github.com/microsoft/referencesource/blob/master/mscorlib/system/collections/generic/list.cs
 	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(Other_Mscorlib_CollectionDebugView<>))]
+	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 	[Serializable]
 	public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	{

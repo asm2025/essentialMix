@@ -7,7 +7,6 @@ namespace asm.Core.Web.Middleware
 	{
 		private string _parameterName = RequestParameterNames.Culture;
 
-		/// <inheritdoc />
 		public CultureHandlerOptions() 
 		{
 		}

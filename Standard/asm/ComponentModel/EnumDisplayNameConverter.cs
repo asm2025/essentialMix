@@ -45,7 +45,9 @@ namespace asm.ComponentModel
 					}
 					catch
 					{
+						// ignored
 					}
+
 					break;
 			}
 

@@ -7,11 +7,6 @@ namespace asm.Other.Nager.PublicSuffix
 {
     public class TldRule
     {
-        public string Name { get; private set; }
-        public TldRuleType Type { get; private set; }
-        public int LabelCount { get; private set; }
-        public TldRuleDivision Division { get; private set; }
-
         public TldRule([NotNull] string ruleData, TldRuleDivision division = TldRuleDivision.Unknown)
         {
             if (string.IsNullOrEmpty(ruleData))
@@ -54,6 +49,11 @@ namespace asm.Other.Nager.PublicSuffix
                 LabelCount = parts.Count;
             }
         }
+
+        public string Name { get; }
+        public TldRuleType Type { get; }
+        public int LabelCount { get; }
+        public TldRuleDivision Division { get; }
 
         public override string ToString()
         {

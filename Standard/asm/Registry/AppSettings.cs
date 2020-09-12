@@ -7,9 +7,9 @@ using System.Reflection;
 using System.Security;
 using System.Security.Permissions;
 using System.Text;
+using asm.Collections;
 using asm.Extensions;
 using Microsoft.Win32;
-using asm.Collections;
 using JetBrains.Annotations;
 
 namespace asm.Registry
@@ -156,20 +156,20 @@ namespace asm.Registry
 
 			try
 			{
-				if (Values.Any(p => p.Scope == Scope.Global))
+				if (Values.Any(p => p.Scope == PropertyScope.Global))
 				{
 					using (RegistryKey key = global::Microsoft.Win32.Registry.LocalMachine.CreateSubKey(Key, false))
 					{
-						foreach (IProperty property in Values.Where(p => p.Scope == Scope.Global))
+						foreach (IProperty property in Values.Where(p => p.Scope == PropertyScope.Global))
 							LoadProperty(key, property);
 					}
 				}
 
-				if (Values.Any(p => p.Scope == Scope.CurrentUser))
+				if (Values.Any(p => p.Scope == PropertyScope.CurrentUser))
 				{
 					using (RegistryKey key = global::Microsoft.Win32.Registry.CurrentUser.CreateSubKey(Key, false))
 					{
-						foreach (IProperty property in Values.Where(p => p.Scope == Scope.CurrentUser))
+						foreach (IProperty property in Values.Where(p => p.Scope == PropertyScope.CurrentUser))
 							LoadProperty(key, property);
 					}
 				}
@@ -190,20 +190,20 @@ namespace asm.Registry
 
 			try
 			{
-				if (Values.Any(p => p.Scope == Scope.Global))
+				if (Values.Any(p => p.Scope == PropertyScope.Global))
 				{
 					using (RegistryKey key = global::Microsoft.Win32.Registry.LocalMachine.CreateSubKey(Key, true))
 					{
-						foreach (IProperty property in Values.Where(p => p.Scope == Scope.Global))
+						foreach (IProperty property in Values.Where(p => p.Scope == PropertyScope.Global))
 							SaveProperty(key, property);
 					}
 				}
 
-				if (Values.Any(p => p.Scope == Scope.CurrentUser))
+				if (Values.Any(p => p.Scope == PropertyScope.CurrentUser))
 				{
 					using (RegistryKey key = global::Microsoft.Win32.Registry.CurrentUser.CreateSubKey(Key, true))
 					{
-						foreach (IProperty property in Values.Where(p => p.Scope == Scope.CurrentUser))
+						foreach (IProperty property in Values.Where(p => p.Scope == PropertyScope.CurrentUser))
 							SaveProperty(key, property);
 					}
 				}

@@ -155,6 +155,10 @@
       <Project>{7E8D64FC-A14B-416B-B54B-02D16D667F09}</Project>
       <Name>asm.Newtonsoft</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Standard\asm.Threading\asm.Threading.csproj">
+      <Project>{147ffae4-4340-4222-b232-15fde6b85f7f}</Project>
+      <Name>asm.Threading</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Standard\asm\asm.csproj">
       <Project>{ad2d9eec-efeb-4184-810c-ac2c5804e35e}</Project>
       <Name>asm</Name>

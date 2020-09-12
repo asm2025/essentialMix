@@ -779,18 +779,18 @@ namespace asm.Extensions
 			if (descending) comparer = comparer.Reverse();
 
 			// sort in given order
-			Sort(thisValue, index, count, comparer, descending ? -1 : 1);
+			SortTheList(thisValue, index, count, comparer, descending ? -1 : 1);
 
-			static void Sort(IList<T> list, int x, int n, IComparer<T> c, int dir)
+			static void SortTheList(IList<T> list, int x, int n, IComparer<T> c, int dir)
 			{
 				if (n < 2) return;
 
 				int mid = n / 2;
 
 				// sort in given order
-				Sort(list, x, mid, c, 1 /* ascending */);
+				SortTheList(list, x, mid, c, 1 /* ascending */);
 				// sort in reverse order
-				Sort(list, x + mid, mid, c, -1 /* descending */);
+				SortTheList(list, x + mid, mid, c, -1 /* descending */);
 				// merge whole sequence in given order  
 				Merge(list, x, n, c, dir);
 			}

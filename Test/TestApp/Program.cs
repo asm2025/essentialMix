@@ -7,18 +7,20 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using asm.Collections;
-using asm.Collections.Concurrent.ProducerConsumer;
 using asm.Comparers;
 using asm.Exceptions;
 using asm.Extensions;
 using asm.Helpers;
-using asm.Other.Microsoft.Collections;
+using Other.Microsoft.Collections;
+using asm.Threading.Collections.ProducerConsumer;
+using asm.Threading.Helpers;
 using Bogus;
 using Bogus.DataSets;
 using Crayon;
 using EasyConsole;
 using JetBrains.Annotations;
 
+// ReSharper disable UnusedMember.Local
 namespace TestApp
 {
 	internal class Program
@@ -387,10 +389,13 @@ work with {HEAVY} items.".Yellow();
 			string timeoutString = timeout > 0
 										? $"{timeout} minute(s)"
 										: "None";
+			// ReSharper disable once JoinDeclarationAndInitializer
 			int threads;
 #if DEBUG
 			// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
+			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
 			threads = LIMIT_THREADS
+						// ReSharper disable once UnreachableCode
 						? 1
 						: RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
 #else
@@ -2814,10 +2819,10 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				BinaryHeap<double, Student> studentHeap = new MaxBinaryHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students, int.MaxValue, e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MaxValue);
 
 				studentHeap = new MinBinaryHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students, int.MinValue, e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MinValue);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -2827,22 +2832,20 @@ work with {HEAVY} items.".Yellow();
 			}
 			while (more);
 
-			static void DoTheKeyTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue, Func<TValue, TKey> getKey)
+			static void DoTheKeyTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue)
 				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 			{
 				Queue<TKey> queue = new Queue<TKey>();
 				DoTheTest(heap, array, queue);
 
-				bool succeeded = true;
-
-				while (succeeded && queue.Count > 0)
+				while (queue.Count > 0)
 				{
 					TKey key = queue.Dequeue();
 					TNode node = heap.FindByKey(key);
 					Debug.Assert(node != null, $"Node for key {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
 					TKey extracted = heap.ExtractValue().Key;
-					succeeded = heap.Comparer.IsEqual(extracted, key);
+					bool succeeded = heap.Comparer.IsEqual(extracted, key);
 					Console.WriteLine($"Extracted {extracted}, expected {key}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
 				}
@@ -2856,16 +2859,14 @@ work with {HEAVY} items.".Yellow();
 				Queue<TValue> queue = new Queue<TValue>();
 				DoTheTest(heap, array, queue);
 
-				bool succeeded = true;
-
-				while (succeeded && queue.Count > 0)
+				while (queue.Count > 0)
 				{
 					TValue key = queue.Dequeue();
 					TNode node = heap.Find(key);
 					Debug.Assert(node != null, $"Node for value {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
 					TValue extracted = heap.ExtractValue().Key;
-					succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
+					bool succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
 					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
 				}
@@ -3080,10 +3081,10 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students, int.MaxValue, e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MaxValue);
 
 				studentHeap = new MinBinomialHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students, int.MinValue, e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MinValue);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -3093,22 +3094,20 @@ work with {HEAVY} items.".Yellow();
 			}
 			while (more);
 
-			static void DoTheKeyTest<TNode, TKey, TValue>(BinomialHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue, Func<TValue, TKey> getKey)
+			static void DoTheKeyTest<TNode, TKey, TValue>(BinomialHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue)
 				where TNode : BinomialNode<TNode, TKey, TValue>
 			{
 				Queue<TKey> queue = new Queue<TKey>();
 				DoTheTest(heap, array, queue);
 
-				bool succeeded = true;
-
-				while (succeeded && queue.Count > 0)
+				while (queue.Count > 0)
 				{
 					TKey key = queue.Dequeue();
 					TNode node = heap.FindByKey(key);
 					Debug.Assert(node != null, $"Node for key {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
 					TKey extracted = heap.ExtractValue().Key;
-					succeeded = heap.Comparer.IsEqual(extracted, key);
+					bool succeeded = heap.Comparer.IsEqual(extracted, key);
 					Console.WriteLine($"Extracted {extracted}, expected {key}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
 				}
@@ -3122,16 +3121,14 @@ work with {HEAVY} items.".Yellow();
 				Queue<TValue> queue = new Queue<TValue>();
 				DoTheTest(heap, array, queue);
 
-				bool succeeded = true;
-
-				while (succeeded && queue.Count > 0)
+				while (queue.Count > 0)
 				{
 					TValue key = queue.Dequeue();
 					TNode node = heap.Find(key);
 					Debug.Assert(node != null, $"Node for value {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
 					TValue extracted = heap.ExtractValue().Key;
-					succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
+					bool succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
 					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
 				}
@@ -3346,10 +3343,10 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students, int.MaxValue, e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MaxValue);
 
 				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students, int.MinValue, e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MinValue);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -3359,22 +3356,20 @@ work with {HEAVY} items.".Yellow();
 			}
 			while (more);
 
-			static void DoTheKeyTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue, Func<TValue, TKey> getKey)
+			static void DoTheKeyTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue)
 				where TNode : PairingNode<TNode, TKey, TValue>
 			{
 				Queue<TKey> queue = new Queue<TKey>();
 				DoTheTest(heap, array, queue);
 
-				bool succeeded = true;
-
-				while (succeeded && queue.Count > 0)
+				while (queue.Count > 0)
 				{
 					TKey key = queue.Dequeue();
 					TNode node = heap.FindByKey(key);
 					Debug.Assert(node != null, $"Node for key {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
 					TKey extracted = heap.ExtractValue().Key;
-					succeeded = heap.Comparer.IsEqual(extracted, key);
+					bool succeeded = heap.Comparer.IsEqual(extracted, key);
 					Console.WriteLine($"Extracted {extracted}, expected {key}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
 				}
@@ -3388,16 +3383,14 @@ work with {HEAVY} items.".Yellow();
 				Queue<TValue> queue = new Queue<TValue>();
 				DoTheTest(heap, array, queue);
 
-				bool succeeded = true;
-
-				while (succeeded && queue.Count > 0)
+				while (queue.Count > 0)
 				{
 					TValue key = queue.Dequeue();
 					TNode node = heap.Find(key);
 					Debug.Assert(node != null, $"Node for value {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
 					TValue extracted = heap.ExtractValue().Key;
-					succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
+					bool succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
 					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
 				}
@@ -3612,10 +3605,10 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				FibonacciHeap<double, Student> studentHeap = new MaxFibonacciHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students, int.MaxValue, e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MaxValue);
 
 				studentHeap = new MinFibonacciHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students, int.MinValue, e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MinValue);
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
@@ -3625,22 +3618,20 @@ work with {HEAVY} items.".Yellow();
 			}
 			while (more);
 
-			static void DoTheKeyTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue, Func<TValue, TKey> getKey)
+			static void DoTheKeyTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue)
 				where TNode : FibonacciNode<TNode, TKey, TValue>
 			{
 				Queue<TKey> queue = new Queue<TKey>();
 				DoTheTest(heap, array, queue);
 
-				bool succeeded = true;
-
-				while (succeeded && queue.Count > 0)
+				while (queue.Count > 0)
 				{
 					TKey key = queue.Dequeue();
 					TNode node = heap.FindByKey(key);
 					Debug.Assert(node != null, $"Node for key {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
 					TKey extracted = heap.ExtractValue().Key;
-					succeeded = heap.Comparer.IsEqual(extracted, key);
+					bool succeeded = heap.Comparer.IsEqual(extracted, key);
 					Console.WriteLine($"Extracted {extracted}, expected {key}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
 				}
@@ -3654,16 +3645,14 @@ work with {HEAVY} items.".Yellow();
 				Queue<TValue> queue = new Queue<TValue>();
 				DoTheTest(heap, array, queue);
 
-				bool succeeded = true;
-
-				while (succeeded && queue.Count > 0)
+				while (queue.Count > 0)
 				{
 					TValue key = queue.Dequeue();
 					TNode node = heap.Find(key);
 					Debug.Assert(node != null, $"Node for value {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
 					TValue extracted = heap.ExtractValue().Key;
-					succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
+					bool succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
 					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
 				}
@@ -4142,7 +4131,7 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine($"Added {count} characters to the set".BrightGreen());
 			}
 
-			static bool DoTheTest<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, List<char> values)
+			static void DoTheTest<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, List<char> values)
 				where TAdjacencyList : class, ICollection<TEdge>
 			{
 				Console.WriteLine("Test adding nodes...");
@@ -4153,13 +4142,13 @@ work with {HEAVY} items.".Yellow();
 				if (graph.Count != values.Count)
 				{
 					Console.WriteLine("Something went wrong, not all nodes were added...!".BrightRed());
-					return false;
+					return;
 				}
 
 				if (graph.Count == 1)
 				{
 					Console.WriteLine("Huh, must add more nodes...!".BrightRed());
-					return true;
+					return;
 				}
 				
 				Console.WriteLine("All nodes are added...!".BrightGreen() + " Let's try adding some relationships...");
@@ -4208,7 +4197,7 @@ This may cause cycles but will make it much more fun for finding shortest paths.
 				Console.WriteLine("Cool, let's try enumerating it.");
 				char value = graph.Top().First();
 				Console.WriteLine($"Picking a value with maximum connections: '{value.ToString().BrightCyan().Underline()}'...");
-				if (!DoTheTestWithValue(graph, values, value)) return false;
+				if (!DoTheTestWithValue(graph, values, value)) return;
 
 				do
 				{
@@ -4226,12 +4215,11 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 					}
 
 					value = response.KeyChar;
-					if (!DoTheTestWithValue(graph, values, value)) return false;
+					if (!DoTheTestWithValue(graph, values, value)) return;
 				}
 				while (response.Key != ConsoleKey.Escape);
 
 				Console.WriteLine();
-				return true;
 			}
 
 			static bool DoTheTestWithValue<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, List<char> values, char value)
@@ -4239,8 +4227,8 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			{
 				const string LINE_SEPARATOR = "*******************************************************************************";
 
-				Console.WriteLine("Breadth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, BreadthDepthTraverse.BreadthFirst)));
-				Console.WriteLine("Depth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, BreadthDepthTraverse.DepthFirst)));
+				Console.WriteLine("Breadth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, BreadthDepthTraversal.BreadthFirst)));
+				Console.WriteLine("Depth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, BreadthDepthTraversal.DepthFirst)));
 				Console.WriteLine("Degree: ".Yellow() + graph.Degree(value));
 
 				// detect a cycle

@@ -12,15 +12,7 @@ namespace asm.Other.Nager.PublicSuffix
 
         public FileCacheProvider([NotNull] string cacheFileName = "publicsuffixcache.dat", TimeSpan? cacheTimeToLive = null)
         {
-            if (cacheTimeToLive.HasValue)
-            {
-                _timeToLive = cacheTimeToLive.Value;
-            }
-            else
-            {
-                _timeToLive = TimeSpan.FromDays(1);
-            }
-
+            _timeToLive = cacheTimeToLive ?? TimeSpan.FromDays(1);
             string tempPath = Path.GetTempPath();
             _cacheFilePath = Path.Combine(tempPath, cacheFileName);
         }

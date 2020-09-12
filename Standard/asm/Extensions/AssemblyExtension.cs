@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,7 +9,6 @@ using System.Security;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using asm.Helpers;
-using asm.Threading;
 
 namespace asm.Extensions
 {
@@ -43,7 +41,7 @@ namespace asm.Extensions
 				: PathHelper.AddDirectorySeparator(Path.GetDirectoryName(path));
 		}
 
-		public static System.Configuration.Configuration GetConfiguration([NotNull] this Assembly thisValue)
+		public static Configuration GetConfiguration([NotNull] this Assembly thisValue)
 		{
 			string path;
 
@@ -135,71 +133,6 @@ namespace asm.Extensions
 
 					yield return fullPath;
 				}
-			}
-		}
-
-		public static Process ExtractAndRunResource([NotNull] this Assembly thisValue, string resourceName)
-		{
-			return ExtractAndRunResource(thisValue, null, null, null, resourceName);
-		}
-
-		public static Process ExtractAndRunResource([NotNull] this Assembly thisValue, string directoryPath, string resourceName)
-		{
-			return ExtractAndRunResource(thisValue, null, directoryPath, null, resourceName);
-		}
-
-		public static Process ExtractAndRunResource([NotNull] this Assembly thisValue, string directoryPath, string resourceLocation, string resourceName)
-		{
-			return ExtractAndRunResource(thisValue, null, directoryPath, resourceLocation, resourceName);
-		}
-
-		public static Process ExtractAndRunResource([NotNull] this Assembly thisValue, RunSettings settings, string resourceName)
-		{
-			return ExtractAndRunResource(thisValue, settings, null, null, resourceName);
-		}
-
-		public static Process ExtractAndRunResource([NotNull] this Assembly thisValue, RunSettings settings, string resourceLocation, string resourceName)
-		{
-			return ExtractAndRunResource(thisValue, settings, null, resourceLocation, resourceName);
-		}
-
-		public static Process ExtractAndRunResource([NotNull] this Assembly thisValue, RunSettings settings, string directoryPath, string resourceLocation, string resourceName)
-		{
-			return ExtractAndRunResources(thisValue, settings, directoryPath, resourceLocation, resourceName).FirstOrDefault();
-		}
-
-		public static IEnumerable<Process> ExtractAndRunResources([NotNull] this Assembly thisValue, [NotNull] params string[] resourceNames)
-		{
-			return ExtractAndRunResources(thisValue, null, null, null, resourceNames);
-		}
-
-		public static IEnumerable<Process> ExtractAndRunResources([NotNull] this Assembly thisValue, string resourceLocation, [NotNull] params string[] resourceNames)
-		{
-			return ExtractAndRunResources(thisValue, null, null, resourceLocation, resourceNames);
-		}
-
-		public static IEnumerable<Process> ExtractAndRunResources([NotNull] this Assembly thisValue, string directoryPath, string resourceLocation, [NotNull] params string[] resourceNames)
-		{
-			return ExtractAndRunResources(thisValue, null, directoryPath, resourceLocation, resourceNames);
-		}
-
-		public static IEnumerable<Process> ExtractAndRunResources([NotNull] this Assembly thisValue, RunSettings settings, [NotNull] params string[] resourceNames)
-		{
-			return ExtractAndRunResources(thisValue, settings, null, null, resourceNames);
-		}
-
-		public static IEnumerable<Process> ExtractAndRunResources([NotNull] this Assembly thisValue, RunSettings settings, string resourceLocation, [NotNull] params string[] resourceNames)
-		{
-			return ExtractAndRunResources(thisValue, settings, null, resourceLocation, resourceNames);
-		}
-
-		public static IEnumerable<Process> ExtractAndRunResources([NotNull] this Assembly thisValue, RunSettings settings, string directoryPath, string resourceLocation, [NotNull] params string[] resourceNames)
-		{
-			settings ??= RunSettings.Default;
-
-			foreach (string resource in ExtractEmbeddedResources(thisValue, directoryPath, resourceLocation, true, resourceNames))
-			{
-				yield return ProcessHelper.Run(resource, null, settings);
 			}
 		}
 
@@ -322,13 +255,13 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
-		public static string GetResourceName([NotNull] Assembly thisValue, string resourceLocation, string resourceName)
+		public static string GetResourceName([NotNull] this Assembly thisValue, string resourceLocation, string resourceName)
 		{
 			return GetResourceName(thisValue, resourceLocation, resourceName, out _);
 		}
 
 		[NotNull]
-		public static string GetResourceName([NotNull] Assembly thisValue, string resourceLocation, string resourceName, out string fileName)
+		public static string GetResourceName([NotNull] this Assembly thisValue, string resourceLocation, string resourceName, out string fileName)
 		{
 			/*
 			 * +------------------+--------------+---------------------------------+-----------------------------------+

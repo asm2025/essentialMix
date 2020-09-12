@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using JetBrains.Annotations;
-using asm.Collections;
 using asm.Helpers;
 using asm.Numeric;
 using asm.Other.JonSkeet.MiscUtil.Text;
@@ -795,20 +794,6 @@ namespace asm.Extensions
 			decimal fraction = SysMath.Abs(Fraction(thisValue));
 			return fraction == decimal.Zero ? 0.0m : 1.0m - fraction;
 		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static BitVectorList AsBitVectorList([NotNull] this byte[] thisValue) { return (BitVectorList)thisValue; }
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static BitVectorList AsBitVectorList([NotNull] this bool[] thisValue) { return (BitVectorList)thisValue; }
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		[NotNull]
-		public static DwordList AsDwordList([NotNull] this byte[] thisValue) { return (DwordList)thisValue; }
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		[NotNull]
-		public static WordList AsWordList([NotNull] this byte[] thisValue) { return (WordList)thisValue; }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static BitVector AsBitVector(this byte thisValue) { return new BitVector(thisValue); }

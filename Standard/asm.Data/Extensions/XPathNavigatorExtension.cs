@@ -15,8 +15,8 @@ namespace asm.Data.Extensions
 
 		public static XmlNode GetNode([NotNull] this XPathNavigator thisValue)
 		{
-			IHasXmlNode hasXmlNode = thisValue as IHasXmlNode;
-			return hasXmlNode?.GetNode();
+			// ReSharper disable once SuspiciousTypeConversion.Global
+			return (thisValue as IHasXmlNode)?.GetNode();
 		}
 	}
 }

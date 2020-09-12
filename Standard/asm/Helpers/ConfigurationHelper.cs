@@ -7,7 +7,7 @@ namespace asm.Helpers
 {
 	public static class ConfigurationHelper
 	{
-		public static string GetConnectionString([NotNull] System.Configuration.Configuration configuration, string name)
+		public static string GetConnectionString([NotNull] Configuration configuration, string name)
 		{
 			name = name.ToNullIfEmpty() ?? throw new ArgumentNullException(nameof(name));
 
@@ -17,7 +17,7 @@ namespace asm.Helpers
 			return section.ConnectionStrings[name]?.ConnectionString;
 		}
 
-		public static void AddConnectionString([NotNull] System.Configuration.Configuration configuration, string name, string connectionString, string provider)
+		public static void AddConnectionString([NotNull] Configuration configuration, string name, string connectionString, string provider)
 		{
 			name = name.ToNullIfEmpty() ?? throw new ArgumentNullException(nameof(name));
 			provider = provider.ToNullIfEmpty() ?? throw new ArgumentNullException(nameof(provider));
@@ -36,7 +36,7 @@ namespace asm.Helpers
 			configuration.Save(ConfigurationSaveMode.Modified);
 		}
 
-		public static void RemoveConnectionString([NotNull] System.Configuration.Configuration configuration, string name)
+		public static void RemoveConnectionString([NotNull] Configuration configuration, string name)
 		{
 			name = name.ToNullIfEmpty() ?? throw new ArgumentNullException(nameof(name));
 
@@ -54,7 +54,7 @@ namespace asm.Helpers
 		/// <param name="configuration"></param>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public static bool Protect<T>([NotNull] System.Configuration.Configuration configuration, string name)
+		public static bool Protect<T>([NotNull] Configuration configuration, string name)
 			where T : ProtectedConfigurationProvider
 		{
 			name = name.ToNullIfEmpty() ?? throw new ArgumentNullException(nameof(name));
@@ -70,7 +70,7 @@ namespace asm.Helpers
 		/// <param name="configuration"></param>
 		/// <param name="section"></param>
 		/// <returns></returns>
-		public static bool Protect<T>([NotNull] System.Configuration.Configuration configuration, [NotNull] ConfigurationSection section)
+		public static bool Protect<T>([NotNull] Configuration configuration, [NotNull] ConfigurationSection section)
 			where T : ProtectedConfigurationProvider
 		{
 			if (section.SectionInformation.IsProtected) return false;
@@ -80,7 +80,7 @@ namespace asm.Helpers
 			return true;
 		}
 
-		public static bool UnProtect([NotNull] System.Configuration.Configuration configuration, string name)
+		public static bool UnProtect([NotNull] Configuration configuration, string name)
 		{
 			name = name.ToNullIfEmpty() ?? throw new ArgumentNullException(nameof(name));
 			ConfigurationSection section = configuration.GetSection(name);
@@ -88,7 +88,7 @@ namespace asm.Helpers
 			return UnProtect(configuration, section);
 		}
 
-		public static bool UnProtect([NotNull] System.Configuration.Configuration configuration, [NotNull] ConfigurationSection section)
+		public static bool UnProtect([NotNull] Configuration configuration, [NotNull] ConfigurationSection section)
 		{
 			if (!section.SectionInformation.IsProtected) return false;
 			section.SectionInformation.UnprotectSection();

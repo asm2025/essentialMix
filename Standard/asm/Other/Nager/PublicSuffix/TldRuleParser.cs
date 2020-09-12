@@ -8,7 +8,7 @@ namespace asm.Other.Nager.PublicSuffix
         [NotNull]
 		public IEnumerable<TldRule> ParseRules([NotNull] string data)
         {
-            string[] lines = data.Split(new char[] { '\n', '\r' });
+            string[] lines = data.Split('\n', '\r');
             return ParseRules(lines);
         }
 

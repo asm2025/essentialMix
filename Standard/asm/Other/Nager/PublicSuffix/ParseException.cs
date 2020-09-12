@@ -8,16 +8,6 @@ namespace asm.Other.Nager.PublicSuffix
     public class ParseException : Exception
     {
         /// <summary>
-        /// Reason of exception
-        /// </summary>
-        public TldRule WinningRule { get; private set; }
-
-        /// <summary>
-        /// Reason of exception
-        /// </summary>
-        public string ErrorMessage { get; private set; }
-
-        /// <summary>
         /// Parse Exception
         /// </summary>
         /// <param name="errorMessage"></param>
@@ -27,6 +17,16 @@ namespace asm.Other.Nager.PublicSuffix
             ErrorMessage = errorMessage;
             WinningRule = winningRule;
         }
+
+        /// <summary>
+        /// Reason of exception
+        /// </summary>
+        public TldRule WinningRule { get; }
+
+        /// <summary>
+        /// Reason of exception
+        /// </summary>
+        public string ErrorMessage { get; }
 
         /// <summary>
         /// Message

@@ -67,8 +67,10 @@ namespace asm.Newtonsoft.Serialization
 		public CultureInfo Culture { get; set; } = CultureInfo.CurrentCulture;
 
 		/// <inheritdoc />
-		public override void WriteJson([NotNull] JsonWriter writer, object value, [NotNull] NewtonsoftJsonSerializer jsonSerializer)
+		public override void WriteJson(JsonWriter writer, object value, NewtonsoftJsonSerializer jsonSerializer)
 		{
+			if (writer == null) throw new ArgumentNullException(nameof(writer));
+			if (jsonSerializer == null) throw new ArgumentNullException(nameof(jsonSerializer));
 			Type type = value.AsType();
 
 			if (!IsTypeIncluded(type))

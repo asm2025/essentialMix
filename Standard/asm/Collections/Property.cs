@@ -12,7 +12,7 @@ namespace asm.Collections
 	{
 		private object _value;
 		private object _defaultValue;
-		private Scope _scope;
+		private PropertyScope _scope;
 
 		public Property([NotNull] string name)
 			: this(name, null, null, null, false, false)
@@ -72,7 +72,7 @@ namespace asm.Collections
 			}
 		}
 
-		public virtual Scope Scope
+		public virtual PropertyScope Scope
 		{
 			get => _scope;
 			set

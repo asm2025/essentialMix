@@ -44,7 +44,7 @@ namespace asm.Other.Nager.PublicSuffix
         }
 
         /// <summary>
-        /// Creates a DomainParser based on an already initialzed tree.
+        /// Creates a DomainParser based on an already initialized tree.
         /// </summary>
         /// <param name="initializedDataStructure">An already initialized tree.</param>
         /// <param name="domainNormalizer">An <see cref="IDomainNormalizer"/>.</param>
@@ -104,8 +104,7 @@ namespace asm.Other.Nager.PublicSuffix
 
         private void AddRules([NotNull] IEnumerable<TldRule> tldRules)
         {
-            _domainDataStructure = _domainDataStructure ?? new DomainDataStructure("*", _rootTldRule);
-
+            _domainDataStructure ??= new DomainDataStructure("*", _rootTldRule);
             _domainDataStructure.AddRules(tldRules);
         }
 
@@ -138,14 +137,14 @@ namespace asm.Other.Nager.PublicSuffix
                 {
                     if (tld.EndsWith(winningRule.Name.Substring(1)))
                     {
-                        throw new ParseException("Domain is a TLD according publicsuffix", winningRule);
+                        throw new ParseException("Domain is a TLD according public suffix", winningRule);
                     }
                 }
                 else
                 {
                     if (tld.Equals(winningRule.Name))
                     {
-                        throw new ParseException("Domain is a TLD according publicsuffix", winningRule);
+                        throw new ParseException("Domain is a TLD according public suffix", winningRule);
                     }
                 }
 
@@ -155,7 +154,7 @@ namespace asm.Other.Nager.PublicSuffix
             return new DomainName(domain, winningRule);
         }
 
-        private void FindMatches([NotNull] IEnumerable<string> parts, [NotNull] DomainDataStructure structure, List<TldRule> matches)
+        private static void FindMatches([NotNull] IEnumerable<string> parts, [NotNull] DomainDataStructure structure, List<TldRule> matches)
         {
             if (structure.TldRule != null)
             {

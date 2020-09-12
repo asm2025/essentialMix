@@ -1,5 +1,6 @@
 // ReSharper disable InconsistentNaming
 // ReSharper disable IdentifierTypo
+// ReSharper disable MemberHidesStaticFromOuterClass
 namespace asm.Web
 {
 	public static class MediaTypeNames

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using asm.Extensions;
 using asm.Collections;
+using asm.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Helpers

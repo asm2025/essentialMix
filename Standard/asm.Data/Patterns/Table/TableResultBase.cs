@@ -16,7 +16,6 @@ namespace asm.Data.Patterns.Table
 		{
 		}
 
-		/// <inheritdoc />
 		protected TableResultBase(string name)
 		{
 			Name = name;

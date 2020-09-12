@@ -1,7 +1,7 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Text;
 using JetBrains.Annotations;
-using asm.Collections;
 using asm.Helpers;
 using asm.Patterns.DateTime;
 
@@ -21,6 +21,7 @@ namespace asm.Extensions
 
 		private static readonly TimeUnit[] TIME_UNIT_VALUES = EnumHelper<TimeUnit>.GetValues();
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsValid(this TimeSpan thisValue, bool zeroIsValid = false, bool infiniteIsValid = false)
 		{
 			if (!zeroIsValid && thisValue == TimeSpan.Zero) return false;
@@ -76,14 +77,6 @@ namespace asm.Extensions
 			return value;
 		}
 
-		public static bool InRange(this TimeSpan thisValue, [NotNull] IReadOnlyRange<double> range, TimeUnit unit) { return InRange(thisValue, range.Minimum, range.Maximum, unit); }
-
-		public static bool InRangeEx(this TimeSpan thisValue, [NotNull] IReadOnlyRange<double> range, TimeUnit unit) { return InRangeEx(thisValue, range.Minimum, range.Maximum, unit); }
-
-		public static bool InRangeLx(this TimeSpan thisValue, [NotNull] IReadOnlyRange<double> range, TimeUnit unit) { return InRangeLx(thisValue, range.Minimum, range.Maximum, unit); }
-
-		public static bool InRangeRx(this TimeSpan thisValue, [NotNull] IReadOnlyRange<double> range, TimeUnit unit) { return InRangeRx(thisValue, range.Minimum, range.Maximum, unit); }
-
 		public static bool InRange(this TimeSpan thisValue, double minimum, double maximum, TimeUnit unit) { return GetValueAt(thisValue, unit).InRange(minimum, maximum); }
 
 		public static bool InRangeEx(this TimeSpan thisValue, double minimum, double maximum, TimeUnit unit) { return GetValueAt(thisValue, unit).InRangeEx(minimum, maximum); }
@@ -92,26 +85,31 @@ namespace asm.Extensions
 
 		public static bool InRangeRx(this TimeSpan thisValue, double minimum, double maximum, TimeUnit unit) { return GetValueAt(thisValue, unit).InRangeRx(minimum, maximum); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool InRange(this TimeSpan thisValue, TimeSpan minimum, TimeSpan maximum)
 		{
 			return thisValue.TotalMilliseconds.InRange(minimum.TotalMilliseconds, maximum.TotalMilliseconds);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool InRangeEx(this TimeSpan thisValue, TimeSpan minimum, TimeSpan maximum)
 		{
 			return thisValue.TotalMilliseconds.InRangeEx(minimum.TotalMilliseconds, maximum.TotalMilliseconds);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool InRangeLx(this TimeSpan thisValue, TimeSpan minimum, TimeSpan maximum)
 		{
 			return thisValue.TotalMilliseconds.InRangeLx(minimum.TotalMilliseconds, maximum.TotalMilliseconds);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool InRangeRx(this TimeSpan thisValue, TimeSpan minimum, TimeSpan maximum)
 		{
 			return thisValue.TotalMilliseconds.InRangeRx(minimum.TotalMilliseconds, maximum.TotalMilliseconds);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static TimeSpan Within(this TimeSpan thisValue, TimeSpan? minimum = null, TimeSpan? maximum = null)
 		{
 			if (minimum.HasValue && maximum.HasValue)
@@ -126,6 +124,7 @@ namespace asm.Extensions
 			return thisValue;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static TimeSpan NotBelow(this TimeSpan thisValue, TimeSpan minimum)
 		{
 			return thisValue < minimum
@@ -133,6 +132,7 @@ namespace asm.Extensions
 						: thisValue;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static TimeSpan NotAbove(this TimeSpan thisValue, TimeSpan maximum)
 		{
 			return thisValue > maximum
@@ -140,6 +140,7 @@ namespace asm.Extensions
 						: thisValue;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static TimeSpan Minimum(this TimeSpan thisValue, TimeSpan value)
 		{
 			return thisValue < value
@@ -162,6 +163,7 @@ namespace asm.Extensions
 			return value;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static TimeSpan Maximum(this TimeSpan thisValue, TimeSpan value)
 		{
 			return thisValue > value
@@ -214,31 +216,42 @@ namespace asm.Extensions
 			return value;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static short TotalShortMilliseconds(this TimeSpan thisValue) { return (short)thisValue.TotalMilliseconds.Within(short.MinValue, short.MaxValue); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static ushort TotalUShortMilliseconds(this TimeSpan thisValue) { return (ushort)thisValue.TotalMilliseconds.Within(ushort.MinValue, ushort.MaxValue); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int TotalIntMilliseconds(this TimeSpan thisValue) { return (int)thisValue.TotalMilliseconds.Within(int.MinValue, int.MaxValue); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static uint TotalUIntMilliseconds(this TimeSpan thisValue) { return (uint)thisValue.TotalMilliseconds.Within(uint.MinValue, uint.MaxValue); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static long TotalLongMilliseconds(this TimeSpan thisValue) { return (long)thisValue.TotalMilliseconds.Within(long.MinValue, long.MaxValue); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static ulong TotalULongMilliseconds(this TimeSpan thisValue) { return (ulong)thisValue.TotalMilliseconds.Within(ulong.MinValue, ulong.MaxValue); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string HoursMinutes(this TimeSpan thisValue) { return thisValue.ToString(HOURS_MINUTES); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string DaysHoursMinutes(this TimeSpan thisValue) { return thisValue.ToString(DAYS_HOURS_MINUTES); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string HoursMinutesSeconds(this TimeSpan thisValue) { return thisValue.ToString(HOURS_MINUTES_SECONDS); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string DaysHoursMinutesSeconds(this TimeSpan thisValue) { return thisValue.ToString(DAYS_HOURS_MINUTES_SECONDS); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string HoursMinutesSecondsMilliseconds(this TimeSpan thisValue, byte millisecondsLength = 3, bool millisecondsAreOptional = false)
 		{
 			millisecondsLength = millisecondsLength.Within((byte)0, (byte)7);
@@ -248,6 +261,7 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string DaysHoursMinutesSecondsMilliseconds(this TimeSpan thisValue, byte millisecondsLength = 3, bool millisecondsAreOptional = false)
 		{
 			millisecondsLength = millisecondsLength.Within((byte)0, (byte)7);
@@ -257,12 +271,15 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string ToShortString(this TimeSpan thisValue) { return thisValue.ToString(SHORT_STRING); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string ToMediumString(this TimeSpan thisValue) { return thisValue.ToString(MEDIUM_STRING); }
 
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string ToLongString(this TimeSpan thisValue) { return thisValue.ToString(LONG_STRING); }
 
 		[NotNull]
@@ -383,26 +400,37 @@ namespace asm.Extensions
 			return thisValue.ToString(sb.ToString());
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static DateTime ToDateTime(this TimeSpan thisValue) { return DateTime.MinValue.Add(thisValue); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int ToInt(this TimeSpan thisValue) { return ToDateTime(thisValue).ToInt(); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static long ToLong(this TimeSpan thisValue) { return ToDateTime(thisValue).ToLong(); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double ToDouble(this TimeSpan thisValue) { return ToDateTime(thisValue).ToDouble(); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Years(this TimeSpan thisValue) { return ToDateTime(thisValue).Years(DateTime.MinValue); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Months(this TimeSpan thisValue) { return ToDateTime(thisValue).Months(DateTime.MinValue); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Days(this TimeSpan thisValue) { return ToDateTime(thisValue).Days(DateTime.MinValue); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Hours(this TimeSpan thisValue) { return ToDateTime(thisValue).Hours(DateTime.MinValue); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Minutes(this TimeSpan thisValue) { return ToDateTime(thisValue).Minutes(DateTime.MinValue); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Seconds(this TimeSpan thisValue) { return ToDateTime(thisValue).Seconds(DateTime.MinValue); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Milliseconds(this TimeSpan thisValue) { return ToDateTime(thisValue).Milliseconds(DateTime.MinValue); }
 	}
 }

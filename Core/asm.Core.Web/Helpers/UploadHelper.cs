@@ -57,7 +57,7 @@ namespace asm.Core.Web.Helpers
 						if (StringSegment.IsNullOrEmpty(fileNameSegment)) fileNameSegment = contentDisposition.FileName.Trim();
 						if (StringSegment.IsNullOrEmpty(fileNameSegment)) continue;
 
-						string fileName = WebUtility.UrlDecode(fileNameSegment.Value).Trim('\"', ' ');
+						string fileName = WebUtility.UrlDecode(fileNameSegment.Value)?.Trim('\"', ' ');
 						if (string.IsNullOrEmpty(fileName)) continue;
 						if (Path.IsPathFullyQualified(fileName)) fileName = Path.GetFileName(fileName);
 						
@@ -124,7 +124,7 @@ namespace asm.Core.Web.Helpers
 
 			foreach (IFormFile file in files.TakeWhile(e => !token.IsCancellationRequested))
 			{
-				string fileName = WebUtility.UrlDecode(file.FileName).Trim('\"', ' ');
+				string fileName = WebUtility.UrlDecode(file.FileName)?.Trim('\"', ' ');
 				if (string.IsNullOrEmpty(fileName)) continue;
 				if (Path.IsPathFullyQualified(fileName)) fileName = Path.GetFileName(fileName);
 						

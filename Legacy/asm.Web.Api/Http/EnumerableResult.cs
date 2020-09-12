@@ -56,7 +56,7 @@ namespace asm.Web.Api.Http
 		protected Func<IEnumerable> GetResultFunction { get; }
 
 		/// <inheritdoc />
-		protected override async Task WriteContent(HttpResponseMessage response, Stream stream, HttpContent content, TransportContext context, CancellationToken token)
+		protected override async Task WriteContent(HttpResponseMessage response, Stream stream, HttpContent content, TransportContext context, CancellationToken token = default(CancellationToken))
 		{
 			if (token.IsCancellationRequested) return;
 
@@ -118,7 +118,7 @@ namespace asm.Web.Api.Http
 		protected Func<IEnumerable<T>> GetResultFunction { get; }
 
 		/// <inheritdoc />
-		protected override async Task WriteContent(HttpResponseMessage response, Stream stream, HttpContent content, TransportContext context, CancellationToken token)
+		protected override async Task WriteContent(HttpResponseMessage response, Stream stream, HttpContent content, TransportContext context, CancellationToken token = default(CancellationToken))
 		{
 			if (token.IsCancellationRequested) return;
 

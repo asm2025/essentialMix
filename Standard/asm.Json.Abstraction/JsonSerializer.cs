@@ -10,7 +10,6 @@ namespace asm.Json.Abstraction
 {
 	public abstract class JsonSerializer : IJsonSerializer
 	{
-		/// <inheritdoc />
 		protected JsonSerializer() 
 		{
 		}

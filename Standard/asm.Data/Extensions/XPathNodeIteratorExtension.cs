@@ -1,3 +1,4 @@
+using System.Xml;
 using System.Xml.XPath;
 using JetBrains.Annotations;
 using asm.Data.Xml;
@@ -17,5 +18,10 @@ namespace asm.Data.Extensions
 
 		[NotNull]
 		public static XNodeLister XList([NotNull] this XPathNodeIterator thisValue) { return new XNodeLister(thisValue); }
+		
+		public static XmlNode GetNode([NotNull] this XPathNodeIterator thisValue)
+		{
+			return thisValue.Current?.GetNode();
+		}
 	}
 }

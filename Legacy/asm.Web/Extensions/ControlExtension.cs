@@ -68,7 +68,7 @@ namespace asm.Web.Extensions
 			}
 		}
 
-		public static void ClientScriptBlock([NotNull] this Control thisValue, string script) { ClientScriptBlock(thisValue, script, true); }
+		public static void ClientScriptBlock([NotNull] this Control thisValue, [NotNull] string script) { ClientScriptBlock(thisValue, script, true); }
 		public static void ClientScriptBlock([NotNull] this Control thisValue, [NotNull] string script, bool startup) { ClientScriptBlock(thisValue, null, script, startup); }
 		public static void ClientScriptBlock([NotNull] this Control thisValue, string key, [NotNull] string script) { ClientScriptBlock(thisValue, key, script, true); }
 		public static void ClientScriptBlock([NotNull] this Control thisValue, string key, [NotNull] string script, bool startup) { ClientScriptBlock(thisValue, key, script, startup, true); }
@@ -332,20 +332,20 @@ namespace asm.Web.Extensions
 			if (options == null) return GetPostBackReference(thisValue, string.Empty, registerForEventValidation);
 			Page page = thisValue.AsPage();
 			ClientScriptManager cs = page.ClientScript;
-			if (options.Argument == null) options.Argument = "{0}";
+			options.Argument ??= "{0}";
 			return cs.GetPostBackEventReference(options, registerForEventValidation);
 		}
 
 		[NotNull]
 		public static string GetCallbackReference([NotNull] this Control thisValue, [NotNull] string onCallbackCompleteName)
 		{
-			return GetCallbackReference(thisValue, "{0}", onCallbackCompleteName, null, null, false);
+			return GetCallbackReference(thisValue, "{0}", onCallbackCompleteName, null!, null, false);
 		}
 
 		[NotNull]
 		public static string GetCallbackReference([NotNull] this Control thisValue, [NotNull] string onCallbackCompleteName, bool useAsync)
 		{
-			return GetCallbackReference(thisValue, "{0}", onCallbackCompleteName, null, null, useAsync);
+			return GetCallbackReference(thisValue, "{0}", onCallbackCompleteName, null!, null, useAsync);
 		}
 
 		[NotNull]

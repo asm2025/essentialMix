@@ -9,7 +9,6 @@ namespace asm.Core.Web.Middleware
 {
 	public abstract class MiddlewareBase
 	{
-		/// <inheritdoc />
 		protected MiddlewareBase(RequestDelegate next, ILogger logger)
 		{
 			Next = next;

@@ -1,7 +1,7 @@
 using System;
 using System.Text;
-using JetBrains.Annotations;
 using asm.Collections;
+using JetBrains.Annotations;
 using asm.Helpers;
 using asm.Numeric;
 

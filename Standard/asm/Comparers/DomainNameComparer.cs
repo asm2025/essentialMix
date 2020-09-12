@@ -54,12 +54,8 @@ namespace asm.Comparers
 			if (ReferenceEquals(x, y)) return 0;
 			if (ReferenceEquals(x, null)) return 1;
 			if (ReferenceEquals(y, null)) return -1;
-			
 			DomainName xd = __parser.Value.Get(x);
 			DomainName yd = __parser.Value.Get(y);
-			if (xd == null && yd == null) return 0;
-			if (xd == null) return 1;
-			if (yd == null) return -1;
 			return string.Compare(xd.Hostname, yd.Hostname, StringComparison.OrdinalIgnoreCase);
 		}
 

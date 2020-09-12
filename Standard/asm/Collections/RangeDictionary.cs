@@ -132,4 +132,14 @@ namespace asm.Collections
 		/// <inheritdoc />
 		public void CopyTo(KeyValuePair<(TKey Minimum, TKey Maximum), TValue>[] array, int arrayIndex) { DictionaryAsGenericCollection.CopyTo(array, arrayIndex); }
 	}
+
+	public static class RangeDictionaryExtension
+	{
+		[NotNull]
+		public static ReadOnlyRangeDictionary<TKey, TValue> AsReadOnly<TKey, TValue>([NotNull] this RangeDictionary<TKey, TValue> thisValue)
+			where TKey : IComparable
+		{
+			return new ReadOnlyRangeDictionary<TKey, TValue>(thisValue);
+		}
+	}
 }

@@ -5,8 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using asm.Extensions;
 using SystemDbContext = Microsoft.EntityFrameworkCore.DbContext;
-using TaskCodeExtension = asm.Extensions.TaskCodeExtension;
 
 namespace asm.Core.Data.Entity.Extensions
 {
@@ -21,13 +21,13 @@ namespace asm.Core.Data.Entity.Extensions
 		public static async Task ReloadAsync<TEntity>([NotNull] this SystemDbContext thisValue, [NotNull] TEntity entity)
 			where TEntity : class
 		{
-			await TaskCodeExtension.ConfigureAwait(thisValue.Entry(entity).ReloadAsync());
+			await thisValue.Entry(entity).ReloadAsync().ConfigureAwait();
 		}
 
 		public static async Task ReloadAsync<TEntity>([NotNull] this SystemDbContext thisValue, [NotNull] TEntity entity, CancellationToken cancellationToken)
 			where TEntity : class
 		{
-			await TaskCodeExtension.ConfigureAwait(thisValue.Entry(entity).ReloadAsync(cancellationToken));
+			await thisValue.Entry(entity).ReloadAsync(cancellationToken).ConfigureAwait();
 		}
 
 		public static void ReloadNavigationProperty<TEntity, TElement>([NotNull] this SystemDbContext thisValue, [NotNull] TEntity entity, [NotNull] Expression<Func<TEntity, IEnumerable<TElement>>> navigationProperty)

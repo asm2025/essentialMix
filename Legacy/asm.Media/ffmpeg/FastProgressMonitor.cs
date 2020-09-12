@@ -1,8 +1,8 @@
 using System;
 using System.Text.RegularExpressions;
-using asm.Collections.Concurrent.MessageQueue;
 using asm.Helpers;
 using asm.Media.Commands;
+using asm.Threading.Collections.MessageQueue;
 using JetBrains.Annotations;
 
 namespace asm.Media.ffmpeg

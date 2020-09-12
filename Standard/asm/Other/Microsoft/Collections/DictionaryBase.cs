@@ -8,16 +8,19 @@ using System.Runtime.Serialization;
 using System.Security;
 using System.Security.Permissions;
 using System.Threading;
+using asm.Collections.DebugView;
 using asm.Exceptions.Collections;
 using asm.Extensions;
+using asm.Other.Microsoft;
 using JetBrains.Annotations;
 using asmMath = asm.Numeric.Math;
 
-namespace asm.Other.Microsoft.Collections
+// ReSharper disable once CheckNamespace
+namespace Other.Microsoft.Collections
 {
 	// based on https://github.com/microsoft/referencesource/blob/master/mscorlib/system/collections/generic/dictionary.cs
 	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(Other_Mscorlib_DictionaryDebugView<,>))]
+	[DebuggerTypeProxy(typeof(Dbg_DictionaryDebugView<,>))]
 	[Serializable]
 	[ComVisible(false)]
 	public abstract class DictionaryBase<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>, ISerializable, IDeserializationCallback
@@ -31,7 +34,7 @@ namespace asm.Other.Microsoft.Collections
 		}
 
 		[DebuggerDisplay("Count = {Count}")]
-		[DebuggerTypeProxy(typeof(Other_Mscorlib_DictionaryKeyCollectionDebugView<,>))]
+		[DebuggerTypeProxy(typeof(Dbg_DictionaryKeyCollectionDebugView<,>))]
 		[Serializable]
 		public sealed class KeyCollection : ICollection<TKey>, ICollection, IReadOnlyCollection<TKey>
 		{
@@ -165,7 +168,7 @@ namespace asm.Other.Microsoft.Collections
 		}
 
 		[DebuggerDisplay("Count = {Count}")]
-		[DebuggerTypeProxy(typeof(Other_Mscorlib_DictionaryValueCollectionDebugView<,>))]
+		[DebuggerTypeProxy(typeof(Dbg_DictionaryValueCollectionDebugView<,>))]
 		[Serializable]
 		public sealed class ValueCollection : ICollection<TValue>, ICollection, IReadOnlyCollection<TValue>
 		{

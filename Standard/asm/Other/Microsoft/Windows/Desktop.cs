@@ -16,7 +16,7 @@ namespace asm.Other.Microsoft.Windows
 	/// </summary>
 	public class Desktop : Disposable, ICloneable
 	{
-		public struct Window
+		public readonly struct Window
 		{
 			/// <summary>
 			/// Creates a new window object.

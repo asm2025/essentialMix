@@ -15,7 +15,6 @@ namespace asm.Web
 	{
 		private string _culture = RequestParameters.DefaultCulture;
 
-		/// <inheritdoc />
 		public RequestParameters() 
 		{
 		}

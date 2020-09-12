@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using asm.Extensions;
+using asm.Patterns.DateTime;
+using JetBrains.Annotations;
 
 namespace asm.Collections
 {
@@ -46,5 +49,16 @@ namespace asm.Collections
 		bool IsPreviousTo(IReadOnlyRange<T> other);
 		bool IsNextTo(IReadOnlyRange<T> other);
 		void CopyTo(T[] array, int arrayIndex);
+	}
+
+	public static class IReadOnlyRangeExtension
+	{
+		public static bool InRange(this TimeSpan thisValue, [NotNull] IReadOnlyRange<double> range, TimeUnit unit) { return thisValue.InRange(range.Minimum, range.Maximum, unit); }
+
+		public static bool InRangeEx(this TimeSpan thisValue, [NotNull] IReadOnlyRange<double> range, TimeUnit unit) { return thisValue.InRangeEx(range.Minimum, range.Maximum, unit); }
+
+		public static bool InRangeLx(this TimeSpan thisValue, [NotNull] IReadOnlyRange<double> range, TimeUnit unit) { return thisValue.InRangeLx(range.Minimum, range.Maximum, unit); }
+
+		public static bool InRangeRx(this TimeSpan thisValue, [NotNull] IReadOnlyRange<double> range, TimeUnit unit) { return thisValue.InRangeRx(range.Minimum, range.Maximum, unit); }
 	}
 }

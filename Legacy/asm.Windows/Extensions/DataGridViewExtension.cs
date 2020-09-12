@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using System.Windows.Forms;
 using asm.Extensions;
-using asm.Helpers;
+using asm.Threading.Helpers;
 using JetBrains.Annotations;
 
 namespace asm.Windows.Extensions

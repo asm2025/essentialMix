@@ -3,9 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Reflection;
+using asm.Collections;
 using JetBrains.Annotations;
 using asm.Extensions;
-using asm.Collections;
 
 namespace asm.Helpers
 {

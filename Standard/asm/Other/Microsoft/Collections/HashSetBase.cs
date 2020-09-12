@@ -6,17 +6,19 @@ using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 using System.Security;
 using System.Security.Permissions;
+using asm.Collections.DebugView;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using asm.Other.Moitah;
 using JetBrains.Annotations;
 using asmMath = asm.Numeric.Math;
 
-namespace asm.Other.Microsoft.Collections
+// ReSharper disable once CheckNamespace
+namespace Other.Microsoft.Collections
 {
 	// based on https://github.com/microsoft/referencesource/blob/master/System.Core/System/Collections/Generic/HashSet.cs
 	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(Other_Mscorlib_HashSetDebugView<>))]
+	[DebuggerTypeProxy(typeof(Dbg_HashSetDebugView<>))]
 	[Serializable]
 	[HostProtection(MayLeakOnAbort = true)]
 	public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback

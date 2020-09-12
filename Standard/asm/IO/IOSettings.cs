@@ -13,12 +13,10 @@ namespace asm.IO
 		private int _bufferSize = BUFFER_DEFAULT;
 		private Encoding _encoding = EncodingHelper.Default;
 
-		/// <inheritdoc />
 		public IOSettings()
 		{
 		}
 
-		/// <inheritdoc />
 		public IOSettings(IOSettings settings)
 		{
 			if (settings == null) return;

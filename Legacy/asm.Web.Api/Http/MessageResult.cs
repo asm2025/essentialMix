@@ -20,7 +20,7 @@ namespace asm.Web.Api.Http
 		public string Message { get; }
 
 		[NotNull]
-		public override Task<HttpResponseMessage> ExecuteAsync(CancellationToken token)
+		public override Task<HttpResponseMessage> ExecuteAsync(CancellationToken token = default(CancellationToken))
 		{
 			return token.IsCancellationRequested
 						? Task.FromCanceled<HttpResponseMessage>(token)

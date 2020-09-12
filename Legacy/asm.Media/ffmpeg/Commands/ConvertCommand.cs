@@ -6,38 +6,37 @@ using asm.Media.Commands;
 
 namespace asm.Media.ffmpeg.Commands
 {
+	/*
+	 * http://ffmpeg.org/ffmpeg.html
+	 * https://trac.ffmpeg.org/wiki/Creating%20multiple%20outputs
+	 * https://trac.ffmpeg.org/wiki/Encode/H.264
+	 * https://trac.ffmpeg.org/wiki/Create%20a%20thumbnail%20image%20every%20X%20seconds%20of%20the%20video
+	 * https://www.radiantmediaplayer.com/guides/working-with-ffmpeg.html
+	 * https://www.virag.si/2012/01/web-video-encoding-tutorial-with-ffmpeg-0-9/
+	 * https://www.virag.si/2012/01/webm-web-video-encoding-tutorial-with-ffmpeg-0-9/
+	 * https://www.tecmint.com/ffmpeg-commands-for-video-audio-and-image-conversion-in-linux/
+	 * https://www.labnol.org/internet/useful-ffmpeg-commands/28490/
+	 * https://www.catswhocode.com/blog/19-ffmpeg-commands-for-all-needs
+	 * https://superuser.com/questions/543589/information-about-ffmpeg-command-line-options
+	 * https://stackoverflow.com/questions/25122740/different-between-s-and-vf-scale-in-ffmpeg-especially-in-two-pass-transc
+	 * https://stackoverflow.com/questions/29350089/what-combinations-of-video-formats-and-video-and-audio-codecs-can-be-played-in-m
+	 * http://diveintohtml5.info/video.html
+	 * http://edoceo.com/cli/ffmpeg
+	 *
+	 * ffmpeg command line arguments are position sensitive - make sure you don�t mix up the order. Good rule of thumb to prevent mistakes is to keep the order of
+	 * ffmpeg [input options] -i [input filename] -codec:v [video options] -codec:a [audio options] [output file options] [output filename]
+	 * 
+	 * ffmpeg -i STREAM.MP4 -acodec libvorbis -ac 2 -ab 96k -ar 44100 -b 345k -s 640�360 output.ogv
+	 * ffmpeg -i STREAM.MP4 -acodec libvorbis -ac 2 -ab 96k -ar 44100 -b 345k -s 640�360 output.webm
+	 * ffmpeg -i STREAM.MP4 -acodec libfaac -ab 96k -vcodec libx264 -vpre slower -level 21 -refs 2 -b 345k -bt 345k -threads 0 -s 640�360 output.mp4
+	 * 
+	 * Encoder info
+	 * ffmpeg -h encoder=libvorbis
+	 * ffmpeg -h encoder=libvpx
+	 * ffmpeg -h encoder=libx264
+	 */
 	public sealed class ConvertCommand : InputOutputCommand
 	{
-		//http://ffmpeg.org/ffmpeg.html
-		//https://trac.ffmpeg.org/wiki/Creating%20multiple%20outputs
-		//https://trac.ffmpeg.org/wiki/Encode/H.264
-		//https://trac.ffmpeg.org/wiki/Create%20a%20thumbnail%20image%20every%20X%20seconds%20of%20the%20video
-		//https://www.radiantmediaplayer.com/guides/working-with-ffmpeg.html
-		//https://www.virag.si/2012/01/web-video-encoding-tutorial-with-ffmpeg-0-9/
-		//https://www.virag.si/2012/01/webm-web-video-encoding-tutorial-with-ffmpeg-0-9/
-		//https://www.tecmint.com/ffmpeg-commands-for-video-audio-and-image-conversion-in-linux/
-		//https://www.labnol.org/internet/useful-ffmpeg-commands/28490/
-		//https://www.catswhocode.com/blog/19-ffmpeg-commands-for-all-needs
-		//https://superuser.com/questions/543589/information-about-ffmpeg-command-line-options
-		//https://stackoverflow.com/questions/25122740/different-between-s-and-vf-scale-in-ffmpeg-especially-in-two-pass-transc
-		//https://stackoverflow.com/questions/29350089/what-combinations-of-video-formats-and-video-and-audio-codecs-can-be-played-in-m
-		//http://diveintohtml5.info/video.html
-		// http://edoceo.com/cli/ffmpeg
-
-		/*
-		 * ffmpeg command line arguments are position sensitive - make sure you don�t mix up the order. Good rule of thumb to prevent mistakes is to keep the order of
-		 * ffmpeg [input options] -i [input filename] -codec:v [video options] -codec:a [audio options] [output file options] [output filename]
-		 * 
-		 * ffmpeg -i STREAM.MP4 -acodec libvorbis -ac 2 -ab 96k -ar 44100 -b 345k -s 640�360 output.ogv
-		 * ffmpeg -i STREAM.MP4 -acodec libvorbis -ac 2 -ab 96k -ar 44100 -b 345k -s 640�360 output.webm
-		 * ffmpeg -i STREAM.MP4 -acodec libfaac -ab 96k -vcodec libx264 -vpre slower -level 21 -refs 2 -b 345k -bt 345k -threads 0 -s 640�360 output.mp4
-		 * 
-		 * Encoder info
-		 * ffmpeg -h encoder=libvorbis
-		 * ffmpeg -h encoder=libvpx
-		 * ffmpeg -h encoder=libx264
-		*/
-
 		public ConvertCommand()
 			: this(null)
 		{

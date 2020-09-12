@@ -10,9 +10,9 @@ namespace asm.Other.Nager.PublicSuffix
         private readonly string _fileUrl;
         private readonly ICacheProvider _cacheProvider;
 
-        public ICacheProvider CacheProvider { get { return _cacheProvider; } }
+        public ICacheProvider CacheProvider => _cacheProvider;
 
-        public WebTldRuleProvider(string url = "https://publicsuffix.org/list/public_suffix_list.dat", ICacheProvider cacheProvider = null)
+		public WebTldRuleProvider(string url = "https://publicsuffix.org/list/public_suffix_list.dat", ICacheProvider cacheProvider = null)
         {
             _fileUrl = url;
 
@@ -48,15 +48,15 @@ namespace asm.Other.Nager.PublicSuffix
         public async Task<string> LoadFromUrl(string url)
         {
             using (HttpClient httpClient = new HttpClient())
-            using (HttpResponseMessage response = await httpClient.GetAsync(url).ConfigureAwait(false))
-            {
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new RuleLoadException($"Cannot load from {url} {response.StatusCode}");
-                }
+			{
+				using (HttpResponseMessage response = await httpClient.GetAsync(url).ConfigureAwait(false))
+				{
+					if (!response.IsSuccessStatusCode)
+						throw new RuleLoadException($"Cannot load from {url} {response.StatusCode}");
 
-                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            }
-        }
+					return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+				}
+			}
+		}
     }
 }

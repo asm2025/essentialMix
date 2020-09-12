@@ -1,5 +1,5 @@
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-using asm.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Windows
@@ -142,14 +142,7 @@ namespace asm.Windows
 		/// <inheritdoc />
 		public override int GetHashCode()
 		{
-			unchecked
-			{
-				int hash = 397 ^ (int)KeyCode;
-				hash = (hash * 397) ^ IsControlPressed.Value();
-				hash = (hash * 397) ^ IsAltPressed.Value();
-				hash = (hash * 397) ^ IsShiftPressed.Value();
-				return hash;
-			}
+			return RuntimeHelpers.GetHashCode(this);
 		}
 
 		public static bool operator ==(KeyMapping keyMapping, KeyEventArgs keyEventArgs) { return keyEventArgs != null && keyMapping.Equals(keyEventArgs); }

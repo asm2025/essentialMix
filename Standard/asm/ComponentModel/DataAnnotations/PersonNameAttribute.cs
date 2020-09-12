@@ -34,6 +34,7 @@ namespace asm.ComponentModel.DataAnnotations
 			}
 			catch
 			{
+				// ignored
 			}
 
 			return new Regex(REGEX_PERSON, RegexHelper.OPTIONS_I | RegexOptions.ExplicitCapture);

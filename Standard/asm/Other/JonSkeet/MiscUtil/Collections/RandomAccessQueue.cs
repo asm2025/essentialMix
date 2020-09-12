@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using asm.Collections;
 using asm.Extensions;
 using JetBrains.Annotations;
 
@@ -260,10 +259,6 @@ namespace asm.Other.JonSkeet.MiscUtil.Collections
 			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
 			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, Count);
-			
-			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
-			Type sourceType = typeof(IItem);
-			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
 			CopyTo(objects, arrayIndex);
 		}

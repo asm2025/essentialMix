@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using asm.Other.Microsoft.Collections;
+using Other.Microsoft.Collections;
 using JetBrains.Annotations;
 
 namespace asm.Collections

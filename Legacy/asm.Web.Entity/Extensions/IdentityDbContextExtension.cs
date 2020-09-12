@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using asm.Extensions;
-using asm.Helpers;
+using asm.Threading.Helpers;
 using asm.Web.Entity.Model.Membership;
 using asm.Web.Extensions;
 using JetBrains.Annotations;

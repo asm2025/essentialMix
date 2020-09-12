@@ -121,9 +121,17 @@
     <Compile Include="UITypeEditors\SaveFileNameUITypeEditor.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Standard\asm.Collections\asm.Collections.csproj">
+      <Project>{619dcb71-8d65-4d68-9d81-c043897767c7}</Project>
+      <Name>asm.Collections</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Standard\asm.Drawing\asm.Drawing.csproj">
       <Project>{EA90A1AF-0FB2-4363-9B02-AB4B6889EFF5}</Project>
       <Name>asm.Drawing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Standard\asm.Threading\asm.Threading.csproj">
+      <Project>{147ffae4-4340-4222-b232-15fde6b85f7f}</Project>
+      <Name>asm.Threading</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Standard\asm\asm.csproj">
       <Project>{ad2d9eec-efeb-4184-810c-ac2c5804e35e}</Project>

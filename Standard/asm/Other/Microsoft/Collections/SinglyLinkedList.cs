@@ -6,16 +6,18 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
 using System.Security.Permissions;
+using asm.Collections.DebugView;
 using asm.Exceptions;
 using asm.Exceptions.Collections;
 using asm.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Other.Microsoft.Collections
+// ReSharper disable once CheckNamespace
+namespace Other.Microsoft.Collections
 {
 	// based on https://github.com/microsoft/referencesource/blob/master/System/compmod/system/collections/generic/linkedlist.cs
 	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(Other_Mscorlib_CollectionDebugView<>))]
+	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 	[ComVisible(false)]
 	public class SinglyLinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
 	{

@@ -39,12 +39,10 @@ namespace asm.Newtonsoft.Serialization
 		protected NamingStrategyType ExtensionDataNameStrategy { get; set; }
 		protected NamingStrategyType DictionaryKeyStrategy { get; set; }
 		
-		[NotNull]
-		public override string GetPropertyName([NotNull] string name, bool hasSpecifiedName) { return ResolvePropertyName(name, hasSpecifiedName); }
+		public override string GetPropertyName(string name, bool hasSpecifiedName) { return ResolvePropertyName(name, hasSpecifiedName); }
 
 		/// <inheritdoc />
-		[NotNull]
-		protected override string ResolvePropertyName([NotNull] string name) { return ResolvePropertyName(name, false); }
+		protected override string ResolvePropertyName(string name) { return ResolvePropertyName(name, false); }
 
 		[NotNull]
 		protected virtual string ResolvePropertyName([NotNull] string name, bool hasSpecifiedName)
@@ -61,8 +59,7 @@ namespace asm.Newtonsoft.Serialization
 		}
 
 		/// <inheritdoc />
-		[NotNull]
-		public override string GetExtensionDataName([NotNull] string name)
+		public override string GetExtensionDataName(string name)
 		{
 			switch (ExtensionDataNameStrategy)
 			{
@@ -76,8 +73,7 @@ namespace asm.Newtonsoft.Serialization
 		}
 
 		/// <inheritdoc />
-		[NotNull]
-		public override string GetDictionaryKey([NotNull] string name)
+		public override string GetDictionaryKey(string name)
 		{
 			switch (DictionaryKeyStrategy)
 			{

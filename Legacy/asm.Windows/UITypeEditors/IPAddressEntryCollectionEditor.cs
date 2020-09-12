@@ -1,5 +1,5 @@
 using System;
-using asm.Network;
+using asm.Collections.Specialized;
 
 namespace asm.Windows.UITypeEditors
 {

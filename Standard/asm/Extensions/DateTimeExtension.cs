@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using asm.Helpers;
 using asm.Patterns.DateTime;
 using JetBrains.Annotations;
@@ -176,32 +177,40 @@ namespace asm.Extensions
 					thisValue.Day);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double OAValue(this DateTime thisValue)
 		{
 			if (thisValue < DateTimeHelper.OaEpoch) throw new ArgumentOutOfRangeException(nameof(thisValue));
 			return Convert.ToDouble((thisValue - DateTimeHelper.OaEpoch).Ticks) / TimeSpan.TicksPerDay;
 		}
 		
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int GetWeekNumber(this DateTime thisValue, CultureInfo culture = null)
 		{
 			CultureInfo ci = culture ?? CultureInfoHelper.Default;
 			return ci.Calendar.GetWeekOfYear(thisValue, ci.DateTimeFormat.CalendarWeekRule, ci.DateTimeFormat.FirstDayOfWeek);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int GetWeekNumberOfMonth(this DateTime thisValue, CultureInfo culture = null)
 		{
 			DateTime first = new DateTime(thisValue.Year, thisValue.Month, 1);
 			return thisValue.GetWeekNumber(culture) - first.GetWeekNumber(culture) + 1;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int ToInt(this DateTime thisValue) { return thisValue.Year * 10_000 + thisValue.Month * 100 + thisValue.Day; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static long ToLong(this DateTime thisValue) { return ToInt(thisValue) * 1_000_000 + thisValue.Hour * 10_000 + thisValue.Minute * 100 + thisValue.Second; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double ToDouble(this DateTime thisValue) { return ToInt(thisValue) + (thisValue.Hour * 10_000 + thisValue.Minute * 100 + thisValue.Second) / 1_000_000d; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Years(this DateTime thisValue, DateTime value) { return (ToInt(thisValue) - ToInt(value)) / 10_000d; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Months(this DateTime thisValue, DateTime value)
 		{
 			int diff = ToInt(thisValue) - ToInt(value);
@@ -210,28 +219,40 @@ namespace asm.Extensions
 			return years * 12 + months;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Days(this DateTime thisValue, DateTime value) { return (thisValue - value).TotalDays; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Hours(this DateTime thisValue, DateTime value) { return (thisValue - value).TotalHours; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Minutes(this DateTime thisValue, DateTime value) { return (thisValue - value).TotalMinutes; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Seconds(this DateTime thisValue, DateTime value) { return (thisValue - value).TotalSeconds; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Milliseconds(this DateTime thisValue, DateTime value) { return (thisValue - value).TotalMilliseconds; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int DaysOfMonth(this DateTime thisValue) { return thisValue.AddMonths(1).AddDays(-1).Day; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int Quarter(this DateTime thisValue) { return (thisValue.Month - 1) / 3 + 1; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int SemiAnnual(this DateTime thisValue) { return (thisValue.Month - 1) / 6 + 1; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int Century(this DateTime thisValue) { return thisValue.Year / 100 + 1; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int Millennium(this DateTime thisValue) { return thisValue.Year / 1000 + 1; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static DateTime Yesterday(this DateTime thisValue) { return thisValue.AddDays(-1); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static DateTime Tomorrow(this DateTime thisValue) { return thisValue.AddDays(1); }
 
 		public static (DateTime Start, DateTime End) PreviousHours(this DateTime thisValue, uint count)
@@ -240,36 +261,42 @@ namespace asm.Extensions
 			return (end.AddHours(-count), end.AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) NextHours(this DateTime thisValue, uint count)
 		{
 			DateTime start = new DateTime(thisValue.Year, thisValue.Month, thisValue.Day, thisValue.Hour, 0, 0).AddHours(1);
 			return (start, start.AddHours(count).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) PreviousDays(this DateTime thisValue, uint count)
 		{
 			DateTime start = thisValue.Date;
 			return (start.AddDays(-count), start.AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) NextDays(this DateTime thisValue, uint count)
 		{
 			DateTime start = thisValue.Date.AddDays(1);
 			return (start, start.AddDays(count).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) PreviousWeeks(this DateTime thisValue, uint count)
 		{
 			DateTime start = thisValue.Date.AddDays(-(int)thisValue.DayOfWeek);
 			return (start.AddDays(-(count * 7)), start.AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) NextWeeks(this DateTime thisValue, uint count)
 		{
 			DateTime start = thisValue.Date.AddDays(-(int)thisValue.DayOfWeek + 7);
 			return (start, start.AddDays(count * 7).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) PreviousMonths(this DateTime thisValue, int count)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
@@ -277,6 +304,7 @@ namespace asm.Extensions
 			return (thisStart.AddMonths(-count), thisStart.AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) NextMonths(this DateTime thisValue, int count)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
@@ -284,6 +312,7 @@ namespace asm.Extensions
 			return (start, start.AddMonths(count).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) PreviousYears(this DateTime thisValue, int count)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
@@ -291,6 +320,7 @@ namespace asm.Extensions
 			return (thisStart.AddYears(-count), thisStart.AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) NextYears(this DateTime thisValue, int count)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
@@ -298,6 +328,7 @@ namespace asm.Extensions
 			return (start, start.AddYears(count).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) PreviousCenturies(this DateTime thisValue, int count)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
@@ -306,6 +337,7 @@ namespace asm.Extensions
 			return (thisStart, thisStart.AddYears(100).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) NextCenturies(this DateTime thisValue, int count)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
@@ -314,6 +346,7 @@ namespace asm.Extensions
 			return (thisStart, thisStart.AddYears(100).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) PreviousWeek(this DateTime thisValue, uint count = 1)
 		{
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
@@ -321,12 +354,14 @@ namespace asm.Extensions
 			return (start, start.AddDays(7).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) ThisWeek(this DateTime thisValue)
 		{
 			DateTime start = thisValue.Date.AddDays(-(int)thisValue.DayOfWeek);
 			return (start, start.AddDays(7).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) NextWeek(this DateTime thisValue, uint count = 1)
 		{
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
@@ -334,6 +369,7 @@ namespace asm.Extensions
 			return (start, start.AddDays(7).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) PreviousMonth(this DateTime thisValue, ushort count = 1)
 		{
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
@@ -341,12 +377,14 @@ namespace asm.Extensions
 			return (thisStart, thisStart.AddMonths(1).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) ThisMonth(this DateTime thisValue)
 		{
 			DateTime start = new DateTime(thisValue.Year, thisValue.Month, 1);
 			return (start, start.AddMonths(1).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) NextMonth(this DateTime thisValue, ushort count = 1)
 		{
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
@@ -354,6 +392,7 @@ namespace asm.Extensions
 			return (start, start.AddMonths(1).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) PreviousQuarter(this DateTime thisValue, ushort count = 1)
 		{
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
@@ -362,6 +401,7 @@ namespace asm.Extensions
 			return (start, start.AddMonths(3).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) ThisQuarter(this DateTime thisValue)
 		{
 			int startMonth = (Quarter(thisValue) - 1) * 3 + 1;
@@ -369,6 +409,7 @@ namespace asm.Extensions
 			return (start, start.AddMonths(3).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) NextQuarter(this DateTime thisValue, ushort count = 1)
 		{
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
@@ -377,6 +418,7 @@ namespace asm.Extensions
 			return (start, start.AddMonths(3).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) PreviousSemiAnnual(this DateTime thisValue, ushort count = 1)
 		{
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
@@ -385,6 +427,7 @@ namespace asm.Extensions
 			return (start, start.AddMonths(6).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) ThisSemiAnnual(this DateTime thisValue)
 		{
 			int startMonth = (SemiAnnual(thisValue) - 1) * 6 + 1;
@@ -392,6 +435,7 @@ namespace asm.Extensions
 			return (start, start.AddMonths(6).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) NextSemiAnnual(this DateTime thisValue, ushort count = 1)
 		{
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
@@ -400,6 +444,7 @@ namespace asm.Extensions
 			return (start, start.AddMonths(6).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) PreviousYear(this DateTime thisValue, ushort count = 1)
 		{
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
@@ -407,12 +452,14 @@ namespace asm.Extensions
 			return (start, start.AddYears(1).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) ThisYear(this DateTime thisValue)
 		{
 			DateTime start = new DateTime(thisValue.Year, 1, 1);
 			return (start, start.AddYears(1).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) NextYear(this DateTime thisValue, ushort count = 1)
 		{
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
@@ -420,6 +467,7 @@ namespace asm.Extensions
 			return (start, start.AddYears(1).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) PreviousCentury(this DateTime thisValue, byte count = 1)
 		{
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
@@ -428,6 +476,7 @@ namespace asm.Extensions
 			return (thisStart, thisStart.AddYears(100).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) ThisCentury(this DateTime thisValue)
 		{
 			int century = Century(thisValue) - 1;
@@ -435,6 +484,7 @@ namespace asm.Extensions
 			return (thisStart, thisStart.AddYears(100).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) NextCentury(this DateTime thisValue, byte count = 1)
 		{
 			if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
@@ -443,6 +493,7 @@ namespace asm.Extensions
 			return (thisStart, thisStart.AddYears(100).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) PreviousMillennium(this DateTime thisValue)
 		{
 			int millennium = Millennium(thisValue) - 2;
@@ -450,6 +501,7 @@ namespace asm.Extensions
 			return (thisStart, thisStart.AddYears(1000).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) ThisMillennium(this DateTime thisValue)
 		{
 			int millennium = Millennium(thisValue) - 1;
@@ -457,6 +509,7 @@ namespace asm.Extensions
 			return (thisStart, thisStart.AddYears(1000).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) NextMillennium(this DateTime thisValue)
 		{
 			int millennium = Millennium(thisValue);
@@ -464,6 +517,7 @@ namespace asm.Extensions
 			return (thisStart, thisStart.AddYears(1000).AddSeconds(-1));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static TimeSpan Elapsed(this DateTime thisValue)
 		{
 			return (thisValue.Kind == DateTimeKind.Utc
@@ -472,6 +526,7 @@ namespace asm.Extensions
 					thisValue;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static TimeSpan Remaining(this DateTime thisValue)
 		{
 			return thisValue -
@@ -480,6 +535,7 @@ namespace asm.Extensions
 						: DateTime.Now);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static long ElapsedTicks(this DateTime thisValue)
 		{
 			return (thisValue.Kind == DateTimeKind.Utc
@@ -488,6 +544,7 @@ namespace asm.Extensions
 					thisValue.Ticks;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static long RemainingTicks(this DateTime thisValue)
 		{
 			return thisValue.Ticks -
@@ -496,6 +553,7 @@ namespace asm.Extensions
 						: DateTime.Now).Ticks;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static long ToJavaScriptTimestamp(this DateTime thisValue)
 		{
 			return ((thisValue.Kind == DateTimeKind.Utc

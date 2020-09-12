@@ -40,7 +40,7 @@ namespace asm.Web
 		public HttpResponseMessage PerformRequest(HttpRequestMessage request)
 		{
 			ThrowIfDisposed();
-			return TaskHelper.Run(() => PerformRequestAsync(request));
+			return PerformRequestAsync(request).GetAwaiter().GetResult();
 		}
 
 		public Task<HttpResponseMessage> PerformRequestAsync(HttpRequestMessage request, CancellationToken token = default(CancellationToken))
@@ -55,13 +55,13 @@ namespace asm.Web
 		{
 			ThrowIfDisposed();
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
-			return TaskHelper.Run(() => GetStringAsync(url));
+			return GetStringAsync(url).GetAwaiter().GetResult();
 		}
 
 		public string GetString([NotNull] Uri url)
 		{
 			ThrowIfDisposed();
-			return TaskHelper.Run(() => GetStringAsync(url));
+			return GetStringAsync(url).GetAwaiter().GetResult();
 		}
 
 		public async Task<string> GetStringAsync([NotNull] string url, CancellationToken token = default(CancellationToken))

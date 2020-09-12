@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using asm.Collections;
 using asm.Helpers;
-using asm.Other.Microsoft.Collections;
 using JetBrains.Annotations;
 
 namespace asm.Extensions
@@ -22,15 +21,10 @@ namespace asm.Extensions
 
 		public static IEqualityComparer<T> GetComparer<T>([NotNull] this ISet<T> thisValue, string fieldName = null)
 		{
-			switch (thisValue)
-			{
-				case HashSet<T> hashSet:
-					return hashSet.Comparer;
-				case HashSetBase<T> hashSetBase:
-					return hashSetBase.Comparer;
-			}
-
 			Type type = thisValue.GetType();
+			PropertyInfo comparerProperty = type.GetProperty("Comparer", Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE, typeof(IEqualityComparer<T>));
+			if (comparerProperty != null) return (IEqualityComparer<T>)comparerProperty.GetValue(thisValue);
+
 			fieldName = fieldName.ToNullIfEmpty();
 			bool useDefaultName = fieldName == null;
 			if (useDefaultName) fieldName = "_comparer";

@@ -77,6 +77,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Standard\asm.Threading\asm.Threading.csproj">
+      <Project>{147FFAE4-4340-4222-B232-15FDE6B85F7F}</Project>
+      <Name>asm.Threading</Name>
+    </ProjectReference>
     <ProjectReference Include="..\asm.Web\asm.Web.csproj">
       <Project>{93e1c15a-bb8f-49e3-a5f4-f31990ba545c}</Project>
       <Name>asm.Web</Name>

@@ -260,12 +260,12 @@ namespace asm.Extensions
 						: Activator.CreateInstance(thisValue);
 		}
 
-		public static IEnumerable<Type> SelfAndMembersTypes([NotNull] this Type thisValue, BreadthDepthTraverse method)
+		public static IEnumerable<Type> SelfAndMembersTypes([NotNull] this Type thisValue, BreadthDepthTraversal method)
 		{
 			return method switch
 			{
-				BreadthDepthTraverse.BreadthFirst => BFSelfAndMembersTypesLocal(thisValue),
-				BreadthDepthTraverse.DepthFirst => DFSelfAndMembersTypesLocal(thisValue),
+				BreadthDepthTraversal.BreadthFirst => BFSelfAndMembersTypesLocal(thisValue),
+				BreadthDepthTraversal.DepthFirst => DFSelfAndMembersTypesLocal(thisValue),
 				_ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
 			};
 

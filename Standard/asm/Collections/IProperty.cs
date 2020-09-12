@@ -11,7 +11,7 @@ namespace asm.Collections
 		[Browsable(false)]
 		object DefaultValue { get; set; }
 
-		Scope Scope { get; set; }
+		PropertyScope Scope { get; set; }
 
 		[Browsable(false)]
 		bool IsPrimitive { get; }

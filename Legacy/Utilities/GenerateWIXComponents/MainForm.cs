@@ -118,13 +118,17 @@ namespace GenerateWIXComponents
 								list = new List<string> {line};
 								filtered[key].FileNames = list;
 							}
-							else list.Add(line);
+							else
+							{
+								list.Add(line);
+							}
 						}
 					}
 
 					if (lines.Count == 0 && orphans.Count > 0)
 					{
-						foreach (string orphan in orphans) lines.Enqueue(orphan);
+						foreach (string orphan in orphans) 
+							lines.Enqueue(orphan);
 
 						orphans.Clear();
 						orphansCleared = true;
@@ -145,41 +149,42 @@ namespace GenerateWIXComponents
 
 				foreach (KeyValuePair<string, IDictionary<string, ComponentInfo>> dirPair in dirs)
 				{
-					TreeNode rootNode = new TreeNode(dirPair.Key);
-
-					foreach (KeyValuePair<string, ComponentInfo> filteredPair in dirPair.Value)
-					{
-						ComponentInfo component = filteredPair.Value;
-						TreeNode componentNode = new TreeNode(component.KeyFileName) { Tag = component };
-						rootNode.Nodes.Add(componentNode);
-
-						if (component.FileNames != null)
-						{
-							if (groupFiles)
-							{
-								foreach (string file in component.FileNames)
-									componentNode.Nodes.Add(file);
-							}
-							else
-							{
-								foreach (string file in component.FileNames)
-								{
-									ComponentInfo comp = new ComponentInfo {Prefix = component.Prefix, KeyFileName = file};
-									TreeNode cn = new TreeNode(comp.KeyFileName) { Tag = comp };
-									rootNode.Nodes.Add(cn);
-								}
-
-								component.FileNames = null;
-							}
-						}
-					}
-
-					tvwOutput.Nodes.Add(rootNode);
-					rootNode.Expand();
+					TreeNode node = new TreeNode(dirPair.Key);
+					AddComponentNodes(node, dirPair.Value, groupFiles);
+					tvwOutput.Nodes.Add(node);
+					node.Expand();
 				}
 
 				tvwOutput.EndUpdate();
 			});
+
+			static void AddComponentNodes(TreeNode root, IDictionary<string, ComponentInfo> dictionary, bool groupFiles)
+			{
+				foreach (KeyValuePair<string, ComponentInfo> pair in dictionary)
+				{
+					ComponentInfo component = pair.Value;
+					TreeNode componentNode = new TreeNode(component.KeyFileName) { Tag = component };
+					root.Nodes.Add(componentNode);
+					if (component.FileNames == null) continue;
+					
+					if (groupFiles)
+					{
+						foreach (string file in component.FileNames)
+							componentNode.Nodes.Add(file);
+					}
+					else
+					{
+						foreach (string file in component.FileNames)
+						{
+							ComponentInfo comp = new ComponentInfo {Prefix = component.Prefix, KeyFileName = file};
+							TreeNode cn = new TreeNode(comp.KeyFileName) { Tag = comp };
+							root.Nodes.Add(cn);
+						}
+
+						component.FileNames = null;
+					}
+				}
+			}
 		}
 
 		private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)

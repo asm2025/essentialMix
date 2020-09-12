@@ -5,9 +5,9 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>8.0</LangVersion>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>10.0.0.0</Version>
+		<Version>11.0.0.0</Version>
 		<Copyright>Copyright © 2008-2020</Copyright>
-		<FileVersion>20.9.7.0</FileVersion>
+		<FileVersion>20.9.12.1</FileVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
 		<PackageTags>utilities, tools, extensions, helpers</PackageTags>
@@ -21,13 +21,6 @@
 	<PropertyGroup Condition="'$(Configuration)' == 'Independent'">
 		<OutputPath>bin\$(Platform)\</OutputPath>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <Compile Remove="Collections\asm_IndexMinDebugView.cs" />
-	  <Compile Remove="Collections\IndexMin.cs" />
-	  <Compile Remove="Collections\MaxIndexMin.cs" />
-	  <Compile Remove="Collections\MinIndexMin.cs" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<Compile Include="..\..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />

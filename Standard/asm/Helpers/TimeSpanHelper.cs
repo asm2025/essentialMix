@@ -82,18 +82,6 @@ namespace asm.Helpers
 						: minimum.NotBelow(INFINITE);
 		}
 
-		public static bool SpinWait([NotNull] WaitHandle waitHandle, TimeSpan timeout, Func<bool> evalFunc)
-		{
-			return SpinWaitInternal(waitHandle, timeout.TotalIntMilliseconds(), evalFunc);
-		}
-
-		public static bool SpinWait([NotNull] WaitHandle waitHandle, Func<bool> evalFunc) { return SpinWaitInternal(waitHandle, INFINITE, evalFunc); }
-
-		public static bool SpinWait([NotNull] WaitHandle waitHandle, int millisecondsTimeout, Func<bool> evalFunc)
-		{
-			return SpinWaitInternal(waitHandle, millisecondsTimeout, evalFunc);
-		}
-
 		public static TimeSpan NeutralUserOperationValue { get; } = TimeSpan.Zero;
 
 		public static TimeSpan MinUserOperationValue { get; } =
@@ -449,8 +437,6 @@ namespace asm.Helpers
 
 			return displayText;
 		}
-
-		private static bool SpinWaitInternal([NotNull] WaitHandle waitHandle, int millisecondsTimeout, Func<bool> evalFunc) { return waitHandle.SpinWaitOne(millisecondsTimeout, evalFunc); }
 
 		[NotNull]
 		private static string GetHigherPartToString(double part)

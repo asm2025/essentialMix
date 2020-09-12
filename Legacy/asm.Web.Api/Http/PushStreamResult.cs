@@ -37,7 +37,7 @@ namespace asm.Web.Api.Http
 
 		/// <inheritdoc />
 		[NotNull]
-		public override Task<HttpResponseMessage> ExecuteAsync(CancellationToken token)
+		public override Task<HttpResponseMessage> ExecuteAsync(CancellationToken token = default(CancellationToken))
 		{
 			HttpResponseMessage response = Request.CreateResponse();
 			response.Content = new PushStreamContent(async (stream, content, context) =>
