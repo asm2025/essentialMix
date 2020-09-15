@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,8 @@ using asm.Logging.Helpers;
 using asm.Patterns.Object;
 using asm.Patterns.Pagination;
 using JetBrains.Annotations;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -201,6 +204,30 @@ namespace asm.Data.Patterns.Repository
 		}
 
 		protected abstract ValueTask<TEntity> GetAsyncInternal([NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
+
+		[NotNull]
+		protected abstract IQueryable<TEntity> PrepareGetQuery([NotNull] object[] keys);
+
+		[NotNull]
+		protected abstract IQueryable<TEntity> PrepareListQuery([NotNull] IQueryable<TEntity> query, IPagination settings);
+
+		[NotNull]
+		protected abstract IQueryable<TEntity> PrepareGetQuery([NotNull] IGetSettings settings);
+
+		protected Expression<Func<TEntity, bool>> BuildFilter(string filterExpression) { return BuildFilter(filterExpression, null, null); }
+		protected Expression<Func<TEntity, bool>> BuildFilter(string filterExpression, ICollection<string> imports) { return BuildFilter(filterExpression, null, imports); }
+		protected Expression<Func<TEntity, bool>> BuildFilter([NotNull] IFilterSettings filterSettings) { return BuildFilter(filterSettings.FilterExpression, filterSettings.FilterReferences, filterSettings.FilterImports); }
+		protected virtual Expression<Func<TEntity, bool>> BuildFilter(string filterExpression, ICollection<string> references, ICollection<string> imports)
+		{
+			if (string.IsNullOrWhiteSpace(filterExpression)) return null;
+			
+			ScriptOptions options = ScriptOptions.Default;
+			if (references != null && references.Count > 0) options.AddReferences(references);
+			if (imports != null && imports.Count > 0) options.AddImports(imports);
+
+			Expression<Func<TEntity, bool>> filter = CSharpScript.EvaluateAsync<Expression<Func<TEntity, bool>>>(filterExpression, options).GetAwaiter().GetResult();
+			return filter;
+		}
 
 		[NotNull]
 		private static PropertyInfo[] GetKeyProperties()

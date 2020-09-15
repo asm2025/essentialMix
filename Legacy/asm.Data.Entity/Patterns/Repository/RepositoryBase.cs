@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using asm.Data.Extensions;
 using asm.Data.Model;
 using asm.Data.Patterns.Parameters;
 using asm.Data.Patterns.Repository;
@@ -104,8 +107,7 @@ namespace asm.Data.Entity.Patterns.Repository
 			return PrepareListQuery(DbSet, settings);
 		}
 
-		[NotNull]
-		protected virtual IQueryable<TEntity> PrepareListQuery([NotNull] IQueryable<TEntity> query, IPagination settings)
+		protected override IQueryable<TEntity> PrepareListQuery(IQueryable<TEntity> query, IPagination settings)
 		{
 			if (settings is IIncludeSettings includeSettings && includeSettings.Include?.Count > 0)
 			{
@@ -113,36 +115,67 @@ namespace asm.Data.Entity.Patterns.Repository
 										.Aggregate(query, (current, path) => current.Include(path));
 			}
 			
-			if (settings is IFilterSettings filterSettings && !string.IsNullOrEmpty(filterSettings.Filter.Expression))
+			if (settings is IFilterSettings filterSettings)
 			{
-				query = query.Where(filterSettings.Filter.Expression, filterSettings.Filter.Arguments);
+				Expression<Func<TEntity, bool>> expression = BuildFilter(filterSettings);
+				if (expression != null) query = query.Where(expression);
 			}
 			
 			if (settings is ISortable sortable && sortable.OrderBy?.Count > 0)
 			{
-				string sortExpression = string.Join(",", sortable.OrderBy
-																.Where(e => e.Type != SortType.None)
-																.Select(e => $"{e.Name} {e.Type}"));
-				if (!string.IsNullOrEmpty(sortExpression)) query = query.OrderBy(sortExpression);
+				bool addedFirst = false;
+
+				foreach (SortField field in sortable.OrderBy.Where(e => e.Type != SortType.None))
+				{
+					if (!addedFirst)
+					{
+						query = query.OrderBy(field.Name, field.Type);
+						addedFirst = true;
+						continue;
+					}
+
+					query = query.ThenBy(field.Name, field.Type);
+				}
 			}
 
 			return query;
 		}
 
-		[NotNull]
-		protected IQueryable<TEntity> PrepareGetQuery(object[] keys)
+		protected override IQueryable<TEntity> PrepareGetQuery(object[] keys)
 		{
 			IQueryable<TEntity> query = DbSet;
-			if (!(keys?.Length > 0)) return query;
 			if (keys.Length != KeyProperties.Length) throw new ArgumentException("Wrong number of key values.", nameof(keys));
 
-			string filter = string.Join(" and ", KeyProperties.Select((p, i) => $"{p.Name} == @{i}"));
-			query = query.Where(filter, keys);
+			StringBuilder sb = new StringBuilder();
+
+			for (int i = 0; i < keys.Length; i++)
+			{
+				if (sb.Length > 0) sb.Append(" and ");
+				PropertyInfo property = KeyProperties[i];
+				sb.Append(property.Name);
+
+				if (property.PropertyType.IsNumeric())
+				{
+					sb.Append(" == ");
+					sb.Append(keys[i]);
+				}
+				else if (keys[i] == null)
+				{
+					sb.Append(" == null");
+				}
+				else
+				{
+					sb.Append(" == ");
+					sb.Append(keys[i]);
+				}
+			}
+
+			Expression<Func<TEntity, bool>> filter = BuildFilter(sb.ToString());
+			if (filter != null) query = query.Where(filter);
 			return query;
 		}
 
-		[NotNull]
-		protected virtual IQueryable<TEntity> PrepareGetQuery([NotNull] IGetSettings settings)
+		protected override IQueryable<TEntity> PrepareGetQuery(IGetSettings settings)
 		{
 			IQueryable<TEntity> query = PrepareGetQuery(settings.KeyValue);
 			
@@ -152,9 +185,10 @@ namespace asm.Data.Entity.Patterns.Repository
 										.Aggregate(query, (current, path) => current.Include(path));
 			}
 
-			if (settings is IFilterSettings filterSettings && !string.IsNullOrEmpty(filterSettings.Filter.Expression))
+			if (settings is IFilterSettings filterSettings)
 			{
-				query = query.Where(filterSettings.Filter.Expression, filterSettings.Filter.Arguments);
+				Expression<Func<TEntity, bool>> expression = BuildFilter(filterSettings);
+				if (expression != null) query = query.Where(expression);
 			}
 
 			return query;

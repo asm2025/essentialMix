@@ -1,10 +1,11 @@
-﻿namespace asm.Data.Patterns.Parameters
+﻿using System.Collections.Generic;
+
+namespace asm.Data.Patterns.Parameters
 {
 	public interface IFilterSettings
 	{
-		/// <summary>
-		/// https://github.com/StefH/System.Linq.Dynamic.Core/wiki/Dynamic-Expressions
-		/// </summary>
-		DynamicFilter Filter { get; set; }
+		string FilterExpression { get; set; }
+		ICollection<string> FilterReferences { get; set; }
+		ICollection<string> FilterImports { get; set; }
 	}
 }

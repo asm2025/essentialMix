@@ -10,6 +10,8 @@ namespace asm.Helpers
 {
 	/// <summary>
 	/// General purpose Expression utilities
+	/// This is largely based on Joseph and Ben Albahari and Eric Johannsen
+	/// <see href="http://www.albahari.com/nutshell/predicatebuilder.aspx">predicate builder</see>
 	/// </summary>
 	public static class ExpressionHelper
 	{

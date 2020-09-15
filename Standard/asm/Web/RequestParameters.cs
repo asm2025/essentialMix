@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using asm.Helpers;
 using asm.Patterns.Sorting;
-using asm.Patterns.String;
 using JetBrains.Annotations;
 
 namespace asm.Web
@@ -33,73 +31,9 @@ namespace asm.Web
 			}
 		}
 
-		[NotNull]
-		public ISet<string> Filter { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+		public string Filter { get; set; }
 
-		public string FilterTargets =>
-			Filter.Count == 0
-				? null
-				: string.Join(",", Filter);
-
-		public string FilterTarget { get; set; }
-
-		public FilterType FilterType { get; set; }
-
-		[NotNull]
-		public ISet<string> SortTargets { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-		public SortType SortType { get; set; }
-
-		[NotNull]
-		public string BuildFilter()
-		{
-			// todo: make Command Param && pass through ()=> function. 
-			StringBuilder filter = new StringBuilder();
-
-			if (!string.IsNullOrEmpty(FilterTarget)
-				&& string.IsNullOrEmpty(FilterTarget))
-			{
-				filter.Append($"AND (${FilterTarget} IS NOT NULL AND ");
-
-				switch (FilterType)
-				{
-					case FilterType.Equals:
-						filter.Append($"${FilterTarget} = '{FilterTarget}'");
-						break;
-					case FilterType.NotEquals:
-						filter.Append($"${FilterTarget} != '{FilterTarget}'");
-						break;
-					case FilterType.DoesNotContain:
-						filter.Append($"NOT (${FilterTarget} LIKE '%{FilterTarget}%')");
-						break;
-					case FilterType.StartsWith:
-						filter.Append($"${FilterTarget} LIKE '{FilterTarget}%'");
-						break;
-					case FilterType.DoesNotStartWith:
-						filter.Append($"NOT (${FilterTarget} LIKE '{FilterTarget}%')");
-						break;
-					case FilterType.EndsWith:
-						filter.Append($"${FilterTarget} LIKE '%{FilterTarget}'");
-						break;
-					case FilterType.DoesNotEndWith:
-						filter.Append($"NOT (${FilterTarget} LIKE '%{FilterTarget}')");
-						break;
-					case FilterType.In:
-						filter.Append($"${FilterTarget} IN ('{FilterTarget}')");
-						break;
-					case FilterType.NotIn:
-						filter.Append($"NOT (${FilterTarget} IN ('{FilterTarget}'))");
-						break;
-					default: // Case Default, Contains
-						filter.Append($"${FilterTarget} LIKE '%{FilterTarget}%'");
-						break;
-				}
-
-				filter.Append(")");
-			}
-
-			return filter.ToString();
-		}
+		public IList<SortField> Sort { get; set; }
 	}
 
 	public static class RequestParameters

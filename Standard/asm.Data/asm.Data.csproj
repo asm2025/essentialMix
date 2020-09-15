@@ -7,7 +7,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Version>11.0.0.0</Version>
 		<Copyright>Copyright © 2008-2020</Copyright>
-		<FileVersion>20.9.12.1</FileVersion>
+		<FileVersion>20.9.15.2</FileVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
 		<PackageTags>utilities, tools, extensions, helpers, database</PackageTags>
@@ -27,6 +27,7 @@
 
 	<ItemGroup>
 	  <PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
+	  <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.7.0" />
 	  <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.8" />
 	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.8" />
 	</ItemGroup>

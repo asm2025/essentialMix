@@ -51,7 +51,7 @@ namespace asm.Data.Extensions
 			return OrderBy(thisValue, name, methodName);
 		}
 
-		private static IOrderedQueryable<T> OrderBy<T>(IQueryable<T> thisValue, [NotNull] string memberName, [NotNull] string methodName)
+		private static IQueryable<T> OrderBy<T>(IQueryable<T> thisValue, [NotNull] string memberName, [NotNull] string methodName)
 		{
 			memberName = memberName.Trim('.', ' ');
 			if (string.IsNullOrEmpty(memberName)) throw new ArgumentNullException(nameof(memberName));
@@ -64,8 +64,9 @@ namespace asm.Data.Extensions
 			foreach (string name in names) 
 			{
 				// use reflection (not ComponentModel) to mirror LINQ
-				MemberInfo mi = type.GetPropertyOrField(name);
-				expr = Expression.PropertyOrField(expr, name);
+				MemberInfo mi = type.GetPropertyOrField(name, asm.Constants.BF_PUBLIC_INSTANCE);
+				if (mi == null) throw new MemberAccessException($"Could not find property or field '{name}'.");
+				expr = Expression.PropertyOrField(expr, mi.Name);
 
 				switch (mi.MemberType)
 				{

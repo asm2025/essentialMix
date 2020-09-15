@@ -35,7 +35,13 @@ namespace asm.Data.Patterns.Parameters
 		public IList<string> Include { get; set; }
 
 		/// <inheritdoc />
-		public DynamicFilter Filter { get; set; }
+		public string FilterExpression { get; set; }
+
+		/// <inheritdoc />
+		public ICollection<string> FilterReferences { get; set; }
+
+		/// <inheritdoc />
+		public ICollection<string> FilterImports { get; set; }
 
 		/// <inheritdoc />
 		public IList<SortField> OrderBy { get; set; }

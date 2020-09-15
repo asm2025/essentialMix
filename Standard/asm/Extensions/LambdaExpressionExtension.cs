@@ -8,6 +8,10 @@ using asm.Reflection;
 
 namespace asm.Extensions
 {
+	/// <summary>
+	/// This is largely based on Joseph and Ben Albahari and Eric Johannsen
+	/// <see href="http://www.albahari.com/nutshell/predicatebuilder.aspx">predicate builder</see>
+	/// </summary>
 	public static class LambdaExpressionExtension
 	{
 		public static Expression Expand([NotNull] this LambdaExpression thisValue) { return new ExpandVisitor().Visit(thisValue); }
