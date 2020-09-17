@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,8 +13,6 @@ using asm.Logging.Helpers;
 using asm.Patterns.Object;
 using asm.Patterns.Pagination;
 using JetBrains.Annotations;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -23,30 +20,6 @@ namespace asm.Data.Patterns.Repository
 {
 	public abstract class RepositoryBase : Disposable, IRepositoryBase
 	{
-		protected static readonly string[] __filterReferences = {
-			"System",
-			"System.Core",
-			"System.Data",
-			"System.Data.DataSetExtensions",
-			"System.Linq",
-			"System.Linq.Expressions",
-			"System.Xml"
-		};
-
-		protected static readonly string[] __filterImports = {
-			"System",
-			"System.Collections",
-			"System.Collections.Generic",
-			"System.Data",
-			"System.Linq",
-			"System.Linq.Expressions",
-			"System.Reflection",
-			"System.Text",
-			"System.Xml",
-			"System.Xml.Linq",
-			"System.Xml.XPath"
-		};
-
 		/// <inheritdoc />
 		protected RepositoryBase([NotNull] IConfiguration configuration)
 			: this(configuration, null)
@@ -237,31 +210,6 @@ namespace asm.Data.Patterns.Repository
 
 		[NotNull]
 		protected abstract IQueryable<TEntity> PrepareGetQuery([NotNull] IGetSettings settings);
-
-		protected Expression<Func<TEntity, bool>> BuildFilter(string filterExpression) { return BuildFilter(filterExpression, null, null); }
-		protected Expression<Func<TEntity, bool>> BuildFilter(string filterExpression, ICollection<string> imports) { return BuildFilter(filterExpression, null, imports); }
-		protected Expression<Func<TEntity, bool>> BuildFilter([NotNull] IFilterSettings filterSettings) { return BuildFilter(filterSettings.FilterExpression, filterSettings.FilterReferences, filterSettings.FilterImports); }
-		protected virtual Expression<Func<TEntity, bool>> BuildFilter(string filterExpression, ICollection<string> references, ICollection<string> imports)
-		{
-			if (string.IsNullOrWhiteSpace(filterExpression)) return null;
-			
-			ScriptOptions options = ScriptOptions.Default;
-			
-			if (references != null && references.Count > 0) 
-				options.AddReferences(__filterReferences.Union(references));
-			else
-				options.AddReferences(__filterReferences);
-
-			options.AddReferences(typeof(TEntity).Assembly);
-
-			if (imports != null && imports.Count > 0) 
-				options.AddImports(__filterImports.Union(imports));
-			else
-				options.AddImports(__filterImports);
-
-			Expression<Func<TEntity, bool>> filter = CSharpScript.EvaluateAsync<Expression<Func<TEntity, bool>>>(filterExpression, options).GetAwaiter().GetResult();
-			return filter;
-		}
 
 		[NotNull]
 		private static PropertyInfo[] GetKeyProperties()

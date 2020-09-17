@@ -32,6 +32,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.8" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.8" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.8" />
+		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.2" />
 	</ItemGroup>
 
 	<ItemGroup>

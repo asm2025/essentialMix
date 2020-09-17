@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
+using System.Linq.Dynamic.Core;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -122,10 +122,9 @@ namespace asm.Core.Data.Entity.Patterns.Repository
 										.Aggregate(query, (current, path) => current.Include(path));
 			}
 			
-			if (settings is IFilterSettings filterSettings)
+			if (settings is IFilterSettings filterSettings && !string.IsNullOrWhiteSpace(filterSettings.FilterExpression))
 			{
-				Expression<Func<TEntity, bool>> expression = BuildFilter(filterSettings);
-				if (expression != null) query = query.Where(expression);
+				query = query.Where(filterSettings.FilterExpression);
 			}
 			
 			if (settings is ISortable sortable && sortable.OrderBy?.Count > 0)
@@ -151,33 +150,25 @@ namespace asm.Core.Data.Entity.Patterns.Repository
 		protected override IQueryable<TEntity> PrepareGetQuery(object[] keys)
 		{
 			IQueryable<TEntity> query = DbSet;
+			if (keys.Length != KeyProperties.Length) throw new ArgumentException("Wrong number of key values.", nameof(keys));
 
-			StringBuilder sb = new StringBuilder();
+			StringBuilder filter = new StringBuilder();
 
 			for (int i = 0; i < keys.Length; i++)
 			{
-				if (sb.Length > 0) sb.Append(" and ");
+				if (filter.Length > 0) filter.Append(" and ");
 				PropertyInfo property = KeyProperties[i];
-				sb.Append(property.Name);
+				filter.Append($"{property.Name} == ");
 
 				if (property.PropertyType.IsNumeric())
-				{
-					sb.Append(" == ");
-					sb.Append(keys[i]);
-				}
+					filter.Append(keys[i]);
 				else if (keys[i] == null)
-				{
-					sb.Append(" == null");
-				}
+					filter.Append("null");
 				else
-				{
-					sb.Append(" == ");
-					sb.Append(keys[i]);
-				}
+					filter.Append($"\"{keys[i]}\"");
 			}
 
-			Expression<Func<TEntity, bool>> filter = BuildFilter(sb.ToString());
-			if (filter != null) query = query.Where(filter);
+			query = query.Where(filter.ToString());
 			return query;
 		}
 
@@ -191,10 +182,9 @@ namespace asm.Core.Data.Entity.Patterns.Repository
 										.Aggregate(query, (current, path) => current.Include(path));
 			}
 
-			if (settings is IFilterSettings filterSettings)
+			if (settings is IFilterSettings filterSettings && !string.IsNullOrWhiteSpace(filterSettings.FilterExpression))
 			{
-				Expression<Func<TEntity, bool>> expression = BuildFilter(filterSettings);
-				if (expression != null) query = query.Where(expression);
+				query = query.Where(filterSettings.FilterExpression);
 			}
 
 			return query;
