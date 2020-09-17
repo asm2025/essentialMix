@@ -23,6 +23,30 @@ namespace asm.Data.Patterns.Repository
 {
 	public abstract class RepositoryBase : Disposable, IRepositoryBase
 	{
+		protected static readonly string[] __filterReferences = {
+			"System",
+			"System.Core",
+			"System.Data",
+			"System.Data.DataSetExtensions",
+			"System.Linq",
+			"System.Linq.Expressions",
+			"System.Xml"
+		};
+
+		protected static readonly string[] __filterImports = {
+			"System",
+			"System.Collections",
+			"System.Collections.Generic",
+			"System.Data",
+			"System.Linq",
+			"System.Linq.Expressions",
+			"System.Reflection",
+			"System.Text",
+			"System.Xml",
+			"System.Xml.Linq",
+			"System.Xml.XPath"
+		};
+
 		/// <inheritdoc />
 		protected RepositoryBase([NotNull] IConfiguration configuration)
 			: this(configuration, null)
@@ -222,8 +246,18 @@ namespace asm.Data.Patterns.Repository
 			if (string.IsNullOrWhiteSpace(filterExpression)) return null;
 			
 			ScriptOptions options = ScriptOptions.Default;
-			if (references != null && references.Count > 0) options.AddReferences(references);
-			if (imports != null && imports.Count > 0) options.AddImports(imports);
+			
+			if (references != null && references.Count > 0) 
+				options.AddReferences(__filterReferences.Union(references));
+			else
+				options.AddReferences(__filterReferences);
+
+			options.AddReferences(typeof(TEntity).Assembly);
+
+			if (imports != null && imports.Count > 0) 
+				options.AddImports(__filterImports.Union(imports));
+			else
+				options.AddImports(__filterImports);
 
 			Expression<Func<TEntity, bool>> filter = CSharpScript.EvaluateAsync<Expression<Func<TEntity, bool>>>(filterExpression, options).GetAwaiter().GetResult();
 			return filter;

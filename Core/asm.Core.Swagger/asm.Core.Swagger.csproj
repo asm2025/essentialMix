@@ -7,7 +7,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Version>11.0.0.0</Version>
 		<Copyright>Copyright © 2019</Copyright>
-		<FileVersion>20.9.15.2</FileVersion>
+		<FileVersion>20.9.17.0</FileVersion>
 		<Authors>asm</Authors>
 		<PackageTags>utilities, tools, extensions, helpers, core, mvc, web api</PackageTags>
 		<SignAssembly>true</SignAssembly>
@@ -29,8 +29,8 @@
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.8" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.6.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.6.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.6.1" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.6.1" />
 	</ItemGroup>
 
 	<ItemGroup>
