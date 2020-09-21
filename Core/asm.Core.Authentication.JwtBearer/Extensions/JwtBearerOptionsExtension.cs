@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using asm.Extensions;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
-namespace asm.Core.Authentication.JwtBearer.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class JwtBearerOptionsExtension
 	{

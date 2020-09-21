@@ -1,4 +1,5 @@
-﻿namespace asm.Other.Nager.PublicSuffix
+﻿// ReSharper disable once CheckNamespace
+namespace Other.Nager.PublicSuffix
 {
     /// <summary>
     /// TLD Rule type, defined by www.publicsuffix.org

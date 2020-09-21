@@ -3,7 +3,8 @@ using System.Text;
 using JetBrains.Annotations;
 using Microsoft.IdentityModel.Tokens;
 
-namespace asm.Core.Authentication.JwtBearer.Helpers
+// ReSharper disable once CheckNamespace
+namespace asm.Helpers
 {
 	public static class SecurityKeyHelper
 	{

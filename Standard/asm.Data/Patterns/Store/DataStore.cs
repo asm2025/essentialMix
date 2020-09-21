@@ -1,7 +1,7 @@
 using System;
 using System.Data;
 using System.Runtime.Serialization;
-using asm.Data.Extensions;
+using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Data.Patterns.Provider;
 

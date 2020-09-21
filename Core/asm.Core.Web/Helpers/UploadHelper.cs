@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
-using asm.Core.Web.Extensions;
+using asm.Extensions;
 using asm.Core.Web.Model;
 using asm.Exceptions.Web;
 using asm.Helpers;

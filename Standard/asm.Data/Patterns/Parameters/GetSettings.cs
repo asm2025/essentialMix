@@ -19,11 +19,5 @@ namespace asm.Data.Patterns.Parameters
 
 		/// <inheritdoc />
 		public string FilterExpression { get; set; }
-
-		/// <inheritdoc />
-		public ICollection<string> FilterReferences { get; set; }
-
-		/// <inheritdoc />
-		public ICollection<string> FilterImports { get; set; }
 	}
 }

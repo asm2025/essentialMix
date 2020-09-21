@@ -2,10 +2,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using asm.Threading.Internal.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Threading.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class BufferBlockExtension
 	{

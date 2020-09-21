@@ -3,7 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
-using asm.Compression.Extensions;
+using asm.Extensions;
 using asm.Helpers;
 using SystemCompressionMode = System.IO.Compression.CompressionMode;
 

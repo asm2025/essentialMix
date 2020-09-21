@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using asm.Core.Web.Annotations;
-using asm.Core.Web.Extensions;
+using asm.Extensions;
 using asm.Core.Web.Helpers;
 using asm.Core.Web.Mvc.Filters;
 using JetBrains.Annotations;

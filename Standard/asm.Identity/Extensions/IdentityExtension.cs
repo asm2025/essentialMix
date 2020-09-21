@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using asm.Extensions;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Identity;
 
-namespace asm.Identity.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class IdentityExtension
 	{

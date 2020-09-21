@@ -6,8 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
 using asm.Core.Web.Mvc.Formatters.Raw;
+using asm.Core.Web.Mvc.Formatters.Raw.Internal;
+using TextInputFormatter = asm.Core.Web.Mvc.Formatters.Text.TextInputFormatter;
+using TextOutputFormatter = asm.Core.Web.Mvc.Formatters.Text.TextOutputFormatter;
 
-namespace asm.Core.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class MvcOptionsExtension
 	{
@@ -40,8 +44,8 @@ namespace asm.Core.Web.Extensions
 				thisValue.InputFormatters.Add(input);
 			}
 
-			thisValue.FormatterMappings.SetMediaTypeMappingForFormat("plain", Mvc.Formatters.Raw.Internal.MediaTypeHeaderValues.TextPlain);
-			thisValue.FormatterMappings.SetMediaTypeMappingForFormat("octet-stream", Mvc.Formatters.Raw.Internal.MediaTypeHeaderValues.OctetStream);
+			thisValue.FormatterMappings.SetMediaTypeMappingForFormat("plain", MediaTypeHeaderValues.TextPlain);
+			thisValue.FormatterMappings.SetMediaTypeMappingForFormat("octet-stream", MediaTypeHeaderValues.OctetStream);
 			return thisValue;
 		}
 
@@ -49,25 +53,25 @@ namespace asm.Core.Web.Extensions
 		public static MvcOptions ConfigureTextFormatter([NotNull] this MvcOptions thisValue)
 		{
 			thisValue.RespectBrowserAcceptHeader = true;
-			Mvc.Formatters.Text.TextInputFormatter input = thisValue.InputFormatters.OfType<Mvc.Formatters.Text.TextInputFormatter>()
-															.FirstOrDefault();
+			TextInputFormatter input = thisValue.InputFormatters.OfType<TextInputFormatter>()
+												.FirstOrDefault();
 			
 			if (input == null)
 			{
-				input = new Mvc.Formatters.Text.TextInputFormatter();
+				input = new TextInputFormatter();
 				thisValue.InputFormatters.Add(input);
 			}
 			
-			Mvc.Formatters.Text.TextOutputFormatter output = thisValue.OutputFormatters.OfType<Mvc.Formatters.Text.TextOutputFormatter>()
-															.FirstOrDefault();
+			TextOutputFormatter output = thisValue.OutputFormatters.OfType<TextOutputFormatter>()
+												.FirstOrDefault();
 			
 			if (output == null)
 			{
-				output = new Mvc.Formatters.Text.TextOutputFormatter();
+				output = new TextOutputFormatter();
 				thisValue.OutputFormatters.Add(output);
 			}
 
-			thisValue.FormatterMappings.SetMediaTypeMappingForFormat("plain", Mvc.Formatters.Text.Internal.MediaTypeHeaderValues.TextPlain);
+			thisValue.FormatterMappings.SetMediaTypeMappingForFormat("plain", Core.Web.Mvc.Formatters.Text.Internal.MediaTypeHeaderValues.TextPlain);
 			return thisValue;
 		}
 

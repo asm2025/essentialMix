@@ -117,7 +117,7 @@
     <Compile Include="Model\ActionData.cs" />
     <Compile Include="Http\CultureHandler.cs" />
     <Compile Include="Extensions\IHttpControllerExtension.cs" />
-    <Compile Include="Extensions\ModelStateDictionaryExtension.cs" />
+    <Compile Include="Extensions\WebApiModelStateDictionaryExtension.cs" />
     <Compile Include="JetBrains.Annotations\JetBrains.Annotations.cs" />
     <Compile Include="Http\MultipartFormDataStreamProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

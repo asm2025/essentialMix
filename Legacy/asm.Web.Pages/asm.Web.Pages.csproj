@@ -72,7 +72,6 @@
     <Compile Include="..\..\GlobalSuppressions.cs">
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
-    <Compile Include="Extensions\ModelStateDictionaryExtension.cs" />
     <Compile Include="JetBrains.Annotations\JetBrains.Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

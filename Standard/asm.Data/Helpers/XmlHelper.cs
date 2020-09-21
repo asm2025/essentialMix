@@ -7,7 +7,6 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using JetBrains.Annotations;
-using asm.Data.Extensions;
 using asm.Data.Xml;
 using asm.Extensions;
 

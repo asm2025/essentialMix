@@ -1,8 +1,8 @@
-﻿using System.Linq;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 
-namespace asm.Core.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class CorsOptionsExtension
 	{

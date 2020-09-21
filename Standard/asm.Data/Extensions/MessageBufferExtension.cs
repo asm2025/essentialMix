@@ -4,7 +4,8 @@ using System.Xml;
 using JetBrains.Annotations;
 using asm.Data.Helpers;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class MessageBufferExtension
 	{

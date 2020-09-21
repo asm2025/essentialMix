@@ -2,7 +2,8 @@ using System.Web.Http.Controllers;
 using JetBrains.Annotations;
 using asm.Web.Api.Helpers;
 
-namespace asm.Web.Api.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class IHttpControllerExtension
 	{

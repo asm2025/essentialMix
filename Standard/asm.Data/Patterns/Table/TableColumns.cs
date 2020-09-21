@@ -5,7 +5,6 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using asm.Extensions;
-using asm.Data.Extensions;
 using JetBrains.Annotations;
 using asm.Patterns.Layout;
 using asm.Patterns.String;

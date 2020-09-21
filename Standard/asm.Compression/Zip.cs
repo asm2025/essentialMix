@@ -4,7 +4,6 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using asm.Compression.Extensions;
 using asm.Exceptions;
 using asm.Exceptions.Compression;
 using asm.Extensions;

@@ -110,7 +110,7 @@
     <Compile Include="Extensions\HttpSessionStateBaseExtension.cs" />
     <Compile Include="Extensions\HttpResponseExtension.cs" />
     <Compile Include="Extensions\IPrincipalExtension.cs" />
-    <Compile Include="Extensions\ModelStateDictionaryExtension.cs" />
+    <Compile Include="Extensions\WebModelStateDictionaryExtension.cs" />
     <Compile Include="Extensions\UpdatePanelExtension.cs" />
     <Compile Include="Extensions\UserManagerExtension.cs" />
     <Compile Include="FetchPageUrlTuple.cs" />

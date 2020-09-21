@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Xml.XPath;
 using asm.Exceptions.Collections;
-using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Web;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class XmlElementExtension
 	{

@@ -1,8 +1,9 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using asm.Core.Authentication.JwtBearer.Helpers;
+using asm.Helpers;
 using JetBrains.Annotations;
 
-namespace asm.Core.Authentication.JwtBearer.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class JwtSecurityTokenExtension
 	{

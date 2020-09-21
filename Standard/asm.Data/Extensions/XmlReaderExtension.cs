@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Serialization;
-using asm.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class XmlReaderExtension
 	{

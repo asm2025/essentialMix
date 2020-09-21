@@ -38,12 +38,6 @@ namespace asm.Data.Patterns.Parameters
 		public string FilterExpression { get; set; }
 
 		/// <inheritdoc />
-		public ICollection<string> FilterReferences { get; set; }
-
-		/// <inheritdoc />
-		public ICollection<string> FilterImports { get; set; }
-
-		/// <inheritdoc />
 		public IList<SortField> OrderBy { get; set; }
 	}
 }

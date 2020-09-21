@@ -1,7 +1,8 @@
 ﻿using JetBrains.Annotations;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
-namespace asm.Core.Swagger.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class SwaggerUIOptionsExtension
 	{

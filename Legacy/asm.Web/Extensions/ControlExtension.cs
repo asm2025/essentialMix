@@ -7,11 +7,12 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Helpers;
+using asm.Web;
 
-namespace asm.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class ControlExtension
 	{

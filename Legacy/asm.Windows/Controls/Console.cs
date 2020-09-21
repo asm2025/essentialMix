@@ -4,13 +4,11 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using asm.Drawing.Extensions;
 using asm.Extensions;
 using asm.Helpers;
 using asm.IO;
 using asm.Threading;
 using asm.Windows.Design;
-using asm.Windows.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Windows.Controls

@@ -8,7 +8,8 @@ using asm.Patterns.Direction;
 using asm.Threading.Helpers;
 using JetBrains.Annotations;
 
-namespace asm.Windows.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class ListBoxExtension
 	{

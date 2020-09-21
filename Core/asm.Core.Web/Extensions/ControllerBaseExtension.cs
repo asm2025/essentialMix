@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using asm.Core.Web.Model;
 using asm.Helpers;
 
-namespace asm.Core.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class ControllerBaseExtension
 	{

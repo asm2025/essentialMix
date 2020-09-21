@@ -7,15 +7,14 @@ using System.Security;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using asm.Extensions;
 using asm.Threading.Helpers;
 using asm.Web.Entity.Model.Membership;
-using asm.Web.Extensions;
 using JetBrains.Annotations;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 
-namespace asm.Web.Entity.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class IdentityDbContextExtension
 	{

@@ -6,7 +6,8 @@ using asm.Helpers;
 using asm.Web.Mvc.Models;
 using Controller = System.Web.Mvc.Controller;
 
-namespace asm.Web.Mvc.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class ControllerExtension
 	{

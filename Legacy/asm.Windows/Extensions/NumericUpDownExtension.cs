@@ -1,7 +1,8 @@
 using System.Windows.Forms;
 using JetBrains.Annotations;
 
-namespace asm.Windows.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class NumericUpDownExtension
 	{

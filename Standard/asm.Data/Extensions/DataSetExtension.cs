@@ -5,11 +5,11 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
-using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Data.Helpers;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class DataSetExtension
 	{

@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 
-namespace asm.Threading.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class TaskStatusExtension
 	{

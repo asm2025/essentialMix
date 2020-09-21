@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Web;
-using asm.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class HttpApplicationStateExtension
 	{

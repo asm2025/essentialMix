@@ -1,10 +1,10 @@
 using System.Data;
 using System.Data.Common;
 using System.Reflection;
-using asm.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class DbProviderFactoryExtension
 	{
@@ -18,7 +18,7 @@ namespace asm.Data.Extensions
 			get
 			{
 				if (_getParameterNameMethod != null) return _getParameterNameMethod;
-				_getParameterNameMethod = typeof(DbCommandBuilder).FindMethod("GetParameterName", asm.Constants.BF_NON_PUBLIC_INSTANCE, null, typeof(string), CallingConventions.Any, null, typeof(string));
+				_getParameterNameMethod = typeof(DbCommandBuilder).FindMethod("GetParameterName", Constants.BF_NON_PUBLIC_INSTANCE, null, typeof(string), CallingConventions.Any, null, typeof(string));
 				return _getParameterNameMethod;
 			}
 		}
@@ -28,7 +28,7 @@ namespace asm.Data.Extensions
 			get
 			{
 				if (_getParameterPlaceholderMethod != null) return _getParameterPlaceholderMethod;
-				_getParameterPlaceholderMethod = typeof(DbCommandBuilder).FindMethod("GetParameterPlaceholder", asm.Constants.BF_NON_PUBLIC_INSTANCE, null, typeof(string), CallingConventions.Any, null, typeof(int));
+				_getParameterPlaceholderMethod = typeof(DbCommandBuilder).FindMethod("GetParameterPlaceholder", Constants.BF_NON_PUBLIC_INSTANCE, null, typeof(string), CallingConventions.Any, null, typeof(int));
 				return _getParameterPlaceholderMethod;
 			}
 		}

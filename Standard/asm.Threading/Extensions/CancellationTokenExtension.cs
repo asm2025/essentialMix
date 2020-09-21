@@ -3,11 +3,12 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using asm.Extensions;
 using asm.Helpers;
+using asm.Threading;
 using JetBrains.Annotations;
 
-namespace asm.Threading.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class CancellationTokenExtension
 	{

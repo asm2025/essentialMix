@@ -2,11 +2,11 @@ using System;
 using System.Data;
 using System.Globalization;
 using System.Reflection;
-using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Data.Patterns.Table;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class ITableColumnExtension
 	{

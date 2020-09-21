@@ -2,7 +2,8 @@
 using System.Globalization;
 using System.Linq;
 
-namespace asm.Other.Nager.PublicSuffix
+// ReSharper disable once CheckNamespace
+namespace Other.Nager.PublicSuffix
 {
     public class IdnMappingNormalizer : IDomainNormalizer
     {

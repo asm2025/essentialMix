@@ -3,7 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Web.SessionState;
 using JetBrains.Annotations;
 
-namespace asm.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class HttpSessionStateBaseExtension
 	{

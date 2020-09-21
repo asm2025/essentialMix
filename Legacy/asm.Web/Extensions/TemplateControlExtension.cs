@@ -2,10 +2,10 @@ using System;
 using System.Reflection;
 using System.Web.Compilation;
 using System.Web.UI;
-using asm.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class TemplateControlExtension
 	{

@@ -4,7 +4,8 @@ using System.Xml.Linq;
 using JetBrains.Annotations;
 using asm.Web;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class XObjectExtension
 	{

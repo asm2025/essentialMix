@@ -2,7 +2,8 @@ using System.Web.Mvc;
 using asm.Web.Mvc.Helpers;
 using JetBrains.Annotations;
 
-namespace asm.Web.Mvc.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class IControllerExtension
 	{

@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace asm.Windows.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class KeysExtension
 	{

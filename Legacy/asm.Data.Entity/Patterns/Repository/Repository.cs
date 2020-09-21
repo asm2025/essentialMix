@@ -3,7 +3,7 @@ using System.Data.Entity;
 using System.Threading;
 using System.Threading.Tasks;
 using asm.Data.Model;
-using asm.Threading.Extensions;
+using asm.Extensions;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

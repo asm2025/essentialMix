@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using asm.Helpers;
-using asm.Threading.Extensions;
-using asm.Threading.Internal.Extensions;
+using asm.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Threading.Collections.ProducerConsumer.Queue

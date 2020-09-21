@@ -1,13 +1,12 @@
 ﻿using System;
-using asm.Core.Extensions;
-using asm.Extensions;
 using asm.Helpers;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-namespace asm.Core.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class IHostBuilderExtension
 	{

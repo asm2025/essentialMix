@@ -2,7 +2,8 @@ using System.Web.Mvc;
 using System.Web.Routing;
 using JetBrains.Annotations;
 
-namespace asm.Web.Mvc.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class RouteCollectionExtension
 	{

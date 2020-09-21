@@ -1,7 +1,8 @@
 using System.Web.UI;
 using JetBrains.Annotations;
 
-namespace asm.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class PageExtension
 	{

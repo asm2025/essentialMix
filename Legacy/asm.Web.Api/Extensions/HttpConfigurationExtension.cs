@@ -10,7 +10,8 @@ using Microsoft.Owin.Security.OAuth;
 using asm.Web.Api.Http;
 using Newtonsoft.Json;
 
-namespace asm.Web.Api.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class HttpConfigurationExtension
 	{

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Xml.XPath;
-using asm.Data.Extensions;
+using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Helpers;
 using asm.Patterns.Object;

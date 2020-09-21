@@ -7,7 +7,6 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using asm.Extensions;
-using asm.Web.Api.Extensions;
 using JetBrains.Annotations;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;

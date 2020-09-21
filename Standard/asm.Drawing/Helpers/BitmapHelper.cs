@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
-using asm.Drawing.Extensions;
 using asm.Exceptions.Drawing;
 using asm.Extensions;
 using asm.Helpers;

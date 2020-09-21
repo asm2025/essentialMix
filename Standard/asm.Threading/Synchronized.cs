@@ -5,7 +5,6 @@ using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Helpers;
 using asm.Patterns.Object;
-using asm.Threading.Extensions;
 
 namespace asm.Threading
 {

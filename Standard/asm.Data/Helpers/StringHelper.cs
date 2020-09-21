@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Xml;
-using asm.Data.Extensions;
+using asm.Extensions;
 
 namespace asm.Data.Helpers
 {

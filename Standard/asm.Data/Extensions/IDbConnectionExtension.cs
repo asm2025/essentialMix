@@ -2,11 +2,11 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Reflection;
-using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Helpers;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class IDbConnectionExtension
 	{
@@ -17,7 +17,7 @@ namespace asm.Data.Extensions
 			DbProviderFactory result;
 
 
-			PropertyInfo property = type.GetProperty("DbProviderFactory", asm.Constants.BF_NON_PUBLIC_INSTANCE | BindingFlags.GetProperty);
+			PropertyInfo property = type.GetProperty("DbProviderFactory", Constants.BF_NON_PUBLIC_INSTANCE | BindingFlags.GetProperty);
 
 			if (property != null && property.PropertyType.IsAssignableTo<DbProviderFactory>())
 			{
@@ -27,7 +27,7 @@ namespace asm.Data.Extensions
 			{
 				// next, try to get the static instance of the factory. This won't work if the config (web.config or app.config) is missing this section
 				Type providerType = TypeHelper.FromName(type.FullName, type.AssemblyQualifiedName);
-				result = (DbProviderFactory)providerType?.InvokeMember("Instance", asm.Constants.BF_PUBLIC_STATIC | BindingFlags.GetProperty | BindingFlags.GetField, null, type, null);
+				result = (DbProviderFactory)providerType?.InvokeMember("Instance", Constants.BF_PUBLIC_STATIC | BindingFlags.GetProperty | BindingFlags.GetField, null, type, null);
 			}
 
 			return result ?? throw new InvalidOperationException("Database Provider not found.");

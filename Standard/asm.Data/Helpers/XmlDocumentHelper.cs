@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Xml;
-using asm.Data.Extensions;
+using asm.Extensions;
 using asm.Helpers;
 using JetBrains.Annotations;
 

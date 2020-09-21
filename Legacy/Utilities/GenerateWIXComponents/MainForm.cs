@@ -5,7 +5,6 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using asm.Extensions;
-using asm.Windows.Extensions;
 using GenerateWIXComponents.Properties;
 
 namespace GenerateWIXComponents

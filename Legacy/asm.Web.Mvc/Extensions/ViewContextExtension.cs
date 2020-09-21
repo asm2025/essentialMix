@@ -3,7 +3,8 @@ using System.Web;
 using System.Web.Mvc;
 using JetBrains.Annotations;
 
-namespace asm.Web.Mvc.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class ViewContextExtension
 	{

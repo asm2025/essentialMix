@@ -6,7 +6,6 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using asm.Extensions;
-using asm.Web.Mvc.Extensions;
 using JetBrains.Annotations;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;

@@ -4,7 +4,7 @@ using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
 using System.Threading;
 using System.Threading.Tasks;
-using asm.Data.Entity.Extensions;
+using asm.Extensions;
 using SystemDbContext = System.Data.Entity.DbContext;
 
 namespace asm.Data.Entity

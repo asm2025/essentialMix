@@ -4,14 +4,14 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
-using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Data.Xml;
 using asm.Exceptions.Collections;
 using asm.Patterns.Sorting;
 using asm.Web;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class XElementExtension
 	{

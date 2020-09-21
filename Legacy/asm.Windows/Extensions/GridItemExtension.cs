@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Windows.Forms;
-using asm.Extensions;
 using asm.Windows.Controls;
 using JetBrains.Annotations;
 
-namespace asm.Windows.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class GridItemExtension
 	{

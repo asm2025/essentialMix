@@ -4,7 +4,8 @@ using JetBrains.Annotations;
 using Microsoft.AspNet.Identity;
 using asm.Threading.Helpers;
 
-namespace asm.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class UserManagerExtension
 	{

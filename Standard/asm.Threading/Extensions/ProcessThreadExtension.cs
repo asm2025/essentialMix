@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace asm.Threading.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class ProcessThreadExtension
 	{

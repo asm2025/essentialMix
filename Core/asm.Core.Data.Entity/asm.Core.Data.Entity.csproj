@@ -7,7 +7,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Version>11.0.0.0</Version>
 		<Copyright>Copyright © 2019</Copyright>
-		<FileVersion>20.9.17.3</FileVersion>
+		<FileVersion>20.9.18.0</FileVersion>
 		<Authors>asm</Authors>
 		<PackageTags>data, database, entity, entityframeworkcore, utilities, tools, extensions, helpers, core</PackageTags>
 		<SignAssembly>true</SignAssembly>

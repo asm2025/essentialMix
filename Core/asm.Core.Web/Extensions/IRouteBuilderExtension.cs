@@ -5,7 +5,8 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 
-namespace asm.Core.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class IRouteBuilderExtension
 	{

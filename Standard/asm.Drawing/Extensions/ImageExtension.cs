@@ -3,7 +3,8 @@ using System.Drawing.Imaging;
 using System.IO;
 using JetBrains.Annotations;
 
-namespace asm.Drawing.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class ImageExtension
 	{

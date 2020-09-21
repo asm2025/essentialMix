@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
 using System.Threading;
-using asm.Extensions;
 using JetBrains.Annotations;
 using Timer = System.Timers.Timer;
 
-namespace asm.Threading.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class CancellationTokenSourceExtension
 	{

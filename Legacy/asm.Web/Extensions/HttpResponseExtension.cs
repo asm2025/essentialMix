@@ -1,11 +1,11 @@
 using System;
 using System.Web;
-using asm.Extensions;
 using JetBrains.Annotations;
 using MSHeaderNames = Microsoft.Net.Http.Headers.HeaderNames;
 using asmHeaderNames = asm.Web.HeaderNames;
 
-namespace asm.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class HttpResponseExtension
 	{

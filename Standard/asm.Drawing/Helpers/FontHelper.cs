@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using asm.Collections;
-using asm.Drawing.Extensions;
 using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Comparers;

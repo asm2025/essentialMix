@@ -7,13 +7,13 @@ using System.Reflection;
 using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
-using asm.Extensions;
 using asm.Helpers;
 using asm.Threading.Helpers;
 using JetBrains.Annotations;
 using Microsoft.Win32.SafeHandles;
 
-namespace asm.Threading.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class ProcessExtension
 	{

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
-namespace asm.Other.Nager.PublicSuffix
+// ReSharper disable once CheckNamespace
+namespace Other.Nager.PublicSuffix
 {
     public interface IDomainNormalizer
     {

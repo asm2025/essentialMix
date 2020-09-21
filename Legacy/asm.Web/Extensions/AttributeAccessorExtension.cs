@@ -1,9 +1,9 @@
 using System.Web.UI;
-using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Helpers;
 
-namespace asm.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class AttributeAccessorExtension
 	{

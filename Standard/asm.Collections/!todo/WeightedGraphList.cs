@@ -8,6 +8,7 @@ using asm.Extensions;
 using asm.Helpers;
 using JetBrains.Annotations;
 
+// ReSharper disable UnusedParameter.Local
 namespace asm.Collections
 {
 	/// <summary>

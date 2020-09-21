@@ -9,7 +9,6 @@ using JetBrains.Annotations;
 using asm.Exceptions.Collections;
 using asm.Helpers;
 using asm.Patterns.Object;
-using asm.Threading.Extensions;
 using asm.Threading.Helpers;
 
 namespace asm.Threading

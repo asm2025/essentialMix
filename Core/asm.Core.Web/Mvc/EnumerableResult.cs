@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using asm.Core.Web.Extensions;
+using asm.Extensions;
 
 namespace asm.Core.Web.Mvc
 {

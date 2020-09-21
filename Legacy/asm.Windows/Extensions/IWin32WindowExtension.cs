@@ -3,10 +3,10 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using asm.Drawing.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Windows.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class IWin32WindowExtension
 	{

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Xml.XPath;
 using JetBrains.Annotations;
-using asm.Data.Extensions;
+using asm.Extensions;
 using asm.Helpers;
 using asm.Patterns.Object;
 

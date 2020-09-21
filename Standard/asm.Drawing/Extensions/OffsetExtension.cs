@@ -1,4 +1,7 @@
-namespace asm.Drawing.Extensions
+using asm.Drawing;
+
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class OffsetExtension
 	{

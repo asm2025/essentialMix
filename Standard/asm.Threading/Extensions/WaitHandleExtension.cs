@@ -1,10 +1,10 @@
 using System;
 using System.Threading;
-using asm.Extensions;
 using asm.Helpers;
 using JetBrains.Annotations;
 
-namespace asm.Threading.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class WaitHandleExtension
 	{

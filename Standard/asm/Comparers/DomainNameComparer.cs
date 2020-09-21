@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using asm.Other.Nager.PublicSuffix;
+using Other.Nager.PublicSuffix;
 
 namespace asm.Comparers
 {

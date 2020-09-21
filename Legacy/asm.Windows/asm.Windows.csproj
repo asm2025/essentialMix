@@ -108,7 +108,7 @@
     <Compile Include="Controls\Tabless.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Extensions\ControlExtension.cs" />
+    <Compile Include="Extensions\WindowsControlExtension.cs" />
     <Compile Include="Extensions\DataGridViewExtension.cs" />
     <Compile Include="Extensions\ISynchronizeInvokeExtension.cs" />
     <Compile Include="Extensions\IWin32WindowExtension.cs" />

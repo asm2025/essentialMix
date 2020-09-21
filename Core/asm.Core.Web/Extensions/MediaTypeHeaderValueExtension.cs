@@ -1,8 +1,8 @@
 using System.IO;
-using asm.Extensions;
 using Microsoft.Net.Http.Headers;
 
-namespace asm.Core.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class MediaTypeHeaderValueExtension
 	{

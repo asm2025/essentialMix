@@ -2,7 +2,8 @@
 using System.Linq;
 using JetBrains.Annotations;
 
-namespace asm.Other.Nager.PublicSuffix.Extensions
+// ReSharper disable once CheckNamespace
+namespace Other.Nager.PublicSuffix
 {
     /// <summary>
     /// <see cref="DomainDataStructure"/> extension methods to create the TLD Tree.

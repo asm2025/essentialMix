@@ -1,7 +1,7 @@
 using System.Text;
 using System.Xml;
 using System.Xml.Schema;
-using asm.Data.Extensions;
+using asm.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Data.Helpers

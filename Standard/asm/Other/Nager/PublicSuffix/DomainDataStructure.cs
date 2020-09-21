@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace asm.Other.Nager.PublicSuffix
+// ReSharper disable once CheckNamespace
+// ReSharper disable once CheckNamespace
+namespace Other.Nager.PublicSuffix
 {
     /// <summary>
     /// Represents a tree of TLD domains

@@ -7,10 +7,12 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Mvc.Html;
 using System.Web.UI;
-using asm.Extensions;
+using asm.Web;
 using JetBrains.Annotations;
+using PagerSettings = asm.Web.Mvc.PagerSettings;
 
-namespace asm.Web.Mvc.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class HtmlHelperExtension
 	{
@@ -199,12 +201,12 @@ namespace asm.Web.Mvc.Extensions
 
 		public static TagBuilder PageLinks([NotNull] this HtmlHelper thisValue, [NotNull] PagerSettings pagerSettings)
 		{
-			return Helpers.HtmlHelper.PageLinks(pagerSettings);
+			return Web.Mvc.Helpers.HtmlHelper.PageLinks(pagerSettings);
 		}
 
 		public static MvcHtmlString PageLinksAction([NotNull] this HtmlHelper thisValue, [NotNull] PagerSettings pagerSettings)
 		{
-			return Helpers.HtmlHelper.PageLinksAction(pagerSettings);
+			return Web.Mvc.Helpers.HtmlHelper.PageLinksAction(pagerSettings);
 		}
 
 		[NotNull]

@@ -1,9 +1,9 @@
 using System;
 using System.Data;
-using asm.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class IDbDataParameterExtension
 	{

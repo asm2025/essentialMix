@@ -1,8 +1,11 @@
 ﻿using System;
 using System.IO.Compression;
+using CompressionLevel = asm.Compression.CompressionLevel;
+using CompressionMode = asm.Compression.CompressionMode;
 using SystemCompressionLevel = System.IO.Compression.CompressionLevel;
 
-namespace asm.Compression.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class SystemCompressionExtension
 	{

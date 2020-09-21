@@ -1,6 +1,7 @@
 using System.Data;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class IDataParameterCollectionExtension
 	{

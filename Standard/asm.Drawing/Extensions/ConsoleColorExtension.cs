@@ -1,8 +1,8 @@
 using System;
 using System.Drawing;
-using asm.Extensions;
 
-namespace asm.Drawing.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class ConsoleColorExtension
 	{

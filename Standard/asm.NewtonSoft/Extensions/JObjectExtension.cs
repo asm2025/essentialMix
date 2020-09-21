@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using asm.Delegation;
-using asm.Extensions;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 
-namespace asm.Newtonsoft.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class JObjectExtension
 	{

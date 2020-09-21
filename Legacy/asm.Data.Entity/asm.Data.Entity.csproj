@@ -98,8 +98,8 @@
     <Compile Include="DbContext.cs" />
     <Compile Include="Migrations\CreateOrMigrateDatabase.cs" />
     <Compile Include="DbMigration.cs" />
-    <Compile Include="Extensions\DbContextExtension.cs" />
-    <Compile Include="Extensions\ExceptionExtension.cs" />
+    <Compile Include="Extensions\DataEntityDbContextExtension.cs" />
+    <Compile Include="Extensions\DataEntityExceptionExtension.cs" />
     <Compile Include="JetBrains.Annotations\JetBrains.Annotations.cs" />
     <Compile Include="Patterns\Provider\DataProvider.cs" />
     <Compile Include="Patterns\Provider\IDataProvider.cs" />

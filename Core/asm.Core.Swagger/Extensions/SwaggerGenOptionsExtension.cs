@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using asm.Core.Extensions;
 using asm.Helpers;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,7 +9,8 @@ using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace asm.Core.Swagger.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class SwaggerGenOptionsExtension
 	{

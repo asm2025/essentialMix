@@ -3,7 +3,8 @@ using System.Xml.XPath;
 using JetBrains.Annotations;
 using asm.Data.Xml;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class XPathNodeIteratorExtension
 	{

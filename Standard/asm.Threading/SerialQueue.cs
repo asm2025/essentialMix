@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using asm.Threading.Internal.Extensions;
+using asm.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Threading

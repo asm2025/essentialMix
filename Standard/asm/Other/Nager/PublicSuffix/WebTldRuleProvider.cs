@@ -3,7 +3,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
-namespace asm.Other.Nager.PublicSuffix
+// ReSharper disable once CheckNamespace
+namespace Other.Nager.PublicSuffix
 {
     public class WebTldRuleProvider : ITldRuleProvider
     {

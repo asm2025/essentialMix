@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using asm.Extensions;
 using JetBrains.Annotations;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace asm.Core.Swagger.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class OperationFilterContextExtension
 	{

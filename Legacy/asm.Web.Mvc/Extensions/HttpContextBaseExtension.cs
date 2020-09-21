@@ -2,7 +2,8 @@ using System.Security.Principal;
 using System.Web;
 using JetBrains.Annotations;
 
-namespace asm.Web.Mvc.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class HttpContextBaseExtension
 	{

@@ -2,14 +2,14 @@ using System;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
-using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Data.Helpers;
 using asm.Helpers;
 using asm.Exceptions.Collections;
 using asm.Patterns.Sorting;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class XDocumentExtension
 	{

@@ -1,4 +1,5 @@
-namespace asm.Drawing.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class FontWeightExtension
 	{

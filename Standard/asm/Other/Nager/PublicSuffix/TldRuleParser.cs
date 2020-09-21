@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace asm.Other.Nager.PublicSuffix
+// ReSharper disable once CheckNamespace
+namespace Other.Nager.PublicSuffix
 {
     public class TldRuleParser
     {

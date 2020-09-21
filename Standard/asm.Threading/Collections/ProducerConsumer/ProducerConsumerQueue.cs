@@ -5,7 +5,6 @@ using asm.Extensions;
 using asm.Helpers;
 using asm.Patterns.Object;
 using asm.Threading.Collections.ProducerConsumer.Queue;
-using asm.Threading.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Threading.Collections.ProducerConsumer

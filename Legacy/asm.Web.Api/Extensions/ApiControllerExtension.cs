@@ -5,10 +5,10 @@ using System.Web.Http;
 using System.Web.Http.Results;
 using asm.Helpers;
 using asm.Web.Api.Model;
-using asm.Web.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Web.Api.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class ApiControllerExtension
 	{

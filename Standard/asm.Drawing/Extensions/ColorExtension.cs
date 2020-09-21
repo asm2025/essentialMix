@@ -1,10 +1,10 @@
 using System;
 using System.Drawing;
 using asm.Collections;
-using asm.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Drawing.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class ColorExtension
 	{

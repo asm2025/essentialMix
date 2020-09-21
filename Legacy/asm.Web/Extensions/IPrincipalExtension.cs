@@ -6,7 +6,8 @@ using System.Web;
 using JetBrains.Annotations;
 using Microsoft.Owin.Security;
 
-namespace asm.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class IPrincipalExtension
 	{

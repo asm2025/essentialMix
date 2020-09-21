@@ -4,10 +4,10 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using JetBrains.Annotations;
-using asm.Extensions;
 using asm.Helpers;
 
-namespace asm.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class HttpRequestExtension
 	{

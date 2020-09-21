@@ -10,7 +10,7 @@ using Microsoft.Extensions.ObjectPool;
 using Newtonsoft.Json;
 
 // ReSharper disable once CheckNamespace
-namespace asm.Core.Web.Extensions
+namespace asm.Extensions
 {
 	public static class MvcOptionsExtension
 	{

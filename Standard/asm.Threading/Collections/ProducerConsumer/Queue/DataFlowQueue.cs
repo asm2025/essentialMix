@@ -2,8 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using asm.Extensions;
 using asm.Helpers;
-using asm.Threading.Internal.Extensions;
 using JetBrains.Annotations;
 
 namespace asm.Threading.Collections.ProducerConsumer.Queue

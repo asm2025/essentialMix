@@ -3,7 +3,8 @@ using System.Data;
 using System.Linq;
 using JetBrains.Annotations;
 
-namespace asm.Data.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class DataTableCollectionExtension
 	{

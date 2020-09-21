@@ -2,7 +2,8 @@ using System;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 
-namespace asm.Core.Web.Extensions
+// ReSharper disable once CheckNamespace
+namespace asm.Extensions
 {
 	public static class ContentDispositionHeaderValueExtension
 	{
