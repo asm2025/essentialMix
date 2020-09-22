@@ -32,7 +32,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Standard\asm.Configuration\asm.Extensions.Configuration.csproj" />
+		<ProjectReference Include="..\..\Standard\asm.Extensions.Configuration\asm.Extensions.Configuration.csproj" />
 		<ProjectReference Include="..\..\Standard\asm.Json.Abstraction\asm.Json.Abstraction.csproj" />
 		<ProjectReference Include="..\..\Standard\asm.Logging\asm.Logging.csproj" />
 		<ProjectReference Include="..\..\Standard\asm.Data\asm.Data.csproj" />

@@ -34,7 +34,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Standard\asm.Configuration\asm.Extensions.Configuration.csproj" />
+	  <ProjectReference Include="..\..\Standard\asm.Extensions.Configuration\asm.Extensions.Configuration.csproj" />
 	  <ProjectReference Include="..\..\Standard\asm\asm.csproj" />
 	</ItemGroup>
 
