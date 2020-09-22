@@ -17,17 +17,16 @@ namespace asm.Extensions
 		[NotNull]
 		public static SwaggerGenOptions Setup([NotNull] this SwaggerGenOptions thisValue, [NotNull] IConfiguration configuration, IHostEnvironment environment = null)
 		{
-			string website = configuration.GetValue<string>(null, "swagger:website", "website");
-
+			string website = configuration.GetAnyValue<string>(null, "swagger:website", "website");
 			OpenApiInfo info = new OpenApiInfo
 			{
-				Title = configuration.GetValue(environment?.ApplicationName, "swagger:title", "title"),
-				Description = configuration.GetValue(string.Empty, "swagger:description", "description")?.Replace("\n", "<br />"),
+				Title = configuration.GetAnyValue(environment?.ApplicationName, "swagger:title", "title"),
+				Description = configuration.GetAnyValue(string.Empty, "swagger:description", "description")?.Replace("\n", "<br />"),
 				Version = configuration.GetValue("swagger:version", "v1"),
 				Contact = new OpenApiContact
 				{
-					Name = configuration.GetValue<string>(null, "swagger:company", "company"),
-					Email = configuration.GetValue<string>(null, "swagger:email", "email"),
+					Name = configuration.GetAnyValue<string>(null, "swagger:company", "company"),
+					Email = configuration.GetAnyValue<string>(null, "swagger:email", "email"),
 					Url = website == null
 							? null
 							: UriHelper.ToUri(website)
