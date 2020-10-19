@@ -256,5 +256,53 @@ namespace asm.Extensions
 						? result
 						: defaultValue;
 		}
+
+		public static void Merge<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] IDictionary<TKey, TValue> other)
+		{
+			if (other.Count == 0) return;
+
+			foreach (KeyValuePair<TKey, TValue> pair in other) 
+				thisValue[pair.Key] = pair.Value;
+		}
+
+		public static void Merge<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] IDictionary<TKey, TValue> other1, [NotNull] IDictionary<TKey, TValue> other2)
+		{
+			if (other1.Count == 0) return;
+
+			foreach (KeyValuePair<TKey, TValue> pair in other1) 
+				thisValue[pair.Key] = pair.Value;
+
+			foreach (KeyValuePair<TKey, TValue> pair in other2) 
+				thisValue[pair.Key] = pair.Value;
+		}
+
+		public static void Merge<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] IDictionary<TKey, TValue> other1, [NotNull] IDictionary<TKey, TValue> other2, [NotNull] IDictionary<TKey, TValue> other3)
+		{
+			if (other1.Count == 0) return;
+
+			foreach (KeyValuePair<TKey, TValue> pair in other1) 
+				thisValue[pair.Key] = pair.Value;
+
+			foreach (KeyValuePair<TKey, TValue> pair in other2) 
+				thisValue[pair.Key] = pair.Value;
+
+			foreach (KeyValuePair<TKey, TValue> pair in other3) 
+				thisValue[pair.Key] = pair.Value;
+		}
+
+		public static void Merge<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] params IDictionary<TKey, TValue>[] dictionaries)
+		{
+			if (dictionaries.Length == 0) return;
+
+			foreach (IDictionary<TKey, TValue> dictionary in dictionaries)
+			{
+				if (dictionary == null || dictionary.Count == 0) continue;
+
+				foreach (KeyValuePair<TKey, TValue> pair in dictionary)
+				{
+					thisValue[pair.Key] = pair.Value;
+				}
+			}
+		}
 	}
 }
