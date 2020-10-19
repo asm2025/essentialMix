@@ -24,7 +24,8 @@
 using System;
 using System.Globalization;
 
-namespace asm.Other.TylerBrinkley.Enumeration.Numeric
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration.Numeric
 {
 	internal interface INumericProvider<TInt>
 		where TInt : struct, IComparable, IComparable<TInt>, IEquatable<TInt>, IConvertible

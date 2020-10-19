@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 
-namespace asm.Other.Microsoft.MultiLanguage
+// ReSharper disable once CheckNamespace
+namespace Other.Microsoft.MultiLanguage
 {
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	internal struct tagSCRIPTINFO

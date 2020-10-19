@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 
-namespace asm.Other.Microsoft.MultiLanguage
+// ReSharper disable once CheckNamespace
+namespace Other.Microsoft.MultiLanguage
 {
 	[StructLayout(LayoutKind.Explicit, Pack = 4)]
 	internal struct __MIDL_IWinTypes_0009

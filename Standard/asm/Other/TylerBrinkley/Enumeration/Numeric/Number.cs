@@ -21,7 +21,8 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-namespace asm.Other.TylerBrinkley.Enumeration.Numeric
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration.Numeric
 {
     internal static class Number
     {

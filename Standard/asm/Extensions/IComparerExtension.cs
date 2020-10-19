@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using asm.Comparers;
-using asm.Other.JonSkeet.MiscUtil.Collections;
-using asm.Other.MarcGravell;
+using Other.JonSkeet.MiscUtil.Collections;
+using Other.MarcGravell;
 
 namespace asm.Extensions
 {

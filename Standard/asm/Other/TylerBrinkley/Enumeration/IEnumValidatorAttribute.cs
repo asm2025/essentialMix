@@ -21,7 +21,8 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-namespace asm.Other.TylerBrinkley.Enumeration
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration
 {
     /// <summary>
     /// Interface to be implemented on an enum validator attribute class to allow custom validation logic.

@@ -1,4 +1,5 @@
-namespace asm.Other.Microsoft.MultiLanguage
+// ReSharper disable once CheckNamespace
+namespace Other.Microsoft.MultiLanguage
 {
 	internal enum MLDETECTCP
 	{

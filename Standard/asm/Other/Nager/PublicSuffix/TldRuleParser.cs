@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
+// ReSharper disable once CheckNamespace
 namespace Other.Nager.PublicSuffix
 {
     public class TldRuleParser

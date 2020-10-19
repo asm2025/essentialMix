@@ -22,9 +22,10 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
-using asm.Other.TylerBrinkley.Collections;
+using Other.TylerBrinkley.Collections;
 
-namespace asm.Other.TylerBrinkley.Enumeration
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration
 {
     internal interface IEnumMember : IFormattable, IConvertible
     {

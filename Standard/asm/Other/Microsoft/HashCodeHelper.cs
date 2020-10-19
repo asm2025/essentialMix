@@ -5,11 +5,13 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Threading;
+using asm;
 using asm.Extensions;
 using asm.Helpers;
 using JetBrains.Annotations;
 
-namespace asm.Other.Microsoft
+// ReSharper disable once CheckNamespace
+namespace Other.Microsoft
 {
 	public class HashCodeHelper
 	{

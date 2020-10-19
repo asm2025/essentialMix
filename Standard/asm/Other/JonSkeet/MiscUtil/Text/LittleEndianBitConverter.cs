@@ -1,4 +1,5 @@
-namespace asm.Other.JonSkeet.MiscUtil.Text
+// ReSharper disable once CheckNamespace
+namespace Other.JonSkeet.MiscUtil.Text
 {
 	/// <summary>
 	/// Implementation of EndianBitConverter which converts to/from little-endian

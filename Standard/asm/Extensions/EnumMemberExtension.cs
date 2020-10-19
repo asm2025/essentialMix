@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using asm.Other.TylerBrinkley.Enumeration;
+using Other.TylerBrinkley.Enumeration;
 using JetBrains.Annotations;
 
 namespace asm.Extensions

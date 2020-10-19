@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 using asm.Extensions;
-using asm.Other.JonSkeet.MiscUtil.Collections;
+using Other.JonSkeet.MiscUtil.Collections;
 
 namespace asm.Comparers
 {

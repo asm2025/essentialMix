@@ -24,7 +24,8 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace asm.Other.TylerBrinkley.Enumeration
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration
 {
 	/// <summary>
 	/// Specifies what enum members to include.

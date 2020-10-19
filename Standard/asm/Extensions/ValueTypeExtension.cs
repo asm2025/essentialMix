@@ -9,7 +9,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using JetBrains.Annotations;
 using asm.Helpers;
 using asm.Numeric;
-using asm.Other.JonSkeet.MiscUtil.Text;
+using Other.JonSkeet.MiscUtil.Text;
 using SysMath = System.Math;
 
 namespace asm.Extensions

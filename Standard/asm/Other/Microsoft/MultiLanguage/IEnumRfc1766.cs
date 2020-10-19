@@ -1,7 +1,8 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace asm.Other.Microsoft.MultiLanguage
+// ReSharper disable once CheckNamespace
+namespace Other.Microsoft.MultiLanguage
 {
 	[ComImport]
 	[Guid("3DC39D1D-C030-11D0-B81B-00C04FC9B31F")]

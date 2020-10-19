@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using asm.Helpers;
-using asm.Other.MarcGravell.Nullable;
+using Other.MarcGravell.Nullable;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace

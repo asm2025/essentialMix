@@ -2,10 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using asm;
 using asm.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Other.JonSkeet.MiscUtil.Collections
+// ReSharper disable once CheckNamespace
+namespace Other.JonSkeet.MiscUtil.Collections
 {
 	/// <inheritdoc cref="Queue{T}" />
 	/// <summary>

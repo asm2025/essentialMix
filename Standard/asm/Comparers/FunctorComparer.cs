@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime;
-using asm.Other.JonSkeet.MiscUtil.Collections;
+using Other.JonSkeet.MiscUtil.Collections;
 using JetBrains.Annotations;
 
 namespace asm.Comparers

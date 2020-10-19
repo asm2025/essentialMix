@@ -25,7 +25,8 @@ using System;
 using System.Globalization;
 using JetBrains.Annotations;
 
-namespace asm.Other.TylerBrinkley.Enumeration.Numeric
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration.Numeric
 {
     internal class Int32NumericProvider : INumericProvider<int>
     {

@@ -1,10 +1,11 @@
 using System;
 using System.Linq.Expressions;
 using asm.Helpers;
-using asm.Other.MarcGravell.Nullable;
 using JetBrains.Annotations;
+using Other.MarcGravell.Nullable;
 
-namespace asm.Other.MarcGravell
+// ReSharper disable once CheckNamespace
+namespace Other.MarcGravell
 {
 	/// <summary>
 	/// Provides standard operators (such as addition) over a single type

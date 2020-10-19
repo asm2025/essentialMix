@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using asm.Extensions;
-using asm.Other.JonSkeet.MiscUtil.Collections;
+using Other.JonSkeet.MiscUtil.Collections;
 using JetBrains.Annotations;
 
 namespace asm.Threading.Other.JonSkeet.MiscUtil.Threading

@@ -23,10 +23,11 @@
 
 using System;
 using System.Collections.Generic;
-using asm.Other.TylerBrinkley.Collections;
-using asm.Other.TylerBrinkley.Enumeration.Numeric;
+using Other.TylerBrinkley.Collections;
+using Other.TylerBrinkley.Enumeration.Numeric;
 
-namespace asm.Other.TylerBrinkley.Enumeration
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration
 {
 	public interface IEnumInfo : IEnumInfoCommon
 	{

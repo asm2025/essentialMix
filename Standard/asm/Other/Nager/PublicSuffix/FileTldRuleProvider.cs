@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
+// ReSharper disable once CheckNamespace
 namespace Other.Nager.PublicSuffix
 {
     public class FileTldRuleProvider : ITldRuleProvider

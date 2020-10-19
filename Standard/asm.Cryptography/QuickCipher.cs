@@ -9,7 +9,7 @@ using asm.Cryptography.Symmetric;
 using asm.Extensions;
 using asm.Helpers;
 using asm.Numeric;
-using asm.Other.Moitah;
+using Other.Moitah;
 using JetBrains.Annotations;
 using RSACng = asm.Cryptography.Asymmetric.RSACng;
 

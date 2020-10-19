@@ -27,11 +27,12 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
-using asm.Other.TylerBrinkley.Enumeration.Numeric;
 using JetBrains.Annotations;
-using AttributeCollection = asm.Other.TylerBrinkley.Collections.AttributeCollection;
+using Other.TylerBrinkley.Enumeration.Numeric;
+using AttributeCollection = Other.TylerBrinkley.Collections.AttributeCollection;
 
-namespace asm.Other.TylerBrinkley.Enumeration
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration
 {
 	/// <summary>
 	/// An enum member which composes its name, value, and attributes.
@@ -63,7 +64,7 @@ namespace asm.Other.TylerBrinkley.Enumeration
 		/// <summary>
 		/// The enum member's attributes.
 		/// </summary>
-		public AttributeCollection Attributes => Member.Attributes;
+		public Collections.AttributeCollection Attributes => Member.Attributes;
 
 		/// <summary>
 		/// Retrieves the enum member's name.
@@ -391,7 +392,7 @@ namespace asm.Other.TylerBrinkley.Enumeration
 		private string _displayName;
 		private EnumMember _enumMember;
 
-		public EnumMember(TInt value, string name, AttributeCollection attributes, EnumCache<TInt, TIntProvider> enumCache)
+		public EnumMember(TInt value, string name, Collections.AttributeCollection attributes, EnumCache<TInt, TIntProvider> enumCache)
 		{
 			Value = value;
 			Name = name;
@@ -410,7 +411,7 @@ namespace asm.Other.TylerBrinkley.Enumeration
 							?? Attributes.Get<DisplayNameAttribute>()?.DisplayName
 							?? Name;
 
-		public AttributeCollection Attributes { get; }
+		public Collections.AttributeCollection Attributes { get; }
 
 		internal EnumCache<TInt, TIntProvider> EnumCache { get; }
 

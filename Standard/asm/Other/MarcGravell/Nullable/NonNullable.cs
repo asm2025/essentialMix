@@ -1,7 +1,8 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace asm.Other.MarcGravell.Nullable
+// ReSharper disable once CheckNamespace
+namespace Other.MarcGravell.Nullable
 {
 	/// <summary>
 	/// Encapsulates a reference compatible with the type parameter. The reference

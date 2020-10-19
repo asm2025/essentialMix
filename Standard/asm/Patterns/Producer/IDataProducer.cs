@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using asm.Extensions;
 using asm.Helpers;
-using asm.Other.JonSkeet.MiscUtil.Collections;
-using asm.Other.MarcGravell;
+using Other.JonSkeet.MiscUtil.Collections;
+using Other.MarcGravell;
 using asm.Patterns.Future;
 using JetBrains.Annotations;
 

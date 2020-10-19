@@ -4,7 +4,8 @@ using System.Linq;
 using asm.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Other.JonSkeet.MiscUtil.Text
+// ReSharper disable once CheckNamespace
+namespace Other.JonSkeet.MiscUtil.Text
 {
 	/// <summary>
 	/// String of UTF-32 characters (ints). This class is immutable, and so is thread-safe

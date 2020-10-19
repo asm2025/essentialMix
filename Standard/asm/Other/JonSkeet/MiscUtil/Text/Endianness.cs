@@ -1,4 +1,5 @@
-namespace asm.Other.JonSkeet.MiscUtil.Text
+// ReSharper disable once CheckNamespace
+namespace Other.JonSkeet.MiscUtil.Text
 {
 	/// <summary>
 	/// Endianness of a converter

@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using asm.Collections;
 using JetBrains.Annotations;
 using asm.Helpers;
-using asm.Other.JonSkeet.MiscUtil.Collections;
+using Other.JonSkeet.MiscUtil.Collections;
 using asmMath = asm.Numeric.Math;
 
 namespace asm.Extensions

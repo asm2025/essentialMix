@@ -2,7 +2,8 @@
 using asm.Comparers;
 using asm.Helpers;
 
-namespace asm.Other.TylerBrinkley.Enumeration
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration
 {
 	/// <summary>
 	/// An efficient type-safe enum comparer which doesn't box the values.

@@ -1,6 +1,7 @@
 using asm;
 
 // ReSharper disable once CheckNamespace
+// ReSharper disable once CheckNamespace
 namespace Other.Microsoft.Collections
 {
 	public unsafe class Bits // should not be serialized

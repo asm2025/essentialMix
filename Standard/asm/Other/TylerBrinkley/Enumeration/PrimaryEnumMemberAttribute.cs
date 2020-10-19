@@ -23,7 +23,8 @@
 
 using System;
 
-namespace asm.Other.TylerBrinkley.Enumeration
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration
 {
     /// <inheritdoc />
 	/// <summary>

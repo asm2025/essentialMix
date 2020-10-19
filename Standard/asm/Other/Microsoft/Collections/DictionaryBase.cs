@@ -11,10 +11,11 @@ using System.Threading;
 using asm.Collections.DebugView;
 using asm.Exceptions.Collections;
 using asm.Extensions;
-using asm.Other.Microsoft;
+using Other.Microsoft;
 using JetBrains.Annotations;
 using asmMath = asm.Numeric.Math;
 
+// ReSharper disable once CheckNamespace
 // ReSharper disable once CheckNamespace
 namespace Other.Microsoft.Collections
 {

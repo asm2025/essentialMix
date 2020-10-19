@@ -27,7 +27,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using asm.Helpers;
 
-namespace asm.Other.TylerBrinkley.Enumeration
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration
 {
 	/// <summary>
 	/// Specifies the enum string representation formats.

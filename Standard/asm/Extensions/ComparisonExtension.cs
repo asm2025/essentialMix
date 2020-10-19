@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
-using asm.Other.JonSkeet.MiscUtil.Collections;
+using Other.JonSkeet.MiscUtil.Collections;
 
 namespace asm.Extensions
 {

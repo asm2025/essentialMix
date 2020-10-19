@@ -20,10 +20,12 @@
 // ****************************************************************************
 
 using System;
+using asm;
 using asm.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Other.Moitah
+// ReSharper disable once CheckNamespace
+namespace Other.Moitah
 {
 	public static class BitHelper
 	{

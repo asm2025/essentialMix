@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using asm.Comparers;
 using JetBrains.Annotations;
 
-namespace asm.Other.JonSkeet.MiscUtil.Collections
+// ReSharper disable once CheckNamespace
+namespace Other.JonSkeet.MiscUtil.Collections
 {
 	/// <summary>
 	/// Utility to build an IComparer implementation from a Comparison delegate,

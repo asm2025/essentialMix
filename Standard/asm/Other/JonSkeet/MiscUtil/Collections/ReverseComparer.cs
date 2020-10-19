@@ -2,7 +2,8 @@
 using asm.Comparers;
 using JetBrains.Annotations;
 
-namespace asm.Other.JonSkeet.MiscUtil.Collections
+// ReSharper disable once CheckNamespace
+namespace Other.JonSkeet.MiscUtil.Collections
 {
 	public class ReverseComparer<T> : GenericComparer<T>
 	{

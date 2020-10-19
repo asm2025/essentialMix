@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using JetBrains.Annotations;
-using asm.Other.MarcGravell;
+using Other.MarcGravell;
 
 namespace asm.Collections
 {

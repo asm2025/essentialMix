@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using asm.Extensions;
 using asm.Helpers;
-using asm.Other.JonSkeet.MiscUtil.Text;
+using Other.JonSkeet.MiscUtil.Text;
 using asm.Patterns.Object;
 using JetBrains.Annotations;
 

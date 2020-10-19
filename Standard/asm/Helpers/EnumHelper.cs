@@ -7,9 +7,9 @@ using asm.Collections;
 using JetBrains.Annotations;
 using asm.Exceptions;
 using asm.Extensions;
-using asm.Other.TylerBrinkley.Enumeration;
-using asm.Other.TylerBrinkley.Enumeration.Numeric;
-using AttributeCollection = asm.Other.TylerBrinkley.Collections.AttributeCollection;
+using Other.TylerBrinkley.Enumeration;
+using Other.TylerBrinkley.Enumeration.Numeric;
+using AttributeCollection = Other.TylerBrinkley.Collections.AttributeCollection;
 
 namespace asm.Helpers
 {

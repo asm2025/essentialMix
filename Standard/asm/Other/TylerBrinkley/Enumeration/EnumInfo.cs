@@ -4,11 +4,12 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security;
 using asm.Extensions;
-using asm.Other.TylerBrinkley.Collections;
-using asm.Other.TylerBrinkley.Enumeration.Numeric;
 using JetBrains.Annotations;
+using Other.TylerBrinkley.Collections;
+using Other.TylerBrinkley.Enumeration.Numeric;
 
-namespace asm.Other.TylerBrinkley.Enumeration
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration
 {
 	// Class that acts as a bridge from the enum type to the underlying type
 	// through the use of the implemented interfaces IEnumInfo<TEnum> and IEnumInfo.

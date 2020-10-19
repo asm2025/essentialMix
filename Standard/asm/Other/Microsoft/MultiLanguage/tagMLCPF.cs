@@ -1,6 +1,7 @@
 using System;
 
-namespace asm.Other.Microsoft.MultiLanguage
+// ReSharper disable once CheckNamespace
+namespace Other.Microsoft.MultiLanguage
 {
 	[Flags]
 	internal enum MLCPF

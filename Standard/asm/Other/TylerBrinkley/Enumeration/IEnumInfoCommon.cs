@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace asm.Other.TylerBrinkley.Enumeration
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration
 {
 	public interface IEnumInfoCommon
 	{

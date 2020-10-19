@@ -1,4 +1,5 @@
-﻿namespace asm.Other.MarcGravell.Nullable
+﻿// ReSharper disable once CheckNamespace
+namespace Other.MarcGravell.Nullable
 {
 	public sealed class ClassNullOp<T> : INullOp<T>
 		where T : class

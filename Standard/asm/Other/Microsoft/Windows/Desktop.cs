@@ -5,11 +5,13 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using asm;
 using asm.Extensions;
 using asm.Patterns.Object;
 using JetBrains.Annotations;
 
-namespace asm.Other.Microsoft.Windows
+// ReSharper disable once CheckNamespace
+namespace Other.Microsoft.Windows
 {
 	/// <summary>
 	/// Encapsulates the Desktop API.

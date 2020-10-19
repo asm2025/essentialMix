@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using asm.Collections;
 
 // ReSharper disable once CheckNamespace
+// ReSharper disable once CheckNamespace
 namespace Other.Microsoft.Collections
 {
 	// based on https://referencesource.microsoft.com/#system/compmod/system/collections/generic/linkedlist.cs

@@ -27,7 +27,8 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 
-namespace asm.Other.TylerBrinkley.Collections
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Collections
 {
 	/// <summary>
 	/// An <see cref="T:global::System.Attribute" /> collection.

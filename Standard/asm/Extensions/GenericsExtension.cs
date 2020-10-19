@@ -18,7 +18,7 @@ using JetBrains.Annotations;
 using asm.Comparers;
 using asm.Delegation;
 using asm.Helpers;
-using asm.Other.MarcGravell;
+using Other.MarcGravell;
 using asm.Patterns.Object;
 using asm.Reflection;
 

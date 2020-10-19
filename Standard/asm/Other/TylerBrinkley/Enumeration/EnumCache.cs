@@ -11,12 +11,13 @@ using System.Threading;
 using asm.Exceptions;
 using asm.Extensions;
 using asm.Helpers;
-using asm.Other.TylerBrinkley.Enumeration.Numeric;
 using JetBrains.Annotations;
-using AttributeCollection = asm.Other.TylerBrinkley.Collections.AttributeCollection;
+using Other.TylerBrinkley.Enumeration.Numeric;
+using AttributeCollection = Other.TylerBrinkley.Collections.AttributeCollection;
 using SysMath = System.Math;
 
-namespace asm.Other.TylerBrinkley.Enumeration
+// ReSharper disable once CheckNamespace
+namespace Other.TylerBrinkley.Enumeration
 {
 	internal sealed class EnumCache<TInt, TIntProvider>
 		where TInt : struct, IComparable, IComparable<TInt>, IEquatable<TInt>, IConvertible
@@ -120,7 +121,7 @@ namespace asm.Other.TylerBrinkley.Enumeration
 				TInt value = isBoolean
 								? fieldDictionary[name]
 								: (TInt)field.GetValue(null);
-				AttributeCollection attributes = new AttributeCollection(Attribute.GetCustomAttributes(field, false));
+				Collections.AttributeCollection attributes = new Collections.AttributeCollection(Attribute.GetCustomAttributes(field, false));
 				EnumMember<TInt, TIntProvider> member = new EnumMember<TInt, TIntProvider>(value, name, attributes, this);
 
 				if (_valueMap.TryGetValue(value, out EnumMember<TInt, TIntProvider> existing))

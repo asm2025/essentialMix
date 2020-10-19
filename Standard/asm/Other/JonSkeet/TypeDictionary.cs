@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using JetBrains.Annotations;
 
-namespace asm.Other.JonSkeet
+// ReSharper disable once CheckNamespace
+namespace Other.JonSkeet
 {
 	// https://codeblog.jonskeet.uk/2008/10/08/mapping-from-a-type-to-an-instance-of-that-type/
 	/// <inheritdoc cref="Dictionary{TKey,TValue}" />

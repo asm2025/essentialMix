@@ -4,7 +4,8 @@ using System.Runtime.InteropServices;
 
 #pragma warning disable 0108
 
-namespace asm.Other.Microsoft.MultiLanguage
+// ReSharper disable once CheckNamespace
+namespace Other.Microsoft.MultiLanguage
 {
 	[ComImport]
 	[Guid("C04D65D2-B70D-11D0-B188-00AA0038C969")]

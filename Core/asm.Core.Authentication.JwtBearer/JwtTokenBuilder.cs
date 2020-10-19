@@ -4,7 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
 using asm.Extensions;
-using asm.Other.JonSkeet.MiscUtil.Collections;
+using Other.JonSkeet.MiscUtil.Collections;
 using JetBrains.Annotations;
 using Microsoft.IdentityModel.Tokens;
 

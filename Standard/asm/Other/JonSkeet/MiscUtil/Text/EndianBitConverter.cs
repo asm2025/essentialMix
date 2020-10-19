@@ -1,9 +1,11 @@
 using System;
 using System.Runtime.InteropServices;
+using asm;
 using asm.Extensions;
 using JetBrains.Annotations;
 
-namespace asm.Other.JonSkeet.MiscUtil.Text
+// ReSharper disable once CheckNamespace
+namespace Other.JonSkeet.MiscUtil.Text
 {
 	/// <summary>
 	/// Equivalent of global::System.BitConverter, but with either endianness.
