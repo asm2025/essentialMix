@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Xml;
 using JetBrains.Annotations;
 
@@ -6,8 +7,15 @@ namespace asm.Extensions
 {
 	public static class XmlAttributeExtension
 	{
-		public static T Get<T>([NotNull] this XmlAttribute thisValue) { return Get(thisValue, default(T)); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Get<T>(this XmlAttribute thisValue) { return Get(thisValue, default(T)); }
 
-		public static T Get<T>([NotNull] this XmlAttribute thisValue, T defaultValue) { return thisValue.Value.To(defaultValue); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Get<T>(this XmlAttribute thisValue, T defaultValue)
+		{
+			return thisValue == null
+						? defaultValue
+						: thisValue.Value.To(defaultValue);
+		}
 	}
 }

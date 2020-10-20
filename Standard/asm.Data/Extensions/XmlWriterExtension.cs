@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Serialization;
@@ -9,8 +10,10 @@ namespace asm.Extensions
 {
 	public static class XmlWriterExtension
 	{
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsValid(this XmlWriter thisValue) { return thisValue != null; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool CanWrite([NotNull] this XmlWriter thisValue) { return IsValid(thisValue) && thisValue.WriteState == WriteState.Closed; }
 
 		public static bool SerializeXml<T>([NotNull] this XmlWriter thisValue, T value, XmlSerializerNamespaces namespaces = null, params Type[] extraTypes)

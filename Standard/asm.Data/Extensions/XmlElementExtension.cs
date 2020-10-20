@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Xml;
 using System.Xml.XPath;
 using asm.Exceptions.Collections;
@@ -11,25 +12,27 @@ namespace asm.Extensions
 {
 	public static class XmlElementExtension
 	{
-		public static int GetIndex([NotNull] this XmlElement thisValue) { return GetIndex(thisValue, true); }
+		public static int GetIndex(this XmlElement thisValue) { return GetIndex(thisValue, true); }
 
-		public static int GetIndex([NotNull] this XmlElement thisValue, bool matchName)
+		public static int GetIndex(this XmlElement thisValue, bool matchName)
 		{
+			if (thisValue == null) return -1;
 			XmlIndexMatchType flags = XmlIndexMatchType.Type;
 			if (matchName) flags |= XmlIndexMatchType.Name;
 			return thisValue.GetIndex(flags);
 		}
 
-		public static XmlNamespaceManager GetNamespaceManager([NotNull] this XmlElement thisValue)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static XmlNamespaceManager GetNamespaceManager(this XmlElement thisValue)
 		{
-			return thisValue.OwnerDocument == null
+			return thisValue?.OwnerDocument == null
 						? null
 						: new XmlNamespaceManager(thisValue.OwnerDocument.NameTable);
 		}
 
-		public static int AppendNamespaces([NotNull] this XmlElement thisValue, [NotNull] params string[] namespaceURI)
+		public static int AppendNamespaces(this XmlElement thisValue, [NotNull] params string[] namespaceURI)
 		{
-			if (thisValue.OwnerDocument == null || namespaceURI.IsNullOrEmpty()) return 0;
+			if (thisValue?.OwnerDocument == null || namespaceURI.IsNullOrEmpty()) return -1;
 
 			int n = 0;
 
@@ -56,11 +59,13 @@ namespace asm.Extensions
 			return n;
 		}
 
-		public static IEnumerable<XmlElement> Ancestors([NotNull] this XmlElement thisValue) { return Ancestors(thisValue, null); }
+		public static IEnumerable<XmlElement> Ancestors(this XmlElement thisValue) { return Ancestors(thisValue, null); }
 
 		[ItemNotNull]
-		public static IEnumerable<XmlElement> Ancestors([NotNull] this XmlElement thisValue, string name)
+		public static IEnumerable<XmlElement> Ancestors(this XmlElement thisValue, string name)
 		{
+			if (thisValue == null) yield break;
+
 			XmlElement e;
 			
 			if (name == null)
@@ -75,20 +80,21 @@ namespace asm.Extensions
 			}
 		}
 
-		public static XmlNodeList Elements([NotNull] this XmlElement thisValue) { return Elements(thisValue, null); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static XmlNodeList Elements(this XmlElement thisValue) { return Elements(thisValue, null); }
 
-		public static XmlNodeList Elements([NotNull] this XmlElement thisValue, string name)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static XmlNodeList Elements(this XmlElement thisValue, string name)
 		{
-			if (!thisValue.HasChildNodes) return null;
+			if (thisValue == null || !thisValue.HasChildNodes) return null;
 			XmlNamespaceManager nsmgr = thisValue.GetNamespaceManager();
 			string expr = name ?? "*";
 			return nsmgr == null ? thisValue.SelectNodes(expr) : thisValue.SelectNodes(expr, nsmgr);
 		}
 
-		public static XmlNodeList Elements([NotNull] this XmlElement thisValue, string name, string attribute, string value)
+		public static XmlNodeList Elements(this XmlElement thisValue, string name, string attribute, string value)
 		{
-			if (!thisValue.HasChildNodes) return null;
-
+			if (thisValue == null || !thisValue.HasChildNodes) return null;
 			XmlNamespaceManager nsmgr = thisValue.GetNamespaceManager();
 			string nm = name ?? "*";
 			string expr = attribute == null
@@ -97,11 +103,11 @@ namespace asm.Extensions
 			return nsmgr == null ? thisValue.SelectNodes(expr) : thisValue.SelectNodes(expr, nsmgr);
 		}
 
-		public static XmlNode First([NotNull] this XmlElement thisValue, string name) { return First(thisValue, name, null, null); }
+		public static XmlNode First(this XmlElement thisValue, string name) { return First(thisValue, name, null, null); }
 
-		public static XmlNode First([NotNull] this XmlElement thisValue, string name, string attribute, string value)
+		public static XmlNode First(this XmlElement thisValue, string name, string attribute, string value)
 		{
-			if (!thisValue.HasChildNodes) return null;
+			if (thisValue == null || !thisValue.HasChildNodes) return null;
 			XmlNamespaceManager nsmgr = thisValue.GetNamespaceManager();
 			string nm = name ?? "*";
 			string expr = attribute == null
@@ -110,11 +116,11 @@ namespace asm.Extensions
 			return nsmgr == null ? thisValue.SelectSingleNode(expr) : thisValue.SelectSingleNode(expr, nsmgr);
 		}
 
-		public static XmlNode Last([NotNull] this XmlElement thisValue, string name) { return Last(thisValue, name, null, null); }
+		public static XmlNode Last(this XmlElement thisValue, string name) { return Last(thisValue, name, null, null); }
 
-		public static XmlNode Last([NotNull] this XmlElement thisValue, string name, string attribute, string value)
+		public static XmlNode Last(this XmlElement thisValue, string name, string attribute, string value)
 		{
-			if (!thisValue.HasChildNodes) return null;
+			if (thisValue == null || !thisValue.HasChildNodes) return null;
 			XmlNamespaceManager nsmgr = thisValue.GetNamespaceManager();
 			string nm = name ?? "*";
 			
@@ -124,9 +130,9 @@ namespace asm.Extensions
 			return nsmgr == null ? thisValue.SelectSingleNode(expr) : thisValue.SelectSingleNode(expr, nsmgr);
 		}
 
-		public static T Evaluate<T>([NotNull] this XmlElement thisValue, string expression) { return Evaluate(thisValue, expression, default(T)); }
+		public static T Evaluate<T>(this XmlElement thisValue, string expression) { return Evaluate(thisValue, expression, default(T)); }
 
-		public static T Evaluate<T>([NotNull] this XmlElement thisValue, string expression, T defaultValue)
+		public static T Evaluate<T>(this XmlElement thisValue, string expression, T defaultValue)
 		{
 			if (!IsValid(thisValue)) return defaultValue;
 			XPathNavigator navigator = thisValue.CreateNavigator();
@@ -138,9 +144,9 @@ namespace asm.Extensions
 			return result;
 		}
 
-		public static T Evaluate<T>([NotNull] this XmlElement thisValue, XPathExpression expression) { return Evaluate(thisValue, expression, default(T)); }
+		public static T Evaluate<T>(this XmlElement thisValue, XPathExpression expression) { return Evaluate(thisValue, expression, default(T)); }
 
-		public static T Evaluate<T>([NotNull] this XmlElement thisValue, XPathExpression expression, T defaultValue)
+		public static T Evaluate<T>(this XmlElement thisValue, XPathExpression expression, T defaultValue)
 		{
 			if (!IsValid(thisValue) || expression == null) return defaultValue;
 			
@@ -153,29 +159,37 @@ namespace asm.Extensions
 			return result;
 		}
 
-		public static bool IsElement([NotNull] this XmlElement thisValue, string name) { return IsValid(thisValue) && thisValue.Name.IsSame(name); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool IsElement(this XmlElement thisValue, string name) { return IsValid(thisValue) && thisValue.Name.IsSame(name); }
 
-		public static bool IsElement([NotNull] this XmlElement thisValue, string localName, string namespaceURI)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool IsElement(this XmlElement thisValue, string localName, string namespaceURI)
 		{
 			return IsValid(thisValue) && thisValue.LocalName.IsSame(localName) && thisValue.NamespaceURI.IsSame(namespaceURI);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsValid(this XmlElement thisValue) { return thisValue != null; }
 
-		public static bool IsWritable([NotNull] this XmlElement thisValue) { return IsValid(thisValue) && !thisValue.IsReadOnly; }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool IsWritable(this XmlElement thisValue) { return IsValid(thisValue) && !thisValue.IsReadOnly; }
 
-		public static T Get<T>([NotNull] this XmlElement thisValue, [NotNull] string name) { return Get(thisValue, name, default(T)); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Get<T>(this XmlElement thisValue, [NotNull] string name) { return Get(thisValue, name, default(T)); }
 
-		public static T Get<T>([NotNull] this XmlElement thisValue, [NotNull] string name, T defaultValue)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Get<T>(this XmlElement thisValue, [NotNull] string name, T defaultValue)
 		{
 			if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
 			if (!IsValid(thisValue) || !thisValue.HasAttributes) return defaultValue;
 			return thisValue.Attributes[name].Get(defaultValue);
 		}
 
-		public static T Get<T>([NotNull] this XmlElement thisValue, [NotNull] string localName, string namespaceUri) { return Get(thisValue, localName, namespaceUri, default(T)); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Get<T>(this XmlElement thisValue, [NotNull] string localName, string namespaceUri) { return Get(thisValue, localName, namespaceUri, default(T)); }
 
-		public static T Get<T>([NotNull] this XmlElement thisValue, [NotNull] string localName, string namespaceUri, T defaultValue)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Get<T>(this XmlElement thisValue, [NotNull] string localName, string namespaceUri, T defaultValue)
 		{
 			if (string.IsNullOrEmpty(namespaceUri)) return Get(thisValue, localName, defaultValue);
 			if (string.IsNullOrEmpty(localName)) throw new ArgumentNullException(nameof(localName));
@@ -307,6 +321,7 @@ namespace asm.Extensions
 			return section;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		private static void AssertIsWritable([NotNull] XmlElement value)
 		{
 			if (IsWritable(value)) return;

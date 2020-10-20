@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Serialization;
@@ -10,9 +11,11 @@ namespace asm.Extensions
 {
 	public static class XmlReaderExtension
 	{
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsValid(this XmlReader thisValue) { return thisValue != null; }
 
-		public static bool CanCollectAttributes([NotNull] this XmlReader thisValue, XmlElement element)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool CanCollectAttributes(this XmlReader thisValue, XmlElement element)
 		{
 			return CanRead(thisValue) &&
 					thisValue.NodeType == XmlNodeType.Element &&
@@ -21,7 +24,8 @@ namespace asm.Extensions
 					thisValue.NamespaceURI.IsSame(element.NamespaceURI);
 		}
 
-		public static bool CanCollectChildren([NotNull] this XmlReader thisValue, XmlElement element)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool CanCollectChildren(this XmlReader thisValue, XmlElement element)
 		{
 			return CanRead(thisValue) &&
 					thisValue.NodeType == XmlNodeType.Element &&
@@ -30,13 +34,14 @@ namespace asm.Extensions
 					thisValue.NamespaceURI.IsSame(element.NamespaceURI);
 		}
 
-		public static bool CanRead([NotNull] this XmlReader thisValue)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool CanRead(this XmlReader thisValue)
 		{
 			return IsValid(thisValue) && (thisValue.ReadState == ReadState.Initial || thisValue.ReadState == ReadState.Interactive);
 		}
 
-		public static void CollectAttributes([NotNull] this XmlReader thisValue, XmlElement element) { CollectAttributes(thisValue, element, true); }
-		public static void CollectAttributes([NotNull] this XmlReader thisValue, XmlElement element, bool stopOnErrors)
+		public static void CollectAttributes(this XmlReader thisValue, XmlElement element) { CollectAttributes(thisValue, element, true); }
+		public static void CollectAttributes(this XmlReader thisValue, XmlElement element, bool stopOnErrors)
 		{
 			if (!CanCollectAttributes(thisValue, element)) return;
 			element.IsEmpty = thisValue.IsEmptyElement;
@@ -62,8 +67,8 @@ namespace asm.Extensions
 			thisValue.MoveToElement();
 		}
 
-		public static void CollectChildren([NotNull] this XmlReader thisValue, XmlElement element, bool ignoreComments) { CollectChildren(thisValue, element, ignoreComments, true); }
-		public static void CollectChildren([NotNull] this XmlReader thisValue, XmlElement element, bool ignoreComments, bool stopOnErrors)
+		public static void CollectChildren(this XmlReader thisValue, XmlElement element, bool ignoreComments) { CollectChildren(thisValue, element, ignoreComments, true); }
+		public static void CollectChildren(this XmlReader thisValue, XmlElement element, bool ignoreComments, bool stopOnErrors)
 		{
 			if (!CanCollectChildren(thisValue, element)) return;
 
@@ -134,7 +139,9 @@ namespace asm.Extensions
 
 			try
 			{
-				return (T)(events.HasValue ? serializer.Deserialize(thisValue, events.Value) : serializer.Deserialize(thisValue));
+				return (T)(events.HasValue
+								? serializer.Deserialize(thisValue, events.Value)
+								: serializer.Deserialize(thisValue));
 			}
 			catch
 			{

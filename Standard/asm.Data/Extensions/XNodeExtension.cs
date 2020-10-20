@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
@@ -13,9 +14,9 @@ namespace asm.Extensions
 	{
 		private static readonly XmlDocument DOCUMENT = new XmlDocument();
 
-		public static int GetIndex([NotNull] this XNode thisValue, XmlIndexMatchType matchType)
+		public static int GetIndex(this XNode thisValue, XmlIndexMatchType matchType)
 		{
-			if (thisValue.Parent == null) return 0;
+			if (thisValue?.Parent == null) return 0;
 
 			int index = 0;
 
@@ -62,11 +63,13 @@ namespace asm.Extensions
 			return node;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsElement(this XNode thisValue, string name)
 		{
 			return thisValue != null && thisValue.NodeType == XmlNodeType.Element && ((XElement)thisValue).Name.LocalName.IsSame(name);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsElement(this XNode thisValue, string localName, string namespaceURI)
 		{
 			return thisValue is XElement element && element.Name.LocalName.IsSame(localName) && element.Name.NamespaceName.IsSame(namespaceURI);

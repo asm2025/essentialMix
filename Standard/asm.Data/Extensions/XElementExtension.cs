@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -15,10 +16,11 @@ namespace asm.Extensions
 {
 	public static class XElementExtension
 	{
-		public static int GetIndex([NotNull] this XElement thisValue) { return GetIndex(thisValue, true); }
+		public static int GetIndex(this XElement thisValue) { return GetIndex(thisValue, true); }
 
-		public static int GetIndex([NotNull] this XElement thisValue, bool matchName)
+		public static int GetIndex(this XElement thisValue, bool matchName)
 		{
+			if (thisValue == null) return -1;
 			XmlIndexMatchType flags = XmlIndexMatchType.Type;
 			if (matchName) flags |= XmlIndexMatchType.Name;
 			return thisValue.GetIndex(flags);
@@ -70,47 +72,47 @@ namespace asm.Extensions
 			return n;
 		}
 
-		public static XNode SelectSingleNode([NotNull] this XElement thisValue, [NotNull] string xpath)
+		public static XNode SelectSingleNode(this XElement thisValue, [NotNull] string xpath)
 		{
+			if (thisValue == null) return null;
 			XNodeLister list = SelectNodes(thisValue, xpath);
 			return list.Count == 0 ? null : list[0];
 		}
 
-		public static XNode SelectSingleNode([NotNull] this XElement thisValue, [NotNull] string xpath, XmlNamespaceManager nsmgr)
+		public static XNode SelectSingleNode(this XElement thisValue, [NotNull] string xpath, XmlNamespaceManager nsmgr)
 		{
-			XNodeLister list = SelectNodes(thisValue, xpath);
+			if (thisValue == null) return null;
+			XNodeLister list = SelectNodes(thisValue, xpath, nsmgr);
 			return list.Count == 0 ? null : list[0];
 		}
 
-		[NotNull]
-		public static XNodeLister SelectNodes([NotNull] this XElement thisValue, [NotNull] string xpath)
+		public static XNodeLister SelectNodes(this XElement thisValue, [NotNull] string xpath)
 		{
+			if (thisValue == null) return null;
 			XPathNavigator navigator = thisValue.CreateNavigator();
 			return new XNodeLister(navigator.Select(xpath));
 		}
 
-		[NotNull]
-		public static XNodeLister SelectNodes([NotNull] this XElement thisValue, [NotNull] string xpath, XmlNamespaceManager nsmgr)
+		public static XNodeLister SelectNodes(this XElement thisValue, [NotNull] string xpath, XmlNamespaceManager nsmgr)
 		{
+			if (thisValue == null) return null;
 			XPathNavigator navigator = thisValue.CreateNavigator();
 			XPathExpression expr = navigator.Compile(xpath);
 			expr.SetContext(nsmgr);
 			return new XNodeLister(navigator.Select(expr));
 		}
 
-		public static XNodeLister Elements([NotNull] this XElement thisValue, string name)
+		public static XNodeLister Elements(this XElement thisValue, string name)
 		{
-			if (!thisValue.HasElements) return null;
-
+			if (thisValue == null || !thisValue.HasElements) return null;
 			XmlNamespaceManager nsmgr = thisValue.GetNamespaceManager();
 			string expr = name ?? "*";
 			return nsmgr == null ? thisValue.SelectNodes(expr) : thisValue.SelectNodes(expr, nsmgr);
 		}
 
-		public static XNodeLister Elements([NotNull] this XElement thisValue, string name, string attribute, string value)
+		public static XNodeLister Elements(this XElement thisValue, string name, string attribute, string value)
 		{
-			if (!thisValue.HasElements) return null;
-
+			if (thisValue == null || !thisValue.HasElements) return null;
 			XmlNamespaceManager nsmgr = thisValue.GetNamespaceManager();
 			string nm = name ?? "*";
 			string expr = attribute == null
@@ -119,11 +121,11 @@ namespace asm.Extensions
 			return nsmgr == null ? thisValue.SelectNodes(expr) : thisValue.SelectNodes(expr, nsmgr);
 		}
 
-		public static XNode First([NotNull] this XElement thisValue, string name) { return First(thisValue, name, null, null); }
+		public static XNode First(this XElement thisValue, string name) { return First(thisValue, name, null, null); }
 
-		public static XNode First([NotNull] this XElement thisValue, string name, string attribute, string value)
+		public static XNode First(this XElement thisValue, string name, string attribute, string value)
 		{
-			if (!thisValue.HasElements) return null;
+			if (thisValue == null || !thisValue.HasElements) return null;
 			XmlNamespaceManager nsmgr = thisValue.GetNamespaceManager();
 			string nm = name ?? "*";
 			string expr = attribute == null
@@ -132,11 +134,11 @@ namespace asm.Extensions
 			return nsmgr == null ? thisValue.SelectSingleNode(expr) : thisValue.SelectSingleNode(expr, nsmgr);
 		}
 
-		public static XNode Last([NotNull] this XElement thisValue, string name) { return Last(thisValue, name, null, null); }
+		public static XNode Last(this XElement thisValue, string name) { return Last(thisValue, name, null, null); }
 
-		public static XNode Last([NotNull] this XElement thisValue, string name, string attribute, string value)
+		public static XNode Last(this XElement thisValue, string name, string attribute, string value)
 		{
-			if (!thisValue.HasElements) return null;
+			if (thisValue == null || !thisValue.HasElements) return null;
 			XmlNamespaceManager nsmgr = thisValue.GetNamespaceManager();
 			string nm = name ?? "*";
 			
@@ -146,9 +148,9 @@ namespace asm.Extensions
 			return nsmgr == null ? thisValue.SelectSingleNode(expr) : thisValue.SelectSingleNode(expr, nsmgr);
 		}
 
-		public static T Evaluate<T>([NotNull] this XElement thisValue, string expression) { return Evaluate(thisValue, expression, default(T)); }
+		public static T Evaluate<T>(this XElement thisValue, string expression) { return Evaluate(thisValue, expression, default(T)); }
 
-		public static T Evaluate<T>([NotNull] this XElement thisValue, string expression, T defaultValue)
+		public static T Evaluate<T>(this XElement thisValue, string expression, T defaultValue)
 		{
 			if (!IsValid(thisValue)) return defaultValue;
 
@@ -161,9 +163,9 @@ namespace asm.Extensions
 			return result;
 		}
 
-		public static T Evaluate<T>([NotNull] this XElement thisValue, XPathExpression expression) { return Evaluate(thisValue, expression, default(T)); }
+		public static T Evaluate<T>(this XElement thisValue, XPathExpression expression) { return Evaluate(thisValue, expression, default(T)); }
 
-		public static T Evaluate<T>([NotNull] this XElement thisValue, XPathExpression expression, T defaultValue)
+		public static T Evaluate<T>(this XElement thisValue, XPathExpression expression, T defaultValue)
 		{
 			if (!IsValid(thisValue) || expression == null) return defaultValue;
 			
@@ -176,19 +178,25 @@ namespace asm.Extensions
 			return result;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsElement(this XElement thisValue, string name) { return IsValid(thisValue) && thisValue.Name.LocalName.IsSame(name); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsElement(this XElement thisValue, string localName, string namespaceURI)
 		{
 			return IsValid(thisValue) && thisValue.Name.LocalName.IsSame(localName) && thisValue.Name.NamespaceName.IsSame(namespaceURI);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsValid(this XElement thisValue) { return thisValue != null; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsWritable(this XElement thisValue) { return IsValid(thisValue); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Get<T>(this XElement thisValue, [NotNull] string name) { return Get(thisValue, name, default(T)); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Get<T>(this XElement thisValue, [NotNull] string name, T defaultValue)
 		{
 			if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
@@ -200,8 +208,10 @@ namespace asm.Extensions
 				: attribute.Get(defaultValue);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Get<T>(this XElement thisValue, [NotNull] string localName, string namespaceUri) { return Get(thisValue, localName, namespaceUri, default(T)); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T Get<T>(this XElement thisValue, [NotNull] string localName, string namespaceUri, T defaultValue)
 		{
 			if (string.IsNullOrEmpty(namespaceUri)) return Get(thisValue, localName, defaultValue);
@@ -365,16 +375,18 @@ namespace asm.Extensions
 			return result;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
-		public static XElement ElementStrict([NotNull] this XElement thisValue, XName name)
+		public static XElement ElementStrict([CanBeNull] this XElement thisValue, XName name)
 		{
-			return thisValue.Element(name) ?? throw new KeyNotFoundException($"Could not find element [{name}]");
+			return thisValue?.Element(name) ?? throw new KeyNotFoundException($"Could not find element [{name}]");
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
-		public static XAttribute AttributeStrict([NotNull] this XElement thisValue, XName name)
+		public static XAttribute AttributeStrict([CanBeNull] this XElement thisValue, XName name)
 		{
-			return thisValue.Attribute(name) ?? throw new KeyNotFoundException($"Could not find attribute [{name}]");
+			return thisValue?.Attribute(name) ?? throw new KeyNotFoundException($"Could not find attribute [{name}]");
 		}
 
 		[NotNull]
@@ -458,6 +470,7 @@ namespace asm.Extensions
 			return newElement;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		private static void AssertIsWritable(XElement value)
 		{
 			if (IsWritable(value)) return;
