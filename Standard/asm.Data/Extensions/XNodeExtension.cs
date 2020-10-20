@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using JetBrains.Annotations;
@@ -12,7 +13,7 @@ namespace asm.Extensions
 {
 	public static class XNodeExtension
 	{
-		private static readonly XmlDocument DOCUMENT = new XmlDocument();
+		private static readonly Lazy<XmlDocument> __document = new Lazy<XmlDocument>(() => new XmlDocument(), LazyThreadSafetyMode.PublicationOnly);
 
 		public static int GetIndex(this XNode thisValue, XmlIndexMatchType matchType)
 		{
@@ -89,7 +90,7 @@ namespace asm.Extensions
 				{
 					case XmlNodeType.Element:
 						bool isEmptyElement = reader.IsEmptyElement;
-						XmlElement element = DOCUMENT.CreateElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
+						XmlElement element = __document.Value.CreateElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
 						element.IsEmpty = isEmptyElement;
 
 						if (reader.MoveToFirstAttribute())
@@ -119,30 +120,30 @@ namespace asm.Extensions
 						newChild = LoadAttributeNode(reader);
 						break;
 					case XmlNodeType.Text:
-						newChild = DOCUMENT.CreateTextNode(reader.Value);
+						newChild = __document.Value.CreateTextNode(reader.Value);
 						break;
 					case XmlNodeType.CDATA:
-						newChild = DOCUMENT.CreateCDataSection(reader.Value);
+						newChild = __document.Value.CreateCDataSection(reader.Value);
 						break;
 					case XmlNodeType.EntityReference:
 						newChild = LoadEntityReferenceNode(reader, preserveWhitespace);
 						break;
 					case XmlNodeType.ProcessingInstruction:
-						newChild = DOCUMENT.CreateProcessingInstruction(reader.Name, reader.Value);
+						newChild = __document.Value.CreateProcessingInstruction(reader.Name, reader.Value);
 						break;
 					case XmlNodeType.Comment:
-						newChild = DOCUMENT.CreateComment(reader.Value);
+						newChild = __document.Value.CreateComment(reader.Value);
 						break;
 					case XmlNodeType.Whitespace:
 						if (preserveWhitespace)
 						{
-							newChild = DOCUMENT.CreateWhitespace(reader.Value);
+							newChild = __document.Value.CreateWhitespace(reader.Value);
 							break;
 						}
 
 						continue;
 					case XmlNodeType.SignificantWhitespace:
-						newChild = DOCUMENT.CreateSignificantWhitespace(reader.Value);
+						newChild = __document.Value.CreateSignificantWhitespace(reader.Value);
 						break;
 					case XmlNodeType.EndElement:
 						if (node == null) return null;
@@ -175,7 +176,7 @@ namespace asm.Extensions
 		{
 			if (reader == null) return null;
 
-			XmlAttribute attribute = DOCUMENT.CreateAttribute(reader.Prefix, reader.LocalName, reader.NamespaceURI);
+			XmlAttribute attribute = __document.Value.CreateAttribute(reader.Prefix, reader.LocalName, reader.NamespaceURI);
 
 			while (reader.ReadAttributeValue())
 			{
@@ -184,10 +185,10 @@ namespace asm.Extensions
 				switch (reader.NodeType)
 				{
 					case XmlNodeType.Text:
-						xmlNode = DOCUMENT.CreateTextNode(reader.Value);
+						xmlNode = __document.Value.CreateTextNode(reader.Value);
 						break;
 					case XmlNodeType.EntityReference:
-						xmlNode = DOCUMENT.CreateEntityReference(reader.LocalName);
+						xmlNode = __document.Value.CreateEntityReference(reader.LocalName);
 
 						if (reader.CanResolveEntity)
 						{
@@ -195,7 +196,7 @@ namespace asm.Extensions
 							LoadAttributeValue(reader, xmlNode);
 
 							if (xmlNode.FirstChild == null)
-								xmlNode.AppendChild(DOCUMENT.CreateTextNode(string.Empty));
+								xmlNode.AppendChild(__document.Value.CreateTextNode(string.Empty));
 						}
 
 						break;
@@ -220,16 +221,16 @@ namespace asm.Extensions
 				switch (reader.NodeType)
 				{
 					case XmlNodeType.Text:
-						xmlNode = DOCUMENT.CreateTextNode(reader.Value);
+						xmlNode = __document.Value.CreateTextNode(reader.Value);
 						break;
 					case XmlNodeType.EntityReference:
-						xmlNode = DOCUMENT.CreateEntityReference(reader.LocalName);
+						xmlNode = __document.Value.CreateEntityReference(reader.LocalName);
 
 						if (reader.CanResolveEntity)
 						{
 							reader.ResolveEntity();
 							LoadAttributeValue(reader, xmlNode);
-							if (xmlNode.FirstChild == null) xmlNode.AppendChild(DOCUMENT.CreateTextNode(string.Empty));
+							if (xmlNode.FirstChild == null) xmlNode.AppendChild(__document.Value.CreateTextNode(string.Empty));
 						}
 
 						break;
@@ -247,7 +248,7 @@ namespace asm.Extensions
 		{
 			if (reader == null) return null;
 
-			XmlEntityReference xmlEntityReference = DOCUMENT.CreateEntityReference(reader.Name);
+			XmlEntityReference xmlEntityReference = __document.Value.CreateEntityReference(reader.Name);
 
 			if (reader.CanResolveEntity)
 			{
@@ -260,7 +261,7 @@ namespace asm.Extensions
 						xmlEntityReference.AppendChild(newChild);
 				}
 
-				if (xmlEntityReference.LastChild == null) xmlEntityReference.AppendChild(DOCUMENT.CreateTextNode(string.Empty));
+				if (xmlEntityReference.LastChild == null) xmlEntityReference.AppendChild(__document.Value.CreateTextNode(string.Empty));
 			}
 
 			return xmlEntityReference;
@@ -293,7 +294,7 @@ namespace asm.Extensions
 			}
 
 			if (version == null) ParseXmlDeclarationValue(reader.Value, out version, out encoding, out standalone);
-			return DOCUMENT.CreateXmlDeclaration(version, encoding, standalone);
+			return __document.Value.CreateXmlDeclaration(version, encoding, standalone);
 		}
 
 		private static void ParseXmlDeclarationValue(string strValue, out string version, out string encoding, out string standalone)
