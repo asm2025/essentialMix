@@ -123,7 +123,7 @@ namespace asm.Extensions
 			}
 		}
 
-		public static string ReadToEnd([NotNull] this WebRequest thisValue, IOResponseSettings settings)
+		public static string ReadToEnd([NotNull] this WebRequest thisValue, IOResponseSettings settings = null)
 		{
 			WebResponse response = GetResponse(thisValue, settings);
 			if (response == null) return null;
@@ -144,7 +144,7 @@ namespace asm.Extensions
 			}
 		}
 
-		public static async Task<string> ReadToEndAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<string> ReadToEndAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			WebResponse response = await GetResponseAsync(thisValue, settings, token);
@@ -166,7 +166,7 @@ namespace asm.Extensions
 			}
 		}
 
-		public static string GetTitle([NotNull] this WebRequest thisValue, IOResponseSettings settings)
+		public static string GetTitle([NotNull] this WebRequest thisValue, IOResponseSettings settings = null)
 		{
 			WebResponse response = GetResponse(thisValue, settings);
 			if (response == null) return null;
@@ -187,7 +187,7 @@ namespace asm.Extensions
 			}
 		}
 
-		public static async Task<string> GetTitleAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<string> GetTitleAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			WebResponse response = await GetResponseAsync(thisValue, settings, token);
@@ -209,7 +209,7 @@ namespace asm.Extensions
 			}
 		}
 
-		public static (string Title, string Buffer) Peek([NotNull] this WebRequest thisValue, IOResponseSettings settings)
+		public static (string Title, string Buffer) Peek([NotNull] this WebRequest thisValue, IOResponseSettings settings = null)
 		{
 			WebResponse response = GetResponse(thisValue, settings);
 			if (response == null) return (null, null);
@@ -230,7 +230,7 @@ namespace asm.Extensions
 			}
 		}
 
-		public static async Task<(string Title, string Buffer)> PeekAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<(string Title, string Buffer)> PeekAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			WebResponse response = await GetResponseAsync(thisValue, settings, token);
@@ -253,13 +253,13 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
-		public static UrlSearchResult Search([NotNull] this WebRequest thisValue, UrlSearchFlags flags, IOResponseSettings settings)
+		public static UrlSearchResult Search([NotNull] this WebRequest thisValue, UrlSearchFlags flags, IOResponseSettings settings = null)
 		{
 			return Search(thisValue, null, flags, settings);
 		}
 
 		[NotNull]
-		public static UrlSearchResult Search([NotNull] this WebRequest thisValue, string searchFor, UrlSearchFlags flags, IOResponseSettings settings)
+		public static UrlSearchResult Search([NotNull] this WebRequest thisValue, string searchFor, UrlSearchFlags flags, IOResponseSettings settings = null)
 		{
 			WebResponse response = GetResponse(thisValue, settings);
 			if (response == null) return new UrlSearchResult { Status = UrlSearchStatus.Failed };
@@ -296,13 +296,13 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
-		public static async Task<UrlSearchResult> SearchAsync([NotNull] this WebRequest thisValue, UrlSearchFlags flags, IOResponseSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<UrlSearchResult> SearchAsync([NotNull] this WebRequest thisValue, UrlSearchFlags flags, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			return await SearchAsync(thisValue, null, flags, settings, token).ConfigureAwait();
 		}
 
 		[NotNull]
-		public static async Task<UrlSearchResult> SearchAsync([NotNull] this WebRequest thisValue, string searchFor, UrlSearchFlags flags, IOResponseSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<UrlSearchResult> SearchAsync([NotNull] this WebRequest thisValue, string searchFor, UrlSearchFlags flags, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			WebResponse response = await GetResponseAsync(thisValue, settings, token);
@@ -340,7 +340,7 @@ namespace asm.Extensions
 			}
 		}
 
-		public static string GetString([NotNull] this WebRequest thisValue, IOResponseSettings settings)
+		public static string GetString([NotNull] this WebRequest thisValue, IOResponseSettings settings = null)
 		{
 			WebResponse response = GetResponse(thisValue, settings);
 			if (response == null) return null;
@@ -361,7 +361,7 @@ namespace asm.Extensions
 			}
 		}
 
-		public static async Task<string> GetStringAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<string> GetStringAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			WebResponse response = await GetResponseAsync(thisValue, settings, token);
@@ -383,7 +383,7 @@ namespace asm.Extensions
 			}
 		}
 
-		public static Stream GetStream([NotNull] this WebRequest thisValue, IOResponseSettings settings)
+		public static Stream GetStream([NotNull] this WebRequest thisValue, IOResponseSettings settings = null)
 		{
 			WebResponse response = GetResponse(thisValue, settings);
 			if (response == null) return null;
@@ -399,7 +399,7 @@ namespace asm.Extensions
 			}
 		}
 
-		public static async Task<Stream> GetStreamAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<Stream> GetStreamAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			WebResponse response = await GetResponseAsync(thisValue, settings, token);
@@ -416,7 +416,7 @@ namespace asm.Extensions
 			}
 		}
 
-		public static WebResponse GetResponse([NotNull] this WebRequest thisValue, IOResponseSettings settings)
+		public static WebResponse GetResponse([NotNull] this WebRequest thisValue, IOResponseSettings settings = null)
 		{
 			if (settings == null) return thisValue.GetResponse();
 
@@ -443,7 +443,7 @@ namespace asm.Extensions
 			return response;
 		}
 
-		public static async Task<WebResponse> GetResponseAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<WebResponse> GetResponseAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			if (token.IsCancellationRequested) return null;
 			if (settings == null) return await thisValue.GetResponseAsync();

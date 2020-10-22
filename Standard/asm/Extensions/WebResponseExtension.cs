@@ -95,7 +95,7 @@ namespace asm.Extensions
 			}
 		}
 
-		public static string ReadToEnd([NotNull] this WebResponse thisValue, IOSettings settings)
+		public static string ReadToEnd([NotNull] this WebResponse thisValue, IOSettings settings = null)
 		{
 			settings ??= new IOSettings();
 
@@ -122,7 +122,7 @@ namespace asm.Extensions
 			return result;
 		}
 
-		public static async Task<string> ReadToEndAsync([NotNull] this WebResponse thisValue, IOSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<string> ReadToEndAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			settings ??= new IOSettings();
@@ -152,7 +152,7 @@ namespace asm.Extensions
 			return result;
 		}
 
-		public static string GetTitle([NotNull] this WebResponse thisValue, IOSettings settings)
+		public static string GetTitle([NotNull] this WebResponse thisValue, IOSettings settings = null)
 		{
 			string result = null;
 			StringBuilder sb = new StringBuilder();
@@ -176,7 +176,7 @@ namespace asm.Extensions
 			return Read(thisValue, readSettings) ? result : null;
 		}
 
-		public static async Task<string> GetTitleAsync([NotNull] this WebResponse thisValue, IOSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<string> GetTitleAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 
@@ -205,7 +205,7 @@ namespace asm.Extensions
 			return result;
 		}
 
-		public static (string Title, string Buffer) Peek([NotNull] this WebResponse thisValue, IOSettings settings)
+		public static (string Title, string Buffer) Peek([NotNull] this WebResponse thisValue, IOSettings settings = null)
 		{
 			bool titleFound = false;
 			bool bufferFilled = false;
@@ -250,7 +250,7 @@ namespace asm.Extensions
 				: (null, null);
 		}
 
-		public static async Task<(string Title, string Buffer)> PeekAsync([NotNull] this WebResponse thisValue, IOSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<(string Title, string Buffer)> PeekAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 
@@ -300,10 +300,10 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
-		public static UrlSearchResult Search([NotNull] this WebResponse thisValue, UrlSearchFlags flags, IOSettings settings) { return Search(thisValue, null, flags, settings); }
+		public static UrlSearchResult Search([NotNull] this WebResponse thisValue, UrlSearchFlags flags, IOSettings settings = null) { return Search(thisValue, null, flags, settings); }
 
 		[NotNull]
-		public static UrlSearchResult Search([NotNull] this WebResponse thisValue, string searchFor, UrlSearchFlags flags, IOSettings settings)
+		public static UrlSearchResult Search([NotNull] this WebResponse thisValue, string searchFor, UrlSearchFlags flags, IOSettings settings = null)
 		{
 			bool hasTitleFlag = flags.HasFlag(UrlSearchFlags.Title);
 			bool hasBufferFlag = flags.HasFlag(UrlSearchFlags.Buffer);
@@ -389,14 +389,14 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
-		public static async Task<UrlSearchResult> SearchAsync([NotNull] this WebResponse thisValue, UrlSearchFlags flags, IOSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<UrlSearchResult> SearchAsync([NotNull] this WebResponse thisValue, UrlSearchFlags flags, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			return await SearchAsync(thisValue, null, flags, settings, token).ConfigureAwait();
 		}
 
 		[NotNull]
 		[ItemNotNull]
-		public static async Task<UrlSearchResult> SearchAsync([NotNull] this WebResponse thisValue, string searchFor, UrlSearchFlags flags, IOSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<UrlSearchResult> SearchAsync([NotNull] this WebResponse thisValue, string searchFor, UrlSearchFlags flags, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			bool hasTitleFlag = flags.HasFlag(UrlSearchFlags.Title);
@@ -485,7 +485,7 @@ namespace asm.Extensions
 			return result;
 		}
 
-		public static string GetString([NotNull] this WebResponse thisValue, IOSettings settings)
+		public static string GetString([NotNull] this WebResponse thisValue, IOSettings settings = null)
 		{
 			bool bufferFilled = false;
 			int bufferSize = settings?.BufferSize ?? IOSettings.BUFFER_DEFAULT;
@@ -505,7 +505,7 @@ namespace asm.Extensions
 				: null;
 		}
 
-		public static async Task<string> GetStringAsync([NotNull] this WebResponse thisValue, IOSettings settings, CancellationToken token = default(CancellationToken))
+		public static async Task<string> GetStringAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 
