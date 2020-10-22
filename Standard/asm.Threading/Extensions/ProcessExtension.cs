@@ -18,14 +18,14 @@ namespace asm.Extensions
 {
 	public static class ProcessExtension
 	{
-		private static readonly Lazy<PropertyInfo> __associated_Property = new Lazy<PropertyInfo>(() => typeof(Process).GetProperty("Associated", Constants.BF_NON_PUBLIC_INSTANCE, typeof(bool)), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly Lazy<PropertyInfo> __associatedProperty = new Lazy<PropertyInfo>(() => typeof(Process).GetProperty("Associated", Constants.BF_NON_PUBLIC_INSTANCE, typeof(bool)), LazyThreadSafetyMode.PublicationOnly);
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsAssociated(this Process thisValue)
 		{
 			if (thisValue.IsDisposed()) return false;
 			thisValue.Refresh();
-			return (bool)__associated_Property.Value.GetValue(thisValue);
+			return (bool)__associatedProperty.Value.GetValue(thisValue);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

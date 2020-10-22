@@ -19,7 +19,7 @@ namespace asm.Extensions
 		private const string MEDIUM_STRING = @"d\.hh\:mm\:ss\.fffff";
 		private const string LONG_STRING = @"d\.hh\:mm\:ss\.fffffff";
 
-		private static readonly TimeUnit[] TIME_UNIT_VALUES = EnumHelper<TimeUnit>.GetValues();
+		private static readonly TimeUnit[] __timeUnitValues = EnumHelper<TimeUnit>.GetValues();
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsValid(this TimeSpan thisValue, bool zeroIsValid = false, bool infiniteIsValid = false)
@@ -53,26 +53,26 @@ namespace asm.Extensions
 		public static double GetValueAt(this TimeSpan thisValue, TimeUnit unit)
 		{
 			unit = unit.HighestFlag();
-			int max = TIME_UNIT_VALUES.IndexOf(unit);
+			int max = __timeUnitValues.IndexOf(unit);
 			if (max < 0) throw new ArgumentOutOfRangeException(nameof(unit));
 
 			double value = 0;
 
 			for (int i = 0; i <= max; i++)
-				value += GetValue(thisValue, TIME_UNIT_VALUES[i]);
+				value += GetValue(thisValue, __timeUnitValues[i]);
 
 			return value;
 		}
 
 		public static double GetValueBelow(this TimeSpan thisValue, TimeUnit unit)
 		{
-			int max = TIME_UNIT_VALUES.IndexOf(unit);
+			int max = __timeUnitValues.IndexOf(unit);
 			if (max < 0) throw new ArgumentOutOfRangeException(nameof(unit));
 
 			double value = 0;
 
 			for (int i = 0; i < max; i++)
-				value += GetValue(thisValue, TIME_UNIT_VALUES[i]);
+				value += GetValue(thisValue, __timeUnitValues[i]);
 
 			return value;
 		}

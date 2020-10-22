@@ -7,12 +7,12 @@ namespace asm.Helpers
 {
 	public static class EnvironmentHelper
 	{
-		private static readonly Regex RGX_IS_ENV_VAR = new Regex("^%\\w+%$", RegexHelper.OPTIONS_I);
-		private static readonly Regex RGX_HAS_ENV_VAR = new Regex("%\\w+%", RegexHelper.OPTIONS_I);
+		private static readonly Regex __rgxIsEnvVar = new Regex("^%\\w+%$", RegexHelper.OPTIONS_I);
+		private static readonly Regex __rgxHasEnvVar = new Regex("%\\w+%", RegexHelper.OPTIONS_I);
 
-		public static bool IsVar(string value) { return !string.IsNullOrEmpty(value) && RGX_IS_ENV_VAR.IsMatch(value); }
+		public static bool IsVar(string value) { return !string.IsNullOrEmpty(value) && __rgxIsEnvVar.IsMatch(value); }
 
-		public static bool HasVar(string value) { return !string.IsNullOrEmpty(value) && RGX_HAS_ENV_VAR.IsMatch(value); }
+		public static bool HasVar(string value) { return !string.IsNullOrEmpty(value) && __rgxHasEnvVar.IsMatch(value); }
 		[NotNull]
 		public static string GetEnvironmentName()
 		{

@@ -29,7 +29,7 @@ namespace asm.Helpers
 			new[] {"*", ".*"}
 		};
 
-		public static readonly Regex ALL_ASTERISKS = new Regex(@"^[*.\\]+$", OPTIONS);
+		public static readonly Regex AllAsterisks = new Regex(@"^[*.\\]+$", OPTIONS);
 
 		[NotNull]
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -53,7 +53,7 @@ namespace asm.Helpers
 			foreach (string entry in entries)
 			{
 				string value = entry.Escape().Replace(__escapeStrings).Replace(RGX_PATTERN_DBL_DOT, RGX_PATTERN_DBL_DOT_RPL, OPTIONS);
-				if (ALL_ASTERISKS.IsMatch(value)) return string.Concat('^', value, '$');
+				if (AllAsterisks.IsMatch(value)) return string.Concat('^', value, '$');
 				unique.Add(string.Concat("(?:", value, ")"));
 			}
 

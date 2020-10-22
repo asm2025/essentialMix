@@ -17,9 +17,9 @@ namespace asm.Media.Helpers
 		private const string KEY_CONVERSION_PRESET = "MediaToolkit:ConversionPreset";
 		private const string KEY_MAX_THREADS = "MediaToolkit:MaxThreads";
 
-		private static readonly ConversionSearchRestriction __conversion_Search_Restriction;
-		private static readonly ConversionPreset __conversion_Preset;
-		private static readonly int __max_Threads;
+		private static readonly ConversionSearchRestriction __conversionSearchRestriction;
+		private static readonly ConversionPreset __conversionPreset;
+		private static readonly int __maxThreads;
 
 		static VideoSizeHelper()
 		{
@@ -57,13 +57,13 @@ namespace asm.Media.Helpers
 			SetEnabledSizes(sizes.Distinct().ToArray());
 
 			tmpConfig = ConfigurationManager.AppSettings[KEY_CONVERSION_RESTRICTION]?.Trim();
-			if (string.IsNullOrEmpty(tmpConfig) || !Enum.TryParse(tmpConfig, true, out __conversion_Search_Restriction)) __conversion_Search_Restriction = ConversionSearchRestriction.None;
+			if (string.IsNullOrEmpty(tmpConfig) || !Enum.TryParse(tmpConfig, true, out __conversionSearchRestriction)) __conversionSearchRestriction = ConversionSearchRestriction.None;
 
 			tmpConfig = ConfigurationManager.AppSettings[KEY_CONVERSION_PRESET]?.Trim();
-			if (string.IsNullOrEmpty(tmpConfig) || !Enum.TryParse(tmpConfig, true, out __conversion_Preset)) __conversion_Preset = ConversionPreset.slow;
+			if (string.IsNullOrEmpty(tmpConfig) || !Enum.TryParse(tmpConfig, true, out __conversionPreset)) __conversionPreset = ConversionPreset.slow;
 
 			tmpConfig = ConfigurationManager.AppSettings[KEY_MAX_THREADS]?.Trim();
-			__max_Threads = tmpConfig.To(0).Within(-1, byte.MaxValue);
+			__maxThreads = tmpConfig.To(0).Within(-1, byte.MaxValue);
 		}
 
 		public static IReadOnlyDictionary<string, VideoSize> AllSizes { get; }
@@ -147,8 +147,8 @@ namespace asm.Media.Helpers
 		{
 			if (videoSize < VideoSizeEnum.SQCIF) yield break;
 			maxVideoSize ??= MaximumVideoSize();
-			restriction ??= __conversion_Search_Restriction;
-			preset ??= __conversion_Preset;
+			restriction ??= __conversionSearchRestriction;
+			preset ??= __conversionPreset;
 
 			// for more info on video size, check out: https://en.wikipedia.org/wiki/Graphics_display_resolution
 			foreach (VideoSize size in AllSizes.Values.Where(e => e.Enabled && e.Value <= maxVideoSize))
@@ -159,7 +159,7 @@ namespace asm.Media.Helpers
 					ConversionOptions mp4 = ConversionOptions.Mp4;
 					mp4.AspectRatio = VideoAspectRatio.R16T9;
 					mp4.Preset = preset;
-					mp4.Threads = __max_Threads;
+					mp4.Threads = __maxThreads;
 					mp4.VideoSize = size;
 					AdjustBitRate(mp4);
 					yield return mp4;
@@ -170,7 +170,7 @@ namespace asm.Media.Helpers
 					ConversionOptions webM = ConversionOptions.WebM;
 					webM.AspectRatio = VideoAspectRatio.R16T9;
 					webM.Preset = preset;
-					webM.Threads = __max_Threads;
+					webM.Threads = __maxThreads;
 					webM.VideoSize = size;
 					AdjustBitRate(webM);
 					yield return webM;
@@ -193,8 +193,8 @@ namespace asm.Media.Helpers
 		{
 			if (videoSize < VideoSizeEnum.SQCIF) yield break;
 			maxVideoSize ??= MaximumVideoSize();
-			restriction ??= __conversion_Search_Restriction;
-			preset ??= __conversion_Preset;
+			restriction ??= __conversionSearchRestriction;
+			preset ??= __conversionPreset;
 
 			// for more info on video size, check out: https://en.wikipedia.org/wiki/Graphics_display_resolution
 			foreach (VideoSize size in AllSizes.Values.Where(e => e.Enabled && e.Value <= maxVideoSize))
@@ -206,7 +206,7 @@ namespace asm.Media.Helpers
 					ConversionOptions mp4 = ConversionOptions.Mp4Pass1;
 					mp4.AspectRatio = VideoAspectRatio.R16T9;
 					mp4.Preset = preset;
-					mp4.Threads = __max_Threads;
+					mp4.Threads = __maxThreads;
 					mp4.VideoSize = size;
 					AdjustBitRate(mp4);
 					mp4Opt[0] = mp4;
@@ -214,7 +214,7 @@ namespace asm.Media.Helpers
 					mp4 = ConversionOptions.Mp4Pass2;
 					mp4.AspectRatio = VideoAspectRatio.R16T9;
 					mp4.Preset = preset;
-					mp4.Threads = __max_Threads;
+					mp4.Threads = __maxThreads;
 					mp4.VideoSize = size;
 					AdjustBitRate(mp4);
 					mp4Opt[1] = mp4;
@@ -227,7 +227,7 @@ namespace asm.Media.Helpers
 					ConversionOptions webM = ConversionOptions.WebMPass1;
 					webM.AspectRatio = VideoAspectRatio.R16T9;
 					webM.Preset = preset;
-					webM.Threads = __max_Threads;
+					webM.Threads = __maxThreads;
 					webM.VideoSize = size;
 					AdjustBitRate(webM);
 					webmOpt[0] = webM;
@@ -235,7 +235,7 @@ namespace asm.Media.Helpers
 					webM = ConversionOptions.WebMPass2;
 					webM.AspectRatio = VideoAspectRatio.R16T9;
 					webM.Preset = preset;
-					webM.Threads = __max_Threads;
+					webM.Threads = __maxThreads;
 					webM.VideoSize = size;
 					AdjustBitRate(webM);
 					webmOpt[1] = webM;

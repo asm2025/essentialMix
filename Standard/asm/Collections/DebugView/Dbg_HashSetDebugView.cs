@@ -12,15 +12,15 @@ namespace asm.Collections.DebugView
 	[DebuggerNonUserCode]
 	public class Dbg_HashSetDebugView<T>
 	{
-		private readonly HashSetBase<T> set;
+		private readonly HashSetBase<T> _set;
 
 		public Dbg_HashSetDebugView(HashSetBase<T> set)
 		{
-			this.set = set;
+			this._set = set;
 		}
 
 		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		[NotNull]
-		public T[] Items => set.ToArray();
+		public T[] Items => _set.ToArray();
 	}
 }

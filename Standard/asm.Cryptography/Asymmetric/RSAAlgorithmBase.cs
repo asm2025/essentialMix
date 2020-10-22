@@ -48,9 +48,9 @@ namespace asm.Cryptography.Asymmetric
 		/// <summary>
 		/// https://github.com/dotnet/corefx/blob/master/Documentation/architecture/cross-platform-cryptography.md#rsa
 		/// </summary>
-		public RSAEncryptionPadding Padding { get; set; } = RSASettings.DEFAULT_PADDING;
-		public RSASignaturePadding SignaturePadding { get; set; } = RSASettings.DEFAULT_SIGNATURE_PADDING;
-		public HashAlgorithmName HashAlgorithm { get; set; } = RSASettings.DEFAULT_HASH_ALGORITHM;
+		public RSAEncryptionPadding Padding { get; set; } = RSASettings.DefaultPadding;
+		public RSASignaturePadding SignaturePadding { get; set; } = RSASettings.DefaultSignaturePadding;
+		public HashAlgorithmName HashAlgorithm { get; set; } = RSASettings.DefaultHashAlgorithm;
 
 		public KeySizes[] LegalKeySizes => Algorithm.LegalKeySizes;
 

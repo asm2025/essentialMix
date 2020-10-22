@@ -9,7 +9,7 @@ namespace asm.ComponentModel.DataAnnotations
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter)]
 	public sealed class UserNameOrEmailAddressAttribute : DataTypeAttribute
 	{
-		private static readonly Regex REGEX = CreateRegEx();
+		private static readonly Regex __regex = CreateRegEx();
 
 		public UserNameOrEmailAddressAttribute() 
 			: base(nameof(UserNameOrEmailAddressAttribute))
@@ -20,7 +20,7 @@ namespace asm.ComponentModel.DataAnnotations
 		/// <summary>Determines whether the specified value matches the pattern of a valid user name or email address.</summary>
 		/// <param name="value">The value to validate.</param>
 		/// <returns>true if the specified value is valid or null; otherwise, false.</returns>
-		public override bool IsValid(object value) { return value == null || value is string input && REGEX.IsMatch(input); }
+		public override bool IsValid(object value) { return value == null || value is string input && __regex.IsMatch(input); }
 
 		[NotNull]
 		private static Regex CreateRegEx()

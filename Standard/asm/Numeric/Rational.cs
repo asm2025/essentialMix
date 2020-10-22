@@ -8,14 +8,14 @@ namespace asm.Numeric
 	public struct Rational : IComparable, IComparable<Rational>, IEquatable<Rational>
 	{
 		// These fields bypass Simplify().
-		public static readonly Rational MIN_VALUE = new Rational {Numerator = int.MinValue, Denominator = 1};
+		public static readonly Rational MinValue = new Rational {Numerator = int.MinValue, Denominator = 1};
 
-		public static readonly Rational MAX_VALUE = new Rational {Numerator = int.MaxValue, Denominator = 1};
-		public static readonly Rational EPSILON = new Rational {Numerator = 1, Denominator = int.MaxValue};
-		public static readonly Rational UNDEFINED = new Rational {Numerator = 0, Denominator = 0};
-		public static readonly Rational ZERO = new Rational {Numerator = 0, Denominator = 1};
-		public static readonly Rational ONE = new Rational {Numerator = 1, Denominator = 1};
-		public static readonly Rational MINUS_ONE = new Rational {Numerator = -1, Denominator = 1};
+		public static readonly Rational MaxValue = new Rational {Numerator = int.MaxValue, Denominator = 1};
+		public static readonly Rational Epsilon = new Rational {Numerator = 1, Denominator = int.MaxValue};
+		public static readonly Rational Undefined = new Rational {Numerator = 0, Denominator = 0};
+		public static readonly Rational Zero = new Rational {Numerator = 0, Denominator = 1};
+		public static readonly Rational One = new Rational {Numerator = 1, Denominator = 1};
+		public static readonly Rational MinusOne = new Rational {Numerator = -1, Denominator = 1};
 
 		public Rational(int numerator, int denominator = 1) : this()
 		{
@@ -45,7 +45,7 @@ namespace asm.Numeric
 		{
 			if (rat1.IsUndefined || rat2.IsUndefined)
 			{
-				return UNDEFINED;
+				return Undefined;
 			}
 			int n = rat1.Numerator * rat2.Denominator + rat1.Denominator * rat2.Numerator;
 			int d = rat1.Denominator * rat2.Denominator;
@@ -56,7 +56,7 @@ namespace asm.Numeric
 		{
 			if (rat1.IsUndefined || rat2.IsUndefined)
 			{
-				return UNDEFINED;
+				return Undefined;
 			}
 			int n = rat1.Numerator * rat2.Denominator - rat1.Denominator * rat2.Numerator;
 			int d = rat1.Denominator * rat2.Denominator;
@@ -67,7 +67,7 @@ namespace asm.Numeric
 		{
 			if (rat1.IsUndefined || rat2.IsUndefined)
 			{
-				return UNDEFINED;
+				return Undefined;
 			}
 			int n = rat1.Numerator * rat2.Numerator;
 			int d = rat1.Denominator * rat2.Denominator;
@@ -78,7 +78,7 @@ namespace asm.Numeric
 		{
 			if (rat1.IsUndefined || rat2.IsUndefined)
 			{
-				return UNDEFINED;
+				return Undefined;
 			}
 			// fixed math error from Version 1
 			int n = rat1.Numerator * rat2.Denominator;
@@ -259,7 +259,7 @@ namespace asm.Numeric
 			}
 			catch
 			{
-				result = UNDEFINED;
+				result = Undefined;
 			}
 			return false;
 		}
@@ -273,7 +273,7 @@ namespace asm.Numeric
 			}
 			catch
 			{
-				result = UNDEFINED;
+				result = Undefined;
 			}
 			return false;
 		}

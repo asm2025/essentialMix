@@ -13,9 +13,9 @@ namespace asm.Helpers
 	{
 		private const string FONT_DEF = "Lucida Console";
 
-		private static FieldInfo _fiOut;
-		private static FieldInfo _fiError;
-		private static MethodInfo _fiInitializeStdOutError;
+		private static FieldInfo __fiOut;
+		private static FieldInfo __fiError;
+		private static MethodInfo __fiInitializeStdOutError;
 
 		public static bool IsInputRedirected => Win32.FileType.Char != Win32.GetFileType(GetInputHandle());
 
@@ -379,17 +379,17 @@ namespace asm.Helpers
 
 		private static void InvalidateOutAndError()
 		{
-			if (_fiOut == null || _fiError == null || _fiInitializeStdOutError == null)
+			if (__fiOut == null || __fiError == null || __fiInitializeStdOutError == null)
 			{
 				Type type = typeof(Console);
-				_fiOut ??= type.GetField("_out", Constants.BF_NON_PUBLIC_STATIC);
-				_fiError ??= type.GetField("_error", BindingFlags.Static | BindingFlags.NonPublic);
-				_fiInitializeStdOutError ??= type.GetMethod("InitializeStdOutError", BindingFlags.Static | BindingFlags.NonPublic);
+				__fiOut ??= type.GetField("_out", Constants.BF_NON_PUBLIC_STATIC);
+				__fiError ??= type.GetField("_error", BindingFlags.Static | BindingFlags.NonPublic);
+				__fiInitializeStdOutError ??= type.GetMethod("InitializeStdOutError", BindingFlags.Static | BindingFlags.NonPublic);
 			}
 
-			_fiOut?.SetValue(null, null);
-			_fiError?.SetValue(null, null);
-			_fiInitializeStdOutError?.Invoke(null, new object[] { true });
+			__fiOut?.SetValue(null, null);
+			__fiError?.SetValue(null, null);
+			__fiInitializeStdOutError?.Invoke(null, new object[] { true });
 		}
 
 		private static void SetOutAndErrorNull()

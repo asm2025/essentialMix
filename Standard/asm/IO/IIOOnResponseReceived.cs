@@ -3,7 +3,7 @@ using System.Net;
 
 namespace asm.IO
 {
-	public interface IIOOnResponseReceived
+	public interface IIoOnResponseReceived
 	{
 		Func<WebResponse, bool> OnResponseReceived { get; set; }
 	}

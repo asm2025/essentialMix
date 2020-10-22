@@ -21,7 +21,7 @@ namespace asm.Extensions
 		private const string RGX_PARTITIONS = "[^{0}]+";
 		private const string RGX_WORDS = @"\w+";
 
-		private static readonly Regex RGX_PRINTF = new Regex(@"\%(\d*\$)?([\'\#\-\+ ]*)(\d*)(?:\.(\d+))?([hl])?([dioxXucsfeEgGpn%])", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __rgxPrintf = new Regex(@"\%(\d*\$)?([\'\#\-\+ ]*)(\d*)(?:\.(\d+))?([hl])?([dioxXucsfeEgGpn%])", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string ToNullIfEmpty(this string thisValue)
@@ -1426,7 +1426,7 @@ namespace asm.Extensions
 
 			// find all format parameters in format string
 			f.Append(thisValue);
-			Match m = RGX_PRINTF.Match(f.ToString());
+			Match m = __rgxPrintf.Match(f.ToString());
 
 			while (m.Success)
 			{
@@ -1674,7 +1674,7 @@ namespace asm.Extensions
 				// includes a format specifier
 				f.Remove(m.Index, m.Length);
 				f.Insert(m.Index, w);
-				m = RGX_PRINTF.Match(f.ToString(), m.Index + w.Length);
+				m = __rgxPrintf.Match(f.ToString(), m.Index + w.Length);
 			}
 
 			return f.ToString();

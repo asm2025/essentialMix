@@ -14,7 +14,7 @@ namespace Other.TylerBrinkley.Enumeration
 	{
 		public new static EnumComparer<TEnum> Default { get; } = new EnumComparer<TEnum>();
 
-		private static readonly IEnumInfo<TEnum> INFO = EnumHelper<TEnum>.Info;
+		private static readonly IEnumInfo<TEnum> __info = EnumHelper<TEnum>.Info;
 
 		public EnumComparer()
 		{
@@ -31,7 +31,7 @@ namespace Other.TylerBrinkley.Enumeration
 		/// <paramref name="y" />,
 		/// and -1 if <paramref name="x" /> is less than <paramref name="y" />.
 		/// </returns>
-		public override int Compare(TEnum x, TEnum y) { return INFO.Compare(x, y); }
+		public override int Compare(TEnum x, TEnum y) { return __info.Compare(x, y); }
 
 		/// <inheritdoc />
 		/// <summary>
@@ -40,7 +40,7 @@ namespace Other.TylerBrinkley.Enumeration
 		/// <param name="x">The first enum value.</param>
 		/// <param name="y">The second enum value.</param>
 		/// <returns>Indication if <paramref name="x" /> equals <paramref name="y" /> without boxing the values.</returns>
-		public override bool Equals(TEnum x, TEnum y) { return INFO.Equals(x, y); }
+		public override bool Equals(TEnum x, TEnum y) { return __info.Equals(x, y); }
 
 		/// <inheritdoc />
 		/// <summary>
@@ -48,6 +48,6 @@ namespace Other.TylerBrinkley.Enumeration
 		/// </summary>
 		/// <param name="obj">The enum value.</param>
 		/// <returns>Hash code for <paramref name="obj" /> without boxing the value.</returns>
-		public override int GetHashCode(TEnum obj) { return INFO.GetHashCode(obj); }
+		public override int GetHashCode(TEnum obj) { return __info.GetHashCode(obj); }
 	}
 }

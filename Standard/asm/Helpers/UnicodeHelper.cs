@@ -15,9 +15,9 @@ namespace asm.Helpers
 	/// </summary>
 	public static class UnicodeHelper
 	{
-		private static readonly ISet<LambdaRange<char>> ALL_RANGES = new HashSet<LambdaRange<char>>();
+		private static readonly ISet<LambdaRange<char>> __allRanges = new HashSet<LambdaRange<char>>();
 
-		public static ReadOnlySet<LambdaRange<char>> AllRanges { get; } = new ReadOnlySet<LambdaRange<char>>(ALL_RANGES);
+		public static ReadOnlySet<LambdaRange<char>> AllRanges { get; } = new ReadOnlySet<LambdaRange<char>>(__allRanges);
 
 		[NotNull]
 		public static LambdaRange<char> BasicLatin => CreateRange('\u0000', '\u007f');
@@ -344,7 +344,7 @@ namespace asm.Helpers
 		{
 			// TODO: Make this efficient. SortedList should do it with a binary search, but it
 			// doesn't give us quite what we want
-			return ALL_RANGES.FirstOrDefault(range => range.Contains(c));
+			return __allRanges.FirstOrDefault(range => range.Contains(c));
 		}
 
 		[NotNull]
@@ -352,7 +352,7 @@ namespace asm.Helpers
 		{
 			// TODO: Check for overlaps
 			LambdaRange<char> ret = new LambdaRange<char>(from, to);
-			ALL_RANGES.Add(ret);
+			__allRanges.Add(ret);
 			return ret;
 		}
 	}

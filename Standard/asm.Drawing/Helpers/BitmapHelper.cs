@@ -415,9 +415,9 @@ namespace asm.Drawing.Helpers
 		{
 			rectangle.Intersect(new Rectangle(0, 0, sourceData.Width, sourceData.Height));
 
-			int x_min = rectangle.Left;
-			int y_min = rectangle.Top;
-			int y_max = rectangle.Bottom - 1;
+			int xMin = rectangle.Left;
+			int yMin = rectangle.Top;
+			int yMax = rectangle.Bottom - 1;
 			int copyWidth = rectangle.Width;
 
 			int srcStride = sourceData.Stride;
@@ -426,14 +426,14 @@ namespace asm.Drawing.Helpers
 			int copySize = copyWidth * pixelSize;
 
 			// do the job
-			byte* src = (byte*)sourceData.ImageData.ToPointer() + y_min * srcStride + x_min * pixelSize;
+			byte* src = (byte*)sourceData.ImageData.ToPointer() + yMin * srcStride + xMin * pixelSize;
 			byte* dst = (byte*)destinationData.ImageData.ToPointer();
 
 			if (rectangle.Top < 0) dst -= dstStride * rectangle.Top;
 			if (rectangle.Left < 0) dst -= pixelSize * rectangle.Left;
 
 			// for each line
-			for (int y = y_min; y <= y_max; y++)
+			for (int y = yMin; y <= yMax; y++)
 			{
 				MemoryHelper.CopyMemory(src, dst, copySize);
 				src += srcStride;

@@ -9,8 +9,8 @@ namespace asm.Media.ffmpeg
 {
 	public class FastProgressMonitor : IProgressMonitor
 	{
-		private static readonly Regex PROGRESS = new Regex(@"^frame=\s*(?<frame>\d+)\s+fps=\s*\d+(?:\.\d+)?\s+q=\s*-?\d+(?:\.\d+)?\s+size=\s*\d+\w+\s+time=\s*[^ ]*\s+bitrate=\s*\d+(?:\.\d+)?\w+/s\s+speed=\s*\d+(?:\.\d+)?x", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex COMPLETED = new Regex(@"^encoded\s+\d+(?:\.\d+)?\s+frames in\s+\d+(?:\.\d+)?s\s+(?:\(\d+(?:\.\d+)? fps\))", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __progress = new Regex(@"^frame=\s*(?<frame>\d+)\s+fps=\s*\d+(?:\.\d+)?\s+q=\s*-?\d+(?:\.\d+)?\s+size=\s*\d+\w+\s+time=\s*[^ ]*\s+bitrate=\s*\d+(?:\.\d+)?\w+/s\s+speed=\s*\d+(?:\.\d+)?x", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __completed = new Regex(@"^encoded\s+\d+(?:\.\d+)?\s+frames in\s+\d+(?:\.\d+)?s\s+(?:\(\d+(?:\.\d+)? fps\))", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
 
 		private readonly double _frames;
 		private readonly Queue<string> _messages;
@@ -23,7 +23,7 @@ namespace asm.Media.ffmpeg
 			_frames = frames;
 			_messages = new Queue<string>(data =>
 			{
-				Match m = PROGRESS.Match(data);
+				Match m = __progress.Match(data);
 
 				if (m.Success)
 				{
@@ -40,7 +40,7 @@ namespace asm.Media.ffmpeg
 				}
 
 				if (!_startCalled) return;
-				m = COMPLETED.Match(data);
+				m = __completed.Match(data);
 				if (!m.Success) return;
 				OnProgressCompleted();
 				_done = true;

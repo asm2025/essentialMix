@@ -5,11 +5,6 @@ namespace asm.Extensions
 {
 	public static class OperatingSystemExtension
 	{
-		//private static readonly HashSet<PlatformID> WINDOWS_PLATFORMS = new HashSet<PlatformID>
-		//{
-
-		//};
-
 		public static bool IsUnix([NotNull] this OperatingSystem thisValue) { return thisValue.Platform == PlatformID.Unix; }
 
 		public static bool IsMacOSX([NotNull] this OperatingSystem thisValue) { return thisValue.Platform == PlatformID.MacOSX; }

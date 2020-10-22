@@ -19,9 +19,9 @@ namespace asm.Network
 		private const int TTL_DEF = 60;
 		private const string FMT_LOGIN = "Username: {0}\r\nSecret: {1}\r\nActionID: 1\r\nEvents: off";
 
-		private static readonly Regex LOGIN_SUCCESS = new Regex(@"Message:\s+Authentication accepted", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly TimeSpan TIME_BETWEEN_READ = TimeSpan.FromSeconds(1);
-		private static readonly TimeSpan TIME_BETWEEN_ACTIONS = TimeSpan.FromSeconds(2);
+		private static readonly Regex __loginSuccess = new Regex(@"Message:\s+Authentication accepted", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly TimeSpan __timeBetweenRead = TimeSpan.FromSeconds(1);
+		private static readonly TimeSpan __timeBetweenActions = TimeSpan.FromSeconds(2);
 
 		private Socket _client;
 
@@ -45,7 +45,7 @@ namespace asm.Network
 
 		public TelnetConnection([NotNull] string host, int port, int timeout)
 		{
-			_lastSent = DateTime.Now - TIME_BETWEEN_ACTIONS;
+			_lastSent = DateTime.Now - __timeBetweenActions;
 			_client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			Encoding = Encoding.ASCII;
 			Host = host;
@@ -240,7 +240,7 @@ namespace asm.Network
 			ThrowIfDisposed();
 			if (IsConnected) return;
 			_client.Connect(Host, Port);
-			Thread.Sleep(TIME_BETWEEN_READ);
+			Thread.Sleep(__timeBetweenRead);
 		}
 
 		public virtual bool TryConnect()
@@ -263,7 +263,7 @@ namespace asm.Network
 			ThrowIfDisposed();
 			if (!IsConnected) return;
 			_client.Disconnect(true);
-			_lastSent = DateTime.Now - TIME_BETWEEN_ACTIONS;
+			_lastSent = DateTime.Now - __timeBetweenActions;
 		}
 
 		public virtual bool Login(string username, string password)
@@ -272,7 +272,7 @@ namespace asm.Network
 			if (!TryConnect()) return false;
 
 			string response = SendAndRead("Login", string.Format(FMT_LOGIN, username, password));
-			return response != null && LOGIN_SUCCESS.IsMatch(response);
+			return response != null && __loginSuccess.IsMatch(response);
 		}
 
 		public bool Send([NotNull] string action, [NotNull] string args)
@@ -288,10 +288,10 @@ namespace asm.Network
 			if (value.Length == 0) return false;
 
 			TimeSpan dif = _lastSent.Elapsed();
-			if (dif < TIME_BETWEEN_ACTIONS) Thread.Sleep(dif);
+			if (dif < __timeBetweenActions) Thread.Sleep(dif);
 
 			int s = _client.Send(Encoding.GetBytes($"{value}\r\n\r\n"));
-			Thread.Sleep(TIME_BETWEEN_ACTIONS);
+			Thread.Sleep(__timeBetweenActions);
 			_lastSent = DateTime.Now;
 			return s > 0;
 		}
@@ -393,7 +393,7 @@ namespace asm.Network
 			if (!IsConnected) throw new NotConnectedException();
 
 			int r = _client.Receive(buffer, 0, buffer.Length, flags, out errorCode);
-			if (r > 0) Thread.Sleep(TIME_BETWEEN_READ);
+			if (r > 0) Thread.Sleep(__timeBetweenRead);
 			return r;
 		}
 

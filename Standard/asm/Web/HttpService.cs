@@ -13,7 +13,7 @@ namespace asm.Web
 {
 	public class HttpService : Disposable
 	{
-		private static HttpService _instance;
+		private static HttpService __instance;
 
 		private HttpClient _client;
 
@@ -115,8 +115,8 @@ namespace asm.Web
 		{
 			get
 			{
-				if (_instance.IsDisposed()) _instance = new HttpService();
-				return _instance;
+				if (__instance.IsDisposed()) __instance = new HttpService();
+				return __instance;
 			}
 		}
 

@@ -28,7 +28,7 @@ namespace Other.JonSkeet.MiscUtil.Text
 		/// <summary>
 		/// An empty UTF-32 string.
 		/// </summary>
-		public static readonly UTF32String EMPTY = new UTF32String(new int[0]);
+		public static readonly UTF32String Empty = new UTF32String(new int[0]);
 
 		/// <summary>
 		/// UTF-32 characters making up the string.
@@ -211,7 +211,7 @@ namespace Other.JonSkeet.MiscUtil.Text
 			if (start > Length)
 				throw new ArgumentOutOfRangeException(nameof(start), "start must be less than or equal to the length of the string");
 			return start == Length
-						? EMPTY
+						? Empty
 						: Substring(start, Length - start);
 		}
 
@@ -225,7 +225,7 @@ namespace Other.JonSkeet.MiscUtil.Text
 		public UTF32String Substring(int start, int count)
 		{
 			_characters.Length.ValidateRange(start, ref count);
-			if (count == 0 || _characters.Length == 0) return EMPTY;
+			if (count == 0 || _characters.Length == 0) return Empty;
 
 			int[] tmp = new int[count];
 			Array.Copy(_characters, start, tmp, 0, count);
@@ -435,7 +435,7 @@ namespace Other.JonSkeet.MiscUtil.Text
 				throw new ArgumentNullException(nameof(strings));
 			int size = strings.Where(s => s != null).Sum(s => s.Length);
 			if (size == 0)
-				return EMPTY;
+				return Empty;
 
 			int[] tmp = new int[size];
 			int index = 0;

@@ -1,17 +1,15 @@
 using System;
+using asm.Helpers;
 
 namespace asm.Extensions
 {
 	public static class IntPtrExtension
 	{
-		private static readonly IntPtr _int_one = new IntPtr(1);
-		private static readonly IntPtr _int_minus_one = new IntPtr(-1);
-
 		public static bool IsZero(this IntPtr thisValue) { return thisValue == IntPtr.Zero; }
 
-		public static bool IsOne(this IntPtr thisValue) { return thisValue == _int_one; }
+		public static bool IsOne(this IntPtr thisValue) { return thisValue == IntPtrHelper.One; }
 
-		public static bool IsMinusOne(this IntPtr thisValue) { return thisValue == _int_minus_one; }
+		public static bool IsMinusOne(this IntPtr thisValue) { return thisValue == IntPtrHelper.MinusOne; }
 
 		public static bool IsInvalidHandle(this IntPtr thisValue) { return thisValue == IntPtr.Zero || thisValue == Win32.INVALID_HANDLE_VALUE; }
 

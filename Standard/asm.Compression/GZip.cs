@@ -47,7 +47,7 @@ namespace asm.Compression
 			try
 			{
 				gZipStream = new GZipStream(target, CompressionLevel.ToSystemCompressionLevel(), true);
-				await source.CopyToAsync(gZipStream, Constants.BUFFER_16KB, token);
+				await source.CopyToAsync(gZipStream, Constants.BUFFER_16_KB, token);
 				await gZipStream.FlushAsync(token);
 				await target.FlushAsync(token);
 			}
@@ -144,7 +144,7 @@ namespace asm.Compression
 			try
 			{
 				gZipStream = new GZipStream(target, SystemCompressionMode.Decompress, true);
-				await source.CopyToAsync(gZipStream, Constants.BUFFER_16KB, token);
+				await source.CopyToAsync(gZipStream, Constants.BUFFER_16_KB, token);
 				await gZipStream.FlushAsync(token);
 				await target.FlushAsync(token);
 			}

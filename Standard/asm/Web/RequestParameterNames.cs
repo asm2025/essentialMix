@@ -6,17 +6,17 @@ namespace asm.Web
 	{
 		private const string CULTURE = "culture";
 		
-		private static string _culture = CULTURE;
+		private static string __culture = CULTURE;
 
 		[NotNull]
 		public static string Culture
 		{
-			get => _culture;
+			get => __culture;
 			set
 			{
 				value = value.Trim();
 				if (string.IsNullOrEmpty(value)) value = CULTURE;
-				_culture = value;
+				__culture = value;
 			}
 		}
 	}

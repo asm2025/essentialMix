@@ -24,13 +24,13 @@ namespace MimeTypes
 		private const string DATA_DIR = "Data";
 		private const string OUTPUT_FILE = "MediaTypeNames.cs";
 
-		private static readonly string[] EXCLUDE =
+		private static readonly string[] __exclude =
 		{
 			"obsoleted",
 			"deprecated"
 		};
 
-		private static readonly IReadOnlyDictionary<char, string> NUMBERS = new ReadOnlyDictionary<char, string>(new Dictionary<char, string>
+		private static readonly IReadOnlyDictionary<char, string> __numbers = new ReadOnlyDictionary<char, string>(new Dictionary<char, string>
 		{
 			{ '0', "Zero" },
 			{ '1', "One" },
@@ -163,7 +163,7 @@ namespace MimeTypes
 			static string GetKey(string name)
 			{
 				name = name.ToNullIfEmpty();
-				if (name == null || name.ContainsAny(true, EXCLUDE)) return null;
+				if (name == null || name.ContainsAny(true, __exclude)) return null;
 
 				StringBuilder sb = new StringBuilder(name.Length);
 
@@ -197,11 +197,11 @@ namespace MimeTypes
 
 							if (n == 1)
 							{
-								sb.Append(NUMBERS[c]);
+								sb.Append(__numbers[c]);
 							}
 							else
 							{
-								if (x == 1) sb.Append(NUMBERS[c]);
+								if (x == 1) sb.Append(__numbers[c]);
 								else if (long.TryParse(name.Substring(i, x), out long num)) sb.Append(num.ToWords().ToPascalCase());
 								else x = 0;
 

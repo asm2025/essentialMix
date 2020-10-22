@@ -20,12 +20,12 @@ namespace asm.Web.Routing
 	{
 		private const string ROUTE_MAP = @"(?s)(?<spaces>\s*)(?<item>\w+\.MapRoute\s*\(\s*(?:(?:name:\s*)?(?<name>[^,]+?))(?:\s*,\s*(?:(?:url:\s*)?(?<url>""{0}"")))(?:\s*,\s*(?:(?:defaults:\s*)?(?:(?:new\s*(?<defaults>\{{.*?\}}))|null))(?:\s*,\s*(?:(?:constraints:\s*)?(?:(?:new\s*(?<constraints>\{{.*?\}}))|null))(?:\s*,\s*(?:(?:namespaces:\s*)?(?:(?:new\s*\[\]\s*\{{(?<namespaces>\s*"".+?""(?:\s*,\s*"".+?"")*\s*)\}})|null)))?)?)?\s*\)[^;]*?;)";
 
-		private static readonly Regex __route_Ignore = new Regex(@"(?s)(?<spaces>\s*)(?<item>\w+\.IgnoreRoute\s*\(\s*""(?<url>[^/]+?(?:/(?:[^/]+?))*)""(?:\s*,\s*(?:(?:constraints:\s*)?(?:(?:new\s*(?<constraints>\{.*?\}))|null)))?\s*\)[^;]*?;)", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex __route_Any = new Regex(string.Format(ROUTE_MAP, "[^/]+?(?:/(?:[^/]+?))*"), RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex __route_Default = new Regex(string.Format(ROUTE_MAP, @"{[\w0-9]+?}(?:/(?:\{[\w0-9]+?}))*"), RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex __is_Route_Var = new Regex(@"\A\{[\w0-9]+?\}\z", RegexHelper.OPTIONS_I);
-		private static readonly Regex __route_Var_Assignment = new Regex(@"\s*=\s*", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex __route_Var_String = new Regex(@"(?<var>\w+\s*:\s*)(?<value>[^\d""]+?)(?<ter>[,\s])", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __routeIgnore = new Regex(@"(?s)(?<spaces>\s*)(?<item>\w+\.IgnoreRoute\s*\(\s*""(?<url>[^/]+?(?:/(?:[^/]+?))*)""(?:\s*,\s*(?:(?:constraints:\s*)?(?:(?:new\s*(?<constraints>\{.*?\}))|null)))?\s*\)[^;]*?;)", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __routeAny = new Regex(string.Format(ROUTE_MAP, "[^/]+?(?:/(?:[^/]+?))*"), RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __routeDefault = new Regex(string.Format(ROUTE_MAP, @"{[\w0-9]+?}(?:/(?:\{[\w0-9]+?}))*"), RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __isRouteVar = new Regex(@"\A\{[\w0-9]+?\}\z", RegexHelper.OPTIONS_I);
+		private static readonly Regex __routeVarAssignment = new Regex(@"\s*=\s*", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __routeVarString = new Regex(@"(?<var>\w+\s*:\s*)(?<value>[^\d""]+?)(?<ter>[,\s])", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
 
 		private static readonly string[] __specialCases =
 		{
@@ -334,7 +334,7 @@ namespace asm.Web.Routing
 			if (string.IsNullOrEmpty(value)) yield break;
 
 			HashSet<string> routes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-			Match match = __route_Ignore.Match(value);
+			Match match = __routeIgnore.Match(value);
 
 			while (match.Success)
 			{
@@ -342,7 +342,7 @@ namespace asm.Web.Routing
 				match = match.NextMatch();
 			}
 
-			match = __route_Default.Match(value);
+			match = __routeDefault.Match(value);
 
 			while (match.Success)
 			{
@@ -350,7 +350,7 @@ namespace asm.Web.Routing
 				match = match.NextMatch();
 			}
 
-			match = __route_Any.Match(value);
+			match = __routeAny.Match(value);
 
 			while (match.Success)
 			{
@@ -386,7 +386,7 @@ namespace asm.Web.Routing
 			foreach (string segment in segments)
 			{
 				if (string.IsNullOrEmpty(segment)) return null;
-				if (__is_Route_Var.IsMatch(segment))
+				if (__isRouteVar.IsMatch(segment))
 				{
 					route.Dynamic++;
 					dynamicFound = true;
@@ -410,7 +410,7 @@ namespace asm.Web.Routing
 				
 				if (!string.IsNullOrEmpty(tmp))
 				{
-					tmp = __route_Var_String.Replace(__route_Var_Assignment.Replace(tmp, ": "), @"${var}""${value}""${ter}");
+					tmp = __routeVarString.Replace(__routeVarAssignment.Replace(tmp, ": "), @"${var}""${value}""${ter}");
 
 					if (!string.IsNullOrEmpty(tmp))
 					{
@@ -423,7 +423,7 @@ namespace asm.Web.Routing
 
 				if (!string.IsNullOrEmpty(tmp))
 				{
-					tmp = __route_Var_String.Replace(__route_Var_Assignment.Replace(tmp, ": "), @"${var}""${value}""${ter}");
+					tmp = __routeVarString.Replace(__routeVarAssignment.Replace(tmp, ": "), @"${var}""${value}""${ter}");
 
 					if (!string.IsNullOrEmpty(tmp))
 					{
@@ -449,14 +449,14 @@ namespace asm.Web.Routing
 			switch (type)
 			{
 				case RouteTypeEnum.Ignore:
-					match = __route_Ignore.Match(value);
+					match = __routeIgnore.Match(value);
 					break;
 				case RouteTypeEnum.Dynamic:
-					match = __route_Default.Match(value);
+					match = __routeDefault.Match(value);
 					break;
 				default:
 					type = RouteTypeEnum.Route;
-					match = __route_Any.Match(value);
+					match = __routeAny.Match(value);
 					break;
 			}
 

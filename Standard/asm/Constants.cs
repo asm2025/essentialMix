@@ -9,23 +9,23 @@ namespace asm
 		public const int N_DATA_BATCH_MAX = 100;
 
 		public const int BUFFER_KB = 1024;
-		public const int BUFFER_2KB = BUFFER_KB * 2;
-		public const int BUFFER_4KB = BUFFER_KB * 4;
-		public const int BUFFER_8KB = BUFFER_KB * 8;
-		public const int BUFFER_16KB = BUFFER_KB * 16;
-		public const int BUFFER_32KB = BUFFER_KB * 32;
-		public const int BUFFER_64KB = BUFFER_KB * 64;
-		public const int BUFFER_128KB = BUFFER_KB * 128;
-		public const int BUFFER_256KB = BUFFER_KB * 256;
+		public const int BUFFER_2_KB = BUFFER_KB * 2;
+		public const int BUFFER_4_KB = BUFFER_KB * 4;
+		public const int BUFFER_8_KB = BUFFER_KB * 8;
+		public const int BUFFER_16_KB = BUFFER_KB * 16;
+		public const int BUFFER_32_KB = BUFFER_KB * 32;
+		public const int BUFFER_64_KB = BUFFER_KB * 64;
+		public const int BUFFER_128_KB = BUFFER_KB * 128;
+		public const int BUFFER_256_KB = BUFFER_KB * 256;
 		public const int BUFFER_MB = BUFFER_KB * BUFFER_KB;
-		public const int BUFFER_2MB = BUFFER_MB * 2;
-		public const int BUFFER_4MB = BUFFER_MB * 4;
-		public const int BUFFER_8MB = BUFFER_MB * 8;
-		public const int BUFFER_16MB = BUFFER_MB * 16;
-		public const int BUFFER_32MB = BUFFER_MB * 32;
-		public const int BUFFER_64MB = BUFFER_MB * 64;
-		public const int BUFFER_128MB = BUFFER_MB * 128;
-		public const int BUFFER_256MB = BUFFER_MB * 256;
+		public const int BUFFER_2_MB = BUFFER_MB * 2;
+		public const int BUFFER_4_MB = BUFFER_MB * 4;
+		public const int BUFFER_8_MB = BUFFER_MB * 8;
+		public const int BUFFER_16_MB = BUFFER_MB * 16;
+		public const int BUFFER_32_MB = BUFFER_MB * 32;
+		public const int BUFFER_64_MB = BUFFER_MB * 64;
+		public const int BUFFER_128_MB = BUFFER_MB * 128;
+		public const int BUFFER_256_MB = BUFFER_MB * 256;
 
 		public const int DEFAULT_CAPACITY = 4;
 

@@ -15,7 +15,7 @@ namespace asm.Helpers
 {
 	public static class StringHelper
 	{
-		private static readonly Regex NUMERIC_STRING = new Regex(@"\A\s*\d*\.?\d+\s*\z", RegexHelper.OPTIONS_I);
+		private static readonly Regex __numericString = new Regex(@"\A\s*\d*\.?\d+\s*\z", RegexHelper.OPTIONS_I);
 		// memoization container for Random method
 		private static readonly ConcurrentDictionary<RandomStringType, IList<Func<char>>> __randomStringType = new ConcurrentDictionary<RandomStringType, IList<Func<char>>>();
 
@@ -217,7 +217,7 @@ namespace asm.Helpers
 		}
 		
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsNumeric(string value) { return !string.IsNullOrEmpty(value) && NUMERIC_STRING.IsMatch(value); }
+		public static bool IsNumeric(string value) { return !string.IsNullOrEmpty(value) && __numericString.IsMatch(value); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int ToBase64Size(string value, Encoding encoding = null) { return ByteHelper.ToBase64Size(value.ByteSize(encoding)); }

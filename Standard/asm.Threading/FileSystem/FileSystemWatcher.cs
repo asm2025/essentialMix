@@ -16,7 +16,7 @@ namespace asm.Threading.FileSystem
 			if (!settings.Directory.Exists) throw new DirectoryNotFoundException();
 
 			string filter = RegexHelper.FromFilePattern(settings.Filter);
-			Regex rgxFilter = RegexHelper.ALL_ASTERISKS.IsMatch(filter)
+			Regex rgxFilter = RegexHelper.AllAsterisks.IsMatch(filter)
 								? null
 								: new Regex(filter, RegexHelper.OPTIONS_I);
 			_watcher = new System.IO.FileSystemWatcher(settings.Directory.FullName)

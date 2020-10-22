@@ -29,7 +29,7 @@ namespace asm.Threading.Helpers
 		private const string FMT_REG_DLL = "\"{0}\" /s";
 		private const string FMT_UNREG_DLL = "/u \"{0}\" /s";
 
-		public static readonly Process EMPTY = new Process();
+		public static readonly Process Empty = new Process();
 
 		[NotNull]
 		public static string[] GetVerbs([NotNull] string fileName)

@@ -62,7 +62,7 @@ namespace asm.Compression
 				ZipArchiveEntry entry = archive.CreateEntry(entryName, CompressionLevel.ToSystemCompressionLevel());
 				entry.LastWriteTime = DateTimeOffset.Now;
 				entryStream = entry.Open();
-				await source.CopyToAsync(entryStream, Constants.BUFFER_16KB, token);
+				await source.CopyToAsync(entryStream, Constants.BUFFER_16_KB, token);
 				await entryStream.FlushAsync(token);
 				await target.FlushAsync(token);
 			}
@@ -198,7 +198,7 @@ namespace asm.Compression
 					if (archive.Entries.Count > 1) throw new ExtractionFailedException("Source contains more than one file entry.");
 					ZipArchiveEntry entry = archive.Entries[0];
 					entryStream = entry.Open();
-					await entryStream.CopyToAsync(target, Constants.BUFFER_16KB, token);
+					await entryStream.CopyToAsync(target, Constants.BUFFER_16_KB, token);
 					await target.FlushAsync(token);
 				}
 			}

@@ -14,7 +14,7 @@ namespace asm.Extensions
 {
 	public static class CancellationTokenExtension
 	{
-		private static readonly Lazy<FieldInfo> __source_Field = new Lazy<FieldInfo>(() => typeof(CancellationToken).GetField("m_source", Constants.BF_NON_PUBLIC_INSTANCE), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly Lazy<FieldInfo> __sourceField = new Lazy<FieldInfo>(() => typeof(CancellationToken).GetField("m_source", Constants.BF_NON_PUBLIC_INSTANCE), LazyThreadSafetyMode.PublicationOnly);
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsAwaitable(this CancellationToken thisValue) { return thisValue.CanBeCanceled; }
@@ -28,9 +28,9 @@ namespace asm.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static CancellationTokenSource GetSource(this CancellationToken thisValue, CancellationTokenSource defaultCancellationTokenSource = null)
 		{
-			if (__source_Field == null) return defaultCancellationTokenSource;
+			if (__sourceField == null) return defaultCancellationTokenSource;
 			WaitHandle _ = thisValue.WaitHandle;
-			return (CancellationTokenSource)__source_Field.Value.GetValue(thisValue) ?? defaultCancellationTokenSource;
+			return (CancellationTokenSource)__sourceField.Value.GetValue(thisValue) ?? defaultCancellationTokenSource;
 		}
 
 		public static CancellationTokenSource GetSource([NotNull] this IEnumerable<CancellationToken> thisValue, CancellationTokenSource defaultCancellationTokenSource = null)

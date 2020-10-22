@@ -471,7 +471,7 @@ namespace asm.Extensions
 						using (StreamReader rd = new StreamReader(memStr))
 						{
 							int read, x = 0, len = (int)memStr.Length;
-							char[] bytes = new char[Math.Min(len, Constants.BUFFER_8KB)];
+							char[] bytes = new char[Math.Min(len, Constants.BUFFER_8_KB)];
 
 							sb.EnsureCapacity(len);
 

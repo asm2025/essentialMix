@@ -1,14 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
+using asm.Helpers;
 
 namespace asm.Windows.Controls
 {
 	public class Tabless : TabControl
 	{
 		private const int TCM_ADJUST_RECT = 0x1328;
-
-		private static readonly IntPtr __int_Ptr_One = new IntPtr(1);
 
 		public Tabless()
 		{
@@ -32,7 +31,7 @@ namespace asm.Windows.Controls
 		{
 			if (m.Msg == TCM_ADJUST_RECT)
 			{
-				m.Result = __int_Ptr_One;
+				m.Result = IntPtrHelper.One;
 				return;
 			}
 			base.WndProc(ref m);

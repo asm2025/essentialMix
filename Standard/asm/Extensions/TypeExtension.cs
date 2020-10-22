@@ -22,7 +22,7 @@ namespace asm.Extensions
 	{
 		private const BindingFlags BF_FIND_EVENT_FIELD = Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE_STATIC | BindingFlags.DeclaredOnly;
 
-		private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, MethodInfo>> _explicitInterfaceCache = new ConcurrentDictionary<Type, ConcurrentDictionary<string, MethodInfo>>();
+		private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, MethodInfo>> __explicitInterfaceCache = new ConcurrentDictionary<Type, ConcurrentDictionary<string, MethodInfo>>();
 		private static readonly ConcurrentDictionary<KeyValuePair<Type, Type>, bool> __castCache = new ConcurrentDictionary<KeyValuePair<Type, Type>, bool>();
 		private static readonly ConcurrentDictionary<KeyValuePair<Type, Type>, bool> __implicitCastCache = new ConcurrentDictionary<KeyValuePair<Type, Type>, bool>();
 
@@ -847,7 +847,7 @@ namespace asm.Extensions
 			if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
 			if (!thisValue.IsInterface) throw new ArgumentException("Type is not an interface.", nameof(thisValue));
 
-			ConcurrentDictionary<string, MethodInfo> dictionary = _explicitInterfaceCache.GetOrAdd(thisValue, type => new ConcurrentDictionary<string, MethodInfo>(StringComparer.OrdinalIgnoreCase));
+			ConcurrentDictionary<string, MethodInfo> dictionary = __explicitInterfaceCache.GetOrAdd(thisValue, type => new ConcurrentDictionary<string, MethodInfo>(StringComparer.OrdinalIgnoreCase));
 			string key = $"{thisValue.FullName}_{name}";
 			MethodInfo method = dictionary.GetOrAdd(key, s =>
 			{

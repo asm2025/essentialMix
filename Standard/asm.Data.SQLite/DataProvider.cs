@@ -20,8 +20,8 @@ namespace asm.Data.SQLite
 		DataProvider<DbType>,
 		IDataProvider<DbType>
 	{
-		private static readonly Regex COLUMN_SIZE = new Regex(@"\((?<size>\d+)\)", RegexHelper.OPTIONS_I);
-		private static readonly Regex CLEANUP_VALUE_TYPE_MESS = new Regex(@"\(\d+\)|\d+$", RegexHelper.OPTIONS_I);
+		private static readonly Regex __columnSize = new Regex(@"\((?<size>\d+)\)", RegexHelper.OPTIONS_I);
+		private static readonly Regex __cleanupValueTypeMess = new Regex(@"\(\d+\)|\d+$", RegexHelper.OPTIONS_I);
 
 		/// <inheritdoc />
 		public DataProvider() 
@@ -67,7 +67,7 @@ namespace asm.Data.SQLite
 					DefaultValue = row["dflt_value"]
 				};
 
-				Match match = COLUMN_SIZE.Match(type);
+				Match match = __columnSize.Match(type);
 				if (match.Success) newColumn.MaxLength = match.Groups["size"].Value.To(0);
 			}
 			catch
@@ -82,7 +82,7 @@ namespace asm.Data.SQLite
 		public virtual Type MapType(string value)
 		{
 			if (string.IsNullOrEmpty(value)) return typeof(object);
-			value = value.Replace(string.Empty, CLEANUP_VALUE_TYPE_MESS);
+			value = value.Replace(string.Empty, __cleanupValueTypeMess);
 
 			Type type = ((IDictionary<string, Type>)StringToTypeMapping).Match(value, StringFunctionalComparer.StartsWithOrdinalIgnoreCase).FirstOrDefault();
 			return type ?? typeof(object);

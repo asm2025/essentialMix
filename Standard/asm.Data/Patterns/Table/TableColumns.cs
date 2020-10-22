@@ -15,7 +15,7 @@ namespace asm.Data.Patterns.Table
 	[Serializable]
 	public class TableColumns : KeyedCollection<string, ITableColumn>
 	{
-		private static readonly string[] COLUMN_NAMES =
+		private static readonly string[] __columnNames =
 		{
 			"ColumnName",
 			"DataType",
@@ -47,32 +47,32 @@ namespace asm.Data.Patterns.Table
 			ClearItems();
 			if (schema.Columns.Count == 0
 				|| schema.Rows.Count == 0
-				|| COLUMN_NAMES.Any(e => !schema.Columns.Contains(e))) return false;
+				|| __columnNames.Any(e => !schema.Columns.Contains(e))) return false;
 
 			IDictionary<string, TableColumnSettings> allSettings = new Dictionary<string, TableColumnSettings>(StringComparer.OrdinalIgnoreCase);
 			
 			foreach (DataRow columnInfo in schema.Rows)
 			{
-				string name = columnInfo.Get<string>(COLUMN_NAMES[0])?.ToLowerInvariant() ?? throw new InvalidOperationException("Column name is missing.");
+				string name = columnInfo.Get<string>(__columnNames[0])?.ToLowerInvariant() ?? throw new InvalidOperationException("Column name is missing.");
 				
 				// filter the columns
 				if (filter?.Invoke(name) == false) continue;
 
-				Type type = columnInfo.Get<Type>(COLUMN_NAMES[1]) ?? throw new InvalidOperationException("Column data type is missing.");
+				Type type = columnInfo.Get<Type>(__columnNames[1]) ?? throw new InvalidOperationException("Column data type is missing.");
 				// get the default settings for the type and specific column settings overrides then merge them
 				TableColumnSettings settings = SettingsMerger(name, type, onGetSettings);
 
 				ITableColumn column = new TableColumn(name, type)
 				{
-					Size = columnInfo.Get<int>(COLUMN_NAMES[2]),
-					PrimaryKey = columnInfo.Get<bool>(COLUMN_NAMES[3]),
-					Unique = columnInfo.Get<bool>(COLUMN_NAMES[4]),
-					RowId = columnInfo.Get<bool>(COLUMN_NAMES[5]),
-					AllowDbNull = columnInfo.Get<bool>(COLUMN_NAMES[6]),
+					Size = columnInfo.Get<int>(__columnNames[2]),
+					PrimaryKey = columnInfo.Get<bool>(__columnNames[3]),
+					Unique = columnInfo.Get<bool>(__columnNames[4]),
+					RowId = columnInfo.Get<bool>(__columnNames[5]),
+					AllowDbNull = columnInfo.Get<bool>(__columnNames[6]),
 					Sortable = type.IsPrimitive(),
-					ReadOnly = columnInfo.Get<bool>(COLUMN_NAMES[7]),
-					Expression = columnInfo.Get<bool>(COLUMN_NAMES[8]),
-					Hidden = columnInfo.Get<bool>(COLUMN_NAMES[9]),
+					ReadOnly = columnInfo.Get<bool>(__columnNames[7]),
+					Expression = columnInfo.Get<bool>(__columnNames[8]),
+					Hidden = columnInfo.Get<bool>(__columnNames[9]),
 					Align = type.IsNumeric() ? HorizontalAlignment.Right : HorizontalAlignment.Left,
 					Order = Items.Count
 				};

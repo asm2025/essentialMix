@@ -35,8 +35,8 @@ namespace asm.Helpers
 
 		private static readonly Regex __isPathQualified = new Regex(@"^(?:[\\/][\\/\?][\.\?][\\/])?(?:[\\/]|(?:[a-zA-Z]:)|(?:[\w\-]+))(?:(?<=[\\/])(?:[\w\p{P}\s]+)+)?(?:[\\/](?:[\w\p{P}\s]+)+)*[\\/]*$", RegexHelper.OPTIONS_I | RegexOptions.Singleline);
 		
-		private static char _directorySeparator = Path.DirectorySeparatorChar;
-		private static char _altDirectorySeparator = Path.AltDirectorySeparatorChar;
+		private static char __directorySeparator = Path.DirectorySeparatorChar;
+		private static char __altDirectorySeparator = Path.AltDirectorySeparatorChar;
 
 		private static readonly ISet<char> __separators = new HashSet<char>
 		{
@@ -47,21 +47,21 @@ namespace asm.Helpers
 
 		public static char DirectorySeparator
 		{
-			get => _directorySeparator;
+			get => __directorySeparator;
 			set
 			{
 				if (value != Path.DirectorySeparatorChar && value != Path.AltDirectorySeparatorChar) throw new InvalidOperationException($"{nameof(DirectorySeparator)} must be one of the characters [{Path.DirectorySeparatorChar}, {Path.AltDirectorySeparatorChar}]");
-				_directorySeparator = value;
+				__directorySeparator = value;
 			}
 		}
 
 		public static char AltDirectorySeparator
 		{
-			get => _altDirectorySeparator;
+			get => __altDirectorySeparator;
 			set
 			{
 				if (value != Path.DirectorySeparatorChar && value != Path.AltDirectorySeparatorChar) throw new InvalidOperationException($"{nameof(AltDirectorySeparator)} must be one of the characters [{Path.DirectorySeparatorChar}, {Path.AltDirectorySeparatorChar}]");
-				_altDirectorySeparator = value;
+				__altDirectorySeparator = value;
 			}
 		}
 

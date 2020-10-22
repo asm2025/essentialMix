@@ -64,17 +64,17 @@ namespace Other.Microsoft.Windows
 			}
 		}
 
-		private static volatile StringCollection _stringCollection;
+		private static volatile StringCollection __stringCollection;
 
 		/// <summary>
 		/// Opens the default desktop.
 		/// </summary>
-		public static readonly Desktop DEFAULT = OpenDefaultDesktop();
+		public static readonly Desktop Default = OpenDefaultDesktop();
 
 		/// <summary>
 		/// Opens the desktop the user if viewing.
 		/// </summary>
-		public static readonly Desktop INPUT = OpenInputDesktop();
+		public static readonly Desktop Input = OpenInputDesktop();
 
 		private readonly ArrayList _windows = new ArrayList();
 
@@ -376,7 +376,7 @@ namespace Other.Microsoft.Windows
 			string[] desktops;
 
 			// lock the object. thread safety and all.
-			lock(_stringCollection = new StringCollection())
+			lock(__stringCollection = new StringCollection())
 			{
 				bool result = Win32.EnumDesktops(windowStation, DesktopProc, IntPtr.Zero);
 
@@ -384,8 +384,8 @@ namespace Other.Microsoft.Windows
 				if (!result) return new string[0];
 
 				//	// turn the collection into an array.
-				desktops = new string[_stringCollection.Count];
-				for (int i = 0; i < desktops.Length; i++) desktops[i] = _stringCollection[i];
+				desktops = new string[__stringCollection.Count];
+				for (int i = 0; i < desktops.Length; i++) desktops[i] = __stringCollection[i];
 			}
 
 			return desktops;
@@ -580,7 +580,7 @@ namespace Other.Microsoft.Windows
 			ArrayList mProc = new ArrayList();
 
 			// get the current desktop name.
-			string currentDesktop = GetDesktopName(INPUT.DesktopHandle);
+			string currentDesktop = GetDesktopName(Input.DesktopHandle);
 
 			// cycle through the processes.
 			foreach (Process process in processes)
@@ -610,7 +610,7 @@ namespace Other.Microsoft.Windows
 		private static bool DesktopProc(string lpszDesktop, IntPtr lParam)
 		{
 			// add the desktop to the collection.
-			_stringCollection.Add(lpszDesktop);
+			__stringCollection.Add(lpszDesktop);
 
 			return true;
 		}

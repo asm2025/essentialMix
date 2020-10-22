@@ -84,7 +84,7 @@ namespace asm.Threading.Other.JonSkeet.MiscUtil.Threading
 			/// <summary>
 			/// Access to single instance of PriorityComparer.
 			/// </summary>
-			internal static readonly IComparer<ThreadPoolWorkItem> INSTANCE = new PriorityComparer();
+			internal static readonly IComparer<ThreadPoolWorkItem> Instance = new PriorityComparer();
 
 			/// <summary>
 			/// Private constructor to prevent instantiation
@@ -144,12 +144,12 @@ namespace asm.Threading.Other.JonSkeet.MiscUtil.Threading
 		/// <summary>
 		/// Lock around all static members.
 		/// </summary>
-		private static readonly object STATIC_LOCK = new object();
+		private static readonly object __staticLock = new object();
 
 		/// <summary>
 		/// Total number of instances created
 		/// </summary>
-		private static int _instanceCount;
+		private static int __instanceCount;
 
 		/// <summary>
 		/// Lock around all access to events.
@@ -198,13 +198,13 @@ namespace asm.Threading.Other.JonSkeet.MiscUtil.Threading
 		/// </summary>
 		public ThreadPool()
 		{
-			lock(STATIC_LOCK)
+			lock(__staticLock)
 			{
-				_instanceCount++;
+				__instanceCount++;
 
 				lock(_stateLock)
 				{
-					_name = "ThreadPool-" + _instanceCount;
+					_name = "ThreadPool-" + __instanceCount;
 				}
 			}
 		}
@@ -215,9 +215,9 @@ namespace asm.Threading.Other.JonSkeet.MiscUtil.Threading
 		/// <param name="name">The name of the new thread pool</param>
 		public ThreadPool(string name)
 		{
-			lock(STATIC_LOCK)
+			lock(__staticLock)
 			{
-				_instanceCount++;
+				__instanceCount++;
 			}
 
 			lock(_stateLock)
@@ -521,7 +521,7 @@ namespace asm.Threading.Other.JonSkeet.MiscUtil.Threading
 						{
 							// This will find the complement of the correct position, due to the
 							// "interesting" nature of PriorityComparer.
-							int position = _queue.BinarySearch(workItem, PriorityComparer.INSTANCE);
+							int position = _queue.BinarySearch(workItem, PriorityComparer.Instance);
 							_queue.Enqueue(workItem, ~position);
 						}
 					}

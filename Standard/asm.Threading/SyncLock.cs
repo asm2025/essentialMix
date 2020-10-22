@@ -17,14 +17,14 @@ namespace asm.Threading
 		/// <summary>
 		/// Lock for static mutable properties.
 		/// </summary>
-		private static readonly object STATIC_LOCK = new object();
+		private static readonly object __staticLock = new object();
 
 		/// <summary>
 		/// The default timeout for new instances of this class
 		/// where the default timeout isn't otherwise specified.
 		/// Defaults to Timeout.INFINITE.
 		/// </summary>
-		private static int _defaultTimeout = System.Threading.Timeout.Infinite;
+		private static int __defaultTimeout = System.Threading.Timeout.Infinite;
 
 		/// <inheritdoc />
 		/// <summary>
@@ -145,18 +145,18 @@ namespace asm.Threading
 		{
 			get
 			{
-				lock(STATIC_LOCK)
+				lock(__staticLock)
 				{
-					return _defaultTimeout;
+					return __defaultTimeout;
 				}
 			}
 			set
 			{
 				if (value < System.Threading.Timeout.Infinite) throw new ArgumentOutOfRangeException(nameof(value), "Invalid timeout specified");
 
-				lock(STATIC_LOCK)
+				lock(__staticLock)
 				{
-					_defaultTimeout = value;
+					__defaultTimeout = value;
 				}
 			}
 		}

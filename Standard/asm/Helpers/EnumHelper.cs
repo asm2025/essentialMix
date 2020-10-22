@@ -34,7 +34,7 @@ namespace asm.Helpers
 
 		private const int S_STARTING_CUSTOM_ENUM_FORMAT_VALUE = (int)EnumFormat.DisplayName + 1;
 
-		private static readonly ConcurrentDictionary<Type, IEnumInfo> _enumInfo = new ConcurrentDictionary<Type, IEnumInfo>();
+		private static readonly ConcurrentDictionary<Type, IEnumInfo> __enumInfo = new ConcurrentDictionary<Type, IEnumInfo>();
 
 		private static Func<EnumMember, string>[] __customEnumMemberFormatters = new Func<EnumMember, string>[0];
 
@@ -2269,7 +2269,7 @@ namespace asm.Helpers
 
 		internal static IEnumInfo GetInfo([NotNull] Type enumType)
 		{
-			return _enumInfo.GetOrAdd(enumType, e =>
+			return __enumInfo.GetOrAdd(enumType, e =>
 												{
 													if (enumType.IsEnum)
 													{

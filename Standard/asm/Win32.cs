@@ -16818,7 +16818,7 @@ namespace asm
 		public static extern bool MoveWindow(IntPtr hWnd, int x, int y, int cx, int cy, bool repaint);
 
 		[DllImport("user32.dll")]
-		public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, WindowPositionFlagsEnum uFlags);
+		public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int y, int cx, int cy, WindowPositionFlagsEnum uFlags);
 
 		[DllImport("user32.dll")]
 		public static extern uint GetWindowLong(IntPtr hWnd, WindowLongSettingIndexEnum nIndex);
@@ -17140,7 +17140,7 @@ namespace asm
 		public static extern bool GenerateConsoleCtrlEvent(CTRL_EVENT dwCtrlEvent, uint dwProcessGroupId);
 
 		[DllImport("kernel32", SetLastError = true)]
-		public static extern bool GetConsoleAlias(string Source, out StringBuilder TargetBuffer, uint TargetBufferLength, string ExeName);
+		public static extern bool GetConsoleAlias(string Source, out StringBuilder targetBuffer, uint targetBufferLength, string exeName);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern uint GetConsoleAliases(StringBuilder[] lpTargetBuffer, uint targetBufferLength, string lpExeName);
@@ -17149,7 +17149,7 @@ namespace asm
 		public static extern uint GetConsoleAliasesLength(string exeName);
 
 		[DllImport("kernel32", SetLastError = true)]
-		public static extern uint GetConsoleAliasExes(out StringBuilder ExeNameBuffer, uint ExeNameBufferLength);
+		public static extern uint GetConsoleAliasExes(out StringBuilder ExeNameBuffer, uint exeNameBufferLength);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern uint GetConsoleAliasExesLength();
@@ -17170,7 +17170,7 @@ namespace asm
 		public static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern uint GetConsoleOriginalTitle(out StringBuilder ConsoleTitle, uint Size);
+		public static extern uint GetConsoleOriginalTitle(out StringBuilder ConsoleTitle, uint size);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern uint GetConsoleOutputCP();
@@ -17244,7 +17244,7 @@ namespace asm
 		public static extern bool SetConsoleCursorPosition(IntPtr hConsoleOutput, COORD dwCursorPosition);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool SetConsoleDisplayMode(IntPtr ConsoleOutput, uint Flags, out COORD NewScreenBufferDimensions);
+		public static extern bool SetConsoleDisplayMode(IntPtr ConsoleOutput, uint flags, out COORD newScreenBufferDimensions);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleHistoryInfo(CONSOLE_HISTORY_INFO ConsoleHistoryInfo);
@@ -17256,7 +17256,7 @@ namespace asm
 		public static extern bool SetConsoleOutputCP(uint wCodePageID);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool SetConsoleScreenBufferInfoEx(IntPtr ConsoleOutput, CONSOLE_SCREEN_BUFFER_INFO_EX ConsoleScreenBufferInfoEx);
+		public static extern bool SetConsoleScreenBufferInfoEx(IntPtr ConsoleOutput, CONSOLE_SCREEN_BUFFER_INFO_EX consoleScreenBufferInfoEx);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleScreenBufferSize(IntPtr hConsoleOutput, COORD dwSize);

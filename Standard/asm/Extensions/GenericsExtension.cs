@@ -30,12 +30,12 @@ namespace asm.Extensions
 		private const string FORMAT_STRING = "#,#0";
 		private const string FORMAT_STRING_FRACTIONS = "#,#0.0#";
 
-		private static readonly Lazy<MethodInfo> _clone_method = new Lazy<MethodInfo>(() => typeof(object).GetTypeInfo().GetDeclaredMethod("MemberwiseClone"), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly Lazy<MethodInfo> __cloneMethod = new Lazy<MethodInfo>(() => typeof(object).GetTypeInfo().GetDeclaredMethod("MemberwiseClone"), LazyThreadSafetyMode.PublicationOnly);
 
-		private static readonly IReadOnlySet<string> _true_strings = new ReadOnlySet<string>(new HashSet<string>(StringComparer.OrdinalIgnoreCase) { bool.TrueString, "yes", "on" });
-		private static readonly IReadOnlySet<string> _false_strings = new ReadOnlySet<string>(new HashSet<string>(StringComparer.OrdinalIgnoreCase) { bool.FalseString, "no", "off" });
+		private static readonly IReadOnlySet<string> __trueStrings = new ReadOnlySet<string>(new HashSet<string>(StringComparer.OrdinalIgnoreCase) { bool.TrueString, "yes", "on" });
+		private static readonly IReadOnlySet<string> __falseStrings = new ReadOnlySet<string>(new HashSet<string>(StringComparer.OrdinalIgnoreCase) { bool.FalseString, "no", "off" });
 
-		private static readonly IReadOnlySet<string> _disposed_field_names = new ReadOnlySet<string>(new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+		private static readonly IReadOnlySet<string> __disposedFieldNames = new ReadOnlySet<string>(new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 		{
 			"disposed",
 			"_disposed",
@@ -444,15 +444,15 @@ namespace asm.Extensions
 			return thisValue.To(defaultValue,
 				(string s, bool d, out bool r) =>
 				{
-					r = _true_strings.Contains(s) || _false_strings.Contains(s) || s.IsNumbers();
+					r = __trueStrings.Contains(s) || __falseStrings.Contains(s) || s.IsNumbers();
 					return r;
 				},
 				(string s, bool d, out bool r) =>
 				{
-					r = _true_strings.Contains(s) || _false_strings.Contains(s) || s.IsNumbers();
+					r = __trueStrings.Contains(s) || __falseStrings.Contains(s) || s.IsNumbers();
 					return r;
 				},
-				(s, d) => _true_strings.Contains(s) || s.ToNumber(0L) != 0L || d);
+				(s, d) => __trueStrings.Contains(s) || s.ToNumber(0L) != 0L || d);
 		}
 
 		/// <summary>
@@ -1539,7 +1539,7 @@ namespace asm.Extensions
 
 					if (fieldInfo != null) return (bool)fieldInfo.GetValue(disposable);
 
-					foreach (string fn in _disposed_field_names)
+					foreach (string fn in __disposedFieldNames)
 					{
 						fieldInfo = type.GetField(fn, Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE, rtType);
 						if (fieldInfo != null)
@@ -2028,7 +2028,7 @@ namespace asm.Extensions
 				if (typeToReflect.IsPrimitive()) return value;
 				if (visited.ContainsKey(value)) return visited[value];
 
-				object cloneObject = _clone_method.Value.Invoke(value, null);
+				object cloneObject = __cloneMethod.Value.Invoke(value, null);
 
 				if (typeToReflect.IsArray)
 				{

@@ -782,37 +782,37 @@ namespace asm.Numeric
 			if (1 - maxError < value) return new Fraction<int>(sign * (n + 1), 1);
 
 			// The lower fraction is 0/1
-			int lower_n = 0;
-			int lower_d = 1;
+			int lowerN = 0;
+			int lowerD = 1;
 
 			// The upper fraction is 1/1
-			int upper_n = 1;
-			int upper_d = 1;
+			int upperN = 1;
+			int upperD = 1;
 
 			while (true)
 			{
 				// The middle fraction is (lower_n + upper_n) / (lower_d + upper_d)
-				int middle_n = lower_n + upper_n;
-				int middle_d = lower_d + upper_d;
-				int lwrd = lower_d;
-				int uprd = upper_d;
-				int lwrn = lower_n;
-				int uprn = upper_n;
+				int middleN = lowerN + upperN;
+				int middleD = lowerD + upperD;
+				int lwrd = lowerD;
+				int uprd = upperD;
+				int lwrn = lowerN;
+				int uprn = upperN;
 
-				if (middle_d * (value + maxError) < middle_n)
+				if (middleD * (value + maxError) < middleN)
 				{
 					// real + error < middle : middle is our new upper
-					Seek(ref upper_n, ref upper_d, lower_n, lower_d, (un, ud) => (lwrd + ud) * (value + maxError) < lwrn + un);
+					Seek(ref upperN, ref upperD, lowerN, lowerD, (un, ud) => (lwrd + ud) * (value + maxError) < lwrn + un);
 				}
-				else if (middle_n < (value - maxError) * middle_d)
+				else if (middleN < (value - maxError) * middleD)
 				{
 					// middle < real - error : middle is our new lower
-					Seek(ref lower_n, ref lower_d, upper_n, upper_d, (ln, ld) => ln + uprn < (value - maxError) * (ld + uprd));
+					Seek(ref lowerN, ref lowerD, upperN, upperD, (ln, ld) => ln + uprn < (value - maxError) * (ld + uprd));
 				}
 				else
 				{
 					// Middle is our best fraction
-					return new Fraction<int>((n * middle_d + middle_n) * sign, middle_d);
+					return new Fraction<int>((n * middleD + middleN) * sign, middleD);
 				}
 			}
 		}
@@ -844,37 +844,37 @@ namespace asm.Numeric
 			if (1 - maxError < value) return new Fraction<int>(sign * (n + 1), 1);
 
 			// The lower fraction is 0/1
-			int lower_n = 0;
-			int lower_d = 1;
+			int lowerN = 0;
+			int lowerD = 1;
 
 			// The upper fraction is 1/1
-			int upper_n = 1;
-			int upper_d = 1;
+			int upperN = 1;
+			int upperD = 1;
 
 			while (true)
 			{
 				// The middle fraction is (lower_n + upper_n) / (lower_d + upper_d)
-				int middle_n = lower_n + upper_n;
-				int middle_d = lower_d + upper_d;
-				int lwrd = lower_d;
-				int uprd = upper_d;
-				int lwrn = lower_n;
-				int uprn = upper_n;
+				int middleN = lowerN + upperN;
+				int middleD = lowerD + upperD;
+				int lwrd = lowerD;
+				int uprd = upperD;
+				int lwrn = lowerN;
+				int uprn = upperN;
 
-				if (middle_d * (value + maxError) < middle_n)
+				if (middleD * (value + maxError) < middleN)
 				{
 					// real + error < middle : middle is our new upper
-					Seek(ref upper_n, ref upper_d, lower_n, lower_d, (un, ud) => (lwrd + ud) * (value + maxError) < lwrn + un);
+					Seek(ref upperN, ref upperD, lowerN, lowerD, (un, ud) => (lwrd + ud) * (value + maxError) < lwrn + un);
 				}
-				else if (middle_n < (value - maxError) * middle_d)
+				else if (middleN < (value - maxError) * middleD)
 				{
 					// middle < real - error : middle is our new lower
-					Seek(ref lower_n, ref lower_d, upper_n, upper_d, (ln, ld) => ln + uprn < (value - maxError) * (ld + uprd));
+					Seek(ref lowerN, ref lowerD, upperN, upperD, (ln, ld) => ln + uprn < (value - maxError) * (ld + uprd));
 				}
 				else
 				{
 					// Middle is our best fraction
-					return new Fraction<int>((n * middle_d + middle_n) * sign, middle_d);
+					return new Fraction<int>((n * middleD + middleN) * sign, middleD);
 				}
 			}
 		}
@@ -906,37 +906,37 @@ namespace asm.Numeric
 			if (1 - maxError < value) return new Fraction<int>(sign * (n + 1), 1);
 
 			// The lower fraction is 0/1
-			int lower_n = 0;
-			int lower_d = 1;
+			int lowerN = 0;
+			int lowerD = 1;
 
 			// The upper fraction is 1/1
-			int upper_n = 1;
-			int upper_d = 1;
+			int upperN = 1;
+			int upperD = 1;
 
 			while (true)
 			{
 				// The middle fraction is (lower_n + upper_n) / (lower_d + upper_d)
-				int middle_n = lower_n + upper_n;
-				int middle_d = lower_d + upper_d;
-				int lwrd = lower_d;
-				int uprd = upper_d;
-				int lwrn = lower_n;
-				int uprn = upper_n;
+				int middleN = lowerN + upperN;
+				int middleD = lowerD + upperD;
+				int lwrd = lowerD;
+				int uprd = upperD;
+				int lwrn = lowerN;
+				int uprn = upperN;
 
-				if (middle_d * (value + maxError) < middle_n)
+				if (middleD * (value + maxError) < middleN)
 				{
 					// real + error < middle : middle is our new upper
-					Seek(ref upper_n, ref upper_d, lower_n, lower_d, (un, ud) => (lwrd + ud) * (value + maxError) < lwrn + un);
+					Seek(ref upperN, ref upperD, lowerN, lowerD, (un, ud) => (lwrd + ud) * (value + maxError) < lwrn + un);
 				}
-				else if (middle_n < (value - maxError) * middle_d)
+				else if (middleN < (value - maxError) * middleD)
 				{
 					// middle < real - error : middle is our new lower
-					Seek(ref lower_n, ref lower_d, upper_n, upper_d, (ln, ld) => ln + uprn < (value - maxError) * (ld + uprd));
+					Seek(ref lowerN, ref lowerD, upperN, upperD, (ln, ld) => ln + uprn < (value - maxError) * (ld + uprd));
 				}
 				else
 				{
 					// Middle is our best fraction
-					return new Fraction<int>((n * middle_d + middle_n) * sign, middle_d);
+					return new Fraction<int>((n * middleD + middleN) * sign, middleD);
 				}
 			}
 		}

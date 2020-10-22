@@ -8,7 +8,7 @@ namespace asm.Patterns.Design
 	{
 		private const string CTOR_ERR = "The singleton must implement exactly one private parameterless ctor.";
 
-		private static readonly Lazy<T> INSTANCE = new Lazy<T>(() =>
+		private static readonly Lazy<T> __instance = new Lazy<T>(() =>
 		{
 			Type type = typeof(T);
 			ConstructorInfo[] ctors = type.GetConstructors(Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE);
@@ -19,6 +19,6 @@ namespace asm.Patterns.Design
 			return (T)ctor.Invoke(Array.Empty<object>());
 		}, LazyThreadSafetyMode.ExecutionAndPublication);
 
-		public static T Instance => INSTANCE.Value;
+		public static T Instance => __instance.Value;
 	}
 }

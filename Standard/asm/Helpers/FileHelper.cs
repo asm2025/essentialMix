@@ -14,9 +14,9 @@ namespace asm.Helpers
 {
 	public static class FileHelper
 	{
-		private static readonly Regex RESERVED_NAMES = new Regex(@"^(?:PRN|AUX|CLOCK\$|NUL|CON|COM\d{1,3}|LPT\d{1,3})$", RegexHelper.OPTIONS_I);
-		private static readonly Regex VALID_NAME = new Regex(@"^(?:\.*?(?!\.))[^\x00-\x1f\?*:\x22;|/<>]+(?<![\s.])$", RegexHelper.OPTIONS_I);
-		private static readonly Regex VALID_PATH = new Regex(@"^(?:[a-z]:\\)?(?:(?:\.*?(?!\.))[^\x00-\x1f\?*:\x22;|/<>]+(?<![\s.])\\?)+$", RegexHelper.OPTIONS_I);
+		private static readonly Regex __reservedNames = new Regex(@"^(?:PRN|AUX|CLOCK\$|NUL|CON|COM\d{1,3}|LPT\d{1,3})$", RegexHelper.OPTIONS_I);
+		private static readonly Regex __validName = new Regex(@"^(?:\.*?(?!\.))[^\x00-\x1f\?*:\x22;|/<>]+(?<![\s.])$", RegexHelper.OPTIONS_I);
+		private static readonly Regex __validPath = new Regex(@"^(?:[a-z]:\\)?(?:(?:\.*?(?!\.))[^\x00-\x1f\?*:\x22;|/<>]+(?<![\s.])\\?)+$", RegexHelper.OPTIONS_I);
 
 		public static int RemoveLines([NotNull] string fileName, int count, Encoding encoding = null, int startAtLine = 0)
 		{
@@ -198,7 +198,7 @@ namespace asm.Helpers
 
 		public static bool IsValidPathName(string value, params char[] moreInvalidChars)
 		{
-			if (string.IsNullOrWhiteSpace(value) || !VALID_NAME.IsMatch(value) || RESERVED_NAMES.IsMatch(value)) return false;
+			if (string.IsNullOrWhiteSpace(value) || !__validName.IsMatch(value) || __reservedNames.IsMatch(value)) return false;
 
 			char[] invalid = moreInvalidChars.IsNullOrEmpty() ? Path.GetInvalidFileNameChars() : moreInvalidChars.Union(Path.GetInvalidFileNameChars()).ToArray();
 			if (value.ContainsAny(invalid)) return false;
@@ -221,7 +221,7 @@ namespace asm.Helpers
 
 		public static bool IsValidPath(string value, params char[] moreInvalidChars)
 		{
-			if (string.IsNullOrWhiteSpace(value) || !VALID_PATH.IsMatch(value) || RESERVED_NAMES.IsMatch(value)) return false;
+			if (string.IsNullOrWhiteSpace(value) || !__validPath.IsMatch(value) || __reservedNames.IsMatch(value)) return false;
 
 			char[] invalid = moreInvalidChars.IsNullOrEmpty() ? Path.GetInvalidPathChars() : moreInvalidChars.Union(Path.GetInvalidPathChars()).ToArray();
 			return !value.ContainsAny(invalid);

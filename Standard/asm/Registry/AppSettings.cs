@@ -20,7 +20,7 @@ namespace asm.Registry
 		private const string ROOT_PREFIX = @"Software\";
 
 		[NonSerialized]
-		private static Assembly _thisAssembly;
+		private static Assembly __thisAssembly;
 
 		[NonSerialized]
 		private string _companyNameDefault;
@@ -247,7 +247,7 @@ namespace asm.Registry
 			_applicationVersionDefault = assembly.GetName().Version?.ToString();
 		}
 
-		private static Assembly ThisAssembly => _thisAssembly ??= Assembly.GetAssembly(typeof(AppSettings));
+		private static Assembly ThisAssembly => __thisAssembly ??= Assembly.GetAssembly(typeof(AppSettings));
 
 		private static void LoadProperty(RegistryKey key, [NotNull] IProperty property)
 		{

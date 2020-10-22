@@ -16,14 +16,14 @@ namespace asm.Helpers
 	{
 		private const string STR_PUBLIC_IP = "http://icanhazip.com/"; // also "http://ipinfo.io/ip"
 
-		private static readonly Regex EXTRACT_IP = new Regex(@"(?s)(?<ip>(?:[0-9]{1,3}\.){3}[0-9]{1,3})", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex EXTRACT_IP_WITH_PORT = new Regex(@"(?s)(?<ip>\d+\.\d+\.\d+\.\d+)(?<port>:\d{1,5})", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __extractIP = new Regex(@"(?s)(?<ip>(?:[0-9]{1,3}\.){3}[0-9]{1,3})", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __extractIPWithPort = new Regex(@"(?s)(?<ip>\d+\.\d+\.\d+\.\d+)(?<port>:\d{1,5})", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
 		private static readonly Regex __isIPv4 = new Regex(@"^\b(?<url>(?<ip>(?:[0-9]{1,3}\.){3}[0-9]{1,3})(?<port>:\d{1,5})?)\b$", RegexHelper.OPTIONS_I);
 		private static readonly Regex __isIPv4Url = new Regex(@"^\b(?<url>(?<protocol>https?://)?(?<ip>(?:[0-9]{1,3}\.){3}[0-9]{1,3})(?<port>:\d{1,5})?)\b/?$", RegexHelper.OPTIONS_I);
 		private static readonly Regex __isIPv4Simple = new Regex(@"^\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}-(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b$", RegexHelper.OPTIONS_I);
 		private static readonly Regex __isIPv4CIDR = new Regex(@"^\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}/\d{1,2}\b$", RegexHelper.OPTIONS_I);
 
-		private static readonly Lazy<NetworkInterfaceType[]> __default_network_interface_type = new Lazy<NetworkInterfaceType[]>(() => new []
+		private static readonly Lazy<NetworkInterfaceType[]> __defaultNetworkInterfaceType = new Lazy<NetworkInterfaceType[]>(() => new []
 		{
 			NetworkInterfaceType.Ethernet,
 			NetworkInterfaceType.Wireless80211,
@@ -34,7 +34,7 @@ namespace asm.Helpers
 		{
 			if (string.IsNullOrEmpty(value)) return null;
 
-			Match match = EXTRACT_IP.Match(value);
+			Match match = __extractIP.Match(value);
 			if (!match.Success) return null;
 			if (!IPAddress.TryParse(match.Groups["ip"].Value, out IPAddress result)) result = null;
 			return result;
@@ -50,7 +50,7 @@ namespace asm.Helpers
 		{
 			if (string.IsNullOrEmpty(value)) return null;
 
-			Match match = EXTRACT_IP_WITH_PORT.Match(value);
+			Match match = __extractIPWithPort.Match(value);
 			if (!match.Success) return null;
 
 			if (!IPAddress.TryParse(match.Groups["ip"].Value + match.Groups["port"].Value, out IPAddress result)) result = null;
@@ -62,7 +62,7 @@ namespace asm.Helpers
 			port = 0;
 			if (string.IsNullOrEmpty(value)) return null;
 
-			Match match = EXTRACT_IP_WITH_PORT.Match(value);
+			Match match = __extractIPWithPort.Match(value);
 			if (!match.Success) return null;
 
 
@@ -173,7 +173,7 @@ namespace asm.Helpers
 
 		public static IPAddress GetLocalIP(params NetworkInterfaceType[] types)
 		{
-			if (types.IsNullOrEmpty()) types = __default_network_interface_type.Value;
+			if (types.IsNullOrEmpty()) types = __defaultNetworkInterfaceType.Value;
 			return GetLocalIP(nit => types.Contains(nit), true)?.FirstOrDefault();
 		}
 
@@ -233,7 +233,7 @@ namespace asm.Helpers
 				string content = request.ReadToEnd(settings);
 				if (string.IsNullOrEmpty(content)) return null;
 
-				Match match = EXTRACT_IP.Match(content);
+				Match match = __extractIP.Match(content);
 				result = match.Success ? IPAddress.Parse(match.Groups["ip"].Value) : null;
 			}
 			catch

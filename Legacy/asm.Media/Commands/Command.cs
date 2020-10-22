@@ -15,7 +15,7 @@ namespace asm.Media.Commands
 		//https://www.labnol.org/internet/useful-ffmpeg-commands/28490/
 		//https://community.spiceworks.com/topic/344566-convert-video-from-web-page-using-ffmpeg
 
-		private static string _workingDir;
+		private static string __workingDir;
 
 		public Command()
 			: this(null)
@@ -70,16 +70,16 @@ namespace asm.Media.Commands
 
 		public static string EnsureDependencies([NotNull] Command command)
 		{
-			_workingDir ??= PathHelper.AddDirectorySeparator(AssemblyHelper.GetEntryAssembly()?.GetDirectoryPath() ?? Directory.GetCurrentDirectory());
+			__workingDir ??= PathHelper.AddDirectorySeparator(AssemblyHelper.GetEntryAssembly()?.GetDirectoryPath() ?? Directory.GetCurrentDirectory());
 
 			if (string.IsNullOrEmpty(command.ExecutableName)) return null;
 
-			string exePath = _workingDir + command.ExecutableName;
+			string exePath = __workingDir + command.ExecutableName;
 			if (!File.Exists(exePath)) throw new FileNotFoundException("Dependency not found.", exePath);
 			
 			foreach (string dependency in command.Dependencies.SkipNullOrEmptyTrim())
 			{
-				if (File.Exists(_workingDir + dependency)) continue;
+				if (File.Exists(__workingDir + dependency)) continue;
 				throw new FileNotFoundException("Dependency not found.", dependency);
 			}
 

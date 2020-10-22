@@ -30,7 +30,7 @@ namespace TestApp
 		private const int MEDIUM = 100_000;
 		private const int HEAVY = 1_000_000;
 
-		private static readonly string COMPILATION_TEXT = $@"
+		private static readonly string __compilationText = $@"
 This is C# (a compiled language), so the test needs to run at least
 once before considering results in order for the code to be compiled
 and run at full speed. The first time this test run, it will start 
@@ -496,11 +496,11 @@ work with {HEAVY} items.".Yellow();
 		
 		private static void TestSortAlgorithm()
 		{
-			const string algorithm = nameof(IListExtension.SortInsertion);
+			const string ALGORITHM = nameof(IListExtension.SortInsertion);
 
-			Action<IList<int>, int, int, IComparer<int>, bool> sortNumbers = GetAlgorithm<int>(algorithm);
-			Action<IList<string>, int, int, IComparer<string>, bool> sortStrings = GetAlgorithm<string>(algorithm);
-			Console.WriteLine($"Testing {algorithm.BrightCyan()} algorithm: ");
+			Action<IList<int>, int, int, IComparer<int>, bool> sortNumbers = GetAlgorithm<int>(ALGORITHM);
+			Action<IList<string>, int, int, IComparer<string>, bool> sortStrings = GetAlgorithm<string>(ALGORITHM);
+			Console.WriteLine($"Testing {ALGORITHM.BrightCyan()} algorithm: ");
 
 			Stopwatch watch = new Stopwatch();
 			IComparer<int> numbersComparer = Comparer<int>.Default;
@@ -4325,7 +4325,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 		private static void CompilationHint()
 		{
-			Console.WriteLine(COMPILATION_TEXT);
+			Console.WriteLine(__compilationText);
 			Console.WriteLine();
 		}
 

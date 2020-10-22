@@ -10,16 +10,16 @@ namespace asm.Extensions
 	{
 		private const string FMT_PARAMETER_PLACEHOLDER_DEFAULT = "@{0}";
 
-		private static MethodInfo _getParameterNameMethod;
-		private static MethodInfo _getParameterPlaceholderMethod;
+		private static MethodInfo __getParameterNameMethod;
+		private static MethodInfo __getParameterPlaceholderMethod;
 
 		private static MethodInfo GetParameterNameMethod
 		{
 			get
 			{
-				if (_getParameterNameMethod != null) return _getParameterNameMethod;
-				_getParameterNameMethod = typeof(DbCommandBuilder).FindMethod("GetParameterName", Constants.BF_NON_PUBLIC_INSTANCE, null, typeof(string), CallingConventions.Any, null, typeof(string));
-				return _getParameterNameMethod;
+				if (__getParameterNameMethod != null) return __getParameterNameMethod;
+				__getParameterNameMethod = typeof(DbCommandBuilder).FindMethod("GetParameterName", Constants.BF_NON_PUBLIC_INSTANCE, null, typeof(string), CallingConventions.Any, null, typeof(string));
+				return __getParameterNameMethod;
 			}
 		}
 
@@ -27,9 +27,9 @@ namespace asm.Extensions
 		{
 			get
 			{
-				if (_getParameterPlaceholderMethod != null) return _getParameterPlaceholderMethod;
-				_getParameterPlaceholderMethod = typeof(DbCommandBuilder).FindMethod("GetParameterPlaceholder", Constants.BF_NON_PUBLIC_INSTANCE, null, typeof(string), CallingConventions.Any, null, typeof(int));
-				return _getParameterPlaceholderMethod;
+				if (__getParameterPlaceholderMethod != null) return __getParameterPlaceholderMethod;
+				__getParameterPlaceholderMethod = typeof(DbCommandBuilder).FindMethod("GetParameterPlaceholder", Constants.BF_NON_PUBLIC_INSTANCE, null, typeof(string), CallingConventions.Any, null, typeof(int));
+				return __getParameterPlaceholderMethod;
 			}
 		}
 

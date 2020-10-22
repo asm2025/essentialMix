@@ -9,12 +9,12 @@ namespace asm.Media.ffmpeg.Commands
 {
 	public class FastMetadataCommand : InputCommand
 	{
-		private static readonly Regex DURATION_START_BITRATE = new Regex(@"duration:\s*(?<duration>[^,]*),\s*start:\s*(?<start>[^,]*),\s*bitrate:\s*(?<bitrate>\d+(?:\.\d+)?)", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex FRAMES = new Regex(@"frame=\s*(?<frames>\d+)\s+fps=\s*\d+", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex STREAMS = new Regex(@"(?s)(?<streams>(?:stream\s+#\d+:\d+\s+->\s+#\d+:\d+)+)", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex STREAM_VIDEO = new Regex(@"stream\s*#\d+:\d+(?:\([^)]+\))?:\s*Video:\s*(?<vcodec>\w+)(?:\s\(\w+\))?[^,]+,\s*(?<colors>\w+).*?,\s*(?<vsize>\d+x\d+)(?:,\s+(?<bitrate>\d+(?:\.\d+)?)\s+kb/s)?(?:,?\s+\[?SAR\s+(?<sar>\d+:\d+)\s+DAR\s+(?<dar>\d+:\d+)\]?)?,.*?\s+(?:(?<fps>\d+(?:\.\d+)?[km]?)\s+fps,)?", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex STREAM_AUDIO = new Regex(@"stream\s*#\d+:\d+(?:\([^)]+\))?:\s*audio:\s*(?<acodec>\w+)(?:\s\(\w+\))?[^,]+,\s*(?<rate>\d+)\s*Hz,\s*(?<channels>\w+(?:\.\w+)?),\s*[^,]+,\s*(?<abitrate>\d+)\s*kb/s", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex FORMAT_AND_FILE_NAME = new Regex(@"input\s+#\d,\s+(?<format>\w+(?:(?:,\w+)+)?),?\s+from\s+'(?<filename>[^']+)'", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __durationStartBitrate = new Regex(@"duration:\s*(?<duration>[^,]*),\s*start:\s*(?<start>[^,]*),\s*bitrate:\s*(?<bitrate>\d+(?:\.\d+)?)", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __frames = new Regex(@"frame=\s*(?<frames>\d+)\s+fps=\s*\d+", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __streams = new Regex(@"(?s)(?<streams>(?:stream\s+#\d+:\d+\s+->\s+#\d+:\d+)+)", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __streamVideo = new Regex(@"stream\s*#\d+:\d+(?:\([^)]+\))?:\s*Video:\s*(?<vcodec>\w+)(?:\s\(\w+\))?[^,]+,\s*(?<colors>\w+).*?,\s*(?<vsize>\d+x\d+)(?:,\s+(?<bitrate>\d+(?:\.\d+)?)\s+kb/s)?(?:,?\s+\[?SAR\s+(?<sar>\d+:\d+)\s+DAR\s+(?<dar>\d+:\d+)\]?)?,.*?\s+(?:(?<fps>\d+(?:\.\d+)?[km]?)\s+fps,)?", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __streamAudio = new Regex(@"stream\s*#\d+:\d+(?:\([^)]+\))?:\s*audio:\s*(?<acodec>\w+)(?:\s\(\w+\))?[^,]+,\s*(?<rate>\d+)\s*Hz,\s*(?<channels>\w+(?:\.\w+)?),\s*[^,]+,\s*(?<abitrate>\d+)\s*kb/s", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __formatAndFileName = new Regex(@"input\s+#\d,\s+(?<format>\w+(?:(?:,\w+)+)?),?\s+from\s+'(?<filename>[^']+)'", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
 
 		public FastMetadataCommand()
 			: base(Properties.Settings.Default.FFMPEG_NAME)
@@ -39,7 +39,7 @@ namespace asm.Media.ffmpeg.Commands
 
 			if (!string.IsNullOrEmpty(data))
 			{
-				Match match = DURATION_START_BITRATE.Match(data);
+				Match match = __durationStartBitrate.Match(data);
 
 				if (match.Success)
 				{
@@ -53,7 +53,7 @@ namespace asm.Media.ffmpeg.Commands
 					Metadata.BitRate = match.Groups["bitrate"].Value.To(0) * 1000;
 				}
 
-				MatchCollection frames = FRAMES.Matches(data);
+				MatchCollection frames = __frames.Matches(data);
 
 				if (frames.Count > 0)
 				{
@@ -70,7 +70,7 @@ namespace asm.Media.ffmpeg.Commands
 					Metadata.FrameCount = f;
 				}
 
-				MatchCollection streams = STREAMS.Matches(data);
+				MatchCollection streams = __streams.Matches(data);
 
 				if (streams.Count > 0)
 				{
@@ -78,7 +78,7 @@ namespace asm.Media.ffmpeg.Commands
 					Metadata.StreamCount = streams.Count;
 				}
 
-				match = STREAM_VIDEO.Match(data);
+				match = __streamVideo.Match(data);
 
 				if (match.Success)
 				{
@@ -98,7 +98,7 @@ namespace asm.Media.ffmpeg.Commands
 					}
 				}
 
-				match = STREAM_AUDIO.Match(data);
+				match = __streamAudio.Match(data);
 
 				if (match.Success)
 				{
@@ -111,7 +111,7 @@ namespace asm.Media.ffmpeg.Commands
 
 				if (Metadata == null) return;
 
-				match = FORMAT_AND_FILE_NAME.Match(data);
+				match = __formatAndFileName.Match(data);
 
 				if (match.Success)
 				{

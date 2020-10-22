@@ -46,8 +46,8 @@ namespace asm.Windows.Helpers
 		/// </summary>
 		private const string ELLIPSIS_CHARS = "...";
 
-		private static readonly Regex PREV_WORD = new Regex(@"\W*\w*$", RegexOptions.Compiled | RegexOptions.Multiline);
-		private static readonly Regex NEXT_WORD = new Regex(@"\w*\W*", RegexOptions.Compiled | RegexOptions.Multiline);
+		private static readonly Regex __prevWord = new Regex(@"\W*\w*$", RegexOptions.Compiled | RegexOptions.Multiline);
+		private static readonly Regex __nextWord = new Regex(@"\w*\W*", RegexOptions.Compiled | RegexOptions.Multiline);
 
 		/// <summary>
 		/// Truncates a text string to fit within a given control width by replacing trimmed text with ellipses. 
@@ -120,8 +120,8 @@ namespace asm.Windows.Helpers
 					// trim at a word boundary using regular expressions
 					if (isWord)
 					{
-						if (isEnd) left -= PREV_WORD.Match(mid, 0, left).Length;
-						if (isStart) right += NEXT_WORD.Match(mid, right).Length;
+						if (isEnd) left -= __prevWord.Match(mid, 0, left).Length;
+						if (isStart) right += __nextWord.Match(mid, right).Length;
 					}
 
 					// build and measure a candidate string with ellipsis

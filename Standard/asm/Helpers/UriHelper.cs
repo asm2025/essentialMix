@@ -25,7 +25,7 @@ namespace asm.Helpers
 		private static readonly string __uriSchemeHttp = $"{Uri.UriSchemeHttp}{Uri.SchemeDelimiter}";
 		private static readonly string __uriSchemeHttps = $"{Uri.UriSchemeHttps}{Uri.SchemeDelimiter}";
 
-		private static readonly IDictionary<string, HttpMethod> _httpMethodsCache = new Dictionary<string, HttpMethod>(StringComparer.OrdinalIgnoreCase);
+		private static readonly IDictionary<string, HttpMethod> __httpMethodsCache = new Dictionary<string, HttpMethod>(StringComparer.OrdinalIgnoreCase);
 
 		public static ISet<string> Schemes { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 		{
@@ -973,13 +973,13 @@ namespace asm.Helpers
 
 			HttpMethod method;
 
-			lock (_httpMethodsCache)
+			lock (__httpMethodsCache)
 			{
-				if (_httpMethodsCache.TryGetValue(value, out method)) return method;
+				if (__httpMethodsCache.TryGetValue(value, out method)) return method;
 				Type type = typeof(HttpMethod);
 				PropertyInfo property = type.GetProperty(value, Constants.BF_PUBLIC_STATIC, type);
 				method = property != null ? (HttpMethod)property.GetValue(null) : new HttpMethod(value);
-				_httpMethodsCache.Add(value.ToUpper(), method);
+				__httpMethodsCache.Add(value.ToUpper(), method);
 			}
 
 			return method;

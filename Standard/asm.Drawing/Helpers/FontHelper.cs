@@ -12,13 +12,13 @@ namespace asm.Drawing.Helpers
 {
 	public static class FontHelper
 	{
-		private static readonly ISet<string> PANNED_MONOSPACE_FONT_NAMES = new HashSet<string>(StringFunctionalComparer.StartsWithOrdinalIgnoreCase)
+		private static readonly ISet<string> __pannedMonospaceFontNames = new HashSet<string>(StringFunctionalComparer.StartsWithOrdinalIgnoreCase)
 		{
 			"ESRI",
 			"Oc_"
 		};
 
-		private static IReadOnlySet<string> _cachedMonospacedFontNames;
+		private static IReadOnlySet<string> __cachedMonospacedFontNames;
 
 		public static bool IsMonospaced([NotNull] Font value, [NotNull] Graphics g) { return g.MeasureString("i", value).Width.IsEqual(g.MeasureString("W", value).Width); }
 
@@ -34,7 +34,7 @@ namespace asm.Drawing.Helpers
 		[NotNull]
 		public static IReadOnlySet<string> GetMonospacedFontNames()
 		{
-			if (_cachedMonospacedFontNames == null)
+			if (__cachedMonospacedFontNames == null)
 			{
 				FontStyle[] requiredStyles = 
 				{
@@ -43,7 +43,7 @@ namespace asm.Drawing.Helpers
 					FontStyle.Italic
 				};
 				ISet<string> cachedMonospacedFontNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-				_cachedMonospacedFontNames = new ReadOnlySet<string>(cachedMonospacedFontNames);
+				__cachedMonospacedFontNames = new ReadOnlySet<string>(cachedMonospacedFontNames);
 
 				using (InstalledFontCollection ifc = new InstalledFontCollection())
 				{
@@ -53,7 +53,7 @@ namespace asm.Drawing.Helpers
 						{
 							foreach (FontFamily fontFamily in ifc.Families)
 							{
-								if (PANNED_MONOSPACE_FONT_NAMES.Contains(fontFamily.Name)) continue;
+								if (__pannedMonospaceFontNames.Contains(fontFamily.Name)) continue;
 								if (!fontFamily.HasStyles(requiredStyles)) continue;
 
 								using (Font font = new Font(fontFamily, 10))
@@ -67,7 +67,7 @@ namespace asm.Drawing.Helpers
 				}
 			}
 			
-			return _cachedMonospacedFontNames;
+			return __cachedMonospacedFontNames;
 		}
 
 		public static SizeF MeasureString(string value, Win32.CONSOLE_FONT_INFO_EX fontInfoEx)
