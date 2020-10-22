@@ -1,15 +1,16 @@
+using System;
 using System.Configuration;
+using System.Threading;
 
 namespace asm.Configuration.Data
 {
 	public class FieldElement : ConfigurationElementBase
 	{
-		private static readonly ConfigurationProperty NAME_PROPERTY;
+		private static readonly Lazy<ConfigurationProperty> __name_Property = new Lazy<ConfigurationProperty>(() => new ConfigurationProperty("name", typeof(string), null, ConfigurationPropertyOptions.IsKey | ConfigurationPropertyOptions.IsRequired), LazyThreadSafetyMode.PublicationOnly);
 
 		static FieldElement()
 		{
-			NAME_PROPERTY = new ConfigurationProperty("name", typeof(string), null, ConfigurationPropertyOptions.IsKey | ConfigurationPropertyOptions.IsRequired);
-			BaseProperties.Add(NAME_PROPERTY);
+			BaseProperties.Add(__name_Property.Value);
 		}
 
 		public FieldElement()
@@ -17,6 +18,6 @@ namespace asm.Configuration.Data
 		}
 
 		[ConfigurationProperty("name", IsRequired = true, IsKey = true)]
-		public string Name => (string)base[NAME_PROPERTY];
+		public string Name => (string)base[__name_Property.Value];
 	}
 }

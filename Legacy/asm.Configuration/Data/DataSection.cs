@@ -1,15 +1,16 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
+using System.Threading;
 
 namespace asm.Configuration.Data
 {
 	public sealed class DataSection : ConfigurationSectionBase
 	{
-		private static readonly ConfigurationProperty TABLES_PROPERTY;
+		private static readonly Lazy<ConfigurationProperty> __tables_Property = new Lazy<ConfigurationProperty>(() => new ConfigurationProperty(string.Empty, typeof(TableSettingsCollection), null, ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsDefaultCollection), LazyThreadSafetyMode.PublicationOnly);
 
 		static DataSection()
 		{
-			TABLES_PROPERTY = new ConfigurationProperty(string.Empty, typeof(TableSettingsCollection), null, ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsDefaultCollection);
-			BaseProperties.Add(TABLES_PROPERTY);
+			BaseProperties.Add(__tables_Property.Value);
 		}
 
 		public DataSection()
@@ -17,6 +18,6 @@ namespace asm.Configuration.Data
 		}
 
 		[ConfigurationProperty("", IsRequired = true, IsDefaultCollection = true)]
-		public TableSettingsCollection Tables => (TableSettingsCollection)base[TABLES_PROPERTY];
+		public TableSettingsCollection Tables => (TableSettingsCollection)base[__tables_Property.Value];
 	}
 }

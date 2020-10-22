@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
@@ -5,6 +6,7 @@ namespace asm.Extensions
 {
 	public static class TaskStatusExtension
 	{
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsReady(this TaskStatus thisValue)
 		{
 			switch (thisValue)
@@ -17,6 +19,7 @@ namespace asm.Extensions
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsRunning(this TaskStatus thisValue)
 		{
 			switch (thisValue)
@@ -29,6 +32,7 @@ namespace asm.Extensions
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsStarted(this TaskStatus thisValue)
 		{
 			switch (thisValue)
@@ -44,6 +48,7 @@ namespace asm.Extensions
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsFinished(this TaskStatus thisValue)
 		{
 			switch (thisValue)

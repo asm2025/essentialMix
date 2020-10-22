@@ -8,8 +8,6 @@ namespace asm.Web.Mvc.Helpers
 {
 	public static class IControllerHelper
 	{
-		private static readonly Type __controllerType = typeof(IController);
-
 		[NotNull]
 		public static string ControllerName<T>()
 			where T : IController
@@ -20,15 +18,16 @@ namespace asm.Web.Mvc.Helpers
 		[NotNull]
 		public static string ControllerName([NotNull] Type type)
 		{
-			if (!__controllerType.IsAssignableFrom(type)) throw new TypeAccessException($"Type '{type}' is not a '{__controllerType}'.");
+			if (!typeof(IController).IsAssignableFrom(type)) throw new TypeAccessException($"Type '{type}' is not assignable from IController.");
 			return type.Name.Replace("Controller", string.Empty);
 		}
 
 		[NotNull]
 		public static IEnumerable<Type> GetAllControllers()
 		{
+			Type type = typeof(IController);
 			return AppDomain.CurrentDomain.GetAssemblies()
-							.SelectMany(e => e.GetTypes().Where(t => !t.IsAbstract && __controllerType.IsAssignableFrom(t)));
+							.SelectMany(e => e.GetTypes().Where(t => !t.IsAbstract && type.IsAssignableFrom(t)));
 		}
 	}
 }

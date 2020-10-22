@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using JetBrains.Annotations;
 using Timer = System.Timers.Timer;
@@ -9,8 +10,10 @@ namespace asm.Extensions
 {
 	public static class CancellationTokenSourceExtension
 	{
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsCancellationRequested(this CancellationTokenSource thisValue) { return thisValue != null && thisValue.IsCancellationRequested; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static void CancelIfNotDisposed(this CancellationTokenSource thisValue, bool throwOnFirstException = false)
 		{
 			if (thisValue.IsDisposed()) return;

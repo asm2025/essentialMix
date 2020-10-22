@@ -1,14 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace asm.Windows.Controls
 {
 	public class Tabless : TabControl
 	{
-		private const int TCM_ADJUSTRECT = 0x1328;
+		private const int TCM_ADJUST_RECT = 0x1328;
 
-		private static readonly IntPtr INT_PTR_ONE = new IntPtr(1);
+		private static readonly Lazy<IntPtr> __int_Ptr_One = new Lazy<IntPtr>(() => new IntPtr(1), LazyThreadSafetyMode.PublicationOnly);
 
 		public Tabless()
 		{
@@ -30,9 +31,9 @@ namespace asm.Windows.Controls
 		/// <param name="m">A Windows Message Object. </param>
 		protected override void WndProc(ref Message m)
 		{
-			if (m.Msg == TCM_ADJUSTRECT)
+			if (m.Msg == TCM_ADJUST_RECT)
 			{
-				m.Result = INT_PTR_ONE;
+				m.Result = __int_Ptr_One.Value;
 				return;
 			}
 			base.WndProc(ref m);

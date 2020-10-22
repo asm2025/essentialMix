@@ -11,7 +11,7 @@ namespace asm.Media
 	[DebuggerDisplay("{DisplayName}")]
 	public sealed class VideoSize
 	{
-		private static readonly IDictionary<string, VideoSizeEnum> VIDEO_SIZE_STRING_CACHE;
+		private static readonly IDictionary<string, VideoSizeEnum> __video_Size_String_Cache;
 
 		private readonly object _lock = new object();
 
@@ -22,13 +22,13 @@ namespace asm.Media
 		static VideoSize()
 		{
 			VideoSizeEnum[] values = EnumHelper<VideoSizeEnum>.GetValues();
-			VIDEO_SIZE_STRING_CACHE = new Dictionary<string, VideoSizeEnum>(values.Length, StringComparer.OrdinalIgnoreCase);
+			__video_Size_String_Cache = new Dictionary<string, VideoSizeEnum>(values.Length, StringComparer.OrdinalIgnoreCase);
 
 			foreach (VideoSizeEnum value in values)
 			{
 				DisplayAttribute displayAttribute = value.GetAttribute<VideoSizeEnum, DisplayAttribute>();
 				if (string.IsNullOrEmpty(displayAttribute?.Description)) continue;
-				VIDEO_SIZE_STRING_CACHE.Add(displayAttribute.Description, value);
+				__video_Size_String_Cache.Add(displayAttribute.Description, value);
 			}
 		}
 
@@ -167,7 +167,7 @@ namespace asm.Media
 				else
 				{
 					string searchString = $"{_width}x{_height}";
-					_value = VIDEO_SIZE_STRING_CACHE.TryGetValue(searchString, out VideoSizeEnum v) ? v : VideoSizeEnum.Custom;
+					_value = __video_Size_String_Cache.TryGetValue(searchString, out VideoSizeEnum v) ? v : VideoSizeEnum.Custom;
 				}
 			}
 

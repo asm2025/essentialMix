@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using asm.Collections;
 using JetBrains.Annotations;
 
@@ -146,6 +147,28 @@ namespace asm.Extensions
 			}
 
 			return added;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static void AddSkipNull<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] TKey key, TValue value)
+			where TValue : class
+		{
+			if (value.IsNull()) return;
+			thisValue.Add(key, value);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static void AddSkipNullOrEmpty<TKey>([NotNull] this IDictionary<TKey, string> thisValue, [NotNull] TKey key, string value)
+		{
+			if (string.IsNullOrEmpty(value)) return;
+			thisValue.Add(key, value);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static void AddSkipNullOrWhiteSpace<TKey>([NotNull] this IDictionary<TKey, string> thisValue, [NotNull] TKey key, string value)
+		{
+			if (string.IsNullOrWhiteSpace(value)) return;
+			thisValue.Add(key, value);
 		}
 
 		public static void Initialize([NotNull] this IDictionary thisValue, object value = null)

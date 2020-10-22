@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using asm.Extensions;
 using asm.Web;
 using JetBrains.Annotations;
@@ -15,12 +16,6 @@ namespace asm.Core.Swagger.Filters
 {
 	public class FormFileFilter : IOperationFilter
 	{
-		private static readonly ISet<Type> __supportedTypes = new HashSet<Type>
-		{
-			typeof(IFormFile),
-			typeof(IFormFileCollection)
-		};
-
 		/// <inheritdoc />
 		public void Apply([NotNull] OpenApiOperation operation, [NotNull] OperationFilterContext context)
 		{
@@ -32,7 +27,7 @@ namespace asm.Core.Swagger.Filters
 			}
 
 			// Check if any of the parameters' types or their nested properties / fields are supported
-			if (!Enumerate(context.ApiDescription.ActionDescriptor).Any(e => __supportedTypes.Contains(e.ParameterType))) return;
+			if (!Enumerate(context.ApiDescription.ActionDescriptor).Any(e => IsSupported(e.ParameterType))) return;
 
 			OpenApiMediaType uploadFileMediaType = operation.RequestBody.Content.GetOrAdd(MediaTypeNames.Multipart.FormData, e => new OpenApiMediaType
 			{
@@ -54,7 +49,7 @@ namespace asm.Core.Swagger.Filters
 				OpenApiSchema schema = generator.GenerateSchema(parameter.ParameterType, repository);
 				if (schema == null) continue;
 
-				if (__supportedTypes.Contains(parameter.ParameterType))
+				if (IsSupported(parameter.ParameterType))
 				{
 					schema.Type = "file";
 				}
@@ -74,6 +69,12 @@ namespace asm.Core.Swagger.Filters
 					yield return parameter;
 				}
 			}
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		private static bool IsSupported(Type type)
+		{
+			return type != null && (type.IsAssignableFrom(typeof(IFormFile)) || type.IsAssignableFrom(typeof(IFormFileCollection)));
 		}
 	}
 }

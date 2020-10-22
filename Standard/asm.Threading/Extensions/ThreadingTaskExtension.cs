@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using asm.Helpers;
@@ -10,12 +11,16 @@ namespace asm.Extensions
 {
 	public static class ThreadingTaskExtension
 	{
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsReady([NotNull] this Task thisValue) { return thisValue.Status.IsReady(); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsRunning([NotNull] this Task thisValue) { return thisValue.Status.IsRunning(); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsStarted([NotNull] this Task thisValue) { return thisValue.Status.IsStarted(); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsFinished([NotNull] this Task thisValue) { return thisValue.Status.IsFinished(); }
 
 		public static Task Then([NotNull] this Task thisValue, [NotNull] Func<Task> next, CancellationToken token = default(CancellationToken))

@@ -8,13 +8,10 @@ namespace asm.Extensions
 {
 	public static class ISynchronizeInvokeExtension
 	{
-		private static readonly object[] EMPTY_PARAMS = Array.Empty<object>();
-
 		public static void InvokeIf([NotNull] this ISynchronizeInvoke thisValue, MethodInvoker action)
 		{
-			//bug ??? lost in threads
 			if (thisValue.InvokeRequired)
-				thisValue.Invoke(action, EMPTY_PARAMS);
+				thisValue.Invoke(action, Array.Empty<object>());
 			else
 				action();
 		}

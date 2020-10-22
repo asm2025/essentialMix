@@ -1,21 +1,28 @@
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // ReSharper disable once CheckNamespace
 namespace asm.Extensions
 {
 	public static class ProcessThreadExtension
 	{
-		private static readonly HashSet<ThreadState> AWAITABLE_STATES = new HashSet<ThreadState>
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool IsAwaitable(this ProcessThread thisValue)
 		{
-				ThreadState.Initialized,
-				ThreadState.Ready,
-				ThreadState.Running,
-				ThreadState.Standby,
-				ThreadState.Wait,
-				ThreadState.Transition
-		};
+			if (thisValue == null) return false;
 
-		public static bool IsAwaitable(this ProcessThread thisValue) { return thisValue != null && AWAITABLE_STATES.Contains(thisValue.ThreadState); }
+			switch (thisValue.ThreadState)
+			{
+				case ThreadState.Initialized:
+				case ThreadState.Ready:
+				case ThreadState.Running:
+				case ThreadState.Standby:
+				case ThreadState.Wait:
+				case ThreadState.Transition:
+					return true;
+				default:
+					return false;
+			}
+		}
 	}
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Windows.Forms;
 
 // ReSharper disable once CheckNamespace
@@ -7,223 +6,225 @@ namespace asm.Extensions
 {
 	public static class KeysExtension
 	{
-		private static readonly ISet<Keys> KEYS_FUNCTION = new HashSet<Keys>
-		{
-			Keys.LButton,
-			Keys.RButton,
-			Keys.Cancel,
-			Keys.MButton,
-			Keys.XButton1,
-			Keys.XButton2,
-			Keys.Tab,
-			Keys.ShiftKey,
-			Keys.ControlKey,
-			Keys.Menu,
-			Keys.Pause,
-			Keys.Capital,
-			Keys.CapsLock,
-			Keys.LineFeed,
-			Keys.KanaMode,
-			Keys.HanguelMode,
-			Keys.HangulMode,
-			Keys.JunjaMode,
-			Keys.FinalMode,
-			Keys.HanjaMode,
-			Keys.KanjiMode,
-			Keys.Escape,
-			Keys.IMEConvert,
-			Keys.IMENonconvert,
-			Keys.IMEAccept,
-			Keys.IMEAceept,
-			Keys.IMEModeChange,
-			Keys.Prior,
-			Keys.Select,
-			Keys.Print,
-			Keys.Execute,
-			Keys.Snapshot,
-			Keys.PrintScreen,
-			Keys.Insert,
-			Keys.Help,
-			Keys.LWin,
-			Keys.RWin,
-			Keys.Apps,
-			Keys.Sleep,
-			Keys.F1,
-			Keys.F2,
-			Keys.F3,
-			Keys.F4,
-			Keys.F5,
-			Keys.F6,
-			Keys.F7,
-			Keys.F8,
-			Keys.F9,
-			Keys.F10,
-			Keys.F11,
-			Keys.F12,
-			Keys.F13,
-			Keys.F14,
-			Keys.F15,
-			Keys.F16,
-			Keys.F17,
-			Keys.F18,
-			Keys.F19,
-			Keys.F20,
-			Keys.F21,
-			Keys.F22,
-			Keys.F23,
-			Keys.F24,
-			Keys.NumLock,
-			Keys.Scroll,
-			Keys.LShiftKey,
-			Keys.RShiftKey,
-			Keys.LControlKey,
-			Keys.RControlKey,
-			Keys.LMenu,
-			Keys.RMenu,
-			Keys.BrowserBack,
-			Keys.BrowserForward,
-			Keys.BrowserRefresh,
-			Keys.BrowserStop,
-			Keys.BrowserSearch,
-			Keys.BrowserFavorites,
-			Keys.BrowserHome,
-			Keys.VolumeMute,
-			Keys.VolumeDown,
-			Keys.VolumeUp,
-			Keys.MediaNextTrack,
-			Keys.MediaPreviousTrack,
-			Keys.MediaStop,
-			Keys.MediaPlayPause,
-			Keys.LaunchMail,
-			Keys.SelectMedia,
-			Keys.LaunchApplication1,
-			Keys.LaunchApplication2,
-			Keys.Oem102,
-			Keys.ProcessKey,
-			Keys.Packet,
-			Keys.Attn,
-			Keys.Crsel,
-			Keys.Exsel,
-			Keys.Play,
-			Keys.Zoom,
-			Keys.NoName,
-			Keys.Pa1,
-			Keys.Shift,
-			Keys.Control,
-			Keys.Alt
-		};
-
-		private static readonly ISet<Keys> KEYS_NAVIGATION = new HashSet<Keys>
-		{
-			Keys.PageUp,
-			Keys.Next,
-			Keys.PageDown,
-			Keys.End,
-			Keys.Home,
-			Keys.Left,
-			Keys.Up,
-			Keys.Right,
-			Keys.Down
-		};
-
-		private static readonly ISet<Keys> KEYS_TYPING = new HashSet<Keys>
-		{
-			Keys.Space,
-			Keys.D0,
-			Keys.D1,
-			Keys.D2,
-			Keys.D3,
-			Keys.D4,
-			Keys.D5,
-			Keys.D6,
-			Keys.D7,
-			Keys.D8,
-			Keys.D9,
-			Keys.A,
-			Keys.B,
-			Keys.C,
-			Keys.D,
-			Keys.E,
-			Keys.F,
-			Keys.G,
-			Keys.H,
-			Keys.I,
-			Keys.J,
-			Keys.K,
-			Keys.L,
-			Keys.M,
-			Keys.N,
-			Keys.O,
-			Keys.P,
-			Keys.Q,
-			Keys.R,
-			Keys.S,
-			Keys.T,
-			Keys.U,
-			Keys.V,
-			Keys.W,
-			Keys.X,
-			Keys.Y,
-			Keys.Z,
-			Keys.NumPad0,
-			Keys.NumPad1,
-			Keys.NumPad2,
-			Keys.NumPad3,
-			Keys.NumPad4,
-			Keys.NumPad5,
-			Keys.NumPad6,
-			Keys.NumPad7,
-			Keys.NumPad8,
-			Keys.NumPad9,
-			Keys.Multiply,
-			Keys.Add,
-			Keys.Separator,
-			Keys.Subtract,
-			Keys.Decimal,
-			Keys.Divide,
-			Keys.OemSemicolon,
-			Keys.Oem1,
-			Keys.Oemplus,
-			Keys.Oemcomma,
-			Keys.OemMinus,
-			Keys.OemPeriod,
-			Keys.OemQuestion,
-			Keys.Oem2,
-			Keys.Oemtilde,
-			Keys.Oem3,
-			Keys.OemOpenBrackets,
-			Keys.Oem4,
-			Keys.OemPipe,
-			Keys.Oem5,
-			Keys.OemCloseBrackets,
-			Keys.Oem6,
-			Keys.OemQuotes,
-			Keys.Oem7,
-			Keys.Oem8,
-			Keys.OemBackslash
-		};
-
-		private static readonly ISet<Keys> KEYS_REMOVE = new HashSet<Keys>
-		{
-			Keys.Space,
-			Keys.Delete,
-			Keys.EraseEof,
-			Keys.OemClear
-		};
-
 		public static char ToChar(this Keys thisValue)
 		{
 			int nonVirtualKey = Win32.MapVirtualKey((uint)thisValue, 2);
 			return Convert.ToChar(nonVirtualKey);
 		}
 
-		public static bool IsFunction(this Keys thisValue) { return KEYS_FUNCTION.Contains(thisValue); }
+		public static bool IsFunction(this Keys thisValue)
+		{
+			switch (thisValue)
+			{
+				case Keys.LButton:
+				case Keys.RButton:
+				case Keys.Cancel:
+				case Keys.MButton:
+				case Keys.XButton1:
+				case Keys.XButton2:
+				case Keys.Tab:
+				case Keys.ShiftKey:
+				case Keys.ControlKey:
+				case Keys.Menu:
+				case Keys.Pause:
+				case Keys.CapsLock:
+				case Keys.LineFeed:
+				case Keys.HangulMode:
+				case Keys.JunjaMode:
+				case Keys.FinalMode:
+				case Keys.KanjiMode:
+				case Keys.Escape:
+				case Keys.IMEConvert:
+				case Keys.IMENonconvert:
+				case Keys.IMEAccept:
+				case Keys.IMEModeChange:
+				case Keys.Prior:
+				case Keys.Select:
+				case Keys.Print:
+				case Keys.Execute:
+				case Keys.PrintScreen:
+				case Keys.Insert:
+				case Keys.Help:
+				case Keys.LWin:
+				case Keys.RWin:
+				case Keys.Apps:
+				case Keys.Sleep:
+				case Keys.F1:
+				case Keys.F2:
+				case Keys.F3:
+				case Keys.F4:
+				case Keys.F5:
+				case Keys.F6:
+				case Keys.F7:
+				case Keys.F8:
+				case Keys.F9:
+				case Keys.F10:
+				case Keys.F11:
+				case Keys.F12:
+				case Keys.F13:
+				case Keys.F14:
+				case Keys.F15:
+				case Keys.F16:
+				case Keys.F17:
+				case Keys.F18:
+				case Keys.F19:
+				case Keys.F20:
+				case Keys.F21:
+				case Keys.F22:
+				case Keys.F23:
+				case Keys.F24:
+				case Keys.NumLock:
+				case Keys.Scroll:
+				case Keys.LShiftKey:
+				case Keys.RShiftKey:
+				case Keys.LControlKey:
+				case Keys.RControlKey:
+				case Keys.LMenu:
+				case Keys.RMenu:
+				case Keys.BrowserBack:
+				case Keys.BrowserForward:
+				case Keys.BrowserRefresh:
+				case Keys.BrowserStop:
+				case Keys.BrowserSearch:
+				case Keys.BrowserFavorites:
+				case Keys.BrowserHome:
+				case Keys.VolumeMute:
+				case Keys.VolumeDown:
+				case Keys.VolumeUp:
+				case Keys.MediaNextTrack:
+				case Keys.MediaPreviousTrack:
+				case Keys.MediaStop:
+				case Keys.MediaPlayPause:
+				case Keys.LaunchMail:
+				case Keys.SelectMedia:
+				case Keys.LaunchApplication1:
+				case Keys.LaunchApplication2:
+				case Keys.Oem102:
+				case Keys.ProcessKey:
+				case Keys.Packet:
+				case Keys.Attn:
+				case Keys.Crsel:
+				case Keys.Exsel:
+				case Keys.Play:
+				case Keys.Zoom:
+				case Keys.NoName:
+				case Keys.Pa1:
+				case Keys.Shift:
+				case Keys.Control:
+				case Keys.Alt:
+					return true;
+				default:
+					return false;
+			}
+		}
 
-		public static bool IsNavigation(this Keys thisValue) { return KEYS_NAVIGATION.Contains(thisValue); }
+		public static bool IsNavigation(this Keys thisValue)
+		{
+			switch (thisValue)
+			{
+				case Keys.PageUp:
+				case Keys.PageDown:
+				case Keys.End:
+				case Keys.Home:
+				case Keys.Left:
+				case Keys.Up:
+				case Keys.Right:
+				case Keys.Down:
+					return true;
+				default:
+					return false;
+			}
+		}
 
-		public static bool IsTyping(this Keys thisValue) { return KEYS_TYPING.Contains(thisValue); }
+		public static bool IsTyping(this Keys thisValue)
+		{
+			switch (thisValue)
+			{
+				case Keys.Space:
+				case Keys.D0:
+				case Keys.D1:
+				case Keys.D2:
+				case Keys.D3:
+				case Keys.D4:
+				case Keys.D5:
+				case Keys.D6:
+				case Keys.D7:
+				case Keys.D8:
+				case Keys.D9:
+				case Keys.A:
+				case Keys.B:
+				case Keys.C:
+				case Keys.D:
+				case Keys.E:
+				case Keys.F:
+				case Keys.G:
+				case Keys.H:
+				case Keys.I:
+				case Keys.J:
+				case Keys.K:
+				case Keys.L:
+				case Keys.M:
+				case Keys.N:
+				case Keys.O:
+				case Keys.P:
+				case Keys.Q:
+				case Keys.R:
+				case Keys.S:
+				case Keys.T:
+				case Keys.U:
+				case Keys.V:
+				case Keys.W:
+				case Keys.X:
+				case Keys.Y:
+				case Keys.Z:
+				case Keys.NumPad0:
+				case Keys.NumPad1:
+				case Keys.NumPad2:
+				case Keys.NumPad3:
+				case Keys.NumPad4:
+				case Keys.NumPad5:
+				case Keys.NumPad6:
+				case Keys.NumPad7:
+				case Keys.NumPad8:
+				case Keys.NumPad9:
+				case Keys.Multiply:
+				case Keys.Add:
+				case Keys.Separator:
+				case Keys.Subtract:
+				case Keys.Decimal:
+				case Keys.Divide:
+				case Keys.Oem1:
+				case Keys.Oemplus:
+				case Keys.Oemcomma:
+				case Keys.OemMinus:
+				case Keys.OemPeriod:
+				case Keys.Oem2:
+				case Keys.Oem3:
+				case Keys.Oem4:
+				case Keys.Oem5:
+				case Keys.Oem6:
+				case Keys.Oem7:
+				case Keys.Oem8:
+				case Keys.OemBackslash:
+					return true;
+				default:
+					return false;
+			}
+		}
 
-		public static bool IsRemove(this Keys thisValue) { return KEYS_REMOVE.Contains(thisValue); }
+		public static bool IsRemove(this Keys thisValue)
+		{
+			switch (thisValue)
+			{
+				case Keys.Space:
+				case Keys.Delete:
+				case Keys.EraseEof:
+				case Keys.OemClear:
+					return true;
+				default:
+					return false;
+			}
+		}
 
 		public static bool IsBackspace(this Keys thisValue) { return thisValue == Keys.Back; }
 

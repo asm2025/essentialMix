@@ -11,8 +11,6 @@ namespace asm.Web.Mvc.Helpers
 {
 	public static class ControllerHelper
 	{
-		private static readonly Type __controllerType = typeof(Controller);
-
 		[NotNull]
 		public static T CreateController<T>(RouteData routeData = null)
 			where T : Controller, new()
@@ -23,7 +21,7 @@ namespace asm.Web.Mvc.Helpers
 		[NotNull]
 		public static Controller CreateController([NotNull] Type type, RouteData routeData = null)
 		{
-			if (!__controllerType.IsAssignableFrom(type)) throw new TypeAccessException($"Type '{type}' is not a '{__controllerType}'.");
+			if (!typeof(Controller).IsAssignableFrom(type)) throw new TypeAccessException($"Type '{type}' is not a Controller.");
 			
 			Controller controller = (Controller)Activator.CreateInstance(type);
 			routeData ??= new RouteData();

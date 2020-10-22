@@ -10,15 +10,13 @@ namespace asm.Web.Mvc.Helpers
 {
 	public static class AreaHelper
 	{
-		private static readonly Type __areaRegistrationType = typeof(AreaRegistration);
-
 		public static IEnumerable<AreaRegistration> GetAllAreas()
 		{
 			ISet<string> names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
 			foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
 			{
-				foreach (Type type in assembly.GetTypes().Where(e => __areaRegistrationType.IsAssignableFrom(e)))
+				foreach (Type type in assembly.GetTypes().Where(e => typeof(AreaRegistration).IsAssignableFrom(e)))
 				{
 					if (string.IsNullOrEmpty(type.FullName) || !names.Add(type.FullName)) continue;
 					yield return (AreaRegistration)Activator.CreateInstance(type);

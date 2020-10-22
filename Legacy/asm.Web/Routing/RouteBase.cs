@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web.Routing;
 using asm.Extensions;
 using asm.Helpers;
@@ -19,21 +20,21 @@ namespace asm.Web.Routing
 	{
 		private const string ROUTE_MAP = @"(?s)(?<spaces>\s*)(?<item>\w+\.MapRoute\s*\(\s*(?:(?:name:\s*)?(?<name>[^,]+?))(?:\s*,\s*(?:(?:url:\s*)?(?<url>""{0}"")))(?:\s*,\s*(?:(?:defaults:\s*)?(?:(?:new\s*(?<defaults>\{{.*?\}}))|null))(?:\s*,\s*(?:(?:constraints:\s*)?(?:(?:new\s*(?<constraints>\{{.*?\}}))|null))(?:\s*,\s*(?:(?:namespaces:\s*)?(?:(?:new\s*\[\]\s*\{{(?<namespaces>\s*"".+?""(?:\s*,\s*"".+?"")*\s*)\}})|null)))?)?)?\s*\)[^;]*?;)";
 
-		private static readonly Regex ROUTE_IGNORE = new Regex(@"(?s)(?<spaces>\s*)(?<item>\w+\.IgnoreRoute\s*\(\s*""(?<url>[^/]+?(?:/(?:[^/]+?))*)""(?:\s*,\s*(?:(?:constraints:\s*)?(?:(?:new\s*(?<constraints>\{.*?\}))|null)))?\s*\)[^;]*?;)", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex ROUTE_ANY = new Regex(string.Format(ROUTE_MAP, "[^/]+?(?:/(?:[^/]+?))*"), RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex ROUTE_DEFAULT = new Regex(string.Format(ROUTE_MAP, @"{[\w0-9]+?}(?:/(?:\{[\w0-9]+?}))*"), RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex IS_ROUTE_VAR = new Regex(@"\A\{[\w0-9]+?\}\z", RegexHelper.OPTIONS_I);
-		private static readonly Regex ROUTE_VAR_ASSIGNMENT = new Regex(@"\s*=\s*", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-		private static readonly Regex ROUTE_VAR_STRING = new Regex(@"(?<var>\w+\s*:\s*)(?<value>[^\d""]+?)(?<ter>[,\s])", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __route_Ignore = new Regex(@"(?s)(?<spaces>\s*)(?<item>\w+\.IgnoreRoute\s*\(\s*""(?<url>[^/]+?(?:/(?:[^/]+?))*)""(?:\s*,\s*(?:(?:constraints:\s*)?(?:(?:new\s*(?<constraints>\{.*?\}))|null)))?\s*\)[^;]*?;)", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __route_Any = new Regex(string.Format(ROUTE_MAP, "[^/]+?(?:/(?:[^/]+?))*"), RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __route_Default = new Regex(string.Format(ROUTE_MAP, @"{[\w0-9]+?}(?:/(?:\{[\w0-9]+?}))*"), RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __is_Route_Var = new Regex(@"\A\{[\w0-9]+?\}\z", RegexHelper.OPTIONS_I);
+		private static readonly Regex __route_Var_Assignment = new Regex(@"\s*=\s*", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+		private static readonly Regex __route_Var_String = new Regex(@"(?<var>\w+\s*:\s*)(?<value>[^\d""]+?)(?<ter>[,\s])", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
 
-		private static readonly string[] SPECIAL_CASES =
+		private static readonly string[] __special_Cases =
 		{
 			"{controller}/{id}",
 			"{action}/{id}",
 			"{id}"
 		};
 
-		private static readonly Type IGNORE_ROUTE_INTERNAL;
+		private static readonly Lazy<Type> __ignore_Route_Internal = new Lazy<Type>(() => System.Type.GetType("global::System.Web.Routing.RouteCollection+IgnoreRouteInternal,global::System.Web"), LazyThreadSafetyMode.PublicationOnly);
 
 		private string _url;
 		private object _constraints;
@@ -42,8 +43,6 @@ namespace asm.Web.Routing
 		private RouteTypeEnum _type = RouteTypeEnum.Route;
 		private IRouteHandler _routeHandlerInternal;
 		private bool _hasFileHandler;
-
-		static RouteBase() { IGNORE_ROUTE_INTERNAL = System.Type.GetType("global::System.Web.Routing.RouteCollection+IgnoreRouteInternal,global::System.Web"); }
 
 		protected RouteBase([NotNull] string url) { Url = url; }
 
@@ -182,16 +181,16 @@ namespace asm.Web.Routing
 			int xprec = 0, yprec = 0, awd = 1;
 			string xurl = Url, yurl = other.Url;
 
-			for (int i = 0; i < SPECIAL_CASES.Length; i++, awd = (int)Math.Pow(2, i + 1))
+			for (int i = 0; i < __special_Cases.Length; i++, awd = (int)Math.Pow(2, i + 1))
 			{
-				string specialCase = SPECIAL_CASES[i];
+				string specialCase = __special_Cases[i];
 				if (xurl.IsSame(specialCase)) xprec += awd;
 				if (yurl.IsSame(specialCase)) yprec += awd;
 			}
 
 			if (xprec > 0 || yprec > 0)
 			{
-				int n = SPECIAL_CASES.Length;
+				int n = __special_Cases.Length;
 				awd = (int)Math.Pow(2, n + 1);
 				if (xprec > 0 && ConstraintsCount > 0) xprec += awd;
 				if (yprec > 0 && other.ConstraintsCount > 0) yprec += awd;
@@ -324,7 +323,7 @@ namespace asm.Web.Routing
 		[NotNull]
 		public static IEnumerable<RouteBase> ParseRoutes(string value) { return ParseRoutesInternal(value).Select(e => e.Item1); }
 
-		public static bool IsMvcIgnoreRoute(System.Web.Routing.RouteBase routeBase) { return routeBase != null && routeBase.GetType() == IGNORE_ROUTE_INTERNAL; }
+		public static bool IsMvcIgnoreRoute(System.Web.Routing.RouteBase routeBase) { return routeBase != null && routeBase.GetType() == __ignore_Route_Internal.Value; }
 
 		public static bool IsMvcPageRoute(System.Web.Routing.RouteBase routeBase) { return IsMvcPageRoute((routeBase as System.Web.Routing.Route)?.RouteHandler); }
 
@@ -335,7 +334,7 @@ namespace asm.Web.Routing
 			if (string.IsNullOrEmpty(value)) yield break;
 
 			HashSet<string> routes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-			Match match = ROUTE_IGNORE.Match(value);
+			Match match = __route_Ignore.Match(value);
 
 			while (match.Success)
 			{
@@ -343,7 +342,7 @@ namespace asm.Web.Routing
 				match = match.NextMatch();
 			}
 
-			match = ROUTE_DEFAULT.Match(value);
+			match = __route_Default.Match(value);
 
 			while (match.Success)
 			{
@@ -351,7 +350,7 @@ namespace asm.Web.Routing
 				match = match.NextMatch();
 			}
 
-			match = ROUTE_ANY.Match(value);
+			match = __route_Any.Match(value);
 
 			while (match.Success)
 			{
@@ -387,7 +386,7 @@ namespace asm.Web.Routing
 			foreach (string segment in segments)
 			{
 				if (string.IsNullOrEmpty(segment)) return null;
-				if (IS_ROUTE_VAR.IsMatch(segment))
+				if (__is_Route_Var.IsMatch(segment))
 				{
 					route.Dynamic++;
 					dynamicFound = true;
@@ -411,7 +410,7 @@ namespace asm.Web.Routing
 				
 				if (!string.IsNullOrEmpty(tmp))
 				{
-					tmp = ROUTE_VAR_STRING.Replace(ROUTE_VAR_ASSIGNMENT.Replace(tmp, ": "), @"${var}""${value}""${ter}");
+					tmp = __route_Var_String.Replace(__route_Var_Assignment.Replace(tmp, ": "), @"${var}""${value}""${ter}");
 
 					if (!string.IsNullOrEmpty(tmp))
 					{
@@ -424,7 +423,7 @@ namespace asm.Web.Routing
 
 				if (!string.IsNullOrEmpty(tmp))
 				{
-					tmp = ROUTE_VAR_STRING.Replace(ROUTE_VAR_ASSIGNMENT.Replace(tmp, ": "), @"${var}""${value}""${ter}");
+					tmp = __route_Var_String.Replace(__route_Var_Assignment.Replace(tmp, ": "), @"${var}""${value}""${ter}");
 
 					if (!string.IsNullOrEmpty(tmp))
 					{
@@ -450,14 +449,14 @@ namespace asm.Web.Routing
 			switch (type)
 			{
 				case RouteTypeEnum.Ignore:
-					match = ROUTE_IGNORE.Match(value);
+					match = __route_Ignore.Match(value);
 					break;
 				case RouteTypeEnum.Dynamic:
-					match = ROUTE_DEFAULT.Match(value);
+					match = __route_Default.Match(value);
 					break;
 				default:
 					type = RouteTypeEnum.Route;
-					match = ROUTE_ANY.Match(value);
+					match = __route_Any.Match(value);
 					break;
 			}
 

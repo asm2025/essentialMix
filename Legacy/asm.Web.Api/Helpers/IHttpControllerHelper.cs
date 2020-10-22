@@ -6,8 +6,6 @@ namespace asm.Web.Api.Helpers
 {
 	public static class IHttpControllerHelper
 	{
-		private static readonly Type __controllerType = typeof(IHttpController);
-
 		[NotNull]
 		public static string ControllerName<T>()
 			where T : IHttpController
@@ -18,7 +16,7 @@ namespace asm.Web.Api.Helpers
 		[NotNull]
 		public static string ControllerName([NotNull] Type type)
 		{
-			if (!__controllerType.IsAssignableFrom(type)) throw new TypeAccessException($"Type '{type}' is not a '{__controllerType}'.");
+			if (!typeof(IHttpController).IsAssignableFrom(type)) throw new TypeAccessException($"Type '{type}' is not assignable from IHttpController.");
 			return type.Name.Replace("Controller", string.Empty);
 		}
 	}

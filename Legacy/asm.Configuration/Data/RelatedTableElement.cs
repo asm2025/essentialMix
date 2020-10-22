@@ -1,4 +1,6 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
+using System.Threading;
 using asm.Data;
 using asm.Extensions;
 
@@ -6,20 +8,15 @@ namespace asm.Configuration.Data
 {
 	public class RelatedTableElement : TableElement
 	{
-		private static readonly ConfigurationProperty FOREIGN_KEY_PROPERTY;
-		private static readonly ConfigurationProperty RELATED_FIELD_PROPERTY;
-		private static readonly ConfigurationProperty TYPE_PROPERTY;
+		private static readonly Lazy<ConfigurationProperty> __foreign_Key_Property = new Lazy<ConfigurationProperty>(() => new ConfigurationProperty("foreignKey", typeof(string), null, ConfigurationPropertyOptions.IsRequired), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly Lazy<ConfigurationProperty> __related_Field_Property = new Lazy<ConfigurationProperty>(() => new ConfigurationProperty("relatedField", typeof(string), null), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly Lazy<ConfigurationProperty> __type_Property = new Lazy<ConfigurationProperty>(() => new ConfigurationProperty("type", typeof(RelatedTableTypeEnum), null, ConfigurationPropertyOptions.IsRequired), LazyThreadSafetyMode.PublicationOnly);
 		
 		static RelatedTableElement()
 		{
-			FOREIGN_KEY_PROPERTY = new ConfigurationProperty("foreignKey", typeof(string), null, ConfigurationPropertyOptions.IsRequired);
-			BaseProperties.Add(FOREIGN_KEY_PROPERTY);
-
-			RELATED_FIELD_PROPERTY = new ConfigurationProperty("relatedField", typeof(string), null);
-			BaseProperties.Add(RELATED_FIELD_PROPERTY);
-
-			TYPE_PROPERTY = new ConfigurationProperty("type", typeof(RelatedTableTypeEnum), null, ConfigurationPropertyOptions.IsRequired);
-			BaseProperties.Add(TYPE_PROPERTY);
+			BaseProperties.Add(__foreign_Key_Property.Value);
+			BaseProperties.Add(__related_Field_Property.Value);
+			BaseProperties.Add(__type_Property.Value);
 		}
 
 		public RelatedTableElement()
@@ -27,12 +24,12 @@ namespace asm.Configuration.Data
 		}
 
 		[ConfigurationProperty("foreignKey", IsRequired = true)]
-		public string ForeignKey => (string)base[FOREIGN_KEY_PROPERTY];
+		public string ForeignKey => (string)base[__foreign_Key_Property.Value];
 
 		[ConfigurationProperty("relatedField")]
-		public string RelatedField => ((string)base[RELATED_FIELD_PROPERTY]).IfNullOrEmpty(PrimaryKey?.Name);
+		public string RelatedField => ((string)base[__related_Field_Property.Value]).IfNullOrEmpty(PrimaryKey?.Name);
 
 		[ConfigurationProperty("type", IsRequired = true)]
-		public RelatedTableTypeEnum Type => (RelatedTableTypeEnum)base[TYPE_PROPERTY];
+		public RelatedTableTypeEnum Type => (RelatedTableTypeEnum)base[__type_Property.Value];
 	}
 }

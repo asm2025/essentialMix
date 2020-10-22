@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Management;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,20 +18,17 @@ namespace asm.Extensions
 {
 	public static class ProcessExtension
 	{
-		private static readonly PropertyInfo ASSOCIATED_PROPERTY;
+		private static readonly Lazy<PropertyInfo> __associated_Property = new Lazy<PropertyInfo>(() => typeof(Process).GetProperty("Associated", Constants.BF_NON_PUBLIC_INSTANCE, typeof(bool)), LazyThreadSafetyMode.PublicationOnly);
 
-		static ProcessExtension()
-		{
-			ASSOCIATED_PROPERTY = typeof(Process).GetProperty("Associated", Constants.BF_NON_PUBLIC_INSTANCE, typeof(bool));
-		}
-
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsAssociated(this Process thisValue)
 		{
 			if (thisValue.IsDisposed()) return false;
 			thisValue.Refresh();
-			return (bool)ASSOCIATED_PROPERTY.GetValue(thisValue);
+			return (bool)__associated_Property.Value.GetValue(thisValue);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsAwaitable(this Process thisValue) { return IsAssociated(thisValue) && !thisValue.HasExited; }
 
 		public static bool IsRunning(this Process thisValue)
@@ -159,6 +157,7 @@ namespace asm.Extensions
 			return SpinWait.SpinUntil(predicate, millisecondsTimeout);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsResponding([NotNull] this Process thisValue)
 		{
 			try
@@ -212,11 +211,24 @@ namespace asm.Extensions
 			return SystemInfo.Get(request).FirstOrDefault(p => p != null && predicate(p));
 		}
 
-		public static bool KillChildren([NotNull] this Process thisValue) { return GetChildren(thisValue).All(p => p.Die()); }
+		public static bool KillChildren([NotNull] this Process thisValue)
+		{
+			foreach (Process p in GetChildren(thisValue))
+			{
+				if (!p.Die()) return false;
+			}
+
+			return true;
+		}
 
 		public static bool KillChildren([NotNull] this Process thisValue, [NotNull] Predicate<Process> predicate)
 		{
-			return GetChildren(thisValue, predicate).All(p => p.Die());
+			foreach (Process p in GetChildren(thisValue, predicate))
+			{
+				if (!p.Die()) return false;
+			}
+
+			return true;
 		}
 
 		[SecurityPermission(SecurityAction.LinkDemand)]
@@ -250,6 +262,7 @@ namespace asm.Extensions
 				Die(process);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static FileVersionInfo Version([NotNull] this Process thisValue)
 		{
 			return IsAwaitable(thisValue)

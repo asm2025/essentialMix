@@ -1,15 +1,16 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
+using System.Threading;
 
 namespace asm.Configuration.Data
 {
 	public class HeaderTableElement : TableElement
 	{
-		private static readonly ConfigurationProperty RELATED_TABLES_PROPERTY;
+		private static readonly Lazy<ConfigurationProperty> __related_Tables_Property = new Lazy<ConfigurationProperty>(() => new ConfigurationProperty(string.Empty, typeof(RelatedTableSettingsCollection), null, ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsDefaultCollection), LazyThreadSafetyMode.PublicationOnly);
 
 		static HeaderTableElement()
 		{
-			RELATED_TABLES_PROPERTY = new ConfigurationProperty(string.Empty, typeof(RelatedTableSettingsCollection), null, ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsDefaultCollection);
-			BaseProperties.Add(RELATED_TABLES_PROPERTY);
+			BaseProperties.Add(__related_Tables_Property.Value);
 		}
 
 		public HeaderTableElement()
@@ -17,6 +18,6 @@ namespace asm.Configuration.Data
 		}
 
 		[ConfigurationProperty("", IsRequired = true, IsDefaultCollection = true)]
-		public RelatedTableSettingsCollection RelatedTables => (RelatedTableSettingsCollection)base[RELATED_TABLES_PROPERTY];
+		public RelatedTableSettingsCollection RelatedTables => (RelatedTableSettingsCollection)base[__related_Tables_Property.Value];
 	}
 }

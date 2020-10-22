@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using asm.Helpers;
 using JetBrains.Annotations;
@@ -8,6 +9,7 @@ namespace asm.Extensions
 {
 	public static class WaitHandleExtension
 	{
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsAwaitable(this WaitHandle thisValue) { return thisValue != null && thisValue.SafeWaitHandle.IsAwaitable(); }
 
 		[NotNull]

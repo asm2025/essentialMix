@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using asm.Helpers;
@@ -12,25 +14,23 @@ namespace asm.Extensions
 {
 	public static class CancellationTokenExtension
 	{
-		private static readonly FieldInfo SOURCE_FIELD;
+		private static readonly Lazy<FieldInfo> __source_Field = new Lazy<FieldInfo>(() => typeof(CancellationToken).GetField("m_source", Constants.BF_NON_PUBLIC_INSTANCE), LazyThreadSafetyMode.PublicationOnly);
 
-		static CancellationTokenExtension()
-		{
-			SOURCE_FIELD = typeof(CancellationToken).GetField("m_source", Constants.BF_NON_PUBLIC_INSTANCE);
-		}
-
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsAwaitable(this CancellationToken thisValue) { return thisValue.CanBeCanceled; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsAwaitable(this CancellationToken? thisValue) { return thisValue != null && IsAwaitable(thisValue.Value); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsCancellationRequested(this CancellationToken? thisValue) { return thisValue != null && thisValue.Value.IsCancellationRequested; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static CancellationTokenSource GetSource(this CancellationToken thisValue, CancellationTokenSource defaultCancellationTokenSource = null)
 		{
-			if (SOURCE_FIELD == null) return defaultCancellationTokenSource;
-
+			if (__source_Field == null) return defaultCancellationTokenSource;
 			WaitHandle _ = thisValue.WaitHandle;
-			return (CancellationTokenSource)SOURCE_FIELD.GetValue(thisValue) ?? defaultCancellationTokenSource;
+			return (CancellationTokenSource)__source_Field.Value.GetValue(thisValue) ?? defaultCancellationTokenSource;
 		}
 
 		public static CancellationTokenSource GetSource([NotNull] this IEnumerable<CancellationToken> thisValue, CancellationTokenSource defaultCancellationTokenSource = null)

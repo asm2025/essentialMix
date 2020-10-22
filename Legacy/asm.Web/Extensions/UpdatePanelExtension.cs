@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Web.UI;
 using JetBrains.Annotations;
 
@@ -9,13 +10,6 @@ namespace asm.Extensions
 {
 	public static class UpdatePanelExtension
 	{
-		private static readonly ISet<Type> SUPPORTED_TYPES = new HashSet<Type>
-															{
-																typeof(INamingContainer),
-																typeof(IPostBackDataHandler),
-																typeof(IPostBackEventHandler)
-															};
-
 		public static void ChildrenAsTriggers([NotNull] this UpdatePanel thisValue, bool includeChildren = true)
 		{
 			if (thisValue.ChildrenAsTriggers)
@@ -116,12 +110,18 @@ namespace asm.Extensions
 
 		private static void ControlAsTriggerInternal([NotNull] UpdatePanel updatePanel, [NotNull] Control control, bool includeChildren = false)
 		{
-			if (updatePanel.NamingContainer != control.NamingContainer || HasTrigger(updatePanel, control) || !control.GetType().ImplementsAny(SUPPORTED_TYPES)) return;
+			if (updatePanel.NamingContainer != control.NamingContainer || HasTrigger(updatePanel, control) || !IsSupportedPanelType(control.GetType())) return;
 			updatePanel.Triggers.Add(new AsyncPostBackTrigger { ControlID = control.UniqueID });
 			if (!includeChildren || control.Controls.Count == 0) return;
 
 			foreach (Control ctl in control.Controls)
 				ControlAsTriggerInternal(updatePanel, ctl, true);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		private static bool IsSupportedPanelType(Type type)
+		{
+			return type != null && (type.IsAssignableFrom(typeof(INamingContainer)) || type.IsAssignableFrom(typeof(IPostBackDataHandler)) || type.IsAssignableFrom(typeof(IPostBackEventHandler)));
 		}
 	}
 }
