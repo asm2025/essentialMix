@@ -8,7 +8,6 @@ namespace asm.Caching
 {
 	public sealed class CacheKeyBuilder
 	{
-		private static readonly string NULL_STRING = Guid.NewGuid().ToString();
 		private readonly StringBuilder _builder = new StringBuilder();
 
 		/// <summary>
@@ -24,7 +23,7 @@ namespace asm.Caching
 			switch (value)
 			{
 				case null:
-					_builder.Append(NULL_STRING);
+					_builder.Append(Guid.NewGuid());
 					break;
 				case DateTime dateTimeValue:
 					_builder.Append(dateTimeValue.Ticks);

@@ -87,8 +87,16 @@ namespace asm.Helpers
 		[NotNull]
 		public static IReadOnlyCollection<string> GetDateTimeFormats(string addFormat)
 		{
-			if (!string.IsNullOrEmpty(addFormat)) __dateTimeFormats.Add(addFormat);
-			return __dateTimeFormats.AsReadOnly();
+			IReadOnlyCollection<string> collection;
+
+			lock(__dateTimeFormats)
+			{
+				if (!string.IsNullOrEmpty(addFormat))
+					__dateTimeFormats.Add(addFormat);
+				collection = __dateTimeFormats.AsReadOnly();
+			}
+
+			return collection;
 		}
 
 		public static char[] GetDefaultListSeparators()

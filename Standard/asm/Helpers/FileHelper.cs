@@ -15,9 +15,7 @@ namespace asm.Helpers
 	public static class FileHelper
 	{
 		private static readonly Regex RESERVED_NAMES = new Regex(@"^(?:PRN|AUX|CLOCK\$|NUL|CON|COM\d{1,3}|LPT\d{1,3})$", RegexHelper.OPTIONS_I);
-		private static readonly char[] INVALID_FILE_NAME_CHAR = Path.GetInvalidFileNameChars();
 		private static readonly Regex VALID_NAME = new Regex(@"^(?:\.*?(?!\.))[^\x00-\x1f\?*:\x22;|/<>]+(?<![\s.])$", RegexHelper.OPTIONS_I);
-		private static readonly char[] INVALID_PATH_CHAR = Path.GetInvalidPathChars();
 		private static readonly Regex VALID_PATH = new Regex(@"^(?:[a-z]:\\)?(?:(?:\.*?(?!\.))[^\x00-\x1f\?*:\x22;|/<>]+(?<![\s.])\\?)+$", RegexHelper.OPTIONS_I);
 
 		public static int RemoveLines([NotNull] string fileName, int count, Encoding encoding = null, int startAtLine = 0)
@@ -185,7 +183,7 @@ namespace asm.Helpers
 		{
 			if (string.IsNullOrWhiteSpace(value)) return null;
 
-			char[] invalid = includeChars?.Union(INVALID_FILE_NAME_CHAR).ToArray() ?? INVALID_FILE_NAME_CHAR;
+			char[] invalid = includeChars?.Union(Path.GetInvalidFileNameChars()).ToArray() ?? Path.GetInvalidFileNameChars();
 			StringBuilder builder = new StringBuilder(value.Length);
 			
 			foreach (char c in value)
@@ -202,7 +200,7 @@ namespace asm.Helpers
 		{
 			if (string.IsNullOrWhiteSpace(value) || !VALID_NAME.IsMatch(value) || RESERVED_NAMES.IsMatch(value)) return false;
 
-			char[] invalid = moreInvalidChars.IsNullOrEmpty() ? INVALID_FILE_NAME_CHAR : moreInvalidChars.Union(INVALID_FILE_NAME_CHAR).ToArray();
+			char[] invalid = moreInvalidChars.IsNullOrEmpty() ? Path.GetInvalidFileNameChars() : moreInvalidChars.Union(Path.GetInvalidFileNameChars()).ToArray();
 			if (value.ContainsAny(invalid)) return false;
 
 			FileInfo fi;
@@ -219,13 +217,13 @@ namespace asm.Helpers
 			return fi != null;
 		}
 
-		public static bool IsValidNameChar(char value) { return !INVALID_FILE_NAME_CHAR.Contains(value); }
+		public static bool IsValidNameChar(char value) { return !Path.GetInvalidFileNameChars().Contains(value); }
 
 		public static bool IsValidPath(string value, params char[] moreInvalidChars)
 		{
 			if (string.IsNullOrWhiteSpace(value) || !VALID_PATH.IsMatch(value) || RESERVED_NAMES.IsMatch(value)) return false;
 
-			char[] invalid = moreInvalidChars.IsNullOrEmpty() ? INVALID_PATH_CHAR : moreInvalidChars.Union(INVALID_PATH_CHAR).ToArray();
+			char[] invalid = moreInvalidChars.IsNullOrEmpty() ? Path.GetInvalidPathChars() : moreInvalidChars.Union(Path.GetInvalidPathChars()).ToArray();
 			return !value.ContainsAny(invalid);
 		}
 
@@ -521,7 +519,7 @@ namespace asm.Helpers
 		{
 			if (files.IsNullOrEmpty()) return;
 			extension = extension.ToNullIfEmpty() ?? throw new ArgumentNullException(nameof(extension));
-			if (extension.ContainsAny(INVALID_FILE_NAME_CHAR)) throw new InvalidOperationException("Extension contains invalid characters.");
+			if (extension.ContainsAny(Path.GetInvalidFileNameChars())) throw new InvalidOperationException("Extension contains invalid characters.");
 			if (!extension.StartsWith('.')) extension = extension.Insert(0, ".");
 
 			foreach (string file in files)

@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
+using System.Threading;
 using asm.Extensions;
 using JetBrains.Annotations;
 using asm.IO;
@@ -22,28 +23,12 @@ namespace asm.Helpers
 		private static readonly Regex __isIPv4Simple = new Regex(@"^\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}-(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b$", RegexHelper.OPTIONS_I);
 		private static readonly Regex __isIPv4CIDR = new Regex(@"^\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}/\d{1,2}\b$", RegexHelper.OPTIONS_I);
 
-		private static readonly NetworkInterfaceType[] DEFAULT_NETWORK_INTERFACE_TYPE =
+		private static readonly Lazy<NetworkInterfaceType[]> __default_network_interface_type = new Lazy<NetworkInterfaceType[]>(() => new []
 		{
 			NetworkInterfaceType.Ethernet,
 			NetworkInterfaceType.Wireless80211,
 			NetworkInterfaceType.GenericModem
-		};
-
-		private static readonly HashSet<DuplicateAddressDetectionState> BAD_DETECTION_STATE = new HashSet<DuplicateAddressDetectionState>
-		{
-			DuplicateAddressDetectionState.Invalid,
-			DuplicateAddressDetectionState.Duplicate
-		};
-
-		private static readonly HashSet<IPAddress> BAD_IP_ADDRESSES = new HashSet<IPAddress>
-		{
-			IPAddress.Any,
-			IPAddress.Loopback,
-			IPAddress.Broadcast,
-			IPAddress.IPv6Any,
-			IPAddress.IPv6Loopback,
-			IPAddress.IPv6None
-		};
+		}, LazyThreadSafetyMode.PublicationOnly);
 
 		public static IPAddress ExtractIP(string value)
 		{
@@ -188,45 +173,49 @@ namespace asm.Helpers
 
 		public static IPAddress GetLocalIP(params NetworkInterfaceType[] types)
 		{
-			if (types.IsNullOrEmpty()) types = DEFAULT_NETWORK_INTERFACE_TYPE;
+			if (types.IsNullOrEmpty()) types = __default_network_interface_type.Value;
 			return GetLocalIP(nit => types.Contains(nit), true)?.FirstOrDefault();
 		}
 
-		public static IPAddress[] GetLocalIP([NotNull] Predicate<NetworkInterfaceType> filter, bool breakOnFound = false)
+		public static IReadOnlyList<IPAddress> GetLocalIP([NotNull] Predicate<NetworkInterfaceType> filter, bool breakOnFound = false)
 		{
 			try
 			{
-				bool found = false;
 				List<IPAddress> list = new List<IPAddress>();
 
 				foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
 				{
 					if (ni.OperationalStatus != OperationalStatus.Up) continue;
 					if (!filter(ni.NetworkInterfaceType)) continue;
-
-					IPInterfaceProperties properties = ni.GetIPProperties();
-					if (!properties.IsDnsEnabled || properties.UnicastAddresses.Count == 0) continue;
-
-					foreach (UnicastIPAddressInformation unicastAddress in properties.UnicastAddresses.Where(
-						ua =>
-							ua.Address.AddressFamily == AddressFamily.InterNetwork &&
-							ua.IsDnsEligible &&
-							!BAD_IP_ADDRESSES.Contains(ua.Address) &&
-							!BAD_DETECTION_STATE.Contains(ua.DuplicateAddressDetectionState)))
-					{
-						list.Add(unicastAddress.Address);
-						found = true;
-						if (breakOnFound) break;
-					}
-
-					if (breakOnFound && found) break;
+					GetUnicastAddresses(ni, list, breakOnFound);
+					if (breakOnFound && list.Count > 0) return list;
 				}
 
-				return list.ToArray();
+				return list;
 			}
 			catch
 			{
 				return null;
+			}
+
+			static void GetUnicastAddresses(NetworkInterface ni, List<IPAddress> list, bool breakOnFound)
+			{
+				IPInterfaceProperties properties = ni.GetIPProperties();
+				if (!properties.IsDnsEnabled || properties.UnicastAddresses.Count == 0) return;
+
+				foreach (UnicastIPAddressInformation address in properties.UnicastAddresses)
+				{
+					if (address.Address.AddressFamily != AddressFamily.InterNetwork || !address.IsDnsEligible) continue;
+					if (address.Address.Equals(IPAddress.Any) ||
+						address.Address.Equals(IPAddress.Loopback) ||
+						address.Address.Equals(IPAddress.IPv6Any) ||
+						address.Address.Equals(IPAddress.IPv6Loopback) ||
+						address.Address.Equals(IPAddress.IPv6None)) continue;
+					if (address.DuplicateAddressDetectionState == DuplicateAddressDetectionState.Invalid ||
+						address.DuplicateAddressDetectionState == DuplicateAddressDetectionState.Duplicate) continue;
+					list.Add(address.Address);
+					if (breakOnFound) return;
+				}
 			}
 		}
 

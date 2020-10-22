@@ -11,8 +11,6 @@ namespace asm.Helpers
 {
 	public static class DirectoryHelper
 	{
-		private static readonly object __deleteFilesLock = new object();
-
 		[SecuritySafeCritical]
 		public static bool Ensure(string path)
 		{
@@ -74,30 +72,27 @@ namespace asm.Helpers
 			path = PathHelper.Trim(path) ?? throw new ArgumentNullException(nameof(path));
 			if (!Directory.Exists(path)) return false;
 
-			lock (__deleteFilesLock)
+			try
 			{
-				try
-				{
-					DirectoryInfo dir = new DirectoryInfo(path);
+				DirectoryInfo dir = new DirectoryInfo(path);
 
-					foreach (FileInfo file in dir.EnumerateFiles(filter, SearchOption.TopDirectoryOnly))
+				foreach (FileInfo file in dir.EnumerateFiles(filter, SearchOption.TopDirectoryOnly))
+				{
+					try
 					{
-						try
-						{
-							file.Delete();
-						}
-						catch
-						{
-							return false;
-						}
+						file.Delete();
 					}
+					catch
+					{
+						return false;
+					}
+				}
 
-					return true;
-				}
-				catch
-				{
-					return false;
-				}
+				return true;
+			}
+			catch
+			{
+				return false;
 			}
 		}
 

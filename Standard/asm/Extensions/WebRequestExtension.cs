@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -18,27 +19,7 @@ namespace asm.Extensions
 {
 	public static class WebRequestExtension
 	{
-		private static readonly IDictionary<string, PropertyInfo> __headerSet = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
-
-		static WebRequestExtension()
-		{
-			Type type = typeof(HttpWebRequest);
-			PropertyInfo property = type.GetProperty("Accept", Constants.BF_PUBLIC_INSTANCE);
-			if (property != null) __headerSet.Add(property.Name, property);
-			property = type.GetProperty("Connection", Constants.BF_PUBLIC_INSTANCE);
-			if (property != null) __headerSet.Add(property.Name, property);
-			property = type.GetProperty("Expect", Constants.BF_PUBLIC_INSTANCE);
-			if (property != null) __headerSet.Add(property.Name, property);
-			property = type.GetProperty("Referer", Constants.BF_PUBLIC_INSTANCE);
-			if (property != null) __headerSet.Add(property.Name, property);
-			property = type.GetProperty("Host", Constants.BF_PUBLIC_INSTANCE);
-			if (property != null) __headerSet.Add(property.Name, property);
-
-			property = type.GetProperty("ContentType", Constants.BF_PUBLIC_INSTANCE);
-			if (property != null) __headerSet.Add("Content-Type", property);
-			property = type.GetProperty("UserAgent", Constants.BF_PUBLIC_INSTANCE);
-			if (property != null) __headerSet.Add("User-Agent", property);
-		}
+		private static readonly ConcurrentDictionary<string, PropertyInfo> __headerSet = new ConcurrentDictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
 
 		public static bool WriteMultipart([NotNull] this WebRequest thisValue, string body, Action<Exception> onError = null, Encoding encoding = null)
 		{
@@ -485,9 +466,14 @@ namespace asm.Extensions
 				return;
 			}
 
+			Type type = typeof(HttpWebRequest);
+
 			foreach (string key in collection.Keys)
 			{
-				if (!__headerSet.TryGetValue(key, out PropertyInfo property))
+				string normalizedKey = key.ToPascalCase();
+				PropertyInfo property = __headerSet.GetOrAdd(normalizedKey, k => type.GetProperty(k, Constants.BF_PUBLIC_INSTANCE));
+				
+				if (property == null)
 				{
 					headers[key] = collection[key];
 					continue;
@@ -495,7 +481,15 @@ namespace asm.Extensions
 
 				string value = collection[key];
 				if (string.IsNullOrEmpty(value)) continue;
-				property.SetValue(httpWebRequest, value);
+
+				try
+				{
+					property.SetValue(httpWebRequest, value);
+				}
+				catch
+				{
+					// ignored
+				}
 			}
 		}
 

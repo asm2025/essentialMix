@@ -10,26 +10,21 @@ namespace asm.Extensions
 {
 	public static class ICustomAttributeProviderExtension
 	{
-		private static readonly Type BASE_TYPE = typeof(Attribute);
-		private static readonly Type DISPLAY_ATTRIBUTE_TYPE = typeof(DisplayAttribute);
-		private static readonly Type DISPLAY_NAME_ATTRIBUTE_TYPE = typeof(DisplayNameAttribute);
-		private static readonly Type DESCRIPTION_ATTRIBUTE_TYPE = typeof(DescriptionAttribute);
-
 		public static string GetDisplayName([NotNull] this ICustomAttributeProvider thisValue, string defaultValue = null)
 		{
-			DisplayAttribute displayAttribute = (DisplayAttribute)GetAttribute(thisValue, DISPLAY_ATTRIBUTE_TYPE);
+			DisplayAttribute displayAttribute = (DisplayAttribute)GetAttribute(thisValue, typeof(DisplayAttribute));
 			string displayName = displayAttribute?.Name;
 			if (displayName != null) return displayName;
 
-			DisplayNameAttribute displayNameAttribute = (DisplayNameAttribute)GetAttribute(thisValue, DISPLAY_NAME_ATTRIBUTE_TYPE);
+			DisplayNameAttribute displayNameAttribute = (DisplayNameAttribute)GetAttribute(thisValue, typeof(DisplayNameAttribute));
 			return displayNameAttribute?.DisplayName ?? defaultValue;
 		}
 
-		public static DisplayAttribute GetDisplay([NotNull] this ICustomAttributeProvider thisValue) { return (DisplayAttribute)GetAttribute(thisValue, DISPLAY_ATTRIBUTE_TYPE); }
+		public static DisplayAttribute GetDisplay([NotNull] this ICustomAttributeProvider thisValue) { return (DisplayAttribute)GetAttribute(thisValue, typeof(DisplayAttribute)); }
 
 		public static string GetDescription([NotNull] this ICustomAttributeProvider thisValue, string defaultValue = null)
 		{
-			DescriptionAttribute attribute = (DescriptionAttribute)GetAttribute(thisValue, DESCRIPTION_ATTRIBUTE_TYPE);
+			DescriptionAttribute attribute = (DescriptionAttribute)GetAttribute(thisValue, typeof(DescriptionAttribute));
 			return attribute?.Description ?? defaultValue;
 		}
 
@@ -65,7 +60,7 @@ namespace asm.Extensions
 		[NotNull]
 		public static IEnumerable<Attribute> GetAttributes([NotNull] this ICustomAttributeProvider thisValue, Type type = null, bool inherit = false)
 		{
-			if (type != null && !type.Is(BASE_TYPE)) throw new InvalidCastException($"The type must be derived from type of {BASE_TYPE.FullName}");
+			if (type != null && !type.Is(typeof(Attribute))) throw new InvalidCastException($"The type must be derived from type of {typeof(Attribute).FullName}");
 
 			object[] attributes = type != null 
 				? thisValue.GetCustomAttributes(type, inherit)

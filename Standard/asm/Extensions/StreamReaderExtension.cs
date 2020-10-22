@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
@@ -10,28 +11,16 @@ namespace asm.Extensions
 	public static class StreamReaderExtension
 	{
 		// The index of the next char to be read from charBuffer
-		private static readonly FieldInfo CHAR_POS;
+		private static readonly Lazy<FieldInfo> _char_pos = new Lazy<FieldInfo>(() => typeof(StreamReader).GetField("charPos", Constants.BF_NON_PUBLIC_INSTANCE | BindingFlags.DeclaredOnly | BindingFlags.GetField), LazyThreadSafetyMode.PublicationOnly);
 		// The number of decoded chars presently used in charBuffer
-		private static readonly FieldInfo CHAR_LEN;
+		private static readonly Lazy<FieldInfo> _char_len = new Lazy<FieldInfo>(() => typeof(StreamReader).GetField("charLen", Constants.BF_NON_PUBLIC_INSTANCE | BindingFlags.DeclaredOnly | BindingFlags.GetField), LazyThreadSafetyMode.PublicationOnly);
 		// The current buffer of decoded characters
-		private static readonly FieldInfo CHAR_BUFFER;
-		private static readonly FieldInfo BYTE_POS;
+		private static readonly Lazy<FieldInfo> _char_buffer = new Lazy<FieldInfo>(() => typeof(StreamReader).GetField("charBuffer", Constants.BF_NON_PUBLIC_INSTANCE | BindingFlags.DeclaredOnly | BindingFlags.GetField), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly Lazy<FieldInfo> _byte_pos = new Lazy<FieldInfo>(() => typeof(StreamReader).GetField("bytePos", Constants.BF_NON_PUBLIC_INSTANCE | BindingFlags.DeclaredOnly | BindingFlags.GetField), LazyThreadSafetyMode.PublicationOnly);
 		// The number of bytes read while advancing reader.BaseStream.Position to (re)fill charBuffer
-		private static readonly FieldInfo BYTE_LEN;
+		private static readonly Lazy<FieldInfo> _byte_len = new Lazy<FieldInfo>(() => typeof(StreamReader).GetField("byteLen", Constants.BF_NON_PUBLIC_INSTANCE | BindingFlags.DeclaredOnly | BindingFlags.GetField), LazyThreadSafetyMode.PublicationOnly);
 		// The current buffer of read bytes (byteBuffer.Length = 1024; this is critical).
-		private static readonly FieldInfo BYTE_BUFFER;
-
-		static StreamReaderExtension()
-		{
-			const BindingFlags BF = Constants.BF_NON_PUBLIC_INSTANCE | BindingFlags.DeclaredOnly | BindingFlags.GetField;
-			Type type = typeof(StreamReader);
-			CHAR_POS = type.GetField("charPos", BF);
-			CHAR_LEN = type.GetField("charLen", BF);
-			CHAR_BUFFER = type.GetField("charBuffer", BF);
-			BYTE_POS = type.GetField("bytePos", BF);
-			BYTE_LEN = type.GetField("byteLen", BF);
-			BYTE_BUFFER = type.GetField("byteBuffer", BF);
-		}
+		private static readonly Lazy<FieldInfo> _byte_buffer = new Lazy<FieldInfo>(() => typeof(StreamReader).GetField("byteBuffer", Constants.BF_NON_PUBLIC_INSTANCE | BindingFlags.DeclaredOnly | BindingFlags.GetField), LazyThreadSafetyMode.PublicationOnly);
 
 		public static int Read([NotNull] this StreamReader thisValue, [NotNull] char[] buffer) { return thisValue.Read(buffer, 0, buffer.Length); }
 
@@ -126,17 +115,17 @@ namespace asm.Extensions
 
 		public static int ReadAllLines([NotNull] this StreamReader thisValue, [NotNull] ISet<string> set) { return ReadLines(thisValue, set, 0); }
 
-		public static int CharPos([NotNull] this StreamReader thisValue) { return (int)CHAR_POS.GetValue(thisValue); }
+		public static int CharPos([NotNull] this StreamReader thisValue) { return (int)_char_pos.Value.GetValue(thisValue); }
 
-		public static int CharLen([NotNull] this StreamReader thisValue) { return (int)CHAR_LEN.GetValue(thisValue); }
+		public static int CharLen([NotNull] this StreamReader thisValue) { return (int)_char_len.Value.GetValue(thisValue); }
 
-		public static char[] CharBuffer([NotNull] this StreamReader thisValue) { return (char[])CHAR_BUFFER.GetValue(thisValue); }
+		public static char[] CharBuffer([NotNull] this StreamReader thisValue) { return (char[])_char_buffer.Value.GetValue(thisValue); }
 
-		public static int BytePos([NotNull] this StreamReader thisValue) { return (int)BYTE_POS.GetValue(thisValue); }
+		public static int BytePos([NotNull] this StreamReader thisValue) { return (int)_byte_pos.Value.GetValue(thisValue); }
 
-		public static int ByteLen([NotNull] this StreamReader thisValue) { return (int)BYTE_LEN.GetValue(thisValue); }
+		public static int ByteLen([NotNull] this StreamReader thisValue) { return (int)_byte_len.Value.GetValue(thisValue); }
 
-		public static byte[] ByteBuffer([NotNull] this StreamReader thisValue) { return (byte[])BYTE_BUFFER.GetValue(thisValue); }
+		public static byte[] ByteBuffer([NotNull] this StreamReader thisValue) { return (byte[])_byte_buffer.Value.GetValue(thisValue); }
 
 		/// <summary>
 		/// Works for UTF8, UTF-16LE, UTF-16BE, UTF-32LE, UTF-32BE, and any single-byte encoding.

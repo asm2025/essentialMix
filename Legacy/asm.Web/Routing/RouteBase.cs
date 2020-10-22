@@ -27,14 +27,14 @@ namespace asm.Web.Routing
 		private static readonly Regex __route_Var_Assignment = new Regex(@"\s*=\s*", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
 		private static readonly Regex __route_Var_String = new Regex(@"(?<var>\w+\s*:\s*)(?<value>[^\d""]+?)(?<ter>[,\s])", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
 
-		private static readonly string[] __special_Cases =
+		private static readonly string[] __specialCases =
 		{
 			"{controller}/{id}",
 			"{action}/{id}",
 			"{id}"
 		};
 
-		private static readonly Lazy<Type> __ignore_Route_Internal = new Lazy<Type>(() => System.Type.GetType("global::System.Web.Routing.RouteCollection+IgnoreRouteInternal,global::System.Web"), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly Lazy<Type> __ignoreRouteInternal = new Lazy<Type>(() => System.Type.GetType("global::System.Web.Routing.RouteCollection+IgnoreRouteInternal,global::System.Web"), LazyThreadSafetyMode.PublicationOnly);
 
 		private string _url;
 		private object _constraints;
@@ -181,16 +181,16 @@ namespace asm.Web.Routing
 			int xprec = 0, yprec = 0, awd = 1;
 			string xurl = Url, yurl = other.Url;
 
-			for (int i = 0; i < __special_Cases.Length; i++, awd = (int)Math.Pow(2, i + 1))
+			for (int i = 0; i < __specialCases.Length; i++, awd = (int)Math.Pow(2, i + 1))
 			{
-				string specialCase = __special_Cases[i];
+				string specialCase = __specialCases[i];
 				if (xurl.IsSame(specialCase)) xprec += awd;
 				if (yurl.IsSame(specialCase)) yprec += awd;
 			}
 
 			if (xprec > 0 || yprec > 0)
 			{
-				int n = __special_Cases.Length;
+				int n = __specialCases.Length;
 				awd = (int)Math.Pow(2, n + 1);
 				if (xprec > 0 && ConstraintsCount > 0) xprec += awd;
 				if (yprec > 0 && other.ConstraintsCount > 0) yprec += awd;
@@ -323,7 +323,7 @@ namespace asm.Web.Routing
 		[NotNull]
 		public static IEnumerable<RouteBase> ParseRoutes(string value) { return ParseRoutesInternal(value).Select(e => e.Item1); }
 
-		public static bool IsMvcIgnoreRoute(System.Web.Routing.RouteBase routeBase) { return routeBase != null && routeBase.GetType() == __ignore_Route_Internal.Value; }
+		public static bool IsMvcIgnoreRoute(System.Web.Routing.RouteBase routeBase) { return routeBase != null && routeBase.GetType() == __ignoreRouteInternal.Value; }
 
 		public static bool IsMvcPageRoute(System.Web.Routing.RouteBase routeBase) { return IsMvcPageRoute((routeBase as System.Web.Routing.Route)?.RouteHandler); }
 

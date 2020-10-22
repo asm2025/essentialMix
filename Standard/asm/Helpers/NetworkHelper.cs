@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using asm.Extensions;
@@ -10,20 +8,14 @@ namespace asm.Helpers
 {
 	public static class NetworkHelper
 	{
-		private static readonly HashSet<Win32.InternetGetConnectedStateFlags> CONNECTED_FLAGS = new HashSet<Win32.InternetGetConnectedStateFlags>
-		{
-			Win32.InternetGetConnectedStateFlags.INTERNET_CONNECTION_MODEM,
-			Win32.InternetGetConnectedStateFlags.INTERNET_CONNECTION_LAN
-		};
-
-		private static NetworkJoinInformation _local;
+		private static NetworkJoinInformation __local;
 
 		public static NetworkJoinInformation Local
 		{
 			get
 			{
-				GetJoinStatus(null, ref _local);
-				return _local;
+				GetJoinStatus(null, ref __local);
+				return __local;
 			}
 		}
 
@@ -59,7 +51,7 @@ namespace asm.Helpers
 		public static bool IsConnectedToInternet()
 		{
 			Win32.InternetGetConnectedStateFlags flags = GetInternetConnectionState();
-			return CONNECTED_FLAGS.Any(cf => flags.HasFlag(cf));
+			return flags.HasFlag(Win32.InternetGetConnectedStateFlags.INTERNET_CONNECTION_MODEM) || flags.HasFlag(Win32.InternetGetConnectedStateFlags.INTERNET_CONNECTION_LAN);
 		}
 
 		public static Win32.InternetGetConnectedStateFlags GetInternetConnectionState()

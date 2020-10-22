@@ -1,18 +1,14 @@
 using System;
-using System.Collections.Generic;
 using JetBrains.Annotations;
 
 namespace asm.Extensions
 {
 	public static class OperatingSystemExtension
 	{
-		private static readonly HashSet<PlatformID> WINDOWS_PLATFORMS = new HashSet<PlatformID>
-		{
-			PlatformID.Win32Windows,
-			PlatformID.Win32NT,
-			PlatformID.WinCE,
-			PlatformID.Win32S
-		};
+		//private static readonly HashSet<PlatformID> WINDOWS_PLATFORMS = new HashSet<PlatformID>
+		//{
+
+		//};
 
 		public static bool IsUnix([NotNull] this OperatingSystem thisValue) { return thisValue.Platform == PlatformID.Unix; }
 
@@ -20,7 +16,19 @@ namespace asm.Extensions
 
 		public static bool IsXbox([NotNull] this OperatingSystem thisValue) { return thisValue.Platform == PlatformID.Xbox; }
 
-		public static bool IsWindows([NotNull] this OperatingSystem thisValue) { return WINDOWS_PLATFORMS.Contains(thisValue.Platform); }
+		public static bool IsWindows([NotNull] this OperatingSystem thisValue)
+		{
+			switch (thisValue.Platform)
+			{
+				case PlatformID.Win32Windows:
+				case PlatformID.Win32NT:
+				case PlatformID.WinCE:
+				case PlatformID.Win32S:
+					return true;
+				default:
+					return false;
+			}
+		}
 
 		public static bool IsWindows32([NotNull] this OperatingSystem thisValue) { return thisValue.Platform == PlatformID.Win32Windows; }
 

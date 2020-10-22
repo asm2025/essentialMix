@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace asm.Windows.Controls
@@ -9,7 +8,7 @@ namespace asm.Windows.Controls
 	{
 		private const int TCM_ADJUST_RECT = 0x1328;
 
-		private static readonly Lazy<IntPtr> __int_Ptr_One = new Lazy<IntPtr>(() => new IntPtr(1), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly IntPtr __int_Ptr_One = new IntPtr(1);
 
 		public Tabless()
 		{
@@ -33,7 +32,7 @@ namespace asm.Windows.Controls
 		{
 			if (m.Msg == TCM_ADJUST_RECT)
 			{
-				m.Result = __int_Ptr_One.Value;
+				m.Result = __int_Ptr_One;
 				return;
 			}
 			base.WndProc(ref m);

@@ -16,19 +16,7 @@ namespace asm.Windows.Controls
 	[DefaultProperty("Mask")]
 	public class MacAddressBox : MaskedTextBox
 	{
-		private static readonly HashSet<char> EXCLUDE_CHARS_WITH_MODIFIER;
-
 		private string _format;
-
-		static MacAddressBox()
-		{
-			EXCLUDE_CHARS_WITH_MODIFIER = new HashSet<char>
-			{
-				'C',
-				'X',
-				'V'
-			};
-		}
 
 		public MacAddressBox()
 		{
@@ -64,7 +52,7 @@ namespace asm.Windows.Controls
 
 			if (c.IsLetterOrDigit() && !MacAddressHelper.IsAllowed(c))
 			{
-				if (e.Modifiers == Keys.None || !EXCLUDE_CHARS_WITH_MODIFIER.Contains(c))
+				if (e.Modifiers == Keys.None || (c != 'C' && c != 'X' && c != 'V'))
 				{
 					e.Handled = true;
 					e.SuppressKeyPress = true;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using asm.Extensions;
@@ -11,7 +12,7 @@ namespace asm.Media
 	[DebuggerDisplay("{DisplayName}")]
 	public sealed class VideoSize
 	{
-		private static readonly IDictionary<string, VideoSizeEnum> __video_Size_String_Cache;
+		private static readonly IReadOnlyDictionary<string, VideoSizeEnum> __video_Size_String_Cache;
 
 		private readonly object _lock = new object();
 
@@ -22,14 +23,16 @@ namespace asm.Media
 		static VideoSize()
 		{
 			VideoSizeEnum[] values = EnumHelper<VideoSizeEnum>.GetValues();
-			__video_Size_String_Cache = new Dictionary<string, VideoSizeEnum>(values.Length, StringComparer.OrdinalIgnoreCase);
+			Dictionary<string, VideoSizeEnum> dictionary = new Dictionary<string, VideoSizeEnum>(values.Length, StringComparer.OrdinalIgnoreCase);
 
 			foreach (VideoSizeEnum value in values)
 			{
 				DisplayAttribute displayAttribute = value.GetAttribute<VideoSizeEnum, DisplayAttribute>();
 				if (string.IsNullOrEmpty(displayAttribute?.Description)) continue;
-				__video_Size_String_Cache.Add(displayAttribute.Description, value);
+				dictionary.Add(displayAttribute.Description, value);
 			}
+
+			__video_Size_String_Cache = new ReadOnlyDictionary<string, VideoSizeEnum>(dictionary);
 		}
 
 		public VideoSize()

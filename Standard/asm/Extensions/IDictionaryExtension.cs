@@ -150,7 +150,7 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static void AddSkipNull<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] TKey key, TValue value)
+		public static void AddSkipNull<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, TKey key, TValue value)
 			where TValue : class
 		{
 			if (value.IsNull()) return;
@@ -158,14 +158,14 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static void AddSkipNullOrEmpty<TKey>([NotNull] this IDictionary<TKey, string> thisValue, [NotNull] TKey key, string value)
+		public static void AddSkipNullOrEmpty<TKey>([NotNull] this IDictionary<TKey, string> thisValue, TKey key, string value)
 		{
 			if (string.IsNullOrEmpty(value)) return;
 			thisValue.Add(key, value);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static void AddSkipNullOrWhiteSpace<TKey>([NotNull] this IDictionary<TKey, string> thisValue, [NotNull] TKey key, string value)
+		public static void AddSkipNullOrWhiteSpace<TKey>([NotNull] this IDictionary<TKey, string> thisValue, TKey key, string value)
 		{
 			if (string.IsNullOrWhiteSpace(value)) return;
 			thisValue.Add(key, value);

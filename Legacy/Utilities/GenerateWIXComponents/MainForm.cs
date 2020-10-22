@@ -25,9 +25,9 @@ namespace GenerateWIXComponents
 		private const string DEF_DIR = "INSTALLDIR";
 
 		//{0} = Uppercase file name, {1} = file name, {2} = GUID, {3} = add line
-		private static readonly string ADD_KEY_LINE = "\t\t<File Id=\"{0}{1}\" Name=\"{2}\" Source=\"$(var.SourcePath){3}\" KeyPath=\"yes\" />";
-		private static readonly string ADD_LINE = "\t\t<File Id=\"{0}{1}\" Name=\"{2}\" Source=\"$(var.SourcePath){2}\" />";
-		private static readonly string COMPONENT_LINE = "\t<Component Id=\"{0}{1}\" DiskId=\"1\" Win64=\"$(var.Win64)\" Guid=\"{2}\">" + Environment.NewLine + "{3}" + Environment.NewLine + "\t</Component>";
+		private const string ADD_KEY_LINE = "\t\t<File Id=\"{0}{1}\" Name=\"{2}\" Source=\"$(var.SourcePath){3}\" KeyPath=\"yes\" />";
+		private const string ADD_LINE = "\t\t<File Id=\"{0}{1}\" Name=\"{2}\" Source=\"$(var.SourcePath){2}\" />";
+		private const string COMPONENT_LINE = @"<Component Id=""{0}{1}"" DiskId=""1"" Win64=""$(var.Win64)"" Guid=""{2}"">{3}</Component>";
 
 		private readonly string _startText;
 		private readonly string _endText = "&Stop";

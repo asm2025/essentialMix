@@ -9,14 +9,6 @@ namespace asm.Extensions
 {
 	public static class CharExtension
 	{
-		private static readonly ISet<UnicodeCategory> NON_PRINTABLE_UNICODE = new HashSet<UnicodeCategory>
-		{
-			UnicodeCategory.Control,
-			UnicodeCategory.Format,
-			UnicodeCategory.LineSeparator,
-			UnicodeCategory.ParagraphSeparator
-		};
-
 		public static char Abs(this char thisValue) { return char.ToUpper(thisValue); }
 
 		public static char Abs(this char thisValue, CultureInfo culture) { return char.ToUpper(thisValue, culture ?? CultureInfoHelper.Default); }
@@ -72,7 +64,7 @@ namespace asm.Extensions
 			if (char.IsControl(thisValue)) return false;
 
 			UnicodeCategory category = char.GetUnicodeCategory(thisValue);
-			return category == UnicodeCategory.OtherNotAssigned || !NON_PRINTABLE_UNICODE.Contains(category);
+			return category == UnicodeCategory.OtherNotAssigned || category != UnicodeCategory.Control && category != UnicodeCategory.Format && category != UnicodeCategory.LineSeparator && category != UnicodeCategory.ParagraphSeparator;
 		}
 
 		public static bool IsSeparator(this char thisValue) { return char.IsSeparator(thisValue); }

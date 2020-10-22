@@ -13,8 +13,6 @@ namespace asm.Helpers
 	{
 		private const string FONT_DEF = "Lucida Console";
 
-		private static readonly Win32.ConsoleFont[] EMPTY_CONSOLE_FONTS = new Win32.ConsoleFont[0];
-
 		private static FieldInfo _fiOut;
 		private static FieldInfo _fiError;
 		private static MethodInfo _fiInitializeStdOutError;
@@ -264,10 +262,10 @@ namespace asm.Helpers
 		public static Win32.ConsoleFont[] GetConsoleFonts()
 		{
 			IntPtr hConsole = GetOutputHandle();
-			if (hConsole.IsInvalidHandle()) return EMPTY_CONSOLE_FONTS;
+			if (hConsole.IsInvalidHandle()) return Array.Empty<Win32.ConsoleFont>();
 
 			int c = GetFontCount();
-			if (c == 0) return EMPTY_CONSOLE_FONTS;
+			if (c == 0) return Array.Empty<Win32.ConsoleFont>();
 
 			Win32.ConsoleFont[] fonts = new Win32.ConsoleFont[c];
 			Win32.GetConsoleFontInfo(hConsole, false, (uint)fonts.Length, fonts);

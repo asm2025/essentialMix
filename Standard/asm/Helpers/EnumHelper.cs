@@ -34,7 +34,7 @@ namespace asm.Helpers
 
 		private const int S_STARTING_CUSTOM_ENUM_FORMAT_VALUE = (int)EnumFormat.DisplayName + 1;
 
-		private static readonly ConcurrentDictionary<Type, IEnumInfo> __enumInfo = new ConcurrentDictionary<Type, IEnumInfo>();
+		private static readonly ConcurrentDictionary<Type, IEnumInfo> _enumInfo = new ConcurrentDictionary<Type, IEnumInfo>();
 
 		private static Func<EnumMember, string>[] __customEnumMemberFormatters = new Func<EnumMember, string>[0];
 
@@ -2269,7 +2269,7 @@ namespace asm.Helpers
 
 		internal static IEnumInfo GetInfo([NotNull] Type enumType)
 		{
-			return __enumInfo.GetOrAdd(enumType, e =>
+			return _enumInfo.GetOrAdd(enumType, e =>
 												{
 													if (enumType.IsEnum)
 													{
@@ -2389,8 +2389,6 @@ namespace asm.Helpers
 	public static class EnumHelper<TEnum>
 		where TEnum : struct, Enum, IComparable
 	{
-		private static readonly Type __type = typeof(TEnum);
-
 		public static IEnumInfo<TEnum> Info { get; } = GetInfo();
 
 		/// <summary>
@@ -3326,7 +3324,7 @@ namespace asm.Helpers
 
 		public static TEnum RemoveFlags(TEnum value, TEnum otherFlags) { return Info.RemoveFlags(value, otherFlags); }
 
-		public static bool IsEnum => __type.IsEnum;
+		public static bool IsEnum => typeof(TEnum).IsEnum;
 
 		/// <summary>
 		///     Indicates if <typeparamref name="TEnum" /> is marked with the <see cref="FlagsAttribute" />.
@@ -3828,10 +3826,11 @@ namespace asm.Helpers
 
 		private static IEnumInfo<TEnum> GetInfo()
 		{
-			if (!__type.IsEnum) throw new NotEnumTypeException(__type);
-			Type underlyingType = Enum.GetUnderlyingType(__type);
+			Type type = typeof(TEnum);
+			if (!type.IsEnum) throw new NotEnumTypeException(type);
+			Type underlyingType = Enum.GetUnderlyingType(type);
 			Type numericProviderType = EnumHelper.GetNumericProviderType(underlyingType);
-			return typeof(EnumInfo<,,>).MakeGenericType(__type, underlyingType, numericProviderType)
+			return typeof(EnumInfo<,,>).MakeGenericType(type, underlyingType, numericProviderType)
 														.CreateInstance<IEnumInfo<TEnum>>();
 		}
 	}
