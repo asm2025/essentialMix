@@ -11,12 +11,16 @@ namespace asm.Extensions
 	public static class CancellationTokenSourceExtension
 	{
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsCancellationRequested(this CancellationTokenSource thisValue) { return thisValue != null && thisValue.IsCancellationRequested; }
+		public static bool IsCancelledOrDisposed(this CancellationTokenSource thisValue)
+		{
+			try { return thisValue == null || thisValue.IsCancellationRequested; }
+			catch (ObjectDisposedException) { return true; }
+		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static void CancelIfNotDisposed(this CancellationTokenSource thisValue, bool throwOnFirstException = false)
 		{
-			if (thisValue.IsDisposed()) return;
+			if (IsCancelledOrDisposed(thisValue)) return;
 			try { thisValue.Cancel(throwOnFirstException); }
 			catch (ObjectDisposedException) { }
 		}

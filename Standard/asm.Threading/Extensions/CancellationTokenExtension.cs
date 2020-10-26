@@ -23,7 +23,11 @@ namespace asm.Extensions
 		public static bool IsAwaitable(this CancellationToken? thisValue) { return thisValue != null && IsAwaitable(thisValue.Value); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsCancellationRequested(this CancellationToken? thisValue) { return thisValue != null && thisValue.Value.IsCancellationRequested; }
+		public static bool IsCancelledOrDisposed(this CancellationToken? thisValue)
+		{
+			try { return thisValue == null || thisValue.Value.IsCancellationRequested; }
+			catch (ObjectDisposedException) { return true; }
+		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static CancellationTokenSource GetSource(this CancellationToken thisValue, CancellationTokenSource defaultCancellationTokenSource = null)

@@ -16,34 +16,25 @@ namespace asm.Helpers
 	/// </summary>
 	public static class PathHelper
 	{
-		public static readonly string ExtendedPathPrefix = @"\\?\";
-		public static readonly string UncPathPrefix = @"\\";
-		public static readonly string UncExtendedPrefixToInsert = @"?\UNC\";
-		public static readonly string UncExtendedPathPrefix = @"\\?\UNC\";
-		public static readonly string DevicePathPrefix = @"\\.\";
-		public static readonly string ParentDirectoryPrefix = @"..\";
-		public static readonly int MaxShortPath = 260;
-		public static readonly int MaxShortDirectoryPath = 248;
+		public static readonly string EXTENDED_PATH_PREFIX = @"\\?\";
+		public static readonly string UNC_PATH_PREFIX = @"\\";
+		public static readonly string UNC_EXTENDED_PREFIX_TO_INSERT = @"?\UNC\";
+		public static readonly string UNC_EXTENDED_PATH_PREFIX = @"\\?\UNC\";
+		public static readonly string DEVICE_PATH_PREFIX = @"\\.\";
+		public static readonly string PARENT_DIRECTORY_PREFIX = @"..\";
+		public static readonly int MAX_SHORT_PATH = 260;
+		public static readonly int MAX_SHORT_DIRECTORY_PATH = 248;
 		// \\?\, \\.\, \??\
-		public static readonly int DevicePrefixLength = 4;
+		public static readonly int DEVICE_PREFIX_LENGTH = 4;
 		// \\
-		public static readonly int UncPrefixLength = 2;
+		public static readonly int UNC_PREFIX_LENGTH = 2;
 		// \\?\UNC\, \\.\UNC\
-		public static readonly int UncExtendedPrefixLength = 8;
-
-		private static readonly char[] __invalidChar = Path.GetInvalidPathChars();
+		public static readonly int UNC_EXTENDED_PREFIX_LENGTH = 8;
 
 		private static readonly Regex __isPathQualified = new Regex(@"^(?:[\\/][\\/\?][\.\?][\\/])?(?:[\\/]|(?:[a-zA-Z]:)|(?:[\w\-]+))(?:(?<=[\\/])(?:[\w\p{P}\s]+)+)?(?:[\\/](?:[\w\p{P}\s]+)+)*[\\/]*$", RegexHelper.OPTIONS_I | RegexOptions.Singleline);
 		
 		private static char __directorySeparator = Path.DirectorySeparatorChar;
 		private static char __altDirectorySeparator = Path.AltDirectorySeparatorChar;
-
-		private static readonly ISet<char> __separators = new HashSet<char>
-		{
-			Path.DirectorySeparatorChar,
-			Path.AltDirectorySeparatorChar,
-			'|'
-		};
 
 		public static char DirectorySeparator
 		{
@@ -180,7 +171,7 @@ namespace asm.Helpers
 
 		public static bool IsPathRooted(string path)
 		{
-			return !string.IsNullOrWhiteSpace(path) && path.IndexOfAny(__invalidChar) < 0 && Path.IsPathRooted(path);
+			return !string.IsNullOrWhiteSpace(path) && Path.IsPathRooted(path) && path.IndexOfAny(Path.GetInvalidPathChars()) < 0;
 		}
 
 		/// <summary>
@@ -195,14 +186,14 @@ namespace asm.Helpers
 			return !string.IsNullOrEmpty(path) && __isPathQualified.IsMatch(path);
 		}
 
-		public static bool IsPathSeparator(char c) { return __separators.Contains(c); }
+		public static bool IsPathSeparator(char value) { return value == Path.DirectorySeparatorChar || value == Path.AltDirectorySeparatorChar || value == '|'; }
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsDirectorySeparator(char value) { return value == Path.DirectorySeparatorChar || value == Path.AltDirectorySeparatorChar; }
 
 		public static bool IsValidDriveChar(char value) { return value >= 'A' && value <= 'Z' || value >= 'a' && value <= 'z'; }
 
-		public static bool IsValidPathChar(char value) { return !__invalidChar.Contains(value); }
+		public static bool IsValidPathChar(char value) { return !Path.GetInvalidPathChars().Contains(value); }
 		
 		public static bool EndsWithPeriodOrSpace(string path)
         {
@@ -220,7 +211,7 @@ namespace asm.Helpers
         /// </summary>
         public static string EnsureExtendedPrefixIfNeeded(string path)
 		{
-			return path != null && (path.Length >= MaxShortPath || EndsWithPeriodOrSpace(path))
+			return path != null && (path.Length >= MAX_SHORT_PATH || EndsWithPeriodOrSpace(path))
 						? EnsureExtendedPrefix(path)
 						: path;
 		}
@@ -245,9 +236,9 @@ namespace asm.Helpers
                 return path;
 
             // Given \\server\share in long path becomes \\?\UNC\server\share
-			return path.StartsWith(UncPathPrefix, StringComparison.OrdinalIgnoreCase)
-						? path.Insert(2, UncExtendedPrefixToInsert)
-						: ExtendedPathPrefix + path;
+			return path.StartsWith(UNC_PATH_PREFIX, StringComparison.OrdinalIgnoreCase)
+						? path.Insert(2, UNC_EXTENDED_PREFIX_TO_INSERT)
+						: EXTENDED_PATH_PREFIX + path;
 		}
 
 		/// <summary>
@@ -271,7 +262,7 @@ namespace asm.Helpers
             // "\??\" for internal usage correctly. "\??\" is recognized and handled, "/??/" is not.
             return IsExtended(path)
 				|| path != null
-				&& path.Length >= DevicePrefixLength
+				&& path.Length >= DEVICE_PREFIX_LENGTH
 				&& IsDirectorySeparator(path[0])
 				&& IsDirectorySeparator(path[1])
 				&& (path[2] == '.' || path[2] == '?')
@@ -284,7 +275,7 @@ namespace asm.Helpers
         public static bool IsDeviceUNC(string path)
         {
 			return path != null
-				&& path.Length >= UncExtendedPrefixLength
+				&& path.Length >= UNC_EXTENDED_PREFIX_LENGTH
                 && IsDevice(path)
                 && IsDirectorySeparator(path[7])
                 && path[4] == 'U'
@@ -302,7 +293,7 @@ namespace asm.Helpers
             // While paths like "//?/C:/" will work, they're treated the same as "\\.\" paths.
             // Skipping of normalization will *only* occur if back slashes ('\') are used.
 			return path != null
-				&& path.Length >= DevicePrefixLength
+				&& path.Length >= DEVICE_PREFIX_LENGTH
                 && path[0] == '\\'
                 && (path[1] == '\\' || path[1] == '?')
                 && path[2] == '?'
@@ -315,7 +306,7 @@ namespace asm.Helpers
         public static bool HasWildCardCharacters([NotNull] string path)
         {
             // Question mark is part of dos device syntax so we have to skip if we are
-            int startIndex = IsDevice(path) ? ExtendedPathPrefix.Length : 0;
+            int startIndex = IsDevice(path) ? EXTENDED_PATH_PREFIX.Length : 0;
 
             // [MS - FSA] 2.1.4.4 Algorithm for Determining if a FileName Is in an Expression
             // https://msdn.microsoft.com/en-us/library/ff469270.aspx
@@ -352,7 +343,7 @@ namespace asm.Helpers
                     // UNC (\\?\UNC\ or \\), scan past server\share
 
                     // Start past the prefix ("\\" or "\\?\UNC\")
-                    i = deviceUnc ? UncExtendedPrefixLength : UncPrefixLength;
+                    i = deviceUnc ? UNC_EXTENDED_PREFIX_LENGTH : UNC_PREFIX_LENGTH;
 
                     // Skip two separators at most
                     int n = 2;
@@ -370,14 +361,14 @@ namespace asm.Helpers
             {
                 // Device path (e.g. "\\?\.", "\\.\")
                 // Skip any characters following the prefix that aren't a separator
-                i = DevicePrefixLength;
+                i = DEVICE_PREFIX_LENGTH;
 
                 while (i < pathLength && !IsDirectorySeparator(path[i]))
                     i++;
 
                 // If there is another separator take it, as long as we have had at least one
                 // non-separator after the prefix (e.g. don't take "\\?\\", but take "\\?\a\")
-                if (i < pathLength && i > DevicePrefixLength && IsDirectorySeparator(path[i]))
+                if (i < pathLength && i > DEVICE_PREFIX_LENGTH && IsDirectorySeparator(path[i]))
                     i++;
             }
             else if (pathLength >= 2
@@ -523,9 +514,8 @@ namespace asm.Helpers
 		public static bool IsValidPath(string path, params char[] includeChars)
 		{
 			if (string.IsNullOrWhiteSpace(path) || path.StartsWith(' ') || path.EndsWith(' ')) return false;
-
-			char[] invalid = includeChars?.Union(__invalidChar).ToArray() ?? __invalidChar;
-			return !path.ContainsAny(invalid);
+			if (includeChars != null && includeChars.Length > 0 && path.ContainsAny(includeChars)) return false;
+			return !path.ContainsAny(Path.GetInvalidPathChars());
 		}
 
 		[NotNull]
