@@ -1,4 +1,5 @@
 using System;
+using System.Security;
 using System.Text;
 using asm.Cryptography.Asymmetric;
 using asm.Cryptography.Encoders;
@@ -76,13 +77,18 @@ namespace asm.Cryptography
 		{
 			// See Base64Encode for details
 			if (string.IsNullOrEmpty(base64Text)) return base64Text;
-
 			byte[] finalBytes = Convert.FromBase64String(base64Text);
 			ushort size = BitConverter.ToUInt16(finalBytes, 0);
 			// Skip Salt
 			int n = Constants.SHORT_SIZE + size;
+			encoding ??= Encoding.Unicode;
+			int len = finalBytes.IndexOf(0, n);
+			if (len == n) return null;
+			len = len < 0
+					? finalBytes.Length - n
+					: len - n;
 			// Convert to string
-			return (encoding ?? Encoding.Unicode).GetString(finalBytes, n, finalBytes.Length - n).TrimEnd('\0');
+			return encoding.GetString(finalBytes, n, len);
 		}
 
 		public static string NumericEncode(string text, NumericSettings settings = null)
@@ -117,6 +123,13 @@ namespace asm.Cryptography
 			}
 		}
 
+		public static string AsymmetricEncrypt([NotNull] string publicKeyXml, SecureString value, RSASettings settings = null)
+		{
+			return value.IsNullOrEmpty()
+						? null
+						: AsymmetricEncrypt(publicKeyXml, value.UnSecure(), settings);
+		}
+
 		public static string AsymmetricEncrypt([NotNull] string publicKeyXml, string value, RSASettings settings = null)
 		{
 			if (publicKeyXml.Length == 0) throw new ArgumentNullException(nameof(publicKeyXml));
@@ -124,6 +137,7 @@ namespace asm.Cryptography
 			settings ??= new RSASettings();
 			byte[] data = settings.Encoding.GetBytes(value);
 			byte[] encrypted = AsymmetricEncrypt(publicKeyXml, data, settings);
+			Array.Clear(data, 0, data.Length);
 			return encrypted == null ? null : Convert.ToBase64String(encrypted);
 		}
 
@@ -156,14 +170,19 @@ namespace asm.Cryptography
 			}
 		}
 
-		public static string AsymmetricDecrypt([NotNull] string privateKeyXml, string value, RSASettings settings = null)
+		public static SecureString AsymmetricDecrypt([NotNull] string privateKeyXml, string value, RSASettings settings = null)
 		{
 			if (privateKeyXml.Length == 0) throw new ArgumentNullException(nameof(privateKeyXml));
-			if (string.IsNullOrEmpty(value)) return value;
+			if (string.IsNullOrEmpty(value)) return null;
 			settings ??= new RSASettings();
 			byte[] encrypted = Convert.FromBase64String(value);
 			byte[] data = AsymmetricDecrypt(privateKeyXml, encrypted, settings);
-			return data == null ? null : settings.Encoding.GetString(data).TrimEnd('\0');
+			if (data == null) return null;
+			int len = data.IndexOf(0);
+			if (len == 0) return null;
+			return (len > -1
+						? settings.Encoding.GetString(data, 0, len)
+						: settings.Encoding.GetString(data)).Secure();
 		}
 
 		public static byte[] AsymmetricDecrypt([NotNull] string privateKeyXml, [NotNull] byte[] data, RSASettings settings = null)
@@ -197,6 +216,13 @@ namespace asm.Cryptography
 			}
 		}
 
+		public static string SymmetricEncrypt([NotNull] string base64Key, SecureString value, SymmetricSettings settings = null)
+		{
+			return value.IsNullOrEmpty()
+						? null
+						: SymmetricEncrypt(base64Key, value.UnSecure(), settings);
+		}
+
 		public static string SymmetricEncrypt([NotNull] string base64Key, string value, SymmetricSettings settings = null)
 		{
 			if (base64Key.Length == 0) throw new ArgumentNullException(nameof(base64Key));
@@ -206,6 +232,7 @@ namespace asm.Cryptography
 			settings ??= new SymmetricSettings();
 			byte[] data = settings.Encoding.GetBytes(value);
 			byte[] encrypted = SymmetricEncrypt(key, data, settings);
+			Array.Clear(data, 0, data.Length);
 			return encrypted == null ? null : Convert.ToBase64String(encrypted);
 		}
 
@@ -242,16 +269,21 @@ namespace asm.Cryptography
 			}
 		}
 
-		public static string SymmetricDecrypt([NotNull] string base64Key, string value, SymmetricSettings settings = null)
+		public static SecureString SymmetricDecrypt([NotNull] string base64Key, string value, SymmetricSettings settings = null)
 		{
 			if (base64Key.Length == 0) throw new ArgumentNullException(nameof(base64Key));
-			if (string.IsNullOrEmpty(value)) return value;
+			if (string.IsNullOrEmpty(value)) return null;
 
 			byte[] key = Convert.FromBase64String(base64Key);
 			settings ??= new SymmetricSettings();
 			byte[] encrypted = Convert.FromBase64String(value);
 			byte[] data = SymmetricDecrypt(key, encrypted, settings);
-			return data == null ? null : settings.Encoding.GetString(data).TrimEnd('\0');
+			if (data == null) return null;
+			int len = data.IndexOf(0);
+			if (len == 0) return null;
+			return (len > -1
+						? settings.Encoding.GetString(data, 0, len)
+						: settings.Encoding.GetString(data)).Secure();
 		}
 
 		public static byte[] SymmetricDecrypt([NotNull] byte[] key, [NotNull] byte[] data, SymmetricSettings settings = null)
@@ -288,14 +320,21 @@ namespace asm.Cryptography
 			}
 		}
 
+		public static string HyperEncrypt([NotNull] string publicKeyXml, SecureString value, HyperSettings settings = null)
+		{
+			return value.IsNullOrEmpty()
+						? null
+						: HyperEncrypt(publicKeyXml, value.UnSecure(), settings);
+		}
+
 		public static string HyperEncrypt([NotNull] string publicKeyXml, string value, HyperSettings settings = null)
 		{
 			if (publicKeyXml.Length == 0) throw new ArgumentNullException(nameof(publicKeyXml));
 			if (string.IsNullOrEmpty(value)) return value;
 			settings ??= new HyperSettings();
-
 			byte[] data = settings.Encoding.GetBytes(value);
 			byte[] encrypted = HyperEncrypt(publicKeyXml, data, settings);
+			Array.Clear(data, 0, data.Length);
 			return encrypted == null ? null : Convert.ToBase64String(encrypted);
 		}
 
@@ -338,15 +377,19 @@ namespace asm.Cryptography
 			return finalBytes;
 		}
 
-		public static string HyperDecrypt([NotNull] string privateKeyXml, string value, HyperSettings settings = null)
+		public static SecureString HyperDecrypt([NotNull] string privateKeyXml, string value, HyperSettings settings = null)
 		{
 			if (privateKeyXml.Length == 0) throw new ArgumentNullException(nameof(privateKeyXml));
-			if (string.IsNullOrEmpty(value)) return value;
+			if (string.IsNullOrEmpty(value)) return null;
 			settings ??= new HyperSettings();
-
 			byte[] encrypted = Convert.FromBase64String(value);
 			byte[] data = HyperDecrypt(privateKeyXml, encrypted, settings);
-			return data == null ? null : settings.Encoding.GetString(data).TrimEnd('\0');
+			if (data == null) return null;
+			int len = data.IndexOf(0);
+			if (len == 0) return null;
+			return (len > -1
+						? settings.Encoding.GetString(data, 0, len)
+						: settings.Encoding.GetString(data)).Secure();
 		}
 
 		public static byte[] HyperDecrypt([NotNull] string privateKeyXml, [NotNull] byte[] data, HyperSettings settings = null)
@@ -410,13 +453,14 @@ namespace asm.Cryptography
 		[NotNull]
 		public static IHashAlgorithm CreateHashAlgorithm(Encoding encoding = null) { return new SHA256CryptoServiceProvider(encoding ?? Encoding.Unicode); }
 
-		public static (string Public, string Private) GenerateAsymmetricKeys(RSASettings settings = null)
+		public static (string Public, string Private) GenerateAsymmetricKeys(RSASettings settings = null) { return GenerateAsymmetricKeys(true, settings); }
+		public static (string Public, string Private) GenerateAsymmetricKeys(bool includeBitStrength, RSASettings settings = null)
 		{
 			using (IAsymmetricAlgorithm asymmetric = CreateAsymmetricAlgorithm(settings))
 			{
-				int bitStrength = asymmetric.KeySize;
-				string privateKey = $"<BitStrength>{bitStrength}</BitStrength>{asymmetric.ToXmlString(true)}";
-				string publicKey = $"<BitStrength>{bitStrength}</BitStrength>{asymmetric.ToXmlString(false)}";
+				string bitStrength = includeBitStrength ? $"<BitStrength>{asymmetric.KeySize}</BitStrength>" : string.Empty;
+				string privateKey = $"{bitStrength}{asymmetric.ToXmlString(true)}";
+				string publicKey = $"{asymmetric.ToXmlString(false)}";
 				return (publicKey, privateKey);
 			}
 		}

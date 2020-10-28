@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using asm.Collections;
 using asm.Comparers;
+using asm.Cryptography;
+using asm.Cryptography.Settings;
 using asm.Exceptions;
 using asm.Extensions;
 using asm.Helpers;
@@ -142,6 +146,8 @@ work with {HEAVY} items.".Yellow();
 			//TestAllHeapsPerformance();
 
 			//TestGraph();
+
+			TestAsymmetric();
 
 			ConsoleHelper.Pause();
 		}
@@ -4314,6 +4320,38 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 				return true;
 			}
+		}
+
+		private static void TestAsymmetric()
+		{
+			RSASettings settings = new RSASettings {
+				Encoding = Encoding.UTF8,
+				KeySize = 512,
+				SaltSize = 8,
+				Padding = RSAEncryptionPadding.Pkcs1,
+				UseExpiration = false
+			};
+			(string publicKey, string privateKey) = QuickCipher.GenerateAsymmetricKeys(false, settings);
+			Title("Generated keys");
+			Console.WriteLine($@"Public:
+'{publicKey}'
+
+Private:
+'{privateKey}'
+");
+
+			string data = "This is test data.";
+			string encrypted = QuickCipher.AsymmetricEncrypt(publicKey, data, settings);
+			SecureString decrypted = QuickCipher.AsymmetricDecrypt(privateKey, encrypted, settings);
+			Title("Encrypted");
+			Console.WriteLine($@"data:
+'{data}'
+
+encrypted:
+'{encrypted}'
+
+decrypted:
+'{decrypted.UnSecure()}'");
 		}
 
 		private static void Title(string title)

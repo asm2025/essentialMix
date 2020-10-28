@@ -24,12 +24,11 @@ namespace asm.Extensions
 			};
 		}
 
-		public static T GetSafe<T>([NotNull] this IList<T> thisValue, int index)
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T SyncGet<T>([NotNull] this IList<T> thisValue, int index)
 		{
-			if (!index.InRangeRx(0, thisValue.Count))
-				throw new ArgumentOutOfRangeException(nameof(index));
-			if (!(thisValue is ICollection collection))
-				return thisValue[index];
+			if (!index.InRangeRx(0, thisValue.Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			if (!(thisValue is ICollection collection)) return thisValue[index];
 
 			lock (collection.SyncRoot)
 			{
@@ -967,6 +966,7 @@ namespace asm.Extensions
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static void Swap<T>([NotNull] this IList<T> thisValue, int index1, int index2)
 		{
 			thisValue.Count.ValidateRange(index1);

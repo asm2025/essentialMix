@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using asm.Collections;
 using JetBrains.Annotations;
 using asm.Comparers;
@@ -10,8 +11,10 @@ namespace asm.Extensions
 {
 	public static class ArrayExtension
 	{
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsNullOrEmpty(this Array thisValue) { return thisValue == null || thisValue.Length == 0; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
 		public static Array Prepend([NotNull] this Array thisValue, [NotNull] params object[] items)
 		{
@@ -24,6 +27,7 @@ namespace asm.Extensions
 			return array;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
 		public static Array Append([NotNull] this Array thisValue, [NotNull] params object[] items)
 		{
@@ -117,6 +121,7 @@ namespace asm.Extensions
 			return range;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool Exists([NotNull] this Array thisValue, [NotNull] Predicate<object> predicate) { return Array.Exists((object[])thisValue, predicate); }
 
 		public static bool Contains([NotNull] this Array thisValue, Array values)
@@ -137,6 +142,7 @@ namespace asm.Extensions
 			return values.Length <= thisValue.Length && values.Cast<object>().All(v => thisValue.Cast<object>().Contains(v, comparer));
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int IndexOf([NotNull] this Array thisValue, object value, int startIndex = 0, int count = -1)
 		{
 			thisValue.Length.ValidateRange(startIndex, ref count);
@@ -161,6 +167,7 @@ namespace asm.Extensions
 			return ndx;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static void Sort([NotNull] this Array thisValue, IComparer comparer = null, int startIndex = 0, int count = -1)
 		{
 			if (thisValue.Rank != 1) throw new RankException();
@@ -169,6 +176,7 @@ namespace asm.Extensions
 			Array.Sort(thisValue, startIndex, count, comparer);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static void Sort([NotNull] this Array thisValue, [NotNull] Comparison<object> comparison, int startIndex, int count)
 		{
 			if (thisValue.Rank != 1) throw new RankException();
