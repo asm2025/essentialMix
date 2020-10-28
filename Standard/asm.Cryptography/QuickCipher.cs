@@ -1,5 +1,6 @@
 using System;
 using System.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using asm.Cryptography.Asymmetric;
 using asm.Cryptography.Encoders;
@@ -12,7 +13,9 @@ using asm.Helpers;
 using asm.Numeric;
 using Other.Moitah;
 using JetBrains.Annotations;
+using RNGCryptoServiceProvider = asm.Cryptography.RandomNumber.RNGCryptoServiceProvider;
 using RSACng = asm.Cryptography.Asymmetric.RSACng;
+using SHA256CryptoServiceProvider = asm.Cryptography.Hash.SHA256CryptoServiceProvider;
 
 namespace asm.Cryptography
 {
@@ -145,29 +148,73 @@ namespace asm.Cryptography
 		{
 			if (publicKeyXml.Length == 0) throw new ArgumentNullException(nameof(publicKeyXml));
 			if (data.Length == 0) return null;
+
 			IAsymmetricAlgorithm asymmetric = null;
-			settings ??= new RSASettings();
 
 			try
 			{
 				asymmetric = CreateAsymmetricAlgorithm(settings);
 				asymmetric.FromXmlString(publicKeyXml);
-
-				if (settings.UseExpiration)
-				{
-					byte[] expiration = BitConverter.GetBytes(settings.GetExpiration().Ticks);
-					byte[] buffer = new byte[expiration.Length + data.Length];
-					expiration.CopyTo(buffer, 0);
-					data.CopyTo(buffer, expiration.Length);
-					data = buffer;
-				}
-
-				return asymmetric.Encrypt(data);
+				return AsymmetricEncrypt(asymmetric, data, settings);
 			}
 			finally
 			{
 				ObjectHelper.Dispose(ref asymmetric);
 			}
+		}
+
+		public static string AsymmetricEncrypt([NotNull] X509Certificate2 certificate, SecureString value, RSASettings settings = null)
+		{
+			return value.IsNullOrEmpty()
+						? null
+						: AsymmetricEncrypt(certificate, value.UnSecure(), settings);
+		}
+
+		public static string AsymmetricEncrypt([NotNull] X509Certificate2 certificate, string value, RSASettings settings = null)
+		{
+			if (string.IsNullOrEmpty(value)) return value;
+			Encoding encoding = settings?.Encoding ?? Encoding.UTF8;
+			byte[] data = encoding.GetBytes(value);
+			byte[] encrypted = AsymmetricEncrypt(certificate, data, settings);
+			Array.Clear(data, 0, data.Length);
+			return encrypted == null
+						? null
+						: Convert.ToBase64String(encrypted);
+		}
+
+		public static byte[] AsymmetricEncrypt([NotNull] X509Certificate2 certificate, [NotNull] byte[] data, RSASettings settings = null)
+		{
+			if (data.Length == 0) return null;
+			System.Security.Cryptography.RSA algorithm = null;
+			IAsymmetricAlgorithm asymmetric = null;
+
+			try
+			{
+				algorithm = certificate.GetPublicEncryptor<System.Security.Cryptography.RSA>();
+				asymmetric = new RSAAlgorithm<System.Security.Cryptography.RSA>(algorithm);
+				return AsymmetricEncrypt(asymmetric, data, settings);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref asymmetric);
+				ObjectHelper.Dispose(ref algorithm);
+			}
+		}
+
+		private static byte[] AsymmetricEncrypt([NotNull] IAsymmetricAlgorithm asymmetric, [NotNull] byte[] data, RSASettings settings = null)
+		{
+			if (data.Length == 0) return null;
+
+			if (settings != null && settings.UseExpiration)
+			{
+				byte[] expiration = BitConverter.GetBytes(settings.GetExpiration().Ticks);
+				byte[] buffer = new byte[expiration.Length + data.Length];
+				expiration.CopyTo(buffer, 0);
+				data.CopyTo(buffer, expiration.Length);
+				data = buffer;
+			}
+
+			return asymmetric.Encrypt(data);
 		}
 
 		public static SecureString AsymmetricDecrypt([NotNull] string privateKeyXml, string value, RSASettings settings = null)
@@ -214,6 +261,56 @@ namespace asm.Cryptography
 			{
 				ObjectHelper.Dispose(ref asymmetric);
 			}
+		}
+
+		public static SecureString AsymmetricDecrypt([NotNull] X509Certificate2 certificate, string value, RSASettings settings = null)
+		{
+			if (string.IsNullOrEmpty(value)) return null;
+			byte[] encrypted = Convert.FromBase64String(value);
+			byte[] data = AsymmetricDecrypt(certificate, encrypted, settings);
+			if (data == null) return null;
+			int len = data.IndexOf(0);
+			if (len == 0) return null;
+			Encoding encoding = settings?.Encoding ?? Encoding.UTF8;
+			return (len > -1
+						? encoding.GetString(data, 0, len)
+						: encoding.GetString(data)).Secure();
+		}
+
+		public static byte[] AsymmetricDecrypt([NotNull] X509Certificate2 certificate, [NotNull] byte[] data, RSASettings settings = null)
+		{
+			if (data.Length == 0) return null;
+			System.Security.Cryptography.RSA algorithm = null;
+			IAsymmetricAlgorithm asymmetric = null;
+
+			try
+			{
+				algorithm = certificate.GetPrivateDecryptor<System.Security.Cryptography.RSA>();
+				asymmetric = new RSAAlgorithm<System.Security.Cryptography.RSA>(algorithm);
+				return AsymmetricDecrypt(asymmetric, data, settings);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref asymmetric);
+				ObjectHelper.Dispose(ref algorithm);
+			}
+		}
+
+		private static byte[] AsymmetricDecrypt([NotNull] IAsymmetricAlgorithm asymmetric, [NotNull] byte[] data, RSASettings settings = null)
+		{
+			if (data.Length == 0) return null;
+
+			byte[] decrypted = asymmetric.Decrypt(data);
+
+			if (settings != null && settings.UseExpiration)
+			{
+				long ticks = BitConverter.ToInt64(decrypted, 0);
+				DateTime expiration = new DateTime(ticks);
+				if (DateTime.UtcNow > expiration) return null;
+				decrypted = decrypted.GetRange(sizeof(long), -1);
+			}
+
+			return decrypted;
 		}
 
 		public static string SymmetricEncrypt([NotNull] string base64Key, SecureString value, SymmetricSettings settings = null)

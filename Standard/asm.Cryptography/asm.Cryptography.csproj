@@ -33,4 +33,10 @@
 		<ProjectReference Include="..\asm\asm.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Reference Include="asm">
+	    <HintPath>..\..\bin\Debug\AnyCPU\netframework\asm.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
 </Project>
