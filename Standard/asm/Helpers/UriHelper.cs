@@ -193,7 +193,7 @@ namespace asm.Helpers
 			request.UseBinary = settings.UseBinary;
 			request.Method = settings.Method.ToWebMethod();
 			request.CachePolicy = settings.CachePolicy;
-			request.Credentials = settings.Credentials ?? CredentialCache.DefaultNetworkCredentials;
+			if (settings.Credentials != null) request.Credentials = settings.Credentials;
 			if (settings.Proxy != null) request.Proxy = settings.Proxy;
 			return request;
 		}
