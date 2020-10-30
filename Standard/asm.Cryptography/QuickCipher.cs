@@ -185,19 +185,17 @@ namespace asm.Cryptography
 		public static byte[] AsymmetricEncrypt([NotNull] X509Certificate2 certificate, [NotNull] byte[] data, RSASettings settings = null)
 		{
 			if (data.Length == 0) return null;
-			System.Security.Cryptography.RSA algorithm = null;
 			IAsymmetricAlgorithm asymmetric = null;
 
 			try
 			{
-				algorithm = certificate.GetPublicEncryptor<System.Security.Cryptography.RSA>();
+				System.Security.Cryptography.RSA algorithm = certificate.GetPublicEncryptor<System.Security.Cryptography.RSA>();
 				asymmetric = new RSAAlgorithm<System.Security.Cryptography.RSA>(algorithm);
 				return AsymmetricEncrypt(asymmetric, data, settings);
 			}
 			finally
 			{
 				ObjectHelper.Dispose(ref asymmetric);
-				ObjectHelper.Dispose(ref algorithm);
 			}
 		}
 
@@ -280,19 +278,17 @@ namespace asm.Cryptography
 		public static byte[] AsymmetricDecrypt([NotNull] X509Certificate2 certificate, [NotNull] byte[] data, RSASettings settings = null)
 		{
 			if (data.Length == 0) return null;
-			System.Security.Cryptography.RSA algorithm = null;
 			IAsymmetricAlgorithm asymmetric = null;
 
 			try
 			{
-				algorithm = certificate.GetPrivateDecryptor<System.Security.Cryptography.RSA>();
+				System.Security.Cryptography.RSA algorithm = certificate.GetPrivateDecryptor<System.Security.Cryptography.RSA>();
 				asymmetric = new RSAAlgorithm<System.Security.Cryptography.RSA>(algorithm);
 				return AsymmetricDecrypt(asymmetric, data, settings);
 			}
 			finally
 			{
 				ObjectHelper.Dispose(ref asymmetric);
-				ObjectHelper.Dispose(ref algorithm);
 			}
 		}
 

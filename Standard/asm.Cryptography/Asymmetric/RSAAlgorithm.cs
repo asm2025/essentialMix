@@ -18,6 +18,13 @@ namespace asm.Cryptography.Asymmetric
 		{
 		}
 
+		/// <inheritdoc />
+		protected override void Dispose(bool disposing)
+		{
+			// skip disposing _algorithm in base class
+			// base.Dispose(disposing);
+		}
+
 		public override object Clone() { return new RSAAlgorithm<T>(Algorithm, Encoding); }
 	}
 }
