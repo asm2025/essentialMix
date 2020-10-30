@@ -7,7 +7,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Version>11.0.0.0</Version>
 		<Copyright>Copyright © 2008-2020</Copyright>
-		<FileVersion>20.10.22.0</FileVersion>
+		<FileVersion>20.10.30.3</FileVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
 		<PackageTags>utilities, tools, extensions, helpers, NewtonSoft, Json</PackageTags>
