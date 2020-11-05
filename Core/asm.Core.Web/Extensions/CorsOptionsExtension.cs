@@ -1,4 +1,6 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Linq;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 
 // ReSharper disable once CheckNamespace
@@ -13,15 +15,19 @@ namespace asm.Extensions
 			{
 				builder.AllowAnyMethod()
 						.AllowAnyHeader();
-				
-				if (origins != null && origins.Length > 0)
+				origins = origins?.SkipNullOrEmptyTrim()
+								.Distinct(StringComparer.OrdinalIgnoreCase)
+								.ToArray();
+
+				if (origins != null && origins.Length > 0 && origins.All(e => e != "*"))
 				{
 					builder.WithOrigins(origins);
-					if (origins.All(e => e == "*")) builder.AllowCredentials();
+					builder.AllowCredentials();
 				}
 				else
 				{
 					builder.AllowAnyOrigin();
+					builder.DisallowCredentials();
 				}
 			});
 			return thisValue;
