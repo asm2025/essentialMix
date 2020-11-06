@@ -23,6 +23,7 @@ using Bogus.DataSets;
 using Crayon;
 using EasyConsole;
 using JetBrains.Annotations;
+using System.ServiceProcess;
 
 // ReSharper disable UnusedMember.Local
 namespace TestApp
@@ -147,7 +148,9 @@ work with {HEAVY} items.".Yellow();
 
 			//TestGraph();
 
-			TestAsymmetric();
+			//TestAsymmetric();
+
+			TestServiceHelper();
 
 			ConsoleHelper.Pause();
 		}
@@ -4352,6 +4355,28 @@ encrypted:
 
 decrypted:
 '{decrypted.UnSecure()}'");
+		}
+
+		private static void TestServiceHelper()
+		{
+			const string SERVICE_NAME = "MSMQ";
+
+			TimeSpan timeout = TimeSpanHelper.ThirtySeconds;
+			Action<ServiceController> startService = sc =>
+			{
+				sc.Start();
+				sc.WaitForStatus(ServiceControllerStatus.Running, timeout);
+			};
+
+			Action<ServiceController> stopService = sc =>
+			{
+				sc.Stop();
+				sc.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
+			};
+
+			ServiceHelper.Invoke(stopService, SERVICE_NAME);
+			Thread.Sleep(5000);
+			ServiceHelper.Invoke(startService, SERVICE_NAME);
 		}
 
 		private static void Title(string title)

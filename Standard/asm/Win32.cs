@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
@@ -16998,6 +16999,7 @@ namespace asm
 		public static extern int WaitForMultipleObjects(uint nCount, IntPtr[] lpHandles, bool bWaitAll, uint dwMilliseconds);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SuppressUnmanagedCodeSecurity]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool CloseHandle(IntPtr hObject);
@@ -17318,6 +17320,12 @@ namespace asm
 
 		[DllImport("ntdll.dll", CallingConvention = CallingConvention.Cdecl)]
 		public static extern unsafe byte* memset(byte* dst, byte c, int count);
+
+		[DllImport("advapi32.dll", SetLastError = true)]
+		public static extern bool LogonUser(string lpszUsername, string lpszDomain, string lpszPassword, int dwLogonType, int dwLogonProvider, out IntPtr phToken);
+
+		[DllImport("advapi32.dll", SetLastError = true)]
+		public static extern bool LogonUser(string lpszUsername, string lpszDomain, IntPtr phPassword, int dwLogonType, int dwLogonProvider, out IntPtr phToken);
 
 		[DllImport("Winmm.dll", CharSet = CharSet.Auto)]
 		public static extern uint timeKillEvent(uint uTimerID);
