@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace asm.Patterns.Images
+namespace asm.Patterns.Imaging
 {
 	public interface IImageBuilder
 	{

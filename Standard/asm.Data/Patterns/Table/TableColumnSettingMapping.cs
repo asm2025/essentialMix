@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Numerics;
 using asm.Extensions;
+using asm.Patterns.Text;
 using JetBrains.Annotations;
-using asm.Patterns.String;
 
 namespace asm.Data.Patterns.Table
 {

@@ -1,9 +1,9 @@
 using System;
 using System.Security.Cryptography;
-using JetBrains.Annotations;
 using asm.Helpers;
+using JetBrains.Annotations;
 
-namespace asm.Patterns.Random
+namespace asm.Patterns.Security.Cryptography
 {
 	[Serializable]
 	public class RNGRandom : RandomNumberGenerator

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace asm.Patterns.String
+namespace asm.Patterns.Text
 {
 	[Flags]
 	public enum RandomStringType

@@ -1,19 +1,20 @@
-﻿using System.Net;
+using System.Net;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
+using asm.Cryptography;
 using asm.Extensions;
-using asm.Patterns.Cryptography;
 using JetBrains.Annotations;
 
-namespace asm.Cryptography.Helpers
+// ReSharper disable once CheckNamespace
+namespace asm.Patterns.Security.Cryptography
 {
-	public static class NetworkCredentialHelper
+	public static class X509CertificateStoreExtension
 	{
-		public static NetworkCredential GetCredentials([NotNull] string name, string token, char separator = '|') { return GetCredentials(name, null, token, separator); }
-		public static NetworkCredential GetCredentials([NotNull] string name, SecureString password, string token, char separator = '|')
+		public static NetworkCredential GetCredentials([NotNull] this X509CertificateStore thisValue, [NotNull] string name, string token, char separator = '|') { return GetCredentials(thisValue, name, null, token, separator); }
+		public static NetworkCredential GetCredentials([NotNull] this X509CertificateStore thisValue, [NotNull] string name, SecureString password, string token, char separator = '|')
 		{
 			if (string.IsNullOrWhiteSpace(token)) return null;
-			X509Certificate2 certificate = X509CertificateStore.Instance.Get(name, password);
+			X509Certificate2 certificate = thisValue.Get(name, password);
 			return certificate == null
 						? null
 						: GetCredentials(certificate, token, separator);

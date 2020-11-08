@@ -26,7 +26,7 @@ namespace asm.Drawing.Helpers
 		{
 			const byte SYMBOL_FONT = 2;
 
-			Win32.LOGFONT logicalFont = new Win32.LOGFONT();
+			LOGFONT logicalFont = new LOGFONT();
 			font.ToLogFont(logicalFont);
 			return logicalFont.lfCharSet == SYMBOL_FONT;
 		}
@@ -51,7 +51,7 @@ namespace asm.Drawing.Helpers
 					{
 						using (Graphics g = Graphics.FromImage(bmp))
 						{
-							foreach (FontFamily fontFamily in ifc.Families)
+							foreach (System.Drawing.FontFamily fontFamily in ifc.Families)
 							{
 								if (__pannedMonospaceFontNames.Contains(fontFamily.Name)) continue;
 								if (!fontFamily.HasStyles(requiredStyles)) continue;
@@ -70,7 +70,7 @@ namespace asm.Drawing.Helpers
 			return __cachedMonospacedFontNames;
 		}
 
-		public static SizeF MeasureString(string value, Win32.CONSOLE_FONT_INFO_EX fontInfoEx)
+		public static SizeF MeasureString(string value, CONSOLE_FONT_INFO_EX fontInfoEx)
 		{
 			if (string.IsNullOrEmpty(value)) return SizeF.Empty;
 			if (fontInfoEx == null) return SizeF.Empty;

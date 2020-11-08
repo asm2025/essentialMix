@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security;
 using System.Security.Cryptography;
+using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -150,6 +151,8 @@ work with {HEAVY} items.".Yellow();
 
 			//TestAsymmetric();
 
+			TestImpersonationHelper();
+			
 			TestServiceHelper();
 
 			ConsoleHelper.Pause();
@@ -4357,6 +4360,29 @@ decrypted:
 '{decrypted.UnSecure()}'");
 		}
 
+		private static void TestImpersonationHelper()
+		{
+			const string SERVICE_NAME = "BITS";
+
+			Title("Testing ImpersonationHelper...");
+
+			bool elevated = WindowsIdentityHelper.HasElevatedPrivileges();
+			Console.WriteLine($"Current process is running with elevated privileges? {elevated.ToYesNo()}");
+
+			Console.WriteLine($"Checking {SERVICE_NAME} service status...");
+			ServiceController controller = null;
+
+			try
+			{
+				controller = ServiceControllerHelper.GetController(SERVICE_NAME);
+				Console.WriteLine($"Is running? {controller.IsRunning().ToYesNo()}");
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref controller);
+			}
+		}
+
 		private static void TestServiceHelper()
 		{
 			const string SERVICE_NAME = "MSMQ";
@@ -4374,9 +4400,43 @@ decrypted:
 				sc.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
 			};
 
-			ServiceHelper.Invoke(stopService, SERVICE_NAME);
-			Thread.Sleep(5000);
-			ServiceHelper.Invoke(startService, SERVICE_NAME);
+			Title($"Testing ServiceControllerHelper with service {SERVICE_NAME}...");
+
+			ServiceController controller = null;
+			WindowsIdentity identity = null;
+
+			try
+			{
+				controller = ServiceControllerHelper.GetController(SERVICE_NAME);
+				Console.WriteLine($"Is running? {controller.IsRunning().ToYesNo()}");
+				Console.WriteLine("Asserting access rights...");
+				
+				identity = WindowsIdentity.GetCurrent();
+				
+				bool canControl = identity.User != null && controller.AssertControlAccessRights(identity.User);
+				Console.WriteLine($"Can control service? {canControl.ToYesNo()}");
+
+				if (canControl)
+				{
+					Console.WriteLine("Stopping the service...");
+
+					if (controller.Status == ServiceControllerStatus.Running)
+					{
+						Console.WriteLine("Stopping the service...");
+						controller.InvokeWithElevatedPrivilege(stopService);
+						Console.WriteLine("Sleeping for a while...");
+						Thread.Sleep(3000);
+					}
+
+					Console.WriteLine("Starting the service...");
+					controller.InvokeWithElevatedPrivilege(startService);
+				}
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref controller);
+				ObjectHelper.Dispose(ref identity);
+			}
 		}
 
 		private static void Title(string title)

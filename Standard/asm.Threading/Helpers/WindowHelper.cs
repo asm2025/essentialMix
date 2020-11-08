@@ -52,7 +52,7 @@ namespace asm.Threading.Helpers
 			}
 		}
 
-		public bool IsDialog => _isDialog ?? (_isDialog = GetWindowStyle().HasFlag((uint)Win32.WindowStylesEnum.WS_DLGFRAME)).Value;
+		public bool IsDialog => _isDialog ?? (_isDialog = GetWindowStyle().HasFlag((uint)WindowStylesEnum.WS_DLGFRAME)).Value;
 
 		public WindowHelper MainWindow => _mainWindow ??= GetWindowMain();
 
@@ -80,13 +80,13 @@ namespace asm.Threading.Helpers
 			}
 		}
 
-		public uint GetStyle() { return Win32.GetWindowLong(Handle, Win32.WindowLongSettingIndexEnum.GWL_STYLE); }
+		public uint GetStyle() { return Win32.GetWindowLong(Handle, WindowLongSettingIndexEnum.GWL_STYLE); }
 
-		public uint SetStyle(uint value) { return Win32.SetWindowLong(Handle, Win32.WindowLongSettingIndexEnum.GWL_STYLE, value); }
+		public uint SetStyle(uint value) { return Win32.SetWindowLong(Handle, WindowLongSettingIndexEnum.GWL_STYLE, value); }
 
-		public uint GetExtStyle() { return Win32.GetWindowLong(Handle, Win32.WindowLongSettingIndexEnum.GWL_EXSTYLE); }
+		public uint GetExtStyle() { return Win32.GetWindowLong(Handle, WindowLongSettingIndexEnum.GWL_EXSTYLE); }
 
-		public uint SetExtStyle(uint value) { return Win32.SetWindowLong(Handle, Win32.WindowLongSettingIndexEnum.GWL_EXSTYLE, value); }
+		public uint SetExtStyle(uint value) { return Win32.SetWindowLong(Handle, WindowLongSettingIndexEnum.GWL_EXSTYLE, value); }
 
 		public int SendMessage(uint message, IntPtr wParam, IntPtr lParam) { return (int)Win32.SendMessage(Handle, message, wParam, lParam); }
 
@@ -229,7 +229,7 @@ namespace asm.Threading.Helpers
 			return (int)(returnThread ? tid : pid);
 		}
 
-		private uint GetWindowStyle() { return Win32.GetWindowLong(Handle, Win32.WindowLongSettingIndexEnum.GWL_STYLE); }
+		private uint GetWindowStyle() { return Win32.GetWindowLong(Handle, WindowLongSettingIndexEnum.GWL_STYLE); }
 
 		private WindowHelper GetWindowMain()
 		{

@@ -5,9 +5,9 @@ namespace asm.Extensions
 {
 	public static class SizeExtension
 	{
-		public static Win32.SIZE ToWin32Size(this Size thisValue)
+		public static SIZE ToWin32Size(this Size thisValue)
 		{
-			return new Win32.SIZE(thisValue.Width, thisValue.Height);
+			return new SIZE(thisValue.Width, thisValue.Height);
 		}
 	}
 }

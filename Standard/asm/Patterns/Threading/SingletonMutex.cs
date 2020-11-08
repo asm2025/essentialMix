@@ -1,27 +1,27 @@
 using System;
 using System.Threading;
 using asm.Extensions;
-using JetBrains.Annotations;
 using asm.Helpers;
 using asm.Patterns.Object;
+using JetBrains.Annotations;
 
-namespace asm.Patterns.Design
+namespace asm.Patterns.Threading
 {
-	public class SingletonX : Disposable
+	public class SingletonMutex : Disposable
 	{
 		private Mutex _mutex;
 
-		public SingletonX([NotNull] string uniqueName)
+		public SingletonMutex([NotNull] string uniqueName)
 			: this(uniqueName, 0)
 		{
 		}
 
-		public SingletonX([NotNull] string uniqueName, TimeSpan timeout)
+		public SingletonMutex([NotNull] string uniqueName, TimeSpan timeout)
 			: this(uniqueName, timeout.TotalIntMilliseconds())
 		{
 		}
 
-		public SingletonX([NotNull] string uniqueName, int millisecondsTimeout)
+		public SingletonMutex([NotNull] string uniqueName, int millisecondsTimeout)
 		{
 			if (string.IsNullOrEmpty(uniqueName)) throw new ArgumentNullException(nameof(uniqueName));
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));

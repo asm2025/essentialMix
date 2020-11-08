@@ -1,4 +1,4 @@
-﻿namespace asm.Patterns.Command
+﻿namespace asm.Patterns.Design
 {
 	public interface ICommand
 	{

@@ -8,7 +8,7 @@ namespace asm.Helpers
 		public static Guid NewSequential()
 		{
 			int result = Win32.UuidCreateSequential(out Guid guid);
-			if (result != Win32.ResultCom.S_OK && result != Win32.ResultWin32.RPC_S_UUID_LOCAL_ONLY) throw new COMException("UuidCreateSequential call failed", result);
+			if (result != ResultCom.S_OK && result != ResultWin32.RPC_S_UUID_LOCAL_ONLY) throw new COMException("UuidCreateSequential call failed", result);
 			return guid;
 		}
 

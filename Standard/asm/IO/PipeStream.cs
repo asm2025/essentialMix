@@ -167,7 +167,7 @@ namespace asm.IO
 			{
 				if (_peerType != PeerType.Server) throw new NotSupportedException();
 				if (Win32.ConnectNamedPipe(_readHandle, IntPtr.Zero)) return false;
-				return (uint)Marshal.GetLastWin32Error() == Win32.ResultWin32.ERROR_PIPE_CONNECTED;
+				return (uint)Marshal.GetLastWin32Error() == ResultWin32.ERROR_PIPE_CONNECTED;
 			}
 		}
 
@@ -194,13 +194,13 @@ namespace asm.IO
 		/// <param name="mode">Read, Write, or ReadWrite - must be compatible with server-side creation mode</param>
 		public void Open(FileAccess mode)
 		{
-			Win32.FileAccessEnum pipemode = 0;
+			FileAccessEnum pipemode = 0;
 
-			if (mode.HasFlag(FileAccess.Read)) pipemode |= Win32.FileAccessEnum.FILE_GENERIC_READ;
-			if (mode.HasFlag(FileAccess.Write)) pipemode |= Win32.FileAccessEnum.FILE_GENERIC_WRITE;
+			if (mode.HasFlag(FileAccess.Read)) pipemode |= FileAccessEnum.FILE_GENERIC_READ;
+			if (mode.HasFlag(FileAccess.Write)) pipemode |= FileAccessEnum.FILE_GENERIC_WRITE;
 
-			Win32.SECURITY_ATTRIBUTES sa = new Win32.SECURITY_ATTRIBUTES();
-			IntPtr handle = Win32.CreateFile(Name, pipemode, 0, ref sa, Win32.CreationDispositionEnum.OpenExisting, 0, IntPtr.Zero);
+			SECURITY_ATTRIBUTES sa = new SECURITY_ATTRIBUTES();
+			IntPtr handle = Win32.CreateFile(Name, pipemode, 0, ref sa, CreationDispositionEnum.OpenExisting, 0, IntPtr.Zero);
 
 			if (handle == Win32.INVALID_HANDLE_VALUE)
 			{
@@ -218,7 +218,7 @@ namespace asm.IO
 			Win32.DisconnectNamedPipe(_readHandle);
 			if (Win32.ConnectNamedPipe(_readHandle, IntPtr.Zero)) return true;
 			uint lastErr = (uint)Marshal.GetLastWin32Error();
-			return lastErr == Win32.ResultWin32.ERROR_PIPE_CONNECTED;
+			return lastErr == ResultWin32.ERROR_PIPE_CONNECTED;
 		}
 
 		/// <summary>
@@ -248,7 +248,7 @@ namespace asm.IO
 
 			if (bufferSize < StreamHelper.BUFFER_DEFAULT) bufferSize = StreamHelper.BUFFER_DEFAULT;
 
-			Win32.SECURITY_ATTRIBUTES saAttr = new Win32.SECURITY_ATTRIBUTES
+			SECURITY_ATTRIBUTES saAttr = new SECURITY_ATTRIBUTES
 			{
 				bInheritHandle = inherit,
 				lpSecurityDescriptor = IntPtr.Zero
@@ -260,8 +260,8 @@ namespace asm.IO
 			{
 				if (!Win32.CreatePipe(out IntPtr rh, out IntPtr wh, ref saAttr, bufferSize)) throw new Win32Exception("Error creating pipe. Internal error: " + Marshal.GetLastWin32Error());
 
-				Win32.SetHandleInformation(rh, Win32.HandleFlagsEnum.INHERIT, inherit ? Win32.HandleFlagsEnum.INHERIT : 0);
-				Win32.SetHandleInformation(wh, Win32.HandleFlagsEnum.INHERIT, inherit ? Win32.HandleFlagsEnum.INHERIT : 0);
+				Win32.SetHandleInformation(rh, HandleFlagsEnum.INHERIT, inherit ? HandleFlagsEnum.INHERIT : 0);
+				Win32.SetHandleInformation(wh, HandleFlagsEnum.INHERIT, inherit ? HandleFlagsEnum.INHERIT : 0);
 				self = new PipeStream {Name = null, _readHandle = rh, _writeHandle = wh};
 			}
 			else
@@ -270,7 +270,7 @@ namespace asm.IO
 					Win32.PIPE_UNLIMITED_INSTANCES, 0, bufferSize, Win32.NMPWAIT_WAIT_FOREVER, ref saAttr);
 				if (handle == Win32.INVALID_HANDLE_VALUE) throw new Win32Exception("Error creating named pipe " + name + ". Internal error: " + Marshal.GetLastWin32Error());
 
-				Win32.SetHandleInformation(handle, Win32.HandleFlagsEnum.INHERIT, inherit ? Win32.HandleFlagsEnum.INHERIT : 0);
+				Win32.SetHandleInformation(handle, HandleFlagsEnum.INHERIT, inherit ? HandleFlagsEnum.INHERIT : 0);
 				self = new PipeStream {Name = name, _readHandle = handle, _writeHandle = handle};
 			}
 

@@ -34,7 +34,7 @@ namespace asm.Extensions
 		public static bool GetBounds([NotNull] this IWin32Window thisValue, out Rectangle rectangle)
 		{
 			rectangle = Rectangle.Empty;
-			if (!Win32.GetWindowRect(new HandleRef(thisValue, thisValue.Handle), out Win32.RECT rct)) return false;
+			if (!Win32.GetWindowRect(new HandleRef(thisValue, thisValue.Handle), out RECT rct)) return false;
 			rectangle = rct.ToRectangle();
 			return true;
 		}
@@ -48,14 +48,14 @@ namespace asm.Extensions
 
 		public static Point MapPoint(this IWin32Window thisValue, Point pt, IWin32Window newWin = null)
 		{
-			Win32.POINT pnt = pt.ToWin32Point();
+			POINT pnt = pt.ToWin32Point();
 			Win32.MapWindowPoints(thisValue?.Handle ?? IntPtr.Zero, newWin?.Handle ?? IntPtr.Zero, ref pnt, 1);
 			return pnt.ToPoint();
 		}
 
 		public static Rectangle MapRectangle([NotNull] this IWin32Window thisValue, Rectangle rectangle, IWin32Window newWin = null)
 		{
-			Win32.RECT ir = rectangle.ToWin32Rect();
+			RECT ir = rectangle.ToWin32Rect();
 			Win32.MapWindowPoints(thisValue.Handle, newWin?.Handle ?? IntPtr.Zero, ref ir, 2);
 			return ir.ToRectangle();
 		}
@@ -64,7 +64,7 @@ namespace asm.Extensions
 		public static Point[] MapPoints([NotNull] this IWin32Window thisValue, [NotNull] Point[] points, IWin32Window newWin = null)
 		{
 			IntPtr hWndTo = newWin?.Handle ?? IntPtr.Zero;
-			Win32.POINT[] pts = new Win32.POINT[points.Length];
+			POINT[] pts = new POINT[points.Length];
 
 			for (int i = 0; i < pts.Length; i++)
 			{
@@ -77,12 +77,12 @@ namespace asm.Extensions
 
 		public static Point PointToScreen([NotNull] this IWin32Window thisValue, Point p)
 		{
-			Win32.POINT pt = p.ToWin32Point();
+			POINT pt = p.ToWin32Point();
 			Win32.MapWindowPoints(thisValue.Handle, IntPtr.Zero, ref pt, 1);
 			return pt.ToPoint();
 		}
 
-		public static void SetPos([NotNull] this IWin32Window thisValue, Rectangle rectangle, IntPtr hWndInsertAfter, Win32.WindowPositionFlagsEnum flags)
+		public static void SetPos([NotNull] this IWin32Window thisValue, Rectangle rectangle, IntPtr hWndInsertAfter, WindowPositionFlagsEnum flags)
 		{
 			Win32.SetWindowPos(thisValue.Handle, hWndInsertAfter, rectangle.Left, rectangle.Top, rectangle.Width + 16, rectangle.Height + 38, flags);
 		}

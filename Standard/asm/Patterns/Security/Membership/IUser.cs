@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Security;
 
-namespace asm.Patterns.Membership
+namespace asm.Patterns.Security.Membership
 {
 	public interface IUser : ICredentials
 	{

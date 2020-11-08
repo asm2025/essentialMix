@@ -31,24 +31,24 @@ namespace asm.Threading
 			string jobName = "ChildProcessTracker" + Process.GetCurrentProcess().Id;
 			IntPtr jobHandle = Win32.CreateJobObject(IntPtr.Zero, jobName);
 
-			Win32.JOBOBJECT_BASIC_LIMIT_INFORMATION info = new Win32.JOBOBJECT_BASIC_LIMIT_INFORMATION
+			JOBOBJECT_BASIC_LIMIT_INFORMATION info = new JOBOBJECT_BASIC_LIMIT_INFORMATION
 			{
-				LimitFlags = Win32.JobObjectLimitEnum.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+				LimitFlags = JobObjectLimitEnum.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
 			};
 
 			// This is the key flag. When our process is killed, Windows will automatically
 			//  close the job handle, and when that happens, we want the child processes to
 			//  be killed, too.
-			Win32.JOBOBJECT_EXTENDED_LIMIT_INFORMATION extendedInfo = new Win32.JOBOBJECT_EXTENDED_LIMIT_INFORMATION {BasicLimitInformation = info};
+			JOBOBJECT_EXTENDED_LIMIT_INFORMATION extendedInfo = new JOBOBJECT_EXTENDED_LIMIT_INFORMATION {BasicLimitInformation = info};
 
-			int length = Marshal.SizeOf(typeof(Win32.JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
+			int length = Marshal.SizeOf(typeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
 			IntPtr extendedInfoPtr = Marshal.AllocHGlobal(length);
 
 			try
 			{
 				Marshal.StructureToPtr(extendedInfo, extendedInfoPtr, false);
 
-				if (!Win32.SetInformationJobObject(jobHandle, Win32.JobObjectInfoTypeEnum.ExtendedLimitInformation,
+				if (!Win32.SetInformationJobObject(jobHandle, JobObjectInfoTypeEnum.ExtendedLimitInformation,
 					extendedInfoPtr, (uint)length))
 				{
 					throw new Win32Exception("Could not set job extended limit information");

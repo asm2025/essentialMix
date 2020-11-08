@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace asm.Patterns.Membership
+namespace asm.Patterns.Security.Membership
 {
 	public class RoleUser<TUser, TKey> : IRoleUser<TUser, TKey>
 		where TUser : IUser<TKey>

@@ -12,7 +12,7 @@ using asm.Helpers;
 using asm.Patterns.Object;
 using JetBrains.Annotations;
 
-namespace asm.Patterns.Cryptography
+namespace asm.Patterns.Security.Cryptography
 {
 	public class X509CertificateStore : Disposable
 	{

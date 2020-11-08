@@ -488,7 +488,7 @@ namespace asm.Helpers
 			uint sz = Win32.INTERNET_MAX_URL_LENGTH;
 			StringBuilder sb = new StringBuilder((int)sz);
 			int ret = Win32.PathCreateFromUrl(url, sb, ref sz, 0);
-			return ret != Win32.ResultCom.S_OK ? null : sb.ToString();
+			return ret != ResultCom.S_OK ? null : sb.ToString();
 		}
 
 		public static string PathToUrl(string path)
@@ -499,7 +499,7 @@ namespace asm.Helpers
 			uint sz = Win32.INTERNET_MAX_URL_LENGTH;
 			StringBuilder sb = new StringBuilder((int)sz);
 			int ret = Win32.UrlCreateFromPath(path, sb, ref sz, 0);
-			return ret != Win32.ResultCom.S_OK ? null : sb.ToString();
+			return ret != ResultCom.S_OK ? null : sb.ToString();
 		}
 
 		public static string NextComponent(string path)

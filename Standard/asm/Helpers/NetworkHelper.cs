@@ -50,15 +50,15 @@ namespace asm.Helpers
 
 		public static bool IsConnectedToInternet()
 		{
-			Win32.InternetGetConnectedStateFlags flags = GetInternetConnectionState();
-			return flags.HasFlag(Win32.InternetGetConnectedStateFlags.INTERNET_CONNECTION_MODEM) || flags.HasFlag(Win32.InternetGetConnectedStateFlags.INTERNET_CONNECTION_LAN);
+			InternetGetConnectedStateFlags flags = GetInternetConnectionState();
+			return flags.HasFlag(InternetGetConnectedStateFlags.INTERNET_CONNECTION_MODEM) || flags.HasFlag(InternetGetConnectedStateFlags.INTERNET_CONNECTION_LAN);
 		}
 
-		public static Win32.InternetGetConnectedStateFlags GetInternetConnectionState()
+		public static InternetGetConnectedStateFlags GetInternetConnectionState()
 		{
 			return Win32.InternetGetConnectedState(out int flags, 0)
-						? (Win32.InternetGetConnectedStateFlags)flags
-						: Win32.InternetGetConnectedStateFlags.INTERNET_CONNECTION_OFFLINE;
+						? (InternetGetConnectedStateFlags)flags
+						: InternetGetConnectedStateFlags.INTERNET_CONNECTION_OFFLINE;
 		}
 	}
 }

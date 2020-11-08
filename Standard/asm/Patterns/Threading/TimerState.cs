@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace asm.Patterns.Timer
+namespace asm.Patterns.Threading
 {
 	public class TimerState
 	{

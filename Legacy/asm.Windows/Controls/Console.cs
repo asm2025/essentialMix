@@ -294,29 +294,29 @@ namespace asm.Windows.Controls
 
 		public void UpdateMode()
 		{
-			Win32.ConsoleModesEnum add = Win32.ConsoleModesEnum.NONE;
-			Win32.ConsoleModesEnum remove = Win32.ConsoleModesEnum.NONE;
+			ConsoleModesEnum add = ConsoleModesEnum.NONE;
+			ConsoleModesEnum remove = ConsoleModesEnum.NONE;
 
-			if (EchoInput) add |= Win32.ConsoleModesEnum.ENABLE_ECHO_INPUT;
-			else remove |= Win32.ConsoleModesEnum.ENABLE_ECHO_INPUT;
+			if (EchoInput) add |= ConsoleModesEnum.ENABLE_ECHO_INPUT;
+			else remove |= ConsoleModesEnum.ENABLE_ECHO_INPUT;
 
-			if (LineInput) add |= Win32.ConsoleModesEnum.ENABLE_LINE_INPUT;
-			else remove |= Win32.ConsoleModesEnum.ENABLE_LINE_INPUT;
+			if (LineInput) add |= ConsoleModesEnum.ENABLE_LINE_INPUT;
+			else remove |= ConsoleModesEnum.ENABLE_LINE_INPUT;
 
-			if (InsertMode) add |= Win32.ConsoleModesEnum.ENABLE_INSERT_MODE;
-			else remove |= Win32.ConsoleModesEnum.ENABLE_INSERT_MODE;
+			if (InsertMode) add |= ConsoleModesEnum.ENABLE_INSERT_MODE;
+			else remove |= ConsoleModesEnum.ENABLE_INSERT_MODE;
 
-			if (MouseInput) add |= Win32.ConsoleModesEnum.ENABLE_MOUSE_INPUT;
-			else remove |= Win32.ConsoleModesEnum.ENABLE_MOUSE_INPUT;
+			if (MouseInput) add |= ConsoleModesEnum.ENABLE_MOUSE_INPUT;
+			else remove |= ConsoleModesEnum.ENABLE_MOUSE_INPUT;
 
-			if (WindowInput) add |= Win32.ConsoleModesEnum.ENABLE_WINDOW_INPUT;
-			else remove |= Win32.ConsoleModesEnum.ENABLE_WINDOW_INPUT;
+			if (WindowInput) add |= ConsoleModesEnum.ENABLE_WINDOW_INPUT;
+			else remove |= ConsoleModesEnum.ENABLE_WINDOW_INPUT;
 
-			if (ProcessedInput) add |= Win32.ConsoleModesEnum.ENABLE_PROCESSED_INPUT;
-			else remove |= Win32.ConsoleModesEnum.ENABLE_PROCESSED_INPUT;
+			if (ProcessedInput) add |= ConsoleModesEnum.ENABLE_PROCESSED_INPUT;
+			else remove |= ConsoleModesEnum.ENABLE_PROCESSED_INPUT;
 
-			if (QuickEdit) add |= Win32.ConsoleModesEnum.ENABLE_QUICK_EDIT_MODE;
-			else remove |= Win32.ConsoleModesEnum.ENABLE_QUICK_EDIT_MODE;
+			if (QuickEdit) add |= ConsoleModesEnum.ENABLE_QUICK_EDIT_MODE;
+			else remove |= ConsoleModesEnum.ENABLE_QUICK_EDIT_MODE;
 
 			ConsoleHelper.SetMode(remove, add);
 		}

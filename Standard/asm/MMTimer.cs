@@ -56,7 +56,7 @@ namespace asm
 		private void Start(uint ms, bool repeat)
 		{
 			Stop();
-			Win32.fuEvent f = Win32.fuEvent.TIME_CALLBACK_FUNCTION | (repeat ? Win32.fuEvent.TIME_PERIODIC : Win32.fuEvent.TIME_ONESHOT);
+			fuEvent f = fuEvent.TIME_CALLBACK_FUNCTION | (repeat ? fuEvent.TIME_PERIODIC : fuEvent.TIME_ONESHOT);
 
 			lock(this)
 			{

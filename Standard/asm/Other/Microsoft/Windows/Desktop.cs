@@ -151,7 +151,7 @@ namespace Other.Microsoft.Windows
 			}
 
 			// attempt to create desktop.
-			_desktop = Win32.CreateDesktop(name, IntPtr.Zero, IntPtr.Zero, 0, Win32.DesktopAccessRightsEnum.DESKTOP_ALL, IntPtr.Zero);
+			_desktop = Win32.CreateDesktop(name, IntPtr.Zero, IntPtr.Zero, 0, DesktopAccessRightsEnum.DESKTOP_ALL, IntPtr.Zero);
 
 			DesktopName = name;
 
@@ -206,7 +206,7 @@ namespace Other.Microsoft.Windows
 			}
 
 			// open the desktop.
-			_desktop = Win32.OpenDesktop(name, 0, true, Win32.DesktopAccessRightsEnum.DESKTOP_ALL);
+			_desktop = Win32.OpenDesktop(name, 0, true, DesktopAccessRightsEnum.DESKTOP_ALL);
 
 			// something went wrong.
 			if (_desktop == IntPtr.Zero) return false;
@@ -233,7 +233,7 @@ namespace Other.Microsoft.Windows
 			}
 
 			// open the desktop.
-			_desktop = Win32.OpenInputDesktop(0, true, Win32.DesktopAccessRightsEnum.DESKTOP_ALL);
+			_desktop = Win32.OpenInputDesktop(0, true, DesktopAccessRightsEnum.DESKTOP_ALL);
 
 			// something went wrong.
 			if (_desktop == IntPtr.Zero) return false;
@@ -309,13 +309,13 @@ namespace Other.Microsoft.Windows
 			// make sure a desktop is open.
 			if (!IsOpen) return null;
 
-			Win32.SECURITY_ATTRIBUTES pa = new Win32.SECURITY_ATTRIBUTES();
-			Win32.SECURITY_ATTRIBUTES ta = new Win32.SECURITY_ATTRIBUTES();
-			Win32.STARTUPINFO si = new Win32.STARTUPINFO {lpDesktop = DesktopName};
+			SECURITY_ATTRIBUTES pa = new SECURITY_ATTRIBUTES();
+			SECURITY_ATTRIBUTES ta = new SECURITY_ATTRIBUTES();
+			STARTUPINFO si = new STARTUPINFO {lpDesktop = DesktopName};
 
 			// start the process.
-			bool result = Win32.CreateProcess(null, path, ref pa, ref ta, true, Win32.CreateProcessFlagsEnum.NORMAL_PRIORITY_CLASS, IntPtr.Zero, null, ref si,
-												out Win32.PROCESS_INFORMATION pi);
+			bool result = Win32.CreateProcess(null, path, ref pa, ref ta, true, CreateProcessFlagsEnum.NORMAL_PRIORITY_CLASS, IntPtr.Zero, null, ref si,
+												out PROCESS_INFORMATION pi);
 			return !result ? null : Process.GetProcessById(pi.dwProcessId);
 		}
 

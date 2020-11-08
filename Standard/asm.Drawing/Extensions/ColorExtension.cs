@@ -10,7 +10,7 @@ namespace asm.Extensions
 	{
 		public static uint ToDWORD(this Color thisValue) { return thisValue.R + ((uint)thisValue.G << 8) + ((uint)thisValue.B << 16); }
 
-		public static Win32.COLORREF ToColorRef(this Color thisValue) { return new Win32.COLORREF(ToDWORD(thisValue)); }
+		public static COLORREF ToColorRef(this Color thisValue) { return new COLORREF(ToDWORD(thisValue)); }
 
 		[NotNull]
 		public static string ToHex(this Color thisValue)

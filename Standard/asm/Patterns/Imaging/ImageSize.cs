@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace asm.Patterns.Images
+namespace asm.Patterns.Imaging
 {
 	public enum ImageSize
 	{

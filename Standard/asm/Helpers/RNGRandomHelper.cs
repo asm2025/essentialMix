@@ -1,6 +1,6 @@
 using System;
+using asm.Patterns.Security.Cryptography;
 using JetBrains.Annotations;
-using asm.Patterns.Random;
 
 namespace asm.Helpers
 {

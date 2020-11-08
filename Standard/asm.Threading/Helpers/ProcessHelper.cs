@@ -18,11 +18,11 @@ namespace asm.Threading.Helpers
 	{
 		private const uint SHELL_BASE_FLAGS = (uint)
 		(
-			Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_INVOKEIDLIST
-			| Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_NOCLOSEPROCESS
-			| Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_NOASYNC
-			| Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_DOENVSUBST
-			| Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_LOG_USAGE
+			ShellExecuteMaskFlagsEnum.SEE_MASK_INVOKEIDLIST
+			| ShellExecuteMaskFlagsEnum.SEE_MASK_NOCLOSEPROCESS
+			| ShellExecuteMaskFlagsEnum.SEE_MASK_NOASYNC
+			| ShellExecuteMaskFlagsEnum.SEE_MASK_DOENVSUBST
+			| ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_LOG_USAGE
 		);
 
 		private const string REG_DLL_CMD = "regsvr32";
@@ -87,7 +87,7 @@ namespace asm.Threading.Helpers
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
 			settings ??= ShellSettings.Default;
 
-			Win32.SHELLEXECUTEINFO info = new Win32.SHELLEXECUTEINFO
+			SHELLEXECUTEINFO info = new SHELLEXECUTEINFO
 			{
 				fMask = SHELL_BASE_FLAGS,
 				nShow = (int)settings.WindowStyle,
@@ -99,14 +99,14 @@ namespace asm.Threading.Helpers
 				hKeyClass = settings.HKeyClass
 			};
 
-			if (settings.InheritConsole) info.fMask |= (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_NO_CONSOLE;
+			if (settings.InheritConsole) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_NO_CONSOLE;
 
 			if (settings.ErrorDialog) info.hWnd = settings.ErrorDialogParentHandle;
-			else info.fMask |= (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_NO_UI;
+			else info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_NO_UI;
 
-			if (PathHelper.IsUnc(info.lpFile)) info.fMask |= (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_CONNECTNETDRV;
-			if (!string.IsNullOrEmpty(info.lpClass)) info.fMask |= (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSNAME;
-			if (!info.hKeyClass.IsInvalidHandle()) info.fMask |= (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSKEY;
+			if (PathHelper.IsUnc(info.lpFile)) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CONNECTNETDRV;
+			if (!string.IsNullOrEmpty(info.lpClass)) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSNAME;
+			if (!info.hKeyClass.IsInvalidHandle()) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSKEY;
 
 			Process p = InternalShellExec(info);
 
@@ -125,9 +125,9 @@ namespace asm.Threading.Helpers
 			if (lpIDList.IsZero()) throw new ArgumentNullException(nameof(lpIDList));
 			settings ??= ShellSettings.Default;
 
-			Win32.SHELLEXECUTEINFO info = new Win32.SHELLEXECUTEINFO
+			SHELLEXECUTEINFO info = new SHELLEXECUTEINFO
 			{
-				fMask = SHELL_BASE_FLAGS | (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_IDLIST,
+				fMask = SHELL_BASE_FLAGS | (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_IDLIST,
 				nShow = (int)settings.WindowStyle,
 				lpIDList = lpIDList,
 				lpVerb = settings.Verb,
@@ -137,10 +137,10 @@ namespace asm.Threading.Helpers
 			};
 
 			if (settings.ErrorDialog) info.hWnd = settings.ErrorDialogParentHandle;
-			else info.fMask |= (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_NO_UI;
+			else info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_NO_UI;
 
-			if (!string.IsNullOrEmpty(info.lpClass)) info.fMask |= (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSNAME;
-			if (!info.hKeyClass.IsInvalidHandle()) info.fMask |= (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSKEY;
+			if (!string.IsNullOrEmpty(info.lpClass)) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSNAME;
+			if (!info.hKeyClass.IsInvalidHandle()) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSKEY;
 
 			return InternalShellExec(info);
 		}
@@ -181,7 +181,7 @@ namespace asm.Threading.Helpers
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
 			settings ??= ShellSettings.Default;
 
-			Win32.SHELLEXECUTEINFO info = new Win32.SHELLEXECUTEINFO
+			SHELLEXECUTEINFO info = new SHELLEXECUTEINFO
 			{
 				fMask = SHELL_BASE_FLAGS,
 				nShow = (int)settings.WindowStyle,
@@ -193,14 +193,14 @@ namespace asm.Threading.Helpers
 				hKeyClass = settings.HKeyClass
 			};
 
-			if (settings.InheritConsole) info.fMask |= (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_NO_CONSOLE;
+			if (settings.InheritConsole) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_NO_CONSOLE;
 
 			if (settings.ErrorDialog) info.hWnd = settings.ErrorDialogParentHandle;
-			else info.fMask |= (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_NO_UI;
+			else info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_NO_UI;
 
-			if (PathHelper.IsUnc(info.lpFile)) info.fMask |= (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_CONNECTNETDRV;
-			if (!string.IsNullOrEmpty(info.lpClass)) info.fMask |= (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSNAME;
-			if (!info.hKeyClass.IsInvalidHandle()) info.fMask |= (uint)Win32.ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSKEY;
+			if (PathHelper.IsUnc(info.lpFile)) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CONNECTNETDRV;
+			if (!string.IsNullOrEmpty(info.lpClass)) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSNAME;
+			if (!info.hKeyClass.IsInvalidHandle()) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSKEY;
 
 			using (Process process = InternalShellExec(info))
 			{
@@ -585,7 +585,7 @@ namespace asm.Threading.Helpers
 			};
 
 			if (settings.WindowStyle.HasValue) process.StartInfo.WindowStyle = settings.WindowStyle.Value;
-			if (settings.RunAsAdministrator && Environment.OSVersion.IsWindowsVistaOrHigher()) process.StartInfo.Verb = Win32.ShellExecuteVerbs.RunAs;
+			if (settings.RunAsAdministrator && Environment.OSVersion.IsWindowsVistaOrHigher()) process.StartInfo.Verb = ShellExecuteVerbs.RunAs;
 
 			if (!settings.ErrorDialogParentHandle.IsInvalidHandle())
 			{
@@ -777,7 +777,7 @@ namespace asm.Threading.Helpers
 			}
 		}
 
-		private static Process InternalShellExec(Win32.SHELLEXECUTEINFO info)
+		private static Process InternalShellExec(SHELLEXECUTEINFO info)
 		{
 			bool succeeded = false;
 			int errCode = 0;
@@ -786,7 +786,7 @@ namespace asm.Threading.Helpers
 			{
 				Thread thread = new Thread(state =>
 				{
-					Win32.SHELLEXECUTEINFO sei = (Win32.SHELLEXECUTEINFO)state;
+					SHELLEXECUTEINFO sei = (SHELLEXECUTEINFO)state;
 					succeeded = Win32.ShellExecuteEx(ref sei);
 					if (!succeeded) errCode = Marshal.GetLastWin32Error();
 				})

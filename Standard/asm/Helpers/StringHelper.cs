@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using asm.Extensions;
-using asm.Patterns.String;
+using asm.Patterns.Text;
 
 namespace asm.Helpers
 {

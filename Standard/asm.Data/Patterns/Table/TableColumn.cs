@@ -5,7 +5,7 @@ using System.Linq;
 using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Patterns.Layout;
-using asm.Patterns.String;
+using asm.Patterns.Text;
 
 namespace asm.Data.Patterns.Table
 {

@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 using asm.Collections;
 using JetBrains.Annotations;
 using asm.Helpers;
-using asm.Patterns.String;
+using asm.Patterns.Text;
 using CharEnumerator = asm.Collections.CharEnumerator;
 
 namespace asm.Extensions

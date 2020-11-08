@@ -1,4 +1,4 @@
-﻿namespace asm.Patterns.String
+﻿namespace asm.Patterns.Text
 {
 	public enum TextCasing
 	{

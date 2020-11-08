@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace asm.Patterns.Membership
+namespace asm.Patterns.Security.Membership
 {
 	public interface IRoleUser<out TUser, out TKey>
 		where TUser : IUser<TKey>

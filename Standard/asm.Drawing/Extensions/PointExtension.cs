@@ -12,9 +12,9 @@ namespace asm.Extensions
 			return (float) System.Math.Sqrt( dx * dx + dy * dy );
 		}
 
-		public static Win32.POINT ToWin32Point(this Point thisValue)
+		public static POINT ToWin32Point(this Point thisValue)
 		{
-			return new Win32.POINT(thisValue.X, thisValue.Y);
+			return new POINT(thisValue.X, thisValue.Y);
 		}
 	}
 }

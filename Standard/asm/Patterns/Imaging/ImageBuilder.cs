@@ -1,7 +1,7 @@
 ﻿using System;
 using asm.Helpers;
 
-namespace asm.Patterns.Images
+namespace asm.Patterns.Imaging
 {
 	public class ImageBuilder : IImageBuilder
 	{
