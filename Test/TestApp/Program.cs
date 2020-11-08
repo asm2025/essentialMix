@@ -4418,9 +4418,7 @@ decrypted:
 
 				if (canControl)
 				{
-					Console.WriteLine("Stopping the service...");
-
-					if (controller.Status == ServiceControllerStatus.Running)
+					if (controller.IsRunning())
 					{
 						Console.WriteLine("Stopping the service...");
 						controller.InvokeWithElevatedPrivilege(stopService);
@@ -4428,8 +4426,11 @@ decrypted:
 						Thread.Sleep(3000);
 					}
 
-					Console.WriteLine("Starting the service...");
-					controller.InvokeWithElevatedPrivilege(startService);
+					if (controller.IsStopped())
+					{
+						Console.WriteLine("Starting the service...");
+						controller.InvokeWithElevatedPrivilege(startService);
+					}
 				}
 			}
 			finally

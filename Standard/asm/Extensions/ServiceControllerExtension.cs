@@ -47,8 +47,9 @@ namespace asm.Extensions
 			ServiceControllerPermission scp = new ServiceControllerPermission(ServiceControllerPermissionAccess.Control, thisValue.MachineName, thisValue.ServiceName);
 			scp.Demand();
 
-			ServiceAccessRights accessRights = GetEffectiveAccessRights(thisValue, sid);
-			return accessRights.HasFlag(ServiceAccessRights.QueryStatus | ServiceAccessRights.Start | ServiceAccessRights.Stop | ServiceAccessRights.PauseContinue);
+			//ServiceAccessRights accessRights = GetEffectiveAccessRights(thisValue, sid);
+			//return accessRights.HasFlag(ServiceAccessRights.QueryStatus | ServiceAccessRights.Start | ServiceAccessRights.Stop | ServiceAccessRights.PauseContinue);
+			return true;
 		}
 
 		public static bool IsStopped([NotNull] this ServiceController thisValue) { return IsStopped(thisValue, TimeSpanHelper.FiveSeconds); }
