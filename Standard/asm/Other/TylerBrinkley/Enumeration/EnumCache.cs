@@ -13,7 +13,6 @@ using asm.Extensions;
 using asm.Helpers;
 using JetBrains.Annotations;
 using Other.TylerBrinkley.Enumeration.Numeric;
-using AttributeCollection = Other.TylerBrinkley.Collections.AttributeCollection;
 using SysMath = System.Math;
 
 // ReSharper disable once CheckNamespace

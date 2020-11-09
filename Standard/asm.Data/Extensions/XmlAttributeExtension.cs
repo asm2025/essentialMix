@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using System.Xml;
-using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
 namespace asm.Extensions

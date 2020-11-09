@@ -44,10 +44,7 @@ namespace asm.Collections
 
 		public override int GetHashCode(EnumRange<T> obj)
 		{
-			unchecked
-			{
-				return EqualityComparer<T>.Default.GetHashCode(obj.Minimum) ^ EqualityComparer<T>.Default.GetHashCode(obj.Maximum);
-			}
+			return EqualityComparer<T>.Default.GetHashCode(obj.Minimum) ^ EqualityComparer<T>.Default.GetHashCode(obj.Maximum);
 		}
 	}
 }

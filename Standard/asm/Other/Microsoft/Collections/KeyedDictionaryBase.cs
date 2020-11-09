@@ -11,7 +11,6 @@ using System.Threading;
 using asm.Collections.DebugView;
 using asm.Exceptions.Collections;
 using asm.Extensions;
-using Other.Microsoft;
 using JetBrains.Annotations;
 using asmMath = asm.Numeric.Math;
 

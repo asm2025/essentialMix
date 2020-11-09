@@ -248,7 +248,7 @@ namespace GenerateWIXComponents
 						sb.Append(string.Format(ADD_KEY_LINE, component.Prefix, component.KeyFileName.ToUpper(), component.KeyFileName, dir + component.KeyFileName));
 
 						foreach (string file in component.FileNames)
-							sb.AppendWithLine(string.Format(ADD_LINE, component.Prefix, file.ToUpper(), file, dir + file));
+							sb.AppendWithLine(string.Format(ADD_LINE, component.Prefix, file.ToUpper(), file));
 
 						sbdir.AppendWithLine(string.Format(COMPONENT_LINE, component.Prefix, component.KeyFileName.ToUpper(), Guid.NewGuid(), sb));
 					}

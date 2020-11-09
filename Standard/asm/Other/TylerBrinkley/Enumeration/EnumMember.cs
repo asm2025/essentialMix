@@ -29,7 +29,6 @@ using System.Linq;
 using System.Threading;
 using JetBrains.Annotations;
 using Other.TylerBrinkley.Enumeration.Numeric;
-using AttributeCollection = Other.TylerBrinkley.Collections.AttributeCollection;
 
 // ReSharper disable once CheckNamespace
 namespace Other.TylerBrinkley.Enumeration

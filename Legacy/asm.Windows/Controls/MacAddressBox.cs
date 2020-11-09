@@ -52,7 +52,7 @@ namespace asm.Windows.Controls
 
 			if (c.IsLetterOrDigit() && !MacAddressHelper.IsAllowed(c))
 			{
-				if (e.Modifiers == Keys.None || (c != 'C' && c != 'X' && c != 'V'))
+				if (e.Modifiers == Keys.None || c != 'C' && c != 'X' && c != 'V')
 				{
 					e.Handled = true;
 					e.SuppressKeyPress = true;
