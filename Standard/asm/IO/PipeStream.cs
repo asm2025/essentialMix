@@ -114,7 +114,7 @@ namespace asm.IO
 
 			if (offset > 0) buf = new byte[count];
 			uint ucount = (uint)count;
-			if (!Win32.ReadFile(_readHandle, buf, ucount, out uint read, IntPtr.Zero)) throw new Win32Exception(Marshal.GetLastWin32Error(), "ReadFile failed");
+			if (!Win32.ReadFile(_readHandle, buf, ucount, out uint read, IntPtr.Zero)) throw new Win32Exception(Marshal.GetLastWin32Error());
 			if (offset == 0) return (int)read;
 			Array.Copy(buf, 0, buffer, offset, read);
 			return (int)read;
@@ -149,7 +149,7 @@ namespace asm.IO
 			if (!result)
 			{
 				int err = Marshal.GetLastWin32Error();
-				throw new Win32Exception(err, "Writing to the stream failed");
+				throw new Win32Exception(err);
 			}
 
 			if (written < count) throw new IOException("Unable to write entire buffer to stream");
@@ -205,7 +205,7 @@ namespace asm.IO
 			if (handle == Win32.INVALID_HANDLE_VALUE)
 			{
 				int err = Marshal.GetLastWin32Error();
-				throw new Win32Exception(err, $"Open failed, win32 error code {err}, pipe name '{Name}' ");
+				throw new Win32Exception(err);
 			}
 
 			_mode = mode;
@@ -258,7 +258,7 @@ namespace asm.IO
 
 			if (name == null)
 			{
-				if (!Win32.CreatePipe(out IntPtr rh, out IntPtr wh, ref saAttr, bufferSize)) throw new Win32Exception("Error creating pipe. Internal error: " + Marshal.GetLastWin32Error());
+				if (!Win32.CreatePipe(out IntPtr rh, out IntPtr wh, ref saAttr, bufferSize)) throw new Win32Exception(Marshal.GetLastWin32Error());
 
 				Win32.SetHandleInformation(rh, HandleFlagsEnum.INHERIT, inherit ? HandleFlagsEnum.INHERIT : 0);
 				Win32.SetHandleInformation(wh, HandleFlagsEnum.INHERIT, inherit ? HandleFlagsEnum.INHERIT : 0);
@@ -268,7 +268,7 @@ namespace asm.IO
 			{
 				IntPtr handle = Win32.CreateNamedPipe(name, (uint)mode, Win32.PIPE_TYPE_BYTE | Win32.PIPE_WAIT,
 					Win32.PIPE_UNLIMITED_INSTANCES, 0, bufferSize, Win32.NMPWAIT_WAIT_FOREVER, ref saAttr);
-				if (handle == Win32.INVALID_HANDLE_VALUE) throw new Win32Exception("Error creating named pipe " + name + ". Internal error: " + Marshal.GetLastWin32Error());
+				if (handle == Win32.INVALID_HANDLE_VALUE) throw new Win32Exception(Marshal.GetLastWin32Error());
 
 				Win32.SetHandleInformation(handle, HandleFlagsEnum.INHERIT, inherit ? HandleFlagsEnum.INHERIT : 0);
 				self = new PipeStream {Name = name, _readHandle = handle, _writeHandle = handle};

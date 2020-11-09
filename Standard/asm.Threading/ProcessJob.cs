@@ -51,7 +51,7 @@ namespace asm.Threading
 				if (!Win32.SetInformationJobObject(jobHandle, JobObjectInfoTypeEnum.ExtendedLimitInformation,
 					extendedInfoPtr, (uint)length))
 				{
-					throw new Win32Exception("Could not set job extended limit information");
+					throw new Win32Exception(Marshal.GetLastWin32Error());
 				}
 			}
 			finally

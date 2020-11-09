@@ -25,6 +25,10 @@ using Crayon;
 using EasyConsole;
 using JetBrains.Annotations;
 using System.ServiceProcess;
+using asm;
+using asm.Patterns.Threading;
+using asm.Threading;
+using TimeoutException = System.TimeoutException;
 
 // ReSharper disable UnusedMember.Local
 namespace TestApp
@@ -151,7 +155,9 @@ work with {HEAVY} items.".Yellow();
 
 			//TestAsymmetric();
 
-			TestImpersonationHelper();
+			//TestSingletonAppGuard();
+
+			//TestImpersonationHelper();
 			
 			TestServiceHelper();
 
@@ -4360,6 +4366,27 @@ decrypted:
 '{decrypted.UnSecure()}'");
 		}
 
+		private static void TestSingletonAppGuard()
+		{
+			SingletonAppGuard guard = null;
+
+			try
+			{
+				guard = new SingletonAppGuard(1000);
+				Console.WriteLine("Heellloooo.!");
+				Console.WriteLine("Sleeping for a while...");
+				Thread.Sleep(5000);
+			}
+			catch (TimeoutException)
+			{
+				Console.WriteLine("Can't run! Another instance is running...");
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref guard);
+			}
+		}
+
 		private static void TestImpersonationHelper()
 		{
 			const string SERVICE_NAME = "BITS";
@@ -4410,9 +4437,9 @@ decrypted:
 				controller = ServiceControllerHelper.GetController(SERVICE_NAME);
 				Console.WriteLine($"Is running? {controller.IsRunning().ToYesNo()}");
 				Console.WriteLine("Asserting access rights...");
-				
+
 				identity = WindowsIdentity.GetCurrent();
-				
+
 				bool canControl = identity.User != null && controller.AssertControlAccessRights(identity.User);
 				Console.WriteLine($"Can control service? {canControl.ToYesNo()}");
 
@@ -4432,6 +4459,32 @@ decrypted:
 						controller.InvokeWithElevatedPrivilege(startService);
 					}
 				}
+			}
+			catch (InvalidOperationException iox) when (iox.InnerException != null && iox.InnerException.Message.StartsWith("Access ", StringComparison.OrdinalIgnoreCase))
+			{
+				Console.WriteLine("I'm not running with elevated privilege! Would you like to restart me as an admin? [Y / Any key]");
+				if (Console.ReadKey().Key != ConsoleKey.Y) return;
+
+				ProcessStartInfo startInfo = new ProcessStartInfo(AppInfo.ExecutablePath)
+				{
+					UseShellExecute = true,
+					Verb = "runas",
+					WindowStyle = ProcessWindowStyle.Normal,
+					CreateNoWindow = false
+				};
+				Process.Start(startInfo);
+
+				//ProcessHelper.ShellExec(AppInfo.ExecutablePath, new ShellSettings
+				//{
+				//	WorkingDirectory = AppInfo.Directory,
+				//	Verb = "runas"
+				//});
+
+				Environment.Exit(0);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.CollectMessages().Red());
 			}
 			finally
 			{

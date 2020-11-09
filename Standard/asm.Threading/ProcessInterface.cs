@@ -108,6 +108,8 @@ namespace asm.Threading
 			startInfo.RedirectStandardInput = true;
 			startInfo.RedirectStandardOutput = true;
 			startInfo.RedirectStandardError = true;
+			startInfo.StandardOutputEncoding = EncodingHelper.Default;
+			startInfo.StandardErrorEncoding = EncodingHelper.Default;
 
 			if (_cts == null)
 			{

@@ -578,9 +578,7 @@ namespace asm.Threading.Helpers
 					Arguments = arguments ?? string.Empty,
 					UseShellExecute = false,
 					WorkingDirectory = settings.WorkingDirectory,
-					CreateNoWindow = settings.CreateNoWindow,
-					StandardOutputEncoding = EncodingHelper.Default,
-					StandardErrorEncoding = EncodingHelper.Default
+					CreateNoWindow = settings.CreateNoWindow
 				}
 			};
 
@@ -635,6 +633,8 @@ namespace asm.Threading.Helpers
 			startInfo.RedirectStandardInput = settings.RedirectInput;
 			startInfo.RedirectStandardOutput = redirectOutput;
 			startInfo.RedirectStandardError = redirectError;
+			if (startInfo.RedirectStandardOutput) startInfo.StandardOutputEncoding = EncodingHelper.Default;
+			if (startInfo.RedirectStandardError) startInfo.StandardErrorEncoding = EncodingHelper.Default;
 
 			if (processEvents != null)
 			{
@@ -865,8 +865,8 @@ namespace asm.Threading.Helpers
 				}
 
 				nowRaiseTheError:
-				if (errCode == 193 || errCode == 216) throw new Win32Exception(errCode, "Invalid application.");
-				throw new Win32Exception(errCode, "Invalid application.");
+				if (errCode == 193 || errCode == 216) throw new Win32Exception(errCode);
+				throw new Win32Exception(errCode);
 			}
 
 			if (info.hProcess.IsInvalidHandle()) return null;
