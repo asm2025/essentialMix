@@ -5,7 +5,7 @@ using asm.Helpers;
 
 namespace asm.IO
 {
-	public class IOResponseSettings : IOSettings, IIoOnResponseReceived
+	public class IOResponseSettings : IOSettings, IIOOnResponseReceived
 	{
 		private const int RETRY_MIN = 0;
 		private const int RETRY_MAX = 99;
@@ -25,7 +25,7 @@ namespace asm.IO
 		public IOResponseSettings(IOSettings settings) 
 			: base(settings)
 		{
-			if (settings is IIoOnResponseReceived responseReceived) OnResponseReceived = responseReceived.OnResponseReceived;
+			if (settings is IIOOnResponseReceived responseReceived) OnResponseReceived = responseReceived.OnResponseReceived;
 			if (settings is IOResponseSettings responseSettings) Retries = responseSettings.Retries;
 		}
 

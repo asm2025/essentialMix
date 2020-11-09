@@ -14,7 +14,6 @@ using asm.Helpers;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
-// ReSharper disable once CheckNamespace
 namespace Other.Microsoft.Collections
 {
 	// based on https://github.com/microsoft/referencesource/blob/master/mscorlib/system/collections/generic/list.cs

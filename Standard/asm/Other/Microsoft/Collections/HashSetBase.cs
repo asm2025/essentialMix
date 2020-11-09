@@ -14,7 +14,6 @@ using JetBrains.Annotations;
 using asmMath = asm.Numeric.Math;
 
 // ReSharper disable once CheckNamespace
-// ReSharper disable once CheckNamespace
 namespace Other.Microsoft.Collections
 {
 	// based on https://github.com/microsoft/referencesource/blob/master/System.Core/System/Collections/Generic/HashSet.cs

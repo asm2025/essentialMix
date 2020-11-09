@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -25,7 +26,7 @@ namespace asm.Helpers
 		private static readonly string __uriSchemeHttp = $"{Uri.UriSchemeHttp}{Uri.SchemeDelimiter}";
 		private static readonly string __uriSchemeHttps = $"{Uri.UriSchemeHttps}{Uri.SchemeDelimiter}";
 
-		private static readonly IDictionary<string, HttpMethod> __httpMethodsCache = new Dictionary<string, HttpMethod>(StringComparer.OrdinalIgnoreCase);
+		private static readonly ConcurrentDictionary<string, HttpMethod> __httpMethodsCache = new ConcurrentDictionary<string, HttpMethod>(StringComparer.OrdinalIgnoreCase);
 
 		public static ISet<string> Schemes { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 		{
@@ -971,18 +972,14 @@ namespace asm.Helpers
 			value = value?.Trim();
 			if (string.IsNullOrEmpty(value)) throw new ArgumentNullException(nameof(value));
 
-			HttpMethod method;
-
-			lock (__httpMethodsCache)
+			return __httpMethodsCache.GetOrAdd(value, v =>
 			{
-				if (__httpMethodsCache.TryGetValue(value, out method)) return method;
 				Type type = typeof(HttpMethod);
 				PropertyInfo property = type.GetProperty(value, Constants.BF_PUBLIC_STATIC, type);
-				method = property != null ? (HttpMethod)property.GetValue(null) : new HttpMethod(value);
-				__httpMethodsCache.Add(value.ToUpper(), method);
-			}
-
-			return method;
+				return property != null
+										? (HttpMethod)property.GetValue(null)
+										: new HttpMethod(value);
+			});
 		}
 
 		public static string GetFileName(Uri url)
