@@ -27,6 +27,7 @@ namespace asm.Core.Web.Middleware
 		{
 		}
 
+		[NotNull]
 		public override Task Invoke([NotNull] HttpContext context)
 		{
 			if (context.RequestAborted.IsCancellationRequested) return Task.FromCanceled(context.RequestAborted);
@@ -35,7 +36,7 @@ namespace asm.Core.Web.Middleware
 			CultureInfo ci = null;
 			HttpRequest request = context.Request;
 
-			if (request.Query != null && request.Query.TryGetValue(ParameterName, out StringValues queryValues) && queryValues.Count > 0)
+			if (request.Query.TryGetValue(ParameterName, out StringValues queryValues) && queryValues.Count > 0)
 			{
 				string name = queryValues.SkipNullOrWhitespace().FirstOrDefault();
 				if (!string.IsNullOrEmpty(name)) ci = CultureInfoHelper.Get(name);
@@ -76,11 +77,13 @@ namespace asm.Core.Web.Middleware
 			return thisValue;
 		}
 
+		[NotNull]
 		public static IApplicationBuilder UseCultureHandler([NotNull] this IApplicationBuilder thisValue)
 		{
 			return thisValue.UseMiddleware<CultureHandler>();
 		}
 
+		[NotNull]
 		public static IApplicationBuilder UseCultureHandler([NotNull] this IApplicationBuilder thisValue, [NotNull] CultureHandlerOptions options)
 		{
 			return thisValue.UseMiddleware<CultureHandler>(options);

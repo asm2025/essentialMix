@@ -17,7 +17,7 @@
     <Prefer32Bit>false</Prefer32Bit>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\sign.pfx</AssemblyOriginatorKeyFile>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>GenerateWIXComponents.Program</StartupObject>

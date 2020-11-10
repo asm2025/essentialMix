@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
-using JetBrains.Annotations;
 
 namespace asm.Linq
 {
 	public abstract class QueryTranslatorProvider : ExpressionVisitor
 	{
-		protected QueryTranslatorProvider([NotNull] IQueryable source)
+		protected QueryTranslatorProvider([JetBrains.Annotations.NotNull] IQueryable source)
 		{
 			Source = source;
 		}
@@ -23,7 +22,7 @@ namespace asm.Linq
 	{
 		private readonly IEnumerable<ExpressionVisitor> _visitors;
 
-		public QueryTranslatorProvider([NotNull] IQueryable source, [NotNull] IEnumerable<ExpressionVisitor> visitors)
+		public QueryTranslatorProvider([JetBrains.Annotations.NotNull] IQueryable source, [JetBrains.Annotations.NotNull] IEnumerable<ExpressionVisitor> visitors)
 			: base(source)
 		{
 		   _visitors = visitors;
@@ -50,7 +49,7 @@ namespace asm.Linq
 			return Source.Provider.Execute(translated);
 		}
 
-		internal IEnumerable ExecuteEnumerable([NotNull] Expression expression)
+		internal IEnumerable ExecuteEnumerable([JetBrains.Annotations.NotNull] Expression expression)
 		{
 			Expression translated = VisitAll(expression);
 			return Source.Provider.CreateQuery(translated);

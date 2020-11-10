@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
-using JetBrains.Annotations;
 
 namespace asm.Numeric
 {
@@ -90,7 +89,7 @@ namespace asm.Numeric
 		//TODO: consider other overloads of ToString().  Perhaps one to always display a division symbol.
 		// For example, new Rational(0, 0).ToString() --> "0/0" instead of "Undefined", or
 		//          new Rational(5).ToString()    --> "5/1" instead of "5"
-		[NotNull]
+		[JetBrains.Annotations.NotNull]
 		public override string ToString()
 		{
 			if (IsUndefined) { return "Undefined"; }
@@ -278,7 +277,7 @@ namespace asm.Numeric
 			return false;
 		}
 
-		public static Rational Parse([NotNull] string s)
+		public static Rational Parse([JetBrains.Annotations.NotNull] string s)
 		{
 			// Note that "3 / -4" would return new Rational(-3, 4).
 			string[] tokens = s.Split('/');

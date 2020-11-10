@@ -105,7 +105,7 @@ namespace asm.Core.Web.Controllers
 			bool hasMediaTypeHeader = MediaTypeHeaderValue.TryParse(section.ContentType, out MediaTypeHeaderValue mediaType);
 			// UTF-7 is insecure and should not be honored. UTF-8 will succeed in 
 			// most cases.
-			return !hasMediaTypeHeader || Encoding.UTF7.Equals(mediaType.Encoding)
+			return !hasMediaTypeHeader || Encoding.UTF8.Equals(mediaType.Encoding)
 						? Encoding.UTF8
 						: mediaType.Encoding;
 		}

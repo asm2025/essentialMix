@@ -10,7 +10,7 @@ namespace asm.Core.Web.Http.ModelBinding
 {
 	public static class HyperModelBinderProvider
 	{
-		public static IReadOnlySet<Type> ExcludedTypes { get; } = new ReadOnlySet<Type>(new HashSet<Type>
+		public static Collections.IReadOnlySet<Type> ExcludedTypes { get; } = new ReadOnlySet<Type>(new HashSet<Type>
 		{
 			typeof(object)
 		});
