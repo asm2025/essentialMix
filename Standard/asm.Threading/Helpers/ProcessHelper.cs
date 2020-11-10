@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 using asm.Extensions;
@@ -14,16 +15,18 @@ using Microsoft.Win32.SafeHandles;
 
 namespace asm.Threading.Helpers
 {
+	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
+	[HostProtection(SecurityAction.LinkDemand, ExternalProcessMgmt = true, SelfAffectingProcessMgmt = true, SharedState = true, Synchronization = true)]
+	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public static class ProcessHelper
 	{
-		private const uint SHELL_BASE_FLAGS = (uint)
-		(
-			ShellExecuteMaskFlagsEnum.SEE_MASK_INVOKEIDLIST
-			| ShellExecuteMaskFlagsEnum.SEE_MASK_NOCLOSEPROCESS
-			| ShellExecuteMaskFlagsEnum.SEE_MASK_NOASYNC
-			| ShellExecuteMaskFlagsEnum.SEE_MASK_DOENVSUBST
-			| ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_LOG_USAGE
-		);
+		private const ShellExecuteMaskFlagsEnum SHELL_BASE_FLAGS =
+			ShellExecuteMaskFlagsEnum.SEE_MASK_NOCLOSEPROCESS |
+			ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_DDEWAIT |
+			ShellExecuteMaskFlagsEnum.SEE_MASK_INVOKEIDLIST |
+			ShellExecuteMaskFlagsEnum.SEE_MASK_NOASYNC |
+			ShellExecuteMaskFlagsEnum.SEE_MASK_DOENVSUBST |
+			ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_LOG_USAGE;
 
 		private const string REG_DLL_CMD = "regsvr32";
 		private const string FMT_REG_DLL = "\"{0}\" /s";
@@ -83,38 +86,10 @@ namespace asm.Threading.Helpers
 
 		public static Process ShellExec([NotNull] string fileName, string arguments, ShellSettings settings)
 		{
-			fileName = fileName.Trim();
-			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
 			settings ??= ShellSettings.Default;
-
-			SHELLEXECUTEINFO info = new SHELLEXECUTEINFO
-			{
-				fMask = SHELL_BASE_FLAGS,
-				nShow = (int)settings.WindowStyle,
-				lpFile = fileName,
-				lpParameters = arguments,
-				lpVerb = settings.Verb,
-				lpDirectory = settings.WorkingDirectory,
-				lpClass = settings.ClassName,
-				hKeyClass = settings.HKeyClass
-			};
-
-			if (settings.InheritConsole) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_NO_CONSOLE;
-
-			if (settings.ErrorDialog) info.hWnd = settings.ErrorDialogParentHandle;
-			else info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_NO_UI;
-
-			if (PathHelper.IsUnc(info.lpFile)) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CONNECTNETDRV;
-			if (!string.IsNullOrEmpty(info.lpClass)) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSNAME;
-			if (!info.hKeyClass.IsInvalidHandle()) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSKEY;
-
+			SHELLEXECUTEINFO info = GetShellExecuteInfo(fileName, arguments, settings);
 			Process p = InternalShellExec(info);
-
-			if (p != null)
-			{
-				if (!settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, p);
-			}
-
+			if (p != null && !settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, p);
 			return p;
 		}
 
@@ -124,24 +99,9 @@ namespace asm.Threading.Helpers
 		{
 			if (lpIDList.IsZero()) throw new ArgumentNullException(nameof(lpIDList));
 			settings ??= ShellSettings.Default;
-
-			SHELLEXECUTEINFO info = new SHELLEXECUTEINFO
-			{
-				fMask = SHELL_BASE_FLAGS | (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_IDLIST,
-				nShow = (int)settings.WindowStyle,
-				lpIDList = lpIDList,
-				lpVerb = settings.Verb,
-				lpDirectory = settings.WorkingDirectory,
-				lpClass = settings.ClassName,
-				hKeyClass = settings.HKeyClass
-			};
-
-			if (settings.ErrorDialog) info.hWnd = settings.ErrorDialogParentHandle;
-			else info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_NO_UI;
-
-			if (!string.IsNullOrEmpty(info.lpClass)) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSNAME;
-			if (!info.hKeyClass.IsInvalidHandle()) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSKEY;
-
+			SHELLEXECUTEINFO info = GetShellExecuteInfo(settings);
+			info.lpIDList = lpIDList;
+			info.fMask |= (int)ShellExecuteMaskFlagsEnum.SEE_MASK_IDLIST;
 			return InternalShellExec(info);
 		}
 
@@ -181,26 +141,7 @@ namespace asm.Threading.Helpers
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
 			settings ??= ShellSettings.Default;
 
-			SHELLEXECUTEINFO info = new SHELLEXECUTEINFO
-			{
-				fMask = SHELL_BASE_FLAGS,
-				nShow = (int)settings.WindowStyle,
-				lpFile = fileName,
-				lpParameters = arguments,
-				lpVerb = settings.Verb,
-				lpDirectory = settings.WorkingDirectory,
-				lpClass = settings.ClassName,
-				hKeyClass = settings.HKeyClass
-			};
-
-			if (settings.InheritConsole) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_NO_CONSOLE;
-
-			if (settings.ErrorDialog) info.hWnd = settings.ErrorDialogParentHandle;
-			else info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_NO_UI;
-
-			if (PathHelper.IsUnc(info.lpFile)) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CONNECTNETDRV;
-			if (!string.IsNullOrEmpty(info.lpClass)) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSNAME;
-			if (!info.hKeyClass.IsInvalidHandle()) info.fMask |= (uint)ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSKEY;
+			SHELLEXECUTEINFO info = GetShellExecuteInfo(fileName, arguments, settings);
 
 			using (Process process = InternalShellExec(info))
 			{
@@ -223,9 +164,9 @@ namespace asm.Threading.Helpers
 				{
 					waitHandle = new SafeWaitHandle(process.Handle, false);
 					if (!waitHandle.IsAwaitable()) return false;
-					processFinishedEvent = new ManualResetEvent(false) {SafeWaitHandle = waitHandle};
+					processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
 					if (!awaitableHandle.IsAwaitable()) return false;
-						
+
 					WaitHandle[] waitHandles =
 					{
 						processFinishedEvent,
@@ -262,16 +203,16 @@ namespace asm.Threading.Helpers
 			Process process = CreateForRun(execName, arguments, settings, out bool redirectOutput, out bool redirectError);
 
 			bool result = false;
-			
+
 			try
 			{
 				result = process.Start();
 				if (!result) return null;
 				if (!settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, process);
-				
+
 				if (redirectOutput) process.BeginOutputReadLine();
 				if (redirectError) process.BeginErrorReadLine();
-				
+
 				settings.OnStart?.Invoke(execName, process.StartTime);
 				return process;
 			}
@@ -396,9 +337,9 @@ namespace asm.Threading.Helpers
 					{
 						waitHandle = new SafeWaitHandle(process.Handle, false);
 						if (!waitHandle.IsAwaitable()) return false;
-						processFinishedEvent = new ManualResetEvent(false) {SafeWaitHandle = waitHandle};
+						processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
 						if (!awaitableHandle.IsAwaitable()) return false;
-						
+
 						WaitHandle[] waitHandles =
 						{
 							processFinishedEvent,
@@ -469,7 +410,7 @@ namespace asm.Threading.Helpers
 			using (Process process = CreateForRun(execName, arguments, settings))
 			{
 				bool processReallyExited = false;
-				
+
 				process.Exited += (sender, args) =>
 				{
 					Process p = (Process)sender;
@@ -498,16 +439,16 @@ namespace asm.Threading.Helpers
 					if (!settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, process);
 					output.StartTime = process.StartTime;
 					settings.OnStart?.Invoke(execName, output.StartTime);
-					
-					AsyncStreamReader outputReader = new AsyncStreamReader(process, process.StandardOutput.BaseStream, data => 
+
+					AsyncStreamReader outputReader = new AsyncStreamReader(process, process.StandardOutput.BaseStream, data =>
 					{
 						if (data == null) return;
 						output.Output.Append(data);
 						output.OutputBuilder.Append(data);
 					}, process.StandardOutput.CurrentEncoding);
 					outputReader.BeginRead();
-					
-					AsyncStreamReader errorReader = new AsyncStreamReader(process, process.StandardError.BaseStream, data => 
+
+					AsyncStreamReader errorReader = new AsyncStreamReader(process, process.StandardError.BaseStream, data =>
 					{
 						if (data == null) return;
 						output.Error.Append(data);
@@ -528,7 +469,7 @@ namespace asm.Threading.Helpers
 					{
 						waitHandle = new SafeWaitHandle(process.Handle, false);
 						if (!waitHandle.IsAwaitable()) return null;
-						processFinishedEvent = new ManualResetEvent(false) {SafeWaitHandle = waitHandle};
+						processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
 						if (!awaitableHandle.IsAwaitable()) return null;
 
 						WaitHandle[] waitHandles =
@@ -569,7 +510,7 @@ namespace asm.Threading.Helpers
 			execName = execName.Trim();
 			if (string.IsNullOrEmpty(execName)) throw new ArgumentNullException(nameof(execName));
 			settings ??= RunSettingsCore.Default;
-			
+
 			Process process = new Process
 			{
 				StartInfo = new ProcessStartInfo
@@ -607,11 +548,11 @@ namespace asm.Threading.Helpers
 			return process;
 		}
 
-		[NotNull] 
+		[NotNull]
 		public static Process CreateForRun([NotNull] string execName) { return CreateForRun(execName, null, RunSettingsBase.Default); }
-		[NotNull] 
+		[NotNull]
 		public static Process CreateForRun([NotNull] string execName, string arguments) { return CreateForRun(execName, arguments, RunSettingsBase.Default); }
-		[NotNull] 
+		[NotNull]
 		public static Process CreateForRun([NotNull] string execName, [NotNull] RunSettingsBase settings) { return CreateForRun(execName, null, settings); }
 		[NotNull]
 		public static Process CreateForRun([NotNull] string execName, string arguments, [NotNull] RunSettingsBase settings)
@@ -661,7 +602,7 @@ namespace asm.Threading.Helpers
 										{
 											// ignored
 										}
-									}				
+									}
 
 									processStartAndExit.OnExit(execName, exitTime, exitCode);
 								};
@@ -746,9 +687,9 @@ namespace asm.Threading.Helpers
 
 				waitHandle = new SafeWaitHandle(process.Handle, false);
 				if (!waitHandle.IsAwaitable()) return Task.FromResult(false);
-				processFinishedEvent = new ManualResetEvent(false) {SafeWaitHandle = waitHandle};
+				processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
 				if (!awaitableHandle.IsAwaitable()) return Task.FromResult(false);
-				
+
 				WaitHandle[] waitHandles =
 				{
 					processFinishedEvent,
@@ -777,7 +718,42 @@ namespace asm.Threading.Helpers
 			}
 		}
 
-		private static Process InternalShellExec(SHELLEXECUTEINFO info)
+		[NotNull]
+		private static SHELLEXECUTEINFO GetShellExecuteInfo(string fileName, string arguments, [NotNull] ShellSettings settings)
+		{
+			fileName = PathHelper.Trim(fileName);
+			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
+
+			SHELLEXECUTEINFO info = GetShellExecuteInfo(settings);
+			info.lpFile = fileName;
+			if (!string.IsNullOrWhiteSpace(arguments)) info.lpParameters = arguments.ToNullIfEmpty();
+			if (PathHelper.IsUnc(fileName)) info.fMask |= (int)ShellExecuteMaskFlagsEnum.SEE_MASK_CONNECTNETDRV;
+			return info;
+		}
+
+		[NotNull]
+		private static SHELLEXECUTEINFO GetShellExecuteInfo([NotNull] ShellSettings settings)
+		{
+			SHELLEXECUTEINFO info = new SHELLEXECUTEINFO
+			{
+				nShow = (int)settings.WindowStyle,
+				hKeyClass = settings.HKeyClass,
+				lpVerb = settings.Verb.ToNullIfEmpty(),
+				lpDirectory = settings.WorkingDirectory.ToNullIfEmpty()
+			};
+
+			ShellExecuteMaskFlagsEnum mask = SHELL_BASE_FLAGS;
+			if (settings.ErrorDialog) info.hWnd = settings.ErrorDialogParentHandle;
+			else mask |= ShellExecuteMaskFlagsEnum.SEE_MASK_FLAG_NO_UI;
+
+			if (settings.InheritConsole) mask |= ShellExecuteMaskFlagsEnum.SEE_MASK_NO_CONSOLE;
+			if (!info.hKeyClass.IsInvalidHandle()) mask |= ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSKEY;
+			if (info.lpClass != null) mask |= ShellExecuteMaskFlagsEnum.SEE_MASK_CLASSNAME;
+			info.fMask = (int)mask;
+			return info;
+		}
+
+		private static Process InternalShellExec([NotNull] SHELLEXECUTEINFO info)
 		{
 			bool succeeded = false;
 			int errCode = 0;
@@ -787,7 +763,7 @@ namespace asm.Threading.Helpers
 				Thread thread = new Thread(state =>
 				{
 					SHELLEXECUTEINFO sei = (SHELLEXECUTEINFO)state;
-					succeeded = Win32.ShellExecuteEx(ref sei);
+					succeeded = Win32.ShellExecuteEx(sei);
 					if (!succeeded) errCode = Marshal.GetLastWin32Error();
 				})
 				{
@@ -801,7 +777,7 @@ namespace asm.Threading.Helpers
 			}
 			else
 			{
-				succeeded = Win32.ShellExecuteEx(ref info);
+				succeeded = Win32.ShellExecuteEx(info);
 				if (!succeeded) errCode = Marshal.GetLastWin32Error();
 			}
 
@@ -809,68 +785,61 @@ namespace asm.Threading.Helpers
 			{
 				if (errCode == 0)
 				{
-					uint flag = (uint)((long)info.hInstApp - 2L);
+					long hInstApp = (long)info.hInstApp;
 
-					if (flag <= 6)
+					switch (hInstApp - 2L)
 					{
-						switch (flag)
-						{
-							case 0:
-								errCode = 2;
-								goto nowRaiseTheError;
-							case 1:
-								errCode = 3;
-								goto nowRaiseTheError;
-							case 2:
-							case 4:
-							case 5:
-								goto resetErrToHInstApp;
-							case 3:
-								errCode = 5;
-								goto nowRaiseTheError;
-							case 6:
-								errCode = 8;
-								goto nowRaiseTheError;
-						}
+						case 0:
+							errCode = 2;
+							break;
+						case 1:
+							errCode = 3;
+							break;
+						case 2:
+						case 4:
+						case 5:
+							errCode = (int)hInstApp;
+							break;
+						case 3:
+							errCode = 5;
+							break;
+						case 6:
+							errCode = 8;
+							break;
+						default:
+							switch (hInstApp - 26L)
+							{
+								case 0:
+									errCode = 32;
+									break;
+								case 2:
+								case 3:
+								case 4:
+									errCode = 1156;
+									break;
+								case 5:
+									errCode = 1155;
+									break;
+								case 6:
+									errCode = 1157;
+									break;
+								default:
+									errCode = (int)hInstApp;
+									break;
+							}
+
+							break;
 					}
-
-					uint flag2 = (uint)((long)info.hInstApp - 26L);
-
-					if (flag2 <= 6)
-					{
-						switch (flag)
-						{
-							case 0:
-								errCode = 32;
-								goto nowRaiseTheError;
-							case 1:
-								errCode = 3;
-								goto nowRaiseTheError;
-							case 2:
-							case 3:
-							case 4:
-								errCode = 1156;
-								goto nowRaiseTheError;
-							case 5:
-								errCode = 1155;
-								goto nowRaiseTheError;
-							case 6:
-								errCode = 1157;
-								goto nowRaiseTheError;
-						}
-					}
-
-					resetErrToHInstApp:
-					errCode = (int)info.hInstApp;
 				}
 
-				nowRaiseTheError:
 				if (errCode == 193 || errCode == 216) throw new Win32Exception(errCode);
 				throw new Win32Exception(errCode);
 			}
 
 			if (info.hProcess.IsInvalidHandle()) return null;
-			return TryGetProcessById(Win32.GetProcessId(info.hProcess), out Process process) ? process : null;
+			return TryGetProcessById(Win32.GetProcessId(info.hProcess), out Process process)
+						? process
+						: null;
 		}
 	}
 }

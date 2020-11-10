@@ -4460,25 +4460,24 @@ decrypted:
 					}
 				}
 			}
-			catch (InvalidOperationException iox) when (iox.InnerException != null && iox.InnerException.Message.StartsWith("Access ", StringComparison.OrdinalIgnoreCase))
+			catch (InvalidOperationException iox) when (iox.InnerException != null)
 			{
 				Console.WriteLine("I'm not running with elevated privilege! Would you like to restart me as an admin? [Y / Any key]");
 				if (Console.ReadKey().Key != ConsoleKey.Y) return;
 
-				ProcessStartInfo startInfo = new ProcessStartInfo(AppInfo.ExecutablePath)
-				{
-					UseShellExecute = true,
-					Verb = "runas",
-					WindowStyle = ProcessWindowStyle.Normal,
-					CreateNoWindow = false
-				};
-				Process.Start(startInfo);
-
-				//ProcessHelper.ShellExec(AppInfo.ExecutablePath, new ShellSettings
+				//ProcessStartInfo startInfo = new ProcessStartInfo(AppInfo.ExecutablePath)
 				//{
-				//	WorkingDirectory = AppInfo.Directory,
-				//	Verb = "runas"
-				//});
+				//	UseShellExecute = true,
+				//	Verb = "runas",
+				//	WindowStyle = ProcessWindowStyle.Normal
+				//};
+				//Process.Start(startInfo);
+
+				ProcessHelper.ShellExec(AppInfo.ExecutablePath, new ShellSettings
+				{
+					WorkingDirectory = AppInfo.Directory,
+					Verb = "runas"
+				});
 
 				Environment.Exit(0);
 			}

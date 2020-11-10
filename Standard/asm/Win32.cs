@@ -603,7 +603,7 @@ namespace asm
 	}
 
 	[Flags]
-	public enum ShellExecuteMaskFlagsEnum : uint
+	public enum ShellExecuteMaskFlagsEnum
 	{
 		SEE_MASK_DEFAULT = 0x00000000,
 		SEE_MASK_CLASSNAME = 0x00000001,
@@ -1611,7 +1611,7 @@ namespace asm
 		public SHELLEXECUTEINFO() { cbSize = Marshal.SizeOf((object)this); }
 
 		public int cbSize;
-		public uint fMask = 0;
+		public int fMask;
 		public IntPtr hWnd = IntPtr.Zero;
 
 		[MarshalAs(UnmanagedType.LPTStr)]
@@ -17242,7 +17242,7 @@ namespace asm
 		public static extern bool GetExitCodeProcess(IntPtr hProcess, out uint lpExitCode);
 
 		[DllImport("shell32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-		public static extern bool ShellExecuteEx(ref SHELLEXECUTEINFO lpExecInfo);
+		public static extern bool ShellExecuteEx(SHELLEXECUTEINFO lpExecInfo);
 
 		[DllImport("netapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
 		public static extern int NetGetJoinInformation(string computerName, ref IntPtr buffer, ref NetworkJoinStatus status);
