@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCompany("asm")]
 [assembly: AssemblyCopyright("Copyright © 2018")]
 [assembly: AssemblyDescription("FFmpeg wrapper")]
-[assembly: AssemblyFileVersion("20.11.8.11")]
+[assembly: AssemblyFileVersion("20.11.10.1")]
 [assembly: AssemblyProduct("asm.MediaToolkit")]
 [assembly: AssemblyTitle("asm.MediaToolkit")]
 [assembly: AssemblyVersion("11.0.0.0")]
