@@ -80,10 +80,11 @@ namespace asm.Helpers
 
 			UriBuilder builder = new UriBuilder(baseUri);
 
-			foreach (string s in paths.SkipNullOrEmptyTrim())
+			for (int i = 0; i < paths.Length; i++)
 			{
-				if (!Uri.IsWellFormedUriString(s, UriKind.Relative)) continue;
-				builder.Path += s;
+				string path = Escape(paths[i]);
+				if (path == null || !Uri.IsWellFormedUriString(path, UriKind.Relative)) continue;
+				builder.Path += path;
 			}
 
 			return builder.Uri;
@@ -92,7 +93,7 @@ namespace asm.Helpers
 		public static Uri ToUri([NotNull] string value, UriKind kind = UriKind.RelativeOrAbsolute, string path = null)
 		{
 			if (kind == UriKind.Absolute) return ToUriBuilder(value, path)?.Uri;
-			value = Trim(value);
+			value = Escape(value);
 			return value == null
 						? null
 						: Uri.TryCreate(value, kind, out Uri uri)
@@ -108,18 +109,18 @@ namespace asm.Helpers
 
 		public static UriBuilder ToUriBuilder(string value, string path = null)
 		{
-			value = Trim(value);
-			path = Trim(path);
+			value = Escape(value);
+			path = Escape(path);
 			if (value == null && path == null) return null;
 
 			UriBuilder builder = null;
 
-			if (!string.IsNullOrEmpty(path) && Uri.IsWellFormedUriString(path, UriKind.Absolute))
+			if (path != null && Uri.IsWellFormedUriString(path, UriKind.Absolute))
 				builder = new UriBuilder(path);
 
 			if (builder != null) return builder;
-			if (!string.IsNullOrEmpty(value) && Uri.IsWellFormedUriString(value, UriKind.RelativeOrAbsolute)) builder = new UriBuilder(value);
-			if (string.IsNullOrEmpty(path) || !Uri.IsWellFormedUriString(path, UriKind.Relative)) return builder;
+			if (value != null && Uri.IsWellFormedUriString(value, UriKind.RelativeOrAbsolute)) builder = new UriBuilder(value);
+			if (path == null || !Uri.IsWellFormedUriString(path, UriKind.Relative)) return builder;
 
 			if (builder == null) builder = new UriBuilder(path);
 			else builder.Path += Path.AltDirectorySeparatorChar + path.TrimStart(Path.AltDirectorySeparatorChar);
@@ -1023,6 +1024,32 @@ namespace asm.Helpers
 		{
 			url = Trim(url);
 			return url?.Replace(__uriSchemeHttp, __uriSchemeHttps, StringComparison.OrdinalIgnoreCase, 0, __uriSchemeHttps.Length);
+		}
+
+		public static string Escape(string value)
+		{
+			value = Trim(value);
+			if (value == null) return null;
+
+			if (value.Contains(Path.AltDirectorySeparatorChar))
+			{
+				StringBuilder sb = new StringBuilder(value.Length);
+
+				foreach (string part in value.Split(StringSplitOptions.RemoveEmptyEntries, Path.AltDirectorySeparatorChar)
+											.SkipNullOrEmpty())
+				{
+					if (sb.Length > 0) sb.Append(Path.AltDirectorySeparatorChar);
+					sb.Append(Uri.EscapeDataString(part));
+				}
+
+				value = sb.ToString();
+			}
+			else
+			{
+				value = Uri.EscapeDataString(value);
+			}
+
+			return value;
 		}
 
 		[NotNull]

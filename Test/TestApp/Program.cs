@@ -159,7 +159,9 @@ work with {HEAVY} items.".Yellow();
 
 			//TestImpersonationHelper();
 			
-			TestServiceHelper();
+			//TestServiceHelper();
+			
+			TestUriHelper();
 
 			ConsoleHelper.Pause();
 		}
@@ -4490,6 +4492,14 @@ decrypted:
 				ObjectHelper.Dispose(ref controller);
 				ObjectHelper.Dispose(ref identity);
 			}
+		}
+
+		private static void TestUriHelper()
+		{
+			const string URI_TEST = "example.com/image file.jpg";
+
+			Uri uri = UriHelper.ToUri(URI_TEST, UriKind.Absolute);
+			Console.WriteLine(uri);
 		}
 
 		private static void Title(string title)
