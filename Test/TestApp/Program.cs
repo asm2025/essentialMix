@@ -4496,7 +4496,7 @@ decrypted:
 
 		private static void TestUriHelper()
 		{
-			const string URI_TEST = "example.com/image file.jpg";
+			const string URI_TEST = "http://example.com/image file.jpg";
 
 			Uri uri = UriHelper.ToUri(URI_TEST, UriKind.Absolute);
 			Console.WriteLine(uri);

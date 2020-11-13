@@ -1029,16 +1029,30 @@ namespace asm.Helpers
 		public static string Escape(string value)
 		{
 			value = Trim(value);
-			if (value == null) return null;
+			if (value == null || Uri.IsWellFormedUriString(value, UriKind.RelativeOrAbsolute)) return value;
 
-			if (value.Contains(Path.AltDirectorySeparatorChar))
+			if (value.Contains('/'))
 			{
+				int schemeSeparator = value.IndexOf("://", StringComparison.Ordinal);
+
+				if (schemeSeparator > -1)
+				{
+					schemeSeparator += 3;
+					if (schemeSeparator == value.Length - 1) return value;
+				}
+
 				StringBuilder sb = new StringBuilder(value.Length);
 
-				foreach (string part in value.Split(StringSplitOptions.RemoveEmptyEntries, Path.AltDirectorySeparatorChar)
+				if (schemeSeparator > -1)
+				{
+					sb.Append(value.Left(schemeSeparator));
+					value = value.Right(value.Length - schemeSeparator);
+				}
+
+				foreach (string part in value.Split(StringSplitOptions.RemoveEmptyEntries, '/')
 											.SkipNullOrEmpty())
 				{
-					if (sb.Length > 0) sb.Append(Path.AltDirectorySeparatorChar);
+					if (sb.Length > 0 && sb[sb.Length - 1] != '/') sb.Append('/');
 					sb.Append(Uri.EscapeDataString(part));
 				}
 
