@@ -84,7 +84,8 @@ namespace asm.Helpers
 			{
 				string path = Escape(paths[i]);
 				if (path == null || !Uri.IsWellFormedUriString(path, UriKind.Relative)) continue;
-				builder.Path += path;
+				if (builder.Path.Length == 0 || builder.Path[builder.Path.Length - 1] != '/') builder.Path += '/';
+				builder.Path += path.TrimStart('/');
 			}
 
 			return builder.Uri;

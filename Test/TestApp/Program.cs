@@ -4501,7 +4501,7 @@ decrypted:
 			string[] uriParts =
 			{
 				"another folder",
-				"more_folders",
+				"more_folders/folder 2",
 				"image file.jpg"
 			};
 
@@ -4519,6 +4519,9 @@ decrypted:
 
 			uri = UriHelper.ToUri(uriParts[0]);
 			Console.WriteLine($"{uriParts[0]} => {uri}");
+
+			uri = UriHelper.ToUri(uriParts[1]);
+			Console.WriteLine($"{uriParts[1]} => {uri}");
 		}
 
 		private static void Title(string title)
