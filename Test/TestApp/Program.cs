@@ -4496,10 +4496,29 @@ decrypted:
 
 		private static void TestUriHelper()
 		{
-			const string URI_TEST = "http://example.com/image file.jpg";
+			const string URI_TEST = "http://example.com/folder path";
+			
+			string[] uriParts =
+			{
+				"another folder",
+				"more_folders",
+				"image file.jpg"
+			};
 
-			Uri uri = UriHelper.ToUri(URI_TEST, UriKind.Absolute);
-			Console.WriteLine(uri);
+			Uri baseUri = UriHelper.ToUri(URI_TEST, UriKind.Absolute);
+			Console.WriteLine($"{URI_TEST} => {baseUri}");
+
+			Uri uri = new Uri(baseUri.ToString());
+
+			foreach (string part in uriParts)
+			{
+				Uri newUri = UriHelper.Combine(uri, part);
+				Console.WriteLine($"{uri} + {part} => {newUri}");
+				uri = newUri;
+			}
+
+			uri = UriHelper.ToUri(uriParts[0]);
+			Console.WriteLine($"{uriParts[0]} => {uri}");
 		}
 
 		private static void Title(string title)

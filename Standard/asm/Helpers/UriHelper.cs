@@ -119,11 +119,37 @@ namespace asm.Helpers
 				builder = new UriBuilder(path);
 
 			if (builder != null) return builder;
-			if (value != null && Uri.IsWellFormedUriString(value, UriKind.RelativeOrAbsolute)) builder = new UriBuilder(value);
+
+			if (value != null)
+			{
+				if (Uri.IsWellFormedUriString(value, UriKind.Absolute)) builder = new UriBuilder(value);
+
+				if (builder == null && Uri.IsWellFormedUriString(value, UriKind.Relative))
+				{
+					builder = new UriBuilder();
+					builder.Path += value;
+				}
+			}
+
 			if (path == null || !Uri.IsWellFormedUriString(path, UriKind.Relative)) return builder;
 
-			if (builder == null) builder = new UriBuilder(path);
-			else builder.Path += Path.AltDirectorySeparatorChar + path.TrimStart(Path.AltDirectorySeparatorChar);
+			if (builder == null)
+			{
+				if (Uri.IsWellFormedUriString(path, UriKind.Relative))
+				{
+					builder = new UriBuilder();
+					builder.Path += path;
+				}
+				else
+				{
+					builder = new UriBuilder(path);
+				}
+			}
+			else
+			{
+				if (builder.Path.Length == 0 || builder.Path[builder.Path.Length - 1] != '/') builder.Path += '/';
+				builder.Path += path.TrimStart('/');
+			}
 
 			return builder;
 		}
