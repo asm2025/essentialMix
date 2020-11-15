@@ -69,7 +69,7 @@ namespace asm.Web
 			ThrowIfDisposed();
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
 			if (token.IsCancellationRequested) return null;
-			if (!UriHelper.ToUri(url, out Uri uri)) throw new ArgumentException("Uri is not well formatted.", nameof(url));
+			if (!UriHelper.TryBuildUri(url, out Uri uri)) throw new ArgumentException("Uri is not well formatted.", nameof(url));
 			return await GetStringAsync(uri, token).ConfigureAwait();
 		}
 
@@ -94,7 +94,7 @@ namespace asm.Web
 			ThrowIfDisposed();
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
 			if (token.IsCancellationRequested) return null;
-			if (!UriHelper.ToUri(url, out Uri uri)) throw new ArgumentException("Uri is not well formatted.", nameof(url));
+			if (!UriHelper.TryBuildUri(url, out Uri uri)) throw new ArgumentException("Uri is not well formatted.", nameof(url));
 			return await GetStreamAsync(uri, token).ConfigureAwait();
 		}
 

@@ -61,37 +61,43 @@ namespace asm.Helpers
 			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 		}
 
-		public static Uri Combine([NotNull] Uri baseUri, string path) { return Combine(baseUri.ToString(), path); }
-		public static Uri Combine([NotNull] Uri baseUri, [NotNull] Uri path) { return Combine(baseUri.ToString(), path.ToString()); }
-		public static Uri Combine(string baseUri, [NotNull] Uri path) { return Combine(baseUri, path.ToString()); }
+		public static Uri Combine(Uri baseUri, string path) { return Combine(baseUri.String(), path); }
+		public static Uri Combine(Uri baseUri, Uri path) { return Combine(baseUri.String(), path.String()); }
+		public static Uri Combine(string baseUri, Uri path) { return Combine(baseUri, path.String()); }
 		public static Uri Combine(string baseUri, string path)
 		{
 			UriBuilder builder = ToUriBuilder(baseUri, path);
 			return builder?.Uri;
 		}
 
-		[NotNull]
-		public static Uri Join([NotNull] string baseUri, [NotNull] params string[] paths) { return Join(ToUri(baseUri), paths); }
+		public static Uri Combine(string baseUri, [NotNull] params string[] paths)
+		{
+			Uri bu = ToUri(baseUri);
+			return bu == null
+						? null
+						: Combine(bu, paths);
+		}
 
-		[NotNull]
-		public static Uri Join([NotNull] Uri baseUri, [NotNull] params string[] paths)
+		public static Uri Combine(Uri baseUri, [NotNull] params string[] paths)
 		{
 			if (paths.IsNullOrEmpty()) return baseUri;
 
-			UriBuilder builder = new UriBuilder(baseUri);
+			UriBuilder builder = baseUri == null
+									? new UriBuilder()
+									: new UriBuilder(baseUri);
 
-			for (int i = 0; i < paths.Length; i++)
+			foreach (string path in paths)
 			{
-				string path = Escape(paths[i]);
-				if (path == null || !Uri.IsWellFormedUriString(path, UriKind.Relative)) continue;
+				string escaped = Escape(path);
+				if (escaped == null || !Uri.IsWellFormedUriString(escaped, UriKind.Relative)) continue;
 				if (builder.Path.Length == 0 || builder.Path[builder.Path.Length - 1] != '/') builder.Path += '/';
-				builder.Path += path.TrimStart('/');
+				builder.Path += escaped.TrimStart('/');
 			}
 
 			return builder.Uri;
 		}
 
-		public static Uri ToUri([NotNull] string value, UriKind kind = UriKind.RelativeOrAbsolute, string path = null)
+		public static Uri ToUri(string value, UriKind kind = UriKind.RelativeOrAbsolute, string path = null)
 		{
 			if (kind == UriKind.Absolute) return ToUriBuilder(value, path)?.Uri;
 			value = Escape(value);
@@ -102,33 +108,33 @@ namespace asm.Helpers
 							: null;
 		}
 
-		public static bool ToUri([NotNull] string value, out Uri uri, UriKind kind = UriKind.RelativeOrAbsolute, string path = null)
-		{
-			uri = ToUri(value, kind, path);
-			return uri != null;
-		}
-
 		public static UriBuilder ToUriBuilder(string value, string path = null)
 		{
 			value = Escape(value);
 			path = Escape(path);
 			if (value == null && path == null) return null;
+			if (path != null && Uri.IsWellFormedUriString(path, UriKind.Absolute)) return new UriBuilder(path);
 
 			UriBuilder builder = null;
 
-			if (path != null && Uri.IsWellFormedUriString(path, UriKind.Absolute))
-				builder = new UriBuilder(path);
-
-			if (builder != null) return builder;
-
 			if (value != null)
 			{
-				if (Uri.IsWellFormedUriString(value, UriKind.Absolute)) builder = new UriBuilder(value);
-
-				if (builder == null && Uri.IsWellFormedUriString(value, UriKind.Relative))
+				if (Uri.IsWellFormedUriString(value, UriKind.Absolute))
 				{
-					builder = new UriBuilder();
-					builder.Path += value;
+					builder = new UriBuilder(value);
+				}
+				else if (Uri.IsWellFormedUriString(value, UriKind.Relative))
+				{
+					if (value.StartsWith('/'))
+					{
+						builder = new UriBuilder();
+						builder.Path += value;
+					}
+					else
+					{
+						if (!value.Contains("://", StringComparison.Ordinal)) value = "http://" + value;
+						builder = new UriBuilder(value);
+					}
 				}
 			}
 
@@ -136,14 +142,22 @@ namespace asm.Helpers
 
 			if (builder == null)
 			{
-				if (Uri.IsWellFormedUriString(path, UriKind.Relative))
-				{
-					builder = new UriBuilder();
-					builder.Path += path;
-				}
-				else
+				if (Uri.IsWellFormedUriString(path, UriKind.Absolute))
 				{
 					builder = new UriBuilder(path);
+				}
+				else if (Uri.IsWellFormedUriString(path, UriKind.Relative))
+				{
+					if (path.StartsWith('/'))
+					{
+						builder = new UriBuilder();
+						builder.Path += path;
+					}
+					else
+					{
+						if (!path.Contains("://", StringComparison.Ordinal)) path = "http://" + path;
+						builder = new UriBuilder(path);
+					}
 				}
 			}
 			else
@@ -155,7 +169,13 @@ namespace asm.Helpers
 			return builder;
 		}
 
-		public static bool ToUriBuilder(string value, out UriBuilder builder, string path = null)
+		public static bool TryBuildUri(string value, out Uri uri, UriKind kind = UriKind.RelativeOrAbsolute, string path = null)
+		{
+			uri = ToUri(value, kind, path);
+			return uri != null;
+		}
+
+		public static bool TryBuildUri(string value, out UriBuilder builder, string path = null)
 		{
 			builder = ToUriBuilder(value, path);
 			return builder != null;
@@ -260,7 +280,7 @@ namespace asm.Helpers
 		{
 			value = value?.Trim();
 			if (string.IsNullOrEmpty(value)) return false;
-			if (!ToUri(value, out Uri outUri, kind) || outUri == null) return false;
+			if (!TryBuildUri(value, out Uri outUri, kind) || outUri == null) return false;
 			if (!outUri.IsAbsoluteUri || scheme == null || scheme.Length == 0) return true;
 			return scheme.Length == 0 || scheme.All(s => s != null && Schemes.Contains(s));
 		}
@@ -1010,6 +1030,7 @@ namespace asm.Helpers
 			});
 		}
 
+		public static string GetFileName(string url) { return GetFileName(ToUri(url)); }
 		public static string GetFileName(Uri url)
 		{
 			if (url == null) return null;
@@ -1021,28 +1042,8 @@ namespace asm.Helpers
 
 			string path = url.IsAbsoluteUri
 							? url.GetComponents(UriComponents.Path, UriFormat.SafeUnescaped)
-							: url.ToString();
+							: url.PathAndQuery;
 			return GetFileName(path);
-		}
-
-		public static string GetFileName(string url)
-		{
-			url = url?.Trim(' ', '/');
-			if (string.IsNullOrEmpty(url)) return null;
-			if (!IsWellFormedUriString(url, UriKind.RelativeOrAbsolute)) return null;
-
-			int n = url.IndexOf('?');
-			if (n > -1) url = url.Substring(0, n);
-			n = url.LastIndexOf('/');
-
-			if (n > -1)
-			{
-				n++;
-				url = n < url.Length ? url.Substring(n) : null;
-			}
-
-			if (url != null && url.Length == 0) url = null;
-			return url;
 		}
 
 		public static string Trim(string url) { return url?.Trim(PathHelper.AltDirectorySeparator, ' ').ToNullIfEmpty(); }
@@ -1076,7 +1077,7 @@ namespace asm.Helpers
 					value = value.Right(value.Length - schemeSeparator);
 				}
 
-				foreach (string part in value.Split(StringSplitOptions.RemoveEmptyEntries, '/')
+				foreach (string part in value.Enumerate('/')
 											.SkipNullOrEmpty())
 				{
 					if (sb.Length > 0 && sb[sb.Length - 1] != '/') sb.Append('/');

@@ -19,7 +19,7 @@ namespace asm.Web.Helpers
 		{
 			url = url?.Trim();
 			if (string.IsNullOrEmpty(url)) url = URL_DEF;
-			if (!UriHelper.ToUri(url, out Uri uri)) throw new ArgumentException("Uri is not well formatted.", nameof(url));
+			if (!UriHelper.TryBuildUri(url, out Uri uri)) throw new ArgumentException("Uri is not well formatted.", nameof(url));
 			return Create(uri);
 		}
 

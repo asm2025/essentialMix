@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.Text;
 using JetBrains.Annotations;
 using asm.Helpers;
 
@@ -8,28 +6,37 @@ namespace asm.Extensions
 {
 	public static class UriExtension
 	{
-		[NotNull]
-		public static Uri Join([NotNull] this Uri thisValue, [NotNull] params string[] paths)
+		public static Uri Append(this Uri thisValue, string path)
 		{
-			if (paths.Length == 0) return thisValue;
-
-			StringBuilder sb = new StringBuilder(thisValue.ToString().TrimEnd(' ', '/'));
-
-			foreach (string path in paths)
-			{
-				string p = UriHelper.Trim(path);
-				if (string.IsNullOrEmpty(p)) continue;
-				sb.Separator(Path.AltDirectorySeparatorChar).Append(p);
-			}
-
-			return new Uri(sb.ToString());
+			return UriHelper.Combine(thisValue, path);
 		}
 
-		public static string RelativeUri([NotNull] this Uri thisValue)
+		public static Uri Append(this Uri thisValue, Uri path)
 		{
-			return !thisValue.IsAbsoluteUri
-						? thisValue.ToString()
-						: thisValue.PathAndQuery;
+			return UriHelper.Combine(thisValue, path);
+		}
+
+		public static Uri Append(this Uri thisValue, [NotNull] params string[] paths)
+		{
+			return UriHelper.Combine(thisValue, paths);
+		}
+
+		public static string String(this Uri thisValue)
+		{
+			return thisValue == null
+						? null
+						: thisValue.IsAbsoluteUri
+							? thisValue.AbsoluteUri
+							: thisValue.PathAndQuery;
+		}
+
+		public static string RelativeUri(this Uri thisValue)
+		{
+			return thisValue == null
+						? null
+						: !thisValue.IsAbsoluteUri
+							? thisValue.ToString()
+							: thisValue.PathAndQuery;
 		}
 	}
 }

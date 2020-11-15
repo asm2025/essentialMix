@@ -4480,8 +4480,6 @@ decrypted:
 					WorkingDirectory = AppInfo.Directory,
 					Verb = "runas"
 				});
-
-				Environment.Exit(0);
 			}
 			catch (Exception ex)
 			{
@@ -4522,6 +4520,33 @@ decrypted:
 
 			uri = UriHelper.ToUri(uriParts[1]);
 			Console.WriteLine($"{uriParts[1]} => {uri}");
+
+			string[] urls = {
+				"server:8088",
+				"server:8088/func1",
+				"server:8088/func1/SubFunc1",
+				"server:8088/my folder/my image.jpg",
+				"http://server",
+				"http://server/func1",
+				"http://server/func/SubFunc1",
+				"http://server:8088",
+				"http://server:8088/func1",
+				"http://server:8088/func1/SubFunc1",
+				"magnet://server",
+				"magnet://server/func1",
+				"magnet://server/func/SubFunc1",
+				"magnet://server:8088",
+				"magnet://server:8088/func1",
+				"magnet://server:8088/func1/SubFunc1",
+				"http://[2001:db8::1]",
+				"http://[2001:db8::1]:80",
+			};
+
+			foreach (string item in urls)
+			{
+				uri = UriHelper.ToUri(item);
+				Console.WriteLine(uri.String());
+			}
 		}
 
 		private static void Title(string title)
