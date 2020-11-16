@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using asm.Extensions;
 using asm.Helpers;
+using JetBrains.Annotations;
 
 namespace asm.Collections
 {
@@ -29,12 +30,12 @@ namespace asm.Collections
 		{
 		}
 
-		public EnumRange([JetBrains.Annotations.NotNull] IReadOnlyRange<T> range) 
+		public EnumRange([NotNull] IReadOnlyRange<T> range) 
 			: this(range.Minimum, range.Maximum)
 		{
 		}
 
-		public EnumRange([JetBrains.Annotations.NotNull] LambdaRange<T> range) 
+		public EnumRange([NotNull] LambdaRange<T> range) 
 			: this(range.Minimum, range.Maximum)
 		{
 		}
@@ -83,7 +84,7 @@ namespace asm.Collections
 
 		}
 
-		public void ForEach([JetBrains.Annotations.NotNull] Action<T, string> action)
+		public void ForEach([NotNull] Action<T, string> action)
 		{
 			int i = 0;
 
@@ -94,7 +95,7 @@ namespace asm.Collections
 			}
 		}
 
-		public void ForEach([JetBrains.Annotations.NotNull] Action<T, string, int> action)
+		public void ForEach([NotNull] Action<T, string, int> action)
 		{
 			int i = 0;
 
@@ -105,7 +106,7 @@ namespace asm.Collections
 			}
 		}
 
-		public void ForEach([JetBrains.Annotations.NotNull] Action<T, string, string> action)
+		public void ForEach([NotNull] Action<T, string, string> action)
 		{
 			int i = 0;
 
@@ -116,7 +117,7 @@ namespace asm.Collections
 			}
 		}
 
-		public void ForEach([JetBrains.Annotations.NotNull] Action<T, string, string, int> action)
+		public void ForEach([NotNull] Action<T, string, string, int> action)
 		{
 			int i = 0;
 
@@ -127,7 +128,7 @@ namespace asm.Collections
 			}
 		}
 
-		public void ForEach([JetBrains.Annotations.NotNull] Func<T, string, bool> action)
+		public void ForEach([NotNull] Func<T, string, bool> action)
 		{
 			int i = 0;
 
@@ -138,7 +139,7 @@ namespace asm.Collections
 			}
 		}
 
-		public void ForEach([JetBrains.Annotations.NotNull] Func<T, string, int, bool> action)
+		public void ForEach([NotNull] Func<T, string, int, bool> action)
 		{
 			int i = 0;
 
@@ -149,7 +150,7 @@ namespace asm.Collections
 			}
 		}
 
-		public void ForEach([JetBrains.Annotations.NotNull] Func<T, string, string, bool> action)
+		public void ForEach([NotNull] Func<T, string, string, bool> action)
 		{
 			int i = 0;
 
@@ -160,7 +161,7 @@ namespace asm.Collections
 			}
 		}
 
-		public void ForEach([JetBrains.Annotations.NotNull] Func<T, string, string, int, bool> action)
+		public void ForEach([NotNull] Func<T, string, string, int, bool> action)
 		{
 			int i = 0;
 
@@ -191,13 +192,13 @@ namespace asm.Collections
 
 		public static bool operator !=(EnumRange<T> x, EnumRange<T> y) { return !(x == y); }
 
-		public static bool operator >([JetBrains.Annotations.NotNull] EnumRange<T> x, EnumRange<T> y) { return x.IsIterable && x.Maximum.IsGreaterThan(y.Maximum); }
+		public static bool operator >([NotNull] EnumRange<T> x, EnumRange<T> y) { return x.IsIterable && x.Maximum.IsGreaterThan(y.Maximum); }
 
-		public static bool operator <([JetBrains.Annotations.NotNull] EnumRange<T> x, EnumRange<T> y) { return x.IsIterable && x.Minimum.IsLessThan(y.Minimum); }
+		public static bool operator <([NotNull] EnumRange<T> x, EnumRange<T> y) { return x.IsIterable && x.Minimum.IsLessThan(y.Minimum); }
 
-		public static bool operator >=([JetBrains.Annotations.NotNull] EnumRange<T> x, EnumRange<T> y) { return x.IsIterable && x.Maximum.IsGreaterThanOrEqual(y.Maximum); }
+		public static bool operator >=([NotNull] EnumRange<T> x, EnumRange<T> y) { return x.IsIterable && x.Maximum.IsGreaterThanOrEqual(y.Maximum); }
 
-		public static bool operator <=([JetBrains.Annotations.NotNull] EnumRange<T> x, EnumRange<T> y) { return x.IsIterable && x.Minimum.IsLessThanOrEqual(y.Minimum); }
+		public static bool operator <=([NotNull] EnumRange<T> x, EnumRange<T> y) { return x.IsIterable && x.Minimum.IsLessThanOrEqual(y.Minimum); }
 
 		public static EnumRange<T> operator +(EnumRange<T> x, EnumRange<T> y)
 		{
@@ -238,7 +239,7 @@ namespace asm.Collections
 			return parsed;
 		}
 
-		[JetBrains.Annotations.NotNull]
+		[NotNull]
 		public static ICollection<EnumRange<T>> ParseGroup<T>(string value)
 			where T : struct, Enum, IComparable
 		{
