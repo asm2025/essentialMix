@@ -34,7 +34,7 @@ namespace asm.Extensions
 		{
 			if (thisValue == null) return null;
 			if (thisValue.IsAbsoluteUri) return thisValue.PathAndQuery;
-			Uri tmp = new Uri("http://tempUri/" + thisValue.OriginalString);
+			Uri tmp = new Uri("http://tempUri/" + thisValue.OriginalString.TrimStart('/'));
 			return tmp.PathAndQuery;
 		}
 	}
