@@ -13,7 +13,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using NewtonsoftJsonSerializer = Newtonsoft.Json.JsonSerializer;
 
-namespace asm.Newtonsoft.Serialization
+namespace asm.Newtonsoft.Converters
 {
 	public class StringEnumTranslationConverter : StringEnumConverter
 	{
@@ -69,8 +69,12 @@ namespace asm.Newtonsoft.Serialization
 		/// <inheritdoc />
 		public override void WriteJson(JsonWriter writer, object value, NewtonsoftJsonSerializer jsonSerializer)
 		{
-			if (writer == null) throw new ArgumentNullException(nameof(writer));
-			if (jsonSerializer == null) throw new ArgumentNullException(nameof(jsonSerializer));
+			if (value == null)
+			{
+				writer.WriteNull();
+				return;
+			}
+			
 			Type type = value.AsType();
 
 			if (!IsTypeIncluded(type))
