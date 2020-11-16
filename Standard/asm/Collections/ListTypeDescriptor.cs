@@ -6,18 +6,19 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using asm.Extensions;
+using JetBrains.Annotations;
 
 namespace asm.Collections
 {
 	public class ListTypeDescriptor<TSource> : TypeDescriptorBase<TSource>, IList
 		where TSource : IList
 	{
-		public ListTypeDescriptor([JetBrains.Annotations.NotNull] TSource source)
+		public ListTypeDescriptor([NotNull] TSource source)
 			: base(source)
 		{
 		}
 
-		[JetBrains.Annotations.NotNull]
+		[NotNull]
 		public override PropertyDescriptorCollection GetProperties()
 		{
 			PropertyDescriptorCollection pds = new PropertyDescriptorCollection(null);
@@ -28,8 +29,8 @@ namespace asm.Collections
 			return pds;
 		}
 
-		[JetBrains.Annotations.NotNull]
-		public override PropertyDescriptorCollection GetProperties([JetBrains.Annotations.NotNull] Attribute[] attributes)
+		[NotNull]
+		public override PropertyDescriptorCollection GetProperties([NotNull] Attribute[] attributes)
 		{
 			if (attributes == null) throw new ArgumentNullException(nameof(attributes));
 			if (attributes.Length == 0) return GetProperties();
@@ -88,24 +89,24 @@ namespace asm.Collections
 
 		public bool IsFixedSize => Source.IsFixedSize;
 
-		public void ForEach([JetBrains.Annotations.NotNull] Action<object> action) { Source.Cast<object>().ForEach(action); }
+		public void ForEach([NotNull] Action<object> action) { Source.Cast<object>().ForEach(action); }
 
-		public void ForEach([JetBrains.Annotations.NotNull] Func<object, bool> action) { Source.Cast<object>().ForEach(action); }
+		public void ForEach([NotNull] Func<object, bool> action) { Source.Cast<object>().ForEach(action); }
 
-		public void ForEach([JetBrains.Annotations.NotNull] Action<object, int> action) { Source.Cast<object>().ForEach(action); }
+		public void ForEach([NotNull] Action<object, int> action) { Source.Cast<object>().ForEach(action); }
 
-		public void ForEach([JetBrains.Annotations.NotNull] Func<object, int, bool> action) { Source.Cast<object>().ForEach(action); }
+		public void ForEach([NotNull] Func<object, int, bool> action) { Source.Cast<object>().ForEach(action); }
 	}
 
 	public class ListTypeDescriptor<TSource, T> : TypeDescriptorBase<TSource>, IList<T>, IList
 		where TSource : IList<T>, IList
 	{
-		public ListTypeDescriptor([JetBrains.Annotations.NotNull] TSource source)
+		public ListTypeDescriptor([NotNull] TSource source)
 			: base(source)
 		{
 		}
 
-		[JetBrains.Annotations.NotNull]
+		[NotNull]
 		public override PropertyDescriptorCollection GetProperties()
 		{
 			PropertyDescriptorCollection pds = new PropertyDescriptorCollection(null);
@@ -116,8 +117,8 @@ namespace asm.Collections
 			return pds;
 		}
 
-		[JetBrains.Annotations.NotNull]
-		public override PropertyDescriptorCollection GetProperties([JetBrains.Annotations.NotNull] Attribute[] attributes)
+		[NotNull]
+		public override PropertyDescriptorCollection GetProperties([NotNull] Attribute[] attributes)
 		{
 			if (attributes == null) throw new ArgumentNullException(nameof(attributes));
 			if (attributes.Length == 0) return GetProperties();
@@ -191,12 +192,12 @@ namespace asm.Collections
 			set => ((IList<T>)Source)[index] = value;
 		}
 
-		public void ForEach([JetBrains.Annotations.NotNull] Action<T> action) { Source.ForEach(action); }
+		public void ForEach([NotNull] Action<T> action) { Source.ForEach(action); }
 
-		public void ForEach([JetBrains.Annotations.NotNull] Func<T, bool> action) { Source.ForEach(action); }
+		public void ForEach([NotNull] Func<T, bool> action) { Source.ForEach(action); }
 
-		public void ForEach([JetBrains.Annotations.NotNull] Action<T, int> action) { Source.ForEach(action); }
+		public void ForEach([NotNull] Action<T, int> action) { Source.ForEach(action); }
 
-		public void ForEach([JetBrains.Annotations.NotNull] Func<T, int, bool> action) { Source.ForEach(action); }
+		public void ForEach([NotNull] Func<T, int, bool> action) { Source.ForEach(action); }
 	}
 }

@@ -6,18 +6,19 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using asm.Extensions;
+using JetBrains.Annotations;
 
 namespace asm.Collections
 {
 	public class DictionaryTypeDescriptor<TSource> : TypeDescriptorBase<TSource>, IDictionary
 		where TSource : IDictionary
 	{
-		public DictionaryTypeDescriptor([JetBrains.Annotations.NotNull] TSource source)
+		public DictionaryTypeDescriptor([NotNull] TSource source)
 			: base(source)
 		{
 		}
 
-		[JetBrains.Annotations.NotNull]
+		[NotNull]
 		public override PropertyDescriptorCollection GetProperties()
 		{
 			PropertyDescriptorCollection pds = new PropertyDescriptorCollection(null);
@@ -25,8 +26,8 @@ namespace asm.Collections
 			return pds;
 		}
 
-		[JetBrains.Annotations.NotNull]
-		public override PropertyDescriptorCollection GetProperties([JetBrains.Annotations.NotNull] Attribute[] attributes)
+		[NotNull]
+		public override PropertyDescriptorCollection GetProperties([NotNull] Attribute[] attributes)
 		{
 			if (attributes == null) throw new ArgumentNullException(nameof(attributes));
 			if (attributes.Length == 0) return GetProperties();
@@ -80,24 +81,24 @@ namespace asm.Collections
 
 		public bool IsSynchronized => Source.IsSynchronized;
 
-		public void ForEach([JetBrains.Annotations.NotNull] Action<DictionaryEntry> action) { Source.Cast<DictionaryEntry>().ForEach(action); }
+		public void ForEach([NotNull] Action<DictionaryEntry> action) { Source.Cast<DictionaryEntry>().ForEach(action); }
 
-		public void ForEach([JetBrains.Annotations.NotNull] Func<DictionaryEntry, bool> action) { Source.Cast<DictionaryEntry>().ForEach(action); }
+		public void ForEach([NotNull] Func<DictionaryEntry, bool> action) { Source.Cast<DictionaryEntry>().ForEach(action); }
 
-		public void ForEach([JetBrains.Annotations.NotNull] Action<DictionaryEntry, int> action) { Source.Cast<DictionaryEntry>().ForEach(action); }
+		public void ForEach([NotNull] Action<DictionaryEntry, int> action) { Source.Cast<DictionaryEntry>().ForEach(action); }
 
-		public void ForEach([JetBrains.Annotations.NotNull] Func<DictionaryEntry, int, bool> action) { Source.Cast<DictionaryEntry>().ForEach(action); }
+		public void ForEach([NotNull] Func<DictionaryEntry, int, bool> action) { Source.Cast<DictionaryEntry>().ForEach(action); }
 	}
 
 	public class DictionaryTypeDescriptor<TSource, TKey, TValue> : TypeDescriptorBase<TSource>, IDictionary<TKey, TValue>, IDictionary
 		where TSource : IDictionary<TKey, TValue>, IDictionary
 	{
-		public DictionaryTypeDescriptor([JetBrains.Annotations.NotNull] TSource source)
+		public DictionaryTypeDescriptor([NotNull] TSource source)
 			: base(source)
 		{
 		}
 
-		[JetBrains.Annotations.NotNull]
+		[NotNull]
 		public override PropertyDescriptorCollection GetProperties()
 		{
 			PropertyDescriptorCollection pds = new PropertyDescriptorCollection(null);
@@ -105,8 +106,8 @@ namespace asm.Collections
 			return pds;
 		}
 
-		[JetBrains.Annotations.NotNull]
-		public override PropertyDescriptorCollection GetProperties([JetBrains.Annotations.NotNull] Attribute[] attributes)
+		[NotNull]
+		public override PropertyDescriptorCollection GetProperties([NotNull] Attribute[] attributes)
 		{
 			if (attributes == null) throw new ArgumentNullException(nameof(attributes));
 			if (attributes.Length == 0) return GetProperties();
@@ -189,12 +190,12 @@ namespace asm.Collections
 
 		public ICollection<TValue> Values => ((IDictionary<TKey, TValue>)Source).Values;
 
-		public void ForEach([JetBrains.Annotations.NotNull] Action<KeyValuePair<TKey, TValue>> action) { Source.ForEach(action); }
+		public void ForEach([NotNull] Action<KeyValuePair<TKey, TValue>> action) { Source.ForEach(action); }
 
-		public void ForEach([JetBrains.Annotations.NotNull] Func<KeyValuePair<TKey, TValue>, bool> action) { Source.ForEach(action); }
+		public void ForEach([NotNull] Func<KeyValuePair<TKey, TValue>, bool> action) { Source.ForEach(action); }
 
-		public void ForEach([JetBrains.Annotations.NotNull] Action<KeyValuePair<TKey, TValue>, int> action) { Source.ForEach(action); }
+		public void ForEach([NotNull] Action<KeyValuePair<TKey, TValue>, int> action) { Source.ForEach(action); }
 
-		public void ForEach([JetBrains.Annotations.NotNull] Func<KeyValuePair<TKey, TValue>, int, bool> action) { Source.ForEach(action); }
+		public void ForEach([NotNull] Func<KeyValuePair<TKey, TValue>, int, bool> action) { Source.ForEach(action); }
 	}
 }

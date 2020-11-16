@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using JetBrains.Annotations;
 
 namespace asm.Drawing
 {
@@ -50,7 +51,7 @@ namespace asm.Drawing
 			}
 		}
 
-		[JetBrains.Annotations.NotNull]
+		[NotNull]
 		public override string ToString() { return $"{Top},{Right},{Bottom},{Left}"; }
 
 		public bool Equals(Offset other) { return other.Top == Top && other.Right == Right && other.Bottom == Bottom && other.Left == Left; }
