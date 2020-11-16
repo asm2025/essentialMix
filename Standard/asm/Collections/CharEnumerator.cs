@@ -14,10 +14,21 @@ namespace asm.Collections
 			if (Index < 0)
 			{
 				Index = 0;
+
+				while (Index < TargetString.Length && TargetString[Index] == Delimiter) 
+					Index++;
+
+				if (Index == TargetString.Length - 1)
+				{
+					Reset();
+					Done = true;
+					return false;
+				}
+
 				NextIndex = TargetString.IndexOf(Delimiter, Index + 1);
-				SearchLength = NextIndex > -1
+				SearchLength = (NextIndex > -1
 									? NextIndex
-									: TargetString.Length;
+									: TargetString.Length) - Index;
 				return true;
 			}
 			
@@ -29,25 +40,21 @@ namespace asm.Collections
 			}
 
 			Index = NextIndex + 1;
-			NextIndex = TargetString.IndexOf(Delimiter, Index + 1);
 
-			while (NextIndex > -1 && Index + 1 == NextIndex)
+			while (Index < TargetString.Length && TargetString[Index] == Delimiter) 
+				Index++;
+
+			if (Index == TargetString.Length - 1)
 			{
-				Index = NextIndex + 1;
-
-				if (Index >= TargetString.Length - 1)
-				{
-					Reset();
-					Done = true;
-					return false;
-				}
-
-				NextIndex = TargetString.IndexOf(Delimiter, Index + 1);
+				Reset();
+				Done = true;
+				return false;
 			}
 
-			SearchLength = NextIndex > -1
-								? NextIndex - Index
-								: TargetString.Length - Index;
+			NextIndex = TargetString.IndexOf(Delimiter, Index + 1);
+			SearchLength = (NextIndex > -1
+								? NextIndex
+								: TargetString.Length) - Index;
 			Done = NextIndex < 0;
 			return true;
 		}

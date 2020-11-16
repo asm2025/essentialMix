@@ -4498,53 +4498,53 @@ decrypted:
 			
 			string[] uriParts =
 			{
-				"another folder",
+				"/another folder",
 				"more_folders/folder 2",
 				"image file.jpg"
 			};
 
-			Uri baseUri = UriHelper.ToUri(URI_TEST, UriKind.Absolute);
-			Console.WriteLine($"{URI_TEST} => {baseUri}");
+			//Uri baseUri = UriHelper.ToUri(URI_TEST, UriKind.Absolute);
+			//Console.WriteLine($"{URI_TEST} => {baseUri.String()}");
 
-			Uri uri = new Uri(baseUri.ToString());
+			//Uri uri = new Uri(baseUri.ToString());
 
-			foreach (string part in uriParts)
-			{
-				Uri newUri = UriHelper.Combine(uri, part);
-				Console.WriteLine($"{uri} + {part} => {newUri}");
-				uri = newUri;
-			}
+			//foreach (string part in uriParts)
+			//{
+			//	Uri newUri = UriHelper.Combine(uri, part);
+			//	Console.WriteLine($"{uri.String()} + {part} => {newUri.String()}");
+			//	uri = newUri;
+			//}
 
-			uri = UriHelper.ToUri(uriParts[0]);
-			Console.WriteLine($"{uriParts[0]} => {uri}");
+			//Uri uri = UriHelper.ToUri(uriParts[0]);
+			//Console.WriteLine($"{uriParts[0]} => {uri.String()}");
 
-			uri = UriHelper.ToUri(uriParts[1]);
-			Console.WriteLine($"{uriParts[1]} => {uri}");
+			//uri = UriHelper.ToUri(uriParts[1]);
+			//Console.WriteLine($"{uriParts[1]} => {uri.String()}");
 
 			string[] urls = {
 				"server:8088",
 				"server:8088/func1",
 				"server:8088/func1/SubFunc1",
 				"server:8088/my folder/my image.jpg",
-				"http://server",
-				"http://server/func1",
-				"http://server/func/SubFunc1",
-				"http://server:8088",
-				"http://server:8088/func1",
-				"http://server:8088/func1/SubFunc1",
-				"magnet://server",
-				"magnet://server/func1",
-				"magnet://server/func/SubFunc1",
-				"magnet://server:8088",
-				"magnet://server:8088/func1",
-				"magnet://server:8088/func1/SubFunc1",
-				"http://[2001:db8::1]",
-				"http://[2001:db8::1]:80",
+				//"http://server",
+				//"http://server/func1",
+				//"http://server/func/SubFunc1",
+				//"http://server:8088",
+				//"http://server:8088/func1",
+				//"http://server:8088/func1/SubFunc1",
+				//"magnet://server",
+				//"magnet://server/func1",
+				//"magnet://server/func/SubFunc1",
+				//"magnet://server:8088",
+				//"magnet://server:8088/func1",
+				//"magnet://server:8088/func1/SubFunc1",
+				//"http://[2001:db8::1]",
+				//"http://[2001:db8::1]:80",
 			};
 
 			foreach (string item in urls)
 			{
-				uri = UriHelper.ToUri(item);
+				Uri uri = UriHelper.ToUri(item);
 				Console.WriteLine(uri.String());
 			}
 		}

@@ -100,18 +100,17 @@ namespace asm.Helpers
 		public static Uri ToUri(string value, UriKind kind = UriKind.RelativeOrAbsolute, string path = null)
 		{
 			if (kind == UriKind.Absolute) return ToUriBuilder(value, path)?.Uri;
-			value = Escape(value);
-			return value == null
-						? null
-						: Uri.TryCreate(value, kind, out Uri uri)
-							? uri
-							: null;
+			value = Escape(value, true);
+			if (string.IsNullOrEmpty(value)) return null;
+			return Uri.TryCreate(value, kind, out Uri uri)
+						? uri
+						: null;
 		}
 
 		public static UriBuilder ToUriBuilder(string value, string path = null)
 		{
-			value = Escape(value);
-			path = Escape(path);
+			value = Escape(value, true);
+			path = Escape(path, string.IsNullOrEmpty(value));
 			if (value == null && path == null) return null;
 			if (path != null && Uri.IsWellFormedUriString(path, UriKind.Absolute)) return new UriBuilder(path);
 
@@ -132,7 +131,6 @@ namespace asm.Helpers
 					}
 					else
 					{
-						if (!value.Contains("://", StringComparison.Ordinal)) value = "http://" + value;
 						builder = new UriBuilder(value);
 					}
 				}
@@ -155,7 +153,6 @@ namespace asm.Helpers
 					}
 					else
 					{
-						if (!path.Contains("://", StringComparison.Ordinal)) path = "http://" + path;
 						builder = new UriBuilder(path);
 					}
 				}
@@ -1046,7 +1043,27 @@ namespace asm.Helpers
 			return GetFileName(path);
 		}
 
-		public static string Trim(string url) { return url?.Trim(PathHelper.AltDirectorySeparator, ' ').ToNullIfEmpty(); }
+		public static string Trim(string url)
+		{
+			url = url.ToNullIfEmpty();
+			if (url == null) return null;
+			url = url.TrimEnd('/', ' ');
+			if (url.Length == 0) return string.Empty;
+
+			int n = -1;
+
+			while (n < url.Length - 1 && url[n + 1] == '/') 
+				n++;
+
+			if (n > 0)
+			{
+				url = n == url.Length - 1
+						? "/"
+						: url.Right(url.Length - n);
+			}
+
+			return url;
+		}
 
 		public static string Secure(string url)
 		{
@@ -1054,10 +1071,12 @@ namespace asm.Helpers
 			return url?.Replace(__uriSchemeHttp, __uriSchemeHttps, StringComparison.OrdinalIgnoreCase, 0, __uriSchemeHttps.Length);
 		}
 
-		public static string Escape(string value)
+		public static string Escape(string value, bool checkScheme = false)
 		{
 			value = Trim(value);
-			if (value == null || Uri.IsWellFormedUriString(value, UriKind.RelativeOrAbsolute)) return value;
+			if (string.IsNullOrEmpty(value)) return value;
+			if (checkScheme && !value.StartsWith('/') && !value.Contains("://", StringComparison.Ordinal)) value = "http://" + value;
+			if (Uri.IsWellFormedUriString(value, UriKind.RelativeOrAbsolute)) return value;
 
 			if (value.Contains('/'))
 			{

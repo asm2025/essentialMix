@@ -27,16 +27,15 @@ namespace asm.Extensions
 						? null
 						: thisValue.IsAbsoluteUri
 							? thisValue.AbsoluteUri
-							: thisValue.PathAndQuery;
+							: RelativeUri(thisValue);
 		}
 
 		public static string RelativeUri(this Uri thisValue)
 		{
-			return thisValue == null
-						? null
-						: !thisValue.IsAbsoluteUri
-							? thisValue.ToString()
-							: thisValue.PathAndQuery;
+			if (thisValue == null) return null;
+			if (thisValue.IsAbsoluteUri) return thisValue.PathAndQuery;
+			Uri tmp = new Uri("http://tempUri/" + thisValue.OriginalString);
+			return tmp.PathAndQuery;
 		}
 	}
 }

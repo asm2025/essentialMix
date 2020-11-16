@@ -63,13 +63,26 @@ namespace asm.Collections
 		{
 			if (!IsIterable || Done) return false;
 
+			int len = Delimiter.Length;
+
 			if (Index < 0)
 			{
 				Index = 0;
+
+				while (Index + len < TargetString.Length && string.Compare(TargetString, Index, Delimiter, 0, len, Comparison) == 0)
+					Index += len;
+
+				if (Index + len == TargetString.Length - 1)
+				{
+					Reset();
+					Done = true;
+					return false;
+				}
+
 				NextIndex = TargetString.IndexOf(Delimiter, Index + 1, Comparison);
-				SearchLength = NextIndex > -1
+				SearchLength = (NextIndex > -1
 									? NextIndex
-									: TargetString.Length;
+									: TargetString.Length) - Index;
 				return true;
 			}
 			
@@ -80,26 +93,22 @@ namespace asm.Collections
 				return false;
 			}
 
-			Index += Delimiter.Length + 1;
-			NextIndex = TargetString.IndexOf(Delimiter, Index + 1, Comparison);
+			Index += NextIndex + 1;
 
-			while (NextIndex > -1 && Index + Delimiter.Length == NextIndex)
+			while (Index + len < TargetString.Length && string.Compare(TargetString, Index, Delimiter, 0, len, Comparison) == 0)
+				Index += len;
+
+			if (Index + len == TargetString.Length - 1)
 			{
-				Index = NextIndex + Delimiter.Length;
-
-				if (Index >= TargetString.Length - 1)
-				{
-					Reset();
-					Done = true;
-					return false;
-				}
-
-				NextIndex = TargetString.IndexOf(Delimiter, Index + 1, Comparison);
+				Reset();
+				Done = true;
+				return false;
 			}
 
-			SearchLength = NextIndex > -1
-								? NextIndex - Index
-								: TargetString.Length - Index;
+			NextIndex = TargetString.IndexOf(Delimiter, Index + 1, Comparison);
+			SearchLength = (NextIndex > -1
+								? NextIndex
+								: TargetString.Length) - Index;
 			Done = NextIndex < 0;
 			return true;
 		}
