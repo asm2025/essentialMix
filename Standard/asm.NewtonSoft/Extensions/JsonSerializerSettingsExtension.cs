@@ -38,6 +38,8 @@ namespace asm.Extensions
 			
 			if (convertersToAdd.HasFlag(JsonSerializerSettingsConverters.Version)) converters.Add(new VersionConverter());
 			if (convertersToAdd.HasFlag(JsonSerializerSettingsConverters.XmlNode)) converters.Add(new XmlNodeConverter());
+			if (convertersToAdd.HasFlag(JsonSerializerSettingsConverters.Uri)) converters.Add(new UriConverter());
+			if (convertersToAdd.HasFlag(JsonSerializerSettingsConverters.Keys)) converters.Add(new KeysConverter());
 			return thisValue;
 		}
 	}

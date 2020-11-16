@@ -47,6 +47,9 @@
       <HintPath>..\..\packages\EasyConsole.1.1.0\lib\net452\EasyConsole.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Configuration" />
@@ -137,6 +140,10 @@
     <ProjectReference Include="..\..\Standard\asm.Exceptions\asm.Exceptions.csproj">
       <Project>{54122B8A-E0FC-4137-B232-8709F445CAF6}</Project>
       <Name>asm.Exceptions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Standard\asm.NewtonSoft\asm.Newtonsoft.csproj">
+      <Project>{7e8d64fc-a14b-416b-b54b-02d16d667f09}</Project>
+      <Name>asm.Newtonsoft</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Standard\asm.Threading\asm.Threading.csproj">
       <Project>{147ffae4-4340-4222-b232-15fde6b85f7f}</Project>

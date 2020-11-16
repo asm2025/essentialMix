@@ -1,7 +1,6 @@
 ﻿using System;
-using System.IO;
-using System.Text;
 using asm.Extensions;
+using asm.Helpers;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
@@ -24,7 +23,13 @@ namespace asm.Newtonsoft.Converters
 		public bool EnsureSchema { get; set; }
 
 		/// <inheritdoc />
-		public override void WriteJson(JsonWriter writer, object value, global::Newtonsoft.Json.JsonSerializer jsonSerializer)
+		public override bool CanConvert(Type objectType)
+		{
+			return objectType != null && (objectType.IsAssignableFrom(typeof(Uri)) || objectType.IsAssignableFrom(typeof(UriBuilder)) || objectType.IsAssignableFrom(typeof(string)));
+		}
+
+		/// <inheritdoc />
+		public override void WriteJson([NotNull] JsonWriter writer, object value, global::Newtonsoft.Json.JsonSerializer jsonSerializer)
 		{
 			if (value == null)
 			{
@@ -32,8 +37,34 @@ namespace asm.Newtonsoft.Converters
 				return;
 			}
 
-			Uri uri = (Uri)value;
-			base.WriteJson(writer, value, jsonSerializer);
+			Uri uri = value switch
+			{
+				Uri uriValue => uriValue,
+				UriBuilder builder => builder.Uri,
+				string urlStr => UriHelper.ToUri(urlStr),
+				_ => throw new InvalidOperationException("Value is not in the correct format.")
+			};
+
+			writer.WriteValue(uri.String());
+		}
+
+		/// <inheritdoc />
+		public override object ReadJson([NotNull] JsonReader reader, Type objectType, object existingValue, global::Newtonsoft.Json.JsonSerializer serializer)
+		{
+			switch (reader.TokenType)
+			{
+				case JsonToken.Null:
+				case JsonToken.None:
+				case JsonToken.Undefined:
+					return null;
+				case JsonToken.String:
+					string value = reader.Value?.ToString();
+					return value == null
+								? null
+								: UriHelper.ToUri(value);
+				default:
+					throw new InvalidOperationException("Value is not in the correct format.");
+			}
 		}
 	}
 }

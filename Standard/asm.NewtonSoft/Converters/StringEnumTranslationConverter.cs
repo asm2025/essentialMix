@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Resources;
 using System.Text;
 using asm.Extensions;
@@ -61,13 +61,16 @@ namespace asm.Newtonsoft.Converters
         }
 
 		[NotNull]
-		public static Type[] RegisteredTypes => __types.Keys.ToArray();
+		public static ICollection<Type> RegisteredTypes => __types.Keys;
 
         [NotNull]
 		public CultureInfo Culture { get; set; } = CultureInfo.CurrentCulture;
 
 		/// <inheritdoc />
-		public override void WriteJson(JsonWriter writer, object value, NewtonsoftJsonSerializer jsonSerializer)
+		public override bool CanConvert(Type objectType) { return objectType != null && IsTypeIncluded(objectType); }
+
+		/// <inheritdoc />
+		public override void WriteJson([NotNull] JsonWriter writer, object value, NewtonsoftJsonSerializer jsonSerializer)
 		{
 			if (value == null)
 			{

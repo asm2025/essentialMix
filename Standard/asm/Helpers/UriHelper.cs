@@ -1089,18 +1089,61 @@ namespace asm.Helpers
 				}
 
 				StringBuilder sb = new StringBuilder(value.Length);
+				bool firstPart = false;
 
 				if (schemeSeparator > -1)
 				{
 					sb.Append(value.Left(schemeSeparator));
 					value = value.Right(value.Length - schemeSeparator);
+					firstPart = true;
 				}
 
 				foreach (string part in value.Enumerate('/')
 											.SkipNullOrEmpty())
 				{
 					if (sb.Length > 0 && sb[sb.Length - 1] != '/') sb.Append('/');
-					sb.Append(Uri.EscapeDataString(part));
+
+					if (firstPart)
+					{
+						int index = part.IndexOf(':');
+
+						if (index > -1)
+						{
+							if (part.Contains(':', index + 1))
+							{
+								// this is probably an IPv6. Just add it for now.
+								sb.Append(part);
+							}
+							else
+							{
+								// this entry probably contains a port number.
+								string[] parts = part.Split(2, StringSplitOptions.RemoveEmptyEntries, ':');
+								if (Uri.EscapeDataString(parts[0]) != parts[0]) throw new InvalidOperationException($"Bad host name '{parts[0]}'.");
+								sb.Append(parts[0]);
+								
+								if (parts.Length > 1)
+								{
+									if (!int.TryParse(parts[1], out int port)) throw new InvalidOperationException($"Invalid port number '{parts[1]}'.");
+
+									if (port != 0 && port != 80)
+									{
+										sb.Append(':');
+										sb.Append(parts[1]);
+									}
+								}
+							}
+						}
+						else
+						{
+							sb.Append(Uri.EscapeDataString(part));
+						}
+
+						firstPart = false;
+					}
+					else
+					{
+						sb.Append(Uri.EscapeDataString(part));
+					}
 				}
 
 				value = sb.ToString();

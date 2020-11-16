@@ -19,6 +19,8 @@ namespace asm.Newtonsoft.Serialization
 		StringEnum = 1 << 10,
 		StringEnumTranslation = 1 << 11,
 		Version = 1 << 12,
-		XmlNode = 1 << 13
+		XmlNode = 1 << 13,
+		Uri = 1 << 14,
+		Keys = 1 << 15,
 	}
 }

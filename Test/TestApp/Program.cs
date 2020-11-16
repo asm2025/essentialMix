@@ -26,8 +26,10 @@ using EasyConsole;
 using JetBrains.Annotations;
 using System.ServiceProcess;
 using asm;
+using asm.Newtonsoft.Helpers;
 using asm.Patterns.Threading;
 using asm.Threading;
+using Newtonsoft.Json;
 using TimeoutException = System.TimeoutException;
 
 // ReSharper disable UnusedMember.Local
@@ -66,6 +68,16 @@ work with {HEAVY} items.".Yellow();
 			nameof(IListExtension.SortGnome),
 			nameof(IListExtension.SortBrick),
 		};
+
+		private class UriTestClass
+		{
+			public Uri Uri { get; set; }
+		}
+
+		private class UriBuilderTestClass
+		{
+			public UriBuilder Builder { get; set; }
+		}
 
 		private static void Main()
 		{
@@ -161,7 +173,9 @@ work with {HEAVY} items.".Yellow();
 			
 			//TestServiceHelper();
 			
-			TestUriHelper();
+			//TestUriHelper();
+			
+			TestJsonUriConverter();
 
 			ConsoleHelper.Pause();
 		}
@@ -4503,49 +4517,82 @@ decrypted:
 				"image file.jpg"
 			};
 
-			//Uri baseUri = UriHelper.ToUri(URI_TEST, UriKind.Absolute);
-			//Console.WriteLine($"{URI_TEST} => {baseUri.String()}");
+			Uri baseUri = UriHelper.ToUri(URI_TEST, UriKind.Absolute);
+			Console.WriteLine($"{URI_TEST} => {baseUri.String()}");
 
-			//Uri uri = new Uri(baseUri.ToString());
+			Uri uri = new Uri(baseUri.ToString());
 
-			//foreach (string part in uriParts)
-			//{
-			//	Uri newUri = UriHelper.Combine(uri, part);
-			//	Console.WriteLine($"{uri.String()} + {part} => {newUri.String()}");
-			//	uri = newUri;
-			//}
+			foreach (string part in uriParts)
+			{
+				Uri newUri = UriHelper.Combine(uri, part);
+				Console.WriteLine($"{uri.String()} + {part} => {newUri.String()}");
+				uri = newUri;
+			}
 
-			//Uri uri = UriHelper.ToUri(uriParts[0]);
-			//Console.WriteLine($"{uriParts[0]} => {uri.String()}");
+			uri = UriHelper.ToUri(uriParts[0]);
+			Console.WriteLine($"{uriParts[0]} => {uri.String()}");
 
-			//uri = UriHelper.ToUri(uriParts[1]);
-			//Console.WriteLine($"{uriParts[1]} => {uri.String()}");
+			uri = UriHelper.ToUri(uriParts[1]);
+			Console.WriteLine($"{uriParts[1]} => {uri.String()}");
 
 			string[] urls = {
 				"server:8088",
 				"server:8088/func1",
 				"server:8088/func1/SubFunc1",
 				"server:8088/my folder/my image.jpg",
-				//"http://server",
-				//"http://server/func1",
-				//"http://server/func/SubFunc1",
-				//"http://server:8088",
-				//"http://server:8088/func1",
-				//"http://server:8088/func1/SubFunc1",
-				//"magnet://server",
-				//"magnet://server/func1",
-				//"magnet://server/func/SubFunc1",
-				//"magnet://server:8088",
-				//"magnet://server:8088/func1",
-				//"magnet://server:8088/func1/SubFunc1",
-				//"http://[2001:db8::1]",
-				//"http://[2001:db8::1]:80",
+				"http://server",
+				"http://server/func1",
+				"http://server/func/SubFunc1",
+				"http://server:8088",
+				"http://server:8088/func1",
+				"http://server:8088/func1/SubFunc1",
+				"magnet://server",
+				"magnet://server/func1",
+				"magnet://server/func/SubFunc1",
+				"magnet://server:8088",
+				"magnet://server:8088/func1",
+				"magnet://server:8088/func1/SubFunc1",
+				"http://[2001:db8::1]",
+				"http://[2001:db8::1]:80",
 			};
 
 			foreach (string item in urls)
 			{
-				Uri uri = UriHelper.ToUri(item);
+				uri = UriHelper.ToUri(item);
 				Console.WriteLine(uri.String());
+			}
+		}
+
+		private static void TestJsonUriConverter()
+		{
+			string[] urls = {
+				"server:8088",
+				"server:8088/func1",
+				"server:8088/func1/SubFunc1",
+				"server:8088/my folder/my image.jpg",
+				"http://server",
+				"http://server/func1",
+				"http://server/func/SubFunc1",
+				"http://server:8088",
+				"http://server:8088/func1",
+				"http://server:8088/func1/SubFunc1",
+				"magnet://server",
+				"magnet://server/func1",
+				"magnet://server/func/SubFunc1",
+				"magnet://server:8088",
+				"magnet://server:8088/func1",
+				"magnet://server:8088/func1/SubFunc1",
+				"http://[2001:db8::1]",
+				"http://[2001:db8::1]:80",
+			};
+
+			JsonSerializerSettings settings = JsonHelper.CreateSettings().AddConverters();
+			UriTestClass uriTest = new UriTestClass();
+
+			foreach (string item in urls)
+			{
+				uriTest.Uri = UriHelper.ToUri(item);
+				Console.WriteLine($"{item} => {JsonConvert.SerializeObject(uriTest, settings)}");
 			}
 		}
 
