@@ -11,7 +11,8 @@ namespace TestCoreApp
 		{
 			Console.OutputEncoding = Encoding.UTF8;
 
-			// YOUR CODE HERE
+			Uri uri = new Uri("http://localhost?p1=Value&p2=A%20B%26p3%3DValue2");
+			Console.WriteLine(uri);
 
 			ConsoleHelper.Pause();
 		}
