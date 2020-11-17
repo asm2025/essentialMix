@@ -66,8 +66,12 @@ namespace asm.Helpers
 		public static Uri Combine(string baseUri, Uri path) { return Combine(baseUri, path.String()); }
 		public static Uri Combine(string baseUri, string path)
 		{
-			UriBuilder builder = ToUriBuilder(baseUri, path);
-			return builder?.Uri;
+			UriBuilder builder = ToUriBuilder(baseUri, path, out bool relative);
+			return builder == null
+						? null
+						: relative
+							? builder.Uri.MakeRelativeUri()
+							: builder.Uri;
 		}
 
 		public static Uri Combine(string baseUri, [NotNull] params string[] paths)
@@ -82,24 +86,67 @@ namespace asm.Helpers
 		{
 			if (paths.IsNullOrEmpty()) return baseUri;
 
-			UriBuilder builder = baseUri == null
-									? new UriBuilder()
-									: new UriBuilder(baseUri);
+			UriBuilder builder;
+			bool relative = false, partsAdded = false;
 
+			if (baseUri == null)
+			{
+				builder = new UriBuilder();
+				relative = true;
+			}
+			else
+			{
+				if (baseUri.IsAbsoluteUri)
+				{
+					builder = new UriBuilder(baseUri);
+					partsAdded = true;
+				}
+				else
+				{
+					builder = new UriBuilder();
+					builder.Path += baseUri.String();
+					relative = true;
+					partsAdded = true;
+				}
+			}
+			
 			foreach (string path in paths)
 			{
 				string escaped = Escape(path);
-				if (escaped == null || !Uri.IsWellFormedUriString(escaped, UriKind.Relative)) continue;
+				if (escaped == null) continue;
+				
+				if (Uri.IsWellFormedUriString(escaped, UriKind.Absolute))
+				{
+					if (partsAdded) throw new NotSupportedException("Operation is not supported for absolute URI.");
+					builder = new UriBuilder(escaped);
+					relative = false;
+					partsAdded = true;
+					continue;
+				}
+
 				if (builder.Path.Length == 0 || builder.Path[builder.Path.Length - 1] != '/') builder.Path += '/';
 				builder.Path += escaped.TrimStart('/');
+				partsAdded = true;
 			}
 
-			return builder.Uri;
+			return relative
+						? builder.Uri
+						: builder.Uri.MakeRelativeUri();
 		}
 
-		public static Uri ToUri(string value, UriKind kind = UriKind.RelativeOrAbsolute, string path = null)
+		public static Uri ToUri(string value, UriKind kind = UriKind.RelativeOrAbsolute) { return ToUri(value, null, kind); }
+		public static Uri ToUri(string value, string path, UriKind kind = UriKind.RelativeOrAbsolute)
 		{
-			if (kind == UriKind.Absolute) return ToUriBuilder(value, path)?.Uri;
+			if (kind == UriKind.Absolute)
+			{
+				UriBuilder builder = ToUriBuilder(value, path, out bool relative);
+				return builder == null
+							? null
+							: relative
+								? builder.Uri.MakeRelativeUri()
+								: builder.Uri;
+			}
+
 			value = Escape(value, true);
 			if (string.IsNullOrEmpty(value)) return null;
 			return Uri.TryCreate(value, kind, out Uri uri)
@@ -107,8 +154,10 @@ namespace asm.Helpers
 						: null;
 		}
 
-		public static UriBuilder ToUriBuilder(string value, string path = null)
+		public static UriBuilder ToUriBuilder(string value, out bool relative) { return ToUriBuilder(value, null, out relative); }
+		public static UriBuilder ToUriBuilder(string value, string path, out bool relative)
 		{
+			relative = false;
 			value = Escape(value, true);
 			path = Escape(path, string.IsNullOrEmpty(value));
 			if (value == null && path == null) return null;
@@ -122,17 +171,12 @@ namespace asm.Helpers
 				{
 					builder = new UriBuilder(value);
 				}
-				else if (Uri.IsWellFormedUriString(value, UriKind.Relative))
+				else
 				{
-					if (value.StartsWith('/'))
-					{
-						builder = new UriBuilder();
-						builder.Path += value;
-					}
-					else
-					{
-						builder = new UriBuilder(value);
-					}
+					builder = new UriBuilder();
+					if (builder.Path.Length == 0 || builder.Path[builder.Path.Length - 1] != '/') builder.Path += '/';
+					builder.Path += value.TrimStart('/');
+					relative = true;
 				}
 			}
 
@@ -146,15 +190,10 @@ namespace asm.Helpers
 				}
 				else if (Uri.IsWellFormedUriString(path, UriKind.Relative))
 				{
-					if (path.StartsWith('/'))
-					{
-						builder = new UriBuilder();
-						builder.Path += path;
-					}
-					else
-					{
-						builder = new UriBuilder(path);
-					}
+					builder = new UriBuilder();
+					if (builder.Path.Length == 0 || builder.Path[builder.Path.Length - 1] != '/') builder.Path += '/';
+					builder.Path += path.TrimStart('/');
+					relative = true;
 				}
 			}
 			else
@@ -166,15 +205,17 @@ namespace asm.Helpers
 			return builder;
 		}
 
-		public static bool TryBuildUri(string value, out Uri uri, UriKind kind = UriKind.RelativeOrAbsolute, string path = null)
+		public static bool TryBuildUri(string value, out Uri uri, UriKind kind = UriKind.RelativeOrAbsolute) { return TryBuildUri(value, null, out uri, kind); }
+		public static bool TryBuildUri(string value, string path, out Uri uri, UriKind kind = UriKind.RelativeOrAbsolute)
 		{
-			uri = ToUri(value, kind, path);
+			uri = ToUri(value, path, kind);
 			return uri != null;
 		}
 
-		public static bool TryBuildUri(string value, out UriBuilder builder, string path = null)
+		public static bool TryBuildUri(string value, out UriBuilder builder, out bool relative) { return TryBuildUri(value, null, out builder, out relative); }
+		public static bool TryBuildUri(string value, string path, out UriBuilder builder, out bool relative)
 		{
-			builder = ToUriBuilder(value, path);
+			builder = ToUriBuilder(value, path, out relative);
 			return builder != null;
 		}
 
@@ -1075,16 +1116,16 @@ namespace asm.Helpers
 		{
 			value = Trim(value);
 			if (string.IsNullOrEmpty(value)) return value;
-			if (checkScheme && !value.StartsWith('/') && !value.Contains("://", StringComparison.Ordinal)) value = "http://" + value;
+			if (checkScheme && !value.StartsWith('/') && !value.Contains(Uri.SchemeDelimiter, StringComparison.Ordinal)) value = Uri.UriSchemeHttp + Uri.SchemeDelimiter + value;
 			if (Uri.IsWellFormedUriString(value, UriKind.RelativeOrAbsolute)) return value;
 
 			if (value.Contains('/'))
 			{
-				int schemeSeparator = value.IndexOf("://", StringComparison.Ordinal);
+				int schemeSeparator = value.IndexOf(Uri.SchemeDelimiter, StringComparison.Ordinal);
 
 				if (schemeSeparator > -1)
 				{
-					schemeSeparator += 3;
+					schemeSeparator += Uri.SchemeDelimiter.Length;
 					if (schemeSeparator == value.Length - 1) return value;
 				}
 
@@ -1125,7 +1166,7 @@ namespace asm.Helpers
 								{
 									if (!int.TryParse(parts[1], out int port)) throw new InvalidOperationException($"Invalid port number '{parts[1]}'.");
 
-									if (port != 0 && port != 80)
+									if (port > 0 && (port != 80 ))
 									{
 										sb.Append(':');
 										sb.Append(parts[1]);

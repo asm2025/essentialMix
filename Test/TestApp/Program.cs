@@ -173,9 +173,9 @@ work with {HEAVY} items.".Yellow();
 			
 			//TestServiceHelper();
 			
-			//TestUriHelper();
+			TestUriHelper();
 			
-			TestJsonUriConverter();
+			//TestJsonUriConverter();
 
 			ConsoleHelper.Pause();
 		}
