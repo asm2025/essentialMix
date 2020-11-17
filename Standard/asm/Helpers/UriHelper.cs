@@ -130,8 +130,8 @@ namespace asm.Helpers
 			}
 
 			return relative
-						? builder.Uri
-						: builder.Uri.MakeRelativeUri();
+						? builder.Uri.MakeRelativeUri()
+						: builder.Uri;
 		}
 
 		public static Uri ToUri(string value, UriKind kind = UriKind.RelativeOrAbsolute) { return ToUri(value, null, kind); }
