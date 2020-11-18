@@ -934,14 +934,14 @@ namespace asm.Extensions
 		public static string Suffix(this string thisValue, char suffix)
 		{
 			if (string.IsNullOrEmpty(thisValue) || thisValue[thisValue.Length - 1] == suffix) return thisValue;
-			return string.Concat(suffix, thisValue);
+			return string.Concat(thisValue, suffix);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Suffix(this string thisValue, string suffix, bool ignoreCase = false)
 		{
 			if (string.IsNullOrEmpty(thisValue) || string.IsNullOrEmpty(suffix) || EndsWithOrdinal(thisValue, suffix, ignoreCase)) return thisValue;
-			return string.Concat(suffix, thisValue);
+			return string.Concat(thisValue, suffix);
 		}
 
 		[NotNull]
