@@ -228,7 +228,7 @@ namespace asm.Extensions
 				throw new RankException();
 			if (thisValue.Length == 0 && values.Length == 0)
 				return true;
-			return values.Length <= thisValue.Length && values.All(thisValue.Contains);
+			return values.Length <= thisValue.Length && values.All(e => thisValue.FastContains(e, 0, thisValue.Length));
 		}
 
 		public static bool Contains<T>([NotNull] this T[] thisValue, T[] values, [NotNull] IEqualityComparer<T> comparer)
@@ -242,6 +242,24 @@ namespace asm.Extensions
 			if (thisValue.Length == 0 && values.Length == 0)
 				return true;
 			return values.Length <= thisValue.Length && values.All(v => thisValue.Contains(v, comparer));
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool FastContains<T>([NotNull] this T[] thisValue, T value)
+		{
+			return FastContains(thisValue, value, 0, thisValue.Length);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool FastContains<T>([NotNull] this T[] thisValue, T value, int startIndex)
+		{
+			return FastContains(thisValue, value, startIndex, thisValue.Length - startIndex);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool FastContains<T>([NotNull] this T[] thisValue, T value, int startIndex, int count)
+		{
+			return Array.IndexOf(thisValue, value, startIndex, count) > -1;
 		}
 
 		[NotNull]
@@ -1353,12 +1371,21 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static int IndexOf<T>([NotNull] this T[] thisValue, T value, int startIndex = 0, int count = -1)
+		public static int IndexOf<T>([NotNull] this T[] thisValue, T value)
 		{
-			thisValue.Length.ValidateRange(startIndex, ref count);
-			return count == 0 || thisValue.Length == 0
-						? -1
-						: Array.IndexOf(thisValue, value, startIndex, count);
+			return IndexOf(thisValue, value, 0, thisValue.Length);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static int IndexOf<T>([NotNull] this T[] thisValue, T value, int startIndex)
+		{
+			return IndexOf(thisValue, value, startIndex, thisValue.Length - startIndex);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static int IndexOf<T>([NotNull] this T[] thisValue, T value, int startIndex, int count)
+		{
+			return Array.IndexOf(thisValue, value, startIndex, count);
 		}
 
 		public static int IndexOf<T>([NotNull] this T[] thisValue, [NotNull] Predicate<T> comparison, int startIndex = 0, int count = -1)

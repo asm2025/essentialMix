@@ -233,13 +233,13 @@ namespace asm.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool ContainsAny([NotNull] this string thisValue, [NotNull] params char[] value)
 		{
-			return thisValue.Length != 0 && ContainsAny(thisValue, 0, thisValue.Length, value);
+			return ContainsAny(thisValue, 0, thisValue.Length, value);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool ContainsAny([NotNull] this string thisValue, int startIndex, [NotNull] params char[] value)
 		{
-			return thisValue.Length != 0 && ContainsAny(thisValue, startIndex, thisValue.Length - startIndex, value);
+			return ContainsAny(thisValue, startIndex, thisValue.Length - startIndex, value);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -249,25 +249,56 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool ContainsAny([NotNull] this string thisValue, [NotNull] IEnumerable<char> value)
+		{
+			return ContainsAny(thisValue, 0, thisValue.Length, value);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool ContainsAny([NotNull] this string thisValue, int startIndex, [NotNull] IEnumerable<char> value)
+		{
+			return ContainsAny(thisValue, startIndex, thisValue.Length - startIndex, value);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool ContainsAny([NotNull] this string thisValue, int startIndex, int count, [NotNull] IEnumerable<char> value)
+		{
+			return IndexOfAny(thisValue, startIndex, count, value) > -1;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int IndexOfAny([NotNull] this string thisValue, [NotNull] params char[] value)
 		{
-			return string.IsNullOrEmpty(thisValue)
-						? -1
-						: IndexOfAny(thisValue, 0, thisValue.Length, value);
+			return IndexOfAny(thisValue, 0, thisValue.Length, value);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int IndexOfAny([NotNull] this string thisValue, int startIndex, [NotNull] params char[] value)
 		{
-			return string.IsNullOrEmpty(thisValue)
-						? -1
-						: IndexOfAny(thisValue, startIndex, thisValue.Length - startIndex, value);
+			return IndexOfAny(thisValue, startIndex, thisValue.Length - startIndex, value);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int IndexOfAny([NotNull] this string thisValue, int startIndex, int count, [NotNull] params char[] value)
 		{
-			thisValue.Length.ValidateRange(startIndex, ref count);
-			if (string.IsNullOrEmpty(thisValue) || value.IsNullOrEmpty() || count == 0) return -1;
+			return IndexOfAny(thisValue, startIndex, count, (ICollection<char>)value);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static int IndexOfAny([NotNull] this string thisValue, [NotNull] IEnumerable<char> value)
+		{
+			return IndexOfAny(thisValue, 0, thisValue.Length, value);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static int IndexOfAny([NotNull] this string thisValue, int startIndex, [NotNull] IEnumerable<char> value)
+		{
+			return IndexOfAny(thisValue, startIndex, thisValue.Length - startIndex, value);
+		}
+
+		public static int IndexOfAny([NotNull] this string thisValue, int startIndex, int count, [NotNull] IEnumerable<char> value)
+		{
+			if (thisValue.Length == 0 || count < 1 || value is ICollection<char> collection && collection.Count == 0) return -1;
 
 			int lastPos = startIndex + count;
 
@@ -281,24 +312,39 @@ namespace asm.Extensions
 			return -1;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int LastIndexOfAny([NotNull] this string thisValue, [NotNull] params char[] value)
 		{
-			return string.IsNullOrEmpty(thisValue) || value.IsNullOrEmpty()
-						? -1
-						: LastIndexOfAny(thisValue, thisValue.Length - 1, thisValue.Length, value);
+			return LastIndexOfAny(thisValue, thisValue.Length - 1, thisValue.Length, value);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int LastIndexOfAny([NotNull] this string thisValue, int startIndex, [NotNull] params char[] value)
 		{
-			return string.IsNullOrEmpty(thisValue) || value.IsNullOrEmpty()
-						? -1
-						: LastIndexOfAny(thisValue, startIndex, startIndex + 1, value);
+			return LastIndexOfAny(thisValue, startIndex, thisValue.Length - startIndex, value);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int LastIndexOfAny([NotNull] this string thisValue, int startIndex, int count, [NotNull] params char[] value)
 		{
-			thisValue.Length.ValidateRange(startIndex, ref count);
-			if (string.IsNullOrEmpty(thisValue) || value.IsNullOrEmpty() || count == 0) return -1;
+			return LastIndexOfAny(thisValue, startIndex, count, (ICollection<char>)value);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static int LastIndexOfAny([NotNull] this string thisValue, [NotNull] IEnumerable<char> value)
+		{
+			return LastIndexOfAny(thisValue, thisValue.Length - 1, thisValue.Length, value);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static int LastIndexOfAny([NotNull] this string thisValue, int startIndex, [NotNull] IEnumerable<char> value)
+		{
+			return LastIndexOfAny(thisValue, startIndex, thisValue.Length - startIndex, value);
+		}
+
+		public static int LastIndexOfAny([NotNull] this string thisValue, int startIndex, int count, [NotNull] IEnumerable<char> value)
+		{
+			if (thisValue.Length == 0 || count < 1 || value is ICollection<char> collection && collection.Count == 0) return -1;
 
 			int lastPos = startIndex - count + 1;
 

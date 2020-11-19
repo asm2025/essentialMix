@@ -7,6 +7,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using asm.Collections;
 using asm.Extensions;
 using JetBrains.Annotations;
 
@@ -17,6 +19,9 @@ namespace asm.Helpers
 		private static readonly Regex __reservedNames = new Regex(@"^(?:PRN|AUX|CLOCK\$|NUL|CON|COM\d{1,3}|LPT\d{1,3})$", RegexHelper.OPTIONS_I);
 		private static readonly Regex __validName = new Regex(@"^(?:\.*?(?!\.))[^\x00-\x1f\?*:\x22;|/<>]+(?<![\s.])$", RegexHelper.OPTIONS_I);
 		private static readonly Regex __validPath = new Regex(@"^(?:[a-z]:\\)?(?:(?:\.*?(?!\.))[^\x00-\x1f\?*:\x22;|/<>]+(?<![\s.])\\?)+$", RegexHelper.OPTIONS_I);
+
+		private static readonly Lazy<IReadOnlySet<char>> __defaultInvalidPathChars = new Lazy<IReadOnlySet<char>>(() => new ReadOnlySet<char>(new HashSet<char>(Path.GetInvalidPathChars())), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly Lazy<IReadOnlySet<char>> __defaultInvalidNameChars = new Lazy<IReadOnlySet<char>>(() => new ReadOnlySet<char>(new HashSet<char>(Path.GetInvalidFileNameChars())), LazyThreadSafetyMode.PublicationOnly);
 
 		public static int RemoveLines([NotNull] string fileName, int count, Encoding encoding = null, int startAtLine = 0)
 		{
@@ -183,14 +188,25 @@ namespace asm.Helpers
 		{
 			if (string.IsNullOrWhiteSpace(value)) return null;
 
-			char[] invalid = includeChars?.Union(Path.GetInvalidFileNameChars()).ToArray() ?? Path.GetInvalidFileNameChars();
 			StringBuilder builder = new StringBuilder(value.Length);
-			
-			foreach (char c in value)
+
+			if (includeChars == null || includeChars.Length == 0)
 			{
-				builder.Append(invalid.Contains(c)
-											? replaceChar
-											: c);
+				foreach (char c in value)
+				{
+					builder.Append(__defaultInvalidNameChars.Value.Contains(c)
+										? replaceChar
+										: c);
+				}
+			}
+			else
+			{
+				foreach (char c in value)
+				{
+					builder.Append(__defaultInvalidNameChars.Value.Contains(c) || includeChars.FastContains(c)
+										? replaceChar
+										: c);
+				}
 			}
 
 			return builder.ToString();
@@ -199,9 +215,8 @@ namespace asm.Helpers
 		public static bool IsValidPathName(string value, params char[] moreInvalidChars)
 		{
 			if (string.IsNullOrWhiteSpace(value) || !__validName.IsMatch(value) || __reservedNames.IsMatch(value)) return false;
-
-			char[] invalid = moreInvalidChars.IsNullOrEmpty() ? Path.GetInvalidFileNameChars() : moreInvalidChars.Union(Path.GetInvalidFileNameChars()).ToArray();
-			if (value.ContainsAny(invalid)) return false;
+			if (value.ContainsAny(__defaultInvalidNameChars.Value)) return false;
+			if (moreInvalidChars != null && moreInvalidChars.Length > 0 && value.ContainsAny(moreInvalidChars)) return false;
 
 			FileInfo fi;
 
@@ -217,14 +232,26 @@ namespace asm.Helpers
 			return fi != null;
 		}
 
-		public static bool IsValidNameChar(char value) { return !Path.GetInvalidFileNameChars().Contains(value); }
+		public static bool IsValidNameChar(char value) { return !__defaultInvalidNameChars.Value.Contains(value); }
 
 		public static bool IsValidPath(string value, params char[] moreInvalidChars)
 		{
 			if (string.IsNullOrWhiteSpace(value) || !__validPath.IsMatch(value) || __reservedNames.IsMatch(value)) return false;
+			if (value.ContainsAny(__defaultInvalidPathChars.Value)) return false;
+			if (moreInvalidChars != null && moreInvalidChars.Length > 0 && value.ContainsAny(moreInvalidChars)) return false;
 
-			char[] invalid = moreInvalidChars.IsNullOrEmpty() ? Path.GetInvalidPathChars() : moreInvalidChars.Union(Path.GetInvalidPathChars()).ToArray();
-			return !value.ContainsAny(invalid);
+			FileInfo fi;
+
+			try
+			{
+				fi = new FileInfo(value);
+			}
+			catch
+			{
+				fi = null;
+			}
+
+			return fi != null;
 		}
 
 		public static bool Join([NotNull] string fileName, [NotNull] params string[] sources) { return Join(fileName, EncodingHelper.Default, sources); }
