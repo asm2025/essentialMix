@@ -48,26 +48,44 @@ namespace asm.Extensions
 														.ToNullIfEmpty()
 														.Split(StringSplitOptions.RemoveEmptyEntries, ',');
 			if (validAudiences.Count == 0) validAudiences = null;
-
 			thisValue.Authority = configuration.GetValue<string>("jwt:authority")
 												.ToNullIfEmpty();
-
 			thisValue.SaveToken = true;
-			thisValue.TokenValidationParameters = new TokenValidationParameters
-			{
-				ValidateIssuerSigningKey = true,
-				ValidateLifetime = true,
-				RequireSignedTokens = true,
-				RequireExpirationTime = true,
-				IssuerSigningKey = signingKey,
-				TokenDecryptionKey = decryptionKey,
-				ValidIssuers = validIssuers,
-				ValidAudiences = validAudiences,
-				ClockSkew = TimeSpanHelper.Minute,
-				ValidateIssuer = validIssuers != null,
-				ValidateAudience = validAudiences != null
-			};
 
+			TokenValidationParameters validationParameters = thisValue.TokenValidationParameters;
+
+			if (validationParameters == null)
+			{
+				validationParameters = new TokenValidationParameters();
+				thisValue.TokenValidationParameters = validationParameters;
+			}
+
+			validationParameters.ValidateIssuerSigningKey = true;
+			validationParameters.ValidateLifetime = true;
+			validationParameters.RequireSignedTokens = true;
+			validationParameters.RequireExpirationTime = true;
+			validationParameters.IssuerSigningKey = signingKey;
+			validationParameters.TokenDecryptionKey = decryptionKey;
+			validationParameters.ValidIssuers = validIssuers;
+			validationParameters.ValidAudiences = validAudiences;
+			validationParameters.ClockSkew = TimeSpanHelper.Minute;
+			validationParameters.ValidateIssuer = validIssuers != null;
+			validationParameters.ValidateAudience = validAudiences != null;
+			return thisValue;
+		}
+
+		[NotNull]
+		public static JwtBearerOptions SetupOpenId([NotNull] this JwtBearerOptions thisValue, [NotNull] IConfiguration configuration, bool isDevelopment = false)
+		{
+			TokenValidationParameters validationParameters = thisValue.TokenValidationParameters;
+
+			if (validationParameters == null)
+			{
+				validationParameters = new TokenValidationParameters();
+				thisValue.TokenValidationParameters = validationParameters;
+			}
+
+			validationParameters.NameClaimType = OpenIdConnectConstants.Claims.Subject;
 			return thisValue;
 		}
 	}
