@@ -38,18 +38,23 @@ namespace asm.Helpers
 		public static readonly TimeSpan Schedule = TimeSpan.FromMilliseconds(SCHEDULE);
 
 		public static readonly TimeSpan Second = TimeSpan.FromSeconds(1);
+		public static readonly TimeSpan TwoSeconds = TimeSpan.FromSeconds(2);
 		public static readonly TimeSpan FiveSeconds = TimeSpan.FromSeconds(5);
 		public static readonly TimeSpan TenSeconds = TimeSpan.FromSeconds(10);
 		public static readonly TimeSpan FifteenSeconds = TimeSpan.FromSeconds(15);
 		public static readonly TimeSpan ThirtySeconds = TimeSpan.FromSeconds(30);
 		public static readonly TimeSpan FortyFiveSeconds = TimeSpan.FromSeconds(45);
 		public static readonly TimeSpan Minute = TimeSpan.FromMinutes(1);
+		public static readonly TimeSpan TwoMinutes = TimeSpan.FromMinutes(2);
 		public static readonly TimeSpan FiveMinutes = TimeSpan.FromMinutes(5);
 		public static readonly TimeSpan TenMinutes = TimeSpan.FromMinutes(10);
 		public static readonly TimeSpan FifteenMinutes = TimeSpan.FromMinutes(15);
 		public static readonly TimeSpan ThirtyMinutes = TimeSpan.FromMinutes(30);
 		public static readonly TimeSpan FortyFiveMinutes = TimeSpan.FromMinutes(45);
 		public static readonly TimeSpan Hour = TimeSpan.FromHours(1);
+		public static readonly TimeSpan TwoHours = TimeSpan.FromHours(2);
+		public static readonly TimeSpan SixHours = TimeSpan.FromHours(6);
+		public static readonly TimeSpan TwelveHours = TimeSpan.FromHours(12);
 		public static readonly TimeSpan Day = TimeSpan.FromDays(1);
 		public static readonly TimeSpan Week = TimeSpan.FromDays(7);
 		public static readonly TimeSpan Month = TimeSpan.FromDays(30);

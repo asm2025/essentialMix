@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using asm.Helpers;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -49,11 +50,13 @@ namespace asm.Extensions
 			{
 				ValidateIssuerSigningKey = true,
 				ValidateLifetime = true,
+				RequireSignedTokens = true,
+				RequireExpirationTime = true,
 				IssuerSigningKey = signingKey,
 				TokenDecryptionKey = decryptionKey,
 				ValidIssuers = validIssuers,
 				ValidAudiences = validAudiences,
-				ClockSkew = TimeSpan.Zero,
+				ClockSkew = TimeSpanHelper.Minute,
 				ValidateIssuer = validIssuers != null,
 				ValidateAudience = validAudiences != null
 			};
