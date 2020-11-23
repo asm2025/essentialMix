@@ -24,7 +24,7 @@ namespace asm.Extensions
 				int n = ipStr.IndexOf(',');
 				if (n > -1) ipStr = n > 0 ? ipStr.Substring(0, n) : null;
 
-				if (ipStr == "::1")
+				if (ipStr == "::1" || ipStr == "127.0.0.1")
 				{
 					IPAddress ip = IPAddressHelper.GetLocalIP();
 					if (ip != null) ipStr = ip.ToString();

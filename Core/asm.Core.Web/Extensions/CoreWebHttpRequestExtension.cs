@@ -14,14 +14,17 @@ namespace asm.Extensions
 		public static string GetIPAddress([NotNull] this HttpRequest thisValue)
 		{
 			string ipStr = thisValue.Headers["HTTP_CF_CONNECTING_IP"];
-			if (string.IsNullOrEmpty(ipStr)) ipStr = thisValue.HttpContext?.Connection.RemoteIpAddress.ToString();
+			if (string.IsNullOrEmpty(ipStr)) ipStr = thisValue.Headers["HTTP_X_CLUSTER_CLIENT_IP"];
+			if (string.IsNullOrEmpty(ipStr)) ipStr = thisValue.Headers["HTTP_X_FORWARDED_FOR"];
+			if (string.IsNullOrEmpty(ipStr)) ipStr = thisValue.Headers["REMOTE_ADDR"];
+			if (string.IsNullOrEmpty(ipStr)) ipStr = thisValue.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString();
 
 			if (!string.IsNullOrEmpty(ipStr))
 			{
 				int n = ipStr.IndexOf(',');
 				if (n > -1) ipStr = n > 0 ? ipStr.Substring(0, n) : null;
 
-				if (ipStr == "::1")
+				if (ipStr == "::1" || ipStr == "127.0.0.1")
 				{
 					IPAddress ip = IPAddressHelper.GetLocalIP();
 					if (ip != null) ipStr = ip.ToString();
