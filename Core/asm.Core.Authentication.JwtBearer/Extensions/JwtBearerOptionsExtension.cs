@@ -39,11 +39,18 @@ namespace asm.Extensions
 				thisValue.IncludeErrorDetails = true;
 			}
 
-			IList<string> validIssuers = configuration.GetValue<string>("jwt:issuer").Split(StringSplitOptions.RemoveEmptyEntries, ',');
+			IList<string> validIssuers = configuration.GetValue<string>("jwt:issuer")
+													.ToNullIfEmpty()
+													.Split(StringSplitOptions.RemoveEmptyEntries, ',');
 			if (validIssuers.Count == 0) validIssuers = null;
 			
-			IList<string> validAudiences = configuration.GetValue<string>("jwt:audience").Split(StringSplitOptions.RemoveEmptyEntries, ',');
+			IList<string> validAudiences = configuration.GetValue<string>("jwt:audience")
+														.ToNullIfEmpty()
+														.Split(StringSplitOptions.RemoveEmptyEntries, ',');
 			if (validAudiences.Count == 0) validAudiences = null;
+
+			thisValue.Authority = configuration.GetValue<string>("jwt:authority")
+												.ToNullIfEmpty();
 
 			thisValue.SaveToken = true;
 			thisValue.TokenValidationParameters = new TokenValidationParameters
