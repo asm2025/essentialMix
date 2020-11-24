@@ -73,20 +73,5 @@ namespace asm.Extensions
 			validationParameters.ValidateAudience = validAudiences != null;
 			return thisValue;
 		}
-
-		[NotNull]
-		public static JwtBearerOptions SetupOpenId([NotNull] this JwtBearerOptions thisValue, [NotNull] IConfiguration configuration, bool isDevelopment = false)
-		{
-			TokenValidationParameters validationParameters = thisValue.TokenValidationParameters;
-
-			if (validationParameters == null)
-			{
-				validationParameters = new TokenValidationParameters();
-				thisValue.TokenValidationParameters = validationParameters;
-			}
-
-			validationParameters.NameClaimType = OpenIdConnectConstants.Claims.Subject;
-			return thisValue;
-		}
 	}
 }

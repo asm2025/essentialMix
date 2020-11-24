@@ -4,13 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Generate WIX toolset Components")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Generate WIX Components")]
+[assembly: AssemblyDescription("Generate WIX toolset Components")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("asm")]
 [assembly: AssemblyProduct("GenerateWIXComponents")]
-[assembly: AssemblyCopyright("Copyright © 2018")]
-[assembly: AssemblyTrademark("asm")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible

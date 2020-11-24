@@ -4,13 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Find missing files in WXS products's file")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Missing WXS Files")]
+[assembly: AssemblyDescription("Find missing files in WXS products's file")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("asm")]
 [assembly: AssemblyProduct("MissingWXSFiles")]
-[assembly: AssemblyCopyright("Copyright © 2018")]
-[assembly: AssemblyTrademark("asm")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible

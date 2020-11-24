@@ -9,6 +9,7 @@ namespace asm.Extensions
 {
 	public static class JwtBearerIServiceCollectionExtension
 	{
+		[NotNull]
 		public static AuthenticationBuilder AddJwtBearerAuthentication([NotNull] this IServiceCollection thisValue, Action<AuthenticationOptions> configureOptions = null)
 		{
 			return thisValue.AddAuthentication(options =>

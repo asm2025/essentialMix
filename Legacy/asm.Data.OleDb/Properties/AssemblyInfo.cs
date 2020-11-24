@@ -7,10 +7,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("asm.Data.OleDb")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("asm")]
 [assembly: AssemblyProduct("asm.Data.OleDb")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
-[assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible

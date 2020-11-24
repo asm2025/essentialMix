@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 // ReSharper disable once CheckNamespace
 namespace asm.Extensions
 {
-	public static class IdentityExtension
+	public static class IdentityErrorExtension
 	{
 		public static string CollectMessages([NotNull] this IEnumerable<IdentityError> thisValue, string message = null)
 		{
