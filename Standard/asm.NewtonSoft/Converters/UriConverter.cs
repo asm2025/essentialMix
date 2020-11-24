@@ -25,7 +25,7 @@ namespace asm.Newtonsoft.Converters
 		/// <inheritdoc />
 		public override bool CanConvert(Type objectType)
 		{
-			return objectType != null && (objectType.IsAssignableFrom(typeof(Uri)) || objectType.IsAssignableFrom(typeof(UriBuilder)));
+			return objectType != null && (typeof(Uri).IsAssignableFrom(objectType) || typeof(UriBuilder).IsAssignableFrom(objectType));
 		}
 
 		/// <inheritdoc />
