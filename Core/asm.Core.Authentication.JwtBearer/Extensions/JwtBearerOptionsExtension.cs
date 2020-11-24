@@ -68,7 +68,7 @@ namespace asm.Extensions
 			validationParameters.TokenDecryptionKey = decryptionKey;
 			validationParameters.ValidIssuers = validIssuers;
 			validationParameters.ValidAudiences = validAudiences;
-			validationParameters.ClockSkew = TimeSpanHelper.Minute;
+			validationParameters.ClockSkew = TimeSpan.Zero;
 			validationParameters.ValidateIssuer = validIssuers != null;
 			validationParameters.ValidateAudience = validAudiences != null;
 			return thisValue;
