@@ -7,9 +7,9 @@ namespace asm.Helpers
 	{
 		public static void Setup(ServicePointManagerOptions options)
 		{
-			if (options.CertificateValidation.HasValue)
+			if (options.SkipCertificateValidation == true)
 			{
-				ServicePointManager.ServerCertificateValidationCallback = delegate { return options.CertificateValidation == false; };
+				ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, errors) => false;
 			}
 
 			if (options.CertificateRevocationList.HasValue)
@@ -51,6 +51,11 @@ namespace asm.Helpers
 			{
 				ServicePointManager.ReusePort = options.ReusePort.Value;
 			}
+		}
+
+		public static void SetupSecurityProtocols()
+		{
+			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | (SecurityProtocolType)0x00003000 /* SecurityProtocolType.Tls13 */;
 		}
 	}
 }

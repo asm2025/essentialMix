@@ -2,7 +2,7 @@ namespace asm.Web
 {
 	public struct ServicePointManagerOptions
 	{
-		public bool? CertificateValidation { get; set; }
+		public bool? SkipCertificateValidation { get; set; }
 		public bool? CertificateRevocationList { get; set; }
 		public int? DefaultConnectionLimit { get; set; }
 		public int? DnsRefreshTimeout { get; set; }

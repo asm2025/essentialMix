@@ -55,12 +55,6 @@ namespace asm.Helpers
 			{"Chrome 40.0.2214.93", "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.93 Safari/537.36"}
 		};
 
-		static UriHelper()
-		{
-			//Windows 7 fix
-			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-		}
-
 		public static Uri Combine(Uri baseUri, string path) { return Combine(baseUri.String(), path); }
 		public static Uri Combine(Uri baseUri, Uri path) { return Combine(baseUri.String(), path.String()); }
 		public static Uri Combine(string baseUri, Uri path) { return Combine(baseUri, path.String()); }
