@@ -22,17 +22,22 @@ namespace asm.Extensions
 			if (!string.IsNullOrEmpty(ipStr))
 			{
 				int n = ipStr.IndexOf(',');
-				if (n > -1) ipStr = n > 0 ? ipStr.Substring(0, n) : null;
-
-				if (ipStr == "::1" || ipStr == "127.0.0.1")
+				
+				if (n > -1)
 				{
-					IPAddress ip = IPAddressHelper.GetLocalIP();
-					if (ip != null) ipStr = ip.ToString();
+					ipStr = n > 0
+								? ipStr.Substring(0, n)
+								: null;
 				}
 			}
-			
-			if (string.IsNullOrEmpty(ipStr)) ipStr = null;
-			return ipStr;
+
+			if (IPAddressHelper.IsLoopback(ipStr))
+			{
+				IPAddress ip = IPAddressHelper.GetLocalIP();
+				if (ip != null) ipStr = ip.ToString();
+			}
+
+			return ipStr.ToNullIfEmpty();
 		}
 
 		public static void AddHeader([NotNull] this HttpRequest thisValue, [NotNull] string name, string value)

@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
-using System.Threading;
 using asm.Extensions;
 using JetBrains.Annotations;
 using asm.IO;
@@ -22,13 +21,6 @@ namespace asm.Helpers
 		private static readonly Regex __isIPv4Url = new Regex(@"^\b(?<url>(?<protocol>https?://)?(?<ip>(?:[0-9]{1,3}\.){3}[0-9]{1,3})(?<port>:\d{1,5})?)\b/?$", RegexHelper.OPTIONS_I);
 		private static readonly Regex __isIPv4Simple = new Regex(@"^\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}-(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b$", RegexHelper.OPTIONS_I);
 		private static readonly Regex __isIPv4CIDR = new Regex(@"^\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}/\d{1,2}\b$", RegexHelper.OPTIONS_I);
-
-		private static readonly Lazy<NetworkInterfaceType[]> __defaultNetworkInterfaceType = new Lazy<NetworkInterfaceType[]>(() => new []
-		{
-			NetworkInterfaceType.Ethernet,
-			NetworkInterfaceType.Wireless80211,
-			NetworkInterfaceType.GenericModem
-		}, LazyThreadSafetyMode.PublicationOnly);
 
 		public static IPAddress ExtractIP(string value)
 		{
@@ -98,6 +90,17 @@ namespace asm.Helpers
 			}
 		}
 
+		public static bool IsLoopback(string value)
+		{
+			return string.IsNullOrEmpty(value)
+				|| value == "::1"
+				|| value == "0.0.0.1"
+				|| value == "0.0.0.0"
+				|| value == "127.0.0.1"
+				|| value.StartsWith("localhost:", StringComparison.OrdinalIgnoreCase)
+				|| value.Equals("localhost", StringComparison.OrdinalIgnoreCase);
+		}
+
 		public static bool IsIPv4Url(string value)
 		{
 			if (string.IsNullOrEmpty(value)) return false;
@@ -132,7 +135,7 @@ namespace asm.Helpers
 			try
 			{
 				Match match = __isIPv4Url.Match(value);
-				if (match.Success) return new List<string> {match.Groups["url"]?.Value};
+				if (match.Success) return new List<string> { match.Groups["url"]?.Value };
 
 				if (value.Contains("/"))
 				{
@@ -144,7 +147,7 @@ namespace asm.Helpers
 				}
 				else
 				{
-					return new List<string> {IPAddress.Parse(value).ToString()};
+					return new List<string> { IPAddress.Parse(value).ToString() };
 				}
 			}
 			catch
@@ -162,7 +165,7 @@ namespace asm.Helpers
 					{
 						for (int y = beginIp[3]; y <= endIp[3]; y++)
 						{
-							list.Add(new IPAddress(new[] {(byte)i, (byte)j, (byte)x, (byte)y}).ToString());
+							list.Add(new IPAddress(new[] { (byte)i, (byte)j, (byte)x, (byte)y }).ToString());
 						}
 					}
 				}
@@ -171,37 +174,30 @@ namespace asm.Helpers
 			return list;
 		}
 
-		public static IPAddress GetLocalIP(params NetworkInterfaceType[] types)
+		public static IPAddress GetLocalIP()
 		{
-			if (types.IsNullOrEmpty()) types = __defaultNetworkInterfaceType.Value;
-			return GetLocalIP(nit => types.Contains(nit), true)?.FirstOrDefault();
+			return GetLocalIP(nit => nit == NetworkInterfaceType.Ethernet
+									|| nit == NetworkInterfaceType.Wireless80211
+									|| nit == NetworkInterfaceType.GenericModem).FirstOrDefault();
 		}
 
-		public static IReadOnlyList<IPAddress> GetLocalIP([NotNull] Predicate<NetworkInterfaceType> filter, bool breakOnFound = false)
+		public static IPAddress GetLocalIP([NotNull] params NetworkInterfaceType[] types)
 		{
-			try
-			{
-				List<IPAddress> list = new List<IPAddress>();
+			return types.Length == 0
+						? GetLocalIP()
+						: GetLocalIP(types.Contains).FirstOrDefault();
+		}
 
-				foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
-				{
-					if (ni.OperationalStatus != OperationalStatus.Up) continue;
-					if (!filter(ni.NetworkInterfaceType)) continue;
-					GetUnicastAddresses(ni, list, breakOnFound);
-					if (breakOnFound && list.Count > 0) return list;
-				}
-
-				return list;
-			}
-			catch
+		[ItemNotNull]
+		public static IEnumerable<IPAddress> GetLocalIP([NotNull] Predicate<NetworkInterfaceType> filter)
+		{
+			foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
 			{
-				return null;
-			}
+				if (ni.OperationalStatus != OperationalStatus.Up) continue;
+				if (!filter(ni.NetworkInterfaceType)) continue;
 
-			static void GetUnicastAddresses(NetworkInterface ni, List<IPAddress> list, bool breakOnFound)
-			{
 				IPInterfaceProperties properties = ni.GetIPProperties();
-				if (!properties.IsDnsEnabled || properties.UnicastAddresses.Count == 0) return;
+				if (properties.UnicastAddresses.Count == 0) continue;
 
 				foreach (UnicastIPAddressInformation address in properties.UnicastAddresses)
 				{
@@ -213,8 +209,7 @@ namespace asm.Helpers
 						address.Address.Equals(IPAddress.IPv6None)) continue;
 					if (address.DuplicateAddressDetectionState == DuplicateAddressDetectionState.Invalid ||
 						address.DuplicateAddressDetectionState == DuplicateAddressDetectionState.Duplicate) continue;
-					list.Add(address.Address);
-					if (breakOnFound) return;
+					yield return address.Address;
 				}
 			}
 		}
