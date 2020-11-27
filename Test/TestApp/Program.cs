@@ -173,7 +173,7 @@ work with {HEAVY} items.".Yellow();
 			
 			//TestServiceHelper();
 			
-			TestUriHelper();
+			//TestUriHelper();
 			
 			//TestJsonUriConverter();
 
@@ -429,7 +429,6 @@ work with {HEAVY} items.".Yellow();
 			// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
 			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
 			threads = LIMIT_THREADS
-						// ReSharper disable once UnreachableCode
 						? 1
 						: RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
 #else
