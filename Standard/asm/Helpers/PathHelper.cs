@@ -69,7 +69,7 @@ namespace asm.Helpers
 
 		public static string AddDirectorySeparator(string path)
 		{
-			path = path?.Trim();
+			path = Trim(path);
 			return string.IsNullOrEmpty(path)
 						? path
 						: path.EndsWith(DirectorySeparator)
@@ -141,7 +141,7 @@ namespace asm.Helpers
 		{
 			rootPath = AddDirectorySeparator(rootPath);
 			if (string.IsNullOrEmpty(rootPath)) throw new ArgumentNullException(nameof(rootPath));
-			targetPath = targetPath?.Trim();
+			targetPath = Trim(targetPath);
 			if (string.IsNullOrEmpty(targetPath)) throw new ArgumentNullException(nameof(targetPath));
 
 			if (!Win32.PathIsUNC(rootPath) && !Win32.PathIsUNC(targetPath))
@@ -482,7 +482,7 @@ namespace asm.Helpers
 
 		public static string UrlToPath(string url)
 		{
-			url = url?.Trim();
+			url = UriHelper.Trim(url);
 			if (string.IsNullOrEmpty(url)) return url;
 
 			uint sz = Win32.INTERNET_MAX_URL_LENGTH;
@@ -493,7 +493,7 @@ namespace asm.Helpers
 
 		public static string PathToUrl(string path)
 		{
-			path = path?.Trim();
+			path = Trim(path);
 			if (string.IsNullOrEmpty(path)) return path;
 
 			uint sz = Win32.INTERNET_MAX_URL_LENGTH;
@@ -521,7 +521,7 @@ namespace asm.Helpers
 		[NotNull]
 		public static string UniqueName(string path)
 		{
-			path = path?.Trim(Path.DirectorySeparatorChar, ' ');
+			path = Trim(path);
 			if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
 
 			string fileName;
@@ -543,7 +543,7 @@ namespace asm.Helpers
 		[NotNull]
 		public static string UniqueName(string path, string fileOrDirectoryName)
 		{
-			fileOrDirectoryName = fileOrDirectoryName?.Trim(Path.DirectorySeparatorChar, ' ');
+			fileOrDirectoryName = Trim(fileOrDirectoryName);
 			if (string.IsNullOrEmpty(fileOrDirectoryName)) throw new ArgumentNullException(nameof(fileOrDirectoryName));
 			if (path != null && path != Path.DirectorySeparatorChar.ToString()) path = path.Trim(Path.DirectorySeparatorChar, ' ');
 
@@ -576,6 +576,7 @@ namespace asm.Helpers
 			return fullPath;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static string Trim(string path) { return path?.Trim(DirectorySeparator, AltDirectorySeparator, ' ').ToNullIfEmpty(); }
 	}
 }

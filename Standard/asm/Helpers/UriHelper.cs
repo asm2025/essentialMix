@@ -11,8 +11,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using asm.Extensions;
 using JetBrains.Annotations;
+using asm.Extensions;
 using asm.IO;
 using asm.Web;
 
@@ -97,8 +97,8 @@ namespace asm.Helpers
 				}
 				else
 				{
-					builder = new UriBuilder();
-					builder.Path += baseUri.String();
+					builder = new UriBuilder().AddPathSeparator();
+					builder.Path += baseUri.String().TrimStart('/');
 					relative = true;
 					partsAdded = true;
 				}
@@ -118,8 +118,7 @@ namespace asm.Helpers
 					continue;
 				}
 
-				if (builder.Path.Length == 0 || builder.Path[builder.Path.Length - 1] != '/') builder.Path += '/';
-				builder.Path += escaped.TrimStart('/');
+				builder.AddPathSeparator().Path += escaped.TrimStart('/');
 				partsAdded = true;
 			}
 
@@ -167,8 +166,7 @@ namespace asm.Helpers
 				}
 				else
 				{
-					builder = new UriBuilder();
-					if (builder.Path.Length == 0 || builder.Path[builder.Path.Length - 1] != '/') builder.Path += '/';
+					builder = new UriBuilder().AddPathSeparator();
 					builder.Path += value.TrimStart('/');
 					relative = true;
 				}
@@ -184,16 +182,14 @@ namespace asm.Helpers
 				}
 				else if (Uri.IsWellFormedUriString(path, UriKind.Relative))
 				{
-					builder = new UriBuilder();
-					if (builder.Path.Length == 0 || builder.Path[builder.Path.Length - 1] != '/') builder.Path += '/';
+					builder = new UriBuilder().AddPathSeparator();
 					builder.Path += path.TrimStart('/');
 					relative = true;
 				}
 			}
 			else
 			{
-				if (builder.Path.Length == 0 || builder.Path[builder.Path.Length - 1] != '/') builder.Path += '/';
-				builder.Path += path.TrimStart('/');
+				builder.AddPathSeparator().Path += path.TrimStart('/');
 			}
 
 			return builder;
@@ -1080,7 +1076,6 @@ namespace asm.Helpers
 
 		public static string Trim(string url)
 		{
-			url = url.ToNullIfEmpty();
 			if (url == null) return null;
 			url = url.TrimEnd('/', ' ');
 			if (url.Length == 0) return string.Empty;

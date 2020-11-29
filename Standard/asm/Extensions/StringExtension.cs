@@ -27,7 +27,7 @@ namespace asm.Extensions
 		public static string ToNullIfEmpty(this string thisValue)
 		{
 			thisValue = thisValue?.Trim();
-			if (string.IsNullOrEmpty(thisValue)) thisValue = null;
+			if (thisValue != null && thisValue.Length == 0) thisValue = null;
 			return thisValue;
 		}
 

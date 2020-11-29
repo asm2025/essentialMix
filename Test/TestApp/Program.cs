@@ -174,6 +174,7 @@ work with {HEAVY} items.".Yellow();
 			//TestServiceHelper();
 			
 			//TestUriHelper();
+			TestUriHelperRelativeUrl();
 			
 			//TestJsonUriConverter();
 
@@ -4560,6 +4561,13 @@ decrypted:
 				uri = UriHelper.ToUri(item);
 				Console.WriteLine(uri.String());
 			}
+		}
+
+		private static void TestUriHelperRelativeUrl()
+		{
+			const string BASE_URI = "/files/images/users";
+			Uri relUri = UriHelper.Combine(BASE_URI, Guid.NewGuid().ToString(), "auto_f_92.jpg");
+			Console.WriteLine(relUri.String());
 		}
 
 		private static void TestJsonUriConverter()
