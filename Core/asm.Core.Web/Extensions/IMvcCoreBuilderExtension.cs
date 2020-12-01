@@ -9,7 +9,7 @@ namespace asm.Extensions
 		[NotNull]
 		public static IMvcCoreBuilder AddDefaultCors([NotNull] this IMvcCoreBuilder thisValue, params string[] origins)
 		{
-			thisValue.AddCors(options => options.AddDefaultCors(origins));
+			thisValue.AddCors(options => options.AddDefaultPolicy(origins));
 			return thisValue;
 		}
 	}

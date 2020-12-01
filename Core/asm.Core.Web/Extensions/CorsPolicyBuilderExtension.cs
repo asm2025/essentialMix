@@ -9,7 +9,7 @@ namespace asm.Extensions
 	public static class CorsPolicyBuilderExtension
 	{
 		[NotNull]
-		public static CorsPolicyBuilder BuildDefaultCors([NotNull] this CorsPolicyBuilder thisValue, params string[] origins)
+		public static CorsPolicyBuilder BuildDefaultPolicy([NotNull] this CorsPolicyBuilder thisValue, params string[] origins)
 		{
 			thisValue.AllowAnyMethod()
 					.AllowAnyHeader();

@@ -1,6 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,9 +11,16 @@ namespace asm.Extensions
 	public static class IServiceCollectionExtension
 	{
 		[NotNull]
-		public static IServiceCollection AddDefaultCors([NotNull] this IServiceCollection thisValue, params string[] origins)
+		public static IServiceCollection AddDefaultCorsPolicy([NotNull] this IServiceCollection thisValue, params string[] origins)
 		{
-			thisValue.AddCors(options => options.AddDefaultCors(origins));
+			thisValue.AddCors(options => options.AddDefaultPolicy(origins));
+			return thisValue;
+		}
+
+		[NotNull]
+		public static IServiceCollection AddDefaultCorsPolicy([NotNull] this IServiceCollection thisValue, [NotNull] Action<CorsPolicyBuilder> configurePolicy, params string[] origins)
+		{
+			thisValue.AddCors(options => options.AddDefaultPolicy(configurePolicy, origins));
 			return thisValue;
 		}
 
