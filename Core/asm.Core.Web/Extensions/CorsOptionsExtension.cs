@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 
@@ -11,24 +10,17 @@ namespace asm.Extensions
 		[NotNull]
 		public static CorsOptions AddDefaultCors([NotNull] this CorsOptions thisValue, params string[] origins)
 		{
+			thisValue.AddDefaultPolicy(builder => builder.BuildDefaultCors(origins));
+			return thisValue;
+		}
+
+		[NotNull]
+		public static CorsOptions AddDefaultCors([NotNull] this CorsOptions thisValue, [NotNull] Action<CorsPolicyBuilder> configurePolicy, params string[] origins)
+		{
 			thisValue.AddDefaultPolicy(builder =>
 			{
-				builder.AllowAnyMethod()
-						.AllowAnyHeader();
-				origins = origins?.SkipNullOrEmptyTrim()
-								.Distinct(StringComparer.OrdinalIgnoreCase)
-								.ToArray();
-
-				if (origins != null && origins.Length > 0 && origins.All(e => e != "*"))
-				{
-					builder.WithOrigins(origins);
-					builder.AllowCredentials();
-				}
-				else
-				{
-					builder.AllowAnyOrigin();
-					builder.DisallowCredentials();
-				}
+				builder.BuildDefaultCors(origins);
+				configurePolicy(builder);
 			});
 			return thisValue;
 		}
