@@ -30,5 +30,36 @@ namespace asm.Extensions
 			ExceptionHelper.CollectMessages(thisValue, sb);
 			return sb.ToString();
 		}
+
+		public static string Unwrap(this Exception thisValue)
+		{
+			switch (thisValue)
+			{
+				case null:
+					return null;
+				case AggregateException ae:
+				{
+					StringBuilder sb = new StringBuilder();
+
+					foreach (Exception inn in ae.InnerExceptions)
+					{
+						Exception ex = inn;
+
+						while (ex.InnerException != null) 
+							ex = ex.InnerException;
+
+						sb.AppendLine(ex.Message);
+					}
+
+					return sb.ToString();
+				}
+				default:
+				{
+					while (thisValue.InnerException != null) 
+						thisValue = thisValue.InnerException;
+
+					return thisValue.Message;
+				}
+			}
 	}
 }
