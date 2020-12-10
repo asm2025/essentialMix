@@ -45,8 +45,7 @@ namespace asm.Extensions
 					{
 						Exception ex = inn;
 
-						while (ex.InnerException != null) 
-							ex = ex.InnerException;
+						while (ex.InnerException != null) ex = ex.InnerException;
 
 						sb.AppendLine(ex.Message);
 					}
@@ -55,11 +54,11 @@ namespace asm.Extensions
 				}
 				default:
 				{
-					while (thisValue.InnerException != null) 
-						thisValue = thisValue.InnerException;
+					while (thisValue.InnerException != null) thisValue = thisValue.InnerException;
 
 					return thisValue.Message;
 				}
 			}
+		}
 	}
 }

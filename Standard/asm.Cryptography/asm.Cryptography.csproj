@@ -6,7 +6,7 @@
 		<LangVersion>9.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<Version>12.0.0.0</Version>
-		<FileVersion>20.12.1.4</FileVersion>
+		<FileVersion>20.12.10.1</FileVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
 		<PackageTags>utilities, tools, cryptography</PackageTags>
@@ -31,12 +31,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\asm.Collections\asm.Collections.csproj" />
 		<ProjectReference Include="..\asm\asm.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Reference Include="asm">
-	    <HintPath>..\..\bin\Debug\AnyCPU\netframework\asm.dll</HintPath>
-	  </Reference>
 	</ItemGroup>
 
 </Project>
