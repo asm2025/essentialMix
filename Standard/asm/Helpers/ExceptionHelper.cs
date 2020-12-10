@@ -18,13 +18,11 @@ namespace asm.Helpers
 						CollectMessages(inn, sb);
 					break;
 				default:
+					while (value.InnerException != null)
+						value = value.InnerException;
+
 					testAndCollect?.Invoke(value);
-
-					if (value.InnerException != null)
-						CollectMessages(value.InnerException, sb);
-					else
-						sb.AppendWithLine(value.Message);
-
+					sb.AppendWithLine(value.Message);
 					break;
 			}
 
