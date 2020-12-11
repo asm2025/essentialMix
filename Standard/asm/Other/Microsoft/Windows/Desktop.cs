@@ -64,7 +64,7 @@ namespace Other.Microsoft.Windows
 			}
 		}
 
-		private static volatile StringCollection __stringCollection;
+		private static StringCollection __stringCollection;
 
 		/// <summary>
 		/// Opens the default desktop.

@@ -18,9 +18,9 @@ namespace asm.Threading
 		/// </summary>
 		private int _count;
 
-		private volatile Thread _owner;
+		private Thread _owner;
 
-		private volatile OrderedLock _innerLock;
+		private OrderedLock _innerLock;
 
 		/// <inheritdoc />
 		/// <summary>
