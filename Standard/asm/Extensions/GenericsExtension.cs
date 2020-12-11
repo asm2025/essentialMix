@@ -462,12 +462,12 @@ namespace asm.Extensions
 			return thisValue.To(defaultValue,
 				(string s, bool d, out bool r) =>
 				{
-					r = __trueStrings.Contains(s) || __falseStrings.Contains(s) || s.IsNumbers();
+					r = __trueStrings.Contains(s) || __falseStrings.Contains(s) || s.IsDigits();
 					return r;
 				},
 				(string s, bool d, out bool r) =>
 				{
-					r = __trueStrings.Contains(s) || __falseStrings.Contains(s) || s.IsNumbers();
+					r = __trueStrings.Contains(s) || __falseStrings.Contains(s) || s.IsDigits();
 					return r;
 				},
 				(s, d) => __trueStrings.Contains(s) || s.ToNumber(0L) != 0L || d);

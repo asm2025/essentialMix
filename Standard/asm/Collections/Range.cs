@@ -552,14 +552,14 @@ namespace asm.Collections
 
 			if (!value.Contains(SPLIT))
 			{
-				if (!value.IsNumbers()) return false;
+				if (!value.IsDigits()) return false;
 				T p = value.To(defaultValue);
 				parsed = new Range<T>(p, p);
 				return true;
 			}
 
 			string[] parts = value.Split(2, SPLIT);
-			if (parts.Length < 2 || !parts.All(s => s.IsNumbers())) return false;
+			if (parts.Length < 2 || !parts.All(s => s.IsDigits())) return false;
 			parsed = new Range<T>(parts[0].To(defaultValue), parts[1].To(defaultValue));
 			return true;
 		}
