@@ -9,6 +9,7 @@ using System.Xml.Serialization;
 using JetBrains.Annotations;
 using asm.Data.Xml;
 using asm.Extensions;
+using asm.Helpers;
 
 namespace asm.Data.Helpers
 {
@@ -211,65 +212,17 @@ namespace asm.Data.Helpers
 
 			XmlReaderSettings settings = XmlReaderHelper.CreateSettings(ignoreWhitespace, ignoreComments, Constants.XML_VALIDATE_EVERYTHING_FLAGS, ValidationType.Schema);
 			XmlDocument document = XmlDocumentHelper.Create(ignoreWhitespace, namespacesUri);
+			TextReader textReader = null;
 			XmlReader reader = null;
 
 			try
 			{
-				using (TextReader textReader = new StringReader(value))
-				{
-					using (reader = XmlReader.Create(textReader, settings, document.NameTable.CreateParserContext(ignoreWhitespace)))
-					{
-						bool addedElements = false;
+				textReader = new StringReader(value);
+				reader = XmlReader.Create(textReader, settings, document.NameTable.CreateParserContext(ignoreWhitespace));
 
-						while (reader.Read())
-						{
-							switch (reader.NodeType)
-							{
-								case XmlNodeType.DocumentType:
-									if (addedElements) continue;
-									string docTypeSystem = reader.GetAttribute("system");
-									string docPublicId = reader.GetAttribute("public");
-									XmlDocumentType docType = document.CreateDocumentType(reader.Name, docPublicId, docTypeSystem, reader.Value);
-									document.AppendChild(docType);
-									break;
-								case XmlNodeType.XmlDeclaration:
-									if (addedElements) continue;
-									string docVersion = reader.GetAttribute("version") ?? "1.0";
-									string docEncoding = reader.GetAttribute("encoding");
-									string docStandAlone = reader.GetAttribute("standalone");
-									XmlDeclaration declaration = document.CreateXmlDeclaration(docVersion, docEncoding, docStandAlone);
-									document.AppendChild(declaration);
-									break;
-								case XmlNodeType.Element:
-									XmlElement child = document.CreateElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
-									reader.CollectAttributes(child);
-									document.AppendChild(child);
-									reader.CollectChildren(child, ignoreComments);
-									addedElements = true;
-									break;
-								case XmlNodeType.Attribute:
-									XmlAttribute attribute = document.CreateAttribute(reader.Prefix, reader.LocalName, reader.NamespaceURI);
-									if (reader.HasValue) attribute.Value = reader.Value;
-									document.AppendChild(attribute);
-									break;
-								case XmlNodeType.Text:
-									document.AppendChild(document.CreateTextNode(reader.Value));
-									break;
-								case XmlNodeType.CDATA:
-									document.AppendChild(document.CreateCDataSection(reader.Value));
-									break;
-								case XmlNodeType.ProcessingInstruction:
-									document.AppendChild(document.CreateProcessingInstruction(reader.Name, reader.Value));
-									break;
-								case XmlNodeType.Comment:
-									if (!ignoreComments) document.AppendChild(document.CreateComment(reader.Value));
-									break;
-								case XmlNodeType.EntityReference:
-									document.AppendChild(document.CreateEntityReference(reader.Name));
-									break;
-							}
-						}
-					}
+				while (reader.Read())
+				{
+					ReadNode(reader, document, ignoreComments);
 				}
 			}
 			catch
@@ -278,10 +231,63 @@ namespace asm.Data.Helpers
 			}
 			finally
 			{
-				if (reader != null && reader.ReadState != ReadState.Closed) reader.Close();
+				if (reader != null && reader.ReadState != ReadState.Closed)
+				{
+					reader.Close();
+					ObjectHelper.Dispose(ref reader);
+					ObjectHelper.Dispose(ref textReader);
+				}
 			}
 
 			return document;
+
+			static void ReadNode(XmlReader reader, XmlDocument document, bool ignoreComments)
+			{
+				switch (reader.NodeType)
+				{
+					case XmlNodeType.DocumentType:
+						if (document.DocumentElement?.HasChildNodes == true) return;
+						string docTypeSystem = reader.GetAttribute("system");
+						string docPublicId = reader.GetAttribute("public");
+						XmlDocumentType docType = document.CreateDocumentType(reader.Name, docPublicId, docTypeSystem, reader.Value);
+						document.AppendChild(docType);
+						break;
+					case XmlNodeType.XmlDeclaration:
+						if (document.DocumentElement?.HasChildNodes == true) return;
+						string docVersion = reader.GetAttribute("version") ?? "1.0";
+						string docEncoding = reader.GetAttribute("encoding");
+						string docStandAlone = reader.GetAttribute("standalone");
+						XmlDeclaration declaration = document.CreateXmlDeclaration(docVersion, docEncoding, docStandAlone);
+						document.AppendChild(declaration);
+						break;
+					case XmlNodeType.Element:
+						XmlElement child = document.CreateElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
+						reader.CollectAttributes(child);
+						document.AppendChild(child);
+						reader.CollectChildren(child, ignoreComments);
+						break;
+					case XmlNodeType.Attribute:
+						XmlAttribute attribute = document.CreateAttribute(reader.Prefix, reader.LocalName, reader.NamespaceURI);
+						if (reader.HasValue) attribute.Value = reader.Value;
+						document.AppendChild(attribute);
+						break;
+					case XmlNodeType.Text:
+						document.AppendChild(document.CreateTextNode(reader.Value));
+						break;
+					case XmlNodeType.CDATA:
+						document.AppendChild(document.CreateCDataSection(reader.Value));
+						break;
+					case XmlNodeType.ProcessingInstruction:
+						document.AppendChild(document.CreateProcessingInstruction(reader.Name, reader.Value));
+						break;
+					case XmlNodeType.Comment:
+						if (!ignoreComments) document.AppendChild(document.CreateComment(reader.Value));
+						break;
+					case XmlNodeType.EntityReference:
+						document.AppendChild(document.CreateEntityReference(reader.Name));
+						break;
+				}
+			}
 		}
 
 		public static XmlElement ParseXmlElement(string value, params string[] namespaceUri) { return ParseXmlElement(value, false, false, namespaceUri); }
