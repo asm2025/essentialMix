@@ -2053,7 +2053,7 @@ namespace asm.Extensions
 				Type typeToReflect = value.GetType();
 				if (typeToReflect.IsDelegate()) return null;
 				if (typeToReflect.IsPrimitive()) return value;
-				if (visited.ContainsKey(value)) return visited[value];
+				if (visited.TryGetValue(value, out object obj)) return obj;
 
 				object cloneObject = __cloneMethod.Value.Invoke(value, null);
 

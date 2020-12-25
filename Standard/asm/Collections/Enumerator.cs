@@ -56,8 +56,7 @@ namespace asm.Collections
 
 		public virtual bool MoveNext()
 		{
-			AssertImpl();
-			if (!IsIterable || Done) return false;
+			if (Impl == null || !IsIterable || Done) return false;
 
 			if (!Impl.MoveNext())
 			{
@@ -80,12 +79,6 @@ namespace asm.Collections
 		{
 			if (disposing) ObjectHelper.Dispose(ref _impl);
 			base.Dispose(disposing);
-		}
-
-		protected void AssertImpl()
-		{
-			if (_impl != null) return;
-			throw new InvalidOperationException("No implementation available for this operation");
 		}
 	}
 
