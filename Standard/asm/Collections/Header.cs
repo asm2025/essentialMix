@@ -1,14 +1,14 @@
 using System;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using asm.Extensions;
 using JetBrains.Annotations;
 using asm.Comparers;
+using asm.Patterns.NotifyChange;
 
 namespace asm.Collections
 {
 	[Serializable]
-	public abstract class Header : IHeader
+	public abstract class Header : NotifyPropertyChangedBase, IHeader
 	{
 		private string _name;
 		private string _text;
@@ -41,8 +41,6 @@ namespace asm.Collections
 			add => PropertyChanged += value;
 			remove => PropertyChanged -= value;
 		}
-
-		public event PropertyChangedEventHandler PropertyChanged;
 
 		public virtual string Name
 		{
@@ -137,10 +135,5 @@ namespace asm.Collections
 		}
 
 		protected virtual void OnNameChanged() { }
-
-		protected virtual void OnPropertyChanged([NotNull] PropertyChangedEventArgs args) { PropertyChanged?.Invoke(this, args); }
-
-		[NotifyPropertyChangedInvocator]
-		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) { OnPropertyChanged(new PropertyChangedEventArgs(propertyName)); }
 	}
 }
