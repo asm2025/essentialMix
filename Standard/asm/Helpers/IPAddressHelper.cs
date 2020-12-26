@@ -224,7 +224,7 @@ namespace asm.Helpers
 				{
 					OnResponseReceived = r => ((HttpWebResponse)r).StatusCode == HttpStatusCode.OK
 				};
-				WebRequest request = UriHelper.BasicHttpWebRequest(STR_PUBLIC_IP, settings);
+				WebRequest request = UriHelper.MakeHttpWebRequest(STR_PUBLIC_IP, settings);
 				string content = request.ReadToEnd(settings);
 				if (string.IsNullOrEmpty(content)) return null;
 

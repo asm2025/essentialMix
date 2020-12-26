@@ -224,20 +224,20 @@ namespace asm.Helpers
 						: UserAgents.Values[RandomHelper.Default.Next(0, UserAgents.Values.Count - 1)];
 		}
 
-		public static WebRequest BasicHttpWebRequest([NotNull] string url, IOHttpRequestSettings settings) { return BasicHttpWebRequest<HttpWebRequest>(url, settings); }
+		public static WebRequest MakeHttpWebRequest([NotNull] string url, IOHttpRequestSettings settings) { return MakeHttpWebRequest<HttpWebRequest>(url, settings); }
 
-		public static T BasicHttpWebRequest<T>([NotNull] string url, IOHttpRequestSettings settings)
+		public static T MakeHttpWebRequest<T>([NotNull] string url, IOHttpRequestSettings settings)
 			where T : HttpWebRequest
 		{
 			Uri uri = ToUri(url, UriKind.Absolute);
-			return uri == null ? default(T) : BasicHttpWebRequest<T>(uri, settings);
+			return uri == null ? default(T) : MakeHttpWebRequest<T>(uri, settings);
 		}
 
 		[NotNull]
-		public static WebRequest BasicHttpWebRequest([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings) { return BasicHttpWebRequest<HttpWebRequest>(url, settings); }
+		public static WebRequest MakeHttpWebRequest([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings) { return MakeHttpWebRequest<HttpWebRequest>(url, settings); }
 
 		[NotNull]
-		public static T BasicHttpWebRequest<T>([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings)
+		public static T MakeHttpWebRequest<T>([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings)
 			where T : HttpWebRequest
 		{
 			T request = (T)WebRequest.Create(url);
@@ -255,14 +255,14 @@ namespace asm.Helpers
 			return request;
 		}
 
-		public static FtpWebRequest BasicFtpRequest([NotNull] string url, IOFTPRequestSettings settings)
+		public static FtpWebRequest MakeFtpRequest([NotNull] string url, IOFTPRequestSettings settings)
 		{
 			Uri uri = ToUri(url, UriKind.Absolute);
-			return uri == null ? null : BasicFtpRequest(uri, settings);
+			return uri == null ? null : MakeFtpRequest(uri, settings);
 		}
 
 		[NotNull]
-		public static FtpWebRequest BasicFtpRequest([NotNull] Uri url, [NotNull] IOFTPRequestSettings settings)
+		public static FtpWebRequest MakeFtpRequest([NotNull] Uri url, [NotNull] IOFTPRequestSettings settings)
 		{
 			FtpWebRequest request = (FtpWebRequest)WebRequest.Create(url);
 			request.Timeout = settings.Timeout;
@@ -275,14 +275,14 @@ namespace asm.Helpers
 			return request;
 		}
 
-		public static FileWebRequest BasicFileWebRequest([NotNull] string url, IOFileWebRequestSettings settings)
+		public static FileWebRequest MakeFileWebRequest([NotNull] string url, IOFileWebRequestSettings settings)
 		{
 			Uri uri = ToUri(url, UriKind.Absolute);
-			return uri == null ? null : BasicFileWebRequest(uri, settings);
+			return uri == null ? null : MakeFileWebRequest(uri, settings);
 		}
 
 		[NotNull]
-		public static FileWebRequest BasicFileWebRequest([NotNull] Uri url, [NotNull] IOFileWebRequestSettings settings)
+		public static FileWebRequest MakeFileWebRequest([NotNull] Uri url, [NotNull] IOFileWebRequestSettings settings)
 		{
 			FileWebRequest request = (FileWebRequest)WebRequest.Create(url);
 			request.Timeout = settings.Timeout;
@@ -360,13 +360,13 @@ namespace asm.Helpers
 		public static string GetTitle([NotNull] string url, IOHttpRequestSettings settings)
 		{
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = MakeHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
 			return request.GetTitle(settings);
 		}
 
 		public static string GetTitle([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings)
 		{
-			WebRequest request = BasicHttpWebRequest(url, settings);
+			WebRequest request = MakeHttpWebRequest(url, settings);
 			return request.GetTitle(settings);
 		}
 
@@ -375,7 +375,7 @@ namespace asm.Helpers
 		{
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
 			token.ThrowIfCancellationRequested();
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = MakeHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
 			return request.GetTitleAsync(settings, token);
 		}
 
@@ -383,20 +383,20 @@ namespace asm.Helpers
 		public static Task<string> GetTitleAsync([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebRequest request = BasicHttpWebRequest(url, settings);
+			WebRequest request = MakeHttpWebRequest(url, settings);
 			return request.GetTitleAsync(settings, token);
 		}
 
 		public static (string Title, string Buffer) Peek([NotNull] string url, IOHttpRequestSettings settings)
 		{
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = MakeHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
 			return request.Peek(settings);
 		}
 
 		public static (string Title, string Buffer) Peek([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings)
 		{
-			WebRequest request = BasicHttpWebRequest(url, settings);
+			WebRequest request = MakeHttpWebRequest(url, settings);
 			return request.Peek(settings);
 		}
 
@@ -405,7 +405,7 @@ namespace asm.Helpers
 		{
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
 			token.ThrowIfCancellationRequested();
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = MakeHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
 			return request.PeekAsync(settings, token);
 		}
 
@@ -413,7 +413,7 @@ namespace asm.Helpers
 		public static Task<(string Title, string Buffer)> PeekAsync([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebRequest request = BasicHttpWebRequest(url, settings);
+			WebRequest request = MakeHttpWebRequest(url, settings);
 			return request.PeekAsync(settings, token);
 		}
 
@@ -424,7 +424,7 @@ namespace asm.Helpers
 		public static UrlSearchResult Search([NotNull] string url, string searchFor, UrlSearchFlags flags, IOHttpRequestSettings settings)
 		{
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = MakeHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
 			return request.Search(searchFor, flags, settings);
 		}
 
@@ -434,7 +434,7 @@ namespace asm.Helpers
 		[NotNull]
 		public static UrlSearchResult Search([NotNull] Uri url, string searchFor, UrlSearchFlags flags, [NotNull] IOHttpRequestSettings settings)
 		{
-			WebRequest request = BasicHttpWebRequest(url, settings);
+			WebRequest request = MakeHttpWebRequest(url, settings);
 			return request.Search(searchFor, flags, settings);
 		}
 
@@ -449,7 +449,7 @@ namespace asm.Helpers
 		{
 			token.ThrowIfCancellationRequested();
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = MakeHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
 			return request.SearchAsync(searchFor, flags, settings, token);
 		}
 
@@ -463,20 +463,20 @@ namespace asm.Helpers
 		public static Task<UrlSearchResult> SearchAsync([NotNull] Uri url, string searchFor, UrlSearchFlags flags, [NotNull] IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebRequest request = BasicHttpWebRequest(url, settings);
+			WebRequest request = MakeHttpWebRequest(url, settings);
 			return request.SearchAsync(searchFor, flags, settings, token);
 		}
 
 		public static string GetString([NotNull] string url, IOHttpRequestSettings settings)
 		{
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = MakeHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
 			return request.GetString(settings);
 		}
 
 		public static string GetString([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings)
 		{
-			WebRequest request = BasicHttpWebRequest(url, settings);
+			WebRequest request = MakeHttpWebRequest(url, settings);
 			return request.GetString(settings);
 		}
 
@@ -485,7 +485,7 @@ namespace asm.Helpers
 		{
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
 			token.ThrowIfCancellationRequested();
-			WebRequest request = BasicHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
+			WebRequest request = MakeHttpWebRequest(url, settings) ?? throw new InvalidOperationException("Could not create a request.");
 			return request.GetStringAsync(settings, token);
 		}
 
@@ -493,7 +493,7 @@ namespace asm.Helpers
 		public static Task<string> GetStringAsync([NotNull] Uri url, [NotNull] IOHttpRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebRequest request = BasicHttpWebRequest(url, settings);
+			WebRequest request = MakeHttpWebRequest(url, settings);
 			return request.GetStringAsync(settings, token);
 		}
 
@@ -512,7 +512,7 @@ namespace asm.Helpers
 			IProgress<int> progress = settings.Progress;
 			progress?.Report(0);
 			
-			WebRequest request = BasicHttpWebRequest(url, settings);
+			WebRequest request = MakeHttpWebRequest(url, settings);
 			WebHeaderCollection headers = request.Headers;
 			headers.Add(HttpRequestHeader.CacheControl, "no-cache");
 			headers.Add(HttpRequestHeader.CacheControl, "no-store");
@@ -606,7 +606,7 @@ namespace asm.Helpers
 			IProgress<int> progress = settings.Progress;
 			progress?.Report(0);
 
-			WebRequest request = BasicHttpWebRequest(url, settings);
+			WebRequest request = MakeHttpWebRequest(url, settings);
 			WebHeaderCollection headers = request.Headers;
 			headers.Add(HttpRequestHeader.CacheControl, "no-cache");
 			headers.Add(HttpRequestHeader.CacheControl, "no-store");
@@ -1238,7 +1238,7 @@ namespace asm.Helpers
 
 			if (contentLength <= 0L) contentLength = -1L;
 
-			FileWebRequest request = BasicFileWebRequest(url, settings);
+			FileWebRequest request = MakeFileWebRequest(url, settings);
 			request.CopyHeaders(headers);
 			request.ContentLength = contentLength;
 			if (request.RequestUri.Scheme == Uri.UriSchemeFile) header = footer = null;

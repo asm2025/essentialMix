@@ -9,11 +9,13 @@ namespace asm.Extensions
 {
 	public static class BufferBlockExtension
 	{
+		[NotNull]
 		public static IPropagatorBlock<T, T> CreateDelayedBlock<T>([NotNull] this BufferBlock<T> thisValue, TimeSpan delay, CancellationToken token = default(CancellationToken))
 		{
 			return CreateDelayedBlock(thisValue, delay, TimeSpan.Zero, token);
 		}
 
+		[NotNull]
 		public static IPropagatorBlock<T, T> CreateDelayedBlock<T>([NotNull] this BufferBlock<T> thisValue, TimeSpan delay, TimeSpan timeout, CancellationToken token = default(CancellationToken))
 		{
 			BufferBlock<T> target = new BufferBlock<T>();
@@ -88,6 +90,7 @@ namespace asm.Extensions
 			return await CreateDelayedBlockAsync(thisValue, delay, TimeSpan.Zero, token).ConfigureAwait();
 		}
 
+		[ItemNotNull]
 		public static async Task<IPropagatorBlock<T, T>> CreateDelayedBlockAsync<T>([NotNull] this BufferBlock<T> thisValue, TimeSpan delay, TimeSpan timeout, CancellationToken token = default(CancellationToken))
 		{
 			BufferBlock<T> target = new BufferBlock<T>();
