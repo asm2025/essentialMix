@@ -178,7 +178,7 @@ namespace asm.Threading.Helpers
 
 					if (!processReallyExited && process.IsAwaitable())
 					{
-						if (!process.WaitForExit(TimeSpanHelper.SCHEDULE)) ndx = -1;
+						if (!process.WaitForExit(TimeSpanHelper.HALF_SCHEDULE)) ndx = -1;
 					}
 
 					process.Die();
@@ -351,7 +351,7 @@ namespace asm.Threading.Helpers
 
 						if (!processReallyExited && process.IsAwaitable())
 						{
-							if (!process.WaitForExit(TimeSpanHelper.SCHEDULE)) ndx = -1;
+							if (!process.WaitForExit(TimeSpanHelper.HALF_SCHEDULE)) ndx = -1;
 						}
 
 						process.Die();
@@ -483,7 +483,7 @@ namespace asm.Threading.Helpers
 
 						if (!processReallyExited && process.IsAwaitable())
 						{
-							if (!process.WaitForExit(TimeSpanHelper.SCHEDULE)) ndx = -1;
+							if (!process.WaitForExit(TimeSpanHelper.HALF_SCHEDULE)) ndx = -1;
 						}
 
 						process.Die();
@@ -704,7 +704,7 @@ namespace asm.Threading.Helpers
 
 				if (!processReallyExited && process.IsAwaitable())
 				{
-					if (!process.WaitForExit(TimeSpanHelper.SCHEDULE)) ndx = -1;
+					if (!process.WaitForExit(TimeSpanHelper.HALF_SCHEDULE)) ndx = -1;
 				}
 
 				return Task.FromResult(ndx == 0);

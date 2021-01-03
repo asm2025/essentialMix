@@ -91,7 +91,7 @@ work with {HEAVY} items.".Yellow();
 			//TestLevenshteinDistance();
 			//TestDeepestPit();
 
-			//TestThreadQueue();
+			TestThreadQueue();
 
 			//TestSortAlgorithm();
 			//TestSortAlgorithms();
@@ -155,13 +155,13 @@ work with {HEAVY} items.".Yellow();
 			//TestFibonacciHeapElementAt();
 			//TestFibonacciHeapDecreaseKey();
 			
-			// IndexMin not working yet!!!
+			// todo IndexMin not working yet!!!
 			//TestIndexMinAdd();
 			//TestIndexMinRemove();
 			//TestIndexMinElementAt();
 			//TestIndexMinDecreaseKey();
 
-			TestAllHeapsPerformance();
+			//TestAllHeapsPerformance();
 
 			//TestGraph();
 

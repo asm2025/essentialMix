@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 using System.Threading;
+using asm.Helpers;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
@@ -47,7 +48,7 @@ namespace asm.Extensions
 		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlThread)]
 		public static void Awake([NotNull] this Thread thisValue)
 		{
-			if (IsSuspending(thisValue)) Thread.Sleep(0);
+			if (IsSuspending(thisValue)) Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
 			if (!IsSuspended(thisValue)) return;
 
 			try
@@ -67,7 +68,7 @@ namespace asm.Extensions
 		public static bool Die(this Thread thisValue)
 		{
 			if (!IsAwaitable(thisValue)) return true;
-			if (IsWaiting(thisValue)) Thread.Sleep(0);
+			if (IsWaiting(thisValue)) Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
 			if (IsStopped(thisValue)) return true;
 			if (IsSuspended(thisValue)) Awake(thisValue);
 

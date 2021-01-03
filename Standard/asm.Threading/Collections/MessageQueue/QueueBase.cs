@@ -192,7 +192,7 @@ namespace asm.Threading.Collections.MessageQueue
 
 			try
 			{
-				if (millisecondsTimeout < TimeSpanHelper.MINIMUM)
+				if (millisecondsTimeout < TimeSpanHelper.ZERO)
 					_manualResetEventSlim.Wait(Token);
 				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
 					return false;
@@ -233,13 +233,13 @@ namespace asm.Threading.Collections.MessageQueue
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !_queue.IsCompleted)
 				{
-					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.MINIMUM_SCHEDULE, Token))
+					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.FAST_SCHEDULE, Token))
 						Callback(item);
 				}
 
 				if (IsDisposed || Token.IsCancellationRequested) return;
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.MINIMUM_SCHEDULE, Token))
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.FAST_SCHEDULE, Token))
 					Callback(item);
 			}
 			catch (ObjectDisposedException) { }

@@ -26,13 +26,8 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 		/// <inheritdoc />
 		protected override void Dispose(bool disposing)
 		{
-			if (disposing)
-			{
-				CompleteInternal();
-				StopInternal(WaitOnDispose);
-				ObjectHelper.Dispose(ref _countdown);
-			}
 			base.Dispose(disposing);
+			if (disposing) ObjectHelper.Dispose(ref _countdown);
 		}
 
 		public override int Count => _queue.Count;
@@ -60,7 +55,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 									}).Start();
 						}
 
-						Thread.Sleep(0);
+						Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
 						if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 						OnWorkStarted(EventArgs.Empty);
 					}
@@ -138,7 +133,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.IsEmpty)
 					{
 						lock (_lock)
-							Monitor.Wait(_lock, TimeSpanHelper.MINIMUM_SCHEDULE);
+							Monitor.Wait(_lock, TimeSpanHelper.FAST_SCHEDULE);
 					}
 
 					if (IsDisposed || Token.IsCancellationRequested) return;

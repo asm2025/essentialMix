@@ -155,7 +155,7 @@ namespace asm.Threading.FileSystem
 
 			try
 			{
-				if (millisecondsTimeout < TimeSpanHelper.MINIMUM)
+				if (millisecondsTimeout < TimeSpanHelper.ZERO)
 					_manualResetEventSlim.Wait(Token);
 				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
 					return false;
@@ -229,13 +229,13 @@ namespace asm.Threading.FileSystem
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !_queue.IsCompleted)
 				{
-					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out (EventType Type, FileSystemEventArgs Args) item, TimeSpanHelper.MINIMUM_SCHEDULE, Token))
+					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out (EventType Type, FileSystemEventArgs Args) item, TimeSpanHelper.FAST_SCHEDULE, Token))
 						Process(item.Type, item.Args);
 				}
 
 				if (IsDisposed || Token.IsCancellationRequested) return;
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out (EventType Type, FileSystemEventArgs Args) item, TimeSpanHelper.MINIMUM_SCHEDULE, Token))
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out (EventType Type, FileSystemEventArgs Args) item, TimeSpanHelper.FAST_SCHEDULE, Token))
 					Process(item.Type, item.Args);
 			}
 			catch (ObjectDisposedException) { }

@@ -45,7 +45,7 @@ namespace asm.IO
 			_bufferSize = BUFFER_DEFAULT;
 			_buffer = new StringBuilder(_bufferSize);
 			Writing = writing;
-			_timer = new Timer(TimeSpanHelper.FAST_SCHEDULE);
+			_timer = new Timer(TimeSpanHelper.QUARTER_SCHEDULE);
 			_timer.Elapsed += (sender, args) =>
 			{
 				lock(_buffer)

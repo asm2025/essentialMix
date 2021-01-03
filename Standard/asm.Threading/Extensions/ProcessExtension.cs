@@ -125,9 +125,9 @@ namespace asm.Extensions
 			Func<bool> predicate;
 
 			if (evalFunc == null)
-				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForExit(TimeSpanHelper.MINIMUM);
+				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForExit(TimeSpanHelper.ZERO);
 			else
-				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForExit(TimeSpanHelper.MINIMUM) || evalFunc();
+				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForExit(TimeSpanHelper.ZERO) || evalFunc();
 
 			return SpinWait.SpinUntil(predicate, millisecondsTimeout);
 		}
@@ -150,9 +150,9 @@ namespace asm.Extensions
 			Func<bool> predicate;
 
 			if (evalFunc == null)
-				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForInputIdle(TimeSpanHelper.MINIMUM_SCHEDULE);
+				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForInputIdle(TimeSpanHelper.FAST_SCHEDULE);
 			else
-				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForInputIdle(TimeSpanHelper.MINIMUM_SCHEDULE) || evalFunc();
+				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForInputIdle(TimeSpanHelper.FAST_SCHEDULE) || evalFunc();
 
 			return SpinWait.SpinUntil(predicate, millisecondsTimeout);
 		}

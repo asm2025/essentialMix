@@ -15,13 +15,15 @@ namespace asm.Helpers
 			InternalNegative = 2
 		}
 		
-		public const int MINIMUM = 0;
+		public const int ZERO = 0;
 		public const int MAXIMUM = int.MaxValue;
 		public const int INFINITE = Timeout.Infinite;
 
-		public const int MINIMUM_SCHEDULE = 50;
-		public const int FAST_SCHEDULE = 250;
-		public const int SCHEDULE = 500;
+		public const int MINIMUM_SCHEDULE = 10;
+		public const int FAST_SCHEDULE = 50;
+		public const int QUARTER_SCHEDULE = 250;
+		public const int HALF_SCHEDULE = 500;
+		public const int SCHEDULE = 1000;
 
 		public const int SECOND = 1000;
 		public const int MINUTE = SECOND * 60;
@@ -33,9 +35,9 @@ namespace asm.Helpers
 		public static readonly TimeSpan Maximum = TimeSpan.FromMilliseconds(MAXIMUM);
 		public static readonly TimeSpan Infinite = Timeout.InfiniteTimeSpan;
 
-		public static readonly TimeSpan MinimumSchedule = TimeSpan.FromMilliseconds(MINIMUM_SCHEDULE);
-		public static readonly TimeSpan FastSchedule = TimeSpan.FromMilliseconds(FAST_SCHEDULE);
-		public static readonly TimeSpan Schedule = TimeSpan.FromMilliseconds(SCHEDULE);
+		public static readonly TimeSpan MinimumSchedule = TimeSpan.FromMilliseconds(FAST_SCHEDULE);
+		public static readonly TimeSpan FastSchedule = TimeSpan.FromMilliseconds(QUARTER_SCHEDULE);
+		public static readonly TimeSpan Schedule = TimeSpan.FromMilliseconds(HALF_SCHEDULE);
 
 		public static readonly TimeSpan Second = TimeSpan.FromSeconds(1);
 		public static readonly TimeSpan TwoSeconds = TimeSpan.FromSeconds(2);
