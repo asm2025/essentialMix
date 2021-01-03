@@ -122,7 +122,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 				}
 
 				if (count == items.Length) count = 0;
-				Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
+				Thread.Sleep(0);
 
 				while (!IsDisposed && !Token.IsCancellationRequested)
 				{

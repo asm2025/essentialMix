@@ -12,7 +12,6 @@ using JetBrains.Annotations;
 
 namespace asm.Collections
 {
-
 	/// <summary>
 	/// <see href="https://algs4.cs.princeton.edu/44sp/IndexMinPQ.java.html">IndexMin</see> priority queue.
 	/// This implementation is based on Robert Sedgewick and Kevin Wayne IndexMinPQ from their book: Algorithms, 4th Edition

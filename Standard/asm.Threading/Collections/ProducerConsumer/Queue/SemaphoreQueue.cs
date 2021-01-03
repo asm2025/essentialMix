@@ -147,7 +147,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 					thread.Start();
 				}
 
-				Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
+				Thread.Sleep(0);
 
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item))
 				{

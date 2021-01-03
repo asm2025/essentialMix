@@ -597,7 +597,7 @@ namespace asm.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static DateTime ClearFractions(this DateTime thisValue)
 		{
-			return thisValue.AddSeconds(-1 * thisValue.Second).AddMilliseconds(-1 * thisValue.Millisecond);
+			return thisValue.AddMilliseconds(-1 * (thisValue.Second * 1000 + thisValue.Millisecond));
 		}
 
 		public static int Weeks(this DateTime thisValue)
@@ -672,8 +672,7 @@ namespace asm.Extensions
 		{
 			return (thisValue.Kind == DateTimeKind.Utc
 						? DateTime.UtcNow
-						: DateTime.Now).Ticks -
-					thisValue.Ticks;
+						: DateTime.Now).Ticks - thisValue.Ticks;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -690,8 +689,7 @@ namespace asm.Extensions
 		{
 			return ((thisValue.Kind == DateTimeKind.Utc
 						? thisValue
-						: thisValue.ToUniversalTime()) -
-					DateTimeHelper.UnixEpoch).TotalLongMilliseconds();
+						: thisValue.ToUniversalTime()) - DateTimeHelper.UnixEpoch).TotalLongMilliseconds();
 		}
 
 		public static bool TryAdd(this DateTime thisValue, TimeSpan value, out DateTime result)

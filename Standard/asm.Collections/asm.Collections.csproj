@@ -7,7 +7,7 @@
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Version>12.0.0.0</Version>
-		<FileVersion>21.1.3.1</FileVersion>
+		<FileVersion>21.1.3.4</FileVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
 		<PackageTags>utilities, tools, extensions, helpers</PackageTags>
@@ -40,10 +40,6 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\asm.Exceptions\asm.Exceptions.csproj" />
 	  <ProjectReference Include="..\asm\asm.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="!todo\DebugView\" />
 	</ItemGroup>
 
 </Project>

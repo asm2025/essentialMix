@@ -68,7 +68,7 @@ namespace asm.Threading.FileSystem
 			if (disposing)
 			{
 				Enabled = false;
-				Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
+				Thread.Sleep(0);
 				ObjectHelper.Dispose(ref _watcher);
 			}
 			base.Dispose(disposing);

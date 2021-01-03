@@ -161,7 +161,7 @@ work with {HEAVY} items.".Yellow();
 			//TestIndexMinElementAt();
 			//TestIndexMinDecreaseKey();
 
-			//TestAllHeapsPerformance();
+			TestAllHeapsPerformance();
 
 			//TestGraph();
 
@@ -174,7 +174,7 @@ work with {HEAVY} items.".Yellow();
 			//TestServiceHelper();
 			
 			//TestUriHelper();
-			TestUriHelperRelativeUrl();
+			//TestUriHelperRelativeUrl();
 			
 			//TestJsonUriConverter();
 
@@ -3990,6 +3990,7 @@ work with {HEAVY} items.".Yellow();
 			Stopwatch clock = new Stopwatch();
 			int tests = 0;
 			int[] values = GetRandomIntegers(true, START);
+			IDictionary<string, long> result = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
 			Student[] students = GetRandomStudents(START);
 			Func<Student, double> getKey = e => e.Grade;
 
@@ -3997,43 +3998,71 @@ work with {HEAVY} items.".Yellow();
 			{
 				Console.Clear();
 				Title("Testing All Heap types performance...");
-				CompilationHint();
+				if (tests == 0) CompilationHint();
 				Console.WriteLine($"Array has {values.Length} items.");
 				Title("Testing IHeap<int> types performance...");
+				result.Clear();
 
 				// BinaryHeap
 				DoHeapTest(new MinBinaryHeap<int>(), values, clock);
+				result[typeof(MinBinaryHeap<int>).Name] = clock.ElapsedTicks;
 				clock.Stop();
 
 				// BinomialHeap
 				DoHeapTest(new MinBinomialHeap<int>(), values, clock);
+				result[typeof(MinBinomialHeap<int>).Name] = clock.ElapsedTicks;
 				clock.Stop();
 
 				// PairingHeap
 				DoHeapTest(new MinPairingHeap<int>(), values, clock);
+				result[typeof(MinPairingHeap<int>).Name] = clock.ElapsedTicks;
 				clock.Stop();
 
 				// FibonacciHeap
 				DoHeapTest(new MinFibonacciHeap<int>(), values, clock);
+				result[typeof(MinFibonacciHeap<int>).Name] = clock.ElapsedTicks;
 				clock.Stop();
 
+				Console.WriteLine();
+				Console.WriteLine("Results for Heap<int>:");
+
+				foreach (KeyValuePair<string, long> pair in result.OrderBy(e => e.Value))
+				{
+					Console.WriteLine($"{pair.Key} took {pair.Value} ticks");
+				}
+
+				ConsoleHelper.Pause();
+
 				Title("Testing IKeyedHeap<TNode, TKey, TValue> types performance...");
+				result.Clear();
 				
 				// BinaryHeap
 				DoHeapTest(new MinBinaryHeap<double, Student>(getKey), students, clock);
+				result[typeof(MinBinaryHeap<double, Student>).Name] = clock.ElapsedTicks;
 				clock.Stop();
 
 				// BinomialHeap
 				DoHeapTest(new MinBinomialHeap<double, Student>(getKey), students, clock);
+				result[typeof(MinBinomialHeap<double, Student>).Name] = clock.ElapsedTicks;
 				clock.Stop();
 
 				// PairingHeap
 				DoHeapTest(new MinPairingHeap<double, Student>(getKey), students, clock);
+				result[typeof(MinPairingHeap<double, Student>).Name] = clock.ElapsedTicks;
 				clock.Stop();
 
 				// FibonacciHeap
 				DoHeapTest(new MinFibonacciHeap<double, Student>(getKey), students, clock);
+				result[typeof(MinFibonacciHeap<double, Student>).Name] = clock.ElapsedTicks;
 				clock.Stop();
+
+				Console.WriteLine();
+				Console.WriteLine("Results for Heap<double, Student>:");
+
+				foreach (KeyValuePair<string, long> pair in result.OrderBy(e => e.Value))
+				{
+					Console.WriteLine($"{pair.Key} took {pair.Value} ticks");
+				}
 
 				Console.WriteLine();
 				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");

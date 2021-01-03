@@ -46,8 +46,6 @@ namespace asm.Extensions
 					{
 						ms.WriteTo(stream);
 					}
-
-					Thread.Sleep(TimeSpanHelper.FAST_SCHEDULE);
 				}
 
 				result = true;
