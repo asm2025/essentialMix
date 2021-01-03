@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 namespace asm.Extensions
 {
 	public static class DateTimeExtension
-	{
+	{ 
 		private const string FMT_DATE_TIME = "{2:0000}{0}{3:00}{0}{4:00} {5:00}{1}{6:00}{1}{7:00}";
 		private const string FMT_DATE_TIME_DAY_FIRST = "{4:00}{0}{3:00}{0}{2:0000} {5:00}{1}{6:00}{1}{7:00}";
 		private const string FMT_DATE = "{1:0000}{0}{2:00}{0}{3:00}";
@@ -235,7 +235,7 @@ namespace asm.Extensions
 		public static double Milliseconds(this DateTime thisValue, DateTime value) { return (thisValue - value).TotalMilliseconds; }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static int DaysOfMonth(this DateTime thisValue) { return thisValue.AddMonths(1).AddDays(-1).Day; }
+		public static int DaysInMonth(this DateTime thisValue) { return DateTime.DaysInMonth(thisValue.Year, thisValue.Month); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int Quarter(this DateTime thisValue) { return (thisValue.Month - 1) / 3 + 1; }
@@ -355,9 +355,15 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static DateTime FirstOfTheWeek(this DateTime thisValue)
+		{
+			return thisValue.Date.AddDays(-(int)thisValue.DayOfWeek);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) ThisWeek(this DateTime thisValue)
 		{
-			DateTime start = thisValue.Date.AddDays(-(int)thisValue.DayOfWeek);
+			DateTime start = FirstOfTheWeek(thisValue);
 			return (start, start.AddDays(7).AddSeconds(-1));
 		}
 
@@ -378,9 +384,32 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static DateTime FirstOfTheMonth(this DateTime thisValue)
+		{
+			return new DateTime(thisValue.Year, thisValue.Month, 1);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static DateTime LastOfTheMonth(this DateTime thisValue)
+		{
+			int daysInMonth = DateTime.DaysInMonth(thisValue.Year, thisValue.Month);
+			return thisValue.Date.AddDays(1 - thisValue.Day + daysInMonth).AddSeconds(-1);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static DateTime LastOfTheMonth(this DateTime thisValue, DayOfWeek dayOfWeek)
+		{
+			DateTime last = LastOfTheMonth(thisValue);
+			DayOfWeek[] daysOrder = DateTimeFormatInfo.CurrentInfo!.GetDaysOrder();
+			int diff = Array.IndexOf(daysOrder, dayOfWeek) - Array.IndexOf(daysOrder, last.DayOfWeek);
+			if (diff > 0) diff -= 7;
+			return last.AddDays(diff);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) ThisMonth(this DateTime thisValue)
 		{
-			DateTime start = new DateTime(thisValue.Year, thisValue.Month, 1);
+			DateTime start = FirstOfTheMonth(thisValue);
 			return (start, start.AddMonths(1).AddSeconds(-1));
 		}
 
@@ -402,10 +431,16 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static (DateTime Start, DateTime End) ThisQuarter(this DateTime thisValue)
+		public static DateTime FirstOfTheQuarter(this DateTime thisValue)
 		{
 			int startMonth = (Quarter(thisValue) - 1) * 3 + 1;
-			DateTime start = new DateTime(thisValue.Year, startMonth, 1);
+			return new DateTime(thisValue.Year, startMonth, 1);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static (DateTime Start, DateTime End) ThisQuarter(this DateTime thisValue)
+		{
+			DateTime start = FirstOfTheQuarter(thisValue);
 			return (start, start.AddMonths(3).AddSeconds(-1));
 		}
 
@@ -428,10 +463,16 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static (DateTime Start, DateTime End) ThisSemiAnnual(this DateTime thisValue)
+		public static DateTime FirstOfTheSemiAnnual(this DateTime thisValue)
 		{
 			int startMonth = (SemiAnnual(thisValue) - 1) * 6 + 1;
-			DateTime start = new DateTime(thisValue.Year, startMonth, 1);
+			return new DateTime(thisValue.Year, startMonth, 1);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static (DateTime Start, DateTime End) ThisSemiAnnual(this DateTime thisValue)
+		{
+			DateTime start = FirstOfTheSemiAnnual(thisValue);
 			return (start, start.AddMonths(6).AddSeconds(-1));
 		}
 
@@ -453,9 +494,15 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static DateTime FirstOfTheYear(this DateTime thisValue)
+		{
+			return new DateTime(thisValue.Year, 1, 1);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static (DateTime Start, DateTime End) ThisYear(this DateTime thisValue)
 		{
-			DateTime start = new DateTime(thisValue.Year, 1, 1);
+			DateTime start = FirstOfTheYear(thisValue);
 			return (start, start.AddYears(1).AddSeconds(-1));
 		}
 
@@ -477,10 +524,16 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static (DateTime Start, DateTime End) ThisCentury(this DateTime thisValue)
+		public static DateTime FirstOfTheCentury(this DateTime thisValue)
 		{
 			int century = Century(thisValue) - 1;
-			DateTime thisStart = new DateTime(century * 100, 1, 1);
+			return new DateTime(century * 100, 1, 1);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static (DateTime Start, DateTime End) ThisCentury(this DateTime thisValue)
+		{
+			DateTime thisStart = FirstOfTheCentury(thisValue);
 			return (thisStart, thisStart.AddYears(100).AddSeconds(-1));
 		}
 
@@ -502,10 +555,16 @@ namespace asm.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static (DateTime Start, DateTime End) ThisMillennium(this DateTime thisValue)
+		public static DateTime FirstOfTheMillennium(this DateTime thisValue)
 		{
 			int millennium = Millennium(thisValue) - 1;
-			DateTime thisStart = new DateTime(millennium * 1000, 1, 1);
+			return new DateTime(millennium * 1000, 1, 1);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static (DateTime Start, DateTime End) ThisMillennium(this DateTime thisValue)
+		{
+			DateTime thisStart = FirstOfTheMillennium(thisValue);
 			return (thisStart, thisStart.AddYears(1000).AddSeconds(-1));
 		}
 
@@ -515,6 +574,79 @@ namespace asm.Extensions
 			int millennium = Millennium(thisValue);
 			DateTime thisStart = new DateTime(millennium * 1000, 1, 1);
 			return (thisStart, thisStart.AddYears(1000).AddSeconds(-1));
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static DateTime ClearMilliseconds(this DateTime thisValue)
+		{
+			return thisValue.AddMilliseconds(-1 * thisValue.Millisecond);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static DateTime ClearSeconds(this DateTime thisValue)
+		{
+			return thisValue.AddSeconds(-1 * thisValue.Second);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static DateTime ClearMinutes(this DateTime thisValue)
+		{
+			return thisValue.AddMinutes(-1 * thisValue.Minute);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static DateTime ClearFractions(this DateTime thisValue)
+		{
+			return thisValue.AddSeconds(-1 * thisValue.Second).AddMilliseconds(-1 * thisValue.Millisecond);
+		}
+
+		public static int Weeks(this DateTime thisValue)
+		{
+			DayOfWeek[] daysOrder = DateTimeFormatInfo.CurrentInfo!.GetDaysOrder();
+			(DateTime start, DateTime end) = ThisMonth(thisValue);
+			int diffStart = Array.IndexOf(daysOrder, start.DayOfWeek);
+			int diffEnd = 6 - Array.IndexOf(daysOrder, end.DayOfWeek);
+			int daysInMonth = DateTime.DaysInMonth(thisValue.Year, thisValue.Month);
+			return (int)Math.Ceiling((diffStart + daysInMonth + diffEnd) / 7.0d);
+		}
+
+		public static DateTime FirstOfWeek(this DateTime thisValue, int week)
+		{
+			if (week < 1) throw new ArgumentOutOfRangeException(nameof(week));
+			week--;
+			DateTime first = FirstOfTheMonth(thisValue);
+			if (week == 0) return first;
+
+			DayOfWeek[] daysOrder = DateTimeFormatInfo.CurrentInfo!.GetDaysOrder();
+
+			if (week < 5)
+			{
+				int diffStart = Array.IndexOf(daysOrder, first.DayOfWeek);
+				return first.AddDays(week * 7 - diffStart);
+			}
+	
+			int diffEnd = 6 - Array.IndexOf(daysOrder, LastOfTheMonth(thisValue).DayOfWeek);
+			DateTime date = first.AddDays(week * 7 - diffEnd - 1);
+			if (date.Month != thisValue.Month) throw new ArgumentOutOfRangeException(nameof(week));
+			return date;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static DateTime ThisOrNext(this DateTime thisValue, DayOfWeek dayOfWeek)
+		{
+			DayOfWeek[] daysOrder = DateTimeFormatInfo.CurrentInfo!.GetDaysOrder();
+			int offset = Array.IndexOf(daysOrder, dayOfWeek) - Array.IndexOf(daysOrder, thisValue.DayOfWeek);
+			if (offset < 0) offset += 7;
+			return thisValue.AddDays(offset);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static DateTime Next(this DateTime thisValue, DayOfWeek dayOfWeek)
+		{
+			DayOfWeek[] daysOrder = DateTimeFormatInfo.CurrentInfo!.GetDaysOrder();
+			int offset = Array.IndexOf(daysOrder, dayOfWeek) - Array.IndexOf(daysOrder, thisValue.DayOfWeek);
+			if (offset <= 0) offset += 7;
+			return thisValue.AddDays(offset);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

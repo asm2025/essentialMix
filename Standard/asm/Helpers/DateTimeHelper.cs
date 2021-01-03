@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using asm.Extensions;
 using asm.Patterns.DateTime;
 using JetBrains.Annotations;
@@ -7,7 +8,7 @@ using JetBrains.Annotations;
 namespace asm.Helpers
 {
 	public static class DateTimeHelper
-	{
+	{ 
 		public const string DATE_FORMAT = "yyyy-MM-dd";
 		public const string DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm";
 		public const string LONG_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
@@ -18,6 +19,10 @@ namespace asm.Helpers
 
 		public static DateTime OaEpoch { get; } = new DateTime(1899, 12, 30, 0, 0, 0, DateTimeKind.Utc);
 		public static DateTime UnixEpoch { get; } = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+		public static DateTime MinDateTime => CultureInfo.CurrentCulture.Calendar.MinSupportedDateTime;
+		public static DateTime MaxDateTime => CultureInfo.CurrentCulture.Calendar.MaxSupportedDateTime;
+		public static DateTime MinUIDateTime => CultureInfo.CurrentUICulture.Calendar.MinSupportedDateTime;
+		public static DateTime MaxUIDateTime => CultureInfo.CurrentUICulture.Calendar.MaxSupportedDateTime;
 
 		public static double Limit(double limit, DateTimeUnit unitToUse)
 		{
@@ -149,12 +154,16 @@ namespace asm.Helpers
 			return date.ToString(culture.DateTimeFormat.ShortDatePattern, culture);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsYear(int year) { return year.InRange(DateTime.MinValue.Year, DateTime.MaxValue.Year); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsMonth(int month) { return month.InRange(1, 12); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int Year(int year) { return year.Within(DateTime.MinValue.Year, DateTime.MaxValue.Year); }
 		
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int Month(int month) { return month.Within(1, 12); }
 
 		public static int Day(int day, int year, int month)
@@ -162,7 +171,7 @@ namespace asm.Helpers
 			if (!IsYear(year)) throw new ArgumentOutOfRangeException(nameof(year));
 			if (!IsMonth(month)) throw new ArgumentOutOfRangeException(nameof(month));
 			DateTime date = new DateTime(year, month, 1);
-			return day.Within(1, date.DaysOfMonth());
+			return day.Within(1, date.DaysInMonth());
 		}
 
 		public static int RandomAge(int minimum, int maximum)
@@ -186,7 +195,7 @@ namespace asm.Helpers
 			if (!IsYear(year)) throw new ArgumentOutOfRangeException(nameof(year));
 			if (!IsMonth(month)) throw new ArgumentOutOfRangeException(nameof(month));
 			DateTime date = new DateTime(year, month, 1);
-			return RNGRandomHelper.Next(1, date.DaysOfMonth());
+			return RNGRandomHelper.Next(1, date.DaysInMonth());
 		}
 
 		public static DateTimeRange GetRange(DateTime? fromDate, DateTime? toDate)
