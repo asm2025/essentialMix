@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading;
 using asm.Helpers;
 using asm.Patterns.Object;
 
@@ -68,7 +67,6 @@ namespace asm.Threading.FileSystem
 			if (disposing)
 			{
 				Enabled = false;
-				Thread.Sleep(0);
 				ObjectHelper.Dispose(ref _watcher);
 			}
 			base.Dispose(disposing);

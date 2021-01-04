@@ -48,7 +48,7 @@ namespace asm.Extensions
 		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlThread)]
 		public static void Awake([NotNull] this Thread thisValue)
 		{
-			if (IsSuspending(thisValue)) Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
+			if (IsSuspending(thisValue)) TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
 			if (!IsSuspended(thisValue)) return;
 
 			try
@@ -68,14 +68,14 @@ namespace asm.Extensions
 		public static bool Die(this Thread thisValue)
 		{
 			if (!IsAwaitable(thisValue)) return true;
-			if (IsWaiting(thisValue)) Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
+			if (IsWaiting(thisValue)) TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
 			if (IsStopped(thisValue)) return true;
 			if (IsSuspended(thisValue)) Awake(thisValue);
 
 			try
 			{
 				thisValue.Abort();
-				while (thisValue.IsAlive) { }
+				SpinWait.SpinUntil(() => !thisValue.IsAlive);
 				return true;
 			}
 			catch (ThreadAbortException)

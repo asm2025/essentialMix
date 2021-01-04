@@ -240,7 +240,6 @@ namespace asm.Network
 			ThrowIfDisposed();
 			if (IsConnected) return;
 			_client.Connect(Host, Port);
-			Thread.Sleep(__timeBetweenRead);
 		}
 
 		public virtual bool TryConnect()
@@ -291,8 +290,8 @@ namespace asm.Network
 			if (dif < __timeBetweenActions) Thread.Sleep(dif);
 
 			int s = _client.Send(Encoding.GetBytes($"{value}\r\n\r\n"));
-			Thread.Sleep(__timeBetweenActions);
 			_lastSent = DateTime.Now;
+			if (__timeBetweenActions > TimeSpan.Zero) Thread.Sleep(__timeBetweenActions);
 			return s > 0;
 		}
 

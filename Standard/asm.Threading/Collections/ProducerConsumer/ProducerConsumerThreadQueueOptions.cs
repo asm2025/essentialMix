@@ -18,8 +18,8 @@ namespace asm.Threading.Collections.ProducerConsumer
 		{
 		}
 
-		public bool IsBackground { get; set; }
+		public bool IsBackground { get; set; } = true;
 
-		public ThreadPriority Priority { get; set; }
+		public ThreadPriority Priority { get; set; } = ThreadPriority.Normal;
 	}
 }

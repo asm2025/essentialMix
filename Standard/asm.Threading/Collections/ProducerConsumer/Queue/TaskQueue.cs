@@ -13,12 +13,14 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 		private readonly Task[] _workers;
 		
+		private AutoResetEvent _workEvent;
 		private CountdownEvent _countdown;
 		private bool _workStarted;
 
 		public TaskQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
+			_workEvent = new AutoResetEvent(false);
 			_countdown = new CountdownEvent(Threads + 1);
 			_workers = new Task[Threads];
 		}
@@ -27,7 +29,9 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 		protected override void Dispose(bool disposing)
 		{
 			base.Dispose(disposing);
-			if (disposing) ObjectHelper.Dispose(ref _countdown);
+			if (!disposing) return;
+			ObjectHelper.Dispose(ref _workEvent);
+			ObjectHelper.Dispose(ref _countdown);
 		}
 
 		public override int Count => _queue.Count;
@@ -48,12 +52,12 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 
 						for (int i = 0; i < _workers.Length; i++) 
 							_workers[i] = Task.Run(Consume, Token).ConfigureAwait();
-
-						Thread.Sleep(TimeSpanHelper.FAST_SCHEDULE);
-						if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
-						OnWorkStarted(EventArgs.Empty);
 					}
 				}
+
+				if (!_workEvent.WaitOne(TimeSpanHelper.HALF_SCHEDULE)) throw new TimeoutException();
+				if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+				OnWorkStarted(EventArgs.Empty);
 			}
 
 			_queue.Enqueue(item);
@@ -109,6 +113,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 
 		private void Consume()
 		{
+			_workEvent.Set();
 			if (IsDisposed) return;
 
 			try

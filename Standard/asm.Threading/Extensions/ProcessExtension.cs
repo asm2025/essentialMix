@@ -238,7 +238,7 @@ namespace asm.Extensions
 
 			if (delay > 0)
 			{
-				Thread.Sleep(delay);
+				TimeSpanHelper.WasteTime(delay);
 				if (!IsAwaitable(thisValue)) return true;
 			}
 

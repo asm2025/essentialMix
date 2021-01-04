@@ -11,13 +11,13 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 	public sealed class TaskGroupQueue<T> : ProducerConsumerThreadQueue<T>
 	{
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
-		private ManualResetEventSlim _manualResetEventSlim;
+		private AutoResetEvent _workDoneEvent;
 		private Thread _worker;
 
 		public TaskGroupQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			_manualResetEventSlim = new ManualResetEventSlim(false);
+			_workDoneEvent = new AutoResetEvent(false);
 			(_worker = new Thread(Consume)
 			{
 				IsBackground = IsBackground,
@@ -30,7 +30,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 		{
 			base.Dispose(disposing);
 			if (!disposing) return;
-			ObjectHelper.Dispose(ref _manualResetEventSlim);
+			ObjectHelper.Dispose(ref _workDoneEvent);
 		}
 
 		public override int Count => _queue.Count;
@@ -61,8 +61,8 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 			try
 			{
 				if (millisecondsTimeout < TimeSpanHelper.ZERO)
-					_manualResetEventSlim.Wait(Token);
-				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
+					_workDoneEvent.WaitOne(Token);
+				else if (!_workDoneEvent.WaitOne(millisecondsTimeout, Token))
 					return false;
 
 				return !Token.IsCancellationRequested;
@@ -93,7 +93,6 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 		private void Consume()
 		{
 			if (IsDisposed) return;
-			_manualResetEventSlim.Reset();
 			OnWorkStarted(EventArgs.Empty);
 
 			try
@@ -118,7 +117,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 				}
 
 				if (count == items.Length) count = 0;
-				Thread.Sleep(TimeSpanHelper.FAST_SCHEDULE);
+				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
 
 				while (!IsDisposed && !Token.IsCancellationRequested)
 				{
@@ -149,7 +148,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 			finally
 			{
 				OnWorkCompleted(EventArgs.Empty);
-				_manualResetEventSlim.Set();
+				_workDoneEvent.Set();
 			}
 		}
 

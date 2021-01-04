@@ -13,12 +13,14 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 		private readonly Thread[] _workers;
 
+		private AutoResetEvent _workEvent;
 		private CountdownEvent _countdown;
 		private bool _workStarted;
 
 		public WaitAndPulseQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
+			_workEvent = new AutoResetEvent(false);
 			_countdown = new CountdownEvent(Threads + 1);
 			_workers = new Thread[Threads];
 		}
@@ -27,7 +29,9 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 		protected override void Dispose(bool disposing)
 		{
 			base.Dispose(disposing);
-			if (disposing) ObjectHelper.Dispose(ref _countdown);
+			if (!disposing) return;
+			ObjectHelper.Dispose(ref _workEvent);
+			ObjectHelper.Dispose(ref _countdown);
 		}
 
 		public override int Count => _queue.Count;
@@ -54,18 +58,19 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 										Priority = Priority
 									}).Start();
 						}
-
-						Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
-						if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
-						OnWorkStarted(EventArgs.Empty);
 					}
 				}
+
+				if (!_workEvent.WaitOne(TimeSpanHelper.HALF_SCHEDULE)) throw new TimeoutException();
+				if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+				OnWorkStarted(EventArgs.Empty);
 			}
 
-			_queue.Enqueue(item);
-
-			lock (_lock) 
+			lock(_lock)
+			{
+				_queue.Enqueue(item);
 				Monitor.Pulse(_lock);
+			}
 		}
 
 		protected override void CompleteInternal()
@@ -78,10 +83,11 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 
 		protected override void ClearInternal()
 		{
-			_queue.Clear();
-
-			lock (_lock) 
+			lock(_lock)
+			{
+				_queue.Clear();
 				Monitor.PulseAll(_lock);
+			}
 		}
 
 		protected override bool WaitInternal(int millisecondsTimeout)
@@ -122,6 +128,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 
 		private void Consume()
 		{
+			_workEvent.Set();
 			if (IsDisposed) return;
 
 			try
@@ -147,23 +154,6 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 			finally
 			{
 				SignalAndCheck();
-			}
-		}
-
-		protected override void Run(T item)
-		{
-			if (IsDisposed || Token.IsCancellationRequested) return;
-
-			try
-			{
-				base.Run(item);
-			}
-			finally
-			{
-				lock(_lock)
-				{
-					Monitor.Pulse(_lock);
-				}
 			}
 		}
 

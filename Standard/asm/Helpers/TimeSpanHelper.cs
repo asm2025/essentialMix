@@ -455,6 +455,34 @@ namespace asm.Helpers
 			return displayText;
 		}
 
+		public static void WasteTime(TimeSpan timeout)
+		{
+			if (timeout <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(timeout));
+			WasteTime(timeout.TotalMilliseconds);
+		}
+
+		public static void WasteTime(double millisecondsTimeout)
+		{
+			if (millisecondsTimeout <= 0.0d) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+			DateTime timeout = DateTime.UtcNow.AddMilliseconds(millisecondsTimeout);
+			SpinWait.SpinUntil(() => timeout <= DateTime.UtcNow);
+		}
+
+		public static void WasteTime(TimeSpan timeout, CancellationToken token)
+		{
+			if (timeout <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(timeout));
+			if (token.IsCancellationRequested) return;
+			WasteTime(timeout.TotalMilliseconds, token);
+		}
+
+		public static void WasteTime(double millisecondsTimeout, CancellationToken token)
+		{
+			if (millisecondsTimeout <= 0.0d) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+			if (token.IsCancellationRequested) return;
+			DateTime timeout = DateTime.UtcNow.AddMilliseconds(millisecondsTimeout);
+			SpinWait.SpinUntil(() => token.IsCancellationRequested || timeout <= DateTime.UtcNow);
+		}
+
 		[NotNull]
 		private static string GetHigherPartToString(double part)
 		{

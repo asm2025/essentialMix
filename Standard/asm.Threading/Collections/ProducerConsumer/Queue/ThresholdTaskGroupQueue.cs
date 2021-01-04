@@ -12,13 +12,14 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 	{
 		private readonly object _lock = new object();
 		private readonly Queue<T> _queue = new Queue<T>();
-		private ManualResetEventSlim _manualResetEventSlim;
+
+		private AutoResetEvent _workDoneEvent;
 		private Thread _worker;
 
 		public ThresholdTaskGroupQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			_manualResetEventSlim = new ManualResetEventSlim(false);
+			_workDoneEvent = new AutoResetEvent(false);
 			(_worker = new Thread(Consume)
 			{
 				IsBackground = IsBackground,
@@ -31,7 +32,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 		{
 			base.Dispose(disposing);
 			if (!disposing) return;
-			ObjectHelper.Dispose(ref _manualResetEventSlim);
+			ObjectHelper.Dispose(ref _workDoneEvent);
 		}
 
 		public override int Count
@@ -85,8 +86,8 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 			try
 			{
 				if (millisecondsTimeout < TimeSpanHelper.ZERO)
-					_manualResetEventSlim.Wait(Token);
-				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
+					_workDoneEvent.WaitOne(Token);
+				else if (!_workDoneEvent.WaitOne(millisecondsTimeout, Token))
 					return false;
 
 				return !Token.IsCancellationRequested;
@@ -117,7 +118,6 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 		private void Consume()
 		{
 			if (IsDisposed) return;
-			_manualResetEventSlim.Reset();
 			OnWorkStarted(EventArgs.Empty);
 
 			try
@@ -136,19 +136,14 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 					{
 						lock(_lock)
 						{
-							if (_queue.Count == 0)
-							{
-								Monitor.Wait(_lock, TimeSpanHelper.FAST_SCHEDULE);
-								Thread.Sleep(0);
-							}
-
+							if (_queue.Count == 0) Monitor.Wait(_lock, TimeSpanHelper.FAST_SCHEDULE);
 							if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
+						}
 
-							while (_queue.Count > 0 && n < tasks.Length && !IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
-							{
-								T item = _queue.Dequeue();
-								tasks[n++] = Task.Run(() => Run(item), Token).ConfigureAwait();
-							}
+						while (_queue.Count > 0 && n < tasks.Length && !IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
+						{
+							T item = _queue.Dequeue();
+							tasks[n++] = Task.Run(() => Run(item), Token).ConfigureAwait();
 						}
 					}
 
@@ -160,13 +155,10 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 				{
 					if (HasThreshold && n == 0) tasks[n++] = Task.Delay(Threshold).ConfigureAwait();
 
-					lock(_lock)
+					while (_queue.Count > 0 && n < tasks.Length && !IsDisposed && !Token.IsCancellationRequested)
 					{
-						while (_queue.Count > 0 && n < tasks.Length && !IsDisposed && !Token.IsCancellationRequested)
-						{
-							T item = _queue.Dequeue();
-							tasks[n++] = Task.Run(() => Run(item), Token).ConfigureAwait();
-						}
+						T item = _queue.Dequeue();
+						tasks[n++] = Task.Run(() => Run(item), Token).ConfigureAwait();
 					}
 
 					if (n < tasks.Length) break;
@@ -181,7 +173,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 			finally
 			{
 				OnWorkCompleted(EventArgs.Empty);
-				_manualResetEventSlim.Set();
+				_workDoneEvent.Set();
 			}
 		}
 	}

@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using asm.Helpers;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
@@ -19,7 +20,6 @@ namespace asm.Extensions
 		public static IPropagatorBlock<T, T> CreateDelayedBlock<T>([NotNull] this BufferBlock<T> thisValue, TimeSpan delay, TimeSpan timeout, CancellationToken token = default(CancellationToken))
 		{
 			BufferBlock<T> target = new BufferBlock<T>();
-
 			Action receiveAndPost;
 
 			if (delay <= TimeSpan.Zero)
@@ -54,7 +54,7 @@ namespace asm.Extensions
 						if (token.IsCancellationRequested) return;
 						T item = thisValue.Receive(token);
 						if (token.IsCancellationRequested) return;
-						Thread.Sleep(delay);
+						TimeSpanHelper.WasteTime(delay, token);
 						if (token.IsCancellationRequested) return;
 						target.Post(item);
 					};
@@ -66,7 +66,7 @@ namespace asm.Extensions
 						if (token.IsCancellationRequested) return;
 						T item = thisValue.Receive(timeout, token);
 						if (token.IsCancellationRequested) return;
-						Thread.Sleep(delay);
+						TimeSpanHelper.WasteTime(delay, token);
 						if (token.IsCancellationRequested) return;
 						target.Post(item);
 					};

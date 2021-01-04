@@ -12,6 +12,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 		private readonly Thread[] _workers;
 
 		private BlockingCollection<T> _queue;
+		private AutoResetEvent _workEvent;
 		private CountdownEvent _countdown;
 		private bool _workStarted;
 
@@ -19,6 +20,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 			: base(options, token)
 		{
 			_queue = new BlockingCollection<T>();
+			_workEvent = new AutoResetEvent(false);
 			_countdown = new CountdownEvent(Threads + 1);
 			_workers = new Thread[Threads];
 		}
@@ -28,6 +30,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 		{
 			base.Dispose(disposing);
 			if (!disposing) return;
+			ObjectHelper.Dispose(ref _workEvent);
 			ObjectHelper.Dispose(ref _queue);
 			ObjectHelper.Dispose(ref _countdown);
 		}
@@ -56,12 +59,12 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 										Priority = Priority
 									}).Start();
 						}
-
-						Thread.Sleep(TimeSpanHelper.MINIMUM_SCHEDULE);
-						if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
-						OnWorkStarted(EventArgs.Empty);
 					}
 				}
+
+				if (!_workEvent.WaitOne(TimeSpanHelper.HALF_SCHEDULE)) throw new TimeoutException();
+				if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+				OnWorkStarted(EventArgs.Empty);
 			}
 
 			_queue.Add(item, Token);
@@ -117,6 +120,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 
 		private void Consume()
 		{
+			_workEvent.Set();
 			if (IsDisposed) return;
 
 			try

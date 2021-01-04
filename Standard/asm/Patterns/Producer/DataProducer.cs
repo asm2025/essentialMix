@@ -101,7 +101,6 @@ namespace asm.Patterns.Producer
 			foreach (T item in items)
 			{
 				Produce(item);
-				Thread.Sleep(0);
 
 				// Un-buffer as we go
 				while (resultBuffer.Count > 0)

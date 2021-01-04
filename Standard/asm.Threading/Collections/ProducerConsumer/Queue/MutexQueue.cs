@@ -13,7 +13,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 		private readonly List<Thread> _running = new List<Thread>();
 
-		private ManualResetEventSlim _manualResetEventSlim;
+		private AutoResetEvent _workDoneEvent;
 		private Mutex _mutex;
 		private Thread _worker;
 
@@ -41,7 +41,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 			}
 
 			IsOwner = createdNew;
-			_manualResetEventSlim = new ManualResetEventSlim(false);
+			_workDoneEvent = new AutoResetEvent(false);
 			(_worker = new Thread(Consume)
 					{
 						IsBackground = IsBackground,
@@ -55,10 +55,10 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 			base.Dispose(disposing);
 			if (!disposing) return;
 			ObjectHelper.Dispose(ref _mutex);
-			ObjectHelper.Dispose(ref _manualResetEventSlim);
+			ObjectHelper.Dispose(ref _workDoneEvent);
 		}
 
-		public override int Count => _queue.Count + RunningCount();
+		public override int Count => _queue.Count + _running.Count;
 
 		public override bool IsBusy => Count > 0;
 
@@ -86,8 +86,8 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 			try
 			{
 				if (millisecondsTimeout < TimeSpanHelper.ZERO)
-					_manualResetEventSlim.Wait(Token);
-				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
+					_workDoneEvent.WaitOne(Token);
+				else if (!_workDoneEvent.WaitOne(millisecondsTimeout, Token))
 					return false;
 
 				return !Token.IsCancellationRequested;
@@ -117,8 +117,6 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 		private void Consume()
 		{
 			if (IsDisposed) return;
-	
-			_manualResetEventSlim.Reset();
 			OnWorkStarted(EventArgs.Empty);
 		
 			try
@@ -133,11 +131,11 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 						IsBackground = IsBackground,
 						Priority = Priority
 					};
-					AddRunning(thread);
 					thread.Start();
+					AddRunning(thread);
 				}
 
-				Thread.Sleep(TimeSpanHelper.FAST_SCHEDULE);
+				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
 
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item))
 				{
@@ -147,8 +145,8 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 						IsBackground = IsBackground,
 						Priority = Priority
 					};
-					AddRunning(thread);
 					thread.Start();
+					AddRunning(thread);
 				}
 			}
 			catch (OperationCanceledException)
@@ -157,14 +155,9 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 			}
 			finally
 			{
-				Thread[] threads;
-
-				lock(_running)
-				{
-					threads = _running.Count > 0
-								? _running.ToArray()
-								: null;
-				}
+				Thread[] threads = _running.Count > 0
+										? _running.ToArray()
+										: null;
 
 				if (threads != null)
 				{
@@ -173,7 +166,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 				}
 
 				OnWorkCompleted(EventArgs.Empty);
-				_manualResetEventSlim.Set();
+				_workDoneEvent.Set();
 			}
 		}
 
@@ -203,20 +196,13 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 
 		private void AddRunning(Thread thread)
 		{
-			lock(_running) 
-				_running.Add(thread);
-		}
+			if (!ObjectLockHelper.WaitFor(thread.IsRunning, _running, TimeSpanHelper.FAST_SCHEDULE)) throw new TimeoutException();
+			_running.Add(thread);
+	}
 
 		private void RemoveRunning(Thread thread)
 		{
-			lock(_running) 
-				_running.Remove(thread);
-		}
-
-		private int RunningCount()
-		{
-			lock(_running) 
-				return _running.Count;
+			_running.Remove(thread);
 		}
 	}
 }
