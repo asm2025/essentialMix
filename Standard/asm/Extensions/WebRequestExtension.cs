@@ -406,7 +406,7 @@ namespace asm.Extensions
 
 			while (response == null && retries < maxRetries)
 			{
-				if (retries > 0 && timeBeforeRetries > 0) Thread.Sleep(timeBeforeRetries);
+				if (retries > 0 && timeBeforeRetries > 0) TimeSpanHelper.WasteTime(timeBeforeRetries);
 
 				try
 				{
@@ -434,7 +434,7 @@ namespace asm.Extensions
 
 			while (!token.IsCancellationRequested && response == null && retries < maxRetries)
 			{
-				if (retries > 0 && timeBeforeRetries > 0) Thread.Sleep(timeBeforeRetries);
+				if (retries > 0 && timeBeforeRetries > 0) TimeSpanHelper.WasteTime(timeBeforeRetries, token);
 
 				try
 				{

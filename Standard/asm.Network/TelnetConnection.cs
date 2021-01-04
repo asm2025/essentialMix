@@ -287,11 +287,11 @@ namespace asm.Network
 			if (value.Length == 0) return false;
 
 			TimeSpan dif = _lastSent.Elapsed();
-			if (dif < __timeBetweenActions) Thread.Sleep(dif);
+			if (dif < __timeBetweenActions) TimeSpanHelper.WasteTime(dif);
 
 			int s = _client.Send(Encoding.GetBytes($"{value}\r\n\r\n"));
 			_lastSent = DateTime.Now;
-			if (__timeBetweenActions > TimeSpan.Zero) Thread.Sleep(__timeBetweenActions);
+			if (__timeBetweenActions > TimeSpan.Zero) TimeSpanHelper.WasteTime(__timeBetweenActions);
 			return s > 0;
 		}
 
@@ -392,7 +392,7 @@ namespace asm.Network
 			if (!IsConnected) throw new NotConnectedException();
 
 			int r = _client.Receive(buffer, 0, buffer.Length, flags, out errorCode);
-			if (r > 0) Thread.Sleep(__timeBetweenRead);
+			if (r > 0) TimeSpanHelper.WasteTime(__timeBetweenRead);
 			return r;
 		}
 

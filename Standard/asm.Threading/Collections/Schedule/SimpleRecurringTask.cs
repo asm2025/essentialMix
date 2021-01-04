@@ -2,7 +2,7 @@
 
 namespace asm.Threading.Collections.Schedule
 {
-	public class RecurringTask : Disposable
+	public class SimpleRecurringTask : Disposable
 	{
 
 	}

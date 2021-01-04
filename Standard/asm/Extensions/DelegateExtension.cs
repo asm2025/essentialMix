@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using asm.Helpers;
 using JetBrains.Annotations;
 
 namespace asm.Extensions
@@ -23,7 +24,7 @@ namespace asm.Extensions
 				{
 					remaining--;
 					if (remaining == 0) throw;
-					if (milliSecondTimeBetweenExecutions > 0) Thread.Sleep(milliSecondTimeBetweenExecutions);
+					if (milliSecondTimeBetweenExecutions > 0) TimeSpanHelper.WasteTime(milliSecondTimeBetweenExecutions, token);
 				}
 			}
 		}
@@ -50,7 +51,7 @@ namespace asm.Extensions
 				{
 					remaining--;
 					if (remaining == 0) throw;
-					if (milliSecondTimeBetweenExecutions > 0) Thread.Sleep(milliSecondTimeBetweenExecutions);
+					if (milliSecondTimeBetweenExecutions > 0) TimeSpanHelper.WasteTime(milliSecondTimeBetweenExecutions, token);
 				}
 			}
 

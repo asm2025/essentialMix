@@ -89,7 +89,7 @@ namespace asm.Threading.Collections.ProducerConsumer
 			ThrowIfDisposed();
 			if (CompleteMarked) throw new InvalidOperationException("Completion marked.");
 			EnqueueInternal(item);
-			if (SleepAfterEnqueue > 0) Thread.Sleep(SleepAfterEnqueue);
+			if (SleepAfterEnqueue > 0) TimeSpanHelper.WasteTime(SleepAfterEnqueue, Token);
 		}
 
 		public void Complete()
