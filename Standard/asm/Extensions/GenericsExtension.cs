@@ -1399,8 +1399,7 @@ namespace asm.Extensions
 
 			for (int i = startIndex; i < lastPos; i++)
 			{
-				if (!comparison(thisValue[i]))
-					continue;
+				if (!comparison(thisValue[i])) continue;
 				x = i;
 				break;
 			}

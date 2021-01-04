@@ -31,6 +31,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
+		<PackageReference Include="System.Threading.Tasks.Dataflow" Version="5.0.0" />
 		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
 	</ItemGroup>
 
@@ -40,12 +41,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\asm\asm.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Reference Include="System.Threading.Tasks.Dataflow">
-	    <HintPath>C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\5.0.0\ref\net5.0\System.Threading.Tasks.Dataflow.dll</HintPath>
-	  </Reference>
 	</ItemGroup>
 
 </Project>
