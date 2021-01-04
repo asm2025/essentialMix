@@ -31,7 +31,7 @@ namespace asm.Threading
 			get => _timeout;
 			set
 			{
-				if (value < TimeSpanHelper.Infinite) throw new ArgumentOutOfRangeException(nameof(value));
+				if (value.TotalMilliseconds < -1.0d) throw new ArgumentOutOfRangeException(nameof(value));
 				_timeout = value;
 			}
 		}

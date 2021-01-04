@@ -33,7 +33,7 @@ namespace asm.Extensions
 					case HtmlText htmlText:
 						if (!string.IsNullOrEmpty(htmlText.Text)) yield return htmlText.Text;
 						continue;
-					case HtmlTag _:
+					case HtmlTag:
 						yield return thisValue.Text();
 						break;
 				}

@@ -67,6 +67,7 @@ namespace asm.Patterns.Threading
 				{
 					if (_hasHandle) _mutex.ReleaseMutex();
 					_mutex.Close();
+					ObjectHelper.Dispose(ref _mutex);
 				}
 			}
 

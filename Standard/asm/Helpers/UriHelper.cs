@@ -1155,7 +1155,7 @@ namespace asm.Helpers
 								{
 									if (!int.TryParse(parts[1], out int port)) throw new InvalidOperationException($"Invalid port number '{parts[1]}'.");
 
-									if (port > 0 && (port != 80 ))
+									if (port > 0 && port != 80)
 									{
 										sb.Append(':');
 										sb.Append(parts[1]);

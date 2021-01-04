@@ -194,9 +194,10 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 			}
 		}
 
-		private void AddRunning(Thread thread)
+		private void AddRunning([NotNull] Thread thread)
 		{
-			if (!ObjectLockHelper.WaitFor(thread.IsRunning, _running, TimeSpanHelper.FAST_SCHEDULE)) throw new TimeoutException();
+			if (!ObjectLockHelper.WaitFor(() => thread.IsAlive, _running, TimeSpanHelper.HALF_SCHEDULE)) throw new TimeoutException();
+			if (!thread.IsAlive) return;
 			_running.Add(thread);
 	}
 

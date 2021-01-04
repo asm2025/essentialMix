@@ -28,7 +28,7 @@ namespace asm.Extensions
 			where TResult : IActionResult
 		{
 			IActionResultExecutor<TResult> executor = context.RequestServices.GetRequiredService<IActionResultExecutor<TResult>>();
-			RouteData routeData = context.GetRouteData() ?? new RouteData();
+			RouteData routeData = context.GetRouteData();
 			ActionContext actionContext = new ActionContext(context, routeData, new ActionDescriptor());
 			return executor.ExecuteAsync(actionContext, result);
 		}

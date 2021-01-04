@@ -38,7 +38,7 @@ namespace asm.Core.Web.Helpers
 
 			if (!DirectoryHelper.Ensure(path)) throw new DirectoryNotFoundException();
 
-			string boundary = MediaTypeHeaderValue.Parse(request.ContentType)?.GetBoundary();
+			string boundary = MediaTypeHeaderValue.Parse(request.ContentType).GetBoundary();
 			if (string.IsNullOrEmpty(boundary)) throw new InvalidDataException("Could not get request boundary.");
 
 			IList<string> uploadedFiles = new List<string>();
@@ -124,7 +124,7 @@ namespace asm.Core.Web.Helpers
 
 			foreach (IFormFile file in files.TakeWhile(e => !token.IsCancellationRequested))
 			{
-				string fileName = WebUtility.UrlDecode(file.FileName)?.Trim('\"', ' ');
+				string fileName = WebUtility.UrlDecode(file.FileName).Trim('\"', ' ');
 				if (string.IsNullOrEmpty(fileName)) continue;
 				if (Path.IsPathFullyQualified(fileName)) fileName = Path.GetFileName(fileName);
 						

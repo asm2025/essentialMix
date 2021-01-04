@@ -18,10 +18,6 @@ namespace asm.Threading
 		/// </summary>
 		private int _count;
 
-		private Thread _owner;
-
-		private OrderedLock _innerLock;
-
 		/// <inheritdoc />
 		/// <summary>
 		/// Creates a new lock with no name, and the default timeout specified by Timeout.
@@ -109,7 +105,7 @@ namespace asm.Threading
 			// Performance note: On a single processor, it is slightly cheaper
 			// to assign owner every time, without a test. On multiple processor
 			// boxes, it is cheaper to avoid the volatile write.
-			if (Interlocked.Increment(ref _count) == 1) _owner = Thread.CurrentThread;
+			if (Interlocked.Increment(ref _count) == 1) Owner = Thread.CurrentThread;
 			return ret;
 		}
 
@@ -121,13 +117,13 @@ namespace asm.Threading
 		protected internal override void Unlock()
 		{
 			base.Unlock();
-			if (Interlocked.Decrement(ref _count) == 0) _owner = null;
+			if (Interlocked.Decrement(ref _count) == 0) Owner = null;
 		}
 
 		/// <summary>
 		/// The current owner of the lock, if any.
 		/// </summary>
-		public Thread Owner => _owner;
+		public Thread Owner { get; private set; }
 
 		/// <summary>
 		/// Gets or sets the "inner" lock for this lock. This lock must not be acquired
@@ -136,11 +132,7 @@ namespace asm.Threading
 		/// an inner lock C, then C is also effectively an inner lock of A.
 		/// If this property to null, this lock is considered not to have an inner lock.
 		/// </summary>
-		public OrderedLock InnerLock
-		{
-			get => _innerLock;
-			set => _innerLock = value;
-		}
+		public OrderedLock InnerLock { get; set; }
 
 		/// <summary>
 		/// Sets the "inner" lock for this lock, returning this lock. This

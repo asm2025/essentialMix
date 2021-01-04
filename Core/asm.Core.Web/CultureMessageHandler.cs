@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Web;
 using asm.Helpers;
 using asm.Web;
-using JetBrains.Annotations;
 
 namespace asm.Core.Web
 {
@@ -30,12 +29,12 @@ namespace asm.Core.Web
 			_parameterName = parameterName;
 		}
 
-		protected override Task<HttpResponseMessage> SendAsync([NotNull] HttpRequestMessage request, CancellationToken cancellationToken)
+		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 		{
 			// here you can chose to get the lang from database, cookie or from the request if the culture is stored on local storage.
 			CultureInfo ci = null;
 
-			if (!string.IsNullOrEmpty(request.RequestUri.Query))
+			if (!string.IsNullOrEmpty(request.RequestUri?.Query))
 			{
 				NameValueCollection queryString = HttpUtility.ParseQueryString(request.RequestUri.Query);
 				string name = queryString[_parameterName]?.Trim();

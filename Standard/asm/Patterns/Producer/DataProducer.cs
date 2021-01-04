@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using JetBrains.Annotations;
 
 namespace asm.Patterns.Producer

@@ -30,7 +30,7 @@ namespace asm.Helpers
 
 		public static bool WaitFor([NotNull] Func<bool> checkCallback, [NotNull] object syncLock, TimeSpan timeout)
 		{
-			if (timeout < TimeSpanHelper.Infinite) throw new ArgumentOutOfRangeException(nameof(timeout));
+			if (timeout.TotalMilliseconds < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(timeout));
 			if (checkCallback()) return true;
 
 			lock(syncLock)

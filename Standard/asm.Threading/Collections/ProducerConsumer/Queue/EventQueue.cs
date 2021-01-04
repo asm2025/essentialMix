@@ -134,8 +134,8 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 						_queueEvent.WaitOne(TimeSpanHelper.FAST_SCHEDULE, Token);
 
 					if (IsDisposed || Token.IsCancellationRequested) return;
-					if (CompleteMarked || !_queue.TryDequeue(out item)) break;
-					Run(item);
+					if (CompleteMarked) break;
+					if (_queue.TryDequeue(out item)) Run(item);
 				}
 
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item)) 

@@ -22,7 +22,7 @@ namespace asm.Extensions
 			switch (root)
 			{
 				case null:
-				case JValue _:
+				case JValue:
 					return;
 				case JProperty property when property.Name != "$id":
 					fieldNames.Add(property.Path);

@@ -48,14 +48,12 @@ namespace asm.Core.Web.Mvc
 					response.Headers.Append(key, value.ToArray());
 				}
 
-				if (Response.Content == null) return Task.CompletedTask;
-				
 				HttpContentHeaders contentHeaders = Response.Content.Headers;
 
 				// Copy the response content headers only after ensuring they are complete.
 				// We ask for Content-Length first because HttpContent lazily computes this
 				// and only afterwards writes the value into the content headers.
-				long? unused = contentHeaders.ContentLength;
+				long? _ = contentHeaders.ContentLength;
 
 				foreach ((string key, IEnumerable<string> value) in contentHeaders)
 				{

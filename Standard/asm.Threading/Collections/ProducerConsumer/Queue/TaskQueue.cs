@@ -123,7 +123,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.TryDequeue(out item))
 					Run(item);
 
-				Thread.Sleep(TimeSpanHelper.FAST_SCHEDULE);
+				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
 
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item))
 					Run(item);

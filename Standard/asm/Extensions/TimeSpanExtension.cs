@@ -25,7 +25,7 @@ namespace asm.Extensions
 		public static bool IsValid(this TimeSpan thisValue, bool zeroIsValid = false, bool infiniteIsValid = false)
 		{
 			if (!zeroIsValid && thisValue == TimeSpan.Zero) return false;
-			if (!infiniteIsValid && thisValue == TimeSpanHelper.Infinite) return false;
+			if (!infiniteIsValid && thisValue.TotalMilliseconds.Equals(TimeSpanHelper.INFINITE)) return false;
 			return thisValue != TimeSpan.MinValue && thisValue != TimeSpan.MaxValue;
 		}
 

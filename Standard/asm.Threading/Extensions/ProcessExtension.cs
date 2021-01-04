@@ -150,9 +150,9 @@ namespace asm.Extensions
 			Func<bool> predicate;
 
 			if (evalFunc == null)
-				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForInputIdle(TimeSpanHelper.FAST_SCHEDULE);
+				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForInputIdle(TimeSpanHelper.HALF_SCHEDULE);
 			else
-				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForInputIdle(TimeSpanHelper.FAST_SCHEDULE) || evalFunc();
+				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForInputIdle(TimeSpanHelper.HALF_SCHEDULE) || evalFunc();
 
 			return SpinWait.SpinUntil(predicate, millisecondsTimeout);
 		}

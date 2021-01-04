@@ -193,9 +193,9 @@ namespace asm.Exceptions.Web
 					break;
 				}
 
-				case UnauthorizedAccessException _:
+				case UnauthorizedAccessException:
 					return 401;
-				case PathTooLongException _:
+				case PathTooLongException:
 					return 414;
 			}
 

@@ -31,14 +31,6 @@ namespace asm.Helpers
 		public const int DAY = HOUR * 24;
 		public const int WEEK = DAY * 7;
 
-		public static readonly TimeSpan Minimum = TimeSpan.Zero;
-		public static readonly TimeSpan Maximum = TimeSpan.FromMilliseconds(MAXIMUM);
-		public static readonly TimeSpan Infinite = Timeout.InfiniteTimeSpan;
-
-		public static readonly TimeSpan MinimumSchedule = TimeSpan.FromMilliseconds(FAST_SCHEDULE);
-		public static readonly TimeSpan FastSchedule = TimeSpan.FromMilliseconds(QUARTER_SCHEDULE);
-		public static readonly TimeSpan Schedule = TimeSpan.FromMilliseconds(HALF_SCHEDULE);
-
 		public static readonly TimeSpan Second = TimeSpan.FromSeconds(1);
 		public static readonly TimeSpan TwoSeconds = TimeSpan.FromSeconds(2);
 		public static readonly TimeSpan FiveSeconds = TimeSpan.FromSeconds(5);
@@ -221,19 +213,14 @@ namespace asm.Helpers
 
 		public static TimeSpan GetTimeSpanPart(TimeUnit part, int partValue)
 		{
-			switch (part)
+			return part switch
 			{
-				case TimeUnit.Second:
-					return new TimeSpan(0, 0, 0, partValue);
-				case TimeUnit.Minute:
-					return new TimeSpan(0, 0, partValue, 0);
-				case TimeUnit.Hour:
-					return new TimeSpan(0, partValue, 0, 0);
-				case TimeUnit.Day:
-					return new TimeSpan(partValue, 0, 0, 0);
-				default:
-					throw new ArgumentOutOfRangeException(nameof(part));
-			}
+				TimeUnit.Second => new TimeSpan(0, 0, 0, partValue),
+				TimeUnit.Minute => new TimeSpan(0, 0, partValue, 0),
+				TimeUnit.Hour => new TimeSpan(0, partValue, 0, 0),
+				TimeUnit.Day => new TimeSpan(partValue, 0, 0, 0),
+				_ => throw new ArgumentOutOfRangeException(nameof(part))
+			};
 		}
 
 		public static int GetPart(TimeSpan timeSpan, TimeUnit format, TimeUnit part)
@@ -245,77 +232,57 @@ namespace asm.Helpers
 
 		public static int GetStandardPart(TimeSpan timeSpan, TimeUnit part)
 		{
-			switch (part)
+			return part switch
 			{
-				case TimeUnit.Second:
-					return timeSpan.Seconds;
-				case TimeUnit.Minute:
-					return timeSpan.Minutes;
-				case TimeUnit.Hour:
-					return timeSpan.Hours;
-				case TimeUnit.Day:
-					return timeSpan.Days;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(part));
-			}
+				TimeUnit.Second => timeSpan.Seconds,
+				TimeUnit.Minute => timeSpan.Minutes,
+				TimeUnit.Hour => timeSpan.Hours,
+				TimeUnit.Day => timeSpan.Days,
+				_ => throw new ArgumentOutOfRangeException(nameof(part))
+			};
 		}
 
 		public static int GetTotalPart(TimeSpan timeSpan, TimeUnit part)
 		{
-			switch (part)
+			return part switch
 			{
-				case TimeUnit.Second:
-					return Convert.ToInt32(Math.Truncate(timeSpan.TotalSeconds));
-				case TimeUnit.Minute:
-					return Convert.ToInt32(Math.Truncate(timeSpan.TotalMinutes));
-				case TimeUnit.Hour:
-					return Convert.ToInt32(Math.Truncate(timeSpan.TotalHours));
-				case TimeUnit.Day:
-					return Convert.ToInt32(Math.Truncate(timeSpan.TotalDays));
-				default:
-					throw new ArgumentOutOfRangeException(nameof(part));
-			}
+				TimeUnit.Second => Convert.ToInt32(Math.Truncate(timeSpan.TotalSeconds)),
+				TimeUnit.Minute => Convert.ToInt32(Math.Truncate(timeSpan.TotalMinutes)),
+				TimeUnit.Hour => Convert.ToInt32(Math.Truncate(timeSpan.TotalHours)),
+				TimeUnit.Day => Convert.ToInt32(Math.Truncate(timeSpan.TotalDays)),
+				_ => throw new ArgumentOutOfRangeException(nameof(part))
+			};
 		}
 
 		[NotNull]
 		public static string GetMask(TimeUnit format, TimeUnit part)
 		{
-			switch (part)
+			return part switch
 			{
-				case TimeUnit.Second:
-					return format.HasFlag(TimeUnit.Minute)
-								? "ss"
-								: "%s";
-				case TimeUnit.Minute:
-					return format.HasFlag(TimeUnit.Hour)
-								? "mm"
-								: "%m";
-				case TimeUnit.Hour:
-					return format.HasFlag(TimeUnit.Day)
-								? "HH"
-								: "%H";
-				case TimeUnit.Day:
-					return "%d";
-				default:
-					throw new ArgumentOutOfRangeException(nameof(part));
-			}
+				TimeUnit.Second => format.HasFlag(TimeUnit.Minute)
+										? "ss"
+										: "%s",
+				TimeUnit.Minute => format.HasFlag(TimeUnit.Hour)
+										? "mm"
+										: "%m",
+				TimeUnit.Hour => format.HasFlag(TimeUnit.Day)
+									? "HH"
+									: "%H",
+				TimeUnit.Day => "%d",
+				_ => throw new ArgumentOutOfRangeException(nameof(part))
+			};
 		}
 
 		public static bool ContainsNextPart(TimeUnit format, TimeUnit part)
 		{
-			switch (part)
+			return part switch
 			{
-				case TimeUnit.Second:
-					return format.HasFlag(TimeUnit.Minute);
-				case TimeUnit.Minute:
-					return format.HasFlag(TimeUnit.Hour);
-				case TimeUnit.Hour:
-					return format.HasFlag(TimeUnit.Day);
-				case TimeUnit.Day:
-					return false;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(part));
-			}
+				TimeUnit.Second => format.HasFlag(TimeUnit.Minute),
+				TimeUnit.Minute => format.HasFlag(TimeUnit.Hour),
+				TimeUnit.Hour => format.HasFlag(TimeUnit.Day),
+				TimeUnit.Day => false,
+				_ => throw new ArgumentOutOfRangeException(nameof(part))
+			};
 		}
 
 		public static int GetNeutralPartValue(TimeUnit format, TimeUnit part)

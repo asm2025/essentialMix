@@ -12,10 +12,10 @@ namespace asm.Core.Web.Mvc.Filters
 		public override void OnActionExecuted([NotNull] ActionExecutedContext context)
 		{
 			IAntiforgery antiForgery = context.HttpContext.RequestServices.GetService<IAntiforgery>();
-
 			// We can send the request token as a JavaScript-readable cookie, 
 			// and Angular will use it by default.
-			AntiforgeryTokenSet tokens = antiForgery.GetAndStoreTokens(context.HttpContext);
+			AntiforgeryTokenSet tokens = antiForgery?.GetAndStoreTokens(context.HttpContext);
+			if (tokens?.RequestToken == null) return;
 			context.HttpContext.Response.Cookies.Append(asm.Web.CookieNames.AntiForgeryToken, tokens.RequestToken, new CookieOptions
 			{
 				HttpOnly = false

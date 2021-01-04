@@ -86,14 +86,11 @@ namespace asm.Core.Web.Http.ModelBinding
 				
 				RouteData routeData = bindingContext.HttpContext.GetRouteData();
 
-				if (routeData != null)
+				foreach ((string key, object value) in routeData.Values)
 				{
-					foreach ((string key, object value) in routeData.Values)
-					{
-						Type type = value?.GetType();
-						if (type == null || !type.IsPrimitive()) continue;
-						values[key] = Convert.ToString(value);
-					}
+					Type type = value?.GetType();
+					if (type == null || !type.IsPrimitive()) continue;
+					values[key] = Convert.ToString(value);
 				}
 
 				switch (contentType)

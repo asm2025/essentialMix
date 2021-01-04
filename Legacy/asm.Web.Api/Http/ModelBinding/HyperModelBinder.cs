@@ -203,7 +203,7 @@ namespace asm.Web.Api.Http.ModelBinding
 			switch (root)
 			{
 				case null:
-				case JValue _:
+				case JValue:
 					return;
 				case JProperty property when property.Name != "$id":
 					values[property.Path] = Convert.ToString(property.Value);
