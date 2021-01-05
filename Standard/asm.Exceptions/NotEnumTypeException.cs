@@ -6,7 +6,7 @@ using asm.Exceptions.Properties;
 namespace asm.Exceptions
 {
 	[Serializable]
-	public class NotEnumTypeException : InvalidCastException
+	public class NotEnumTypeException : TypeMismatchException
 	{
 		public NotEnumTypeException()
 			: base(Resources.ValueIsNotEnumType)
@@ -14,7 +14,7 @@ namespace asm.Exceptions
 		}
 
 		public NotEnumTypeException([NotNull] Type type)
-			: base( string.Format(Resources.ValueTypeIsNotEnumType, type))
+			: base( string.Format(Resources.ValueTypeIsNotEnumType, type.FullName))
 		{
 		}
 

@@ -277,6 +277,24 @@ namespace asm.Exceptions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Type is not of the expected types..
+        /// </summary>
+        internal static string TypeMismatch {
+            get {
+                return ResourceManager.GetString("TypeMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type &apos;{0}&apos; is not of the expected types..
+        /// </summary>
+        internal static string TypeNameMismatch {
+            get {
+                return ResourceManager.GetString("TypeNameMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Pixel format is not supported..
         /// </summary>
         internal static string UnsupportedImageFormat {

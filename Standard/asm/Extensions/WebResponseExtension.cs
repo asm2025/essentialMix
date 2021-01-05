@@ -31,25 +31,22 @@ namespace asm.Extensions
 		public static bool Read([NotNull] this WebResponse thisValue, [NotNull] IOSettings settings)
 		{
 			IIOOnRead ioOnRead = settings as IIOOnRead ?? throw new ArgumentException("Argument must provide an OnRead implementation.", nameof(settings));
+			Stream stream = null;
+			StreamReader reader = null;
 
 			try
 			{
-				using (Stream stream = GetStream(thisValue))
+				stream = GetStream(thisValue);
+				if (stream == null) return false;
+				reader = new StreamReader(stream, settings.Encoding, true);
+				int length;
+				char[] chars = new char[settings.BufferSize];
+
+				do
 				{
-					if (stream == null) return false;
-
-					using (StreamReader reader = new StreamReader(stream, settings.Encoding, true))
-					{
-						int length;
-						char[] chars = new char[settings.BufferSize];
-
-						do
-						{
-							length = reader.Read(chars);
-						}
-						while (length > 0 && ioOnRead.OnRead(chars, length));
-					}
+					length = reader.Read(chars);
 				}
+				while (length > 0 && ioOnRead.OnRead(chars, length));
 
 				return true;
 			}
@@ -58,32 +55,36 @@ namespace asm.Extensions
 				settings.OnError(ex);
 				return false;
 			}
+			finally
+			{
+				ObjectHelper.Dispose(ref reader);
+				ObjectHelper.Dispose(ref stream);
+			}
 		}
 
 		public static async Task<bool> ReadAsync([NotNull] this WebResponse thisValue, [NotNull] IOSettings settings, CancellationToken token = default(CancellationToken))
 		{
-			IIOOnRead ioOnRead = settings as IIOOnRead ?? throw new ArgumentException("Argument must provide an OnRead implementation.", nameof(settings));
 			token.ThrowIfCancellationRequested();
+
+			IIOOnRead ioOnRead = settings as IIOOnRead ?? throw new ArgumentException("Argument must provide an OnRead implementation.", nameof(settings));
+			Stream stream = null;
+			StreamReader reader = null;
 
 			try
 			{
-				using (Stream stream = GetStream(thisValue))
+				stream = GetStream(thisValue);
+				token.ThrowIfCancellationRequested();
+				if (stream == null) return false;
+				reader = new StreamReader(stream, settings.Encoding, true);
+
+				int length;
+				char[] chars = new char[settings.BufferSize];
+
+				do
 				{
-					token.ThrowIfCancellationRequested();
-					if (stream == null) return false;
-
-					using (StreamReader reader = new StreamReader(stream, settings.Encoding, true))
-					{
-						int length;
-						char[] chars = new char[settings.BufferSize];
-
-						do
-						{
-							length = await reader.ReadAsync(chars).ConfigureAwait();
-						}
-						while (!token.IsCancellationRequested && length > 0 && ioOnRead.OnRead(chars, length));
-					}
+					length = await reader.ReadAsync(chars).ConfigureAwait();
 				}
+				while (!token.IsCancellationRequested && length > 0 && ioOnRead.OnRead(chars, length));
 
 				token.ThrowIfCancellationRequested();
 				return true;
@@ -93,30 +94,37 @@ namespace asm.Extensions
 				settings.OnError(ex);
 				return false;
 			}
+			finally
+			{
+				ObjectHelper.Dispose(ref reader);
+				ObjectHelper.Dispose(ref stream);
+			}
 		}
 
 		public static string ReadToEnd([NotNull] this WebResponse thisValue, IOSettings settings = null)
 		{
 			settings ??= new IOSettings();
 
+			Stream stream = null;
+			StreamReader reader = null;
 			string result;
 
 			try
 			{
-				using (Stream stream = GetStream(thisValue))
-				{
-					if (stream == null) return null;
-
-					using (StreamReader reader = new StreamReader(stream, settings.Encoding, true, settings.BufferSize))
-					{
-						result = reader.ReadToEnd();
-					}
-				}
+				stream = GetStream(thisValue);
+				if (stream == null) return null;
+				reader = new StreamReader(stream, settings.Encoding, true, settings.BufferSize);
+				result = reader.ReadToEnd();
 			}
 			catch (Exception ex) when (settings.OnError != null)
 			{
 				result = null;
 				settings.OnError(ex);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref reader);
+				ObjectHelper.Dispose(ref stream);
 			}
 
 			return result;
@@ -127,26 +135,28 @@ namespace asm.Extensions
 			token.ThrowIfCancellationRequested();
 			settings ??= new IOSettings();
 
+			Stream stream = null;
+			StreamReader reader = null;
 			string result;
 
 			try
 			{
-				using (Stream stream = GetStream(thisValue))
-				{
-					token.ThrowIfCancellationRequested();
-					if (stream == null) return null;
-
-					using (StreamReader reader = new StreamReader(stream, settings.Encoding, true, settings.BufferSize))
-					{
-						result = await reader.ReadToEndAsync().ConfigureAwait();
-						token.ThrowIfCancellationRequested();
-					}
-				}
+				stream = GetStream(thisValue);
+				token.ThrowIfCancellationRequested();
+				if (stream == null) return null;
+				reader = new StreamReader(stream, settings.Encoding, true, settings.BufferSize);
+				result = await reader.ReadToEndAsync().ConfigureAwait();
+				token.ThrowIfCancellationRequested();
 			}
 			catch (Exception ex) when (settings.OnError != null)
 			{
 				result = null;
 				settings.OnError(ex);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref reader);
+				ObjectHelper.Dispose(ref stream);
 			}
 
 			return result;
