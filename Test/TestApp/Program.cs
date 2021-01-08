@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Principal;
@@ -405,30 +404,26 @@ work with {HEAVY} items.".Yellow();
 
 		private static void TestThreadQueue()
 		{
-			// change this to true to use 1 thread only for debugging
-			const bool LIMIT_THREADS = false;
-
 			int len = RNGRandomHelper.Next(100, 1000);
 			int[] values = GetRandomIntegers(len);
 			int timeout = RNGRandomHelper.Next(0, 1);
 			string timeoutString = timeout > 0
 										? $"{timeout} minute(s)"
 										: "None";
-			// ReSharper disable once JoinDeclarationAndInitializer
 			int threads;
-#if DEBUG
-			// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
-			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
-#pragma warning disable 162
-			threads = LIMIT_THREADS
-						// ReSharper disable once UnreachableCode
-						? 1
-						: RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
-#pragma warning restore 162
-#else
-			// Otherwise, use the default (Best to be TaskHelper.ProcessDefault which = Environment.ProcessorCount)
-			threads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
-#endif
+
+			if (DebugHelper.DebugMode)
+			{
+				// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
+				threads = LimitThreads()
+							? 1
+							: RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
+			}
+			else
+			{
+				// Otherwise, use the default (Best to be TaskHelper.ProcessDefault which = Environment.ProcessorCount)
+				threads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
+			}
 
 			Func<int, TaskResult> exec = e =>
 			{
@@ -4766,157 +4761,10 @@ decrypted:
 			return students;
 		}
 
-		private class Student : IComparable<Student>, IComparable, IEquatable<Student>
+		private static bool LimitThreads()
 		{
-			public string Name { get; set; }
-
-			public double Grade { get; set; }
-
-			/// <inheritdoc />
-			public override string ToString() { return $"{Name} [{Grade:F2}]"; }
-
-			/// <inheritdoc />
-			public int CompareTo(Student other)
-			{
-				if (ReferenceEquals(this, other)) return 0;
-				if (ReferenceEquals(other, null)) return -1;
-				int cmp = Grade.CompareTo(other.Grade);
-				if (cmp != 0) return cmp;
-				return string.Compare(Name, other.Name, StringComparison.OrdinalIgnoreCase);
-			}
-
-			/// <inheritdoc />
-			int IComparable.CompareTo(object obj) { return CompareTo(obj as Student); }
-
-			/// <inheritdoc />
-			public bool Equals(Student other)
-			{
-				if (ReferenceEquals(null, other)) return false;
-				if (ReferenceEquals(this, other)) return true;
-				return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) && Grade.Equals(other.Grade);
-			}
-		}
-	}
-
-	internal class UriTestClass
-	{
-		public Uri Uri { get; set; }
-	}
-
-	internal class UriBuilderTestClass
-	{
-		public UriBuilder Builder { get; set; }
-	}
-
-	public static class Extension
-	{
-		[NotNull]
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static string ToYesNo(this bool thisValue)
-		{
-			return thisValue
-						? "Yes".BrightGreen()
-						: "No".BrightRed();
-		}
-
-		public static void PrintProps<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue)
-			where TNode : LinkedBinaryNode<TNode, T>
-		{
-			Console.WriteLine();
-			Console.WriteLine($"{"Dimensions:".Yellow()} {thisValue.Count.ToString().Underline()} x {thisValue.GetHeight().ToString().Underline()}.");
-			Console.WriteLine($"{"Balanced:".Yellow()} {thisValue.IsBalanced().ToYesNo()}");
-			Console.WriteLine($"{"Valid:".Yellow()} {thisValue.Validate().ToYesNo()}");
-			Console.WriteLine($"{"Minimum:".Yellow()} {thisValue.Minimum()} {"Maximum:".Yellow()} {thisValue.Maximum()}");
-		}
-
-		public static void PrintWithProps<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue)
-			where TNode : LinkedBinaryNode<TNode, T>
-		{
-			PrintProps(thisValue);
-			thisValue.Print();
-		}
-
-		public static void Print<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue)
-			where TNode : LinkedBinaryNode<TNode, T>
-		{
-			Console.WriteLine();
-			thisValue.WriteTo(Console.Out);
-		}
-
-		public static void PrintProps<T>([NotNull] this ArrayBinaryTree<T> thisValue)
-		{
-			Console.WriteLine();
-			Console.WriteLine($"{"Dimensions:".Yellow()} {thisValue.Count.ToString().Underline()} x {thisValue.GetHeight().ToString().Underline()}.");
-			Console.WriteLine($"{"Valid:".Yellow()} {thisValue.Validate().ToYesNo()}");
-			Console.WriteLine($"{"LeftMost:".Yellow()} {thisValue.LeftMost()} {"RightMost:".Yellow()} {thisValue.RightMost()}");
-		}
-
-		public static void PrintWithProps<T>([NotNull] this ArrayBinaryTree<T> thisValue)
-		{
-			PrintProps(thisValue);
-			thisValue.Print();
-		}
-
-		public static void Print<T>([NotNull] this ArrayBinaryTree<T> thisValue)
-		{
-			Console.WriteLine();
-			thisValue.WriteTo(Console.Out);
-		}
-
-		public static void PrintProps<T, TAdjacencyList, TEdge>([NotNull] this GraphList<T, TAdjacencyList, TEdge> thisValue)
-			where TAdjacencyList : class, ICollection<TEdge>
-		{
-			Console.WriteLine();
-			Console.WriteLine($"{"Order:".Yellow()} {thisValue.Count.ToString().Underline()}.");
-			Console.WriteLine($"{"Size:".Yellow()} {thisValue.GetSize().ToString().Underline()}.");
-		}
-
-		public static void PrintWithProps<T, TAdjacencyList, TEdge>([NotNull] this GraphList<T, TAdjacencyList, TEdge> thisValue)
-			where TAdjacencyList : class, ICollection<TEdge>
-		{
-			PrintProps(thisValue);
-			thisValue.Print();
-		}
-
-		public static void Print<T, TAdjacencyList, TEdge>([NotNull] this GraphList<T, TAdjacencyList, TEdge> thisValue)
-			where TAdjacencyList : class, ICollection<TEdge>
-		{
-			Console.WriteLine();
-			thisValue.WriteTo(Console.Out);
-		}
-
-		public static void Print<TNode, TKey, TValue>([NotNull] this BinaryHeap<TNode, TKey, TValue> thisValue)
-			where TNode : KeyedBinaryNode<TNode, TKey, TValue>
-		{
-			Console.WriteLine();
-			thisValue.WriteTo(Console.Out);
-		}
-
-		public static void Print<TNode, TKey, TValue>([NotNull] this BinomialHeap<TNode, TKey, TValue> thisValue)
-			where TNode : BinomialNode<TNode, TKey, TValue>
-		{
-			Console.WriteLine();
-			Console.WriteLine("Count: " + thisValue.Count);
-			Console.WriteLine();
-			thisValue.WriteTo(Console.Out);
-		}
-
-		public static void Print<TNode, TKey, TValue>([NotNull] this FibonacciHeap<TNode, TKey, TValue> thisValue)
-			where TNode : FibonacciNode<TNode, TKey, TValue>
-		{
-			Console.WriteLine();
-			Console.WriteLine("Count: " + thisValue.Count);
-			Console.WriteLine();
-			thisValue.WriteTo(Console.Out);
-		}
-
-		public static void Print<TNode, TKey, TValue>([NotNull] this PairingHeap<TNode, TKey, TValue> thisValue)
-			where TNode : PairingNode<TNode, TKey, TValue>
-		{
-			Console.WriteLine();
-			Console.WriteLine("Count: " + thisValue.Count);
-			Console.WriteLine();
-			thisValue.WriteTo(Console.Out);
+			// change this to true to use 1 thread only for debugging
+			return true;
 		}
 	}
 }
