@@ -1,14 +1,12 @@
-name: .NET
+name: Publish packages
 
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:
-
+    name: build, pack & publish
     runs-on: ubuntu-latest
 
     steps:
@@ -20,6 +18,9 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet build --configuration Release --no-restore
+    - name: Publish asm
+      uses: brandedoutcast/publish-nuget@latest
+      with: 
+        PROJECT_FILE_PATH: asm/Standard/asm/asm.csproj
+        NUGET_KEY: oy2cpwuhyq4rpnjnyktqatrbzwooxhgetetj3xnl7qaytq
