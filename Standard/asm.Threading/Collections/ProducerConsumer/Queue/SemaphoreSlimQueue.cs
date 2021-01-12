@@ -171,7 +171,7 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 			}
 			finally
 			{
-				RemoveRunning(Thread.CurrentThread);
+				_running.Remove(Thread.CurrentThread);
 				if (entered) _semaphore.Release();
 			}
 		}
@@ -181,11 +181,6 @@ namespace asm.Threading.Collections.ProducerConsumer.Queue
 			if (!ObjectLockHelper.WaitFor(() => thread.IsAlive, _running, TimeSpanHelper.HALF_SCHEDULE)) throw new TimeoutException();
 			if (!thread.IsAlive) return;
 			_running.Add(thread);
-		}
-
-		private void RemoveRunning(Thread thread)
-		{
-			_running.Remove(thread);
 		}
 	}
 }
