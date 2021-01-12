@@ -1461,7 +1461,7 @@ namespace asm.Extensions
 			if (invoke.ReturnType != typeof(void)) throw new InvalidOperationException("Invalid signature.");
 
 			ParameterInfo[] parameters = invoke.GetParameters();
-			if (parameters.Length != 2 || parameters[0].ParameterType != typeof(object) || parameters[1].ParameterType.IsSubclassOf(typeof(EventArgs))) throw new InvalidOperationException("Invalid signature.");
+			if (parameters.Length != 2 || parameters[0].ParameterType != typeof(object) || !parameters[1].ParameterType.IsSubclassOf(typeof(EventArgs))) throw new InvalidOperationException("Invalid signature.");
 			return invoke;
 		}
 

@@ -10,7 +10,9 @@ namespace asm.Threading.Helpers
 	{
 		public static bool WaitForEvent<TSource>([NotNull] WaitForEventSettings<TSource> settings)
 		{
-			return WaitForEvent<TSource, EventArgs>(settings);
+			// WARNING: DO NOT DISPOSE THIS
+			EventWatcher<TSource> watcher = EventWatcher.Create(settings);
+			return watcher.Wait(settings.Timeout.TotalIntMilliseconds());
 		}
 
 		public static bool WaitForEvent<TSource, TArgs>([NotNull] WaitForEventSettings<TSource, TArgs> settings)
@@ -24,7 +26,11 @@ namespace asm.Threading.Helpers
 		[NotNull]
 		public static Task<bool> WaitForEventAsync<TSource>([NotNull] WaitForEventSettings<TSource> settings, CancellationToken token = default(CancellationToken))
 		{
-			return WaitForEventAsync<TSource, EventArgs>(settings, token);
+			// Short-circuit: already cancelled
+			if (token.IsCancellationRequested) return Task.FromResult(false);
+			// WARNING: DO NOT DISPOSE THIS
+			EventWatcher<TSource> watcher = EventWatcher.Create(settings);
+			return watcher.WaitAsync(settings.Timeout.TotalIntMilliseconds(), token);
 		}
 
 		[NotNull]

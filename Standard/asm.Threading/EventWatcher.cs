@@ -22,14 +22,24 @@ namespace asm.Threading
 		protected internal EventWatcher([NotNull] TSource target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<TSource, TArgs>, TArgs> watcherCallback)
 		{
 			Type type = target.GetType();
-			if (eventInfo.DeclaringType != type) throw new MemberAccessException($"Type '{type}' does not contain a definition for event '{eventInfo.Name}'.");
+			if (eventInfo.DeclaringType == null || !eventInfo.DeclaringType.IsAssignableFrom(type)) throw new MemberAccessException($"Type '{type}' does not contain a definition for event '{eventInfo.Name}'.");
 			Target = target;
 			EventInfo = eventInfo;
 			WatcherCallback = watcherCallback;
 			_manualResetEventSlim = new ManualResetEventSlim(false);
 			_cts = new CancellationTokenSource();
 			Token = _cts.Token;
-			_listener = EventInfo.CreateDelegate<TArgs>(OnEvent);
+			_listener = typeof(TArgs) == typeof(EventArgs)
+							? EventInfo.CreateDelegate((sender, args) =>
+							{
+								Completed = true;
+								WatcherCallback.Invoke(this, (TArgs)args);
+							})
+							: EventInfo.CreateDelegate<TArgs>((sender, args) =>
+							{
+								Completed = true;
+								WatcherCallback.Invoke(this, args);
+							});
 			EventInfo.AddEventHandler(Target, _listener);
 		}
 
@@ -119,12 +129,6 @@ namespace asm.Threading
 			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed());
 			return Task.Run(() => Wait(millisecondsTimeout), Token);
 		}
-
-		private void OnEvent(object sender, TArgs args)
-		{
-			Completed = true;
-			WatcherCallback.Invoke(this, args);
-		}
 	}
 
 	public class EventWatcher<TSource> : EventWatcher<TSource, EventArgs>
@@ -147,21 +151,20 @@ namespace asm.Threading
 		[NotNull]
 		public static EventWatcher Create([NotNull] WaitForEventSettings settings)
 		{
-			return (EventWatcher)Create<object, EventArgs>(settings);
+			return new EventWatcher(settings.Target, settings.EventInfo, settings.WatcherCallback);
 		}
 
 		[NotNull]
 		public static EventWatcher<TSource> Create<TSource>([NotNull] WaitForEventSettings<TSource> settings)
 		{
-			return (EventWatcher<TSource>)Create<TSource, EventArgs>(settings);
+			return new EventWatcher<TSource>(settings.Target, settings.EventInfo, settings.WatcherCallback);
 		}
 
 		[NotNull]
 		public static EventWatcher<TSource, TArgs> Create<TSource, TArgs>([NotNull] WaitForEventSettings<TSource, TArgs> settings)
 			where TArgs : EventArgs
 		{
-			EventWatcher<TSource, TArgs> watcher = new EventWatcher<TSource, TArgs>(settings.Target, settings.EventInfo, settings.WatcherCallback);
-			return watcher;
+			return new EventWatcher<TSource, TArgs>(settings.Target, settings.EventInfo, settings.WatcherCallback);
 		}
 	}
 }
