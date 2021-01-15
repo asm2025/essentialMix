@@ -327,5 +327,19 @@ namespace asm.Extensions
 				}
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool TryGetValue<TKey, TValue>([NotNull] this IDictionary<TKey, object> thisValue, TKey key, out TValue value) { return TryGetValue(thisValue, key, out value, default(TValue)); }
+		public static bool TryGetValue<TKey, TValue>([NotNull] this IDictionary<TKey, object> thisValue, TKey key, out TValue value, TValue defaultValue)
+		{
+			if (thisValue.TryGetValue(key, out object obj))
+			{
+				value = obj.To(defaultValue);
+				return true;
+			}
+
+			value = defaultValue;
+			return false;
+		}
 	}
 }
