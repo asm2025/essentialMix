@@ -36,12 +36,6 @@ namespace asm.Collections
 
 		public override string ToString() { return _text.IfNullOrEmpty(() => _name); }
 
-		event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
-		{
-			add => PropertyChanged += value;
-			remove => PropertyChanged -= value;
-		}
-
 		public virtual string Name
 		{
 			get => _name;

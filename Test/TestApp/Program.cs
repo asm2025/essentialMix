@@ -8,6 +8,15 @@ using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Bogus;
+using Bogus.DataSets;
+using Crayon;
+using JetBrains.Annotations;
+using System.ServiceProcess;
+using asm;
+using asm.Newtonsoft.Helpers;
+using asm.Patterns.Threading;
+using asm.Threading;
 using asm.Collections;
 using asm.Comparers;
 using asm.Cryptography;
@@ -18,18 +27,9 @@ using asm.Helpers;
 using Other.Microsoft.Collections;
 using asm.Threading.Collections.ProducerConsumer;
 using asm.Threading.Helpers;
-using Bogus;
-using Bogus.DataSets;
-using Crayon;
-using EasyConsole;
-using JetBrains.Annotations;
-using System.ServiceProcess;
-using asm;
-using asm.Newtonsoft.Helpers;
-using asm.Patterns.Threading;
-using asm.Threading;
 using Newtonsoft.Json;
 using TimeoutException = System.TimeoutException;
+using Menu = EasyConsole.Menu;
 
 // ReSharper disable UnusedMember.Local
 namespace TestApp
@@ -80,7 +80,7 @@ work with {HEAVY} items.".Yellow();
 			//TestLevenshteinDistance();
 			//TestDeepestPit();
 
-			TestThreadQueue();
+			//TestThreadQueue();
 
 			//TestSortAlgorithm();
 			//TestSortAlgorithms();
@@ -166,6 +166,8 @@ work with {HEAVY} items.".Yellow();
 			//TestUriHelperRelativeUrl();
 			
 			//TestJsonUriConverter();
+
+			TestDevicesMonitor();
 
 			ConsoleHelper.Pause();
 		}
@@ -4617,6 +4619,26 @@ decrypted:
 			{
 				uriTest.Uri = UriHelper.ToUri(item);
 				Console.WriteLine($"{item} => {JsonConvert.SerializeObject(uriTest, settings)}");
+			}
+		}
+
+		private static void TestDevicesMonitor()
+		{
+			TestUSBForm form = null;
+			Title("Testing devices monitor");
+
+			try
+			{
+				form = new TestUSBForm();
+				form.ShowDialog();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message.BrightRed());
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref form);
 			}
 		}
 

@@ -21,6 +21,7 @@ namespace asm.Helpers
 
 		public const int MINIMUM_SCHEDULE = 10;
 		public const int FAST_SCHEDULE = 50;
+		public const int FAST_SCHEDULE2 = 100;
 		public const int QUARTER_SCHEDULE = 250;
 		public const int HALF_SCHEDULE = 500;
 		public const int SCHEDULE = 1000;

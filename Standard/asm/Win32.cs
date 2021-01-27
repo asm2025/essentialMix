@@ -1101,7 +1101,32 @@ namespace asm
 		GenericExecute = 1 << 16,
 		GenericWrite = 1 << 17,
 		GenericRead = 1 << 18
-	}	
+	}
+
+	public enum DBT_DeviceType
+	{
+		OEM = 0x00000000,
+		Volume = 0x00000002,
+		Port = 0x00000003,
+		DeviceInterface = 0x00000005,
+		Handle = 0x00000006
+	}
+
+	public enum DBT
+	{
+		DBT_QUERYCHANGECONFIG = 0x0017,
+		DBT_CONFIGCHANGED = 0x0018,
+		DBT_CONFIGCHANGECANCELED = 0x0019,
+		DBT_DEVICEARRIVAL = 0x8000,
+		DBT_DEVICEQUERYREMOVE = 0x8001,
+		DBT_DEVICEQUERYREMOVEFAILED = 0x8002,
+		DBT_DEVICEREMOVEPENDING = 0x8003,
+		DBT_DEVICEREMOVECOMPLETE = 0x8004,
+		DBT_DEVICETYPESPECIFIC = 0x8005,
+		DBT_CUSTOMEVENT = 0x8006,
+		DBT_DEVNODES_CHANGED = 0x8007,
+		DBT_USERDEFINED = 0xFFFF,
+	}
 	#endregion
 
 	#region struct
@@ -1524,6 +1549,77 @@ namespace asm
 		public TRUSTEE_FORM TrusteeForm;
 		public TRUSTEE_TYPE TrusteeType;
 		public IntPtr ptstrName;
+	}
+
+	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+	public struct DEV_BROADCAST_HDR
+	{
+		public int Size;
+		public DBT_DeviceType DeviceType;
+		public int Reserved;
+	}
+
+	[StructLayout( LayoutKind.Sequential )]
+	public struct DEV_BROADCAST_OEM
+	{
+		public int Size;
+		public DBT_DeviceType DeviceType;
+		public int Reserved;
+		public int Identifier;
+		public int SuppFunc;
+	}
+
+	[StructLayout( LayoutKind.Sequential )]
+	public struct DEV_BROADCAST_VOLUME
+	{
+		public int Size;
+		public DBT_DeviceType DeviceType;
+		public int Reserved;
+		public int UnitMask;
+		public short Flags;
+	}
+
+	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+	public struct DEV_BROADCAST_PORT
+	{
+		public int Size;
+		public DBT_DeviceType DeviceType;
+		public int Reserved;
+		[MarshalAs(UnmanagedType.ByValTStr, SizeConst=128)]
+		public string Name;
+	}
+
+	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+	public struct DEV_BROADCAST_DEVICEINTERFACE
+	{
+		public int Size;
+		public DBT_DeviceType DeviceType;
+		public int Reserved;
+		public Guid ClassGuid;
+		[MarshalAs(UnmanagedType.ByValTStr, SizeConst=128)]
+		public string Name;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public struct DEV_BROADCAST_HANDLE
+	{
+		public int Size;
+		public DBT_DeviceType DeviceType;
+		public int Reserved;
+		public IntPtr Handle;
+		public IntPtr HDevNotify;
+		public Guid EventGuid;
+		public long NameOffset;
+		public byte Data;
+		public byte Data1;
+	}
+
+	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+	public struct DEV_BROADCAST_USERDEFINED
+	{
+		public DEV_BROADCAST_HDR dbh;
+		[MarshalAs(UnmanagedType.ByValTStr, SizeConst=256)]
+		public string szName;
 	}
 	#endregion
 
@@ -16907,6 +17003,58 @@ namespace asm
 		public const string PrintTo = "printto"; //see MSDN
 		public const string Find = "find"; //Start a search
 	}
+
+	public static class DeviceGuids
+	{
+		public const string D61883 = "7EBEFBC0-3200-11d2-B4C2-00A0C9697D07";
+		public const string AVC = "095780C3-48A1-4570-BD95-46707F78C2DC";
+		public const string BLUETOOTH = "0850302A-B344-4fda-9BE9-90576B8D46F0";
+		public const string APPLICATION_LAUNCH_BUTTON = "629758EE-986E-4D9E-8E47-DE27F8AB054D";
+		public const string BATTERY = "72631E54-78A4-11D0-BCF7-00AA00B7B32A";
+		public const string LID = "4AFA3D52-74A7-11d0-be5e-00A0C9062857";
+		public const string MEMORY = "3FD0F03D-92E0-45FB-B75C-5ED8FFB01021";
+		public const string MESSAGE_INDICATOR = "CD48A365-FA94-4CE2-A232-A1B764E5D8B4";
+		public const string PROCESSOR = "97FADB10-4E33-40AE-359C-8BEF029DBDD0";
+		public const string SYS_BUTTON = "4AFA3D53-74A7-11d0-be5e-00A0C9062857";
+		public const string THERMAL_ZONE = "4AFA3D51-74A7-11d0-be5e-00A0C9062857";
+		public const string BRIGHTNESS = "FDE5BBA4-B3F9-46FB-BDAA-0728CE3100B4";
+		public const string CD_CHANGER = "53F56312-B6BF-11D0-94F2-00A0C91EFB8B";
+		public const string CDROM = "53F56308-B6BF-11D0-94F2-00A0C91EFB8B";
+		public const string COM_PORT = "86E0D1E0-8089-11D0-9CE4-08003E301F73";
+		public const string DISK = "53F56307-B6BF-11D0-94F2-00A0C91EFB8B";
+		public const string DISPLAY_ADAPTER = "5B45201D-F2F2-4F3B-85BB-30FF1F953599";
+		public const string FLOPPY = "53F56311-B6BF-11D0-94F2-00A0C91EFB8B";
+		public const string HID = "4D1E55B2-F16F-11CF-88CB-001111000030";
+		public const string I2C = "2564AA4F-DDDB-4495-B497-6AD4A84163D7";
+		// WIA devices and Still Image (STI) devices
+		public const string IMAGE = "6BDD1FC6-810F-11D0-BEC7-08002BE2092F";
+		public const string KEYBOARD = "884b96c3-56ef-11d1-bc8c-00a0c91405dd";
+		public const string MEDIUM_CHANGER = "53F56310-B6BF-11D0-94F2-00A0C91EFB8B";
+		public const string MODEM = "2C7089AA-2E0E-11D1-B114-00C04FC2AAE4";
+		public const string MONITOR = "E6F07B5F-EE97-4a90-B076-33F57BF4EAA7";
+		public const string MOUSE = "378DE44C-56EF-11D1-BC8C-00A0C91405DD";
+		public const string NETWORK = "CAC88484-7515-4C03-82E6-71A87ABAC361";
+		public const string OPM = "BF4672DE-6B4E-4BE4-A325-68A91EA49C09";
+		public const string PARALLEL_PORTS = "97F76EF0-F883-11D0-AF1F-0000F800845C";
+		// PARCLASS
+		public const string PARALLEL_DEVICES = "811FC6A5-F728-11D0-A537-0000F8753ED1";
+		public const string PARTITION = "53F5630A-B6BF-11D0-94F2-00A0C91EFB8B";
+		// 4D36E978-E325-11CE-BFC1-08002BE10318
+		public const string SERENUM_BUS_ENUMERATOR = "53F5630A-B6BF-11D0-94F2-00A0C91EFB8B";
+		public const string SIDE_SHOW = "152E5811-FEB9-4B00-90F4-D32947AE1681";
+		public const string STORAGE_PORT = "2ACCFE60-C130-11D2-B082-00A0C91EFB8B";
+		public const string TAPE = "53F5630B-B6BF-11D0-94F2-00A0C91EFB8B";
+		public const string USB = "A5DCBF10-6530-11D2-901F-00C04FB951ED";
+		public const string USB_HOST_CONTROLLER = "3ABF6F2D-71C4-462A-8A92-1E6861E6AF27";
+		public const string USB_HUB = "F18A0E88-C30C-11D0-8815-00A0C906BED8";
+		public const string VIDEO_OUTPUT_ARRIVAL = "1AD9E4F0-F88D-4360-BAB9-4C2D55E564CD";
+		public const string VOLUME = "53F5630D-B6BF-11D0-94F2-00A0C91EFB8B";
+		public const string WINDOWS_PORTABLE_DEVICES = "6AC27878-A6FA-4155-BA85-F98F491D4F33";
+		public const string WINDOWS_PORTABLE_DEVICES_PRIVATE = "BA0C718F-4DED-49B7-BDD3-FABE28661211";
+		public const string WRITE_ONCE_DISK = "53F5630C-B6BF-11D0-94F2-00A0C91EFB8B";
+		public const string DISPLAY_DEVICE_ARRIVAL = "1CA05180-A699-450A-9A0C-DE4FBE3DDD89";
+		public const string IO_VOLUME_DEVICE = "53F5630D-B6BF-11D0-94F2-00A0C91EFB8B";
+	}
 	#endregion
 
 	/// <summary>
@@ -16967,6 +17115,12 @@ namespace asm
 		public const int UOI_NAME = 2;
 
 		public const int LF_FACESIZE = 32;
+
+		public const int WM_DEVICECHANGE = 0x0219;
+
+		public const int DEVICE_NOTIFY_WINDOW_HANDLE = 0x00000000;
+		public const int DEVICE_NOTIFY_SERVICE_HANDLE = 0x00000001;
+		public const int DEVICE_NOTIFY_ALL_INTERFACE_CLASSES = 0x00000004;
 
 		public static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
@@ -17599,6 +17753,12 @@ namespace asm
 
 		[DllImport("advapi32.dll", SetLastError = true)]
 		public static extern bool QueryServiceObjectSecurity(SafeHandle serviceHandle, SecurityInfos secInfo, byte[] lpSecDesrBuf, uint bufSize, out uint bufSizeNeeded);
+
+		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern IntPtr RegisterDeviceNotification(IntPtr recipient, IntPtr notificationFilter, int flags);
+
+		[DllImport("user32.dll")]
+		public static extern bool UnregisterDeviceNotification(IntPtr handle);
 
 		public static string GetLastErrorMessage() { return GetSystemMessage(Marshal.GetLastWin32Error()); }
 

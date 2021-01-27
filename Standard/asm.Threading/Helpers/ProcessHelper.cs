@@ -12,6 +12,7 @@ using asm.Helpers;
 using JetBrains.Annotations;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
+using MSRegistry = Microsoft.Win32.Registry;
 
 namespace asm.Threading.Helpers
 {
@@ -47,13 +48,13 @@ namespace asm.Threading.Helpers
 
 			try
 			{
-				registryKey = global::Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(extension);
+				registryKey = MSRegistry.ClassesRoot.OpenSubKey(extension);
 
 				if (registryKey != null)
 				{
 					string str = (string)registryKey.GetValue(string.Empty);
 					registryKey.Close();
-					registryKey = global::Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(str + "\\shell");
+					registryKey = MSRegistry.ClassesRoot.OpenSubKey(str + "\\shell");
 
 					if (registryKey != null)
 					{
