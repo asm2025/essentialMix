@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using asm.Extensions;
 using GenerateWIXComponents.Properties;
@@ -25,9 +26,12 @@ namespace GenerateWIXComponents
 		private const string DEF_DIR = "INSTALLDIR";
 
 		//{0} = Uppercase file name, {1} = file name, {2} = GUID, {3} = add line
-		private const string ADD_KEY_LINE = "\t\t<File Id=\"{0}{1}\" Name=\"{2}\" Source=\"$(var.SourcePath){3}\" KeyPath=\"yes\" />";
-		private const string ADD_LINE = "\t\t<File Id=\"{0}{1}\" Name=\"{2}\" Source=\"$(var.SourcePath){2}\" />";
-		private const string COMPONENT_LINE = @"<Component Id=""{0}{1}"" DiskId=""1"" Win64=""$(var.Win64)"" Guid=""{2}"">{3}</Component>";
+		private const string GROUP_BEGIN = "<ComponentGroup Id=\"{0}Components\" Directory=\"{1}\">";
+		private const string GROUP_END = "</ComponentGroup>";
+		private const string COMPONENT_BEGIN = "<Component Id=\"{0}{1}\" DiskId=\"1\" Win64=\"$(var.Win64)\" Guid=\"{2}\">";
+		private const string COMPONENT_END = "</Component>";
+		private const string ADD_KEY_FILE = "<File Id=\"{0}{1}\" Name=\"{2}\" Source=\"$(var.SourcePath){3}\" KeyPath=\"yes\" />";
+		private const string ADD_FILE = "<File Id=\"{0}{1}\" Name=\"{2}\" Source=\"$(var.SourcePath){2}\" />";
 
 		private readonly string _startText;
 		private readonly string _endText = "&Stop";
@@ -49,15 +53,59 @@ namespace GenerateWIXComponents
 			_loading = false;
 		}
 
+		private void btnBin_Click(object sender, EventArgs e)
+		{
+			fbd.Reset();
+			if (fbd.ShowDialog(this) != DialogResult.OK) return;
+			txtBin.Text = fbd.SelectedPath;
+		}
+
+		private void txtBin_TextChanged(object sender, EventArgs e)
+		{
+			txtInput.Text = string.Empty;
+
+			string path = txtBin.Text;
+			if (string.IsNullOrEmpty(path) || !Directory.Exists(path)) return;
+
+			int rootLength = path.Length + 1;
+			StringBuilder sb = new StringBuilder();
+
+			foreach (string directory in Directory.EnumerateDirectories(path))
+			{
+				AddFiles(sb, directory, rootLength);
+			}
+
+			AddFiles(sb, path, rootLength);
+			txtInput.Text = sb.ToString();
+
+			static void AddFiles(StringBuilder sb, string path, int rootLength)
+			{
+				foreach (string directory in Directory.EnumerateDirectories(path))
+				{
+					AddFiles(sb, directory, rootLength);
+				}
+
+				foreach (string file in Directory.EnumerateFiles(path))
+				{
+					if (file.Contains("JetBrains.Annotations", StringComparison.OrdinalIgnoreCase) || file.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase)) continue;
+					string pth = file.Substring(rootLength);
+					sb.AppendWithLine(pth);
+				}
+			}
+		}
+
 		private void worker_DoWork(object sender, DoWorkEventArgs e)
 		{
-			tvwOutput.InvokeIf(() => tvwOutput.Nodes.Clear());
-
 			bool groupFiles = false;
-			chkGroupFiles.InvokeIf(() => groupFiles = chkGroupFiles.Checked);
-
 			Queue<string> lines = null;
-			txtInput.InvokeIf(() => lines = new Queue<string>(txtInput.Lines));
+
+			this.InvokeIf(() =>
+			{
+				tvwOutput.Nodes.Clear();
+				groupFiles = chkGroupFiles.Checked;
+				lines = new Queue<string>(txtInput.Lines.SkipNullOrEmptyTrim());
+			});
+
 			if (lines == null || lines.Count == 0) return;
 			EnableControls();
 
@@ -70,7 +118,9 @@ namespace GenerateWIXComponents
 				while (lines.Count > 0)
 				{
 					string line = lines.Dequeue();
-					string ext = Path.GetExtension(line)?.ToLower();
+					if (line.Contains("JetBrains.Annotations", StringComparison.OrdinalIgnoreCase)) continue;
+
+					string ext = Path.GetExtension(line).ToLowerInvariant();
 					if (ext == ".pdb") continue;
 
 					int sep = line.IndexOf('\\');
@@ -85,7 +135,7 @@ namespace GenerateWIXComponents
 					else
 					{
 						dir = line.Substring(0, sep);
-						pfx = dir.ToUpper() + "_";
+						pfx = dir.ToUpperInvariant() + "_";
 						line = line.Substring(sep + 1, line.Length - sep - 1);
 					}
 
@@ -124,14 +174,13 @@ namespace GenerateWIXComponents
 						}
 					}
 
-					if (lines.Count == 0 && orphans.Count > 0)
-					{
-						foreach (string orphan in orphans) 
-							lines.Enqueue(orphan);
+					if (lines.Count == 0 || orphans.Count == 0) continue;
 
-						orphans.Clear();
-						orphansCleared = true;
-					}
+					foreach (string orphan in orphans) 
+						lines.Enqueue(orphan);
+
+					orphans.Clear();
+					orphansCleared = true;
 				}
 			}
 			catch (Exception exception)
@@ -208,7 +257,7 @@ namespace GenerateWIXComponents
 			if (worker.IsBusy)
 			{
 				worker.CancelAsync();
-				return;
+				SpinWait.SpinUntil(() => !worker.IsBusy);
 			}
 
 			worker.RunWorkerAsync();
@@ -216,10 +265,13 @@ namespace GenerateWIXComponents
 
 		private void btnCopy_Click(object sender, EventArgs e)
 		{
+			const int RETRIES = 3;
+
 			Clipboard.Clear();
 			if (!HasOutput()) return;
 
-			StringBuilder sbdir = new StringBuilder(tvwOutput.GetNodeCount(true) * 256);
+			StringBuilder sbd = new StringBuilder();
+			string tabs = string.Empty;
 
 			foreach (TreeNode rootNode in tvwOutput.Nodes)
 			{
@@ -227,13 +279,14 @@ namespace GenerateWIXComponents
 
 				if (rootNode.Text == DEF_DIR)
 				{
-					sbdir.AppendWithLine($"<ComponentGroup Id=\"XXXComponents\" Directory=\"{rootNode.Text.ToUpper()}\">");
 					dir = string.Empty;
+					tabs = string.Empty;
 				}
 				else
 				{
-					sbdir.AppendWithLine($"<ComponentGroup Id=\"{rootNode.Text.ToUpper()}Components\" Directory=\"{rootNode.Text.ToUpper()}\">");
+					sbd.AppendWithLine(string.Format(GROUP_BEGIN, rootNode.Text.ToUpperInvariant(), rootNode.Text));
 					dir = rootNode.Text + Path.DirectorySeparatorChar;
+					tabs = "\t";
 				}
 
 				foreach (TreeNode componentNode in rootNode.Nodes)
@@ -241,24 +294,46 @@ namespace GenerateWIXComponents
 					ComponentInfo component = (ComponentInfo)componentNode.Tag;
 
 					if (component.FileNames == null)
-						sbdir.AppendWithLine(string.Format(COMPONENT_LINE, component.Prefix, component.KeyFileName.ToUpper(), Guid.NewGuid(), string.Format(ADD_KEY_LINE, component.Prefix, component.KeyFileName.ToUpper(), component.KeyFileName, dir + component.KeyFileName)));
+					{
+						sbd.AppendWithLine(tabs + string.Format(COMPONENT_BEGIN, component.Prefix, component.KeyFileName.ToUpperInvariant(), Guid.NewGuid()));
+						sbd.AppendWithLine(tabs + "\t" + string.Format(ADD_KEY_FILE, component.Prefix, component.KeyFileName.ToUpperInvariant(), component.KeyFileName, dir + component.KeyFileName));
+						sbd.AppendWithLine(tabs + COMPONENT_END);
+					}
 					else
 					{
-						StringBuilder sb = new StringBuilder(1024);
-						sb.Append(string.Format(ADD_KEY_LINE, component.Prefix, component.KeyFileName.ToUpper(), component.KeyFileName, dir + component.KeyFileName));
-
+						sbd.AppendWithLine(tabs + string.Format(COMPONENT_BEGIN, component.Prefix, component.KeyFileName.ToUpperInvariant(), Guid.NewGuid()));
+						sbd.AppendWithLine(tabs + "\t" + string.Format(ADD_KEY_FILE, component.Prefix, component.KeyFileName.ToUpperInvariant(), component.KeyFileName, dir + component.KeyFileName));
+						
 						foreach (string file in component.FileNames)
-							sb.AppendWithLine(string.Format(ADD_LINE, component.Prefix, file.ToUpper(), file));
+							sbd.AppendWithLine(tabs + "\t" + string.Format(ADD_FILE, component.Prefix, file.ToUpperInvariant(), file));
 
-						sbdir.AppendWithLine(string.Format(COMPONENT_LINE, component.Prefix, component.KeyFileName.ToUpper(), Guid.NewGuid(), sb));
+						sbd.AppendWithLine(tabs + COMPONENT_END);
 					}
 				}
 
-				sbdir.AppendWithLine("</ComponentGroup>");
+				if (tabs.Length > 0) sbd.AppendWithLine(GROUP_END);
 			}
 
-			sbdir.AppendLine();
-			Clipboard.SetText(sbdir.ToString(), TextDataFormat.Text);
+			if (sbd.Length > 0) sbd.AppendLine();
+
+			string data = sbd.ToString();
+			int clipboardErr = 0;
+
+			while (clipboardErr < RETRIES)
+			{
+				try
+				{
+					Clipboard.Clear();
+					Clipboard.SetText(data, TextDataFormat.Text);
+					break;
+				}
+				catch (Exception ex)
+				{
+					clipboardErr++;
+					if (clipboardErr < RETRIES) continue;
+					MessageBox.Show(ex.Unwrap(), "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			}
 		}
 
 		private void btnExit_Click(object sender, EventArgs e)
@@ -292,7 +367,7 @@ namespace GenerateWIXComponents
 			}
 
 			this.EnableControls(true, btnGenerate, btnCopy, btnExit);
-			btnGenerate.InvokeIf(() =>
+			this.InvokeIf(() =>
 			{
 				if (worker.IsBusy)
 				{
@@ -304,9 +379,10 @@ namespace GenerateWIXComponents
 					btnGenerate.Enabled = HasText();
 					if (btnGenerate.Text != _startText) btnGenerate.Text = _startText;
 				}
+
+				btnCopy.Enabled = HasOutput();
+				btnExit.Enabled = !worker.IsBusy;
 			});
-			btnCopy.InvokeIf(() => btnCopy.Enabled = HasOutput());
-			btnExit.InvokeIf(() => btnExit.Enabled = !worker.IsBusy);
 		}
 	}
 }
