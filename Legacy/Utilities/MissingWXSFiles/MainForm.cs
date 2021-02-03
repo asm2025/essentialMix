@@ -107,7 +107,7 @@ namespace MissingWXSFiles
 
 		private static string GetIDSearchString(string pathId)
 		{
-			return FMT_HEAD + pathId.Replace('\\', '_').Quote();
+			return FMT_HEAD + pathId.Replace('_', ':', '\\', '-').Quote();
 		}
 	}
 }

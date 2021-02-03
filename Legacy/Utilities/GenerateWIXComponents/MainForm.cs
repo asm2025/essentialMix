@@ -135,7 +135,7 @@ namespace GenerateWIXComponents
 					else
 					{
 						dir = line.Substring(0, sep);
-						pfx = dir.ToUpperInvariant() + "_";
+						pfx = dir.ToUpperInvariant().Replace('_', ':', '\\', '-') + "_";
 						line = line.Substring(sep + 1, line.Length - sep - 1);
 					}
 
@@ -271,11 +271,10 @@ namespace GenerateWIXComponents
 			if (!HasOutput()) return;
 
 			StringBuilder sbd = new StringBuilder();
-			string tabs = string.Empty;
 
 			foreach (TreeNode rootNode in tvwOutput.Nodes)
 			{
-				string dir;
+				string dir, tabs;
 
 				if (rootNode.Text == DEF_DIR)
 				{
