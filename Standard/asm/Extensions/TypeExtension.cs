@@ -260,6 +260,15 @@ namespace asm.Extensions
 						: Activator.CreateInstance(thisValue);
 		}
 
+		public static IEnumerable<Type> SelfAndBaseTypes([NotNull] this Type thisValue)
+		{
+			while (thisValue != null)
+			{
+				yield return thisValue;
+				thisValue = thisValue.BaseType;
+			}
+		}
+
 		public static IEnumerable<Type> SelfAndMembersTypes([NotNull] this Type thisValue, BreadthDepthTraversal method)
 		{
 			return method switch
