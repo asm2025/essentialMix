@@ -1,8 +1,9 @@
-﻿<Application x:Class="WIXToolsetComponents.App"
+﻿<Application x:Class="WiXComponents.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:WIXToolsetComponents"
-             StartupUri="View/MainWindow.xaml">
+             xmlns:local="clr-namespace:WiXComponents"
+             StartupUri="MainWindow.xaml">
     <Application.Resources>
+         
     </Application.Resources>
 </Application>
