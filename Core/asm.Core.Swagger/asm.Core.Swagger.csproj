@@ -28,13 +28,18 @@
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.3" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.0.7" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.0.7" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.1.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Standard\asm.Extensions.Configuration\asm.Extensions.Configuration.csproj" />
-	  <ProjectReference Include="..\..\Standard\asm\asm.csproj" />
+		<ProjectReference Include="..\..\Standard\asm.Extensions.Configuration\asm.Extensions.Configuration.csproj" />
+		<ProjectReference Include="..\..\Standard\asm\asm.csproj" />
 	</ItemGroup>
+
+	<PropertyGroup>
+		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
+if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+	</PropertyGroup>
 
 </Project>

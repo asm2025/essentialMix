@@ -26,15 +26,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
-	  <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\asm.Exceptions\asm.Exceptions.csproj" />
-	  <ProjectReference Include="..\asm.Logging\asm.Logging.csproj" />
-	  <ProjectReference Include="..\asm\asm.csproj" />
+		<ProjectReference Include="..\asm.Exceptions\asm.Exceptions.csproj" />
+		<ProjectReference Include="..\asm.Logging\asm.Logging.csproj" />
+		<ProjectReference Include="..\asm\asm.csproj" />
 	</ItemGroup>
+
+	<PropertyGroup>
+		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
+if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+	</PropertyGroup>
 
 </Project>

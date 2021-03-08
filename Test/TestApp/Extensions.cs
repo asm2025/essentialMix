@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using asm.Collections;
-using Crayon;
 using JetBrains.Annotations;
+using static Crayon.Output;
 
 namespace TestApp
 {
@@ -14,18 +14,18 @@ namespace TestApp
 		public static string ToYesNo(this bool thisValue)
 		{
 			return thisValue
-						? "Yes".BrightGreen()
-						: "No".BrightRed();
+						? Bright.Green("Yes")
+						: Bright.Red("No");
 		}
 
 		public static void PrintProps<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue)
 			where TNode : LinkedBinaryNode<TNode, T>
 		{
 			Console.WriteLine();
-			Console.WriteLine($"{"Dimensions:".Yellow()} {thisValue.Count.ToString().Underline()} x {thisValue.GetHeight().ToString().Underline()}.");
-			Console.WriteLine($"{"Balanced:".Yellow()} {thisValue.IsBalanced().ToYesNo()}");
-			Console.WriteLine($"{"Valid:".Yellow()} {thisValue.Validate().ToYesNo()}");
-			Console.WriteLine($"{"Minimum:".Yellow()} {thisValue.Minimum()} {"Maximum:".Yellow()} {thisValue.Maximum()}");
+			Console.WriteLine($"{Yellow("Dimensions:")} {Underline(thisValue.Count.ToString())} x {Underline(thisValue.GetHeight().ToString())}.");
+			Console.WriteLine($"{Yellow("Balanced:")} {thisValue.IsBalanced().ToYesNo()}");
+			Console.WriteLine($"{Yellow("Valid:")} {thisValue.Validate().ToYesNo()}");
+			Console.WriteLine($"{Yellow("Minimum:")} {thisValue.Minimum()} {Yellow("Maximum:")} {thisValue.Maximum()}");
 		}
 
 		public static void PrintWithProps<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue)
@@ -45,9 +45,9 @@ namespace TestApp
 		public static void PrintProps<T>([NotNull] this ArrayBinaryTree<T> thisValue)
 		{
 			Console.WriteLine();
-			Console.WriteLine($"{"Dimensions:".Yellow()} {thisValue.Count.ToString().Underline()} x {thisValue.GetHeight().ToString().Underline()}.");
-			Console.WriteLine($"{"Valid:".Yellow()} {thisValue.Validate().ToYesNo()}");
-			Console.WriteLine($"{"LeftMost:".Yellow()} {thisValue.LeftMost()} {"RightMost:".Yellow()} {thisValue.RightMost()}");
+			Console.WriteLine($"{Yellow("Dimensions:")} {Underline(thisValue.Count.ToString())} x {Underline(thisValue.GetHeight().ToString())}.");
+			Console.WriteLine($"{Yellow("Valid:")} {thisValue.Validate().ToYesNo()}");
+			Console.WriteLine($"{Yellow("LeftMost:")} {thisValue.LeftMost()} {Yellow("RightMost:")} {thisValue.RightMost()}");
 		}
 
 		public static void PrintWithProps<T>([NotNull] this ArrayBinaryTree<T> thisValue)
@@ -66,8 +66,8 @@ namespace TestApp
 			where TAdjacencyList : class, ICollection<TEdge>
 		{
 			Console.WriteLine();
-			Console.WriteLine($"{"Order:".Yellow()} {thisValue.Count.ToString().Underline()}.");
-			Console.WriteLine($"{"Size:".Yellow()} {thisValue.GetSize().ToString().Underline()}.");
+			Console.WriteLine($"{Yellow("Order:")} {Underline(thisValue.Count.ToString())}.");
+			Console.WriteLine($"{Yellow("Size:")} {Underline(thisValue.GetSize().ToString())}.");
 		}
 
 		public static void PrintWithProps<T, TAdjacencyList, TEdge>([NotNull] this GraphList<T, TAdjacencyList, TEdge> thisValue)

@@ -27,7 +27,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="..\..\Test\TestApp\MediaTypes\text.csv" Link="Text\text.csv" />
+		<None Include="..\..\Test\TestApp\MediaTypes\text.csv" Link="Text\text.csv" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -43,7 +43,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\asm.Exceptions\asm.Exceptions.csproj" />
+		<ProjectReference Include="..\asm.Exceptions\asm.Exceptions.csproj" />
 	</ItemGroup>
+
+	<PropertyGroup>
+		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
+if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+	</PropertyGroup>
 
 </Project>

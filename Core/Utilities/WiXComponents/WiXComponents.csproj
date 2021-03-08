@@ -12,11 +12,11 @@
 		<Authors>asm</Authors>
 		<PackageTags>utilities, tools, extensions, helpers, core, mvc, web api</PackageTags>
 		<SignAssembly>true</SignAssembly>
-		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
+		<AssemblyOriginatorKeyFile>..\..\..\sign.pfx</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug' OR '$(Configuration)' == 'Release'">
-		<OutputPath>..\..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
+		<OutputPath>..\..\..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Independent'">
@@ -29,6 +29,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="5.0.0" />
@@ -43,24 +44,44 @@
 		<PackageReference Include="Serilog.Formatting.Compact" Version="1.1.0" />
 		<PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-		<PackageReference Include="Serilog.Sinks.Debug" Version="1.0.1" />
+		<PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
 		<PackageReference Include="System.Management" Version="5.0.0" />
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Standard\asm.Extensions.Configuration\asm.Extensions.Configuration.csproj" />
-		<ProjectReference Include="..\..\Standard\asm.Json.Abstraction\asm.Json.Abstraction.csproj" />
-		<ProjectReference Include="..\..\Standard\asm.Logging\asm.Logging.csproj" />
-		<ProjectReference Include="..\..\Standard\asm.Data\asm.Data.csproj" />
-		<ProjectReference Include="..\..\Standard\asm\asm.csproj" />
+		<ProjectReference Include="..\..\..\Standard\asm.Extensions.Configuration\asm.Extensions.Configuration.csproj" />
+		<ProjectReference Include="..\..\..\Standard\asm.Json.Abstraction\asm.Json.Abstraction.csproj" />
+		<ProjectReference Include="..\..\..\Standard\asm.Logging\asm.Logging.csproj" />
+		<ProjectReference Include="..\..\..\Standard\asm.Data\asm.Data.csproj" />
+		<ProjectReference Include="..\..\..\Standard\asm.NewtonSoft\asm.Newtonsoft.csproj" />
+		<ProjectReference Include="..\..\..\Standard\asm\asm.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Models\" />
-	  <Folder Include="ViewModels\" />
-	  <Folder Include="Views\" />
+		<Folder Include="Models\" />
+		<Folder Include="ViewModels\" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Properties\Settings.Designer.cs">
+	    <DesignTimeSharedInput>True</DesignTimeSharedInput>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Settings.settings</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Properties\Settings.settings">
+	    <Generator>SettingsSingleFileGenerator</Generator>
+	    <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+	  </None>
+	</ItemGroup>
+
+	<PropertyGroup>
+		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
+if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+	</PropertyGroup>
 
 </Project>

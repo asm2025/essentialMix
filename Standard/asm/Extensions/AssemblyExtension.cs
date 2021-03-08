@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
@@ -14,7 +15,78 @@ namespace asm.Extensions
 {
 	public static class AssemblyExtension
 	{
+		private const string VERSION_DEF = "0.0.0.0";
+
 		private static readonly Regex __asmFileProtocolTrim = new Regex(@"\Afile:///?", RegexHelper.OPTIONS_I);
+
+		[NotNull]
+		public static string GetCode([NotNull] this Assembly thisValue)
+		{
+			return (thisValue.GetCustomAttribute<GuidAttribute>()?.Value ?? Guid.Empty.ToString("B")).ToUpperInvariant();
+		}
+
+		[NotNull]
+		public static string GetTitle([NotNull] this Assembly thisValue)
+		{
+			string title = thisValue.GetCustomAttribute<AssemblyTitleAttribute>()?.Title;
+			if (string.IsNullOrWhiteSpace(title)) title = thisValue.GetName().Name;
+			if (string.IsNullOrWhiteSpace(title)) title = Path.GetFileNameWithoutExtension(GetPath(thisValue));
+			return title;
+		}
+
+		[NotNull]
+		public static string GetAssemblyName([NotNull] this Assembly thisValue)
+		{
+			return Path.GetFileNameWithoutExtension(GetPath(thisValue));
+		}
+
+		[NotNull]
+		public static string GetDescription([NotNull] this Assembly thisValue)
+		{
+			return thisValue.GetCustomAttribute<AssemblyDescriptionAttribute>()?.Description ?? string.Empty;
+		}
+
+		[NotNull]
+		public static string GetProductName([NotNull] this Assembly thisValue)
+		{
+			return thisValue.GetCustomAttribute<AssemblyProductAttribute>()?.Product ?? string.Empty;
+		}
+
+		[NotNull]
+		public static string GetCompany([NotNull] this Assembly thisValue)
+		{
+			return thisValue.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company ?? string.Empty;
+		}
+
+		[NotNull]
+		public static string GetCopyright([NotNull] this Assembly thisValue)
+		{
+			return thisValue.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? string.Empty;
+		}
+
+		[NotNull]
+		public static string GetTrademark([NotNull] this Assembly thisValue)
+		{
+			return thisValue.GetCustomAttribute<AssemblyTrademarkAttribute>()?.Trademark ?? string.Empty;
+		}
+
+		[NotNull]
+		public static string GetVersion([NotNull] this Assembly thisValue)
+		{
+			return thisValue.GetCustomAttribute<AssemblyVersionAttribute>().Version ?? VERSION_DEF;
+		}
+
+		[NotNull]
+		public static string GetFileVersion([NotNull] this Assembly thisValue)
+		{
+			return thisValue.GetCustomAttribute<AssemblyFileVersionAttribute>().Version ?? VERSION_DEF;
+		}
+
+		[NotNull]
+		public static string GetCulture([NotNull] this Assembly thisValue)
+		{
+			return thisValue.GetCustomAttribute<AssemblyCultureAttribute>()?.Culture ?? CultureInfo.CurrentCulture.Name;
+		}
 
 		[NotNull]
 		public static string GetPath([NotNull] this Assembly thisValue)

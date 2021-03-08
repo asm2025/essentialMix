@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using Bogus;
 using Bogus.DataSets;
-using Crayon;
 using JetBrains.Annotations;
 using System.ServiceProcess;
 using asm;
@@ -30,6 +29,7 @@ using asm.Threading.Helpers;
 using Newtonsoft.Json;
 using TimeoutException = System.TimeoutException;
 using Menu = EasyConsole.Menu;
+using static Crayon.Output;
 
 // ReSharper disable UnusedMember.Local
 namespace TestApp
@@ -41,12 +41,12 @@ namespace TestApp
 		private const int MEDIUM = 100_000;
 		private const int HEAVY = 1_000_000;
 
-		private static readonly string __compilationText = $@"
+		private static readonly string __compilationText = Yellow($@"
 This is C# (a compiled language), so the test needs to run at least
 once before considering results in order for the code to be compiled
 and run at full speed. The first time this test run, it will start 
-with just {START} items and the next time when you press '{"Y".BrightGreen()}', it will 
-work with {HEAVY} items.".Yellow();
+with just {START} items and the next time when you press '{Bright.Green("Y")}', it will 
+work with {HEAVY} items.");
 
 		private static readonly Lazy<Faker> __fakeGenerator = new Lazy<Faker>(() => new Faker(), LazyThreadSafetyMode.PublicationOnly);
 		private static readonly string[] __sortAlgorithms = 
@@ -192,7 +192,7 @@ work with {HEAVY} items.".Yellow();
 				for (int j = i + 1; j < domains.Length; j++)
 				{
 					string y = domains[j];
-					Console.WriteLine("Testing:".BrightBlack());
+					Console.WriteLine(Bright.Black("Testing:"));
 					Console.WriteLine(x);
 					Console.WriteLine(y);
 					bool matching = DomainNameComparer.Default.Equals(x, y);
@@ -204,11 +204,11 @@ work with {HEAVY} items.".Yellow();
 
 			if (matchingDomains.Count == 0)
 			{
-				Console.WriteLine("No matching entries..!".BrightRed());
+				Console.WriteLine(Bright.Red("No matching entries..!"));
 				return;
 			}
 
-			Console.WriteLine($"Found {matchingDomains.Count.ToString().BrightGreen()} entries:");
+			Console.WriteLine($"Found {Bright.Green(matchingDomains.Count.ToString())} entries:");
 
 			foreach ((string, string) tuple in matchingDomains)
 			{
@@ -226,7 +226,7 @@ work with {HEAVY} items.".Yellow();
 
 			do
 			{
-				Console.Write($"Type in {"a number".BrightGreen()} to calculate the Fibonacci number for or {"ESCAPE".BrightRed()} key to exit. ");
+				Console.Write($"Type in {Bright.Green("a number")} to calculate the Fibonacci number for or {Bright.Red("ESCAPE")} key to exit. ");
 				string response = Console.ReadLine();
 				more = !string.IsNullOrWhiteSpace(response);
 				if (more && uint.TryParse(response, out uint value)) Console.WriteLine(asm.Numeric.Math.Fibonacci(value));
@@ -259,21 +259,21 @@ work with {HEAVY} items.".Yellow();
 				Title("Testing group anagrams...");
 				i = (i + 1) % allWords.Length;
 				string[] words = allWords[i];
-				Console.Write("Words: ".BrightBlack());
+				Console.Write(Bright.Black("Words: "));
 				
 				if (words == null) Console.WriteLine("<null>");
 				else if (words.Length == 0) Console.WriteLine("[]");
 				else Console.WriteLine("[" + string.Join(", ", words) + "]");
 				
 				IReadOnlyCollection<IReadOnlyList<string>> anagrams = StringHelper.GroupAnagrams(words);
-				Console.Write("Anagrams: ".BrightYellow());
+				Console.Write(Bright.Yellow("Anagrams: "));
 
 				if (anagrams == null) Console.WriteLine("<null>");
 				else if (anagrams.Count == 0) Console.WriteLine("[]");
 				else Console.WriteLine(string.Join(", ", anagrams.Select(e => "[" + string.Join(", ", e) + "]")));
 				
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -303,13 +303,13 @@ work with {HEAVY} items.".Yellow();
 			{
 				i = (i + 1) % allNumbers.Length;
 				int[] numbers = allNumbers[i];
-				Console.Write("Numbers: ".BrightBlack());
+				Console.Write(Bright.Black("Numbers: "));
 				
 				if (numbers.Length == 0) Console.WriteLine("[]");
 				else Console.WriteLine("[" + string.Join(", ", numbers) + "]");
 				
-				Console.WriteLine("Sum: ".BrightYellow() + numbers.KadaneMaximumSum());
-				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+				Console.WriteLine(Bright.Yellow("Sum: ") + numbers.KadaneMaximumSum());
+				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -349,8 +349,8 @@ work with {HEAVY} items.".Yellow();
 				i = (i + 1) % allStrings.Length;
 				(string first, string second) = allStrings[i];
 				Console.WriteLine($"Strings: '{first}', '{second}'");
-				Console.WriteLine("Levenshtein Distance: ".BrightYellow() + StringHelper.LevenshteinDistance(first, second));
-				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+				Console.WriteLine(Bright.Yellow("Levenshtein Distance: ") + StringHelper.LevenshteinDistance(first, second));
+				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -390,13 +390,13 @@ work with {HEAVY} items.".Yellow();
 			{
 				i = (i + 1) % allNumbers.Length;
 				(string label, int[] numbers) = allNumbers[i];
-				Console.Write(label.BrightBlack());
+				Console.Write(Bright.Black(label));
 				
 				if (numbers.Length == 0) Console.WriteLine("[]");
 				else Console.WriteLine("[" + string.Join(", ", numbers) + "]");
 				
-				Console.WriteLine("Deepest Pit: ".BrightYellow() + numbers.DeepestPit());
-				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+				Console.WriteLine(Bright.Yellow("Deepest Pit: ") + numbers.DeepestPit());
+				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -442,7 +442,7 @@ work with {HEAVY} items.".Yellow();
 				Console.Clear();
 				Console.WriteLine();
 				ThreadQueueMode mode = modes.Dequeue();
-				Title($"Testing multi-thread queue in '{mode.ToString().BrightCyan()}' mode...");
+				Title($"Testing multi-thread queue in '{Bright.Cyan(mode.ToString())}' mode...");
 
 				// if there is a timeout, will use a CancellationTokenSource.
 				using (CancellationTokenSource cts = timeout > 0
@@ -461,22 +461,22 @@ work with {HEAVY} items.".Yellow();
 					// Create a generic queue producer
 					using (IProducerConsumer<int> queue = ProducerConsumerQueue.Create(mode, options, token))
 					{
-						queue.WorkStarted += (sender, args) =>
+						queue.WorkStarted += (_, _) =>
 						{
 							Console.WriteLine();
-							Console.WriteLine($"Starting multi-thread test. mode: '{mode.ToString().BrightCyan()}', values: {values.Length.ToString().BrightCyan()}, threads: {options.Threads.ToString().BrightCyan()}, timeout: {timeoutString.BrightCyan()}...");
-							if (mode == ThreadQueueMode.ThresholdTaskGroup) Console.WriteLine($"in {mode} mode, {threads.ToString().BrightCyan()} tasks will be issued every {((ProducerConsumerThresholdQueueOptions<int>)options).Threshold.TotalSeconds.ToString("N0").BrightCyan()} second(s).");
+							Console.WriteLine($"Starting multi-thread test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Length.ToString())}, threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}...");
+							if (mode == ThreadQueueMode.ThresholdTaskGroup) Console.WriteLine($"in {mode} mode, {Bright.Cyan(threads.ToString())} tasks will be issued every {Bright.Cyan(((ProducerConsumerThresholdQueueOptions<int>)options).Threshold.TotalSeconds.ToString("N0"))} second(s).");
 							Console.WriteLine();
 							Console.WriteLine();
 							clock.Restart();
 						};
 
-						queue.WorkCompleted += (sender, args) =>
+						queue.WorkCompleted += (_, _) =>
 						{
 							long elapsed = clock.ElapsedMilliseconds;
 							Console.WriteLine();
 							Console.WriteLine();
-							Console.WriteLine($"Finished test. mode: '{mode.ToString().BrightCyan()}', values: {values.Length.ToString().BrightCyan()}, threads: {options.Threads.ToString().BrightCyan()}, timeout: {timeoutString.BrightCyan()}, elapsed: {elapsed.ToString().BrightCyan()} ms.");
+							Console.WriteLine($"Finished test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Length.ToString())}, threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}, elapsed: {Bright.Cyan(elapsed.ToString())} ms.");
 							Console.WriteLine();
 						};
 
@@ -509,7 +509,7 @@ work with {HEAVY} items.".Yellow();
 
 				if (modes.Count == 0) continue;
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				if (response.Key != ConsoleKey.Y) modes.Clear();
@@ -524,7 +524,7 @@ work with {HEAVY} items.".Yellow();
 
 			Action<IList<int>, int, int, IComparer<int>, bool> sortNumbers = GetAlgorithm<int>(ALGORITHM);
 			Action<IList<string>, int, int, IComparer<string>, bool> sortStrings = GetAlgorithm<string>(ALGORITHM);
-			Console.WriteLine($"Testing {ALGORITHM.BrightCyan()} algorithm: ");
+			Console.WriteLine($"Testing {Bright.Cyan(ALGORITHM)} algorithm: ");
 
 			Stopwatch watch = new Stopwatch();
 			IComparer<int> numbersComparer = Comparer<int>.Default;
@@ -536,15 +536,15 @@ work with {HEAVY} items.".Yellow();
 				Console.Clear();
 				int[] numbers = GetRandomIntegers(RNGRandomHelper.Next(5, 20));
 				string[] strings = GetRandomStrings(RNGRandomHelper.Next(3, 10)).ToArray();
-				Console.WriteLine("Numbers: ".BrightCyan() + string.Join(", ", numbers));
-				Console.WriteLine("String: ".BrightCyan() + string.Join(", ", strings.Select(e => e.SingleQuote())));
+				Console.WriteLine(Bright.Cyan("Numbers: ") + string.Join(", ", numbers));
+				Console.WriteLine(Bright.Cyan("String: ") + string.Join(", ", strings.Select(e => e.SingleQuote())));
 
 				Console.Write("Numbers");
 				watch.Restart();
 				sortNumbers(numbers, 0, -1, numbersComparer, false);
 				long numericResults = watch.ElapsedMilliseconds;
 				watch.Stop();
-				Console.WriteLine($" => {numericResults.ToString().BrightGreen()}");
+				Console.WriteLine($" => {Bright.Green(numericResults.ToString())}");
 				Console.WriteLine("Result: " + string.Join(", ", numbers));
 				Console.WriteLine();
 
@@ -553,15 +553,15 @@ work with {HEAVY} items.".Yellow();
 				sortStrings(strings, 0, -1, stringComparer, false);
 				long stringResults = watch.ElapsedMilliseconds;
 				watch.Stop();
-				Console.WriteLine($" => {stringResults.ToString().BrightGreen()}");
+				Console.WriteLine($" => {Bright.Green(stringResults.ToString())}");
 				Console.WriteLine("Result: " + string.Join(", ", strings.Select(e => e.SingleQuote())));
 				Console.WriteLine();
 
-				Console.WriteLine("Finished".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Finished"));
 				Console.WriteLine();
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -580,7 +580,7 @@ work with {HEAVY} items.".Yellow();
 			IComparer<string> stringComparer = StringComparer.Ordinal;
 			IDictionary<string, long> numericResults = new Dictionary<string, long>();
 			IDictionary<string, long> stringResults = new Dictionary<string, long>();
-			string sectionSeparator = new string('*', 80).BrightMagenta();
+			string sectionSeparator = Bright.Magenta(new string('*', 80));
 			bool more;
 			int tests = 0;
 			int[] numbers = GetRandomIntegers(START);
@@ -592,8 +592,8 @@ work with {HEAVY} items.".Yellow();
 
 				if (tests == 0)
 				{
-					Console.WriteLine("Numbers: ".BrightCyan() + string.Join(", ", numbers));
-					Console.WriteLine("String: ".BrightCyan() + string.Join(", ", strings.Select(e => e.SingleQuote())));
+					Console.WriteLine(Bright.Cyan("Numbers: ") + string.Join(", ", numbers));
+					Console.WriteLine(Bright.Cyan("String: ") + string.Join(", ", strings.Select(e => e.SingleQuote())));
 					CompilationHint();
 				}
 
@@ -603,14 +603,14 @@ work with {HEAVY} items.".Yellow();
 					Action<IList<int>, int, int, IComparer<int>, bool> sortNumbers = GetAlgorithm<int>(algorithm);
 					Action<IList<string>, int, int, IComparer<string>, bool> sortStrings = GetAlgorithm<string>(algorithm);
 					Console.WriteLine(sectionSeparator);
-					Console.WriteLine($"Testing {algorithm.BrightCyan()} algorithm: ");
+					Console.WriteLine($"Testing {Bright.Cyan(algorithm)} algorithm: ");
 
 					Console.Write("Numbers");
 					int[] ints = (int[])numbers.Clone();
 					watch.Restart();
 					sortNumbers(ints, 0, -1, numbersComparer, false);
 					numericResults[algorithm] = watch.ElapsedTicks;
-					Console.WriteLine($" => {numericResults[algorithm].ToString().BrightGreen()}");
+					Console.WriteLine($" => {Bright.Green(numericResults[algorithm].ToString())}");
 					if (tests == 0) Console.WriteLine("Result: " + string.Join(", ", ints));
 
 					Console.Write("Strings");
@@ -619,15 +619,15 @@ work with {HEAVY} items.".Yellow();
 					watch.Restart();
 					sortStrings(str, 0, -1, stringComparer, false);
 					stringResults[algorithm] = watch.ElapsedTicks;
-					Console.WriteLine($" => {stringResults[algorithm].ToString().BrightGreen()}");
+					Console.WriteLine($" => {Bright.Green(stringResults[algorithm].ToString())}");
 					if (tests == 0) Console.WriteLine("Result: " + string.Join(", ", str.Select(e => e.SingleQuote())));
 					Console.WriteLine();
 				}
 
 				Console.WriteLine(sectionSeparator);
-				Console.WriteLine("Finished".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Finished"));
 				Console.WriteLine();
-				Console.WriteLine($"Fastest {RESULT_COUNT} numeric sort:".BrightGreen());
+				Console.WriteLine(Bright.Green($"Fastest {RESULT_COUNT} numeric sort:"));
 			
 				foreach (KeyValuePair<string, long> pair in numericResults
 															.OrderBy(e => e.Value)
@@ -637,7 +637,7 @@ work with {HEAVY} items.".Yellow();
 				}
 
 				Console.WriteLine();
-				Console.WriteLine($"Fastest {RESULT_COUNT} string sort:".BrightGreen());
+				Console.WriteLine(Bright.Green($"Fastest {RESULT_COUNT} string sort:"));
 
 				foreach (KeyValuePair<string, long> pair in stringResults
 															.OrderBy(e => e.Value)
@@ -647,7 +647,7 @@ work with {HEAVY} items.".Yellow();
 				}
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -655,7 +655,7 @@ work with {HEAVY} items.".Yellow();
 
 				if (tests > 0)
 				{
-					Console.Write($"Would you like to increase the array size? {"[Y]".BrightGreen()} or {"any other key".Dim()} to exit. ");
+					Console.Write($"Would you like to increase the array size? {Bright.Green("[Y]")} or {Dim("any other key")} to exit. ");
 					response = Console.ReadKey(true);
 					Console.WriteLine();
 					if (response.Key != ConsoleKey.Y) continue;
@@ -780,7 +780,7 @@ work with {HEAVY} items.".Yellow();
 				list.Clear();
 				int count = list.Count;
 				Debug.Assert(count == 0, "Values are not cleared correctly!");
-				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
 				clock.Restart();
 
 				foreach (int v in values)
@@ -793,35 +793,35 @@ work with {HEAVY} items.".Yellow();
 
 				if (list.Count != values.Length)
 				{
-					Console.WriteLine("Something went wrong, Count isn't right...!".BrightRed());
+					Console.WriteLine(Bright.Red("Something went wrong, Count isn't right...!"));
 					return;
 				}
 
-				Console.WriteLine("Test find a random value...".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Test find a random value..."));
 				int x = IListExtension.PickRandom(values);
 				SinglyLinkedListNode<int> node = list.Find(x);
 
 				if (node == null)
 				{
-					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't find a shit...!"));
 					return;
 				}
 
 				int value = IListExtension.PickRandom(values);
-				Console.WriteLine($"Found. Now will add {value.ToString().BrightCyan().Underline()} after {x.ToString().BrightCyan().Underline()}...");
+				Console.WriteLine($"Found. Now will add {Bright.Cyan().Underline(value.ToString())} after {Bright.Cyan().Underline(x.ToString())}...");
 				list.AddAfter(node, value);
 				Console.WriteLine("Node's next: " + node.Next.Value);
 				list.Remove(node.Next);
 
-				Console.WriteLine($"Test adding {value.ToString().BrightCyan().Underline()} before {x.ToString().BrightCyan().Underline()}...");
+				Console.WriteLine($"Test adding {Bright.Cyan().Underline(value.ToString())} before {Bright.Cyan().Underline(x.ToString())}...");
 				SinglyLinkedListNode<int> previous = list.AddBefore(node, value);
 				list.Remove(previous);
 	
-				Console.WriteLine($"Test adding {value.ToString().BrightCyan().Underline()} to the beginning of the list...");
+				Console.WriteLine($"Test adding {Bright.Cyan().Underline(value.ToString())} to the beginning of the list...");
 				list.AddFirst(value);
 				list.RemoveFirst();
 
-				Console.WriteLine("Test search...".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				int missed = 0;
 				clock.Restart();
@@ -836,14 +836,14 @@ work with {HEAVY} items.".Yellow();
 
 					missed++;
 					Console.WriteLine(missed <= 3
-										? $"Find missed a value: {v} :((".BrightRed()
-										: "FIND MISSED A LOT :((".BrightRed());
+										? Bright.Red($"Find missed a value: {v} :((")
+										: Bright.Red("FIND MISSED A LOT :(("));
 					if (missed > 3) return;
 					//return;
 				}
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 				int removed = 0;
 				missed = 0;
 				clock.Restart();
@@ -858,8 +858,8 @@ work with {HEAVY} items.".Yellow();
 
 					missed++;
 					Console.WriteLine(missed <= 3
-										? $"Remove missed a value: {v} :((".BrightRed()
-										: "REMOVE MISSED A LOT. :((".BrightRed());
+										? Bright.Red($"Remove missed a value: {v} :((")
+										: Bright.Red("REMOVE MISSED A LOT. :(("));
 					Console.WriteLine("Does it contain the value? " + list.Contains(v).ToYesNo());
 					if (missed > 3) return;
 					//return;
@@ -867,7 +867,7 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine($"Removed {removed} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -899,7 +899,7 @@ work with {HEAVY} items.".Yellow();
 				list.Clear();
 				int count = list.Count;
 				Debug.Assert(count == 0, "Values are not cleared correctly!");
-				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
 				clock.Restart();
 
 				foreach (int v in values)
@@ -912,33 +912,33 @@ work with {HEAVY} items.".Yellow();
 
 				if (list.Count != values.Length)
 				{
-					Console.WriteLine("Something went wrong, Count isn't right...!".BrightRed());
+					Console.WriteLine(Bright.Red("Something went wrong, Count isn't right...!"));
 					return;
 				}
 
-				Console.WriteLine("Test find a random value...".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Test find a random value..."));
 				int x = IListExtension.PickRandom(values);
 				LinkedListNode<int> node = list.Find(x);
 
 				if (node == null)
 				{
-					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't find a shit...!"));
 					return;
 				}
 
 				int value = IListExtension.PickRandom(values);
-				Console.WriteLine($"Found. Now will add {value.ToString().BrightCyan().Underline()} after {x.ToString().BrightCyan().Underline()}...");
+				Console.WriteLine($"Found. Now will add {Bright.Cyan().Underline(value.ToString())} after {Bright.Cyan().Underline(x.ToString())}...");
 				list.AddAfter(node, value);
 				Console.WriteLine("Node's next: " + node.Next?.Value);
 
-				Console.WriteLine($"Test adding {value.ToString().BrightCyan().Underline()} before {x.ToString().BrightCyan().Underline()}...");
+				Console.WriteLine($"Test adding {Bright.Cyan().Underline(value.ToString())} before {Bright.Cyan().Underline(x.ToString())}...");
 				list.AddBefore(node, value);
 				Console.WriteLine("Node's previous: " + node.Previous?.Value);
 				
-				Console.WriteLine($"Test adding {value.ToString().BrightCyan().Underline()} to the beginning of the list...");
+				Console.WriteLine($"Test adding {Bright.Cyan().Underline(value.ToString())} to the beginning of the list...");
 				list.AddFirst(value);
 
-				Console.WriteLine("Test search...".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				int missed = 0;
 				clock.Restart();
@@ -953,14 +953,14 @@ work with {HEAVY} items.".Yellow();
 
 					missed++;
 					Console.WriteLine(missed <= 3
-										? $"Find missed a value: {v} :((".BrightRed()
-										: "FIND MISSED A LOT :((".BrightRed());
+										? Bright.Red($"Find missed a value: {v} :((")
+										: Bright.Red("FIND MISSED A LOT :(("));
 					if (missed > 3) return;
 					//return;
 				}
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 				int removed = 0;
 				missed = 0;
 				clock.Restart();
@@ -975,8 +975,8 @@ work with {HEAVY} items.".Yellow();
 
 					missed++;
 					Console.WriteLine(missed <= 3
-										? $"Remove missed a value: {v} :((".BrightRed()
-										: "REMOVE MISSED A LOT. :((".BrightRed());
+										? Bright.Red($"Remove missed a value: {v} :((")
+										: Bright.Red("REMOVE MISSED A LOT. :(("));
 					Console.WriteLine("Does it contain the value? " + list.Contains(v).ToYesNo());
 					if (missed > 3) return;
 					//return;
@@ -984,7 +984,7 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine($"Removed {removed} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1013,7 +1013,7 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine($"Array has {values.Length} items.");
 				Console.WriteLine("Test queue functionality...");
 
-				Console.Write($"Would you like to print the results? {"[Y]".BrightGreen()} or {"any other key".Dim()}: ");
+				Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
 				bool print = Console.ReadKey(true).Key == ConsoleKey.Y;
 				Console.WriteLine();
 
@@ -1029,7 +1029,7 @@ work with {HEAVY} items.".Yellow();
 				Title("End testing Deque as a Stack...");
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1046,7 +1046,7 @@ work with {HEAVY} items.".Yellow();
 				deque.Clear();
 				int count = deque.Count;
 				Debug.Assert(count == 0, "Values are not cleared correctly!");
-				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
 				clock.Restart();
 
 				foreach (int v in values)
@@ -1059,11 +1059,11 @@ work with {HEAVY} items.".Yellow();
 
 				if (deque.Count != values.Length)
 				{
-					Console.WriteLine("Something went wrong, Count isn't right...!".BrightRed());
+					Console.WriteLine(Bright.Red("Something went wrong, Count isn't right...!"));
 					return;
 				}
 
-				Console.WriteLine("Test search...".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				int missed = 0;
 				count = deque.Count / 4;
@@ -1082,15 +1082,15 @@ work with {HEAVY} items.".Yellow();
 
 					missed++;
 					Console.WriteLine(missed <= 3
-										? $"Find missed a value: {v} :((".BrightRed()
-										: "FIND MISSED A LOT :((".BrightRed());
+										? Bright.Red($"Find missed a value: {v} :((")
+										: Bright.Red("FIND MISSED A LOT :(("));
 					if (missed > 3) return;
 					//return;
 				}
 
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 		
 				int removed = 0;
 				count = deque.Count;
@@ -1139,7 +1139,7 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine($"Array has {values.Length} items.");
 				Console.WriteLine("Test queue functionality...");
 
-				Console.Write($"Would you like to print the results? {"[Y]".BrightGreen()} or {"any other key".Dim()}: ");
+				Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
 				bool print = Console.ReadKey(true).Key == ConsoleKey.Y;
 				Console.WriteLine();
 
@@ -1155,7 +1155,7 @@ work with {HEAVY} items.".Yellow();
 				Title("End testing Deque as a Stack...");
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1172,7 +1172,7 @@ work with {HEAVY} items.".Yellow();
 				deque.Clear();
 				int count = deque.Count;
 				Debug.Assert(count == 0, "Values are not cleared correctly!");
-				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
 				clock.Restart();
 
 				foreach (int v in values)
@@ -1185,11 +1185,11 @@ work with {HEAVY} items.".Yellow();
 
 				if (deque.Count != values.Length)
 				{
-					Console.WriteLine("Something went wrong, Count isn't right...!".BrightRed());
+					Console.WriteLine(Bright.Red("Something went wrong, Count isn't right...!"));
 					return;
 				}
 
-				Console.WriteLine("Test search...".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				int missed = 0;
 				count = deque.Count / 4;
@@ -1208,15 +1208,15 @@ work with {HEAVY} items.".Yellow();
 
 					missed++;
 					Console.WriteLine(missed <= 3
-										? $"Find missed a value: {v} :((".BrightRed()
-										: "FIND MISSED A LOT :((".BrightRed());
+										? Bright.Red($"Find missed a value: {v} :((")
+										: Bright.Red("FIND MISSED A LOT :(("));
 					if (missed > 3) return;
 					//return;
 				}
 
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 				int removed = 0;
 				count = deque.Count;
 				clock.Restart();
@@ -1269,39 +1269,39 @@ work with {HEAVY} items.".Yellow();
 				switch (i)
 				{
 					case 0:
-						Console.WriteLine($@"Data from {"LevelOrder".BrightCyan()} traversal:
+						Console.WriteLine($@"Data from {Bright.Cyan("LevelOrder")} traversal:
 {TREE_DATA_LEVEL}");
 						tree.FromLevelOrder(TREE_DATA_LEVEL);
 						break;
 					case 1:
-						Console.WriteLine($@"Data from {"PreOrder".BrightCyan()} traversal:
+						Console.WriteLine($@"Data from {Bright.Cyan("PreOrder")} traversal:
 {TREE_DATA_PRE}");
 						tree.FromPreOrder(TREE_DATA_PRE);
 						break;
 					case 2:
-						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} traversal:
+						Console.WriteLine($@"Data from {Bright.Cyan("InOrder")} traversal:
 {TREE_DATA_IN}");
 						tree.FromInOrder(TREE_DATA_IN);
 						break;
 					case 3:
-						Console.WriteLine($@"Data from {"PostOrder".BrightCyan()} traversal:
+						Console.WriteLine($@"Data from {Bright.Cyan("PostOrder")} traversal:
 {TREE_DATA_POST}");
 						tree.FromPostOrder(TREE_DATA_POST);
 						break;
 					case 4:
-						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} and {"LevelOrder".BrightCyan()} traversals:
+						Console.WriteLine($@"Data from {Bright.Cyan("InOrder")} and {Bright.Cyan("LevelOrder")} traversals:
 {TREE_DATA_IN}
 {TREE_DATA_LEVEL}");
 						tree.FromInOrderAndLevelOrder(TREE_DATA_IN, TREE_DATA_LEVEL);
 						break;
 					case 5:
-						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} and {"PreOrder".BrightCyan()} traversals:
+						Console.WriteLine($@"Data from {Bright.Cyan("InOrder")} and {Bright.Cyan("PreOrder")} traversals:
 {TREE_DATA_IN}
 {TREE_DATA_PRE}");
 						tree.FromInOrderAndPreOrder(TREE_DATA_IN, TREE_DATA_PRE);
 						break;
 					case 6:
-						Console.WriteLine($@"Data from {"InOrder".BrightCyan()} and {"PostOrder".BrightCyan()} traversals:
+						Console.WriteLine($@"Data from {Bright.Cyan("InOrder")} and {Bright.Cyan("PostOrder")} traversals:
 {TREE_DATA_IN}
 {TREE_DATA_POST}");
 						tree.FromInOrderAndPostOrder(TREE_DATA_IN, TREE_DATA_POST);
@@ -1318,7 +1318,7 @@ work with {HEAVY} items.".Yellow();
 				}
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to move to next test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1337,9 +1337,9 @@ work with {HEAVY} items.".Yellow();
 				Title("Testing BinarySearchTree.Add()...");
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(true, len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
-				Console.WriteLine("Test adding...".BrightGreen());
+				Console.WriteLine(Bright.Green("Test adding..."));
 				tree.Clear();
 
 				foreach (int v in values)
@@ -1348,11 +1348,11 @@ work with {HEAVY} items.".Yellow();
 					//tree.PrintWithProps();
 				}
 
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+				Console.WriteLine(Bright.Black("InOrder: ") + string.Join(", ", tree));
 				tree.PrintWithProps();
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1371,22 +1371,22 @@ work with {HEAVY} items.".Yellow();
 				Title("Testing BinarySearchTree.Remove()...");
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(true, len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
-				Console.WriteLine("Test adding...".BrightGreen());
+				Console.WriteLine(Bright.Green("Test adding..."));
 				tree.Clear();
 				tree.Add(values);
 				Debug.Assert(tree.Count == values.Length, $"Values are not added correctly! {values.Length} != {tree.Count}.");
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+				Console.WriteLine(Bright.Black("InOrder: ") + string.Join(", ", tree));
 				tree.PrintWithProps();
 
 				Console.WriteLine("Test finding a random value...");
 				int value = IListExtension.PickRandom(values);
-				Console.WriteLine($"will look for {value.ToString().BrightCyan().Underline()}.");
+				Console.WriteLine($"will look for {Bright.Cyan().Underline(value.ToString())}.");
 
 				if (!tree.Contains(value))
 				{
-					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't find a shit...!"));
 					return;
 				}
 
@@ -1403,7 +1403,7 @@ work with {HEAVY} items.".Yellow();
 						continue;
 					}
 
-					Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
+					Console.WriteLine(Bright.Red($"Find missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 				}
@@ -1412,11 +1412,11 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine();
 				Console.WriteLine("Test removing a random value...");
 				value = IListExtension.PickRandom(values);
-				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
+				Console.WriteLine($"will remove {Bright.Cyan().Underline(value.ToString())}.");
 
 				if (!tree.Remove(value))
 				{
-					Console.WriteLine("Didn't remove a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't remove a shit...!"));
 					return;
 				}
 
@@ -1437,13 +1437,13 @@ work with {HEAVY} items.".Yellow();
 						continue;
 					}
 
-					Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
+					Console.WriteLine(Bright.Red($"Remove missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 				}
 
 				Console.WriteLine("OK");
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1462,28 +1462,28 @@ work with {HEAVY} items.".Yellow();
 				Title("Testing BinarySearchTree.Balance()...");
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(true, len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
-				Console.WriteLine("Test adding...".BrightGreen());
+				Console.WriteLine(Bright.Green("Test adding..."));
 				tree.Clear();
 				tree.Add(values);
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+				Console.WriteLine(Bright.Black("InOrder: ") + string.Join(", ", tree));
 				tree.PrintWithProps();
 
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 				int value = IListExtension.PickRandom(values);
-				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
+				Console.WriteLine($"will remove {Bright.Cyan().Underline(value.ToString())}.");
 
 				if (!tree.Remove(value))
 				{
-					Console.WriteLine("Didn't remove a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't remove a shit...!"));
 					return;
 				}
 
 				tree.PrintWithProps();
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1509,10 +1509,10 @@ work with {HEAVY} items.".Yellow();
 			do
 			{
 				int value = RNGRandomHelper.Next(min, max);
-				Console.WriteLine($"Closest value to {value.ToString().Yellow()} => {tree.FindClosestValue(value, -1)} ");
+				Console.WriteLine($"Closest value to {Yellow(value.ToString())} => {tree.FindClosestValue(value, -1)} ");
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1531,15 +1531,15 @@ work with {HEAVY} items.".Yellow();
 				Title("Testing BinaryTree BranchSums...");
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(true, len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				tree.Clear();
 				tree.Add(values);
 				tree.Print();
-				Console.WriteLine("Branch Sums: ".BrightBlack() + string.Join(", ", tree.BranchSums()));
+				Console.WriteLine(Bright.Black("Branch Sums: ") + string.Join(", ", tree.BranchSums()));
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1558,18 +1558,18 @@ work with {HEAVY} items.".Yellow();
 				Title("Testing BinaryTree Invert...");
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(true, len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				tree.Clear();
 				tree.Add(values);
 				tree.Print();
-				Console.WriteLine("Inverted: ".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Inverted: "));
 
 				tree.Invert();
 				tree.Print();
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1588,9 +1588,9 @@ work with {HEAVY} items.".Yellow();
 				Title("Testing AVLTree.Add()...");
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(true, len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
-				Console.WriteLine("Test adding...".BrightGreen());
+				Console.WriteLine(Bright.Green("Test adding..."));
 				tree.Clear();
 
 				foreach (int v in values)
@@ -1599,11 +1599,11 @@ work with {HEAVY} items.".Yellow();
 					//tree.PrintWithProps();
 				}
 
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+				Console.WriteLine(Bright.Black("InOrder: ") + string.Join(", ", tree));
 				tree.PrintWithProps();
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1623,22 +1623,22 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(true, len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
-				Console.WriteLine("Test adding...".BrightGreen());
+				Console.WriteLine(Bright.Green("Test adding..."));
 				tree.Clear();
 				tree.Add(values);
 				Debug.Assert(tree.Count == values.Length, $"Values are not added correctly! {values.Length} != {tree.Count}.");
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+				Console.WriteLine(Bright.Black("InOrder: ") + string.Join(", ", tree));
 				tree.PrintWithProps();
 
 				Console.WriteLine("Test finding a random value...");
 				int value = IListExtension.PickRandom(values);
-				Console.WriteLine($"will look for {value.ToString().BrightCyan().Underline()}.");
+				Console.WriteLine($"will look for {Bright.Cyan().Underline(value.ToString())}.");
 
 				if (!tree.Contains(value))
 				{
-					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't find a shit...!"));
 					return;
 				}
 
@@ -1655,19 +1655,19 @@ work with {HEAVY} items.".Yellow();
 						continue;
 					}
 
-					Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
+					Console.WriteLine(Bright.Red($"Find missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 				}
 				Console.WriteLine($"Found {found} of {values.Length} items.");
 
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 				value = IListExtension.PickRandom(values);
-				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
+				Console.WriteLine($"will remove {Bright.Cyan().Underline(value.ToString())}.");
 
 				if (!tree.Remove(value))
 				{
-					Console.WriteLine("Didn't remove a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't remove a shit...!"));
 					return;
 				}
 
@@ -1687,13 +1687,13 @@ work with {HEAVY} items.".Yellow();
 						Debug.Assert(values.Length - removed == tree.Count, $"Values are not removed correctly! {values.Length - removed} != {tree.Count}.");
 						continue;
 					}
-					Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
+					Console.WriteLine(Bright.Red($"Remove missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 				}
 
 				Console.WriteLine("OK");
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1713,9 +1713,9 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(true, len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
-				Console.WriteLine("Test adding...".BrightGreen());
+				Console.WriteLine(Bright.Green("Test adding..."));
 				tree.Clear();
 
 				foreach (int v in values)
@@ -1724,11 +1724,11 @@ work with {HEAVY} items.".Yellow();
 					//tree.PrintWithProps();
 				}
 
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+				Console.WriteLine(Bright.Black("InOrder: ") + string.Join(", ", tree));
 				tree.PrintWithProps();
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1747,23 +1747,23 @@ work with {HEAVY} items.".Yellow();
 				Title("Testing RedBlackTree.Remove()...");
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(true, len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
-				Console.WriteLine("Test adding...".BrightGreen());
+				Console.WriteLine(Bright.Green("Test adding..."));
 				tree.Clear();
 				tree.Add(values);
 				Debug.Assert(tree.Count == values.Length, $"Values are not added correctly! {values.Length} != {tree.Count}.");
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+				Console.WriteLine(Bright.Black("InOrder: ") + string.Join(", ", tree));
 				tree.PrintWithProps();
 
 				Console.WriteLine("Test finding a random value...");
 
 				int value = IListExtension.PickRandom(values);
-				Console.WriteLine($"will look for {value.ToString().BrightCyan().Underline()}.");
+				Console.WriteLine($"will look for {Bright.Cyan().Underline(value.ToString())}.");
 
 				if (!tree.Contains(value))
 				{
-					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't find a shit...!"));
 					return;
 				}
 
@@ -1780,20 +1780,20 @@ work with {HEAVY} items.".Yellow();
 						continue;
 					}
 
-					Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
+					Console.WriteLine(Bright.Red($"Find missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 				}
 				Console.WriteLine($"Found {found} of {values.Length} items.");
 
 				Console.WriteLine();
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 				value = IListExtension.PickRandom(values);
-				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
+				Console.WriteLine($"will remove {Bright.Cyan().Underline(value.ToString())}.");
 
 				if (!tree.Remove(value))
 				{
-					Console.WriteLine("Didn't remove a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't remove a shit...!"));
 					return;
 				}
 
@@ -1813,13 +1813,13 @@ work with {HEAVY} items.".Yellow();
 						Debug.Assert(values.Length - removed == tree.Count, $"Values are not removed correctly! {values.Length - removed} != {tree.Count}.");
 						continue;
 					}
-					Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
+					Console.WriteLine(Bright.Red($"Remove missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 				}
 
 				Console.WriteLine("OK");
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1841,7 +1841,7 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(true, len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				DoTheTest(binarySearchTree, values);
 
@@ -1850,7 +1850,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(redBlackTree, values);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1861,20 +1861,20 @@ work with {HEAVY} items.".Yellow();
 				where TNode : LinkedBinaryNode<TNode, int>
 			{
 				Console.WriteLine();
-				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Testing {tree.GetType().Name}..."));
 				tree.Clear();
 				tree.Add(array);
 
-				Console.WriteLine("InOrder: ".BrightBlack() + string.Join(", ", tree));
+				Console.WriteLine(Bright.Black("InOrder: ") + string.Join(", ", tree));
 				tree.PrintWithProps();
 
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 				int value = IListExtension.PickRandom(array);
-				Console.WriteLine($"will remove {value.ToString().BrightCyan().Underline()}.");
+				Console.WriteLine($"will remove {Bright.Cyan().Underline(value.ToString())}.");
 
 				if (!tree.Remove(value))
 				{
-					Console.WriteLine("Didn't remove a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't remove a shit...!"));
 					return;
 				}
 
@@ -1905,7 +1905,7 @@ work with {HEAVY} items.".Yellow();
 				ConsoleHelper.Pause();
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -1916,11 +1916,11 @@ work with {HEAVY} items.".Yellow();
 				where TNode : LinkedBinaryNode<TNode, int>
 			{
 				Console.WriteLine();
-				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Testing {tree.GetType().Name}..."));
 				tree.Clear();
 				Debug.Assert(tree.Count == 0, "Values are not cleared correctly!");
 
-				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
 				Console.WriteLine();
 				Console.WriteLine($"Array: {string.Join(", ", values)}");
 				
@@ -1928,7 +1928,7 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine($"Added {tree.Count} of {values.Length} items.");
 				tree.PrintProps();
 
-				Console.WriteLine("Test search...".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				int missed = 0;
 
@@ -1942,8 +1942,8 @@ work with {HEAVY} items.".Yellow();
 
 					missed++;
 					Console.WriteLine(missed <= 3
-										? $"Find missed a value: {v} :((".BrightRed()
-										: "FIND MISSED A LOT :((".BrightRed());
+										? Bright.Red($"Find missed a value: {v} :((")
+										: Bright.Red("FIND MISSED A LOT :(("));
 					if (missed > 3) return;
 					//return;
 				}
@@ -1951,7 +1951,7 @@ work with {HEAVY} items.".Yellow();
 
 				tree.Print();
 
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 				int removed = 0;
 				missed = 0;
 
@@ -1969,8 +1969,8 @@ work with {HEAVY} items.".Yellow();
 
 					missed++;
 					Console.WriteLine(missed <= 3
-										? $"Remove missed a value: {v} :((".BrightRed()
-										: "REMOVE MISSED A LOT. :((".BrightRed());
+										? Bright.Red($"Remove missed a value: {v} :((")
+										: Bright.Red("REMOVE MISSED A LOT. :(("));
 					Console.WriteLine("Does it contain the value? " + tree.Contains(v).ToYesNo());
 					tree.Print();
 					if (missed > 3) return;
@@ -2007,7 +2007,7 @@ work with {HEAVY} items.".Yellow();
 				clock.Stop();
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -2023,17 +2023,17 @@ work with {HEAVY} items.".Yellow();
 				where TNode : LinkedBinaryNode<TNode, int>
 			{
 				Console.WriteLine();
-				Console.WriteLine($"Testing {tree.GetType().Name}...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Testing {tree.GetType().Name}..."));
 				tree.Clear();
 				Debug.Assert(tree.Count == 0, "Values are not cleared correctly!");
-				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
 
 				clock.Restart();
 				tree.Add(values);
 				Console.WriteLine($"Added {tree.Count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 				tree.PrintProps();
 
-				Console.WriteLine("Test search...".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				int missed = 0;
 				clock.Restart();
@@ -2048,14 +2048,14 @@ work with {HEAVY} items.".Yellow();
 
 					missed++;
 					Console.WriteLine(missed <= 3
-										? $"Find missed a value: {v} :((".BrightRed()
-										: "FIND MISSED A LOT :((".BrightRed());
+										? Bright.Red($"Find missed a value: {v} :((")
+										: Bright.Red("FIND MISSED A LOT :(("));
 					if (missed > 3) return;
 					//return;
 				}
 				Console.WriteLine($"Found {found} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 				int removed = 0;
 				missed = 0;
 				clock.Restart();
@@ -2070,8 +2070,8 @@ work with {HEAVY} items.".Yellow();
 
 					missed++;
 					Console.WriteLine(missed <= 3
-										? $"Remove missed a value: {v} :((".BrightRed()
-										: "REMOVE MISSED A LOT. :((".BrightRed());
+										? Bright.Red($"Remove missed a value: {v} :((")
+										: Bright.Red("REMOVE MISSED A LOT. :(("));
 					if (missed > 3) return;
 					//return;
 				}
@@ -2099,7 +2099,7 @@ work with {HEAVY} items.".Yellow();
 				clock.Stop();
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -2114,12 +2114,12 @@ work with {HEAVY} items.".Yellow();
 			static void DoTheTest<T>(SortedSet<T> sortedSet, T[] values, Stopwatch clock)
 			{
 				Console.WriteLine();
-				Console.WriteLine($"Testing {sortedSet.GetType().Name}...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Testing {sortedSet.GetType().Name}..."));
 				sortedSet.Clear();
 
 				int count = sortedSet.Count;
 				Debug.Assert(count == 0, "Values are not cleared correctly!");
-				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
 				clock.Restart();
 
 				foreach (T v in values)
@@ -2131,10 +2131,10 @@ work with {HEAVY} items.".Yellow();
 
 				Console.WriteLine($"Added {count} items of {values.Length} in {clock.ElapsedMilliseconds} ms.");
 				Console.WriteLine();
-				Console.WriteLine($"{"Count:".Yellow()} {sortedSet.Count.ToString().Underline()}.");
-				Console.WriteLine($"{"Minimum:".Yellow()} {sortedSet.Min} {"Maximum:".Yellow()} {sortedSet.Max}");
+				Console.WriteLine($"{Yellow("Count:")} {Underline(sortedSet.Count.ToString())}.");
+				Console.WriteLine($"{Yellow("Minimum:")} {sortedSet.Min} {Yellow("Maximum:")} {sortedSet.Max}");
 
-				Console.WriteLine("Test search...".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				clock.Restart();
 
@@ -2146,13 +2146,13 @@ work with {HEAVY} items.".Yellow();
 						continue;
 					}
 
-					Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
+					Console.WriteLine(Bright.Red($"Find missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					//return;
 				}
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 				int removed = 0;
 				clock.Restart();
 
@@ -2165,7 +2165,7 @@ work with {HEAVY} items.".Yellow();
 						continue;
 					}
 					
-					Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
+					Console.WriteLine(Bright.Red($"Remove missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 					//return;
@@ -2185,38 +2185,38 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(true, len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				Console.WriteLine();
-				Console.WriteLine("Testing BinarySearchTree: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Testing BinarySearchTree: ") + string.Join(", ", values));
 				Console.WriteLine();
 				LinkedBinaryTree<int> tree1 = new BinarySearchTree<int>();
 				LinkedBinaryTree<int> tree2 = new BinarySearchTree<int>();
 				DoTheTest(tree1, tree2, values);
 
 				Console.WriteLine();
-				Console.WriteLine("Testing BinarySearchTree and AVLTree: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Testing BinarySearchTree and AVLTree: ") + string.Join(", ", values));
 				Console.WriteLine();
 				tree1.Clear();
 				tree2 = new AVLTree<int>();
 				DoTheTest(tree1, tree2, values);
 
 				Console.WriteLine();
-				Console.WriteLine("Testing AVLTree: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Testing AVLTree: ") + string.Join(", ", values));
 				Console.WriteLine();
 				tree1 = new AVLTree<int>();
 				tree2 = new AVLTree<int>();
 				DoTheTest(tree1, tree2, values);
 
 				Console.WriteLine();
-				Console.WriteLine("Testing RedBlackTree: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Testing RedBlackTree: ") + string.Join(", ", values));
 				Console.WriteLine();
 				RedBlackTree<int> rbTree1 = new RedBlackTree<int>();
 				RedBlackTree<int> rbTree2 = new RedBlackTree<int>();
 				DoTheTest(rbTree1, rbTree2, values);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -2227,12 +2227,12 @@ work with {HEAVY} items.".Yellow();
 				where TNode : LinkedBinaryNode<TNode, int>
 			{
 				Console.WriteLine();
-				Console.WriteLine($"Testing {tree1.GetType().Name} and {tree1.GetType().Name}...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Testing {tree1.GetType().Name} and {tree1.GetType().Name}..."));
 				tree1.Add(array);
 				tree2.Add(array);
 
-				Console.WriteLine("InOrder1: ".BrightBlack() + string.Join(", ", tree1));
-				Console.WriteLine("InOrder2: ".BrightBlack() + string.Join(", ", tree2));
+				Console.WriteLine(Bright.Black("InOrder1: ") + string.Join(", ", tree1));
+				Console.WriteLine(Bright.Black("InOrder2: ") + string.Join(", ", tree2));
 				tree1.PrintWithProps();
 				tree2.PrintWithProps();
 				Console.WriteLine($"tree1 == tree2? {tree1.Equals(tree2).ToYesNo()}");
@@ -2252,19 +2252,19 @@ work with {HEAVY} items.".Yellow();
 				Console.Clear();
 				Title("Testing Trie...");
 				if (values.Count == 0) AddWords(trie, values);
-				Console.WriteLine("Words list: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Words list: ") + string.Join(", ", values));
 
 				string word = values.PickRandom();
 				DoTheTest(trie, word, values);
 				
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || values.Count >= MAX_LIST) continue;
 
-				Console.Write($"Would you like to add more words? {"[Y]".BrightGreen()} / {"any key".Dim()} ");
+				Console.Write($"Would you like to add more words? {Bright.Green("[Y]")} / {Dim("any key")} ");
 				response = Console.ReadKey(true);
 				Console.WriteLine();
 				if (response.Key != ConsoleKey.Y) continue;
@@ -2276,7 +2276,7 @@ work with {HEAVY} items.".Yellow();
 			static void AddWords(Trie<char> trie, ISet<string> set)
 			{
 				int len = RNGRandomHelper.Next(10, 20);
-				Console.WriteLine($"Generating {len} words: ".BrightGreen());
+				Console.WriteLine(Bright.Green($"Generating {len} words: "));
 				ICollection<string> newValues = GetRandomStrings(true, len);
 
 				foreach (string value in newValues)
@@ -2288,23 +2288,23 @@ work with {HEAVY} items.".Yellow();
 
 			static void DoTheTest(Trie<char> trie, string token, ISet<string> values)
 			{
-				Console.WriteLine($"Test find '{token.BrightCyan().Underline()}'...");
+				Console.WriteLine($"Test find '{Bright.Cyan().Underline(token)}'...");
 
 				if (!trie.Contains(token))
 				{
-					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't find a shit...!"));
 					return;
 				}
 				
-				Console.WriteLine("Found...!".BrightGreen() + " Let's try all caps...");
+				Console.WriteLine(Bright.Green("Found...!") + " Let's try all caps...");
 
 				if (!trie.Contains(token.ToUpperInvariant()))
 				{
-					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't find a shit...!"));
 					return;
 				}
 
-				Console.WriteLine("Found...!".BrightGreen() + " Let's try words with a common prefix...");
+				Console.WriteLine(Bright.Green("Found...!") + " Let's try words with a common prefix...");
 
 				string prefix = token;
 
@@ -2316,7 +2316,7 @@ work with {HEAVY} items.".Yellow();
 								: match.Value;
 				}
 
-				Console.WriteLine($"Prefix: '{prefix.BrightCyan().Underline()}'");
+				Console.WriteLine($"Prefix: '{Bright.Cyan().Underline(prefix)}'");
 				int results = 0;
 
 				foreach (IEnumerable<char> enumerable in trie.Find(prefix))
@@ -2326,7 +2326,7 @@ work with {HEAVY} items.".Yellow();
 
 				if (results == 0)
 				{
-					Console.WriteLine("Didn't find a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't find a shit...!"));
 					return;
 				}
 
@@ -2337,7 +2337,7 @@ work with {HEAVY} items.".Yellow();
 					results = 0;
 					prefix = prefix.Left(prefix.Length / 2);
 					Console.WriteLine();
-					Console.WriteLine($"Results were too few, let's try another prefix: '{prefix.BrightCyan().Underline()}'");
+					Console.WriteLine($"Results were too few, let's try another prefix: '{Bright.Cyan().Underline(prefix)}'");
 
 					foreach (IEnumerable<char> enumerable in trie.Find(prefix))
 					{
@@ -2346,18 +2346,18 @@ work with {HEAVY} items.".Yellow();
 				}
 
 				Console.WriteLine();
-				Console.WriteLine($"Test remove '{token.BrightRed().Underline()}'");
+				Console.WriteLine($"Test remove '{Bright.Red().Underline(token)}'");
 
 				if (!trie.Remove(token))
 				{
-					Console.WriteLine("Didn't remove a shit...!".BrightRed());
+					Console.WriteLine(Bright.Red("Didn't remove a shit...!"));
 					return;
 				}
 
 				values.Remove(token);
 				results = 0;
 				Console.WriteLine();
-				Console.WriteLine($"Cool {"removed".BrightGreen()}, let's try to find the last prefix again: '{prefix.BrightCyan().Underline()}'");
+				Console.WriteLine($"Cool {Bright.Green("removed")}, let's try to find the last prefix again: '{Bright.Cyan().Underline(prefix)}'");
 
 				foreach (IEnumerable<char> enumerable in trie.Find(prefix))
 				{
@@ -2399,7 +2399,7 @@ work with {HEAVY} items.".Yellow();
 
 			Console.Clear();
 			Console.WriteLine("Adding similar words...");
-			Console.WriteLine("Words list: ".BrightBlack() + string.Join(", ", values));
+			Console.WriteLine(Bright.Black("Words list: ") + string.Join(", ", values));
 
 			foreach (string value in values) 
 				trie.Add(value);
@@ -2407,7 +2407,7 @@ work with {HEAVY} items.".Yellow();
 			int results = 0;
 			string prefix = "car";
 			Console.WriteLine();
-			Console.WriteLine($"Test find '{prefix.BrightCyan().Underline()}'...");
+			Console.WriteLine($"Test find '{Bright.Cyan().Underline(prefix)}'...");
 
 			foreach (IEnumerable<char> enumerable in trie.Find(prefix))
 			{
@@ -2416,24 +2416,24 @@ work with {HEAVY} items.".Yellow();
 
 			if (results == 0)
 			{
-				Console.WriteLine("Didn't find a shit...!".BrightRed());
+				Console.WriteLine(Bright.Red("Didn't find a shit...!"));
 				return;
 			}
 
 			string word = values[0];
 			Console.WriteLine();
-			Console.WriteLine($"Test remove '{word.BrightRed().Underline()}'");
+			Console.WriteLine($"Test remove '{Bright.Red().Underline(word)}'");
 
 			if (!trie.Remove(word))
 			{
-				Console.WriteLine("Didn't remove a shit...!".BrightRed());
+				Console.WriteLine(Bright.Red("Didn't remove a shit...!"));
 				return;
 			}
 
 			results = 0;
-			Console.WriteLine($"Cool {"removed".BrightGreen()}.");
+			Console.WriteLine($"Cool {Bright.Green("removed")}.");
 			Console.WriteLine();
-			Console.WriteLine($"let's try to find the last prefix again: '{prefix.BrightCyan().Underline()}'");
+			Console.WriteLine($"let's try to find the last prefix again: '{Bright.Cyan().Underline(prefix)}'");
 
 			foreach (IEnumerable<char> enumerable in trie.Find(prefix))
 			{
@@ -2442,19 +2442,19 @@ work with {HEAVY} items.".Yellow();
 
 			word = values[values.Length - 1];
 			Console.WriteLine();
-			Console.WriteLine($"Test remove '{word.BrightRed().Underline()}'");
+			Console.WriteLine($"Test remove '{Bright.Red().Underline(word)}'");
 
 			if (!trie.Remove(word))
 			{
-				Console.WriteLine("Didn't remove a shit...!".BrightRed());
+				Console.WriteLine(Bright.Red("Didn't remove a shit...!"));
 				return;
 			}
 
 			prefix = "ca";
 			results = 0;
-			Console.WriteLine($"Cool {"removed".BrightGreen()}.");
+			Console.WriteLine($"Cool {Bright.Green("removed")}.");
 			Console.WriteLine();
-			Console.WriteLine($"Test find '{prefix.BrightCyan().Underline()}'...");
+			Console.WriteLine($"Test find '{Bright.Cyan().Underline(prefix)}'...");
 
 			foreach (IEnumerable<char> enumerable in trie.Find(prefix))
 			{
@@ -2491,7 +2491,7 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine($"Added {count} items of {values.Length} in {clock.ElapsedMilliseconds} ms. Count = {skipList.Count}, Level = {skipList.Level}.");
 				//skipList.WriteTo(Console.Out);
 
-				Console.WriteLine("Test search...".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				clock.Restart();
 
@@ -2503,7 +2503,7 @@ work with {HEAVY} items.".Yellow();
 						continue;
 					}
 
-					Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
+					Console.WriteLine(Bright.Red($"Find missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 					//return;
@@ -2511,7 +2511,7 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine();
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 				int removed = 0;
 				clock.Restart();
 
@@ -2524,7 +2524,7 @@ work with {HEAVY} items.".Yellow();
 						continue;
 					}
 					
-					Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
+					Console.WriteLine(Bright.Red($"Remove missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 					//return;
@@ -2537,14 +2537,14 @@ work with {HEAVY} items.".Yellow();
 
 				if (skipList.Count != 0)
 				{
-					Console.WriteLine($"Something went wrong, the count is {skipList.Count}...!".BrightRed());
+					Console.WriteLine(Bright.Red($"Something went wrong, the count is {skipList.Count}...!"));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 					//return;
 				}
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -2575,7 +2575,7 @@ work with {HEAVY} items.".Yellow();
 
 				Console.WriteLine($"Added {disjointSet.Count} items of {values.Length} in {clock.ElapsedMilliseconds} ms.");
 
-				Console.WriteLine("Test search...".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				clock.Restart();
 
@@ -2587,7 +2587,7 @@ work with {HEAVY} items.".Yellow();
 						continue;
 					}
 
-					Console.WriteLine($"Find missed a value: {v} :((".BrightRed());
+					Console.WriteLine(Bright.Red($"Find missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 					//return;
@@ -2595,7 +2595,7 @@ work with {HEAVY} items.".Yellow();
 				Console.WriteLine($"Found {found} of {disjointSet.Count} items in {clock.ElapsedMilliseconds} ms.");
 
 				
-				Console.WriteLine("Test find and union...".BrightYellow());
+				Console.WriteLine(Bright.Yellow("Test find and union..."));
 
 				int threshold = (int)Math.Floor(disjointSet.Count / 0.5d);
 
@@ -2617,7 +2617,7 @@ work with {HEAVY} items.".Yellow();
 				}
 
 				Console.WriteLine();
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 				int removed = 0;
 				clock.Restart();
 
@@ -2629,7 +2629,7 @@ work with {HEAVY} items.".Yellow();
 						continue;
 					}
 					
-					Console.WriteLine($"Remove missed a value: {v} :((".BrightRed());
+					Console.WriteLine(Bright.Red($"Remove missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 					//return;
@@ -2642,14 +2642,14 @@ work with {HEAVY} items.".Yellow();
 
 				if (disjointSet.Count != 0)
 				{
-					Console.WriteLine($"Something went wrong, the count is {disjointSet.Count}...!".BrightRed());
+					Console.WriteLine(Bright.Red($"Something went wrong, the count is {disjointSet.Count}...!"));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 					//return;
 				}
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -2670,7 +2670,7 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				BinaryHeap<int> heap = new MaxBinaryHeap<int>();
 				DoTheTest(heap, values);
@@ -2686,7 +2686,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(studentsHeap, students);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -2696,7 +2696,7 @@ work with {HEAVY} items.".Yellow();
 			static void DoTheTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
 				foreach (TValue value in array)
 				{
@@ -2704,7 +2704,7 @@ work with {HEAVY} items.".Yellow();
 					//heap.PrintWithProps();
 				}
 
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
 			}
 		}
@@ -2720,7 +2720,7 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				BinaryHeap<int> heap = new MaxBinaryHeap<int>();
 				DoTheTest(heap, values);
@@ -2736,7 +2736,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(studentsHeap, students);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -2746,9 +2746,9 @@ work with {HEAVY} items.".Yellow();
 			static void DoTheTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
 				Console.WriteLine("Test removing...");
 				bool removeStarted = false;
@@ -2778,8 +2778,8 @@ work with {HEAVY} items.".Yellow();
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
 				int k = RNGRandomHelper.Next(1, values.Length);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
 				BinaryHeap<int> heap = new MaxBinaryHeap<int>();
 				DoTheTest(heap, values, k);
@@ -2788,8 +2788,8 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(heap, values, k);
 
 				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				BinaryHeap<double, Student> studentHeap = new MaxBinaryHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students, k);
@@ -2798,7 +2798,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(studentHeap, students, k);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -2808,11 +2808,11 @@ work with {HEAVY} items.".Yellow();
 			static void DoTheTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
 				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
-				Console.WriteLine($"Kth element at position {k} = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+				Console.WriteLine($"Kth element at position {k} = {Bright.Cyan().Underline(heap.ElementAt(k).ToString())}");
 				Console.WriteLine();
 				Console.WriteLine();
 			}
@@ -2829,8 +2829,8 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
 				BinaryHeap<int> heap = new MaxBinaryHeap<int>();
 				DoTheValueTest(heap, values, int.MaxValue);
@@ -2839,8 +2839,8 @@ work with {HEAVY} items.".Yellow();
 				DoTheValueTest(heap, values, int.MinValue);
 
 				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				BinaryHeap<double, Student> studentHeap = new MaxBinaryHeap<double, Student>(e => e.Grade);
 				DoTheKeyTest(studentHeap, students, int.MaxValue);
@@ -2849,7 +2849,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheKeyTest(studentHeap, students, int.MinValue);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -2905,7 +2905,7 @@ work with {HEAVY} items.".Yellow();
 
 				int max = Math.Min(MAX, array.Length);
 				queue.Clear();
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
 				foreach (TValue v in array)
 				{
@@ -2914,7 +2914,7 @@ work with {HEAVY} items.".Yellow();
 					heap.Add(node);
 				}
 
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
 			}
 		}
@@ -2930,7 +2930,7 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				BinomialHeap<int> heap = new MaxBinomialHeap<int>();
 				DoTheTest(heap, values);
@@ -2946,7 +2946,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(studentHeap, students);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -2956,7 +2956,7 @@ work with {HEAVY} items.".Yellow();
 			static void DoTheTest<TNode, TKey, TValue>(BinomialHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : BinomialNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
 				foreach (TValue value in array)
 				{
@@ -2964,7 +2964,7 @@ work with {HEAVY} items.".Yellow();
 					//heap.PrintWithProps();
 				}
 
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
 			}
 		}
@@ -2980,7 +2980,7 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				BinomialHeap<int> heap = new MaxBinomialHeap<int>();
 				DoTheTest(heap, values);
@@ -2989,7 +2989,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(heap, values);
 
 				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students);
@@ -2998,7 +2998,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(studentHeap, students);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -3008,9 +3008,9 @@ work with {HEAVY} items.".Yellow();
 			static void DoTheTest<TNode, TKey, TValue>(BinomialHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : BinomialNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
 				Console.WriteLine("Test removing...");
 				bool removeStarted = false;
@@ -3040,8 +3040,8 @@ work with {HEAVY} items.".Yellow();
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
 				int k = RNGRandomHelper.Next(1, values.Length);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
 				BinomialHeap<int> heap = new MaxBinomialHeap<int>();
 				DoTheTest(heap, values, k);
@@ -3050,8 +3050,8 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(heap, values, k);
 
 				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students, k);
@@ -3060,7 +3060,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(studentHeap, students, k);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -3070,11 +3070,11 @@ work with {HEAVY} items.".Yellow();
 			static void DoTheTest<TNode, TKey, TValue>(BinomialHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
 				where TNode : BinomialNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
-				Console.WriteLine($"Kth element at position {k} element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+				Console.WriteLine($"Kth element at position {k} element = {Bright.Cyan().Underline(heap.ElementAt(k).ToString())}");
 				Console.WriteLine();
 				Console.WriteLine();
 			}
@@ -3091,8 +3091,8 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
 				BinomialHeap<int> heap = new MaxBinomialHeap<int>();
 				DoTheValueTest(heap, values, int.MaxValue);
@@ -3101,8 +3101,8 @@ work with {HEAVY} items.".Yellow();
 				DoTheValueTest(heap, values, int.MinValue);
 
 				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
 				DoTheKeyTest(studentHeap, students, int.MaxValue);
@@ -3111,7 +3111,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheKeyTest(studentHeap, students, int.MinValue);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -3167,7 +3167,7 @@ work with {HEAVY} items.".Yellow();
 
 				int max = Math.Min(MAX, array.Length);
 				queue.Clear();
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
 				foreach (TValue v in array)
 				{
@@ -3176,7 +3176,7 @@ work with {HEAVY} items.".Yellow();
 					heap.Add(node);
 				}
 
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
 			}
 		}
@@ -3192,7 +3192,7 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				PairingHeap<int> heap = new MaxPairingHeap<int>();
 				DoTheTest(heap, values);
@@ -3208,7 +3208,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(studentHeap, students);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -3218,7 +3218,7 @@ work with {HEAVY} items.".Yellow();
 			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : PairingNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
 				foreach (TValue value in array)
 				{
@@ -3226,7 +3226,7 @@ work with {HEAVY} items.".Yellow();
 					//heap.PrintWithProps();
 				}
 
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
 			}
 		}
@@ -3242,7 +3242,7 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				PairingHeap<int> heap = new MaxPairingHeap<int>();
 				DoTheTest(heap, values);
@@ -3251,7 +3251,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(heap, values);
 
 				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students);
@@ -3260,7 +3260,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(studentHeap, students);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -3270,9 +3270,9 @@ work with {HEAVY} items.".Yellow();
 			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : PairingNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
 				Console.WriteLine("Test removing...");
 				bool removeStarted = false;
@@ -3302,8 +3302,8 @@ work with {HEAVY} items.".Yellow();
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
 				int k = RNGRandomHelper.Next(1, values.Length);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
 				PairingHeap<int> heap = new MaxPairingHeap<int>();
 				DoTheTest(heap, values, k);
@@ -3312,8 +3312,8 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(heap, values, k);
 
 				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students, k);
@@ -3322,7 +3322,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(studentHeap, students, k);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -3332,11 +3332,11 @@ work with {HEAVY} items.".Yellow();
 			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
 				where TNode : PairingNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
-				Console.WriteLine($"Kth element at position {k} element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+				Console.WriteLine($"Kth element at position {k} element = {Bright.Cyan().Underline(heap.ElementAt(k).ToString())}");
 				Console.WriteLine();
 				Console.WriteLine();
 			}
@@ -3353,8 +3353,8 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
 				PairingHeap<int> heap = new MaxPairingHeap<int>();
 				DoTheValueTest(heap, values, int.MaxValue);
@@ -3363,8 +3363,8 @@ work with {HEAVY} items.".Yellow();
 				DoTheValueTest(heap, values, int.MinValue);
 
 				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
 				DoTheKeyTest(studentHeap, students, int.MaxValue);
@@ -3373,7 +3373,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheKeyTest(studentHeap, students, int.MinValue);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -3429,7 +3429,7 @@ work with {HEAVY} items.".Yellow();
 
 				int max = Math.Min(MAX, array.Length);
 				queue.Clear();
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
 				foreach (TValue v in array)
 				{
@@ -3438,7 +3438,7 @@ work with {HEAVY} items.".Yellow();
 					heap.Add(node);
 				}
 
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
 			}
 		}
@@ -3454,7 +3454,7 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				FibonacciHeap<int> heap = new MaxFibonacciHeap<int>();
 				DoTheTest(heap, values);
@@ -3470,7 +3470,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(studentHeap, students);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -3480,7 +3480,7 @@ work with {HEAVY} items.".Yellow();
 			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : FibonacciNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
 				foreach (TValue value in array)
 				{
@@ -3488,7 +3488,7 @@ work with {HEAVY} items.".Yellow();
 					//heap.PrintWithProps();
 				}
 
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
 			}
 		}
@@ -3504,7 +3504,7 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				FibonacciHeap<int> heap = new MaxFibonacciHeap<int>();
 				DoTheTest(heap, values);
@@ -3513,7 +3513,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(heap, values);
 
 				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				FibonacciHeap<double, Student> studentHeap = new MaxFibonacciHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students);
@@ -3522,7 +3522,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(studentHeap, students);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -3532,9 +3532,9 @@ work with {HEAVY} items.".Yellow();
 			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : FibonacciNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
 				Console.WriteLine("Test removing...");
 				bool removeStarted = false;
@@ -3564,8 +3564,8 @@ work with {HEAVY} items.".Yellow();
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
 				int k = RNGRandomHelper.Next(1, values.Length);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
 				FibonacciHeap<int> heap = new MaxFibonacciHeap<int>();
 				DoTheTest(heap, values, k);
@@ -3574,8 +3574,8 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(heap, values, k);
 
 				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				FibonacciHeap<double, Student> studentHeap = new MaxFibonacciHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students, k);
@@ -3584,7 +3584,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheTest(studentHeap, students, k);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -3594,11 +3594,11 @@ work with {HEAVY} items.".Yellow();
 			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
 				where TNode : FibonacciNode<TNode, TKey, TValue>
 			{
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
-				Console.WriteLine($"Kth element at position {k} element = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+				Console.WriteLine($"Kth element at position {k} element = {Bright.Cyan().Underline(heap.ElementAt(k).ToString())}");
 				Console.WriteLine();
 				Console.WriteLine();
 			}
@@ -3615,8 +3615,8 @@ work with {HEAVY} items.".Yellow();
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
-				Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-				Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
 				FibonacciHeap<int> heap = new MaxFibonacciHeap<int>();
 				DoTheValueTest(heap, values, int.MaxValue);
@@ -3625,8 +3625,8 @@ work with {HEAVY} items.".Yellow();
 				DoTheValueTest(heap, values, int.MinValue);
 
 				Student[] students = GetRandomStudents(len);
-				Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-				Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				FibonacciHeap<double, Student> studentHeap = new MaxFibonacciHeap<double, Student>(e => e.Grade);
 				DoTheKeyTest(studentHeap, students, int.MaxValue);
@@ -3635,7 +3635,7 @@ work with {HEAVY} items.".Yellow();
 				DoTheKeyTest(studentHeap, students, int.MinValue);
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -3691,7 +3691,7 @@ work with {HEAVY} items.".Yellow();
 
 				int max = Math.Min(MAX, array.Length);
 				queue.Clear();
-				Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
 				foreach (TValue v in array)
 				{
@@ -3700,7 +3700,7 @@ work with {HEAVY} items.".Yellow();
 					heap.Add(node);
 				}
 
-				Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 				heap.Print();
 			}
 		}
@@ -3724,7 +3724,7 @@ work with {HEAVY} items.".Yellow();
 
 		//		int len = RNGRandomHelper.Next(1, 12);
 		//		int[] values = GetRandomIntegers(len);
-		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+		//		Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 		//		IndexMin<int> heap = new MaxIndexMin<int>();
 		//		DoTheTest(heap, values);
@@ -3740,7 +3740,7 @@ work with {HEAVY} items.".Yellow();
 		//		DoTheTest(studentsHeap, students);
 
 		//		Console.WriteLine();
-		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 		//		ConsoleKeyInfo response = Console.ReadKey(true);
 		//		Console.WriteLine();
 		//		more = response.Key == ConsoleKey.Y;
@@ -3750,7 +3750,7 @@ work with {HEAVY} items.".Yellow();
 		//	static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array)
 		//		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 		//	{
-		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".Bright.Green());
 
 		//		foreach (TValue value in array)
 		//		{
@@ -3758,7 +3758,7 @@ work with {HEAVY} items.".Yellow();
 		//			//heap.PrintWithProps();
 		//		}
 
-		//		Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+		//		Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 		//	}
 		//}
 
@@ -3773,7 +3773,7 @@ work with {HEAVY} items.".Yellow();
 
 		//		int len = RNGRandomHelper.Next(1, 12);
 		//		int[] values = GetRandomIntegers(len);
-		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
+		//		Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 		//		IndexMin<int> heap = new MaxIndexMin<int>();
 		//		DoTheTest(heap, values);
@@ -3789,7 +3789,7 @@ work with {HEAVY} items.".Yellow();
 		//		DoTheTest(studentsHeap, students);
 
 		//		Console.WriteLine();
-		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 		//		ConsoleKeyInfo response = Console.ReadKey(true);
 		//		Console.WriteLine();
 		//		more = response.Key == ConsoleKey.Y;
@@ -3799,9 +3799,9 @@ work with {HEAVY} items.".Yellow();
 		//	static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array)
 		//		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 		//	{
-		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".Bright.Green());
 		//		heap.Add(array);
-		//		Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+		//		Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 		//		Console.WriteLine("Test removing...");
 		//		bool removeStarted = false;
 
@@ -3830,8 +3830,8 @@ work with {HEAVY} items.".Yellow();
 		//		int len = RNGRandomHelper.Next(1, 12);
 		//		int[] values = GetRandomIntegers(len);
 		//		int k = RNGRandomHelper.Next(1, values.Length);
-		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-		//		Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+		//		Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+		//		Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
 		//		IndexMin<int> heap = new MaxIndexMin<int>();
 		//		DoTheTest(heap, values, k);
@@ -3840,8 +3840,8 @@ work with {HEAVY} items.".Yellow();
 		//		DoTheTest(heap, values, k);
 
 		//		Student[] students = GetRandomStudents(len);
-		//		Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-		//		Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+		//		Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+		//		Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 		//		IndexMin<double, Student> studentHeap = new MaxIndexMin<double, Student>(e => e.Grade);
 		//		DoTheTest(studentHeap, students, k);
@@ -3850,7 +3850,7 @@ work with {HEAVY} items.".Yellow();
 		//		DoTheTest(studentHeap, students, k);
 
 		//		Console.WriteLine();
-		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 		//		ConsoleKeyInfo response = Console.ReadKey(true);
 		//		Console.WriteLine();
 		//		more = response.Key == ConsoleKey.Y;
@@ -3860,10 +3860,10 @@ work with {HEAVY} items.".Yellow();
 		//	static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array, int k)
 		//		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 		//	{
-		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".Bright.Green());
 		//		heap.Add(array);
-		//		Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
-		//		Console.WriteLine($"Kth element at position {k} = {heap.ElementAt(k).ToString().BrightCyan().Underline()}");
+		//		Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+		//		Console.WriteLine($"Kth element at position {k} = {heap.ElementAt(k).ToString().Bright.Cyan().Underline()}");
 		//		Console.WriteLine();
 		//		Console.WriteLine();
 		//	}
@@ -3880,8 +3880,8 @@ work with {HEAVY} items.".Yellow();
 
 		//		int len = RNGRandomHelper.Next(1, 12);
 		//		int[] values = GetRandomIntegers(len);
-		//		Console.WriteLine("Array: ".BrightBlack() + string.Join(", ", values));
-		//		Console.WriteLine("Array [sorted]: ".Yellow() + string.Join(", ", values.OrderBy(e => e)));
+		//		Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+		//		Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
 		//		IndexMin<int> heap = new MaxIndexMin<int>();
 		//		DoTheValueTest(heap, values, int.MaxValue);
@@ -3890,8 +3890,8 @@ work with {HEAVY} items.".Yellow();
 		//		DoTheValueTest(heap, values, int.MinValue);
 
 		//		Student[] students = GetRandomStudents(len);
-		//		Console.WriteLine("Students: ".BrightBlack() + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-		//		Console.WriteLine("Students [sorted]: ".Yellow() + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+		//		Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+		//		Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 		//		IndexMin<double, Student> studentHeap = new MaxIndexMin<double, Student>(e => e.Grade);
 		//		DoTheKeyTest(studentHeap, students, int.MaxValue, e => e.Grade);
@@ -3900,7 +3900,7 @@ work with {HEAVY} items.".Yellow();
 		//		DoTheKeyTest(studentHeap, students, int.MinValue, e => e.Grade);
 
 		//		Console.WriteLine();
-		//		Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+		//		Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 		//		ConsoleKeyInfo response = Console.ReadKey(true);
 		//		Console.WriteLine();
 		//		more = response.Key == ConsoleKey.Y;
@@ -3960,7 +3960,7 @@ work with {HEAVY} items.".Yellow();
 
 		//		int max = Math.Min(MAX, array.Length);
 		//		queue.Clear();
-		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".BrightGreen());
+		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".Bright.Green());
 
 		//		foreach (TValue v in array)
 		//		{
@@ -3969,7 +3969,7 @@ work with {HEAVY} items.".Yellow();
 		//			heap.Add(node);
 		//		}
 
-		//		Console.WriteLine("Enumeration: ".BrightBlack() + string.Join(", ", heap));
+		//		Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
 		//	}
 		//}
 		#endregion
@@ -4055,7 +4055,7 @@ work with {HEAVY} items.".Yellow();
 				}
 
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
@@ -4071,16 +4071,16 @@ work with {HEAVY} items.".Yellow();
 			static void DoHeapTest<T>(IHeap<T> heap, T[] values, Stopwatch clock)
 			{
 				Console.WriteLine();
-				Console.WriteLine($"Testing {heap.GetType().Name}...".BrightGreen());
+				Console.WriteLine(Bright.Green($"Testing {heap.GetType().Name}..."));
 				heap.Clear();
-				Console.WriteLine($"Original values: {values.Length.ToString().BrightYellow()}...");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
 				Debug.Assert(heap.Count == 0, "Values are not cleared correctly!");
 
 				clock.Restart();
 				heap.Add(values);
 				Console.WriteLine($"Added {heap.Count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 
-				Console.WriteLine("Test removing...".BrightRed());
+				Console.WriteLine(Bright.Red("Test removing..."));
 				int removed = 0;
 				clock.Restart();
 
@@ -4152,13 +4152,13 @@ work with {HEAVY} items.".Yellow();
 				Title("Testing graph add()");
 				menu.Display();
 				Console.WriteLine();
-				Console.Write($"Press {"[Y]".BrightGreen()} to make another test or {"any other key".Dim()} to exit. ");
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || values.Count >= MAX_LIST) continue;
 
-				Console.Write($"Would you like to add more character? {"[Y]".BrightGreen()} / {"any key".Dim()} ");
+				Console.Write($"Would you like to add more character? {Bright.Green("[Y]")} / {Dim("any key")} ");
 				response = Console.ReadKey(true);
 				Console.WriteLine();
 				if (response.Key != ConsoleKey.Y) continue;
@@ -4170,7 +4170,7 @@ work with {HEAVY} items.".Yellow();
 			static void AddValues(List<char> list)
 			{
 				int len = RNGRandomHelper.Next(1, 12);
-				Console.WriteLine("Generating new characters: ".BrightGreen());
+				Console.WriteLine(Bright.Green("Generating new characters: "));
 				char[] newValues = GetRandomChar(true, len);
 				int count = 0;
 
@@ -4181,37 +4181,37 @@ work with {HEAVY} items.".Yellow();
 					count++;
 				}
 
-				Console.WriteLine($"Added {count} characters to the set".BrightGreen());
+				Console.WriteLine(Bright.Green($"Added {count} characters to the set"));
 			}
 
 			static void DoTheTest<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, List<char> values)
 				where TAdjacencyList : class, ICollection<TEdge>
 			{
 				Console.WriteLine("Test adding nodes...");
-				Console.WriteLine("characters list: ".BrightBlack() + string.Join(", ", values));
+				Console.WriteLine(Bright.Black("characters list: ") + string.Join(", ", values));
 				graph.Clear();
 				graph.Add(values);
 
 				if (graph.Count != values.Count)
 				{
-					Console.WriteLine("Something went wrong, not all nodes were added...!".BrightRed());
+					Console.WriteLine(Bright.Red("Something went wrong, not all nodes were added...!"));
 					return;
 				}
 
 				if (graph.Count == 1)
 				{
-					Console.WriteLine("Huh, must add more nodes...!".BrightRed());
+					Console.WriteLine(Bright.Red("Huh, must add more nodes...!"));
 					return;
 				}
 				
-				Console.WriteLine("All nodes are added...!".BrightGreen() + " Let's try adding some relationships...");
-				Console.Write($@"{"Would you like to add a bit of randomization?".Yellow()} {"[Y]".BrightGreen()} / {"any key".Dim()}.
+				Console.WriteLine(Bright.Green("All nodes are added...!") + " Let's try adding some relationships...");
+				Console.Write($@"{Yellow("Would you like to add a bit of randomization?")} {Bright.Green("[Y]")} / {Dim("any key")}.
 This may cause cycles but will make it much more fun for finding shortest paths. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				int threshold = response.Key != ConsoleKey.Y ? 0 : (int)Math.Floor(values.Count * 0.5d);
 
-				Console.Write($"{"Can the edges have negative weights?".Yellow()} {"[Y]".BrightGreen()} / {"any key".Dim()}.");
+				Console.Write($"{Yellow("Can the edges have negative weights?")} {Bright.Green("[Y]")} / {Dim("any key")}.");
 				response = Console.ReadKey(true);
 				Console.WriteLine();
 				int min = response.Key == ConsoleKey.Y
@@ -4232,7 +4232,7 @@ This may cause cycles but will make it much more fun for finding shortest paths.
 				{
 					char to = queue.Dequeue();
 					if (graph.ContainsEdge(from, to)) continue;
-					Console.WriteLine($"Adding {from.ToString().BrightCyan().Underline()} to {to.ToString().BrightCyan().Underline()}...");
+					Console.WriteLine($"Adding {Bright.Cyan().Underline(from.ToString())} to {Bright.Cyan().Underline(to.ToString())}...");
 					addEdge(from, to);
 
 					if (threshold > 0 && __fakeGenerator.Value.Random.Bool())
@@ -4249,14 +4249,14 @@ This may cause cycles but will make it much more fun for finding shortest paths.
 				Console.WriteLine();
 				Console.WriteLine("Cool, let's try enumerating it.");
 				char value = graph.Top().First();
-				Console.WriteLine($"Picking a value with maximum connections: '{value.ToString().BrightCyan().Underline()}'...");
+				Console.WriteLine($"Picking a value with maximum connections: '{Bright.Cyan().Underline(value.ToString())}'...");
 				if (!DoTheTestWithValue(graph, values, value)) return;
 
 				do
 				{
 					Console.WriteLine();
-					Console.Write($@"Type in {"a character".BrightGreen()} to traverse from,
-or press {"ESCAPE".BrightRed()} key to exit this test. ");
+					Console.Write($@"Type in {Bright.Green("a character")} to traverse from,
+or press {Bright.Red("ESCAPE")} key to exit this test. ");
 					response = Console.ReadKey();
 					Console.WriteLine();
 					if (response.Key == ConsoleKey.Escape) continue;
@@ -4280,31 +4280,31 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 			{
 				const string LINE_SEPARATOR = "*******************************************************************************";
 
-				Console.WriteLine("Breadth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, BreadthDepthTraversal.BreadthFirst)));
-				Console.WriteLine("Depth First: ".Yellow() + string.Join(", ", graph.Enumerate(value, BreadthDepthTraversal.DepthFirst)));
-				Console.WriteLine("Degree: ".Yellow() + graph.Degree(value));
+				Console.WriteLine(Yellow("Breadth First: ") + string.Join(", ", graph.Enumerate(value, BreadthDepthTraversal.BreadthFirst)));
+				Console.WriteLine(Yellow("Depth First: ") + string.Join(", ", graph.Enumerate(value, BreadthDepthTraversal.DepthFirst)));
+				Console.WriteLine(Yellow("Degree: ") + graph.Degree(value));
 
 				// detect a cycle
 				IEnumerable<char> cycle = graph.FindCycle();
-				if (cycle != null) Console.WriteLine("Found cycle: ".BrightRed() + string.Join(", ", cycle));
+				if (cycle != null) Console.WriteLine(Bright.Red("Found cycle: ") + string.Join(", ", cycle));
 
 				// test specific graph type features
 				switch (graph)
 				{
 					case DirectedGraphList<char> directedGraph:
-						Console.WriteLine("InDegree: ".Yellow() + directedGraph.InDegree(value));
-						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", directedGraph.TopologicalSort())); }
-						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
+						Console.WriteLine(Yellow("InDegree: ") + directedGraph.InDegree(value));
+						try { Console.WriteLine(Yellow("Topological Sort: ") + string.Join(", ", directedGraph.TopologicalSort())); }
+						catch (Exception e) { Console.WriteLine(Yellow("Topological Sort: ") + Bright.Red(e.Message)); }
 						break;
 					case MixedGraphList<char> mixedGraph:
-						Console.WriteLine("InDegree: ".Yellow() + mixedGraph.InDegree(value));
-						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", mixedGraph.TopologicalSort())); }
-						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
+						Console.WriteLine(Yellow("InDegree: ") + mixedGraph.InDegree(value));
+						try { Console.WriteLine(Yellow("Topological Sort: ") + string.Join(", ", mixedGraph.TopologicalSort())); }
+						catch (Exception e) { Console.WriteLine(Yellow("Topological Sort: ") + Bright.Red(e.Message)); }
 						break;
 					case WeightedDirectedGraphList<char, int> weightedDirectedGraph:
-						Console.WriteLine("InDegree: ".Yellow() + weightedDirectedGraph.InDegree(value));
-						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", weightedDirectedGraph.TopologicalSort())); }
-						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
+						Console.WriteLine(Yellow("InDegree: ") + weightedDirectedGraph.InDegree(value));
+						try { Console.WriteLine(Yellow("Topological Sort: ") + string.Join(", ", weightedDirectedGraph.TopologicalSort())); }
+						catch (Exception e) { Console.WriteLine(Yellow("Topological Sort: ") + Bright.Red(e.Message)); }
 						break;
 					case WeightedUndirectedGraphList<char, int> weightedUndirectedGraph:
 						Console.WriteLine(LINE_SEPARATOR);
@@ -4312,7 +4312,7 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 						if (spanningTree != null)
 						{
-							Console.WriteLine("Prim Spanning Tree: ".Yellow());
+							Console.WriteLine(Yellow("Prim Spanning Tree: "));
 							spanningTree.Print();
 							Console.WriteLine(LINE_SEPARATOR);
 						}
@@ -4321,15 +4321,15 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 						if (spanningTree != null)
 						{
-							Console.WriteLine("Kruskal Spanning Tree: ".Yellow());
+							Console.WriteLine(Yellow("Kruskal Spanning Tree: "));
 							spanningTree.Print();
 							Console.WriteLine(LINE_SEPARATOR);
 						}
 						break;
 					case WeightedMixedGraphList<char, int> weightedMixedGraph:
-						Console.WriteLine("InDegree: ".Yellow() + weightedMixedGraph.InDegree(value));
-						try { Console.WriteLine("Topological Sort: ".Yellow() + string.Join(", ", weightedMixedGraph.TopologicalSort())); }
-						catch (Exception e) { Console.WriteLine("Topological Sort: ".Yellow() + e.Message.BrightRed()); }
+						Console.WriteLine(Yellow("InDegree: ") + weightedMixedGraph.InDegree(value));
+						try { Console.WriteLine(Yellow("Topological Sort: ") + string.Join(", ", weightedMixedGraph.TopologicalSort())); }
+						catch (Exception e) { Console.WriteLine(Yellow("Topological Sort: ") + Bright.Red(e.Message)); }
 						break;
 				}
 
@@ -4340,9 +4340,9 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 
 					do
 					{
-						Console.Write($@"Current position is '{value.ToString().BrightGreen()}'. Type in {"a character".BrightGreen()} to find the shortest path to,
-(You can press the {"RETURN".BrightGreen()} key to accept the current random value '{to.ToString().BrightGreen()}'),
-or press {"ESCAPE".BrightRed()} key to exit this test. ");
+						Console.Write($@"Current position is '{Bright.Green(value.ToString())}'. Type in {Bright.Green("a character")} to find the shortest path to,
+(You can press the {Bright.Green("RETURN")} key to accept the current random value '{Bright.Green(to.ToString())}'),
+or press {Bright.Red("ESCAPE")} key to exit this test. ");
 						response = Console.ReadKey();
 						Console.WriteLine();
 						if (response.Key == ConsoleKey.Escape) return false;
@@ -4354,15 +4354,15 @@ or press {"ESCAPE".BrightRed()} key to exit this test. ");
 					while (response.Key != ConsoleKey.Enter);
 
 					Console.WriteLine();
-					Console.WriteLine($"{"Shortest Path".Yellow()} from '{value.ToString().BrightCyan()}' to '{to.ToString().BrightCyan()}'");
+					Console.WriteLine($"{Yellow("Shortest Path")} from '{Bright.Cyan(value.ToString())}' to '{Bright.Cyan(to.ToString())}'");
 					
 					Console.Write("Dijkstra: ");
 					try { Console.WriteLine(string.Join(" -> ", wGraph.SingleSourcePath(value, to, SingleSourcePathAlgorithm.Dijkstra))); }
-					catch (Exception e) { Console.WriteLine(e.Message.BrightRed()); }
+					catch (Exception e) { Console.WriteLine(Bright.Red(e.Message)); }
 					
 					Console.Write("Bellman-Ford: ");
 					try { Console.WriteLine(string.Join(" -> ", wGraph.SingleSourcePath(value, to, SingleSourcePathAlgorithm.BellmanFord))); }
-					catch (Exception e) { Console.WriteLine(e.Message.BrightRed()); }
+					catch (Exception e) { Console.WriteLine(Bright.Red(e.Message)); }
 				}
 
 				return true;
@@ -4516,7 +4516,7 @@ decrypted:
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex.CollectMessages().Red());
+				Console.WriteLine(Red(ex.CollectMessages()));
 			}
 			finally
 			{
@@ -4634,7 +4634,7 @@ decrypted:
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex.Message.BrightRed());
+				Console.WriteLine(Bright.Red(ex.Message));
 			}
 			finally
 			{
@@ -4645,7 +4645,7 @@ decrypted:
 		private static void Title(string title)
 		{
 			Console.WriteLine();
-			Console.WriteLine(title.Bold().BrightBlack());
+			Console.WriteLine(Bold().Bright.Black(title));
 			Console.WriteLine();
 		}
 

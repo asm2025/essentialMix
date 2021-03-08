@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WiXComponents": {
+      "commandName": "Project",
+      "commandLineArgs": "test.txt"
+    }
+  }
+}
