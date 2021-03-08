@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using JetBrains.Annotations;
 using asm.Exceptions;
@@ -584,7 +585,8 @@ namespace asm.Extensions
 						: Enum.ToObject(type, thisValue);
 		}
 
-		public static string ObjectName(this object thisValue) { return thisValue.AsType().FullName; }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static string ObjectName([NotNull] this object thisValue) { return thisValue.GetType().FullName; }
 
 		private static bool ValidateParametersAndValues(ParameterInfo[] parameters, object[] values)
 		{

@@ -188,7 +188,7 @@ namespace asm.Helpers
 
 		public static bool IsPathSeparator(char value) { return value == Path.DirectorySeparatorChar || value == Path.AltDirectorySeparatorChar || value == '|'; }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsDirectorySeparator(char value) { return value == Path.DirectorySeparatorChar || value == Path.AltDirectorySeparatorChar; }
 
 		public static bool IsValidDriveChar(char value) { return value >= 'A' && value <= 'Z' || value >= 'a' && value <= 'z'; }

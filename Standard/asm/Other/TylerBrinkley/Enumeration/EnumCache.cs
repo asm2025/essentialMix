@@ -387,10 +387,10 @@ namespace Other.TylerBrinkley.Enumeration
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public bool IsValidSimple(TInt value) { return IsFlagEnum && IsValidFlagCombination(value) || IsDefined(value); }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public bool IsDefined(TInt value)
 		{
 			return _isContiguous
@@ -463,7 +463,7 @@ namespace Other.TylerBrinkley.Enumeration
 			return false;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public bool IsValidFlagCombination(TInt value) { return Provider.And(AllFlags, value).Equals(value); }
 
 		public string FormatFlags(TInt value, string delimiter, EnumFormat[] formats) { return FormatFlagsInternal(value, null, delimiter, formats); }
@@ -490,16 +490,16 @@ namespace Other.TylerBrinkley.Enumeration
 
 		public int GetFlagCount(TInt value, TInt otherFlags) { return Provider.BitCount(Provider.And(Provider.And(value, otherFlags), AllFlags)); }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public bool HasAnyFlags(TInt value) { return !value.Equals(Provider.Zero); }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public bool HasAnyFlags(TInt value, TInt otherFlags) { return !Provider.And(value, otherFlags).Equals(Provider.Zero); }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public bool HasAllFlags(TInt value) { return HasAllFlags(value, AllFlags); }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public bool HasAllFlags(TInt value, TInt otherFlags) { return Provider.And(value, otherFlags).Equals(otherFlags); }
 
 		public TInt ToggleFlags(TInt value) { return Provider.Xor(value, AllFlags); }

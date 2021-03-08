@@ -121,6 +121,7 @@ namespace WiXComponents
 			}
 			catch (Exception ex)
 			{
+				// This will be ignored until a logger was setup
 				Log.Error(ex.CollectMessages());
 			}
 			finally
@@ -146,7 +147,32 @@ namespace WiXComponents
 
 		private void RunGuidReplacer()
 		{
-			Console.WriteLine("Hello world!");
+			//string fileName = PathHelper.Trim(args[0]);
+
+			//if (string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
+			//{
+			//	Console.WriteLine("File not found.");
+			//	return 1;
+			//}
+
+			//List<string> files = new List<string>();
+
+			//try
+			//{
+			//	XmlDocument doc = XmlDocumentHelper.LoadFile(fileName);
+			//	XmlNamespaceManager manager = new XmlNamespaceManager(doc.NameTable);
+			//	manager.AddNamespace("msbld", "http://schemas.microsoft.com/developer/msbuild/2003");
+
+			//	// Finds all of the files included in the project.
+			//	XmlNodeList nodes = doc.SelectNodes("/")
+			//}
+			//catch (Exception ex)
+			//{
+			//	Console.WriteLine(ex.CollectMessages());
+			//	return 1;
+			//}
+
+			//string path = Path.GetDirectoryName(fileName) ?? Directory.GetCurrentDirectory();
 		}
 
 		private void ConfigureServices([NotNull] ServiceCollection services, [NotNull] Options options)
