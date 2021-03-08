@@ -11,18 +11,17 @@ namespace asm.Helpers
 	public static class IConfigurationBuilderHelper
 	{
 		[NotNull]
-		public static IConfigurationBuilder CreateConfiguration()
+		public static IConfigurationBuilder CreateConfiguration(string baseDirectory = null)
 		{
+			baseDirectory = PathHelper.Trim(baseDirectory) ?? AppDomain.CurrentDomain.BaseDirectory;
 			IHostEnvironment env = new HostingEnvironment
 			{
 				EnvironmentName = EnvironmentHelper.GetEnvironmentName(),
 				ApplicationName = AppDomain.CurrentDomain.FriendlyName,
-				ContentRootPath = AppDomain.CurrentDomain.BaseDirectory,
-				ContentRootFileProvider = new PhysicalFileProvider(AppDomain.CurrentDomain.BaseDirectory)
+				ContentRootPath = baseDirectory,
+				ContentRootFileProvider = new PhysicalFileProvider(baseDirectory)
 			};
-
-			return new ConfigurationBuilder()
-				.Setup(env);
+			return new ConfigurationBuilder().Setup(env);
 		}
 	}
 }

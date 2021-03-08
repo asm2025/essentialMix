@@ -3,11 +3,11 @@
 namespace WiXComponents.Views
 {
 	/// <summary>
-	/// Interaction logic for Main.xaml
+	/// Interaction logic for MainView.xaml
 	/// </summary>
-	public partial class Main : Window
+	public partial class MainView : Window
 	{
-		public Main()
+		public MainView()
 		{
 			InitializeComponent();
 		}

@@ -4,6 +4,7 @@ using System.Reflection;
 using asm.Helpers;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 
 namespace asm.Extensions
@@ -50,9 +51,11 @@ namespace asm.Extensions
 		[NotNull]
 		public static IConfigurationBuilder AddConfigurationFile([NotNull] this IConfigurationBuilder thisValue, string path, [NotNull] string fileName, bool optional, string environmentName)
 		{
+			const string FILE_PROVIDER_KEY = "FileProvider";
+
 			//https://jumpforjoysoftware.com/2018/09/aspnet-core-shared-settings/
 			fileName = PathHelper.Trim(fileName) ?? throw new ArgumentNullException(nameof(fileName));
-			environmentName = environmentName.ToNullIfEmpty() ?? Environments.Development;
+			environmentName = environmentName.ToNullIfEmpty() ?? Environments.Production;
 
 			if (Path.IsPathRooted(fileName))
 			{
@@ -64,6 +67,7 @@ namespace asm.Extensions
 				path = PathHelper.Trim(path);
 			}
 
+			if (string.IsNullOrEmpty(path) && thisValue.Properties.TryGetValue(FILE_PROVIDER_KEY, out PhysicalFileProvider fileProvider)) path = fileProvider.Root;
 			if (string.IsNullOrEmpty(path)) path = Directory.GetCurrentDirectory();
 
 			string fileBase = Path.GetFileNameWithoutExtension(fileName).ToNullIfEmpty();
