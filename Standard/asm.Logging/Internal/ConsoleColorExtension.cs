@@ -5,6 +5,9 @@ namespace asm.Logging.Internal
 {
 	internal static class ConsoleColorExtension
 	{
+		public const string FOREGROUND_COLOR = "\x1B[39m\x1B[22m";
+		public const string BACKGROUND_COLOR = "\x1B[49m";
+
 		[NotNull]
 		public static string GetForegroundColorEscapeCode(this ConsoleColor thisValue)
 		{
@@ -25,7 +28,7 @@ namespace asm.Logging.Internal
 				ConsoleColor.Magenta =>     "\x1B[1m\x1B[35m",
 				ConsoleColor.Cyan =>        "\x1B[1m\x1B[36m",
 				ConsoleColor.White =>       "\x1B[1m\x1B[37m",
-				_ => ConsoleColorHelper.ForegroundColor
+				_ => FOREGROUND_COLOR
 			};
 		}
 
@@ -42,7 +45,7 @@ namespace asm.Logging.Internal
 				ConsoleColor.DarkMagenta => "\x1B[45m",
 				ConsoleColor.DarkCyan =>    "\x1B[46m",
 				ConsoleColor.Gray =>        "\x1B[47m",
-				_ => ConsoleColorHelper.BackgroundColor
+				_ => BACKGROUND_COLOR
 			};
 		}
 	}

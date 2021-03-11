@@ -8,20 +8,27 @@ using Microsoft.Extensions.Logging;
 
 namespace WiXComponents
 {
-	public class Options
+	public class StartupArguments
 	{
-		public Options()
+		private const string SEC_INPUT = "INPUT";
+
+		public StartupArguments()
 		{
 		}
 
-		[Value(0, MetaName = "Input Files", HelpText = "Input files to be read. Supported file types are *.wixproj, *.csproj, *.vbproj, *.wxs, *.wsi, *.xml")]
+		[Option('f', "files", SetName = SEC_INPUT, HelpText = @"If a file or more are provided, a search inside these files is conducted to replace each WiX toolset 
+component's GUID with a new random one. This can be useful when a previous installer's components have corrupted registry entries; typically on a developer computer.
+Supported file types are wixproj, csproj, vbproj, wxs, wsi, xml.")]
 		public ICollection<string> Files { get; set; }
+
+		[Option('d', "directory", SetName = SEC_INPUT, HelpText = "Searches a path for wxs and wsi files to perform component's GUID replacement. See files argument for details.")]
+		public string Directory { get; set; }
 
 		[Option('l', "log", Default = LogLevel.None, HelpText = "Enables logging with the specified level.")]
 		public LogLevel LogLevel { get; set; }
 
 		[NotNull]
-		public static string GetUsage([NotNull] ParserResult<Options> result)
+		public static string GetUsage([NotNull] ParserResult<StartupArguments> result)
 		{
 			return HelpText.AutoBuild(result, helpText => HelpText.DefaultParsingErrorsHandler(result, SetHelpTextProps(helpText)));
 		}
