@@ -28,7 +28,7 @@ Supported file types are wixproj, csproj, vbproj, wxs, wsi, xml.")]
 		[Option('s', "directories", SetName = INPT_DIRECTORY, Default = false, HelpText = "Whether or not to include sub-directories in the search.")]
 		public bool IncludeSubDirectory { get; set; }
 
-		[Option('l', "log", Default = LogLevel.None, HelpText = "Enables logging with the specified level.")]
+		[Option('l', "log", Default = LogLevel.None, HelpText = "Enables logging with the specified level. The output file name format is .\\_logs\\WiXComponents_[date].log")]
 		public LogLevel LogLevel { get; set; }
 
 		[NotNull]

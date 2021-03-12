@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Serilog;
-using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using WiXComponents.Views;
@@ -26,7 +25,22 @@ namespace WiXComponents
 	/// </summary>
 	public partial class App : Application
 	{
+		/// <inheritdoc />
+		public App() 
+		{
+			Writer = new LoggerConfiguration()
+					.MinimumLevel.Is(LogEventLevel.Verbose)
+					.Enrich.FromLogContext()
+					.WriteTo.Console(outputTemplate: "[{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SystemConsoleTheme.Literate)
+					.CreateLogger();
+		}
+
+		[NotNull]
+		public Serilog.ILogger Writer { get; }
+
 		public IServiceProvider ServiceProvider { get; private set; }
+
+		public ILogger Logger { get; private set; }
 
 		/// <inheritdoc />
 		protected override void OnStartup(StartupEventArgs e)
@@ -34,12 +48,6 @@ namespace WiXComponents
 			// Setup
 			JsonConvert.DefaultSettings = () => JsonHelper.CreateSettings();
 			string basePath = Assembly.GetExecutingAssembly().GetDirectoryPath();
-
-			// Console writer
-			Serilog.ILogger console = new LoggerConfiguration()
-									.Enrich.FromLogContext()
-									.WriteTo.Console(LogEventLevel.Verbose, "[{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SystemConsoleTheme.Literate, applyThemeToRedirectedOutput: true)
-									.CreateLogger();
 
 			ConsoleHelper.AttachConsole(out bool consoleCreated);
 			
@@ -49,7 +57,7 @@ namespace WiXComponents
 			}
 			else if (e.Args.Length > 0)
 			{
-				console.Fatal("Could not create console window.");
+				Writer.Fatal("Could not create Writer window.");
 				Shutdown();
 				return;
 			}
@@ -79,7 +87,7 @@ namespace WiXComponents
 				if (result.Tag == ParserResultType.NotParsed)
 				{
 					string usage = StartupArguments.GetUsage(result);
-					console.Error(usage);
+					Writer.Error(usage);
 					Shutdown();
 					return;
 				}
@@ -88,7 +96,7 @@ namespace WiXComponents
 			}
 			catch (Exception ex)
 			{
-				console.Error(ex.CollectMessages());
+				Writer.Error(ex.CollectMessages());
 				Shutdown();
 				return;
 			}
@@ -117,10 +125,11 @@ namespace WiXComponents
 
 			// Services
 			ConfigureServices(args, configuration);
+			Logger = ServiceProvider.GetService<ILogger<App>>();
 
 			if (args.Files.Count > 0 || !string.IsNullOrEmpty(args.Directory))
 			{
-				ProcessCommandLine(args, console);
+				ProcessCommandLine(args);
 				if (consoleCreated) ConsoleHelper.FreeConsole();
 				Shutdown();
 				return;
@@ -144,7 +153,15 @@ namespace WiXComponents
 			ServiceCollection services = new();
 			services.AddSingleton(startupArguments);
 			services.AddSingleton(configuration);
-			services.AddLogging(builder => builder.AddSerilog(null, true));
+			services.AddLogging(builder =>
+			{
+				// clear the default providers
+				builder.ClearProviders();
+				builder.AddConfiguration(configuration.GetSection("logging"));
+				builder.AddDebug();
+				builder.AddEventSourceLogger();
+				builder.AddSerilog(null, true);
+			});
 			services.AddTransient<MainView>();
 			ServiceProvider = services.BuildServiceProvider();
 		}
@@ -155,35 +172,33 @@ namespace WiXComponents
 			window.Show();
 		}
 
-		private void ProcessCommandLine([NotNull] StartupArguments args, [NotNull] Serilog.ILogger console)
+		private void ProcessCommandLine([NotNull] StartupArguments args)
 		{
 			// When we are here, args either has files or a directory to be processed.
-			ILogger logger = ServiceProvider.GetService<ILogger<App>>();
+			IEnumerable<string> files;
 
 			if (string.IsNullOrEmpty(args.Directory))
 			{
-				ProcessFiles(args.Files, console, logger);
-				return;
+				files = args.Files;
 			}
-
-			if (!Directory.Exists(args.Directory))
+			else
 			{
-				console.Fatal("Path not found.");
-				logger.LogError("Path not found.");
-				return;
+				if (!Directory.Exists(args.Directory))
+				{
+					Writer.Fatal("Path not found.");
+					Logger?.LogError("Path not found.");
+					return;
+				}
+				
+				files = DirectoryHelper.EnumerateFiles(args.Directory, "*.wxs;*.wsi;*.xml", args.IncludeSubDirectory
+																						? SearchOption.AllDirectories
+																						: SearchOption.TopDirectoryOnly);
 			}
 
-			IEnumerable<string> files = DirectoryHelper.EnumerateFiles(args.Directory, "*.wxs;*.wsi;*.xml", args.IncludeSubDirectory
-																											? SearchOption.AllDirectories
-																											: SearchOption.TopDirectoryOnly);
-			ProcessFiles(files, console, logger);
-		}
-
-		private void ProcessFiles([NotNull] IEnumerable<string> files, [NotNull] Serilog.ILogger console, ILogger logger)
-		{
+			// wixproj, csproj, vbproj, wxs, wsi, xml
 			foreach (string file in files)
 			{
-				console.Information(file);
+				Writer.Verbose(file);
 			}
 
 			//string fileName = PathHelper.Trim(args[0]);
