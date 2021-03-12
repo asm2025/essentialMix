@@ -1826,6 +1826,95 @@ namespace asm.Extensions
 			}
 		}
 
+		public static IEnumerable<T> Combine<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] IEnumerable<T> enumerable)
+		{
+			foreach (T item in thisValue)
+				yield return item;
+
+			foreach (T item in enumerable)
+				yield return item;
+		}
+
+		public static IEnumerable<T> Combine<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] IEnumerable<T> enumerable1, [NotNull] IEnumerable<T> enumerable2)
+		{
+			foreach (T item in thisValue)
+				yield return item;
+
+			foreach (T item in enumerable1)
+				yield return item;
+
+			foreach (T item in enumerable2)
+				yield return item;
+		}
+
+		public static IEnumerable<T> Combine<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] IEnumerable<T> enumerable1, [NotNull] IEnumerable<T> enumerable2, [NotNull] IEnumerable<T> enumerable3)
+		{
+			foreach (T item in thisValue)
+				yield return item;
+
+			foreach (T item in enumerable1)
+				yield return item;
+
+			foreach (T item in enumerable2)
+				yield return item;
+
+			foreach (T item in enumerable3)
+				yield return item;
+		}
+
+		public static IEnumerable<T> Combine<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] IEnumerable<T> enumerable1, [NotNull] IEnumerable<T> enumerable2, [NotNull] IEnumerable<T> enumerable3, [NotNull] IEnumerable<T> enumerable4)
+		{
+			foreach (T item in thisValue)
+				yield return item;
+
+			foreach (T item in enumerable1)
+				yield return item;
+
+			foreach (T item in enumerable2)
+				yield return item;
+
+			foreach (T item in enumerable3)
+				yield return item;
+
+			foreach (T item in enumerable4)
+				yield return item;
+		}
+
+		public static IEnumerable<T> Combine<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] IEnumerable<T> enumerable1, [NotNull] IEnumerable<T> enumerable2, [NotNull] IEnumerable<T> enumerable3, [NotNull] IEnumerable<T> enumerable4, [NotNull] IEnumerable<T> enumerable5)
+		{
+			foreach (T item in thisValue)
+				yield return item;
+
+			foreach (T item in enumerable1)
+				yield return item;
+
+			foreach (T item in enumerable2)
+				yield return item;
+
+			foreach (T item in enumerable3)
+				yield return item;
+
+			foreach (T item in enumerable4)
+				yield return item;
+
+			foreach (T item in enumerable5)
+				yield return item;
+		}
+
+		public static IEnumerable<T> Combine<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] params IEnumerable<T>[] enumerables)
+		{
+			foreach (T item in thisValue)
+				yield return item;
+
+			foreach (IEnumerable<T> enumerable in enumerables)
+			{
+				if (enumerable == null) continue;
+
+				foreach (T item in enumerable)
+					yield return item;
+			}
+		}
+
 		[NotNull]
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<T> Paginate<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] IPagination settings)

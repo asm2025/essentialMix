@@ -2,7 +2,7 @@
   "profiles": {
     "WiXComponents": {
       "commandName": "Project",
-      "commandLineArgs": "test.txt"
+      "commandLineArgs": "-d D:\\Users\\asm\\Desktop\\Installer"
     }
   }
 }

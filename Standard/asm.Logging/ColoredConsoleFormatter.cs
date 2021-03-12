@@ -34,7 +34,7 @@ namespace asm.Logging
 
 		// see the constants defined above for valid values
 		private int _disposeStage;
-		private ColoredConsoleOptions _formatterOptions;
+		private ColoredConsoleFormatterOptions _formatterOptions;
 
 		public ColoredConsoleFormatter()
 			: this(null)
@@ -42,7 +42,7 @@ namespace asm.Logging
 		}
 
 		/// <inheritdoc />
-		public ColoredConsoleFormatter(IOptionsMonitor<ColoredConsoleOptions> options)
+		public ColoredConsoleFormatter(IOptionsMonitor<ColoredConsoleFormatterOptions> options)
 			: base(nameof(ColoredConsoleFormatter))
 		{
 			ReloadLoggerOptions(options.CurrentValue);
@@ -157,7 +157,7 @@ namespace asm.Logging
 			}
 		}
 
-		private void ReloadLoggerOptions(ColoredConsoleOptions options)
+		private void ReloadLoggerOptions(ColoredConsoleFormatterOptions options)
 		{
 			_formatterOptions = options;
 			if (_formatterOptions.ColorBehavior == LoggerColorBehavior.Default) _formatterOptions.ColorBehavior = LoggerColorBehavior.Enabled;

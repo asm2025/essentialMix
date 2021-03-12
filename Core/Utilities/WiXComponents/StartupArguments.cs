@@ -10,19 +10,23 @@ namespace WiXComponents
 {
 	public class StartupArguments
 	{
-		private const string SEC_INPUT = "INPUT";
+		private const string INPT_FILES = "Files";
+		private const string INPT_DIRECTORY = "Directory";
 
 		public StartupArguments()
 		{
 		}
 
-		[Option('f', "files", SetName = SEC_INPUT, HelpText = @"If a file or more are provided, a search inside these files is conducted to replace each WiX toolset 
+		[Option('f', "files", SetName = INPT_FILES, HelpText = @"If a file or more are provided, a search inside these files is conducted to replace each WiX toolset 
 component's GUID with a new random one. This can be useful when a previous installer's components have corrupted registry entries; typically on a developer computer.
 Supported file types are wixproj, csproj, vbproj, wxs, wsi, xml.")]
 		public ICollection<string> Files { get; set; }
 
-		[Option('d', "directory", SetName = SEC_INPUT, HelpText = "Searches a path for wxs and wsi files to perform component's GUID replacement. See files argument for details.")]
+		[Option('d', "directory", SetName = INPT_DIRECTORY, HelpText = "Searches a path for wxs and wsi files to perform component's GUID replacement. See files argument for details.")]
 		public string Directory { get; set; }
+
+		[Option('s', "directories", SetName = INPT_DIRECTORY, Default = false, HelpText = "Whether or not to include sub-directories in the search.")]
+		public bool IncludeSubDirectory { get; set; }
 
 		[Option('l', "log", Default = LogLevel.None, HelpText = "Enables logging with the specified level.")]
 		public LogLevel LogLevel { get; set; }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using asm.Extensions;
 using JetBrains.Annotations;
@@ -31,14 +30,19 @@ namespace asm.Helpers
 
 		public static readonly Regex AllAsterisks = new Regex(@"^[*.\\]+$", OPTIONS);
 
-		[NotNull]
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static string FromWildCards(string pattern)
+		public static string EscapeFilePattern(string pattern)
 		{
 			pattern = pattern?.Trim();
-			if (string.IsNullOrEmpty(pattern)) pattern = "*";
-			string value = pattern.Escape().Replace(__escapeStrings).Replace(RGX_PATTERN_DBL_DOT, RGX_PATTERN_DBL_DOT_RPL, OPTIONS);
-			return string.Concat('^', value, '$');
+			return string.IsNullOrEmpty(pattern)
+						? "*"
+						: pattern.Escape().Replace(__escapeStrings).Replace(RGX_PATTERN_DBL_DOT, RGX_PATTERN_DBL_DOT_RPL, OPTIONS);
+		}
+
+		[NotNull]
+		public static string FromWildCards(string pattern)
+		{
+			pattern = EscapeFilePattern(pattern);
+			return string.Concat('^', pattern, '$');
 		}
 
 		[NotNull]
@@ -52,7 +56,7 @@ namespace asm.Helpers
 
 			foreach (string entry in entries)
 			{
-				string value = entry.Escape().Replace(__escapeStrings).Replace(RGX_PATTERN_DBL_DOT, RGX_PATTERN_DBL_DOT_RPL, OPTIONS);
+				string value = EscapeFilePattern(entry);
 				if (AllAsterisks.IsMatch(value)) return string.Concat('^', value, '$');
 				unique.Add(string.Concat("(?:", value, ")"));
 			}

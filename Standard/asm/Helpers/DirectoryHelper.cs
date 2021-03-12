@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Security;
 using System.Text;
+using System.Text.RegularExpressions;
 using asm.Extensions;
 using JetBrains.Annotations;
 
@@ -150,49 +151,90 @@ namespace asm.Helpers
 		public static IEnumerable<string> Enumerate(string path, string pattern, SearchOption option, bool applyPatternToDirectories)
 		{
 			path = PathHelper.Trim(path) ?? @".\";
-			pattern = pattern?.Trim();
+			pattern = pattern?.Trim().Replace(';', '|');
 			if (string.IsNullOrEmpty(pattern)) pattern = "*";
-			string dirPattern = applyPatternToDirectories ? pattern : "*";
-			return EnumerateEntries(path, dirPattern, pattern, option);
 
-			IEnumerable<string> EnumerateEntries(string entryPath, string entryDirPattern, string entryPattern, SearchOption entryOption)
+			bool multiPatterns = pattern.Contains('|');
+			if (multiPatterns) pattern = RegexHelper.FromFilePattern(pattern);
+
+			if (pattern == "^*$")
 			{
-				if (entryOption == SearchOption.TopDirectoryOnly)
-				{
-					if (entryDirPattern == entryPattern)
-					{
-						foreach (string entry in Directory.EnumerateFileSystemEntries(entryPath, entryDirPattern, SearchOption.TopDirectoryOnly))
-							yield return entry;
-					}
-					else
-					{
-						foreach (string entry in Directory.EnumerateDirectories(entryPath, entryDirPattern, SearchOption.TopDirectoryOnly))
-							yield return entry;
+				multiPatterns = false;
+				pattern = "*";
+			}
 
-						foreach (string entry in Directory.EnumerateFiles(entryPath, entryPattern, SearchOption.TopDirectoryOnly))
-							yield return entry;
+			string dirPattern = applyPatternToDirectories ? pattern : "*";
+			bool useFSPattern = dirPattern.Equals(pattern, StringComparison.OrdinalIgnoreCase);
+
+			if (!multiPatterns)
+			{
+				return useFSPattern
+							? Directory.EnumerateFileSystemEntries(path, pattern, option)
+							: option == SearchOption.TopDirectoryOnly
+								? Directory.EnumerateDirectories(path, dirPattern).Combine(Directory.EnumerateFiles(path, pattern))
+								: EnumerateLocal(path, dirPattern, pattern);
+			}
+
+			Regex rgxPattern = new Regex(pattern, RegexHelper.OPTIONS_I);
+			if (useFSPattern) return Directory.EnumerateFileSystemEntries(path, "*", option).Where(e => rgxPattern.IsMatch(e));
+
+			Regex rgxDirectory = dirPattern == "*"
+									? null
+									: new Regex(dirPattern, RegexHelper.OPTIONS_I);
+			return EnumerateRgxLocal(path, rgxDirectory, rgxPattern, option);
+
+			static IEnumerable<string> EnumerateLocal(string path, string dirPattern, string filePattern)
+			{
+				Queue<string> queue = new Queue<string>();
+				queue.Enqueue(path);
+
+				while (queue.Count > 0)
+				{
+					path = queue.Dequeue();
+
+					foreach (string directory in Directory.EnumerateDirectories(path, dirPattern))
+					{
+						yield return directory;
+						queue.Enqueue(directory);
 					}
+
+					foreach (string file in Directory.EnumerateFiles(path, filePattern))
+						yield return file;
 				}
-				else
-				{
-					if (entryDirPattern == entryPattern)
-					{
-						foreach (string entry in Directory.EnumerateFileSystemEntries(entryPath, entryDirPattern, SearchOption.AllDirectories))
-							yield return entry;
-					}
-					else
-					{
-						string[] directories = Directory.GetDirectories(entryPath, entryDirPattern, SearchOption.TopDirectoryOnly);
-				
-						foreach (string entry in directories)
-							yield return entry;
+			}
 
-						foreach (string entry in Directory.EnumerateFiles(entryPath, entryPattern, SearchOption.TopDirectoryOnly))
-							yield return entry;
-	
-						foreach (string entry in directories.SelectMany(d => EnumerateEntries(d, dirPattern, pattern, option)))
-							yield return entry;
+			static IEnumerable<string> EnumerateRgxLocal(string path, Regex dirPattern, Regex filePattern, SearchOption option)
+			{
+				if (option == SearchOption.TopDirectoryOnly)
+				{
+					IEnumerable<string> enumerable = Directory.EnumerateDirectories(path);
+					if (dirPattern != null) enumerable = enumerable.Where(e => dirPattern.IsMatch(e));
+
+					enumerable = enumerable.Combine(Directory.EnumerateFiles(path).Where(e => filePattern.IsMatch(e)));
+					
+					foreach (string entry in enumerable)
+						yield return entry;
+
+					yield break;
+				}
+
+				Queue<string> queue = new Queue<string>();
+				queue.Enqueue(path);
+
+				while (queue.Count > 0)
+				{
+					path = queue.Dequeue();
+					IEnumerable<string> directories = Directory.EnumerateDirectories(path);
+					if (dirPattern != null) directories = directories.Where(e => dirPattern.IsMatch(e));
+
+					foreach (string directory in directories)
+					{
+						yield return directory;
+						queue.Enqueue(directory);
 					}
+
+					foreach (string file in Directory.EnumerateFiles(path).Where(e => filePattern.IsMatch(e)))
+						yield return file;
 				}
 			}
 		}

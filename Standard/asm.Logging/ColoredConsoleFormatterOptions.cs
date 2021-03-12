@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging.Console;
 
 namespace asm.Logging
 {
-	public class ColoredConsoleOptions : SimpleConsoleFormatterOptions
+	public class ColoredConsoleFormatterOptions : SimpleConsoleFormatterOptions
 	{
 		public ConsoleColors TraceColors { get; set; }
 		public ConsoleColors DebugColors { get; set; }
