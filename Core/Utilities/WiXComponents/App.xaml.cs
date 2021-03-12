@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
+using WiXComponents.Properties;
 using WiXComponents.Views;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -26,21 +27,25 @@ namespace WiXComponents
 	public partial class App : Application
 	{
 		/// <inheritdoc />
-		public App() 
+		public App()
 		{
-			Writer = new LoggerConfiguration()
-					.MinimumLevel.Is(LogEventLevel.Verbose)
-					.Enrich.FromLogContext()
-					.WriteTo.Console(outputTemplate: "[{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SystemConsoleTheme.Literate)
-					.CreateLogger();
+			Serilog.ILogger serilogLogger = new LoggerConfiguration()
+											.MinimumLevel.Is(LogEventLevel.Verbose)
+											.Enrich.FromLogContext()
+											.WriteTo.Console(outputTemplate: "[{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SystemConsoleTheme.Literate, applyThemeToRedirectedOutput: true)
+											.CreateLogger();
+			ILoggerFactory factory = LoggerFactory.Create(builder =>
+			{
+				builder.ClearProviders();
+				builder.AddSerilog(serilogLogger, true);
+			});
+			Logger = new Logger<App>(factory.CreateLogger(nameof(App)));
 		}
 
-		[NotNull]
-		public Serilog.ILogger Writer { get; }
 
 		public IServiceProvider ServiceProvider { get; private set; }
 
-		public ILogger Logger { get; private set; }
+		public Logger<App> Logger { get; private set; }
 
 		/// <inheritdoc />
 		protected override void OnStartup(StartupEventArgs e)
@@ -57,7 +62,7 @@ namespace WiXComponents
 			}
 			else if (e.Args.Length > 0)
 			{
-				Writer.Fatal("Could not create Writer window.");
+				Logger.LogError("Could not create Writer window.");
 				Shutdown();
 				return;
 			}
@@ -86,8 +91,7 @@ namespace WiXComponents
 
 				if (result.Tag == ParserResultType.NotParsed)
 				{
-					string usage = StartupArguments.GetUsage(result);
-					Writer.Error(usage);
+					Logger.LogError(StartupArguments.GetUsage(result));
 					Shutdown();
 					return;
 				}
@@ -96,7 +100,7 @@ namespace WiXComponents
 			}
 			catch (Exception ex)
 			{
-				Writer.Error(ex.CollectMessages());
+				Logger.LogError(ex.CollectMessages());
 				Shutdown();
 				return;
 			}
@@ -109,7 +113,7 @@ namespace WiXComponents
 			// Logging
 			if (configuration.GetValue<bool>("Logging:Enabled") && args.LogLevel > LogLevel.None)
 			{
-				LoggerConfiguration loggerConfiguration = new ();
+				LoggerConfiguration loggerConfiguration = new();
 				loggerConfiguration.ReadFrom.Configuration(configuration);
 				loggerConfiguration.MinimumLevel.Is(args.LogLevel switch
 				{
@@ -125,7 +129,7 @@ namespace WiXComponents
 
 			// Services
 			ConfigureServices(args, configuration);
-			Logger = ServiceProvider.GetService<ILogger<App>>();
+			Logger._logger = ServiceProvider.GetService<ILogger<App>>();
 
 			if (args.Files.Count > 0 || !string.IsNullOrEmpty(args.Directory))
 			{
@@ -175,30 +179,33 @@ namespace WiXComponents
 		private void ProcessCommandLine([NotNull] StartupArguments args)
 		{
 			// When we are here, args either has files or a directory to be processed.
-			IEnumerable<string> files;
-
 			if (string.IsNullOrEmpty(args.Directory))
 			{
-				files = args.Files;
-			}
-			else
-			{
-				if (!Directory.Exists(args.Directory))
-				{
-					Writer.Fatal("Path not found.");
-					Logger?.LogError("Path not found.");
-					return;
-				}
-				
-				files = DirectoryHelper.EnumerateFiles(args.Directory, "*.wxs;*.wsi;*.xml", args.IncludeSubDirectory
-																						? SearchOption.AllDirectories
-																						: SearchOption.TopDirectoryOnly);
+				ProcessFiles(args.Files);
+				return;
 			}
 
+			if (!Directory.Exists(args.Directory))
+			{
+				Logger.LogError(Errors.DirectoryNotFound, args.Directory);
+				return;
+			}
+				
+			ProcessFiles(DirectoryHelper.EnumerateFiles(args.Directory, "*.wxs;*.wsi;*.xml", args.IncludeSubDirectory
+																								? SearchOption.AllDirectories
+																								: SearchOption.TopDirectoryOnly));
+		}
+
+		private void ProcessFiles([NotNull] IEnumerable<string> files)
+		{
 			// wixproj, csproj, vbproj, wxs, wsi, xml
 			foreach (string file in files)
 			{
-				Writer.Verbose(file);
+				if (!File.Exists(file))
+				{
+					Logger.LogError(Errors.FileNotFound, file);
+					continue;
+				}
 			}
 
 			//string fileName = PathHelper.Trim(args[0]);
