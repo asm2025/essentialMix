@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
 using WiXComponents.Views;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -25,12 +26,21 @@ namespace WiXComponents
 	/// </summary>
 	public partial class App : Application
 	{
-		private IConfiguration _configuration;
 		public IServiceProvider ServiceProvider { get; private set; }
 
 		/// <inheritdoc />
 		protected override void OnStartup(StartupEventArgs e)
 		{
+			// Setup
+			JsonConvert.DefaultSettings = () => JsonHelper.CreateSettings();
+			string basePath = Assembly.GetExecutingAssembly().GetDirectoryPath();
+
+			// Console writer
+			Serilog.ILogger console = new LoggerConfiguration()
+									.Enrich.FromLogContext()
+									.WriteTo.Console(LogEventLevel.Verbose, "[{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SystemConsoleTheme.Literate, applyThemeToRedirectedOutput: true)
+									.CreateLogger();
+
 			ConsoleHelper.AttachConsole(out bool consoleCreated);
 			
 			if (ConsoleHelper.HasConsole)
@@ -39,27 +49,21 @@ namespace WiXComponents
 			}
 			else if (e.Args.Length > 0)
 			{
-				throw new Exception("Could not create console window.");
+				console.Fatal("Could not create console window.");
+				Shutdown();
+				return;
 			}
 
-			// Setup and command line processing
-			JsonConvert.DefaultSettings = () => JsonHelper.CreateSettings();
-			string basePath = Assembly.GetExecutingAssembly().GetDirectoryPath();
-
 			// Configuration
-			_configuration = IConfigurationBuilderHelper.CreateConfiguration(basePath)
-														.AddConfigurationFiles(basePath, EnvironmentHelper.GetEnvironmentName())
-														.AddEnvironmentVariables()
-														.AddUserSecrets()
-														.AddArguments(e.Args)
-														.Build();
+			IConfiguration configuration = IConfigurationBuilderHelper.CreateConfiguration(basePath)
+																	.AddConfigurationFiles(basePath, EnvironmentHelper.GetEnvironmentName())
+																	.AddEnvironmentVariables()
+																	.AddUserSecrets()
+																	.AddArguments(e.Args)
+																	.Build();
 
-			// Logging
-			LoggingLevelSwitch levelSwitch = new();
-			LoggerConfiguration loggerConfiguration = new ();
-			loggerConfiguration.MinimumLevel.ControlledBy(levelSwitch);
-			
 			Parser parser = null;
+			StartupArguments args;
 
 			try
 			{
@@ -68,65 +72,64 @@ namespace WiXComponents
 				{
 					settings.CaseSensitive = false;
 					settings.CaseInsensitiveEnumValues = true;
-					settings.HelpWriter = Console.Error;
 				});
 
 				ParserResult<StartupArguments> result = parser.ParseArguments<StartupArguments>(e.Args);
-				ObjectHelper.Dispose(ref parser);
 
 				if (result.Tag == ParserResultType.NotParsed)
 				{
+					string usage = StartupArguments.GetUsage(result);
+					console.Error(usage);
 					Shutdown();
 					return;
 				}
 
-				StartupArguments args = ((Parsed<StartupArguments>)result).Value;
-
-				// Logging:2
-				if (_configuration.GetValue<bool>("Logging:Enabled") && args.LogLevel > LogLevel.None)
-				{
-					loggerConfiguration.ReadFrom.Configuration(_configuration);
-					levelSwitch.MinimumLevel = args.LogLevel switch
-					{
-						LogLevel.Trace => LogEventLevel.Verbose,
-						LogLevel.Debug => LogEventLevel.Debug,
-						LogLevel.Information => LogEventLevel.Information,
-						LogLevel.Warning => LogEventLevel.Warning,
-						LogLevel.Error => LogEventLevel.Error,
-						_ => LogEventLevel.Fatal
-					};
-					Log.Logger = loggerConfiguration.CreateLogger();
-				}
-
-				// Services
-				ConfigureServices(args);
-
-				// Command line
-				if (args.Files.Count > 0 || !string.IsNullOrEmpty(args.Directory))
-				{
-					ProcessCommandLine(args);
-					if (consoleCreated) ConsoleHelper.FreeConsole();
-					Shutdown();
-					return;
-				}
-
-				// Start the main window
-				ConsoleHelper.Hide();
-				if (consoleCreated) ConsoleHelper.FreeConsole();
-				base.OnStartup(e);
-				Start();
+				args = ((Parsed<StartupArguments>)result).Value;
 			}
 			catch (Exception ex)
 			{
-				// This won't produce log until a logger is setup in the above try block
-				Log.Error(ex.CollectMessages());
+				console.Error(ex.CollectMessages());
 				Shutdown();
+				return;
 			}
 			finally
 			{
 				// in case an error occurred and the parser was not disposed
 				ObjectHelper.Dispose(ref parser);
 			}
+
+			// Logging
+			if (configuration.GetValue<bool>("Logging:Enabled") && args.LogLevel > LogLevel.None)
+			{
+				LoggerConfiguration loggerConfiguration = new ();
+				loggerConfiguration.ReadFrom.Configuration(configuration);
+				loggerConfiguration.MinimumLevel.Is(args.LogLevel switch
+				{
+					LogLevel.Trace => LogEventLevel.Verbose,
+					LogLevel.Debug => LogEventLevel.Debug,
+					LogLevel.Information => LogEventLevel.Information,
+					LogLevel.Warning => LogEventLevel.Warning,
+					LogLevel.Error => LogEventLevel.Error,
+					_ => LogEventLevel.Fatal
+				});
+				Log.Logger = loggerConfiguration.CreateLogger();
+			}
+
+			// Services
+			ConfigureServices(args, configuration);
+
+			if (args.Files.Count > 0 || !string.IsNullOrEmpty(args.Directory))
+			{
+				ProcessCommandLine(args, console);
+				if (consoleCreated) ConsoleHelper.FreeConsole();
+				Shutdown();
+				return;
+			}
+
+			ConsoleHelper.Hide();
+			if (consoleCreated) ConsoleHelper.FreeConsole();
+			base.OnStartup(e);
+			Start();
 		}
 
 		/// <inheritdoc />
@@ -136,12 +139,12 @@ namespace WiXComponents
 			Log.CloseAndFlush();
 		}
 
-		private void ConfigureServices([NotNull] StartupArguments startupArguments)
+		private void ConfigureServices([NotNull] StartupArguments startupArguments, [NotNull] IConfiguration configuration)
 		{
 			ServiceCollection services = new();
 			services.AddSingleton(startupArguments);
-			services.AddLogging(builder => builder.AddSerilog(null, true)
-												.AddColoredConsoleFormatter());
+			services.AddSingleton(configuration);
+			services.AddLogging(builder => builder.AddSerilog(null, true));
 			services.AddTransient<MainView>();
 			ServiceProvider = services.BuildServiceProvider();
 		}
@@ -152,33 +155,35 @@ namespace WiXComponents
 			window.Show();
 		}
 
-		private void ProcessCommandLine([NotNull] StartupArguments args)
+		private void ProcessCommandLine([NotNull] StartupArguments args, [NotNull] Serilog.ILogger console)
 		{
 			// When we are here, args either has files or a directory to be processed.
 			ILogger logger = ServiceProvider.GetService<ILogger<App>>();
 
 			if (string.IsNullOrEmpty(args.Directory))
 			{
-				ProcessFiles(args.Files, logger);
+				ProcessFiles(args.Files, console, logger);
 				return;
 			}
 
 			if (!Directory.Exists(args.Directory))
 			{
+				console.Fatal("Path not found.");
 				logger.LogError("Path not found.");
 				return;
 			}
 
-			ProcessFiles(DirectoryHelper.Enumerate(args.Directory, "*.wxs;*.wsi;*.xml", args.IncludeSubDirectory
-																								? SearchOption.AllDirectories
-																								: SearchOption.TopDirectoryOnly), logger);
+			IEnumerable<string> files = DirectoryHelper.EnumerateFiles(args.Directory, "*.wxs;*.wsi;*.xml", args.IncludeSubDirectory
+																											? SearchOption.AllDirectories
+																											: SearchOption.TopDirectoryOnly);
+			ProcessFiles(files, console, logger);
 		}
 
-		private void ProcessFiles([NotNull] IEnumerable<string> files, ILogger logger)
+		private void ProcessFiles([NotNull] IEnumerable<string> files, [NotNull] Serilog.ILogger console, ILogger logger)
 		{
 			foreach (string file in files)
 			{
-				logger.LogInformation(file);
+				console.Information(file);
 			}
 
 			//string fileName = PathHelper.Trim(args[0]);

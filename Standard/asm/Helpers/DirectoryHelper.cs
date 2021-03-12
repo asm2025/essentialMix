@@ -144,10 +144,17 @@ namespace asm.Helpers
 			return info.FullName;
 		}
 
+		[NotNull]
 		public static IEnumerable<string> Enumerate(string path) { return Enumerate(path, null, SearchOption.TopDirectoryOnly, false); }
+		[NotNull]
 		public static IEnumerable<string> Enumerate(string path, SearchOption option) { return Enumerate(path, null, option, false); }
-		public static IEnumerable<string> Enumerate(string path, string pattern) { return Enumerate(path, pattern, SearchOption.AllDirectories, false); }
+		[NotNull]
+		public static IEnumerable<string> Enumerate(string path, string pattern) { return Enumerate(path, pattern, SearchOption.TopDirectoryOnly, false); }
+		[NotNull]
 		public static IEnumerable<string> Enumerate(string path, string pattern, SearchOption option) { return Enumerate(path, pattern, option, false); }
+		[NotNull]
+		public static IEnumerable<string> Enumerate(string path, string pattern, bool applyPatternToDirectories) { return Enumerate(path, pattern, SearchOption.TopDirectoryOnly, applyPatternToDirectories); }
+		[NotNull]
 		public static IEnumerable<string> Enumerate(string path, string pattern, SearchOption option, bool applyPatternToDirectories)
 		{
 			path = PathHelper.Trim(path) ?? @".\";
@@ -237,6 +244,62 @@ namespace asm.Helpers
 						yield return file;
 				}
 			}
+		}
+
+		[NotNull]
+		public static IEnumerable<string> EnumerateDirectories(string path) { return EnumerateDirectories(path, null, SearchOption.TopDirectoryOnly); }
+		[NotNull]
+		public static IEnumerable<string> EnumerateDirectories(string path, SearchOption option) { return EnumerateDirectories(path, null, option); }
+		[NotNull]
+		public static IEnumerable<string> EnumerateDirectories(string path, string pattern) { return EnumerateDirectories(path, pattern, SearchOption.TopDirectoryOnly); }
+		[NotNull]
+		public static IEnumerable<string> EnumerateDirectories(string path, string pattern, SearchOption option)
+		{
+			path = PathHelper.Trim(path) ?? @".\";
+			pattern = pattern?.Trim().Replace(';', '|');
+			if (string.IsNullOrEmpty(pattern)) pattern = "*";
+
+			bool multiPatterns = pattern.Contains('|');
+			if (multiPatterns) pattern = RegexHelper.FromFilePattern(pattern);
+
+			if (pattern == "^*$")
+			{
+				multiPatterns = false;
+				pattern = "*";
+			}
+
+			if (!multiPatterns) return Directory.EnumerateDirectories(path, pattern, option);
+
+			Regex rgxPattern = new Regex(pattern, RegexHelper.OPTIONS_I);
+			return Directory.EnumerateDirectories(path, "*", option).Where(e => rgxPattern.IsMatch(e));
+		}
+
+		[NotNull]
+		public static IEnumerable<string> EnumerateFiles(string path) { return EnumerateFiles(path, null, SearchOption.TopDirectoryOnly); }
+		[NotNull]
+		public static IEnumerable<string> EnumerateFiles(string path, SearchOption option) { return EnumerateFiles(path, null, option); }
+		[NotNull]
+		public static IEnumerable<string> EnumerateFiles(string path, string pattern) { return EnumerateFiles(path, pattern, SearchOption.TopDirectoryOnly); }
+		[NotNull]
+		public static IEnumerable<string> EnumerateFiles(string path, string pattern, SearchOption option)
+		{
+			path = PathHelper.Trim(path) ?? @".\";
+			pattern = pattern?.Trim().Replace(';', '|');
+			if (string.IsNullOrEmpty(pattern)) pattern = "*";
+
+			bool multiPatterns = pattern.Contains('|');
+			if (multiPatterns) pattern = RegexHelper.FromFilePattern(pattern);
+
+			if (pattern == "^*$")
+			{
+				multiPatterns = false;
+				pattern = "*";
+			}
+
+			if (!multiPatterns) return Directory.EnumerateFiles(path, pattern, option);
+
+			Regex rgxPattern = new Regex(pattern, RegexHelper.OPTIONS_I);
+			return Directory.EnumerateFiles(path, "*", option).Where(e => rgxPattern.IsMatch(e));
 		}
 	}
 }
