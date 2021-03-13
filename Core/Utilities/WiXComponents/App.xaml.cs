@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Windows;
+using System.Xml;
+using asm.Data.Helpers;
 using asm.Extensions;
 using asm.Helpers;
 using asm.Newtonsoft.Helpers;
@@ -17,7 +21,6 @@ using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using WiXComponents.Properties;
 using WiXComponents.Views;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace WiXComponents
 {
@@ -26,6 +29,20 @@ namespace WiXComponents
 	/// </summary>
 	public partial class App : Application
 	{
+		private static readonly Lazy<IReadOnlySet<string>> __supportedProjects = new Lazy<IReadOnlySet<string>>(() => new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+		{
+			".WiXProj",
+			".CSProj",
+			".VBProj",
+		}, LazyThreadSafetyMode.PublicationOnly);
+
+		private static readonly Lazy<IReadOnlySet<string>> __supportedFiles = new Lazy<IReadOnlySet<string>>(() => new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+		{
+			".wxs",
+			".wsi",
+			".xml",
+		}, LazyThreadSafetyMode.PublicationOnly);
+
 		/// <inheritdoc />
 		public App()
 		{
@@ -45,7 +62,8 @@ namespace WiXComponents
 
 		public IServiceProvider ServiceProvider { get; private set; }
 
-		public Logger<App> Logger { get; private set; }
+		[NotNull]
+		public Logger<App> Logger { get; }
 
 		/// <inheritdoc />
 		protected override void OnStartup(StartupEventArgs e)
@@ -179,61 +197,125 @@ namespace WiXComponents
 		private void ProcessCommandLine([NotNull] StartupArguments args)
 		{
 			// When we are here, args either has files or a directory to be processed.
-			if (string.IsNullOrEmpty(args.Directory))
+			if (!string.IsNullOrEmpty(args.Directory))
 			{
-				ProcessFiles(args.Files);
+				if (!Directory.Exists(args.Directory))
+				{
+					Logger.LogError(Errors.DirectoryNotFound, args.Directory);
+					return;
+				}
+
+				IEnumerable<string> files = DirectoryHelper.EnumerateFiles(args.Directory, "*.wxs;*.wsi;*.xml", args.IncludeSubDirectory
+																													? SearchOption.AllDirectories
+																													: SearchOption.TopDirectoryOnly);
+				foreach (string fileName in files)
+				{
+					ProcessWiXFile(fileName);
+				}
+
 				return;
 			}
 
-			if (!Directory.Exists(args.Directory))
+			foreach (string fileName in args.Files)
 			{
-				Logger.LogError(Errors.DirectoryNotFound, args.Directory);
-				return;
+				string ext = PathHelper.Extension(fileName);
+				if (ext == null) continue;
+				if (__supportedProjects.Value.Contains(ext)) ProcessProjectFile(fileName);
+				if (__supportedFiles.Value.Contains(ext)) ProcessWiXFile(fileName);
 			}
-				
-			ProcessFiles(DirectoryHelper.EnumerateFiles(args.Directory, "*.wxs;*.wsi;*.xml", args.IncludeSubDirectory
-																								? SearchOption.AllDirectories
-																								: SearchOption.TopDirectoryOnly));
 		}
 
-		private void ProcessFiles([NotNull] IEnumerable<string> files)
+		private void ProcessProjectFile([NotNull] string fileName)
 		{
-			// wixproj, csproj, vbproj, wxs, wsi, xml
-			foreach (string file in files)
+			// wixproj, csproj, vbproj
+			if (!File.Exists(fileName))
 			{
-				if (!File.Exists(file))
-				{
-					Logger.LogError(Errors.FileNotFound, file);
-					continue;
-				}
+				Logger.LogError(Errors.FileNotFound, fileName);
+				return;
 			}
 
-			//string fileName = PathHelper.Trim(args[0]);
+			string path = Path.GetDirectoryName(fileName) ?? Directory.GetCurrentDirectory();
 
-			//if (string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
-			//{
-			//	Console.WriteLine("File not found.");
-			//	return 1;
-			//}
+			try
+			{
+				XmlDocument doc = XmlDocumentHelper.LoadFile(fileName);
+				XmlNode root = doc.DocumentElement;
+				if (root == null) return;
 
-			//List<string> files = new List<string>();
+				XmlNamespaceManager manager = doc.GetNamespaceManager();
+				string prefix = manager.GetDefaultPrefix();
 
-			//try
-			//{
-			//	XmlDocument doc = XmlDocumentHelper.LoadFile(fileName);
-			//	XmlNamespaceManager manager = new XmlNamespaceManager(doc.NameTable);
-			//	manager.AddNamespace("msbld", "http://schemas.microsoft.com/developer/msbuild/2003");
+				// Finds all of the files included in the project.
+				XmlNodeList nodes = doc.SelectNodes($"//{prefix}Compile", manager);
+				
+				if (nodes != null && nodes.Count > 0)
+				{
+					foreach (XmlNode node in nodes)
+					{
+						if (node.HasAttributeOrChild("Link")) continue;
+						string itemName = node.Attributes?["Include"]?.Value;
+						if (string.IsNullOrEmpty(itemName)) continue;
 
-			//	// Finds all of the files included in the project.
-			//	XmlNodeList nodes = doc.SelectNodes("/")
-			//}
-			//catch (Exception ex)
-			//{
-			//	Console.WriteLine(ex.CollectMessages());
-			//	return 1;
-			//}
+						string ext = PathHelper.Extension(itemName);
+						if (ext == null || !__supportedFiles.Value.Contains(ext)) continue;
+						ProcessWiXFile(Path.Combine(path, itemName));
+					}
+				}
 
-			//string path = Path.GetDirectoryName(fileName) ?? Directory.GetCurrentDirectory();
+				nodes = doc.SelectNodes($"//{prefix}Content", manager);
+				if (nodes == null || nodes.Count == 0) return;
+				
+				foreach (XmlNode node in nodes)
+				{
+					if (node.HasAttributeOrChild("Link")) continue;
+					string itemName = node.Attributes?["Include"]?.Value;
+					if (string.IsNullOrEmpty(itemName)) continue;
+
+					string ext = PathHelper.Extension(itemName);
+					if (ext == null || !__supportedFiles.Value.Contains(ext)) continue;
+					ProcessWiXFile(Path.Combine(path, itemName));
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.LogError(ex.CollectMessages());
+			}
+		}
+
+		private void ProcessWiXFile([NotNull] string fileName)
+		{
+			// wxs, wsi, xml
+			if (!File.Exists(fileName))
+			{
+				Logger.LogError(Errors.FileNotFound, fileName);
+				return;
+			}
+
+			try
+			{
+				// This will only update files that aren't readonly
+				if ((File.GetAttributes(fileName) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) return;
+				
+				bool modified = false;
+				XmlDocument doc = new()
+				{
+					PreserveWhitespace = true
+				};
+				doc.Load(fileName);
+		
+				foreach (XmlElement element in doc.GetElementsByTagName("Component").Cast<XmlElement>())
+				{
+					element.SetAttribute("Guid", Guid.NewGuid().ToString("B").ToUpperInvariant());
+					modified = true;
+				}
+		
+				if (!modified) return;
+				doc.Save(fileName);
+			}
+			catch (Exception ex)
+			{
+				Logger.LogError(ex.CollectMessages());
+			}
 		}
 	}
 }

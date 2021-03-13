@@ -126,5 +126,53 @@ namespace asm.Extensions
 		{
 			return thisValue != null && thisValue.NodeType == XmlNodeType.Element && thisValue.Name.IsSame(localName) && thisValue.NamespaceURI.IsSame(namespaceURI);
 		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool HasAttribute([NotNull] this XmlNode thisValue, [NotNull] string name)
+		{
+			return thisValue.Attributes.Has(name);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool HasAttribute([NotNull] this XmlNode thisValue, [NotNull] string localName, string namespaceURI)
+		{
+			return thisValue.Attributes.Has(localName, namespaceURI);
+		}
+
+		public static bool HasChild([NotNull] this XmlNode thisValue, [NotNull] string name)
+		{
+			if (!thisValue.HasChildNodes) return false;
+
+			foreach (XmlNode node in thisValue.ChildNodes)
+			{
+				if (node.Name != name) continue;
+				return true;
+			}
+
+			return false;
+		}
+
+		public static bool HasChild([NotNull] this XmlNode thisValue, [NotNull] string localName, string namespaceURI)
+		{
+			if (!thisValue.HasChildNodes) return false;
+			
+			foreach (XmlNode node in thisValue.ChildNodes)
+			{
+				if (node.LocalName != localName || node.NamespaceURI != namespaceURI) continue;
+				return true;
+			}
+
+			return false;
+		}
+
+		public static bool HasAttributeOrChild([NotNull] this XmlNode thisValue, [NotNull] string name)
+		{
+			return HasAttribute(thisValue, name) || HasChild(thisValue, name);
+		}
+
+		public static bool HasAttributeOrChild([NotNull] this XmlNode thisValue, [NotNull] string localName, string namespaceURI)
+		{
+			return HasAttribute(thisValue, localName, namespaceURI) || HasChild(thisValue, localName, namespaceURI);
+		}
 	}
 }

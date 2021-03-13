@@ -7,6 +7,16 @@ namespace asm.Extensions
 {
 	public static class XmlNamespaceManagerExtension
 	{
+		[NotNull]
+		public static string GetDefaultPrefix([NotNull] this XmlNamespaceManager thisValue)
+		{
+			const string NS_DEF = "tns";
+
+			return thisValue.HasNamespace(NS_DEF)
+						? NS_DEF + ":"
+						: string.Empty;
+		}
+
 		public static int Append([NotNull] this XmlNamespaceManager thisValue, [NotNull] params string[] namespaceURI)
 		{
 			if (namespaceURI.IsNullOrEmpty()) return 0;

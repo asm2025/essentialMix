@@ -80,7 +80,26 @@ namespace asm.Extensions
 		}
 
 		[NotNull]
-		public static XmlNamespaceManager GetNamespaceManager([NotNull] this XmlDocument thisValue) { return new XmlNamespaceManager(thisValue.NameTable); }
+		public static XmlNamespaceManager GetNamespaceManager([NotNull] this XmlDocument thisValue)
+		{
+			XmlNamespaceManager manager = new XmlNamespaceManager(thisValue.NameTable);
+			XmlNodeList namespaces = thisValue.SelectNodes(@"//namespace::*[not(. = ../../namespace::*)]");
+			if (namespaces == null) return manager;
+
+			foreach (XmlNode node in namespaces)
+			{
+				string prefix = node.LocalName;
+
+				if (prefix == "xmlns")
+				{
+					manager.AddNamespace(string.Empty, node.Value);
+					prefix = "tns";
+				}
+				manager.AddNamespace(prefix, node.Value);
+			}
+
+			return manager;
+		}
 
 		[NotNull]
 		public static XDocument ToXDocument([NotNull] this XmlDocument thisValue)

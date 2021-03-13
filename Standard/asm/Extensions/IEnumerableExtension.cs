@@ -799,46 +799,105 @@ namespace asm.Extensions
 			}
 		}
 
-		public static bool AnyChild<T>([NotNull] this T thisValue, [NotNull] Predicate<T> selector, [NotNull] Func<T, IEnumerable<T>> getChildren)
+		public static bool Any<T>([NotNull] this T thisValue, [NotNull] Predicate<T> selector, [NotNull] Func<T, IEnumerable<T>> getChildren) { return Any(thisValue, BreadthDepthTraversal.BreadthFirst, selector, getChildren); }
+		public static bool Any<T>([NotNull] this T thisValue, int depth, [NotNull] Predicate<T> selector, [NotNull] Func<T, IEnumerable<T>> getChildren) { return Any(thisValue, BreadthDepthTraversal.BreadthFirst, depth, selector, getChildren); }
+		public static bool Any<T>([NotNull] this T thisValue, BreadthDepthTraversal traversal, [NotNull] Predicate<T> selector, [NotNull] Func<T, IEnumerable<T>> getChildren) { return Any(thisValue, traversal, -1, selector, getChildren); }
+		public static bool Any<T>([NotNull] this T thisValue, BreadthDepthTraversal traversal, int depth, [NotNull] Predicate<T> selector, [NotNull] Func<T, IEnumerable<T>> getChildren)
 		{
-			IEnumerable<T> topChildren = getChildren.Invoke(thisValue);
-			if (topChildren == null) return false;
-
-			Stack<IEnumerator<T>> stack = new Stack<IEnumerator<T>>();
-			IEnumerator<T> e = topChildren.GetEnumerator();
-
-			try
+			return traversal switch
 			{
-				while (true)
+				BreadthDepthTraversal.BreadthFirst => depth < 0
+														? BFAnyLocal(thisValue, selector, getChildren)
+														: BFAnyWithDepthLocal(thisValue, depth, selector, getChildren),
+				BreadthDepthTraversal.DepthFirst => depth < 0
+														? DFAnyLocal(thisValue, selector, getChildren)
+														: DFAnyWithDepthLocal(thisValue, depth, selector, getChildren),
+				_ => throw new ArgumentOutOfRangeException(nameof(traversal), traversal, null)
+			};
+
+			static bool BFAnyLocal(T thisValue, Predicate<T> selector, Func<T, IEnumerable<T>> getChildren)
+			{
+				Queue<T> queue = new Queue<T>();
+				queue.Enqueue(thisValue);
+
+				while (queue.Count > 0)
 				{
-					while (e.MoveNext())
-					{
-						T current = e.Current;
-						if (selector(current)) return true;
+					T item = queue.Dequeue();
+					if (selector(item)) return true;
 
-						IEnumerable<T> children = getChildren.Invoke(current);
-						if (children == null) continue;
-						stack.Push(e);
-						e = children.GetEnumerator();
-					}
+					IEnumerable<T> children = getChildren.Invoke(item);
+					if (children == null) continue;
 
-					if (stack.Count == 0) break;
-					ObjectHelper.Dispose(ref e);
-					e = stack.Pop();
+					foreach (T child in children) 
+						queue.Enqueue(child);
 				}
+
+				return false;
 			}
-			finally
+
+			static bool BFAnyWithDepthLocal(T thisValue, int depth, Predicate<T> selector, Func<T, IEnumerable<T>> getChildren)
 			{
-				ObjectHelper.Dispose(ref e);
+				Queue<(T, int)> queue = new Queue<(T, int)>();
+				queue.Enqueue((thisValue, 0));
+
+				while (queue.Count > 0)
+				{
+					(T item, int d) = queue.Dequeue();
+					if (selector(item)) return true;
+					if (d == depth) continue;
+
+					IEnumerable<T> children = getChildren.Invoke(item);
+					if (children == null) continue;
+					d++;
+
+					foreach (T child in children) 
+						queue.Enqueue((child, d));
+				}
+
+				return false;
+			}
+
+			static bool DFAnyLocal(T thisValue, Predicate<T> selector, Func<T, IEnumerable<T>> getChildren)
+			{
+				Stack<T> stack = new Stack<T>();
+				stack.Push(thisValue);
 
 				while (stack.Count > 0)
 				{
-					IEnumerator<T> item = stack.Pop();
-					ObjectHelper.Dispose(ref item);
+					T item = stack.Pop();
+					if (selector(item)) return true;
+
+					IEnumerable<T> children = getChildren.Invoke(item);
+					if (children == null) continue;
+
+					foreach (T child in children) 
+						stack.Push(child);
 				}
+
+				return false;
 			}
 
-			return false;
+			static bool DFAnyWithDepthLocal(T thisValue, int depth, Predicate<T> selector, Func<T, IEnumerable<T>> getChildren)
+			{
+				Stack<(T, int)> stack = new Stack<(T, int)>();
+				stack.Push((thisValue, 0));
+
+				while (stack.Count > 0)
+				{
+					(T item, int d) = stack.Pop();
+					if (selector(item)) return true;
+					if (d == depth) continue;
+
+					IEnumerable<T> children = getChildren.Invoke(item);
+					if (children == null) continue;
+					d++;
+
+					foreach (T child in children) 
+						stack.Push((child, d));
+				}
+
+				return false;
+			}
 		}
 
 		public static IEnumerable Traverse([NotNull] this IEnumerable thisValue, [NotNull] Func<object, IEnumerable> getChildren, DequeuePriority dequeuePriority = DequeuePriority.FIFO)

@@ -77,7 +77,7 @@ namespace asm.Helpers
 							: string.Concat(path, DirectorySeparator);
 		}
 
-		public static string Extenstion(string path, string value = null)
+		public static string Extension(string path, string value = null)
 		{
 			path = Trim(path) ?? throw new ArgumentNullException(nameof(path));
 			

@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Text;
 using System.Xml;
 using asm.Extensions;
@@ -67,15 +66,8 @@ namespace asm.Data.Helpers
 		[NotNull]
 		public static XmlDocument LoadFile([NotNull] string filename, XmlReaderSettings settings, XmlParserContext context)
 		{
-			if (filename == null) throw new ArgumentNullException(nameof(filename));
-			if (!File.Exists(filename)) throw new FileNotFoundException("File not found", filename);
-
 			XmlDocument document = new XmlDocument();
-			XmlReaderSettings options = settings ?? XmlReaderHelper.CreateSettings();
-
-			using (XmlReader reader = context == null ? XmlReader.Create(filename, options) : XmlReader.Create(filename, options, context))
-				document.Load(reader);
-
+			document.LoadFile(filename);
 			return document;
 		}
 	}
