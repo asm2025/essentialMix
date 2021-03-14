@@ -4,8 +4,44 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WiXComponents"
-        mc:Ignorable="d"
-        Width="800" Height="450">
-    <Grid>
-    </Grid>
+        mc:Ignorable="d" Title="{Binding Title}"
+        Width="800" Height="600" ResizeMode="NoResize"
+		WindowStyle="None" Background="Transparent" AllowsTransparency="True">
+    <Border CornerRadius="8" Background="Transparent">
+        <Border Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Margin="8" CornerRadius="8">
+			<Border.Effect>
+				<DropShadowEffect Direction="270" ShadowDepth="4" BlurRadius="10" Opacity="0.5" />
+			</Border.Effect>
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+				</Grid.RowDefinitions>
+				<Border Height="48px" CornerRadius="8, 8, 0, 0" VerticalAlignment="Top" Padding="0" Margin="0"
+						Background="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+					<Image Source="../wixtoolset.ico" HorizontalAlignment="Left" Width="32" Height="32" Margin="16,4,4,4" />
+				</Border>
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 0, 16, 0">
+					<Button Name="MinimizeButton" Margin="4, 4, 4, 70" Click="MinimizeButton_Click">
+						<Button.Template>
+							<ControlTemplate TargetType="Button">
+								<ContentPresenter Content="{TemplateBinding Content}" />
+							</ControlTemplate>
+						</Button.Template>
+						<Image Width="20" Height="20" Source="../Resources/min.png" Margin="0,8,8,0" />
+					</Button>
+					<Button Name="CloseButton" Margin="4,4,4,70" Click="CloseButton_Click">
+						<Button.Template>
+							<ControlTemplate TargetType="Button">
+								<ContentPresenter Content="{TemplateBinding Content}" />
+							</ControlTemplate>
+						</Button.Template>
+						<Image Width="20" Height="20" Source="../Resources/close.png" Margin="0,8,8,0" />
+					</Button>
+				</StackPanel>
+				<Grid>
+
+				</Grid>
+			</Grid>
+		</Border>
+	</Border>
 </Window>

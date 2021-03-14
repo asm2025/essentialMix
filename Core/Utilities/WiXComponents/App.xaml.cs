@@ -198,6 +198,7 @@ namespace WiXComponents
 
 		private void Start()
 		{
+			//https://www.reactiveui.net/docs/getting-started/compelling-example
 			MainView window = ServiceProvider.GetRequiredService<MainView>();
 			window.Show();
 		}

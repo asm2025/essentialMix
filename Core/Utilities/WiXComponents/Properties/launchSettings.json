@@ -1,8 +1,7 @@
 {
   "profiles": {
     "WiXComponents": {
-      "commandName": "Project",
-      "commandLineArgs": "-f D:\\Users\\asm\\Desktop\\Installer\\Installer.wixproj -l Information"
+      "commandName": "Project"
     }
   }
 }
