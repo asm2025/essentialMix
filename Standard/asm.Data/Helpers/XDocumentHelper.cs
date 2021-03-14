@@ -74,7 +74,6 @@ namespace asm.Data.Helpers
 		[NotNull]
 		public static XDocument LoadFile([NotNull] string filename, LoadOptions options)
 		{
-			if (filename == null) throw new ArgumentNullException(nameof(filename));
 			if (!File.Exists(filename)) throw new FileNotFoundException("File not found", filename);
 
 			XDocument document = XDocument.Load(filename, options);

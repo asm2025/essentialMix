@@ -15,6 +15,8 @@ namespace asm.Data.Helpers
 {
 	public static class XmlHelper
 	{
+		public const string NS_DEFAULT = "_";
+
 		private static readonly XmlSerializerFactory __factory = new XmlSerializerFactory();
 		private static readonly ConcurrentDictionary<Type, XmlSerializer> __serializersCache = new ConcurrentDictionary<Type, XmlSerializer>();
 		

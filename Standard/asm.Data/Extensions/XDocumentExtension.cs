@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.XPath;
 using JetBrains.Annotations;
 using asm.Data.Helpers;
 using asm.Helpers;
@@ -68,11 +69,12 @@ namespace asm.Extensions
 		public static int AppendNamespaces([NotNull] this XDocument thisValue, [NotNull] params string[] namespaceURI)
 		{
 			if (namespaceURI.IsNullOrEmpty()) return 0;
-			if (thisValue.Root == null) throw new ArgumentException("The XDocument must have a root element to hold the namespace(s)");
+			if (thisValue.Root == null) throw new ArgumentException("A root element to hold the namespace(s)");
 			return thisValue.Root.AppendNamespaces(namespaceURI);
 		}
 
-		public static XmlNamespaceManager GetNamespaceManager([NotNull] this XDocument thisValue)
+		[NotNull]
+		public static XmlNamespaceManager GetNamespaceManager([NotNull] this XDocument thisValue, bool appendDocumentNamespaces = true)
 		{
 			XmlNameTable nameTable;
 
@@ -86,7 +88,28 @@ namespace asm.Extensions
 				nameTable = null;
 			}
 
-			return nameTable == null ? null : new XmlNamespaceManager(nameTable);
+			XmlNamespaceManager manager = new XmlNamespaceManager(nameTable ?? new NameTable());
+			if (!appendDocumentNamespaces || thisValue.Root == null) return manager;
+
+			XPathNavigator navigator = thisValue.Root.CreateNavigator();
+			XPathNodeIterator namespaces = navigator.Select("//namespace::*[not(. = ../../namespace::*)]");
+
+			while (namespaces.MoveNext())
+			{
+				XPathNavigator node = namespaces.Current;
+				if (node == null) continue;
+
+				string prefix = node.Name;
+
+				if (prefix == "xmlns")
+				{
+					manager.AddNamespace(string.Empty, node.Value);
+					prefix = XmlHelper.NS_DEFAULT;
+				}
+				manager.AddNamespace(prefix, node.Value);
+			}
+
+			return manager;
 		}
 
 		[NotNull]

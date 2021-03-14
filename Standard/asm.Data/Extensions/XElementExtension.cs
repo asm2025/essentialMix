@@ -6,7 +6,6 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using JetBrains.Annotations;
-using asm.Data.Xml;
 using asm.Exceptions.Collections;
 using asm.Patterns.Sorting;
 using asm.Web;
@@ -70,82 +69,6 @@ namespace asm.Extensions
 			}
 			
 			return n;
-		}
-
-		public static XNode SelectSingleNode(this XElement thisValue, [NotNull] string xpath)
-		{
-			if (thisValue == null) return null;
-			XNodeLister list = SelectNodes(thisValue, xpath);
-			return list.Count == 0 ? null : list[0];
-		}
-
-		public static XNode SelectSingleNode(this XElement thisValue, [NotNull] string xpath, XmlNamespaceManager nsmgr)
-		{
-			if (thisValue == null) return null;
-			XNodeLister list = SelectNodes(thisValue, xpath, nsmgr);
-			return list.Count == 0 ? null : list[0];
-		}
-
-		public static XNodeLister SelectNodes(this XElement thisValue, [NotNull] string xpath)
-		{
-			if (thisValue == null) return null;
-			XPathNavigator navigator = thisValue.CreateNavigator();
-			return new XNodeLister(navigator.Select(xpath));
-		}
-
-		public static XNodeLister SelectNodes(this XElement thisValue, [NotNull] string xpath, XmlNamespaceManager nsmgr)
-		{
-			if (thisValue == null) return null;
-			XPathNavigator navigator = thisValue.CreateNavigator();
-			XPathExpression expr = navigator.Compile(xpath);
-			expr.SetContext(nsmgr);
-			return new XNodeLister(navigator.Select(expr));
-		}
-
-		public static XNodeLister Elements(this XElement thisValue, string name)
-		{
-			if (thisValue == null || !thisValue.HasElements) return null;
-			XmlNamespaceManager nsmgr = thisValue.GetNamespaceManager();
-			string expr = name ?? "*";
-			return nsmgr == null ? thisValue.SelectNodes(expr) : thisValue.SelectNodes(expr, nsmgr);
-		}
-
-		public static XNodeLister Elements(this XElement thisValue, string name, string attribute, string value)
-		{
-			if (thisValue == null || !thisValue.HasElements) return null;
-			XmlNamespaceManager nsmgr = thisValue.GetNamespaceManager();
-			string nm = name ?? "*";
-			string expr = attribute == null
-				? nm
-				: $"{nm}[@{attribute}='{value ?? string.Empty}']";
-			return nsmgr == null ? thisValue.SelectNodes(expr) : thisValue.SelectNodes(expr, nsmgr);
-		}
-
-		public static XNode First(this XElement thisValue, string name) { return First(thisValue, name, null, null); }
-
-		public static XNode First(this XElement thisValue, string name, string attribute, string value)
-		{
-			if (thisValue == null || !thisValue.HasElements) return null;
-			XmlNamespaceManager nsmgr = thisValue.GetNamespaceManager();
-			string nm = name ?? "*";
-			string expr = attribute == null
-				? nm
-				: $"{nm}[@{attribute}='{value ?? string.Empty}']";
-			return nsmgr == null ? thisValue.SelectSingleNode(expr) : thisValue.SelectSingleNode(expr, nsmgr);
-		}
-
-		public static XNode Last(this XElement thisValue, string name) { return Last(thisValue, name, null, null); }
-
-		public static XNode Last(this XElement thisValue, string name, string attribute, string value)
-		{
-			if (thisValue == null || !thisValue.HasElements) return null;
-			XmlNamespaceManager nsmgr = thisValue.GetNamespaceManager();
-			string nm = name ?? "*";
-			
-			string expr = attribute == null
-				? $"{nm}[last()]"
-				: $"{nm}[@{attribute}='{value ?? string.Empty}'][last()]";
-			return nsmgr == null ? thisValue.SelectSingleNode(expr) : thisValue.SelectSingleNode(expr, nsmgr);
 		}
 
 		public static T Evaluate<T>(this XElement thisValue, string expression) { return Evaluate(thisValue, expression, default(T)); }

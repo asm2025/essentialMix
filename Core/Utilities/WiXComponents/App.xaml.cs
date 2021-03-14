@@ -21,6 +21,7 @@ using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using WiXComponents.Properties;
 using WiXComponents.Views;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace WiXComponents
 {
@@ -48,8 +49,7 @@ namespace WiXComponents
 		{
 			Serilog.ILogger serilogLogger = new LoggerConfiguration()
 											.MinimumLevel.Is(LogEventLevel.Verbose)
-											.Enrich.FromLogContext()
-											.WriteTo.Console(outputTemplate: "[{Level:u3}] {Message:lj}{NewLine}{Exception}", theme: SystemConsoleTheme.Literate, applyThemeToRedirectedOutput: true)
+											.WriteTo.Console(outputTemplate: "{Level:u3} {Message:lj}{NewLine}{Exception}", theme: SystemConsoleTheme.Literate, applyThemeToRedirectedOutput: true)
 											.CreateLogger();
 			ILoggerFactory factory = LoggerFactory.Create(builder =>
 			{
@@ -86,6 +86,7 @@ namespace WiXComponents
 			}
 
 			// Configuration
+			Logger.LogInformation("Loading configuration.");
 			IConfiguration configuration = IConfigurationBuilderHelper.CreateConfiguration(basePath)
 																	.AddConfigurationFiles(basePath, EnvironmentHelper.GetEnvironmentName())
 																	.AddEnvironmentVariables()
@@ -99,6 +100,7 @@ namespace WiXComponents
 			try
 			{
 				// Command line
+				Logger.LogInformation("Processing command line.");
 				parser = new Parser(settings =>
 				{
 					settings.CaseSensitive = false;
@@ -129,7 +131,9 @@ namespace WiXComponents
 			}
 
 			// Logging
-			if (configuration.GetValue<bool>("Logging:Enabled") && args.LogLevel > LogLevel.None)
+			Logger.LogInformation("Configuring logging.");
+
+			if (configuration.GetValue<bool>("Logging:Enabled") && args.LogLevel < LogLevel.None)
 			{
 				LoggerConfiguration loggerConfiguration = new();
 				loggerConfiguration.ReadFrom.Configuration(configuration);
@@ -146,17 +150,20 @@ namespace WiXComponents
 			}
 
 			// Services
+			Logger.LogInformation("Configuring services.");
 			ConfigureServices(args, configuration);
 			Logger._logger = ServiceProvider.GetService<ILogger<App>>();
 
 			if (args.Files.Count > 0 || !string.IsNullOrEmpty(args.Directory))
 			{
+				Logger.LogInformation("Starting command line.");
 				ProcessCommandLine(args);
 				if (consoleCreated) ConsoleHelper.FreeConsole();
 				Shutdown();
 				return;
 			}
 
+			Logger.LogInformation("Starting main window.");
 			ConsoleHelper.Hide();
 			if (consoleCreated) ConsoleHelper.FreeConsole();
 			base.OnStartup(e);
@@ -167,6 +174,7 @@ namespace WiXComponents
 		protected override void OnExit(ExitEventArgs e)
 		{
 			base.OnExit(e);
+			Logger.LogInformation("Exiting.");
 			Log.CloseAndFlush();
 		}
 
@@ -199,6 +207,8 @@ namespace WiXComponents
 			// When we are here, args either has files or a directory to be processed.
 			if (!string.IsNullOrEmpty(args.Directory))
 			{
+				Logger.LogInformation($"Processing directory '{args.Directory}'.");
+
 				if (!Directory.Exists(args.Directory))
 				{
 					Logger.LogError(Errors.DirectoryNotFound, args.Directory);
@@ -216,6 +226,8 @@ namespace WiXComponents
 				return;
 			}
 
+			Logger.LogInformation("Processing files.");
+
 			foreach (string fileName in args.Files)
 			{
 				string ext = PathHelper.Extension(fileName);
@@ -228,63 +240,93 @@ namespace WiXComponents
 		private void ProcessProjectFile([NotNull] string fileName)
 		{
 			// wixproj, csproj, vbproj
+			Logger.LogInformation($"Processing project file '{fileName}'.");
+
 			if (!File.Exists(fileName))
 			{
 				Logger.LogError(Errors.FileNotFound, fileName);
 				return;
 			}
 
-			string path = Path.GetDirectoryName(fileName) ?? Directory.GetCurrentDirectory();
+			IList<string> files = new List<string>();
 
 			try
 			{
+				Logger.LogInformation("Loading project file.");
 				XmlDocument doc = XmlDocumentHelper.LoadFile(fileName);
 				XmlNode root = doc.DocumentElement;
-				if (root == null) return;
+				
+				if (root == null)
+				{
+					Logger.LogInformation("Skipping empty project.");
+					return;
+				}
 
 				XmlNamespaceManager manager = doc.GetNamespaceManager();
 				string prefix = manager.GetDefaultPrefix();
 
+				Logger.LogInformation("Project loaded, looking for files.");
 				// Finds all of the files included in the project.
 				XmlNodeList nodes = doc.SelectNodes($"//{prefix}Compile", manager);
-				
-				if (nodes != null && nodes.Count > 0)
-				{
-					foreach (XmlNode node in nodes)
-					{
-						if (node.HasAttributeOrChild("Link")) continue;
-						string itemName = node.Attributes?["Include"]?.Value;
-						if (string.IsNullOrEmpty(itemName)) continue;
-
-						string ext = PathHelper.Extension(itemName);
-						if (ext == null || !__supportedFiles.Value.Contains(ext)) continue;
-						ProcessWiXFile(Path.Combine(path, itemName));
-					}
-				}
-
+				ProcessNodes(nodes, files, Logger);
 				nodes = doc.SelectNodes($"//{prefix}Content", manager);
-				if (nodes == null || nodes.Count == 0) return;
-				
-				foreach (XmlNode node in nodes)
-				{
-					if (node.HasAttributeOrChild("Link")) continue;
-					string itemName = node.Attributes?["Include"]?.Value;
-					if (string.IsNullOrEmpty(itemName)) continue;
-
-					string ext = PathHelper.Extension(itemName);
-					if (ext == null || !__supportedFiles.Value.Contains(ext)) continue;
-					ProcessWiXFile(Path.Combine(path, itemName));
-				}
+				ProcessNodes(nodes, files, Logger);
 			}
 			catch (Exception ex)
 			{
 				Logger.LogError(ex.CollectMessages());
+				return;
+			}
+
+			if (files.Count == 0)
+			{
+				Logger.LogInformation("No suitable components found.");
+				return;
+			}
+
+			Logger.LogInformation($"Found {files.Count} files.");
+
+			string path = Path.GetDirectoryName(fileName) ?? Directory.GetCurrentDirectory();
+			Logger.LogInformation($"Current path: '{path}'.");
+
+			foreach (string file in files)
+			{
+				ProcessWiXFile(Path.Combine(path, file));
+			}
+
+			static void ProcessNodes(XmlNodeList nodes, IList<string> files, ILogger logger)
+			{
+				if (nodes == null || nodes.Count == 0) return;
+
+				foreach (XmlNode node in nodes)
+				{
+					string itemName = node.Attributes?["Include"]?.Value;
+					if (string.IsNullOrEmpty(itemName)) continue;
+
+					if (node.HasAttributeOrChild("Link"))
+					{
+						logger.LogInformation($"Skipping '{itemName}' link.");
+						continue;
+					}
+
+					string ext = PathHelper.Extension(itemName);
+						
+					if (ext == null || !__supportedFiles.Value.Contains(ext))
+					{
+						logger.LogInformation($"Skipping '{itemName}'.");
+						continue;
+					}
+
+					files.Add(itemName);
+				}
 			}
 		}
 
 		private void ProcessWiXFile([NotNull] string fileName)
 		{
 			// wxs, wsi, xml
+			Logger.LogInformation($"Processing file '{fileName}'.");
+
 			if (!File.Exists(fileName))
 			{
 				Logger.LogError(Errors.FileNotFound, fileName);
@@ -294,7 +336,11 @@ namespace WiXComponents
 			try
 			{
 				// This will only update files that aren't readonly
-				if ((File.GetAttributes(fileName) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) return;
+				if ((File.GetAttributes(fileName) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+				{
+					Logger.LogInformation("Skipping read only file.");
+					return;
+				}
 				
 				bool modified = false;
 				XmlDocument doc = new()
@@ -310,7 +356,9 @@ namespace WiXComponents
 				}
 		
 				if (!modified) return;
+				Logger.LogInformation("Saving file...");
 				doc.Save(fileName);
+				Logger.LogInformation("File saved.");
 			}
 			catch (Exception ex)
 			{

@@ -3,7 +3,6 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using JetBrains.Annotations;
-using asm.Data.Helpers;
 using asm.Data.Xml;
 using asm.Web;
 
@@ -50,13 +49,15 @@ namespace asm.Extensions
 			return index;
 		}
 
-		public static XNode ToXNode([NotNull] this XmlNode thisValue)
+		public static XNode ToXNode(this XmlNode thisValue, XmlWriterSettings settings)
 		{
-			XNode node;
+			if (thisValue == null) return null;
 
+			XNode node;
+			
 			using (XNodeBuilder builder = new XNodeBuilder())
 			{
-				using (XmlWriter writer = XmlWriter.Create(new XNodeBuilder(), XmlWriterHelper.CreateSettings()))
+				using (XmlWriter writer = XmlWriter.Create(builder, settings))
 					thisValue.WriteTo(writer);
 
 				node = builder.Root;

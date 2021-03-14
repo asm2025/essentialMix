@@ -13,11 +13,5 @@ namespace asm.Extensions
 			XPathNavigator navigator = resolver == null ? thisValue.SelectSingleNode(nodePath) : thisValue.SelectSingleNode(nodePath, resolver);
 			return navigator?.Value;
 		}
-
-		public static XmlNode GetNode([NotNull] this XPathNavigator thisValue)
-		{
-			// ReSharper disable once SuspiciousTypeConversion.Global
-			return (thisValue as IHasXmlNode)?.GetNode();
-		}
 	}
 }

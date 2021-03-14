@@ -1,5 +1,6 @@
 using System.Text;
 using System.Xml;
+using asm.Data.Helpers;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
@@ -10,10 +11,8 @@ namespace asm.Extensions
 		[NotNull]
 		public static string GetDefaultPrefix([NotNull] this XmlNamespaceManager thisValue)
 		{
-			const string NS_DEF = "tns";
-
-			return thisValue.HasNamespace(NS_DEF)
-						? NS_DEF + ":"
+			return thisValue.HasNamespace(XmlHelper.NS_DEFAULT)
+						? XmlHelper.NS_DEFAULT + ":"
 						: string.Empty;
 		}
 

@@ -74,16 +74,18 @@ namespace asm.Extensions
 
 		public static int AppendNamespaces([NotNull] this XmlDocument thisValue, [NotNull] params string[] namespaceURI)
 		{
-			return namespaceURI.IsNullOrEmpty()
-						? 0
-						: thisValue.NameTable.Append(namespaceURI);
+			if (namespaceURI.IsNullOrEmpty()) return 0;
+			XmlNamespaceManager manager = new XmlNamespaceManager(thisValue.NameTable);
+			return manager.Append(namespaceURI);
 		}
 
 		[NotNull]
-		public static XmlNamespaceManager GetNamespaceManager([NotNull] this XmlDocument thisValue)
+		public static XmlNamespaceManager GetNamespaceManager([NotNull] this XmlDocument thisValue, bool appendDocumentNamespaces = true)
 		{
 			XmlNamespaceManager manager = new XmlNamespaceManager(thisValue.NameTable);
-			XmlNodeList namespaces = thisValue.SelectNodes(@"//namespace::*[not(. = ../../namespace::*)]");
+			if (!appendDocumentNamespaces) return manager;
+
+			XmlNodeList namespaces = thisValue.SelectNodes("//namespace::*[not(. = ../../namespace::*)]");
 			if (namespaces == null) return manager;
 
 			foreach (XmlNode node in namespaces)
@@ -93,7 +95,7 @@ namespace asm.Extensions
 				if (prefix == "xmlns")
 				{
 					manager.AddNamespace(string.Empty, node.Value);
-					prefix = "tns";
+					prefix = XmlHelper.NS_DEFAULT;
 				}
 				manager.AddNamespace(prefix, node.Value);
 			}
@@ -182,7 +184,6 @@ namespace asm.Extensions
 		public static void LoadFile([NotNull] this XmlDocument thisValue, [NotNull] string filename, XmlReaderSettings settings) { LoadFile(thisValue, filename, settings, null); }
 		public static void LoadFile([NotNull] this XmlDocument thisValue, [NotNull] string filename, XmlReaderSettings settings, XmlParserContext context)
 		{
-			if (filename == null) throw new ArgumentNullException(nameof(filename));
 			if (!File.Exists(filename)) throw new FileNotFoundException("File not found", filename);
 
 			XmlReaderSettings options = settings ?? XmlReaderHelper.CreateSettings();
