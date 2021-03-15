@@ -3,10 +3,10 @@
 namespace WiXComponents.ViewModels
 {
 	/// <inheritdoc />
-	public class AboutViewModel : AppViewModel
+	public class HomeViewModel : ViewModelBase
 	{
 		/// <inheritdoc />
-		public AboutViewModel(ILogger logger)
+		public HomeViewModel(ILogger logger)
 			: base(logger)
 		{
 		}

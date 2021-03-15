@@ -1,20 +1,28 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Input;
+using Microsoft.Extensions.Logging;
+using WiXComponents.Commands;
 using WiXComponents.ViewModels;
 
-namespace WiXComponents.Views
+namespace WiXComponents
 {
 	/// <summary>
-	/// Interaction logic for MainView.xaml
+	/// Interaction logic for MainWindow.xaml
 	/// </summary>
-	public partial class MainView : Window
+	public partial class MainWindow : Window
 	{
-		public MainView(MainViewModel viewModel)
+		/// <inheritdoc />
+		public MainWindow(ILogger<MainWindow> logger)
 		{
+			MainViewModel viewModel = new MainViewModel(logger);
+			viewModel.Navigator.UpdateViewModel.Execute(ViewType.Home);
 			DataContext = viewModel;
 			InitializeComponent();
+			Logger = logger;
 		}
+
+		public ILogger Logger { get; }
 
 		/// <inheritdoc />
 		protected override void OnClosed(EventArgs e)
@@ -38,6 +46,11 @@ namespace WiXComponents.Views
 		private void CloseButton_Click(object sender, RoutedEventArgs e)
 		{
 			Close();
+		}
+
+		private void CommandBinding_OnCanExecute(object sender, CanExecuteRoutedEventArgs e)
+		{
+			e.CanExecute = true;
 		}
 	}
 }

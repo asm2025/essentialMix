@@ -20,8 +20,8 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using WiXComponents.Properties;
-using WiXComponents.Views;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace WiXComponents
 {
@@ -59,8 +59,9 @@ namespace WiXComponents
 			Logger = new Logger<App>(factory.CreateLogger(nameof(App)));
 		}
 
-
 		public IServiceProvider ServiceProvider { get; private set; }
+
+		public static App Instance => (App)Current;
 
 		[NotNull]
 		public Logger<App> Logger { get; }
@@ -71,18 +72,22 @@ namespace WiXComponents
 			// Setup
 			JsonConvert.DefaultSettings = () => JsonHelper.CreateSettings();
 			string basePath = Assembly.GetExecutingAssembly().GetDirectoryPath();
+			bool consoleCreated = false;
 
-			ConsoleHelper.AttachConsole(out bool consoleCreated);
-			
-			if (ConsoleHelper.HasConsole)
+			if (e.Args.Length > 0)
 			{
-				ConsoleHelper.Show();
-			}
-			else if (e.Args.Length > 0)
-			{
-				Logger.LogError("Could not create Writer window.");
-				Shutdown();
-				return;
+				ConsoleHelper.AttachConsole(out consoleCreated);
+
+				if (ConsoleHelper.HasConsole)
+				{
+					ConsoleHelper.Show();
+				}
+				else
+				{
+					Logger.LogError("Could not create Writer window.");
+					Shutdown();
+					return;
+				}
 			}
 
 			// Configuration
@@ -192,14 +197,13 @@ namespace WiXComponents
 				builder.AddEventSourceLogger();
 				builder.AddSerilog(null, true);
 			});
-			services.AddTransient<MainView>();
+			services.AddSingleton<MainWindow>();
 			ServiceProvider = services.BuildServiceProvider();
 		}
 
 		private void Start()
 		{
-			//https://www.reactiveui.net/docs/getting-started/compelling-example
-			MainView window = ServiceProvider.GetRequiredService<MainView>();
+			MainWindow window = ServiceProvider.GetRequiredService<MainWindow>();
 			window.Show();
 		}
 

@@ -1,9 +1,23 @@
-﻿namespace WiXComponents.ViewModels
+﻿using Microsoft.Extensions.Logging;
+using WiXComponents.State.Navigators;
+
+namespace WiXComponents.ViewModels
 {
-	public class MainViewModel : AboutViewModel
+	/// <inheritdoc />
+	public class MainViewModel : AppViewModel
 	{
-		public MainViewModel()
+		private INavigator _navigator;
+
+		/// <inheritdoc />
+		public MainViewModel(ILogger logger)
+			: base(logger)
 		{
+		}
+
+		public INavigator Navigator
+		{
+			get => _navigator ??= new Navigator();
+			set => _navigator = value;
 		}
 	}
 }
