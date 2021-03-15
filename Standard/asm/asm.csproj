@@ -5,8 +5,8 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>9.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<Version>12.2.0.0</Version>
-		<FileVersion>21.3.15.14</FileVersion>
+		<Version>12.6.0.0</Version>
+		<FileVersion>21.3.15.16</FileVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -32,6 +32,7 @@
 		<PackageProjectUrl>https://github.com/asm2025/asm</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/asm2025/asm</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>

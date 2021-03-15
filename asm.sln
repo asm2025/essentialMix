@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		buckramega.png = buckramega.png
 		LICENSE.md = LICENSE.md
 		.nuget\nuget.config = .nuget\nuget.config
+		publish.bat = publish.bat
 		sign.pfx = sign.pfx
 	EndProjectSection
 EndProject
@@ -432,25 +433,5 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {64C519D3-02FB-49B2-89A1-EE4837D6197C}
-	EndGlobalSection
-	GlobalSection(AutomaticVersions) = postSolution
-		UpdateAssemblyVersion = True
-		UpdateAssemblyFileVersion = True
-		UpdateAssemblyInfoVersion = False
-		AdvancedSettingsExpanded = True
-		AssemblyVersionSettings = IncrementOnDemand.None.None.None
-		AssemblyFileVersionSettings = ShortYearStamp.MonthStamp.DayStamp.IncrementWithResetOnIncrease
-		UpdatePackageVersion = False
-		AssemblyInfoVersionType = SettingsVersion
-		InheritWinAppVersionFrom = None
-		UpdateAssemblyVersion.Release|Any CPU = True
-		UpdateAssemblyFileVersion.Release|Any CPU = True
-		UpdateAssemblyInfoVersion.Release|Any CPU = False
-		AdvancedSettingsExpanded.Release|Any CPU = True
-		AssemblyVersionSettings.Release|Any CPU = IncrementOnDemand.IncrementWithResetOnIncrease.IncrementWithResetOnIncrease.IncrementWithResetOnIncrease
-		AssemblyFileVersionSettings.Release|Any CPU = ShortYearStamp.MonthStamp.DayStamp.IncrementWithResetOnIncrease
-		UpdatePackageVersion.Release|Any CPU = False
-		AssemblyInfoVersionType.Release|Any CPU = SettingsVersion
-		InheritWinAppVersionFrom.Release|Any CPU = None
 	EndGlobalSection
 EndGlobal
