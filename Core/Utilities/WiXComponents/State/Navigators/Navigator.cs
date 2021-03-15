@@ -1,5 +1,5 @@
 ﻿using System.Windows.Input;
-using asm.Patterns.NotifyChange;
+using essentialMix.Patterns.NotifyChange;
 using WiXComponents.Commands;
 using WiXComponents.ViewModels;
 

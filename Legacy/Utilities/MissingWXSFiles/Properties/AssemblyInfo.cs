@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Missing WXS Files")]
 [assembly: AssemblyDescription("Find missing files in WXS products's file")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("asm")]
+[assembly: AssemblyCompany("essentialMix")]
 [assembly: AssemblyProduct("MissingWXSFiles")]
 [assembly: AssemblyCulture("")]
 
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("12.6.0.0")]
-[assembly: AssemblyFileVersion("21.3.15.16")]
+[assembly: AssemblyVersion("12.7.0.0")]
+[assembly: AssemblyFileVersion("21.3.15.17")]

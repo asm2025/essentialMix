@@ -25,7 +25,7 @@
     <ApplicationIcon>wixtoolset.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug' OR '$(Configuration)' == 'Release'">
-    <OutputPath>..\..\..\bin\$(Configuration)\$(Platform)\framework\</OutputPath>
+    <OutputPath>..\..\..\bin\$(Configuration)\$(Platform)\$(TargetFrameworkVersion)\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Independent'">
     <OutputPath>bin\$(Platform)\</OutputPath>
@@ -93,11 +93,11 @@
     <Content Include="wixtoolset.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\asm.Windows\asm.Windows.csproj">
+    <ProjectReference Include="..\..\essentialMix.Windows\essentialMix.Windows.csproj">
       <Project>{f1c40361-05a1-4932-b06b-ab2be3129ede}</Project>
-      <Name>asm.Windows</Name>
+      <Name>essentialMix.Windows</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Standard\asm\asm.csproj">
+    <ProjectReference Include="..\..\..\Standard\essentialMix\essentialMix.csproj">
       <Project>{ad2d9eec-efeb-4184-810c-ac2c5804e35e}</Project>
       <Name>asm</Name>
     </ProjectReference>

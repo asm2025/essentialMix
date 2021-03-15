@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
-using asm.Extensions;
+using essentialMix.Extensions;
 using CommandLine;
 using CommandLine.Text;
 using JetBrains.Annotations;
@@ -40,16 +40,16 @@ Supported file types are wixproj, csproj, vbproj, wxs, wsi, xml.")]
 		[NotNull]
 		public static HeadingInfo GetHeader(Assembly assembly = null)
 		{
-			Assembly asm = assembly ?? Assembly.GetExecutingAssembly();
-			return new HeadingInfo(string.Concat(asm.GetCompany(), ' ', asm.GetTitle()), asm.GetFileVersion());
+			Assembly essentialMix = assembly ?? Assembly.GetExecutingAssembly();
+			return new HeadingInfo(string.Concat(essentialMix.GetCompany(), ' ', essentialMix.GetTitle()), essentialMix.GetFileVersion());
 		}
 
 		[NotNull]
 		private static HelpText SetHelpTextProps([NotNull] HelpText helpText, Assembly assembly = null)
 		{
-			Assembly asm = assembly ?? Assembly.GetExecutingAssembly();
-			helpText.Heading = GetHeader(asm);
-			helpText.Copyright = asm.GetCopyright();
+			Assembly essentialMix = assembly ?? Assembly.GetExecutingAssembly();
+			helpText.Heading = GetHeader(essentialMix);
+			helpText.Copyright = essentialMix.GetCopyright();
 			helpText.AddDashesToOption = true;
 			helpText.AddEnumValuesToHelpText = true;
 			helpText.AdditionalNewLineAfterOption = true;

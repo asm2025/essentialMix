@@ -1,5 +1,5 @@
 ﻿using System.Threading;
-using asm.Patterns.NotifyChange;
+using essentialMix.Patterns.NotifyChange;
 using Microsoft.Extensions.Logging;
 
 namespace WiXComponents.ViewModels

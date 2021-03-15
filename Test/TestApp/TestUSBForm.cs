@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using asm;
-using asm.Helpers;
-using asm.Patterns.Hardware;
+using essentialMix;
+using essentialMix.Helpers;
+using essentialMix.Patterns.Hardware;
 
 namespace TestApp
 {

@@ -19,8 +19,8 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
-    - name: Publish asm
+    - name: Publish essentialMix
       uses: brandedoutcast/publish-nuget@latest
       with: 
-        PROJECT_FILE_PATH: asm/Standard/asm/asm.csproj
+        PROJECT_FILE_PATH: essentialMix/Standard/essentialMix/essentialMix.csproj
         NUGET_KEY: oy2cpwuhyq4rpnjnyktqatrbzwooxhgetetj3xnl7qaytq

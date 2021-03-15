@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
-using asm.Helpers;
+using essentialMix.Helpers;
 
 namespace GenerateWIXComponents
 {

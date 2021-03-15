@@ -1,5 +1,0 @@
-The work in this folder is based on FlvExtract library from J.D. Purcell source which I 
-cloned a long time ago. I needed the functionality but I had to modify the source to fit
-for a more general purpose usage.
-However, it is of valuable help for the majority of code that I used to make the asm.Media project.
-https://www.moitah.net/

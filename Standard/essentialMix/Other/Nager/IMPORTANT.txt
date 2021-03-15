@@ -1,0 +1,11 @@
+The work in this folder tree "Nager" and its subfolders are not mine.
+I needed the functionality and had a similar idea to make a SQLite database
+which can be updated on demand or periodically in the essentialMix.Data project but 
+there is no need to reinvent the wheel since someone already has done it.
+Unfortunately, There is a problem running this from nuget packages because 
+apparently it's not configured to have strong assembly name. Since I don't
+have the time to debug the issue, I'll just use it for now as a copy. The 
+license of this code is included in LICENSE.md which can also be founded on 
+the website https://github.com/nager/Nager.PublicSuffix. Maybe later I can 
+check it again and preferably remove the folder and use the nuget package if
+a fix is available for this.

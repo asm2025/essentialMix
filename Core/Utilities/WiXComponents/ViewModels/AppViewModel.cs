@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
-using asm.Extensions;
-using asm.Helpers;
+using essentialMix.Extensions;
+using essentialMix.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace WiXComponents.ViewModels
@@ -14,10 +14,10 @@ namespace WiXComponents.ViewModels
 
 		static AppViewModel()
 		{
-			Assembly asm = AssemblyHelper.GetEntryAssembly();
-			__title = asm.GetTitle();
-			__company = asm.GetCompany();
-			__version = asm.GetFileVersion();
+			Assembly essentialMix = AssemblyHelper.GetEntryAssembly();
+			__title = essentialMix.GetTitle();
+			__company = essentialMix.GetCompany();
+			__version = essentialMix.GetFileVersion();
 		}
 
 		/// <inheritdoc />

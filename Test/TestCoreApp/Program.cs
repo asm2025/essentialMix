@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text;
-using asm.Helpers;
+using essentialMix.Helpers;
 
 // ReSharper disable UnusedMember.Local
 namespace TestCoreApp

@@ -6,9 +6,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using asm.Collections;
-using asm.Extensions;
-using asm.Helpers;
+using essentialMix.Collections;
+using essentialMix.Extensions;
+using essentialMix.Helpers;
 using CsvHelper;
 using Humanizer;
 
@@ -66,7 +66,7 @@ namespace MimeTypes
 			try
 			{
 				streamWriter = new StreamWriter(OUTPUT_FILE, false, Encoding.UTF8);
-				streamWriter.WriteLine(@"namespace asm.Web
+				streamWriter.WriteLine(@"namespace essentialMix.Web
 {
 	public static class MediaTypeNames
 	{");

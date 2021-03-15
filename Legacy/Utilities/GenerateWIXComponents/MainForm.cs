@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using asm.Extensions;
+using essentialMix.Extensions;
 using GenerateWIXComponents.Properties;
 
 namespace GenerateWIXComponents

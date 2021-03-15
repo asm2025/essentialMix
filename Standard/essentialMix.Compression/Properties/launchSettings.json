@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "essentialMix.Compression": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

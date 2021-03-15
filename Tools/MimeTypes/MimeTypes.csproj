@@ -23,7 +23,7 @@
     <AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug' OR '$(Configuration)' == 'Release'">
-    <OutputPath>..\..\bin\$(Configuration)\$(Platform)\netframework\</OutputPath>
+    <OutputPath>..\..\bin\$(Configuration)\$(Platform)\$(TargetFrameworkVersion)\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Independent'">
     <OutputPath>bin\$(Platform)\</OutputPath>
@@ -115,7 +115,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Standard\asm\asm.csproj">
+    <ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj">
       <Project>{f990c776-ffbe-4323-bf26-debf8eaf8892}</Project>
       <Name>asm</Name>
     </ProjectReference>
