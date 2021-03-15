@@ -5,12 +5,10 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>9.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>12.0.0.0</Version>
-		<FileVersion>21.2.3.9</FileVersion>
+		<Version>12.2.0.0</Version>
+		<FileVersion>21.3.15.14</FileVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
-		<PackageTags>utilities, tools, extensions, helpers</PackageTags>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
@@ -21,6 +19,28 @@
 	<PropertyGroup Condition="'$(Configuration)' == 'Independent'">
 		<OutputPath>bin\$(Platform)\</OutputPath>
 	</PropertyGroup>
+	
+	<PropertyGroup>
+		<IsPackable>True</IsPackable>
+		<PackageId>$(ProjectName)</PackageId>
+		<PackageIcon>buckramega.png</PackageIcon>
+		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
+		<PackageVersion>$(Version)</PackageVersion>
+		<Authors>asm</Authors>
+		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
+		<PackageTags>utilities, tools, extensions, helpers, components, patterns</PackageTags>
+		<PackageProjectUrl>https://github.com/asm2025/asm</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/asm2025/asm</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Include="..\..\buckramega.png" Pack="True" PackagePath="" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Compile Include="..\..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
@@ -48,7 +68,9 @@
 
 	<PropertyGroup>
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
-if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
+		</PreBuildEvent>
+		<AssemblyVersion>12.3.0.0</AssemblyVersion>
 	</PropertyGroup>
 
 </Project>

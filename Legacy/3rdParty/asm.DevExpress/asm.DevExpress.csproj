@@ -14,15 +14,15 @@
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 		<TargetFrameworkProfile />
 		<TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+		<LangVersion>9.0</LangVersion>
 		<NuGetPackageImportStamp>
 		</NuGetPackageImportStamp>
 		<Prefer32Bit>false</Prefer32Bit>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\..\sign.pfx</AssemblyOriginatorKeyFile>
-		<LangVersion>9.0</LangVersion>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug' OR '$(Configuration)' == 'Release'">
-		<OutputPath>..\..\..\bin\$(Configuration)\$(Platform)\netframework\</OutputPath>
+		<OutputPath>..\..\..\bin\$(Configuration)\$(Platform)\framework\</OutputPath>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)' == 'Independent'">
 		<OutputPath>bin\$(Platform)\</OutputPath>
@@ -147,7 +147,8 @@
 	</ItemGroup>
 	<PropertyGroup>
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
-if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
+		</PreBuildEvent>
 	</PropertyGroup>
 	<Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

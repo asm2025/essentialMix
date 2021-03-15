@@ -22,7 +22,7 @@
     <AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug' OR '$(Configuration)' == 'Release'">
-    <OutputPath>..\..\bin\$(Configuration)\$(Platform)\netframework\</OutputPath>
+    <OutputPath>..\..\bin\$(Configuration)\$(Platform)\framework\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Independent'">
     <OutputPath>bin\$(Platform)\</OutputPath>
@@ -131,7 +131,8 @@
   </ItemGroup>
   <PropertyGroup>
     <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
-if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
+		</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
