@@ -5,7 +5,7 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>9.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<Version>12.6.0.0</Version>
+		<Version>12.7.0.0</Version>
 		<FileVersion>21.3.15.17</FileVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
@@ -28,8 +28,8 @@
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns, core, mvc, web api, serialization, formatters</PackageTags>
-		<PackageProjectUrl>https://github.com/asm2025/asm</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/asm2025/asm</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/asm2025/essentialMix</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/asm2025/essentialMix</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<IncludeSymbols>True</IncludeSymbols>
@@ -61,7 +61,6 @@
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
 if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
 		</PreBuildEvent>
-		<AssemblyVersion>12.7.0.0</AssemblyVersion>
 	</PropertyGroup>
 
 </Project>

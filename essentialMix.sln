@@ -438,6 +438,7 @@ Global
 		UpdateAssemblyVersion = True
 		UpdateAssemblyFileVersion = True
 		UpdateAssemblyInfoVersion = False
+		AdvancedSettingsExpanded = True
 		AssemblyVersionSettings = IncrementOnDemand.IncrementWithResetOnIncrease.IncrementWithResetOnIncrease.IncrementWithResetOnIncrease
 		AssemblyFileVersionSettings = ShortYearStamp.MonthStamp.DayStamp.IncrementWithResetOnIncrease
 		UpdatePackageVersion = False
@@ -446,6 +447,7 @@ Global
 		UpdateAssemblyVersion.Release|Any CPU = True
 		UpdateAssemblyFileVersion.Release|Any CPU = True
 		UpdateAssemblyInfoVersion.Release|Any CPU = False
+		AdvancedSettingsExpanded.Release|Any CPU = True
 		AssemblyVersionSettings.Release|Any CPU = IncrementOnDemand.IncrementWithResetOnIncrease.IncrementWithResetOnIncrease.IncrementWithResetOnIncrease
 		AssemblyFileVersionSettings.Release|Any CPU = ShortYearStamp.MonthStamp.DayStamp.IncrementWithResetOnIncrease
 		UpdatePackageVersion.Release|Any CPU = False
