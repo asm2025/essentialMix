@@ -26,7 +26,6 @@
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
 if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
 		</PreBuildEvent>
-		<AssemblyVersion>12.3.0.0</AssemblyVersion>
 	</PropertyGroup>
 
 </Project>
