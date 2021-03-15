@@ -23,4 +23,4 @@ jobs:
       uses: brandedoutcast/publish-nuget@latest
       with: 
         PROJECT_FILE_PATH: asm/Standard/asm/asm.csproj
-        NUGET_KEY: oy2cpwuhyq4rpnjnyktqatrbzwooxhgetetj3xnl7qaytq
+        NUGET_KEY: oy2ojmccewn4iszebfcqwx4zwtw3x2fehh6ij2vtbuggs4
