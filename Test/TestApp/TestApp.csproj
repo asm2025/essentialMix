@@ -7,8 +7,7 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>9.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<Version>12.7.0.0</Version>
-		<FileVersion>21.3.15.17</FileVersion>
+		<FileVersion>21.3.16.2</FileVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -74,6 +73,7 @@
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
 if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
 		</PreBuildEvent>
+		<AssemblyVersion>12.20.0.0</AssemblyVersion>
 	</PropertyGroup>
 
 </Project>
