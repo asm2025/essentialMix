@@ -29,7 +29,8 @@
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
 		<DefineConstants>TRACE</DefineConstants>
 		<Optimize>true</Optimize>
-		<DebugType>pdbonly</DebugType>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
 		<ErrorReport>prompt</ErrorReport>
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
@@ -39,8 +40,8 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<AssemblyVersion>12.20.0.0</AssemblyVersion>
-		<FileVersion>21.3.16.2</FileVersion>
+		<AssemblyVersion>12.21.0.0</AssemblyVersion>
+		<FileVersion>21.3.21.3</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 		<PackageVersion>$(Version)</PackageVersion>
@@ -70,8 +71,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\essentialMix.Data\essentialMix.Data.csproj" />
-		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
+		<ProjectReference Include="..\..\Standard\essentialMix.Data\essentialMix.Data.csproj" />
+		<ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup>

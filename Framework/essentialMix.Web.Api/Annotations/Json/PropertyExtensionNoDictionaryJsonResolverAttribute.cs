@@ -1,5 +1,5 @@
 ﻿using JetBrains.Annotations;
-using essentialMix.Serialization.Json;
+using essentialMix.Newtonsoft.Serialization;
 using Newtonsoft.Json.Serialization;
 
 namespace essentialMix.Web.Api.Annotations.Json

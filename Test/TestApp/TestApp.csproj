@@ -12,8 +12,8 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
-		<AssemblyVersion>12.20.0.0</AssemblyVersion>
-		<FileVersion>21.3.16.2</FileVersion>
+		<AssemblyVersion>12.21.0.0</AssemblyVersion>
+		<FileVersion>21.3.21.3</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 	</PropertyGroup>
@@ -29,7 +29,8 @@
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
 		<DefineConstants>TRACE</DefineConstants>
 		<Optimize>true</Optimize>
-		<DebugType>pdbonly</DebugType>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
 		<UseVSHostingProcess>false</UseVSHostingProcess>
 		<ErrorReport>prompt</ErrorReport>
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>

@@ -29,7 +29,8 @@
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
 		<DefineConstants>TRACE</DefineConstants>
 		<Optimize>true</Optimize>
-		<DebugType>pdbonly</DebugType>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
 		<ErrorReport>prompt</ErrorReport>
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
@@ -39,8 +40,8 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<AssemblyVersion>12.20.0.0</AssemblyVersion>
-		<FileVersion>21.3.16.2</FileVersion>
+		<AssemblyVersion>12.21.0.0</AssemblyVersion>
+		<FileVersion>21.3.21.3</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 		<PackageVersion>$(Version)</PackageVersion>
@@ -88,9 +89,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\essentialMix.NewtonSoft\essentialMix.NewtonSoft.csproj" />
-		<ProjectReference Include="..\essentialMix.Threading\essentialMix.Threading.csproj" />
-		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
+		<ProjectReference Include="..\..\Standard\essentialMix.NewtonSoft\essentialMix.NewtonSoft.csproj" />
+		<ProjectReference Include="..\..\Standard\essentialMix.Threading\essentialMix.Threading.csproj" />
+		<ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="System.Net.Http" />
+	  <Reference Include="System.Web" />
+	  <Reference Include="System.Web.Extensions" />
 	</ItemGroup>
 
 	<PropertyGroup>

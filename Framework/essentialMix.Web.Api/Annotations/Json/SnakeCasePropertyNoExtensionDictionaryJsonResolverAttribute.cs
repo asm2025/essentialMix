@@ -1,4 +1,4 @@
-﻿using essentialMix.Serialization.Json;
+﻿using essentialMix.Newtonsoft.Serialization;
 
 namespace essentialMix.Web.Api.Annotations.Json
 {

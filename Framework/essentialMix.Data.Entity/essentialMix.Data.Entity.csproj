@@ -30,7 +30,8 @@
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
 		<DefineConstants>TRACE</DefineConstants>
 		<Optimize>true</Optimize>
-		<DebugType>pdbonly</DebugType>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
 		<ErrorReport>prompt</ErrorReport>
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
@@ -40,8 +41,8 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<AssemblyVersion>12.20.0.0</AssemblyVersion>
-		<FileVersion>21.3.16.2</FileVersion>
+		<AssemblyVersion>12.21.0.0</AssemblyVersion>
+		<FileVersion>21.3.21.3</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 		<PackageVersion>$(Version)</PackageVersion>
@@ -67,20 +68,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="Properties\Settings.settings">
-			<Generator>SettingsSingleFileGenerator</Generator>
-			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
-		</None>
-		<Compile Include="Properties\Settings.Designer.cs">
-			<AutoGen>True</AutoGen>
-			<DesignTimeSharedInput>True</DesignTimeSharedInput>
-			<DependentUpon>Settings.settings</DependentUpon>
-		</Compile>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="EntityFramework" Version="6.4.4" />
-		<PackageReference Include="EntityFramework.SqlServer" Version="6.4.4" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Primitives" Version="5.0.0" />
@@ -95,9 +83,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\essentialMix.Data\essentialMix.Data.csproj" />
-		<ProjectReference Include="..\essentialMix.Threading\essentialMix.Threading.csproj" />
-		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
+		<ProjectReference Include="..\..\Standard\essentialMix.Data\essentialMix.Data.csproj" />
+		<ProjectReference Include="..\..\Standard\essentialMix.Threading\essentialMix.Threading.csproj" />
+		<ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Properties\Settings.settings">
+	    <Generator>SettingsSingleFileGenerator</Generator>
+	  </None>
 	</ItemGroup>
 
 </Project>

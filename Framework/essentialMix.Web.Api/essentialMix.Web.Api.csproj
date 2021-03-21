@@ -29,7 +29,8 @@
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
 		<DefineConstants>TRACE</DefineConstants>
 		<Optimize>true</Optimize>
-		<DebugType>pdbonly</DebugType>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
 		<ErrorReport>prompt</ErrorReport>
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
@@ -39,8 +40,8 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<AssemblyVersion>12.20.0.0</AssemblyVersion>
-		<FileVersion>21.3.16.2</FileVersion>
+		<AssemblyVersion>12.21.0.0</AssemblyVersion>
+		<FileVersion>21.3.21.3</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 		<PackageVersion>$(Version)</PackageVersion>
@@ -81,14 +82,18 @@
 		<PackageReference Include="System.Security.Permissions" Version="5.0.0" />
 		<PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
-		<PackageReference Include="System.Web.Http.Owin" Version="5.2.7" />
+		<PackageReference Include="Microsoft.AspNet.WebApi.Owin" Version="5.2.7" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\essentialMix.Data\essentialMix.Data.csproj" />
-		<ProjectReference Include="..\essentialMix.NewtonSoft\essentialMix.NewtonSoft.csproj" />
 		<ProjectReference Include="..\essentialMix.Web\essentialMix.Web.csproj" />
-		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
+		<ProjectReference Include="..\..\Standard\essentialMix.Data\essentialMix.Data.csproj" />
+		<ProjectReference Include="..\..\Standard\essentialMix.NewtonSoft\essentialMix.NewtonSoft.csproj" />
+		<ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="System.Web" />
 	</ItemGroup>
 
 	<PropertyGroup>

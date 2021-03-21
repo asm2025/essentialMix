@@ -69,25 +69,25 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Core.Web.Forma
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Framework", "Framework", "{591D5F22-6872-4AE0-B802-98E4223B280F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "essentialMix.Configuration", "Framework\essentialMix.Configuration\essentialMix.Configuration.csproj", "{5BEE6DCC-15C2-4293-81DD-0AC328EE68A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Configuration", "Framework\essentialMix.Configuration\essentialMix.Configuration.csproj", "{5BEE6DCC-15C2-4293-81DD-0AC328EE68A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "essentialMix.Data.Entity", "Framework\essentialMix.Data.Entity\essentialMix.Data.Entity.csproj", "{0E7FE908-5B05-4827-A5D7-FD0FB5265C67}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Data.Entity", "Framework\essentialMix.Data.Entity\essentialMix.Data.Entity.csproj", "{0E7FE908-5B05-4827-A5D7-FD0FB5265C67}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "essentialMix.Data.OleDb", "Framework\essentialMix.Data.OleDb\essentialMix.Data.OleDb.csproj", "{1BAD75A8-FF3C-40B6-8C63-BD206600AFF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Data.OleDb", "Framework\essentialMix.Data.OleDb\essentialMix.Data.OleDb.csproj", "{1BAD75A8-FF3C-40B6-8C63-BD206600AFF9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "essentialMix.Media", "Framework\essentialMix.Media\essentialMix.Media.csproj", "{124AB335-EEAC-416F-B06B-80AD3CF56E38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Media", "Framework\essentialMix.Media\essentialMix.Media.csproj", "{124AB335-EEAC-416F-B06B-80AD3CF56E38}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "essentialMix.Web", "Framework\essentialMix.Web\essentialMix.Web.csproj", "{93E1C15A-BB8F-49E3-A5F4-F31990BA545C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Web", "Framework\essentialMix.Web\essentialMix.Web.csproj", "{93E1C15A-BB8F-49E3-A5F4-F31990BA545C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "essentialMix.Web.Api", "Framework\essentialMix.Web.Api\essentialMix.Web.Api.csproj", "{79076C91-8981-4EC3-A71F-2FCDEA310681}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Web.Api", "Framework\essentialMix.Web.Api\essentialMix.Web.Api.csproj", "{79076C91-8981-4EC3-A71F-2FCDEA310681}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "essentialMix.Web.Entity", "Framework\essentialMix.Web.Entity\essentialMix.Web.Entity.csproj", "{CEAAE2C4-9209-4330-AAA9-B54317EEE897}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Web.Entity", "Framework\essentialMix.Web.Entity\essentialMix.Web.Entity.csproj", "{CEAAE2C4-9209-4330-AAA9-B54317EEE897}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "essentialMix.Web.Mvc", "Framework\essentialMix.Web.Mvc\essentialMix.Web.Mvc.csproj", "{DE3E279B-B0D5-4ACD-9AFC-342431734E2C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Web.Mvc", "Framework\essentialMix.Web.Mvc\essentialMix.Web.Mvc.csproj", "{DE3E279B-B0D5-4ACD-9AFC-342431734E2C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "essentialMix.Web.Pages", "Framework\essentialMix.Web.Pages\essentialMix.Web.Pages.csproj", "{BB06E476-0224-4FE8-BB6F-AAF73049BAA4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Web.Pages", "Framework\essentialMix.Web.Pages\essentialMix.Web.Pages.csproj", "{BB06E476-0224-4FE8-BB6F-AAF73049BAA4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "essentialMix.Windows", "Framework\essentialMix.Windows\essentialMix.Windows.csproj", "{F1C40361-05A1-4932-B06B-AB2BE3129EDE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Windows", "Framework\essentialMix.Windows\essentialMix.Windows.csproj", "{F1C40361-05A1-4932-B06B-AB2BE3129EDE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{B7E8F0CB-531A-4EEB-9815-72E76CCC2691}"
 EndProject
@@ -97,7 +97,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCoreApp", "Test\TestCor
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{C5C80153-F755-455F-997A-B0A0CD53E811}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MimeTypes", "Tools\MimeTypes\MimeTypes.csproj", "{686389FC-08C6-4A7A-BE48-380B8E1CC0FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MimeTypes", "Tools\MimeTypes\MimeTypes.csproj", "{686389FC-08C6-4A7A-BE48-380B8E1CC0FC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Collections", "Standard\essentialMix.Collections\essentialMix.Collections.csproj", "{619DCB71-8D65-4D68-9D81-C043897767C7}"
 EndProject
@@ -391,5 +391,21 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {64C519D3-02FB-49B2-89A1-EE4837D6197C}
+	EndGlobalSection
+	GlobalSection(AutomaticVersions) = postSolution
+		UpdateAssemblyVersion = False
+		UpdateAssemblyFileVersion = True
+		UpdateAssemblyInfoVersion = False
+		AdvancedSettingsExpanded = True
+		AssemblyFileVersionSettings = ShortYearStamp.MonthStamp.DayStamp.IncrementWithResetOnIncrease
+		UpdatePackageVersion = False
+		AssemblyInfoVersionType = SettingsVersion
+		InheritWinAppVersionFrom = None
+		UpdateAssemblyVersion.Release|Any CPU = False
+		UpdateAssemblyFileVersion.Release|Any CPU = False
+		UpdateAssemblyInfoVersion.Release|Any CPU = False
+		UpdatePackageVersion.Release|Any CPU = False
+		AssemblyInfoVersionType.Release|Any CPU = SettingsVersion
+		InheritWinAppVersionFrom.Release|Any CPU = None
 	EndGlobalSection
 EndGlobal
