@@ -1,12 +1,38 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 		<OutputType>Exe</OutputType>
+		<TargetFramework>net5.0</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>9.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<Prefer32Bit>false</Prefer32Bit>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<AssemblyVersion>12.20.0.0</AssemblyVersion>
 		<FileVersion>21.3.16.2</FileVersion>
+		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
+		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<DebugSymbols>true</DebugSymbols>
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<DebugType>full</DebugType>
+		<UseVSHostingProcess>false</UseVSHostingProcess>
+		<ErrorReport>prompt</ErrorReport>
+		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<DefineConstants>TRACE</DefineConstants>
+		<Optimize>true</Optimize>
+		<DebugType>pdbonly</DebugType>
+		<UseVSHostingProcess>false</UseVSHostingProcess>
+		<ErrorReport>prompt</ErrorReport>
+		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -25,7 +51,6 @@
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
 if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
 		</PreBuildEvent>
-		<AssemblyVersion>12.20.0.0</AssemblyVersion>
 	</PropertyGroup>
 
 </Project>

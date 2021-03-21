@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>9.0</LangVersion>
@@ -16,6 +18,21 @@
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Independent'">
 		<OutputPath>bin\$(Platform)\</OutputPath>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug' OR '$(Configuration)' == 'Independent'">
+		<DebugSymbols>true</DebugSymbols>
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<DebugType>full</DebugType>
+		<ErrorReport>prompt</ErrorReport>
+		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<DefineConstants>TRACE</DefineConstants>
+		<Optimize>true</Optimize>
+		<DebugType>pdbonly</DebugType>
+		<ErrorReport>prompt</ErrorReport>
+		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	
 	<PropertyGroup>
@@ -47,10 +64,6 @@
 
 	<ItemGroup>
 		<Compile Include="..\..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Include="..\..\Test\TestApp\MediaTypes\text.csv" Link="Text\text.csv" />
 	</ItemGroup>
 
 	<ItemGroup>

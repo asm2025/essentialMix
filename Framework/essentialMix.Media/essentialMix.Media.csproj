@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>net48</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>9.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -46,7 +46,7 @@
 		<PackageVersion>$(Version)</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
-		<PackageTags>utilities, tools, extensions, helpers, components, patterns, cryptography</PackageTags>
+		<PackageTags>utilities, tools, extensions, helpers, components, patterns, database, dbms, orm, xml, serialization</PackageTags>
 		<PackageProjectUrl>https://github.com/asm2025/essentialMix</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/asm2025/essentialMix</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
@@ -66,11 +66,35 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
+		<None Include="Properties\Settings.settings">
+			<Generator>SettingsSingleFileGenerator</Generator>
+			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
+		</None>
+		<Compile Include="Properties\Settings.Designer.cs">
+			<AutoGen>True</AutoGen>
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+			<DependentUpon>Settings.settings</DependentUpon>
+		</Compile>
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\essentialMix.Collections\essentialMix.Collections.csproj" />
+		<Content Include="ffmpeg.exe">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="ffprobe.exe">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="System.Drawing.Common" Version="5.0.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\essentialMix.Drawing\essentialMix.Drawing.csproj" />
+		<ProjectReference Include="..\essentialMix.Threading\essentialMix.Threading.csproj" />
 		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
 	</ItemGroup>
 

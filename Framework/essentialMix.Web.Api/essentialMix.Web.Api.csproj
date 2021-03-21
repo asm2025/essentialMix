@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>net48</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>9.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -46,7 +46,7 @@
 		<PackageVersion>$(Version)</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
-		<PackageTags>utilities, tools, extensions, helpers, components, patterns, cryptography</PackageTags>
+		<PackageTags>utilities, tools, extensions, helpers, components, patterns, database, dbms, orm, xml, serialization</PackageTags>
 		<PackageProjectUrl>https://github.com/asm2025/essentialMix</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/asm2025/essentialMix</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
@@ -67,10 +67,27 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
+		<PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.3" />
+		<PackageReference Include="Microsoft.AspNet.Identity.Owin" Version="2.2.3" />
+		<PackageReference Include="Microsoft.Owin" Version="4.1.1" />
+		<PackageReference Include="Microsoft.Owin.Security" Version="4.1.1" />
+		<PackageReference Include="Microsoft.Owin.Security.Cookies" Version="4.1.1" />
+		<PackageReference Include="Microsoft.Owin.Security.OAuth" Version="4.1.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="Owin" Version="1.0.0.0" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0.0" />
+		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
+		<PackageReference Include="System.Security.AccessControl" Version="5.0.0" />
+		<PackageReference Include="System.Security.Permissions" Version="5.0.0" />
+		<PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
+		<PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
+		<PackageReference Include="System.Web.Http.Owin" Version="5.2.7" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\essentialMix.Collections\essentialMix.Collections.csproj" />
+		<ProjectReference Include="..\essentialMix.Data\essentialMix.Data.csproj" />
+		<ProjectReference Include="..\essentialMix.NewtonSoft\essentialMix.NewtonSoft.csproj" />
+		<ProjectReference Include="..\essentialMix.Web\essentialMix.Web.csproj" />
 		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
 	</ItemGroup>
 

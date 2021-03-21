@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>net48</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>9.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -46,7 +46,7 @@
 		<PackageVersion>$(Version)</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
-		<PackageTags>utilities, tools, extensions, helpers, components, patterns, cryptography</PackageTags>
+		<PackageTags>utilities, tools, extensions, helpers, components, patterns, database, dbms, orm, xml, serialization</PackageTags>
 		<PackageProjectUrl>https://github.com/asm2025/essentialMix</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/asm2025/essentialMix</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
@@ -64,13 +64,13 @@
 	<ItemGroup>
 		<Compile Include="..\..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
 	</ItemGroup>
-
+	
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\essentialMix.Collections\essentialMix.Collections.csproj" />
+		<ProjectReference Include="..\essentialMix.Data\essentialMix.Data.csproj" />
 		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
 	</ItemGroup>
 

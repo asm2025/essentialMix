@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>net48</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>9.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -46,7 +46,7 @@
 		<PackageVersion>$(Version)</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
-		<PackageTags>utilities, tools, extensions, helpers, components, patterns, cryptography</PackageTags>
+		<PackageTags>utilities, tools, extensions, helpers, components, patterns, database, dbms, orm, xml, serialization</PackageTags>
 		<PackageProjectUrl>https://github.com/asm2025/essentialMix</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/asm2025/essentialMix</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
@@ -66,11 +66,23 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<EmbeddedResource Include="Controls\RtfConsole.resx">
+			<DependentUpon>RtfConsole.cs</DependentUpon>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Controls\Console.resx">
+			<DependentUpon>Console.cs</DependentUpon>
+		</EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
+		<PackageReference Include="System.Security.Principal.Windows" Version="5.0.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\essentialMix.Collections\essentialMix.Collections.csproj" />
+		<ProjectReference Include="..\essentialMix.Drawing\essentialMix.Drawing.csproj" />
+		<ProjectReference Include="..\essentialMix.Threading\essentialMix.Threading.csproj" />
 		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
 	</ItemGroup>
 
