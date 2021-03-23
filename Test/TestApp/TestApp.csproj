@@ -12,8 +12,8 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
-		<AssemblyVersion>12.24.0.0</AssemblyVersion>
-		<FileVersion>21.3.22.3</FileVersion>
+		<AssemblyVersion>12.25.0.0</AssemblyVersion>
+		<FileVersion>21.3.23.0</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 	</PropertyGroup>
@@ -64,7 +64,7 @@
 		<PackageReference Include="Crayon" Version="2.0.60.0" />
 		<PackageReference Include="EasyConsole" Version="1.1.0.0" />
 		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
-		<PackageReference Include="Newtonsoft.Json" Version="12.0.3.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="System.Diagnostics.EventLog" Version="5.0.1.0" />
 		<PackageReference Include="System.IO" Version="4.3.0.0" />
 		<PackageReference Include="System.Runtime" Version="4.3.1.0" />
