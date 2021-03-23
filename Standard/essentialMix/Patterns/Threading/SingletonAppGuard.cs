@@ -1,10 +1,12 @@
 using System;
+using System.Reflection;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
+using JetBrains.Annotations;
 
 namespace essentialMix.Patterns.Threading
 {
@@ -15,21 +17,38 @@ namespace essentialMix.Patterns.Threading
 
 		/// <inheritdoc />
 		public SingletonAppGuard()
-			: this(TimeSpanHelper.INFINITE)
+			: this(null, TimeSpanHelper.INFINITE)
+		{
+		}
+
+		public SingletonAppGuard([NotNull] Assembly assembly)
+			: this(assembly, TimeSpanHelper.INFINITE)
 		{
 		}
 
 		public SingletonAppGuard(TimeSpan timeout) 
-			: this(timeout.TotalIntMilliseconds())
+			: this(null, timeout.TotalIntMilliseconds())
 		{
 		}
 
 		public SingletonAppGuard(int timeout) 
+			: this(null, timeout)
+		{
+		}
+
+		public SingletonAppGuard(Assembly assembly, TimeSpan timeout) 
+			: this(assembly, timeout.TotalIntMilliseconds())
+		{
+		}
+
+		public SingletonAppGuard(Assembly assembly, int timeout) 
 		{
 			try
 			{
+				assembly ??= Assembly.GetCallingAssembly();
+				AppInfo appInfo = new AppInfo(assembly);
 				// Global prefix means it is global to the machine.
-				string mutexId = $"Global\\{AppInfo.AppGuid}";
+				string mutexId = $"Global\\{appInfo.AppGuid}";
 				_mutex = new Mutex(false, mutexId);
 
 				SecurityIdentifier worldSid = new SecurityIdentifier(WellKnownSidType.WorldSid, null);

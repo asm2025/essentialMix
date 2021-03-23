@@ -167,7 +167,9 @@ work with {HEAVY} items.");
 			
 			//TestJsonUriConverter();
 
-			TestDevicesMonitor();
+			//TestDevicesMonitor();
+
+			TestAppInfo();
 
 			ConsoleHelper.Pause();
 		}
@@ -4500,17 +4502,10 @@ decrypted:
 				Console.WriteLine("I'm not running with elevated privilege! Would you like to restart me as an admin? [Y / Any key]");
 				if (Console.ReadKey().Key != ConsoleKey.Y) return;
 
-				//ProcessStartInfo startInfo = new ProcessStartInfo(AppInfo.ExecutablePath)
-				//{
-				//	UseShellExecute = true,
-				//	Verb = "runas",
-				//	WindowStyle = ProcessWindowStyle.Normal
-				//};
-				//Process.Start(startInfo);
-
-				ProcessHelper.ShellExec(AppInfo.ExecutablePath, new ShellSettings
+				AppInfo appInfo = new AppInfo(typeof(Program).Assembly);
+				ProcessHelper.ShellExec(appInfo.ExecutablePath, new ShellSettings
 				{
-					WorkingDirectory = AppInfo.Directory,
+					WorkingDirectory = appInfo.Directory,
 					Verb = "runas"
 				});
 			}
@@ -4640,6 +4635,26 @@ decrypted:
 			{
 				ObjectHelper.Dispose(ref form);
 			}
+		}
+
+		private static void TestAppInfo()
+		{
+			Title("Testing AppInfo");
+
+			AppInfo appInfo = new AppInfo(typeof(Program).Assembly);
+			Console.WriteLine($"Guid: {appInfo.AppGuid}");
+			Console.WriteLine($"ExecutablePath: {appInfo.ExecutablePath}");
+			Console.WriteLine($"ExecutableName: {appInfo.ExecutableName}");
+			Console.WriteLine($"Directory: {appInfo.Directory}");
+			Console.WriteLine($"Title: {appInfo.Title}");
+			Console.WriteLine($"Description: {appInfo.Description}");
+			Console.WriteLine($"ProductName: {appInfo.ProductName}");
+			Console.WriteLine($"Company: {appInfo.Company}");
+			Console.WriteLine($"Copyright: {appInfo.Copyright}");
+			Console.WriteLine($"Trademark: {appInfo.Trademark}");
+			Console.WriteLine($"Version: {appInfo.Version}");
+			Console.WriteLine($"FileVersion: {appInfo.FileVersion}");
+			Console.WriteLine($"Culture: {appInfo.Culture}");
 		}
 
 		private static void Title(string title)

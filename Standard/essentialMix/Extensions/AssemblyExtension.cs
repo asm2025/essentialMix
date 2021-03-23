@@ -73,13 +73,15 @@ namespace essentialMix.Extensions
 		[NotNull]
 		public static string GetVersion([NotNull] this Assembly thisValue)
 		{
-			return thisValue.GetCustomAttribute<AssemblyVersionAttribute>().Version ?? VERSION_DEF;
+			AssemblyVersionAttribute assemblyVersion = thisValue.GetCustomAttribute<AssemblyVersionAttribute>();
+			if (assemblyVersion != null) return assemblyVersion.Version;
+			return Convert.ToString(thisValue.GetName().Version);
 		}
 
 		[NotNull]
 		public static string GetFileVersion([NotNull] this Assembly thisValue)
 		{
-			return thisValue.GetCustomAttribute<AssemblyFileVersionAttribute>().Version ?? VERSION_DEF;
+			return thisValue.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? VERSION_DEF;
 		}
 
 		[NotNull]

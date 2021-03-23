@@ -57,7 +57,7 @@ namespace essentialMix.Patterns.Security.Cryptography
 						? null
 						: _certificates.GetOrAdd(name, fileName =>
 						{
-							string path = Path.Combine(AppInfo.Directory, fileName);
+							string path = PathHelper.GetFullPath(fileName);
 							return new X509Certificate2(path, password);
 						});
 		}
