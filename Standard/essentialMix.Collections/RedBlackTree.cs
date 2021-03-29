@@ -70,7 +70,7 @@ namespace essentialMix.Collections
 		{
 			if (Root == null || Root.IsLeaf) return 0;
 			int height = 0;
-			IterateLevels((i, _) => height++);
+			IterateLevels((_, _) => height++);
 			return height;
 		}
 

@@ -281,11 +281,7 @@ namespace Other.Microsoft.Collections
 		// Sets or Gets the element at the given index.
 		public T this[int index]
 		{
-			get
-			{
-				if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-				return Items[index];
-			}
+			get => Items[index];
 			set => Insert(index, value, false);
 		}
 
@@ -334,12 +330,6 @@ namespace Other.Microsoft.Collections
 		public void Insert(int index, T item)
 		{
 			Insert(index, item, true);
-			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			if (Count == Items.Length) EnsureCapacity(Count + 1);
-			if (index < Count) Array.Copy(Items, index, Items, index + 1, Count - index);
-			Items[index] = item;
-			Count++;
-			_version++;
 		}
 
 		void IList.Insert(int index, object item)
@@ -413,47 +403,42 @@ namespace Other.Microsoft.Collections
 		{
 			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 
-			switch (enumerable)
+			int count;
+
+			if (enumerable is ICollection<T> collection)
 			{
-				case ICollection<T> collection:
+				count = collection.Count;
+				if (count == 0) return;
+				EnsureCapacity(Count + count);
+				if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
+
+				// If we're inserting a List into itself, we want to be able to deal with that.
+				if (ReferenceEquals(this, collection))
 				{
-					int count = collection.Count;
-					if (count == 0) return;
-					EnsureCapacity(Count + count);
-					if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
-
-					// If we're inserting a List into itself, we want to be able to deal with that.
-					if (ReferenceEquals(this, collection))
-					{
-						// Copy first part of _items to insert location
-						Array.Copy(Items, 0, Items, index, index);
-						// Copy last part of _items back to inserted location
-						Array.Copy(Items, index + count, Items, index * 2, Count - index);
-					}
-					else
-					{
-						collection.CopyTo(Items, index);
-					}
-
-					Count += count;
-					_version++;
-					RangeInserted(index, count);
-					break;
+					// Copy first part of _items to insert location
+					Array.Copy(Items, 0, Items, index, index);
+					// Copy last part of _items back to inserted location
+					Array.Copy(Items, index + count, Items, index * 2, Count - index);
 				}
-				default:
+				else
 				{
-					int count = enumerable.FastCount();
-					if (count > 0) EnsureCapacity(Count + count);
+					collection.CopyTo(Items, index);
+				}
 
-					using (IEnumerator<T> en = enumerable.GetEnumerator())
-					{
-						while (en.MoveNext())
-						{
-							Insert(index++, en.Current, true);
-						}
-					}
+				Count += count;
+				_version++;
+				RangeInserted(index, count);
+				return;
+			}
 
-					break;
+			count = enumerable.FastCount();
+			if (count > 0) EnsureCapacity(Count + count);
+
+			using (IEnumerator<T> en = enumerable.GetEnumerator())
+			{
+				while (en.MoveNext())
+				{
+					Insert(index++, en.Current, true);
 				}
 			}
 		}
@@ -481,9 +466,9 @@ namespace Other.Microsoft.Collections
 				freeIndex++;
 
 			if (freeIndex >= Count) return 0;
-			int result = Count - freeIndex;
-			RemoveRange(freeIndex, result);
-			return result;
+			int count = Count - freeIndex;
+			RemoveRange(freeIndex, count);
+			return count;
 		}
 
 		public IEnumerator<T> GetEnumerator()

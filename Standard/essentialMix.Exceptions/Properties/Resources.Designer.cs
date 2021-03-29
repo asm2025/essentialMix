@@ -268,6 +268,15 @@ namespace essentialMix.Exceptions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Serialization data is missing..
+        /// </summary>
+        internal static string SerializationDataMissing {
+            get {
+                return ResourceManager.GetString("SerializationDataMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SevenZip unknown exception..
         /// </summary>
         internal static string SevenZipException {

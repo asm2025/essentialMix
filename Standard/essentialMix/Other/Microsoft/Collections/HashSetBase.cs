@@ -9,7 +9,7 @@ using System.Security.Permissions;
 using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
-using Other.Moitah;
+using essentialMix.Helpers;
 using JetBrains.Annotations;
 using essentialMixMath = essentialMix.Numeric.Math;
 
@@ -45,9 +45,11 @@ namespace Other.Microsoft.Collections
 		[HostProtection(MayLeakOnAbort = true)]
 		public struct Enumerator : IEnumerator<T>, IEnumerator
 		{
+			[NonSerialized]
 			private HashSetBase<T> _set;
+			private readonly int _version;
+
 			private int _index;
-			private int _version;
 
 			internal Enumerator([NotNull] HashSetBase<T> set)
 			{
@@ -72,20 +74,26 @@ namespace Other.Microsoft.Collections
 
 			public bool MoveNext()
 			{
-				if (_version != _set._version) throw new VersionChangedException();
-
-				while (_index < _set._lastIndex)
+				if (_version == _set._version && _index < _set.Count)
 				{
-					if (_set._slots[_index].HashCode >= 0)
+					while (_index < _set._lastIndex)
 					{
-						Current = _set._slots[_index].Value;
+						if (_set._slots[_index].HashCode >= 0)
+						{
+							Current = _set._slots[_index].Value;
+							_index++;
+							return true;
+						}
+
 						_index++;
-						return true;
 					}
-
-					_index++;
 				}
+				return MoveNextRare();
+			}
 
+			private bool MoveNextRare()
+			{
+				if (_version != _set._version) throw new VersionChangedException();
 				_index = _set._lastIndex + 1;
 				Current = default(T);
 				return false;
@@ -139,16 +147,16 @@ namespace Other.Microsoft.Collections
 			_freeList = -1;
 		}
 
-		protected HashSetBase([NotNull] IEnumerable<T> enumerable)
-			: this(enumerable, null)
-		{
-		}
-
 		protected HashSetBase(int capacity, IEqualityComparer<T> comparer)
 			: this(comparer)
 		{
 			if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
 			if (capacity > 0) Initialize(capacity);
+		}
+
+		protected HashSetBase([NotNull] IEnumerable<T> enumerable)
+			: this(enumerable, null)
+		{
 		}
 
 		/// <summary>
@@ -202,8 +210,8 @@ namespace Other.Microsoft.Collections
 		/// </summary>
 		bool ICollection<T>.IsReadOnly => false;
 
-		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 		[SecurityCritical]
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null) throw new ArgumentNullException(nameof(info));
@@ -631,9 +639,7 @@ namespace Other.Microsoft.Collections
 
 				// faster if other is a hashset with the same equality comparer
 				if (other is ISet<T> otherAsSet && AreEqualityComparersEqual(this, otherAsSet))
-				{
 					return otherAsSet.Count < Count && ContainsAllElements(otherAsSet);
-				}
 			}
 
 			// couldn't fall out in the above cases; do it the long way
@@ -772,6 +778,53 @@ namespace Other.Microsoft.Collections
 		}
 
 		/// <summary>
+		///     Adds value to HashSet if not contained already
+		///     Returns true if added and false if already present
+		/// </summary>
+		/// <param name="value">value to find</param>
+		/// <returns></returns>
+		protected virtual bool AddIfNotPresent(T value)
+		{
+			if (_buckets == null) Initialize(0);
+
+			int hashCode = InternalGetHashCode(value);
+			int bucket = hashCode % _buckets.Length;
+
+			for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].Next)
+			{
+				if (_slots[i].HashCode == hashCode && Comparer.Equals(_slots[i].Value, value)) return false;
+			}
+
+			int index;
+
+			if (_freeList >= 0)
+			{
+				index = _freeList;
+				_freeList = _slots[index].Next;
+			}
+			else
+			{
+				if (_lastIndex == _slots.Length)
+				{
+					IncreaseCapacity();
+					// this will change during resize
+					bucket = hashCode % _buckets.Length;
+				}
+
+				index = _lastIndex;
+				_lastIndex++;
+			}
+
+			_slots[index].HashCode = hashCode;
+			_slots[index].Value = value;
+			_slots[index].Next = _buckets[bucket] - 1;
+			_buckets[bucket] = index + 1;
+			Count++;
+			_version++;
+			return true;
+		}
+
+		/// <summary>
 		///     Copies this to an array. Used for DebugView
 		/// </summary>
 		/// <returns></returns>
@@ -781,6 +834,18 @@ namespace Other.Microsoft.Collections
 			T[] newArray = new T[Count];
 			CopyTo(newArray);
 			return newArray;
+		}
+
+		/// <summary>
+		///     Initializes buckets and slots arrays. Uses suggested capacity by finding next prime
+		///     greater than or equal to capacity.
+		/// </summary>
+		/// <param name="capacity"></param>
+		private void Initialize(int capacity)
+		{
+			int size = essentialMixMath.GetPrime(capacity);
+			_buckets = new int[size];
+			_slots = new Slot[size];
 		}
 
 		// Initializes the HashSet from another HashSet with the same element type and
@@ -807,7 +872,6 @@ namespace Other.Microsoft.Collections
 				{
 					_buckets = (int[])hashSetBase._buckets.Clone();
 					_slots = (Slot[])hashSetBase._slots.Clone();
-
 					_lastIndex = hashSetBase._lastIndex;
 					_freeList = hashSetBase._freeList;
 				}
@@ -837,19 +901,6 @@ namespace Other.Microsoft.Collections
 				foreach (T item in source)
 					AddIfNotPresent(item);
 			}
-		}
-
-		/// <summary>
-		///     Initializes buckets and slots arrays. Uses suggested capacity by finding next prime
-		///     greater than or equal to capacity.
-		/// </summary>
-		/// <param name="capacity"></param>
-		private void Initialize(int capacity)
-		{
-			int size = essentialMixMath.GetPrime(capacity);
-
-			_buckets = new int[size];
-			_slots = new Slot[size];
 		}
 
 		/// <summary>
@@ -901,59 +952,11 @@ namespace Other.Microsoft.Collections
 			_buckets = newBuckets;
 		}
 
-		/// <summary>
-		///     Adds value to HashSet if not contained already
-		///     Returns true if added and false if already present
-		/// </summary>
-		/// <param name="value">value to find</param>
-		/// <returns></returns>
-		protected virtual bool AddIfNotPresent(T value)
-		{
-			if (_buckets == null) Initialize(0);
-
-			int hashCode = InternalGetHashCode(value);
-			int bucket = hashCode % _buckets.Length;
-
-			for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].Next)
-			{
-				if (_slots[i].HashCode == hashCode && Comparer.Equals(_slots[i].Value, value)) return false;
-			}
-
-			int index;
-
-			if (_freeList >= 0)
-			{
-				index = _freeList;
-				_freeList = _slots[index].Next;
-			}
-			else
-			{
-				if (_lastIndex == _slots.Length)
-				{
-					IncreaseCapacity();
-					// this will change during resize
-					bucket = hashCode % _buckets.Length;
-				}
-
-				index = _lastIndex;
-				_lastIndex++;
-			}
-
-			_slots[index].HashCode = hashCode;
-			_slots[index].Value = value;
-			_slots[index].Next = _buckets[bucket] - 1;
-			_buckets[bucket] = index + 1;
-			Count++;
-			_version++;
-			return true;
-		}
-
 		// Add value at known index with known hash code. Used only
 		// when constructing from another HashSet.
 		private void AddValue(int index, int hashCode, T value)
 		{
 			int bucket = hashCode % _buckets.Length;
-
 			_slots[index].HashCode = hashCode;
 			_slots[index].Value = value;
 			_slots[index].Next = _buckets[bucket] - 1;
@@ -966,7 +969,6 @@ namespace Other.Microsoft.Collections
 		///     Used by SupersetOf, ProperSupersetOf, and SetEquals.
 		/// </summary>
 		/// <param name="other"></param>
-		/// <returns></returns>
 		private bool ContainsAllElements([NotNull] IEnumerable<T> other)
 		{
 			foreach (T item in other)
@@ -1025,8 +1027,8 @@ namespace Other.Microsoft.Collections
 			// (could happen if another thread is modifying the collection)
 			int originalLastIndex = _lastIndex;
 			int intArrayLength = BitHelper.ToIntArrayLength(originalLastIndex);
-
 			Bits bits;
+
 			if (intArrayLength <= STACK_ALLOC_THRESHOLD)
 			{
 				int* bitArrayPtr = stackalloc int[intArrayLength];
@@ -1109,7 +1111,6 @@ namespace Other.Microsoft.Collections
 		{
 			int originalLastIndex = _lastIndex;
 			int intArrayLength = BitHelper.ToIntArrayLength(originalLastIndex);
-
 			Bits itemsToRemove;
 			Bits itemsAddedFromOther;
 

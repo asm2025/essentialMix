@@ -1241,6 +1241,18 @@ namespace essentialMix.Numeric
 			return value1;
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static double Log2(double x)
+		{
+			return SysMath.Log(x, 2);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static double Log10(double x)
+		{
+			return SysMath.Log(x, 10);
+		}
+
 		/// <summary>
 		/// Binary seek for the value where f() becomes false.
 		/// </summary>

@@ -1,103 +1,311 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using essentialMix.Collections.DebugView;
+using essentialMix.Comparers;
+using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
-using essentialMix.Threading;
+using essentialMix.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
+	// based on https://github.com/microsoft/referencesource/blob/master/mscorlib/system/collections/generic/list.cs
+	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 	[Serializable]
-	public class ObservableList<T> : List<T>, INotifyCollectionChanged, INotifyPropertyChanged
+	public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPropertyChanged, INotifyCollectionChanged
 	{
-		private const string PROPERTY_NAME_ITEMS = "Item[]";
+		protected const string ITEMS_NAME = "Item[]";
 
-		[NonSerialized]
-		private readonly SimpleMonitor _monitor = new SimpleMonitor();
-
-		[NonSerialized]
-		private uint _updateRefCount;
-
-		public ObservableList() { }
-
-		public ObservableList(int capacity)
-			: base(capacity) { }
-
-		public ObservableList([NotNull] IEnumerable<T> enumerable)
-			: base(enumerable)
+		[Serializable]
+		internal class SynchronizedList : IList<T>
 		{
-		}
+			private readonly ObservableList<T> _list;
 
-		public new T this[int index]
-		{
-			get => base[index];
-			set
+			private object _root;
+
+			internal SynchronizedList(ObservableList<T> list)
 			{
-				if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-				CheckReentrancy();
+				_list = list;
+				_root = ((ICollection)list).SyncRoot;
+			}
 
-				T obj = this[index];
-				base[index] = value;
-				OnPropertyChanged();
-				OnCollectionChanged(NotifyCollectionChangedAction.Replace, obj, value, index);
+			public int Count
+			{
+				get
+				{
+					lock (_root)
+					{
+						return _list.Count;
+					}
+				}
+			}
+
+			public bool IsReadOnly
+			{
+				get
+				{
+					lock (_root)
+					{
+						return ((ICollection<T>)_list).IsReadOnly;
+					}
+				}
+			}
+
+			public void Add(T item)
+			{
+				lock (_root)
+				{
+					_list.Add(item);
+				}
+			}
+
+			public void Clear()
+			{
+				lock (_root)
+				{
+					_list.Clear();
+				}
+			}
+
+			public bool Contains(T item)
+			{
+				lock (_root)
+				{
+					return _list.Contains(item);
+				}
+			}
+
+			public void CopyTo(T[] array, int arrayIndex)
+			{
+				lock (_root)
+				{
+					_list.CopyTo(array, arrayIndex);
+				}
+			}
+
+			public bool Remove(T item)
+			{
+				lock (_root)
+				{
+					return _list.Remove(item);
+				}
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				lock (_root)
+				{
+					return _list.GetEnumerator();
+				}
+			}
+
+			IEnumerator<T> IEnumerable<T>.GetEnumerator()
+			{
+				lock (_root)
+				{
+					return ((IEnumerable<T>)_list).GetEnumerator();
+				}
+			}
+
+			public T this[int index]
+			{
+				get
+				{
+					lock (_root)
+					{
+						return _list[index];
+					}
+				}
+				set
+				{
+					lock (_root)
+					{
+						_list[index] = value;
+					}
+				}
+			}
+
+			public int IndexOf(T item)
+			{
+				lock (_root)
+				{
+					return _list.IndexOf(item);
+				}
+			}
+
+			public void Insert(int index, T item)
+			{
+				lock (_root)
+				{
+					_list.Insert(index, item);
+				}
+			}
+
+			public void RemoveAt(int index)
+			{
+				lock (_root)
+				{
+					_list.RemoveAt(index);
+				}
 			}
 		}
 
-		public new void Add(T item)
+		[Serializable]
+		public struct Enumerator : IEnumerator<T>, IEnumerator
 		{
-			CheckReentrancy();
-			base.Add(item);
-			OnCollectionChanged(NotifyCollectionChangedAction.Add, item);
+			[NonSerialized]
+			private readonly ObservableList<T> _list;
+			private readonly int _version;
+
+			private int _index;
+
+			internal Enumerator([NotNull] ObservableList<T> list)
+			{
+				_list = list;
+				_version = list._version;
+				_index = 0;
+				Current = default(T);
+			}
+
+			public T Current { get; private set; }
+
+			object IEnumerator.Current
+			{
+				get
+				{
+					if (_index.InRangeRx(0, _list.Count)) throw new InvalidOperationException();
+					return Current;
+				}
+			}
+
+			public void Dispose()
+			{
+			}
+
+			public bool MoveNext()
+			{
+				if (_version == _list._version && _index < _list.Count)
+				{
+					Current = _list.Items[_index];
+					_index++;
+					return true;
+				}
+				return MoveNextRare();
+			}
+
+			private bool MoveNextRare()
+			{
+				if (_version != _list._version) throw new VersionChangedException();
+				_index = _list.Count + 1;
+				Current = default(T);
+				return false;
+			}
+
+			void IEnumerator.Reset()
+			{
+				if (_version != _list._version) throw new VersionChangedException();
+				_index = 0;
+				Current = default(T);
+			}
 		}
 
-		public new void Insert(int index, T item)
+		protected internal int _version;
+
+		[NonSerialized]
+		private object _syncRoot;
+
+		public ObservableList()
+			: this(0)
 		{
-			CheckReentrancy();
-			base.Insert(index, item);
-			OnPropertyChanged(nameof(Count));
-			OnPropertyChanged(PROPERTY_NAME_ITEMS);
-			OnCollectionChanged(NotifyCollectionChangedAction.Add, item, index);
 		}
 
-		public new void RemoveAt(int index)
+		public ObservableList(int capacity)
 		{
-			CheckReentrancy();
-			T item = base[index];
-			base.RemoveAt(index);
-			OnPropertyChanged(nameof(Count));
-			OnPropertyChanged(PROPERTY_NAME_ITEMS);
-			OnCollectionChanged(NotifyCollectionChangedAction.Remove, item, index);
+			if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
+			Items = capacity == 0
+						? Array.Empty<T>()
+						: new T[capacity];
 		}
 
-		public new bool Remove(T item)
+		public ObservableList([NotNull] IEnumerable<T> enumerable)
 		{
-			int index = IndexOf(item);
-			if (index < 0) return false;
-			RemoveAt(index);
-			return true;
+			Items = Array.Empty<T>();
+			InsertRange(0, enumerable);
 		}
 
-		public new void Clear()
+		public int Capacity
 		{
-			CheckReentrancy();
-			base.Clear();
-			OnPropertyChanged(nameof(Count));
-			OnPropertyChanged(PROPERTY_NAME_ITEMS);
-			OnCollectionReset();
+			get => Items.Length;
+			set
+			{
+				if (value < Count) throw new ArgumentOutOfRangeException(nameof(value));
+				if (value == Items.Length) return;
+
+				if (value > 0)
+				{
+					T[] newItems = new T[value];
+					if (Count > 0) Array.Copy(Items, 0, newItems, 0, Count);
+					Items = newItems;
+				}
+				else
+				{
+					Items = Array.Empty<T>();
+				}
+
+				_version++;
+			}
 		}
 
-		public void BeginUpdate() { _updateRefCount++; }
+		// Read-only property describing how many elements are in the List.
+		[field: ContractPublicPropertyName("Count")]
+		public int Count { get; private set; }
 
-		public void EndUpdate()
+		public T this[int index]
 		{
-			_updateRefCount--;
-			if (_updateRefCount > 0) return;
-			OnPropertyChanged(nameof(Count));
-			OnPropertyChanged(PROPERTY_NAME_ITEMS);
-			OnCollectionChanged();
+			get => Items[index];
+			set => Insert(index, value, false);
 		}
+
+		object IList.this[int index]
+		{
+			get => this[index];
+			set
+			{
+				if (!ObjectHelper.IsCompatible<T>(value)) throw new ArgumentException("Incompatible value.", nameof(value));
+				Insert(index, (T)value, false);
+			}
+		}
+
+		bool IList.IsFixedSize => false;
+
+		public bool IsReadOnly => false;
+
+		bool IList.IsReadOnly => false;
+
+		bool ICollection.IsSynchronized => false;
+
+		object ICollection.SyncRoot
+		{
+			get
+			{
+				if (_syncRoot == null) Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
+				return _syncRoot;
+			}
+		}
+
+		protected bool SuppressCollectionEvents { get; set; }
+
+		[NotNull]
+		protected T[] Items { get; private set; }
 
 		event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
 		{
@@ -108,168 +316,521 @@ namespace essentialMix.Collections
 		public event PropertyChangedEventHandler PropertyChanged;
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-		public virtual void Move(int oldIndex, int newIndex)
+		[NotNull]
+		public ReadOnlyCollection<T> AsReadOnly()
 		{
-			if (!oldIndex.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(oldIndex));
-			if (!newIndex.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(newIndex));
-			CheckReentrancy();
-
-			T obj = base[oldIndex];
-			base.RemoveAt(oldIndex);
-			base.Insert(newIndex, obj);
-			OnPropertyChanged(PROPERTY_NAME_ITEMS);
-			OnCollectionChanged(NotifyCollectionChangedAction.Move, obj, newIndex, oldIndex);
+			return new ReadOnlyCollection<T>(this);
 		}
 
-		public new void InsertRange(int index, [NotNull] IEnumerable<T> collection)
+		public void Insert(int index, T item)
 		{
-			BeginUpdate();
+			Insert(index, item, true);
+		}
+
+		void IList.Insert(int index, object item)
+		{
+			if (!ObjectHelper.IsCompatible<T>(item)) throw new ArgumentException("Incompatible value.", nameof(item));
+			Insert(index, (T)item, true);
+		}
+
+		public void Add(T item) { Insert(Count, item, true); }
+
+		int IList.Add(object item)
+		{
+			if (!ObjectHelper.IsCompatible<T>(item)) throw new ArgumentException("Incompatible value.", nameof(item));
+			Insert(Count, (T)item, true);
+			return Count - 1;
+		}
+
+		public void RemoveAt(int index)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			T item = Items[index];
+			if (index < Count - 1) Array.Copy(Items, index + 1, Items, index, Count - (index + 1));
+			Items[Count] = default(T);
+			Count--;
+			_version++;
+			OnPropertyChanged(nameof(Count));
+			OnPropertyChanged(ITEMS_NAME);
+			OnCollectionChanged(NotifyCollectionChangedAction.Remove, item);
+		}
+
+		public bool Remove(T item)
+		{
+			int index = IndexOf(item);
+			if (index < 0) return false;
+			RemoveAt(index);
+			return true;
+		}
+
+		void IList.Remove(object item)
+		{
+			if (!ObjectHelper.IsCompatible<T>(item)) return;
+			Remove((T)item);
+		}
+
+		public void Clear()
+		{
+			if (Count == 0) return;
+			Array.Clear(Items, 0, Count); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
+			Count = 0;
+			_version++;
+			OnPropertyChanged(nameof(Count));
+			OnPropertyChanged(ITEMS_NAME);
+			OnCollectionChanged(NotifyCollectionChangedAction.Reset);
+		}
+
+		public void AddRange([NotNull] IEnumerable<T> enumerable)
+		{
+			InsertRange(Count, enumerable);
+		}
+
+		public void InsertRange(int index, [NotNull] IEnumerable<T> enumerable)
+		{
+			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+
+			int count;
+
+			if (enumerable is ICollection<T> collection)
+			{
+				count = collection.Count;
+				if (count == 0) return;
+				EnsureCapacity(Count + count);
+				if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
+
+				// If we're inserting a List into itself, we want to be able to deal with that.
+				if (ReferenceEquals(this, collection))
+				{
+					// Copy first part of _items to insert location
+					Array.Copy(Items, 0, Items, index, index);
+					// Copy last part of _items back to inserted location
+					Array.Copy(Items, index + count, Items, index * 2, Count - index);
+				}
+				else
+				{
+					collection.CopyTo(Items, index);
+				}
+
+				Count += count;
+				_version++;
+				OnPropertyChanged(nameof(Count));
+				OnPropertyChanged(ITEMS_NAME);
+				OnCollectionChanged(NotifyCollectionChangedAction.Add);
+				return;
+			}
+
+			bool added;
+			SuppressCollectionEvents = true;
 
 			try
 			{
-				base.InsertRange(index, collection);
+				count = enumerable.FastCount();
+				if (count > 0) EnsureCapacity(Count + count);
+
+				using (IEnumerator<T> en = enumerable.GetEnumerator())
+				{
+					added = en.MoveNext();
+
+					if (added)
+					{
+						do
+						{
+							Insert(index++, en.Current, true);
+						}
+						while (en.MoveNext());
+					}
+				}
 			}
 			finally
 			{
-				EndUpdate();
+				SuppressCollectionEvents = false;
+			}
+
+			if (!added) return;
+			OnPropertyChanged(nameof(Count));
+			OnPropertyChanged(ITEMS_NAME);
+			OnCollectionChanged(NotifyCollectionChangedAction.Add);
+		}
+
+		public void RemoveRange(int index, int count)
+		{
+			Count.ValidateRange(index, ref count);
+			if (count == 0) return;
+			if (index < Count) Array.Copy(Items, index + count, Items, index, Count - index);
+			Array.Clear(Items, Count - count, count);
+			Count -= count;
+			_version++;
+			OnPropertyChanged(nameof(Count));
+			OnPropertyChanged(ITEMS_NAME);
+			OnCollectionChanged(NotifyCollectionChangedAction.Remove);
+		}
+
+		public int RemoveAll([NotNull] Predicate<T> match)
+		{
+			int freeIndex = 0;   // the first free slot in items array
+
+			// Find the first item which needs to be removed.
+			while (freeIndex < Count && !match(Items[freeIndex]))
+				freeIndex++;
+
+			if (freeIndex >= Count) return 0;
+			int count = Count - freeIndex;
+			RemoveRange(freeIndex, count);
+			return count;
+		}
+
+		public IEnumerator<T> GetEnumerator()
+		{
+			return new Enumerator(this);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+		public int BinarySearch([NotNull] T item)
+		{
+			return BinarySearch(0, Count, item, null);
+		}
+
+		public int BinarySearch([NotNull] T item, IComparer<T> comparer)
+		{
+			return BinarySearch(0, Count, item, comparer);
+		}
+
+		public int BinarySearch(int index, int count, [NotNull] T item, IComparer<T> comparer)
+		{
+			Count.ValidateRange(index, ref count);
+			return Array.BinarySearch(Items, index, count, item, comparer);
+		}
+
+		public int IndexOf(T item) { return IndexOf(item, 0, -1); }
+		public int IndexOf(T item, int index) { return IndexOf(item, index, -1); }
+		public int IndexOf(T item, int index, int count)
+		{
+			Count.ValidateRange(index, ref count);
+			return Array.IndexOf(Items, item, index, count);
+		}
+
+		int IList.IndexOf(object item)
+		{
+			return ObjectHelper.IsCompatible<T>(item)
+						? IndexOf((T)item)
+						: -1;
+		}
+
+		public int LastIndexOf(T item) { return LastIndexOf(item, 0, -1); }
+		public int LastIndexOf(T item, int index) { return LastIndexOf(item, index, -1); }
+		public int LastIndexOf(T item, int index, int count)
+		{
+			Count.ValidateRange(index, ref count);
+			if (index == 0) index = Count - 1;
+			return Count == 0
+						? -1
+						: Array.LastIndexOf(Items, item, index, count);
+		}
+
+		public bool Contains(T item)
+		{
+			return IndexOf(item, 0, -1) > -1;
+		}
+
+		bool IList.Contains(object item)
+		{
+			return ObjectHelper.IsCompatible<T>(item) && Contains((T)item);
+		}
+
+		public T Find([NotNull] Predicate<T> match)
+		{
+			for (int i = 0; i < Count; i++)
+			{
+				if (!match(Items[i])) continue;
+				return Items[i];
+			}
+			return default(T);
+		}
+
+		public T FindLast([NotNull] Predicate<T> match)
+		{
+			for (int i = Count - 1; i >= 0; i--)
+			{
+				T item = Items[i];
+				if (!match(item)) continue;
+				return item;
+			}
+			return default(T);
+		}
+
+		public IEnumerable<T> FindAll([NotNull] Predicate<T> match)
+		{
+			for (int i = 0; i < Count; i++)
+			{
+				T item = Items[i];
+				if (!match(item)) continue;
+				yield return item;
 			}
 		}
 
-		public new void RemoveRange(int index, int count)
+		public int FindIndex([NotNull] Predicate<T> match)
 		{
-			BeginUpdate();
+			return FindIndex(0, Count, match);
+		}
 
-			try
+		public int FindIndex(int startIndex, [NotNull] Predicate<T> match)
+		{
+			return FindIndex(startIndex, -1, match);
+		}
+
+		public int FindIndex(int startIndex, int count, [NotNull] Predicate<T> match)
+		{
+			Count.ValidateRange(startIndex, ref count);
+			return Array.FindIndex(Items, startIndex, count, match);
+		}
+
+		public int FindLastIndex([NotNull] Predicate<T> match)
+		{
+			return FindLastIndex(0, -1, match);
+		}
+
+		public int FindLastIndex(int startIndex, [NotNull] Predicate<T> match)
+		{
+			return FindLastIndex(startIndex, -1, match);
+		}
+
+		public int FindLastIndex(int startIndex, int count, [NotNull] Predicate<T> match)
+		{
+			Count.ValidateRange(startIndex, ref count);
+			return Array.FindLastIndex(Items, startIndex, count, match);
+		}
+
+		public bool Exists([NotNull] Predicate<T> match) { return FindIndex(match) != -1; }
+
+		public IEnumerable<TOutput> ConvertAll<TOutput>([NotNull] Converter<T, TOutput> converter)
+		{
+			for (int i = 0; i < Count; i++)
 			{
-				base.RemoveRange(index, count);
-			}
-			finally
-			{
-				EndUpdate();
+				yield return converter(Items[i]);
 			}
 		}
 
-		public new int RemoveAll([NotNull] Predicate<T> match)
+		public void CopyTo([NotNull] T[] array) { CopyTo(array, 0); }
+		public void CopyTo(T[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
+		public void CopyTo([NotNull] T[] array, int arrayIndex, int count)
 		{
-			BeginUpdate();
+			if (Count == 0) return;
+			array.Length.ValidateRange(arrayIndex, ref count);
+			if (count == 0) return;
+			Count.ValidateRange(arrayIndex, ref count);
+			// Delegate rest of error checking to Array.Copy.
+			Array.Copy(Items, 0, array, arrayIndex, count);
+		}
+
+		void ICollection.CopyTo(Array array, int arrayIndex)
+		{
+			if (array.Rank != 1) throw new RankException();
+			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
+			if (Count == 0) return;
+
+			if (array is T[] tArray)
+			{
+				CopyTo(tArray, arrayIndex);
+				return;
+			}
+
+			/*
+			 * Catch the obvious case assignment will fail.
+			 * We can find all possible problems by doing the check though.
+			 * For example, if the element type of the Array is derived from T,
+			 * we can't figure out if we can successfully copy the element beforehand.
+			 */
+			array.Length.ValidateRange(arrayIndex, Count);
+
+			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
+			Type sourceType = typeof(T);
+			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
+			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
 
 			try
 			{
-				return base.RemoveAll(match);
+				foreach (T item in this)
+				{
+					objects[arrayIndex++] = item;
+				}
 			}
-			finally
+			catch (ArrayTypeMismatchException)
 			{
-				EndUpdate();
+				throw new ArgumentException("Invalid array type", nameof(array));
 			}
 		}
 
-		public new void Reverse(int index, int count)
+		[NotNull]
+		public T[] ToArray()
 		{
-			BeginUpdate();
+			T[] array = new T[Count];
+			Array.Copy(Items, 0, array, 0, Count);
+			return array;
+		}
 
-			try
+		public IEnumerable<T> GetRange(int index, int count)
+		{
+			Count.ValidateRange(index, ref count);
+			int last = index + count;
+
+			for (int i = index; i < last; i++)
 			{
-				base.Reverse(index, count);
-			}
-			finally
-			{
-				EndUpdate();
+				yield return Items[i];
 			}
 		}
 
-		public new void Sort(int index, int count, IComparer<T> comparer)
+		public void ForEach([NotNull] Action<T> action)
 		{
-			BeginUpdate();
+			int version = _version;
 
-			try
+			for (int i = 0; i < Count; i++)
 			{
-				base.Sort(index, count, comparer);
+				if (version != _version) break;
+				action(Items[i]);
 			}
-			finally
-			{
-				EndUpdate();
-			}
+
+			if (version != _version) throw new VersionChangedException();
 		}
 
-		public new void Sort([NotNull] Comparison<T> comparison)
+		public void ForEach([NotNull] Action<T, int> action)
 		{
-			BeginUpdate();
+			int version = _version;
 
-			try
+			for (int i = 0; i < Count; i++)
 			{
-				base.Sort(comparison);
+				if (version != _version) break;
+				action(Items[i], i);
 			}
-			finally
+
+			if (version != _version) throw new VersionChangedException();
+		}
+	
+		public void Reverse() { Reverse(0, Count); }
+		public void Reverse(int index, int count)
+		{
+			Count.ValidateRange(index, ref count);
+			if (Count < 2 || count < 2) return;
+			Array.Reverse(Items, index, count);
+			_version++;
+			OnPropertyChanged(ITEMS_NAME);
+			OnCollectionChanged(NotifyCollectionChangedAction.Replace);
+		}
+
+		public void Sort([NotNull] Comparison<T> comparison)
+		{
+			if (Count == 0) return;
+			IComparer<T> comparer = new FunctorComparer<T>(comparison);
+			Sort(0, Count, comparer);
+		}
+		public void Sort() { Sort(0, Count, null); }
+		public void Sort(IComparer<T> comparer) { Sort(0, Count, comparer); }
+		public void Sort(int index, int count, IComparer<T> comparer)
+		{
+			Count.ValidateRange(index, ref count);
+			Array.Sort(Items, index, count, comparer);
+			_version++;
+			OnPropertyChanged(ITEMS_NAME);
+			OnCollectionChanged(NotifyCollectionChangedAction.Replace);
+		}
+
+		public void TrimExcess()
+		{
+			int threshold = (int)(Items.Length * 0.9);
+			if (Count >= threshold) return;
+			Capacity = Count;
+		}
+
+		public bool TrueForAll([NotNull] Predicate<T> match)
+		{
+			for (int i = 0; i < Count; i++)
 			{
-				EndUpdate();
+				if (match(Items[i])) continue;
+				return false;
 			}
+			return true;
+		}
+
+		[NotNull]
+		public static IList<T> Synchronized(ObservableList<T> list)
+		{
+			return new SynchronizedList(list);
 		}
 
 		[NotifyPropertyChangedInvocator]
-		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{
-			if (_updateRefCount > 0) return;
+			if (SuppressCollectionEvents) return;
 			OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
 		}
 
 		protected virtual void OnPropertyChanged([NotNull] PropertyChangedEventArgs e)
 		{
-			if (_updateRefCount > 0) return;
+			if (SuppressCollectionEvents) return;
 			PropertyChanged?.Invoke(this, e);
 		}
 
-		protected virtual void OnCollectionChanged() { OnCollectionReset(); }
-
-		protected virtual void OnCollectionChanged(NotifyCollectionChangedAction action, object item)
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action)
 		{
-			if (_updateRefCount > 0) return;
+			if (SuppressCollectionEvents) return;
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action));
+		}
+
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object item)
+		{
+			if (SuppressCollectionEvents) return;
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item));
 		}
 
-		protected virtual void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index)
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index)
 		{
-			if (_updateRefCount > 0) return;
+			if (SuppressCollectionEvents) return;
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index));
 		}
 
-		protected virtual void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index, int oldIndex)
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index, int oldIndex)
 		{
-			if (_updateRefCount > 0) return;
+			if (SuppressCollectionEvents) return;
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index, oldIndex));
 		}
 
-		protected virtual void OnCollectionChanged(NotifyCollectionChangedAction action, object oldItem, object newItem, int index)
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object oldItem, object newItem, int index)
 		{
-			if (_updateRefCount > 0) return;
+			if (SuppressCollectionEvents) return;
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, newItem, oldItem, index));
-		}
-
-		protected virtual void OnCollectionReset()
-		{
-			if (_updateRefCount > 0) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 		}
 
 		protected virtual void OnCollectionChanged([NotNull] NotifyCollectionChangedEventArgs e)
 		{
-			if (_updateRefCount > 0 || CollectionChanged == null) return;
+			if (SuppressCollectionEvents) return;
+			CollectionChanged?.Invoke(this, e);
+		}
 
-			using (BlockReentrancy())
+		protected void EnsureCapacity(int min)
+		{
+			if (Items.Length >= min) return;
+			Capacity = (Items.Length == 0 ? Constants.DEFAULT_CAPACITY : Items.Length * 2).NotBelow(min);
+		}
+
+		protected void Insert(int index, T item, bool add)
+		{
+			if (add)
 			{
-				CollectionChanged?.Invoke(this, e);
+				if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+				if (Count == Items.Length) EnsureCapacity(Count + 1);
+				if (index < Count) Array.Copy(Items, index, Items, index + 1, Count - index);
+				Count++;
+				_version++;
+				OnCollectionChanged(NotifyCollectionChangedAction.Add, item);
+				return;
 			}
-		}
 
-		protected void CheckReentrancy()
-		{
-			if (_monitor.Busy && CollectionChanged != null && CollectionChanged.GetInvocationList().Length > 1) throw new InvalidOperationException("Observable collection reentrancy not allowed.");
-		}
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 
-		[NotNull]
-		protected IDisposable BlockReentrancy()
-		{
-			_monitor.Enter();
-			return _monitor;
+			T oldItem = Items[index];
+			Items[index] = item;
+			_version++;
+			OnCollectionChanged(NotifyCollectionChangedAction.Replace, oldItem, item, index);
 		}
 	}
 }
