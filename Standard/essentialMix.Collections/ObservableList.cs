@@ -819,17 +819,21 @@ namespace essentialMix.Collections
 				if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 				if (Count == Items.Length) EnsureCapacity(Count + 1);
 				if (index < Count) Array.Copy(Items, index, Items, index + 1, Count - index);
+				Items[index] = item;
 				Count++;
 				_version++;
-				OnCollectionChanged(NotifyCollectionChangedAction.Add, item);
+				OnPropertyChanged(nameof(Count));
+				OnPropertyChanged(ITEMS_NAME);
+				OnCollectionChanged(NotifyCollectionChangedAction.Add, item, index);
 				return;
 			}
 
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-
 			T oldItem = Items[index];
 			Items[index] = item;
 			_version++;
+			OnPropertyChanged(nameof(Count));
+			OnPropertyChanged(ITEMS_NAME);
 			OnCollectionChanged(NotifyCollectionChangedAction.Replace, oldItem, item, index);
 		}
 	}

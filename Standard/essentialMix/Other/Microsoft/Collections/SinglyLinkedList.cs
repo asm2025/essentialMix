@@ -110,7 +110,7 @@ namespace Other.Microsoft.Collections
 				_version = siInfo.GetInt32(nameof(_version));
 				Current = (T)siInfo.GetValue(nameof(Current), typeof(T));
 				_index = siInfo.GetInt32(nameof(_index));
-				if (_list.siInfo != null) _list.OnDeserialization(sender);
+				if (_list.siInfo != null) ((IDeserializationCallback)_list).OnDeserialization(sender);
 
 				if (!_index.InRangeRx(0, _list.Count))
 				{

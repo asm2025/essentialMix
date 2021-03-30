@@ -1399,15 +1399,14 @@ namespace essentialMix.Collections
 				_version++;
 				OnPropertyChanged(nameof(Count));
 				OnPropertyChanged(ITEMS_NAME);
-				OnCollectionChanged(NotifyCollectionChangedAction.Add);
+				OnCollectionChanged(NotifyCollectionChangedAction.Add, item);
 				return true;
 			}
 
 			//
 			// Search for a node at bottom to insert the new node. 
-			// If we can guanratee the node we found is not a 4-node, it would be easy to do insertion.
+			// If we can guarantee the node we found is not a 4-node, it would be easy to do insertion.
 			// We split 4-nodes along the search path.
-			// 
 			Node current = _root;
 			Node parent = null;
 			Node grandParent = null;
@@ -1450,6 +1449,7 @@ namespace essentialMix.Collections
 			Debug.Assert(parent != null, "Parent node cannot be null here!");
 			// ready to insert the new node
 			Node node = new Node(item);
+
 			if (order > 0) parent.Right = node;
 			else parent.Left = node;
 
@@ -1508,6 +1508,7 @@ namespace essentialMix.Collections
 							// We can achieve this by a single rotation        
 							// This case is converted to one of other cased below.
 							Debug.Assert(!parent.IsRed, "parent must be a black node!");
+
 							if (parent.Right == sibling) RotateLeft(parent);
 							else RotateRight(parent);
 

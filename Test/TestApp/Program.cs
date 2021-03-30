@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Security;
@@ -169,7 +171,9 @@ work with {HEAVY} items.");
 
 			//TestDevicesMonitor();
 
-			TestAppInfo();
+			//TestAppInfo();
+
+			TestObservableCollections();
 
 			ConsoleHelper.Pause();
 		}
@@ -1895,7 +1899,7 @@ work with {HEAVY} items.");
 			do
 			{
 				Console.Clear();
-				Title("Testing all BinaryTrees performance...");
+				Title("Testing all BinaryTrees functionality...");
 
 				DoTheTest(binarySearchTree, values);
 				ConsoleHelper.Pause();
@@ -4655,6 +4659,103 @@ decrypted:
 			Console.WriteLine($"Version: {appInfo.Version}");
 			Console.WriteLine($"FileVersion: {appInfo.FileVersion}");
 			Console.WriteLine($"Culture: {appInfo.Culture}");
+		}
+
+		private static void TestObservableCollections()
+		{
+			bool more;
+			Title("Testing observable collections");
+			
+			ObservableList<int> list = new ObservableList<int>(); 
+			list.PropertyChanged += onPropertyChanged;
+			list.CollectionChanged += onCollectionChanged;
+
+			ObservableHashSet<int> set = new ObservableHashSet<int>();
+			set.PropertyChanged += onPropertyChanged;
+			set.CollectionChanged += onCollectionChanged;
+
+			ObservableSortedSet<int> sortedSet = new ObservableSortedSet<int>();
+			sortedSet.PropertyChanged += onPropertyChanged;
+			sortedSet.CollectionChanged += onCollectionChanged;
+
+			//ObservableDictionary<int, string> dictionary = new ObservableDictionary<int, string>();
+			int[] values = GetRandomIntegers(30);
+
+			do
+			{
+				DoTheTest(list, values);
+				ConsoleHelper.Pause();
+
+				DoTheTest(set, values);
+				ConsoleHelper.Pause();
+
+				DoTheTest(sortedSet, values);
+				ConsoleHelper.Pause();
+
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+
+			static void DoTheTest<T>(ICollection<T> collection, T[] values)
+			{
+				Console.WriteLine();
+				Console.WriteLine(Bright.Green($"Testing {collection.GetType().Name}..."));
+				collection.Clear();
+				Debug.Assert(collection.Count == 0, "Values are not cleared correctly!");
+
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
+				Console.WriteLine();
+				Console.WriteLine($"Array: {string.Join(", ", values)}");
+
+				foreach (T v in values)
+				{
+					collection.Add(v);
+				}
+
+				Console.WriteLine($"Added {collection.Count} of {values.Length} items.");
+				Console.WriteLine(Bright.Red("Test removing..."));
+				
+				int removed = 0;
+				int missed = 0;
+
+				foreach (T v in values)
+				{
+					Console.WriteLine($"Removing {v}:");
+
+					if (collection.Remove(v))
+					{
+						removed++;
+						continue;
+					}
+
+					missed++;
+					Console.WriteLine(missed <= 3
+										? Bright.Red($"Remove missed a value: {v} :((")
+										: Bright.Red("REMOVE MISSED A LOT. :(("));
+					Console.WriteLine("Does it contain the value? " + collection.Contains(v).ToYesNo());
+					if (missed > 3) return;
+					//return;
+				}
+
+				Console.WriteLine($"Removed {removed} of {values.Length} items.");
+			}
+
+			static void onPropertyChanged(object sender, PropertyChangedEventArgs args)
+			{
+				Console.WriteLine($"{Underline(sender.GetType().Name)} => {Bright.Cyan("Property")}[{Bright.Yellow(args.PropertyName)}]");
+			}
+
+			static void onCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+			{
+				string item = e.NewItems != null && e.NewItems.Count > 0
+								? Convert.ToString(e.NewItems[0])
+								: "...";
+				Console.WriteLine($"{Underline(sender.GetType().Name)}[{item}] => Collection{Bright.Cyan(e.Action.ToString())}");
+			}
 		}
 
 		private static void Title(string title)
