@@ -4678,11 +4678,12 @@ decrypted:
 			sortedSet.PropertyChanged += onPropertyChanged;
 			sortedSet.CollectionChanged += onCollectionChanged;
 
-			ObservableDictionary<int, string> dictionary = new ObservableDictionary<int, string>();
-			sortedSet.PropertyChanged += onPropertyChanged;
-			sortedSet.CollectionChanged += onCollectionChanged;
+			ObservableDictionary<int, char> dictionary = new ObservableDictionary<int, char>();
+			dictionary.PropertyChanged += onPropertyChanged;
+			dictionary.CollectionChanged += onCollectionChanged;
 
 			int[] values = GetRandomIntegers(30);
+			char[] chars = GetRandomChar(values.Length);
 
 			do
 			{
@@ -4693,6 +4694,9 @@ decrypted:
 				ConsoleHelper.Pause();
 
 				DoTheTest(sortedSet, values);
+				ConsoleHelper.Pause();
+
+				DoTheTestWithValue(dictionary, values, chars);
 				ConsoleHelper.Pause();
 
 				Console.WriteLine();
@@ -4747,17 +4751,64 @@ decrypted:
 				Console.WriteLine($"Removed {removed} of {values.Length} items.");
 			}
 
+			static void DoTheTestWithValue<TKey, TValue>(IDictionary<TKey, TValue> dictionary, TKey[] keys, TValue[] values)
+			{
+				Console.WriteLine();
+				Console.WriteLine(Bright.Green($"Testing {dictionary.GetType().Name}..."));
+				dictionary.Clear();
+				Debug.Assert(dictionary.Count == 0, "Values are not cleared correctly!");
+
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
+				Console.WriteLine();
+				Console.WriteLine($"Keys: {string.Join(", ", keys)}");
+				Console.WriteLine($"Values: {string.Join(", ", values)}");
+
+				for (int i = 0; i < values.Length; i++)
+				{
+					dictionary.Add(keys[i], values[i]);
+				}
+
+				Console.WriteLine($"Added {dictionary.Count} of {values.Length} items.");
+				Console.WriteLine(Bright.Red("Test removing..."));
+				
+				int removed = 0;
+				int missed = 0;
+
+				foreach (TKey key in keys)
+				{
+					Console.WriteLine($"Removing {key}:");
+
+					if (dictionary.Remove(key))
+					{
+						removed++;
+						continue;
+					}
+
+					missed++;
+					Console.WriteLine(missed <= 3
+										? Bright.Red($"Remove missed a value: {key} :((")
+										: Bright.Red("REMOVE MISSED A LOT. :(("));
+					Console.WriteLine("Does it contain the value? " + dictionary.ContainsKey(key).ToYesNo());
+					if (missed > 3) return;
+					//return;
+				}
+
+				Console.WriteLine($"Removed {removed} of {values.Length} items.");
+			}
+
 			static void onPropertyChanged(object sender, PropertyChangedEventArgs args)
 			{
-				Console.WriteLine($"{Underline(sender.GetType().Name)} => {Bright.Cyan("Property")}[{Bright.Yellow(args.PropertyName)}]");
+				Console.WriteLine($"{Bright.Cyan("Property")}[{Bright.Yellow(args.PropertyName)}]");
 			}
 
 			static void onCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 			{
-				string item = e.NewItems != null && e.NewItems.Count > 0
-								? Convert.ToString(e.NewItems[0])
-								: "...";
-				Console.WriteLine($"{Underline(sender.GetType().Name)}[{item}] => Collection{Bright.Cyan(e.Action.ToString())}");
+				string item = e.OldItems != null && e.OldItems.Count > 0
+								? Convert.ToString(e.OldItems[0])
+								: e.NewItems != null && e.NewItems.Count > 0
+									? Convert.ToString(e.NewItems[0])
+									: "...";
+				Console.WriteLine($"{item} => Collection{Bright.Cyan(e.Action.ToString())}");
 			}
 		}
 

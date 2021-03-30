@@ -635,7 +635,7 @@ namespace essentialMix.Collections
 				entry.Value = default(TValue);
 				OnPropertyChanged(nameof(Count));
 				OnPropertyChanged(ITEMS_NAME);
-				OnCollectionChanged(NotifyCollectionChangedAction.Remove);
+				OnCollectionChanged(NotifyCollectionChangedAction.Remove, key, entry.Value);
 				return true;
 			}
 
