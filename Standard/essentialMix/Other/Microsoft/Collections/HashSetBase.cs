@@ -210,9 +210,10 @@ namespace Other.Microsoft.Collections
 		/// </summary>
 		bool ICollection<T>.IsReadOnly => false;
 
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
 		[SecurityCritical]
 		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+		protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null) throw new ArgumentNullException(nameof(info));
 
@@ -227,7 +228,8 @@ namespace Other.Microsoft.Collections
 			info.AddValue(ELEMENTS_NAME, array, typeof(T[]));
 		}
 
-		public virtual void OnDeserialization(object sender)
+		void IDeserializationCallback.OnDeserialization(object sender) { OnDeserialization1(); }
+		protected virtual void OnDeserialization1()
 		{
 			if (_siInfo == null)
 			{

@@ -9,6 +9,7 @@ using System.Security;
 using System.Security.Permissions;
 using System.Threading;
 using essentialMix.Collections.DebugView;
+using essentialMix.Exceptions;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
@@ -24,6 +25,10 @@ namespace Other.Microsoft.Collections
 	[ComVisible(false)]
 	public abstract class DictionaryBase<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>, ISerializable, IDeserializationCallback
 	{
+		// constants for serialization
+		private const string HASH_SIZE_NAME = "HashSize"; // Must save buckets.Length
+		private const string ITEMS_NAME = "KeyValuePairs";
+
 		protected struct Entry
 		{
 			public int HashCode; // Lower 31 bits of hash code, -1 if unused
@@ -128,9 +133,9 @@ namespace Other.Microsoft.Collections
 			void ICollection.CopyTo(Array array, int index)
 			{
 				if (array.Rank != 1) throw new RankException();
-				if (array.GetLowerBound(0) != 0) throw new ArgumentException("Lower bound is larger than zero.");
+				if (array.GetLowerBound(0) != 0) throw new LBoundLargerThanZeroException();
 				if (!index.InRangeRx(0, array.Length)) throw new ArgumentOutOfRangeException(nameof(index));
-				if (array.Length - index < _dictionary.Count) throw new ArgumentException("Array is too small to hold all the values.", nameof(array));
+				if (array.Length - index < _dictionary.Count) throw new ArrayTooSmallException();
 
 				if (array is TKey[] keys)
 				{
@@ -153,7 +158,7 @@ namespace Other.Microsoft.Collections
 			public void CopyTo(TKey[] array, int index)
 			{
 				if (!index.InRangeRx(0, array.Length)) throw new ArgumentOutOfRangeException(nameof(index));
-				if (array.Length - index < _dictionary.Count) throw new ArgumentException("Array is too small to hold all the values.", nameof(array));
+				if (array.Length - index < _dictionary.Count) throw new ArrayTooSmallException();
 
 				int count = _dictionary._count;
 				Entry[] entries = _dictionary._entries;
@@ -262,7 +267,7 @@ namespace Other.Microsoft.Collections
 			public void CopyTo(TValue[] array, int index)
 			{
 				if (index < 0 || index > array.Length) throw new ArgumentOutOfRangeException(nameof(index));
-				if (array.Length - index < _dictionary.Count) throw new ArgumentException("Array is too small to hold all the values.", nameof(array));
+				if (array.Length - index < _dictionary.Count) throw new ArrayTooSmallException();
 
 				int count = _dictionary._count;
 				Entry[] entries = _dictionary._entries;
@@ -277,9 +282,9 @@ namespace Other.Microsoft.Collections
 			void ICollection.CopyTo(Array array, int index)
 			{
 				if (array.Rank != 1) throw new RankException();
-				if (array.GetLowerBound(0) != 0) throw new ArgumentException("Lower bound is larger than zero.");
+				if (array.GetLowerBound(0) != 0) throw new LBoundLargerThanZeroException();
 				if (!index.InRangeRx(0, array.Length)) throw new ArgumentOutOfRangeException(nameof(index));
-				if (array.Length - index < _dictionary.Count) throw new ArgumentException("Array is too small to hold all the values.", nameof(array));
+				if (array.Length - index < _dictionary.Count) throw new ArrayTooSmallException();
 
 				if (array is TValue[] values) CopyTo(values, index);
 				else
@@ -393,10 +398,6 @@ namespace Other.Microsoft.Collections
 			}
 		}
 
-		// constants for serialization
-		private const string HASH_SIZE_NAME = "HashSize"; // Must save buckets.Length
-		private const string KEY_VALUE_PAIRS_NAME = "KeyValuePairs";
-
 		protected internal int _version;
 
 		private int[] _buckets;
@@ -438,7 +439,8 @@ namespace Other.Microsoft.Collections
 		protected DictionaryBase([NotNull] IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
 			: this(dictionary.Count, comparer)
 		{
-			foreach (KeyValuePair<TKey, TValue> pair in dictionary) Add(pair.Key, pair.Value);
+			foreach (KeyValuePair<TKey, TValue> pair in dictionary) 
+				Add(pair.Key, pair.Value);
 		}
 
 		protected DictionaryBase(SerializationInfo info, StreamingContext context)
@@ -510,7 +512,8 @@ namespace Other.Microsoft.Collections
 
 		ICollection IDictionary.Values => Values;
 
-		public virtual void OnDeserialization(object sender)
+		void IDeserializationCallback.OnDeserialization(object sender) { OnDeserialization(); }
+		protected virtual void OnDeserialization()
 		{
 			HashCodeHelper.SerializationInfoTable.TryGetValue(this, out SerializationInfo siInfo);
 
@@ -531,17 +534,18 @@ namespace Other.Microsoft.Collections
 			{
 				_buckets = new int[hashSize];
 
-				for (int i = 0; i < _buckets.Length; i++) _buckets[i] = -1;
+				for (int i = 0; i < _buckets.Length; i++)
+					_buckets[i] = -1;
 
 				_entries = new Entry[hashSize];
 				_freeList = -1;
 
-				KeyValuePair<TKey, TValue>[] array = (KeyValuePair<TKey, TValue>[])siInfo.GetValue(KEY_VALUE_PAIRS_NAME, typeof(KeyValuePair<TKey, TValue>[]));
-				if (array == null) throw new SerializationException("Missing keys.");
+				KeyValuePair<TKey, TValue>[] array = (KeyValuePair<TKey, TValue>[])siInfo.GetValue(ITEMS_NAME, typeof(KeyValuePair<TKey, TValue>[]));
+				if (array == null) throw new SerializationDataMissingException();
 
 				foreach (KeyValuePair<TKey, TValue> pair in array)
 				{
-					if (ReferenceEquals(pair.Key, null)) throw new SerializationException("Null key found");
+					if (ReferenceEquals(pair.Key, null)) throw new NullKeyException();
 					Insert(pair.Key, pair.Value, true);
 				}
 			}
@@ -554,9 +558,10 @@ namespace Other.Microsoft.Collections
 			HashCodeHelper.SerializationInfoTable.Remove(this);
 		}
 
-		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
 		[SecurityCritical]
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+		protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			info.AddValue(nameof(_version), _version);
 			info.AddValue(nameof(Comparer), Comparer, typeof(IEqualityComparer<TKey>));
@@ -564,7 +569,7 @@ namespace Other.Microsoft.Collections
 			if (_buckets == null) return;
 			KeyValuePair<TKey, TValue>[] array = new KeyValuePair<TKey, TValue>[Count];
 			CopyTo(array, 0);
-			info.AddValue(KEY_VALUE_PAIRS_NAME, array, typeof(KeyValuePair<TKey, TValue>[]));
+			info.AddValue(ITEMS_NAME, array, typeof(KeyValuePair<TKey, TValue>[]));
 		}
 
 		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() { return new Enumerator(this, Enumerator.KEY_VALUE_PAIR); }
@@ -689,9 +694,9 @@ namespace Other.Microsoft.Collections
 		void ICollection.CopyTo(Array array, int index)
 		{
 			if (array.Rank != 1) throw new RankException();
-			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Lower bound is larger than zero.");
+			if (array.GetLowerBound(0) != 0) throw new LBoundLargerThanZeroException();
 			if (!index.InRangeRx(0, array.Length)) throw new ArgumentOutOfRangeException(nameof(index));
-			if (array.Length - index < Count) throw new ArgumentException("Array is too small to hold all the values.", nameof(array));
+			if (array.Length - index < Count) throw new ArrayTooSmallException();
 
 			switch (array)
 			{
@@ -700,13 +705,12 @@ namespace Other.Microsoft.Collections
 					break;
 				case DictionaryEntry[] dictionaryEntries:
 				{
-					DictionaryEntry[] dictEntryArray = dictionaryEntries;
 					Entry[] entries = _entries;
 
 					for (int i = 0; i < _count; i++)
 					{
 						if (entries[i].HashCode < 0) continue;
-						dictEntryArray[index++] = new DictionaryEntry(entries[i].Key, entries[i].Value);
+						dictionaryEntries[index++] = new DictionaryEntry(entries[i].Key, entries[i].Value);
 					}
 
 					break;
@@ -729,7 +733,7 @@ namespace Other.Microsoft.Collections
 			}
 		}
 
-		protected virtual void Insert([NotNull] TKey key, TValue collection, bool add)
+		protected virtual void Insert([NotNull] TKey key, TValue value, bool add)
 		{
 			if (_buckets == null) Initialize(0);
 			
@@ -740,7 +744,7 @@ namespace Other.Microsoft.Collections
 			{
 				if (_entries[i].HashCode != hashCode || !Comparer.Equals(_entries[i].Key, key)) continue;
 				if (add) throw new DuplicateKeyException();
-				_entries[i].Value = collection;
+				_entries[i].Value = value;
 				_version++;
 				return;
 			}
@@ -768,7 +772,7 @@ namespace Other.Microsoft.Collections
 			_entries[index].HashCode = hashCode;
 			_entries[index].Next = _buckets[targetBucket];
 			_entries[index].Key = key;
-			_entries[index].Value = collection;
+			_entries[index].Value = value;
 			_buckets[targetBucket] = index;
 			_version++;
 		}
@@ -788,7 +792,7 @@ namespace Other.Microsoft.Collections
 		private void CopyTo([NotNull] KeyValuePair<TKey, TValue>[] array, int index)
 		{
 			if (!index.InRangeRx(0, array.Length)) throw new ArgumentOutOfRangeException(nameof(index));
-			if (array.Length - index < Count) throw new ArgumentException("Array is too small to hold all the values.", nameof(array));
+			if (array.Length - index < Count) throw new ArrayTooSmallException();
 
 			int count = _count;
 			Entry[] entries = _entries;
@@ -838,7 +842,8 @@ namespace Other.Microsoft.Collections
 			Contract.Assert(newSize >= _entries.Length);
 			int[] newBuckets = new int[newSize];
 
-			for (int i = 0; i < newBuckets.Length; i++) newBuckets[i] = -1;
+			for (int i = 0; i < newBuckets.Length; i++) 
+				newBuckets[i] = -1;
 
 			Entry[] newEntries = new Entry[newSize];
 			Array.Copy(_entries, 0, newEntries, 0, _count);

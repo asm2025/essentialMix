@@ -9,6 +9,7 @@ using System.Security;
 using System.Security.Permissions;
 using System.Threading;
 using essentialMix.Collections.DebugView;
+using essentialMix.Exceptions;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
@@ -128,9 +129,9 @@ namespace Other.Microsoft.Collections
 			void ICollection.CopyTo(Array array, int index)
 			{
 				if (array.Rank != 1) throw new RankException();
-				if (array.GetLowerBound(0) != 0) throw new ArgumentException("Lower bound is larger than zero.");
+				if (array.GetLowerBound(0) != 0) throw new LBoundLargerThanZeroException();
 				if (!index.InRangeRx(0, array.Length)) throw new ArgumentOutOfRangeException(nameof(index));
-				if (array.Length - index < _dictionary.Count) throw new ArgumentException("Array is too small to hold all the values.", nameof(array));
+				if (array.Length - index < _dictionary.Count) throw new ArrayTooSmallException();
 
 				if (array is TKey[] keys)
 				{
@@ -153,7 +154,7 @@ namespace Other.Microsoft.Collections
 			public void CopyTo(TKey[] array, int index)
 			{
 				if (!index.InRangeRx(0, array.Length)) throw new ArgumentOutOfRangeException(nameof(index));
-				if (array.Length - index < _dictionary.Count) throw new ArgumentException("Array is too small to hold all the values.", nameof(array));
+				if (array.Length - index < _dictionary.Count) throw new ArrayTooSmallException();
 
 				int count = _dictionary._count;
 				Entry[] entries = _dictionary._entries;
@@ -262,7 +263,7 @@ namespace Other.Microsoft.Collections
 			public void CopyTo(TValue[] array, int index)
 			{
 				if (index < 0 || index > array.Length) throw new ArgumentOutOfRangeException(nameof(index));
-				if (array.Length - index < _dictionary.Count) throw new ArgumentException("Array is too small to hold all the values.", nameof(array));
+				if (array.Length - index < _dictionary.Count) throw new ArrayTooSmallException();
 
 				int count = _dictionary._count;
 				Entry[] entries = _dictionary._entries;
@@ -277,9 +278,9 @@ namespace Other.Microsoft.Collections
 			void ICollection.CopyTo(Array array, int index)
 			{
 				if (array.Rank != 1) throw new RankException();
-				if (array.GetLowerBound(0) != 0) throw new ArgumentException("Lower bound is larger than zero.");
+				if (array.GetLowerBound(0) != 0) throw new LBoundLargerThanZeroException();
 				if (!index.InRangeRx(0, array.Length)) throw new ArgumentOutOfRangeException(nameof(index));
-				if (array.Length - index < _dictionary.Count) throw new ArgumentException("Array is too small to hold all the values.", nameof(array));
+				if (array.Length - index < _dictionary.Count) throw new ArrayTooSmallException();
 
 				if (array is TValue[] values) CopyTo(values, index);
 				else
@@ -496,7 +497,8 @@ namespace Other.Microsoft.Collections
 
 		IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Values;
 
-		public virtual void OnDeserialization(object sender)
+		void IDeserializationCallback.OnDeserialization(object sender) { OnDeserialization(); }
+		protected virtual void OnDeserialization()
 		{
 			HashCodeHelper.SerializationInfoTable.TryGetValue(this, out SerializationInfo siInfo);
 
@@ -523,11 +525,11 @@ namespace Other.Microsoft.Collections
 				_freeList = -1;
 
 				KeyValuePair<TKey, TValue>[] array = (KeyValuePair<TKey, TValue>[])siInfo.GetValue(KEY_VALUE_PAIRS_NAME, typeof(KeyValuePair<TKey, TValue>[]));
-				if (array == null) throw new SerializationException("Missing keys.");
+				if (array == null) throw new SerializationDataMissingException();
 
 				foreach (KeyValuePair<TKey, TValue> pair in array)
 				{
-					if (ReferenceEquals(pair.Key, null)) throw new SerializationException("Null key found");
+					if (ReferenceEquals(pair.Key, null)) throw new NullKeyException();
 					Insert(pair.Key, pair.Value, true);
 				}
 			}
@@ -540,6 +542,7 @@ namespace Other.Microsoft.Collections
 			HashCodeHelper.SerializationInfoTable.Remove(this);
 		}
 
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
 		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 		[SecurityCritical]
 		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -643,9 +646,9 @@ namespace Other.Microsoft.Collections
 		void ICollection.CopyTo(Array array, int index)
 		{
 			if (array.Rank != 1) throw new RankException();
-			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Lower bound is larger than zero.");
+			if (array.GetLowerBound(0) != 0) throw new LBoundLargerThanZeroException();
 			if (!index.InRangeRx(0, array.Length)) throw new ArgumentOutOfRangeException(nameof(index));
-			if (array.Length - index < Count) throw new ArgumentException("Array is too small to hold all the values.", nameof(array));
+			if (array.Length - index < Count) throw new ArrayTooSmallException();
 
 			switch (array)
 			{
@@ -745,7 +748,7 @@ namespace Other.Microsoft.Collections
 		private void CopyTo([NotNull] KeyValuePair<TKey, TValue>[] array, int index)
 		{
 			if (!index.InRangeRx(0, array.Length)) throw new ArgumentOutOfRangeException(nameof(index));
-			if (array.Length - index < Count) throw new ArgumentException("Array is too small to hold all the values.", nameof(array));
+			if (array.Length - index < Count) throw new ArrayTooSmallException();
 
 			int count = _count;
 			Entry[] entries = _entries;

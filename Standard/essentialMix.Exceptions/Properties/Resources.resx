@@ -210,4 +210,13 @@
   <data name="SerializationDataMissing" xml:space="preserve">
     <value>Serialization data is missing.</value>
   </data>
+  <data name="KeyIsNull" xml:space="preserve">
+    <value>Key is null.</value>
+  </data>
+  <data name="ArrayTooSmall" xml:space="preserve">
+    <value>Array is too small to hold all the values.</value>
+  </data>
+  <data name="LBoundLargerThanZero" xml:space="preserve">
+    <value>Lower bound is larger than zero.</value>
+  </data>
 </root>

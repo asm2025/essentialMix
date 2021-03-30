@@ -61,6 +61,15 @@ namespace essentialMix.Exceptions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Array is too small to hold all the values..
+        /// </summary>
+        internal static string ArrayTooSmall {
+            get {
+                return ResourceManager.GetString("ArrayTooSmall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Buffer is not large enough for the requested data..
         /// </summary>
         internal static string BufferNotLargeEnough {
@@ -192,6 +201,24 @@ namespace essentialMix.Exceptions.Properties {
         internal static string ItemLocked {
             get {
                 return ResourceManager.GetString("ItemLocked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Key is null..
+        /// </summary>
+        internal static string KeyIsNull {
+            get {
+                return ResourceManager.GetString("KeyIsNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lower bound is larger than zero..
+        /// </summary>
+        internal static string LBoundLargerThanZero {
+            get {
+                return ResourceManager.GetString("LBoundLargerThanZero", resourceCulture);
             }
         }
         

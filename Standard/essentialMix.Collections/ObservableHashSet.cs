@@ -224,9 +224,10 @@ namespace essentialMix.Collections
 		public event PropertyChangedEventHandler PropertyChanged;
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
 
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
 		[SecurityCritical]
 		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+		protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null) throw new ArgumentNullException(nameof(info));
 
@@ -241,7 +242,8 @@ namespace essentialMix.Collections
 			info.AddValue(ELEMENTS_NAME, array, typeof(T[]));
 		}
 
-		public virtual void OnDeserialization(object sender)
+		void IDeserializationCallback.OnDeserialization(object sender) { OnDeserialization(); }
+		protected virtual void OnDeserialization()
 		{
 			if (_siInfo == null)
 			{
@@ -252,7 +254,6 @@ namespace essentialMix.Collections
 				return;
 			}
 
-			bool added = false;
 			int capacity = _siInfo.GetInt32(CAPACITY_NAME);
 			Comparer = (IEqualityComparer<T>)_siInfo.GetValue(nameof(Comparer), typeof(IEqualityComparer<T>));
 			_freeList = -1;
@@ -268,12 +269,15 @@ namespace essentialMix.Collections
 				{
 					// there are no resizes here because we already set capacity above
 					foreach (T item in array) 
-						added |= AddIfNotPresent(item);
+						AddIfNotPresent(item);
 				}
 				finally
 				{
 					SuppressCollectionEvents = false;
 				}
+
+				OnPropertyChanged(nameof(Count));
+				OnCollectionChanged(NotifyCollectionChangedAction.Add);
 			}
 			else
 			{
@@ -282,9 +286,6 @@ namespace essentialMix.Collections
 
 			_version = _siInfo.GetInt32(VERSION_NAME);
 			_siInfo = null;
-			if (!added) return;
-			OnPropertyChanged(nameof(Count));
-			OnCollectionChanged(NotifyCollectionChangedAction.Add);
 		}
 
 		public IEnumerator<T> GetEnumerator() { return new Enumerator(this); }

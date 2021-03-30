@@ -851,8 +851,8 @@ namespace essentialMix.Collections
 			}
 			
 			array.Length.ValidateRange(index, Count);
-			if (array.Rank != 1) throw new ArgumentException("Array rank is not supported.", nameof(array));
-			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Array lower bound is not supported.", nameof(array));
+			if (array.Rank != 1) throw new RankException();
+			if (array.GetLowerBound(0) != 0) throw new LBoundLargerThanZeroException();
 			
 			object[] objects = array as object[];
 			if (objects == null) throw new ArrayTypeMismatchException();

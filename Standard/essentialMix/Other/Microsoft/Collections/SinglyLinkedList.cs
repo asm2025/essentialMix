@@ -177,6 +177,7 @@ namespace Other.Microsoft.Collections
 			}
 		}
 
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
 		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 		[SecurityCritical]
 		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -193,7 +194,8 @@ namespace Other.Microsoft.Collections
 			info.AddValue(VALUES, array, typeof(T[]));
 		}
 
-		public virtual void OnDeserialization(object sender)
+		void IDeserializationCallback.OnDeserialization(object sender) { OnDeserialization(); }
+		protected virtual void OnDeserialization()
 		{
 			if (siInfo == null) return; //Somebody had a dependency on this Dictionary and fixed us up before the ObjectManager got to it.
 
