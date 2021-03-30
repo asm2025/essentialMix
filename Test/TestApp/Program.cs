@@ -4678,7 +4678,10 @@ decrypted:
 			sortedSet.PropertyChanged += onPropertyChanged;
 			sortedSet.CollectionChanged += onCollectionChanged;
 
-			//ObservableDictionary<int, string> dictionary = new ObservableDictionary<int, string>();
+			ObservableDictionary<int, string> dictionary = new ObservableDictionary<int, string>();
+			sortedSet.PropertyChanged += onPropertyChanged;
+			sortedSet.CollectionChanged += onCollectionChanged;
+
 			int[] values = GetRandomIntegers(30);
 
 			do

@@ -780,7 +780,9 @@ namespace essentialMix.Collections
 		protected void OnCollectionChanged(NotifyCollectionChangedAction action)
 		{
 			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action));
+			OnCollectionChanged(action == NotifyCollectionChangedAction.Reset
+									? new NotifyCollectionChangedEventArgs(action)
+									: new NotifyCollectionChangedEventArgs(action, Array.Empty<KeyValuePair<TKey, TValue>>()));
 		}
 
 		protected void OnCollectionChanged(NotifyCollectionChangedAction action, TKey key, TValue value)
