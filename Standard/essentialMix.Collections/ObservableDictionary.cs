@@ -29,7 +29,7 @@ namespace essentialMix.Collections
 	{
 		// constants for serialization
 		private const string HASH_SIZE_NAME = "HashSize"; // Must save buckets.Length
-		private const string ITEMS_NAME = "KeyValuePairs";
+		private const string ITEMS_NAME = "Item[]";
 
 		protected struct Entry
 		{
@@ -429,8 +429,8 @@ namespace essentialMix.Collections
 		public ObservableDictionary(int capacity, IEqualityComparer<TKey> comparer)
 		{
 			if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
-			if (capacity > 0) Initialize(capacity);
 			Comparer = comparer ?? EqualityComparer<TKey>.Default;
+			if (capacity > 0) Initialize(capacity);
 		}
 
 		public ObservableDictionary([NotNull] IDictionary<TKey, TValue> dictionary)
@@ -543,44 +543,43 @@ namespace essentialMix.Collections
 			int hashSize = siInfo.GetInt32(HASH_SIZE_NAME);
 			Comparer = (IEqualityComparer<TKey>)siInfo.GetValue(nameof(Comparer), typeof(IEqualityComparer<TKey>));
 
-			if (hashSize != 0)
-			{
-				_buckets = new int[hashSize];
-
-				for (int i = 0; i < _buckets.Length; i++) 
-					_buckets[i] = -1;
-
-				_entries = new Entry[hashSize];
-				_freeList = -1;
-
-				KeyValuePair<TKey, TValue>[] array = (KeyValuePair<TKey, TValue>[])siInfo.GetValue(ITEMS_NAME, typeof(KeyValuePair<TKey, TValue>[]));
-				if (array == null) throw new SerializationDataMissingException();
-				SuppressCollectionEvents = true;
-
-				try
-				{
-					foreach (KeyValuePair<TKey, TValue> pair in array)
-					{
-						if (ReferenceEquals(pair.Key, null)) throw new NullKeyException();
-						Insert(pair.Key, pair.Value, true);
-					}
-				}
-				finally
-				{
-					SuppressCollectionEvents = false;
-				}
-
-				OnPropertyChanged(nameof(Count));
-				OnPropertyChanged(ITEMS_NAME);
-				OnCollectionChanged(NotifyCollectionChangedAction.Add);
-			}
-			else
+			if (hashSize == 0)
 			{
 				_buckets = null;
+				_version = realVersion;
+				return;
+			}
+
+			_buckets = new int[hashSize];
+
+			for (int i = 0; i < _buckets.Length; i++) 
+				_buckets[i] = -1;
+
+			_entries = new Entry[hashSize];
+			_freeList = -1;
+
+			KeyValuePair<TKey, TValue>[] array = (KeyValuePair<TKey, TValue>[])siInfo.GetValue(ITEMS_NAME, typeof(KeyValuePair<TKey, TValue>[]));
+			if (array == null) throw new SerializationDataMissingException();
+			SuppressCollectionEvents = true;
+
+			try
+			{
+				foreach (KeyValuePair<TKey, TValue> pair in array)
+				{
+					if (ReferenceEquals(pair.Key, null)) throw new NullKeyException();
+					Insert(pair.Key, pair.Value, true);
+				}
+			}
+			finally
+			{
+				SuppressCollectionEvents = false;
 			}
 
 			_version = realVersion;
 			HashCodeHelper.SerializationInfoTable.Remove(this);
+			OnPropertyChanged(nameof(Count));
+			OnPropertyChanged(ITEMS_NAME);
+			OnCollectionChanged(NotifyCollectionChangedAction.Add);
 		}
 
 		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
@@ -625,17 +624,18 @@ namespace essentialMix.Collections
 				else _entries[last].Next = _entries[i].Next;
 
 				Entry entry = _entries[i];
+				TValue value = entry.Value;
 				entry.HashCode = -1;
 				entry.Next = _freeList;
 				entry.Key = default(TKey);
+				entry.Value = default(TValue);
 				_entries[i] = entry;
 				_freeList = i;
 				_freeCount++;
 				_version++;
-				entry.Value = default(TValue);
 				OnPropertyChanged(nameof(Count));
 				OnPropertyChanged(ITEMS_NAME);
-				OnCollectionChanged(NotifyCollectionChangedAction.Remove, key, entry.Value);
+				OnCollectionChanged(NotifyCollectionChangedAction.Remove, key, value);
 				return true;
 			}
 

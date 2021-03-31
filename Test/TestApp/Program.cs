@@ -1908,7 +1908,6 @@ work with {HEAVY} items.");
 				ConsoleHelper.Pause();
 
 				DoTheTest(redBlackTree, values);
-				ConsoleHelper.Pause();
 
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
@@ -4682,8 +4681,13 @@ decrypted:
 			dictionary.PropertyChanged += onPropertyChanged;
 			dictionary.CollectionChanged += onCollectionChanged;
 
+			ObservableKeyedDictionary<int, Student> keyedDictionary = new ObservableKeyedDictionary<int, Student>(e => e.Id);
+			keyedDictionary.PropertyChanged += onPropertyChanged;
+			keyedDictionary.CollectionChanged += onCollectionChanged;
+
 			int[] values = GetRandomIntegers(30);
 			char[] chars = GetRandomChar(values.Length);
+			Student[] students = GetRandomStudents(values.Length);
 
 			do
 			{
@@ -4698,6 +4702,8 @@ decrypted:
 
 				DoTheTestWithValue(dictionary, values, chars);
 				ConsoleHelper.Pause();
+
+				DoTheTest(keyedDictionary, students);
 
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
@@ -4945,6 +4951,7 @@ decrypted:
 			{
 				students[i] = new Student
 				{
+					Id = i,
 					Name = __fakeGenerator.Value.Name.FirstName(__fakeGenerator.Value.PickRandom<Name.Gender>()),
 					Grade = __fakeGenerator.Value.Random.Double(0.0d, 100.0d)
 				};

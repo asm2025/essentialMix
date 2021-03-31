@@ -1,8 +1,11 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
@@ -13,21 +16,20 @@ using essentialMix.Exceptions;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
+using Other.Microsoft;
 using essentialMixMath = essentialMix.Numeric.Math;
 
-// ReSharper disable once CheckNamespace
-namespace Other.Microsoft.Collections
+namespace essentialMix.Collections
 {
-	// based on https://github.com/microsoft/referencesource/blob/master/mscorlib/system/collections/generic/dictionary.cs
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_DictionaryDebugView<,>))]
 	[Serializable]
 	[ComVisible(false)]
-	public abstract class DictionaryBase<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>, ISerializable, IDeserializationCallback
+	public class ObservableKeyedDictionary<TKey, TValue> : ICollection<TValue>, ICollection, IReadOnlyDictionary<TKey, TValue>, ISerializable, IDeserializationCallback, INotifyPropertyChanged, INotifyCollectionChanged
 	{
 		// constants for serialization
 		private const string HASH_SIZE_NAME = "HashSize"; // Must save buckets.Length
-		private const string ITEMS_NAME = "KeyValuePairs";
+		private const string ITEMS_NAME = "Item[]";
 
 		protected struct Entry
 		{
@@ -47,11 +49,11 @@ namespace Other.Microsoft.Collections
 			// ReSharper disable once MemberHidesStaticFromOuterClass
 			public struct Enumerator : IEnumerator<TKey>, IEnumerator
 			{
-				private readonly DictionaryBase<TKey, TValue> _dictionary;
+				private ObservableKeyedDictionary<TKey, TValue> _dictionary;
 				private int _index;
 				private int _version;
 
-				internal Enumerator([NotNull] DictionaryBase<TKey, TValue> dictionary)
+				internal Enumerator([NotNull] ObservableKeyedDictionary<TKey, TValue> dictionary)
 				{
 					_dictionary = dictionary;
 					_version = dictionary._version;
@@ -101,9 +103,9 @@ namespace Other.Microsoft.Collections
 				}
 			}
 
-			private DictionaryBase<TKey, TValue> _dictionary;
+			private readonly ObservableKeyedDictionary<TKey, TValue> _dictionary;
 
-			public KeyCollection([NotNull] DictionaryBase<TKey, TValue> dictionary)
+			public KeyCollection([NotNull] ObservableKeyedDictionary<TKey, TValue> dictionary)
 			{
 				_dictionary = dictionary;
 			}
@@ -181,11 +183,11 @@ namespace Other.Microsoft.Collections
 			// ReSharper disable once MemberHidesStaticFromOuterClass
 			public struct Enumerator : IEnumerator<TValue>, IEnumerator
 			{
-				private DictionaryBase<TKey, TValue> _dictionary;
+				private ObservableKeyedDictionary<TKey, TValue> _dictionary;
 				private int _index;
 				private int _version;
 
-				internal Enumerator([NotNull] DictionaryBase<TKey, TValue> dictionary)
+				internal Enumerator([NotNull] ObservableKeyedDictionary<TKey, TValue> dictionary)
 				{
 					_dictionary = dictionary;
 					_version = dictionary._version;
@@ -235,9 +237,9 @@ namespace Other.Microsoft.Collections
 				}
 			}
 
-			private DictionaryBase<TKey, TValue> _dictionary;
+			private ObservableKeyedDictionary<TKey, TValue> _dictionary;
 
-			public ValueCollection([NotNull] DictionaryBase<TKey, TValue> dictionary)
+			public ValueCollection([NotNull] ObservableKeyedDictionary<TKey, TValue> dictionary)
 			{
 				_dictionary = dictionary;
 			}
@@ -262,7 +264,7 @@ namespace Other.Microsoft.Collections
 
 			void ICollection<TValue>.Clear() { throw new NotSupportedException(); }
 
-			bool ICollection<TValue>.Contains(TValue item) { return _dictionary.ContainsValue(item); }
+			bool ICollection<TValue>.Contains(TValue item) { return _dictionary.Contains(item); }
 
 			public void CopyTo(TValue[] array, int index)
 			{
@@ -308,14 +310,14 @@ namespace Other.Microsoft.Collections
 			internal const int DICT_ENTRY = 1;
 			internal const int KEY_VALUE_PAIR = 2;
 
-			private readonly DictionaryBase<TKey, TValue> _dictionary;
+			private readonly ObservableKeyedDictionary<TKey, TValue> _dictionary;
 			private readonly int _version;
 
 			private int _index;
 			private KeyValuePair<TKey, TValue> _current;
 			private int _getEnumeratorRetType; // What should Enumerator.Current return?
 
-			internal Enumerator([NotNull] DictionaryBase<TKey, TValue> dictionary, int getEnumeratorRetType)
+			internal Enumerator([NotNull] ObservableKeyedDictionary<TKey, TValue> dictionary, int getEnumeratorRetType)
 			{
 				_dictionary = dictionary;
 				_version = dictionary._version;
@@ -398,58 +400,63 @@ namespace Other.Microsoft.Collections
 			}
 		}
 
-		protected internal int _version;
-
 		private int[] _buckets;
 		private Entry[] _entries;
 		private int _count;
+		private int _version;
 		private int _freeList;
 		private int _freeCount;
 		private KeyCollection _keys;
 		private ValueCollection _values;
 		private object _syncRoot;
 
-		protected DictionaryBase()
-			: this(0, null)
+		public ObservableKeyedDictionary([NotNull] Func<TValue, TKey> getKey)
+			: this(getKey, 0, null)
 		{
 		}
 
-		protected DictionaryBase(int capacity)
-			: this(capacity, null)
+		public ObservableKeyedDictionary([NotNull] Func<TValue, TKey> getKey, int capacity)
+			: this(getKey, capacity, null)
 		{
 		}
 
-		protected DictionaryBase(IEqualityComparer<TKey> comparer)
-			: this(0, comparer)
+		public ObservableKeyedDictionary([NotNull] Func<TValue, TKey> getKey, IEqualityComparer<TKey> comparer)
+			: this(getKey, 0, comparer)
 		{
 		}
 
-		protected DictionaryBase(int capacity, IEqualityComparer<TKey> comparer)
+		public ObservableKeyedDictionary([NotNull] Func<TValue, TKey> getKey, int capacity, IEqualityComparer<TKey> comparer)
 		{
 			if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
-			if (capacity > 0) Initialize(capacity);
+			GetKey = getKey;
 			Comparer = comparer ?? EqualityComparer<TKey>.Default;
+			if (capacity > 0) Initialize(capacity);
 		}
 
-		protected DictionaryBase([NotNull] IDictionary<TKey, TValue> dictionary)
-			: this(dictionary, null)
+		public ObservableKeyedDictionary([NotNull] Func<TValue, TKey> getKey, [NotNull] IEnumerable<TValue> collection)
+			: this(getKey, collection, null)
 		{
 		}
 
-		protected DictionaryBase([NotNull] IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
-			: this(dictionary.Count, comparer)
+		public ObservableKeyedDictionary([NotNull] Func<TValue, TKey> getKey, [NotNull] IEnumerable<TValue> collection, IEqualityComparer<TKey> comparer)
+			: this(getKey, 0, comparer)
 		{
-			foreach (KeyValuePair<TKey, TValue> pair in dictionary) 
-				Add(pair.Key, pair.Value);
+			foreach (TValue item in collection) 
+				Insert(GetKey(item), item, true);
 		}
 
-		protected DictionaryBase(SerializationInfo info, StreamingContext context)
+		protected ObservableKeyedDictionary(SerializationInfo info, StreamingContext context)
 		{
 			//We can't do anything with the keys and values until the entire graph has been deserialized
 			//and we have a reasonable estimate that GetHashCode is not going to fail. For the time being,
 			//we'll just cache this. The graph is not valid until OnDeserialization has been called.
 			HashCodeHelper.SerializationInfoTable.Add(this, info);
+			// temporarily assign a function
+			GetKey = _ => default(TKey);
 		}
+
+		[NotNull]
+		public Func<TValue, TKey> GetKey { get; private set; }
 
 		bool ICollection.IsSynchronized => false;
 
@@ -462,7 +469,7 @@ namespace Other.Microsoft.Collections
 			}
 		}
 
-		public TValue this[TKey key]
+		public TValue this[[NotNull] TKey key]
 		{
 			get
 			{
@@ -470,23 +477,17 @@ namespace Other.Microsoft.Collections
 				if (i < 0) throw new KeyNotFoundException();
 				return _entries[i].Value;
 			}
-			set => Insert(key, value, false);
+			set
+			{
+				int i = FindEntry(key);
+				if (i < 0) throw new KeyNotFoundException();
+				TKey k = GetKey(_entries[i].Value);
+				if (!Comparer.Equals(k, key)) throw new InvalidOperationException();
+				Insert(k, value, false);
+			}
 		}
 
 		public int Count => _count - _freeCount;
-
-		object IDictionary.this[object key]
-		{
-			get
-			{
-				if (!IsCompatibleKey(key)) return null;
-				int i = FindEntry((TKey)key);
-				return i >= 0
-							? (object)_entries[i].Value
-							: null;
-			}
-			set => this[(TKey)key] = (TValue)value;
-		}
 
 		public IEqualityComparer<TKey> Comparer { get; private set; }
 
@@ -497,20 +498,23 @@ namespace Other.Microsoft.Collections
 		[NotNull]
 		public KeyCollection Keys => _keys ??= new KeyCollection(this);
 
-		ICollection<TKey> IDictionary<TKey, TValue>.Keys => Keys;
-
 		IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Keys;
-
-		ICollection IDictionary.Keys => Keys;
 
 		[NotNull]
 		public ValueCollection Values => _values ??= new ValueCollection(this);
 
-		ICollection<TValue> IDictionary<TKey, TValue>.Values => Values;
-
 		IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Values;
 
-		ICollection IDictionary.Values => Values;
+		protected bool SuppressCollectionEvents { get; set; }
+
+		event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+		{
+			add => PropertyChanged += value;
+			remove => PropertyChanged -= value;
+		}
+
+		public event PropertyChangedEventHandler PropertyChanged;
+		public event NotifyCollectionChangedEventHandler CollectionChanged;
 
 		void IDeserializationCallback.OnDeserialization(object sender) { OnDeserialization(); }
 		protected virtual void OnDeserialization()
@@ -539,7 +543,7 @@ namespace Other.Microsoft.Collections
 
 			_buckets = new int[hashSize];
 
-			for (int i = 0; i < _buckets.Length; i++) 
+			for (int i = 0; i < _buckets.Length; i++)
 				_buckets[i] = -1;
 
 			_entries = new Entry[hashSize];
@@ -547,20 +551,31 @@ namespace Other.Microsoft.Collections
 
 			KeyValuePair<TKey, TValue>[] array = (KeyValuePair<TKey, TValue>[])siInfo.GetValue(ITEMS_NAME, typeof(KeyValuePair<TKey, TValue>[]));
 			if (array == null) throw new SerializationDataMissingException();
+			SuppressCollectionEvents = true;
 
-			foreach (KeyValuePair<TKey, TValue> pair in array)
+			try
 			{
-				if (ReferenceEquals(pair.Key, null)) throw new NullKeyException();
-				Insert(pair.Key, pair.Value, true);
+				foreach (KeyValuePair<TKey, TValue> pair in array)
+				{
+					if (ReferenceEquals(pair.Key, null)) throw new NullKeyException();
+					Insert(pair.Key, pair.Value, true);
+				}
+			}
+			finally
+			{
+				SuppressCollectionEvents = false;
 			}
 
 			_version = realVersion;
 			HashCodeHelper.SerializationInfoTable.Remove(this);
+			OnPropertyChanged(nameof(Count));
+			OnPropertyChanged(ITEMS_NAME);
+			OnCollectionChanged(NotifyCollectionChangedAction.Add);
 		}
 
 		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
-		[SecurityCritical]
 		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+		[SecurityCritical]
 		protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			info.AddValue(nameof(_version), _version);
@@ -572,19 +587,100 @@ namespace Other.Microsoft.Collections
 			info.AddValue(ITEMS_NAME, array, typeof(KeyValuePair<TKey, TValue>[]));
 		}
 
-		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() { return new Enumerator(this, Enumerator.KEY_VALUE_PAIR); }
+		[NotifyPropertyChangedInvocator]
+		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			if (SuppressCollectionEvents) return;
+			OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
+		}
+
+		protected virtual void OnPropertyChanged([NotNull] PropertyChangedEventArgs e)
+		{
+			if (SuppressCollectionEvents) return;
+			PropertyChanged?.Invoke(this, e);
+		}
+
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action)
+		{
+			if (SuppressCollectionEvents) return;
+			OnCollectionChanged(action == NotifyCollectionChangedAction.Reset
+									? new NotifyCollectionChangedEventArgs(action)
+									: new NotifyCollectionChangedEventArgs(action, Array.Empty<KeyValuePair<TKey, TValue>>()));
+		}
+
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action, TKey key, TValue value)
+		{
+			if (SuppressCollectionEvents) return;
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, new KeyValuePair<TKey, TValue>(key, value)));
+		}
+
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action, KeyValuePair<TKey, TValue> item)
+		{
+			if (SuppressCollectionEvents) return;
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item));
+		}
+
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action, TKey key, TValue value, int index)
+		{
+			if (SuppressCollectionEvents) return;
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, new KeyValuePair<TKey, TValue>(key, value), index));
+		}
+
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action, KeyValuePair<TKey, TValue> item, int index)
+		{
+			if (SuppressCollectionEvents) return;
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index));
+		}
+
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action, TKey key, TValue value, int index, int oldIndex)
+		{
+			if (SuppressCollectionEvents) return;
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, new KeyValuePair<TKey, TValue>(key, value), index, oldIndex));
+		}
+
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action, KeyValuePair<TKey, TValue> item, int index, int oldIndex)
+		{
+			if (SuppressCollectionEvents) return;
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index, oldIndex));
+		}
+
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action, TKey oldKey, TValue oldValue, TKey newKey, TValue newValue, int index)
+		{
+			if (SuppressCollectionEvents) return;
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, new KeyValuePair<TKey, TValue>(oldKey, oldValue), new KeyValuePair<TKey, TValue>(newKey, newValue), index));
+		}
+
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action, KeyValuePair<TKey, TValue> oldItem, KeyValuePair<TKey, TValue> newItem, int index)
+		{
+			if (SuppressCollectionEvents) return;
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, newItem, oldItem, index));
+		}
+
+		protected virtual void OnCollectionChanged([NotNull] NotifyCollectionChangedEventArgs e)
+		{
+			if (SuppressCollectionEvents) return;
+			CollectionChanged?.Invoke(this, e);
+		}
+
+		public IEnumerator<TValue> GetEnumerator() { return Values.GetEnumerator(); }
+
+		IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() { return new Enumerator(this, Enumerator.KEY_VALUE_PAIR); }
 
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-		IDictionaryEnumerator IDictionary.GetEnumerator() { return new Enumerator(this, Enumerator.DICT_ENTRY); }
+		public void Add(TValue value)
+		{
+			if (ReferenceEquals(value, null)) throw new ArgumentNullException(nameof(value));
+			Insert(GetKey(value), value, true);
+		}
 
-		public void Add(TKey key, TValue value) { Insert(key, value, true); }
+		public bool Remove(TValue value)
+		{
+			if (ReferenceEquals(value, null)) throw new ArgumentNullException(nameof(value));
+			return RemoveByKey(GetKey(value));
+		}
 
-		void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> keyValuePair) { Add(keyValuePair.Key, keyValuePair.Value); }
-
-		void IDictionary.Add(object key, object value) { Add((TKey)key, (TValue)value); }
-
-		public virtual bool Remove(TKey key)
+		public bool RemoveByKey([NotNull] TKey key)
 		{
 			if (_buckets == null) return false;
 
@@ -600,6 +696,7 @@ namespace Other.Microsoft.Collections
 				else _entries[last].Next = _entries[i].Next;
 
 				Entry entry = _entries[i];
+				TValue value = entry.Value;
 				entry.HashCode = -1;
 				entry.Next = _freeList;
 				entry.Key = default(TKey);
@@ -608,26 +705,16 @@ namespace Other.Microsoft.Collections
 				_freeList = i;
 				_freeCount++;
 				_version++;
+				OnPropertyChanged(nameof(Count));
+				OnPropertyChanged(ITEMS_NAME);
+				OnCollectionChanged(NotifyCollectionChangedAction.Remove, key, value);
 				return true;
 			}
 
 			return false;
 		}
 
-		public bool Remove(KeyValuePair<TKey, TValue> keyValuePair)
-		{
-			int i = FindEntry(keyValuePair.Key);
-			if (i < 0 || !EqualityComparer<TValue>.Default.Equals(_entries[i].Value, keyValuePair.Value)) return false;
-			Remove(keyValuePair.Key);
-			return true;
-		}
-
-		void IDictionary.Remove(object key)
-		{
-			if (IsCompatibleKey(key)) Remove((TKey)key);
-		}
-
-		public virtual void Clear()
+		public void Clear()
 		{
 			if (_count == 0) return;
 
@@ -639,41 +726,19 @@ namespace Other.Microsoft.Collections
 			_count = 0;
 			_freeCount = 0;
 			_version++;
+			OnPropertyChanged(nameof(Count));
+			OnPropertyChanged(ITEMS_NAME);
+			OnCollectionChanged(NotifyCollectionChangedAction.Reset);
 		}
 
-		public bool ContainsKey(TKey key) { return FindEntry(key) >= 0; }
+		public bool ContainsKey([NotNull] TKey key) { return FindEntry(key) >= 0; }
 
-		public bool ContainsValue(TValue value)
+		public bool Contains(TValue value)
 		{
-			if (ReferenceEquals(value, null))
-			{
-				for (int i = 0; i < _count; i++)
-				{
-					if (_entries[i].HashCode >= 0 && ReferenceEquals(_entries[i].Value, null))
-						return true;
-				}
-			}
-			else
-			{
-				EqualityComparer<TValue> c = EqualityComparer<TValue>.Default;
-
-				for (int i = 0; i < _count; i++)
-				{
-					if (_entries[i].HashCode >= 0 && c.Equals(_entries[i].Value, value))
-						return true;
-				}
-			}
-
-			return false;
+			if (ReferenceEquals(value, null)) throw new ArgumentNullException(nameof(value));
+			int i = FindEntry(GetKey(value));
+			return i >= 0 && EqualityComparer<TValue>.Default.Equals(_entries[i].Value, value);
 		}
-
-		public bool Contains(KeyValuePair<TKey, TValue> keyValuePair)
-		{
-			int i = FindEntry(keyValuePair.Key);
-			return i >= 0 && EqualityComparer<TValue>.Default.Equals(_entries[i].Value, keyValuePair.Value);
-		}
-
-		bool IDictionary.Contains(object key) { return IsCompatibleKey(key) && ContainsKey((TKey)key); }
 
 		public bool TryGetValue(TKey key, out TValue value)
 		{
@@ -689,7 +754,7 @@ namespace Other.Microsoft.Collections
 			return false;
 		}
 
-		void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int index) { CopyTo(array, index); }
+		public void CopyTo(TValue[] array, int index) { Values.CopyTo(array, index); }
 
 		void ICollection.CopyTo(Array array, int index)
 		{
@@ -705,12 +770,13 @@ namespace Other.Microsoft.Collections
 					break;
 				case DictionaryEntry[] dictionaryEntries:
 				{
+					DictionaryEntry[] dictEntryArray = dictionaryEntries;
 					Entry[] entries = _entries;
 
 					for (int i = 0; i < _count; i++)
 					{
 						if (entries[i].HashCode < 0) continue;
-						dictionaryEntries[index++] = new DictionaryEntry(entries[i].Key, entries[i].Value);
+						dictEntryArray[index++] = new DictionaryEntry(entries[i].Key, entries[i].Value);
 					}
 
 					break;
@@ -733,7 +799,7 @@ namespace Other.Microsoft.Collections
 			}
 		}
 
-		protected virtual void Insert([NotNull] TKey key, TValue value, bool add)
+		protected void Insert([NotNull] TKey key, TValue value, bool add)
 		{
 			if (_buckets == null) Initialize(0);
 			
@@ -746,6 +812,9 @@ namespace Other.Microsoft.Collections
 				if (add) throw new DuplicateKeyException();
 				_entries[i].Value = value;
 				_version++;
+				OnPropertyChanged(nameof(Count));
+				OnPropertyChanged(ITEMS_NAME);
+				OnCollectionChanged(NotifyCollectionChangedAction.Add, key, value);
 				return;
 			}
 
@@ -775,6 +844,9 @@ namespace Other.Microsoft.Collections
 			_entries[index].Value = value;
 			_buckets[targetBucket] = index;
 			_version++;
+			OnPropertyChanged(nameof(Count));
+			OnPropertyChanged(ITEMS_NAME);
+			OnCollectionChanged(NotifyCollectionChangedAction.Add, key, value);
 		}
 
 		// This is a convenience method for the internal callers that were converted from using Hashtable.
@@ -824,7 +896,8 @@ namespace Other.Microsoft.Collections
 			int size = essentialMixMath.GetPrime(capacity);
 			_buckets = new int[size];
 
-			for (int i = 0; i < _buckets.Length; i++) _buckets[i] = -1;
+			for (int i = 0; i < _buckets.Length; i++) 
+				_buckets[i] = -1;
 
 			_entries = new Entry[size];
 			_freeList = -1;
@@ -851,8 +924,10 @@ namespace Other.Microsoft.Collections
 			if (forceNewHashCodes)
 			{
 				for (int i = 0; i < _count; i++)
+				{
 					if (newEntries[i].HashCode != -1)
 						newEntries[i].HashCode = Comparer.GetHashCode(newEntries[i].Key) & 0x7FFFFFFF;
+				}
 			}
 
 			for (int i = 0; i < _count; i++)
@@ -866,7 +941,5 @@ namespace Other.Microsoft.Collections
 			_buckets = newBuckets;
 			_entries = newEntries;
 		}
-
-		private static bool IsCompatibleKey(object key) { return key is TKey; }
 	}
 }

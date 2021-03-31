@@ -180,7 +180,7 @@ namespace Other.Microsoft.Collections
 		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
 		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 		[SecurityCritical]
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+		protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			// Customized serialization for SinglyLinkedList.
 			// We need to do this because it will be too expensive to Serialize each node.

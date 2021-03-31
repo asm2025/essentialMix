@@ -25,6 +25,10 @@ namespace Other.Microsoft.Collections
 	[ComVisible(false)]
 	public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, ICollection, IReadOnlyDictionary<TKey, TValue>, ISerializable, IDeserializationCallback
 	{
+		// constants for serialization
+		private const string HASH_SIZE_NAME = "HashSize"; // Must save buckets.Length
+		private const string ITEMS_NAME = "Item[]";
+
 		protected struct Entry
 		{
 			public int HashCode; // Lower 31 bits of hash code, -1 if unused
@@ -394,10 +398,6 @@ namespace Other.Microsoft.Collections
 			}
 		}
 
-		// constants for serialization
-		private const string HASH_SIZE_NAME = "HashSize"; // Must save buckets.Length
-		private const string KEY_VALUE_PAIRS_NAME = "KeyValuePairs";
-
 		private int[] _buckets;
 		private Entry[] _entries;
 		private int _count;
@@ -515,27 +515,28 @@ namespace Other.Microsoft.Collections
 			int hashSize = siInfo.GetInt32(HASH_SIZE_NAME);
 			Comparer = (IEqualityComparer<TKey>)siInfo.GetValue(nameof(Comparer), typeof(IEqualityComparer<TKey>));
 
-			if (hashSize != 0)
-			{
-				_buckets = new int[hashSize];
-
-				for (int i = 0; i < _buckets.Length; i++) _buckets[i] = -1;
-
-				_entries = new Entry[hashSize];
-				_freeList = -1;
-
-				KeyValuePair<TKey, TValue>[] array = (KeyValuePair<TKey, TValue>[])siInfo.GetValue(KEY_VALUE_PAIRS_NAME, typeof(KeyValuePair<TKey, TValue>[]));
-				if (array == null) throw new SerializationDataMissingException();
-
-				foreach (KeyValuePair<TKey, TValue> pair in array)
-				{
-					if (ReferenceEquals(pair.Key, null)) throw new NullKeyException();
-					Insert(pair.Key, pair.Value, true);
-				}
-			}
-			else
+			if (hashSize == 0)
 			{
 				_buckets = null;
+				_version = realVersion;
+				return;
+			}
+
+			_buckets = new int[hashSize];
+
+			for (int i = 0; i < _buckets.Length; i++) 
+				_buckets[i] = -1;
+
+			_entries = new Entry[hashSize];
+			_freeList = -1;
+
+			KeyValuePair<TKey, TValue>[] array = (KeyValuePair<TKey, TValue>[])siInfo.GetValue(ITEMS_NAME, typeof(KeyValuePair<TKey, TValue>[]));
+			if (array == null) throw new SerializationDataMissingException();
+
+			foreach (KeyValuePair<TKey, TValue> pair in array)
+			{
+				if (ReferenceEquals(pair.Key, null)) throw new NullKeyException();
+				Insert(pair.Key, pair.Value, true);
 			}
 
 			_version = realVersion;
@@ -545,7 +546,7 @@ namespace Other.Microsoft.Collections
 		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
 		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 		[SecurityCritical]
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+		protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			info.AddValue(nameof(_version), _version);
 			info.AddValue(nameof(Comparer), Comparer, typeof(IEqualityComparer<TKey>));
@@ -553,7 +554,7 @@ namespace Other.Microsoft.Collections
 			if (_buckets == null) return;
 			KeyValuePair<TKey, TValue>[] array = new KeyValuePair<TKey, TValue>[Count];
 			CopyTo(array, 0);
-			info.AddValue(KEY_VALUE_PAIRS_NAME, array, typeof(KeyValuePair<TKey, TValue>[]));
+			info.AddValue(ITEMS_NAME, array, typeof(KeyValuePair<TKey, TValue>[]));
 		}
 
 		public IEnumerator<TValue> GetEnumerator() { return Values.GetEnumerator(); }
@@ -593,11 +594,11 @@ namespace Other.Microsoft.Collections
 				entry.HashCode = -1;
 				entry.Next = _freeList;
 				entry.Key = default(TKey);
+				entry.Value = default(TValue);
 				_entries[i] = entry;
 				_freeList = i;
 				_freeCount++;
 				_version++;
-				entry.Value = default(TValue);
 				return true;
 			}
 
