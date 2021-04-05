@@ -173,8 +173,9 @@ work with {HEAVY} items.");
 
 			//TestAppInfo();
 
-			TestObservableCollections();
+			//TestObservableCollections();
 
+			//TestEnumerateDirectoriesAndFiles();
 			ConsoleHelper.Pause();
 		}
 

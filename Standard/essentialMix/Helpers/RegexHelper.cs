@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using essentialMix.Extensions;
-using JetBrains.Annotations;
 
 namespace essentialMix.Helpers
 {
@@ -28,24 +27,24 @@ namespace essentialMix.Helpers
 			new[] {"*", ".*"}
 		};
 
-		public static readonly Regex AllAsterisks = new Regex(@"^[*.\\]+$", OPTIONS);
+		public static readonly Regex AllAsterisks = new Regex(@"^\^?[*.\\]+\$?$", OPTIONS);
 
 		public static string EscapeFilePattern(string pattern)
 		{
 			pattern = pattern?.Trim();
 			return string.IsNullOrEmpty(pattern)
-						? "*"
+						? null
 						: pattern.Escape().Replace(__escapeStrings).Replace(RGX_PATTERN_DBL_DOT, RGX_PATTERN_DBL_DOT_RPL, OPTIONS);
 		}
 
-		[NotNull]
 		public static string FromWildCards(string pattern)
 		{
 			pattern = EscapeFilePattern(pattern);
-			return string.Concat('^', pattern, '$');
+			return pattern == null || AllAsterisks.IsMatch(pattern)
+						? null
+						: string.Concat('^', pattern, '$');
 		}
 
-		[NotNull]
 		public static string FromFilePattern(string pattern)
 		{
 			pattern = pattern?.Replace("||", "|").Trim('|', ' ');
@@ -57,7 +56,7 @@ namespace essentialMix.Helpers
 			foreach (string entry in entries)
 			{
 				string value = EscapeFilePattern(entry);
-				if (AllAsterisks.IsMatch(value)) return string.Concat('^', value, '$');
+				if (value == null || AllAsterisks.IsMatch(value)) return null;
 				unique.Add(string.Concat("(?:", value, ")"));
 			}
 

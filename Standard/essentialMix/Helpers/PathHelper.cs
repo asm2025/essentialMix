@@ -576,7 +576,71 @@ namespace essentialMix.Helpers
 			return fullPath;
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static string Trim(string path) { return path?.Trim(DirectorySeparator, AltDirectorySeparator, ' ').ToNullIfEmpty(); }
+		public static string Trim(string path)
+		{
+			if (string.IsNullOrEmpty(path)) return path;
+
+			int s = 0, e = path.Length - 1;
+
+			bool searching = true;
+
+			while (s < e && searching)
+			{
+				char c = path[s];
+
+				if (c == ' ')
+				{
+					s++;
+					continue;
+				}
+		
+				if ((c == '\\' || c == '/') && s + 1 <= e)
+				{
+					c = path[s + 1];
+
+					if (c == '\\' || c == '/' || c == ' ')
+					{
+						s++;
+						continue;
+					}
+				}
+
+				searching = false;
+			}
+	
+			searching = e > s;
+	
+			while (e > s && searching)
+			{
+				char c = path[e];
+
+				if (c == ' ')
+				{
+					e--;
+					continue;
+				}
+		
+				if ((c == '\\' || c == '/') && e - 1 >= s)
+				{
+					c = path[e - 1];
+
+					if (c == '\\' || c == '/' || c == ' ')
+					{
+						e--;
+						continue;
+					}
+				}
+
+				searching = false;
+			}
+
+			e = e - s + 1;
+			if (s == 0 && e == path.Length) return path;
+			path = e < 1
+						? null
+						: path.Substring(s, e);
+			if (path == "." || path == "..") path = null;
+			return path;
+		}
 	}
 }
