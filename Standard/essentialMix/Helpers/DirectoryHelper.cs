@@ -145,29 +145,29 @@ namespace essentialMix.Helpers
 		}
 
 		[NotNull]
-		public static IEnumerable<string> Enumerate(string path) { return Enumerate(path, null, SearchOption.TopDirectoryOnly, false, null); }
+		public static IEnumerable<string> Enumerate(string path) { return Enumerate(path, null, false, SearchOption.TopDirectoryOnly, null); }
 		[NotNull]
-		public static IEnumerable<string> Enumerate(string path, SearchOption option) { return Enumerate(path, null, option, false, null); }
+		public static IEnumerable<string> Enumerate(string path, SearchOption option) { return Enumerate(path, null, false, option, null); }
 		[NotNull]
-		public static IEnumerable<string> Enumerate(string path, string pattern) { return Enumerate(path, pattern, SearchOption.TopDirectoryOnly, false, null); }
+		public static IEnumerable<string> Enumerate(string path, string pattern) { return Enumerate(path, pattern, false, SearchOption.TopDirectoryOnly, null); }
 		[NotNull]
-		public static IEnumerable<string> Enumerate(string path, string pattern, SearchOption option) { return Enumerate(path, pattern, option, false, null); }
+		public static IEnumerable<string> Enumerate(string path, string pattern, SearchOption option) { return Enumerate(path, pattern, false, option, null); }
 		[NotNull]
-		public static IEnumerable<string> Enumerate(string path, string pattern, bool applyPatternToDirectories) { return Enumerate(path, pattern, SearchOption.TopDirectoryOnly, applyPatternToDirectories, null); }
+		public static IEnumerable<string> Enumerate(string path, string pattern, bool applyPatternToDirectories) { return Enumerate(path, pattern, applyPatternToDirectories, SearchOption.TopDirectoryOnly, null); }
 		[NotNull]
-		public static IEnumerable<string> Enumerate(string path, string pattern, SearchOption option, bool applyPatternToDirectories) { return Enumerate(path, pattern, option, applyPatternToDirectories, null); }
+		public static IEnumerable<string> Enumerate(string path, string pattern, bool applyPatternToDirectories, SearchOption option) { return Enumerate(path, pattern, applyPatternToDirectories, option, null); }
 		[NotNull]
-		public static IEnumerable<string> Enumerate(string path, Predicate<string> onEnqueue) { return Enumerate(path, null, SearchOption.TopDirectoryOnly, false, onEnqueue); }
+		public static IEnumerable<string> Enumerate(string path, Predicate<string> onEnqueue) { return Enumerate(path, null, false, SearchOption.TopDirectoryOnly, onEnqueue); }
 		[NotNull]
-		public static IEnumerable<string> Enumerate(string path, SearchOption option, Predicate<string> onEnqueue) { return Enumerate(path, null, option, false, onEnqueue); }
+		public static IEnumerable<string> Enumerate(string path, SearchOption option, Predicate<string> onEnqueue) { return Enumerate(path, null, false, option, onEnqueue); }
 		[NotNull]
-		public static IEnumerable<string> Enumerate(string path, string pattern, Predicate<string> onEnqueue) { return Enumerate(path, pattern, SearchOption.TopDirectoryOnly, false, onEnqueue); }
+		public static IEnumerable<string> Enumerate(string path, string pattern, Predicate<string> onEnqueue) { return Enumerate(path, pattern, false, SearchOption.TopDirectoryOnly, onEnqueue); }
 		[NotNull]
-		public static IEnumerable<string> Enumerate(string path, string pattern, SearchOption option, Predicate<string> onEnqueue) { return Enumerate(path, pattern, option, false, onEnqueue); }
+		public static IEnumerable<string> Enumerate(string path, string pattern, SearchOption option, Predicate<string> onEnqueue) { return Enumerate(path, pattern, false, option, onEnqueue); }
 		[NotNull]
-		public static IEnumerable<string> Enumerate(string path, string pattern, bool applyPatternToDirectories, Predicate<string> onEnqueue) { return Enumerate(path, pattern, SearchOption.TopDirectoryOnly, applyPatternToDirectories, onEnqueue); }
+		public static IEnumerable<string> Enumerate(string path, string pattern, bool applyPatternToDirectories, Predicate<string> onEnqueue) { return Enumerate(path, pattern, applyPatternToDirectories, SearchOption.TopDirectoryOnly, onEnqueue); }
 		[NotNull]
-		public static IEnumerable<string> Enumerate(string path, string pattern, SearchOption option, bool applyPatternToDirectories, Predicate<string> onEnqueue)
+		public static IEnumerable<string> Enumerate(string path, string pattern, bool applyPatternToDirectories, SearchOption option, Predicate<string> onEnqueue)
 		{
 			path = Path.GetFullPath(PathHelper.Trim(path) ?? ".\\");
 			pattern = pattern?.Trim(';', '|', ' ')

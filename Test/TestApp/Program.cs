@@ -4822,16 +4822,18 @@ decrypted:
 		private static void TestEnumerateDirectoriesAndFiles()
 		{
 			bool more;
-			
+			string path = Directory.GetCurrentDirectory();
+
 			do
 			{
 				Console.Clear();
 
-				Title("Testing directory enumeration. Select enumeration type:");
-				Console.WriteLine("1. Filesystem");
-				Console.WriteLine("2. Directories");
-				Console.WriteLine("3. Files");
-				Console.WriteLine("Any other character to exit");
+				Title($"Testing directory enumeration [{path}].");
+				Console.WriteLine("1. Change directory");
+				Console.WriteLine("2. File system items");
+				Console.WriteLine("3. Directories");
+				Console.WriteLine("4. Files");
+				Console.WriteLine("Any character to exit");
 				
 				char c = Console.ReadKey().KeyChar;
 				Console.WriteLine();
@@ -4839,17 +4841,31 @@ decrypted:
 				switch (c)
 				{
 					case '1':
-						EnumFileSystem();
+						string newPath;
+
+						do
+						{
+							Console.Clear();
+							Console.WriteLine("Enter new directory [ENTER to skip]: ");
+							newPath = Console.ReadLine();
+						}
+						while (!string.IsNullOrEmpty(newPath) && !Directory.Exists(newPath));
+
+						path = newPath.ToNullIfEmpty() ?? Directory.GetCurrentDirectory();
 						more = true;
-						ConsoleHelper.Pause();
 						break;
 					case '2':
-						EnumDirectories();
+						EnumFileSystem(path);
 						more = true;
 						ConsoleHelper.Pause();
 						break;
 					case '3':
-						EnumFiles();
+						EnumDirectories(path);
+						more = true;
+						ConsoleHelper.Pause();
+						break;
+					case '4':
+						EnumFiles(path);
 						more = true;
 						ConsoleHelper.Pause();
 						break;
@@ -4861,11 +4877,17 @@ decrypted:
 			}
 			while (more);
 
-			static void EnumFileSystem()
+			static void EnumFileSystem(string path)
 			{
-				IEnumerable<string> enumerate = DirectoryHelper.Enumerate(".\\", SearchOption.AllDirectories);
-				Console.WriteLine("File system listing of current directory:");
+				Console.WriteLine("Enter a pattern to be used. i.e. *.txt or multi-pattern like *.txt|*.log. [ENTER to use *.*]");
+				string pattern = Console.ReadLine();
+				Console.WriteLine($"Apply this pattern to directories as well? {Bright.Green("[Y]")} or {Dim("any other key")} to apply it to files only. ");
+				bool applyToDirectories = Console.ReadKey().Key == ConsoleKey.Y;
 
+				IEnumerable<string> enumerate = DirectoryHelper.Enumerate(path, pattern, applyToDirectories, SearchOption.AllDirectories);
+				Console.WriteLine();
+				Console.WriteLine($"File system listing of {path}");
+				Console.WriteLine();
 				IEnumerator<string> enumerator = null;
 
 				try
@@ -4894,11 +4916,14 @@ decrypted:
 				}
 			}
 
-			static void EnumDirectories()
+			static void EnumDirectories(string path)
 			{
-				IEnumerable<string> enumerate = DirectoryHelper.EnumerateDirectories(".\\", SearchOption.AllDirectories);
-				Console.WriteLine("Directories listing of current directory:");
-
+				Console.WriteLine("Enter a pattern to be used. i.e. de*g or multi-pattern like de*|ob*|bin. [ENTER to use *.*]");
+				string pattern = Console.ReadLine();
+				IEnumerable<string> enumerate = DirectoryHelper.EnumerateDirectories(path, pattern, SearchOption.AllDirectories);
+				Console.WriteLine();
+				Console.WriteLine($"Directories listing of {path}");
+				Console.WriteLine();
 				IEnumerator<string> enumerator = null;
 
 				try
@@ -4927,11 +4952,14 @@ decrypted:
 				}
 			}
 
-			static void EnumFiles()
+			static void EnumFiles(string path)
 			{
-				IEnumerable<string> enumerate = DirectoryHelper.EnumerateFiles(".\\", SearchOption.AllDirectories);
-				Console.WriteLine("Files listing of current directory:");
-
+				Console.WriteLine("Enter a pattern to be used. i.e. *.txt or multi-pattern like *.txt|*.log. [ENTER to use *.*]");
+				string pattern = Console.ReadLine();
+				IEnumerable<string> enumerate = DirectoryHelper.EnumerateFiles(path, pattern, SearchOption.AllDirectories);
+				Console.WriteLine();
+				Console.WriteLine($"Files listing of {path}");
+				Console.WriteLine();
 				IEnumerator<string> enumerator = null;
 
 				try
