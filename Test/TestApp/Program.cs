@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Security;
 using System.Security.Cryptography;
@@ -175,8 +176,7 @@ work with {HEAVY} items.");
 
 			//TestObservableCollections();
 
-			//TestEnumerateDirectoriesAndFiles();
-			ConsoleHelper.Pause();
+			TestEnumerateDirectoriesAndFiles();
 		}
 
 		private static void TestDomainName()
@@ -4816,6 +4816,148 @@ decrypted:
 									? Convert.ToString(e.NewItems[0])
 									: "...";
 				Console.WriteLine($"{item} => Collection{Bright.Cyan(e.Action.ToString())}");
+			}
+		}
+
+		private static void TestEnumerateDirectoriesAndFiles()
+		{
+			bool more;
+			
+			do
+			{
+				Console.Clear();
+
+				Title("Testing directory enumeration. Select enumeration type:");
+				Console.WriteLine("1. Filesystem");
+				Console.WriteLine("2. Directories");
+				Console.WriteLine("3. Files");
+				Console.WriteLine("Any other character to exit");
+				
+				char c = Console.ReadKey().KeyChar;
+				Console.WriteLine();
+
+				switch (c)
+				{
+					case '1':
+						EnumFileSystem();
+						more = true;
+						ConsoleHelper.Pause();
+						break;
+					case '2':
+						EnumDirectories();
+						more = true;
+						ConsoleHelper.Pause();
+						break;
+					case '3':
+						EnumFiles();
+						more = true;
+						ConsoleHelper.Pause();
+						break;
+					default:
+						Console.WriteLine("Exiting...");
+						more = false;
+						break;
+				}
+			}
+			while (more);
+
+			static void EnumFileSystem()
+			{
+				IEnumerable<string> enumerate = DirectoryHelper.Enumerate(".\\", SearchOption.AllDirectories);
+				Console.WriteLine("File system listing of current directory:");
+
+				IEnumerator<string> enumerator = null;
+
+				try
+				{
+					enumerator = enumerate.GetEnumerator();
+
+					if (!enumerator.MoveNext())
+					{
+						Console.WriteLine("No contents found");
+						return;
+					}
+
+					do
+					{
+						Console.WriteLine(enumerator.Current);
+					}
+					while (enumerator.MoveNext());
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine(Bright.Red(ex.CollectMessages()));
+				}
+				finally
+				{
+					ObjectHelper.Dispose(ref enumerator);
+				}
+			}
+
+			static void EnumDirectories()
+			{
+				IEnumerable<string> enumerate = DirectoryHelper.EnumerateDirectories(".\\", SearchOption.AllDirectories);
+				Console.WriteLine("Directories listing of current directory:");
+
+				IEnumerator<string> enumerator = null;
+
+				try
+				{
+					enumerator = enumerate.GetEnumerator();
+
+					if (!enumerator.MoveNext())
+					{
+						Console.WriteLine("No contents found");
+						return;
+					}
+
+					do
+					{
+						Console.WriteLine(enumerator.Current);
+					}
+					while (enumerator.MoveNext());
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine(Bright.Red(ex.CollectMessages()));
+				}
+				finally
+				{
+					ObjectHelper.Dispose(ref enumerator);
+				}
+			}
+
+			static void EnumFiles()
+			{
+				IEnumerable<string> enumerate = DirectoryHelper.EnumerateFiles(".\\", SearchOption.AllDirectories);
+				Console.WriteLine("Files listing of current directory:");
+
+				IEnumerator<string> enumerator = null;
+
+				try
+				{
+					enumerator = enumerate.GetEnumerator();
+
+					if (!enumerator.MoveNext())
+					{
+						Console.WriteLine("No contents found");
+						return;
+					}
+
+					do
+					{
+						Console.WriteLine(enumerator.Current);
+					}
+					while (enumerator.MoveNext());
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine(Bright.Red(ex.CollectMessages()));
+				}
+				finally
+				{
+					ObjectHelper.Dispose(ref enumerator);
+				}
 			}
 		}
 

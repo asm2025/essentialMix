@@ -42,7 +42,7 @@
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
 		<AssemblyVersion>12.26.1.0</AssemblyVersion>
-		<FileVersion>21.3.31.3</FileVersion>
+		<FileVersion>21.4.6.0</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 		<PackageVersion>$(Version)</PackageVersion>
