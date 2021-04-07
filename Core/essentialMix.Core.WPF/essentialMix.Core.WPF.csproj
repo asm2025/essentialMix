@@ -5,7 +5,6 @@
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 		<TargetFramework>net5.0-windows</TargetFramework>
 		<UseWPF>true</UseWPF>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>9.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -42,8 +41,8 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<AssemblyVersion>12.26.1.2</AssemblyVersion>
-		<FileVersion>21.4.7.3</FileVersion>
+		<AssemblyVersion>12.27.1.0</AssemblyVersion>
+		<FileVersion>21.4.7.11</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 		<PackageVersion>$(Version)</PackageVersion>
@@ -69,9 +68,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="essentialMix" Version="12.26.1" />
-		<PackageReference Include="essentialMix.Threading" Version="12.26.1" />
-		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup>
