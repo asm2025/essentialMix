@@ -3,7 +3,9 @@
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-		<TargetFramework>net48</TargetFramework>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>9.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -40,14 +42,14 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<AssemblyVersion>12.27.0.0</AssemblyVersion>
-		<FileVersion>21.4.7.7</FileVersion>
+		<AssemblyVersion>12.26.1.2</AssemblyVersion>
+		<FileVersion>21.4.7.3</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 		<PackageVersion>$(Version)</PackageVersion>
 		<Authors>asm</Authors>
-		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
-		<PackageTags>utilities, tools, extensions, helpers, components, patterns, database, dbms, orm, xml, serialization</PackageTags>
+		<Description>Common extensions methods, helper classes, components, common patterns, Windows Presentation Foundation, WPF</Description>
+		<PackageTags>utilities, tools, extensions, helpers, components, patterns, core, wpf</PackageTags>
 		<PackageProjectUrl>https://github.com/asm2025/essentialMix</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/asm2025/essentialMix</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
@@ -67,34 +69,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="HtmlAgilityPack" Version="1.11.32" />
+		<PackageReference Include="essentialMix" Version="12.26.1" />
+		<PackageReference Include="essentialMix.Threading" Version="12.26.1" />
 		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
-		<PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.3" />
-		<PackageReference Include="Microsoft.AspNet.Identity.Owin" Version="2.2.3" />
-		<PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.7" />
-		<PackageReference Include="Microsoft.Owin" Version="4.1.1" />
-		<PackageReference Include="Microsoft.Owin.Host.SystemWeb" Version="4.1.1" />
-		<PackageReference Include="Microsoft.Owin.Security" Version="4.1.1" />
-		<PackageReference Include="Microsoft.Owin.Security.Cookies" Version="4.1.1" />
-		<PackageReference Include="Microsoft.Owin.Security.OAuth" Version="4.1.1" />
-		<PackageReference Include="Microsoft.Web.Infrastructure" Version="1.0.0.0" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<PackageReference Include="Owin" Version="1.0.0.0" />
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0.0" />
-		<PackageReference Include="System.Net.Http" Version="4.3.4" />
-		<PackageReference Include="System.Security.AccessControl" Version="5.0.0.0" />
-		<PackageReference Include="System.Security.Permissions" Version="5.0.0.0" />
-		<PackageReference Include="System.Security.Principal.Windows" Version="5.0.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\essentialMix.Web\essentialMix.Web.csproj" />
-		<ProjectReference Include="..\..\Standard\essentialMix.Newtonsoft\essentialMix.Newtonsoft.csproj" />
-		<ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Reference Include="System.Web" />
 	</ItemGroup>
 
 	<PropertyGroup>
