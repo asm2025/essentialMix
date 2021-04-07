@@ -12,8 +12,8 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
-		<AssemblyVersion>12.26.1.0</AssemblyVersion>
-		<FileVersion>21.4.6.5</FileVersion>
+		<AssemblyVersion>12.27.0.0</AssemblyVersion>
+		<FileVersion>21.4.7.8</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 	</PropertyGroup>

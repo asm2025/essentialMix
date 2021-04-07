@@ -103,6 +103,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Collections", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Threading", "Standard\essentialMix.Threading\essentialMix.Threading.csproj", "{147FFAE4-4340-4222-B232-15FDE6B85F7F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Core.WPF", "Core\essentialMix.Core.WPF\essentialMix.Core.WPF.csproj", "{DA7441A4-93D1-400F-8D87-47CF66FAB08C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -262,8 +264,8 @@ Global
 		{5BEE6DCC-15C2-4293-81DD-0AC328EE68A0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0E7FE908-5B05-4827-A5D7-FD0FB5265C67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0E7FE908-5B05-4827-A5D7-FD0FB5265C67}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0E7FE908-5B05-4827-A5D7-FD0FB5265C67}.Independent|Any CPU.ActiveCfg = Independent|Any CPU
-		{0E7FE908-5B05-4827-A5D7-FD0FB5265C67}.Independent|Any CPU.Build.0 = Independent|Any CPU
+		{0E7FE908-5B05-4827-A5D7-FD0FB5265C67}.Independent|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E7FE908-5B05-4827-A5D7-FD0FB5265C67}.Independent|Any CPU.Build.0 = Debug|Any CPU
 		{0E7FE908-5B05-4827-A5D7-FD0FB5265C67}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E7FE908-5B05-4827-A5D7-FD0FB5265C67}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1BAD75A8-FF3C-40B6-8C63-BD206600AFF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -344,6 +346,12 @@ Global
 		{147FFAE4-4340-4222-B232-15FDE6B85F7F}.Independent|Any CPU.Build.0 = Release|Any CPU
 		{147FFAE4-4340-4222-B232-15FDE6B85F7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{147FFAE4-4340-4222-B232-15FDE6B85F7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA7441A4-93D1-400F-8D87-47CF66FAB08C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA7441A4-93D1-400F-8D87-47CF66FAB08C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA7441A4-93D1-400F-8D87-47CF66FAB08C}.Independent|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA7441A4-93D1-400F-8D87-47CF66FAB08C}.Independent|Any CPU.Build.0 = Debug|Any CPU
+		{DA7441A4-93D1-400F-8D87-47CF66FAB08C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA7441A4-93D1-400F-8D87-47CF66FAB08C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -388,6 +396,7 @@ Global
 		{686389FC-08C6-4A7A-BE48-380B8E1CC0FC} = {C5C80153-F755-455F-997A-B0A0CD53E811}
 		{619DCB71-8D65-4D68-9D81-C043897767C7} = {4286CD0A-AF03-453E-837E-E0C89AEB790A}
 		{147FFAE4-4340-4222-B232-15FDE6B85F7F} = {4286CD0A-AF03-453E-837E-E0C89AEB790A}
+		{DA7441A4-93D1-400F-8D87-47CF66FAB08C} = {0B837EAF-FDAB-420D-AC9F-AD56180C1F91}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {64C519D3-02FB-49B2-89A1-EE4837D6197C}
@@ -403,10 +412,11 @@ Global
 		AssemblyInfoVersionType = SettingsVersion
 		InheritWinAppVersionFrom = None
 		UpdateAssemblyVersion.Release|Any CPU = False
-		UpdateAssemblyFileVersion.Release|Any CPU = False
+		UpdateAssemblyFileVersion.Release|Any CPU = True
 		UpdateAssemblyInfoVersion.Release|Any CPU = False
 		ShouldCreateLogs.Release|Any CPU = True
 		AdvancedSettingsExpanded.Release|Any CPU = True
+		AssemblyFileVersionSettings.Release|Any CPU = ShortYearStamp.MonthStamp.DayStamp.IncrementWithResetOnIncrease
 		UpdatePackageVersion.Release|Any CPU = False
 		AssemblyInfoVersionType.Release|Any CPU = SettingsVersion
 		InheritWinAppVersionFrom.Release|Any CPU = None
