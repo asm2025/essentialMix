@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
@@ -10,7 +10,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 	public sealed class WaitAndPulseQueue<T> : ProducerConsumerThreadQueue<T>
 	{
 		private readonly object _lock = new object();
-		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
+		private readonly Queue<T> _queue = new Queue<T>();
 		private readonly Thread[] _workers;
 
 		private AutoResetEvent _workEvent;
@@ -137,19 +137,25 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.IsEmpty)
+					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.Count == 0)
 					{
 						lock (_lock)
 							Monitor.Wait(_lock, TimeSpanHelper.FAST_SCHEDULE);
 					}
 
 					if (IsDisposed || Token.IsCancellationRequested) return;
-					if (CompleteMarked || !_queue.TryDequeue(out item)) break;
+					if (CompleteMarked) break;
+					if (_queue.Count == 0) continue;
+					item = _queue.Dequeue();
 					Run(item);
 				}
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item)) 
+				while (!IsDisposed && !Token.IsCancellationRequested)
+				{
+					if (_queue.Count == 0) break;
+					item = _queue.Dequeue();
 					Run(item);
+				}
 			}
 			finally
 			{

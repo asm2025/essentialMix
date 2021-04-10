@@ -128,6 +128,20 @@ namespace essentialMix.Extensions
 			return thisValue != null && thisValue.NodeType == XmlNodeType.Element && thisValue.Name.IsSame(localName) && thisValue.NamespaceURI.IsSame(namespaceURI);
 		}
 
+		public static T Select<T>([NotNull] this XmlNode thisValue, [NotNull] string path)
+			where T : XmlNode
+		{
+			return Select<T>(thisValue, path, null);
+		}
+
+		public static T Select<T>([NotNull] this XmlNode thisValue, [NotNull] string path, XmlNamespaceManager manager)
+			where T : XmlNode
+		{
+			return manager == null
+				? (T)thisValue.SelectSingleNode(path)
+				: (T)thisValue.SelectSingleNode(path, manager);
+		}
+
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool HasAttribute([NotNull] this XmlNode thisValue, [NotNull] string name)
 		{

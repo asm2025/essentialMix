@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.XPath;
 using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Web;
@@ -74,6 +75,22 @@ namespace essentialMix.Extensions
 		public static bool IsElement(this XNode thisValue, string localName, string namespaceURI)
 		{
 			return thisValue is XElement element && element.Name.LocalName.IsSame(localName) && element.Name.NamespaceName.IsSame(namespaceURI);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Select<T>([NotNull] this XNode thisValue, [NotNull] string path)
+			where T : XNode
+		{
+			return Select<T>(thisValue, path, null);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static T Select<T>([NotNull] this XNode thisValue, [NotNull] string path, XmlNamespaceManager manager)
+			where T : XNode
+		{
+			return manager == null
+				? (T)thisValue.XPathEvaluate(path)
+				: (T)thisValue.XPathEvaluate(path, manager);
 		}
 
 		private static XmlNode LoadNode(XmlReader reader, bool preserveWhitespace)

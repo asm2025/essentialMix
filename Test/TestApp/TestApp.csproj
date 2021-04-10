@@ -12,8 +12,8 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
-		<AssemblyVersion>12.27.1.0</AssemblyVersion>
-		<FileVersion>21.4.7.10</FileVersion>
+		<AssemblyVersion>12.27.2.0</AssemblyVersion>
+		<FileVersion>21.4.10.2</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 	</PropertyGroup>
@@ -99,7 +99,6 @@
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
 if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
 		</PreBuildEvent>
-		<Version>12.27.1.0</Version>
 	</PropertyGroup>
 
 </Project>
