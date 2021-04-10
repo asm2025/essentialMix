@@ -237,7 +237,9 @@ namespace essentialMix.Helpers
 			{
 				enumerable = enumerable.Where(e =>
 				{
-					string name = Path.GetDirectoryName(e);
+					// use Path.GetFileName for directory too.
+					// the weird naming of Path.GetDirectoryName is misleading
+					string name = Path.GetFileName(e);
 					return name == null || rgxPattern.IsMatch(name);
 				});
 			}
@@ -287,7 +289,9 @@ namespace essentialMix.Helpers
 					{
 						enumerable = enumerable.Where(e =>
 						{
-							string name = Path.GetDirectoryName(e);
+							// use Path.GetFileName for directory too.
+							// the weird naming of Path.GetDirectoryName is misleading
+							string name = Path.GetFileName(e);
 							return name == null || pattern.IsMatch(name);
 						});
 					}
@@ -344,7 +348,9 @@ namespace essentialMix.Helpers
 			Regex rgxPattern = new Regex(pattern, RegexHelper.OPTIONS_I);
 			return Directory.EnumerateDirectories(path, "*", option).Where(e =>
 			{
-				string name = Path.GetDirectoryName(e);
+				// use Path.GetFileName for directory too.
+				// the weird naming of Path.GetDirectoryName is misleading
+				string name = Path.GetFileName(e);
 				return name == null || rgxPattern.IsMatch(name);
 			});
 		}
