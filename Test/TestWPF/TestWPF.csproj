@@ -54,6 +54,16 @@
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Page Include="App.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Core\essentialMix.Core.WPF\essentialMix.Core.WPF.csproj" />
+	  <ProjectReference Include="..\..\Standard\essentialMix.Collections\essentialMix.Collections.csproj" />
+	  <ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
+	</ItemGroup>
+
 	<PropertyGroup>
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
 if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"

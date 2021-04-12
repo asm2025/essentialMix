@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Windows;
+using JetBrains.Annotations;
+using TestWPF.ViewModels;
 
 namespace TestWPF
 {
@@ -9,8 +11,9 @@ namespace TestWPF
 	public partial class MainWindow : Window
 	{
 		/// <inheritdoc />
-		public MainWindow()
+		public MainWindow([NotNull] MainViewModel viewModel)
 		{
+			DataContext = viewModel;
 			InitializeComponent();
 		}
 
