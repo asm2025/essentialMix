@@ -12,7 +12,10 @@ namespace essentialMix.Patterns.NotifyChange
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		protected virtual void OnPropertyChanged([NotNull] PropertyChangedEventArgs args) { PropertyChanged?.Invoke(this, args); }
+		protected virtual void OnPropertyChanged([NotNull] PropertyChangedEventArgs args)
+		{
+			PropertyChanged?.Invoke(this, args);
+		}
 
 		[NotifyPropertyChangedInvocator]
 		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)

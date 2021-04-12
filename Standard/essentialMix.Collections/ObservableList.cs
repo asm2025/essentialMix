@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using essentialMix.Collections.DebugView;
@@ -218,7 +219,27 @@ namespace essentialMix.Collections
 			}
 		}
 
-		protected internal int _version;
+		[Serializable]
+		private class SimpleMonitor : IDisposable
+		{
+			private int _busyCount;
+
+			public void Enter()
+			{
+				++_busyCount;
+			}
+ 
+			public void Dispose()
+			{
+				--_busyCount;
+			}
+ 
+			public bool Busy => _busyCount > 0;
+		}
+
+		private int _version;
+
+		private SimpleMonitor _monitor = new SimpleMonitor();
 
 		[NonSerialized]
 		private object _syncRoot;
@@ -344,15 +365,17 @@ namespace essentialMix.Collections
 
 		public void RemoveAt(int index)
 		{
+			CheckReentrancy();
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 			T item = Items[index];
 			if (index < Count - 1) Array.Copy(Items, index + 1, Items, index, Count - (index + 1));
 			Items[Count] = default(T);
 			Count--;
 			_version++;
+			if (SuppressCollectionEvents) return;
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Remove, item);
+			OnCollectionChanged(NotifyCollectionChangedAction.Remove, item, index);
 		}
 
 		public bool Remove(T item)
@@ -371,13 +394,15 @@ namespace essentialMix.Collections
 
 		public void Clear()
 		{
+			CheckReentrancy();
 			if (Count == 0) return;
 			Array.Clear(Items, 0, Count); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
 			Count = 0;
 			_version++;
+			if (SuppressCollectionEvents) return;
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Reset);
+			OnCollectionChanged();
 		}
 
 		public void AddRange([NotNull] IEnumerable<T> enumerable)
@@ -387,82 +412,47 @@ namespace essentialMix.Collections
 
 		public void InsertRange(int index, [NotNull] IEnumerable<T> enumerable)
 		{
+			CheckReentrancy();
 			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 
-			int count;
+			List<T> newItems = enumerable.ToList();
+			if (newItems.Count == 0) return;
+			EnsureCapacity(Count + newItems.Count);
+			if (index < Count) Array.Copy(Items, index, Items, index + newItems.Count, Count - index);
 
-			if (enumerable is ICollection<T> collection)
+			// If we're inserting a List into itself, we want to be able to deal with that.
+			if (ReferenceEquals(this, enumerable))
 			{
-				count = collection.Count;
-				if (count == 0) return;
-				EnsureCapacity(Count + count);
-				if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
-
-				// If we're inserting a List into itself, we want to be able to deal with that.
-				if (ReferenceEquals(this, collection))
-				{
-					// Copy first part of _items to insert location
-					Array.Copy(Items, 0, Items, index, index);
-					// Copy last part of _items back to inserted location
-					Array.Copy(Items, index + count, Items, index * 2, Count - index);
-				}
-				else
-				{
-					collection.CopyTo(Items, index);
-				}
-
-				Count += count;
-				_version++;
-				OnPropertyChanged(nameof(Count));
-				OnPropertyChanged(ITEMS_NAME);
-				OnCollectionChanged(NotifyCollectionChangedAction.Add);
-				return;
+				// Copy first part of _items to insert location
+				Array.Copy(Items, 0, Items, index, index);
+				// Copy last part of _items back to inserted location
+				Array.Copy(Items, index + newItems.Count, Items, index * 2, Count - index);
+			}
+			else
+			{
+				newItems.CopyTo(Items, index);
 			}
 
-			bool added;
-			SuppressCollectionEvents = true;
-
-			try
-			{
-				count = enumerable.FastCount();
-				if (count > 0) EnsureCapacity(Count + count);
-
-				using (IEnumerator<T> en = enumerable.GetEnumerator())
-				{
-					added = en.MoveNext();
-
-					if (added)
-					{
-						do
-						{
-							Insert(index++, en.Current, true);
-						}
-						while (en.MoveNext());
-					}
-				}
-			}
-			finally
-			{
-				SuppressCollectionEvents = false;
-			}
-
-			if (!added) return;
+			Count += newItems.Count;
+			_version++;
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Add);
+			OnCollectionChanged(NotifyCollectionChangedAction.Add, newItems, index);
 		}
 
 		public void RemoveRange(int index, int count)
 		{
+			CheckReentrancy();
 			Count.ValidateRange(index, ref count);
 			if (count == 0) return;
+			T[] removed = Items.GetRange(index, count);
 			if (index < Count) Array.Copy(Items, index + count, Items, index, Count - index);
 			Array.Clear(Items, Count - count, count);
 			Count -= count;
 			_version++;
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Remove);
+			OnCollectionChanged(NotifyCollectionChangedAction.Remove, removed, index);
 		}
 
 		public int RemoveAll([NotNull] Predicate<T> match)
@@ -669,15 +659,10 @@ namespace essentialMix.Collections
 			return array;
 		}
 
-		public IEnumerable<T> GetRange(int index, int count)
+		[NotNull]
+		public T[] GetRange(int index, int count)
 		{
-			Count.ValidateRange(index, ref count);
-			int last = index + count;
-
-			for (int i = index; i < last; i++)
-			{
-				yield return Items[i];
-			}
+			return Items.GetRange(index, count);
 		}
 
 		public void ForEach([NotNull] Action<T> action)
@@ -714,7 +699,7 @@ namespace essentialMix.Collections
 			Array.Reverse(Items, index, count);
 			_version++;
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Replace);
+			OnCollectionChanged();
 		}
 
 		public void Sort([NotNull] Comparison<T> comparison)
@@ -731,7 +716,7 @@ namespace essentialMix.Collections
 			Array.Sort(Items, index, count, comparer);
 			_version++;
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Replace);
+			OnCollectionChanged();
 		}
 
 		public void TrimExcess()
@@ -770,18 +755,10 @@ namespace essentialMix.Collections
 			PropertyChanged?.Invoke(this, e);
 		}
 
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action)
+		protected void OnCollectionChanged()
 		{
 			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(action == NotifyCollectionChangedAction.Reset
-									? new NotifyCollectionChangedEventArgs(action)
-									: new NotifyCollectionChangedEventArgs(action, Array.Empty<T>()));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object item)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item));
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 		}
 
 		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index)
@@ -790,22 +767,39 @@ namespace essentialMix.Collections
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index));
 		}
 
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index, int oldIndex)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index, oldIndex));
-		}
-
 		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object oldItem, object newItem, int index)
 		{
 			if (SuppressCollectionEvents) return;
 			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, newItem, oldItem, index));
 		}
 
+		protected void OnCollectionChanged(NotifyCollectionChangedAction action, IList items, int startingIndex)
+		{
+			if (SuppressCollectionEvents) return;
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, items, startingIndex));
+		}
+
 		protected virtual void OnCollectionChanged([NotNull] NotifyCollectionChangedEventArgs e)
 		{
 			if (SuppressCollectionEvents) return;
 			CollectionChanged?.Invoke(this, e);
+		}
+
+		protected IDisposable BlockReentrancy()
+		{
+			_monitor.Enter();
+			return _monitor;
+		}
+
+		protected void CheckReentrancy()
+		{
+			if (!_monitor.Busy) return;
+			// we can allow changes if there's only one listener - the problem
+			// only arises if reentrant changes make the original event args
+			// invalid for later listeners.  This keeps existing code working
+			// (e.g. Selector.SelectedItems).
+			if (CollectionChanged != null && CollectionChanged.GetInvocationList().Length > 1)
+				throw new InvalidOperationException("Reentrancy not allowed.");
 		}
 
 		protected void EnsureCapacity(int min)

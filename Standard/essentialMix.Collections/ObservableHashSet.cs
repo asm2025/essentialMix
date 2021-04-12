@@ -26,7 +26,7 @@ namespace essentialMix.Collections
 	[HostProtection(MayLeakOnAbort = true)]
 	public class ObservableHashSet<T> : ISet<T>, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback, INotifyPropertyChanged, INotifyCollectionChanged
 	{
-		protected const string ELEMENTS_NAME = "Elements";
+		private const string ITEMS_NAME = "Item[]";
 
 		// store lower 31 bits of hash code
 		private const int LOWER31_BIT_MASK = 0x7FFFFFFF;
@@ -124,7 +124,26 @@ namespace essentialMix.Collections
 			internal T Value;
 		}
 
-		protected internal int _version;
+		[Serializable]
+		private class SimpleMonitor : IDisposable
+		{
+			private int _busyCount;
+
+			public void Enter()
+			{
+				++_busyCount;
+			}
+ 
+			public void Dispose()
+			{
+				--_busyCount;
+			}
+ 
+			public bool Busy => _busyCount > 0;
+		}
+
+		private int _version;
+		private SimpleMonitor _monitor = new SimpleMonitor();
 
 		private int[] _buckets;
 		private Slot[] _slots;
@@ -239,7 +258,7 @@ namespace essentialMix.Collections
 			if (_buckets == null) return;
 			T[] array = new T[Count];
 			CopyTo(array);
-			info.AddValue(ELEMENTS_NAME, array, typeof(T[]));
+			info.AddValue(ITEMS_NAME, array, typeof(T[]));
 		}
 
 		void IDeserializationCallback.OnDeserialization(object sender) { OnDeserialization(); }
@@ -262,7 +281,7 @@ namespace essentialMix.Collections
 			{
 				_buckets = new int[capacity];
 				_slots = new Slot[capacity];
-				T[] array = (T[])_siInfo.GetValue(ELEMENTS_NAME, typeof(T[])) ?? throw new SerializationException("Missing keys");
+				T[] array = (T[])_siInfo.GetValue(ITEMS_NAME, typeof(T[])) ?? throw new SerializationException("Missing keys");
 				SuppressCollectionEvents = true;
 
 				try
@@ -277,7 +296,7 @@ namespace essentialMix.Collections
 				}
 
 				OnPropertyChanged(nameof(Count));
-				OnCollectionChanged(NotifyCollectionChangedAction.Add);
+				OnCollectionChanged();
 			}
 			else
 			{
@@ -314,6 +333,7 @@ namespace essentialMix.Collections
 		/// <returns>true if removed; false if not (i.e. if the item wasn't in the HashSet)</returns>
 		public bool Remove(T item)
 		{
+			CheckReentrancy();
 			if (_buckets == null) return false;
 			
 			int hashCode = InternalGetHashCode(item);
@@ -352,8 +372,9 @@ namespace essentialMix.Collections
 					_freeList = i;
 				}
 
+				if (SuppressCollectionEvents) return true;
 				OnPropertyChanged(nameof(Count));
-				OnCollectionChanged(NotifyCollectionChangedAction.Remove, item);
+				OnCollectionChanged();
 				return true;
 			}
 
@@ -367,6 +388,7 @@ namespace essentialMix.Collections
 		/// </summary>
 		public void Clear()
 		{
+			CheckReentrancy();
 			if (_lastIndex <= 0) return;
 			// clear the elements so that the gc can reclaim the references.
 			// clear only up to _lastIndex for _slots 
@@ -376,8 +398,9 @@ namespace essentialMix.Collections
 			Count = 0;
 			_freeList = -1;
 			_version++;
+			if (SuppressCollectionEvents) return;
 			OnPropertyChanged(nameof(Count));
-			OnCollectionChanged(NotifyCollectionChangedAction.Reset);
+			OnCollectionChanged();
 		}
 
 		/// <summary>
@@ -387,6 +410,7 @@ namespace essentialMix.Collections
 		/// <returns></returns>
 		public int RemoveWhere([NotNull] Predicate<T> match)
 		{
+			CheckReentrancy();
 			int numRemoved = 0;
 			SuppressCollectionEvents = true;
 
@@ -409,12 +433,9 @@ namespace essentialMix.Collections
 				SuppressCollectionEvents = false;
 			}
 
-			if (numRemoved > 0)
-			{
-				OnPropertyChanged(nameof(Count));
-				OnCollectionChanged(NotifyCollectionChangedAction.Remove);
-			}
-
+			if (numRemoved == 0) return 0;
+			OnPropertyChanged(nameof(Count));
+			OnCollectionChanged();
 			return numRemoved;
 		}
 
@@ -471,6 +492,8 @@ namespace essentialMix.Collections
 		/// <param name="other">enumerable with items to add</param>
 		public void UnionWith(IEnumerable<T> other)
 		{
+			CheckReentrancy();
+
 			bool added = false;
 			SuppressCollectionEvents = true;
 
@@ -486,7 +509,7 @@ namespace essentialMix.Collections
 
 			if (!added) return;
 			OnPropertyChanged(nameof(Count));
-			OnCollectionChanged(NotifyCollectionChangedAction.Add);
+			OnCollectionChanged();
 		}
 
 		/// <summary>
@@ -559,7 +582,7 @@ namespace essentialMix.Collections
 
 			if (!removed) return;
 			OnPropertyChanged(nameof(Count));
-			OnCollectionChanged(NotifyCollectionChangedAction.Remove);
+			OnCollectionChanged();
 		}
 
 		/// <summary>
@@ -789,6 +812,7 @@ namespace essentialMix.Collections
 			if (_buckets != null)
 			{
 				int i = InternalIndexOf(equalValue);
+
 				if (i >= 0)
 				{
 					actualValue = _slots[i].Value;
@@ -858,6 +882,7 @@ namespace essentialMix.Collections
 		/// <returns></returns>
 		protected bool AddIfNotPresent(T value)
 		{
+			CheckReentrancy();
 			if (_buckets == null) Initialize(0);
 
 			int hashCode = InternalGetHashCode(value);
@@ -894,15 +919,16 @@ namespace essentialMix.Collections
 			_buckets[bucket] = index + 1;
 			Count++;
 			_version++;
+			if (SuppressCollectionEvents) return true;
 			OnPropertyChanged(nameof(Count));
-			OnCollectionChanged(NotifyCollectionChangedAction.Add, value);
+			OnCollectionChanged();
 			return true;
 		}
 
 		[NotifyPropertyChangedInvocator]
 		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{
-			if (SuppressCollectionEvents) return;
+			if (SuppressCollectionEvents || PropertyChanged == null) return;
 			OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
 		}
 
@@ -912,42 +938,37 @@ namespace essentialMix.Collections
 			PropertyChanged?.Invoke(this, e);
 		}
 
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action)
+		protected void OnCollectionChanged()
 		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(action == NotifyCollectionChangedAction.Reset
-									? new NotifyCollectionChangedEventArgs(action)
-									: new NotifyCollectionChangedEventArgs(action, Array.Empty<T>()));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object item)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index, int oldIndex)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index, oldIndex));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object oldItem, object newItem, int index)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, newItem, oldItem, index));
+			if (SuppressCollectionEvents || CollectionChanged == null) return;
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 		}
 
 		protected virtual void OnCollectionChanged([NotNull] NotifyCollectionChangedEventArgs e)
 		{
-			if (SuppressCollectionEvents) return;
-			CollectionChanged?.Invoke(this, e);
+			if (SuppressCollectionEvents || CollectionChanged == null) return;
+
+			using (BlockReentrancy())
+			{
+				CollectionChanged?.Invoke(this, e);
+			}
+		}
+
+		protected IDisposable BlockReentrancy()
+		{
+			_monitor.Enter();
+			return _monitor;
+		}
+
+		protected void CheckReentrancy()
+		{
+			if (!_monitor.Busy) return;
+			// we can allow changes if there's only one listener - the problem
+			// only arises if reentrant changes make the original event args
+			// invalid for later listeners.  This keeps existing code working
+			// (e.g. Selector.SelectedItems).
+			if (CollectionChanged != null && CollectionChanged.GetInvocationList().Length > 1)
+				throw new InvalidOperationException("Reentrancy not allowed.");
 		}
 
 		/// <summary>
@@ -1042,7 +1063,7 @@ namespace essentialMix.Collections
 
 			if (!added) return;
 			OnPropertyChanged(nameof(Count));
-			OnCollectionChanged(NotifyCollectionChangedAction.Add);
+			OnCollectionChanged();
 		}
 
 		/// <summary>
@@ -1148,6 +1169,7 @@ namespace essentialMix.Collections
 		/// <param name="other"></param>
 		private void IntersectWithHashSetWithSameEc(ISet<T> other)
 		{
+			CheckReentrancy();
 			bool removed = false;
 			SuppressCollectionEvents = true;
 
@@ -1167,7 +1189,7 @@ namespace essentialMix.Collections
 
 			if (!removed) return;
 			OnPropertyChanged(nameof(Count));
-			OnCollectionChanged(NotifyCollectionChangedAction.Remove);
+			OnCollectionChanged();
 		}
 
 		/// <summary>
@@ -1179,6 +1201,7 @@ namespace essentialMix.Collections
 		[SecuritySafeCritical]
 		private unsafe void IntersectWithEnumerable([NotNull] IEnumerable<T> other)
 		{
+			CheckReentrancy();
 			// keep track of current last index; don't want to move past the end of our bit array
 			// (could happen if another thread is modifying the collection)
 			int originalLastIndex = _lastIndex;
@@ -1223,7 +1246,7 @@ namespace essentialMix.Collections
 
 			if (!removed) return;
 			OnPropertyChanged(nameof(Count));
-			OnCollectionChanged(NotifyCollectionChangedAction.Remove);
+			OnCollectionChanged();
 		}
 
 		/// <summary>
@@ -1255,6 +1278,7 @@ namespace essentialMix.Collections
 		/// <param name="other"></param>
 		private void SymmetricExceptWithUniqueHashSet([NotNull] ISet<T> other)
 		{
+			CheckReentrancy();
 			bool added = false;
 			SuppressCollectionEvents = true;
 
@@ -1273,7 +1297,7 @@ namespace essentialMix.Collections
 
 			if (!added) return;
 			OnPropertyChanged(nameof(Count));
-			OnCollectionChanged(NotifyCollectionChangedAction.Add);
+			OnCollectionChanged();
 		}
 
 		/// <summary>
@@ -1293,6 +1317,7 @@ namespace essentialMix.Collections
 		[SecuritySafeCritical]
 		private unsafe void SymmetricExceptWithEnumerable([NotNull] IEnumerable<T> other)
 		{
+			CheckReentrancy();
 			int originalLastIndex = _lastIndex;
 			int intArrayLength = BitHelper.ToIntArrayLength(originalLastIndex);
 			Bits itemsToRemove;
@@ -1315,7 +1340,7 @@ namespace essentialMix.Collections
 				itemsAddedFromOther = new Bits(itemsAddedFromOtherArray, intArrayLength);
 			}
 
-			bool add = false, remove = false;
+			bool changed = false;
 			SuppressCollectionEvents = true;
 
 			try
@@ -1332,7 +1357,7 @@ namespace essentialMix.Collections
 						// expected that location could be out of bounds because adding the item
 						// will increase _lastIndex as soon as all the free spots are filled.
 						itemsAddedFromOther.MarkBit(location);
-						add = true;
+						changed = true;
 					}
 					else
 					{
@@ -1348,7 +1373,7 @@ namespace essentialMix.Collections
 				for (int i = 0; i < originalLastIndex; i++)
 				{
 					if (!itemsToRemove.IsMarked(i)) continue;
-					remove |= Remove(_slots[i].Value);
+					changed |= Remove(_slots[i].Value);
 				}
 			}
 			finally
@@ -1356,10 +1381,9 @@ namespace essentialMix.Collections
 				SuppressCollectionEvents = false;
 			}
 
-			if (!add && !remove) return;
+			if (!changed) return;
 			OnPropertyChanged(nameof(Count));
-			if (add) OnCollectionChanged(NotifyCollectionChangedAction.Add);
-			if (remove) OnCollectionChanged(NotifyCollectionChangedAction.Remove);
+			OnCollectionChanged();
 		}
 
 		/// <summary>
@@ -1412,7 +1436,7 @@ namespace essentialMix.Collections
 			_version++;
 			location = index;
 			OnPropertyChanged(nameof(Count));
-			OnCollectionChanged(NotifyCollectionChangedAction.Add, value);
+			OnCollectionChanged();
 			return true;
 		}
 

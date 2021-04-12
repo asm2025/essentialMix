@@ -76,7 +76,7 @@ namespace essentialMix.Collections
 			private bool _lBoundActive, _uBoundActive;
 			//used to see if the count is out of date            
 
-			public TreeSubSet(ObservableSortedSet<T> underlying, T min, T max, bool lowerBoundActive, bool upperBoundActive)
+			public TreeSubSet([NotNull] ObservableSortedSet<T> underlying, T min, T max, bool lowerBoundActive, bool upperBoundActive)
 				: base(underlying.Comparer)
 			{
 				_underlying = underlying;
@@ -85,7 +85,7 @@ namespace essentialMix.Collections
 				_lBoundActive = lowerBoundActive;
 				_uBoundActive = upperBoundActive;
 				_root = _underlying.FindRange(_min, _max, _lBoundActive, _uBoundActive); // root is first element within range                                
-				Count = 0;
+				_count = 0;
 				_version = -1;
 				VersionCheckImpl();
 			}
@@ -109,7 +109,6 @@ namespace essentialMix.Collections
 			internal override bool AddIfNotPresent(T item)
 			{
 				if (!IsWithinRange(item)) throw new ArgumentOutOfRangeException(nameof(item));
-
 				bool ret = _underlying.AddIfNotPresent(item);
 				VersionCheck();
 				return ret;
@@ -147,7 +146,7 @@ namespace essentialMix.Collections
 				}
 
 				_root = null;
-				Count = 0;
+				_count = 0;
 				_version = _underlying._version;
 			}
 
@@ -160,8 +159,7 @@ namespace essentialMix.Collections
 				comp = _uBoundActive
 							? Comparer.Compare(_max, item)
 							: 1;
-				if (comp < 0) return false;
-				return true;
+				return comp >= 0;
 			}
 
 			internal override bool InOrderTreeWalk(TreeWalkPredicate action, bool reverse)
@@ -174,7 +172,9 @@ namespace essentialMix.Collections
 				// See page 264 of "Introduction to algorithms" by Thomas H. Cormen
 				Stack<Node> stack = new Stack<Node>(2 * (int)Math.Log2(Count + 1)); //this is not exactly right if count is out of date, but the stack can grow
 				Node current = _root;
+
 				while (current != null)
+				{
 					if (IsWithinRange(current.Value))
 					{
 						stack.Push(current);
@@ -182,8 +182,13 @@ namespace essentialMix.Collections
 									? current.Right
 									: current.Left;
 					}
-					else if (_lBoundActive && Comparer.Compare(_min, current.Value) > 0) current = current.Right;
-					else current = current.Left;
+					else
+					{
+						current = _lBoundActive && Comparer.Compare(_min, current.Value) > 0
+									? current.Right
+									: current.Left;
+					}
+				}
 
 				while (stack.Count != 0)
 				{
@@ -194,6 +199,7 @@ namespace essentialMix.Collections
 									? current.Left
 									: current.Right;
 					while (node != null)
+					{
 						if (IsWithinRange(node.Value))
 						{
 							stack.Push(node);
@@ -201,8 +207,13 @@ namespace essentialMix.Collections
 										? node.Right
 										: node.Left;
 						}
-						else if (_lBoundActive && Comparer.Compare(_min, node.Value) > 0) node = node.Right;
-						else node = node.Left;
+						else
+						{
+							node = _lBoundActive && Comparer.Compare(_min, node.Value) > 0
+										? node.Right
+										: node.Left;
+						}
+					}
 				}
 
 				return true;
@@ -211,7 +222,6 @@ namespace essentialMix.Collections
 			internal override bool BreadthFirstTreeWalk(TreeWalkPredicate action)
 			{
 				VersionCheck();
-
 				if (_root == null) return true;
 
 				List<Node> processQueue = new List<Node>
@@ -261,17 +271,15 @@ namespace essentialMix.Collections
 			private void VersionCheckImpl()
 			{
 				Debug.Assert(_underlying != null, "Underlying set no longer exists");
-				if (_version != _underlying._version)
+				if (_version == _underlying._version) return;
+				_root = _underlying.FindRange(_min, _max, _lBoundActive, _uBoundActive);
+				_version = _underlying._version;
+				_count = 0;
+				InOrderTreeWalk(delegate
 				{
-					_root = _underlying.FindRange(_min, _max, _lBoundActive, _uBoundActive);
-					_version = _underlying._version;
-					Count = 0;
-					InOrderTreeWalk(delegate
-					{
-						Count++;
-						return true;
-					});
-				}
+					_count++;
+					return true;
+				});
 			}
 
 			//This passes functionality down to the underlying tree, clipping edges if necessary
@@ -301,11 +309,9 @@ namespace essentialMix.Collections
 
 				foreach (T item in other)
 				{
-					if (Contains(item))
-					{
-						toSave.Add(item);
-						Remove(item);
-					}
+					if (!Contains(item)) continue;
+					toSave.Add(item);
+					Remove(item);
 				}
 
 				Clear();
@@ -353,7 +359,7 @@ namespace essentialMix.Collections
 				}
 
 				_underlying._version = _sinfo.GetInt32(VERSION_NAME);
-				Count = _underlying.Count;
+				_count = _underlying.Count;
 				_version = _underlying._version - 1;
 				VersionCheck(); //this should update the count to be right and update root to be right
 				if (Count != savedCount) throw new SerializationDataMissingException();
@@ -377,7 +383,7 @@ namespace essentialMix.Collections
 			{
 			}
 
-			internal Enumerator(ObservableSortedSet<T> set, bool reverse)
+			internal Enumerator([NotNull] ObservableSortedSet<T> set, bool reverse)
 			{
 				_set = set;
 				_version = set._version;
@@ -568,10 +574,30 @@ namespace essentialMix.Collections
 			public T[] Items { get; }
 		}
 
+		[Serializable]
+		private class SimpleMonitor : IDisposable
+		{
+			private int _busyCount;
+
+			public void Enter()
+			{
+				++_busyCount;
+			}
+ 
+			public void Dispose()
+			{
+				--_busyCount;
+			}
+ 
+			public bool Busy => _busyCount > 0;
+		}
+
 		private Node _root;
 		private int _version;
 		private object _syncRoot;
 		private SerializationInfo _sinfo; //A temporary variable which we need during deserialization. 
+		private SimpleMonitor _monitor = new SimpleMonitor();
+		private int _count;
 
 		public ObservableSortedSet()
 			: this((IComparer<T>)null)
@@ -598,7 +624,7 @@ namespace essentialMix.Collections
 				//breadth first traversal to recreate nodes
 				if (set.Count == 0)
 				{
-					Count = 0;
+					_count = 0;
 					_version = 0;
 					_root = null;
 					return;
@@ -667,13 +693,12 @@ namespace essentialMix.Collections
 					}
 				}
 
-				Count = set.Count;
+				_count = set.Count;
 				_version = 0;
 			}
 			else
 			{
 				//As it stands, you're doing an NlogN sort of the collection
-
 				List<T> els = new List<T>(enumerable);
 				els.Sort(Comparer);
 
@@ -685,7 +710,7 @@ namespace essentialMix.Collections
 				}
 
 				_root = ConstructRootFromSortedArray(els.ToArray(), 0, els.Count - 1, null);
-				Count = els.Count;
+				_count = els.Count;
 				_version = 0;
 			}
 		}
@@ -721,9 +746,17 @@ namespace essentialMix.Collections
 			{
 				T[] items = (T[])_sinfo.GetValue(ITEMS_NAME, typeof(T[]));
 				if (items == null) throw new SerializationDataMissingException();
+				SuppressCollectionEvents = true;
 
-				foreach (T item in items) 
-					Add(item);
+				try
+				{
+					foreach (T item in items) 
+						Add(item);
+				}
+				finally
+				{
+					SuppressCollectionEvents = false;
+				}
 			}
 
 			_version = _sinfo.GetInt32(VERSION_NAME);
@@ -731,7 +764,14 @@ namespace essentialMix.Collections
 			_sinfo = null;
 		}
 
-		public int Count { get; private set; }
+		public int Count
+		{
+			get
+			{
+				VersionCheck();
+				return _count;
+			}
+		}
 
 		public IComparer<T> Comparer { get; private set; }
 
@@ -813,17 +853,18 @@ namespace essentialMix.Collections
 
 		public virtual void Clear()
 		{
+			CheckReentrancy();
 			_root = null;
-			Count = 0;
+			_count = 0;
 			++_version;
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Reset);
+			OnCollectionChanged();
 		}
 
 		public virtual bool Contains(T item) { return FindNode(item) != null; }
 
-		public void CopyTo(T[] array) { CopyTo(array, 0, Count); }
+		public void CopyTo([NotNull] T[] array) { CopyTo(array, 0, Count); }
 
 		public void CopyTo(T[] array, int index) { CopyTo(array, index, Count); }
 
@@ -873,6 +914,7 @@ namespace essentialMix.Collections
 		/// <param name="other"></param>
 		public void UnionWith(IEnumerable<T> other)
 		{
+			CheckReentrancy();
 			if (other == null) throw new ArgumentNullException(nameof(other));
 
 			ObservableSortedSet<T> s = other as ObservableSortedSet<T>;
@@ -884,11 +926,11 @@ namespace essentialMix.Collections
 			{
 				ObservableSortedSet<T> dummy = new ObservableSortedSet<T>(s, Comparer);
 				_root = dummy._root;
-				Count = dummy.Count;
+				_count = dummy.Count;
 				_version++;
 				OnPropertyChanged(nameof(Count));
 				OnPropertyChanged(ITEMS_NAME);
-				OnCollectionChanged(NotifyCollectionChangedAction.Add);
+				OnCollectionChanged();
 				return;
 			}
 
@@ -929,7 +971,8 @@ namespace essentialMix.Collections
 					Enumerator remaining = mineEnded
 												? theirs
 												: mine;
-					do merged[c++] = remaining.Current;
+					do 
+						merged[c++] = remaining.Current;
 					while (remaining.MoveNext());
 				}
 
@@ -937,11 +980,11 @@ namespace essentialMix.Collections
 				//safe to gc the root, we  have all the elements
 				_root = null;
 				_root = ConstructRootFromSortedArray(merged, 0, c - 1, null);
-				Count = c;
+				_count = c;
 				_version++;
 				OnPropertyChanged(nameof(Count));
 				OnPropertyChanged(ITEMS_NAME);
-				OnCollectionChanged(NotifyCollectionChangedAction.Add);
+				OnCollectionChanged();
 			}
 			else
 			{
@@ -969,6 +1012,7 @@ namespace essentialMix.Collections
 			//only let this happen if i am also a ObservableSortedSet, not a SubSet
 			if (s != null && t == null && AreComparersEqual(this, s))
 			{
+				CheckReentrancy();
 				//first do a merge sort to an array.
 				T[] merged = new T[Count];
 				int c = 0;
@@ -1009,11 +1053,11 @@ namespace essentialMix.Collections
 				//safe to gc the root, we  have all the elements
 				_root = null;
 				_root = ConstructRootFromSortedArray(merged, 0, c - 1, null);
-				Count = c;
+				_count = c;
 				_version++;
 				OnPropertyChanged(nameof(Count));
 				OnPropertyChanged(ITEMS_NAME);
-				OnCollectionChanged(NotifyCollectionChangedAction.Add);
+				OnCollectionChanged();
 			}
 			else
 			{
@@ -1071,7 +1115,8 @@ namespace essentialMix.Collections
 			{
 				//outside range, no point doing anything               
 				if (Comparer.Compare(asSorted.Max, Min) < 0 || Comparer.Compare(asSorted.Min, Max) > 0) return;
-				
+				CheckReentrancy();
+			
 				T min = Min;
 				T max = Max;
 				SuppressCollectionEvents = true;
@@ -1092,7 +1137,7 @@ namespace essentialMix.Collections
 
 				OnPropertyChanged(nameof(Count));
 				OnPropertyChanged(ITEMS_NAME);
-				OnCollectionChanged(NotifyCollectionChangedAction.Add);
+				OnCollectionChanged();
 			}
 			else
 			{
@@ -1205,7 +1250,6 @@ namespace essentialMix.Collections
 			if (other is ICollection { Count: 0 }) return true;
 
 			//another way for sorted sets
-
 			if (other is ObservableSortedSet<T> asSorted && AreComparersEqual(asSorted, this))
 			{
 				if (asSorted.Count >= Count) return false;
@@ -1291,8 +1335,8 @@ namespace essentialMix.Collections
 
 		public int RemoveWhere([NotNull] Predicate<T> match)
 		{
-			if (match == null) throw new ArgumentNullException(nameof(match));
-			
+			CheckReentrancy();
+
 			List<T> matches = new List<T>(Count);
 
 			BreadthFirstTreeWalk(delegate(Node n)
@@ -1303,11 +1347,19 @@ namespace essentialMix.Collections
 
 			// reverse breadth first to (try to) incur low cost
 			int actuallyRemoved = 0;
+			SuppressCollectionEvents = true;
 
-			for (int i = matches.Count - 1; i >= 0; i--)
+			try
 			{
-				if (Remove(matches[i]))
-					actuallyRemoved++;
+				for (int i = matches.Count - 1; i >= 0; i--)
+				{
+					if (Remove(matches[i]))
+						actuallyRemoved++;
+				}
+			}
+			finally
+			{
+				SuppressCollectionEvents = false;
 			}
 
 			return actuallyRemoved;
@@ -1325,6 +1377,7 @@ namespace essentialMix.Collections
 		/// </summary>
 		/// <param name="lowerValue">Lowest Value allowed in the subset</param>
 		/// <param name="upperValue">Highest Value allowed in the subset</param>
+		[NotNull]
 		public virtual ObservableSortedSet<T> GetViewBetween(T lowerValue, T upperValue)
 		{
 			if (Comparer.Compare(lowerValue, upperValue) > 0) throw new ArgumentException("lowerBound is greater than upperBound");
@@ -1334,7 +1387,7 @@ namespace essentialMix.Collections
 		[NotifyPropertyChangedInvocator]
 		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{
-			if (SuppressCollectionEvents) return;
+			if (SuppressCollectionEvents || PropertyChanged == null) return;
 			OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
 		}
 
@@ -1344,45 +1397,41 @@ namespace essentialMix.Collections
 			PropertyChanged?.Invoke(this, e);
 		}
 
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action)
+		protected void OnCollectionChanged()
 		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(action == NotifyCollectionChangedAction.Reset
-									? new NotifyCollectionChangedEventArgs(action)
-									: new NotifyCollectionChangedEventArgs(action, Array.Empty<T>()));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object item)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index, int oldIndex)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index, oldIndex));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, object oldItem, object newItem, int index)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, newItem, oldItem, index));
+			if (SuppressCollectionEvents || CollectionChanged == null) return;
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 		}
 
 		protected virtual void OnCollectionChanged([NotNull] NotifyCollectionChangedEventArgs e)
 		{
-			if (SuppressCollectionEvents) return;
-			CollectionChanged?.Invoke(this, e);
+			if (SuppressCollectionEvents || CollectionChanged == null) return;
+
+			using (BlockReentrancy())
+			{
+				CollectionChanged?.Invoke(this, e);
+			}
 		}
 
-		internal virtual void VersionCheck() {}
+		[NotNull]
+		protected IDisposable BlockReentrancy()
+		{
+			_monitor.Enter();
+			return _monitor;
+		}
+
+		protected void CheckReentrancy()
+		{
+			if (!_monitor.Busy) return;
+			// we can allow changes if there's only one listener - the problem
+			// only arises if reentrant changes make the original event args
+			// invalid for later listeners.  This keeps existing code working
+			// (e.g. Selector.SelectedItems).
+			if (CollectionChanged != null && CollectionChanged.GetInvocationList().Length > 1)
+				throw new InvalidOperationException("Reentrancy not allowed.");
+		}
+		
+		internal virtual void VersionCheck() { }
 
 		//virtual function for subclass that needs to do range checks
 		internal virtual bool IsWithinRange(T item) { return true; }
@@ -1393,15 +1442,17 @@ namespace essentialMix.Collections
 		/// </summary>
 		internal virtual bool AddIfNotPresent(T item)
 		{
+			CheckReentrancy();
+
 			if (_root == null)
 			{
 				// empty tree
 				_root = new Node(item, false);
-				Count = 1;
+				_count = 1;
 				_version++;
 				OnPropertyChanged(nameof(Count));
 				OnPropertyChanged(ITEMS_NAME);
-				OnCollectionChanged(NotifyCollectionChangedAction.Add, item);
+				OnCollectionChanged();
 				return true;
 			}
 
@@ -1460,15 +1511,16 @@ namespace essentialMix.Collections
 
 			// Root node is always black
 			_root.IsRed = false;
-			++Count;
+			++_count;
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Add, item);
+			OnCollectionChanged();
 			return true;
 		}
 
 		internal virtual bool DoRemove(T item)
 		{
+			CheckReentrancy();
 			if (_root == null) return false;
 
 			// Search for a node and then find its successor. 
@@ -1602,19 +1654,15 @@ namespace essentialMix.Collections
 			if (match != null)
 			{
 				ReplaceNode(match, parentOfMatch, parent, grandParent);
-				--Count;
+				--_count;
 			}
 
 			if (_root != null) _root.IsRed = false;
-
-			if (foundMatch)
-			{
-				OnPropertyChanged(nameof(Count));
-				OnPropertyChanged(ITEMS_NAME);
-				OnCollectionChanged(NotifyCollectionChangedAction.Remove, item);
-			}
-
-			return foundMatch;
+			if (!foundMatch) return false;
+			OnPropertyChanged(nameof(Count));
+			OnPropertyChanged(ITEMS_NAME);
+			OnCollectionChanged();
+			return true;
 		}
 
 		//
@@ -1625,7 +1673,6 @@ namespace essentialMix.Collections
 		// Otherwise returns false.
 		//
 		internal bool InOrderTreeWalk(TreeWalkPredicate action) { return InOrderTreeWalk(action, false); }
-
 		// Allows for the change in traversal direction. Reverse visits nodes in descending order 
 		internal virtual bool InOrderTreeWalk(TreeWalkPredicate action, bool reverse)
 		{
@@ -1712,7 +1759,7 @@ namespace essentialMix.Collections
 			return null;
 		}
 
-		//used for bithelpers. Note that this implementation is completely different 
+		//used for bit-helpers. Note that this implementation is completely different 
 		//from the Subset's. The two should not be mixed. This indexes as if the tree were an array.
 		//http://en.wikipedia.org/wiki/Binary_Tree#Methods_for_storing_binary_trees
 		internal virtual int InternalIndexOf(T item)
@@ -1741,19 +1788,26 @@ namespace essentialMix.Collections
 		internal Node FindRange(T from, T to, bool lowerBoundActive, bool upperBoundActive)
 		{
 			Node current = _root;
+			
 			while (current != null)
-				if (lowerBoundActive && Comparer.Compare(from, current.Value) > 0) current = current.Right;
+			{
+				if (lowerBoundActive && Comparer.Compare(from, current.Value) > 0)
+				{
+					current = current.Right;
+				}
 				else
 				{
 					if (upperBoundActive && Comparer.Compare(to, current.Value) < 0) current = current.Left;
 					else return current;
 				}
+			}
 
 			return null;
 		}
 
-		internal virtual void IntersectWithEnumerable(IEnumerable<T> other)
+		internal virtual void IntersectWithEnumerable([NotNull] IEnumerable<T> other)
 		{
+			CheckReentrancy();
 			List<T> toSave = new List<T>(Count);
 			SuppressCollectionEvents = true;
 
@@ -1776,12 +1830,13 @@ namespace essentialMix.Collections
 
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Replace);
+			OnCollectionChanged();
 		}
 
 		//OTHER must be a set
-		internal void SymmetricExceptWithSameEc(ISet<T> other)
+		internal void SymmetricExceptWithSameEc([NotNull] ISet<T> other)
 		{
+			CheckReentrancy();
 			SuppressCollectionEvents = true;
 
 			try
@@ -1802,13 +1857,14 @@ namespace essentialMix.Collections
 
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Replace);
+			OnCollectionChanged();
 		}
 
 		//OTHER must be a sorted array
-		internal void SymmetricExceptWithSameEc(IList<T> other)
+		internal void SymmetricExceptWithSameEc([NotNull] IList<T> other)
 		{
 			if (other.Count == 0) return;
+			CheckReentrancy();
 
 			T last = other[0];
 			SuppressCollectionEvents = true;
@@ -1835,11 +1891,12 @@ namespace essentialMix.Collections
 
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Replace);
+			OnCollectionChanged();
 		}
 
-		private void AddAllElements(IEnumerable<T> collection)
+		private void AddAllElements([NotNull] IEnumerable<T> collection)
 		{
+			CheckReentrancy();
 			SuppressCollectionEvents = true;
 
 			try
@@ -1857,11 +1914,12 @@ namespace essentialMix.Collections
 
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Add);
+			OnCollectionChanged();
 		}
 
-		private void RemoveAllElements(IEnumerable<T> collection)
+		private void RemoveAllElements([NotNull] IEnumerable<T> collection)
 		{
+			CheckReentrancy();
 			T min = Min;
 			T max = Max;
 			SuppressCollectionEvents = true;
@@ -1881,10 +1939,10 @@ namespace essentialMix.Collections
 
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Remove);
+			OnCollectionChanged();
 		}
 
-		private bool ContainsAllElements(IEnumerable<T> collection)
+		private bool ContainsAllElements([NotNull] IEnumerable<T> collection)
 		{
 			foreach (T item in collection)
 			{
@@ -1899,6 +1957,7 @@ namespace essentialMix.Collections
 		///     Copies this to an array. Used for DebugView
 		/// </summary>
 		/// <returns></returns>
+		[NotNull]
 		internal T[] ToArray()
 		{
 			T[] newArray = new T[Count];
@@ -1906,7 +1965,7 @@ namespace essentialMix.Collections
 			return newArray;
 		}
 
-		private bool IsSubsetOfSortedSetWithSameEc(ObservableSortedSet<T> asSorted)
+		private bool IsSubsetOfSortedSetWithSameEc([NotNull] ObservableSortedSet<T> asSorted)
 		{
 			ObservableSortedSet<T> prunedOther = asSorted.GetViewBetween(Min, Max);
 
@@ -1952,7 +2011,7 @@ namespace essentialMix.Collections
 		// <ReferencesCritical Name="Method: BitHelper.MarkBit(System.Int32):System.Void" Ring="1" />
 		// </SecurityKernel>
 		[SecurityCritical]
-		private unsafe ElementCount CheckUniqueAndUnfoundElements(IEnumerable<T> other, bool returnIfUnfound)
+		private unsafe ElementCount CheckUniqueAndUnfoundElements([NotNull] IEnumerable<T> other, bool returnIfUnfound)
 		{
 			ElementCount result;
 
@@ -2021,7 +2080,6 @@ namespace essentialMix.Collections
 		// It doesn't matter if we keep grandParent and greatGrantParent up-to-date 
 		// because we won't need to split again in the next node.
 		// By the time we need to split again, everything will be correctly set.
-		//  
 		private void InsertionBalance(Node current, ref Node parent, Node grandParent, Node greatGrandParent)
 		{
 			Debug.Assert(grandParent != null, "Grand parent cannot be null here!");
@@ -2062,11 +2120,14 @@ namespace essentialMix.Collections
 				if (parent.Left == child) parent.Left = newChild;
 				else parent.Right = newChild;
 			}
-			else _root = newChild;
+			else
+			{
+				_root = newChild;
+			}
 		}
 
 		// Replace the matching node with its successor.
-		private void ReplaceNode(Node match, Node parentOfMatch, Node successor, Node parentOfSuccessor)
+		private void ReplaceNode([NotNull] Node match, Node parentOfMatch, Node successor, Node parentOfSuccessor)
 		{
 			if (successor == match)
 			{
@@ -2100,6 +2161,7 @@ namespace essentialMix.Collections
 		///     Used for deep equality of ObservableSortedSet testing
 		/// </summary>
 		/// <returns></returns>
+		[NotNull]
 		public static IEqualityComparer<ObservableSortedSet<T>> CreateSetComparer() { return new ObservableSortedSetEqualityComparer<T>(); }
 
 		/// <summary>
@@ -2107,6 +2169,7 @@ namespace essentialMix.Collections
 		///     memberEqualityComparer. Note that this equality comparer's definition of equality must be the
 		///     same as this set's Comparer's definition of equality
 		/// </summary>
+		[NotNull]
 		public static IEqualityComparer<ObservableSortedSet<T>> CreateSetComparer(IEqualityComparer<T> memberEqualityComparer)
 		{
 			return new ObservableSortedSetEqualityComparer<T>(memberEqualityComparer);
@@ -2141,15 +2204,15 @@ namespace essentialMix.Collections
 		}
 
 		//This is a little frustrating because we can't support more sorted structures
-		private static bool AreComparersEqual(ObservableSortedSet<T> set1, ObservableSortedSet<T> set2) { return set1.Comparer.Equals(set2.Comparer); }
+		private static bool AreComparersEqual([NotNull] ObservableSortedSet<T> set1, [NotNull] ObservableSortedSet<T> set2) { return set1.Comparer.Equals(set2.Comparer); }
 
-		private static bool Is2Node(Node node)
+		private static bool Is2Node([NotNull] Node node)
 		{
 			Debug.Assert(node != null, "node cannot be null!");
 			return IsBlackNode(node) && IsNullOrBlack(node.Left) && IsNullOrBlack(node.Right);
 		}
 
-		private static bool Is4Node(Node node) { return IsRedNode(node.Left) && IsRedNode(node.Right); }
+		private static bool Is4Node([NotNull] Node node) { return IsRedNode(node.Left) && IsRedNode(node.Right); }
 
 		private static bool IsRedNode(Node node) { return node != null && node.IsRed; }
 
@@ -2157,7 +2220,7 @@ namespace essentialMix.Collections
 
 		private static bool IsNullOrBlack(Node node) { return node == null || !node.IsRed; }
 
-		private static void Merge2Nodes(Node parent, Node child1, Node child2)
+		private static void Merge2Nodes([NotNull] Node parent, [NotNull] Node child1, [NotNull] Node child2)
 		{
 			Debug.Assert(IsRedNode(parent), "parent must be be red");
 			// combing two 2-nodes into a 4-node
@@ -2166,7 +2229,7 @@ namespace essentialMix.Collections
 			child2.IsRed = true;
 		}
 
-		private static void Split4Node(Node node)
+		private static void Split4Node([NotNull] Node node)
 		{
 			node.IsRed = true;
 			node.Left.IsRed = false;
@@ -2176,7 +2239,7 @@ namespace essentialMix.Collections
 		/// <summary>
 		///     Testing counter that can track rotations
 		/// </summary>
-		private static TreeRotation RotationNeeded(Node parent, Node current, Node sibling)
+		private static TreeRotation RotationNeeded([NotNull] Node parent, Node current, [NotNull] Node sibling)
 		{
 			Debug.Assert(IsRedNode(sibling.Left) || IsRedNode(sibling.Right), "sibling must have at least one red child");
 			
@@ -2192,7 +2255,8 @@ namespace essentialMix.Collections
 						: TreeRotation.LeftRight;
 		}
 
-		private static Node RotateLeft(Node node)
+		[NotNull]
+		private static Node RotateLeft([NotNull] Node node)
 		{
 			Node x = node.Right;
 			node.Right = x.Left;
@@ -2200,7 +2264,8 @@ namespace essentialMix.Collections
 			return x;
 		}
 
-		private static Node RotateLeftRight(Node node)
+		[NotNull]
+		private static Node RotateLeftRight([NotNull] Node node)
 		{
 			Node child = node.Left;
 			Node grandChild = child.Right;
@@ -2212,7 +2277,8 @@ namespace essentialMix.Collections
 			return grandChild;
 		}
 
-		private static Node RotateRight(Node node)
+		[NotNull]
+		private static Node RotateRight([NotNull] Node node)
 		{
 			Node x = node.Left;
 			node.Left = x.Right;
@@ -2220,7 +2286,8 @@ namespace essentialMix.Collections
 			return x;
 		}
 
-		private static Node RotateRightLeft(Node node)
+		[NotNull]
+		private static Node RotateRightLeft([NotNull] Node node)
 		{
 			Node child = node.Right;
 			Node grandChild = child.Left;
@@ -2306,7 +2373,7 @@ namespace essentialMix.Collections
 			return root;
 		}
 
-		private static Node GetSibling(Node node, Node parent)
+		private static Node GetSibling(Node node, [NotNull] Node parent)
 		{
 			return parent.Left == node
 						? parent.Right

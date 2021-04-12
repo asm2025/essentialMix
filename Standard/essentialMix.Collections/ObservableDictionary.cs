@@ -27,9 +27,9 @@ namespace essentialMix.Collections
 	[ComVisible(false)]
 	public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>, ISerializable, IDeserializationCallback, INotifyPropertyChanged, INotifyCollectionChanged
 	{
-		// constants for serialization
 		private const string HASH_SIZE_NAME = "HashSize"; // Must save buckets.Length
 		private const string ITEMS_NAME = "Item[]";
+		private const int LOWER31_BIT_MASK = 0x7FFFFFFF;
 
 		protected struct Entry
 		{
@@ -400,7 +400,27 @@ namespace essentialMix.Collections
 			}
 		}
 
-		protected internal int _version;
+		[Serializable]
+		private class SimpleMonitor : IDisposable
+		{
+			private int _busyCount;
+
+			public void Enter()
+			{
+				++_busyCount;
+			}
+ 
+			public void Dispose()
+			{
+				--_busyCount;
+			}
+ 
+			public bool Busy => _busyCount > 0;
+		}
+
+		private int _version;
+
+		private SimpleMonitor _monitor = new SimpleMonitor();
 
 		private int[] _buckets;
 		private Entry[] _entries;
@@ -441,8 +461,17 @@ namespace essentialMix.Collections
 		public ObservableDictionary([NotNull] IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
 			: this(dictionary.Count, comparer)
 		{
-			foreach (KeyValuePair<TKey, TValue> pair in dictionary) 
-				Insert(pair.Key, pair.Value, true);
+			SuppressCollectionEvents = true;
+
+			try
+			{
+				foreach (KeyValuePair<TKey, TValue> pair in dictionary) 
+					Insert(pair.Key, pair.Value, true);
+			}
+			finally
+			{
+				SuppressCollectionEvents = false;
+			}
 		}
 
 		protected ObservableDictionary(SerializationInfo info, StreamingContext context)
@@ -472,7 +501,7 @@ namespace essentialMix.Collections
 				if (i < 0) throw new KeyNotFoundException();
 				return _entries[i].Value;
 			}
-			set => Insert(key, value, false);
+			set => Insert(key, value, null);
 		}
 
 		public int Count => _count - _freeCount;
@@ -579,7 +608,7 @@ namespace essentialMix.Collections
 			HashCodeHelper.SerializationInfoTable.Remove(this);
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Add);
+			OnCollectionChanged();
 		}
 
 		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
@@ -610,9 +639,10 @@ namespace essentialMix.Collections
 
 		public bool Remove(TKey key)
 		{
+			CheckReentrancy();
 			if (_buckets == null) return false;
 
-			int hashCode = Comparer.GetHashCode(key) & 0x7FFFFFFF;
+			int hashCode = Comparer.GetHashCode(key) & LOWER31_BIT_MASK;
 			int bucket = hashCode % _buckets.Length;
 			int last = -1;
 
@@ -624,7 +654,6 @@ namespace essentialMix.Collections
 				else _entries[last].Next = _entries[i].Next;
 
 				Entry entry = _entries[i];
-				TValue value = entry.Value;
 				entry.HashCode = -1;
 				entry.Next = _freeList;
 				entry.Key = default(TKey);
@@ -633,9 +662,10 @@ namespace essentialMix.Collections
 				_freeList = i;
 				_freeCount++;
 				_version++;
+				if (SuppressCollectionEvents) return true;
 				OnPropertyChanged(nameof(Count));
 				OnPropertyChanged(ITEMS_NAME);
-				OnCollectionChanged(NotifyCollectionChangedAction.Remove, key, value);
+				OnCollectionChanged();
 				return true;
 			}
 
@@ -644,6 +674,7 @@ namespace essentialMix.Collections
 
 		public bool Remove(KeyValuePair<TKey, TValue> keyValuePair)
 		{
+			CheckReentrancy();
 			int i = FindEntry(keyValuePair.Key);
 			if (i < 0 || !EqualityComparer<TValue>.Default.Equals(_entries[i].Value, keyValuePair.Value)) return false;
 			Remove(keyValuePair.Key);
@@ -657,6 +688,7 @@ namespace essentialMix.Collections
 
 		public void Clear()
 		{
+			CheckReentrancy();
 			if (_count == 0) return;
 
 			for (int i = 0; i < _buckets.Length; i++) 
@@ -667,9 +699,10 @@ namespace essentialMix.Collections
 			_count = 0;
 			_freeCount = 0;
 			_version++;
+			if (SuppressCollectionEvents) return;
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Reset);
+			OnCollectionChanged();
 		}
 
 		public bool ContainsKey(TKey key) { return FindEntry(key) >= 0; }
@@ -767,7 +800,7 @@ namespace essentialMix.Collections
 		[NotifyPropertyChangedInvocator]
 		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{
-			if (SuppressCollectionEvents) return;
+			if (SuppressCollectionEvents || PropertyChanged == null) return;
 			OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
 		}
 
@@ -777,84 +810,57 @@ namespace essentialMix.Collections
 			PropertyChanged?.Invoke(this, e);
 		}
 
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action)
+		protected void OnCollectionChanged()
 		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(action == NotifyCollectionChangedAction.Reset
-									? new NotifyCollectionChangedEventArgs(action)
-									: new NotifyCollectionChangedEventArgs(action, Array.Empty<KeyValuePair<TKey, TValue>>()));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, TKey key, TValue value)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, new KeyValuePair<TKey, TValue>(key, value)));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, KeyValuePair<TKey, TValue> item)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, TKey key, TValue value, int index)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, new KeyValuePair<TKey, TValue>(key, value), index));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, KeyValuePair<TKey, TValue> item, int index)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, TKey key, TValue value, int index, int oldIndex)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, new KeyValuePair<TKey, TValue>(key, value), index, oldIndex));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, KeyValuePair<TKey, TValue> item, int index, int oldIndex)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index, oldIndex));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, TKey oldKey, TValue oldValue, TKey newKey, TValue newValue, int index)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, new KeyValuePair<TKey, TValue>(oldKey, oldValue), new KeyValuePair<TKey, TValue>(newKey, newValue), index));
-		}
-
-		protected void OnCollectionChanged(NotifyCollectionChangedAction action, KeyValuePair<TKey, TValue> oldItem, KeyValuePair<TKey, TValue> newItem, int index)
-		{
-			if (SuppressCollectionEvents) return;
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, newItem, oldItem, index));
+			if (SuppressCollectionEvents || CollectionChanged == null) return;
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 		}
 
 		protected virtual void OnCollectionChanged([NotNull] NotifyCollectionChangedEventArgs e)
 		{
-			if (SuppressCollectionEvents) return;
-			CollectionChanged?.Invoke(this, e);
+			if (SuppressCollectionEvents || CollectionChanged == null) return;
+
+			using (BlockReentrancy())
+			{
+				CollectionChanged?.Invoke(this, e);
+			}
 		}
 
-		protected void Insert([NotNull] TKey key, TValue value, bool add)
+		protected IDisposable BlockReentrancy()
 		{
+			_monitor.Enter();
+			return _monitor;
+		}
+
+		protected void CheckReentrancy()
+		{
+			if (!_monitor.Busy) return;
+			// we can allow changes if there's only one listener - the problem
+			// only arises if reentrant changes make the original event args
+			// invalid for later listeners.  This keeps existing code working
+			// (e.g. Selector.SelectedItems).
+			if (CollectionChanged != null && CollectionChanged.GetInvocationList().Length > 1)
+				throw new InvalidOperationException("Reentrancy not allowed.");
+		}
+
+		protected void Insert([NotNull] TKey key, TValue value, bool? add)
+		{
+			CheckReentrancy();
 			if (_buckets == null) Initialize(0);
 			
-			int hashCode = Comparer.GetHashCode(key) & 0x7FFFFFFF;
+			int hashCode = Comparer.GetHashCode(key) & LOWER31_BIT_MASK;
 			int targetBucket = hashCode % _buckets.Length;
 
 			for (int i = _buckets[targetBucket]; i >= 0; i = _entries[i].Next)
 			{
 				if (_entries[i].HashCode != hashCode || !Comparer.Equals(_entries[i].Key, key)) continue;
-				if (add) throw new DuplicateKeyException();
+				if (add == true) throw new DuplicateKeyException();
 				_entries[i].Value = value;
 				_version++;
+				if (SuppressCollectionEvents) return;
 				OnPropertyChanged(nameof(Count));
 				OnPropertyChanged(ITEMS_NAME);
-				OnCollectionChanged(NotifyCollectionChangedAction.Add, key, value);
+				OnCollectionChanged();
 				return;
 			}
 
@@ -884,9 +890,10 @@ namespace essentialMix.Collections
 			_entries[index].Value = value;
 			_buckets[targetBucket] = index;
 			_version++;
+			if (SuppressCollectionEvents) return;
 			OnPropertyChanged(nameof(Count));
 			OnPropertyChanged(ITEMS_NAME);
-			OnCollectionChanged(NotifyCollectionChangedAction.Add, key, value);
+			OnCollectionChanged();
 		}
 
 		// This is a convenience method for the internal callers that were converted from using Hashtable.
@@ -920,7 +927,7 @@ namespace essentialMix.Collections
 		{
 			if (_buckets == null) return -1;
 
-			int hashCode = Comparer.GetHashCode(key) & 0x7FFFFFFF;
+			int hashCode = Comparer.GetHashCode(key) & LOWER31_BIT_MASK;
 
 			for (int i = _buckets[hashCode % _buckets.Length]; i >= 0; i = _entries[i].Next)
 			{
@@ -966,7 +973,7 @@ namespace essentialMix.Collections
 				for (int i = 0; i < _count; i++)
 				{
 					if (newEntries[i].HashCode != -1)
-						newEntries[i].HashCode = Comparer.GetHashCode(newEntries[i].Key) & 0x7FFFFFFF;
+						newEntries[i].HashCode = Comparer.GetHashCode(newEntries[i].Key) & LOWER31_BIT_MASK;
 				}
 			}
 

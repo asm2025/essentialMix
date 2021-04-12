@@ -105,6 +105,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Threading", "S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Core.WPF", "Core\essentialMix.Core.WPF\essentialMix.Core.WPF.csproj", "{DA7441A4-93D1-400F-8D87-47CF66FAB08C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestWPF", "Test\TestWPF\TestWPF.csproj", "{3A572869-478A-44F2-B702-54C87E3C86AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -352,6 +354,12 @@ Global
 		{DA7441A4-93D1-400F-8D87-47CF66FAB08C}.Independent|Any CPU.Build.0 = Debug|Any CPU
 		{DA7441A4-93D1-400F-8D87-47CF66FAB08C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA7441A4-93D1-400F-8D87-47CF66FAB08C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A572869-478A-44F2-B702-54C87E3C86AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A572869-478A-44F2-B702-54C87E3C86AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A572869-478A-44F2-B702-54C87E3C86AD}.Independent|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A572869-478A-44F2-B702-54C87E3C86AD}.Independent|Any CPU.Build.0 = Debug|Any CPU
+		{3A572869-478A-44F2-B702-54C87E3C86AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A572869-478A-44F2-B702-54C87E3C86AD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -397,28 +405,9 @@ Global
 		{619DCB71-8D65-4D68-9D81-C043897767C7} = {4286CD0A-AF03-453E-837E-E0C89AEB790A}
 		{147FFAE4-4340-4222-B232-15FDE6B85F7F} = {4286CD0A-AF03-453E-837E-E0C89AEB790A}
 		{DA7441A4-93D1-400F-8D87-47CF66FAB08C} = {0B837EAF-FDAB-420D-AC9F-AD56180C1F91}
+		{3A572869-478A-44F2-B702-54C87E3C86AD} = {B7E8F0CB-531A-4EEB-9815-72E76CCC2691}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {64C519D3-02FB-49B2-89A1-EE4837D6197C}
-	EndGlobalSection
-	GlobalSection(AutomaticVersions) = postSolution
-		UpdateAssemblyVersion = False
-		UpdateAssemblyFileVersion = True
-		UpdateAssemblyInfoVersion = False
-		ShouldCreateLogs = True
-		AdvancedSettingsExpanded = True
-		AssemblyFileVersionSettings = ShortYearStamp.MonthStamp.DayStamp.IncrementWithResetOnIncrease
-		UpdatePackageVersion = False
-		AssemblyInfoVersionType = SettingsVersion
-		InheritWinAppVersionFrom = None
-		UpdateAssemblyVersion.Release|Any CPU = False
-		UpdateAssemblyFileVersion.Release|Any CPU = True
-		UpdateAssemblyInfoVersion.Release|Any CPU = False
-		ShouldCreateLogs.Release|Any CPU = True
-		AdvancedSettingsExpanded.Release|Any CPU = True
-		AssemblyFileVersionSettings.Release|Any CPU = ShortYearStamp.MonthStamp.DayStamp.IncrementWithResetOnIncrease
-		UpdatePackageVersion.Release|Any CPU = False
-		AssemblyInfoVersionType.Release|Any CPU = SettingsVersion
-		InheritWinAppVersionFrom.Release|Any CPU = None
 	EndGlobalSection
 EndGlobal
