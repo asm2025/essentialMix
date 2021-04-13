@@ -32,9 +32,6 @@ namespace essentialMix.Extensions
 
 		private static readonly Lazy<MethodInfo> __cloneMethod = new Lazy<MethodInfo>(() => typeof(object).GetTypeInfo().GetDeclaredMethod("MemberwiseClone"), LazyThreadSafetyMode.PublicationOnly);
 
-		private static readonly IReadOnlySet<string> __trueStrings = new ReadOnlySet<string>(new HashSet<string>(StringComparer.OrdinalIgnoreCase) { bool.TrueString, "yes", "on" });
-		private static readonly IReadOnlySet<string> __falseStrings = new ReadOnlySet<string>(new HashSet<string>(StringComparer.OrdinalIgnoreCase) { bool.FalseString, "no", "off" });
-
 		private static readonly IReadOnlySet<string> __disposedFieldNames = new ReadOnlySet<string>(new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 		{
 			"disposed",
@@ -460,17 +457,33 @@ namespace essentialMix.Extensions
 			where T : IComparable, IComparable<T>, IEquatable<T>, IConvertible
 		{
 			return thisValue.To(defaultValue,
-				(string s, bool d, out bool r) =>
+								(string s, bool _, out bool r) => ToBooleanLocal(s, out r),
+								(string s, bool _, out bool r) => ToBooleanLocal(s, out r),
+								(s, d) => ToBooleanLocal(s, out bool r) && r || d);
+
+			static bool ToBooleanLocal(string str, out bool result)
+			{
+				result = false;
+				if (string.IsNullOrEmpty(str)) return true;
+
+				if (double.TryParse(str, out double p))
 				{
-					r = __trueStrings.Contains(s) || __falseStrings.Contains(s) || s.IsDigits();
-					return r;
-				},
-				(string s, bool d, out bool r) =>
+					result = !p.Equals(0.0d);
+					return true;
+				}
+
+				if (string.Equals(str, bool.TrueString, StringComparison.OrdinalIgnoreCase) 
+					|| string.Equals(str, "yes", StringComparison.OrdinalIgnoreCase) 
+					|| string.Equals(str, "on", StringComparison.OrdinalIgnoreCase))
 				{
-					r = __trueStrings.Contains(s) || __falseStrings.Contains(s) || s.IsDigits();
-					return r;
-				},
-				(s, d) => __trueStrings.Contains(s) || s.ToNumber(0L) != 0L || d);
+					result = true;
+					return true;
+				}
+
+				return string.Equals(str, bool.FalseString, StringComparison.OrdinalIgnoreCase) 
+						|| string.Equals(str, "no", StringComparison.OrdinalIgnoreCase) 
+						|| string.Equals(str, "off", StringComparison.OrdinalIgnoreCase);
+			}
 		}
 
 		/// <summary>
@@ -1757,12 +1770,12 @@ namespace essentialMix.Extensions
 				return rootDictionary;
 			EnumerateProperties(thisValue
 								, type
-								, (source, key, property) =>
+								, (_, key, property) =>
 								{
 									rootDictionary.Add(key, property.PropertyType);
 									return true;
 								}
-								, (source, key, field) =>
+								, (_, key, field) =>
 								{
 									rootDictionary.Add(key, field.FieldType);
 									return true;
@@ -1776,7 +1789,7 @@ namespace essentialMix.Extensions
 			Dictionary<string, PropertyInfo> rootDictionary = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
 			if (thisValue.IsNull())
 				return rootDictionary;
-			EnumerateProperties(thisValue, type, (source, key, property) =>
+			EnumerateProperties(thisValue, type, (_, key, property) =>
 					{
 						rootDictionary.Add(key, property);
 						return true;
@@ -1792,12 +1805,12 @@ namespace essentialMix.Extensions
 				return rootDictionary;
 			EnumerateProperties(thisValue
 								, type
-								, (source, key, property) =>
+								, (_, key, property) =>
 								{
 									rootDictionary.Add(key, property);
 									return true;
 								}
-								, (source, key, field) =>
+								, (_, key, field) =>
 								{
 									rootDictionary.Add(key, field);
 									return true;
