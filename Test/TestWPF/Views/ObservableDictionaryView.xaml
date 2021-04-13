@@ -6,6 +6,19 @@
 	mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="800" 
 	Title="{Binding Path=Title}">
 	<Grid>
-		<TextBlock Text="{Binding Path=Title}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+		<ListBox ItemsSource="{Binding Path=Items}">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<TextBlock>
+						<TextBlock.Text>
+							<MultiBinding StringFormat="{}{0}, Size: {1} bytes">
+								<Binding Path="Key"></Binding>
+								<Binding Path="Value"></Binding>
+							</MultiBinding>
+						</TextBlock.Text>
+					</TextBlock>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
 	</Grid>
 </Page>

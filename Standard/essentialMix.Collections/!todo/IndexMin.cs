@@ -56,7 +56,7 @@ namespace essentialMix.Collections
 			{
 				get
 				{
-					if (_index.InRangeRx(0, _indexMin.Count)) throw new InvalidOperationException();
+					if (!_index.InRange(0, _indexMin.Count)) throw new InvalidOperationException();
 					return Current;
 				}
 			}

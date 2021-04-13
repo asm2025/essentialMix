@@ -23,7 +23,9 @@ namespace TestWPF.ViewModels
 				new ObservableListViewModel(),
 				new ObservableSortedSetViewModel()
 			};
-			ChangeView = new RelayCommand<ViewModelBase>(vm => SelectedViewModel = vm, vm => vm != SelectedViewModel);
+			ChangeViewCommand = new RelayCommand<ViewModelBase>(vm => SelectedViewModel = vm, vm => vm != SelectedViewModel);
+			GenerateCommand = new RelayCommand(() => SelectedViewModel.Generate(), () => SelectedViewModel != null);
+			ClearCommand = new RelayCommand(() => SelectedViewModel.Clear(), () => SelectedViewModel != null);
 		}
 
 		[NotNull]
@@ -44,6 +46,12 @@ namespace TestWPF.ViewModels
 		public ObservableCollection<ViewModelBase> ViewModels { get; }
 
 		[NotNull]
-		public ICommand ChangeView { get; }
+		public ICommand ChangeViewCommand { get; }
+
+		[NotNull]
+		public ICommand GenerateCommand { get; }
+
+		[NotNull]
+		public ICommand ClearCommand { get; }
 	}
 }

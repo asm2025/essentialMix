@@ -11,6 +11,7 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 		<ItemsControl ItemsSource="{Binding Path=ViewModels}">
 			<ItemsControl.ItemsPanel>
@@ -21,12 +22,24 @@
 			<ItemsControl.ItemTemplate>
 				<DataTemplate DataType="viewModels:ViewModelBase">
 					<Button Content="{Binding Path=Title}"
-							Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.ChangeView}"
+							Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.ChangeViewCommand}"
 							CommandParameter="{Binding}"
 							Padding="8" />
 				</DataTemplate>
 			</ItemsControl.ItemTemplate>
 		</ItemsControl>
-		<Frame Grid.Row="1" NavigationUIVisibility="Hidden" Content="{Binding Path=SelectedViewModel}" />
+		<Frame Grid.Row="1" NavigationUIVisibility="Hidden" Margin="8 0">
+			<Frame.Content>
+				<Binding Path="SelectedViewModel">
+					<Binding.TargetNullValue>
+						<TextBlock Text="Select a view from the menu." HorizontalAlignment="Center" VerticalAlignment="Center" />
+					</Binding.TargetNullValue>
+				</Binding>
+			</Frame.Content>
+		</Frame>
+		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="8">
+			<Button Content="Generate" Command="{Binding Path=GenerateCommand}" />
+			<Button Content="Clear" Command="{Binding Path=ClearCommand}" />
+		</StackPanel>
 	</Grid>
 </Window>
