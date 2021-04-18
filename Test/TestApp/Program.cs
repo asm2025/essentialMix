@@ -148,7 +148,7 @@ work with {HEAVY} items.");
 			//TestFibonacciHeapElementAt();
 			//TestFibonacciHeapDecreaseKey();
 			
-			// todo IndexMin not working yet!!!
+			// todo fix IndexMin/Max
 			//TestIndexMinAdd();
 			//TestIndexMinRemove();
 			//TestIndexMinElementAt();
@@ -3715,270 +3715,267 @@ work with {HEAVY} items.");
 		#region Not working
 		/*
 		 * something is off about this class!
-		 * I'm 100% sure there must be a bug in there because it can't be right to refer
-		 * to _pq[1] instead of _pq[0] while it uses freely the zero based offset!
-		 * I'm not sure if the original code works but the idea is cool. It might perform
-		 * better but it'll take time to adjust it. Maybe later.
+		 * it can't be right to refer to _pq[1] instead of _pq[0] while it uses freely the zero based offset!
 		 */
-		//private static void TestIndexMinAdd()
-		//{
-		//	bool more;
+		private static void TestIndexMinAdd()
+		{
+			bool more;
 
-		//	do
-		//	{
-		//		Console.Clear();
-		//		Title("Testing IndexMin.Add()...");
+			do
+			{
+				Console.Clear();
+				Title("Testing IndexMin.Add()...");
 
-		//		int len = RNGRandomHelper.Next(1, 12);
-		//		int[] values = GetRandomIntegers(len);
-		//		Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
-		//		IndexMin<int> heap = new MaxIndexMin<int>();
-		//		DoTheTest(heap, values);
+				IndexMin<int> heap = new MaxIndexMin<int>();
+				DoTheTest(heap, values);
 
-		//		heap = new MinIndexMin<int>();
-		//		DoTheTest(heap, values);
+				heap = new MinIndexMin<int>();
+				DoTheTest(heap, values);
 
-		//		Student[] students = GetRandomStudents(len);
-		//		IndexMin<double, Student> studentsHeap = new MaxIndexMin<double, Student>(e => e.Grade);
-		//		DoTheTest(studentsHeap, students);
+				Student[] students = GetRandomStudents(len);
+				IndexMin<double, Student> studentsHeap = new MaxIndexMin<double, Student>(e => e.Grade);
+				DoTheTest(studentsHeap, students);
 
-		//		studentsHeap = new MinIndexMin<double, Student>(e => e.Grade);
-		//		DoTheTest(studentsHeap, students);
+				studentsHeap = new MinIndexMin<double, Student>(e => e.Grade);
+				DoTheTest(studentsHeap, students);
 
-		//		Console.WriteLine();
-		//		Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
-		//		ConsoleKeyInfo response = Console.ReadKey(true);
-		//		Console.WriteLine();
-		//		more = response.Key == ConsoleKey.Y;
-		//	}
-		//	while (more);
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
 
-		//	static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array)
-		//		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
-		//	{
-		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".Bright.Green());
+			static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array)
+				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+			{
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
-		//		foreach (TValue value in array)
-		//		{
-		//			heap.Add(value);
-		//			//heap.PrintWithProps();
-		//		}
+				foreach (TValue value in array)
+				{
+					heap.Add(value);
+					//heap.PrintWithProps();
+				}
 
-		//		Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
-		//	}
-		//}
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+			}
+		}
 
-		//private static void TestIndexMinRemove()
-		//{
-		//	bool more;
+		private static void TestIndexMinRemove()
+		{
+			bool more;
 
-		//	do
-		//	{
-		//		Console.Clear();
-		//		Title("Testing IndexMin.Remove()...");
+			do
+			{
+				Console.Clear();
+				Title("Testing IndexMin.Remove()...");
 
-		//		int len = RNGRandomHelper.Next(1, 12);
-		//		int[] values = GetRandomIntegers(len);
-		//		Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
-		//		IndexMin<int> heap = new MaxIndexMin<int>();
-		//		DoTheTest(heap, values);
+				IndexMin<int> heap = new MaxIndexMin<int>();
+				DoTheTest(heap, values);
 
-		//		heap = new MinIndexMin<int>();
-		//		DoTheTest(heap, values);
+				heap = new MinIndexMin<int>();
+				DoTheTest(heap, values);
 
-		//		Student[] students = GetRandomStudents(len);
-		//		IndexMin<double, Student> studentsHeap = new MaxIndexMin<double, Student>(e => e.Grade);
-		//		DoTheTest(studentsHeap, students);
+				Student[] students = GetRandomStudents(len);
+				IndexMin<double, Student> studentsHeap = new MaxIndexMin<double, Student>(e => e.Grade);
+				DoTheTest(studentsHeap, students);
 
-		//		studentsHeap = new MinIndexMin<double, Student>(e => e.Grade);
-		//		DoTheTest(studentsHeap, students);
+				studentsHeap = new MinIndexMin<double, Student>(e => e.Grade);
+				DoTheTest(studentsHeap, students);
 
-		//		Console.WriteLine();
-		//		Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
-		//		ConsoleKeyInfo response = Console.ReadKey(true);
-		//		Console.WriteLine();
-		//		more = response.Key == ConsoleKey.Y;
-		//	}
-		//	while (more);
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
 
-		//	static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array)
-		//		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
-		//	{
-		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".Bright.Green());
-		//		heap.Add(array);
-		//		Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
-		//		Console.WriteLine("Test removing...");
-		//		bool removeStarted = false;
+			static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array)
+				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+			{
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
+				heap.Add(array);
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine("Test removing...");
+				bool removeStarted = false;
 
-		//		while (heap.Count > 0)
-		//		{
-		//			if (!removeStarted) removeStarted = true;
-		//			else Console.Write(", ");
+				while (heap.Count > 0)
+				{
+					if (!removeStarted) removeStarted = true;
+					else Console.Write(", ");
 
-		//			Console.Write(heap.ExtractValue());
-		//		}
+					Console.Write(heap.ExtractValue());
+				}
 
-		//		Console.WriteLine();
-		//		Console.WriteLine();
-		//	}
-		//}
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
 
-		//private static void TestIndexMinElementAt()
-		//{
-		//	bool more;
+		private static void TestIndexMinElementAt()
+		{
+			bool more;
 
-		//	do
-		//	{
-		//		Console.Clear();
-		//		Title("Testing IndexMin ElementAt...");
+			do
+			{
+				Console.Clear();
+				Title("Testing IndexMin ElementAt...");
 
-		//		int len = RNGRandomHelper.Next(1, 12);
-		//		int[] values = GetRandomIntegers(len);
-		//		int k = RNGRandomHelper.Next(1, values.Length);
-		//		Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
-		//		Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				int k = RNGRandomHelper.Next(1, values.Length);
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
-		//		IndexMin<int> heap = new MaxIndexMin<int>();
-		//		DoTheTest(heap, values, k);
+				IndexMin<int> heap = new MaxIndexMin<int>();
+				DoTheTest(heap, values, k);
 
-		//		heap = new MinIndexMin<int>();
-		//		DoTheTest(heap, values, k);
+				heap = new MinIndexMin<int>();
+				DoTheTest(heap, values, k);
 
-		//		Student[] students = GetRandomStudents(len);
-		//		Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-		//		Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+				Student[] students = GetRandomStudents(len);
+				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
-		//		IndexMin<double, Student> studentHeap = new MaxIndexMin<double, Student>(e => e.Grade);
-		//		DoTheTest(studentHeap, students, k);
+				IndexMin<double, Student> studentHeap = new MaxIndexMin<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students, k);
 
-		//		studentHeap = new MinIndexMin<double, Student>(e => e.Grade);
-		//		DoTheTest(studentHeap, students, k);
+				studentHeap = new MinIndexMin<double, Student>(e => e.Grade);
+				DoTheTest(studentHeap, students, k);
 
-		//		Console.WriteLine();
-		//		Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
-		//		ConsoleKeyInfo response = Console.ReadKey(true);
-		//		Console.WriteLine();
-		//		more = response.Key == ConsoleKey.Y;
-		//	}
-		//	while (more);
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
 
-		//	static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array, int k)
-		//		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
-		//	{
-		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".Bright.Green());
-		//		heap.Add(array);
-		//		Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
-		//		Console.WriteLine($"Kth element at position {k} = {heap.ElementAt(k).ToString().Bright.Cyan().Underline()}");
-		//		Console.WriteLine();
-		//		Console.WriteLine();
-		//	}
-		//}
+			static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array, int k)
+				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+			{
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
+				heap.Add(array);
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine($"Kth element at position {k} = {Underline(Bright.Cyan(heap.ElementAt(k).ToString()))}");
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+		}
 
-		//private static void TestIndexMinDecreaseKey()
-		//{
-		//	bool more;
+		private static void TestIndexMinDecreaseKey()
+		{
+			bool more;
 
-		//	do
-		//	{
-		//		Console.Clear();
-		//		Title("Testing IndexMin DecreaseKey...");
+			do
+			{
+				Console.Clear();
+				Title("Testing IndexMin DecreaseKey...");
 
-		//		int len = RNGRandomHelper.Next(1, 12);
-		//		int[] values = GetRandomIntegers(len);
-		//		Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
-		//		Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
+				int len = RNGRandomHelper.Next(1, 12);
+				int[] values = GetRandomIntegers(len);
+				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
+				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
-		//		IndexMin<int> heap = new MaxIndexMin<int>();
-		//		DoTheValueTest(heap, values, int.MaxValue);
+				IndexMin<int> heap = new MaxIndexMin<int>();
+				DoTheValueTest(heap, values, int.MaxValue);
 
-		//		heap = new MinIndexMin<int>();
-		//		DoTheValueTest(heap, values, int.MinValue);
+				heap = new MinIndexMin<int>();
+				DoTheValueTest(heap, values, int.MinValue);
 
-		//		Student[] students = GetRandomStudents(len);
-		//		Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
-		//		Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
+				Student[] students = GetRandomStudents(len);
+				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
+				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
-		//		IndexMin<double, Student> studentHeap = new MaxIndexMin<double, Student>(e => e.Grade);
-		//		DoTheKeyTest(studentHeap, students, int.MaxValue, e => e.Grade);
+				IndexMin<double, Student> studentHeap = new MaxIndexMin<double, Student>(e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MaxValue);
 
-		//		studentHeap = new MinIndexMin<double, Student>(e => e.Grade);
-		//		DoTheKeyTest(studentHeap, students, int.MinValue, e => e.Grade);
+				studentHeap = new MinIndexMin<double, Student>(e => e.Grade);
+				DoTheKeyTest(studentHeap, students, int.MinValue);
 
-		//		Console.WriteLine();
-		//		Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
-		//		ConsoleKeyInfo response = Console.ReadKey(true);
-		//		Console.WriteLine();
-		//		more = response.Key == ConsoleKey.Y;
-		//	}
-		//	while (more);
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
 
-		//	static void DoTheKeyTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue, Func<TValue, TKey> getKey)
-		//		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
-		//	{
-		//		Queue<TKey> queue = new Queue<TKey>();
-		//		DoTheTest(heap, array, queue);
+			static void DoTheKeyTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue)
+				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+			{
+				Queue<TKey> queue = new Queue<TKey>();
+				DoTheTest(heap, array, queue);
 
-		//		bool succeeded = true;
+				bool succeeded = true;
 
-		//		while (succeeded && queue.Count > 0)
-		//		{
-		//			TKey key = queue.Dequeue();
-		//			TNode node = heap.FindByKey(key);
-		//			Debug.Assert(node != null, $"Node for key {key} is not found.");
-		//			heap.DecreaseKey(node, newKeyValue);
-		//			TKey extracted = heap.ExtractValue().Key;
-		//			succeeded = heap.Comparer.IsEqual(extracted, key);
-		//			Console.WriteLine($"Extracted {extracted}, expected {key}");
-		//			Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
-		//		}
+				while (succeeded && queue.Count > 0)
+				{
+					TKey key = queue.Dequeue();
+					TNode node = heap.FindByKey(key);
+					Debug.Assert(node != null, $"Node for key {key} is not found.");
+					heap.DecreaseKey(node, newKeyValue);
+					TKey extracted = heap.ExtractValue().Key;
+					succeeded = heap.Comparer.IsEqual(extracted, key);
+					Console.WriteLine($"Extracted {extracted}, expected {key}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
+				}
 
-		//		Console.WriteLine();
-		//	}
+				Console.WriteLine();
+			}
 
-		//	static void DoTheValueTest<TNode, TValue>(IndexMin<TNode, TValue, TValue> heap, TValue[] array, TValue newKeyValue)
-		//		where TNode : KeyedBinaryNode<TNode, TValue, TValue>
-		//	{
-		//		Queue<TValue> queue = new Queue<TValue>();
-		//		DoTheTest(heap, array, queue);
+			static void DoTheValueTest<TNode, TValue>(IndexMin<TNode, TValue, TValue> heap, TValue[] array, TValue newKeyValue)
+				where TNode : KeyedBinaryNode<TNode, TValue, TValue>
+			{
+				Queue<TValue> queue = new Queue<TValue>();
+				DoTheTest(heap, array, queue);
 
-		//		bool succeeded = true;
+				bool succeeded = true;
 
-		//		while (succeeded && queue.Count > 0)
-		//		{
-		//			TValue key = queue.Dequeue();
-		//			TNode node = heap.Find(key);
-		//			Debug.Assert(node != null, $"Node for value {key} is not found.");
-		//			heap.DecreaseKey(node, newKeyValue);
-		//			TValue extracted = heap.ExtractValue().Key;
-		//			succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
-		//			Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
-		//			Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
-		//		}
+				while (succeeded && queue.Count > 0)
+				{
+					TValue key = queue.Dequeue();
+					TNode node = heap.Find(key);
+					Debug.Assert(node != null, $"Node for value {key} is not found.");
+					heap.DecreaseKey(node, newKeyValue);
+					TValue extracted = heap.ExtractValue().Key;
+					succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
+					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
+				}
 
-		//		Console.WriteLine();
-		//	}
+				Console.WriteLine();
+			}
 
-		//	static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array, Queue<TKey> queue)
-		//		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
-		//	{
-		//		const int MAX = 10;
+			static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array, Queue<TKey> queue)
+				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+			{
+				const int MAX = 10;
 
-		//		int max = Math.Min(MAX, array.Length);
-		//		queue.Clear();
-		//		Console.WriteLine($"Test adding ({heap.GetType().Name})...".Bright.Green());
+				int max = Math.Min(MAX, array.Length);
+				queue.Clear();
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
-		//		foreach (TValue v in array)
-		//		{
-		//			TNode node = heap.MakeNode(v);
-		//			if (queue.Count < max) queue.Enqueue(node.Key);
-		//			heap.Add(node);
-		//		}
+				foreach (TValue v in array)
+				{
+					TNode node = heap.MakeNode(v);
+					if (queue.Count < max) queue.Enqueue(node.Key);
+					heap.Add(node);
+				}
 
-		//		Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
-		//	}
-		//}
+				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+			}
+		}
 		#endregion
 
 		private static void TestAllHeapsPerformance()
@@ -4222,7 +4219,7 @@ This may cause cycles but will make it much more fun for finding shortest paths.
 				response = Console.ReadKey(true);
 				Console.WriteLine();
 				int min = response.Key == ConsoleKey.Y
-							? (int)sbyte.MinValue
+							? sbyte.MinValue
 							: byte.MinValue, max = sbyte.MaxValue;
 
 				Queue<char> queue = new Queue<char>(values);
