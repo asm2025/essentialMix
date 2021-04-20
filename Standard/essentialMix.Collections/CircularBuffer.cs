@@ -26,19 +26,19 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 	[Serializable]
-	public class Deque<T> : IList<T>, IList, IReadOnlyList<T>, IReadOnlyCollection<T>, ICollection, IEnumerable
+	public class CircularBuffer<T> : IList<T>, IList, IReadOnlyList<T>, IReadOnlyCollection<T>, ICollection, IEnumerable
 	{
 		[Serializable]
 		internal class SynchronizedList : IList<T>
 		{
-			private readonly Deque<T> _deque;
+			private readonly CircularBuffer<T> _circularBuffer;
 			private readonly IList _list;
 			private readonly object _root;
 
-			internal SynchronizedList(Deque<T> deque)
+			internal SynchronizedList(CircularBuffer<T> circularBuffer)
 			{
-				_deque = deque;
-				_list = deque;
+				_circularBuffer = circularBuffer;
+				_list = circularBuffer;
 				_root = _list.SyncRoot;
 			}
 
@@ -49,14 +49,14 @@ namespace essentialMix.Collections
 				{
 					lock (_root)
 					{
-						return _deque[index];
+						return _circularBuffer[index];
 					}
 				}
 				set
 				{
 					lock (_root)
 					{
-						_deque[index] = value;
+						_circularBuffer[index] = value;
 					}
 				}
 			}
@@ -68,7 +68,7 @@ namespace essentialMix.Collections
 				{
 					lock (_root)
 					{
-						return _deque.Count;
+						return _circularBuffer.Count;
 					}
 				}
 			}
@@ -90,7 +90,7 @@ namespace essentialMix.Collections
 			{
 				lock (_root)
 				{
-					_deque.Insert(index, item);
+					_circularBuffer.Insert(index, item);
 				}
 			}
 
@@ -99,7 +99,7 @@ namespace essentialMix.Collections
 			{
 				lock (_root)
 				{
-					_deque.Insert(_deque.Count, item);
+					_circularBuffer.Insert(_circularBuffer.Count, item);
 				}
 			}
 
@@ -108,7 +108,7 @@ namespace essentialMix.Collections
 			{
 				lock (_root)
 				{
-					_deque.RemoveAt(index);
+					_circularBuffer.RemoveAt(index);
 				}
 			}
 
@@ -117,7 +117,7 @@ namespace essentialMix.Collections
 			{
 				lock (_root)
 				{
-					return _deque.Remove(item);
+					return _circularBuffer.Remove(item);
 				}
 			}
 
@@ -126,7 +126,7 @@ namespace essentialMix.Collections
 			{
 				lock (_root)
 				{
-					_deque.Clear();
+					_circularBuffer.Clear();
 				}
 			}
 
@@ -135,7 +135,7 @@ namespace essentialMix.Collections
 			{
 				lock (_root)
 				{
-					return _deque.IndexOf(item);
+					return _circularBuffer.IndexOf(item);
 				}
 			}
 
@@ -144,7 +144,7 @@ namespace essentialMix.Collections
 			{
 				lock (_root)
 				{
-					return _deque.Contains(item);
+					return _circularBuffer.Contains(item);
 				}
 			}
 
@@ -153,7 +153,7 @@ namespace essentialMix.Collections
 			{
 				lock (_root)
 				{
-					_deque.CopyTo(array, arrayIndex);
+					_circularBuffer.CopyTo(array, arrayIndex);
 				}
 			}
 
@@ -162,7 +162,7 @@ namespace essentialMix.Collections
 			{
 				lock (_root)
 				{
-					return _deque.GetEnumerator();
+					return _circularBuffer.GetEnumerator();
 				}
 			}
 
@@ -171,7 +171,7 @@ namespace essentialMix.Collections
 			{
 				lock (_root)
 				{
-					return _deque.GetEnumerator();
+					return _circularBuffer.GetEnumerator();
 				}
 			}
 		}
@@ -179,12 +179,12 @@ namespace essentialMix.Collections
 		[Serializable]
 		public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
 		{
-			private readonly Deque<T> _deque;
+			private readonly CircularBuffer<T> _deque;
 			private readonly int _version;
 
 			private int _index;
 
-			internal Enumerator([NotNull] Deque<T> deque)
+			internal Enumerator([NotNull] CircularBuffer<T> deque)
 			{
 				_deque = deque;
 				_index = 0;
@@ -237,29 +237,20 @@ namespace essentialMix.Collections
 			}
 		}
 
+		private int _offset;
 		private int _version;
 
 		[NonSerialized]
 		private object _syncRoot;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="Deque{T}" /> class.
+		/// Initializes a new instance of the <see cref="CircularBuffer{T}" /> class with the specified capacity.
 		/// </summary>
-		public Deque()
-			: this(Constants.DEFAULT_CAPACITY)
+		/// <param name="capacity">The initial capacity. Must be greater than <c>1</c>.</param>
+		public CircularBuffer(int capacity)
 		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Deque{T}" /> class with the specified capacity.
-		/// </summary>
-		/// <param name="capacity">The initial capacity. Must be greater than <c>0</c>.</param>
-		public Deque(int capacity)
-		{
-			if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
-			Items = capacity == 0
-						? Array.Empty<T>()
-						: new T[capacity];
+			if (capacity < 1) throw new ArgumentOutOfRangeException(nameof(capacity));
+			Items = new T[capacity];
 		}
 
 		public int Capacity
@@ -267,20 +258,12 @@ namespace essentialMix.Collections
 			get => Items.Length;
 			set
 			{
-				if (value < Count) throw new ArgumentOutOfRangeException(nameof(value));
+				if (value < Count || value < 1) throw new ArgumentOutOfRangeException(nameof(value));
 				if (value == Items.Length) return;
-
-				if (value > 0)
-				{
-					T[] newItems = new T[value];
-					CopyTo(newItems, 0);
-					Items = newItems;
-				}
-				else
-				{
-					Items = Array.Empty<T>();
-				}
-
+				T[] newItems = new T[value];
+				CopyTo(newItems, 0);
+				Items = newItems;
+				_offset = 0;
 				_version++;
 			}
 		}
@@ -292,8 +275,12 @@ namespace essentialMix.Collections
 		/// <inheritdoc cref="IList{T}" />
 		public T this[int index]
 		{
-			get => Items[index];
-			set => Insert(index, value, false);
+			get => Items[IndexToBufferIndex(index)];
+			set
+			{
+				Items[IndexToBufferIndex(index)] = value;
+				_version++;
+			}
 		}
 
 		/// <inheritdoc />
@@ -303,7 +290,7 @@ namespace essentialMix.Collections
 			set
 			{
 				if (!ObjectHelper.IsCompatible<T>(value)) throw new ArgumentException("Value is of incorrect type.", nameof(value));
-				Insert(index, (T)value, false);
+				this[index] = (T)value;
 			}
 		}
 
@@ -329,6 +316,9 @@ namespace essentialMix.Collections
 			}
 		}
 
+		/// <summary>
+		/// The circular Items that holds the view.
+		/// </summary>
 		[NotNull]
 		protected T[] Items { get; private set; }
 
@@ -344,25 +334,33 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		public void Insert(int index, T item)
 		{
-			Insert(index, item, true);
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+
+			if (index == 0)
+				Items[PreDecrement(1)] = item;
+			else
+				Items[IndexToBufferIndex(index)] = item;
+
+			Count++;
+			_version++;
 		}
 
 		/// <inheritdoc />
 		void IList.Insert(int index, object value)
 		{
 			if (!ObjectHelper.IsCompatible<T>(value)) throw new InvalidCastException();
-			Insert(index, (T)value, true);
+			Insert(index, (T)value);
 		}
 
 		/// <inheritdoc />
-		void ICollection<T>.Add(T item) { Insert(Count, item, true); }
+		void ICollection<T>.Add(T item) { Insert(Count, item); }
 
 		/// <inheritdoc />
 		int IList.Add(object value)
 		{
-			if (value is null && !typeof(T).IsClass) throw new ArgumentNullException(nameof(value), "Value cannot be null.");
+			if (value == null && !typeof(T).IsClass) throw new ArgumentNullException(nameof(value), "Value cannot be null.");
 			if (!ObjectHelper.IsCompatible<T>(value)) throw new ArgumentException("Value is of incorrect type.", nameof(value));
-			Insert(Count, (T)value, true);
+			Insert(Count, (T)value);
 			return Count - 1;
 		}
 
@@ -377,7 +375,7 @@ namespace essentialMix.Collections
 		public bool Remove(T item)
 		{
 			int index = IndexOf(item);
-			if (index < 0) return false;
+			if (index == -1) return false;
 			RemoveAt(index);
 			return true;
 		}
@@ -389,23 +387,23 @@ namespace essentialMix.Collections
 			Remove((T)value);
 		}
 
-		public void Enqueue(T item) { Insert(Count, item, true); }
+		public void Enqueue(T item) { Insert(Count, item); }
 
 		public void Enqueue([NotNull] IEnumerable<T> enumerable) { InsertRange(Count, enumerable); }
 
 		public void EnqueueBefore(int index, T value)
 		{
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			Insert(index, value, true);
+			Insert(index, value);
 		}
 
 		public void EnqueueAfter(int index, T value)
 		{
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			Insert(++index, value, true);
+			Insert(++index, value);
 		}
 
-		public void EnqueueLast(T item) { Insert(0, item, true); }
+		public void EnqueueLast(T item) { Insert(0, item); }
 
 		public T Dequeue()
 		{
@@ -413,23 +411,23 @@ namespace essentialMix.Collections
 			return RemoveAtInternal(0);
 		}
 
-		public void Push(T item) { Insert(Count, item, true); }
+		public void Push(T item) { Insert(Count, item); }
 
 		public void Push([NotNull] IEnumerable<T> enumerable) { InsertRange(Count, enumerable.Reverse()); }
 
 		public void PushBefore(int index, T value)
 		{
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			Insert(++index, value, true);
+			Insert(++index, value);
 		}
 
 		public void PushAfter(int index, T value)
 		{
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			Insert(index, value, true);
+			Insert(index, value);
 		}
 
-		public void PushLast(T item) { Insert(0, item, true); }
+		public void PushLast(T item) { Insert(0, item); }
 
 		public void PushLast([NotNull] IEnumerable<T> enumerable) { InsertRange(0, enumerable.Reverse()); }
 
@@ -442,18 +440,19 @@ namespace essentialMix.Collections
 		public T PeekQueue()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			return Items[0];
+			return Items[IndexToBufferIndex(0)];
 		}
 
 		public T PeekStack()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			return Items[Count - 1];
+			return Items[IndexToBufferIndex(Count - 1)];
 		}
 
 		/// <inheritdoc cref="ICollection{T}" />
 		public void Clear()
 		{
+			_offset = 0;
 			Count = 0;
 			_version++;
 		}
@@ -474,10 +473,8 @@ namespace essentialMix.Collections
 		{
 			Count.ValidateRange(index, ref count);
 			if (count == 0) return;
-			if (index < Count) Array.Copy(Items, index + count, Items, index, Count - index);
-			Array.Clear(Items, Count - count, count);
+			RemoveGapAt(index, count);
 			Count -= count;
-			_version++;
 		}
 
 		/// <summary>
@@ -490,7 +487,7 @@ namespace essentialMix.Collections
 			int freeIndex = 0;   // the first free slot in items array
 
 			// Find the first item which needs to be removed.
-			while (freeIndex < Count && !match(Items[freeIndex]))
+			while (freeIndex < Count && !match(Items[IndexToBufferIndex(freeIndex)]))
 				freeIndex++;
 
 			if (freeIndex >= Count) return 0;
@@ -561,7 +558,10 @@ namespace essentialMix.Collections
 		public int IndexOf(T item, int index, int count)
 		{
 			Count.ValidateRange(index, ref count);
-			return Array.IndexOf(Items, item, index, count);
+			int ndx = Array.IndexOf(Items, item, index, count);
+			return ndx < 0
+						? -1
+						: ndx - _offset;
 		}
 
 		/// <inheritdoc />
@@ -670,7 +670,7 @@ namespace essentialMix.Collections
 
 			for (int i = startIndex; i < endIndex; i++)
 			{
-				if (!match(Items[i])) continue;
+				if (!match(Items[IndexToBufferIndex(i)])) continue;
 				return i;
 			}
 
@@ -681,7 +681,7 @@ namespace essentialMix.Collections
 		{
 			for (int i = Count - 1; i >= 0; i--)
 			{
-				T item = Items[i];
+				T item = Items[IndexToBufferIndex(i)];
 				if (!match(item)) continue;
 				return item;
 			}
@@ -706,7 +706,7 @@ namespace essentialMix.Collections
 
 			for (int i = startIndex; i > endIndex; i--)
 			{
-				if (!match(Items[i])) continue;
+				if (!match(Items[IndexToBufferIndex(i)])) continue;
 				return i;
 			}
 
@@ -719,20 +719,28 @@ namespace essentialMix.Collections
 		{
 			for (int i = 0; i < Count; i++)
 			{
-				yield return converter(Items[i]);
+				yield return converter(Items[IndexToBufferIndex(i)]);
 			}
 		}
 
-		public void CopyTo([NotNull] T[] array) { CopyTo(array, 0); }
-		public void CopyTo(T[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
-		public void CopyTo([NotNull] T[] array, int arrayIndex, int count)
+		/// <inheritdoc />
+		public void CopyTo(T[] array, int arrayIndex)
 		{
 			if (Count == 0) return;
-			array.Length.ValidateRange(arrayIndex, ref count);
-			if (count == 0) return;
-			Count.ValidateRange(arrayIndex, ref count);
-			// Delegate rest of error checking to Array.Copy.
-			Array.Copy(Items, 0, array, arrayIndex, count);
+			array.Length.ValidateRange(arrayIndex, Count);
+
+			if (_offset > Capacity - Count)
+			{
+				// The existing buffer is split, so we have to copy it in parts
+				int length = Capacity - _offset;
+				Array.Copy(Items, _offset, array, arrayIndex, length);
+				Array.Copy(Items, 0, array, arrayIndex + length, Count - length);
+			}
+			else
+			{
+				// The existing buffer is whole
+				Array.Copy(Items, _offset, array, arrayIndex, Count);
+			}
 		}
 
 		/// <inheritdoc />
@@ -759,18 +767,19 @@ namespace essentialMix.Collections
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
 			Type sourceType = typeof(T);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
-			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
+			if (!(array is object[])) throw new ArgumentException("Invalid array type", nameof(array));
 
-			try
+			if (_offset > Capacity - Count)
 			{
-				foreach (T item in this)
-				{
-					objects[arrayIndex++] = item;
-				}
+				// The existing buffer is split, so we have to copy it in parts
+				int length = Capacity - _offset;
+				Array.Copy(Items, _offset, array, arrayIndex, length);
+				Array.Copy(Items, 0, array, arrayIndex + length, Count - length);
 			}
-			catch (ArrayTypeMismatchException)
+			else
 			{
-				throw new ArgumentException("Invalid array type", nameof(array));
+				// The existing buffer is whole
+				Array.Copy(Items, _offset, array, arrayIndex, Count);
 			}
 		}
 
@@ -792,7 +801,7 @@ namespace essentialMix.Collections
 
 			for (int i = index; i < last; i++)
 			{
-				yield return Items[i];
+				yield return Items[IndexToBufferIndex(i)];
 			}
 		}
 
@@ -836,7 +845,25 @@ namespace essentialMix.Collections
 		{
 			Count.ValidateRange(index, ref count);
 			if (Count < 2 || count < 2) return;
-			Array.Reverse(Items, index, count);
+
+			if (_offset > Capacity - Count)
+			{
+				int split = count / 2;
+
+				for (int i = index; i < split; i++)
+				{
+					int x = IndexToBufferIndex(index + count - (i + 1));
+					int y = IndexToBufferIndex(index + i);
+					T tmp = Items[x];
+					Items[x] = Items[y];
+					Items[y] = tmp;
+				}
+			}
+			else
+			{
+				Array.Reverse(Items, index, count);
+			}
+
 			_version++;
 		}
 
@@ -863,7 +890,29 @@ namespace essentialMix.Collections
 		public void Sort(int index, int count, IComparer<T> comparer)
 		{
 			Count.ValidateRange(index, ref count);
-			Array.Sort(Items, index, count, comparer);
+			if (count < 2) return;
+
+			if (_offset > Capacity - Count)
+			{
+				// will just do a bubble sort
+				int last = index + count;
+
+				for (int i = index; i < last; i++)
+				{
+					int x = IndexToBufferIndex(index + count - (i + 1));
+					int y = IndexToBufferIndex(index + i);
+					if (comparer.IsLessThanOrEqual(Items[x], Items[y])) continue;
+					// swap
+					T tmp = Items[x];
+					Items[x] = Items[y];
+					Items[y] = tmp;
+				}
+			}
+			else
+			{
+				Array.Sort(Items, index, count, comparer);
+			}
+
 			_version++;
 		}
 
@@ -888,101 +937,49 @@ namespace essentialMix.Collections
 		{
 			for (int i = 0; i < Count; i++)
 			{
-				if (match(Items[i])) continue;
+				if (match(Items[IndexToBufferIndex(i)])) continue;
 				return false;
 			}
 			return true;
-		}
-
-		protected void Insert(int index, T item, bool add)
-		{
-			if (add)
-			{
-				if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-				if (Count == Items.Length) EnsureCapacity(Count + 1);
-				if (index < Count) Array.Copy(Items, index, Items, index + 1, Count - index);
-				Count++;
-			}
-			else
-			{
-				if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			}
-
-			Items[index] = item;
-			_version++;
 		}
 
 		protected void InsertRange(int index, [NotNull] IEnumerable<T> enumerable)
 		{
 			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 
-			int count;
-
 			switch (enumerable)
 			{
 				case IReadOnlyCollection<T> readOnlyCollection:
-				{
-					count = readOnlyCollection.Count;
-					if (count == 0) return;
-					EnsureCapacity(Count + count);
-					if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
+					if (readOnlyCollection.Count == 0) return;
+					EnsureCapacity(checked(Count + readOnlyCollection.Count));
+					MakeGapAt(index, readOnlyCollection.Count);
 
-					// If we're inserting a List into itself, we want to be able to deal with that.
-					if (ReferenceEquals(this, readOnlyCollection))
-					{
-						// Copy first part of _items to insert location
-						Array.Copy(Items, 0, Items, index, index);
-						// Copy last part of _items back to inserted location
-						Array.Copy(Items, index + count, Items, index * 2, Count - index);
-					}
-					else
-					{
-						foreach (T item in readOnlyCollection) 
-							Items[index++] = item;
-					}
+					foreach (T item in enumerable)
+						Items[IndexToBufferIndex(index++)] = item;
 
-					Count += count;
+					Count += readOnlyCollection.Count;
 					_version++;
 					break;
-				}
 				case ICollection<T> collection:
-				{
-					count = collection.Count;
-					if (count == 0) return;
-					EnsureCapacity(Count + count);
-					if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
+					if (collection.Count == 0) return;
+					EnsureCapacity(checked(Count + collection.Count));
+					MakeGapAt(index, collection.Count);
 
-					// If we're inserting a List into itself, we want to be able to deal with that.
-					if (ReferenceEquals(this, collection))
-					{
-						// Copy first part of _items to insert location
-						Array.Copy(Items, 0, Items, index, index);
-						// Copy last part of _items back to inserted location
-						Array.Copy(Items, index + count, Items, index * 2, Count - index);
-					}
-					else
-					{
-						collection.CopyTo(Items, index);
-					}
+					foreach (T item in enumerable)
+						Items[IndexToBufferIndex(index++)] = item;
 
-					Count += count;
+					Count += collection.Count;
 					_version++;
 					break;
-				}
 				default:
-				{
-					count = enumerable.FastCount();
-					if (count > 0) EnsureCapacity(Count + count);
-
 					using (IEnumerator<T> enumerator = enumerable.GetEnumerator())
 					{
 						while (enumerator.MoveNext())
 						{
-							Insert(index++, enumerator.Current, true);
+							Insert(index++, enumerator.Current);
 						}
 					}
 					break;
-				}
 			}
 		}
 
@@ -993,18 +990,163 @@ namespace essentialMix.Collections
 			Capacity = (Items.Length == 0 ? Constants.DEFAULT_CAPACITY : Items.Length * 2).NotBelow(min);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		protected int IndexToBufferIndex(int index)
+		{
+			return (index + _offset) % Capacity;
+		}
+
 		private T RemoveAtInternal(int index)
 		{
-			T item = Items[index];
-			if (index < Count - 1) Array.Copy(Items, index + 1, Items, index, Count - (index + 1));
-			Items[Count] = default(T);
+			T item;
+
+			if (index == 0)
+			{
+				item = Items[PostIncrement(1)];
+			}
+			else if (index == Count - 1)
+			{
+				item = Items[IndexToBufferIndex(Count - 1)];
+			}
+			else
+			{
+				item = Items[IndexToBufferIndex(index)];
+				RemoveGapAt(index, 1);
+			}
+
 			Count--;
 			_version++;
 			return item;
 		}
 
+		/// <summary>
+		/// Decrements <see cref="_offset" /> by <paramref name="size" /> using modulo-<see cref="Capacity" /> arithmetic.
+		/// </summary>
+		/// <param name="size">
+		/// The value by which to reduce <see cref="_offset" />. May not be negative or greater than
+		/// <see cref="Capacity" />.
+		/// </param>
+		/// <returns>The value of <see cref="_offset" /> before it was decremented.</returns>
+		private int PreDecrement(int size)
+		{
+			_offset -= size;
+			if (_offset < 0) _offset += Capacity;
+			_version++;
+			return _offset;
+		}
+
+		/// <summary>
+		/// Increments <see cref="_offset" /> by <paramref name="size" /> using modulo-<see cref="Capacity" /> arithmetic.
+		/// </summary>
+		/// <param name="size">The value by which to increase <see cref="_offset" />. May not be negative.</param>
+		/// <returns>The value of <see cref="_offset" /> after it was incremented.</returns>
+		private int PostIncrement(int size)
+		{
+			int ret = _offset;
+			_offset += size;
+			_offset %= Capacity;
+			_version++;
+			return ret;
+		}
+
+		/// <summary>
+		/// Make room for one or more elements to be inserted in the view.
+		/// </summary>
+		/// <param name="index">The index into the view at which the elements are to be inserted.</param>
+		/// <param name="size">
+		/// The gap size.
+		/// </param>
+		private void MakeGapAt(int index, int size)
+		{
+			if (Count + size >= Capacity) EnsureCapacity(Count + size);
+			if (!index.InRangeEx(0, Count)) return;
+
+			if (index < Count / 2)
+			{
+				/*
+				* Inserting into the first half of the list.
+				* Move lower items down: [0, index) -> [Capacity - size, Capacity - size + index)
+				* This clears out the low "index" number of items, moving them "size" place down;
+				* after rotation, there will be a "size"-sized hole at "index".
+				*/
+				int writeIndex = Capacity - size;
+
+				for (int i = 0; i < index; ++i)
+					Items[IndexToBufferIndex(writeIndex + i)] = Items[IndexToBufferIndex(i)];
+
+				// Rotate to the new view
+				PreDecrement(size);
+			}
+			else
+			{
+				/*
+				* Inserting into the second half of the list.
+				* Move higher items up: [index, count) -> [index + 1, 1 + count)
+				*/
+				int copyCount = Count - index;
+				int writeIndex = index + size;
+
+				for (int i = copyCount - 1; i >= 0; --i)
+					Items[IndexToBufferIndex(writeIndex + i)] = Items[IndexToBufferIndex(index + i)];
+
+				_version++;
+			}
+		}
+
+		/// <summary>
+		/// Prepare for removal of elements from the view.
+		/// </summary>
+		/// <param name="index">The index into the view at which the range begins.</param>
+		/// <param name="size">
+		/// The number of elements in the range. This must be greater than 0 and less than or equal
+		/// to <see cref="Count" />.
+		/// </param>
+		private void RemoveGapAt(int index, int size)
+		{
+			if (size == 0) return;
+
+			if (index == 0)
+			{
+				// Removing from the beginning: rotate to the new view
+				PostIncrement(size);
+				return;
+			}
+
+			if (index == Count - size)
+			{
+				// Removing from the ending: nothing to be done
+				return;
+			}
+
+			if (index + size / 2 < Count / 2)
+			{
+				// Removing from first half of list
+				// Move lower items up: [0, index) -> [collectionCount, collectionCount + index)
+				int copyCount = index;
+				int writeIndex = size;
+
+				for (int i = copyCount - 1; i >= 0; --i)
+					Items[IndexToBufferIndex(writeIndex + i)] = Items[IndexToBufferIndex(i)];
+
+				// Rotate to new view
+				PostIncrement(size);
+			}
+			else
+			{
+				// Removing from second half of list
+				// Move higher items down: [index + collectionCount, count) -> [index, count - collectionCount)
+				int copyCount = Count - size - index;
+				int readIndex = index + size;
+
+				for (int i = 0; i != copyCount; ++i)
+					Items[IndexToBufferIndex(index + i)] = Items[IndexToBufferIndex(readIndex + i)];
+
+				_version++;
+			}
+		}
+
 		[NotNull]
-		public static IList<T> Synchronized(Deque<T> list)
+		public static IList<T> Synchronized(CircularBuffer<T> list)
 		{
 			return new SynchronizedList(list);
 		}

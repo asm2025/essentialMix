@@ -32,14 +32,6 @@ namespace essentialMix.Extensions
 
 		private static readonly Lazy<MethodInfo> __cloneMethod = new Lazy<MethodInfo>(() => typeof(object).GetTypeInfo().GetDeclaredMethod("MemberwiseClone"), LazyThreadSafetyMode.PublicationOnly);
 
-		private static readonly IReadOnlySet<string> __disposedFieldNames = new ReadOnlySet<string>(new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-		{
-			"disposed",
-			"_disposed",
-			"m_disposed",
-			"mDisposed",
-		});
-
 		private static readonly ConcurrentDictionary<Type, Func<object, object>> __cachedIl = new ConcurrentDictionary<Type, Func<object, object>>();
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -1577,14 +1569,10 @@ namespace essentialMix.Extensions
 					}
 
 					if (fieldInfo != null) return (bool)fieldInfo.GetValue(disposable);
-
-					foreach (string fn in __disposedFieldNames)
-					{
-						fieldInfo = type.GetField(fn, Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE, rtType);
-						if (fieldInfo != null)
-							break;
-					}
-
+					fieldInfo = type.GetField("disposed", Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE, rtType);
+					if (fieldInfo == null) fieldInfo = type.GetField("_disposed", Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE, rtType);
+					if (fieldInfo == null) fieldInfo = type.GetField("m_disposed", Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE, rtType);
+					if (fieldInfo == null) fieldInfo = type.GetField("mDisposed", Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE, rtType);
 					return fieldInfo != null && (bool)fieldInfo.GetValue(disposable);
 			}
 		}

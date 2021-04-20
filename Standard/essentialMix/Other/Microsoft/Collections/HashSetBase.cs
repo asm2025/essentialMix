@@ -121,7 +121,7 @@ namespace Other.Microsoft.Collections
 			internal T Value;
 		}
 
-		protected internal int _version;
+		private int _version;
 
 		private int[] _buckets;
 		private Slot[] _slots;

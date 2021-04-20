@@ -8,8 +8,6 @@ namespace essentialMix.Data.Patterns.Repository
 {
 	public class UnitOfWork : Disposable, IUnitOfWork
 	{
-		private static readonly Type __targetType = typeof(IRepositoryBase);
-		
 		private readonly ConcurrentDictionary<Type, Func<IRepositoryBase>> _templates = new ConcurrentDictionary<Type, Func<IRepositoryBase>>();
 		private readonly ConcurrentDictionary<Type, IRepositoryBase> _instances = new ConcurrentDictionary<Type, IRepositoryBase>();
 
@@ -22,26 +20,26 @@ namespace essentialMix.Data.Patterns.Repository
 		public void Register<T>(Expression<Func<T>> template)
 			where T : IRepositoryBase
 		{
-			Expression castExpr = Expression.Convert(template.Body, __targetType);
+			Expression castExpr = Expression.Convert(template.Body, typeof(IRepositoryBase));
 			Register(typeof(T), Expression.Lambda<Func<IRepositoryBase>>(castExpr));
 		}
 
 		/// <inheritdoc />
 		public void Register(Type type, Expression<Func<IRepositoryBase>> template)
 		{
-			if (!__targetType.IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement {nameof(IRepositoryBase)} interface.", nameof(type));
+			if (!typeof(IRepositoryBase).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement {nameof(IRepositoryBase)} interface.", nameof(type));
 			_templates.TryAdd(type, template.Compile());
 		}
 
 		/// <inheritdoc />
-		public void Unregister<T>()
+		public void Deregister<T>()
 			where T : IRepositoryBase
 		{
-			Unregister(typeof(T));
+			Deregister(typeof(T));
 		}
 
 		/// <inheritdoc />
-		public void Unregister(Type type)
+		public void Deregister(Type type)
 		{
 			_templates.TryRemove(type, out _);
 			_instances.TryRemove(type, out _);
@@ -69,7 +67,7 @@ namespace essentialMix.Data.Patterns.Repository
 						? instance
 						: !_templates.TryGetValue(type, out Func<IRepositoryBase> template)
 							? null
-							: _instances.GetOrAdd(type, t => template())) ?? throw new InvalidOperationException("Type is not registered or created.");
+							: _instances.GetOrAdd(type, _ => template())) ?? throw new InvalidOperationException("Type is not registered or created.");
 		}
 
 		/// <inheritdoc />

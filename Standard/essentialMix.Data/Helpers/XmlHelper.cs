@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
@@ -17,7 +18,7 @@ namespace essentialMix.Data.Helpers
 	{
 		public const string NS_DEFAULT = "_";
 
-		private static readonly XmlSerializerFactory __factory = new XmlSerializerFactory();
+		private static readonly Lazy<XmlSerializerFactory> __factory = new Lazy<XmlSerializerFactory>(() => new XmlSerializerFactory(), LazyThreadSafetyMode.PublicationOnly);
 		private static readonly ConcurrentDictionary<Type, XmlSerializer> __serializersCache = new ConcurrentDictionary<Type, XmlSerializer>();
 		
 		[NotNull]
@@ -27,8 +28,8 @@ namespace essentialMix.Data.Helpers
 		public static XmlSerializer CreateSerializer([NotNull] Type type, XmlSerializerSettings settings = null)
 		{
 			XmlSerializer serializer = __serializersCache.GetOrAdd(type, e => settings == null
-																				? __factory.CreateSerializer(e)
-																				: __factory.CreateSerializer(e, settings.Overrides, settings.ExtraTypes, settings.Root, settings.DefaultNamespace, settings.Location));
+																				? __factory.Value.CreateSerializer(e)
+																				: __factory.Value.CreateSerializer(e, settings.Overrides, settings.ExtraTypes, settings.Root, settings.DefaultNamespace, settings.Location));
 			return serializer ?? throw new SerializationException($"Could not create a serializer for the type {type.FullName}.");
 		}
 
@@ -36,7 +37,7 @@ namespace essentialMix.Data.Helpers
 		public static XmlSerializer CreateSerializer([NotNull] XmlTypeMapping mapping)
 		{
 			Type type = Type.GetType(mapping.TypeFullName) ?? throw new TypeLoadException();
-			return __serializersCache.GetOrAdd(type, _ => __factory.CreateSerializer(mapping));
+			return __serializersCache.GetOrAdd(type, _ => __factory.Value.CreateSerializer(mapping));
 		}
 
 		public static string Serialize<T>([NotNull] T value, XmlSerializerSettings settings = null, XmlWriterSettings writerSettings = null)

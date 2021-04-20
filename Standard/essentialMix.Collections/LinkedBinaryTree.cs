@@ -520,7 +520,7 @@ namespace essentialMix.Collections
 			public void Dispose() { }
 		}
 
-		protected internal int _version;
+		internal int _version;
 
 		private object _syncRoot;
 
@@ -2178,7 +2178,6 @@ namespace essentialMix.Collections
 			// update
 			SetHeight(node);
 			SetHeight(newRoot);
-			_version++;
 			return newRoot;
 		}
 
@@ -2195,7 +2194,6 @@ namespace essentialMix.Collections
 			// update
 			SetHeight(node);
 			SetHeight(newRoot);
-			_version++;
 			return newRoot;
 		}
 

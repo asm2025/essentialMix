@@ -5,7 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using essentialMix.Collections;
 using JetBrains.Annotations;
 using essentialMix.Linq.Expressions;
 using essentialMix.Reflection;
@@ -14,39 +13,6 @@ namespace essentialMix.Extensions
 {
 	public static class ExpressionExtension
 	{
-		private static readonly IReadOnlySet<ExpressionType> __convertExpressions = new ReadOnlySet<ExpressionType>(new HashSet<ExpressionType>
-		{
-			ExpressionType.Convert
-			, ExpressionType.ConvertChecked
-			, ExpressionType.TypeAs
-			, ExpressionType.Unbox
-		});
-
-		private static readonly IReadOnlySet<ExpressionType> __unaryExpressions = __convertExpressions.Union(new []
-		{
-			ExpressionType.Decrement
-			, ExpressionType.Increment
-			, ExpressionType.IsFalse
-			, ExpressionType.IsTrue
-			, ExpressionType.Negate
-			, ExpressionType.NegateChecked
-			, ExpressionType.Not
-			, ExpressionType.OnesComplement
-			, ExpressionType.PostDecrementAssign
-			, ExpressionType.PostIncrementAssign
-			, ExpressionType.PreDecrementAssign
-			, ExpressionType.PreIncrementAssign
-			, ExpressionType.Quote
-			, ExpressionType.Throw
-			, ExpressionType.UnaryPlus
-		}).AsReadOnlySet();
-
-		private static readonly IReadOnlySet<ExpressionType> __simplifyExpressions = __convertExpressions.Union(new []
-		{
-			ExpressionType.Lambda
-			, ExpressionType.Invoke
-		}).AsReadOnlySet();
-
 		private class ArgumentExtractor : ExpressionVisitor
 		{
 			private readonly List<object> _list = new List<object>();
@@ -131,85 +97,268 @@ namespace essentialMix.Extensions
 			}
 		}
 
-		public static Expression RemoveConvert(this Expression thisValue) { return Simplify(thisValue, __convertExpressions); }
-		
-		public static Expression RemoveUnary(this Expression thisValue) { return Simplify(thisValue, __unaryExpressions); }
-
-		public static Expression Simplify(this Expression thisValue) { return Simplify(thisValue, __simplifyExpressions); }
-		public static Expression Simplify(this Expression thisValue, [NotNull] params ExpressionType[] valuesToRemove) { return valuesToRemove.Length == 0 ? thisValue : Simplify(thisValue, valuesToRemove.AsReadOnlySet()); }
-		public static Expression Simplify(this Expression thisValue, [NotNull] IEnumerable<ExpressionType> valuesToRemove) { return Simplify(thisValue, valuesToRemove.AsReadOnlySet()); }
-		public static Expression Simplify(this Expression thisValue, [NotNull] IReadOnlySet<ExpressionType> valuesToRemove)
+		public static Expression RemoveConvert(this Expression thisValue)
 		{
-			if (valuesToRemove.Count == 0) return thisValue;
+			return Simplify(thisValue, ExpressionType.Convert
+							, ExpressionType.ConvertChecked
+							, ExpressionType.TypeAs
+							, ExpressionType.Unbox);
+		}
 
-			while (thisValue != null && valuesToRemove.Contains(thisValue.NodeType))
+		public static Expression RemoveUnary(this Expression thisValue)
+		{
+			return Simplify(thisValue, ExpressionType.Decrement
+							, ExpressionType.Increment
+							, ExpressionType.IsFalse
+							, ExpressionType.IsTrue
+							, ExpressionType.Negate
+							, ExpressionType.NegateChecked
+							, ExpressionType.Not
+							, ExpressionType.OnesComplement
+							, ExpressionType.PostDecrementAssign
+							, ExpressionType.PostIncrementAssign
+							, ExpressionType.PreDecrementAssign
+							, ExpressionType.PreIncrementAssign
+							, ExpressionType.Quote
+							, ExpressionType.Throw
+							, ExpressionType.UnaryPlus);
+		}
+
+		public static Expression Simplify(this Expression thisValue, ExpressionType expression)
+		{
+			if (thisValue == null || thisValue.NodeType != expression) return thisValue;
+
+			switch (thisValue.NodeType)
 			{
-				switch (thisValue.NodeType)
-				{
-					case ExpressionType.ArrayLength:
-					case ExpressionType.Convert:
-					case ExpressionType.ConvertChecked:
-					case ExpressionType.Decrement:
-					case ExpressionType.Increment:
-					case ExpressionType.IsFalse:
-					case ExpressionType.IsTrue:
-					case ExpressionType.Negate:
-					case ExpressionType.NegateChecked:
-					case ExpressionType.Not:
-					case ExpressionType.OnesComplement:
-					case ExpressionType.PostDecrementAssign:
-					case ExpressionType.PostIncrementAssign:
-					case ExpressionType.PreDecrementAssign:
-					case ExpressionType.PreIncrementAssign:
-					case ExpressionType.Quote:
-					case ExpressionType.Throw:
-					case ExpressionType.TypeAs:
-					case ExpressionType.UnaryPlus:
-					case ExpressionType.Unbox:
-						thisValue = ((UnaryExpression)thisValue).Operand;
-						break;
-					case ExpressionType.Block:
-						thisValue = ((BlockExpression)thisValue).Result;
-						break;
-					case ExpressionType.Goto:
-						thisValue = ((GotoExpression)thisValue).Value;
-						break;
-					case ExpressionType.Invoke:
-						thisValue = ((InvocationExpression)thisValue).Expression;
-						break;
-					case ExpressionType.Lambda:
-						thisValue = ((LambdaExpression)thisValue).Body;
-						break;
-					case ExpressionType.ListInit:
-						thisValue = ((ListInitExpression)thisValue).NewExpression;
-						break;
-					case ExpressionType.Loop:
-						thisValue = ((LoopExpression)thisValue).Body;
-						break;
-					case ExpressionType.MemberAccess:
-						thisValue = ((MemberExpression)thisValue).Expression;
-						break;
-					case ExpressionType.MemberInit:
-						thisValue = ((MemberInitExpression)thisValue).NewExpression;
-						break;
-					case ExpressionType.Switch:
-						thisValue = ((SwitchExpression)thisValue).SwitchValue;
-						break;
-					case ExpressionType.Try:
-						thisValue = ((TryExpression)thisValue).Body;
-						break;
-					case ExpressionType.TypeEqual:
-						thisValue = ((TypeBinaryExpression)thisValue).Expression;
-						break;
-					case ExpressionType.TypeIs:
-						thisValue = ((TypeBinaryExpression)thisValue).Expression;
-						break;
-					default:
-						goto ExitLoop;
-				}
+				case ExpressionType.ArrayLength:
+				case ExpressionType.Convert:
+				case ExpressionType.ConvertChecked:
+				case ExpressionType.Decrement:
+				case ExpressionType.Increment:
+				case ExpressionType.IsFalse:
+				case ExpressionType.IsTrue:
+				case ExpressionType.Negate:
+				case ExpressionType.NegateChecked:
+				case ExpressionType.Not:
+				case ExpressionType.OnesComplement:
+				case ExpressionType.PostDecrementAssign:
+				case ExpressionType.PostIncrementAssign:
+				case ExpressionType.PreDecrementAssign:
+				case ExpressionType.PreIncrementAssign:
+				case ExpressionType.Quote:
+				case ExpressionType.Throw:
+				case ExpressionType.TypeAs:
+				case ExpressionType.UnaryPlus:
+				case ExpressionType.Unbox:
+					return ((UnaryExpression)thisValue).Operand;
+				case ExpressionType.Block:
+					return ((BlockExpression)thisValue).Result;
+				case ExpressionType.Goto:
+					return ((GotoExpression)thisValue).Value;
+				case ExpressionType.Invoke:
+					return ((InvocationExpression)thisValue).Expression;
+				case ExpressionType.Lambda:
+					return ((LambdaExpression)thisValue).Body;
+				case ExpressionType.ListInit:
+					return ((ListInitExpression)thisValue).NewExpression;
+				case ExpressionType.Loop:
+					return ((LoopExpression)thisValue).Body;
+				case ExpressionType.MemberAccess:
+					return ((MemberExpression)thisValue).Expression;
+				case ExpressionType.MemberInit:
+					return ((MemberInitExpression)thisValue).NewExpression;
+				case ExpressionType.Switch:
+					return ((SwitchExpression)thisValue).SwitchValue;
+				case ExpressionType.Try:
+					return ((TryExpression)thisValue).Body;
+				case ExpressionType.TypeEqual:
+					return ((TypeBinaryExpression)thisValue).Expression;
+				case ExpressionType.TypeIs:
+					return ((TypeBinaryExpression)thisValue).Expression;
+				default:
+					return thisValue;
+			}
+		}
+
+		public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2)
+		{
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression1);
+			return thisValue == null
+						? null
+						: Simplify(thisValue, expression2);
+		}
+
+		public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3)
+		{
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression1);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression2);
+			return thisValue == null
+						? null
+						: Simplify(thisValue, expression3);
+		}
+
+		public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
+			ExpressionType expression4)
+		{
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression1);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression2);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression3);
+			return thisValue == null
+						? null
+						: Simplify(thisValue, expression4);
+		}
+
+		public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
+			ExpressionType expression4, ExpressionType expression5)
+		{
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression1);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression2);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression3);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression4);
+			return thisValue == null
+						? null
+						: Simplify(thisValue, expression5);
+		}
+
+		public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
+			ExpressionType expression4, ExpressionType expression5, ExpressionType expression6)
+		{
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression1);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression2);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression3);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression4);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression5);
+			return thisValue == null
+						? null
+						: Simplify(thisValue, expression6);
+		}
+
+		public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
+			ExpressionType expression4, ExpressionType expression5, ExpressionType expression6, ExpressionType expression7)
+		{
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression1);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression2);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression3);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression4);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression5);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression6);
+			return thisValue == null
+						? null
+						: Simplify(thisValue, expression7);
+		}
+
+		public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
+			ExpressionType expression4, ExpressionType expression5, ExpressionType expression6, ExpressionType expression7, ExpressionType expression8)
+		{
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression1);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression2);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression3);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression4);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression5);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression6);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression7);
+			return thisValue == null
+						? null
+						: Simplify(thisValue, expression8);
+		}
+
+		public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
+			ExpressionType expression4, ExpressionType expression5, ExpressionType expression6, ExpressionType expression7, ExpressionType expression8, 
+			ExpressionType expression9)
+		{
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression1);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression2);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression3);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression4);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression5);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression6);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression7);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression8);
+			return thisValue == null
+						? null
+						: Simplify(thisValue, expression9);
+		}
+
+		public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
+			ExpressionType expression4, ExpressionType expression5, ExpressionType expression6, ExpressionType expression7, ExpressionType expression8, 
+			ExpressionType expression9, ExpressionType expression10)
+		{
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression1);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression2);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression3);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression4);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression5);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression6);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression7);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression8);
+			if (thisValue == null) return null;
+			thisValue = Simplify(thisValue, expression9);
+			return thisValue == null
+						? null
+						: Simplify(thisValue, expression10);
+		}
+
+		public static Expression Simplify(this Expression thisValue)
+		{
+			return Simplify(thisValue, ExpressionType.Lambda
+							, ExpressionType.Invoke);
+		}
+
+		public static Expression Simplify(this Expression thisValue, [NotNull] params ExpressionType[] valuesToRemove) { return valuesToRemove.Length == 0 ? thisValue : Simplify(thisValue, valuesToRemove.AsReadOnlySet()); }
+		public static Expression Simplify(this Expression thisValue, [NotNull] IEnumerable<ExpressionType> valuesToRemove)
+		{
+			if (thisValue == null) return null;
+
+			foreach (ExpressionType expression in valuesToRemove)
+			{
+				thisValue = Simplify(thisValue, expression);
+				if (thisValue == null) return null;
 			}
 
-			ExitLoop:
 			return thisValue;
 		}
 

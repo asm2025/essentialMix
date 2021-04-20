@@ -11,9 +11,9 @@ namespace essentialMix.Collections.DebugView
 	public class Dbg_IndexMinDebugView<TNode, TKey, TValue>
 		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 	{
-		private readonly IndexMin<TNode, TKey, TValue> _heap;
+		private readonly IndexHeap<TNode, TKey, TValue> _heap;
 
-		public Dbg_IndexMinDebugView([NotNull] IndexMin<TNode, TKey, TValue> heap)
+		public Dbg_IndexMinDebugView([NotNull] IndexHeap<TNode, TKey, TValue> heap)
 		{
 			_heap = heap;
 		}

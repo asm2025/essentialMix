@@ -135,7 +135,7 @@ namespace Other.Microsoft.Collections
 			}
 		}
 
-		protected internal int _version;
+		private int _version;
 
 		// This LinkedList is a singly-Linked circular list.
 		internal SinglyLinkedListNode<T> _head;

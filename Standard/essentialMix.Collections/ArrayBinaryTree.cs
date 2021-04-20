@@ -620,7 +620,7 @@ namespace essentialMix.Collections
 			public void Dispose() { }
 		}
 
-		protected internal int _version;
+		private int _version;
 
 		private object _syncRoot;
 

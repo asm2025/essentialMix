@@ -215,7 +215,7 @@ namespace Other.Microsoft.Collections
 			}
 		}
 
-		protected internal int _version;
+		private int _version;
 
 		[NonSerialized]
 		private object _syncRoot;
@@ -345,6 +345,7 @@ namespace Other.Microsoft.Collections
 
 		int IList.Add(object item)
 		{
+			if (item is null && !typeof(T).IsClass) throw new ArgumentNullException(nameof(item), "Value cannot be null.");
 			if (!ObjectHelper.IsCompatible<T>(item)) throw new ArgumentException("Incompatible value.", nameof(item));
 			Insert(Count, (T)item, true);
 			return Count - 1;
@@ -405,40 +406,72 @@ namespace Other.Microsoft.Collections
 
 			int count;
 
-			if (enumerable is ICollection<T> collection)
+			switch (enumerable)
 			{
-				count = collection.Count;
-				if (count == 0) return;
-				EnsureCapacity(Count + count);
-				if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
-
-				// If we're inserting a List into itself, we want to be able to deal with that.
-				if (ReferenceEquals(this, collection))
+				case IReadOnlyCollection<T> readOnlyCollection:
 				{
-					// Copy first part of _items to insert location
-					Array.Copy(Items, 0, Items, index, index);
-					// Copy last part of _items back to inserted location
-					Array.Copy(Items, index + count, Items, index * 2, Count - index);
+					count = readOnlyCollection.Count;
+					if (count == 0) return;
+					EnsureCapacity(Count + count);
+					if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
+
+					// If we're inserting a List into itself, we want to be able to deal with that.
+					if (ReferenceEquals(this, readOnlyCollection))
+					{
+						// Copy first part of _items to insert location
+						Array.Copy(Items, 0, Items, index, index);
+						// Copy last part of _items back to inserted location
+						Array.Copy(Items, index + count, Items, index * 2, Count - index);
+					}
+					else
+					{
+						foreach (T item in readOnlyCollection) 
+							Items[index++] = item;
+					}
+
+					Count += count;
+					_version++;
+					RangeInserted(index, count);
+					break;
 				}
-				else
+				case ICollection<T> collection:
 				{
-					collection.CopyTo(Items, index);
+					count = collection.Count;
+					if (count == 0) return;
+					EnsureCapacity(Count + count);
+					if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
+
+					// If we're inserting a List into itself, we want to be able to deal with that.
+					if (ReferenceEquals(this, collection))
+					{
+						// Copy first part of _items to insert location
+						Array.Copy(Items, 0, Items, index, index);
+						// Copy last part of _items back to inserted location
+						Array.Copy(Items, index + count, Items, index * 2, Count - index);
+					}
+					else
+					{
+						collection.CopyTo(Items, index);
+					}
+
+					Count += count;
+					_version++;
+					RangeInserted(index, count);
+					break;
 				}
-
-				Count += count;
-				_version++;
-				RangeInserted(index, count);
-				return;
-			}
-
-			count = enumerable.FastCount();
-			if (count > 0) EnsureCapacity(Count + count);
-
-			using (IEnumerator<T> en = enumerable.GetEnumerator())
-			{
-				while (en.MoveNext())
+				default:
 				{
-					Insert(index++, en.Current, true);
+					count = enumerable.FastCount();
+					if (count > 0) EnsureCapacity(Count + count);
+
+					using (IEnumerator<T> en = enumerable.GetEnumerator())
+					{
+						while (en.MoveNext())
+						{
+							Insert(index++, en.Current, true);
+						}
+					}
+					break;
 				}
 			}
 		}

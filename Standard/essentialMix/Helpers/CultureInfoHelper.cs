@@ -16,37 +16,50 @@ namespace essentialMix.Helpers
 		public const int INVARIANT = 127;
 
 		private static readonly ConcurrentDictionary<int, ReadOnlyDictionary<string, CultureInfo>> __culturesByRegion = new ConcurrentDictionary<int, ReadOnlyDictionary<string, CultureInfo>>();
-		private static readonly char[] __defaultSeparators = { ',', ';' };
 
-		private static readonly HashSet<string> __dateTimeFormats = new HashSet<string>(new[]
+		private static readonly Lazy<ISet<string>> __dateTimeFormats = new Lazy<ISet<string>>(() =>
 		{
-			"d",
-			"D",
-			"f",
-			"F",
-			"g",
-			"G",
-			"m",
-			"M",
-			"o",
-			"O",
-			"r",
-			"R",
-			"s",
-			"t",
-			"T",
-			"u",
-			"U",
-			"y",
-			"Y"
-		}.Concat(CultureInfo.InvariantCulture.DateTimeFormat.GetAllDateTimePatterns())
-		.Concat(Default.DateTimeFormat.GetAllDateTimePatterns()));
+			HashSet<string> set = new HashSet<string>(StringComparer.Ordinal)
+			{
+				"d",
+				"D",
+				"f",
+				"F",
+				"g",
+				"G",
+				"m",
+				"M",
+				"o",
+				"O",
+				"r",
+				"R",
+				"s",
+				"t",
+				"T",
+				"u",
+				"U",
+				"y",
+				"Y"
+			};
+
+			foreach (string pattern in CultureInfo.InvariantCulture.DateTimeFormat.GetAllDateTimePatterns()) 
+				set.Add(pattern);
+
+			foreach (string pattern in Thread.CurrentThread.CurrentCulture.DateTimeFormat.GetAllDateTimePatterns()) 
+				set.Add(pattern);
+
+			return set;
+		}, LazyThreadSafetyMode.PublicationOnly);
+
+		private static readonly Lazy<IReadOnlyDictionary<string, CultureInfo>> __cultures = new Lazy<IReadOnlyDictionary<string, CultureInfo>>(() => new ReadOnlyDictionary<string, CultureInfo>(CultureInfo.GetCultures(CultureTypes.AllCultures)
+																													.ToDictionary(k => k.Name, StringComparer.OrdinalIgnoreCase)), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly Lazy<IReadOnlyDictionary<string, CultureInfo>> __specificCultures = new Lazy<IReadOnlyDictionary<string, CultureInfo>>(() => new ReadOnlyDictionary<string, CultureInfo>(CultureInfo.GetCultures(CultureTypes.SpecificCultures)
+			.ToDictionary(k => k.Name, v => v, StringComparer.OrdinalIgnoreCase)), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly Lazy<IReadOnlyDictionary<string, CultureInfo>> __neutralCultures = new Lazy<IReadOnlyDictionary<string, CultureInfo>>(() => new ReadOnlyDictionary<string, CultureInfo>(CultureInfo.GetCultures(CultureTypes.NeutralCultures)
+			.ToDictionary(k => k.Name, v => v, StringComparer.OrdinalIgnoreCase)), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly ConcurrentDictionary<string, CultureInfo> __cultureCache = new ConcurrentDictionary<string, CultureInfo>(StringComparer.OrdinalIgnoreCase);
 
 		private static CultureInfo __english;
-		private static ReadOnlyDictionary<string, CultureInfo> __cultures;
-		private static ReadOnlyDictionary<string, CultureInfo> __specificCultures;
-		private static ReadOnlyDictionary<string, CultureInfo> __neutralCultures;
-		private static readonly ConcurrentDictionary<string, CultureInfo> __cultureCache = new ConcurrentDictionary<string, CultureInfo>(StringComparer.OrdinalIgnoreCase);
 
 		[NotNull]
 		public static CultureInfo Default => Thread.CurrentThread.CurrentCulture;
@@ -55,59 +68,38 @@ namespace essentialMix.Helpers
 		public static CultureInfo English => __english ??= Get("en");
 
 		[NotNull]
-		public static ReadOnlyDictionary<string, CultureInfo> Cultures
-		{
-			get
-			{
-				return __cultures ??= new ReadOnlyDictionary<string, CultureInfo>(CultureInfo.GetCultures(CultureTypes.AllCultures)
-																							.ToDictionary(k => k.Name, StringComparer.OrdinalIgnoreCase));
-			}
-		}
+		public static IReadOnlyDictionary<string, CultureInfo> Cultures => __cultures.Value;
 
 		[NotNull]
-		public static ReadOnlyDictionary<string, CultureInfo> SpecificCultures
-		{
-			get
-			{
-				return __specificCultures ??= new ReadOnlyDictionary<string, CultureInfo>(CultureInfo.GetCultures(CultureTypes.SpecificCultures)
-																									.ToDictionary(k => k.Name, v => v, StringComparer.OrdinalIgnoreCase));
-			}
-		}
+		public static IReadOnlyDictionary<string, CultureInfo> SpecificCultures => __specificCultures.Value;
 
 		[NotNull]
-		public static ReadOnlyDictionary<string, CultureInfo> NeutralCultures
-		{
-			get
-			{
-				return __neutralCultures ??= new ReadOnlyDictionary<string, CultureInfo>(CultureInfo.GetCultures(CultureTypes.NeutralCultures)
-																									.ToDictionary(k => k.Name, v => v, StringComparer.OrdinalIgnoreCase));
-			}
-		}
+		public static IReadOnlyDictionary<string, CultureInfo> NeutralCultures => __neutralCultures.Value;
 
 		[NotNull]
 		public static IReadOnlyCollection<string> GetDateTimeFormats(string addFormat)
 		{
-			IReadOnlyCollection<string> collection;
-
-			lock(__dateTimeFormats)
-			{
-				if (!string.IsNullOrEmpty(addFormat))
-					__dateTimeFormats.Add(addFormat);
-				collection = __dateTimeFormats.AsReadOnly();
-			}
-
-			return collection;
+			if (!string.IsNullOrEmpty(addFormat)) __dateTimeFormats.Value.Add(addFormat);
+			return __dateTimeFormats.Value.AsReadOnly();
 		}
 
 		public static char[] GetDefaultListSeparators()
 		{
 			string ls = Default.TextInfo.ListSeparator;
+			
 			if (string.IsNullOrEmpty(ls))
-				return __defaultSeparators;
+			{
+				return new[]
+				{
+					',',
+					';'
+				};
+			}
 
-			char[] separators = new char[__defaultSeparators.Length + ls.Length];
-			__defaultSeparators.CopyTo(separators, 0);
-			ls.CopyTo(0, separators, __defaultSeparators.Length, ls.Length);
+			char[] separators = new char[ls.Length + 2];
+			separators[0] = ',';
+			separators[1] = ';';
+			ls.CopyTo(0, separators, 2, ls.Length);
 			return separators;
 		}
 
@@ -177,9 +169,9 @@ namespace essentialMix.Helpers
 
 		public static ReadOnlyDictionary<string, CultureInfo> ListByRegion([NotNull] RegionInfo region)
 		{
-			return __culturesByRegion.GetOrAdd(region.GeoId, geoId => new ReadOnlyDictionary<string, CultureInfo>((SpecificCultures.Values ?? throw new InvalidOperationException("Cannot access cultures."))
-																																								.Where(e => e.LCID != INVARIANT && !e.IsNeutralCulture && e.Region().GeoId == region.GeoId)
-																																								.ToDictionary(k => k.Name, v => v, StringComparer.OrdinalIgnoreCase)));
+			return __culturesByRegion.GetOrAdd(region.GeoId, geoId => new ReadOnlyDictionary<string, CultureInfo>((SpecificCultures.Values)
+																												.Where(e => e.LCID != INVARIANT && !e.IsNeutralCulture && e.Region().GeoId == geoId)
+																												.ToDictionary(k => k.Name, v => v, StringComparer.OrdinalIgnoreCase)));
 		}
 
 		public static bool IsCultureName(string name) { return !string.IsNullOrEmpty(name) && Cultures.ContainsKey(name); }

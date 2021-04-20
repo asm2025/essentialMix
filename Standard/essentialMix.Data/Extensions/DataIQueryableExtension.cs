@@ -11,7 +11,7 @@ namespace essentialMix.Extensions
 {
 	public static class DataIQueryableExtension
 	{
-		private static readonly ConcurrentDictionary<string, MethodInfo> __methods = new ConcurrentDictionary<string, MethodInfo>(StringComparer.OrdinalIgnoreCase);
+		private static readonly ConcurrentDictionary<string, MethodInfo> __orderByMethods = new ConcurrentDictionary<string, MethodInfo>(StringComparer.OrdinalIgnoreCase);
 
 		public static IQueryable<T> OrderBy<T>([NotNull] this IQueryable<T> thisValue, string name, SortType sortType)
 		{
@@ -83,7 +83,7 @@ namespace essentialMix.Extensions
 
 			Type delegateType = typeof(Func<,>).MakeGenericType(typeof(T), type);
 			LambdaExpression lambda = Expression.Lambda(delegateType, expr, arg);
-			MethodInfo orderBy = __methods.GetOrAdd(methodName, mn => typeof(Queryable).GetMethods()
+			MethodInfo orderBy = __orderByMethods.GetOrAdd(methodName, mn => typeof(Queryable).GetMethods()
 																						.Single(method => method.Name.IsSame(mn) &&
 																										method.IsGenericMethodDefinition &&
 																										method.GetGenericArguments().Length == 2 &&

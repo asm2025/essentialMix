@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Patterns.DateTime;
@@ -19,7 +20,7 @@ namespace essentialMix.Extensions
 		private const string MEDIUM_STRING = @"d\.hh\:mm\:ss\.fffff";
 		private const string LONG_STRING = @"d\.hh\:mm\:ss\.fffffff";
 
-		private static readonly TimeUnit[] __timeUnitValues = EnumHelper<TimeUnit>.GetValues();
+		private static readonly Lazy<TimeUnit[]> __timeUnitValues = new Lazy<TimeUnit[]>(EnumHelper<TimeUnit>.GetValues, LazyThreadSafetyMode.PublicationOnly);
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsValid(this TimeSpan thisValue, bool zeroIsValid = false, bool infiniteIsValid = false)
@@ -53,26 +54,26 @@ namespace essentialMix.Extensions
 		public static double GetValueAt(this TimeSpan thisValue, TimeUnit unit)
 		{
 			unit = unit.HighestFlag();
-			int max = __timeUnitValues.IndexOf(unit);
+			int max = __timeUnitValues.Value.IndexOf(unit);
 			if (max < 0) throw new ArgumentOutOfRangeException(nameof(unit));
 
 			double value = 0;
 
 			for (int i = 0; i <= max; i++)
-				value += GetValue(thisValue, __timeUnitValues[i]);
+				value += GetValue(thisValue, __timeUnitValues.Value[i]);
 
 			return value;
 		}
 
 		public static double GetValueBelow(this TimeSpan thisValue, TimeUnit unit)
 		{
-			int max = __timeUnitValues.IndexOf(unit);
+			int max = __timeUnitValues.Value.IndexOf(unit);
 			if (max < 0) throw new ArgumentOutOfRangeException(nameof(unit));
 
 			double value = 0;
 
 			for (int i = 0; i < max; i++)
-				value += GetValue(thisValue, __timeUnitValues[i]);
+				value += GetValue(thisValue, __timeUnitValues.Value[i]);
 
 			return value;
 		}

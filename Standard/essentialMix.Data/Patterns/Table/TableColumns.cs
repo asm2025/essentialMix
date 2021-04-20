@@ -82,38 +82,7 @@ namespace essentialMix.Data.Patterns.Table
 				Items.Add(column);
 			}
 
-			if (DetailsOwner)
-			{
-				foreach (ITableColumn column in Items)
-				{
-					column.Weight = column.Hidden || !allSettings.TryGetValue(column.Name, out TableColumnSettings settings) || !settings.Weight.HasValue || settings.Weight < 1
-										? (int?)null
-										: settings.Weight.Value.Within(1, 12);
-				}
-			}
-			else
-			{
-				ITableColumn[] visibleColumns = Items.Where(e => !e.Hidden).ToArray();
-				double sum = visibleColumns.Length > 0
-								? visibleColumns.Sum(e => allSettings[e.Name].Weight ?? 0)
-								: 0.0d;
-
-				if (sum > 0.0d)
-				{
-					foreach (ITableColumn column in Items)
-					{
-						column.Weight = column.Hidden || !allSettings.TryGetValue(column.Name, out TableColumnSettings settings) || !settings.Weight.HasValue || settings.Weight < 1
-											? (int?)null
-											: (int)Math.Floor(settings.Weight.Value / sum * 12.0d);
-					}
-				}
-				else
-				{
-					foreach (ITableColumn column in Items) 
-						column.Weight = null;
-				}
-			}
-
+			AdjustWidths(allSettings);
 			return true;
 		}
 
@@ -152,12 +121,43 @@ namespace essentialMix.Data.Patterns.Table
 				Items.Add(column);
 			}
 
+			AdjustWidths(allSettings);
+			return true;
+		}
+
+		private static TableColumnSettings SettingsMerger(string name, Type type, Func<string, TableColumnSettings?> onGetSettings)
+		{
+			TableColumnSettings target = TableColumnSettingMapping.GetSettings(type);
+			TableColumnSettings? overrides = onGetSettings?.Invoke(name);
+			TableColumnSettings.Merge(ref target, overrides);
+			if (target.TextCasing.HasValue) return target;
+			type = type.ResolveType();
+			if (type == null) return target;
+
+			if (type.IsArray)
+			{
+				type = type.GetElementType();
+				if (type == null || !type.IsAssignableFrom(typeof(byte)) && !type.IsAssignableFrom(typeof(sbyte))) return target;
+				target.Formatting = TableColumnFormatting.Raw;
+				target.TextCasing = TextCasing.Upper;
+			}
+			else if (type == typeof(Guid))
+			{
+				target.Formatting = TableColumnFormatting.Raw;
+				target.TextCasing = TextCasing.Upper;
+			}
+
+			return target;
+		}
+
+		private void AdjustWidths(IDictionary<string, TableColumnSettings> allSettings)
+		{
 			if (DetailsOwner)
 			{
 				foreach (ITableColumn column in Items)
 				{
 					column.Weight = column.Hidden || !allSettings.TryGetValue(column.Name, out TableColumnSettings settings) || !settings.Weight.HasValue || settings.Weight < 1
-										? (int?)null
+										? null
 										: settings.Weight.Value.Within(1, 12);
 				}
 			}
@@ -173,7 +173,7 @@ namespace essentialMix.Data.Patterns.Table
 					foreach (ITableColumn column in Items)
 					{
 						column.Weight = column.Hidden || !allSettings.TryGetValue(column.Name, out TableColumnSettings settings) || !settings.Weight.HasValue || settings.Weight < 1
-											? (int?)null
+											? null
 											: (int)Math.Floor(settings.Weight.Value / sum * 12.0d);
 					}
 				}
@@ -183,41 +183,6 @@ namespace essentialMix.Data.Patterns.Table
 						column.Weight = null;
 				}
 			}
-
-			return true;
-		}
-
-		private static TableColumnSettings SettingsMerger(string name, Type type, Func<string, TableColumnSettings?> onGetSettings)
-		{
-			TableColumnSettings target = TableColumnSettingMapping.GetSettings(type);
-			TableColumnSettings? overrides = onGetSettings?.Invoke(name);
-			TableColumnSettings.Merge(ref target, overrides);
-
-			if (!target.TextCasing.HasValue)
-			{
-				type = type.ResolveType();
-
-				if (type != null)
-				{
-					if (type.IsArray)
-					{
-						type = type.GetElementType();
-
-						if (type != null && (type.IsAssignableFrom(typeof(byte)) || type.IsAssignableFrom(typeof(sbyte))))
-						{
-							target.Formatting = TableColumnFormatting.Raw;
-							target.TextCasing = TextCasing.Upper;
-						}
-					}
-					else if (type == typeof(Guid))
-					{
-						target.Formatting = TableColumnFormatting.Raw;
-						target.TextCasing = TextCasing.Upper;
-					}
-				}
-			}
-
-			return target;
 		}
 	}
 }

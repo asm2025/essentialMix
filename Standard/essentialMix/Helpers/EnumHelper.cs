@@ -2271,19 +2271,19 @@ namespace essentialMix.Helpers
 		{
 			return __enumInfo.GetOrAdd(enumType, e =>
 												{
-													if (enumType.IsEnum)
+													if (e.IsEnum)
 													{
-														Type closedEnumsType = typeof(EnumHelper<>).MakeGenericType(enumType);
+														Type closedEnumsType = typeof(EnumHelper<>).MakeGenericType(e);
 														return (IEnumInfo)closedEnumsType.GetProperty("Info", Constants.BF_PUBLIC_NON_PUBLIC_STATIC)?.GetValue(null);
 													}
 
-													Type underlyingType = Nullable.GetUnderlyingType(enumType);
+													Type underlyingType = Nullable.GetUnderlyingType(e);
 													if (underlyingType == null) throw new NotEnumTypeException();
 													if (!underlyingType.IsEnum) throw new NotEnumTypeException(underlyingType);
 													
 													Type numericProviderType = GetNumericProviderType(underlyingType);
 													return typeof(EnumInfo<,>).MakeGenericType(underlyingType, numericProviderType)
-																			.CreateInstance<IEnumInfo>(enumType);
+																			.CreateInstance<IEnumInfo>(e);
 												});
 		}
 

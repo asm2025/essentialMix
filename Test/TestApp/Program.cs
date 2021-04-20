@@ -97,6 +97,7 @@ work with {HEAVY} items.");
 
 			//TestDeque();
 			//TestLinkedDeque();
+			TestCircularBuffer();
 
 			//TestBinaryTreeFromTraversal();
 			
@@ -148,7 +149,7 @@ work with {HEAVY} items.");
 			//TestFibonacciHeapElementAt();
 			//TestFibonacciHeapDecreaseKey();
 			
-			// todo fix IndexMin/Max
+			// todo fix IndexHeap/Max
 			//TestIndexMinAdd();
 			//TestIndexMinRemove();
 			//TestIndexMinElementAt();
@@ -1225,6 +1226,126 @@ work with {HEAVY} items.");
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine(Bright.Red("Test removing..."));
+				int removed = 0;
+				count = deque.Count;
+				clock.Restart();
+
+				if (print)
+				{
+					while (deque.Count > 0 && count > 0)
+					{
+						Console.Write(remove());
+						count--;
+						removed++;
+						if (deque.Count > 0) Console.Write(", ");
+					}
+				}
+				else
+				{
+					while (deque.Count > 0 && count > 0)
+					{
+						remove();
+						count--;
+						removed++;
+					}
+				}
+
+				Debug.Assert(count == 0 && deque.Count == 0, $"Values are not cleared correctly! {count} != {deque.Count}.");
+				Console.WriteLine();
+				Console.WriteLine();
+				Console.WriteLine($"Removed {removed} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+			}
+		}
+
+		private static void TestCircularBuffer()
+		{
+			bool more;
+			int tests = 0;
+			Stopwatch clock = new Stopwatch();
+			int[] values = GetRandomIntegers(true, START);
+			CircularBuffer<int> deque = new CircularBuffer<int>(values.Length);
+
+			do
+			{
+				Console.Clear();
+				Title("Testing CircularBuffer...");
+				CompilationHint();
+				Console.WriteLine($"Array has {values.Length} items.");
+				Console.WriteLine("Test queue functionality...");
+
+				Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
+				bool print = Console.ReadKey(true).Key == ConsoleKey.Y;
+				Console.WriteLine();
+
+				// Queue test
+				Title("Testing Deque as a Queue...");
+				DoTheTest(deque, values, deque.Enqueue, deque.Dequeue, print, clock);
+				Title("End testing Deque as a Queue...");
+				ConsoleHelper.Pause();
+
+				// Stack test
+				Title("Testing Deque as a Stack...");
+				DoTheTest(deque, values, deque.Push, deque.Pop, print, clock);
+				Title("End testing Deque as a Stack...");
+
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+				if (!more || tests > 0) continue;
+				values = GetRandomIntegers(true, HEAVY);
+				tests++;
+			}
+			while (more);
+
+			clock.Stop();
+
+			static void DoTheTest(CircularBuffer<int> deque, int[] values, Action<int> add, Func<int> remove, bool print, Stopwatch clock)
+			{
+				deque.Clear();
+				int count = deque.Count;
+				Debug.Assert(count == 0, "Values are not cleared correctly!");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
+				clock.Restart();
+
+				foreach (int v in values)
+				{
+					add(v);
+					count++;
+				}
+
+				Console.WriteLine($"Added {count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine(Bright.Yellow("Test search..."));
+				int found = 0;
+				int missed = 0;
+				int offset = values.Length - deque.Capacity;
+				count = deque.Count / 4;
+				clock.Restart();
+
+				// will just test for items not more than MAX_SEARCH
+				for (int i = 0; i < count; i++)
+				{
+					int v = values[offset + i];
+
+					if (deque.Contains(v))
+					{
+						found++;
+						continue;
+					}
+
+					missed++;
+					Console.WriteLine(missed <= 3
+										? Bright.Red($"Find missed a value: {v} :((")
+										: Bright.Red("FIND MISSED A LOT :(("));
+					if (missed > 3) return;
+					//return;
+				}
+
+				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
+
+				Console.WriteLine(Bright.Red("Test removing..."));
+		
 				int removed = 0;
 				count = deque.Count;
 				clock.Restart();
@@ -3724,23 +3845,23 @@ work with {HEAVY} items.");
 			do
 			{
 				Console.Clear();
-				Title("Testing IndexMin.Add()...");
+				Title("Testing IndexHeap.Add()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
-				IndexMin<int> heap = new MaxIndexMin<int>();
+				IndexHeap<int> heap = new IndexMax<int>();
 				DoTheTest(heap, values);
 
-				heap = new MinIndexMin<int>();
+				heap = new IndexMin<int>();
 				DoTheTest(heap, values);
 
 				Student[] students = GetRandomStudents(len);
-				IndexMin<double, Student> studentsHeap = new MaxIndexMin<double, Student>(e => e.Grade);
+				IndexHeap<double, Student> studentsHeap = new IndexMax<double, Student>(e => e.Grade);
 				DoTheTest(studentsHeap, students);
 
-				studentsHeap = new MinIndexMin<double, Student>(e => e.Grade);
+				studentsHeap = new IndexMin<double, Student>(e => e.Grade);
 				DoTheTest(studentsHeap, students);
 
 				Console.WriteLine();
@@ -3751,7 +3872,7 @@ work with {HEAVY} items.");
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array)
+			static void DoTheTest<TNode, TKey, TValue>(IndexHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -3773,23 +3894,23 @@ work with {HEAVY} items.");
 			do
 			{
 				Console.Clear();
-				Title("Testing IndexMin.Remove()...");
+				Title("Testing IndexHeap.Remove()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
-				IndexMin<int> heap = new MaxIndexMin<int>();
+				IndexHeap<int> heap = new IndexMax<int>();
 				DoTheTest(heap, values);
 
-				heap = new MinIndexMin<int>();
+				heap = new IndexMin<int>();
 				DoTheTest(heap, values);
 
 				Student[] students = GetRandomStudents(len);
-				IndexMin<double, Student> studentsHeap = new MaxIndexMin<double, Student>(e => e.Grade);
+				IndexHeap<double, Student> studentsHeap = new IndexMax<double, Student>(e => e.Grade);
 				DoTheTest(studentsHeap, students);
 
-				studentsHeap = new MinIndexMin<double, Student>(e => e.Grade);
+				studentsHeap = new IndexMin<double, Student>(e => e.Grade);
 				DoTheTest(studentsHeap, students);
 
 				Console.WriteLine();
@@ -3800,7 +3921,7 @@ work with {HEAVY} items.");
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array)
+			static void DoTheTest<TNode, TKey, TValue>(IndexHeap<TNode, TKey, TValue> heap, TValue[] array)
 				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -3829,7 +3950,7 @@ work with {HEAVY} items.");
 			do
 			{
 				Console.Clear();
-				Title("Testing IndexMin ElementAt...");
+				Title("Testing IndexHeap ElementAt...");
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
@@ -3837,20 +3958,20 @@ work with {HEAVY} items.");
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
-				IndexMin<int> heap = new MaxIndexMin<int>();
+				IndexHeap<int> heap = new IndexMax<int>();
 				DoTheTest(heap, values, k);
 
-				heap = new MinIndexMin<int>();
+				heap = new IndexMin<int>();
 				DoTheTest(heap, values, k);
 
 				Student[] students = GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
-				IndexMin<double, Student> studentHeap = new MaxIndexMin<double, Student>(e => e.Grade);
+				IndexHeap<double, Student> studentHeap = new IndexMax<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students, k);
 
-				studentHeap = new MinIndexMin<double, Student>(e => e.Grade);
+				studentHeap = new IndexMin<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students, k);
 
 				Console.WriteLine();
@@ -3861,7 +3982,7 @@ work with {HEAVY} items.");
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array, int k)
+			static void DoTheTest<TNode, TKey, TValue>(IndexHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
 				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -3880,27 +4001,27 @@ work with {HEAVY} items.");
 			do
 			{
 				Console.Clear();
-				Title("Testing IndexMin DecreaseKey...");
+				Title("Testing IndexHeap DecreaseKey...");
 
 				int len = RNGRandomHelper.Next(1, 12);
 				int[] values = GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
-				IndexMin<int> heap = new MaxIndexMin<int>();
+				IndexHeap<int> heap = new IndexMax<int>();
 				DoTheValueTest(heap, values, int.MaxValue);
 
-				heap = new MinIndexMin<int>();
+				heap = new IndexMin<int>();
 				DoTheValueTest(heap, values, int.MinValue);
 
 				Student[] students = GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
-				IndexMin<double, Student> studentHeap = new MaxIndexMin<double, Student>(e => e.Grade);
+				IndexHeap<double, Student> studentHeap = new IndexMax<double, Student>(e => e.Grade);
 				DoTheKeyTest(studentHeap, students, int.MaxValue);
 
-				studentHeap = new MinIndexMin<double, Student>(e => e.Grade);
+				studentHeap = new IndexMin<double, Student>(e => e.Grade);
 				DoTheKeyTest(studentHeap, students, int.MinValue);
 
 				Console.WriteLine();
@@ -3911,7 +4032,7 @@ work with {HEAVY} items.");
 			}
 			while (more);
 
-			static void DoTheKeyTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue)
+			static void DoTheKeyTest<TNode, TKey, TValue>(IndexHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue)
 				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 			{
 				Queue<TKey> queue = new Queue<TKey>();
@@ -3934,7 +4055,7 @@ work with {HEAVY} items.");
 				Console.WriteLine();
 			}
 
-			static void DoTheValueTest<TNode, TValue>(IndexMin<TNode, TValue, TValue> heap, TValue[] array, TValue newKeyValue)
+			static void DoTheValueTest<TNode, TValue>(IndexHeap<TNode, TValue, TValue> heap, TValue[] array, TValue newKeyValue)
 				where TNode : KeyedBinaryNode<TNode, TValue, TValue>
 			{
 				Queue<TValue> queue = new Queue<TValue>();
@@ -3957,7 +4078,7 @@ work with {HEAVY} items.");
 				Console.WriteLine();
 			}
 
-			static void DoTheTest<TNode, TKey, TValue>(IndexMin<TNode, TKey, TValue> heap, TValue[] array, Queue<TKey> queue)
+			static void DoTheTest<TNode, TKey, TValue>(IndexHeap<TNode, TKey, TValue> heap, TValue[] array, Queue<TKey> queue)
 				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 			{
 				const int MAX = 10;

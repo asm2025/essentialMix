@@ -360,7 +360,7 @@ namespace Other.Microsoft.Collections
 				{
 					if (_index == 0 || _index == _dictionary._count + 1) throw new InvalidOperationException();
 					return _getEnumeratorRetType == DICT_ENTRY
-								? (object)new DictionaryEntry(_current.Key, _current.Value)
+								? new DictionaryEntry(_current.Key, _current.Value)
 								: new KeyValuePair<TKey, TValue>(_current.Key, _current.Value);
 				}
 			}
@@ -482,7 +482,7 @@ namespace Other.Microsoft.Collections
 				if (!IsCompatibleKey(key)) return null;
 				int i = FindEntry((TKey)key);
 				return i >= 0
-							? (object)_entries[i].Value
+							? _entries[i].Value
 							: null;
 			}
 			set => this[(TKey)key] = (TValue)value;

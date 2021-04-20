@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using essentialMix.Helpers;
 using essentialMix.Patterns.Sorting;
-using JetBrains.Annotations;
 
 namespace essentialMix.Web
 {
@@ -11,7 +8,7 @@ namespace essentialMix.Web
 	public class RequestParameters<T>
 		where T : struct, IComparable
 	{
-		private string _culture = RequestParameters.DefaultCulture;
+		private string _culture = SupportedCultures.DefaultCulture;
 
 		public RequestParameters() 
 		{
@@ -26,7 +23,7 @@ namespace essentialMix.Web
 			get => _culture;
 			set
 			{
-				if (!RequestParameters.IsSupportedCulture(value)) return;
+				if (!SupportedCultures.IsSupportedCulture(value)) return;
 				_culture = value;
 			}
 		}
@@ -34,23 +31,5 @@ namespace essentialMix.Web
 		public string Filter { get; set; }
 
 		public IList<SortField> Sort { get; set; }
-	}
-
-	public static class RequestParameters
-	{
-		private static readonly ISet<string> __supportedCultures = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-		public static string DefaultCulture => __supportedCultures.Count == 0 ? null : __supportedCultures.First();
-
-		public static bool AddCulture([NotNull] string name) { return CultureInfoHelper.IsCultureName(name) && __supportedCultures.Add(name); }
-
-		public static bool RemoveCulture([NotNull] string name) { return __supportedCultures.Remove(name); }
-
-		public static bool IsSupportedCulture(string name) { return CultureInfoHelper.IsSupported(name, __supportedCultures); }
-
-		public static void ResetCultures()
-		{
-			__supportedCultures.Clear();
-		}
 	}
 }

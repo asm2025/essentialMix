@@ -13,7 +13,7 @@ namespace essentialMix.Collections
 	public abstract class KeyedHeap<TNode, TKey, TValue> : IKeyedHeap<TNode, TKey, TValue>, IReadOnlyCollection<TValue>, ICollection
 		where TNode : class, IKeyedNode<TKey, TValue>
 	{
-		protected internal int _version;
+		internal int _version;
 
 		private object _syncRoot;
 
