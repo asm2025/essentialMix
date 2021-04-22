@@ -413,7 +413,7 @@ namespace essentialMix.Extensions
 					proxy.TrySetCanceled();
 					break;
 				case TaskStatus.RanToCompletion:
-					proxy.TrySetResult(!(source is Task<TResult> task)
+					proxy.TrySetResult(source is not Task<TResult> task
 						? default(TResult) // source is a Task
 						: task.Result); // source is a Task<TResult>
 					break;

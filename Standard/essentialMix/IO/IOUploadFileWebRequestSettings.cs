@@ -16,7 +16,7 @@ namespace essentialMix.IO
 		public IOUploadFileWebRequestSettings(IOSettings settings) 
 			: base(settings)
 		{
-			if (!(settings is IOUploadFileWebRequestSettings ioUploadFileWebRequestSettings)) return;
+			if (settings is not IOUploadFileWebRequestSettings ioUploadFileWebRequestSettings) return;
 			Method = ioUploadFileWebRequestSettings.Method;
 		}
 

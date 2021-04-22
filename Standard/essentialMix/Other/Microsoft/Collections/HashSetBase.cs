@@ -598,13 +598,13 @@ namespace Other.Microsoft.Collections
 		public bool IsSupersetOf(IEnumerable<T> other)
 		{
 			// try to fall out early based on counts
-			if (!(other is ICollection<T> otherAsCollection)) return ContainsAllElements(other);
+			if (other is not ICollection<T> otherAsCollection) return ContainsAllElements(other);
 			// if other is the empty set then this is a superset
 			if (otherAsCollection.Count == 0) return true;
 
 			// try to compare based on counts alone if other is a hashset with
 			// same equality comparer
-			if (!(other is ISet<T> otherAsSet) || !AreEqualityComparersEqual(this, otherAsSet)) return ContainsAllElements(other);
+			if (other is not ISet<T> otherAsSet || !AreEqualityComparersEqual(this, otherAsSet)) return ContainsAllElements(other);
 			return otherAsSet.Count <= Count && ContainsAllElements(other);
 		}
 

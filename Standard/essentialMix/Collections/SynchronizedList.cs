@@ -53,7 +53,7 @@ namespace essentialMix.Collections
 			get => this[index];
 			set
 			{
-				if (!(value is Lockable<T> lockable)) throw new InvalidCastException();
+				if (value is not Lockable<T> lockable) throw new InvalidCastException();
 				this[index] = lockable;
 			}
 		}
@@ -85,7 +85,7 @@ namespace essentialMix.Collections
 
 		public int Add(object value)
 		{
-			if (!(value is Lockable<T> lockable)) throw new InvalidCastException();
+			if (value is not Lockable<T> lockable) throw new InvalidCastException();
 			Add(lockable);
 			return Count - 1;
 		}
@@ -100,7 +100,7 @@ namespace essentialMix.Collections
 
 		public void Insert(int index, [NotNull] object value)
 		{
-			if (!(value is Lockable<T> lockable)) throw new InvalidCastException();
+			if (value is not Lockable<T> lockable) throw new InvalidCastException();
 			Insert(index, lockable);
 		}
 		public void Insert(int index, Lockable<T> item)
@@ -129,7 +129,7 @@ namespace essentialMix.Collections
 
 		public void Remove([NotNull] object value)
 		{
-			if (!(value is Lockable<T> lockable)) throw new InvalidCastException();
+			if (value is not Lockable<T> lockable) throw new InvalidCastException();
 			Remove(lockable);
 		}
 
@@ -203,7 +203,7 @@ namespace essentialMix.Collections
 
 		public int IndexOf([NotNull] object value)
 		{
-			if (!(value is Lockable<T> lockable)) throw new InvalidCastException();
+			if (value is not Lockable<T> lockable) throw new InvalidCastException();
 			return IndexOf(lockable);
 		}
 		public int IndexOf(Lockable<T> item)
@@ -216,7 +216,7 @@ namespace essentialMix.Collections
 
 		public bool Contains(object value)
 		{
-			if (!(value is Lockable<T> lockable)) throw new InvalidCastException();
+			if (value is not Lockable<T> lockable) throw new InvalidCastException();
 			return Contains(lockable);
 		}
 		public bool Contains(Lockable<T> item)

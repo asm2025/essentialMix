@@ -219,7 +219,7 @@ namespace essentialMix.Threading
 		{
 			ThrowIfDisposed();
 			base.CopyFrom(executableBase);
-			if (!(executableBase is ExecutableBase<T> executable)) return;
+			if (executableBase is not ExecutableBase<T> executable) return;
 			Settings = executable.Settings;
 		}
 

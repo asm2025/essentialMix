@@ -54,7 +54,7 @@ namespace essentialMix.Collections
 		// Equals method for the comparer itself. 
 		public override bool Equals(object obj)
 		{
-			if (!(obj is ObservableSortedSetEqualityComparer<T> comparer)) return false;
+			if (obj is not ObservableSortedSetEqualityComparer<T> comparer) return false;
 			return Comparer == comparer.Comparer;
 		}
 

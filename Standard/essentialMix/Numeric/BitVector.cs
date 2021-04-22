@@ -162,7 +162,7 @@ namespace essentialMix.Numeric
 
 		public override bool Equals(object obj)
 		{
-			if (!(obj is BitVector)) return false;
+			if (obj is not BitVector) return false;
 			return Equals((BitVector)obj);
 		}
 

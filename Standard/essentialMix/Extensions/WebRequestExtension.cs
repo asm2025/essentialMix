@@ -456,7 +456,7 @@ namespace essentialMix.Extensions
 
 			WebHeaderCollection headers = thisValue.Headers;
 
-			if (!(thisValue is HttpWebRequest httpWebRequest))
+			if (thisValue is not HttpWebRequest httpWebRequest)
 			{
 				foreach (string key in collection.Keys)
 					headers[key] = collection[key];
@@ -495,7 +495,7 @@ namespace essentialMix.Extensions
 		{
 			WebHeaderCollection headers = thisValue.Headers;
 
-			if (!(thisValue is HttpWebRequest httpWebRequest))
+			if (thisValue is not HttpWebRequest httpWebRequest)
 			{
 				foreach (KeyValuePair<string, TValue> pair in enumerable)
 				{
@@ -528,7 +528,7 @@ namespace essentialMix.Extensions
 
 			WebHeaderCollection headers = thisValue.Headers;
 
-			if (!(thisValue is HttpWebRequest httpWebRequest))
+			if (thisValue is not HttpWebRequest httpWebRequest)
 			{
 				foreach (DictionaryEntry entry in hashtable)
 				{

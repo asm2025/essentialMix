@@ -10,7 +10,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer
 		protected NamedProducerConsumerThreadQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			if (!(options is ProducerConsumerThreadNamedQueueOptions<T> namedQueueOptions)) return;
+			if (options is not ProducerConsumerThreadNamedQueueOptions<T> namedQueueOptions) return;
 			Name = namedQueueOptions.Name;
 		}
 

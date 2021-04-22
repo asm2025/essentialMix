@@ -62,7 +62,7 @@ namespace essentialMix.Media.ffmpeg.Commands
 					}
 				}
 
-				if (!(jObject["streams"] is JArray streamsObjects)) return;
+				if (jObject["streams"] is not JArray streamsObjects) return;
 
 				foreach (JObject jStream in streamsObjects.OfType<JObject>())
 				{

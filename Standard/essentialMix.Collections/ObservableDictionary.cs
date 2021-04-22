@@ -781,7 +781,7 @@ namespace essentialMix.Collections
 				}
 				default:
 				{
-					if (!(array is object[] objects)) throw new ArrayTypeMismatchException();
+					if (array is not object[] objects) throw new ArrayTypeMismatchException();
 
 					int count = _count;
 					Entry[] entries = _entries;

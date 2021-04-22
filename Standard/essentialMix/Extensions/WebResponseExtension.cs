@@ -20,7 +20,7 @@ namespace essentialMix.Extensions
 			Stream stream = thisValue.GetResponseStream();
 			if (stream == null) return null;
 
-			if (!(thisValue is HttpWebResponse httpWebResponse)) return stream;
+			if (thisValue is not HttpWebResponse httpWebResponse) return stream;
 
 			if (httpWebResponse.ContentEncoding.IndexOf("gzip", StringComparison.InvariantCultureIgnoreCase) > -1) stream = new GZipStream(stream, CompressionMode.Decompress);
 			else if (httpWebResponse.ContentEncoding.IndexOf("deflate", StringComparison.InvariantCultureIgnoreCase) > -1) stream = new DeflateStream(stream, CompressionMode.Decompress);

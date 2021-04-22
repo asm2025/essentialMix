@@ -62,7 +62,7 @@ namespace essentialMix.Extensions
 		{
 			if (string.IsNullOrEmpty(format) || value.IsNull()) return string.Empty;
 
-			if (!(value is IEnumerable enumerable)) return string.Format(format, value);
+			if (value is not IEnumerable enumerable) return string.Format(format, value);
 
 			StringBuilder sb = new StringBuilder();
 

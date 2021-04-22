@@ -15,7 +15,7 @@ namespace essentialMix.IO
 		public IOReadSettings([NotNull] IOSettings settings)
 			: base(settings)
 		{
-			if (!(settings is IIOOnRead iioOnRead)) throw new InvalidOperationException(nameof(settings) + " must implement IIOOnRead interface.");
+			if (settings is not IIOOnRead iioOnRead) throw new InvalidOperationException(nameof(settings) + " must implement IIOOnRead interface.");
 			OnRead = iioOnRead.OnRead;
 		}
 

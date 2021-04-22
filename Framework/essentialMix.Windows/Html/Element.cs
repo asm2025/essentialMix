@@ -39,7 +39,7 @@ namespace essentialMix.Windows.Html
 				return;
 			}
 
-			if (!(html is Label label)) throw new TypeAccessException();
+			if (html is not Label label) throw new TypeAccessException();
 			_size = new SizeF(label.Width, label.Height);
 		}
 

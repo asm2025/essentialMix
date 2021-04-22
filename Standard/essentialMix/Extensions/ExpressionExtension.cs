@@ -656,7 +656,7 @@ namespace essentialMix.Extensions
 		public static IReadOnlyCollection<Expression> GetArguments(this Expression thisValue)
 		{
 			thisValue = Simplify(thisValue);
-			if (thisValue == null || !(thisValue is IArgumentProvider provider)) return null;
+			if (thisValue == null || thisValue is not IArgumentProvider provider) return null;
 
 			// try property first
 			Type type = thisValue.GetType();

@@ -13,7 +13,7 @@ namespace essentialMix.Extensions
 	{
 		public static void AddOrUpdateClaim([NotNull] this IPrincipal thisValue, [NotNull] string key, string value)
 		{
-			if (!(thisValue.Identity is ClaimsIdentity identity)) return;
+			if (thisValue.Identity is not ClaimsIdentity identity) return;
 
 			HttpContext ctx = HttpContext.Current ?? throw new InvalidOperationException("No HTTP context is currently running.");
 			IAuthenticationManager authenticationManager = ctx.GetOwinContext()?.Authentication ?? throw new InvalidOperationException("Could not get an Owin context's authentication manager.");

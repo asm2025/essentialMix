@@ -46,11 +46,11 @@ namespace essentialMix.Comparers
 
 		public int Compare(object x, object y)
 		{
-			return !(x is char xc)
+			return x is not char xc
 						? y is char
 							? -1
 							: 0
-						: !(y is char yc)
+						: y is not char yc
 							? 1
 							: Compare(xc, yc);
 		}
@@ -59,7 +59,7 @@ namespace essentialMix.Comparers
 
 		public int GetHashCode(object obj)
 		{
-			return !(obj is char c)
+			return obj is not char c
 						? ReferenceComparer.Default.GetHashCode(obj)
 						: GetHashCode(c);
 		}

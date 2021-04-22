@@ -1016,14 +1016,15 @@ work with {HEAVY} items.");
 
 			do
 			{
+				bool canPrint = values.Length <= START * 2;
 				Console.Clear();
 				Title("Testing Deque...");
 				CompilationHint();
 				Console.WriteLine($"Array has {values.Length} items.");
 				Console.WriteLine("Test queue functionality...");
 
-				Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
-				bool print = Console.ReadKey(true).Key == ConsoleKey.Y;
+				if (canPrint) Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
+				bool print = canPrint && Console.ReadKey(true).Key == ConsoleKey.Y;
 				Console.WriteLine();
 
 				// Queue test
@@ -1042,8 +1043,8 @@ work with {HEAVY} items.");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
-				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, HEAVY);
+				if (!more || tests > 1) continue;
+				values = GetRandomIntegers(true, tests == 0 ? START * 2 : HEAVY);
 				tests++;
 			}
 			while (more);
@@ -1056,6 +1057,7 @@ work with {HEAVY} items.");
 				int count = deque.Count;
 				Debug.Assert(count == 0, "Values are not cleared correctly!");
 				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
+				if (print) Console.WriteLine(string.Join(", ", values));
 				clock.Restart();
 
 				foreach (int v in values)
@@ -1142,14 +1144,15 @@ work with {HEAVY} items.");
 
 			do
 			{
+				bool canPrint = values.Length <= START * 2;
 				Console.Clear();
 				Title("Testing Deque...");
 				CompilationHint();
 				Console.WriteLine($"Array has {values.Length} items.");
 				Console.WriteLine("Test queue functionality...");
 
-				Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
-				bool print = Console.ReadKey(true).Key == ConsoleKey.Y;
+				if (canPrint) Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
+				bool print = canPrint && Console.ReadKey(true).Key == ConsoleKey.Y;
 				Console.WriteLine();
 
 				// Queue test
@@ -1168,8 +1171,8 @@ work with {HEAVY} items.");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
-				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, HEAVY);
+				if (!more || tests > 1) continue;
+				values = GetRandomIntegers(true,  tests == 0 ? START * 2 : HEAVY);
 				tests++;
 			}
 			while (more);
@@ -1182,6 +1185,7 @@ work with {HEAVY} items.");
 				int count = deque.Count;
 				Debug.Assert(count == 0, "Values are not cleared correctly!");
 				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
+				if (print) Console.WriteLine(string.Join(", ", values));
 				clock.Restart();
 
 				foreach (int v in values)
@@ -1263,50 +1267,48 @@ work with {HEAVY} items.");
 			int tests = 0;
 			Stopwatch clock = new Stopwatch();
 			int[] values = GetRandomIntegers(true, START);
-			CircularBuffer<int> deque = new CircularBuffer<int>(values.Length);
+			CircularBuffer<int> circularBuffer = new CircularBuffer<int>(values.Length);
 
 			do
 			{
+				bool canPrint = values.Length <= START * 2;
 				Console.Clear();
 				Title("Testing CircularBuffer...");
 				CompilationHint();
 				Console.WriteLine($"Array has {values.Length} items.");
 				Console.WriteLine("Test queue functionality...");
 
-				Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
-				bool print = Console.ReadKey(true).Key == ConsoleKey.Y;
+				if (canPrint) Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
+				bool print = canPrint && Console.ReadKey(true).Key == ConsoleKey.Y;
 				Console.WriteLine();
 
-				// Queue test
-				Title("Testing Deque as a Queue...");
-				DoTheTest(deque, values, deque.Enqueue, deque.Dequeue, print, clock);
-				Title("End testing Deque as a Queue...");
+				Title("Testing CircularBuffer as a Queue...");
+				DoTheTest(circularBuffer, values, circularBuffer.Add, circularBuffer.Dequeue, print, clock);
 				ConsoleHelper.Pause();
-
-				// Stack test
-				Title("Testing Deque as a Stack...");
-				DoTheTest(deque, values, deque.Push, deque.Pop, print, clock);
-				Title("End testing Deque as a Stack...");
-
 				Console.WriteLine();
+
+				Title("Testing CircularBuffer as a Stack...");
+				DoTheTest(circularBuffer, values, circularBuffer.Add, circularBuffer.Pop, print, clock);
+				
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
-				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, HEAVY);
+				if (!more || tests > 1) continue;
+				values = GetRandomIntegers(true,  tests == 0 ? START * 2 : HEAVY);
 				tests++;
 			}
 			while (more);
 
 			clock.Stop();
 
-			static void DoTheTest(CircularBuffer<int> deque, int[] values, Action<int> add, Func<int> remove, bool print, Stopwatch clock)
+			static void DoTheTest(CircularBuffer<int> circularBuffer, int[] values, Action<int> add, Func<int> remove, bool print, Stopwatch clock)
 			{
-				deque.Clear();
-				int count = deque.Count;
+				circularBuffer.Clear();
+				int count = circularBuffer.Count;
 				Debug.Assert(count == 0, "Values are not cleared correctly!");
 				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
+				if (print) Console.WriteLine(string.Join(", ", values));
 				clock.Restart();
 
 				foreach (int v in values)
@@ -1316,11 +1318,13 @@ work with {HEAVY} items.");
 				}
 
 				Console.WriteLine($"Added {count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+				if (print) Console.WriteLine(string.Join(", ", circularBuffer));
+
 				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				int missed = 0;
-				int offset = values.Length - deque.Capacity;
-				count = deque.Count / 4;
+				int offset = values.Length - circularBuffer.Capacity;
+				count = circularBuffer.Count / 4;
 				clock.Restart();
 
 				// will just test for items not more than MAX_SEARCH
@@ -1328,7 +1332,7 @@ work with {HEAVY} items.");
 				{
 					int v = values[offset + i];
 
-					if (deque.Contains(v))
+					if (circularBuffer.Contains(v))
 					{
 						found++;
 						continue;
@@ -1344,25 +1348,30 @@ work with {HEAVY} items.");
 
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
+				Console.WriteLine(Bright.Yellow("Test copy..."));
+				int[] array = new int[circularBuffer.Capacity];
+				circularBuffer.CopyTo(array, 0);
+				if (print) Console.WriteLine(string.Join(", ", array));
+
 				Console.WriteLine(Bright.Red("Test removing..."));
 		
 				int removed = 0;
-				count = deque.Count;
+				count = circularBuffer.Count;
 				clock.Restart();
 
 				if (print)
 				{
-					while (deque.Count > 0 && count > 0)
+					while (circularBuffer.Count > 0 && count > 0)
 					{
 						Console.Write(remove());
 						count--;
 						removed++;
-						if (deque.Count > 0) Console.Write(", ");
+						if (circularBuffer.Count > 0) Console.Write(", ");
 					}
 				}
 				else
 				{
-					while (deque.Count > 0 && count > 0)
+					while (circularBuffer.Count > 0 && count > 0)
 					{
 						remove();
 						count--;
@@ -1370,10 +1379,10 @@ work with {HEAVY} items.");
 					}
 				}
 
-				Debug.Assert(count == 0 && deque.Count == 0, $"Values are not cleared correctly! {count} != {deque.Count}.");
+				Debug.Assert(count == 0 && circularBuffer.Count == 0, $"Values are not cleared correctly! {count} != {circularBuffer.Count}.");
 				Console.WriteLine();
 				Console.WriteLine();
-				Console.WriteLine($"Removed {removed} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Removed {removed} of {circularBuffer.Capacity} items in {clock.ElapsedMilliseconds} ms.");
 			}
 		}
 

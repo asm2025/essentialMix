@@ -71,7 +71,7 @@ namespace essentialMix.Statistics
 		public override bool Equals(object obj) { return Equals(obj as ChainState<T>); }
 
 		/// <inheritdoc />
-		public bool Equals(ChainState<T> other) { return !(other is null) && other.Count == Count && this.SequenceEqual(other); }
+		public bool Equals(ChainState<T> other) { return other is not null && other.Count == Count && this.SequenceEqual(other); }
 
 		public static bool operator ==(ChainState<T> a, ChainState<T> b)
 		{

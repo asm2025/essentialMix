@@ -19,8 +19,8 @@ namespace essentialMix.Extensions
 
 			TResult computedValue = (TResult)exp.Method.Invoke(exp.Instance, exp.Arguments);
 			if (computedValue != null
-				&& !(computedValue is IConvertible)
-				&& !(computedValue is ICacheable))
+				&& computedValue is not IConvertible
+				&& computedValue is not ICacheable)
 				throw new NotSafeToCacheException(computedValue);
 			ICacheEntry entry = thisValue.CreateEntry(exp.Key);
 			entry.Value = computedValue;
@@ -34,8 +34,8 @@ namespace essentialMix.Extensions
 
 			TResult computedValue = await ((Task<TResult>)exp.Method.Invoke(exp.Instance, exp.Arguments)).ConfigureAwait(false);
 			if (computedValue != null
-				&& !(computedValue is IConvertible)
-				&& !(computedValue is ICacheable))
+				&& computedValue is not IConvertible
+				&& computedValue is not ICacheable)
 				throw new NotSafeToCacheException(computedValue);
 			ICacheEntry entry = thisValue.CreateEntry(exp.Key);
 			entry.Value = computedValue;
@@ -44,7 +44,7 @@ namespace essentialMix.Extensions
 
 		private static (string Key, MethodInfo Method, object Instance, object[] Arguments) ParseExpression([NotNull] LambdaExpression expression)
 		{
-			if (!(expression.Body is MethodCallExpression methodCall))
+			if (expression.Body is not MethodCallExpression methodCall)
 				throw new ArgumentNotMethodExpressionException(nameof(expression));
 
 			MethodInfo method = methodCall.Method;

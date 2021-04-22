@@ -50,7 +50,7 @@ namespace essentialMix.Collections.Specialized
 
 		private void OnItemPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			if (!(sender is IPAddressEntry item)) return;
+			if (sender is not IPAddressEntry item) return;
 
 			int index = IndexOf(item);
 			OnPropertyChanged($"Item[{index}]");

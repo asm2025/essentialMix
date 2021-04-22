@@ -18,7 +18,7 @@ namespace essentialMix.Extensions
 			StringBuilder sb = new StringBuilder();
 			ExceptionHelper.CollectMessages(thisValue, sb, exception =>
 			{
-				if (!(exception is DbEntityValidationException ve)) return;
+				if (exception is not DbEntityValidationException ve) return;
 
 				foreach (ValidationResult result in ve.EntityValidationErrors)
 				{

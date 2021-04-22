@@ -23,7 +23,7 @@ namespace essentialMix.Web.Drawing
 		protected override object CustomConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
 			if (value == null) return null;
-			if (!(value is string str)) return new PxUnit();
+			if (value is not string str) return new PxUnit();
 
 			string s = str.Trim();
 			return s.Length == 0 ? new PxUnit() : PxUnit.Parse(s, culture);

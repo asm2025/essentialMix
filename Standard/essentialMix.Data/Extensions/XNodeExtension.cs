@@ -37,7 +37,7 @@ namespace essentialMix.Extensions
 				for (XNode n = thisValue; n != null; n = n.PreviousNode)
 				{
 					if (matchT && n.NodeType != thisValue.NodeType) continue;
-					if (!(n is XElement element) || !element.Name.LocalName.IsSame(thisName)) continue;
+					if (n is not XElement element || !element.Name.LocalName.IsSame(thisName)) continue;
 					++index;
 				}
 			}

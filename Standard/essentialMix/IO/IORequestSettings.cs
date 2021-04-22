@@ -19,7 +19,7 @@ namespace essentialMix.IO
 		public IORequestSettings(IOSettings settings) 
 			: base(settings)
 		{
-			if (!(settings is IORequestSettings iioRequestSettings)) return;
+			if (settings is not IORequestSettings iioRequestSettings) return;
 			Timeout = iioRequestSettings.Timeout;
 			Credentials = iioRequestSettings.Credentials;
 		}

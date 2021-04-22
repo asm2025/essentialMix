@@ -21,7 +21,7 @@ namespace essentialMix.Patterns.DateTime
 		/// <inheritdoc />
 		int IComparable.CompareTo(object obj)
 		{
-			return !(obj is DateTimeRange r)
+			return obj is not DateTimeRange r
 						? -1
 						: CompareTo(r);
 		}

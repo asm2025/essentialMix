@@ -11,7 +11,7 @@ namespace essentialMix.IO
 		public IOHttpDownloadFileWebRequestSettings(IOSettings settings) 
 			: base(settings)
 		{
-			if (!(settings is IOHttpDownloadFileWebRequestSettings ioHttpDownloadFileWebRequestSettings)) return;
+			if (settings is not IOHttpDownloadFileWebRequestSettings ioHttpDownloadFileWebRequestSettings) return;
 			Overwrite = ioHttpDownloadFileWebRequestSettings.Overwrite;
 		}
 

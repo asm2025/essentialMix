@@ -25,7 +25,7 @@ namespace essentialMix.Extensions
 			JObject obj = thisValue;
 			string nam = name;
 			if (!WalkPath(ref obj, ref nam)) return defaultValue;
-			return !(obj.GetValue(nam, StringComparison.OrdinalIgnoreCase) is JValue value) 
+			return obj.GetValue(nam, StringComparison.OrdinalIgnoreCase) is not JValue value 
 						? defaultValue
 						: value.Value.To(defaultValue, beforeParse, whenFailed);
 		}
@@ -40,7 +40,7 @@ namespace essentialMix.Extensions
 			JObject obj = thisValue;
 			string nam = name;
 			if (!WalkPath(ref obj, ref nam)) return defaultValue;
-			return !(obj.GetValue(nam, StringComparison.OrdinalIgnoreCase) is JValue value) 
+			return obj.GetValue(nam, StringComparison.OrdinalIgnoreCase) is not JValue value 
 						? defaultValue
 						: value.To(defaultValue, beforeParse, whenFailed);
 		}
@@ -71,7 +71,7 @@ namespace essentialMix.Extensions
 			}
 
 			if (!thisValue.TryGetValue(name, StringComparison.OrdinalIgnoreCase, out JToken token)
-				|| !(token is JValue jValue))
+				|| token is not JValue jValue)
 			{
 				value = defaultValue;
 				return false;
@@ -95,7 +95,7 @@ namespace essentialMix.Extensions
 			}
 
 			if (!thisValue.TryGetValue(name, StringComparison.OrdinalIgnoreCase, out JToken token)
-				|| !(token is JValue jValue))
+				|| token is not JValue jValue)
 			{
 				value = defaultValue;
 				return false;
@@ -115,7 +115,7 @@ namespace essentialMix.Extensions
 			while (jObject != null && queue.Count > 1)
 			{
 				name = queue.Dequeue();
-				if (!(jObject.GetValue(name, StringComparison.OrdinalIgnoreCase) is JObject jObj) || !jObj.HasValues) return false;
+				if (jObject.GetValue(name, StringComparison.OrdinalIgnoreCase) is not JObject jObj || !jObj.HasValues) return false;
 				jObject = jObj;
 			}
 
@@ -136,7 +136,7 @@ namespace essentialMix.Extensions
 				name = queue.Dequeue();
 
 				if (!jObject.TryGetValue(name, StringComparison.OrdinalIgnoreCase, out JToken token) 
-					|| !(token is JObject jObj)
+					|| token is not JObject jObj
 					|| !jObj.HasValues) return false;
 
 				jObject = jObj;

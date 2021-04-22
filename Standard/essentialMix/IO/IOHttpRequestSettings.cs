@@ -20,7 +20,7 @@ namespace essentialMix.IO
 		public IOHttpRequestSettings(IOSettings settings) 
 			: base(settings)
 		{
-			if (!(settings is IOHttpRequestSettings ioHttpRequestSettings)) return;
+			if (settings is not IOHttpRequestSettings ioHttpRequestSettings) return;
 			Method = ioHttpRequestSettings.Method;
 			AllowAutoRedirect = ioHttpRequestSettings.AllowAutoRedirect;
 			AllowWriteStreamBuffering = ioHttpRequestSettings.AllowWriteStreamBuffering;

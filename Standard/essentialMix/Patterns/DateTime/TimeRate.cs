@@ -27,7 +27,7 @@ namespace essentialMix.Patterns.DateTime
 		/// <inheritdoc />
 		public int CompareTo(object obj)
 		{
-			return !(obj is TimeRate r)
+			return obj is not TimeRate r
 						? -1
 						: CompareTo(r);
 		}

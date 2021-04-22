@@ -28,7 +28,7 @@ namespace essentialMix.Extensions
 		public static T SyncGet<T>([NotNull] this IList<T> thisValue, int index)
 		{
 			if (!index.InRangeRx(0, thisValue.Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			if (!(thisValue is ICollection collection)) return thisValue[index];
+			if (thisValue is not ICollection collection) return thisValue[index];
 
 			lock (collection.SyncRoot)
 			{

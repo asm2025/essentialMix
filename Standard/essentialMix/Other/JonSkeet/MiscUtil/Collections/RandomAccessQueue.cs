@@ -261,7 +261,7 @@ namespace Other.JonSkeet.MiscUtil.Collections
 			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
 			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, Count);
-			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
+			if (array is not object[] objects) throw new ArgumentException("Invalid array type", nameof(array));
 			CopyTo(objects, arrayIndex);
 		}
 
@@ -294,7 +294,7 @@ namespace Other.JonSkeet.MiscUtil.Collections
 				return 0;
 			}
 
-			if (!(obj is IComparable comp)) throw new ArgumentException("obj does not implement IComparable");
+			if (obj is not IComparable comp) throw new ArgumentException("obj does not implement IComparable");
 
 			if (Count == 0) return ~0;
 
@@ -792,7 +792,7 @@ namespace Other.JonSkeet.MiscUtil.Collections
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
 			Type sourceType = typeof(T);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
-			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
+			if (array is not object[] objects) throw new ArgumentException("Invalid array type", nameof(array));
 
 			try
 			{
@@ -836,7 +836,7 @@ namespace Other.JonSkeet.MiscUtil.Collections
 				return 0;
 			}
 
-			if (!(obj is IComparable comp)) throw new ArgumentException("obj does not implement IComparable");
+			if (obj is not IComparable comp) throw new ArgumentException("obj does not implement IComparable");
 
 			if (Count == 0) return ~0;
 

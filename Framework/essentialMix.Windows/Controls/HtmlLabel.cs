@@ -320,7 +320,7 @@ namespace essentialMix.Windows.Controls
 						}
 						else
 						{
-							if (!(values[currElement].Html is Label label)) continue;
+							if (values[currElement].Html is not Label label) continue;
 							RectangleF rect = new RectangleF(left, top + line.Height - values[currElement].Size.Height,
 								values[currElement].Size.Width, values[currElement].Size.Height);
 							Rectangle irect = new Rectangle((int)left, (int)(top + line.Height - values[currElement].Size.Height),

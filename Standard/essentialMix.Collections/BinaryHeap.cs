@@ -1393,7 +1393,7 @@ namespace essentialMix.Collections
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
 			Type sourceType = typeof(TValue);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
-			if (!(array is object[] objects)) throw new ArgumentException("Invalid array type", nameof(array));
+			if (array is not object[] objects) throw new ArgumentException("Invalid array type", nameof(array));
 			Iterate(e => objects[index++] = Items[e].Value);
 		}
 

@@ -13,7 +13,7 @@ namespace essentialMix.IO
 		public IOFTPRequestSettings(IOSettings settings) 
 			: base(settings)
 		{
-			if (!(settings is IOFTPRequestSettings ioftpRequestSettings)) return;
+			if (settings is not IOFTPRequestSettings ioftpRequestSettings) return;
 			Method = ioftpRequestSettings.Method;
 		}
 

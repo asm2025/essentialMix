@@ -1555,7 +1555,7 @@ namespace essentialMix.Extensions
 				case Disposable disposableBase:
 					return disposableBase.GetPropertyValue("IsDisposedOrDisposing", out bool propDisposed, Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE) && propDisposed;
 				default:
-					if (!(thisValue is IDisposable disposable))
+					if (thisValue is not IDisposable disposable)
 						return false;
 					fieldName = fieldName?.Trim();
 
