@@ -187,7 +187,7 @@ namespace essentialMix.Threading.Other.JonSkeet.MiscUtil.Threading
 
 		private int _maxThreads = DEFAULT_MAX_THREADS;
 
-		private volatile int _workingThreads;
+		private int _workingThreads;
 
 		private ThreadPriority _workerThreadPriority = ThreadPriority.Normal;
 

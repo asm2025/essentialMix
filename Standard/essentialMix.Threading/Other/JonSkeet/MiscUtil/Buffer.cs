@@ -8,8 +8,8 @@ namespace essentialMix.Threading.Other.JonSkeet.MiscUtil
 	/// </summary>
 	public class Buffer : Disposable, IBuffer, IDisposable
     {
-		private volatile bool _available;
 		private readonly bool _clearOnDispose;
+		private bool _available;
 
         internal Buffer(int size, bool clearOnDispose)
         {

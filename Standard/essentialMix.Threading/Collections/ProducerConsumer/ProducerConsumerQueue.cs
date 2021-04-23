@@ -17,7 +17,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer
 	{
 		private CancellationTokenSource _cts;
 
-		private volatile int _completeMarked;
+		private int _completeMarked;
 
 		protected ProducerConsumerQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 		{

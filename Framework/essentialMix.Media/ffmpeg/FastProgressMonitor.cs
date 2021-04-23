@@ -15,8 +15,8 @@ namespace essentialMix.Media.ffmpeg
 		private readonly double _frames;
 		private readonly Queue<string> _messages;
 		
-		private volatile bool _startCalled;
-		private volatile bool _done;
+		private bool _startCalled;
+		private bool _done;
 
 		public FastProgressMonitor(long frames, [NotNull] Action onStart, [NotNull] Action<int> onProgress, [NotNull] Action onCompleted)
 		{
