@@ -439,13 +439,13 @@ namespace essentialMix.Collections
 			return RemoveAtInternal(Count - 1);
 		}
 
-		public T PeekQueue()
+		public T PeekHead()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
 			return Items[0];
 		}
 
-		public T PeekStack()
+		public T PeekTail()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
 			return Items[Count - 1];

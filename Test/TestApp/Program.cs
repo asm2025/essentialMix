@@ -1320,6 +1320,11 @@ work with {HEAVY} items.");
 				Console.WriteLine($"Added {count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 				if (print) Console.WriteLine(string.Join(", ", circularBuffer));
 
+				int insertItem = RandomHelper.Next(10000, 10100);
+				Console.WriteLine($"Inserting {insertItem}.");
+				circularBuffer.Insert(insertItem);
+				if (print) Console.WriteLine(string.Join(", ", circularBuffer));
+
 				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				int missed = 0;

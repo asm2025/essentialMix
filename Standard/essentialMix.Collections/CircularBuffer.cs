@@ -287,32 +287,57 @@ namespace essentialMix.Collections
 		{
 			if (_tail > -1)
 			{
-				if (_tail < _head)
+				if (_tail >= _head)
 				{
-					T last = Items[Items.Length - 1];
+					if (_tail < Items.Length - 1)
+					{
+						_tail++;
 
-					for (int i = _head; i < Items.Length - 1; i++) 
-						Items[i + 1] = Items[i];
+						for (int i = _tail; i > _head; i--) 
+							Items[i] = Items[i - 1];
+					}
+					else
+					{
+						T last = Items[_tail];
 
-					Items[0] = last;
+						for (int i = _tail; i > _head; i--) 
+							Items[i] = Items[i - 1];
 
-					for (int i = 1; i < _tail - 1; i++) 
-						Items[i + 1] = Items[i];
+						_tail = 0;
+						if (_tail == _head) _head = (_head + 1) % Items.Length;
+						Items[_tail] = last;
+					}
 				}
 				else
 				{
-					for (int i = _head; i < _tail - 1; i++) 
-						Items[i + 1] = Items[i];
+					T last = Items[Items.Length - 1];
+
+					if (_head < Items.Length - 1)
+					{
+						for (int i = Items.Length - 1; i > _head; i--) 
+							Items[i] = Items[i - 1];
+					}
+					else
+					{
+						_head = 0;
+					}
+
+					_tail = (_tail + 1) % Items.Length;
+
+					for (int i = _tail; i > 0; i--) 
+						Items[i] = Items[i - 1];
+
+					Items[0] = last;
+					if (_tail == _head) _head = (_head + 1) % Items.Length;
 				}
 			}
 			else
 			{
-				_tail = (_tail + 1) % Items.Length;
+				_tail = 0;
 			}
 
-			Items[_tail] = item;
+			Items[_head] = item;
 			Count = (Count + 1).NotAbove(Items.Length);
-			if (Count == Items.Length) _head = (_tail + 1) % Items.Length;
 			_version++;
 		}
 
@@ -338,13 +363,13 @@ namespace essentialMix.Collections
 			return RemoveAtInternal(_tail);
 		}
 
-		public T Head()
+		public T PeekHead()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
 			return Items[_head];
 		}
 
-		public T Tail()
+		public T PeekTail()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
 			return Items[_tail];
@@ -495,8 +520,8 @@ namespace essentialMix.Collections
 					}
 
 					// case c: index > tail and index >= head
-					for (int i = _head; i < index; i++) 
-						Items[i + 1] = Items[i];
+					for (int i = index; i > _head; i--) 
+						Items[i] = Items[i - 1];
 
 					_head = (_head + 1) % Items.Length;
 				}
