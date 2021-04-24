@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 {
-	public sealed class ThresholdTaskGroupQueue<T> : ProducerConsumerThresholdQueue<T>
+	public sealed class ThresholdTaskGroupQueue<T> : ProducerConsumerThresholdQueue<T>, IProducerQueue<T>
 	{
 		private readonly object _lock = new object();
 		private readonly Queue<T> _queue = new Queue<T>();
@@ -57,6 +57,58 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 				_queue.Enqueue(item);
 				Monitor.Pulse(_lock);
+			}
+		}
+
+		/// <inheritdoc />
+		public bool TryDequeue(out T item)
+		{
+			ThrowIfDisposed();
+
+			if (_queue.Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+			
+			lock(_lock)
+			{
+				ThrowIfDisposed();
+
+				if (_queue.Count == 0)
+				{
+					item = default(T);
+					return false;
+				}
+
+				item = _queue.Dequeue();
+				return true;
+			}
+		}
+
+		/// <inheritdoc />
+		public bool TryPeek(out T item)
+		{
+			ThrowIfDisposed();
+
+			if (_queue.Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+			
+			lock(_lock)
+			{
+				ThrowIfDisposed();
+
+				if (_queue.Count == 0)
+				{
+					item = default(T);
+					return false;
+				}
+
+				item = _queue.Peek();
+				return true;
 			}
 		}
 

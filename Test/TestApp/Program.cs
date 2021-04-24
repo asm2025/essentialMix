@@ -29,6 +29,7 @@ using essentialMix.Extensions;
 using essentialMix.Helpers;
 using Other.Microsoft.Collections;
 using essentialMix.Threading.Collections.ProducerConsumer;
+using essentialMix.Threading.Collections.ProducerConsumer.Queue;
 using essentialMix.Threading.Helpers;
 using Newtonsoft.Json;
 using TimeoutException = System.TimeoutException;
@@ -459,13 +460,16 @@ work with {HEAVY} items.");
 														: null)
 				{
 					CancellationToken token = cts?.Token ?? CancellationToken.None;
-					ProducerConsumerQueueOptions<int> options = mode == ThreadQueueMode.ThresholdTaskGroup
-																	? new ProducerConsumerThresholdQueueOptions<int>(threads, exec)
-																	{
-																		// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
-																		Threshold = TimeSpan.FromSeconds(1)
-																	}
-																	: new ProducerConsumerQueueOptions<int>(threads, exec);
+					ProducerConsumerQueueOptions<int> options = mode switch
+					{
+						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<int>(threads, exec)
+						{
+							// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
+							Threshold = TimeSpan.FromSeconds(1)
+						},
+						ThreadQueueMode.CircularBuffer => new CircularBufferQueueOptions<int>(threads, values.Length / 2, exec),
+						_ => new ProducerConsumerQueueOptions<int>(threads, exec)
+					};
 			
 					// Create a generic queue producer
 					using (IProducerConsumer<int> queue = ProducerConsumerQueue.Create(mode, options, token))

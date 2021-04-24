@@ -5,6 +5,8 @@
 		Task,
 		DataFlow,
 		WaitAndPulse,
+		CircularBuffer,
+		Deque,
 		Event,
 		BlockingCollection,
 		TaskGroup,

@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 {
-	public sealed class TaskQueue<T> : ProducerConsumerQueue<T>
+	public sealed class TaskQueue<T> : ProducerConsumerQueue<T>, IProducerQueue<T>
 	{
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 		private readonly Task[] _workers;
@@ -61,6 +61,20 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			}
 
 			_queue.Enqueue(item);
+		}
+
+		/// <inheritdoc />
+		public bool TryDequeue(out T item)
+		{
+			ThrowIfDisposed();
+			return _queue.TryDequeue(out item);
+		}
+
+		/// <inheritdoc />
+		public bool TryPeek(out T item)
+		{
+			ThrowIfDisposed();
+			return _queue.TryPeek(out item);
 		}
 
 		protected override void CompleteInternal()

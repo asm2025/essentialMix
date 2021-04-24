@@ -1,25 +1,27 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
+using essentialMix.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 {
-	public sealed class WaitAndPulseQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
+	public sealed class WaitAndPulseCircularBuffer<T> : ProducerConsumerThreadQueue<T>, IProducerDeque<T>
 	{
 		private readonly object _lock = new object();
-		private readonly Queue<T> _queue = new Queue<T>();
+		private readonly CircularBuffer<T> _circularBuffer;
 		private readonly Thread[] _workers;
 
 		private AutoResetEvent _workEvent;
 		private CountdownEvent _countdown;
 		private bool _workStarted;
 
-		public WaitAndPulseQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+		public WaitAndPulseCircularBuffer([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
+			if (options is not CircularBufferQueueOptions<T> circularBufferOptions) throw new ArgumentException("Capacity is not specified.");
+			_circularBuffer = new CircularBuffer<T>(circularBufferOptions.Capacity);
 			_workEvent = new AutoResetEvent(false);
 			_countdown = new CountdownEvent(Threads + 1);
 			_workers = new Thread[Threads];
@@ -34,41 +36,18 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _countdown);
 		}
 
-		public override int Count => _queue.Count;
+		public override int Count => _circularBuffer.Count;
 
-		public override bool IsBusy => _countdown != null && _countdown.CurrentCount > 1;
+		public override bool IsBusy => _countdown is { CurrentCount: > 1 };
 
 		protected override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested) return;
-
-			if (!_workStarted)
-			{
-				lock(_workers)
-				{
-					if (!_workStarted)
-					{
-						_workStarted = true;
-
-						for (int i = 0; i < _workers.Length; i++)
-						{
-							(_workers[i] = new Thread(Consume)
-									{
-										IsBackground = IsBackground,
-										Priority = Priority
-									}).Start();
-						}
-					}
-				}
-
-				if (!_workEvent.WaitOne(TimeSpanHelper.HALF_SCHEDULE)) throw new TimeoutException();
-				if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
-				OnWorkStarted(EventArgs.Empty);
-			}
+			StartWorkers();
 
 			lock(_lock)
 			{
-				_queue.Enqueue(item);
+				_circularBuffer.Add(item);
 				Monitor.Pulse(_lock);
 			}
 		}
@@ -78,49 +57,117 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 		{
 			ThrowIfDisposed();
 
-			if (_queue.Count == 0)
+			if (_circularBuffer.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
-			
+
 			lock(_lock)
 			{
 				ThrowIfDisposed();
 
-				if (_queue.Count == 0)
+				if (_circularBuffer.Count == 0)
 				{
 					item = default(T);
 					return false;
 				}
 
-				item = _queue.Dequeue();
+				item = _circularBuffer.Dequeue();
+				return true;
+			}
+		}
+
+		public void Push(T item)
+		{
+			ThrowIfDisposed();
+			if (CompleteMarked) throw new InvalidOperationException("Completion marked.");
+			if (Token.IsCancellationRequested) return;
+			StartWorkers();
+
+			lock(_lock)
+			{
+				_circularBuffer.Insert(item);
+				Monitor.Pulse(_lock);
+			}
+
+			if (SleepAfterEnqueue > 0) Thread.Sleep(SleepAfterEnqueue);
+		}
+
+		/// <inheritdoc />
+		public bool TryPop(out T item)
+		{
+			ThrowIfDisposed();
+
+			if (_circularBuffer.Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+
+			lock(_lock)
+			{
+				ThrowIfDisposed();
+
+				if (_circularBuffer.Count == 0)
+				{
+					item = default(T);
+					return false;
+				}
+
+				item = _circularBuffer.Pop();
 				return true;
 			}
 		}
 
 		/// <inheritdoc />
-		public bool TryPeek(out T item)
+		public bool TryPeekHead(out T item)
 		{
 			ThrowIfDisposed();
 
-			if (_queue.Count == 0)
+			if (_circularBuffer.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
-			
+
 			lock(_lock)
 			{
 				ThrowIfDisposed();
 
-				if (_queue.Count == 0)
+				if (_circularBuffer.Count == 0)
 				{
 					item = default(T);
 					return false;
 				}
 
-				item = _queue.Peek();
+				item = _circularBuffer.PeekHead();
+				return true;
+			}
+		}
+
+		/// <inheritdoc />
+		public bool TryPeekTail(out T item)
+		{
+			ThrowIfDisposed();
+
+			if (_circularBuffer.Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+
+			lock(_lock)
+			{
+				ThrowIfDisposed();
+
+				if (_circularBuffer.Count == 0)
+				{
+					item = default(T);
+					return false;
+				}
+
+				item = _circularBuffer.PeekTail();
 				return true;
 			}
 		}
@@ -137,7 +184,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 		{
 			lock(_lock)
 			{
-				_queue.Clear();
+				_circularBuffer.Clear();
 				Monitor.PulseAll(_lock);
 			}
 		}
@@ -178,6 +225,30 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				ObjectHelper.Dispose(ref _workers[i]);
 		}
 
+		private void StartWorkers()
+		{
+			if (_workStarted) return;
+
+			lock(_workers)
+			{
+				if (_workStarted) return;
+				_workStarted = true;
+
+				for (int i = 0; i < _workers.Length; i++)
+				{
+					(_workers[i] = new Thread(Consume)
+							{
+								IsBackground = IsBackground,
+								Priority = Priority
+							}).Start();
+				}
+			}
+
+			if (!_workEvent.WaitOne(TimeSpanHelper.HALF_SCHEDULE)) throw new TimeoutException();
+			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+			OnWorkStarted(EventArgs.Empty);
+		}
+
 		private void Consume()
 		{
 			_workEvent.Set();
@@ -189,7 +260,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.Count == 0)
+					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _circularBuffer.Count == 0)
 					{
 						lock (_lock)
 							Monitor.Wait(_lock, TimeSpanHelper.FAST_SCHEDULE);
@@ -197,15 +268,15 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 					if (IsDisposed || Token.IsCancellationRequested) return;
 					if (CompleteMarked) break;
-					if (_queue.Count == 0) continue;
-					item = _queue.Dequeue();
+					if (_circularBuffer.Count == 0) continue;
+					item = _circularBuffer.Dequeue();
 					Run(item);
 				}
 
 				while (!IsDisposed && !Token.IsCancellationRequested)
 				{
-					if (_queue.Count == 0) break;
-					item = _queue.Dequeue();
+					if (_circularBuffer.Count == 0) break;
+					item = _circularBuffer.Dequeue();
 					Run(item);
 				}
 			}

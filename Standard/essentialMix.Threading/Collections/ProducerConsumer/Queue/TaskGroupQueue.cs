@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 {
-	public sealed class TaskGroupQueue<T> : ProducerConsumerThreadQueue<T>
+	public sealed class TaskGroupQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 		private AutoResetEvent _workDoneEvent;
@@ -41,6 +41,20 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 		{
 			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 			_queue.Enqueue(item);
+		}
+
+		/// <inheritdoc />
+		public bool TryDequeue(out T item)
+		{
+			ThrowIfDisposed();
+			return _queue.TryDequeue(out item);
+		}
+
+		/// <inheritdoc />
+		public bool TryPeek(out T item)
+		{
+			ThrowIfDisposed();
+			return _queue.TryPeek(out item);
 		}
 
 		protected override void CompleteInternal()

@@ -74,6 +74,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\essentialMix.Collections\essentialMix.Collections.csproj" />
 		<ProjectReference Include="..\essentialMix.Exceptions\essentialMix.Exceptions.csproj" />
 		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
 	</ItemGroup>

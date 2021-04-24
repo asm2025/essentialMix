@@ -17,6 +17,9 @@ namespace essentialMix.Collections
 	/// This implementation is based on Robert Sedgewick and Kevin Wayne IndexMinPQ from their book: Algorithms, 4th Edition
 	/// <a href="https://algs4.cs.princeton.edu/24pq">Section 2.4</a>
 	/// <para>
+	/// <a href="https://algs4.cs.princeton.edu/24pq/IndexMinPQ.java.html">2.4 Priority Queues</a>
+	/// </para>
+	/// <para>
 	/// This implementation uses a binary heap along with an array to associate keys with integers in the given range.
 	/// </para>
 	/// </summary>
@@ -389,7 +392,7 @@ namespace essentialMix.Collections
 			_qp[index] = Count;
 			_pq[Count] = index;
 			_nodes[index] = node;
-			Swim(Count - 1);
+			Swim(Count);
 			return node;
 		}
 
