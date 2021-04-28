@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using essentialMix.Exceptions.Threading;
 using JetBrains.Annotations;
@@ -74,7 +75,7 @@ namespace essentialMix.Threading
 		/// The lock order would be violated if this lock were taken out. (i.e. attempting
 		/// to acquire the lock could cause deadlock.)
 		/// </exception>
-		public override LockToken Lock(int timeout)
+		public override IDisposable Lock(int timeout)
 		{
 			// Check whether we should be allowed to take out this lock, according to
 			// the inner locks we have.
@@ -99,7 +100,7 @@ namespace essentialMix.Threading
 				}
 			}
 
-			LockToken ret = base.Lock(timeout);
+			IDisposable ret = base.Lock(timeout);
 
 			// Now remember that we've locked, and set the owner if necessary
 			// Performance note: On a single processor, it is slightly cheaper

@@ -14,8 +14,8 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
-		<AssemblyVersion>12.28.3.0</AssemblyVersion>
-		<FileVersion>21.4.24.0</FileVersion>
+		<AssemblyVersion>12.28.4.0</AssemblyVersion>
+		<FileVersion>21.4.28.0</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 	</PropertyGroup>
@@ -84,7 +84,7 @@
 		<PackageReference Include="EntityFramework" Version="6.4.4" />
 		<PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
 		<PackageReference Include="CsvHelper" Version="27.0.1" />
-		<PackageReference Include="Humanizer" Version="2.8.26" />
+		<PackageReference Include="Humanizer" Version="2.9.9" />
 		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0.0" />
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1.0" />
 		<PackageReference Include="System.Buffers" Version="4.5.1" />

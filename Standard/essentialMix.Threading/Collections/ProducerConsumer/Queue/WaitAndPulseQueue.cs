@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
@@ -9,8 +9,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 {
 	public sealed class WaitAndPulseQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
-		private readonly object _lock = new object();
-		private readonly Queue<T> _queue = new Queue<T>();
+		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 		private readonly Thread[] _workers;
 
 		private AutoResetEvent _workEvent;
@@ -66,10 +65,10 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				OnWorkStarted(EventArgs.Empty);
 			}
 
-			lock(_lock)
+			lock(_queue)
 			{
 				_queue.Enqueue(item);
-				Monitor.Pulse(_lock);
+				Monitor.Pulse(_queue);
 			}
 		}
 
@@ -77,68 +76,30 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 		public bool TryDequeue(out T item)
 		{
 			ThrowIfDisposed();
-
-			if (_queue.Count == 0)
-			{
-				item = default(T);
-				return false;
-			}
-			
-			lock(_lock)
-			{
-				ThrowIfDisposed();
-
-				if (_queue.Count == 0)
-				{
-					item = default(T);
-					return false;
-				}
-
-				item = _queue.Dequeue();
-				return true;
-			}
+			return _queue.TryDequeue(out item);
 		}
 
 		/// <inheritdoc />
 		public bool TryPeek(out T item)
 		{
 			ThrowIfDisposed();
-
-			if (_queue.Count == 0)
-			{
-				item = default(T);
-				return false;
-			}
-			
-			lock(_lock)
-			{
-				ThrowIfDisposed();
-
-				if (_queue.Count == 0)
-				{
-					item = default(T);
-					return false;
-				}
-
-				item = _queue.Peek();
-				return true;
-			}
+			return _queue.TryPeek(out item);
 		}
 
 		protected override void CompleteInternal()
 		{
 			CompleteMarked = true;
 
-			lock (_lock) 
-				Monitor.PulseAll(_lock);
+			lock (_queue) 
+				Monitor.PulseAll(_queue);
 		}
 
 		protected override void ClearInternal()
 		{
-			lock(_lock)
+			lock(_queue)
 			{
 				_queue.Clear();
-				Monitor.PulseAll(_lock);
+				Monitor.PulseAll(_queue);
 			}
 		}
 
@@ -191,21 +152,19 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				{
 					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.Count == 0)
 					{
-						lock (_lock)
-							Monitor.Wait(_lock, TimeSpanHelper.FAST_SCHEDULE);
+						lock (_queue)
+							Monitor.Wait(_queue, TimeSpanHelper.FAST_SCHEDULE);
 					}
 
 					if (IsDisposed || Token.IsCancellationRequested) return;
 					if (CompleteMarked) break;
-					if (_queue.Count == 0) continue;
-					item = _queue.Dequeue();
+					if (!_queue.TryDequeue(out item)) continue;
 					Run(item);
 				}
 
 				while (!IsDisposed && !Token.IsCancellationRequested)
 				{
-					if (_queue.Count == 0) break;
-					item = _queue.Dequeue();
+					if (!_queue.TryDequeue(out item)) break;
 					Run(item);
 				}
 			}

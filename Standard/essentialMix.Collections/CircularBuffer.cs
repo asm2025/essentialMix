@@ -534,7 +534,7 @@ namespace essentialMix.Collections
 				_head = 0;
 				_tail = -1;
 			}
-			
+
 			_version++;
 			return item;
 		}

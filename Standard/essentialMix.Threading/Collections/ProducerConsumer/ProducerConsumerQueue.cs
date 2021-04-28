@@ -128,7 +128,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer
 		{
 			ThrowIfDisposed();
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			return Task.Run(() => WaitInternal(millisecondsTimeout), Token);
+			return Task.Run(() => WaitInternal(millisecondsTimeout), Token).ConfigureAwait();
 		}
 
 		public void Clear()
@@ -210,8 +210,6 @@ namespace essentialMix.Threading.Collections.ProducerConsumer
 				ThreadQueueMode.Task => new TaskQueue<T>(options, token),
 				ThreadQueueMode.DataFlow => new DataFlowQueue<T>(options, token),
 				ThreadQueueMode.WaitAndPulse => new WaitAndPulseQueue<T>(options, token),
-				ThreadQueueMode.CircularBuffer => new WaitAndPulseCircularBuffer<T>(options, token),
-				ThreadQueueMode.Deque => new WaitAndPulseDeque<T>(options, token),
 				ThreadQueueMode.Event => new EventQueue<T>(options, token),
 				ThreadQueueMode.BlockingCollection => new BlockingCollectionQueue<T>(options, token),
 				ThreadQueueMode.TaskGroup => new TaskGroupQueue<T>(options, token),

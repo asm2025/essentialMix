@@ -4,10 +4,11 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using essentialMix.Extensions;
+using JetBrains.Annotations;
 
 namespace essentialMix.Patterns.Object
 {
-	public abstract class Disposable : IDisposable
+	public class Disposable : IDisposable
 	{
 		private const int DISPOSAL_NOT_STARTED = 0;
 		private const int DISPOSAL_STARTED = 1;
@@ -21,16 +22,22 @@ namespace essentialMix.Patterns.Object
 
 		// see the constants defined above for valid values
 		private int _disposeStage;
+		private Action _onDispose;
 
-#if DEBUG
-		/// <summary>
-		/// Initializes a new instance of the Disposable class.
-		/// </summary>
 		protected Disposable()
+			: this(null)
 		{
-			_creationStackTrace = new StackTrace(1, true);
 		}
 
+		private Disposable(Action onDispose)
+		{
+			_onDispose = onDispose;
+#if DEBUG
+			_creationStackTrace = new StackTrace(1, true);
+#endif
+		}
+
+#if DEBUG
 		/// <summary>
 		/// Finalizes an instance of the Disposable class.
 		/// </summary>
@@ -64,6 +71,15 @@ namespace essentialMix.Patterns.Object
 		[SuppressMessage("Microsoft.Usage", "CA1816", Justification = "GC.SuppressFinalize is called indirectly.")]
 		public void Dispose()
 		{
+			Action todo;
+
+			lock(this)
+			{
+				todo = _onDispose;
+				_onDispose = null;
+			}
+
+			todo?.Invoke();
 			if (Interlocked.CompareExchange(ref _disposeStage, DISPOSAL_STARTED, DISPOSAL_NOT_STARTED) != DISPOSAL_NOT_STARTED) return;
 			GC.SuppressFinalize(this);
 			OnDisposing();
@@ -124,6 +140,9 @@ namespace essentialMix.Patterns.Object
 			GC.SuppressFinalize(this);
 			Interlocked.Exchange(ref _disposeStage, DISPOSAL_COMPLETE);
 		}
+
+		[NotNull]
+		public static IDisposable Create([NotNull] Action action) { return new Disposable(action); }
 	}
 }
 #pragma warning restore 1591, 0612

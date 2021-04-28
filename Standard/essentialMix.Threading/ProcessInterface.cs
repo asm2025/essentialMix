@@ -262,7 +262,7 @@ namespace essentialMix.Threading
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 			return !_inputProcess.IsAwaitable()
 				? Task.FromResult(true) 
-				: Task.Run(() => Wait(millisecondsTimeout), _token);
+				: Task.Run(() => Wait(millisecondsTimeout), _token).ConfigureAwait();
 		}
 
 		public bool Wait() { return Wait(TimeSpanHelper.INFINITE); }

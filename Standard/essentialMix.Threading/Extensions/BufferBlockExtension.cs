@@ -75,7 +75,7 @@ namespace essentialMix.Extensions
 
 			do
 			{
-				Task<bool> task = Task.Run(() => thisValue.OutputAvailableAsync(token), token);
+				Task<bool> task = Task.Run(() => thisValue.OutputAvailableAsync(token), token).ConfigureAwait();
 				if (token.IsCancellationRequested || !task.IsCompleted || !task.Result) break;
 				receiveAndPost();
 			}

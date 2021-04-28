@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -16,6 +15,7 @@ using Bogus;
 using Bogus.DataSets;
 using JetBrains.Annotations;
 using System.ServiceProcess;
+using System.Threading.Tasks;
 using essentialMix;
 using essentialMix.Newtonsoft.Helpers;
 using essentialMix.Patterns.Threading;
@@ -29,7 +29,6 @@ using essentialMix.Extensions;
 using essentialMix.Helpers;
 using Other.Microsoft.Collections;
 using essentialMix.Threading.Collections.ProducerConsumer;
-using essentialMix.Threading.Collections.ProducerConsumer.Queue;
 using essentialMix.Threading.Helpers;
 using Newtonsoft.Json;
 using TimeoutException = System.TimeoutException;
@@ -85,7 +84,8 @@ work with {HEAVY} items.");
 			//TestLevenshteinDistance();
 			//TestDeepestPit();
 
-			//TestThreadQueue();
+			TestThreadQueue();
+			//TestAsyncLock();
 
 			//TestSortAlgorithm();
 			//TestSortAlgorithms();
@@ -174,6 +174,8 @@ work with {HEAVY} items.");
 			//TestObservableCollections();
 
 			//TestEnumerateDirectoriesAndFiles();
+
+			ConsoleHelper.Pause();
 		}
 
 		private static void TestDomainName()
@@ -411,7 +413,11 @@ work with {HEAVY} items.");
 		private static void TestThreadQueue()
 		{
 			int len = RNGRandomHelper.Next(100, 1000);
-			int[] values = GetRandomIntegers(len);
+			int[] values = new int[len];
+
+			for (int i = 0; i < values.Length; i++)
+				values[i] = i + 1;
+
 			int timeout = RNGRandomHelper.Next(0, 1);
 			string timeoutString = timeout > 0
 										? $"{timeout} minute(s)"
@@ -431,11 +437,6 @@ work with {HEAVY} items.");
 				threads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
 			}
 
-			Func<int, TaskResult> exec = e =>
-			{
-				Console.Write(", {0}", e);
-				return TaskResult.Success;
-			};
 			Queue<ThreadQueueMode> modes = new Queue<ThreadQueueMode>(EnumHelper<ThreadQueueMode>.GetValues());
 			Stopwatch clock = new Stopwatch();
 
@@ -456,13 +457,12 @@ work with {HEAVY} items.");
 					CancellationToken token = cts?.Token ?? CancellationToken.None;
 					ProducerConsumerQueueOptions<int> options = mode switch
 					{
-						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<int>(threads, exec)
+						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<int>(threads, Exec)
 						{
 							// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
 							Threshold = TimeSpan.FromSeconds(1)
 						},
-						ThreadQueueMode.CircularBuffer => new CircularBufferQueueOptions<int>(threads, values.Length / 2, exec),
-						_ => new ProducerConsumerQueueOptions<int>(threads, exec)
+						_ => new ProducerConsumerQueueOptions<int>(threads, Exec)
 					};
 			
 					// Create a generic queue producer
@@ -523,8 +523,52 @@ work with {HEAVY} items.");
 			}
 
 			clock.Stop();
+
+			static TaskResult Exec(int e)
+			{
+				Task.Delay(50).GetAwaiter().GetResult();
+				Console.Write($"{e:D4} ");
+				return TaskResult.Success;
+			}
 		}
-		
+	
+		private static void TestAsyncLock()
+		{
+			Title("Testing AsyncLock");
+
+			AsyncLock locker = null;
+
+			try
+			{
+				locker = new AsyncLock();
+				Task task1 = Method1().ContinueWith(_ => Console.WriteLine(nameof(Method1) + " completed"));
+				Task task2 = Method2().ContinueWith(_ => Console.WriteLine(nameof(Method2) + " completed"));
+				Task.WhenAll(task1, task2).ConfigureAwait().GetAwaiter().GetResult();
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref locker);
+			}
+
+			Task<int> Method1()
+			{
+				using (locker.EnterAsync().ConfigureAwait().GetAwaiter().GetResult())
+				{
+					Task.Delay(2000).ConfigureAwait().GetAwaiter().GetResult();
+					return Task.FromResult(123);
+				}
+			}
+
+			Task<string> Method2()
+			{
+				using (locker.EnterAsync().ConfigureAwait().GetAwaiter().GetResult())
+				{
+					Task.Delay(2000).ConfigureAwait().GetAwaiter().GetResult();
+					return Task.FromResult("test");
+				}
+			}
+		}
+	
 		private static void TestSortAlgorithm()
 		{
 			const string ALGORITHM = nameof(IListExtension.SortInsertion);
@@ -4999,7 +5043,7 @@ decrypted:
 		private static bool LimitThreads()
 		{
 			// change this to true to use 1 thread only for debugging
-			return true;
+			return false;
 		}
 	}
 }

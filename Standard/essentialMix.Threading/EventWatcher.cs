@@ -127,7 +127,7 @@ namespace essentialMix.Threading
 			ThrowIfDisposed();
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed());
-			return Task.Run(() => Wait(millisecondsTimeout), Token);
+			return Task.Run(() => Wait(millisecondsTimeout), Token).ConfigureAwait();
 		}
 	}
 

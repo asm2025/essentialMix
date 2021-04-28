@@ -201,6 +201,11 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 					if (n < tasks.Length) break;
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitSilently(Token)) return;
+
+					for (int i = 0; i < tasks.Length; i++)
+						ObjectHelper.Dispose(ref tasks[i]);
+
+					Array.Clear(tasks, 0, tasks.Length);
 				}
 
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
@@ -215,12 +220,20 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 					if (n < tasks.Length) break;
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitSilently(Token)) return;
+
+					for (int i = 0; i < tasks.Length; i++)
+						ObjectHelper.Dispose(ref tasks[i]);
+
+					Array.Clear(tasks, 0, tasks.Length);
 					n = 0;
 				}
 
 				if (n < 1 || IsDisposed || Token.IsCancellationRequested) return;
 				Array.Resize(ref tasks, ++n);
 				tasks.WaitSilently(Token);
+				
+				for (int i = 0; i < tasks.Length; i++)
+					ObjectHelper.Dispose(ref tasks[i]);
 			}
 			finally
 			{

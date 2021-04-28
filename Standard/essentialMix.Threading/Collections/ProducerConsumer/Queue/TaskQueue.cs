@@ -120,6 +120,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			Cancel();
 			ClearInternal();
 			if (!_workStarted) return;
+			Task.WhenAll(_workers);
 
 			for (int i = 0; i < _workers.Length; i++) 
 				ObjectHelper.Dispose(ref _workers[i]);

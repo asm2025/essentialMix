@@ -145,6 +145,10 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitSilently(Token)) return;
 					count = 0;
+
+					for (int i = 0; i < tasks.Length; i++) 
+						ObjectHelper.Dispose(ref tasks[i]);
+
 					Array.Clear(tasks, 0, tasks.Length);
 				}
 
@@ -157,7 +161,10 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 					tasks[i] = Task.Run(() => Run(item), Token).ConfigureAwait();
 				}
 
-				tasks.WaitSilently(Token);
+				if (!tasks.WaitSilently(Token)) return;
+				
+				for (int i = 0; i < tasks.Length; i++)
+					ObjectHelper.Dispose(ref tasks[i]);
 			}
 			finally
 			{

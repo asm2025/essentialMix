@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
@@ -11,11 +11,11 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 	public sealed class SemaphoreSlimQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
-		private readonly List<Thread> _running = new List<Thread>();
 
 		private ManualResetEventSlim _manualResetEventSlim;
 		private SemaphoreSlim _semaphore;
 		private Thread _worker;
+		private int _running;
 
 		public SemaphoreSlimQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
@@ -38,7 +38,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _manualResetEventSlim);
 		}
 
-		public override int Count => _queue.Count + _running.Count;
+		public override int Count => _queue.Count + _running;
 
 		public override bool IsBusy => Count > 0;
 
@@ -122,13 +122,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.TryDequeue(out item))
 				{
 					T value = item;
-					Thread thread = new Thread(() => Run(value))
-					{
-						IsBackground = IsBackground,
-						Priority = Priority
-					};
-					thread.Start();
-					AddRunning(thread);
+					Task.Run(() => RunAsync(value), Token);
 				}
 
 				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
@@ -136,14 +130,10 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item))
 				{
 					T value = item;
-					Thread thread = new Thread(() => Run(value))
-					{
-						IsBackground = IsBackground,
-						Priority = Priority
-					};
-					thread.Start();
-					AddRunning(thread);
+					Task.Run(() => RunAsync(value), Token);
 				}
+
+				SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || _running == 0);
 			}
 			catch (OperationCanceledException)
 			{
@@ -151,22 +141,13 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			}
 			finally
 			{
-				Thread[] threads = _running.Count > 0
-										? _running.ToArray()
-										: null;
-
-				if (threads != null)
-				{
-					foreach (Thread thread in threads) 
-						thread.Join();
-				}
-
 				OnWorkCompleted(EventArgs.Empty);
 				_manualResetEventSlim.Set();
 			}
 		}
 
-		protected override void Run(T item)
+		[NotNull]
+		private async Task RunAsync(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested) return;
 
@@ -174,10 +155,11 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 			try
 			{
-				_semaphore.Wait(Token);
+				await _semaphore.WaitAsync(Token);
 				entered = true;
+				Interlocked.Increment(ref _running);
 				if (IsDisposed || Token.IsCancellationRequested) return;
-				base.Run(item);
+				Run(item);
 			}
 			catch (OperationCanceledException)
 			{
@@ -185,16 +167,12 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			}
 			finally
 			{
-				_running.Remove(Thread.CurrentThread);
-				if (entered) _semaphore.Release();
+				if (entered)
+				{
+					_semaphore.Release();
+					Interlocked.Decrement(ref _running);
+				}
 			}
-		}
-
-		private void AddRunning([NotNull] Thread thread)
-		{
-			if (!ObjectLockHelper.WaitFor(() => thread.IsAlive, _running, TimeSpanHelper.HALF_SCHEDULE)) throw new TimeoutException();
-			if (!thread.IsAlive) return;
-			_running.Add(thread);
 		}
 	}
 }

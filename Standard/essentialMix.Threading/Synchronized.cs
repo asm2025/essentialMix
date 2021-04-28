@@ -193,7 +193,7 @@ namespace essentialMix.Threading
 		{
 			ThrowIfDisposed();
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			return Task.Run(() => WaitInternal(millisecondsTimeout), Token);
+			return Task.Run(() => WaitInternal(millisecondsTimeout), Token).ConfigureAwait();
 		}
 
 		private bool WaitInternal(int millisecondsTimeout)

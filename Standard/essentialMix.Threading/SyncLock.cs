@@ -1,7 +1,9 @@
 using System;
+using System.Threading;
 using essentialMix.Extensions;
 using essentialMix.Exceptions.Threading;
 using essentialMix.Helpers;
+using essentialMix.Patterns.Object;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading
@@ -15,16 +17,44 @@ namespace essentialMix.Threading
 	public class SyncLock
 	{
 		/// <summary>
-		/// Lock for static mutable properties.
+		/// A lock token returned by a Lock method call on a SyncLock.
+		/// This effectively holds the lock until it is disposed - a
+		/// slight violation of the IDisposable contract, but it makes
+		/// for easy use of the SyncLock global::System. This type itself
+		/// is not thread-safe - LockTokens should not be shared between
+		/// threads.
 		/// </summary>
-		private static readonly object __staticLock = new object();
+		private class LockToken : Disposable
+		{
+			/// <summary>
+			/// The lock this token has been created by.
+			/// </summary>
+			private readonly SyncLock _parent;
+
+			/// <summary>
+			/// Constructs a new lock token for the specified lock.
+			/// </summary>
+			/// <param name="parent">The internal monitor used for locking.</param>
+			internal LockToken(SyncLock parent)
+			{
+				_parent = parent;
+			}
+
+			protected override void Dispose(bool disposing)
+			{
+				if (disposing) _parent.Unlock();
+				base.Dispose(disposing);
+			}
+		}
 
 		/// <summary>
 		/// The default timeout for new instances of this class
 		/// where the default timeout isn't otherwise specified.
 		/// Defaults to Timeout.INFINITE.
 		/// </summary>
-		private static int __defaultTimeout = System.Threading.Timeout.Infinite;
+		private static int __defaultTimeout = TimeSpanHelper.INFINITE;
+
+		private object _syncRoot;
 
 		/// <inheritdoc />
 		/// <summary>
@@ -68,7 +98,7 @@ namespace essentialMix.Threading
 		public SyncLock(string name, int timeout)
 		{
 			if (timeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(timeout), "Invalid timeout specified");
-			name ??= "Anonymous Lock";
+			name ??= "AnonymousLock";
 			Name = name;
 			Timeout = timeout;
 		}
@@ -84,12 +114,19 @@ namespace essentialMix.Threading
 		public string Name { get; }
 
 		/// <summary>
-		/// The internal monitor used for locking. While this
+		/// The synchronization object used for locking. While this
 		/// is owned by the thread, it can be used for waiting
 		/// and pulsing in the usual way. Note that manually entering/exiting
 		/// this monitor could result in the lock malfunctioning.
 		/// </summary>
-		public object Monitor { get; } = new object();
+		public object SyncRoot
+		{
+			get
+			{
+				if (_syncRoot == null) Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
+				return _syncRoot;
+			}
+		}
 
 		/// <summary>
 		/// Locks the monitor, with the default timeout.
@@ -97,7 +134,7 @@ namespace essentialMix.Threading
 		/// <returns>A lock token which should be disposed to release the lock</returns>
 		/// <exception cref="LockTimeoutException">The operation times out.</exception>
 		[NotNull]
-		public LockToken Lock() { return Lock(TimeSpanHelper.INFINITE); }
+		public IDisposable Lock() { return Lock(TimeSpanHelper.INFINITE); }
 
 		/// <summary>
 		/// Locks the monitor, with the specified timeout.
@@ -109,7 +146,7 @@ namespace essentialMix.Threading
 		/// <returns>A lock token which should be disposed to release the lock</returns>
 		/// <exception cref="LockTimeoutException">The operation times out.</exception>
 		[NotNull]
-		public LockToken Lock(TimeSpan timeout) { return Lock(timeout.TotalIntMilliseconds()); }
+		public IDisposable Lock(TimeSpan timeout) { return Lock(timeout.TotalIntMilliseconds()); }
 
 		/// <summary>
 		/// Locks the monitor, with the specified timeout. Derived classes may override
@@ -125,10 +162,10 @@ namespace essentialMix.Threading
 		/// <returns>A lock token which should be disposed to release the lock</returns>
 		/// <exception cref="LockTimeoutException">The operation times out.</exception>
 		[NotNull]
-		public virtual LockToken Lock(int millisecondsTimeout)
+		public virtual IDisposable Lock(int millisecondsTimeout)
 		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout), "Invalid timeout specified");
-			if (!System.Threading.Monitor.TryEnter(Monitor, millisecondsTimeout)) throw new LockTimeoutException("Failed to acquire lock {0}", Name);
+			if (!Monitor.TryEnter(SyncRoot, millisecondsTimeout)) throw new LockTimeoutException("Failed to acquire lock {0}", Name);
 			return new LockToken(this);
 		}
 
@@ -138,26 +175,16 @@ namespace essentialMix.Threading
 		/// </summary>
 		protected internal virtual void Unlock()
 		{
-			System.Threading.Monitor.Exit(Monitor);
+			Monitor.Exit(SyncRoot);
 		}
 
 		protected static int DefaultTimeout
 		{
-			get
-			{
-				lock(__staticLock)
-				{
-					return __defaultTimeout;
-				}
-			}
+			get => __defaultTimeout;
 			set
 			{
-				if (value < System.Threading.Timeout.Infinite) throw new ArgumentOutOfRangeException(nameof(value), "Invalid timeout specified");
-
-				lock(__staticLock)
-				{
-					__defaultTimeout = value;
-				}
+				if (value < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(value), "Invalid timeout specified");
+				Interlocked.CompareExchange(ref __defaultTimeout, value, TimeSpanHelper.INFINITE);
 			}
 		}
 	}
