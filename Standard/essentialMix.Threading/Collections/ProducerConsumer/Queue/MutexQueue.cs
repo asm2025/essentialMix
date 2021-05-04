@@ -74,6 +74,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			get
 			{
 				int threads = _countdown?.CurrentCount ?? 0;
+				if (threads > 1) threads--;
 				return _queue.Count + threads;
 			}
 		}
@@ -170,7 +171,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 					else _countdown.AddCount();
 					thread.Start(item);
 					threads.Add(thread);
-					if (_countdown.CurrentCount - 1 < Threads) continue;
+					if (threads.Count < Threads) continue;
 					_countdown.Signal();
 					_countdown.Wait(Token);
 					ClearThreads(threads);
@@ -191,7 +192,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 					else _countdown.AddCount();
 					thread.Start(item);
 					threads.Add(thread);
-					if (_countdown.CurrentCount - 1 < Threads) continue;
+					if (threads.Count < Threads) continue;
 					_countdown.Signal();
 					_countdown.Wait(Token);
 					ClearThreads(threads);

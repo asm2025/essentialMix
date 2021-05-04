@@ -61,6 +61,24 @@ namespace essentialMix.Exceptions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The argument included a null value..
+        /// </summary>
+        internal static string ArgumentHasNullValue {
+            get {
+                return ResourceManager.GetString("ArgumentHasNullValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} argument included a null value. (Parameter &apos;{0}&apos;).
+        /// </summary>
+        internal static string ArgumentNameHasNullValue {
+            get {
+                return ResourceManager.GetString("ArgumentNameHasNullValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Array is too small to hold all the values..
         /// </summary>
         internal static string ArrayTooSmall {

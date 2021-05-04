@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using essentialMix.Exceptions;
 using essentialMix.Helpers;
 using Other.MarcGravell.Nullable;
 using JetBrains.Annotations;
@@ -12,42 +13,44 @@ namespace essentialMix.Extensions
 	public static class ThreadingTaskExtension
 	{
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsReady([NotNull] this Task thisValue) { return thisValue.Status.IsReady(); }
+		public static bool IsReady(this Task thisValue) { return thisValue != null && thisValue.Status.IsReady(); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsRunning([NotNull] this Task thisValue) { return thisValue.Status.IsRunning(); }
+		public static bool IsRunning(this Task thisValue) { return thisValue != null && thisValue.Status.IsRunning(); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsStarted([NotNull] this Task thisValue) { return thisValue.Status.IsStarted(); }
+		public static bool IsStarted(this Task thisValue) { return thisValue != null && thisValue.Status.IsStarted(); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsFinished([NotNull] this Task thisValue) { return thisValue.Status.IsFinished(); }
+		public static bool IsFinished(this Task thisValue) { return thisValue != null && thisValue.Status.IsFinished(); }
 
-		public static Task Then([NotNull] this Task thisValue, [NotNull] Func<Task> next, CancellationToken token = default(CancellationToken))
+		public static Task Then(this Task thisValue, [NotNull] Func<Task> next, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			return thisValue
-					.ContinueWith(_ => next(), token, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default)
-					.Unwrap();
+			return thisValue == null || thisValue.IsCanceled || thisValue.IsFaulted
+						? thisValue
+						: thisValue
+						.ContinueWith(_ => next(), token, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default)
+						.Unwrap();
 		}
 
-		public static Task<TResult> Then<TResult>([NotNull] this Task<TResult> thisValue, [NotNull] Func<Task<TResult>, Task<TResult>> next, CancellationToken token = default(CancellationToken))
+		public static Task<TResult> Then<TResult>(this Task<TResult> thisValue, [NotNull] Func<Task<TResult>, Task<TResult>> next, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			return thisValue
-					.ContinueWith(next, token, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default)
-					.Unwrap();
+			return thisValue == null || thisValue.IsCanceled || thisValue.IsFaulted
+						? thisValue
+						: thisValue
+						.ContinueWith(next, token, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default)
+						.Unwrap();
 		}
 
-		[NotNull]
-		public static Task WithCancellation([NotNull] this Task thisValue, CancellationToken token = default(CancellationToken))
+		public static Task WithCancellation(this Task thisValue, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 
-			if (thisValue.IsCompleted || thisValue.IsCanceled)
+			if (thisValue == null || thisValue.IsCanceled || thisValue.IsFaulted || thisValue.IsCompleted)
 			{
 				// Either the task has already completed or timeout will never occur.
-				// No proxy necessary.
 				return thisValue;
 			}
 
@@ -57,12 +60,11 @@ namespace essentialMix.Extensions
 			return thisValue;
 		}
 
-		[NotNull]
-		public static Task<TResult> WithCancellation<TResult>([NotNull] this Task<TResult> thisValue, CancellationToken token = default(CancellationToken))
+		public static Task<TResult> WithCancellation<TResult>(this Task<TResult> thisValue, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 
-			if (thisValue.IsCompleted || thisValue.IsCanceled)
+			if (thisValue == null || thisValue.IsCanceled || thisValue.IsFaulted || thisValue.IsCompleted)
 			{
 				// Either the task has already completed or timeout will never occur.
 				// No proxy necessary.
@@ -75,28 +77,50 @@ namespace essentialMix.Extensions
 			return thisValue;
 		}
 
-		[NotNull]
-		public static Task<T> WithResult<T>([NotNull] this Task thisValue, T value, CancellationToken token = default(CancellationToken)) { return thisValue.ContinueWith(_ => value, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default); }
-
-		public static Task TimeoutAfter([NotNull] this Task thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken))
+		public static Task<T> WithResult<T>(this Task thisValue, T value, CancellationToken token = default(CancellationToken))
 		{
-			return TimeoutAfter(thisValue, timeout.TotalIntMilliseconds(), token);
+			if (thisValue == null) return null;
+
+			if (thisValue.IsFaulted)
+			{
+				TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
+				
+				if (thisValue.Exception != null)
+					tcs.SetException(thisValue.Exception.InnerExceptions);
+				else
+					tcs.SetException(new Exception("Unknown error."));
+
+				return tcs.Task;
+			}
+
+			if (thisValue.IsCanceled) return Task.FromCanceled<T>(token);
+			if (thisValue.IsCompleted) return Task.FromResult(value);
+			return thisValue.ContinueWith(_ => value, token);
 		}
 
+		public static Task<T> WithResult<T>(this Task thisValue, [NotNull] Func<T> getValue, CancellationToken token = default(CancellationToken))
+		{
+			if (thisValue == null) return null;
+			if (thisValue.IsCanceled) return Task.FromCanceled<T>(token);
+			if (thisValue.IsFaulted) return Task.FromException<T>(thisValue.Exception ?? new Exception("Unknown error."));
+			if (thisValue.IsCompleted) return Task.FromResult(getValue());
+			return thisValue.ContinueWith(_ => getValue(), token);
+		}
+
+		public static Task TimeoutAfter(this Task thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return TimeoutAfter(thisValue, timeout.TotalIntMilliseconds(), token); }
 		/// <summary>
 		/// https://blogs.msdn.microsoft.com/pfxteam/2011/11/10/crafting-a-task-timeoutafter-method/
 		/// </summary>
-		public static Task TimeoutAfter([NotNull] this Task thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken))
+		public static Task TimeoutAfter(this Task thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken))
 		{
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE)
-				throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 			token.ThrowIfCancellationRequested();
+			if (thisValue == null) return null;
 
 			// Short-circuit: infinite timeout or task already completed/faulted
 			if (thisValue.IsFinished() || millisecondsTimeout < 0)
 			{
 				// Either the task has already completed/faulted or timeout will never occur.
-				// No proxy necessary.
 				return thisValue;
 			}
 
@@ -124,8 +148,7 @@ namespace essentialMix.Extensions
 			// Wire up the logic for what happens when source task completes
 			thisValue.ContinueWith((antecedent, state) =>
 			{
-				if (token.IsCancellationRequested)
-					return;
+				if (token.IsCancellationRequested) return;
 				// Recover our state data
 				(Timer Timer, TaskCompletionSource<VoidTypeStruct> CompletionSource) tuple = (ValueTuple<Timer, TaskCompletionSource<VoidTypeStruct>>)state;
 
@@ -138,16 +161,12 @@ namespace essentialMix.Extensions
 			return tcs.Task;
 		}
 
-		public static Task<TResult> TimeoutAfter<TResult>([NotNull] this Task<TResult> thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken))
+		public static Task<TResult> TimeoutAfter<TResult>(this Task<TResult> thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return TimeoutAfter(thisValue, timeout.TotalIntMilliseconds(), token); }
+		public static Task<TResult> TimeoutAfter<TResult>(this Task<TResult> thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken))
 		{
-			return TimeoutAfter(thisValue, timeout.TotalIntMilliseconds(), token);
-		}
-
-		public static Task<TResult> TimeoutAfter<TResult>([NotNull] this Task<TResult> thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken))
-		{
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE)
-				throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 			token.ThrowIfCancellationRequested();
+			if (thisValue == null) return null;
 
 			// Short-circuit #1: infinite timeout or task already completed/faulted
 			if (thisValue.IsFinished() || millisecondsTimeout < 0)
@@ -193,27 +212,18 @@ namespace essentialMix.Extensions
 			return tcs.Task;
 		}
 
-		public static bool WaitSilently([NotNull] this Task thisValue, CancellationToken token = default(CancellationToken)) { return WaitSilently(thisValue, TimeSpanHelper.INFINITE, token); }
-
-		public static bool WaitSilently([NotNull] this Task thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken))
+		public static bool WaitSilently(this Task thisValue, CancellationToken token = default(CancellationToken)) { return WaitSilently(thisValue, TimeSpanHelper.INFINITE, token); }
+		public static bool WaitSilently(this Task thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return WaitSilently(thisValue, timeout.TotalIntMilliseconds(), token); }
+		public static bool WaitSilently(this Task thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken))
 		{
-			return WaitSilently(thisValue, timeout.TotalIntMilliseconds(), token);
-		}
-
-		public static bool WaitSilently([NotNull] this Task thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken))
-		{
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE)
-				throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 
 			// Short-circuit #1: already cancelled
-			if (token.IsCancellationRequested)
-				return false;
+			if (token.IsCancellationRequested) return false;
 
 			// Short-circuit #2: task already completed/faulted
-			if (thisValue.IsCanceled || thisValue.IsFaulted)
-				return false;
-			if (thisValue.IsCompleted)
-				return true;
+			if (thisValue == null || thisValue.IsCanceled || thisValue.IsFaulted) return false;
+			if (thisValue.IsCompleted) return true;
 
 			try
 			{
@@ -238,16 +248,10 @@ namespace essentialMix.Extensions
 		}
 
 		public static bool WaitSilently([NotNull] this Task[] thisValue, CancellationToken token = default(CancellationToken)) { return WaitSilently(thisValue, TimeSpanHelper.INFINITE, token); }
-
-		public static bool WaitSilently([NotNull] this Task[] thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken))
-		{
-			return WaitSilently(thisValue, timeout.TotalIntMilliseconds(), token);
-		}
-
+		public static bool WaitSilently([NotNull] this Task[] thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return WaitSilently(thisValue, timeout.TotalIntMilliseconds(), token); }
 		public static bool WaitSilently([NotNull] this Task[] thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken))
 		{
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE)
-				throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 
 			// Short-circuit #1: already cancelled
 			if (token.IsCancellationRequested) return false;
@@ -257,6 +261,7 @@ namespace essentialMix.Extensions
 
 			foreach (Task task in thisValue)
 			{
+				if (task == null) throw new ArgumentHasNullValueException(nameof(thisValue));
 				if (task.IsCanceled || task.IsFaulted) return false;
 				if (task.IsCompleted) i++;
 			}
@@ -286,34 +291,25 @@ namespace essentialMix.Extensions
 		}
 
 		public static bool WaitAll([NotNull] this Task[] thisValue, CancellationToken token = default(CancellationToken)) { return WaitAll(thisValue, TimeSpanHelper.INFINITE, token); }
-
-		public static bool WaitAll([NotNull] this Task[] thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken))
-		{
-			return WaitAll(thisValue, timeout.TotalIntMilliseconds(), token);
-		}
-
+		public static bool WaitAll([NotNull] this Task[] thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return WaitAll(thisValue, timeout.TotalIntMilliseconds(), token); }
 		public static bool WaitAll([NotNull] this Task[] thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken))
 		{
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE)
-				throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 
 			// Short-circuit #1: already cancelled
-			if (token.IsCancellationRequested)
-				return false;
+			if (token.IsCancellationRequested) return false;
 
 			// Short-circuit #2: task already completed/faulted
 			int i = 0;
 
 			foreach (Task task in thisValue)
 			{
-				if (task.IsCanceled || task.IsFaulted)
-					return false;
-				if (task.IsCompleted)
-					i++;
+				if (task == null) throw new ArgumentHasNullValueException(nameof(thisValue));
+				if (task.IsCanceled || task.IsFaulted) return false;
+				if (task.IsCompleted) i++;
 			}
 
-			if (i == thisValue.Length)
-				return true;
+			if (i == thisValue.Length) return true;
 
 			bool result;
 
@@ -362,33 +358,31 @@ namespace essentialMix.Extensions
 						: Task.WhenAny(thisValue);
 		}
 
-		public static object GetResult([NotNull] this Task thisValue)
+		public static object GetResult(this Task thisValue)
 		{
+			if (thisValue == null) return null;
+
 			Type type = thisValue.GetType();
-			if (!type.IsGenericType)
-				return null;
+			if (!type.IsGenericType) return null;
 
 			Type[] types = type.GetGenericArguments();
 			if (types.Length == 0 || types[0].Name == "VoidTaskResult") return null;
 			return ((dynamic)thisValue).Result;
 		}
 
-		public static Task<TU> As<T, TU>([NotNull] this Task<T> thisValue)
+		public static Task<TU> As<T, TU>(this Task<T> thisValue, CancellationToken token = default(CancellationToken))
 			where T : TU
 		{
+			if (thisValue == null) return null;
 			TaskCompletionSource<TU> tcs = new TaskCompletionSource<TU>();
 			thisValue.ContinueWith(t =>
 			{
 				if (t.IsFaulted)
 				{
 					if (t.Exception != null)
-					{
 						tcs.SetException(t.Exception.InnerExceptions);
-					}
 					else
-					{
 						tcs.SetException(new Exception("Unknown error."));
-					}
 				}
 				else if (t.IsCanceled)
 				{

@@ -7,15 +7,8 @@ namespace essentialMix.Helpers
 		public static void Dispose<T>(ref T value)
 			where T : class
 		{
-			switch (value)
-			{
-				case null:
-					return;
-				case IDisposable disposable:
-					disposable.Dispose();
-					break;
-			}
-
+			if (value == null) return;
+			if (value is IDisposable disposable) disposable.Dispose();
 			value = null;
 		}
 

@@ -12,14 +12,15 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 	{
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 
-		private CountdownEvent _countdown;
+		private ManualResetEvent _allWorkDone;
 		private SemaphoreSlim _semaphore;
 		private Thread _worker;
+		private volatile int _running;
 
 		public SemaphoreSlimQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			_countdown = new CountdownEvent(1);
+			_allWorkDone = new ManualResetEvent(false);
 			_semaphore = new SemaphoreSlim(Threads);
 			(_worker = new Thread(Consume)
 			{
@@ -34,10 +35,17 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			base.Dispose(disposing);
 			if (!disposing) return;
 			ObjectHelper.Dispose(ref _semaphore);
-			ObjectHelper.Dispose(ref _countdown);
+			ObjectHelper.Dispose(ref _allWorkDone);
 		}
 
-		public override int Count => _queue.Count + _countdown.CurrentCount - 1;
+		public override int Count
+		{
+			get
+			{
+				int threads = _running;
+				return _queue.Count + threads;
+			}
+		}
 
 		public override bool IsBusy => Count > 0;
 
@@ -78,8 +86,8 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 			try
 			{
-				if (millisecondsTimeout > TimeSpanHelper.INFINITE) return _countdown.Wait(millisecondsTimeout, Token);
-				_countdown.Wait(Token);
+				if (millisecondsTimeout > TimeSpanHelper.INFINITE) return _allWorkDone.WaitOne(millisecondsTimeout, Token);
+				_allWorkDone.WaitOne(Token);
 				return !Token.IsCancellationRequested;
 			}
 			catch (OperationCanceledException)
@@ -110,6 +118,9 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			if (IsDisposed) return;
 			OnWorkStarted(EventArgs.Empty);
 
+			Task[] tasks = new Task[Threads];
+			Interlocked.Exchange(ref _running, 0);
+
 			try
 			{
 				T item;
@@ -117,86 +128,77 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
 					if (!_queue.TryDequeue(out item)) continue;
-					_countdown.AddCount();
-					RunAsync(item);
+					T value = item;
+					int index = Array.FindIndex(tasks,e => e == null || e.IsFinished());
+
+					if (tasks[index] != null)
+					{
+						// reuse finished task slot
+						ObjectHelper.Dispose(ref tasks[index]);
+						tasks[index] = null;
+						Interlocked.Decrement(ref _running);
+					}
+
+					tasks[index] = Task.Run(() => RunThread(value), Token).ConfigureAwait();
+					Interlocked.Increment(ref _running);
+					// don't wait until all slots are filled
+					if (_running < Threads) continue;
+					Task.WaitAny(tasks, Token);
 				}
 
+				if (Token.IsCancellationRequested) return;
 				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
 
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item))
 				{
-					_countdown.AddCount();
-					RunAsync(item);
+					T value = item;
+					int index = Array.FindIndex(tasks,e => e == null || e.IsFinished());
+
+					if (tasks[index] != null)
+					{
+						// reuse finished task slot
+						ObjectHelper.Dispose(ref tasks[index]);
+						tasks[index] = null;
+						Interlocked.Decrement(ref _running);
+					}
+
+					tasks[index] = Task.Run(() => RunThread(value), Token).ConfigureAwait();
+					Interlocked.Increment(ref _running);
+					// don't wait until all slots are filled
+					if (_running < Threads) continue;
+					Task.WaitAny(tasks, Token);
 				}
+	
+				if (_running == 0) return;
+				int firstNullIndex = Array.FindIndex(tasks,e => e == null);
+				if (firstNullIndex > -1) Array.Resize(ref tasks, firstNullIndex + 1);
+				Task.WaitAll(tasks, Token);
+				Interlocked.Exchange(ref _running, 0);
 			}
 			finally
 			{
-				SignalAndCheck();
+				OnWorkCompleted(EventArgs.Empty);
+				_allWorkDone.Set();
 			}
 		}
 
-		[NotNull]
-		private Task RunAsync(T item)
+		private void RunThread(T item)
 		{
-			if (IsDisposed) return Task.CompletedTask;
+			if (IsDisposed || Token.IsCancellationRequested) return;
 
-			if (Token.IsCancellationRequested)
-			{
-				_countdown?.SignalOne();
-				return Task.CompletedTask;
-			}
-
-			return _semaphore.WaitAsync(Token)
-							.ContinueWith(task =>
-							{
-								if (IsDisposed || Token.IsCancellationRequested || !task.IsCompleted)
-								{
-									_semaphore?.Release();
-									_countdown?.SignalOne();
-									return;
-								}
-
-								try
-								{
-									Run(item);
-								}
-								finally
-								{
-									_semaphore?.Release();
-									SignalAndCheck();
-								}
-							}, Token);
-		}
-
-		private void SignalAndCheck()
-		{
-			if (IsDisposed || _countdown == null) return;
-			Monitor.Enter(_countdown);
-
-			bool completed = false;
+			bool entered = false;
 
 			try
 			{
-				if (IsDisposed || _countdown == null) return;
-				_countdown.Signal();
-				if (!CompleteMarked || _countdown.CurrentCount > 1) return;
+				if (!_semaphore.Wait(TimeSpanHelper.INFINITE, Token)) return;
+				entered = true;
+				if (IsDisposed || Token.IsCancellationRequested) return;
+				Run(item);
 			}
 			finally
 			{
-				if (_countdown is { CurrentCount: < 2 })
-				{
-					_countdown.SignalAll();
-					completed = true;
-				}
-				
-				if (_countdown != null) 
-					Monitor.Exit(_countdown);
-				else
-					completed = true;
+				if (entered) _semaphore?.Release();
 			}
-
-			if (!completed) return;
-			OnWorkCompleted(EventArgs.Empty);
 		}
 	}
 }

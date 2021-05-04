@@ -1396,8 +1396,7 @@ namespace essentialMix.Extensions
 		public static int IndexOf<T>([NotNull] this T[] thisValue, [NotNull] Predicate<T> comparison, int startIndex = 0, int count = -1)
 		{
 			thisValue.Length.ValidateRange(startIndex, ref count);
-			if (count == 0 || thisValue.Length == 0)
-				return -1;
+			if (count == 0 || thisValue.Length == 0) return -1;
 
 			int x = -1;
 			int lastPos = startIndex + count;

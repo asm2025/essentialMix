@@ -437,16 +437,17 @@ work with {HEAVY} items.");
 				threads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
 			}
 
-			Queue<ThreadQueueMode> modes = new Queue<ThreadQueueMode>(EnumHelper<ThreadQueueMode>.GetValues());
+			ThreadQueueMode[] modes = EnumHelper<ThreadQueueMode>.GetValues();
+			Queue<ThreadQueueMode> queueModes = new Queue<ThreadQueueMode>(modes);
 			Stopwatch clock = new Stopwatch();
 
 			if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
 
-			while (modes.Count > 0)
+			while (queueModes.Count > 0)
 			{
 				Console.Clear();
 				Console.WriteLine();
-				ThreadQueueMode mode = modes.Dequeue();
+				ThreadQueueMode mode = queueModes.Dequeue();
 				Title($"Testing multi-thread queue in '{Bright.Cyan(mode.ToString())}' mode...");
 
 				// if there is a timeout, will use a CancellationTokenSource.
@@ -514,12 +515,25 @@ work with {HEAVY} items.");
 					}
 				}
 
-				if (modes.Count == 0) continue;
+				if (queueModes.Count == 0)
+				{
+					Console.WriteLine();
+					Console.Write($"Would you like to repeat the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to exit. ");
+
+					if (Console.ReadKey(true).Key == ConsoleKey.Y)
+					{
+						foreach (ThreadQueueMode m in modes) 
+							queueModes.Enqueue(m);
+					}
+
+					continue;
+				}
+
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
-				if (response.Key != ConsoleKey.Y) modes.Clear();
+				if (response.Key != ConsoleKey.Y) queueModes.Clear();
 			}
 
 			clock.Stop();

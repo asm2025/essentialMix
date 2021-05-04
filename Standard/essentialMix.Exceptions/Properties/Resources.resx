@@ -219,4 +219,10 @@
   <data name="LBoundLargerThanZero" xml:space="preserve">
     <value>Lower bound is larger than zero.</value>
   </data>
+  <data name="ArgumentNameHasNullValue" xml:space="preserve">
+    <value>The {0} argument included a null value. (Parameter '{0}')</value>
+  </data>
+  <data name="ArgumentHasNullValue" xml:space="preserve">
+    <value>The argument included a null value.</value>
+  </data>
 </root>
