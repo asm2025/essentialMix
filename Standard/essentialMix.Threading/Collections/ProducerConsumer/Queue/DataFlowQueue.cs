@@ -37,12 +37,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			{
 				PropagateCompletion = false
 			});
-
-			(_worker = new Thread(Consume)
-			{
-				IsBackground = IsBackground,
-				Priority = Priority
-			}).Start();
+			Task.Run(Consume).ConfigureAwait();
 		}
 
 		/// <inheritdoc />
@@ -116,31 +111,18 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _worker);
 		}
 
-		private void Consume()
+		[NotNull]
+		private Task Consume()
 		{
-			if (IsDisposed) return;
+			if (IsDisposed) return Task.CompletedTask;
 			_manualResetEventSlim.Reset();
 			OnWorkStarted(EventArgs.Empty);
-
-			try
-			{
-				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
-					Task.WhenAll(_queue.Completion, _processor.Completion).Execute();
-			}
-			catch (OperationCanceledException)
-			{
-			}
-			catch (TimeoutException)
-			{
-			}
-			catch (AggregateException ag) when (ag.InnerException is OperationCanceledException || ag.InnerException is TimeoutException)
-			{
-			}
-			finally
-			{
-				OnWorkCompleted(EventArgs.Empty);
-				_manualResetEventSlim.Set();
-			}
+			return Task.WhenAll(_queue.Completion, _processor.Completion)
+						.ContinueWith(_ =>
+						{
+							OnWorkCompleted(EventArgs.Empty);
+							_manualResetEventSlim.Set();
+						});
 		}
 	}
 }

@@ -248,7 +248,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				}
 
 				if (count < 1 || IsDisposed || Token.IsCancellationRequested) return;
-				Array.Resize(ref tasks, ++count);
+				Array.Resize(ref tasks, count);
 				tasks.WaitSilently(Token);
 				
 				for (int i = 0; i < tasks.Length; i++)
