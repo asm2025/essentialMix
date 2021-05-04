@@ -8,11 +8,34 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Patterns.Object
 {
-	public class Disposable : IDisposable
+	public abstract class Disposable : IDisposable
 	{
 		private const int DISPOSAL_NOT_STARTED = 0;
 		private const int DISPOSAL_STARTED = 1;
 		private const int DISPOSAL_COMPLETE = 2;
+
+		private class DisposableAction : IDisposable
+		{
+			private Action _onDispose;
+	
+			public DisposableAction(Action onDispose)
+			{
+				_onDispose = onDispose;
+			}
+
+			public void Dispose()
+			{
+				Action todo;
+
+				lock(this)
+				{
+					todo = _onDispose;
+					_onDispose = null;
+				}
+
+				todo?.Invoke();
+			}
+		}
 
 #if DEBUG
 		// useful diagnostics when a failure to dispose is detected
@@ -22,16 +45,9 @@ namespace essentialMix.Patterns.Object
 
 		// see the constants defined above for valid values
 		private int _disposeStage;
-		private Action _onDispose;
 
 		protected Disposable()
-			: this(null)
 		{
-		}
-
-		private Disposable(Action onDispose)
-		{
-			_onDispose = onDispose;
 #if DEBUG
 			_creationStackTrace = new StackTrace(1, true);
 #endif
@@ -41,7 +57,6 @@ namespace essentialMix.Patterns.Object
 		/// <summary>
 		/// Finalizes an instance of the Disposable class.
 		/// </summary>
-		[SuppressMessage("Microsoft.Design", "CA1063", Justification = "The enforced behavior of CA1063 is not thread-safe or full-featured enough for our purposes here.")]
 		~Disposable()
 		{
 			Dispose(false);
@@ -67,22 +82,10 @@ namespace essentialMix.Patterns.Object
 		/// <summary>
 		/// Disposes of this object, if it hasn't already been disposed.
 		/// </summary>
-		[SuppressMessage("Microsoft.Design", "CA1063", Justification = "The enforced behavior of CA1063 is not thread-safe or full-featured enough for our purposes here.")]
-		[SuppressMessage("Microsoft.Usage", "CA1816", Justification = "GC.SuppressFinalize is called indirectly.")]
 		public void Dispose()
 		{
-			Action todo;
-
-			lock(this)
-			{
-				todo = _onDispose;
-				_onDispose = null;
-			}
-
-			todo?.Invoke();
 			if (Interlocked.CompareExchange(ref _disposeStage, DISPOSAL_STARTED, DISPOSAL_NOT_STARTED) != DISPOSAL_NOT_STARTED) return;
 			GC.SuppressFinalize(this);
-			OnDisposing();
 			Dispose(true);
 			MarkAsDisposed();
 		}
@@ -124,17 +127,12 @@ namespace essentialMix.Patterns.Object
 		{
 		}
 
-		protected virtual void OnDisposing()
-		{
-		}
-
 		/// <summary>
 		/// Marks this object as disposed without running any other dispose logic.
 		/// </summary>
 		/// <remarks>
 		/// Use this method with caution. It is helpful when you have an object that can be disposed in multiple fashions, such as through a <c>CloseAsync</c> method.
 		/// </remarks>
-		[SuppressMessage("Microsoft.Usage", "CA1816", Justification = "This is a helper method for IDisposable.Dispose.")]
 		protected void MarkAsDisposed()
 		{
 			GC.SuppressFinalize(this);
@@ -142,7 +140,7 @@ namespace essentialMix.Patterns.Object
 		}
 
 		[NotNull]
-		public static IDisposable Create([NotNull] Action action) { return new Disposable(action); }
+		public static IDisposable Create([NotNull] Action action) { return new DisposableAction(action); }
 	}
 }
 #pragma warning restore 1591, 0612

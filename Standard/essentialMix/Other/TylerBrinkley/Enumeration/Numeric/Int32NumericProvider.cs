@@ -50,7 +50,7 @@ namespace Other.TylerBrinkley.Enumeration.Numeric
 
 		public bool IsInValueRange(ulong value) { return value <= int.MaxValue; }
 
-		public bool IsInValueRange(long value) { return value >= int.MinValue && value <= int.MaxValue; }
+		public bool IsInValueRange(long value) { return value is >= int.MinValue and <= int.MaxValue; }
 
 		public int LeftShift(int value, int amount) { return value << amount; }
 

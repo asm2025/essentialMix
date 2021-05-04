@@ -80,26 +80,31 @@ namespace essentialMix.Extensions
 			}
 		}
 
-		public static async Task<bool> ReadAsync([NotNull] this WebRequest thisValue, [NotNull] IOResponseSettings settings, CancellationToken token = default(CancellationToken))
+		public static Task<bool> ReadAsync([NotNull] this WebRequest thisValue, [NotNull] IOResponseSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebResponse response = await GetResponseAsync(thisValue, settings, token);
-			if (response == null || token.IsCancellationRequested) return false;
+			return GetResponseAsync(thisValue, settings, token)
+				.ContinueWith(task =>
+				{
+					WebResponse response = task.Result;
+					if (response == null) return false;
 
-			try
-			{
-				return settings.OnResponseReceived?.Invoke(response) != false && await response.ReadAsync(settings, token).ConfigureAwait();
-			}
-			catch (Exception ex) when (settings.OnError != null)
-			{
-				settings.OnError(ex);
-				return false;
-			}
-			finally
-			{
-				ObjectHelper.Dispose(ref response);
-				thisValue.Abort();
-			}
+					try
+					{
+						if (token.IsCancellationRequested) return false;
+						return settings.OnResponseReceived?.Invoke(response) != false && response.ReadAsync(settings, token).Execute();
+					}
+					catch (Exception ex) when (settings.OnError != null)
+					{
+						settings.OnError(ex);
+						return false;
+					}
+					finally
+					{
+						ObjectHelper.Dispose(ref response);
+						thisValue.Abort();
+					}
+				}, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
 		}
 
 		public static string ReadToEnd([NotNull] this WebRequest thisValue, IOResponseSettings settings = null)
@@ -109,7 +114,9 @@ namespace essentialMix.Extensions
 
 			try
 			{
-				return settings?.OnResponseReceived?.Invoke(response) == false ? null : response.ReadToEnd(settings);
+				return settings?.OnResponseReceived?.Invoke(response) == false
+							? null
+							: response.ReadToEnd(settings);
 			}
 			catch (Exception ex) when (settings?.OnError != null)
 			{
@@ -123,26 +130,33 @@ namespace essentialMix.Extensions
 			}
 		}
 
-		public static async Task<string> ReadToEndAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
+		public static Task<string> ReadToEndAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebResponse response = await GetResponseAsync(thisValue, settings, token);
-			if (response == null || token.IsCancellationRequested) return null;
+			return GetResponseAsync(thisValue, settings, token)
+				.ContinueWith(task =>
+				{
+					WebResponse response = task.Result;
+					if (response == null) return null;
 
-			try
-			{
-				return settings?.OnResponseReceived?.Invoke(response) == false ? null : await response.ReadToEndAsync(settings, token);
-			}
-			catch (Exception ex) when (settings?.OnError != null)
-			{
-				settings.OnError(ex);
-				return null;
-			}
-			finally
-			{
-				ObjectHelper.Dispose(ref response);
-				thisValue.Abort();
-			}
+					try
+					{
+						if (token.IsCancellationRequested) return null;
+						return settings?.OnResponseReceived?.Invoke(response) == false
+									? null
+									: response.ReadToEndAsync(settings, token).Execute();
+					}
+					catch (Exception ex) when (settings?.OnError != null)
+					{
+						settings.OnError(ex);
+						return null;
+					}
+					finally
+					{
+						ObjectHelper.Dispose(ref response);
+						thisValue.Abort();
+					}
+				}, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
 		}
 
 		public static string GetTitle([NotNull] this WebRequest thisValue, IOResponseSettings settings = null)
@@ -152,7 +166,9 @@ namespace essentialMix.Extensions
 
 			try
 			{
-				return settings?.OnResponseReceived?.Invoke(response) == false ? null : response.GetTitle(settings);
+				return settings?.OnResponseReceived?.Invoke(response) == false
+							? null
+							: response.GetTitle(settings);
 			}
 			catch (Exception ex) when (settings?.OnError != null)
 			{
@@ -166,26 +182,33 @@ namespace essentialMix.Extensions
 			}
 		}
 
-		public static async Task<string> GetTitleAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
+		[NotNull]
+		public static Task<string> GetTitleAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebResponse response = await GetResponseAsync(thisValue, settings, token);
-			if (response == null || token.IsCancellationRequested) return null;
+			return GetResponseAsync(thisValue, settings, token)
+				.ContinueWith(task =>
+				{
+					WebResponse response = task.Result;
+					if (response == null) return null;
 
-			try
-			{
-				return settings?.OnResponseReceived?.Invoke(response) == false ? null : await response.GetTitleAsync(settings, token).ConfigureAwait();
-			}
-			catch (Exception ex) when (settings?.OnError != null)
-			{
-				settings.OnError(ex);
-				return null;
-			}
-			finally
-			{
-				ObjectHelper.Dispose(ref response);
-				thisValue.Abort();
-			}
+					try
+					{
+						return token.IsCancellationRequested || settings?.OnResponseReceived?.Invoke(response) == false
+									? null
+									: response.GetTitleAsync(settings, token).Execute();
+					}
+					catch (Exception ex) when (settings?.OnError != null)
+					{
+						settings.OnError(ex);
+						return null;
+					}
+					finally
+					{
+						ObjectHelper.Dispose(ref response);
+						thisValue.Abort();
+					}
+				}, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
 		}
 
 		public static (string Title, string Buffer) Peek([NotNull] this WebRequest thisValue, IOResponseSettings settings = null)
@@ -195,7 +218,9 @@ namespace essentialMix.Extensions
 
 			try
 			{
-				return settings?.OnResponseReceived?.Invoke(response) == false ? (null, null) : response.Peek(settings);
+				return settings?.OnResponseReceived?.Invoke(response) == false
+							? (null, null)
+							: response.Peek(settings);
 			}
 			catch (Exception ex) when (settings?.OnError != null)
 			{
@@ -209,26 +234,34 @@ namespace essentialMix.Extensions
 			}
 		}
 
-		public static async Task<(string Title, string Buffer)> PeekAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
+		public static Task<(string Title, string Buffer)> PeekAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebResponse response = await GetResponseAsync(thisValue, settings, token);
-			if (response == null || token.IsCancellationRequested) return (null, null);
+			return GetResponseAsync(thisValue, settings, token)
+				.ContinueWith(task =>
+				{
+					WebResponse response = task.Result;
+					if (response == null) return (null, null);
 
-			try
-			{
-				return settings?.OnResponseReceived?.Invoke(response) == false ? (null, null) : await response.PeekAsync(settings, token).ConfigureAwait();
-			}
-			catch (Exception ex) when (settings?.OnError != null)
-			{
-				settings.OnError(ex);
-				return (null, null);
-			}
-			finally
-			{
-				ObjectHelper.Dispose(ref response);
-				thisValue.Abort();
-			}
+					try
+					{
+						return token.IsCancellationRequested
+									? (null, null)
+									: settings?.OnResponseReceived?.Invoke(response) == false
+										? (null, null)
+										: response.PeekAsync(settings, token).Execute();
+					}
+					catch (Exception ex) when (settings?.OnError != null)
+					{
+						settings.OnError(ex);
+						return (null, null);
+					}
+					finally
+					{
+						ObjectHelper.Dispose(ref response);
+						thisValue.Abort();
+					}
+				}, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
 		}
 
 		[NotNull]
@@ -275,48 +308,54 @@ namespace essentialMix.Extensions
 		}
 
 		[NotNull]
-		public static async Task<UrlSearchResult> SearchAsync([NotNull] this WebRequest thisValue, UrlSearchFlags flags, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
+		public static Task<UrlSearchResult> SearchAsync([NotNull] this WebRequest thisValue, UrlSearchFlags flags, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
-			return await SearchAsync(thisValue, null, flags, settings, token).ConfigureAwait();
+			return SearchAsync(thisValue, null, flags, settings, token);
 		}
 
 		[NotNull]
-		public static async Task<UrlSearchResult> SearchAsync([NotNull] this WebRequest thisValue, string searchFor, UrlSearchFlags flags, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
+		public static Task<UrlSearchResult> SearchAsync([NotNull] this WebRequest thisValue, string searchFor, UrlSearchFlags flags, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebResponse response = await GetResponseAsync(thisValue, settings, token);
-			if (response == null || token.IsCancellationRequested) return null;
-
-			try
-			{
-				if (settings?.OnResponseReceived != null)
+			return GetResponseAsync(thisValue, settings, token)
+				.ContinueWith(task =>
 				{
-					if (!settings.OnResponseReceived(response)) return new UrlSearchResult { Status = UrlSearchStatus.Failed };
-				}
+					WebResponse response = task.Result;
+					if (response == null) return null;
 
-				UrlSearchResult result = await response.SearchAsync(searchFor, flags, settings, token).ConfigureAwait();
-				token.ThrowIfCancellationRequested();
-				result.RedirectUri = thisValue.RequestUri != response.ResponseUri
-					? response.ResponseUri.IsAbsoluteUri || !thisValue.RequestUri.IsAbsoluteUri
-						? response.ResponseUri
-						: new Uri(thisValue.RequestUri, response.ResponseUri)
-					: thisValue.RequestUri;
-				return result;
-			}
-			catch (Exception ex)
-			{
-				settings?.OnError?.Invoke(ex);
-				return new UrlSearchResult
-				{
-					Status = UrlSearchStatus.Error,
-					Exception = ex
-				};
-			}
-			finally
-			{
-				ObjectHelper.Dispose(ref response);
-				thisValue.Abort();
-			}
+					try
+					{
+						if (token.IsCancellationRequested) return null;
+
+						if (settings?.OnResponseReceived != null)
+						{
+							if (!settings.OnResponseReceived(response)) return new UrlSearchResult { Status = UrlSearchStatus.Failed };
+						}
+
+						UrlSearchResult result = response.SearchAsync(searchFor, flags, settings, token).Execute();
+						token.ThrowIfCancellationRequested();
+						result.RedirectUri = thisValue.RequestUri != response.ResponseUri
+												? response.ResponseUri.IsAbsoluteUri || !thisValue.RequestUri.IsAbsoluteUri
+													? response.ResponseUri
+													: new Uri(thisValue.RequestUri, response.ResponseUri)
+												: thisValue.RequestUri;
+						return result;
+					}
+					catch (Exception ex)
+					{
+						settings?.OnError?.Invoke(ex);
+						return new UrlSearchResult
+						{
+							Status = UrlSearchStatus.Error,
+							Exception = ex
+						};
+					}
+					finally
+					{
+						ObjectHelper.Dispose(ref response);
+						thisValue.Abort();
+					}
+				}, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
 		}
 
 		public static string GetString([NotNull] this WebRequest thisValue, IOResponseSettings settings = null)
@@ -340,26 +379,34 @@ namespace essentialMix.Extensions
 			}
 		}
 
-		public static async Task<string> GetStringAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
+		[NotNull]
+		public static Task<string> GetStringAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebResponse response = await GetResponseAsync(thisValue, settings, token);
-			if (response == null || token.IsCancellationRequested) return null;
+			return GetResponseAsync(thisValue, settings, token)
+				.ContinueWith(task =>
+				{
+					WebResponse response = task.Result;
+					if (response == null) return null;
 
-			try
-			{
-				return settings?.OnResponseReceived?.Invoke(response) == false ? null : await response.GetStringAsync(settings, token).ConfigureAwait();
-			}
-			catch (Exception ex) when (settings?.OnError != null)
-			{
-				settings.OnError(ex);
-				return null;
-			}
-			finally
-			{
-				ObjectHelper.Dispose(ref response);
-				thisValue.Abort();
-			}
+					try
+					{
+						if (token.IsCancellationRequested) return null;
+						return settings?.OnResponseReceived?.Invoke(response) == false
+									? null
+									: response.GetStringAsync(settings, token).Execute();
+					}
+					catch (Exception ex) when (settings?.OnError != null)
+					{
+						settings.OnError(ex);
+						return null;
+					}
+					finally
+					{
+						ObjectHelper.Dispose(ref response);
+						thisValue.Abort();
+					}
+				}, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
 		}
 
 		public static Stream GetStream([NotNull] this WebRequest thisValue, IOResponseSettings settings = null)
@@ -378,21 +425,29 @@ namespace essentialMix.Extensions
 			}
 		}
 
-		public static async Task<Stream> GetStreamAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
+		[NotNull]
+		public static Task<Stream> GetStreamAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			WebResponse response = await GetResponseAsync(thisValue, settings, token);
-			if (response == null || token.IsCancellationRequested) return null;
+			return GetResponseAsync(thisValue, settings, token)
+				.ContinueWith(task =>
+				{
+					WebResponse response = task.Result;
+					if (response == null) return null;
 
-			try
-			{
-				return settings?.OnResponseReceived?.Invoke(response) == false ? null : response.GetStream();
-			}
-			catch (Exception ex) when (settings?.OnError != null)
-			{
-				settings.OnError(ex);
-				return null;
-			}
+					try
+					{
+						if (token.IsCancellationRequested) return null;
+						return settings?.OnResponseReceived?.Invoke(response) == false
+									? null
+									: response.GetStream();
+					}
+					catch (Exception ex) when (settings?.OnError != null)
+					{
+						settings.OnError(ex);
+						return null;
+					}
+				}, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
 		}
 
 		public static WebResponse GetResponse([NotNull] this WebRequest thisValue, IOResponseSettings settings = null)
@@ -422,10 +477,10 @@ namespace essentialMix.Extensions
 			return response;
 		}
 
-		public static async Task<WebResponse> GetResponseAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
+		public static Task<WebResponse> GetResponseAsync([NotNull] this WebRequest thisValue, IOResponseSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			if (token.IsCancellationRequested) return null;
-			if (settings == null) return await thisValue.GetResponseAsync();
+			if (settings == null) return thisValue.GetResponseAsync();
 
 			WebResponse response = null;
 			int retries = 0;
@@ -438,7 +493,7 @@ namespace essentialMix.Extensions
 
 				try
 				{
-					response = await thisValue.GetResponseAsync().ConfigureAwait();
+					response = thisValue.GetResponseAsync().Execute();
 				}
 				catch (Exception ex)
 				{
@@ -447,7 +502,7 @@ namespace essentialMix.Extensions
 				}
 			}
 
-			return response;
+			return Task.FromResult(response);
 		}
 
 		public static void CopyHeaders([NotNull] this WebRequest thisValue, [NotNull] NameValueCollection collection)

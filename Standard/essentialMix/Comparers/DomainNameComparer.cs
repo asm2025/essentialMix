@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using essentialMix.Extensions;
 using Other.Nager.PublicSuffix;
 
 namespace essentialMix.Comparers
@@ -20,7 +21,7 @@ namespace essentialMix.Comparers
 			{
 				try
 				{
-					tldRuleProvider.BuildAsync().GetAwaiter().GetResult();
+					tldRuleProvider.BuildAsync().Execute();
 				}
 				catch
 				{

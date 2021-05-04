@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using essentialMix.Extensions;
@@ -11,13 +12,13 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 	public sealed class TaskGroupQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
-		private AutoResetEvent _workDoneEvent;
+		private CountdownEvent _countdown;
 		private Thread _worker;
 
 		public TaskGroupQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			_workDoneEvent = new AutoResetEvent(false);
+			_countdown = new CountdownEvent(1);
 			(_worker = new Thread(Consume)
 			{
 				IsBackground = IsBackground,
@@ -30,10 +31,10 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 		{
 			base.Dispose(disposing);
 			if (!disposing) return;
-			ObjectHelper.Dispose(ref _workDoneEvent);
+			ObjectHelper.Dispose(ref _countdown);
 		}
 
-		public override int Count => _queue.Count;
+		public override int Count => _queue.Count + _countdown.CurrentCount - 1;
 
 		public override bool IsBusy => Count > 0;
 
@@ -74,11 +75,8 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 			try
 			{
-				if (millisecondsTimeout < TimeSpanHelper.ZERO)
-					_workDoneEvent.WaitOne(Token);
-				else if (!_workDoneEvent.WaitOne(millisecondsTimeout, Token))
-					return false;
-
+				if (millisecondsTimeout > TimeSpanHelper.INFINITE) return _countdown.Wait(millisecondsTimeout, Token);
+				_countdown.Wait(Token);
 				return !Token.IsCancellationRequested;
 			}
 			catch (OperationCanceledException)
@@ -122,7 +120,8 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 					for (int i = 0; !IsDisposed && !Token.IsCancellationRequested && i < items.Length; i++)
 					{
 						T item = items[i];
-						tasks[i] = Task.Run(() => Run(item), Token).ConfigureAwait();
+						_countdown.AddCount();
+						tasks[i] = RunAsync(item);
 					}
 
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitSilently(Token)) return;
@@ -140,15 +139,16 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 					for (int i = 0; !IsDisposed && !Token.IsCancellationRequested && i < items.Length; i++)
 					{
 						T item = items[i];
-						tasks[i] = Task.Run(() => Run(item), Token).ConfigureAwait();
+						_countdown.AddCount();
+						tasks[i] = RunAsync(item);
 					}
 
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitSilently(Token)) return;
-					count = 0;
 
 					for (int i = 0; i < tasks.Length; i++) 
 						ObjectHelper.Dispose(ref tasks[i]);
 
+					count = 0;
 					Array.Clear(tasks, 0, tasks.Length);
 				}
 
@@ -158,7 +158,8 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				for (int i = 0; !IsDisposed && !Token.IsCancellationRequested && i < tasks.Length; i++)
 				{
 					T item = items[i];
-					tasks[i] = Task.Run(() => Run(item), Token).ConfigureAwait();
+					_countdown.AddCount();
+					tasks[i] = RunAsync(item);
 				}
 
 				if (!tasks.WaitSilently(Token)) return;
@@ -169,14 +170,14 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			finally
 			{
 				OnWorkCompleted(EventArgs.Empty);
-				_workDoneEvent.Set();
+				_countdown.SignalAll();
 			}
 		}
 
-		private bool ReadItems([NotNull] T[] items, ref int offset)
+		private bool ReadItems([NotNull] IList<T> items, ref int offset)
 		{
 			if (IsDisposed || Token.IsCancellationRequested) return false;
-			int count = items.Length - offset;
+			int count = items.Count - offset;
 			if (count < 1) return false;
 
 			int read = 0;
@@ -189,6 +190,23 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			}
 
 			return !IsDisposed && !Token.IsCancellationRequested && read > 0;
+		}
+
+		[NotNull]
+		private Task RunAsync(T item)
+		{
+			if (IsDisposed || Token.IsCancellationRequested) return Task.CompletedTask;
+			return Task.Run(() =>
+			{
+				try
+				{
+					Run(item);
+				}
+				finally
+				{
+					_countdown?.SignalOne();
+				}
+			}, Token);
 		}
 	}
 }

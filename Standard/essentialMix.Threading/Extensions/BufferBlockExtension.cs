@@ -75,8 +75,8 @@ namespace essentialMix.Extensions
 
 			do
 			{
-				Task<bool> task = Task.Run(() => thisValue.OutputAvailableAsync(token), token).ConfigureAwait();
-				if (token.IsCancellationRequested || !task.IsCompleted || !task.Result) break;
+				bool outputAvailable = thisValue.OutputAvailableAsync(token).Execute();
+				if (token.IsCancellationRequested || !outputAvailable) break;
 				receiveAndPost();
 			}
 			while (!token.IsCancellationRequested);
@@ -85,9 +85,9 @@ namespace essentialMix.Extensions
 			return DataflowBlock.Encapsulate(thisValue, target);
 		}
 
-		public static async Task<IPropagatorBlock<T, T>> CreateDelayedBlockAsync<T>([NotNull] this BufferBlock<T> thisValue, TimeSpan delay, CancellationToken token = default(CancellationToken))
+		public static Task<IPropagatorBlock<T, T>> CreateDelayedBlockAsync<T>([NotNull] this BufferBlock<T> thisValue, TimeSpan delay, CancellationToken token = default(CancellationToken))
 		{
-			return await CreateDelayedBlockAsync(thisValue, delay, TimeSpan.Zero, token).ConfigureAwait();
+			return CreateDelayedBlockAsync(thisValue, delay, TimeSpan.Zero, token);
 		}
 
 		[ItemNotNull]

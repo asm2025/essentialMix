@@ -176,7 +176,7 @@ namespace essentialMix.Helpers
 							.ToNullIfEmpty();
 			if (pattern == "|") throw new ArgumentException("Invalid pattern.", nameof(pattern));
 			// multi-pattern means RegEx will be used to match the entries
-			bool multiPatterns = pattern != null && pattern.Length > 1 && pattern.Contains('|');
+			bool multiPatterns = pattern is { Length: > 1 } && pattern.Contains('|');
 			if (multiPatterns) pattern = RegexHelper.FromFilePattern(pattern);
 			if (pattern == null || RegexHelper.AllAsterisks.IsMatch(pattern)) multiPatterns = false;
 
@@ -333,7 +333,7 @@ namespace essentialMix.Helpers
 			if (pattern == "|") throw new ArgumentException("Invalid pattern.", nameof(pattern));
 
 			// multi-pattern means RegEx will be used to match the entries
-			bool multiPatterns = pattern != null && pattern.Length > 1 && pattern.Contains('|');
+			bool multiPatterns = pattern is { Length: > 1 } && pattern.Contains('|');
 			if (multiPatterns) pattern = RegexHelper.FromFilePattern(pattern);
 			if (pattern == null || RegexHelper.AllAsterisks.IsMatch(pattern)) multiPatterns = false;
 
@@ -379,7 +379,7 @@ namespace essentialMix.Helpers
 							.ToNullIfEmpty();
 			if (pattern == "|") throw new ArgumentException("Invalid pattern.", nameof(pattern));
 			// multi-pattern means RegEx will be used to match the entries
-			bool multiPatterns = pattern != null && pattern.Length > 1 && pattern.Contains('|');
+			bool multiPatterns = pattern is { Length: > 1 } && pattern.Contains('|');
 			if (multiPatterns) pattern = RegexHelper.FromFilePattern(pattern);
 			if (pattern == null || RegexHelper.AllAsterisks.IsMatch(pattern)) multiPatterns = false;
 

@@ -119,7 +119,7 @@ namespace essentialMix.Threading
 				if (_token.CanBeCanceled) _token.Register(() => _cts.Cancel());
 			}
 
-			_inputProcess.Exited += (sender, args) =>
+			_inputProcess.Exited += (sender, _) =>
 			{
 				Process p = (Process)sender;
 				DateTime? exitTime = null;
@@ -262,7 +262,7 @@ namespace essentialMix.Threading
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 			return !_inputProcess.IsAwaitable()
 				? Task.FromResult(true) 
-				: Task.Run(() => Wait(millisecondsTimeout), _token).ConfigureAwait();
+				: Task.Run(() => Wait(millisecondsTimeout), _token);
 		}
 
 		public bool Wait() { return Wait(TimeSpanHelper.INFINITE); }

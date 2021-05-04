@@ -589,16 +589,17 @@ namespace essentialMix.Helpers
 			return fileStream;
 		}
 
-		public static async Task<FileStream> DownloadFileAsync([NotNull] string url, [NotNull] string fileName, [NotNull] IOHttpDownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
+		[NotNull]
+		public static Task<FileStream> DownloadFileAsync([NotNull] string url, [NotNull] string fileName, [NotNull] IOHttpDownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
 			token.ThrowIfCancellationRequested();
 			Uri uri = ToUri(url, UriKind.Absolute) ?? throw new ArgumentException("Url is invalid.", nameof(url));
-			return await DownloadFileAsync(uri, fileName, settings, token).ConfigureAwait();
+			return DownloadFileAsync(uri, fileName, settings, token);
 		}
 
-		public static async Task<FileStream> DownloadFileAsync([NotNull] Uri url, string fileName, [NotNull] IOHttpDownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
+		public static Task<FileStream> DownloadFileAsync([NotNull] Uri url, string fileName, [NotNull] IOHttpDownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
@@ -620,69 +621,67 @@ namespace essentialMix.Helpers
 			if (!DirectoryHelper.Ensure(path)) return null;
 
 			FileStream fileStream = null;
-			WebResponse response = null;
 			Stream responseStream = null;
 			bool success = false;
+			return request.GetResponseAsync(settings, token)
+						.ContinueWith(task =>
+						{
+							WebResponse response = task.Result;
 
-			try
-			{
-				response = await request.GetResponseAsync(settings, token);
-				token.ThrowIfCancellationRequested();
+							if (response == null)
+							{
+								progress?.Report(100);
+								return null;
+							}
 
-				if (response == null)
-				{
-					progress?.Report(100);
-					return null;
-				}
+							try
+							{
+								double received = 0.0d;
+								double len = response.ContentLength;
 
-				double received = 0.0d;
-				double len = response.ContentLength;
+								if (len.Equals(0.0d))
+								{
+									progress?.Report(100);
+									return null;
+								}
 
-				if (len.Equals(0.0d))
-				{
-					progress?.Report(100);
-					return null;
-				}
+								if (len < 0.0d) progress = null;
 
-				if (len < 0.0d) progress = null;
+								FileMode mode = settings.Overwrite
+													? FileMode.Create
+													: FileMode.CreateNew;
+								fileStream = new FileStream(fileName, mode, FileAccess.Write);
 
-				FileMode mode = settings.Overwrite
-									? FileMode.Create
-									: FileMode.CreateNew;
-				fileStream = new FileStream(fileName, mode, FileAccess.Write);
+								int read;
+								byte[] buffer = new byte[settings.BufferSize];
+								responseStream = response.GetResponseStream() ?? throw new IOException("Could not get response stream.");
 
-				int read;
-				byte[] buffer = new byte[settings.BufferSize];
-				responseStream = response.GetResponseStream() ?? throw new IOException("Could not get response stream.");
+								while (!token.IsCancellationRequested && (read = responseStream.ReadAsync(buffer, token).Execute()) > 0)
+								{
+									received += read;
+									fileStream.WriteAsync(buffer, 0, read, token).Execute();
+									progress?.Report((int)(received / len * 100.0d));
+								}
 
-				while (!token.IsCancellationRequested && (read = await responseStream.ReadAsync(buffer, token)) > 0)
-				{
-					received += read;
-					await fileStream.WriteAsync(buffer, 0, read, token);
-					if (progress == null) continue;
-					progress.Report((int)(received / len * 100.0d));
-					Thread.Sleep(0);
-				}
+								token.ThrowIfCancellationRequested();
+								fileStream.Position = 0;
+								success = true;
+								progress?.Report(100);
+								return fileStream;
+							}
+							finally
+							{
+								request.Abort();
+								ObjectHelper.Dispose(ref responseStream);
+								ObjectHelper.Dispose(ref response);
 
-				token.ThrowIfCancellationRequested();
-				fileStream.Position = 0;
-				success = true;
-			}
-			finally
-			{
-				request.Abort();
-				ObjectHelper.Dispose(ref responseStream);
-				ObjectHelper.Dispose(ref response);
-
-				if (!success && fileStream != null)
-				{
-					ObjectHelper.Dispose(ref fileStream);
-					FileHelper.Delete(fileName);
-				}
-			}
-
-			progress?.Report(100);
-			return fileStream;
+								if (!success && fileStream != null)
+								{
+									ObjectHelper.Dispose(ref fileStream);
+									FileHelper.Delete(fileName);
+								}
+							}
+						}, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
 		}
 
 		public static Uri UploadFile([NotNull] string fileName, [NotNull] string url, [NotNull] IOUploadFileWebRequestSettings settings)
@@ -734,13 +733,13 @@ namespace essentialMix.Helpers
 				{
 					int read;
 
-					if (header != null && header.Length > 0)
+					if (header is { Length: > 0 })
 						stream.Write(header);
 
 					while ((read = reader.Read(buffer)) > 0) 
 						writer.Write(buffer, 0, read);
 
-					if (footer != null && footer.Length > 0)
+					if (footer is { Length: > 0 })
 						stream.Write(footer);
 				}
 
@@ -771,7 +770,7 @@ namespace essentialMix.Helpers
 			{
 				stream = request.GetRequestStream();
 
-				if (header != null && header.Length > 0)
+				if (header is { Length: > 0 })
 					stream.Write(header);
 
 				int read;
@@ -780,7 +779,7 @@ namespace essentialMix.Helpers
 				while ((read = reader.Read(buffer)) > 0) 
 					stream.Write(buffer, 0, read);
 
-				if (footer != null && footer.Length > 0)
+				if (footer is { Length: > 0 })
 					stream.Write(footer);
 
 				response = request.GetResponse();
@@ -798,26 +797,36 @@ namespace essentialMix.Helpers
 			return uri;
 		}
 
-		public static async Task<Uri> UploadFileAsync([NotNull] string fileName, [NotNull] string url, [NotNull] IOUploadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
+		[NotNull]
+		public static Task<Uri> UploadFileAsync([NotNull] string fileName, [NotNull] string url, [NotNull] IOUploadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
 			token.ThrowIfCancellationRequested();
 			Uri uri = ToUri(url, UriKind.Absolute) ?? throw new ArgumentException("Url is invalid.", nameof(url));
-			return await UploadFileAsync(fileName, uri, settings, token).ConfigureAwait();
+			return UploadFileAsync(fileName, uri, settings, token);
 		}
 
+		[NotNull]
 		public static async Task<Uri> UploadFileAsync([NotNull] string fileName, [NotNull] Uri url, [NotNull] IOUploadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
 			token.ThrowIfCancellationRequested();
 
-			using (FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+			FileStream stream = null;
+
+			try
 			{
+				stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 				return await UploadFileAsync(stream, url, settings, token);
 			}
+			finally
+			{
+				ObjectHelper.Dispose(ref stream);
+			}
 		}
-
+		
+		[NotNull]
 		public static async Task<Uri> UploadFileAsync([NotNull] Stream stream, [NotNull] Uri url, [NotNull] IOUploadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
@@ -826,9 +835,16 @@ namespace essentialMix.Helpers
 			/*
 			 * todo: detect if this is a text file?
 			 */
-			using (BinaryReader reader = new BinaryReader(stream))
+			BinaryReader reader = null;
+
+			try
 			{
+				reader = new BinaryReader(stream);
 				return await UploadFileAsync(reader, url, settings, token);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref reader);
 			}
 		}
 
@@ -840,6 +856,7 @@ namespace essentialMix.Helpers
 			WebResponse response = null;
 			Stream responseStream = null;
 			Stream stream = null;
+			StreamWriter writer = null;
 
 			try
 			{
@@ -847,23 +864,16 @@ namespace essentialMix.Helpers
 				token.ThrowIfCancellationRequested();
 
 				char[] buffer = new char[length];
+				writer = new StreamWriter(stream, reader.CurrentEncoding, reader.CurrentEncoding.GetMaxByteCount(buffer.Length));
+				if (header is { Length: > 0 }) await stream.WriteAsync(header, token);
 
-				using (StreamWriter writer = new StreamWriter(stream, reader.CurrentEncoding, reader.CurrentEncoding.GetMaxByteCount(buffer.Length)))
-				{
-					int read;
-					token.ThrowIfCancellationRequested();
-					if (header != null && header.Length > 0) await stream.WriteAsync(header, token);
+				int read;
 
-					while ((read = await reader.ReadAsync(buffer)) > 0)
-					{
-						token.ThrowIfCancellationRequested();
-						await writer.WriteAsync(buffer, 0, read);
-					}
+				while (!token.IsCancellationRequested && (read = await reader.ReadAsync(buffer)) > 0) 
+					await writer.WriteAsync(buffer, 0, read);
 
-					token.ThrowIfCancellationRequested();
-					if (footer != null && footer.Length > 0) await stream.WriteAsync(footer, token);
-				}
-
+				token.ThrowIfCancellationRequested();
+				if (footer is { Length: > 0 }) await stream.WriteAsync(footer, token);
 				response = await request.GetResponseAsync(settings, token);
 				token.ThrowIfCancellationRequested();
 				uri = response.ResponseUri;
@@ -871,6 +881,7 @@ namespace essentialMix.Helpers
 			finally
 			{
 				request.Abort();
+				ObjectHelper.Dispose(ref writer);
 				ObjectHelper.Dispose(ref stream);
 				ObjectHelper.Dispose(ref responseStream);
 				ObjectHelper.Dispose(ref response);
@@ -893,7 +904,7 @@ namespace essentialMix.Helpers
 			{
 				stream = await request.GetRequestStreamAsync();
 				token.ThrowIfCancellationRequested();
-				if (header != null && header.Length > 0) await stream.WriteAsync(header, token);
+				if (header is { Length: > 0 }) await stream.WriteAsync(header, token);
 
 				int read;
 				byte[] buffer = new byte[length];
@@ -905,7 +916,7 @@ namespace essentialMix.Helpers
 				}
 
 				token.ThrowIfCancellationRequested();
-				if (footer != null && footer.Length > 0) await stream.WriteAsync(footer, token);
+				if (footer is { Length: > 0 }) await stream.WriteAsync(footer, token);
 				response = await request.GetResponseAsync(settings, token);
 				token.ThrowIfCancellationRequested();
 				uri = response.ResponseUri;
@@ -1047,8 +1058,7 @@ namespace essentialMix.Helpers
 		{
 			value = value?.Trim();
 			if (string.IsNullOrEmpty(value)) throw new ArgumentNullException(nameof(value));
-
-			return __httpMethodsCache.GetOrAdd(value, v =>
+			return __httpMethodsCache.GetOrAdd(value, _ =>
 			{
 				Type type = typeof(HttpMethod);
 				PropertyInfo property = type.GetProperty(value, Constants.BF_PUBLIC_STATIC, type);

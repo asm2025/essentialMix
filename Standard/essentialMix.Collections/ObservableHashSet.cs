@@ -13,6 +13,7 @@ using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
+using essentialMix.Threading;
 using JetBrains.Annotations;
 using Other.Microsoft.Collections;
 using essentialMixMath = essentialMix.Numeric.Math;
@@ -122,24 +123,6 @@ namespace essentialMix.Collections
 			internal int HashCode; // Lower 31 bits of hash code, -1 if unused
 			internal int Next; // Index of next entry, -1 if last
 			internal T Value;
-		}
-
-		[Serializable]
-		private class SimpleMonitor : IDisposable
-		{
-			private int _busyCount;
-
-			public void Enter()
-			{
-				++_busyCount;
-			}
- 
-			public void Dispose()
-			{
-				--_busyCount;
-			}
- 
-			public bool Busy => _busyCount > 0;
 		}
 
 		private int _version;

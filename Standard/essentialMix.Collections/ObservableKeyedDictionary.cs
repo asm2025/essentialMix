@@ -15,6 +15,7 @@ using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
+using essentialMix.Threading;
 using JetBrains.Annotations;
 using Other.Microsoft;
 using essentialMixMath = essentialMix.Numeric.Math;
@@ -363,7 +364,7 @@ namespace essentialMix.Collections
 				{
 					if (_index == 0 || _index == _dictionary._count + 1) throw new InvalidOperationException();
 					return _getEnumeratorRetType == DICT_ENTRY
-								? (object)new DictionaryEntry(_current.Key, _current.Value)
+								? new DictionaryEntry(_current.Key, _current.Value)
 								: new KeyValuePair<TKey, TValue>(_current.Key, _current.Value);
 				}
 			}
@@ -399,24 +400,6 @@ namespace essentialMix.Collections
 				_index = 0;
 				_current = new KeyValuePair<TKey, TValue>();
 			}
-		}
-
-		[Serializable]
-		private class SimpleMonitor : IDisposable
-		{
-			private int _busyCount;
-
-			public void Enter()
-			{
-				++_busyCount;
-			}
- 
-			public void Dispose()
-			{
-				--_busyCount;
-			}
- 
-			public bool Busy => _busyCount > 0;
 		}
 
 		private int[] _buckets;

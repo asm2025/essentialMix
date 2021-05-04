@@ -202,7 +202,7 @@ namespace essentialMix.Cryptography
 		{
 			if (data.Length == 0) return null;
 
-			if (settings != null && settings.UseExpiration)
+			if (settings is { UseExpiration: true })
 			{
 				byte[] expiration = BitConverter.GetBytes(settings.GetExpiration().Ticks);
 				byte[] buffer = new byte[expiration.Length + data.Length];
@@ -297,7 +297,7 @@ namespace essentialMix.Cryptography
 
 			byte[] decrypted = asymmetric.Decrypt(data);
 
-			if (settings != null && settings.UseExpiration)
+			if (settings is { UseExpiration: true })
 			{
 				long ticks = BitConverter.ToInt64(decrypted, 0);
 				DateTime expiration = new DateTime(ticks);

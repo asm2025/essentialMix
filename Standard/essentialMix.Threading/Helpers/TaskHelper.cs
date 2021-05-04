@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
@@ -74,14 +74,13 @@ namespace essentialMix.Threading.Helpers
 			CancellationTokenSource mergedCts = !token.CanBeCanceled
 				? cts
 				: cts.Merge(token);
-			Task task = Task.Run(() => action(mergedCts), mergedCts.Token)
+			return Task.Run(() => action(mergedCts), mergedCts.Token)
 				.TimeoutAfter(millisecondsTimeout, mergedCts.Token)
-				.ContinueWith(t =>
+				.ContinueWith(_ =>
 				{
 					ObjectHelper.Dispose(ref mergedCts);
 					ObjectHelper.Dispose(ref cts);
 				}, mergedCts.Token);
-			return task.ConfigureAwait();
 		}
 
 		[NotNull]
@@ -99,7 +98,7 @@ namespace essentialMix.Threading.Helpers
 			CancellationTokenSource mergedCts = !token.CanBeCanceled
 				? cts
 				: cts.Merge(token);
-			Task<TResult> task = Task.Run(() => func(mergedCts), mergedCts.Token)
+			return Task.Run(() => func(mergedCts), mergedCts.Token)
 				.TimeoutAfter(millisecondsTimeout, mergedCts.Token)
 				.ContinueWith(t =>
 				{
@@ -107,7 +106,6 @@ namespace essentialMix.Threading.Helpers
 					ObjectHelper.Dispose(ref cts);
 					return t.Result;
 				}, mergedCts.Token);
-			return task.ConfigureAwait();
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -121,71 +119,145 @@ namespace essentialMix.Threading.Helpers
 		public static TResult Run<TResult>([NotNull] Func<Task<TResult>> func, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			return func().GetAwaiter().GetResult();
+			return func().Execute();
 		}
 
-		public static void Sequence([NotNull] Action[] actions, bool continueOnError, CancellationToken token = default(CancellationToken))
+		public static void Sequence([NotNull] params Action[] actions) { SequenceAsync(CancellationToken.None, actions).Execute(); }
+		
+		[NotNull]
+		public static Task SequenceAsync([NotNull] params Action[] actions) { return SequenceAsync(CancellationToken.None, actions); }
+		public static async Task SequenceAsync(CancellationToken token, [NotNull] params Action[] actions)
 		{
 			if (actions.Length == 0) return;
-			if (actions.Any(e => e == null)) throw new NullReferenceException($"{nameof(actions)} contains a null reference.");
-			IEnumerable<Action> en = actions;
-			if (token.CanBeCanceled) en = en.TakeWhile(e => !token.IsCancellationRequested);
-			
-			Task result = Task.CompletedTask;
 
-			foreach (Action action in en)
+			Queue<Action> queue = new Queue<Action>(actions.Length);
+
+			foreach (Action action in actions)
 			{
-				result = result.ContinueWith(t => token.IsCancellationRequested || t.IsCanceled
-													? Task.FromCanceled(token)
-													: t.IsFaulted
-														? continueOnError
-															? Task.Run(action, token).ConfigureAwait()
-															: Task.FromException(t.Exception ?? new Exception("Unknown error."))
-														: Task.Run(action, token).ConfigureAwait(), TaskContinuationOptions.NotOnCanceled)
-								.Unwrap();
+				if (action == null) throw new NullReferenceException($"{nameof(actions)} contains a null reference.");
+				queue.Enqueue(action);
+			}
+
+			BufferBlock<Action> buffer = null;
+			ActionBlock<Action> processor = null;
+			IDisposable link = null;
+
+			try
+			{
+				buffer = new BufferBlock<Action>(new DataflowBlockOptions
+				{
+					CancellationToken = token
+				});
+				processor = new ActionBlock<Action>(ac => ac(), new ExecutionDataflowBlockOptions
+				{
+					MaxDegreeOfParallelism = 1,
+					CancellationToken = token
+				});
+				link = buffer.LinkTo(processor, new DataflowLinkOptions
+				{
+					PropagateCompletion = false
+				});
+
+				while (!token.IsCancellationRequested && queue.Count > 0)
+				{
+					Action action = queue.Dequeue();
+					await buffer.SendAsync(action, token).ConfigureAwait();
+				}
+
+				token.ThrowIfCancellationRequested();
+				buffer.Complete();
+				await Task.WhenAll(buffer.Completion, processor.Completion);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref link);
+				ObjectHelper.Dispose(ref processor);
+				ObjectHelper.Dispose(ref buffer);
 			}
 		}
 
-		public static Task<TResult> Sequence<TResult>([NotNull] Func<TResult, Task<TResult>>[] functions, bool continueOnError, CancellationToken token = default(CancellationToken))
+		public static TResult Sequence<TResult>([NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, default(TResult), null, functions).Execute(); }
+		public static TResult Sequence<TResult>([NotNull] Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, default(TResult), evaluator, functions).Execute(); }
+		public static TResult Sequence<TResult>(TResult defaultValue, [NotNull] Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, defaultValue, evaluator, functions).Execute(); }
+
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>([NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, default(TResult), null, functions); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>([NotNull] Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, default(TResult), evaluator, functions); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>(TResult defaultValue, Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, defaultValue, evaluator, functions); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>(CancellationToken token, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(token, default(TResult), null, functions); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>(CancellationToken token, [NotNull] Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(token, default(TResult), evaluator, functions); }
+		public static async Task<TResult> SequenceAsync<TResult>(CancellationToken token, TResult defaultValue, Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions)
 		{
-			return Sequence(functions, continueOnError, default(TResult), null, token);
-		}
+			if (functions.Length == 0) return defaultValue;
 
-		public static Task<TResult> Sequence<TResult>([NotNull] Func<TResult, Task<TResult>>[] functions, TResult defaultValue, [NotNull] Func<TResult, bool> evaluator, CancellationToken token = default(CancellationToken))
-		{
-			return Sequence(functions, false, defaultValue, evaluator, token);
-		}
+			Queue<Func<TResult, Task<TResult>>> queue = new Queue<Func<TResult, Task<TResult>>>(functions.Length);
 
-		public static Task<TResult> Sequence<TResult>([NotNull] Func<TResult, Task<TResult>>[] functions, bool continueOnError, [NotNull] Func<TResult, bool> evaluator, CancellationToken token = default(CancellationToken))
-		{
-			return Sequence(functions, continueOnError, default(TResult), evaluator, token);
-		}
-
-		public static Task<TResult> Sequence<TResult>([NotNull] Func<TResult, Task<TResult>>[] functions, bool continueOnError, TResult defaultValue, Func<TResult, bool> evaluator, CancellationToken token = default(CancellationToken))
-		{
-			TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
-			tcs.SetResult(defaultValue);
-			if (functions.Length == 0) return tcs.Task;
-
-			IEnumerable<Func<TResult, Task<TResult>>> fs = functions;
-			if (token.CanBeCanceled) fs = fs.TakeWhile(f => !token.IsCancellationRequested);
-			Task<TResult> result = tcs.Task;
-
-			foreach (Func<TResult, Task<TResult>> func in fs)
+			foreach (Func<TResult, Task<TResult>> func in functions)
 			{
-				result = result.ContinueWith(t => token.IsCancellationRequested || t.IsCanceled
-													? Task.FromCanceled<TResult>(token)
-													: t.IsFaulted
-														? continueOnError
-															? func(defaultValue).ConfigureAwait()
-															: Task.FromException<TResult>(t.Exception ?? new Exception("Unknown error."))
-														: evaluator?.Invoke(t.Result) == true
-															? Task.FromResult(t.Result)
-															: func(t.Result).ConfigureAwait(), TaskContinuationOptions.NotOnCanceled)
-								.Unwrap();
+				if (func == null) throw new NullReferenceException($"{nameof(functions)} contains a null reference.");
+				queue.Enqueue(func);
 			}
 
-			return result;
+			TResult result = defaultValue;
+			CancellationTokenSource cts = null;
+			BufferBlock<Func<TResult, Task<TResult>>> buffer = null;
+			ActionBlock<Func<TResult, Task<TResult>>> processor = null;
+			IDisposable link = null;
+
+			try
+			{
+				cts = new CancellationTokenSource();
+
+				if (token.CanBeCanceled)
+				{
+					CancellationTokenSource ctsReg = cts;
+					token.Register(() => ctsReg.Cancel());
+				}
+
+				buffer = new BufferBlock<Func<TResult, Task<TResult>>>(new DataflowBlockOptions
+				{
+					CancellationToken = token
+				});
+
+				CancellationTokenSource ctsRef = cts;
+				processor = new ActionBlock<Func<TResult, Task<TResult>>>(func =>
+				{
+					result = func(result).Execute();
+					if (!token.IsCancellationRequested && (evaluator == null || evaluator(result))) return;
+					result = defaultValue;
+					ctsRef.Cancel();
+				}, new ExecutionDataflowBlockOptions
+				{
+					MaxDegreeOfParallelism = 1,
+					CancellationToken = token
+				});
+				link = buffer.LinkTo(processor, new DataflowLinkOptions
+				{
+					PropagateCompletion = false
+				});
+
+				while (!token.IsCancellationRequested && queue.Count > 0)
+				{
+					Func<TResult, Task<TResult>> func = queue.Dequeue();
+					await buffer.SendAsync(func, token).ConfigureAwait();
+				}
+
+				token.ThrowIfCancellationRequested();
+				buffer.Complete();
+				await Task.WhenAll(buffer.Completion, processor.Completion);
+				return result;
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref link);
+				ObjectHelper.Dispose(ref processor);
+				ObjectHelper.Dispose(ref buffer);
+				ObjectHelper.Dispose(ref cts);
+			}
 		}
 	}
 }

@@ -1,21 +1,25 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 {
+	/// <summary>
+	/// Not recommended because it's way too expensive unless you know what you're doing and need to
+	/// have items run on their own threads.
+	/// </summary>
 	public sealed class SemaphoreQueue<T> : NamedProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 
-		private ManualResetEventSlim _manualResetEventSlim;
+		private CountdownEvent _countdown;
+		private ManualResetEvent _allWorkDone;
 		private Semaphore _semaphore;
 		private Thread _worker;
-		private int _running;
 
 		public SemaphoreQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
@@ -47,7 +51,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			}
 
 			IsOwner = createdNew;
-			_manualResetEventSlim = new ManualResetEventSlim(false);
+			_allWorkDone = new ManualResetEvent(false);
 			(_worker = new Thread(Consume)
 					{
 						IsBackground = IsBackground,
@@ -67,10 +71,18 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				ObjectHelper.Dispose(ref _semaphore);
 			}
 
-			ObjectHelper.Dispose(ref _manualResetEventSlim);
+			ObjectHelper.Dispose(ref _countdown);
+			ObjectHelper.Dispose(ref _allWorkDone);
 		}
 
-		public override int Count => _queue.Count + _running;
+		public override int Count
+		{
+			get
+			{
+				int threads = _countdown?.CurrentCount ?? 0;
+				return _queue.Count + threads;
+			}
+		}
 
 		public override bool IsBusy => Count > 0;
 
@@ -111,11 +123,8 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 			try
 			{
-				if (millisecondsTimeout < TimeSpanHelper.ZERO)
-					_manualResetEventSlim.Wait(Token);
-				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
-					return false;
-
+				if (millisecondsTimeout > TimeSpanHelper.INFINITE) return _allWorkDone.WaitOne(millisecondsTimeout, Token);
+				_allWorkDone.WaitOne(Token);
 				return !Token.IsCancellationRequested;
 			}
 			catch (OperationCanceledException)
@@ -136,77 +145,112 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			CompleteInternal();
 			// Wait for the consumer's thread to finish.
 			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
+			Cancel();
 			ClearInternal();
+			ObjectHelper.Dispose(ref _countdown);
 			ObjectHelper.Dispose(ref _worker);
 		}
 
 		private void Consume()
 		{
 			if (IsDisposed) return;
-
-			_manualResetEventSlim.Reset();
 			OnWorkStarted(EventArgs.Empty);
+
+			IList<Thread> threads = new List<Thread>(Threads);
 
 			try
 			{
 				T item;
 
-				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.TryDequeue(out item))
+				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					T value = item;
-					Task.Run(() => RunAsync(value), Token);
+					if (!_queue.TryDequeue(out item)) continue;
+
+					Thread thread = new Thread(RunThread)
+					{
+						IsBackground = IsBackground,
+						Priority = Priority
+					};
+
+					if (_countdown == null) _countdown = new CountdownEvent(2);
+					else _countdown.AddCount();
+					thread.Start(item);
+					threads.Add(thread);
+					if (_countdown.CurrentCount - 1 < Threads) continue;
+					_countdown.Signal();
+					_countdown.Wait(Token);
+					ClearThreads(threads);
+					ObjectHelper.Dispose(ref _countdown);
 				}
 
 				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
 
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item))
 				{
-					T value = item;
-					Task.Run(() => RunAsync(value), Token);
+					Thread thread = new Thread(RunThread)
+					{
+						IsBackground = IsBackground,
+						Priority = Priority
+					};
+
+					if (_countdown == null) _countdown = new CountdownEvent(2);
+					else _countdown.AddCount();
+					thread.Start(item);
+					threads.Add(thread);
+					if (_countdown.CurrentCount - 1 < Threads) continue;
+					_countdown.Signal();
+					_countdown.Wait(Token);
+					ClearThreads(threads);
+					ObjectHelper.Dispose(ref _countdown);
 				}
 
-				SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || _running == 0);
-			}
-			catch (OperationCanceledException)
-			{
-				// ignored
+				if (_countdown is not { CurrentCount: > 1 }) return;
+				_countdown.Signal();
+				_countdown.Wait(Token);
 			}
 			finally
 			{
+				ClearThreads(threads);
+				ObjectHelper.Dispose(ref _countdown);
 				OnWorkCompleted(EventArgs.Empty);
-				_manualResetEventSlim.Set();
+				_allWorkDone.Set();
+			}
+
+			static void ClearThreads(IList<Thread> threads)
+			{
+				for (int i = threads.Count - 1; i >= 0; i--)
+				{
+					Thread th = threads[i];
+					ObjectHelper.Dispose(ref th);
+					threads.RemoveAt(i);
+				}
 			}
 		}
 
-		[NotNull]
-		private Task RunAsync(T item)
+		private void RunThread(object rawValue)
 		{
-			if (IsDisposed || Token.IsCancellationRequested) return Task.CompletedTask;
+			if (IsDisposed) return;
+
+			if (Token.IsCancellationRequested)
+			{
+				_countdown?.Signal();
+				return;
+			}
 
 			bool entered = false;
 
 			try
 			{
-				_semaphore.WaitOne(Token);
+				if (!_semaphore.WaitOne(Token)) return;
 				entered = true;
-				Interlocked.Increment(ref _running);
-				if (IsDisposed || Token.IsCancellationRequested) return Task.CompletedTask;
-				Run(item);
-			}
-			catch (OperationCanceledException)
-			{
-				// ignored
+				if (IsDisposed || Token.IsCancellationRequested) return;
+				Run((T)rawValue);
 			}
 			finally
 			{
-				if (entered)
-				{
-					_semaphore.Release();
-					Interlocked.Decrement(ref _running);
-				}
+				if (entered) _semaphore?.Release();
+				_countdown?.Signal();
 			}
-
-			return Task.CompletedTask;
 		}
 	}
 }

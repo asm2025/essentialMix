@@ -20,7 +20,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			: base(options, token)
 		{
 			_workEvent = new AutoResetEvent(false);
-			_countdown = new CountdownEvent(Threads + 1);
+			_countdown = new CountdownEvent(1);
 			_workers = new Thread[Threads];
 		}
 
@@ -33,9 +33,9 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _countdown);
 		}
 
-		public override int Count => _queue.Count;
+		public override int Count => _queue.Count + _countdown.CurrentCount - 1;
 
-		public override bool IsBusy => _countdown != null && _countdown.CurrentCount > 1;
+		public override bool IsBusy => Count > 0;
 
 		protected override void EnqueueInternal(T item)
 		{
@@ -56,6 +56,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 										IsBackground = IsBackground,
 										Priority = Priority
 									}).Start();
+							_countdown.AddCount();
 						}
 					}
 				}
@@ -176,20 +177,33 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 		private void SignalAndCheck()
 		{
-			if (IsDisposed) return;
+			if (IsDisposed || _countdown == null) return;
 			Monitor.Enter(_countdown);
+
+			bool completed = false;
 
 			try
 			{
-				_countdown.SignalOne();
+				if (IsDisposed || _countdown == null) return;
+				_countdown.Signal();
 				if (!CompleteMarked || _countdown.CurrentCount > 1) return;
-				OnWorkCompleted(EventArgs.Empty);
 			}
 			finally
 			{
-				if (_countdown.CurrentCount < 2) _countdown.SignalAll();
-				Monitor.Exit(_countdown);
+				if (_countdown is { CurrentCount: < 2 })
+				{
+					_countdown.SignalAll();
+					completed = true;
+				}
+				
+				if (_countdown != null) 
+					Monitor.Exit(_countdown);
+				else
+					completed = true;
 			}
+
+			if (!completed) return;
+			OnWorkCompleted(EventArgs.Empty);
 		}
 	}
 }

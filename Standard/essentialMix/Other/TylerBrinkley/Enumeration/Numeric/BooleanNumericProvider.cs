@@ -21,7 +21,7 @@ namespace Other.TylerBrinkley.Enumeration.Numeric
 
 		public bool IsInValueRange(ulong value) { return value <= byte.MaxValue; }
 
-		public bool IsInValueRange(long value) { return value >= 0L && value <= byte.MaxValue; }
+		public bool IsInValueRange(long value) { return value is >= 0L and <= byte.MaxValue; }
 
 		public bool LeftShift(bool value, int amount) { return !value & amount == 1; }
 

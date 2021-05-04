@@ -68,7 +68,7 @@ namespace essentialMix.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsElement(this XNode thisValue, string name)
 		{
-			return thisValue != null && thisValue.NodeType == XmlNodeType.Element && ((XElement)thisValue).Name.LocalName.IsSame(name);
+			return thisValue is { NodeType: XmlNodeType.Element } && ((XElement)thisValue).Name.LocalName.IsSame(name);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

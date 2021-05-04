@@ -53,7 +53,7 @@ namespace essentialMix.Extensions
 
 			TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
 			if (token.CanBeCanceled) token.Register(() => tcs.TrySetResult(null));
-			if (Task.WhenAny(thisValue, tcs.Task).ConfigureAwait().Result == tcs.Task) throw new OperationCanceledException(token);
+			if (Task.WhenAny(thisValue, tcs.Task).Execute() == tcs.Task) throw new OperationCanceledException(token);
 			return thisValue;
 		}
 
@@ -71,12 +71,12 @@ namespace essentialMix.Extensions
 
 			TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
 			if (token.CanBeCanceled) token.Register(() => tcs.TrySetResult(default));
-			if (Task.WhenAny(thisValue, tcs.Task).ConfigureAwait().Result == tcs.Task) throw new OperationCanceledException(token);
+			if (Task.WhenAny(thisValue, tcs.Task).Execute() == tcs.Task) throw new OperationCanceledException(token);
 			return thisValue;
 		}
 
 		[NotNull]
-		public static Task<T> WithResult<T>([NotNull] this Task thisValue, T value, CancellationToken token = default(CancellationToken)) { return thisValue.ContinueWith(t => value, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default); }
+		public static Task<T> WithResult<T>([NotNull] this Task thisValue, T value, CancellationToken token = default(CancellationToken)) { return thisValue.ContinueWith(_ => value, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default); }
 
 		public static Task TimeoutAfter([NotNull] this Task thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken))
 		{
@@ -335,7 +335,7 @@ namespace essentialMix.Extensions
 		{
 			return token.IsCancellationRequested
 						? Task.FromCanceled(token)
-						: Task.WhenAll(thisValue).ConfigureAwait();
+						: Task.WhenAll(thisValue);
 		}
 
 		[NotNull]
@@ -343,7 +343,7 @@ namespace essentialMix.Extensions
 		{
 			return token.IsCancellationRequested
 						? Task.FromCanceled<TResult[]>(token)
-						: Task.WhenAll(thisValue).ConfigureAwait();
+						: Task.WhenAll(thisValue);
 		}
 
 		[NotNull]
@@ -351,7 +351,7 @@ namespace essentialMix.Extensions
 		{
 			return token.IsCancellationRequested
 						? Task.FromCanceled<Task>(token)
-						: Task.WhenAny(thisValue).ConfigureAwait();
+						: Task.WhenAny(thisValue);
 		}
 
 		[NotNull]
@@ -359,7 +359,7 @@ namespace essentialMix.Extensions
 		{
 			return token.IsCancellationRequested
 						? Task.FromCanceled<Task<TResult>>(token)
-						: Task.WhenAny(thisValue).ConfigureAwait();
+						: Task.WhenAny(thisValue);
 		}
 
 		public static object GetResult([NotNull] this Task thisValue)

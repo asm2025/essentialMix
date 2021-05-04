@@ -14,6 +14,7 @@ using essentialMix.Comparers;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
+using essentialMix.Threading;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections
@@ -217,24 +218,6 @@ namespace essentialMix.Collections
 				_index = 0;
 				Current = default(T);
 			}
-		}
-
-		[Serializable]
-		private class SimpleMonitor : IDisposable
-		{
-			private int _busyCount;
-
-			public void Enter()
-			{
-				++_busyCount;
-			}
- 
-			public void Dispose()
-			{
-				--_busyCount;
-			}
- 
-			public bool Busy => _busyCount > 0;
 		}
 
 		private int _version;

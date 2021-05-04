@@ -1,21 +1,25 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 {
+	/// <summary>
+	/// Not recommended because it's way too expensive unless you know what you're doing and need to
+	/// have items run on their own threads.
+	/// </summary>
 	public sealed class MutexQueue<T> : NamedProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 
-		private AutoResetEvent _workDoneEvent;
+		private CountdownEvent _countdown;
+		private ManualResetEvent _allWorkDone;
 		private Mutex _mutex;
 		private Thread _worker;
-		private int _running;
 
 		public MutexQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
@@ -41,7 +45,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			}
 
 			IsOwner = createdNew;
-			_workDoneEvent = new AutoResetEvent(false);
+			_allWorkDone = new ManualResetEvent(false);
 			(_worker = new Thread(Consume)
 					{
 						IsBackground = IsBackground,
@@ -61,10 +65,18 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				ObjectHelper.Dispose(ref _mutex);
 			}
 
-			ObjectHelper.Dispose(ref _workDoneEvent);
+			ObjectHelper.Dispose(ref _countdown);
+			ObjectHelper.Dispose(ref _allWorkDone);
 		}
 
-		public override int Count => _queue.Count + _running;
+		public override int Count
+		{
+			get
+			{
+				int threads = _countdown?.CurrentCount ?? 0;
+				return _queue.Count + threads;
+			}
+		}
 
 		public override bool IsBusy => Count > 0;
 
@@ -105,11 +117,8 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 			try
 			{
-				if (millisecondsTimeout < TimeSpanHelper.ZERO)
-					_workDoneEvent.WaitOne(Token);
-				else if (!_workDoneEvent.WaitOne(millisecondsTimeout, Token))
-					return false;
-
+				if (millisecondsTimeout > TimeSpanHelper.INFINITE) return _allWorkDone.WaitOne(millisecondsTimeout, Token);
+				_allWorkDone.WaitOne(Token);
 				return !Token.IsCancellationRequested;
 			}
 			catch (OperationCanceledException)
@@ -130,7 +139,9 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			CompleteInternal();
 			// Wait for the consumer's thread to finish.
 			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
+			Cancel();
 			ClearInternal();
+			ObjectHelper.Dispose(ref _countdown);
 			ObjectHelper.Dispose(ref _worker);
 		}
 
@@ -138,67 +149,102 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 		{
 			if (IsDisposed) return;
 			OnWorkStarted(EventArgs.Empty);
-		
+	
+			IList<Thread> threads = new List<Thread>(Threads);
+	
 			try
 			{
 				T item;
 
-				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.TryDequeue(out item))
+				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					T value = item;
-					Task.Run(() => RunAsync(value), Token);
+					if (!_queue.TryDequeue(out item)) continue;
+
+					Thread thread = new Thread(RunThread)
+					{
+						IsBackground = IsBackground,
+						Priority = Priority
+					};
+
+					if (_countdown == null) _countdown = new CountdownEvent(2);
+					else _countdown.AddCount();
+					thread.Start(item);
+					threads.Add(thread);
+					if (_countdown.CurrentCount - 1 < Threads) continue;
+					_countdown.Signal();
+					_countdown.Wait(Token);
+					ClearThreads(threads);
+					ObjectHelper.Dispose(ref _countdown);
 				}
 
 				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
 
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item))
 				{
-					T value = item;
-					Task.Run(() => RunAsync(value), Token);
+					Thread thread = new Thread(RunThread)
+					{
+						IsBackground = IsBackground,
+						Priority = Priority
+					};
+
+					if (_countdown == null) _countdown = new CountdownEvent(2);
+					else _countdown.AddCount();
+					thread.Start(item);
+					threads.Add(thread);
+					if (_countdown.CurrentCount - 1 < Threads) continue;
+					_countdown.Signal();
+					_countdown.Wait(Token);
+					ClearThreads(threads);
+					ObjectHelper.Dispose(ref _countdown);
 				}
 
-				SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || _running == 0);
-			}
-			catch (OperationCanceledException)
-			{
-				// ignored
+				if (_countdown is not { CurrentCount: > 1 }) return;
+				_countdown.Signal();
+				_countdown.Wait(Token);
 			}
 			finally
 			{
+				ClearThreads(threads);
+				ObjectHelper.Dispose(ref _countdown);
 				OnWorkCompleted(EventArgs.Empty);
-				_workDoneEvent.Set();
+				_allWorkDone.Set();
+			}
+
+			static void ClearThreads(IList<Thread> threads)
+			{
+				for (int i = threads.Count - 1; i >= 0; i--)
+				{
+					Thread th = threads[i];
+					ObjectHelper.Dispose(ref th);
+					threads.RemoveAt(i);
+				}
 			}
 		}
 
-		[NotNull]
-		private Task RunAsync(T item)
+		private void RunThread(object rawValue)
 		{
-			if (IsDisposed || Token.IsCancellationRequested) return Task.CompletedTask;
+			if (IsDisposed) return;
+
+			if (Token.IsCancellationRequested)
+			{
+				_countdown?.Signal();
+				return;
+			}
 
 			bool entered = false;
 
 			try
 			{
-				if (!_mutex.WaitOne(Token)) return Task.CompletedTask;
+				if (!_mutex.WaitOne(Token)) return;
 				entered = true;
-				Interlocked.Increment(ref _running);
-				if (IsDisposed || Token.IsCancellationRequested) return Task.CompletedTask;
-				Run(item);
-			}
-			catch (OperationCanceledException)
-			{
-				// ignored
+				if (IsDisposed || Token.IsCancellationRequested) return;
+				Run((T)rawValue);
 			}
 			finally
 			{
-				if (entered)
-				{
-					_mutex.ReleaseMutex();
-					Interlocked.Decrement(ref _running);
-				}
+				if (entered) _mutex?.ReleaseMutex();
+				_countdown?.Signal();
 			}
-
-			return Task.CompletedTask;
 		}
 	}
 }

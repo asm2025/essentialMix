@@ -12,7 +12,6 @@ namespace essentialMix.Threading
 	public sealed class Synchronized<T> : Disposable
 	{
 		private readonly object _lock = new object();
-		private readonly object _threadsLock = new object();
 		private readonly Thread[] _workers;
 		private ManualResetEventSlim _mainWaitEvent = new ManualResetEventSlim(false);
 		private ManualResetEventSlim _workerWaitEvent = new ManualResetEventSlim(false);
@@ -43,7 +42,7 @@ namespace essentialMix.Threading
 			_cts = new CancellationTokenSource();
 			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed());
 			_token = _cts.Token;
-			_countdown = new CountdownEvent(3);
+			_countdown = new CountdownEvent(1);
 			_workers = new[]
 			{
 				new Thread(Main)
@@ -138,7 +137,7 @@ namespace essentialMix.Threading
 		[NotNull]
 		private Func<T, bool> WorkerRoutine { get; }
 
-		private bool IsBusyInternal => _countdown != null && _countdown.CurrentCount > 1;
+		private bool IsBusyInternal => _countdown is { CurrentCount: > 1 };
 
 		public void Start()
 		{
@@ -148,7 +147,11 @@ namespace essentialMix.Threading
 			lock (_lock)
 			{
 				OnWorkStarted(EventArgs.Empty);
-				_workers.ForEach(t => t.Start());
+				_workers.ForEach(t =>
+				{
+					t.Start();
+					_countdown.AddCount();
+				});
 			}
 		}
 
@@ -193,7 +196,7 @@ namespace essentialMix.Threading
 		{
 			ThrowIfDisposed();
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			return Task.Run(() => WaitInternal(millisecondsTimeout), Token).ConfigureAwait();
+			return Task.Run(() => WaitInternal(millisecondsTimeout), Token);
 		}
 
 		private bool WaitInternal(int millisecondsTimeout)
@@ -299,19 +302,33 @@ namespace essentialMix.Threading
 
 		private void SignalAndCheck()
 		{
-			if (IsDisposed) return;
+			if (IsDisposed || _countdown == null) return;
+			Monitor.Enter(_countdown);
 
-			bool done;
+			bool completed = false;
 
-			lock (_threadsLock)
+			try
 			{
-				_countdown.SignalOne();
-				done = _countdown.CurrentCount == 1;
+				if (IsDisposed || _countdown == null) return;
+				_countdown.Signal();
+				if (_countdown.CurrentCount > 1) return;
+			}
+			finally
+			{
+				if (_countdown is { CurrentCount: < 2 })
+				{
+					_countdown.SignalAll();
+					completed = true;
+				}
+				
+				if (_countdown != null) 
+					Monitor.Exit(_countdown);
+				else
+					completed = true;
 			}
 
-			if (!done) return;
+			if (!completed) return;
 			OnWorkCompleted(EventArgs.Empty);
-			_countdown.SignalAll();
 		}
 	}
 }

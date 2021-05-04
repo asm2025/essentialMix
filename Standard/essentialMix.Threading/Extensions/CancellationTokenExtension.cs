@@ -49,7 +49,7 @@ namespace essentialMix.Extensions
 			CancellationTokenAwaiter awaiter = new CancellationTokenAwaiter(thisValue);
 			Task task = awaiter.Task;
 			// ReSharper disable once MethodSupportsCancellation
-			return task.ContinueWith(t => ObjectHelper.Dispose(ref awaiter)).ConfigureAwait();
+			return task.ContinueWith(_ => ObjectHelper.Dispose(ref awaiter));
 		}
 
 		[NotNull]

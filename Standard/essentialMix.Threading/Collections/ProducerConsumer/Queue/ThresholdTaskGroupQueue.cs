@@ -12,14 +12,13 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 	{
 		private readonly object _lock = new object();
 		private readonly Queue<T> _queue = new Queue<T>();
-
-		private AutoResetEvent _workDoneEvent;
+		private CountdownEvent _countdown;
 		private Thread _worker;
 
 		public ThresholdTaskGroupQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			_workDoneEvent = new AutoResetEvent(false);
+			_countdown = new CountdownEvent(1);
 			(_worker = new Thread(Consume)
 			{
 				IsBackground = IsBackground,
@@ -32,7 +31,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 		{
 			base.Dispose(disposing);
 			if (!disposing) return;
-			ObjectHelper.Dispose(ref _workDoneEvent);
+			ObjectHelper.Dispose(ref _countdown);
 		}
 
 		public override int Count
@@ -40,9 +39,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			get
 			{
 				lock(_lock)
-				{
-					return _queue.Count;
-				}
+					return _queue.Count + _countdown.CurrentCount - 1;
 			}
 		}
 
@@ -137,11 +134,8 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			
 			try
 			{
-				if (millisecondsTimeout < TimeSpanHelper.ZERO)
-					_workDoneEvent.WaitOne(Token);
-				else if (!_workDoneEvent.WaitOne(millisecondsTimeout, Token))
-					return false;
-
+				if (millisecondsTimeout > TimeSpanHelper.INFINITE) return _countdown.Wait(millisecondsTimeout, Token);
+				_countdown.Wait(Token);
 				return !Token.IsCancellationRequested;
 			}
 			catch (OperationCanceledException)
@@ -174,17 +168,17 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 			try
 			{
-				int n = 0;
+				int count = 0;
 				int threads = Threads;
 				if (HasThreshold) threads++;
 				Task[] tasks = new Task[threads];
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					n = 0;
-					if (HasThreshold) tasks[n++] = Task.Delay(Threshold).ConfigureAwait();
+					count = 0;
+					if (HasThreshold) tasks[count++] = Task.Delay(Threshold).ConfigureAwait();
 
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && n < tasks.Length)
+					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && count < tasks.Length)
 					{
 						lock(_lock)
 						{
@@ -192,44 +186,69 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 							if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
 						}
 
-						while (_queue.Count > 0 && n < tasks.Length && !IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
+						while (_queue.Count > 0 && count < tasks.Length && !IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 						{
 							T item = _queue.Dequeue();
-							tasks[n++] = Task.Run(() => Run(item), Token).ConfigureAwait();
+							_countdown.AddCount();
+							tasks[count++] = Task.Run(() =>
+							{
+								try
+								{
+									Run(item);
+								}
+								finally
+								{
+									_countdown?.SignalOne();
+								}
+							}, Token);
 						}
 					}
 
-					if (n < tasks.Length) break;
+					if (count < tasks.Length) break;
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitSilently(Token)) return;
 
 					for (int i = 0; i < tasks.Length; i++)
 						ObjectHelper.Dispose(ref tasks[i]);
 
+					count = 0;
 					Array.Clear(tasks, 0, tasks.Length);
 				}
+
+				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
 
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
 				{
-					if (HasThreshold && n == 0) tasks[n++] = Task.Delay(Threshold).ConfigureAwait();
+					if (HasThreshold && count == 0) tasks[count++] = Task.Delay(Threshold).ConfigureAwait();
 
-					while (_queue.Count > 0 && n < tasks.Length && !IsDisposed && !Token.IsCancellationRequested)
+					while (_queue.Count > 0 && count < tasks.Length && !IsDisposed && !Token.IsCancellationRequested)
 					{
 						T item = _queue.Dequeue();
-						tasks[n++] = Task.Run(() => Run(item), Token).ConfigureAwait();
+						_countdown.AddCount();
+						tasks[count++] = Task.Run(() =>
+						{
+							try
+							{
+								Run(item);
+							}
+							finally
+							{
+								_countdown?.SignalOne();
+							}
+						}, Token);
 					}
 
-					if (n < tasks.Length) break;
+					if (count < tasks.Length) break;
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitSilently(Token)) return;
 
 					for (int i = 0; i < tasks.Length; i++)
 						ObjectHelper.Dispose(ref tasks[i]);
 
+					count = 0;
 					Array.Clear(tasks, 0, tasks.Length);
-					n = 0;
 				}
 
-				if (n < 1 || IsDisposed || Token.IsCancellationRequested) return;
-				Array.Resize(ref tasks, ++n);
+				if (count < 1 || IsDisposed || Token.IsCancellationRequested) return;
+				Array.Resize(ref tasks, ++count);
 				tasks.WaitSilently(Token);
 				
 				for (int i = 0; i < tasks.Length; i++)
@@ -238,7 +257,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			finally
 			{
 				OnWorkCompleted(EventArgs.Empty);
-				_workDoneEvent.Set();
+				_countdown.SignalAll();
 			}
 		}
 	}

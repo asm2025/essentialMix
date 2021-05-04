@@ -49,7 +49,7 @@ namespace Other.TylerBrinkley.Enumeration.Numeric
 
 		public bool IsInValueRange(ulong value) { return value <= (ulong)short.MaxValue; }
 
-		public bool IsInValueRange(long value) { return value >= short.MinValue && value <= short.MaxValue; }
+		public bool IsInValueRange(long value) { return value is >= short.MinValue and <= short.MaxValue; }
 
 		public short LeftShift(short value, int amount) { return (short)(value << amount); }
 

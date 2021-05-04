@@ -120,12 +120,12 @@ namespace essentialMix.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsElement(this XmlNode thisValue, string name) { return thisValue != null && thisValue.NodeType == XmlNodeType.Element && thisValue.Name.IsSame(name); }
+		public static bool IsElement(this XmlNode thisValue, string name) { return thisValue is { NodeType: XmlNodeType.Element } && thisValue.Name.IsSame(name); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsElement(this XmlNode thisValue, string localName, string namespaceURI)
 		{
-			return thisValue != null && thisValue.NodeType == XmlNodeType.Element && thisValue.Name.IsSame(localName) && thisValue.NamespaceURI.IsSame(namespaceURI);
+			return thisValue is { NodeType: XmlNodeType.Element } && thisValue.Name.IsSame(localName) && thisValue.NamespaceURI.IsSame(namespaceURI);
 		}
 
 		public static T Select<T>([NotNull] this XmlNode thisValue, [NotNull] string path)

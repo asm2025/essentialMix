@@ -35,7 +35,7 @@ namespace essentialMix.ComponentModel
 			public override PropertyDescriptorCollection GetProperties(Attribute[] attributes)
 			{
 				// Retrieve cached properties and filtered properties
-				bool filtering = attributes != null && attributes.Length > 0;
+				bool filtering = attributes is { Length: > 0 };
 				FilterCache cache = _provider._filterCache;
 				PropertyDescriptorCollection properties = _provider._propCache;
 

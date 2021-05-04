@@ -15,7 +15,7 @@ namespace essentialMix.Extensions
 	{
 		public static bool IsValid(this DataTable thisValue, bool bCount = false, bool bNoErrors = false)
 		{
-			bool b = thisValue != null && thisValue.IsInitialized;
+			bool b = thisValue is { IsInitialized: true };
 			if (bCount && b) b &= thisValue.Rows.Count > 0;
 			if (bNoErrors && b) b &= !thisValue.HasErrors;
 			return b;

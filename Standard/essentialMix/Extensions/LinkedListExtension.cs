@@ -27,7 +27,7 @@ namespace essentialMix.Extensions
 
 			T result;
 
-			if (thisValue is ICollection collection && collection.IsSynchronized)
+			if (thisValue is ICollection { IsSynchronized: true } collection)
 			{
 				lock (collection.SyncRoot)
 				{
@@ -51,7 +51,7 @@ namespace essentialMix.Extensions
 
 			T result;
 
-			if (thisValue is ICollection collection && collection.IsSynchronized)
+			if (thisValue is ICollection { IsSynchronized: true } collection)
 			{
 				lock (collection.SyncRoot)
 				{

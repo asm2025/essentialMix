@@ -173,7 +173,7 @@ namespace essentialMix.Collections
 
 				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
 
-				if (edges != null && edges.Count > 0)
+				if (edges is { Count: > 0 })
 				{
 					foreach (GraphEdge<T, TWeight> edge in edges.Values.OrderBy(e => e.Weight))
 					{

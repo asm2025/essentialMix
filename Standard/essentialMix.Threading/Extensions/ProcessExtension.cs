@@ -73,7 +73,7 @@ namespace essentialMix.Extensions
 		{
 			if (!IsAwaitable(thisValue)) return Task.FromResult(true);
 			token.ThrowIfCancellationRequested();
-			return Task.Run(() => WaitForExit(thisValue, millisecondsTimeout, exitContext, token), token).ConfigureAwait();
+			return Task.Run(() => WaitForExit(thisValue, millisecondsTimeout, exitContext, token), token);
 		}
 
 		public static bool WaitForExit([NotNull] this Process thisValue, CancellationToken token = default(CancellationToken)) { return WaitForExit(thisValue, TimeSpanHelper.INFINITE, false, token); }

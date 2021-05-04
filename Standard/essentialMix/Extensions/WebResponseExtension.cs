@@ -62,7 +62,7 @@ namespace essentialMix.Extensions
 			}
 		}
 
-		public static async Task<bool> ReadAsync([NotNull] this WebResponse thisValue, [NotNull] IOSettings settings, CancellationToken token = default(CancellationToken))
+		public static Task<bool> ReadAsync([NotNull] this WebResponse thisValue, [NotNull] IOSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 
@@ -74,7 +74,7 @@ namespace essentialMix.Extensions
 			{
 				stream = GetStream(thisValue);
 				token.ThrowIfCancellationRequested();
-				if (stream == null) return false;
+				if (stream == null) return Task.FromResult(false);
 				reader = new StreamReader(stream, settings.Encoding, true);
 
 				int length;
@@ -82,17 +82,17 @@ namespace essentialMix.Extensions
 
 				do
 				{
-					length = await reader.ReadAsync(chars).ConfigureAwait();
+					length = reader.ReadAsync(chars).Execute();
 				}
 				while (!token.IsCancellationRequested && length > 0 && ioOnRead.OnRead(chars, length));
 
 				token.ThrowIfCancellationRequested();
-				return true;
+				return Task.FromResult(true);
 			}
 			catch (Exception ex) when (settings.OnError != null)
 			{
 				settings.OnError(ex);
-				return false;
+				return Task.FromResult(false);
 			}
 			finally
 			{
@@ -130,7 +130,7 @@ namespace essentialMix.Extensions
 			return result;
 		}
 
-		public static async Task<string> ReadToEndAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
+		public static Task<string> ReadToEndAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			settings ??= new IOSettings();
@@ -145,7 +145,7 @@ namespace essentialMix.Extensions
 				token.ThrowIfCancellationRequested();
 				if (stream == null) return null;
 				reader = new StreamReader(stream, settings.Encoding, true, settings.BufferSize);
-				result = await reader.ReadToEndAsync().ConfigureAwait();
+				result = reader.ReadToEndAsync().Execute();
 				token.ThrowIfCancellationRequested();
 			}
 			catch (Exception ex) when (settings.OnError != null)
@@ -159,14 +159,14 @@ namespace essentialMix.Extensions
 				ObjectHelper.Dispose(ref stream);
 			}
 
-			return result;
+			return Task.FromResult(result);
 		}
 
 		public static string GetTitle([NotNull] this WebResponse thisValue, IOSettings settings = null)
 		{
 			string result = null;
 			StringBuilder sb = new StringBuilder();
-			IOReadSettings readSettings = new IOReadSettings(settings, (bf, len) =>
+			IOReadSettings readSettings = new IOReadSettings(settings, (bf, _) =>
 			{
 				sb.Append(bf);
 
@@ -186,13 +186,13 @@ namespace essentialMix.Extensions
 			return Read(thisValue, readSettings) ? result : null;
 		}
 
-		public static async Task<string> GetTitleAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
+		public static Task<string> GetTitleAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 
 			string result = null;
 			StringBuilder sb = new StringBuilder();
-			IOReadSettings readSettings = new IOReadSettings(settings, (bf, len) =>
+			IOReadSettings readSettings = new IOReadSettings(settings, (bf, _) =>
 			{
 				token.ThrowIfCancellationRequested();
 				sb.Append(bf);
@@ -210,9 +210,8 @@ namespace essentialMix.Extensions
 				// reached end of head-block; no title found =[
 				return !contents.Contains("</head>", StringComparison.OrdinalIgnoreCase);
 			});
-			if (!await ReadAsync(thisValue, readSettings, token).ConfigureAwait()) return null;
-			token.ThrowIfCancellationRequested();
-			return result;
+			return ReadAsync(thisValue, readSettings, token)
+				.ContinueWith(_ => result, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
 		}
 
 		public static (string Title, string Buffer) Peek([NotNull] this WebResponse thisValue, IOSettings settings = null)
@@ -223,7 +222,7 @@ namespace essentialMix.Extensions
 			int bufferSize = settings?.BufferSize ?? IOSettings.BUFFER_DEFAULT;
 			StringBuilder bufferFetch = new StringBuilder(bufferSize);
 			StringBuilder sb = new StringBuilder(bufferSize);
-			IOReadSettings readSettings = new IOReadSettings(settings, (buf, len) =>
+			IOReadSettings readSettings = new IOReadSettings(settings, (buf, _) =>
 			{
 				sb.Append(buf);
 
@@ -260,7 +259,7 @@ namespace essentialMix.Extensions
 				: (null, null);
 		}
 
-		public static async Task<(string Title, string Buffer)> PeekAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
+		public static Task<(string Title, string Buffer)> PeekAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 
@@ -270,7 +269,7 @@ namespace essentialMix.Extensions
 			int bufferSize = settings?.BufferSize ?? IOSettings.BUFFER_DEFAULT;
 			StringBuilder bufferFetch = new StringBuilder(bufferSize);
 			StringBuilder sb = new StringBuilder(bufferSize);
-			IOReadSettings readSettings = new IOReadSettings(settings, (buf, len) =>
+			IOReadSettings readSettings = new IOReadSettings(settings, (buf, _) =>
 			{
 				token.ThrowIfCancellationRequested();
 				sb.Append(buf);
@@ -303,10 +302,8 @@ namespace essentialMix.Extensions
 				token.ThrowIfCancellationRequested();
 				return !titleFound || !bufferFilled;
 			});
-
-			if (!await ReadAsync(thisValue, readSettings, token).ConfigureAwait()) return (null, null);
-			token.ThrowIfCancellationRequested();
-			return (title, bufferFetch.ToString());
+			return ReadAsync(thisValue, readSettings, token)
+					.ContinueWith(_ => (title, bufferFetch.ToString()), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
 		}
 
 		[NotNull]
@@ -331,7 +328,7 @@ namespace essentialMix.Extensions
 					StringComparison comparison = flags.HasFlag(UrlSearchFlags.IgnoreCase)
 							? StringComparison.InvariantCultureIgnoreCase
 							: StringComparison.InvariantCulture;
-					onRead = (c, i) =>
+					onRead = (c, _) =>
 					{
 						if (result.Status == UrlSearchStatus.Unknown) result.Status = UrlSearchStatus.Success;
 						sb.Append(c);
@@ -374,7 +371,7 @@ namespace essentialMix.Extensions
 				}
 				else
 				{
-					onRead = (c, i) =>
+					onRead = (_, _) =>
 					{
 						if (result.Status == UrlSearchStatus.Unknown) result.Status = UrlSearchStatus.Success;
 						return false;
@@ -399,14 +396,14 @@ namespace essentialMix.Extensions
 		}
 
 		[NotNull]
-		public static async Task<UrlSearchResult> SearchAsync([NotNull] this WebResponse thisValue, UrlSearchFlags flags, IOSettings settings = null, CancellationToken token = default(CancellationToken))
+		public static Task<UrlSearchResult> SearchAsync([NotNull] this WebResponse thisValue, UrlSearchFlags flags, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
-			return await SearchAsync(thisValue, null, flags, settings, token).ConfigureAwait();
+			return SearchAsync(thisValue, null, flags, settings, token);
 		}
 
 		[NotNull]
 		[ItemNotNull]
-		public static async Task<UrlSearchResult> SearchAsync([NotNull] this WebResponse thisValue, string searchFor, UrlSearchFlags flags, IOSettings settings = null, CancellationToken token = default(CancellationToken))
+		public static Task<UrlSearchResult> SearchAsync([NotNull] this WebResponse thisValue, string searchFor, UrlSearchFlags flags, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			bool hasTitleFlag = flags.HasFlag(UrlSearchFlags.Title);
@@ -425,7 +422,7 @@ namespace essentialMix.Extensions
 					StringComparison comparison = flags.HasFlag(UrlSearchFlags.IgnoreCase)
 							? StringComparison.InvariantCultureIgnoreCase
 							: StringComparison.InvariantCulture;
-					onRead = (c, i) =>
+					onRead = (c, _) =>
 					{
 						if (result.Status == UrlSearchStatus.Unknown) result.Status = UrlSearchStatus.Success;
 						sb.Append(c);
@@ -470,7 +467,7 @@ namespace essentialMix.Extensions
 				}
 				else
 				{
-					onRead = (c, i) =>
+					onRead = (_, _) =>
 					{
 						token.ThrowIfCancellationRequested();
 						if (result.Status == UrlSearchStatus.Unknown) result.Status = UrlSearchStatus.Success;
@@ -479,7 +476,7 @@ namespace essentialMix.Extensions
 				}
 
 				IOReadSettings readSettings = new IOReadSettings(settings, onRead);
-				if (! await ReadAsync(thisValue, readSettings, token).ConfigureAwait()) result.Status = UrlSearchStatus.Failed;
+				if (!ReadAsync(thisValue, readSettings, token).Execute()) result.Status = UrlSearchStatus.Failed;
 			}
 			catch (WebException wex)
 			{
@@ -492,7 +489,7 @@ namespace essentialMix.Extensions
 				result.Exception = ex;
 			}
 
-			return result;
+			return Task.FromResult(result);
 		}
 
 		public static string GetString([NotNull] this WebResponse thisValue, IOSettings settings = null)
@@ -500,14 +497,11 @@ namespace essentialMix.Extensions
 			bool bufferFilled = false;
 			int bufferSize = settings?.BufferSize ?? IOSettings.BUFFER_DEFAULT;
 			StringBuilder sb = new StringBuilder(bufferSize);
-			IOReadSettings readSettings = new IOReadSettings(settings, (buf, len) =>
+			IOReadSettings readSettings = new IOReadSettings(settings, (buf, _) =>
 			{
-				if (!bufferFilled)
-				{
-					sb.Append(buf);
-					bufferFilled = sb.Length >= bufferSize;
-				}
-
+				if (bufferFilled) return !bufferFilled;
+				sb.Append(buf);
+				bufferFilled = sb.Length >= bufferSize;
 				return !bufferFilled;
 			});
 			return Read(thisValue, readSettings) && sb.Length > 0
@@ -515,14 +509,15 @@ namespace essentialMix.Extensions
 				: null;
 		}
 
-		public static async Task<string> GetStringAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
+		[NotNull]
+		public static Task<string> GetStringAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 
 			bool bufferFilled = false;
 			int bufferSize = settings?.BufferSize ?? IOSettings.BUFFER_DEFAULT;
 			StringBuilder sb = new StringBuilder(bufferSize);
-			IOReadSettings readSettings = new IOReadSettings(settings, (buf, len) =>
+			IOReadSettings readSettings = new IOReadSettings(settings, (buf, _) =>
 			{
 				if (!bufferFilled)
 				{
@@ -533,9 +528,8 @@ namespace essentialMix.Extensions
 				token.ThrowIfCancellationRequested();
 				return !bufferFilled;
 			});
-			if (!await ReadAsync(thisValue, readSettings, token).ConfigureAwait()) return null;
-			token.ThrowIfCancellationRequested();
-			return sb.ToString();
+			return ReadAsync(thisValue, readSettings, token)
+				.ContinueWith(_ => sb.ToString(), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
 		}
 	}
 }

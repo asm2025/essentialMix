@@ -183,7 +183,7 @@ namespace essentialMix.Windows.Html
 			if (_sourceWithGuards[_idx] == '<')
 			{
 				char ch = char.ToUpper(_sourceWithGuards[_idx + 1]);
-				if (ch >= 'A' && ch <= 'Z' || ch == '!' || ch == '/')
+				if (ch is >= 'A' and <= 'Z' || ch == '!' || ch == '/')
 				{
 					++_idx;
 					return ParseTag();

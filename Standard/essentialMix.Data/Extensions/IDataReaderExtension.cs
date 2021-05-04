@@ -8,7 +8,7 @@ namespace essentialMix.Extensions
 {
 	public static class IDataReaderExtension
 	{
-		public static bool IsValid(this IDataReader thisValue) { return thisValue != null && !thisValue.IsClosed; }
+		public static bool IsValid(this IDataReader thisValue) { return thisValue is { IsClosed: false }; }
 
 		public static T Get<T>([NotNull] this IDataReader thisValue, [NotNull] string name) { return Get(thisValue, name, default(T)); }
 

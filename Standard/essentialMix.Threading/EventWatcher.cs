@@ -30,12 +30,12 @@ namespace essentialMix.Threading
 			_cts = new CancellationTokenSource();
 			Token = _cts.Token;
 			_listener = typeof(TArgs) == typeof(EventArgs)
-							? EventInfo.CreateDelegate((sender, args) =>
+							? EventInfo.CreateDelegate((_, args) =>
 							{
 								Completed = true;
 								WatcherCallback.Invoke(this, (TArgs)args);
 							})
-							: EventInfo.CreateDelegate<TArgs>((sender, args) =>
+							: EventInfo.CreateDelegate<TArgs>((_, args) =>
 							{
 								Completed = true;
 								WatcherCallback.Invoke(this, args);
@@ -127,7 +127,7 @@ namespace essentialMix.Threading
 			ThrowIfDisposed();
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed());
-			return Task.Run(() => Wait(millisecondsTimeout), Token).ConfigureAwait();
+			return Task.Run(() => Wait(millisecondsTimeout), Token);
 		}
 	}
 

@@ -35,7 +35,8 @@ namespace essentialMix.Threading.Collections.ProducerConsumer
 			if (disposing)
 			{
 				CompleteInternal();
-				StopInternal(!WaitOnDispose);
+				if (WaitOnDispose) WaitInternal(TimeSpanHelper.INFINITE);
+				else StopInternal(true);
 				ObjectHelper.Dispose(ref _cts);
 			}
 			base.Dispose(disposing);
@@ -128,7 +129,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer
 		{
 			ThrowIfDisposed();
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			return Task.Run(() => WaitInternal(millisecondsTimeout), Token).ConfigureAwait();
+			return Task.Run(() => WaitInternal(millisecondsTimeout), Token);
 		}
 
 		public void Clear()

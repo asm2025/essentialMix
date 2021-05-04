@@ -216,7 +216,7 @@ namespace essentialMix.Helpers
 		{
 			if (string.IsNullOrWhiteSpace(value) || !__validName.IsMatch(value) || __reservedNames.IsMatch(value)) return false;
 			if (value.ContainsAny(__defaultInvalidNameChars.Value)) return false;
-			if (moreInvalidChars != null && moreInvalidChars.Length > 0 && value.ContainsAny(moreInvalidChars)) return false;
+			if (moreInvalidChars is { Length: > 0 } && value.ContainsAny(moreInvalidChars)) return false;
 
 			FileInfo fi;
 
@@ -238,7 +238,7 @@ namespace essentialMix.Helpers
 		{
 			if (string.IsNullOrWhiteSpace(value) || !__validPath.IsMatch(value) || __reservedNames.IsMatch(value)) return false;
 			if (value.ContainsAny(__defaultInvalidPathChars.Value)) return false;
-			if (moreInvalidChars != null && moreInvalidChars.Length > 0 && value.ContainsAny(moreInvalidChars)) return false;
+			if (moreInvalidChars is { Length: > 0 } && value.ContainsAny(moreInvalidChars)) return false;
 
 			FileInfo fi;
 

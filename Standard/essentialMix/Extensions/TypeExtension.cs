@@ -1394,7 +1394,7 @@ namespace essentialMix.Extensions
 		{
 			string typeName = thisValue.FullName ?? throw new InvalidOperationException("Type name is null.");
 			Assembly assembly = thisValue.Assembly;
-			if (arguments != null && arguments.Length == 0) arguments = null;
+			if (arguments is { Length: 0 }) arguments = null;
 
 			object value;
 
@@ -1417,7 +1417,7 @@ namespace essentialMix.Extensions
 
 						int i = 0;
 
-						if (arguments != null && arguments.Length > 0)
+						if (arguments is { Length: > 0 })
 						{
 							for (; i < arguments.Length && i < parameters.Length; i++)
 							{
@@ -1553,7 +1553,7 @@ namespace essentialMix.Extensions
 				type = declaredOnly ? null : type.BaseType;
 			}
 
-			return types != null && types.Count > 0
+			return types is { Count: > 0 }
 						? types[0][0]
 						: thisValue;
 		}

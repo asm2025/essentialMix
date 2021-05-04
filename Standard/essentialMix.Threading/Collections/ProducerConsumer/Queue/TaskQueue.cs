@@ -21,7 +21,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			: base(options, token)
 		{
 			_workEvent = new AutoResetEvent(false);
-			_countdown = new CountdownEvent(Threads + 1);
+			_countdown = new CountdownEvent(1);
 			_workers = new Task[Threads];
 		}
 
@@ -34,9 +34,9 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _countdown);
 		}
 
-		public override int Count => _queue.Count;
+		public override int Count => _queue.Count + _countdown.CurrentCount - 1;
 
-		public override bool IsBusy => _countdown != null && _countdown.CurrentCount > 1;
+		public override bool IsBusy => Count > 0;
 
 		protected override void EnqueueInternal(T item)
 		{
@@ -50,8 +50,11 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 					{
 						_workStarted = true;
 
-						for (int i = 0; i < _workers.Length; i++) 
+						for (int i = 0; i < _workers.Length; i++)
+						{
+							_countdown.AddCount();
 							_workers[i] = Task.Run(Consume, Token).ConfigureAwait();
+						}
 					}
 				}
 
@@ -97,7 +100,6 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				if (millisecondsTimeout > TimeSpanHelper.INFINITE) return _countdown.Wait(millisecondsTimeout, Token);
 				_countdown.Wait(Token);
 				return !Token.IsCancellationRequested;
-
 			}
 			catch (OperationCanceledException)
 			{
@@ -119,28 +121,26 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
 			Cancel();
 			ClearInternal();
-			if (!_workStarted) return;
-			Task.WhenAll(_workers);
-
-			for (int i = 0; i < _workers.Length; i++) 
-				ObjectHelper.Dispose(ref _workers[i]);
 		}
 
 		private void Consume()
 		{
 			_workEvent.Set();
-			if (IsDisposed) return;
+			if (IsDisposed || Token.IsCancellationRequested) return;
 
 			try
 			{
 				T item;
 
-				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.TryDequeue(out item))
+				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
+				{
+					if (!_queue.TryDequeue(out item)) continue;
 					Run(item);
+				}
 
 				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item))
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item)) 
 					Run(item);
 			}
 			finally
@@ -151,20 +151,30 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 		private void SignalAndCheck()
 		{
-			if (IsDisposed) return;
+			if (IsDisposed || _countdown == null) return;
 			Monitor.Enter(_countdown);
+
+			bool completed = false;
 
 			try
 			{
-				_countdown.SignalOne();
+				if (IsDisposed || _countdown == null) return;
+				_countdown.Signal();
 				if (!CompleteMarked || _countdown.CurrentCount > 1) return;
-				OnWorkCompleted(EventArgs.Empty);
 			}
 			finally
 			{
-				if (_countdown.CurrentCount < 2) _countdown.SignalAll();
-				Monitor.Exit(_countdown);
+				if (_countdown is { CurrentCount: < 2 }) completed = true;
+
+				if (_countdown != null) 
+					Monitor.Exit(_countdown);
+				else
+					completed = true;
 			}
+
+			if (!completed) return;
+			OnWorkCompleted(EventArgs.Empty);
+			_countdown.SignalAll();
 		}
 	}
 }

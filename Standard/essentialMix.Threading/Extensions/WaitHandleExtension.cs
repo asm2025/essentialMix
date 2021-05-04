@@ -165,7 +165,7 @@ namespace essentialMix.Extensions
 			if (!IsAwaitable(thisValue)) return true;
 
 			Func<bool> predicate = evalFunc == null
-								? (Func<bool>)(() => !IsAwaitable(thisValue) || thisValue.WaitOne(TimeSpanHelper.ZERO, exitContext))
+								? () => !IsAwaitable(thisValue) || thisValue.WaitOne(TimeSpanHelper.ZERO, exitContext)
 								: () => !IsAwaitable(thisValue) || thisValue.WaitOne(TimeSpanHelper.ZERO, exitContext) || evalFunc();
 			bool result = SpinWait.SpinUntil(predicate, millisecondsTimeout);
 			if (result && setEvent && thisValue is EventWaitHandle evt) evt.Set();
@@ -188,7 +188,7 @@ namespace essentialMix.Extensions
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 
 			Func<bool> predicate = evalFunc == null
-								? (Func<bool>)(() => WaitHandle.WaitAll(thisValue, TimeSpanHelper.ZERO, exitContext))
+								? () => WaitHandle.WaitAll(thisValue, TimeSpanHelper.ZERO, exitContext)
 								: () => WaitHandle.WaitAll(thisValue, TimeSpanHelper.ZERO, exitContext) || evalFunc();
 			return SpinWait.SpinUntil(predicate, millisecondsTimeout);
 		}
@@ -207,11 +207,11 @@ namespace essentialMix.Extensions
 
 			int index = -1;
 			Func<bool> predicate = evalFunc == null
-								? (Func<bool>)(() =>
-												{
-													index = WaitHandle.WaitAny(thisValue, TimeSpanHelper.ZERO, exitContext);
-													return index == 0;
-												})
+								? () =>
+								{
+									index = WaitHandle.WaitAny(thisValue, TimeSpanHelper.ZERO, exitContext);
+									return index == 0;
+								}
 								: () =>
 								{
 									index = WaitHandle.WaitAny(thisValue, TimeSpanHelper.ZERO, exitContext);

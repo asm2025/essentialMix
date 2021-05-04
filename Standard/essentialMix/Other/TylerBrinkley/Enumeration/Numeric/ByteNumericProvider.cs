@@ -49,7 +49,7 @@ namespace Other.TylerBrinkley.Enumeration.Numeric
 
 		public bool IsInValueRange(ulong value) { return value <= byte.MaxValue; }
 
-		public bool IsInValueRange(long value) { return value >= byte.MinValue && value <= byte.MaxValue; }
+		public bool IsInValueRange(long value) { return value is >= byte.MinValue and <= byte.MaxValue; }
 
 		public byte LeftShift(byte value, int amount) { return (byte)(value << amount); }
 

@@ -16,15 +16,16 @@ namespace essentialMix.Extensions
 			return TaskHelper.Run(() => FindByNameOrEmailAsync(thisValue, userName, email));
 		}
 
+		[NotNull]
 		public static Task<TUser> FindByNameOrEmailAsync<TUser, TKey>([NotNull] this UserManager<TUser, TKey> thisValue, string userName, string email)
 			where TUser : class, IUser<TKey>
 			where TKey : IEquatable<TKey>
 		{
 			Func<TUser, Task<TUser>>[] functions = {
-				user => thisValue.FindByNameAsync(userName),
-				user => thisValue.FindByEmailAsync(email)
+				_ => thisValue.FindByNameAsync(userName),
+				_ => thisValue.FindByEmailAsync(email)
 			};
-			return TaskHelper.Sequence(functions, true, default(TUser), user => user != null);
+			return TaskHelper.SequenceAsync(default(TUser), user => user != null, functions);
 		}
 	}
 }

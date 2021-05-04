@@ -161,13 +161,13 @@ namespace essentialMix.Collections
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public bool IsInternal([NotNull] T value)
 		{
-			return TryGetValue(value, out TAdjacencyList edges) && edges != null && edges.Count > 1;
+			return TryGetValue(value, out TAdjacencyList edges) && edges is { Count: > 1 };
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public bool IsExternal([NotNull] T value)
 		{
-			return TryGetValue(value, out TAdjacencyList edges) && edges != null && edges.Count < 2;
+			return TryGetValue(value, out TAdjacencyList edges) && edges is { Count: < 2 };
 		}
 
 		[NotNull]
@@ -596,7 +596,7 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		protected sealed override void Insert(T key, HashSet<T> collection, bool add)
 		{
-			if (collection != null && collection.Count > 0 && !collection.IsSubsetOf(Keys)) throw new KeyNotFoundException();
+			if (collection is { Count: > 0 } && !collection.IsSubsetOf(Keys)) throw new KeyNotFoundException();
 			base.Insert(key, collection, add);
 		}
 

@@ -10,7 +10,7 @@ namespace essentialMix.Extensions
 		public static ValueTask AsValueTask<T>(this ValueTask<T> thisValue)
 		{
 			if (!thisValue.IsCompletedSuccessfully) return new ValueTask(thisValue.AsTask());
-			thisValue.GetAwaiter().GetResult();
+			thisValue.ConfigureAwait(false).GetAwaiter().GetResult();
 			return default(ValueTask);
 		}
 	}

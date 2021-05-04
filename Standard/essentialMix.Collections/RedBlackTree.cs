@@ -535,13 +535,13 @@ namespace essentialMix.Collections
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		private static bool IsRed(RedBlackNode<T> node)
 		{
-			return node != null && node.Color;
+			return node is { Color: true };
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		private static bool IsBlack(RedBlackNode<T> node)
 		{
-			return node != null && !node.Color;
+			return node is { Color: false };
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

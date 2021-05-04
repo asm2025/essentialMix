@@ -453,7 +453,7 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		protected sealed override void Insert(T key, KeyedCollection<T, GraphEdge<T, TWeight>> collection, bool add)
 		{
-			if (collection != null && collection.Count > 0)
+			if (collection is { Count: > 0 })
 			{
 				foreach (GraphEdge<T, TWeight> edge in collection)
 				{
@@ -488,7 +488,7 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		public sealed override bool ContainsEdge(T from, T to)
 		{
-			return TryGetValue(from, out KeyedCollection<T, GraphEdge<T, TWeight>> edges) && edges != null && edges.Count > 0 && edges.ContainsKey(to);
+			return TryGetValue(@from, out KeyedCollection<T, GraphEdge<T, TWeight>> edges) && edges is { Count: > 0 } && edges.ContainsKey(to);
 		}
 
 		[NotNull]

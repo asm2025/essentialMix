@@ -49,7 +49,7 @@ namespace Other.TylerBrinkley.Enumeration.Numeric
 
 		public bool IsInValueRange(ulong value) { return value <= (ulong)sbyte.MaxValue; }
 
-		public bool IsInValueRange(long value) { return value >= sbyte.MinValue && value <= sbyte.MaxValue; }
+		public bool IsInValueRange(long value) { return value is >= sbyte.MinValue and <= sbyte.MaxValue; }
 
 		public sbyte LeftShift(sbyte value, int amount) { return (sbyte)(value << amount); }
 

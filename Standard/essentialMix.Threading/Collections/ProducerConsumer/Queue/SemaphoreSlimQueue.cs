@@ -12,15 +12,14 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 	{
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 
-		private ManualResetEventSlim _manualResetEventSlim;
+		private CountdownEvent _countdown;
 		private SemaphoreSlim _semaphore;
 		private Thread _worker;
-		private int _running;
 
 		public SemaphoreSlimQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			_manualResetEventSlim = new ManualResetEventSlim(false);
+			_countdown = new CountdownEvent(1);
 			_semaphore = new SemaphoreSlim(Threads);
 			(_worker = new Thread(Consume)
 			{
@@ -35,10 +34,10 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			base.Dispose(disposing);
 			if (!disposing) return;
 			ObjectHelper.Dispose(ref _semaphore);
-			ObjectHelper.Dispose(ref _manualResetEventSlim);
+			ObjectHelper.Dispose(ref _countdown);
 		}
 
-		public override int Count => _queue.Count + _running;
+		public override int Count => _queue.Count + _countdown.CurrentCount - 1;
 
 		public override bool IsBusy => Count > 0;
 
@@ -79,11 +78,8 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 			try
 			{
-				if (millisecondsTimeout < TimeSpanHelper.ZERO)
-					_manualResetEventSlim.Wait(Token);
-				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
-					return false;
-
+				if (millisecondsTimeout > TimeSpanHelper.INFINITE) return _countdown.Wait(millisecondsTimeout, Token);
+				_countdown.Wait(Token);
 				return !Token.IsCancellationRequested;
 			}
 			catch (OperationCanceledException)
@@ -104,6 +100,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			CompleteInternal();
 			// Wait for the consumer's thread to finish.
 			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
+			Cancel();
 			ClearInternal();
 			ObjectHelper.Dispose(ref _worker);
 		}
@@ -111,68 +108,95 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 		private void Consume()
 		{
 			if (IsDisposed) return;
-
-			_manualResetEventSlim.Reset();
 			OnWorkStarted(EventArgs.Empty);
 
 			try
 			{
 				T item;
 
-				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.TryDequeue(out item))
+				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					T value = item;
-					Task.Run(() => RunAsync(value), Token);
+					if (!_queue.TryDequeue(out item)) continue;
+					_countdown.AddCount();
+					RunAsync(item);
 				}
 
 				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
 
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item))
 				{
-					T value = item;
-					Task.Run(() => RunAsync(value), Token);
+					_countdown.AddCount();
+					RunAsync(item);
 				}
-
-				SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || _running == 0);
-			}
-			catch (OperationCanceledException)
-			{
-				// ignored
 			}
 			finally
 			{
-				OnWorkCompleted(EventArgs.Empty);
-				_manualResetEventSlim.Set();
+				SignalAndCheck();
 			}
 		}
 
 		[NotNull]
-		private async Task RunAsync(T item)
+		private Task RunAsync(T item)
 		{
-			if (IsDisposed || Token.IsCancellationRequested) return;
+			if (IsDisposed) return Task.CompletedTask;
 
-			bool entered = false;
+			if (Token.IsCancellationRequested)
+			{
+				_countdown?.SignalOne();
+				return Task.CompletedTask;
+			}
+
+			return _semaphore.WaitAsync(Token)
+							.ContinueWith(task =>
+							{
+								if (IsDisposed || Token.IsCancellationRequested || !task.IsCompleted)
+								{
+									_semaphore?.Release();
+									_countdown?.SignalOne();
+									return;
+								}
+
+								try
+								{
+									Run(item);
+								}
+								finally
+								{
+									_semaphore?.Release();
+									SignalAndCheck();
+								}
+							}, Token);
+		}
+
+		private void SignalAndCheck()
+		{
+			if (IsDisposed || _countdown == null) return;
+			Monitor.Enter(_countdown);
+
+			bool completed = false;
 
 			try
 			{
-				await _semaphore.WaitAsync(Token);
-				entered = true;
-				Interlocked.Increment(ref _running);
-				if (IsDisposed || Token.IsCancellationRequested) return;
-				Run(item);
-			}
-			catch (OperationCanceledException)
-			{
-				// ignored
+				if (IsDisposed || _countdown == null) return;
+				_countdown.Signal();
+				if (!CompleteMarked || _countdown.CurrentCount > 1) return;
 			}
 			finally
 			{
-				if (entered)
+				if (_countdown is { CurrentCount: < 2 })
 				{
-					_semaphore.Release();
-					Interlocked.Decrement(ref _running);
+					_countdown.SignalAll();
+					completed = true;
 				}
+				
+				if (_countdown != null) 
+					Monitor.Exit(_countdown);
+				else
+					completed = true;
 			}
+
+			if (!completed) return;
+			OnWorkCompleted(EventArgs.Empty);
 		}
 	}
 }

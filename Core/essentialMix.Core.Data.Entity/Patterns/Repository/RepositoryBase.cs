@@ -114,7 +114,7 @@ namespace essentialMix.Core.Data.Entity.Patterns.Repository
 
 		protected override IQueryable<TEntity> PrepareListQuery(IQueryable<TEntity> query, IPagination settings)
 		{
-			if (settings is IIncludeSettings includeSettings && includeSettings.Include?.Count > 0)
+			if (settings is IIncludeSettings { Include: { Count: > 0 } } includeSettings)
 			{
 				query = includeSettings.Include.SkipNullOrEmpty()
 										.Aggregate(query, (current, path) => current.Include(path));
@@ -125,7 +125,7 @@ namespace essentialMix.Core.Data.Entity.Patterns.Repository
 				query = query.Where(filterSettings.FilterExpression);
 			}
 			
-			if (settings is ISortable sortable && sortable.OrderBy?.Count > 0)
+			if (settings is ISortable { OrderBy: { Count: > 0 } } sortable)
 			{
 				bool addedFirst = false;
 
@@ -174,7 +174,7 @@ namespace essentialMix.Core.Data.Entity.Patterns.Repository
 		{
 			IQueryable<TEntity> query = PrepareGetQuery(settings.KeyValue);
 			
-			if (settings is IIncludeSettings includeSettings && includeSettings.Include?.Count > 0)
+			if (settings is IIncludeSettings { Include: { Count: > 0 } } includeSettings)
 			{
 				query = includeSettings.Include.SkipNullOrEmpty()
 										.Aggregate(query, (current, path) => current.Include(path));

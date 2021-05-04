@@ -10,7 +10,8 @@ namespace essentialMix.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static Task ConfigureAwait([NotNull] this Task thisValue, bool continueOnCapturedContext = false)
 		{
-			return ConfigureAwait(thisValue, out _, continueOnCapturedContext);
+			thisValue.ConfigureAwait(continueOnCapturedContext);
+			return thisValue;
 		}
 
 		[NotNull]
@@ -25,7 +26,8 @@ namespace essentialMix.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static Task<TResult> ConfigureAwait<TResult>([NotNull] this Task<TResult> thisValue, bool continueOnCapturedContext = false)
 		{
-			return ConfigureAwait(thisValue, out _, continueOnCapturedContext);
+			thisValue.ConfigureAwait(continueOnCapturedContext);
+			return thisValue;
 		}
 
 		[NotNull]
@@ -34,6 +36,18 @@ namespace essentialMix.Extensions
 		{
 			awaitable = thisValue.ConfigureAwait(continueOnCapturedContext);
 			return thisValue;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static void Execute([NotNull] this Task thisValue, bool continueOnCapturedContext = false)
+		{
+			thisValue.ConfigureAwait(continueOnCapturedContext).GetAwaiter().GetResult();
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static TResult Execute<TResult>([NotNull] this Task<TResult> thisValue, bool continueOnCapturedContext = false)
+		{
+			return thisValue.ConfigureAwait(continueOnCapturedContext).GetAwaiter().GetResult();
 		}
 	}
 }

@@ -45,7 +45,7 @@ namespace essentialMix.Media.ffmpeg.Commands
 		public ConvertCommand(int? frames)
 			: base(Properties.Settings.Default.FFMPEG_NAME)
 		{
-			Monitor = frames.HasValue && frames.Value > 0
+			Monitor = frames is > 0
 				? new FastProgressMonitor(frames.Value, 
 				() => OnProgressStart(EventArgs.Empty),
 				percent => OnProgress(new ProgressChangedEventArgs(percent, null)),

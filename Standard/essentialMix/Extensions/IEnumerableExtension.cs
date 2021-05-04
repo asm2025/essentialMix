@@ -234,7 +234,7 @@ namespace essentialMix.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsDynamic<T>([NotNull] this IEnumerable<T> thisValue) { return thisValue is ICollection<T> collection && !collection.IsReadOnly; }
+		public static bool IsDynamic<T>([NotNull] this IEnumerable<T> thisValue) { return thisValue is ICollection<T> { IsReadOnly: false }; }
 
 		[NotNull]
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

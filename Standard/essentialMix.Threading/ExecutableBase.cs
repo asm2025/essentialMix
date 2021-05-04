@@ -104,7 +104,7 @@ namespace essentialMix.Threading
 		public Task<bool> RunAsync(CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			return Task.Run(() => Run(token), token).ConfigureAwait();
+			return Task.Run(() => Run(token), token);
 		}
 
 		public abstract bool Run(CancellationToken token = default(CancellationToken));

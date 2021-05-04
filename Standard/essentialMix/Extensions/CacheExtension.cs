@@ -18,9 +18,7 @@ namespace essentialMix.Extensions
 			if (thisValue.TryGetValue(exp.Key, out TResult cachedValue)) return cachedValue;
 
 			TResult computedValue = (TResult)exp.Method.Invoke(exp.Instance, exp.Arguments);
-			if (computedValue != null
-				&& computedValue is not IConvertible
-				&& computedValue is not ICacheable)
+			if (computedValue is { } and not IConvertible and not ICacheable)
 				throw new NotSafeToCacheException(computedValue);
 			ICacheEntry entry = thisValue.CreateEntry(exp.Key);
 			entry.Value = computedValue;
@@ -33,9 +31,7 @@ namespace essentialMix.Extensions
 			if (thisValue.TryGetValue(exp.Key, out TResult cachedValue)) return cachedValue;
 
 			TResult computedValue = await ((Task<TResult>)exp.Method.Invoke(exp.Instance, exp.Arguments)).ConfigureAwait(false);
-			if (computedValue != null
-				&& computedValue is not IConvertible
-				&& computedValue is not ICacheable)
+			if (computedValue is { } and not IConvertible and not ICacheable)
 				throw new NotSafeToCacheException(computedValue);
 			ICacheEntry entry = thisValue.CreateEntry(exp.Key);
 			entry.Value = computedValue;

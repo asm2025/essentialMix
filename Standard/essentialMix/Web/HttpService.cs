@@ -40,7 +40,7 @@ namespace essentialMix.Web
 		public HttpResponseMessage PerformRequest(HttpRequestMessage request)
 		{
 			ThrowIfDisposed();
-			return PerformRequestAsync(request).GetAwaiter().GetResult();
+			return PerformRequestAsync(request).Execute();
 		}
 
 		public Task<HttpResponseMessage> PerformRequestAsync(HttpRequestMessage request, CancellationToken token = default(CancellationToken))
@@ -55,22 +55,22 @@ namespace essentialMix.Web
 		{
 			ThrowIfDisposed();
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
-			return GetStringAsync(url).GetAwaiter().GetResult();
+			return GetStringAsync(url).Execute();
 		}
 
 		public string GetString([NotNull] Uri url)
 		{
 			ThrowIfDisposed();
-			return GetStringAsync(url).GetAwaiter().GetResult();
+			return GetStringAsync(url).Execute();
 		}
 
-		public async Task<string> GetStringAsync([NotNull] string url, CancellationToken token = default(CancellationToken))
+		public Task<string> GetStringAsync([NotNull] string url, CancellationToken token = default(CancellationToken))
 		{
 			ThrowIfDisposed();
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
 			if (token.IsCancellationRequested) return null;
 			if (!UriHelper.TryBuildUri(url, out Uri uri)) throw new ArgumentException("Uri is not well formatted.", nameof(url));
-			return await GetStringAsync(uri, token).ConfigureAwait();
+			return GetStringAsync(uri, token);
 		}
 
 		public async Task<string> GetStringAsync([NotNull] Uri url, CancellationToken token = default(CancellationToken))
@@ -78,24 +78,31 @@ namespace essentialMix.Web
 			ThrowIfDisposed();
 			if (token.IsCancellationRequested) return null;
 
-			using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url))
+			HttpRequestMessage request = null;
+			HttpResponseMessage response = null;
+
+			try
 			{
-				using (HttpResponseMessage response = await PerformRequestAsync(request, token).ConfigureAwait())
-				{
-					response.EnsureSuccessStatusCode();
-					return await response.Content
-										.ReadAsStringAsync().ConfigureAwait();
-				}
+				request = new HttpRequestMessage(HttpMethod.Get, url);
+				response = await PerformRequestAsync(request, token).ConfigureAwait();
+				response.EnsureSuccessStatusCode();
+				return await response.Content
+									.ReadAsStringAsync();
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref response);
+				ObjectHelper.Dispose(ref request);
 			}
 		}
 
-		public async Task<Stream> GetStreamAsync([NotNull] string url, CancellationToken token = default(CancellationToken))
+		public Task<Stream> GetStreamAsync([NotNull] string url, CancellationToken token = default(CancellationToken))
 		{
 			ThrowIfDisposed();
 			if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
 			if (token.IsCancellationRequested) return null;
 			if (!UriHelper.TryBuildUri(url, out Uri uri)) throw new ArgumentException("Uri is not well formatted.", nameof(url));
-			return await GetStreamAsync(uri, token).ConfigureAwait();
+			return GetStreamAsync(uri, token);
 		}
 
 		public async Task<Stream> GetStreamAsync([NotNull] Uri url, CancellationToken token = default(CancellationToken))
@@ -103,11 +110,21 @@ namespace essentialMix.Web
 			ThrowIfDisposed();
 			if (token.IsCancellationRequested) return null;
 
-			using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url))
+			HttpRequestMessage request = null;
+			HttpResponseMessage response = null;
+
+			try
 			{
-				HttpResponseMessage response = await PerformRequestAsync(request, token).ConfigureAwait();
+				request = new HttpRequestMessage(HttpMethod.Get, url);
+				response = await PerformRequestAsync(request, token).ConfigureAwait();
 				response.EnsureSuccessStatusCode();
-				return await response.Content.ReadAsStreamAsync().ConfigureAwait();
+				return await response.Content.ReadAsStreamAsync();
+			}
+			catch
+			{
+				ObjectHelper.Dispose(ref response);
+				ObjectHelper.Dispose(ref request);
+				throw;
 			}
 		}
 

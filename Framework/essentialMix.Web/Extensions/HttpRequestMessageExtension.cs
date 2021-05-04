@@ -10,7 +10,7 @@ namespace essentialMix.Extensions
 		public static bool IsLocalUrl([NotNull] this HttpRequestMessage thisValue)
 		{
 			object isLocal = thisValue.Properties["MS_IsLocal"];
-			return isLocal as bool? == true || isLocal is Lazy<bool> localFlag && localFlag.Value;
+			return isLocal as bool? == true || isLocal is Lazy<bool> { Value: true };
 		}
 	}
 }

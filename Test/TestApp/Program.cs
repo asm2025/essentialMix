@@ -412,7 +412,7 @@ work with {HEAVY} items.");
 
 		private static void TestThreadQueue()
 		{
-			int len = RNGRandomHelper.Next(100, 1000);
+			int len = RNGRandomHelper.Next(16, 32);
 			int[] values = new int[len];
 
 			for (int i = 0; i < values.Length; i++)
@@ -526,7 +526,7 @@ work with {HEAVY} items.");
 
 			static TaskResult Exec(int e)
 			{
-				Task.Delay(50).GetAwaiter().GetResult();
+				Task.Delay(50).Execute();
 				Console.Write($"{e:D4} ");
 				return TaskResult.Success;
 			}
@@ -543,7 +543,7 @@ work with {HEAVY} items.");
 				locker = new AsyncLock();
 				Task task1 = Method1().ContinueWith(_ => Console.WriteLine(nameof(Method1) + " completed"));
 				Task task2 = Method2().ContinueWith(_ => Console.WriteLine(nameof(Method2) + " completed"));
-				Task.WhenAll(task1, task2).ConfigureAwait().GetAwaiter().GetResult();
+				Task.WhenAll(task1, task2).Execute();
 			}
 			finally
 			{
@@ -552,18 +552,18 @@ work with {HEAVY} items.");
 
 			Task<int> Method1()
 			{
-				using (locker.EnterAsync().ConfigureAwait().GetAwaiter().GetResult())
+				using (locker.EnterAsync().Execute())
 				{
-					Task.Delay(2000).ConfigureAwait().GetAwaiter().GetResult();
+					Task.Delay(2000).Execute();
 					return Task.FromResult(123);
 				}
 			}
 
 			Task<string> Method2()
 			{
-				using (locker.EnterAsync().ConfigureAwait().GetAwaiter().GetResult())
+				using (locker.EnterAsync().Execute())
 				{
-					Task.Delay(2000).ConfigureAwait().GetAwaiter().GetResult();
+					Task.Delay(2000).Execute();
 					return Task.FromResult("test");
 				}
 			}
@@ -4719,9 +4719,9 @@ decrypted:
 
 			static void onCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 			{
-				string item = e.OldItems != null && e.OldItems.Count > 0
+				string item = e.OldItems is { Count: > 0 }
 								? Convert.ToString(e.OldItems[0])
-								: e.NewItems != null && e.NewItems.Count > 0
+								: e.NewItems is { Count: > 0 }
 									? Convert.ToString(e.NewItems[0])
 									: "...";
 				Console.WriteLine($"{item} => Collection{Bright.Cyan(e.Action.ToString())}");

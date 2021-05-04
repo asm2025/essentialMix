@@ -191,7 +191,7 @@ namespace essentialMix.Helpers
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsDirectorySeparator(char value) { return value == Path.DirectorySeparatorChar || value == Path.AltDirectorySeparatorChar; }
 
-		public static bool IsValidDriveChar(char value) { return value >= 'A' && value <= 'Z' || value >= 'a' && value <= 'z'; }
+		public static bool IsValidDriveChar(char value) { return value is >= 'A' and <= 'Z' || value is >= 'a' and <= 'z'; }
 
 		public static bool IsValidPathChar(char value) { return !Path.GetInvalidPathChars().Contains(value); }
 		
@@ -246,11 +246,7 @@ namespace essentialMix.Helpers
 		/// </summary>
 		public static bool IsDrive(string path)
 		{
-			return path != null
-					&& path.Length >= 2
-					&& IsValidDriveChar(path[0])
-					&& IsDirectorySeparator(path[1])
-					&& (path.Length == 2 || IsDirectorySeparator(path[2]));
+			return path is { Length: >= 2 } && IsValidDriveChar(path[0]) && IsDirectorySeparator(path[1]) && (path.Length == 2 || IsDirectorySeparator(path[2]));
 		}
 
         /// <summary>
@@ -514,7 +510,7 @@ namespace essentialMix.Helpers
 		public static bool IsValidPath(string path, params char[] includeChars)
 		{
 			if (string.IsNullOrWhiteSpace(path) || path.StartsWith(' ') || path.EndsWith(' ')) return false;
-			if (includeChars != null && includeChars.Length > 0 && path.ContainsAny(includeChars)) return false;
+			if (includeChars is { Length: > 0 } && path.ContainsAny(includeChars)) return false;
 			return !path.ContainsAny(Path.GetInvalidPathChars());
 		}
 

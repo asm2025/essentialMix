@@ -53,7 +53,7 @@ namespace essentialMix.Extensions
 				return Array.Empty<T>();
 
 			T[] values = EnumHelper<T>.GetValues();
-			return exclude != null && exclude.Length > 0
+			return exclude is { Length: > 0 }
 						? values.Where(e => !exclude.Contains(e) && thisValue.HasFlag(e)).ToArray()
 						: values;
 		}

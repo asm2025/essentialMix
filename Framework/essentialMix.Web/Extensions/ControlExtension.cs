@@ -403,19 +403,19 @@ namespace essentialMix.Extensions
 		public static bool IsCallback([NotNull] this Control thisValue)
 		{
 			Page page = AsPage(thisValue);
-			return page != null && page.IsCallback;
+			return page is { IsCallback: true };
 		}
 
 		public static bool IsFirstLoad([NotNull] this Control thisValue)
 		{
 			Page page = AsPage(thisValue);
-			return page != null && !page.IsPostBack && !page.IsCallback;
+			return page is { IsPostBack: false, IsCallback: false };
 		}
 
 		public static bool IsPostBack([NotNull] this Control thisValue)
 		{
 			Page page = AsPage(thisValue);
-			return page != null && page.IsPostBack;
+			return page is { IsPostBack: true };
 		}
 
 		public static void MetaTag([NotNull] this Control thisValue, [NotNull] string name, string content)

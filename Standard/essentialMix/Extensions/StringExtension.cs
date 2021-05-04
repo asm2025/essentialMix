@@ -27,7 +27,7 @@ namespace essentialMix.Extensions
 		public static string ToNullIfEmpty(this string thisValue)
 		{
 			thisValue = thisValue?.Trim();
-			if (thisValue != null && thisValue.Length == 0) thisValue = null;
+			if (thisValue is { Length: 0 }) thisValue = null;
 			return thisValue;
 		}
 
@@ -298,7 +298,7 @@ namespace essentialMix.Extensions
 
 		public static int IndexOfAny([NotNull] this string thisValue, int startIndex, int count, [NotNull] IEnumerable<char> value)
 		{
-			if (thisValue.Length == 0 || count < 1 || value is ICollection<char> collection && collection.Count == 0) return -1;
+			if (thisValue.Length == 0 || count < 1 || value is ICollection<char> { Count: 0 }) return -1;
 
 			int lastPos = startIndex + count;
 
@@ -344,7 +344,7 @@ namespace essentialMix.Extensions
 
 		public static int LastIndexOfAny([NotNull] this string thisValue, int startIndex, int count, [NotNull] IEnumerable<char> value)
 		{
-			if (thisValue.Length == 0 || count < 1 || value is ICollection<char> collection && collection.Count == 0) return -1;
+			if (thisValue.Length == 0 || count < 1 || value is ICollection<char> { Count: 0 }) return -1;
 
 			int lastPos = startIndex - count + 1;
 
@@ -382,7 +382,7 @@ namespace essentialMix.Extensions
 			return thisValue == null
 						? values.Any(e => e == null)
 						: thisValue.Length == 0
-							? values.Any(e => e != null && e.Length == 0)
+							? values.Any(e => e is { Length: 0 })
 							: values.Any(value => string.Equals(thisValue, value, StringComparison.OrdinalIgnoreCase));
 		}
 
@@ -426,7 +426,7 @@ namespace essentialMix.Extensions
 		public static bool ContainsAny(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
 		{
 			if (thisValue == null) return values.Length == 0 || values.Any(e => e == null);
-			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e != null && e.Length == 0);
+			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e is { Length: 0 });
 			StringComparison comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 			return values.Any(value => thisValue.Contains(value, comparison));
 		}
@@ -435,7 +435,7 @@ namespace essentialMix.Extensions
 		public static bool StartsWithAny(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
 		{
 			if (thisValue == null) return values.Length == 0 || values.Any(e => e == null);
-			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e != null && e.Length == 0);
+			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e is { Length: 0 });
 			StringComparison comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 			return values.Any(value => thisValue.StartsWith(value, comparison));
 		}
@@ -452,7 +452,7 @@ namespace essentialMix.Extensions
 		public static bool EndsWithAny(this string thisValue, bool ignoreCase, [NotNull] params string[] values)
 		{
 			if (thisValue == null) return values.Length == 0 || values.Any(e => e == null);
-			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e != null && e.Length == 0);
+			if (string.IsNullOrEmpty(thisValue)) return values.Length > 0 && values.Any(e => e is { Length: 0 });
 			StringComparison comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 			return values.Any(value => thisValue.EndsWith(value, comparison));
 		}
@@ -1648,7 +1648,7 @@ namespace essentialMix.Extensions
 								case char c:
 									w = c.ToString();
 									break;
-								case string s when s.Length > 0:
+								case string { Length: > 0 } s:
 									w = s[0].ToString();
 									break;
 							}

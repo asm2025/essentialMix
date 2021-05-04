@@ -394,7 +394,7 @@ namespace Other.JonSkeet.MiscUtil.Text
 		/// </summary>
 		/// <param name="value">The value to test.</param>
 		/// <returns>Whether or not the given value is a valid UTF-32 character.</returns>
-		public static bool IsValidUtf32Char(int value) { return value >= 0 && value <= MAX_UTF32_CHARACTER; }
+		public static bool IsValidUtf32Char(int value) { return value is >= 0 and <= MAX_UTF32_CHARACTER; }
 
 		/// <summary>
 		/// Compares one string with another for equality.

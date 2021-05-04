@@ -331,7 +331,7 @@ namespace essentialMix.Extensions
 		public static bool IsAuthenticated([NotNull] this HtmlHelper thisValue)
 		{
 			HttpRequestBase request = thisValue.ViewContext.GetRequest();
-			return request != null && request.IsAuthenticated;
+			return request is { IsAuthenticated: true };
 		}
 
 		[NotNull]

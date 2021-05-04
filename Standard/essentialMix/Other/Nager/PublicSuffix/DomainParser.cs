@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using essentialMix.Extensions;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
@@ -40,7 +41,7 @@ namespace Other.Nager.PublicSuffix
         public DomainParser([NotNull] ITldRuleProvider ruleProvider, IDomainNormalizer domainNormalizer = null)
             : this(domainNormalizer)
         {
-            IEnumerable<TldRule> rules = ruleProvider.BuildAsync().GetAwaiter().GetResult();
+            IEnumerable<TldRule> rules = ruleProvider.BuildAsync().Execute();
             AddRules(rules);
         }
 

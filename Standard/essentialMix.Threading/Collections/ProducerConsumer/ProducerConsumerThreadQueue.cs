@@ -9,9 +9,16 @@ namespace essentialMix.Threading.Collections.ProducerConsumer
 		protected ProducerConsumerThreadQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			if (options is not ProducerConsumerThreadQueueOptions<T> threadQueueOptions) return;
-			IsBackground = threadQueueOptions.IsBackground;
-			Priority = threadQueueOptions.Priority;
+			if (options is ProducerConsumerThreadQueueOptions<T> threadQueueOptions)
+			{
+				IsBackground = threadQueueOptions.IsBackground;
+				Priority = threadQueueOptions.Priority;
+			}
+			else
+			{
+				IsBackground = true;
+				Priority = ThreadPriority.Normal;
+			}
 		}
 
 		public bool IsBackground { get; }

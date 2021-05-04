@@ -18,16 +18,16 @@ namespace essentialMix.Extensions
 			thisValue.Entry(entity).Reload();
 		}
 
-		public static async Task ReloadAsync<TEntity>([NotNull] this SystemDbContext thisValue, TEntity entity)
+		public static Task ReloadAsync<TEntity>([NotNull] this SystemDbContext thisValue, TEntity entity)
 			where TEntity : class
 		{
-			await thisValue.Entry(entity).ReloadAsync().ConfigureAwait();
+			return thisValue.Entry(entity).ReloadAsync();
 		}
 
-		public static async Task ReloadAsync<TEntity>([NotNull] this SystemDbContext thisValue, TEntity entity, CancellationToken cancellationToken)
+		public static Task ReloadAsync<TEntity>([NotNull] this SystemDbContext thisValue, TEntity entity, CancellationToken cancellationToken)
 			where TEntity : class
 		{
-			await thisValue.Entry(entity).ReloadAsync(cancellationToken).ConfigureAwait();
+			return thisValue.Entry(entity).ReloadAsync(cancellationToken);
 		}
 
 		public static void ReloadNavigationProperty<TEntity, TElement>([NotNull] this SystemDbContext thisValue, TEntity entity, Expression<Func<TEntity, ICollection<TElement>>> navigationProperty)

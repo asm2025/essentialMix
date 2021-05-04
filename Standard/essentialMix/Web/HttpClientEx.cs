@@ -103,36 +103,36 @@ namespace essentialMix.Web
 			}
 		}
 
-		public HttpResponseMessage Delete(string requestUri) { return DeleteAsync(requestUri).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Delete(string requestUri, CancellationToken cancellationToken) { return DeleteAsync(requestUri, cancellationToken).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Delete(Uri requestUri) { return DeleteAsync(requestUri).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Delete(Uri requestUri, CancellationToken cancellationToken) { return DeleteAsync(requestUri, cancellationToken).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Get(string requestUri) { return GetAsync(requestUri).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Get(string requestUri, HttpCompletionOption completionOption) { return GetAsync(requestUri, completionOption).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Get(string requestUri, HttpCompletionOption completionOption, CancellationToken cancellationToken) { return GetAsync(requestUri, completionOption, cancellationToken).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Get(string requestUri, CancellationToken cancellationToken) { return GetAsync(requestUri, cancellationToken).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Get(Uri requestUri) { return GetAsync(requestUri).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Get(Uri requestUri, HttpCompletionOption completionOption) { return GetAsync(requestUri, completionOption).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Get(Uri requestUri, HttpCompletionOption completionOption, CancellationToken cancellationToken) { return GetAsync(requestUri, completionOption, cancellationToken).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Get(Uri requestUri, CancellationToken cancellationToken) { return GetAsync(requestUri, cancellationToken).GetAwaiter().GetResult(); }
-		public byte[] GetByteArray(string requestUri) { return GetByteArrayAsync(requestUri).GetAwaiter().GetResult(); }
-		public byte[] GetByteArray(Uri requestUri) { return GetByteArrayAsync(requestUri).GetAwaiter().GetResult(); }
-		public Stream GetStream(string requestUri) { return GetStreamAsync(requestUri).GetAwaiter().GetResult(); }
-		public Stream GetStream(Uri requestUri) { return GetStreamAsync(requestUri).GetAwaiter().GetResult(); }
-		public string GetString(string requestUri) { return GetStringAsync(requestUri).GetAwaiter().GetResult(); }
-		public string GetString(Uri requestUri) { return GetStringAsync(requestUri).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Post(string requestUri, HttpContent content) { return PostAsync(requestUri, content).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Post(string requestUri, HttpContent content, CancellationToken cancellationToken) { return PostAsync(requestUri, content, cancellationToken).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Post(Uri requestUri, HttpContent content) { return PostAsync(requestUri, content).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Post(Uri requestUri, HttpContent content, CancellationToken cancellationToken) { return PostAsync(requestUri, content, cancellationToken).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Put(string requestUri, HttpContent content) { return PutAsync(requestUri, content).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Put(string requestUri, HttpContent content, CancellationToken cancellationToken) { return PutAsync(requestUri, content, cancellationToken).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Put(Uri requestUri, HttpContent content) { return PutAsync(requestUri, content).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Put(Uri requestUri, HttpContent content, CancellationToken cancellationToken) { return PutAsync(requestUri, content, cancellationToken).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Send(HttpRequestMessage request) { return SendAsync(request).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Send(HttpRequestMessage request, HttpCompletionOption completionOption) { return SendAsync(request, completionOption).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Send(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken) { return SendAsync(request, completionOption, cancellationToken).GetAwaiter().GetResult(); }
-		public HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken) { return SendAsync(request, cancellationToken).GetAwaiter().GetResult(); }
+		public HttpResponseMessage Delete(string requestUri) { return DeleteAsync(requestUri).Execute(); }
+		public HttpResponseMessage Delete(string requestUri, CancellationToken cancellationToken) { return DeleteAsync(requestUri, cancellationToken).Execute(); }
+		public HttpResponseMessage Delete(Uri requestUri) { return DeleteAsync(requestUri).Execute(); }
+		public HttpResponseMessage Delete(Uri requestUri, CancellationToken cancellationToken) { return DeleteAsync(requestUri, cancellationToken).Execute(); }
+		public HttpResponseMessage Get(string requestUri) { return GetAsync(requestUri).Execute(); }
+		public HttpResponseMessage Get(string requestUri, HttpCompletionOption completionOption) { return GetAsync(requestUri, completionOption).Execute(); }
+		public HttpResponseMessage Get(string requestUri, HttpCompletionOption completionOption, CancellationToken cancellationToken) { return GetAsync(requestUri, completionOption, cancellationToken).Execute(); }
+		public HttpResponseMessage Get(string requestUri, CancellationToken cancellationToken) { return GetAsync(requestUri, cancellationToken).Execute(); }
+		public HttpResponseMessage Get(Uri requestUri) { return GetAsync(requestUri).Execute(); }
+		public HttpResponseMessage Get(Uri requestUri, HttpCompletionOption completionOption) { return GetAsync(requestUri, completionOption).Execute(); }
+		public HttpResponseMessage Get(Uri requestUri, HttpCompletionOption completionOption, CancellationToken cancellationToken) { return GetAsync(requestUri, completionOption, cancellationToken).Execute(); }
+		public HttpResponseMessage Get(Uri requestUri, CancellationToken cancellationToken) { return GetAsync(requestUri, cancellationToken).Execute(); }
+		public byte[] GetByteArray(string requestUri) { return GetByteArrayAsync(requestUri).Execute(); }
+		public byte[] GetByteArray(Uri requestUri) { return GetByteArrayAsync(requestUri).Execute(); }
+		public Stream GetStream(string requestUri) { return GetStreamAsync(requestUri).Execute(); }
+		public Stream GetStream(Uri requestUri) { return GetStreamAsync(requestUri).Execute(); }
+		public string GetString(string requestUri) { return GetStringAsync(requestUri).Execute(); }
+		public string GetString(Uri requestUri) { return GetStringAsync(requestUri).Execute(); }
+		public HttpResponseMessage Post(string requestUri, HttpContent content) { return PostAsync(requestUri, content).Execute(); }
+		public HttpResponseMessage Post(string requestUri, HttpContent content, CancellationToken cancellationToken) { return PostAsync(requestUri, content, cancellationToken).Execute(); }
+		public HttpResponseMessage Post(Uri requestUri, HttpContent content) { return PostAsync(requestUri, content).Execute(); }
+		public HttpResponseMessage Post(Uri requestUri, HttpContent content, CancellationToken cancellationToken) { return PostAsync(requestUri, content, cancellationToken).Execute(); }
+		public HttpResponseMessage Put(string requestUri, HttpContent content) { return PutAsync(requestUri, content).Execute(); }
+		public HttpResponseMessage Put(string requestUri, HttpContent content, CancellationToken cancellationToken) { return PutAsync(requestUri, content, cancellationToken).Execute(); }
+		public HttpResponseMessage Put(Uri requestUri, HttpContent content) { return PutAsync(requestUri, content).Execute(); }
+		public HttpResponseMessage Put(Uri requestUri, HttpContent content, CancellationToken cancellationToken) { return PutAsync(requestUri, content, cancellationToken).Execute(); }
+		public HttpResponseMessage Send(HttpRequestMessage request) { return SendAsync(request).Execute(); }
+		public HttpResponseMessage Send(HttpRequestMessage request, HttpCompletionOption completionOption) { return SendAsync(request, completionOption).Execute(); }
+		public HttpResponseMessage Send(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken) { return SendAsync(request, completionOption, cancellationToken).Execute(); }
+		public HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken) { return SendAsync(request, cancellationToken).Execute(); }
 
 		protected virtual bool OnResponse([NotNull] HttpResponseMessage response)
 		{

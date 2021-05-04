@@ -85,7 +85,7 @@ namespace essentialMix.Threading.Collections.MessageQueue
 
 		public CancellationToken Token { get; }
 
-		public bool IsBusy => _manualResetEventSlim != null && !_manualResetEventSlim.IsSet;
+		public bool IsBusy => _manualResetEventSlim is { IsSet: false };
 
 		public bool CompleteMarked => _queue.IsAddingCompleted;
 
@@ -160,7 +160,7 @@ namespace essentialMix.Threading.Collections.MessageQueue
 		{
 			ThrowIfDisposed();
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			return Task.Run(() => WaitInternal(millisecondsTimeout), Token).ConfigureAwait();
+			return Task.Run(() => WaitInternal(millisecondsTimeout), Token);
 		}
 
 		public void Clear()
@@ -226,7 +226,6 @@ namespace essentialMix.Threading.Collections.MessageQueue
 		private void Consume()
 		{
 			if (IsDisposed) return;
-
 			_manualResetEventSlim.Reset();
 
 			try

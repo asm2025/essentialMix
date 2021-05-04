@@ -38,7 +38,7 @@ namespace essentialMix.Extensions
 				configure?.Invoke(options);
 				options.ForwardedHeaders |= ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
 
-				if (options.AllowedHosts == null || options.AllowedHosts.Count == 0 && allowedHosts != null && allowedHosts.Length > 0)
+				if (options.AllowedHosts == null || options.AllowedHosts.Count == 0 && allowedHosts is { Length: > 0 })
 				{
 					options.AllowedHosts = allowedHosts;
 				}

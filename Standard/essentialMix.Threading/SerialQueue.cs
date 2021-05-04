@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using essentialMix.Extensions;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading
@@ -37,8 +36,8 @@ namespace essentialMix.Threading
 			lock (_locker)
 			{
 				task = _lastTask != null && _lastTask.TryGetTarget(out Task lastTask) 
-					? lastTask.ContinueWith(_ => func()).ConfigureAwait() 
-					: Task.Run(func).ConfigureAwait();
+					? lastTask.ContinueWith(_ => func()) 
+					: Task.Run(func);
 				_lastTask = new WeakReference<Task>(task);
 			}
 

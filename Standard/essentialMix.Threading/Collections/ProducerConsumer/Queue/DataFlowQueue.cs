@@ -125,7 +125,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			try
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
-					Task.WhenAll(_queue.Completion, _processor.Completion).ConfigureAwait().Wait(Token);
+					Task.WhenAll(_queue.Completion, _processor.Completion).Execute();
 			}
 			catch (OperationCanceledException)
 			{

@@ -49,7 +49,7 @@ namespace essentialMix.Media.ffmpeg.Commands
 					_metadata.FormatLongName = (string)jFormat["format_long_name"];
 					_metadata.ProbeScore = (int)jFormat["probe_score"];
 
-					if (jFormat["tags"] is JObject jTags && jTags.Count > 0)
+					if (jFormat["tags"] is JObject { Count: > 0 } jTags)
 					{
 						IDictionary<string, string> tags = new Dictionary<string, string>(jTags.Count);
 
@@ -99,7 +99,7 @@ namespace essentialMix.Media.ffmpeg.Commands
 				else Metadata.Video.BitRate = Metadata.Video.Size.BitRate;
 			}
 
-			if (Metadata.Audio != null && Metadata.Audio.BitRate > 0) Metadata.Audio.BitRate *= 1000;
+			if (Metadata.Audio is { BitRate: > 0 }) Metadata.Audio.BitRate *= 1000;
 
 			using StreamMetaDataCommand streamMetaData = new StreamMetaDataCommand(Metadata)
 			{

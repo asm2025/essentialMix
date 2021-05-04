@@ -17,7 +17,7 @@ namespace essentialMix.Extensions
 							.Distinct(StringComparer.OrdinalIgnoreCase)
 							.ToArray();
 
-			if (origins != null && origins.Length > 0 && origins.All(e => e != "*"))
+			if (origins is { Length: > 0 } && origins.All(e => e != "*"))
 			{
 				thisValue.WithOrigins(origins);
 				thisValue.AllowCredentials();

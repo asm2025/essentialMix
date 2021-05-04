@@ -6,19 +6,17 @@ namespace essentialMix.Extensions
 {
 	public static class CountdownEventExtension
 	{
-		public static void SignalOne([NotNull] this CountdownEvent thisValue) { SignalBy(thisValue, 1); }
-		public static void SignalBy([NotNull] this CountdownEvent thisValue, int count)
+		public static bool SignalOne([NotNull] this CountdownEvent thisValue) { return SignalBy(thisValue, 1); }
+		public static bool SignalBy([NotNull] this CountdownEvent thisValue, int count)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-			if (count == 0) return;
-			if (thisValue.CurrentCount == 0) return;
-			thisValue.Signal(count.NotAbove(thisValue.CurrentCount));
+			if (count == 0) return thisValue.CurrentCount == 0;
+			return thisValue.CurrentCount == 0 || thisValue.Signal(count.NotAbove(thisValue.CurrentCount));
 		}
 
-		public static void SignalAll([NotNull] this CountdownEvent thisValue)
+		public static bool SignalAll([NotNull] this CountdownEvent thisValue)
 		{
-			if (thisValue.CurrentCount == 0) return;
-			thisValue.Signal(thisValue.CurrentCount);
+			return thisValue.CurrentCount == 0 || thisValue.Signal(thisValue.CurrentCount);
 		}
 	}
 }

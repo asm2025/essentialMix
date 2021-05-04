@@ -72,15 +72,15 @@ namespace essentialMix.Web.Api.Http.ModelBinding
 				switch (contentType)
 				{
 					case "application/x-www-form-urlencoded":
-						HandleFormData(request.Content.ReadAsStringAsync().GetAwaiter().GetResult().TrimStart('?'));
+						HandleFormData(request.Content.ReadAsStringAsync().Execute().TrimStart('?'));
 						break;
 					case "application/json":
 					case "text/json":
-						HandleJson(request.Content.ReadAsStringAsync().GetAwaiter().GetResult().Trim());
+						HandleJson(request.Content.ReadAsStringAsync().Execute().Trim());
 						break;
 					case "application/xml":
 					case "text/xml":
-						HandleXml(request.Content.ReadAsStringAsync().GetAwaiter().GetResult().Trim());
+						HandleXml(request.Content.ReadAsStringAsync().Execute().Trim());
 						break;
 				}
 

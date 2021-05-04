@@ -130,7 +130,7 @@ namespace essentialMix.Collections
 
 				HashSet<T> edges = this[vertex];
 
-				if (edges != null && edges.Count > 0)
+				if (edges is { Count: > 0 })
 				{
 					foreach (T edge in edges)
 					{
@@ -181,7 +181,7 @@ namespace essentialMix.Collections
 
 				HashSet<T> edges = this[vertex];
 
-				if (edges != null && edges.Count > 0)
+				if (edges is { Count: > 0 })
 				{
 					foreach (T edge in edges)
 					{

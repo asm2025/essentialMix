@@ -12,6 +12,7 @@ using essentialMix.Exceptions;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
+using essentialMix.Threading;
 using JetBrains.Annotations;
 using Math = essentialMix.Numeric.Math;
 
@@ -572,24 +573,6 @@ namespace essentialMix.Collections
 			[NotNull]
 			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 			public T[] Items { get; }
-		}
-
-		[Serializable]
-		private class SimpleMonitor : IDisposable
-		{
-			private int _busyCount;
-
-			public void Enter()
-			{
-				++_busyCount;
-			}
- 
-			public void Dispose()
-			{
-				--_busyCount;
-			}
- 
-			public bool Busy => _busyCount > 0;
 		}
 
 		private Node _root;
@@ -1580,7 +1563,7 @@ namespace essentialMix.Collections
 										: parent.Left;
 						}
 
-						Debug.Assert(sibling != null && !sibling.IsRed, "sibling must not be null and it must be black!");
+						Debug.Assert(sibling is { IsRed: false }, "sibling must not be null and it must be black!");
 
 						if (Is2Node(sibling))
 						{
@@ -2139,7 +2122,7 @@ namespace essentialMix.Collections
 			{
 				Debug.Assert(parentOfSuccessor != null, "parent of successor cannot be null!");
 				Debug.Assert(successor.Left == null, "Left child of successor must be null!");
-				Debug.Assert(successor.Right == null && successor.IsRed || !successor.IsRed && successor.Right != null && successor.Right.IsRed, "Successor must be in valid state");
+				Debug.Assert(successor.Right == null && successor.IsRed || !successor.IsRed && successor.Right is { IsRed: true }, "Successor must be in valid state");
 				if (successor.Right != null) successor.Right.IsRed = false;
 
 				if (parentOfSuccessor != match)
@@ -2214,9 +2197,9 @@ namespace essentialMix.Collections
 
 		private static bool Is4Node([NotNull] Node node) { return IsRedNode(node.Left) && IsRedNode(node.Right); }
 
-		private static bool IsRedNode(Node node) { return node != null && node.IsRed; }
+		private static bool IsRedNode(Node node) { return node is { IsRed: true }; }
 
-		private static bool IsBlackNode(Node node) { return node != null && !node.IsRed; }
+		private static bool IsBlackNode(Node node) { return node is { IsRed: false }; }
 
 		private static bool IsNullOrBlack(Node node) { return node == null || !node.IsRed; }
 
