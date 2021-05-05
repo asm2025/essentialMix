@@ -17,7 +17,7 @@ namespace essentialMix.Collections
 		public ObservableCollectionTypeDescriptor([NotNull] TSource source)
 			: base(source)
 		{
-			source.CollectionChanged += (sender, args) => OnCollectionChanged(args);
+			source.CollectionChanged += (_, args) => OnCollectionChanged(args);
 		}
 
 		[NotNull]

@@ -98,18 +98,18 @@ namespace essentialMix.Threading.Helpers
 
 		public static bool EnumerateWindows([NotNull] Func<WindowHelper, bool> callback)
 		{
-			return Win32.EnumWindows((hWnd, param) => callback(new WindowHelper(hWnd)), IntPtr.Zero);
+			return Win32.EnumWindows((hWnd, _) => callback(new WindowHelper(hWnd)), IntPtr.Zero);
 		}
 
 		public static bool EnumerateChildWindows(IntPtr hWndParent, [NotNull] Func<WindowHelper, bool> callback)
 		{
-			return Win32.EnumChildWindows(hWndParent, (hWnd, param) => callback(new WindowHelper(hWnd)), IntPtr.Zero);
+			return Win32.EnumChildWindows(hWndParent, (hWnd, _) => callback(new WindowHelper(hWnd)), IntPtr.Zero);
 		}
 
 		public static WindowHelper FindWindow([NotNull] Predicate<WindowHelper> predicate)
 		{
 			WindowHelper target = null;
-			Win32.EnumWindows((hWnd, param) =>
+			Win32.EnumWindows((hWnd, _) =>
 			{
 				WindowHelper current = new WindowHelper(hWnd);
 				if (!predicate(current)) return true;
@@ -122,7 +122,7 @@ namespace essentialMix.Threading.Helpers
 		public static WindowHelper FindChildWindow(IntPtr hWndParent, [NotNull] Predicate<WindowHelper> predicate)
 		{
 			WindowHelper target = null;
-			Win32.EnumChildWindows(hWndParent, (hWnd, lParam) =>
+			Win32.EnumChildWindows(hWndParent, (hWnd, _) =>
 			{
 				WindowHelper current = new WindowHelper(hWnd);
 				if (!predicate(current)) return true;
@@ -136,7 +136,7 @@ namespace essentialMix.Threading.Helpers
 		public static IList<WindowHelper> FindWindows([NotNull] Predicate<WindowHelper> predicate)
 		{
 			IList<WindowHelper> target = new List<WindowHelper>();
-			Win32.EnumWindows((hWnd, lParam) =>
+			Win32.EnumWindows((hWnd, _) =>
 			{
 				WindowHelper current = new WindowHelper(hWnd);
 				if (predicate(current)) target.Add(current);
@@ -149,7 +149,7 @@ namespace essentialMix.Threading.Helpers
 		public static IList<WindowHelper> FindChildWindows(IntPtr hWndParent, [NotNull] Predicate<WindowHelper> predicate)
 		{
 			List<WindowHelper> target = new List<WindowHelper>();
-			Win32.EnumChildWindows(hWndParent, (hWnd, lParam) =>
+			Win32.EnumChildWindows(hWndParent, (hWnd, _) =>
 			{
 				WindowHelper current = new WindowHelper(hWnd);
 				if (predicate(current)) target.Add(current);
@@ -166,7 +166,7 @@ namespace essentialMix.Threading.Helpers
 
 			foreach (ProcessThread thread in process.Threads
 				.CastTo<ProcessThread>()
-				.TakeWhile(p => process.IsAwaitable()))
+				.TakeWhile(_ => process.IsAwaitable()))
 			{
 				target = FindThreadWindow(thread, predicate);
 				if (target != null) break;
@@ -181,7 +181,7 @@ namespace essentialMix.Threading.Helpers
 
 			foreach (ProcessThread thread in process.Threads
 				.CastTo<ProcessThread>()
-				.TakeWhile(p => process.IsAwaitable()))
+				.TakeWhile(_ => process.IsAwaitable()))
 			{
 				foreach (WindowHelper windowHelper in FindThreadWindows(thread, predicate))
 					yield return windowHelper;
@@ -193,7 +193,7 @@ namespace essentialMix.Threading.Helpers
 			if (!thread.IsAwaitable()) return null;
 
 			WindowHelper target = null;
-			Win32.EnumThreadWindows(thread.Id, (hWnd, lParam) =>
+			Win32.EnumThreadWindows(thread.Id, (hWnd, _) =>
 			{
 				WindowHelper current = new WindowHelper(hWnd);
 				
@@ -214,7 +214,7 @@ namespace essentialMix.Threading.Helpers
 			if (!thread.IsAwaitable()) return Enumerable.Empty<WindowHelper>();
 
 			IList<WindowHelper> list = new List<WindowHelper>();
-			Win32.EnumThreadWindows(thread.Id, (hWnd, lParam) =>
+			Win32.EnumThreadWindows(thread.Id, (hWnd, _) =>
 			{
 				WindowHelper current = new WindowHelper(hWnd);
 				if (predicate(current)) list.Add(current);

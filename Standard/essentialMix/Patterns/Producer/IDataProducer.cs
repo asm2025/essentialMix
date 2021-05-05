@@ -50,8 +50,8 @@ namespace essentialMix.Patterns.Producer
 		{
 			Future<IEnumerable<TSource>> ret = new Future<IEnumerable<TSource>>();
 			List<TSource> list = new List<TSource>();
-			thisValue.Data += (sender, value) => list.Add(value);
-			thisValue.Completed += (sender, args) => ret.Value = list;
+			thisValue.Data += (_, value) => list.Add(value);
+			thisValue.Completed += (_, _) => ret.Value = list;
 			return ret;
 		}
 
@@ -76,7 +76,7 @@ namespace essentialMix.Patterns.Producer
 		public static List<TSource> ToList<TSource>([NotNull] this IDataProducer<TSource> thisValue)
 		{
 			List<TSource> list = new List<TSource>();
-			thisValue.Data += (sender, value) => list.Add(value);
+			thisValue.Data += (_, value) => list.Add(value);
 			return list;
 		}
 
@@ -89,7 +89,7 @@ namespace essentialMix.Patterns.Producer
 		{
 			Future<TSource[]> ret = new Future<TSource[]>();
 			List<TSource> list = thisValue.ToList();
-			thisValue.Completed += (sender, args) => ret.Value = list.ToArray();
+			thisValue.Completed += (_, _) => ret.Value = list.ToArray();
 			return ret;
 		}
 
@@ -118,8 +118,8 @@ namespace essentialMix.Patterns.Producer
 		{
 			keyComparer ??= EqualityComparer<TKey>.Default;
 			Collections.Lookup<TKey, TElement> lookup = new Collections.Lookup<TKey, TElement>(keyComparer);
-			thisValue.Data += (sender, value) => lookup.Add(keySelector(value), elementSelector(value));
-			thisValue.Completed += (sender, args) => lookup.TrimExcess();
+			thisValue.Data += (_, value) => lookup.Add(keySelector(value), elementSelector(value));
+			thisValue.Completed += (_, _) => lookup.TrimExcess();
 			return lookup;
 		}
 
@@ -155,7 +155,7 @@ namespace essentialMix.Patterns.Producer
 			keyComparer ??= EqualityComparer<TKey>.Default;
 
 			Dictionary<TKey, TElement> dict = new Dictionary<TKey, TElement>(keyComparer);
-			thisValue.Data += (sender, value) => dict.Add(keySelector(value), elementSelector(value));
+			thisValue.Data += (_, value) => dict.Add(keySelector(value), elementSelector(value));
 			return dict;
 		}
 
@@ -313,7 +313,7 @@ namespace essentialMix.Patterns.Producer
 			DataProducer<TResult> ret = new DataProducer<TResult>();
 			Dictionary<TKey, DataProducer<TElement>> dictionary = new Dictionary<TKey, DataProducer<TElement>>(comparer);
 
-			thisValue.Data += (sender, value) =>
+			thisValue.Data += (_, value) =>
 			{
 				TKey key = keySelector(value);
 
@@ -327,7 +327,7 @@ namespace essentialMix.Patterns.Producer
 				subProducer.Produce(elementSelector(value));
 			};
 
-			thisValue.Completed += (sender, args) =>
+			thisValue.Completed += (_, _) =>
 			{
 				foreach (DataProducer<TElement> value in dictionary.Values)
 					value.Complete();
@@ -515,7 +515,7 @@ namespace essentialMix.Patterns.Producer
 			TSource current = default(TSource);
 			bool empty = true, canBeNull = typeof(TSource).IsClass;
 
-			thisValue.Data += (sender, value) =>
+			thisValue.Data += (_, value) =>
 			{
 				if (canBeNull && !value.HasValue())
 				{
@@ -532,7 +532,7 @@ namespace essentialMix.Patterns.Producer
 				}
 			};
 
-			thisValue.Completed += (sender, args) =>
+			thisValue.Completed += (_, _) =>
 			{
 				// Only value types should throw an exception
 				if (empty && !ReferenceEquals(current, null)) throw new InvalidOperationException("Empty sequence");
@@ -566,7 +566,7 @@ namespace essentialMix.Patterns.Producer
 			TSource current = default(TSource);
 			bool empty = true, canBeNull = typeof(TSource).IsClass;
 
-			thisValue.Data += (sender, value) =>
+			thisValue.Data += (_, value) =>
 			{
 				if (canBeNull && !value.HasValue())
 				{
@@ -582,7 +582,7 @@ namespace essentialMix.Patterns.Producer
 					current = value;
 				}
 			};
-			thisValue.Completed += (sender, args) =>
+			thisValue.Completed += (_, _) =>
 			{
 				// Only value types should throw an exception
 				if (empty && !ReferenceEquals(current, null)) throw new InvalidOperationException("Empty sequence");
@@ -601,7 +601,7 @@ namespace essentialMix.Patterns.Producer
 		[NotNull]
 		public static IDataProducer<TSource> Where<TSource>([NotNull] this IDataProducer<TSource> thisValue, [NotNull] Func<TSource, bool> predicate)
 		{
-			return thisValue.Where((x, index) => predicate(x));
+			return thisValue.Where((x, _) => predicate(x));
 		}
 		/// <summary>
 		/// Filters a data-producer based on a predicate on each value; the index
@@ -616,7 +616,7 @@ namespace essentialMix.Patterns.Producer
 			DataProducer<TSource> ret = new DataProducer<TSource>();
 			int index = 0;
 
-			thisValue.Data += (sender, value) =>
+			thisValue.Data += (_, value) =>
 			{
 				if (predicate(value, index++))
 				{
@@ -624,7 +624,7 @@ namespace essentialMix.Patterns.Producer
 				}
 			};
 
-			thisValue.Completed += (sender, args) => ret.Complete();
+			thisValue.Completed += (_, _) => ret.Complete();
 			return ret;
 		}
 
@@ -639,12 +639,12 @@ namespace essentialMix.Patterns.Producer
 		{
 			DataProducer<TSource> ret = new DataProducer<TSource>();
 			bool empty = true;
-			thisValue.Data += (sender, value) =>
+			thisValue.Data += (_, value) =>
 			{
 				empty = false;
 				ret.Produce(value);
 			};
-			thisValue.Completed += (sender, args) =>
+			thisValue.Completed += (_, _) =>
 			{
 				if (empty) ret.Produce(defaultValue);
 				ret.Complete();
@@ -670,7 +670,7 @@ namespace essentialMix.Patterns.Producer
 		[NotNull]
 		public static IDataProducer<TResult> Select<TSource, TResult>([NotNull] this IDataProducer<TSource> thisValue, [NotNull] Func<TSource, TResult> projection)
 		{
-			return thisValue.Select((t, index) => projection(t));
+			return thisValue.Select((t, _) => projection(t));
 		}
 		/// <summary>
 		/// Returns a projection on the data-producer, using a transformation
@@ -686,8 +686,8 @@ namespace essentialMix.Patterns.Producer
 		{
 			DataProducer<TResult> ret = new DataProducer<TResult>();
 			int index = 0;
-			thisValue.Data += (sender, value) => ret.Produce(projection(value, index++));
-			thisValue.Completed += (sender, args) => ret.Complete();
+			thisValue.Data += (_, value) => ret.Produce(projection(value, index++));
+			thisValue.Completed += (_, _) => ret.Complete();
 			return ret;
 		}
 
@@ -737,12 +737,12 @@ namespace essentialMix.Patterns.Producer
 		public static IDataProducer<TSource> Skip<TSource>([NotNull] this IDataProducer<TSource> thisValue, int count)
 		{
 			DataProducer<TSource> ret = new DataProducer<TSource>();
-			thisValue.Data += (sender, value) =>
+			thisValue.Data += (_, value) =>
 			{
 				if (count > 0) count--;
 				else ret.Produce(value);
 			};
-			thisValue.Completed += (sender, args) => ret.Complete();
+			thisValue.Completed += (_, _) => ret.Complete();
 			return ret;
 		}
 		/// <summary>
@@ -756,7 +756,7 @@ namespace essentialMix.Patterns.Producer
 		[NotNull]
 		public static IDataProducer<TSource> TakeWhile<TSource>([NotNull] this IDataProducer<TSource> thisValue, [NotNull] Func<TSource, bool> predicate)
 		{
-			return thisValue.TakeWhile((x, index) => predicate(x));
+			return thisValue.TakeWhile((x, _) => predicate(x));
 		}
 		/// <summary>
 		/// Returns a data-producer that will yield
@@ -804,7 +804,7 @@ namespace essentialMix.Patterns.Producer
 		[NotNull]
 		public static IDataProducer<TSource> SkipWhile<TSource>([NotNull] this IDataProducer<TSource> thisValue, [NotNull] Func<TSource, bool> predicate)
 		{
-			return thisValue.SkipWhile((t, index) => predicate(t));
+			return thisValue.SkipWhile((t, _) => predicate(t));
 		}
 		/// <summary>
 		/// Returns a data-producer that will ignore the
@@ -821,13 +821,13 @@ namespace essentialMix.Patterns.Producer
 			DataProducer<TSource> ret = new DataProducer<TSource>();
 			bool skipping = true;
 			int index = 0;
-			thisValue.Data += (sender, value) =>
+			thisValue.Data += (_, value) =>
 			{
 				if (skipping) skipping = predicate(value, index++);
 				// Note - not an else clause!
 				if (!skipping) ret.Produce(value);
 			};
-			thisValue.Completed += (sender, args) => ret.Complete();
+			thisValue.Completed += (_, _) => ret.Complete();
 			return ret;
 		}
 
@@ -855,14 +855,14 @@ namespace essentialMix.Patterns.Producer
             DataProducer<TSource> ret = new DataProducer<TSource>();
             HashSet<TSource> set = new HashSet<TSource>(comparer);
 
-            thisValue.Data += (sender, value) =>
+            thisValue.Data += (_, value) =>
             {
                 if (set.Add(value))
                 {
                     ret.Produce(value);
                 }
             };
-            thisValue.Completed += (sender, args) => ret.Complete();
+            thisValue.Completed += (_, _) => ret.Complete();
             return ret;
         }
 
@@ -881,8 +881,8 @@ namespace essentialMix.Patterns.Producer
 			// use List (rather than ToList) so we have a List<T> with
 			// Reverse immediately available (more efficient, and 2.0 compatible)
 			List<TSource> results = new List<TSource>();
-			thisValue.Data += (sender, item) => results.Add(item);
-			thisValue.Completed += (sender, args) => 
+			thisValue.Data += (_, item) => results.Add(item);
+			thisValue.Completed += (_, _) => 
 			{
 				List<TSource> items = new List<TSource>(results);
 				items.Reverse();
@@ -1085,8 +1085,8 @@ namespace essentialMix.Patterns.Producer
 		{
 			Future<int> ret = new Future<int>();
 			int count = 0;
-			thisValue.Data += (sender, t) => count++;
-			thisValue.Completed += (sender, args) => ret.Value = count;
+			thisValue.Data += (_, _) => count++;
+			thisValue.Completed += (_, _) => ret.Value = count;
 
 			return ret;
 		}
@@ -1109,11 +1109,11 @@ namespace essentialMix.Patterns.Producer
 			Future<int> ret = new Future<int>();
 			int count = 0;
 
-			thisValue.Data += (sender, t) =>
+			thisValue.Data += (_, t) =>
 			{
 				if (predicate(t)) count++;
 			};
-			thisValue.Completed += (sender, args) => ret.Value = count;
+			thisValue.Completed += (_, _) => ret.Value = count;
 
 			return ret;
 		}
@@ -1132,8 +1132,8 @@ namespace essentialMix.Patterns.Producer
 		{
 			Future<long> ret = new Future<long>();
 			int count = 0;
-			thisValue.Data += (sender, t) => count++;
-			thisValue.Completed += (sender, args) => ret.Value = count;
+			thisValue.Data += (_, _) => count++;
+			thisValue.Completed += (_, _) => ret.Value = count;
 
 			return ret;
 		}
@@ -1156,11 +1156,11 @@ namespace essentialMix.Patterns.Producer
 			Future<long> ret = new Future<long>();
 			int count = 0;
 
-			thisValue.Data += (sender, t) =>
+			thisValue.Data += (_, t) =>
 			{
 				if (predicate(t)) count++;
 			};
-			thisValue.Completed += (sender, args) => ret.Value = count;
+			thisValue.Completed += (_, _) => ret.Value = count;
 
 			return ret;
 		}
@@ -1177,7 +1177,7 @@ namespace essentialMix.Patterns.Producer
 		[NotNull]
 		public static IFuture<TSource> First<TSource>([NotNull] this IDataProducer<TSource> thisValue)
 		{
-			return thisValue.First(x => true);
+			return thisValue.First(_ => true);
 		}
 
 		/// <summary>
@@ -1225,7 +1225,7 @@ namespace essentialMix.Patterns.Producer
 		[NotNull]
 		public static IFuture<TSource> Last<TSource>([NotNull] this IDataProducer<TSource> thisValue)
 		{
-			return thisValue.Last(x => true);
+			return thisValue.Last(_ => true);
 		}
 
 		/// <summary>
@@ -1246,7 +1246,7 @@ namespace essentialMix.Patterns.Producer
 			bool gotData = false;
 			TSource prev = default(TSource);
 
-			thisValue.Data += (sender, value) =>
+			thisValue.Data += (_, value) =>
 			{
 				if (predicate(value))
 				{
@@ -1254,7 +1254,7 @@ namespace essentialMix.Patterns.Producer
 					gotData = true;
 				}
 			};
-			thisValue.Completed += (sender, args) =>
+			thisValue.Completed += (_, _) =>
 			{
 				if (!gotData) throw new InvalidOperationException("Sequence is empty");
 				ret.Value = prev;
@@ -1270,7 +1270,7 @@ namespace essentialMix.Patterns.Producer
 		[NotNull]
 		public static IFuture<TSource> FirstOrDefault<TSource>([NotNull] this IDataProducer<TSource> thisValue)
 		{
-			return thisValue.FirstOrDefault(x => true);
+			return thisValue.FirstOrDefault(_ => true);
 		}
 		/// <summary>
 		/// Returns a future to the first value from a sequence that matches the given condition, or the default
@@ -1307,7 +1307,7 @@ namespace essentialMix.Patterns.Producer
 		[NotNull]
 		public static IFuture<TSource> LastOrDefault<TSource>([NotNull] this IDataProducer<TSource> thisValue)
 		{
-			return thisValue.LastOrDefault(x => true);
+			return thisValue.LastOrDefault(_ => true);
 		}
 		/// <summary>
 		/// Returns the last value from a sequence that matches the given condition, or the default
@@ -1321,11 +1321,11 @@ namespace essentialMix.Patterns.Producer
 			Future<TSource> ret = new Future<TSource>();
 			TSource prev = default(TSource);
 
-			thisValue.Data += (sender, value) =>
+			thisValue.Data += (_, value) =>
 			{
 				if (predicate(value)) prev = value;
 			};
-			thisValue.Completed += (sender, args) => ret.Value = prev;
+			thisValue.Completed += (_, _) => ret.Value = prev;
 
 			return ret;
 		}
@@ -1338,7 +1338,7 @@ namespace essentialMix.Patterns.Producer
 		[NotNull]
 		public static IFuture<TSource> Single<TSource>([NotNull] this IDataProducer<TSource> thisValue)
 		{
-			return thisValue.Single(x => true);
+			return thisValue.Single(_ => true);
 		}
 
 		/// <summary>
@@ -1356,7 +1356,7 @@ namespace essentialMix.Patterns.Producer
 			TSource output = default(TSource);
 			bool gotValue = false;
 
-			thisValue.Data += (sender, value) =>
+			thisValue.Data += (_, value) =>
 			{
 				if (predicate(value))
 				{
@@ -1366,7 +1366,7 @@ namespace essentialMix.Patterns.Producer
 				}
 			};
 
-			thisValue.Completed += (sender, args) =>
+			thisValue.Completed += (_, _) =>
 			{
 				if (!gotValue) throw new InvalidOperationException("No elements in thisValue data");
 				ret.Value = output;
@@ -1384,7 +1384,7 @@ namespace essentialMix.Patterns.Producer
 		[NotNull]
 		public static IFuture<TSource> SingleOrDefault<TSource>([NotNull] this IDataProducer<TSource> thisValue)
 		{
-			return thisValue.SingleOrDefault(x => true);
+			return thisValue.SingleOrDefault(_ => true);
 		}
 		/// <summary>
 		/// Returns a future to a single value from a data-thisValue that matches the
@@ -1402,7 +1402,7 @@ namespace essentialMix.Patterns.Producer
 			TSource output = default(TSource);
 			bool gotValue = false;
 
-			thisValue.Data += (sender, value) =>
+			thisValue.Data += (_, value) =>
 			{
 				if (predicate(value))
 				{
@@ -1412,7 +1412,7 @@ namespace essentialMix.Patterns.Producer
 				}
 			};
 
-			thisValue.Completed += (sender, args) =>
+			thisValue.Completed += (_, _) =>
 			{
 				ret.Value = output;
 			};
@@ -1602,7 +1602,7 @@ namespace essentialMix.Patterns.Producer
 			bool first = true;
 			TSource current = default(TSource);
 
-			thisValue.Data += (sender, value) =>
+			thisValue.Data += (_, value) =>
 			{
 				if (first)
 				{
@@ -1614,7 +1614,7 @@ namespace essentialMix.Patterns.Producer
 					current = func(current, value);
 				}
 			};
-			thisValue.Completed += (sender, args) => ret.Value = current;
+			thisValue.Completed += (_, _) => ret.Value = current;
 
 			return ret;
 		}
@@ -1657,8 +1657,8 @@ namespace essentialMix.Patterns.Producer
 			Future<TResult> result = new Future<TResult>();
 			TAccumulate current = seed;
 
-			thisValue.Data += (sender, value) => current = func(current, value);
-			thisValue.Completed += (sender, args) => result.Value = resultSelector(current);
+			thisValue.Data += (_, value) => current = func(current, value);
+			thisValue.Completed += (_, _) => result.Value = resultSelector(current);
 
 			return result;
 		}

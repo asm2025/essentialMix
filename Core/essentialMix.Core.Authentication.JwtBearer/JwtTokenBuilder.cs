@@ -79,7 +79,7 @@ namespace essentialMix.Core.Authentication.JwtBearer
 
 		private void AddSetting([NotNull] string root, [NotNull] string key, object value)
 		{
-			IDictionary<string, object> dicOptions = _settings.GetOrAdd(root, r => new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase));
+			IDictionary<string, object> dicOptions = _settings.GetOrAdd(root, _ => new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase));
 			dicOptions[key] = value;
 		}
 	}

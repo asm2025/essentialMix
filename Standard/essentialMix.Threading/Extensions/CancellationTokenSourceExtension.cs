@@ -61,7 +61,7 @@ namespace essentialMix.Extensions
 			if (timeoutMillisecond < Timeout.Infinite) throw new ArgumentOutOfRangeException(nameof(timeoutMillisecond));
 
 			Timer timer = new Timer(timeoutMillisecond) { AutoReset = false };
-			timer.Elapsed += (sender, eventArgs) => thisValue?.Cancel();
+			timer.Elapsed += (_, _) => thisValue?.Cancel();
 			timer.Start();
 			return thisValue;
 		}

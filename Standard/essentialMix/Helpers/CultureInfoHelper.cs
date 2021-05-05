@@ -169,7 +169,7 @@ namespace essentialMix.Helpers
 
 		public static ReadOnlyDictionary<string, CultureInfo> ListByRegion([NotNull] RegionInfo region)
 		{
-			return __culturesByRegion.GetOrAdd(region.GeoId, geoId => new ReadOnlyDictionary<string, CultureInfo>((SpecificCultures.Values)
+			return __culturesByRegion.GetOrAdd(region.GeoId, geoId => new ReadOnlyDictionary<string, CultureInfo>(SpecificCultures.Values
 																												.Where(e => e.LCID != INVARIANT && !e.IsNeutralCulture && e.Region().GeoId == geoId)
 																												.ToDictionary(k => k.Name, v => v, StringComparer.OrdinalIgnoreCase)));
 		}

@@ -488,7 +488,7 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		public sealed override bool ContainsEdge(T from, T to)
 		{
-			return TryGetValue(@from, out KeyedCollection<T, GraphEdge<T, TWeight>> edges) && edges is { Count: > 0 } && edges.ContainsKey(to);
+			return TryGetValue(from, out KeyedCollection<T, GraphEdge<T, TWeight>> edges) && edges is { Count: > 0 } && edges.ContainsKey(to);
 		}
 
 		[NotNull]

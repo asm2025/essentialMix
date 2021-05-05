@@ -1,7 +1,6 @@
 ﻿using System;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace essentialMix.Newtonsoft.Converters
@@ -29,7 +28,7 @@ namespace essentialMix.Newtonsoft.Converters
 		}
 
 		/// <inheritdoc />
-		public override void WriteJson([NotNull] JsonWriter writer, object value, global::Newtonsoft.Json.JsonSerializer jsonSerializer)
+		public override void WriteJson(JsonWriter writer, object value, global::Newtonsoft.Json.JsonSerializer jsonSerializer)
 		{
 			if (value == null)
 			{
@@ -49,7 +48,7 @@ namespace essentialMix.Newtonsoft.Converters
 		}
 
 		/// <inheritdoc />
-		public override object ReadJson([NotNull] JsonReader reader, Type objectType, object existingValue, global::Newtonsoft.Json.JsonSerializer serializer)
+		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, global::Newtonsoft.Json.JsonSerializer serializer)
 		{
 			switch (reader.TokenType)
 			{

@@ -72,7 +72,7 @@ namespace essentialMix.Core.Web.Middleware
 		[NotNull]
 		public static IServiceCollection AddCultureHandler([NotNull] this IServiceCollection thisValue, Action<CultureHandlerOptions> options = null)
 		{
-			options ??= opts => {};
+			options ??= _ => {};
 			thisValue.Configure(options);
 			return thisValue;
 		}

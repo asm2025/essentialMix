@@ -12,7 +12,7 @@ namespace essentialMix.Windows.Helpers
 		{
 			thisValue.KeyPreview = true;
 
-			thisValue.KeyDown += (sender, e) =>
+			thisValue.KeyDown += (_, e) =>
 			{
 				if (!IsHotKey(e, key, ctrl, shift, alt)) return;
 				function();

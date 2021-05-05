@@ -9,7 +9,7 @@ namespace essentialMix.Helpers
 		{
 			if (options.SkipCertificateValidation == true)
 			{
-				ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, errors) => false;
+				ServicePointManager.ServerCertificateValidationCallback = (_, _, _, _) => false;
 			}
 
 			if (options.CertificateRevocationList.HasValue)

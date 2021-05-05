@@ -96,7 +96,7 @@ namespace essentialMix.Linq.Expressions
 		private Expression TransformExpr(MemberExpression node)
 		{
 			// Collapse captured outer variables
-			if (node?.Member is not FieldInfo || node.Member.ReflectedType != null && (!node.Member.ReflectedType.IsNestedPrivate || !node.Member.ReflectedType.Name.StartsWith("<>")))
+			if (node?.Member is not FieldInfo fi || fi.ReflectedType != null && (!fi.ReflectedType.IsNestedPrivate || !fi.ReflectedType.Name.StartsWith("<>")))
 				return node;
 
 			ConstantExpression expression = node.Expression as ConstantExpression;
@@ -108,7 +108,6 @@ namespace essentialMix.Linq.Expressions
 			Type t = obj.GetType();
 			if (!t.IsNestedPrivate || !t.Name.StartsWith("<>")) return node;
 
-			FieldInfo fi = (FieldInfo)node.Member;
 			object result = fi.GetValue(obj);
 			return result is Expression expr ? Visit(expr) : node;
 		}

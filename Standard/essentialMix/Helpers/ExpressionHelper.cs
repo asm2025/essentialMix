@@ -605,7 +605,7 @@ namespace essentialMix.Helpers
 			foreach (ParameterExpression expression in parameters)
 			{
 				result.Add(type == expression.Type 
-								? (Expression)expression 
+								? expression 
 								: Expression.Convert(expression, type));
 			}
 

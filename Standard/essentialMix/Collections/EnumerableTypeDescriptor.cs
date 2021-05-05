@@ -21,7 +21,7 @@ namespace essentialMix.Collections
 		public override PropertyDescriptorCollection GetProperties()
 		{
 			PropertyDescriptorCollection pds = new PropertyDescriptorCollection(null);
-			ForEach((o, i) => pds.Add(new EnumerableTypePropertyDescriptor<TSource>(this, i)));
+			ForEach((_, i) => pds.Add(new EnumerableTypePropertyDescriptor<TSource>(this, i)));
 			return pds;
 		}
 
@@ -69,7 +69,7 @@ namespace essentialMix.Collections
 		public override PropertyDescriptorCollection GetProperties()
 		{
 			PropertyDescriptorCollection pds = new PropertyDescriptorCollection(null);
-			ForEach((o, i) => pds.Add(new EnumerableTypePropertyDescriptor<TSource, TValue>(this, i)));
+			ForEach((_, i) => pds.Add(new EnumerableTypePropertyDescriptor<TSource, TValue>(this, i)));
 			return pds;
 		}
 

@@ -44,7 +44,7 @@ namespace essentialMix.Data.Patterns.Settings
 			EnsureRows();
 
 			DataRow row = Table.Rows[0];
-			row[name] = value != null ? (object)value : DBNull.Value;
+			row[name] = value != null ? value : DBNull.Value;
 			row.AcceptChanges();
 		}
 

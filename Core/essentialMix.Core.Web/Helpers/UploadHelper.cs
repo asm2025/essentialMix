@@ -122,7 +122,7 @@ namespace essentialMix.Core.Web.Helpers
 			
 			IList<string> uploadedFiles = new List<string>();
 
-			foreach (IFormFile file in files.TakeWhile(e => !token.IsCancellationRequested))
+			foreach (IFormFile file in files.TakeWhile(_ => !token.IsCancellationRequested))
 			{
 				string fileName = WebUtility.UrlDecode(file.FileName).Trim('\"', ' ');
 				if (string.IsNullOrEmpty(fileName)) continue;

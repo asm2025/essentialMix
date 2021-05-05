@@ -50,7 +50,7 @@ namespace essentialMix.Extensions
 
 			// Convert return type when necessary.
 			Expression convertedMethodCall = delegateInfo.ReturnType == thisValue.ReturnType
-				? (Expression)methodCall
+				? methodCall
 				: Expression.Convert(methodCall, delegateInfo.ReturnType);
 			return Expression.Lambda<TDelegate>(convertedMethodCall, delegateArguments).Compile();
 		}

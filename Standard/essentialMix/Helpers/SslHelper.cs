@@ -7,7 +7,7 @@ namespace essentialMix.Helpers
 		public static void NukeSsl(bool debugOnly = true)
 		{
 			if (debugOnly && !DebugHelper.DebugMode) return;
-			ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, errors) => true;
+			ServicePointManager.ServerCertificateValidationCallback = (_, _, _, _) => true;
 		}
 	}
 }

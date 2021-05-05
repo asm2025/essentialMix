@@ -110,14 +110,14 @@ namespace essentialMix.Threading
 
 			try
 			{
-				byteLen = (int)BaseStream?.EndRead(ar);
+				byteLen = BaseStream?.EndRead(ar) ?? 0;
 			}
 			catch (IOException)
 			{
 				// We should ideally consume errors from operations getting cancelled
 				// so that we don't crash the unsuspecting parent with an unhandled exc. 
 				// This seems to come in 2 forms of exceptions (depending on platform and scenario),
-				// namely OperationCanceledException and IOException (for errorcode that we don't 
+				// namely OperationCanceledException and IOException (for error code that we don't 
 				// map explicitly). 
 				byteLen = 0; // Treat this as EOF
 			}

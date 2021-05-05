@@ -20,12 +20,12 @@ namespace essentialMix.Web.Mvc.Models
 		private PagerSettings _pager;
 
 		protected PagedViewModel([AspMvcController] string controller, [AspMvcAction] string action)
-			: this(string.Empty, controller, action, new PagerSettings(page => PAGE_URL_DEF))
+			: this(string.Empty, controller, action, new PagerSettings(_ => PAGE_URL_DEF))
 		{
 		}
 
 		protected PagedViewModel([AspMvcArea] string area, [AspMvcController] string controller, [AspMvcAction] string action)
-			: this(area, controller, action, new PagerSettings(page => PAGE_URL_DEF))
+			: this(area, controller, action, new PagerSettings(_ => PAGE_URL_DEF))
 		{
 		}
 

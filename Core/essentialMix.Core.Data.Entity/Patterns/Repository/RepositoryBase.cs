@@ -70,7 +70,7 @@ namespace essentialMix.Core.Data.Entity.Patterns.Repository
 		{
 			token.ThrowIfCancellationRequested();
 			settings ??= new Pagination();
-			return new ValueTask<IList<TEntity>>(PrepareListQuery(settings).Paginate(settings).ToListAsync(token).As<List<TEntity>, IList<TEntity>>());
+			return new ValueTask<IList<TEntity>>(PrepareListQuery(settings).Paginate(settings).ToListAsync(token).As<List<TEntity>, IList<TEntity>>(token));
 		}
 
 		protected override TEntity GetInternal(params object[] keys) { return PrepareGetQuery(keys).FirstOrDefault(); }

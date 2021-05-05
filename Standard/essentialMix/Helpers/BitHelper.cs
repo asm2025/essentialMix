@@ -120,12 +120,12 @@ namespace essentialMix.Helpers
 			if (_useStackAlloc) 
 			{
 				int bitArrayIndex = bitPosition / Constants.INT_BIT_SIZE;
-				if (bitArrayIndex < _length && bitArrayIndex >= 0) _arrayPtr[bitArrayIndex] |= (MARKED_BIT_FLAG << (bitPosition % Constants.INT_BIT_SIZE));
+				if (bitArrayIndex < _length && bitArrayIndex >= 0) _arrayPtr[bitArrayIndex] |= MARKED_BIT_FLAG << (bitPosition % Constants.INT_BIT_SIZE);
 			}
 			else 
 			{
 				int bitArrayIndex = bitPosition / Constants.INT_BIT_SIZE;
-				if (bitArrayIndex < _length && bitArrayIndex >= 0) _array[bitArrayIndex] |= (MARKED_BIT_FLAG << (bitPosition % Constants.INT_BIT_SIZE));
+				if (bitArrayIndex < _length && bitArrayIndex >= 0) _array[bitArrayIndex] |= MARKED_BIT_FLAG << (bitPosition % Constants.INT_BIT_SIZE);
 			}
 		}
 

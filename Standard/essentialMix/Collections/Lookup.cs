@@ -69,7 +69,7 @@ namespace essentialMix.Collections
 		/// <summary>
 		/// Returns the set of values for the given key
 		/// </summary>
-		public IEnumerable<TElement> this[[NotNull] TKey key] => _groups.TryGetValue(key, out LookupGrouping group) ? (IEnumerable<TElement>)group : Array.Empty<TElement>();
+		public IEnumerable<TElement> this[[NotNull] TKey key] => _groups.TryGetValue(key, out LookupGrouping group) ? group : Array.Empty<TElement>();
 
 		/// <inheritdoc />
 		/// <summary>

@@ -156,7 +156,7 @@ namespace essentialMix.Threading.Helpers
 				}
 
 				bool processReallyExited = false;
-				process.Exited += (sender, args) => processReallyExited = true;
+				process.Exited += (_, _) => processReallyExited = true;
 
 				SafeWaitHandle waitHandle = null;
 				ManualResetEvent processFinishedEvent = null;
@@ -264,7 +264,7 @@ namespace essentialMix.Threading.Helpers
 			{
 				if (settings.RedirectOutput)
 				{
-					process.OutputDataReceived += (sender, args) =>
+					process.OutputDataReceived += (_, args) =>
 					{
 						if (args.Data == null) return;
 						settings.OnOutput?.Invoke(args.Data);
@@ -273,7 +273,7 @@ namespace essentialMix.Threading.Helpers
 
 				if (settings.RedirectError)
 				{
-					process.ErrorDataReceived += (sender, args) =>
+					process.ErrorDataReceived += (_, args) =>
 					{
 						if (args.Data == null) return;
 						settings.OnError?.Invoke(args.Data);
@@ -282,7 +282,7 @@ namespace essentialMix.Threading.Helpers
 
 				bool processReallyExited = false;
 
-				process.Exited += (sender, args) =>
+				process.Exited += (sender, _) =>
 				{
 					Process p = (Process)sender;
 					DateTime? exitTime = null;
@@ -412,7 +412,7 @@ namespace essentialMix.Threading.Helpers
 			{
 				bool processReallyExited = false;
 
-				process.Exited += (sender, args) =>
+				process.Exited += (sender, _) =>
 				{
 					Process p = (Process)sender;
 
@@ -580,13 +580,13 @@ namespace essentialMix.Threading.Helpers
 
 			if (processEvents != null)
 			{
-				if (processEvents.OnOutput != null) process.OutputDataReceived += (sender, args) => processEvents.OnOutput(args.Data);
-				if (processEvents.OnError != null) process.ErrorDataReceived += (sender, args) => processEvents.OnError(args.Data);
+				if (processEvents.OnOutput != null) process.OutputDataReceived += (_, args) => processEvents.OnOutput(args.Data);
+				if (processEvents.OnError != null) process.ErrorDataReceived += (_, args) => processEvents.OnError(args.Data);
 			}
 
 			if (processStartAndExit.OnExit != null)
 			{
-				process.Exited += (sender, args) =>
+				process.Exited += (sender, _) =>
 								{
 									Process p = (Process)sender;
 									DateTime? exitTime = null;
@@ -698,7 +698,7 @@ namespace essentialMix.Threading.Helpers
 				};
 
 				bool processReallyExited = false;
-				process.Exited += (sender, args) => processReallyExited = true;
+				process.Exited += (_, _) => processReallyExited = true;
 
 				int ndx = waitHandles.WaitAny();
 				if (ndx != 0) return Task.FromResult(false);

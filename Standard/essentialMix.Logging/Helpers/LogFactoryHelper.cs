@@ -68,7 +68,7 @@ namespace essentialMix.Logging.Helpers
 							? instance
 							: !__templates.TryGetValue(type, out Func<ILoggerFactory> template)
 								? null
-								: __instances.GetOrAdd(type, t => template())) ?? throw new InvalidOperationException("Type is not registered or created.");
+								: __instances.GetOrAdd(type, _ => template())) ?? throw new InvalidOperationException("Type is not registered or created.");
 		}
 
 		public static void Clear()

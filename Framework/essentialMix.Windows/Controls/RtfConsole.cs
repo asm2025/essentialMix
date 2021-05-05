@@ -38,8 +38,8 @@ namespace essentialMix.Windows.Controls
 			_writer = new BufferedWriter(FlushBuffer);
 
 			_processInterface = new ProcessInterface();
-			_processInterface.Output += (sender, args) => OnOutput(args);
-			_processInterface.Error += (sender, args) => OnError(args);
+			_processInterface.Output += (_, args) => OnOutput(args);
+			_processInterface.Error += (_, args) => OnError(args);
 		}
 
 		protected override void Dispose(bool disposing)

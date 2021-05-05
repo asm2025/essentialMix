@@ -25,25 +25,25 @@ namespace essentialMix.Threading.FileSystem
 				EnableRaisingEvents = false
 			};
 
-			_watcher.Created += (sender, args) =>
+			_watcher.Created += (_, args) =>
 			{
 				if (!settings.ChangeType.HasFlag(WatcherChangeTypes.Created) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
 				OnCreated(args);
 			};
 
-			_watcher.Renamed += (sender, args) =>
+			_watcher.Renamed += (_, args) =>
 			{
 				if (!settings.ChangeType.HasFlag(WatcherChangeTypes.Renamed) || rgxFilter != null && !rgxFilter.IsMatch(args.OldName) && !rgxFilter.IsMatch(args.Name)) return;
 				OnRenamed(args);
 			};
 
-			_watcher.Deleted += (sender, args) =>
+			_watcher.Deleted += (_, args) =>
 			{
 				if (!settings.ChangeType.HasFlag(WatcherChangeTypes.Deleted) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
 				OnDeleted(args);
 			};
 
-			_watcher.Changed += (sender, args) =>
+			_watcher.Changed += (_, args) =>
 			{
 				if (!settings.ChangeType.HasFlag(WatcherChangeTypes.Changed) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
 				OnChanged(args);

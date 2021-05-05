@@ -1486,8 +1486,8 @@ namespace essentialMix.Collections
 			// ready to insert the new node
 			Node node = new Node(item);
 
-			if (order > 0) parent.Right = node;
-			else parent.Left = node;
+			if (order > 0) parent!.Right = node;
+			else parent!.Left = node;
 
 			// the new node will be red, so we will need to adjust the colors if parent node is also red
 			if (parent.IsRed) InsertionBalance(node, ref parent, grandParent, greatGrandParent);

@@ -26,9 +26,9 @@ namespace essentialMix.Windows.UITypeEditors
 		protected override CollectionForm CreateCollectionForm()
 		{
 			Form = base.CreateCollectionForm();
-			if (Form.AcceptButton is Button button) button.Click += (sender, args) => OnOKClick(EventArgs.Empty);
+			if (Form.AcceptButton is Button button) button.Click += (_, _) => OnOKClick(EventArgs.Empty);
 			button = Form.CancelButton as Button;
-			if (button != null) button.Click += (sender, args) => OnCancelClick(EventArgs.Empty);
+			if (button != null) button.Click += (_, _) => OnCancelClick(EventArgs.Empty);
 			OnFormCreated(EventArgs.Empty);
 			return Form;
 		}

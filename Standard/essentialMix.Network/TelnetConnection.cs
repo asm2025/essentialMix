@@ -2,7 +2,6 @@ using System;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using essentialMix.Exceptions.Network;
 using essentialMix.Extensions;
 using essentialMix.Helpers;

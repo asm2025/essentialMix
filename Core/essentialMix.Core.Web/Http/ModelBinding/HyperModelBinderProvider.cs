@@ -31,7 +31,7 @@ namespace essentialMix.Core.Web.Http.ModelBinding
 			}
 		}
 
-		public IModelBinder GetBinder([NotNull] ModelBinderProviderContext context)
+		public IModelBinder GetBinder(ModelBinderProviderContext context)
 		{
 			HyperModelBinderProvider.Types.TryGetValue(context.Metadata.ModelType, out HyperModelBinder binder);
 			return binder;

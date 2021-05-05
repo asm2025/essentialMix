@@ -9,7 +9,8 @@ namespace essentialMix.Data.Helpers
 {
 	public static class TableColumnHelper
 	{
-		public static TableColumnSettings? PrepareAndFilter([NotNull] string name, [NotNull] IReadOnlyDictionary<string, (string Name, TableColumnSettings Settings)> dictionary, [NotNull] ResourceManager resourceManager, CultureInfo culture)
+		[NotNull]
+		public static ITableColumnSettings PrepareAndFilter([NotNull] string name, [NotNull] IReadOnlyDictionary<string, (string Name, TableColumnSettings Settings)> dictionary, [NotNull] ResourceManager resourceManager, CultureInfo culture)
 		{
 			string resourceName;
 			TableColumnSettings settings;

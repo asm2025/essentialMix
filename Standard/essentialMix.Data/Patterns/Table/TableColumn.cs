@@ -120,7 +120,7 @@ namespace essentialMix.Data.Patterns.Table
 			newName = newName?.Trim();
 			if (string.IsNullOrEmpty(newName)) newName = null;
 			newName ??= Name;
-			if (newDataType == null) newDataType = DataType;
+			newDataType ??= DataType;
 			TableColumn column = new TableColumn(newName, newDataType)
 			{
 				Text = Text,

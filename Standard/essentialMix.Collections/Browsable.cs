@@ -149,7 +149,7 @@ namespace essentialMix.Collections
 			{
 				if (_items != null) return _items;
 				_items = new ItemsCollection(this);
-				_items.CollectionChanged += (sender, args) =>
+				_items.CollectionChanged += (_, args) =>
 				{
 					if (CollectionChanged == null) return;
 					CollectionChanged(this, args);

@@ -90,8 +90,8 @@ namespace essentialMix.Collections
 
 			LinkedBinaryNode<T> node = MakeNode(value);
 
-			if (order < 0) parent.Left = node;
-			else parent.Right = node;
+			if (order < 0) parent!.Left = node;
+			else parent!.Right = node;
 
 			// update parents
 			while (stack.Count > 0)

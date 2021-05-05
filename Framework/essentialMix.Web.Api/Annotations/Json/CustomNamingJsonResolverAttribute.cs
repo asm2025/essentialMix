@@ -3,7 +3,6 @@ using System.Net.Http.Formatting;
 using System.Web.Http.Controllers;
 using JetBrains.Annotations;
 using essentialMix.Extensions;
-using essentialMix.Helpers;
 using essentialMix.Newtonsoft.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;

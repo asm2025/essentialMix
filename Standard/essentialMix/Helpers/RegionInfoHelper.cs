@@ -20,9 +20,9 @@ namespace essentialMix.Helpers
 		{
 			get
 			{
-				return __regions ??= new ReadOnlyDictionary<int, RegionInfo>((CultureInfoHelper
+				return __regions ??= new ReadOnlyDictionary<int, RegionInfo>(CultureInfoHelper
 																			.SpecificCultures
-																			.Values ?? throw new InvalidOperationException("Cannot access cultures."))
+																			.Values
 																			.Where(e => e.LCID != CultureInfoHelper.INVARIANT && !e.IsNeutralCulture)
 																			.Select(e => e.Region())
 																			.Distinct(e => e.GeoId)

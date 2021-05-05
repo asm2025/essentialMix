@@ -176,7 +176,8 @@ namespace essentialMix.Data.Patterns.Table
 			}
 		});
 
-		public static TableColumnSettings GetSettings([NotNull] Type type)
+		[NotNull]
+		public static ITableColumnSettings GetSettings([NotNull] Type type)
 		{
 			type = type.ResolveType() ?? throw new ArgumentException($"Type {type} could not be resolved.");
 			if (type.IsArray) type = type.GetElementType() ?? throw new ArgumentException($"Type {type} could not be resolved.");

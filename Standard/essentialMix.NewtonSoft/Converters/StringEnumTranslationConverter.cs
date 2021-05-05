@@ -70,7 +70,7 @@ namespace essentialMix.Newtonsoft.Converters
 		public override bool CanConvert(Type objectType) { return objectType != null && IsTypeIncluded(objectType); }
 
 		/// <inheritdoc />
-		public override void WriteJson([NotNull] JsonWriter writer, object value, NewtonsoftJsonSerializer jsonSerializer)
+		public override void WriteJson(JsonWriter writer, object value, NewtonsoftJsonSerializer jsonSerializer)
 		{
 			if (value == null)
 			{
@@ -104,7 +104,7 @@ namespace essentialMix.Newtonsoft.Converters
 		public static void Register([NotNull] Type type)
 		{
 			if (!type.IsEnum) throw new InvalidEnumArgumentException();
-			__types.AddOrUpdate(type, t => true, (t, b) => true);
+			__types.AddOrUpdate(type, _ => true, (_, _) => true);
 		}
 
 		public static void Unregister([NotNull] Type type)

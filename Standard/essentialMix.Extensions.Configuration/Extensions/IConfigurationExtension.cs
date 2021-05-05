@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 
+// ReSharper disable once CheckNamespace
 namespace essentialMix.Extensions
 {
 	public static class IConfigurationExtension

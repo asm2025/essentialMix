@@ -26,13 +26,6 @@ namespace essentialMix.Extensions
 		private static readonly ConcurrentDictionary<KeyValuePair<Type, Type>, bool> __castCache = new ConcurrentDictionary<KeyValuePair<Type, Type>, bool>();
 		private static readonly ConcurrentDictionary<KeyValuePair<Type, Type>, bool> __implicitCastCache = new ConcurrentDictionary<KeyValuePair<Type, Type>, bool>();
 
-		private static readonly IReadOnlySet<Type> __findInterfaceExceptionBreak = new ReadOnlySet<Type>(new HashSet<Type>
-		{
-			typeof(NotSupportedException),
-			typeof(ArgumentException),
-			typeof(NullReferenceException),
-		});
-
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static TypeCode AsTypeCode([NotNull] this Type thisValue, bool resolveGenerics = false)
 		{
@@ -343,10 +336,17 @@ namespace essentialMix.Extensions
 				{
 					interfaceType = type.GetInterface(name, ignoreCase);
 				}
-				catch (Exception e)
+				catch (NotSupportedException)
 				{
-					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
-					// ignored
+					break;
+				}
+				catch (ArgumentException)
+				{
+					break;
+				}
+				catch (NullReferenceException)
+				{
+					break;
 				}
 			}
 			while (interfaceType == null && !declaredOnly && (type = type.BaseType) != null);
@@ -491,9 +491,17 @@ namespace essentialMix.Extensions
 					nested = type.GetNestedType(name, bindingAttributes);
 					if (baseType != null && !nested.Is(baseType)) nested = null;
 				}
-				catch (Exception e)
+				catch (NotSupportedException)
 				{
-					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
+					break;
+				}
+				catch (ArgumentException)
+				{
+					break;
+				}
+				catch (NullReferenceException)
+				{
+					break;
 				}
 			}
 			while (nested == null && !declaredOnly && (type = type.BaseType) != null);
@@ -520,7 +528,7 @@ namespace essentialMix.Extensions
 
 		public static int NestedTypesCount([NotNull] this Type thisValue, BindingFlags bindingAttributes = BindingFlags.Default, Type baseType = null)
 		{
-			return GetNestedTypes(thisValue, p => true, bindingAttributes, baseType)?.Count() ?? 0;
+			return GetNestedTypes(thisValue, _ => true, bindingAttributes, baseType)?.Count() ?? 0;
 		}
 
 		public static FieldInfo FindField([NotNull] this Type thisValue, [NotNull] string name, BindingFlags bindingAttributes = BindingFlags.Default, Type baseType = null)
@@ -538,10 +546,17 @@ namespace essentialMix.Extensions
 					info = type.GetField(name, bindingAttributes);
 					if (info != null && baseType != null && !info.FieldType.Is(baseType)) info = null;
 				}
-				catch (Exception e)
+				catch (NotSupportedException)
 				{
-					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
-					// ignored
+					break;
+				}
+				catch (ArgumentException)
+				{
+					break;
+				}
+				catch (NullReferenceException)
+				{
+					break;
 				}
 			}
 			while (info == null && !declaredOnly && (type = type.BaseType) != null);
@@ -569,7 +584,7 @@ namespace essentialMix.Extensions
 
 		public static int FieldsCount([NotNull] this Type thisValue, BindingFlags bindingAttributes = BindingFlags.Default, Type baseType = null)
 		{
-			return GetFields(thisValue, p => true, bindingAttributes, baseType)?.Count() ?? 0;
+			return GetFields(thisValue, _ => true, bindingAttributes, baseType)?.Count() ?? 0;
 		}
 
 		public static EventInfo FindEvent([NotNull] this Type thisValue, [NotNull] string name, BindingFlags bindingAttributes = BindingFlags.Default)
@@ -586,10 +601,17 @@ namespace essentialMix.Extensions
 				{
 					info = type.GetEvent(name, bindingAttributes);
 				}
-				catch (Exception e)
+				catch (NotSupportedException)
 				{
-					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
-					// ignored
+					break;
+				}
+				catch (ArgumentException)
+				{
+					break;
+				}
+				catch (NullReferenceException)
+				{
+					break;
 				}
 			}
 			while (info == null && !declaredOnly && (type = type.BaseType) != null);
@@ -617,7 +639,7 @@ namespace essentialMix.Extensions
 
 		public static int EventsCount([NotNull] this Type thisValue, BindingFlags bindingAttributes = BindingFlags.Default)
 		{
-			return GetEvents(thisValue, p => true, bindingAttributes)?.Count() ?? 0;
+			return GetEvents(thisValue, _ => true, bindingAttributes)?.Count() ?? 0;
 		}
 
 		public static FieldInfo FindEventField([NotNull] this Type thisValue, [NotNull] string name, bool declaredOnly = false)
@@ -641,20 +663,26 @@ namespace essentialMix.Extensions
 					field = type.GetField(prop, BF_FIND_EVENT_FIELD);
 					if (field != null) break;
 				}
-				catch (Exception e)
+				catch (NotSupportedException)
 				{
-					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
-					// ignored
+					break;
+				}
+				catch (ArgumentException)
+				{
+					break;
+				}
+				catch (NullReferenceException)
+				{
+					break;
 				}
 			}
-			while (field == null && !declaredOnly && (type = type.BaseType) != null);
+			while (!declaredOnly && (type = type.BaseType) != null);
 
 			return field;
 		}
 
 		public static PropertyInfo FindProperty([NotNull] this Type thisValue, [NotNull] string name, BindingFlags bindingAttributes = BindingFlags.Default, Binder binder = null,
-			Type returnType = null,
-			ParameterModifier[] modifiers = null, params Type[] types)
+			Type returnType = null, ParameterModifier[] modifiers = null, params Type[] types)
 		{
 			if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
 
@@ -672,9 +700,17 @@ namespace essentialMix.Extensions
 					info = type.GetProperty(name, bindingAttributes, binder, returnType, paramTypes, modifiers);
 					if (info != null && returnType != null && !info.PropertyType.Is(returnType)) info = null;
 				}
-				catch (Exception e)
+				catch (NotSupportedException)
 				{
-					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
+					break;
+				}
+				catch (ArgumentException)
+				{
+					break;
+				}
+				catch (NullReferenceException)
+				{
+					break;
 				}
 			}
 			while (info == null && !declaredOnly && (type = type.BaseType) != null);
@@ -684,7 +720,7 @@ namespace essentialMix.Extensions
 
 		public static int PropertiesCount([NotNull] this Type thisValue, BindingFlags bindingAttributes = BindingFlags.Default, Type returnType = null)
 		{
-			return GetProperties(thisValue, p => true, bindingAttributes, returnType)?.Count() ?? 0;
+			return GetProperties(thisValue, _ => true, bindingAttributes, returnType)?.Count() ?? 0;
 		}
 
 		public static ConstructorInfo FindConstructor([NotNull] this Type thisValue, BindingFlags bindingAttributes = BindingFlags.Default, Binder binder = null,
@@ -700,10 +736,17 @@ namespace essentialMix.Extensions
 				{
 					info = type.GetConstructor(bindingAttributes, binder, callConvention, types ?? Type.EmptyTypes, modifiers);
 				}
-				catch (Exception e)
+				catch (NotSupportedException)
 				{
-					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
-					// ignored
+					break;
+				}
+				catch (ArgumentException)
+				{
+					break;
+				}
+				catch (NullReferenceException)
+				{
+					break;
 				}
 			}
 			while (info == null && !declaredOnly && (type = type.BaseType) != null);
@@ -756,7 +799,7 @@ namespace essentialMix.Extensions
 
 		public static int ConstructorsCount([NotNull] this Type thisValue, BindingFlags bindingAttributes = BindingFlags.Default)
 		{
-			return GetConstructors(thisValue, p => true, bindingAttributes)?.Count() ?? 0;
+			return GetConstructors(thisValue, _ => true, bindingAttributes)?.Count() ?? 0;
 		}
 
 		/// <summary>
@@ -796,9 +839,17 @@ namespace essentialMix.Extensions
 					info = type.GetMethod(name, bindingAttributes, binder, callConvention, paramTypes, modifiers);
 					if (info != null && returnType != null && !info.ReturnType.Is(returnType)) info = null;
 				}
-				catch (Exception e)
+				catch (NotSupportedException)
 				{
-					if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
+					break;
+				}
+				catch (ArgumentException)
+				{
+					break;
+				}
+				catch (NullReferenceException)
+				{
+					break;
 				}
 			}
 			while (info == null && !declaredOnly && (type = type.BaseType) != null);
@@ -857,9 +908,9 @@ namespace essentialMix.Extensions
 			if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
 			if (!thisValue.IsInterface) throw new ArgumentException("Type is not an interface.", nameof(thisValue));
 
-			ConcurrentDictionary<string, MethodInfo> dictionary = __explicitInterfaceCache.GetOrAdd(thisValue, type => new ConcurrentDictionary<string, MethodInfo>(StringComparer.OrdinalIgnoreCase));
+			ConcurrentDictionary<string, MethodInfo> dictionary = __explicitInterfaceCache.GetOrAdd(thisValue, _ => new ConcurrentDictionary<string, MethodInfo>(StringComparer.OrdinalIgnoreCase));
 			string key = $"{thisValue.FullName}_{name}";
-			MethodInfo method = dictionary.GetOrAdd(key, s =>
+			MethodInfo method = dictionary.GetOrAdd(key, _ =>
 			{
 				string dotName = "." + name;
 				return thisValue.GetMethods(BINDING_FLAGS)
@@ -870,7 +921,7 @@ namespace essentialMix.Extensions
 
 		public static int MethodsCount([NotNull] this Type thisValue, BindingFlags bindingAttributes = BindingFlags.Default)
 		{
-			return GetMethods(thisValue, p => true, bindingAttributes)?.Count() ?? 0;
+			return GetMethods(thisValue, _ => true, bindingAttributes)?.Count() ?? 0;
 		}
 
 		public static MemberInfo FindMember([NotNull] this Type thisValue, string name, MemberTypes searchType, BindingFlags bindingAttributes = BindingFlags.Default,
@@ -912,10 +963,17 @@ namespace essentialMix.Extensions
 							if (members.Length > 1) throw new AmbiguousMatchException();
 							info = members[0];
 						}
-						catch (Exception e)
+						catch (NotSupportedException)
 						{
-							if (__findInterfaceExceptionBreak.Contains(e.GetType())) break;
-							// ignored
+							break;
+						}
+						catch (ArgumentException)
+						{
+							break;
+						}
+						catch (NullReferenceException)
+						{
+							break;
 						}
 					}
 					while (info == null && !declaredOnly && (type = type.BaseType) != null);
@@ -1001,7 +1059,7 @@ namespace essentialMix.Extensions
 			if (CanImplicitlyCastTo(thisValue, type)) return true;
 
 			KeyValuePair<Type, Type> key = new KeyValuePair<Type, Type>(thisValue, type);
-			return __castCache.GetOrAdd(key, e =>
+			return __castCache.GetOrAdd(key, _ =>
 			{
 				if (thisValue.IsValueType)
 				{
@@ -1037,7 +1095,7 @@ namespace essentialMix.Extensions
 			if (value.IsAssignableFrom(thisValue)) return true;
 
 			KeyValuePair<Type, Type> key = new KeyValuePair<Type, Type>(thisValue, value);
-			return __implicitCastCache.GetOrAdd(key, e =>
+			return __implicitCastCache.GetOrAdd(key, _ =>
 			{
 				try
 				{

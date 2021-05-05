@@ -360,7 +360,7 @@ namespace Other.Microsoft.Collections
 				{
 					if (_index == 0 || _index == _dictionary._count + 1) throw new InvalidOperationException();
 					return _getEnumeratorRetType == DICT_ENTRY
-								? (object)new DictionaryEntry(_current.Key, _current.Value)
+								? new DictionaryEntry(_current.Key, _current.Value)
 								: new KeyValuePair<TKey, TValue>(_current.Key, _current.Value);
 				}
 			}

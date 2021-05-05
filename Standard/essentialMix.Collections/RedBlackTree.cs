@@ -145,8 +145,8 @@ namespace essentialMix.Collections
 
 			RedBlackNode<T> node = MakeNode(value);
 
-			if (order < 0) parent.Left = node;
-			else parent.Right = node;
+			if (order < 0) parent!.Left = node;
+			else parent!.Right = node;
 
 			// the new node will be red, so we will need to adjust the colors if parent node is also red
 			if (parent.Color && grandParent != null) Balance(node, ref parent, grandParent, greatGrandParent);

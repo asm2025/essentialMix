@@ -94,8 +94,8 @@ namespace essentialMix.Patterns.Producer
 		{
 			bool stop = false;
 			Queue<TResult> resultBuffer = new Queue<TResult>();
-			pipeline.Data += (sender, result) => resultBuffer.Enqueue(result);
-			pipeline.Completed += (sender, args) => stop = true;
+			pipeline.Data += (_, result) => resultBuffer.Enqueue(result);
+			pipeline.Completed += (_, _) => stop = true;
 
 			foreach (T item in items)
 			{

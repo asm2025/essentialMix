@@ -368,7 +368,7 @@ namespace essentialMix.Helpers
 			if (hConsole.IsInvalidHandle()) return null;
 
 			//Obtain the current console font index
-			return !Win32.GetCurrentConsoleFont(hConsole, false, out CONSOLE_FONT_INFO fontInfo) ? (CONSOLE_FONT_INFO?)null : fontInfo;
+			return !Win32.GetCurrentConsoleFont(hConsole, false, out CONSOLE_FONT_INFO fontInfo) ? null : fontInfo;
 		}
 
 		private static CONSOLE_FONT_INFO_EX GetCurrentFontEx(IntPtr hConsole)

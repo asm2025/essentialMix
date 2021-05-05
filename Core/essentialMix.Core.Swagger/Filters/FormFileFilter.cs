@@ -29,7 +29,7 @@ namespace essentialMix.Core.Swagger.Filters
 			// Check if any of the parameters' types or their nested properties / fields are supported
 			if (!Enumerate(context.ApiDescription.ActionDescriptor).Any(e => IsSupported(e.ParameterType))) return;
 
-			OpenApiMediaType uploadFileMediaType = operation.RequestBody.Content.GetOrAdd(MediaTypeNames.Multipart.FormData, e => new OpenApiMediaType
+			OpenApiMediaType uploadFileMediaType = operation.RequestBody.Content.GetOrAdd(MediaTypeNames.Multipart.FormData, _ => new OpenApiMediaType
 			{
 				Schema = new OpenApiSchema
 				{

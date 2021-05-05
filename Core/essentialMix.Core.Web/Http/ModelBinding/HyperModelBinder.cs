@@ -38,8 +38,7 @@ namespace essentialMix.Core.Web.Http.ModelBinding
 		protected int MaxRecursionLimit { get; }
 
 		/// <inheritdoc />
-		[NotNull]
-		public virtual Task BindModelAsync([NotNull] ModelBindingContext bindingContext)
+		public virtual Task BindModelAsync(ModelBindingContext bindingContext)
 		{
 			if (!TargetType.IsAssignableFrom(bindingContext.ModelType)) throw new TypeInitializationException(bindingContext.ModelType.FullName, null);
 

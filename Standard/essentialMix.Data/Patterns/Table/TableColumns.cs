@@ -42,14 +42,14 @@ namespace essentialMix.Data.Patterns.Table
 
 		internal bool DetailsOwner { get; set; }
 
-		public bool MapSchemaTable([NotNull] DataTable schema, Func<string, bool> filter = null, Func<string, TableColumnSettings?> onGetSettings = null)
+		public bool MapSchemaTable([NotNull] DataTable schema, Func<string, bool> filter = null, Func<string, ITableColumnSettings> onGetSettings = null)
 		{
 			ClearItems();
 			if (schema.Columns.Count == 0
 				|| schema.Rows.Count == 0
 				|| __columnNames.Any(e => !schema.Columns.Contains(e))) return false;
 
-			IDictionary<string, TableColumnSettings> allSettings = new Dictionary<string, TableColumnSettings>(StringComparer.OrdinalIgnoreCase);
+			IDictionary<string, ITableColumnSettings> allSettings = new Dictionary<string, ITableColumnSettings>(StringComparer.OrdinalIgnoreCase);
 			
 			foreach (DataRow columnInfo in schema.Rows)
 			{
@@ -60,7 +60,7 @@ namespace essentialMix.Data.Patterns.Table
 
 				Type type = columnInfo.Get<Type>(__columnNames[1]) ?? throw new InvalidOperationException("Column data type is missing.");
 				// get the default settings for the type and specific column settings overrides then merge them
-				TableColumnSettings settings = SettingsMerger(name, type, onGetSettings);
+				ITableColumnSettings settings = SettingsMerger(name, type, onGetSettings);
 
 				ITableColumn column = new TableColumn(name, type)
 				{
@@ -86,20 +86,20 @@ namespace essentialMix.Data.Patterns.Table
 			return true;
 		}
 
-		public bool MapSchemaTable<TInstance>([NotNull] TInstance instance, Func<string, bool> filter = null, Func<string, TableColumnSettings?> onGetSettings = null)
+		public bool MapSchemaTable<TInstance>([NotNull] TInstance instance, Func<string, bool> filter = null, Func<string, ITableColumnSettings> onGetSettings = null)
 		{
 			ClearItems();
 			IReadOnlyDictionary<string, Type> schema = instance.ToSchema();
 			if (schema.Count == 0) return false;
 
-			IDictionary<string, TableColumnSettings> allSettings = new Dictionary<string, TableColumnSettings>(StringComparer.OrdinalIgnoreCase);
+			IDictionary<string, ITableColumnSettings> allSettings = new Dictionary<string, ITableColumnSettings>(StringComparer.OrdinalIgnoreCase);
 			
 			foreach (KeyValuePair<string, Type> pair in schema)
 			{
 				// filter the columns
 				if (filter?.Invoke(pair.Key) == false) continue;
 				// get the default settings for the type and specific column settings overrides then merge them
-				TableColumnSettings settings = SettingsMerger(pair.Key, pair.Value, onGetSettings);
+				ITableColumnSettings settings = SettingsMerger(pair.Key, pair.Value, onGetSettings);
 
 				ITableColumn column = new TableColumn(pair.Key, pair.Value)
 				{
@@ -125,11 +125,12 @@ namespace essentialMix.Data.Patterns.Table
 			return true;
 		}
 
-		private static TableColumnSettings SettingsMerger(string name, Type type, Func<string, TableColumnSettings?> onGetSettings)
+		[NotNull]
+		private static ITableColumnSettings SettingsMerger(string name, Type type, Func<string, ITableColumnSettings> onGetSettings)
 		{
-			TableColumnSettings target = TableColumnSettingMapping.GetSettings(type);
-			TableColumnSettings? overrides = onGetSettings?.Invoke(name);
-			TableColumnSettings.Merge(ref target, overrides);
+			ITableColumnSettings target = TableColumnSettingMapping.GetSettings(type);
+			ITableColumnSettings overrides = onGetSettings?.Invoke(name);
+			TableColumnSettings.Apply(ref target, overrides);
 			if (target.TextCasing.HasValue) return target;
 			type = type.ResolveType();
 			if (type == null) return target;
@@ -150,20 +151,20 @@ namespace essentialMix.Data.Patterns.Table
 			return target;
 		}
 
-		private void AdjustWidths(IDictionary<string, TableColumnSettings> allSettings)
+		private void AdjustWidths(IDictionary<string, ITableColumnSettings> allSettings)
 		{
 			if (DetailsOwner)
 			{
 				foreach (ITableColumn column in Items)
 				{
-					column.Weight = column.Hidden || !allSettings.TryGetValue(column.Name, out TableColumnSettings settings) || !settings.Weight.HasValue || settings.Weight < 1
+					column.Weight = column.Hidden == true || !allSettings.TryGetValue(column.Name, out ITableColumnSettings settings) || settings.Weight is null or < 1
 										? null
 										: settings.Weight.Value.Within(1, 12);
 				}
 			}
 			else
 			{
-				ITableColumn[] visibleColumns = Items.Where(e => !e.Hidden).ToArray();
+				ITableColumn[] visibleColumns = Items.Where(e => e.Hidden is null or false).ToArray();
 				double sum = visibleColumns.Length > 0
 								? visibleColumns.Sum(e => allSettings[e.Name].Weight ?? 0)
 								: 0.0d;
@@ -172,7 +173,7 @@ namespace essentialMix.Data.Patterns.Table
 				{
 					foreach (ITableColumn column in Items)
 					{
-						column.Weight = column.Hidden || !allSettings.TryGetValue(column.Name, out TableColumnSettings settings) || !settings.Weight.HasValue || settings.Weight < 1
+						column.Weight = column.Hidden == true || !allSettings.TryGetValue(column.Name, out ITableColumnSettings settings) || settings.Weight is null or < 1
 											? null
 											: (int)Math.Floor(settings.Weight.Value / sum * 12.0d);
 					}

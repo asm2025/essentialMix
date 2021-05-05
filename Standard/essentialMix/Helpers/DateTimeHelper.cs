@@ -122,7 +122,7 @@ namespace essentialMix.Helpers
 		public static DateTime? TryParseDate(string dateStr)
 		{
 			if (string.IsNullOrEmpty(dateStr)) return null;
-			return TryParseDate(dateStr, out DateTime date) ? date : (DateTime?)null;
+			return TryParseDate(dateStr, out DateTime date) ? date : null;
 		}
 
 		public static string FormatShortDate(string dateStr)
