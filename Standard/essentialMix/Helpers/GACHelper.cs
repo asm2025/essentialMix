@@ -117,10 +117,10 @@ namespace essentialMix.Helpers
 	/// <summary>
 	/// <see cref="IAssemblyCache.QueryAssemblyInfo"/>
 	/// </summary>
-	public enum QueryessentialMixinfoFlag
+	public enum QueryInfoFlag
 	{
-		QueryessentialMixinfoFlagValidate = 1,
-		QueryessentialMixinfoFlagGetsize = 2
+		QueryInfoFlagValidate = 1,
+		QueryInfoFlagGetSize = 2
 	}
 
 	public enum IassemblycacheInstallFlag

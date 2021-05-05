@@ -127,7 +127,7 @@ namespace essentialMix.Helpers
 
 			if (type != null) return type;
 			assemblyName = assemblyName?.Trim();
-			return !string.IsNullOrEmpty(assemblyName) && AssemblyHelper.TryLoad(assemblyName, out Assembly essentialMix) && essentialMix != null && (type = essentialMix.GetType(name, false)) != null
+			return !string.IsNullOrEmpty(assemblyName) && AssemblyHelper.TryLoad(assemblyName, out Assembly asm) && asm != null && (type = asm.GetType(name, false)) != null
 						? type
 						: null;
 		}
