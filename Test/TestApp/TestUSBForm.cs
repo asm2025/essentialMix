@@ -32,7 +32,7 @@ namespace TestApp
 		protected override void OnHandleDestroyed(EventArgs e)
 		{
 			base.OnHandleDestroyed(e);
-			_devicesMonitor.Deregister();
+			_devicesMonitor.Unregister();
 		}
 
 		/// <summary>

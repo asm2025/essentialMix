@@ -16123,7 +16123,7 @@ namespace essentialMix
 
 		/// <summary>
 		///     The manifest has a default namespace specified on the assembly element but its value is not
-		///     "urn:schemas-microsoft-com:essentialMix.v1".
+		///     "urn:schemas-microsoft-com:asm.v1".
 		/// </summary>
 		public const int ERROR_SXS_MANIFEST_INVALID_REQUIRED_DEFAULT_NAMESPACE = 14019;
 

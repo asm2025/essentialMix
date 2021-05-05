@@ -27,7 +27,7 @@ namespace essentialMix.Patterns.Hardware
 		/// <inheritdoc />
 		protected override void Dispose(bool disposing)
 		{
-			if (disposing) Deregister();
+			if (disposing) Unregister();
 			base.Dispose(disposing);
 		}
 
@@ -62,7 +62,7 @@ namespace essentialMix.Patterns.Hardware
 			_notificationHandle = Win32.RegisterDeviceNotification(hWnd, _notificationData, flags);
 		}
 
-		public void Deregister()
+		public void Unregister()
 		{
 			if (_notificationHandle.IsInvalidHandle()) return;
 			Win32.UnregisterDeviceNotification(_notificationHandle);
