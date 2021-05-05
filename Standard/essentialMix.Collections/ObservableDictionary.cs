@@ -15,10 +15,10 @@ using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
+using essentialMix.Numeric;
 using essentialMix.Threading;
 using JetBrains.Annotations;
 using Other.Microsoft;
-using essentialMixMath = essentialMix.Numeric.Math;
 
 namespace essentialMix.Collections
 {
@@ -923,7 +923,7 @@ namespace essentialMix.Collections
 
 		private void Initialize(int capacity)
 		{
-			int size = essentialMixMath.GetPrime(capacity);
+			int size = Math2.GetPrime(capacity);
 			_buckets = new int[size];
 
 			for (int i = 0; i < _buckets.Length; i++) 
@@ -935,7 +935,7 @@ namespace essentialMix.Collections
 
 		private void Resize()
 		{
-			int newSize = essentialMixMath.ExpandPrime(_count);
+			int newSize = Math2.ExpandPrime(_count);
 			if (newSize <= _count) throw new InvalidOperationException("Cannot expand the set any further.");
 			Resize(newSize, false);
 		}

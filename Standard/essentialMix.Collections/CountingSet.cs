@@ -179,6 +179,6 @@ namespace essentialMix.Collections
 						: elementCounts;
 		}
 
-		private static int GetNextTableSize(int currentSize) { return Numeric.Math.GetPrime(currentSize); }
+		private static int GetNextTableSize(int currentSize) { return Numeric.Math2.GetPrime(currentSize); }
 	}
 }

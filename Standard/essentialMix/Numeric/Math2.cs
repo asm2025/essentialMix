@@ -5,11 +5,10 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
-using SysMath = System.Math;
 
 namespace essentialMix.Numeric
 {
-	public static class Math
+	public static class Math2
 	{
 		/*
 		 * used to cache results instead of calculating them every time.
@@ -135,7 +134,7 @@ namespace essentialMix.Numeric
 			if ((value & 1ul) == 0 || value < 2ul || value % 2ul == 0ul || value % 3ul == 0ul || value % 5ul == 0ul) return false;
 			if (__primes.Value.Contains(value)) return true;
 
-			ulong uMax = (ulong)SysMath.Sqrt(value);
+			ulong uMax = (ulong)Math.Sqrt(value);
 
 			foreach (ulong prime in __primes.Value)
 			{
@@ -188,7 +187,7 @@ namespace essentialMix.Numeric
 			if (prime > 0ul) return prime;
 
 			// Outside of our predefined table. Compute the hard way.
-			ulong max = (ulong)SysMath.Sqrt(value);
+			ulong max = (ulong)Math.Sqrt(value);
 
 			for (ulong i = value; i <= max; i += 2ul)
 			{
@@ -232,42 +231,42 @@ namespace essentialMix.Numeric
 		{
 			return basis == 0
 						? 0.0d
-						: SysMath.Abs(value) / (double)SysMath.Abs(basis) * 100.0d;
+						: Math.Abs(value) / (double)Math.Abs(basis) * 100.0d;
 		}
 
 		public static double Ratio(int value, int basis)
 		{
 			return basis == 0
 						? 0.0d
-						: SysMath.Abs(value) / (double)SysMath.Abs(basis) * 100.0d;
+						: Math.Abs(value) / (double)Math.Abs(basis) * 100.0d;
 		}
 
 		public static double Ratio(long value, long basis)
 		{
 			return basis == 0
 						? 0.0d
-						: SysMath.Abs(value) / (double)SysMath.Abs(basis) * 100.0d;
+						: Math.Abs(value) / (double)Math.Abs(basis) * 100.0d;
 		}
 
 		public static double Ratio(float value, float basis)
 		{
-			return SysMath.Abs(basis) < float.Epsilon
+			return Math.Abs(basis) < float.Epsilon
 						? 0.0f
-						: SysMath.Abs(value) / SysMath.Abs(basis) * 100.0f;
+						: Math.Abs(value) / Math.Abs(basis) * 100.0f;
 		}
 
 		public static double Ratio(double value, double basis)
 		{
-			return SysMath.Abs(basis) < double.Epsilon
+			return Math.Abs(basis) < double.Epsilon
 						? 0.0d
-						: SysMath.Abs(value) / SysMath.Abs(basis) * 100.0d;
+						: Math.Abs(value) / Math.Abs(basis) * 100.0d;
 		}
 
 		public static decimal Ratio(decimal value, decimal basis)
 		{
-			return SysMath.Abs(basis) < decimal.Zero
+			return Math.Abs(basis) < decimal.Zero
 						? 0.0m
-						: SysMath.Abs(value) / SysMath.Abs(basis) * 100.0m;
+						: Math.Abs(value) / Math.Abs(basis) * 100.0m;
 		}
 
 		public static byte RatioValue(byte value, byte basis) { return (byte)(value / 100.0d * basis); }
@@ -276,21 +275,21 @@ namespace essentialMix.Numeric
 		{
 			return (short)(basis == 0
 								? 0
-								: SysMath.Abs(value) / 100.0d * SysMath.Abs(basis));
+								: Math.Abs(value) / 100.0d * Math.Abs(basis));
 		}
 
 		public static int RatioValue(int value, int basis)
 		{
 			return (int)(basis == 0
 							? 0
-							: SysMath.Abs(value) / 100.0d * SysMath.Abs(basis));
+							: Math.Abs(value) / 100.0d * Math.Abs(basis));
 		}
 
 		public static long RatioValue(long value, long basis)
 		{
 			return (long)(basis == 0
 							? 0
-							: SysMath.Abs(value) / 100.0d * SysMath.Abs(basis));
+							: Math.Abs(value) / 100.0d * Math.Abs(basis));
 		}
 
 		public static (byte x, byte y) AspectRatio(byte x, byte y, byte value, bool resizeToX = true)
@@ -410,8 +409,8 @@ namespace essentialMix.Numeric
 			while (a != 0 && b != 0)
 			{
 				byte a1 = a;
-				a = SysMath.Min(a, b);
-				b = (byte)(SysMath.Max(a1, b) % SysMath.Min(a1, b));
+				a = Math.Min(a, b);
+				b = (byte)(Math.Max(a1, b) % Math.Min(a1, b));
 			}
 
 			return (byte)(a | b);
@@ -427,8 +426,8 @@ namespace essentialMix.Numeric
 			while (a != 0 && b != 0)
 			{
 				short a1 = a;
-				a = SysMath.Min(a, b);
-				b = (short)(SysMath.Max(a1, b) % SysMath.Min(a1, b));
+				a = Math.Min(a, b);
+				b = (short)(Math.Max(a1, b) % Math.Min(a1, b));
 			}
 
 			return (short)(a | b);
@@ -444,8 +443,8 @@ namespace essentialMix.Numeric
 			while (a != 0 && b != 0)
 			{
 				ushort a1 = a;
-				a = SysMath.Min(a, b);
-				b = (ushort)(SysMath.Max(a1, b) % SysMath.Min(a1, b));
+				a = Math.Min(a, b);
+				b = (ushort)(Math.Max(a1, b) % Math.Min(a1, b));
 			}
 
 			return (ushort)(a | b);
@@ -461,8 +460,8 @@ namespace essentialMix.Numeric
 			while (a != 0 && b != 0)
 			{
 				int a1 = a;
-				a = SysMath.Min(a, b);
-				b = SysMath.Max(a1, b) % SysMath.Min(a1, b);
+				a = Math.Min(a, b);
+				b = Math.Max(a1, b) % Math.Min(a1, b);
 			}
 
 			return a | b;
@@ -478,8 +477,8 @@ namespace essentialMix.Numeric
 			while (a != 0u && b != 0u)
 			{
 				uint a1 = a;
-				a = SysMath.Min(a, b);
-				b = SysMath.Max(a1, b) % SysMath.Min(a1, b);
+				a = Math.Min(a, b);
+				b = Math.Max(a1, b) % Math.Min(a1, b);
 			}
 
 			return a | b;
@@ -495,8 +494,8 @@ namespace essentialMix.Numeric
 			while (a != 0 && b != 0)
 			{
 				long a1 = a;
-				a = SysMath.Min(a, b);
-				b = SysMath.Max(a1, b) % SysMath.Min(a1, b);
+				a = Math.Min(a, b);
+				b = Math.Max(a1, b) % Math.Min(a1, b);
 			}
 
 			return a | b;
@@ -512,8 +511,8 @@ namespace essentialMix.Numeric
 			while (a != 0ul && b != 0ul)
 			{
 				ulong a1 = a;
-				a = SysMath.Min(a, b);
-				b = SysMath.Max(a1, b) % SysMath.Min(a1, b);
+				a = Math.Min(a, b);
+				b = Math.Max(a1, b) % Math.Min(a1, b);
 			}
 
 			return a | b;
@@ -636,15 +635,15 @@ namespace essentialMix.Numeric
 		{
 			if (accuracy <= (float)0.0 || accuracy >= (float)1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
 
-			int sign = SysMath.Sign(value);
-			if (sign == -1) value = SysMath.Abs(value);
+			int sign = Math.Sign(value);
+			if (sign == -1) value = Math.Abs(value);
 
 			// Accuracy is the maximum relative error; convert to absolute maxError
 			float maxError = sign == 0
 								? accuracy
 								: value * accuracy;
 
-			int n = (int)SysMath.Floor(value);
+			int n = (int)Math.Floor(value);
 			value -= n;
 			if (value < maxError) return new Fraction<int>(sign * n, 1);
 			if (1 - maxError < value) return new Fraction<int>(sign * (n + 1), 1);
@@ -662,7 +661,7 @@ namespace essentialMix.Numeric
 				previousDenominator = temp;
 				numerator = Convert.ToInt32(value * denominator);
 			}
-			while (SysMath.Abs(value - (float)numerator / denominator) > maxError && !z.Equals((int)z));
+			while (Math.Abs(value - (float)numerator / denominator) > maxError && !z.Equals((int)z));
 
 			return new Fraction<int>((n * denominator + numerator) * sign, denominator);
 		}
@@ -680,15 +679,15 @@ namespace essentialMix.Numeric
 		{
 			if (accuracy <= 0.0 || accuracy >= 1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
 
-			int sign = SysMath.Sign(value);
-			if (sign == -1) value = SysMath.Abs(value);
+			int sign = Math.Sign(value);
+			if (sign == -1) value = Math.Abs(value);
 
 			// Accuracy is the maximum relative error; convert to absolute maxError
 			double maxError = sign == 0
 								? accuracy
 								: value * accuracy;
 
-			int n = (int)SysMath.Floor(value);
+			int n = (int)Math.Floor(value);
 			value -= n;
 			if (value < maxError) return new Fraction<int>(sign * n, 1);
 			if (1 - maxError < value) return new Fraction<int>(sign * (n + 1), 1);
@@ -706,7 +705,7 @@ namespace essentialMix.Numeric
 				previousDenominator = temp;
 				numerator = Convert.ToInt32(value * denominator);
 			}
-			while (SysMath.Abs(value - (double)numerator / denominator) > maxError && !z.Equals((int)z));
+			while (Math.Abs(value - (double)numerator / denominator) > maxError && !z.Equals((int)z));
 
 			return new Fraction<int>((n * denominator + numerator) * sign, denominator);
 		}
@@ -724,15 +723,15 @@ namespace essentialMix.Numeric
 		{
 			if (accuracy <= (decimal)0.0 || accuracy >= (decimal)1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
 
-			int sign = SysMath.Sign(value);
-			if (sign == -1) value = SysMath.Abs(value);
+			int sign = Math.Sign(value);
+			if (sign == -1) value = Math.Abs(value);
 
 			// Accuracy is the maximum relative error; convert to absolute maxError
 			decimal maxError = sign == 0
 									? accuracy
 									: value * accuracy;
 
-			int n = (int)SysMath.Floor(value);
+			int n = (int)Math.Floor(value);
 			value -= n;
 			if (value < maxError) return new Fraction<int>(sign * n, 1);
 			if (1 - maxError < value) return new Fraction<int>(sign * (n + 1), 1);
@@ -750,7 +749,7 @@ namespace essentialMix.Numeric
 				previousDenominator = temp;
 				numerator = Convert.ToInt32(value * denominator);
 			}
-			while (SysMath.Abs(value - (decimal)numerator / denominator) > maxError && !z.Equals((int)z));
+			while (Math.Abs(value - (decimal)numerator / denominator) > maxError && !z.Equals((int)z));
 
 			return new Fraction<int>((n * denominator + numerator) * sign, denominator);
 		}
@@ -768,15 +767,15 @@ namespace essentialMix.Numeric
 		{
 			if (accuracy <= (float)0.0 || accuracy >= (float)1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
 
-			int sign = SysMath.Sign(value);
-			if (sign == -1) value = SysMath.Abs(value);
+			int sign = Math.Sign(value);
+			if (sign == -1) value = Math.Abs(value);
 
 			// Accuracy is the maximum relative error; convert to absolute maxError
 			float maxError = sign == 0
 								? accuracy
 								: value * accuracy;
 
-			int n = (int)SysMath.Floor(value);
+			int n = (int)Math.Floor(value);
 			value -= n;
 			if (value < maxError) return new Fraction<int>(sign * n, 1);
 			if (1 - maxError < value) return new Fraction<int>(sign * (n + 1), 1);
@@ -830,15 +829,15 @@ namespace essentialMix.Numeric
 		{
 			if (accuracy <= 0.0 || accuracy >= 1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
 
-			int sign = SysMath.Sign(value);
-			if (sign == -1) value = SysMath.Abs(value);
+			int sign = Math.Sign(value);
+			if (sign == -1) value = Math.Abs(value);
 
 			// Accuracy is the maximum relative error; convert to absolute maxError
 			double maxError = sign == 0
 								? accuracy
 								: value * accuracy;
 
-			int n = (int)SysMath.Floor(value);
+			int n = (int)Math.Floor(value);
 			value -= n;
 			if (value < maxError) return new Fraction<int>(sign * n, 1);
 			if (1 - maxError < value) return new Fraction<int>(sign * (n + 1), 1);
@@ -892,15 +891,15 @@ namespace essentialMix.Numeric
 		{
 			if (accuracy <= (decimal)0.0 || accuracy >= (decimal)1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
 
-			int sign = SysMath.Sign(value);
-			if (sign == -1) value = SysMath.Abs(value);
+			int sign = Math.Sign(value);
+			if (sign == -1) value = Math.Abs(value);
 
 			// Accuracy is the maximum relative error; convert to absolute maxError
 			decimal maxError = sign == 0
 									? accuracy
 									: value * accuracy;
 
-			int n = (int)SysMath.Floor(value);
+			int n = (int)Math.Floor(value);
 			value -= n;
 			if (value < maxError) return new Fraction<int>(sign * n, 1);
 			if (1 - maxError < value) return new Fraction<int>(sign * (n + 1), 1);
@@ -983,7 +982,7 @@ namespace essentialMix.Numeric
 				value = -value;
 			}
 
-			while (!value.Equals(SysMath.Floor(value)))
+			while (!value.Equals(Math.Floor(value)))
 			{
 				n <<= 1;
 				value *= 2;
@@ -1244,13 +1243,13 @@ namespace essentialMix.Numeric
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Log2(double x)
 		{
-			return SysMath.Log(x, 2);
+			return Math.Log(x, 2);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Log10(double x)
 		{
-			return SysMath.Log(x, 10);
+			return Math.Log(x, 10);
 		}
 
 		/// <summary>

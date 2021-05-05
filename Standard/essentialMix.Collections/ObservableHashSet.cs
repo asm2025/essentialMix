@@ -13,10 +13,10 @@ using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
+using essentialMix.Numeric;
 using essentialMix.Threading;
 using JetBrains.Annotations;
 using Other.Microsoft.Collections;
-using essentialMixMath = essentialMix.Numeric.Math;
 
 namespace essentialMix.Collections
 {
@@ -829,7 +829,7 @@ namespace essentialMix.Collections
 			{
 				// similar to IncreaseCapacity but moves down elements in case add/remove/etc
 				// caused fragmentation
-				int newSize = essentialMixMath.GetPrime(Count);
+				int newSize = Math2.GetPrime(Count);
 				Slot[] newSlots = new Slot[newSize];
 				int[] newBuckets = new int[newSize];
 
@@ -973,7 +973,7 @@ namespace essentialMix.Collections
 		/// <param name="capacity"></param>
 		private void Initialize(int capacity)
 		{
-			int size = essentialMixMath.GetPrime(capacity);
+			int size = Math2.GetPrime(capacity);
 			_buckets = new int[size];
 			_slots = new Slot[size];
 		}
@@ -1000,7 +1000,7 @@ namespace essentialMix.Collections
 				if (source is ObservableHashSet<T> hashSetBase)
 				{
 					int capacity = source.Count;
-					int threshold = essentialMixMath.ExpandPrime(count + 1);
+					int threshold = Math2.ExpandPrime(count + 1);
 					if (threshold <= count) throw new InvalidOperationException("Cannot expand the set any further.");
 
 					if (threshold >= capacity)
@@ -1057,7 +1057,7 @@ namespace essentialMix.Collections
 		/// </summary>
 		private void IncreaseCapacity()
 		{
-			int newSize = essentialMixMath.ExpandPrime(Count);
+			int newSize = Math2.ExpandPrime(Count);
 			if (newSize <= Count) throw new InvalidOperationException("Cannot expand the set any further.");
 			// Able to increase capacity; copy elements to larger array and rehash
 			SetCapacity(newSize, false);
@@ -1070,7 +1070,7 @@ namespace essentialMix.Collections
 		/// </summary>
 		private void SetCapacity(int newSize, bool forceNewHashCodes)
 		{
-			Contract.Assert(essentialMixMath.IsPrime(newSize), "New size is not prime!");
+			Contract.Assert(Math2.IsPrime(newSize), "New size is not prime!");
 			Contract.Assert(_buckets != null, "SetCapacity called on a set with no elements");
 
 			Slot[] newSlots = new Slot[newSize];

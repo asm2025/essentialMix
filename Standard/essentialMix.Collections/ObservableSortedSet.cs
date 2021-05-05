@@ -12,9 +12,9 @@ using essentialMix.Exceptions;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
+using essentialMix.Numeric;
 using essentialMix.Threading;
 using JetBrains.Annotations;
-using Math = essentialMix.Numeric.Math;
 
 namespace essentialMix.Collections
 {
@@ -171,7 +171,7 @@ namespace essentialMix.Collections
 
 				// The maximum height of a red-black tree is 2*lg(n+1).
 				// See page 264 of "Introduction to algorithms" by Thomas H. Cormen
-				Stack<Node> stack = new Stack<Node>(2 * (int)Math.Log2(Count + 1)); //this is not exactly right if count is out of date, but the stack can grow
+				Stack<Node> stack = new Stack<Node>(2 * (int)Math2.Log2(Count + 1)); //this is not exactly right if count is out of date, but the stack can grow
 				Node current = _root;
 
 				while (current != null)
@@ -390,7 +390,7 @@ namespace essentialMix.Collections
 				_version = set._version;
 				_current = null;
 				_reverse = reverse;
-				_stack = new Stack<Node>(2 * (int)Math.Log2(set.Count + 1));
+				_stack = new Stack<Node>(2 * (int)Math2.Log2(set.Count + 1));
 				_sinfo = null;
 				Initialize();
 			}
@@ -444,7 +444,7 @@ namespace essentialMix.Collections
 				_version = _sinfo.GetInt32(ENUM_VERSION_NAME);
 				_reverse = _sinfo.GetBoolean(REVERSE_NAME);
 				bool enumStarted = _sinfo.GetBoolean(ENUM_START_NAME);
-				_stack = new Stack<Node>(2 * (int)Math.Log2(_set.Count + 1));
+				_stack = new Stack<Node>(2 * (int)Math2.Log2(_set.Count + 1));
 				_current = null;
 				if (!enumStarted) return;
 				T item = (T)_sinfo.GetValue(NODE_VALUE_NAME, typeof(T));
@@ -614,8 +614,8 @@ namespace essentialMix.Collections
 				}
 
 				//pre order way to replicate nodes
-				Stack<Node> theirStack = new Stack<Node>(2 * (int)Math.Log2(set.Count) + 2);
-				Stack<Node> myStack = new Stack<Node>(2 * (int)Math.Log2(set.Count) + 2);
+				Stack<Node> theirStack = new Stack<Node>(2 * (int)Math2.Log2(set.Count) + 2);
+				Stack<Node> myStack = new Stack<Node>(2 * (int)Math2.Log2(set.Count) + 2);
 				Node theirCurrent = set._root;
 				Node myCurrent = theirCurrent != null
 									? new Node(theirCurrent.Value, theirCurrent.IsRed)
@@ -1665,7 +1665,7 @@ namespace essentialMix.Collections
 			// See page 264 of "Introduction to algorithms" by Thomas H. Cormen
 			// note: this should be logbase2, but since the stack grows itself, we 
 			// don't want the extra cost
-			Stack<Node> stack = new Stack<Node>(2 * (int)Math.Log2(Count + 1));
+			Stack<Node> stack = new Stack<Node>(2 * (int)Math2.Log2(Count + 1));
 			Node current = _root;
 
 			while (current != null)

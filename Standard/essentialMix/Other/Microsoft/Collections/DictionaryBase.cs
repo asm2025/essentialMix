@@ -12,8 +12,8 @@ using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
+using essentialMix.Numeric;
 using JetBrains.Annotations;
-using essentialMixMath = essentialMix.Numeric.Math;
 
 // ReSharper disable once CheckNamespace
 namespace Other.Microsoft.Collections
@@ -821,7 +821,7 @@ namespace Other.Microsoft.Collections
 
 		private void Initialize(int capacity)
 		{
-			int size = essentialMixMath.GetPrime(capacity);
+			int size = Math2.GetPrime(capacity);
 			_buckets = new int[size];
 
 			for (int i = 0; i < _buckets.Length; i++) _buckets[i] = -1;
@@ -832,7 +832,7 @@ namespace Other.Microsoft.Collections
 
 		private void Resize()
 		{
-			int newSize = essentialMixMath.ExpandPrime(_count);
+			int newSize = Math2.ExpandPrime(_count);
 			if (newSize <= _count) throw new InvalidOperationException("Cannot expand the set any further.");
 			Resize(newSize, false);
 		}

@@ -9,7 +9,6 @@ using Other.Microsoft.Collections;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 using essentialMix.Numeric;
-using SysMath = System.Math;
 
 namespace essentialMix.Collections
 {
@@ -255,7 +254,7 @@ namespace essentialMix.Collections
 			int index = 0;
 			int c = 0;
 			byte v = 0;
-			List<BitVector> bitVectors = new List<BitVector>((int)SysMath.Ceiling(count / 8.0d));
+			List<BitVector> bitVectors = new List<BitVector>((int)Math.Ceiling(count / 8.0d));
 
 			for (int i = count - 1; i >= startIndex; i--)
 			{

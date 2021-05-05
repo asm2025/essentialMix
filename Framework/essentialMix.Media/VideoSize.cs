@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
-using Math = essentialMix.Numeric.Math;
+using essentialMix.Numeric;
 
 namespace essentialMix.Media
 {
@@ -146,7 +146,7 @@ namespace essentialMix.Media
 				{
 					BitRate = _width * _height;
 					AspectRatio = (double)_width / _height;
-					RationalApproximation = Math.RationalApproximation(AspectRatio).ToString();
+					RationalApproximation = Math2.RationalApproximation(AspectRatio).ToString();
 					DimensionsString = $"{Width}x{Height}";
 				}
 				else

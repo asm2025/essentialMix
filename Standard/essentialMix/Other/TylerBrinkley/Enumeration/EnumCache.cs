@@ -13,7 +13,6 @@ using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 using Other.TylerBrinkley.Enumeration.Numeric;
-using SysMath = System.Math;
 
 // ReSharper disable once CheckNamespace
 namespace Other.TylerBrinkley.Enumeration
@@ -729,7 +728,7 @@ namespace Other.TylerBrinkley.Enumeration
 			do
 			{
 				oldParsers = parsers;
-				parsers = new EnumMemberParser[SysMath.Max(oldParsers?.Length ?? 0, index + 1)];
+				parsers = new EnumMemberParser[Math.Max(oldParsers?.Length ?? 0, index + 1)];
 				oldParsers?.CopyTo(parsers, 0);
 				parsers[index] = parser;
 			} while ((parsers = Interlocked.CompareExchange(ref _enumMemberParsers, parsers, oldParsers)) != oldParsers);

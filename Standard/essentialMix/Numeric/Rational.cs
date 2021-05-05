@@ -229,7 +229,7 @@ namespace essentialMix.Numeric
 		private void Reduce()
 		{
 			// Reduce() is never called if Numerator or Denominator equals 0.
-			int greatestCommonDivisor = Math.GCD(Numerator, Denominator);
+			int greatestCommonDivisor = Math2.GCD(Numerator, Denominator);
 			Numerator /= greatestCommonDivisor;
 			Denominator /= greatestCommonDivisor;
 		}

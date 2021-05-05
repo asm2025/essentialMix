@@ -5,8 +5,8 @@ using System.Runtime.CompilerServices;
 using essentialMix.Collections;
 using JetBrains.Annotations;
 using essentialMix.Helpers;
+using essentialMix.Numeric;
 using Other.JonSkeet.MiscUtil.Collections;
-using essentialMixMath = essentialMix.Numeric.Math;
 
 namespace essentialMix.Extensions
 {
@@ -1092,7 +1092,7 @@ namespace essentialMix.Extensions
 				int r = thisValue[i].CompareTo(thisValue[i - 1]) <= 0
 							? i - 1
 							: i;
-				deepest = essentialMixMath.Max(deepest, essentialMixMath.Min(thisValue[p].Subtract(thisValue[q]), thisValue[r].Subtract(thisValue[q])));
+				deepest = Math2.Max(deepest, Math2.Min(thisValue[p].Subtract(thisValue[q]), thisValue[r].Subtract(thisValue[q])));
 				p = i - 1;
 				q = -1;
 			}

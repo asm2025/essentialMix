@@ -89,7 +89,7 @@ namespace essentialMix.Drawing.Helpers
 		[NotNull]
 		public static Image Resize([NotNull] Image image, int value, bool resizeToX = true)
 		{
-			(int x, int y) = Numeric.Math.AspectRatio(image.Width, image.Height, value, resizeToX);
+			(int x, int y) = Numeric.Math2.AspectRatio(image.Width, image.Height, value, resizeToX);
 			return Resize(image, x, y);
 		}
 

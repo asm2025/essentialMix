@@ -10,7 +10,6 @@ using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Numeric;
 using Other.JonSkeet.MiscUtil.Text;
-using SysMath = System.Math;
 
 namespace essentialMix.Extensions
 {
@@ -652,8 +651,8 @@ namespace essentialMix.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int DigitCount(this decimal thisValue)
 		{
-			thisValue = SysMath.Abs(thisValue);
-			ulong d = (ulong)SysMath.Floor(thisValue);
+			thisValue = Math.Abs(thisValue);
+			ulong d = (ulong)Math.Floor(thisValue);
 			decimal f = Fraction(thisValue);
 			int n;
 	
@@ -667,7 +666,7 @@ namespace essentialMix.Extensions
 			{
 				n++;
 				f *= 10.0m;
-				f -= SysMath.Floor(f);
+				f -= Math.Floor(f);
 			}
 
 			return n;
@@ -706,7 +705,7 @@ namespace essentialMix.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int DecimalPlaces(this decimal thisValue)
 		{
-			string s = SysMath.Abs(thisValue).ToString(NUM_SELF_FORMAT);
+			string s = Math.Abs(thisValue).ToString(NUM_SELF_FORMAT);
 			int n = s.IndexOf('.') + 1;
 			return n == 0 || n == s.Length
 						? 0
@@ -777,21 +776,21 @@ namespace essentialMix.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static float Supplement(this float thisValue)
 		{
-			float fraction = SysMath.Abs(Fraction(thisValue));
+			float fraction = Math.Abs(Fraction(thisValue));
 			return fraction < float.Epsilon ? 0.0f : 1.0f - fraction;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static double Supplement(this double thisValue)
 		{
-			double fraction = SysMath.Abs(Fraction(thisValue));
+			double fraction = Math.Abs(Fraction(thisValue));
 			return fraction < double.Epsilon ? 0.0d : 1.0d - fraction;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static decimal Supplement(this decimal thisValue)
 		{
-			decimal fraction = SysMath.Abs(Fraction(thisValue));
+			decimal fraction = Math.Abs(Fraction(thisValue));
 			return fraction == decimal.Zero ? 0.0m : 1.0m - fraction;
 		}
 
@@ -883,13 +882,13 @@ namespace essentialMix.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsEqual(this float thisValue, float value) { return SysMath.Abs(thisValue - value) < float.Epsilon; }
+		public static bool IsEqual(this float thisValue, float value) { return Math.Abs(thisValue - value) < float.Epsilon; }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsEqual(this double thisValue, double value) { return SysMath.Abs(thisValue - value) < double.Epsilon; }
+		public static bool IsEqual(this double thisValue, double value) { return Math.Abs(thisValue - value) < double.Epsilon; }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsEqual(this decimal thisValue, decimal value) { return SysMath.Abs(thisValue - value) == decimal.Zero; }
+		public static bool IsEqual(this decimal thisValue, decimal value) { return Math.Abs(thisValue - value) == decimal.Zero; }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static char Previous(this char thisValue, byte maximum) { return (char)Previous((byte)thisValue, maximum); }
@@ -1099,21 +1098,21 @@ namespace essentialMix.Extensions
 		[NotNull]
 		public static string PadLeft(this float thisValue, NumericBase toBase, ushort totalWidth, char paddingChar = ' ')
 		{
-			return Convert.ToString((long)SysMath.Floor(thisValue), (int)toBase).PadLeft(totalWidth, paddingChar);
+			return Convert.ToString((long)Math.Floor(thisValue), (int)toBase).PadLeft(totalWidth, paddingChar);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
 		public static string PadLeft(this double thisValue, NumericBase toBase, ushort totalWidth, char paddingChar = ' ')
 		{
-			return Convert.ToString((long)SysMath.Floor(thisValue), (int)toBase).PadLeft(totalWidth, paddingChar);
+			return Convert.ToString((long)Math.Floor(thisValue), (int)toBase).PadLeft(totalWidth, paddingChar);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
 		public static string PadLeft(this decimal thisValue, NumericBase toBase, ushort totalWidth, char paddingChar = ' ')
 		{
-			return Convert.ToString((long)SysMath.Floor(thisValue), (int)toBase).PadLeft(totalWidth, paddingChar);
+			return Convert.ToString((long)Math.Floor(thisValue), (int)toBase).PadLeft(totalWidth, paddingChar);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -1193,21 +1192,21 @@ namespace essentialMix.Extensions
 		[NotNull]
 		public static string PadRight(this float thisValue, NumericBase toBase, ushort totalWidth, char paddingChar = ' ')
 		{
-			return Convert.ToString((long)SysMath.Floor(thisValue), (int)toBase).PadRight(totalWidth, paddingChar);
+			return Convert.ToString((long)Math.Floor(thisValue), (int)toBase).PadRight(totalWidth, paddingChar);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
 		public static string PadRight(this double thisValue, NumericBase toBase, ushort totalWidth, char paddingChar = ' ')
 		{
-			return Convert.ToString((long)SysMath.Floor(thisValue), (int)toBase).PadRight(totalWidth, paddingChar);
+			return Convert.ToString((long)Math.Floor(thisValue), (int)toBase).PadRight(totalWidth, paddingChar);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
 		public static string PadRight(this decimal thisValue, NumericBase toBase, ushort totalWidth, char paddingChar = ' ')
 		{
-			return Convert.ToString((long)SysMath.Floor(thisValue), (int)toBase).PadRight(totalWidth, paddingChar);
+			return Convert.ToString((long)Math.Floor(thisValue), (int)toBase).PadRight(totalWidth, paddingChar);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -1303,37 +1302,37 @@ namespace essentialMix.Extensions
 		public static double Progress(this double thisValue, double total) { return thisValue / total * 100.0d; }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static sbyte Multiplier(this sbyte thisValue, sbyte value) { return (sbyte)(value * SysMath.Ceiling(thisValue / (double)value)); }
+		public static sbyte Multiplier(this sbyte thisValue, sbyte value) { return (sbyte)(value * Math.Ceiling(thisValue / (double)value)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static byte Multiplier(this byte thisValue, byte value) { return (byte)(value * SysMath.Ceiling(thisValue / (double)value)); }
+		public static byte Multiplier(this byte thisValue, byte value) { return (byte)(value * Math.Ceiling(thisValue / (double)value)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static short Multiplier(this short thisValue, short value) { return (short)(value * SysMath.Ceiling(thisValue / (double)value)); }
+		public static short Multiplier(this short thisValue, short value) { return (short)(value * Math.Ceiling(thisValue / (double)value)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static ushort Multiplier(this ushort thisValue, ushort value) { return (ushort)(value * SysMath.Ceiling(thisValue / (double)value)); }
+		public static ushort Multiplier(this ushort thisValue, ushort value) { return (ushort)(value * Math.Ceiling(thisValue / (double)value)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static int Multiplier(this int thisValue, int value) { return (int)(value * SysMath.Ceiling(thisValue / (double)value)); }
+		public static int Multiplier(this int thisValue, int value) { return (int)(value * Math.Ceiling(thisValue / (double)value)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static uint Multiplier(this uint thisValue, uint value) { return (uint)(value * SysMath.Ceiling(thisValue / (double)value)); }
+		public static uint Multiplier(this uint thisValue, uint value) { return (uint)(value * Math.Ceiling(thisValue / (double)value)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static long Multiplier(this long thisValue, long value) { return (long)(value * SysMath.Ceiling(thisValue / (double)value)); }
+		public static long Multiplier(this long thisValue, long value) { return (long)(value * Math.Ceiling(thisValue / (double)value)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static ulong Multiplier(this ulong thisValue, ulong value) { return (ulong)(value * SysMath.Ceiling(thisValue / (double)value)); }
+		public static ulong Multiplier(this ulong thisValue, ulong value) { return (ulong)(value * Math.Ceiling(thisValue / (double)value)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static float Multiplier(this float thisValue, float value) { return (float)(value * SysMath.Ceiling(thisValue / value)); }
+		public static float Multiplier(this float thisValue, float value) { return (float)(value * Math.Ceiling(thisValue / value)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static double Multiplier(this double thisValue, double value) { return value * SysMath.Ceiling(thisValue / value); }
+		public static double Multiplier(this double thisValue, double value) { return value * Math.Ceiling(thisValue / value); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static decimal Multiplier(this decimal thisValue, decimal value) { return value * SysMath.Ceiling(thisValue / value); }
+		public static decimal Multiplier(this decimal thisValue, decimal value) { return value * Math.Ceiling(thisValue / value); }
 
 		/// <summary>
 		/// returns 0 if thisValue is odd and 1 if thisValue is even
@@ -1370,7 +1369,7 @@ namespace essentialMix.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static int Even(this int thisValue)
 		{
-			// also the following works too: SysMath.Floor(1 + SysMath.Pow(-1, SysMath.Abs(thisValue)) / 2)
+			// also the following works too: Math.Floor(1 + Math.Pow(-1, Math.Abs(thisValue)) / 2)
 			return 1 - (thisValue & 1);
 		}
 

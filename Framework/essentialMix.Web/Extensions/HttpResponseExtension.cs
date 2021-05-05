@@ -1,8 +1,8 @@
 using System;
 using System.Web;
 using JetBrains.Annotations;
+using essentialMix.Web;
 using MSHeaderNames = Microsoft.Net.Http.Headers.HeaderNames;
-using essentialMixHeaderNames = essentialMix.Web.HeaderNames;
 
 // ReSharper disable once CheckNamespace
 namespace essentialMix.Extensions
@@ -16,8 +16,8 @@ namespace essentialMix.Extensions
 
 		public static void AddError([NotNull] this HttpResponse thisValue, [NotNull] Exception exception)
 		{
-			thisValue.Headers.Add(essentialMixHeaderNames.ApplicationError, exception.CollectMessages());
-			thisValue.Headers.Add(MSHeaderNames.AccessControlExposeHeaders, essentialMixHeaderNames.ApplicationError);
+			thisValue.Headers.Add(HeaderNames.ApplicationError, exception.CollectMessages());
+			thisValue.Headers.Add(MSHeaderNames.AccessControlExposeHeaders, HeaderNames.ApplicationError);
 		}
 
 		public static void AddHeader([NotNull] this HttpResponse thisValue, [NotNull] string name, string value)

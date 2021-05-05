@@ -235,7 +235,7 @@ work with {HEAVY} items.");
 				Console.Write($"Type in {Bright.Green("a number")} to calculate the Fibonacci number for or {Bright.Red("ESCAPE")} key to exit. ");
 				string response = Console.ReadLine();
 				more = !string.IsNullOrWhiteSpace(response);
-				if (more && uint.TryParse(response, out uint value)) Console.WriteLine(essentialMix.Numeric.Math.Fibonacci(value));
+				if (more && uint.TryParse(response, out uint value)) Console.WriteLine(essentialMix.Numeric.Math2.Fibonacci(value));
 			}
 			while (more);
 		}

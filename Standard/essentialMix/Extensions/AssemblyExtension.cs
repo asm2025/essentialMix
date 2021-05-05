@@ -17,7 +17,7 @@ namespace essentialMix.Extensions
 	{
 		private const string VERSION_DEF = "0.0.0.0";
 
-		private static readonly Regex __essentialMixFileProtocolTrim = new Regex(@"\Afile:///?", RegexHelper.OPTIONS_I);
+		private static readonly Regex __fileProtocolTrim = new Regex(@"\Afile:///?", RegexHelper.OPTIONS_I);
 
 		[NotNull]
 		public static string GetCode([NotNull] this Assembly thisValue)
@@ -102,7 +102,7 @@ namespace essentialMix.Extensions
 							: Path.GetFullPath(thisValue.Location);
 			}
 
-			string path = __essentialMixFileProtocolTrim.Replace(codeBase, string.Empty)
+			string path = __fileProtocolTrim.Replace(codeBase, string.Empty)
 												.Replace('/', '\\');
 			return Path.GetFullPath(path);
 		}

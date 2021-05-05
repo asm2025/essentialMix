@@ -9,7 +9,6 @@ using System.Web;
 using System.Web.Http;
 using JetBrains.Annotations;
 using essentialMix.Helpers;
-using essentialMixHeaderNames = essentialMix.Web.HeaderNames;
 
 namespace essentialMix.Web.Api.Http
 {
@@ -104,7 +103,7 @@ namespace essentialMix.Web.Api.Http
 			}
 
 			Uri fileUrl = UriHelper.Combine(Request.RequestUri, Destination.ToString().TrimEnd('/') + '/' + Path.GetFileName(destinationFileName));
-			response.Headers.Add(essentialMixHeaderNames.UploadedFile, fileUrl.ToString());
+			response.Headers.Add(HeaderNames.UploadedFile, fileUrl.ToString());
 		}
 	}
 }
