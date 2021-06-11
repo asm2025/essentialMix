@@ -5,21 +5,23 @@ using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
+namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
-	public sealed class WaitAndPulseQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
+	public sealed class EventQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 		private readonly Thread[] _workers;
 
 		private AutoResetEvent _workEvent;
+		private AutoResetEvent _queueEvent;
 		private CountdownEvent _countdown;
 		private bool _workStarted;
 
-		public WaitAndPulseQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+		public EventQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
 			_workEvent = new AutoResetEvent(false);
+			_queueEvent = new AutoResetEvent(false);
 			_countdown = new CountdownEvent(1);
 			_workers = new Thread[Threads];
 		}
@@ -30,16 +32,17 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			base.Dispose(disposing);
 			if (!disposing) return;
 			ObjectHelper.Dispose(ref _workEvent);
+			ObjectHelper.Dispose(ref _queueEvent);
 			ObjectHelper.Dispose(ref _countdown);
 		}
 
-		public override int Count => _queue.Count + _countdown.CurrentCount - 1;
+		public override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
 
 		public override bool IsBusy => Count > 0;
 
 		protected override void EnqueueInternal(T item)
 		{
-			if (IsDisposed || Token.IsCancellationRequested) return;
+			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 
 			if (!_workStarted)
 			{
@@ -66,11 +69,8 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				OnWorkStarted(EventArgs.Empty);
 			}
 
-			lock(_queue)
-			{
-				_queue.Enqueue(item);
-				Monitor.Pulse(_queue);
-			}
+			_queue.Enqueue(item);
+			_queueEvent.Set();
 		}
 
 		/// <inheritdoc />
@@ -87,21 +87,27 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			return _queue.TryPeek(out item);
 		}
 
+		/// <inheritdoc />
+		public void RemoveWhile(Predicate<T> predicate)
+		{
+			ThrowIfDisposed();
+
+			while (_queue.TryPeek(out T item) && predicate(item))
+			{
+				_queue.TryDequeue(out _);
+			}
+		}
+
 		protected override void CompleteInternal()
 		{
 			CompleteMarked = true;
-
-			lock (_queue) 
-				Monitor.PulseAll(_queue);
+			_queueEvent.Set();
 		}
 
 		protected override void ClearInternal()
 		{
-			lock(_queue)
-			{
-				_queue.Clear();
-				Monitor.PulseAll(_queue);
-			}
+			_queue.Clear();
+			_queueEvent.Set();
 		}
 
 		protected override bool WaitInternal(int millisecondsTimeout)
@@ -133,6 +139,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			CompleteInternal();
 			// Wait for the consumer's thread to finish.
 			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
+			Cancel();
 			ClearInternal();
 			if (!_workStarted) return;
 
@@ -151,23 +158,16 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.Count == 0)
-					{
-						lock (_queue)
-							Monitor.Wait(_queue, TimeSpanHelper.FAST_SCHEDULE);
-					}
+					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.IsEmpty) 
+						_queueEvent.WaitOne(TimeSpanHelper.FAST_SCHEDULE, Token);
 
 					if (IsDisposed || Token.IsCancellationRequested) return;
 					if (CompleteMarked) break;
-					if (!_queue.TryDequeue(out item)) continue;
-					Run(item);
+					if (_queue.TryDequeue(out item)) Run(item);
 				}
 
-				while (!IsDisposed && !Token.IsCancellationRequested)
-				{
-					if (!_queue.TryDequeue(out item)) break;
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item)) 
 					Run(item);
-				}
 			}
 			finally
 			{

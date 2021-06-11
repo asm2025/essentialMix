@@ -6,7 +6,7 @@ using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
+namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	public sealed class DataFlowQueue<T> : ProducerConsumerThreadQueue<T>
 	{

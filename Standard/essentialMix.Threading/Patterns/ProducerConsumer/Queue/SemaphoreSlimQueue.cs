@@ -6,7 +6,7 @@ using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
+namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	public sealed class SemaphoreSlimQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
@@ -15,6 +15,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 		private ManualResetEvent _allWorkDone;
 		private SemaphoreSlim _semaphore;
 		private Thread _worker;
+
 		private volatile int _running;
 
 		public SemaphoreSlimQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
@@ -67,6 +68,17 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 		{
 			ThrowIfDisposed();
 			return _queue.TryPeek(out item);
+		}
+
+		/// <inheritdoc />
+		public void RemoveWhile(Predicate<T> predicate)
+		{
+			ThrowIfDisposed();
+
+			while (_queue.TryPeek(out T item) && predicate(item))
+			{
+				_queue.TryDequeue(out _);
+			}
 		}
 
 		protected override void CompleteInternal()

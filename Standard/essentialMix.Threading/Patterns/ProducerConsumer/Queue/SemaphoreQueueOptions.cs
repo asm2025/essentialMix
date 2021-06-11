@@ -2,7 +2,7 @@
 using System.Security.AccessControl;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
+namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	public class SemaphoreQueueOptions<T> : ProducerConsumerThreadNamedQueueOptions<T>
 	{

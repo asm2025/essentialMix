@@ -1,18 +1,20 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
-using essentialMix.Threading.Collections.ProducerConsumer.Queue;
+using essentialMix.Threading.Patterns.ProducerConsumer.Queue;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer
+namespace essentialMix.Threading.Patterns.ProducerConsumer
 {
 	/*
 	 * This is based on the insightful book of Joseph Albahari, C# 6 in a Nutshell
 	 * http://www.albahari.com/threading/
 	 */
+	[DebuggerDisplay("{Count}")]
 	public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T>
 	{
 		private CancellationTokenSource _cts;

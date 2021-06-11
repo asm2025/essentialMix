@@ -1,7 +1,7 @@
 using System;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer
+namespace essentialMix.Threading.Patterns.ProducerConsumer
 {
 	public class ProducerConsumerThreadNamedQueueOptions<T> : ProducerConsumerThreadQueueOptions<T>
 	{

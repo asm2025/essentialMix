@@ -3,7 +3,7 @@ using essentialMix.Extensions;
 using essentialMix.Threading.Helpers;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer
+namespace essentialMix.Threading.Patterns.ProducerConsumer
 {
 	public class ProducerConsumerQueueOptions<T>
 	{

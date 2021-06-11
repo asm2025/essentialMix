@@ -12,8 +12,8 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
-		<AssemblyVersion>12.31.0.0</AssemblyVersion>
-		<FileVersion>21.5.5.0</FileVersion>
+		<AssemblyVersion>12.31.1.0</AssemblyVersion>
+		<FileVersion>21.6.11.0</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 	</PropertyGroup>
@@ -61,7 +61,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Bogus" Version="33.0.2.0" />
-		<PackageReference Include="Crayon" Version="2.0.60.0" />
+		<PackageReference Include="Crayon" Version="2.0.62" />
 		<PackageReference Include="EasyConsole" Version="1.1.0.0" />
 		<PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
@@ -99,7 +99,6 @@
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
 if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
 		</PreBuildEvent>
-		<Version>12.31.0.0</Version>
 	</PropertyGroup>
 
 </Project>

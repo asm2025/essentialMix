@@ -1,27 +1,26 @@
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
+namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
-	public sealed class EventQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
+	public sealed class WaitAndPulseQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
-		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
+		private readonly object _lock = new object();
+		private readonly Queue<T> _queue = new Queue<T>();
 		private readonly Thread[] _workers;
 
 		private AutoResetEvent _workEvent;
-		private AutoResetEvent _queueEvent;
 		private CountdownEvent _countdown;
 		private bool _workStarted;
 
-		public EventQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+		public WaitAndPulseQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
 			_workEvent = new AutoResetEvent(false);
-			_queueEvent = new AutoResetEvent(false);
 			_countdown = new CountdownEvent(1);
 			_workers = new Thread[Threads];
 		}
@@ -32,17 +31,16 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			base.Dispose(disposing);
 			if (!disposing) return;
 			ObjectHelper.Dispose(ref _workEvent);
-			ObjectHelper.Dispose(ref _queueEvent);
 			ObjectHelper.Dispose(ref _countdown);
 		}
 
-		public override int Count => _queue.Count + _countdown.CurrentCount - 1;
+		public override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
 
 		public override bool IsBusy => Count > 0;
 
 		protected override void EnqueueInternal(T item)
 		{
-			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+			if (IsDisposed || Token.IsCancellationRequested) return;
 
 			if (!_workStarted)
 			{
@@ -69,33 +67,105 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				OnWorkStarted(EventArgs.Empty);
 			}
 
-			_queue.Enqueue(item);
-			_queueEvent.Set();
+			lock(_lock)
+			{
+				_queue.Enqueue(item);
+				Monitor.Pulse(_lock);
+			}
 		}
 
 		/// <inheritdoc />
 		public bool TryDequeue(out T item)
 		{
 			ThrowIfDisposed();
-			return _queue.TryDequeue(out item);
+			
+			if (_queue.Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+
+			lock(_lock)
+			{
+				if (_queue.Count == 0)
+				{
+					item = default(T);
+					return false;
+				}
+
+				item = _queue.Dequeue();
+				Monitor.Pulse(_lock);
+				return true;
+			}
 		}
 
 		/// <inheritdoc />
 		public bool TryPeek(out T item)
 		{
 			ThrowIfDisposed();
-			return _queue.TryPeek(out item);
+
+			if (_queue.Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+
+			lock(_lock)
+			{
+				ThrowIfDisposed();
+
+				if (_queue.Count == 0)
+				{
+					item = default(T);
+					return false;
+				}
+
+				item = _queue.Peek();
+				return true;
+			}
+		}
+
+		/// <inheritdoc />
+		public void RemoveWhile(Predicate<T> predicate)
+		{
+			ThrowIfDisposed();
+			if (_queue.Count == 0) return;
+
+			lock(_lock)
+			{
+				ThrowIfDisposed();
+				if (_queue.Count == 0) return;
+
+				int n = 0;
+
+				while (_queue.Count > 0)
+				{
+					T item = _queue.Peek();
+					if (!predicate(item)) break;
+					_queue.Dequeue();
+					n++;
+				}
+
+				if (n == 0) return;
+				Monitor.Pulse(_lock);
+			}
 		}
 
 		protected override void CompleteInternal()
 		{
 			CompleteMarked = true;
-			_queueEvent.Set();
+
+			lock (_lock) 
+				Monitor.PulseAll(_lock);
 		}
 
 		protected override void ClearInternal()
 		{
-			_queue.Clear();
+			lock(_lock)
+			{
+				_queue.Clear();
+				Monitor.PulseAll(_lock);
+			}
 		}
 
 		protected override bool WaitInternal(int millisecondsTimeout)
@@ -127,7 +197,6 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			CompleteInternal();
 			// Wait for the consumer's thread to finish.
 			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
-			Cancel();
 			ClearInternal();
 			if (!_workStarted) return;
 
@@ -146,16 +215,23 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.IsEmpty) 
-						_queueEvent.WaitOne(TimeSpanHelper.FAST_SCHEDULE, Token);
+					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.Count == 0)
+					{
+						lock (_lock)
+							Monitor.Wait(_lock, TimeSpanHelper.FAST_SCHEDULE);
+					}
 
 					if (IsDisposed || Token.IsCancellationRequested) return;
-					if (CompleteMarked) break;
-					if (_queue.TryDequeue(out item)) Run(item);
+					if (CompleteMarked || _queue.Count == 0) continue;
+					item = _queue.Dequeue();
+					Run(item);
 				}
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item)) 
+				while (_queue.Count > 0 && !IsDisposed && !Token.IsCancellationRequested)
+				{
+					item = _queue.Dequeue();
 					Run(item);
+				}
 			}
 			finally
 			{

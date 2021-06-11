@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer
+namespace essentialMix.Threading.Patterns.ProducerConsumer
 {
 	public abstract class ProducerConsumerThreadQueue<T> : ProducerConsumerQueue<T>, IProducerConsumerThreadQueue<T>, IDisposable
 	{

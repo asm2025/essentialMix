@@ -6,48 +6,42 @@ using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
+namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	/// <summary>
 	/// Not recommended because it's way too expensive unless you know what you're doing and need to
 	/// have items run on their own threads.
 	/// </summary>
-	public sealed class SemaphoreQueue<T> : NamedProducerConsumerThreadQueue<T>, IProducerQueue<T>
+	public sealed class MutexQueue<T> : NamedProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
 		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
 
 		private CountdownEvent _countdown;
 		private ManualResetEvent _allWorkDone;
-		private Semaphore _semaphore;
+		private Mutex _mutex;
 		private Thread _worker;
 
-		public SemaphoreQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+		public MutexQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
 			bool createdNew;
 			string name = Name.ToNullIfEmpty()?.LeftMax(Win32.MAX_PATH);
-			
+
 			if (name == null)
 			{
-				_semaphore = new Semaphore(Threads, Threads, null, out createdNew);
+				_mutex = new Mutex(false, null, out createdNew);
 			}
 			else
 			{
 				try
 				{
-					_semaphore = Semaphore.OpenExisting(name);
+					_mutex = Mutex.OpenExisting(name);
 					createdNew = false;
 				}
 				catch (WaitHandleCannotBeOpenedException)
 				{
-					_semaphore = new Semaphore(Threads, Threads, name, out createdNew);
+					_mutex = new Mutex(false, name, out createdNew);
 				}
-			}
-
-			if (createdNew && options is SemaphoreQueueOptions<T> { Security: { } } semaphoreQueueOptions)
-			{
-				// see https://docs.microsoft.com/en-us/dotnet/api/system.threading.semaphore.openexisting for examples
-				_semaphore.SetAccessControl(semaphoreQueueOptions.Security);
 			}
 
 			IsOwner = createdNew;
@@ -65,25 +59,17 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			base.Dispose(disposing);
 			if (!disposing) return;
 
-			if (_semaphore != null)
+			if (_mutex != null)
 			{
-				_semaphore.Close();
-				ObjectHelper.Dispose(ref _semaphore);
+				_mutex.Close();
+				ObjectHelper.Dispose(ref _mutex);
 			}
 
 			ObjectHelper.Dispose(ref _countdown);
 			ObjectHelper.Dispose(ref _allWorkDone);
 		}
 
-		public override int Count
-		{
-			get
-			{
-				int threads = _countdown?.CurrentCount ?? 0;
-				if (threads > 1) threads--;
-				return _queue.Count + threads;
-			}
-		}
+		public override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
 
 		public override bool IsBusy => Count > 0;
 
@@ -105,6 +91,17 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 		{
 			ThrowIfDisposed();
 			return _queue.TryPeek(out item);
+		}
+
+		/// <inheritdoc />
+		public void RemoveWhile(Predicate<T> predicate)
+		{
+			ThrowIfDisposed();
+
+			while (_queue.TryPeek(out T item) && predicate(item))
+			{
+				_queue.TryDequeue(out _);
+			}
 		}
 
 		protected override void CompleteInternal()
@@ -156,9 +153,9 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 		{
 			if (IsDisposed) return;
 			OnWorkStarted(EventArgs.Empty);
-
+	
 			IList<Thread> threads = new List<Thread>(Threads);
-
+	
 			try
 			{
 				T item;
@@ -221,8 +218,8 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			{
 				for (int i = threads.Count - 1; i >= 0; i--)
 				{
-					Thread thread = threads[i];
-					ObjectHelper.Dispose(ref thread);
+					Thread th = threads[i];
+					ObjectHelper.Dispose(ref th);
 					threads.RemoveAt(i);
 				}
 			}
@@ -242,14 +239,14 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 			try
 			{
-				if (!_semaphore.WaitOne(Token)) return;
+				if (!_mutex.WaitOne(Token)) return;
 				entered = true;
 				if (IsDisposed || Token.IsCancellationRequested) return;
 				Run((T)rawValue);
 			}
 			finally
 			{
-				if (entered) _semaphore?.Release();
+				if (entered) _mutex?.ReleaseMutex();
 				_countdown?.Signal();
 			}
 		}

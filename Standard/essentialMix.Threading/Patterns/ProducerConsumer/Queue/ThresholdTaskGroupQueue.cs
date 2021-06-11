@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using essentialMix.Helpers;
 using essentialMix.Extensions;
+using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
+namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	public sealed class ThresholdTaskGroupQueue<T> : ProducerConsumerThresholdQueue<T>, IProducerQueue<T>
 	{
 		private readonly object _lock = new object();
 		private readonly Queue<T> _queue = new Queue<T>();
+
 		private CountdownEvent _countdown;
 		private Thread _worker;
 
@@ -34,14 +35,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _countdown);
 		}
 
-		public override int Count
-		{
-			get
-			{
-				lock(_lock)
-					return _queue.Count + _countdown.CurrentCount - 1;
-			}
-		}
+		public override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
 
 		public override bool IsBusy => Count > 0;
 
@@ -79,6 +73,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				}
 
 				item = _queue.Dequeue();
+				Monitor.Pulse(_lock);
 				return true;
 			}
 		}
@@ -106,6 +101,32 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 
 				item = _queue.Peek();
 				return true;
+			}
+		}
+
+		/// <inheritdoc />
+		public void RemoveWhile(Predicate<T> predicate)
+		{
+			ThrowIfDisposed();
+			if (_queue.Count == 0) return;
+
+			lock(_lock)
+			{
+				ThrowIfDisposed();
+				if (_queue.Count == 0) return;
+
+				int n = 0;
+
+				while (_queue.Count > 0)
+				{
+					T item = _queue.Peek();
+					if (!predicate(item)) break;
+					_queue.Dequeue();
+					n++;
+				}
+
+				if (n == 0) return;
+				Monitor.Pulse(_lock);
 			}
 		}
 
@@ -171,6 +192,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 				int count = 0;
 				int threads = Threads;
 				if (HasThreshold) threads++;
+		
 				Task[] tasks = new Task[threads];
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)

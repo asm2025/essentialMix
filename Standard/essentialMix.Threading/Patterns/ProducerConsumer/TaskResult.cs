@@ -1,4 +1,4 @@
-namespace essentialMix.Threading.Collections.ProducerConsumer
+namespace essentialMix.Threading.Patterns.ProducerConsumer
 {
 	public enum TaskResult
 	{

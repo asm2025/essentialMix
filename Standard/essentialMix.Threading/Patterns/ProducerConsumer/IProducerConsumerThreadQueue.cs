@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer
+namespace essentialMix.Threading.Patterns.ProducerConsumer
 {
 	public interface IProducerConsumerThreadQueue<in T> : IProducerConsumer<T>
 	{

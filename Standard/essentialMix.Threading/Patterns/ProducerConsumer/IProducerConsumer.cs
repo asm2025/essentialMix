@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer
+namespace essentialMix.Threading.Patterns.ProducerConsumer
 {
 	/*
 	 * This is based on the insightful book of Joseph Albahari, C# 6 in a Nutshell

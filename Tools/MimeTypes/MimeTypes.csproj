@@ -14,8 +14,8 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
-		<AssemblyVersion>12.31.0.0</AssemblyVersion>
-		<FileVersion>21.5.5.0</FileVersion>
+		<AssemblyVersion>12.31.1.0</AssemblyVersion>
+		<FileVersion>21.6.11.0</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 	</PropertyGroup>
@@ -83,8 +83,8 @@
 	<ItemGroup>
 		<PackageReference Include="EntityFramework" Version="6.4.4" />
 		<PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
-		<PackageReference Include="CsvHelper" Version="27.0.2" />
-		<PackageReference Include="Humanizer" Version="2.9.9" />
+		<PackageReference Include="CsvHelper" Version="27.1.0" />
+		<PackageReference Include="Humanizer" Version="2.11.10" />
 		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0.0" />
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1.0" />
 		<PackageReference Include="System.Buffers" Version="4.5.1" />
@@ -102,7 +102,6 @@
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
 if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
 		</PreBuildEvent>
-		<Version>12.31.0.0</Version>
 	</PropertyGroup>
 	
 </Project>

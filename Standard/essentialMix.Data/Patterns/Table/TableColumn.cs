@@ -40,7 +40,7 @@ namespace essentialMix.Data.Patterns.Table
 		/// <inheritdoc />
 		public string DataTypeName { get; }
 
-		public bool Formattable { get; set; }
+		public bool? Formattable { get; set; }
 
 		/// <inheritdoc />
 		public string Text
@@ -74,10 +74,10 @@ namespace essentialMix.Data.Patterns.Table
 		public bool AllowDbNull { get; set; }
 
 		/// <inheritdoc />
-		public bool Sortable { get; set; }
+		public bool? Sortable { get; set; }
 
 		/// <inheritdoc />
-		public bool Searchable { get; set; }
+		public bool? Searchable { get; set; }
 
 		/// <inheritdoc />
 		public bool ReadOnly { get; set; }
@@ -89,13 +89,13 @@ namespace essentialMix.Data.Patterns.Table
 		public bool Expression { get; set; }
 
 		/// <inheritdoc />
-		public bool Hidden { get; set; }
+		public bool? Hidden { get; set; }
 
 		/// <inheritdoc />
-		public int Order { get; set; }
+		public int? Order { get; set; }
 
 		/// <inheritdoc />
-		public HorizontalAlignment Align { get; set; }
+		public HorizontalAlignment? Align { get; set; }
 
 		/// <inheritdoc />
 		public int? Weight { get; set; }
@@ -104,7 +104,7 @@ namespace essentialMix.Data.Patterns.Table
 
 		public string CustomFormat { get; set; }
 
-		public TextCasing TextCasing { get; set; }
+		public TextCasing? TextCasing { get; set; }
 
 		public string Class { get; set; }
 
@@ -112,14 +112,19 @@ namespace essentialMix.Data.Patterns.Table
 		public object ThStyle { get; set; }
 		public string TdClass { get; set; }
 		public string Variant { get; set; }
-		public bool IsRowHeader { get; set; }
+		public bool? IsRowHeader { get; set; }
+
+		/// <inheritdoc />
+		public void Apply(ITableColumnSettings column)
+		{
+			ITableColumnSettings target = this;
+			TableColumnSettings.Apply(ref target, column);
+		}
 
 		[NotNull]
 		public ITableColumn Copy(string newName = null, Type newDataType = null)
 		{
-			newName = newName?.Trim();
-			if (string.IsNullOrEmpty(newName)) newName = null;
-			newName ??= Name;
+			newName = newName.ToNullIfEmpty() ?? Name;
 			newDataType ??= DataType;
 			TableColumn column = new TableColumn(newName, newDataType)
 			{

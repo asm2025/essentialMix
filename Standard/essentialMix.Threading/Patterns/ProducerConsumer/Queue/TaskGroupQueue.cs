@@ -7,7 +7,7 @@ using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
+namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	public sealed class TaskGroupQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
@@ -34,7 +34,7 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _countdown);
 		}
 
-		public override int Count => _queue.Count + _countdown.CurrentCount - 1;
+		public override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
 
 		public override bool IsBusy => Count > 0;
 
@@ -56,6 +56,17 @@ namespace essentialMix.Threading.Collections.ProducerConsumer.Queue
 		{
 			ThrowIfDisposed();
 			return _queue.TryPeek(out item);
+		}
+
+		/// <inheritdoc />
+		public void RemoveWhile(Predicate<T> predicate)
+		{
+			ThrowIfDisposed();
+
+			while (_queue.TryPeek(out T item) && predicate(item))
+			{
+				_queue.TryDequeue(out _);
+			}
 		}
 
 		protected override void CompleteInternal()
