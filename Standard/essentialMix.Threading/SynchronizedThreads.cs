@@ -9,7 +9,7 @@ using essentialMix.Patterns.Object;
 namespace essentialMix.Threading
 {
 	// based on TwoWaySignaling
-	public sealed class Synchronized<T> : Disposable
+	public sealed class SynchronizedThreads<T> : Disposable
 	{
 		private readonly object _lock = new object();
 		private readonly Thread[] _workers;
@@ -23,17 +23,17 @@ namespace essentialMix.Threading
 		private readonly ThreadPriority _priority;
 		private bool _waitForQueuedItems = true;
 
-		public Synchronized([NotNull] Func<T, bool> mainRoutine, [NotNull] Func<T, bool> workerRoutine, CancellationToken token = default(CancellationToken))
+		public SynchronizedThreads([NotNull] Func<T, bool> mainRoutine, [NotNull] Func<T, bool> workerRoutine, CancellationToken token = default(CancellationToken))
 			: this(mainRoutine, workerRoutine, ThreadPriority.Normal, false, token)
 		{
 		}
 
-		public Synchronized([NotNull] Func<T, bool> mainRoutine, [NotNull] Func<T, bool> workerRoutine, bool isBackground, CancellationToken token = default(CancellationToken))
+		public SynchronizedThreads([NotNull] Func<T, bool> mainRoutine, [NotNull] Func<T, bool> workerRoutine, bool isBackground, CancellationToken token = default(CancellationToken))
 			: this(mainRoutine, workerRoutine, ThreadPriority.Normal, isBackground, token)
 		{
 		}
 
-		public Synchronized([NotNull] Func<T, bool> mainRoutine, [NotNull] Func<T, bool> workerRoutine, ThreadPriority priority, bool isBackground, CancellationToken token = default(CancellationToken))
+		public SynchronizedThreads([NotNull] Func<T, bool> mainRoutine, [NotNull] Func<T, bool> workerRoutine, ThreadPriority priority, bool isBackground, CancellationToken token = default(CancellationToken))
 		{
 			MainRoutine = mainRoutine;
 			WorkerRoutine = workerRoutine;

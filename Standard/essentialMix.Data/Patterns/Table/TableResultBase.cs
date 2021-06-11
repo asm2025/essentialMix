@@ -27,7 +27,7 @@ namespace essentialMix.Data.Patterns.Table
 		/// <inheritdoc />
 		public TableColumns Columns { get; } = new TableColumns();
 
-		public virtual bool MapSchemaTable([NotNull] DataTable schema, Func<string, bool> filter = null, Func<string, TableColumnSettings?> onGetSettings = null)
+		public virtual bool MapSchemaTable([NotNull] DataTable schema, Func<string, bool> filter = null, Func<string, ITableColumnSettings> onGetSettings = null)
 		{
 			return Columns.MapSchemaTable(schema, filter, onGetSettings);
 		}
@@ -64,7 +64,7 @@ namespace essentialMix.Data.Patterns.Table
 
 		public ICollection<T> Items { get; }
 
-		public virtual bool MapSchemaTable<TInstance>([NotNull] TInstance instance, Func<string, bool> filter = null, Func<string, TableColumnSettings?> onGetSettings = null)
+		public virtual bool MapSchemaTable<TInstance>([NotNull] TInstance instance, Func<string, bool> filter = null, Func<string, ITableColumnSettings> onGetSettings = null)
 		{
 			return Columns.MapSchemaTable(instance, filter, onGetSettings);
 		}

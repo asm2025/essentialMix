@@ -28,7 +28,6 @@ namespace essentialMix.Extensions
 		public static object Format([NotNull] this ITableColumn thisValue, object value, [NotNull] CultureInfo cultureInfo)
 		{
 			thisValue.Formatting ??= TableColumnFormatting.General;
-
 			return thisValue.Formatting.Value switch
 			{
 				TableColumnFormatting.Text => Convert.ToString(value),
@@ -46,7 +45,7 @@ namespace essentialMix.Extensions
 				TableColumnFormatting.Custom => !string.IsNullOrEmpty(thisValue.CustomFormat)
 													? string.Format(cultureInfo, thisValue.CustomFormat, value)
 													: Convert.ToString(value, cultureInfo),
-				_ => thisValue.Formattable
+				_ => thisValue.Formattable == true
 						? Convert.ToString(value, cultureInfo)
 						: value
 			};

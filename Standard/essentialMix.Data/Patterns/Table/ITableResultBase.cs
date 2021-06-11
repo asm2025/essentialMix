@@ -12,13 +12,13 @@ namespace essentialMix.Data.Patterns.Table
 		[NotNull]
 		TableColumns Columns { get; }
 
-		bool MapSchemaTable(DataTable schema, Func<string, bool> filter = null, Func<string, TableColumnSettings?> onGetSettings = null);
+		bool MapSchemaTable(DataTable schema, Func<string, bool> filter = null, Func<string, ITableColumnSettings> onGetSettings = null);
 	}
 
 	public interface ITableResultBase<T> : ITableResultBase
 	{
 		[NotNull]
 		ICollection<T> Items { get; }
-		bool MapSchemaTable<TInstance>(TInstance instance, Func<string, bool> filter = null, Func<string, TableColumnSettings?> onGetSettings = null);
+		bool MapSchemaTable<TInstance>(TInstance instance, Func<string, bool> filter = null, Func<string, ITableColumnSettings> onGetSettings = null);
 	}
 }

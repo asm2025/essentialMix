@@ -9,7 +9,7 @@ using JetBrains.Annotations;
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	[DebuggerDisplay("{Count}")]
-	public sealed class SynchronizedQueue<T> : Disposable, IProducerConsumer<T>, IProducerQueue<T>
+	public sealed class SynchronizedProducerQueue<T> : Disposable, IProducerConsumer<T>, IProducerQueue<T>
 	{
 		private readonly IProducerQueue<T> _producerQueue;
 
@@ -17,7 +17,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		private IProducerConsumer<T> _queue;
 
 		/// <inheritdoc />
-		public SynchronizedQueue(ThreadQueueMode mode, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+		public SynchronizedProducerQueue(ThreadQueueMode mode, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 		{
 			_queue = ProducerConsumerQueue.Create(mode, options, token);
 			_producerQueue = _queue as IProducerQueue<T> ?? throw new NotSupportedException();
