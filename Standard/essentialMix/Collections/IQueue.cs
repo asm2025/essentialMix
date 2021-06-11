@@ -1,10 +1,9 @@
-﻿using JetBrains.Annotations;
-
-namespace essentialMix.Collections
+﻿namespace essentialMix.Collections
 {
 	public interface IQueue<T>
 	{
-		void Enqueue([NotNull] T item);
-		void Dequeue();
+		void Enqueue(T item);
+		T Dequeue();
+		void Clear();
 	}
 }
