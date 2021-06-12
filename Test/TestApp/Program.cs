@@ -30,9 +30,12 @@ using essentialMix.Helpers;
 using Other.Microsoft.Collections;
 using essentialMix.Threading.Helpers;
 using essentialMix.Threading.Patterns.ProducerConsumer;
+using essentialMix.Threading.Patterns.ProducerConsumer.Queue;
 using Newtonsoft.Json;
+
 using TimeoutException = System.TimeoutException;
 using Menu = EasyConsole.Menu;
+
 using static Crayon.Output;
 
 // ReSharper disable UnusedMember.Local
@@ -84,7 +87,8 @@ work with {HEAVY} items.");
 			//TestLevenshteinDistance();
 			//TestDeepestPit();
 
-			TestThreadQueue();
+			//TestThreadQueue();
+			//TestWaitAndPulseProducerQueue();
 			//TestAsyncLock();
 
 			//TestSortAlgorithm();
@@ -98,7 +102,7 @@ work with {HEAVY} items.");
 
 			//TestDeque();
 			//TestLinkedDeque();
-			//TestCircularBuffer();
+			TestCircularBuffer();
 
 			//TestBinaryTreeFromTraversal();
 			
@@ -437,11 +441,11 @@ work with {HEAVY} items.");
 				threads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
 			}
 
+			if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
+
 			ThreadQueueMode[] modes = EnumHelper<ThreadQueueMode>.GetValues();
 			Queue<ThreadQueueMode> queueModes = new Queue<ThreadQueueMode>(modes);
 			Stopwatch clock = new Stopwatch();
-
-			if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
 
 			while (queueModes.Count > 0)
 			{
@@ -523,6 +527,166 @@ work with {HEAVY} items.");
 					if (Console.ReadKey(true).Key == ConsoleKey.Y)
 					{
 						foreach (ThreadQueueMode m in modes) 
+							queueModes.Enqueue(m);
+					}
+
+					continue;
+				}
+
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				if (response.Key != ConsoleKey.Y) queueModes.Clear();
+			}
+
+			clock.Stop();
+
+			static TaskResult Exec(int e)
+			{
+				Task.Delay(50).Execute();
+				Console.Write($"{e:D4} ");
+				return TaskResult.Success;
+			}
+		}
+
+		private enum WaitAndPulseProducerSupportedTypes
+		{
+			Queue,
+			Stack,
+			Deque,
+			CircularBuffer,
+			List
+		}
+
+		private static void TestWaitAndPulseProducerQueue()
+		{
+			int len = RNGRandomHelper.Next(16, 32);
+			int[] values = new int[len];
+
+			for (int i = 0; i < values.Length; i++)
+				values[i] = i + 1;
+
+			int timeout = RNGRandomHelper.Next(0, 1);
+			string timeoutString = timeout > 0
+										? $"{timeout} minute(s)"
+										: "None";
+			int threads;
+
+			if (DebugHelper.DebugMode)
+			{
+				// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
+				threads = LimitThreads()
+							? 1
+							: RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
+			}
+			else
+			{
+				// Otherwise, use the default (Best to be TaskHelper.ProcessDefault which = Environment.ProcessorCount)
+				threads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
+			}
+
+			if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
+
+			WaitAndPulseProducerSupportedTypes[] modes = EnumHelper<WaitAndPulseProducerSupportedTypes>.GetValues();
+			Queue<WaitAndPulseProducerSupportedTypes> queueModes = new Queue<WaitAndPulseProducerSupportedTypes>(modes);
+			ProducerConsumerQueueOptions<int> options = new ProducerConsumerQueueOptions<int>(threads, Exec);
+			Stopwatch clock = new Stopwatch();
+
+			while (queueModes.Count > 0)
+			{
+				Console.Clear();
+				Console.WriteLine();
+				WaitAndPulseProducerSupportedTypes mode = queueModes.Dequeue();
+				Title($"Testing multi-thread queue in '{Bright.Cyan(mode.ToString())}' mode...");
+
+				// if there is a timeout, will use a CancellationTokenSource.
+				using (CancellationTokenSource cts = timeout > 0
+														? new CancellationTokenSource(TimeSpan.FromMinutes(timeout))
+														: null)
+				{
+					CancellationToken token = cts?.Token ?? CancellationToken.None;
+			
+					// Create a generic queue producer
+					IProducerConsumer<int> queue = null;
+
+					try
+					{
+						switch (mode)
+						{
+							case WaitAndPulseProducerSupportedTypes.Queue:
+								queue = new WaitAndPulseQueue<Queue<int>, int>(new Queue<int>(), options, token);
+								break;
+							case WaitAndPulseProducerSupportedTypes.Stack:
+								queue = new WaitAndPulseQueue<Stack<int>, int>(new Stack<int>(), options, token);
+								break;
+							case WaitAndPulseProducerSupportedTypes.Deque:
+								queue = new WaitAndPulseQueue<Deque<int>, int>(new Deque<int>(), options, token);
+								break;
+							case WaitAndPulseProducerSupportedTypes.CircularBuffer:
+								queue = new WaitAndPulseQueue<CircularBuffer<int>, int>(new CircularBuffer<int>(values.Length / 2), options, token);
+								break;
+							case WaitAndPulseProducerSupportedTypes.List:
+								queue = new WaitAndPulseQueue<List<int>, int>(new List<int>(), options, token);
+								break;
+							default:
+								throw new ArgumentOutOfRangeException();
+						}
+
+						queue.WorkStarted += (_, _) =>
+						{
+							Console.WriteLine();
+							Console.WriteLine($"Starting multi-thread test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Length.ToString())}, threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}...");
+							Console.WriteLine();
+							clock.Restart();
+						};
+
+						queue.WorkCompleted += (_, _) =>
+						{
+							long elapsed = clock.ElapsedMilliseconds;
+							Console.WriteLine();
+							Console.WriteLine($"Finished test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Length.ToString())}, threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}, elapsed: {Bright.Cyan(elapsed.ToString())} ms.");
+							Console.WriteLine();
+						};
+
+						foreach (int value in values)
+						{
+							queue.Enqueue(value);
+						}
+
+						queue.Complete();
+					}
+					finally
+					{
+						/*
+						* when the queue is being disposed, it will wait until the queued items are processed.
+						* this works when queue.WaitOnDispose is true , which it is by default.
+						* alternatively, the following can be done to wait for all items to be processed:
+						*
+						* // Important: marks the completion of queued items, no further items can be queued
+						* // after this point. the queue will not to wait for more items other than the already queued.
+						* queue.Complete();
+						* // wait for the queue to finish
+						* queue.Wait();
+						*
+						* another way to go about it, is not to call queue.Complete(); if this queue will
+						* wait indefinitely and maybe use a CancellationTokenSource.
+						*
+						* for now, the queue will wait for the items to be finished once reached the next
+						* dispose curly bracket.
+						*/
+						ObjectHelper.Dispose(ref queue);
+					}
+				}
+
+				if (queueModes.Count == 0)
+				{
+					Console.WriteLine();
+					Console.Write($"Would you like to repeat the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to exit. ");
+
+					if (Console.ReadKey(true).Key == ConsoleKey.Y)
+					{
+						foreach (WaitAndPulseProducerSupportedTypes m in queueModes) 
 							queueModes.Enqueue(m);
 					}
 
@@ -1340,7 +1504,6 @@ work with {HEAVY} items.");
 
 				Title("Testing CircularBuffer as a Queue...");
 				DoTheTest(circularBuffer, values, circularBuffer.Add, circularBuffer.Dequeue, print, clock);
-				ConsoleHelper.Pause();
 				Console.WriteLine();
 
 				Title("Testing CircularBuffer as a Stack...");
@@ -1376,11 +1539,6 @@ work with {HEAVY} items.");
 				Console.WriteLine($"Added {count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 				if (print) Console.WriteLine(string.Join(", ", circularBuffer));
 
-				int insertItem = RandomHelper.Next(10000, 10100);
-				Console.WriteLine($"Inserting {insertItem}.");
-				circularBuffer.Insert(insertItem);
-				if (print) Console.WriteLine(string.Join(", ", circularBuffer));
-
 				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				int missed = 0;
@@ -1408,6 +1566,11 @@ work with {HEAVY} items.");
 				}
 
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
+
+				int insertItem = RandomHelper.Next(10000, 10100);
+				Console.WriteLine($"Inserting {insertItem}.");
+				circularBuffer.Insert(insertItem);
+				if (print) Console.WriteLine(string.Join(", ", circularBuffer));
 
 				Console.WriteLine(Bright.Yellow("Test copy..."));
 				int[] array = new int[circularBuffer.Capacity];

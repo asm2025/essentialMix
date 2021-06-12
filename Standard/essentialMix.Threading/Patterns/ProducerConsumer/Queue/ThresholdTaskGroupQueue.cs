@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,8 +11,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	public sealed class ThresholdTaskGroupQueue<T> : ProducerConsumerThresholdQueue<T>, IProducerQueue<T>
 	{
-		private readonly object _lock = new object();
-		private readonly Queue<T> _queue = new Queue<T>();
+		private readonly Queue<T> _queue;
+		private readonly ICollection _collection;
 
 		private CountdownEvent _countdown;
 		private Thread _worker;
@@ -19,6 +20,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public ThresholdTaskGroupQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
+			_queue = new Queue<T>();
+			_collection = _queue;
 			_countdown = new CountdownEvent(1);
 			(_worker = new Thread(Consume)
 			{
@@ -35,6 +38,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _countdown);
 		}
 
+		/// <inheritdoc />
+		public object SyncRoot => _collection.SyncRoot;
+
 		public override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
 
 		public override bool IsBusy => Count > 0;
@@ -43,11 +49,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 
-			lock (_lock)
+			lock (SyncRoot)
 			{
 				if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 				_queue.Enqueue(item);
-				Monitor.Pulse(_lock);
+				Monitor.Pulse(SyncRoot);
 			}
 		}
 
@@ -62,7 +68,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				return false;
 			}
 			
-			lock(_lock)
+			lock(SyncRoot)
 			{
 				ThrowIfDisposed();
 
@@ -73,7 +79,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				}
 
 				item = _queue.Dequeue();
-				Monitor.Pulse(_lock);
+				Monitor.Pulse(SyncRoot);
 				return true;
 			}
 		}
@@ -89,7 +95,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				return false;
 			}
 			
-			lock(_lock)
+			lock(SyncRoot)
 			{
 				ThrowIfDisposed();
 
@@ -110,7 +116,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			ThrowIfDisposed();
 			if (_queue.Count == 0) return;
 
-			lock(_lock)
+			lock(SyncRoot)
 			{
 				ThrowIfDisposed();
 				if (_queue.Count == 0) return;
@@ -126,25 +132,25 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				}
 
 				if (n == 0) return;
-				Monitor.Pulse(_lock);
+				Monitor.Pulse(SyncRoot);
 			}
 		}
 
 		protected override void CompleteInternal()
 		{
-			lock(_lock)
+			lock(SyncRoot)
 			{
 				CompleteMarked = true;
-				Monitor.PulseAll(_lock);
+				Monitor.PulseAll(SyncRoot);
 			}
 		}
 
 		protected override void ClearInternal()
 		{
-			lock (_lock)
+			lock (SyncRoot)
 			{
 				_queue.Clear();
-				Monitor.PulseAll(_lock);
+				Monitor.PulseAll(SyncRoot);
 			}
 		}
 
@@ -202,9 +208,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && count < tasks.Length)
 					{
-						lock(_lock)
+						lock(SyncRoot)
 						{
-							if (_queue.Count == 0) Monitor.Wait(_lock, TimeSpanHelper.FAST_SCHEDULE);
+							if (_queue.Count == 0) Monitor.Wait(SyncRoot, TimeSpanHelper.FAST_SCHEDULE);
 							if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
 						}
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -14,7 +15,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 	/// </summary>
 	public sealed class SemaphoreQueue<T> : NamedProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
-		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
+		private readonly ConcurrentQueue<T> _queue;
+		private readonly ICollection _collection;
 
 		private CountdownEvent _countdown;
 		private ManualResetEvent _allWorkDone;
@@ -51,6 +53,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 
 			IsOwner = createdNew;
+			_queue = new ConcurrentQueue<T>();
+			_collection = _queue;
 			_allWorkDone = new ManualResetEvent(false);
 			(_worker = new Thread(Consume)
 					{
@@ -74,6 +78,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _countdown);
 			ObjectHelper.Dispose(ref _allWorkDone);
 		}
+
+		/// <inheritdoc />
+		public object SyncRoot => _collection.SyncRoot;
 
 		public override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
 

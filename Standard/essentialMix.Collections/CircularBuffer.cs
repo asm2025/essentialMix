@@ -139,7 +139,7 @@ namespace essentialMix.Collections
 				_position = -1;
 				_head = circularBuffer._head;
 				_tail = circularBuffer._tail;
-				_length = circularBuffer.Items.Length;
+				_length = circularBuffer._items.Length;
 				_count = circularBuffer.Count;
 				_version = circularBuffer._version;
 				Current = default(T);
@@ -168,7 +168,7 @@ namespace essentialMix.Collections
 						if (_position > _tail) return MoveNextRare();
 					}
 
-					Current = _circularBuffer.Items[_position];
+					Current = _circularBuffer._items[_position];
 					_index++;
 					return true;
 				}
@@ -210,6 +210,7 @@ namespace essentialMix.Collections
 		private int _head;
 		private int _tail;
 		private int _version;
+		private T[] _items;
 
 		[NonSerialized]
 		private object _syncRoot;
@@ -222,19 +223,19 @@ namespace essentialMix.Collections
 		{
 			if (capacity < 1) throw new ArgumentOutOfRangeException(nameof(capacity));
 			_tail = -1;
-			Items = new T[capacity];
+			_items = new T[capacity];
 		}
 
 		public int Capacity
 		{
-			get => Items.Length;
+			get => _items.Length;
 			set
 			{
 				if (value < Count || value < 1) throw new ArgumentOutOfRangeException(nameof(value));
-				if (value == Items.Length) return;
+				if (value == _items.Length) return;
 				T[] newItems = new T[value];
 				CopyTo(newItems, 0);
-				Items = newItems;
+				_items = newItems;
 				_head = 0;
 				_tail = Count - 1;
 				_version++;
@@ -261,12 +262,6 @@ namespace essentialMix.Collections
 			}
 		}
 
-		/// <summary>
-		/// The circular Items that holds the view.
-		/// </summary>
-		[NotNull]
-		protected T[] Items { get; private set; }
-
 		/// <inheritdoc />
 		public IEnumerator<T> GetEnumerator() { return new Enumerator(this); }
 
@@ -276,10 +271,10 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		public void Add(T item)
 		{
-			_tail = (_tail + 1) % Items.Length;
-			Items[_tail] = item;
-			if (Count == Items.Length && _tail == _head) _head = (_head + 1) % Items.Length;
-			Count = (Count + 1).NotAbove(Items.Length);
+			_tail = (_tail + 1) % _items.Length;
+			_items[_tail] = item;
+			if (Count == _items.Length && _tail == _head) _head = (_head + 1) % _items.Length;
+			if (Count < _items.Length) Count++;
 			_version++;
 		}
 
@@ -289,46 +284,46 @@ namespace essentialMix.Collections
 			{
 				if (_tail >= _head)
 				{
-					if (_tail < Items.Length - 1)
+					if (_tail < _items.Length - 1)
 					{
 						_tail++;
 
 						for (int i = _tail; i > _head; i--) 
-							Items[i] = Items[i - 1];
+							_items[i] = _items[i - 1];
 					}
 					else
 					{
-						T last = Items[_tail];
+						T last = _items[_tail];
 
 						for (int i = _tail; i > _head; i--) 
-							Items[i] = Items[i - 1];
+							_items[i] = _items[i - 1];
 
 						_tail = 0;
-						if (_tail == _head) _head = (_head + 1) % Items.Length;
-						Items[_tail] = last;
+						if (_tail == _head) _head = (_head + 1) % _items.Length;
+						_items[_tail] = last;
 					}
 				}
 				else
 				{
-					T last = Items[Items.Length - 1];
+					T last = _items[_items.Length - 1];
 
-					if (_head < Items.Length - 1)
+					if (_head < _items.Length - 1)
 					{
-						for (int i = Items.Length - 1; i > _head; i--) 
-							Items[i] = Items[i - 1];
+						for (int i = _items.Length - 1; i > _head; i--) 
+							_items[i] = _items[i - 1];
 					}
 					else
 					{
 						_head = 0;
 					}
 
-					_tail = (_tail + 1) % Items.Length;
+					_tail = (_tail + 1) % _items.Length;
 
 					for (int i = _tail; i > 0; i--) 
-						Items[i] = Items[i - 1];
+						_items[i] = _items[i - 1];
 
-					Items[0] = last;
-					if (_tail == _head) _head = (_head + 1) % Items.Length;
+					_items[0] = last;
+					if (_tail == _head) _head = (_head + 1) % _items.Length;
 				}
 			}
 			else
@@ -336,8 +331,8 @@ namespace essentialMix.Collections
 				_tail = 0;
 			}
 
-			Items[_head] = item;
-			Count = (Count + 1).NotAbove(Items.Length);
+			_items[_head] = item;
+			Count = (Count + 1).NotAbove(_items.Length);
 			_version++;
 		}
 
@@ -345,7 +340,7 @@ namespace essentialMix.Collections
 		public bool Remove(T item)
 		{
 			if (Count == 0) return false;
-			int index = Array.IndexOf(Items, item, 0, Count);
+			int index = Array.IndexOf(_items, item, 0, Count);
 			if (index < 0) return false;
 			RemoveAtInternal(index);
 			return true;
@@ -366,13 +361,13 @@ namespace essentialMix.Collections
 		public T PeekHead()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			return Items[_head];
+			return _items[_head];
 		}
 
 		public T PeekTail()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			return Items[_tail];
+			return _items[_tail];
 		}
 
 		/// <inheritdoc cref="ICollection{T}" />
@@ -394,9 +389,9 @@ namespace essentialMix.Collections
 		public bool Contains(T item)
 		{
 			if (Count == 0) return false;
-			if (_tail >= _head) return Array.IndexOf(Items, item, _head, Count) > -1;
-			return Array.IndexOf(Items, item, _head, Items.Length - _head) > -1 
-					|| Array.IndexOf(Items, item, 0, _tail) > -1;
+			if (_tail >= _head) return Array.IndexOf(_items, item, _head, Count) > -1;
+			return Array.IndexOf(_items, item, _head, _items.Length - _head) > -1 
+					|| Array.IndexOf(_items, item, 0, _tail) > -1;
 		}
 
 		/// <inheritdoc />
@@ -408,14 +403,14 @@ namespace essentialMix.Collections
 			if (_tail < _head)
 			{
 				// The existing buffer is split, so we have to copy it in parts
-				int length = Items.Length - _head;
-				Array.Copy(Items, _head, array, arrayIndex, length);
-				Array.Copy(Items, 0, array, arrayIndex + length, Count - length);
+				int length = _items.Length - _head;
+				Array.Copy(_items, _head, array, arrayIndex, length);
+				Array.Copy(_items, 0, array, arrayIndex + length, Count - length);
 			}
 			else
 			{
 				// The existing buffer is whole
-				Array.Copy(Items, _head, array, arrayIndex, Count);
+				Array.Copy(_items, _head, array, arrayIndex, Count);
 			}
 		}
 
@@ -448,14 +443,14 @@ namespace essentialMix.Collections
 			if (_tail < _head)
 			{
 				// The existing buffer is split, so we have to copy it in parts
-				int length = Items.Length - _head;
-				Array.Copy(Items, _head, array, arrayIndex, length);
-				Array.Copy(Items, 0, array, arrayIndex + length, Count - length);
+				int length = _items.Length - _head;
+				Array.Copy(_items, _head, array, arrayIndex, length);
+				Array.Copy(_items, 0, array, arrayIndex + length, Count - length);
 			}
 			else
 			{
 				// The existing buffer is whole
-				Array.Copy(Items, _head, array, arrayIndex, Count);
+				Array.Copy(_items, _head, array, arrayIndex, Count);
 			}
 		}
 
@@ -474,7 +469,7 @@ namespace essentialMix.Collections
 		{
 			if (_tail < 0) throw new ArgumentOutOfRangeException(nameof(index));
 
-			T item = Items[index];
+			T item = _items[index];
 
 			if (_tail >= _head)
 			{
@@ -484,16 +479,16 @@ namespace essentialMix.Collections
 				if (index == _head)
 				{
 					// case a: index == head
-					_head = (_head + 1) % Items.Length;
+					_head = (_head + 1) % _items.Length;
 				}
 				else if (index <= _tail)
 				{
 					// case b: index > head and index <= tail
 					for (int i = index; i < _tail - 1; i++) 
-						Items[i] = Items[i + 1];
+						_items[i] = _items[i + 1];
 
 					_tail--;
-					if (_tail < 0) _tail = Items.Length - 1;
+					if (_tail < 0) _tail = _items.Length - 1;
 				}
 				else
 				{
@@ -508,7 +503,7 @@ namespace essentialMix.Collections
 				{
 					// case a: index <= tail
 					_tail--;
-					if (_tail < 0) _tail = Items.Length - 1;
+					if (_tail < 0) _tail = _items.Length - 1;
 				}
 				else
 				{
@@ -521,9 +516,9 @@ namespace essentialMix.Collections
 
 					// case c: index > tail and index >= head
 					for (int i = index; i > _head; i--) 
-						Items[i] = Items[i - 1];
+						_items[i] = _items[i - 1];
 
-					_head = (_head + 1) % Items.Length;
+					_head = (_head + 1) % _items.Length;
 				}
 			}
 

@@ -13,7 +13,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 	{
 		private readonly IProducerQueue<T> _producerQueue;
 
-		private object _syncRoot;
 		private IProducerConsumer<T> _queue;
 
 		/// <inheritdoc />
@@ -30,15 +29,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			base.Dispose(disposing);
 		}
 
-		[NotNull]
-		public object SyncRoot
-		{
-			get
-			{
-				if (_syncRoot == null) Interlocked.CompareExchange(ref _syncRoot, new object(), null);
-				return _syncRoot;
-			}
-		}
+		/// <inheritdoc />
+		public object SyncRoot => _producerQueue.SyncRoot;
 
 		/// <inheritdoc />
 		public bool CompleteMarked => _queue.CompleteMarked;
@@ -129,18 +121,27 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public Task<bool> WaitAsync(int millisecondsTimeout) { return _queue.WaitAsync(millisecondsTimeout); }
 
 		/// <inheritdoc />
+		/// <summary>
+		/// Use lock or <see cref="Monitor" /> enter methods with <see cref="SyncRoot" /> to synchronize the queue
+		/// </summary>
 		public bool TryDequeue(out T item)
 		{
 			return _producerQueue.TryDequeue(out item);
 		}
 
 		/// <inheritdoc />
+		/// <summary>
+		/// Use lock or <see cref="Monitor" /> enter methods with <see cref="SyncRoot" /> to synchronize the queue
+		/// </summary>
 		public bool TryPeek(out T item)
 		{
 			return _producerQueue.TryPeek(out item);
 		}
 
 		/// <inheritdoc />
+		/// <summary>
+		/// Use lock or <see cref="Monitor" /> enter methods with <see cref="SyncRoot" /> to synchronize the queue
+		/// </summary>
 		public void RemoveWhile(Predicate<T> predicate)
 		{
 			_producerQueue.RemoveWhile(predicate);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -11,13 +12,17 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	public sealed class TaskGroupQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
-		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
+		private readonly ConcurrentQueue<T> _queue;
+		private readonly ICollection _collection;
+
 		private CountdownEvent _countdown;
 		private Thread _worker;
 
 		public TaskGroupQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
+			_queue = new ConcurrentQueue<T>();
+			_collection = _queue;
 			_countdown = new CountdownEvent(1);
 			(_worker = new Thread(Consume)
 			{
@@ -33,6 +38,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			if (!disposing) return;
 			ObjectHelper.Dispose(ref _countdown);
 		}
+
+		/// <inheritdoc />
+		public object SyncRoot => _collection.SyncRoot;
 
 		public override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
 

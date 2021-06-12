@@ -997,8 +997,7 @@ namespace essentialMix.Collections
 		{
 			T item = Items[index];
 			if (index < Count - 1) Array.Copy(Items, index + 1, Items, index, Count - (index + 1));
-			Items[Count] = default(T);
-			Count--;
+			Items[--Count] = default(T);
 			_version++;
 			return item;
 		}

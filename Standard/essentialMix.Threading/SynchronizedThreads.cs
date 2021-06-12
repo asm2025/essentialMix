@@ -149,8 +149,8 @@ namespace essentialMix.Threading
 				OnWorkStarted(EventArgs.Empty);
 				_workers.ForEach(t =>
 				{
-					t.Start();
 					_countdown.AddCount();
+					t.Start();
 				});
 			}
 		}
@@ -305,30 +305,25 @@ namespace essentialMix.Threading
 			if (IsDisposed || _countdown == null) return;
 			Monitor.Enter(_countdown);
 
-			bool completed = false;
+			bool completed;
 
 			try
 			{
 				if (IsDisposed || _countdown == null) return;
 				_countdown.Signal();
-				if (_countdown.CurrentCount > 1) return;
 			}
 			finally
 			{
-				if (_countdown is { CurrentCount: < 2 })
-				{
-					_countdown.SignalAll();
-					completed = true;
-				}
-				
-				if (_countdown != null) 
-					Monitor.Exit(_countdown);
-				else
-					completed = true;
+				completed = _countdown is null or { CurrentCount: < 2 };
 			}
 
-			if (!completed) return;
-			OnWorkCompleted(EventArgs.Empty);
+			if (completed)
+			{
+				OnWorkCompleted(EventArgs.Empty);
+				_countdown.SignalAll();
+			}
+
+			if (_countdown != null) Monitor.Exit(_countdown);
 		}
 	}
 }

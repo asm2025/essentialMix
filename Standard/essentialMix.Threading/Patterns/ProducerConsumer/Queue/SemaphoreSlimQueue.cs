@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +11,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	public sealed class SemaphoreSlimQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
 	{
-		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
+		private readonly ConcurrentQueue<T> _queue;
+		private readonly ICollection _collection;
 
 		private ManualResetEvent _allWorkDone;
 		private SemaphoreSlim _semaphore;
@@ -21,6 +23,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public SemaphoreSlimQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
+			_queue = new ConcurrentQueue<T>();
+			_collection = _queue;
 			_allWorkDone = new ManualResetEvent(false);
 			_semaphore = new SemaphoreSlim(Threads);
 			(_worker = new Thread(Consume)
@@ -38,6 +42,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _semaphore);
 			ObjectHelper.Dispose(ref _allWorkDone);
 		}
+
+		/// <inheritdoc />
+		public object SyncRoot => _collection.SyncRoot;
 
 		public override int Count
 		{

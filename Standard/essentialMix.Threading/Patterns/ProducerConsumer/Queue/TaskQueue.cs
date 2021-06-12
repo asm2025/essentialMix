@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +11,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	public sealed class TaskQueue<T> : ProducerConsumerQueue<T>, IProducerQueue<T>
 	{
-		private readonly ConcurrentQueue<T> _queue = new ConcurrentQueue<T>();
+		private readonly ConcurrentQueue<T> _queue;
+		private readonly ICollection _collection;
 		private readonly Task[] _workers;
 		
 		private AutoResetEvent _workEvent;
@@ -20,6 +22,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public TaskQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
+			_queue = new ConcurrentQueue<T>();
+			_collection = _queue;
 			_workEvent = new AutoResetEvent(false);
 			_countdown = new CountdownEvent(1);
 			_workers = new Task[Threads];
@@ -33,6 +37,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			ObjectHelper.Dispose(ref _workEvent);
 			ObjectHelper.Dispose(ref _countdown);
 		}
+
+		/// <inheritdoc />
+		public object SyncRoot => _collection.SyncRoot;
 
 		public override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
 
@@ -165,27 +172,25 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			if (IsDisposed || _countdown == null) return;
 			Monitor.Enter(_countdown);
 
-			bool completed = false;
+			bool completed;
 
 			try
 			{
 				if (IsDisposed || _countdown == null) return;
 				_countdown.Signal();
-				if (!CompleteMarked || _countdown.CurrentCount > 1) return;
 			}
 			finally
 			{
-				if (_countdown is { CurrentCount: < 2 }) completed = true;
-
-				if (_countdown != null) 
-					Monitor.Exit(_countdown);
-				else
-					completed = true;
+				completed = _countdown is null or { CurrentCount: < 2 };
 			}
 
-			if (!completed) return;
-			OnWorkCompleted(EventArgs.Empty);
-			_countdown.SignalAll();
+			if (completed)
+			{
+				OnWorkCompleted(EventArgs.Empty);
+				_countdown.SignalAll();
+			}
+
+			if (_countdown != null) Monitor.Exit(_countdown);
 		}
 	}
 }

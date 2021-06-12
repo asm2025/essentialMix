@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using essentialMix.Collections;
 using essentialMix.Comparers;
-using essentialMix.Threading;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
@@ -25,45 +23,37 @@ namespace Other.JonSkeet.MiscUtil.Collections
 		{
 			if (comparers != null)
 			{
-				Comparers.AddRange(comparers.Where(e => e != null)
-											.Select(e => new Lockable<IComparer<T>>(e)));
+				foreach (IComparer<T> comparer in comparers.Where(e => e != null)) 
+					Comparers.Add(comparer);
 			}
 
 			if (equalityComparers != null)
 			{
-				EqualityComparers.AddRange(equalityComparers.Where(e => e != null)
-															.Select(e => new Lockable<IEqualityComparer<T>>(e)));
+				foreach (IEqualityComparer<T> equalityComparer in equalityComparers.Where(e => e != null))
+					EqualityComparers.Add(equalityComparer);
 			}
 		}
 
 		[NotNull]
-		protected SynchronizedList<IComparer<T>> Comparers { get; } = new SynchronizedList<IComparer<T>>
-		{
-			new Lockable<IComparer<T>>(Comparer<T>.Default)
-		};
+		protected SynchronizedCollection<IComparer<T>> Comparers { get; } = new SynchronizedCollection<IComparer<T>>();
 
 		[NotNull]
-		protected SynchronizedList<IEqualityComparer<T>> EqualityComparers { get; } = new SynchronizedList<IEqualityComparer<T>>
-		{
-			new List<IEqualityComparer<T>>(new List<IEqualityComparer<T>>
-			{
-				EqualityComparer<T>.Default
-			})
-		};
+		protected SynchronizedCollection<IEqualityComparer<T>> EqualityComparers { get; } = new SynchronizedCollection<IEqualityComparer<T>>();
 
 		public virtual int Compare(T x, T y)
 		{
 			if (ReferenceEquals(x, y)) return 0;
 			if (x == null) return 1;
 			if (y == null) return -1;
-			return Comparers.Select(lockable => lockable.Value.Compare(x, y)).FirstOrDefault(cmp => cmp != 0);
+			return Comparers.Select(e => e.Compare(x, y))
+							.FirstOrDefault(e => e != 0);
 		}
 
 		public virtual bool Equals(T x, T y)
 		{
 			if (ReferenceEquals(x, y)) return true;
 			if (x == null) return false;
-			return y != null && EqualityComparers.Any(lockable => lockable.Value.Equals(x, y));
+			return y != null && EqualityComparers.Any(e => e.Equals(x, y));
 		}
 
 		public int GetHashCode(T obj) { return obj.GetHashCode(); }
