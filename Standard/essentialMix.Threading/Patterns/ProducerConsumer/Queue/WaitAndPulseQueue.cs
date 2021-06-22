@@ -305,9 +305,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						_clear = deque.Clear;
 						break;
 					case CircularBuffer<T> circularBuffer:
-						_enqueue = circularBuffer.Add;
+						_enqueue = circularBuffer.Enqueue;
 						_dequeue = circularBuffer.Dequeue;
-						_peek = circularBuffer.PeekHead;
+						_peek = circularBuffer.Peek;
 						_clear = circularBuffer.Clear;
 						break;
 					case IList<T> list:

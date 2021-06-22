@@ -9,7 +9,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
-	[DebuggerDisplay("{Count}")]
+	[DebuggerDisplay("Count = {Count}")]
 	public class Lister<T> : Enumerator<T>, IReadOnlyList<T>
 	{
 		private readonly IReadOnlyList<T> _readOnlyList;

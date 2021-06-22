@@ -14,7 +14,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 	 * This is based on the insightful book of Joseph Albahari, C# 6 in a Nutshell
 	 * http://www.albahari.com/threading/
 	 */
-	[DebuggerDisplay("{Count}")]
+	[DebuggerDisplay("Count = {Count}")]
 	public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T>
 	{
 		private CancellationTokenSource _cts;

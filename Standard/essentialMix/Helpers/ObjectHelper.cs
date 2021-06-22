@@ -7,21 +7,33 @@ namespace essentialMix.Helpers
 		public static void Dispose<T>(ref T value)
 			where T : class
 		{
-			if (value == null) return;
-			if (value is IDisposable disposable) disposable.Dispose();
+			if (value is IDisposable disposable)
+			{
+				try
+				{
+					disposable?.Dispose();
+				}
+				catch (ObjectDisposedException)
+				{
+					// ignored
+				}
+			}
+
 			value = null;
 		}
 
 		public static void Dispose<T>(T value)
 			where T : class
 		{
-			switch (value)
+			if (value is not IDisposable disposable) return;
+
+			try
 			{
-				case null:
-					return;
-				case IDisposable disposable:
-					disposable.Dispose();
-					break;
+				disposable?.Dispose();
+			}
+			catch (ObjectDisposedException)
+			{
+				// ignored
 			}
 		}
 

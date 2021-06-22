@@ -1496,18 +1496,13 @@ work with {HEAVY} items.");
 				Title("Testing CircularBuffer...");
 				CompilationHint();
 				Console.WriteLine($"Array has {values.Length} items.");
-				Console.WriteLine("Test queue functionality...");
 
 				if (canPrint) Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
 				bool print = canPrint && Console.ReadKey(true).Key == ConsoleKey.Y;
 				Console.WriteLine();
 
-				Title("Testing CircularBuffer as a Queue...");
-				DoTheTest(circularBuffer, values, circularBuffer.Add, circularBuffer.Dequeue, print, clock);
+				DoTheTest(circularBuffer, values, circularBuffer.Enqueue, circularBuffer.Dequeue, print, clock);
 				Console.WriteLine();
-
-				Title("Testing CircularBuffer as a Stack...");
-				DoTheTest(circularBuffer, values, circularBuffer.Add, circularBuffer.Pop, print, clock);
 				
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
@@ -1542,7 +1537,7 @@ work with {HEAVY} items.");
 				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				int missed = 0;
-				int offset = values.Length - circularBuffer.Capacity;
+				int offset = values.Length - circularBuffer.Count;
 				count = circularBuffer.Count / 4;
 				clock.Restart();
 
@@ -1566,11 +1561,6 @@ work with {HEAVY} items.");
 				}
 
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
-
-				int insertItem = RandomHelper.Next(10000, 10100);
-				Console.WriteLine($"Inserting {insertItem}.");
-				circularBuffer.Insert(insertItem);
-				if (print) Console.WriteLine(string.Join(", ", circularBuffer));
 
 				Console.WriteLine(Bright.Yellow("Test copy..."));
 				int[] array = new int[circularBuffer.Capacity];

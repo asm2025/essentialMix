@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
-	[DebuggerDisplay("{Count}")]
+	[DebuggerDisplay("Count = {Count}")]
 	public sealed class SynchronizedProducerQueue<T> : Disposable, IProducerConsumer<T>, IProducerQueue<T>
 	{
 		private readonly IProducerQueue<T> _producerQueue;

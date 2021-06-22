@@ -16,118 +16,16 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 	[Serializable]
-	public class CircularBuffer<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection, IEnumerable
+	public class CircularBuffer<T> : ICollection, IReadOnlyCollection<T>, IEnumerable
 	{
 		[Serializable]
-		internal class SynchronizedCollection : ICollection<T>, IReadOnlyCollection<T>, IEnumerable
-		{
-			private readonly CircularBuffer<T> _circularBuffer;
-			private readonly ICollection<T> _collection;
-			private readonly object _root;
-
-			internal SynchronizedCollection(CircularBuffer<T> circularBuffer)
-			{
-				_circularBuffer = circularBuffer;
-				_collection = circularBuffer;
-				_root = ((ICollection)circularBuffer).SyncRoot;
-			}
-
-			public int Count
-			{
-				get
-				{
-					lock (_root)
-					{
-						return _circularBuffer.Count;
-					}
-				}
-			}
-
-			/// <inheritdoc />
-			public bool IsReadOnly
-			{
-				get
-				{
-					lock (_root)
-					{
-						return _collection.IsReadOnly;
-					}
-				}
-			}
-
-			/// <inheritdoc />
-			public void Add(T item)
-			{
-				lock (_root)
-				{
-					_circularBuffer.Add(item);
-				}
-			}
-
-			/// <inheritdoc />
-			public bool Remove(T item)
-			{
-				lock (_root)
-				{
-					return _circularBuffer.Remove(item);
-				}
-			}
-
-			/// <inheritdoc />
-			public void Clear()
-			{
-				lock (_root)
-				{
-					_circularBuffer.Clear();
-				}
-			}
-
-			/// <inheritdoc />
-			public bool Contains(T item)
-			{
-				lock (_root)
-				{
-					return _circularBuffer.Contains(item);
-				}
-			}
-
-			/// <inheritdoc />
-			public void CopyTo(T[] array, int arrayIndex)
-			{
-				lock (_root)
-				{
-					_circularBuffer.CopyTo(array, arrayIndex);
-				}
-			}
-
-			/// <inheritdoc />
-			IEnumerator IEnumerable.GetEnumerator()
-			{
-				lock (_root)
-				{
-					return _circularBuffer.GetEnumerator();
-				}
-			}
-
-			/// <inheritdoc />
-			public IEnumerator<T> GetEnumerator()
-			{
-				lock (_root)
-				{
-					return _circularBuffer.GetEnumerator();
-				}
-			}
-		}
-
-		[Serializable]
-		public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
+		private struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
 		{
 			private readonly CircularBuffer<T> _circularBuffer;
 			private readonly int _version;
 
-			private readonly int _head;
-			private readonly int _tail;
-			private readonly int _length;
+			private readonly int _read;
+			private readonly int _capacity;
 			private readonly int _count;
 			private int _index;
 			private int _position;
@@ -135,11 +33,9 @@ namespace essentialMix.Collections
 			internal Enumerator([NotNull] CircularBuffer<T> circularBuffer)
 			{
 				_circularBuffer = circularBuffer;
-				_index = 0;
-				_position = -1;
-				_head = circularBuffer._head;
-				_tail = circularBuffer._tail;
-				_length = circularBuffer._items.Length;
+				_index = _position = -1;
+				_read = circularBuffer._read;
+				_capacity = circularBuffer._items.Length;
 				_count = circularBuffer.Count;
 				_version = circularBuffer._version;
 				Current = default(T);
@@ -151,23 +47,11 @@ namespace essentialMix.Collections
 			/// <inheritdoc />
 			public bool MoveNext()
 			{
-				if (_version == _circularBuffer._version && _index < _count)
+				if (_version == _circularBuffer._version && _index < _count - 1)
 				{
-					if (_position < 0)
-					{
-						_position = _head;
-					}
-					else if (_tail < _head)
-					{
-						_position = (_position + 1) % _length;
-						if (_position < _head && _position > _tail) return MoveNextRare();
-					}
-					else
-					{
-						_position++;
-						if (_position > _tail) return MoveNextRare();
-					}
-
+					_position = _position < 0
+									? _position = _read
+									: _position = (_position + 1) % _capacity;
 					Current = _circularBuffer._items[_position];
 					_index++;
 					return true;
@@ -201,14 +85,13 @@ namespace essentialMix.Collections
 			void IEnumerator.Reset()
 			{
 				if (_version != _circularBuffer._version) throw new VersionChangedException();
-				_index = 0;
-				_position = -1;
+				_index = _position = -1;
 				Current = default(T);
 			}
 		}
 
-		private int _head;
-		private int _tail;
+		private int _read;
+		private int _write;
 		private int _version;
 		private T[] _items;
 
@@ -221,8 +104,8 @@ namespace essentialMix.Collections
 		/// <param name="capacity">The initial capacity. Must be greater than <c>0</c>.</param>
 		public CircularBuffer(int capacity)
 		{
-			if (capacity < 1) throw new ArgumentOutOfRangeException(nameof(capacity));
-			_tail = -1;
+			if (capacity <= 0) throw new ArgumentOutOfRangeException(nameof(capacity));
+			_read = _write = -1;
 			_items = new T[capacity];
 		}
 
@@ -231,13 +114,15 @@ namespace essentialMix.Collections
 			get => _items.Length;
 			set
 			{
-				if (value < Count || value < 1) throw new ArgumentOutOfRangeException(nameof(value));
+				if (value < Count || value <= 0) throw new ArgumentOutOfRangeException(nameof(value));
 				if (value == _items.Length) return;
 				T[] newItems = new T[value];
 				CopyTo(newItems, 0);
 				_items = newItems;
-				_head = 0;
-				_tail = Count - 1;
+				_write = Count - 1;
+				_read = Count == 0
+							? -1
+							: 0;
 				_version++;
 			}
 		}
@@ -245,9 +130,6 @@ namespace essentialMix.Collections
 		/// <inheritdoc cref="ICollection{T}" />
 		[field: ContractPublicPropertyName("Count")]
 		public int Count { get; private set; }
-
-		/// <inheritdoc />
-		bool ICollection<T>.IsReadOnly => false;
 
 		/// <inheritdoc />
 		bool ICollection.IsSynchronized => false;
@@ -268,114 +150,36 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-		/// <inheritdoc />
-		public void Add(T item)
+		public void Enqueue(T item)
 		{
-			_tail = (_tail + 1) % _items.Length;
-			_items[_tail] = item;
-			if (Count == _items.Length && _tail == _head) _head = (_head + 1) % _items.Length;
+			_write = (_write + 1) % _items.Length;
+			if (_read < 0) _read = 0;
+			_items[_write] = item;
 			if (Count < _items.Length) Count++;
+			else _read = _write;
 			_version++;
-		}
-
-		public void Insert(T item)
-		{
-			if (_tail > -1)
-			{
-				if (_tail >= _head)
-				{
-					if (_tail < _items.Length - 1)
-					{
-						_tail++;
-
-						for (int i = _tail; i > _head; i--) 
-							_items[i] = _items[i - 1];
-					}
-					else
-					{
-						T last = _items[_tail];
-
-						for (int i = _tail; i > _head; i--) 
-							_items[i] = _items[i - 1];
-
-						_tail = 0;
-						if (_tail == _head) _head = (_head + 1) % _items.Length;
-						_items[_tail] = last;
-					}
-				}
-				else
-				{
-					T last = _items[_items.Length - 1];
-
-					if (_head < _items.Length - 1)
-					{
-						for (int i = _items.Length - 1; i > _head; i--) 
-							_items[i] = _items[i - 1];
-					}
-					else
-					{
-						_head = 0;
-					}
-
-					_tail = (_tail + 1) % _items.Length;
-
-					for (int i = _tail; i > 0; i--) 
-						_items[i] = _items[i - 1];
-
-					_items[0] = last;
-					if (_tail == _head) _head = (_head + 1) % _items.Length;
-				}
-			}
-			else
-			{
-				_tail = 0;
-			}
-
-			_items[_head] = item;
-			Count = (Count + 1).NotAbove(_items.Length);
-			_version++;
-		}
-
-		/// <inheritdoc />
-		public bool Remove(T item)
-		{
-			if (Count == 0) return false;
-			int index = Array.IndexOf(_items, item, 0, Count);
-			if (index < 0) return false;
-			RemoveAtInternal(index);
-			return true;
 		}
 
 		public T Dequeue()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			return RemoveAtInternal(_head);
+			T item = _items[_read];
+			Count--;
+			_read = (_read + 1) % _items.Length;
+			return item;
 		}
 
-		public T Pop()
+		public T Peek()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			return RemoveAtInternal(_tail);
-		}
-
-		public T PeekHead()
-		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			return _items[_head];
-		}
-
-		public T PeekTail()
-		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			return _items[_tail];
+			return _items[_read];
 		}
 
 		/// <inheritdoc cref="ICollection{T}" />
 		public void Clear()
 		{
 			Count = 0;
-			_head = 0;
-			_tail = -1;
+			_read = _write = -1;
 			_version++;
 		}
 
@@ -389,28 +193,27 @@ namespace essentialMix.Collections
 		public bool Contains(T item)
 		{
 			if (Count == 0) return false;
-			if (_tail >= _head) return Array.IndexOf(_items, item, _head, Count) > -1;
-			return Array.IndexOf(_items, item, _head, _items.Length - _head) > -1 
-					|| Array.IndexOf(_items, item, 0, _tail) > -1;
+			if (_write >= _read) return Array.IndexOf(_items, item, _read, Count) > -1;
+			return Array.IndexOf(_items, item, _read, _items.Length - _read) > -1 
+					|| Array.IndexOf(_items, item, 0, _write) > -1;
 		}
 
-		/// <inheritdoc />
 		public void CopyTo(T[] array, int arrayIndex)
 		{
 			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, Count);
 
-			if (_tail < _head)
+			if (_write < _read)
 			{
 				// The existing buffer is split, so we have to copy it in parts
-				int length = _items.Length - _head;
-				Array.Copy(_items, _head, array, arrayIndex, length);
+				int length = _items.Length - _read;
+				Array.Copy(_items, _read, array, arrayIndex, length);
 				Array.Copy(_items, 0, array, arrayIndex + length, Count - length);
 			}
 			else
 			{
 				// The existing buffer is whole
-				Array.Copy(_items, _head, array, arrayIndex, Count);
+				Array.Copy(_items, _read, array, arrayIndex, Count);
 			}
 		}
 
@@ -440,17 +243,17 @@ namespace essentialMix.Collections
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (array is not object[]) throw new ArgumentException("Invalid array type", nameof(array));
 
-			if (_tail < _head)
+			if (_write < _read)
 			{
 				// The existing buffer is split, so we have to copy it in parts
-				int length = _items.Length - _head;
-				Array.Copy(_items, _head, array, arrayIndex, length);
+				int length = _items.Length - _read;
+				Array.Copy(_items, _read, array, arrayIndex, length);
 				Array.Copy(_items, 0, array, arrayIndex + length, Count - length);
 			}
 			else
 			{
 				// The existing buffer is whole
-				Array.Copy(_items, _head, array, arrayIndex, Count);
+				Array.Copy(_items, _read, array, arrayIndex, Count);
 			}
 		}
 
@@ -463,81 +266,6 @@ namespace essentialMix.Collections
 			T[] result = new T[Count];
 			CopyTo(result, 0);
 			return result;
-		}
-
-		private T RemoveAtInternal(int index)
-		{
-			if (_tail < 0) throw new ArgumentOutOfRangeException(nameof(index));
-
-			T item = _items[index];
-
-			if (_tail >= _head)
-			{
-				// case 1: tail >= head
-				if (index < _head) throw new ArgumentOutOfRangeException(nameof(index));
-
-				if (index == _head)
-				{
-					// case a: index == head
-					_head = (_head + 1) % _items.Length;
-				}
-				else if (index <= _tail)
-				{
-					// case b: index > head and index <= tail
-					for (int i = index; i < _tail - 1; i++) 
-						_items[i] = _items[i + 1];
-
-					_tail--;
-					if (_tail < 0) _tail = _items.Length - 1;
-				}
-				else
-				{
-					// case c: index > head and index > tail
-					throw new ArgumentOutOfRangeException(nameof(index));
-				}
-			}
-			else
-			{
-				// case 2: tail < head
-				if (index <= _tail)
-				{
-					// case a: index <= tail
-					_tail--;
-					if (_tail < 0) _tail = _items.Length - 1;
-				}
-				else
-				{
-					// index > tail
-					if (index < _head)
-					{
-						// case b: index > tail and index < head
-						throw new ArgumentOutOfRangeException(nameof(index));
-					}
-
-					// case c: index > tail and index >= head
-					for (int i = index; i > _head; i--) 
-						_items[i] = _items[i - 1];
-
-					_head = (_head + 1) % _items.Length;
-				}
-			}
-
-			Count = (Count - 1).NotBelow(0);
-			
-			if (Count == 0)
-			{
-				_head = 0;
-				_tail = -1;
-			}
-
-			_version++;
-			return item;
-		}
-
-		[NotNull]
-		public static ICollection<T> Synchronized(CircularBuffer<T> list)
-		{
-			return new SynchronizedCollection(list);
 		}
 	}
 }
