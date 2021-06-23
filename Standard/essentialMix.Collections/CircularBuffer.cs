@@ -6,7 +6,6 @@ using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Threading;
 using essentialMix.Collections.DebugView;
-using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
@@ -24,18 +23,18 @@ namespace essentialMix.Collections
 			private readonly CircularBuffer<T> _circularBuffer;
 			private readonly int _version;
 
-			private readonly int _read;
+			private readonly int _head;
 			private readonly int _capacity;
 			private readonly int _count;
 			private int _index;
 			private int _position;
 
-			internal Enumerator([NotNull] CircularBuffer<T> circularBuffer)
+			internal Enumerator(CircularBuffer<T> circularBuffer)
 			{
 				_circularBuffer = circularBuffer;
 				_index = _position = -1;
-				_read = circularBuffer._read;
-				_capacity = circularBuffer._items.Length;
+				_head = circularBuffer._head;
+				_capacity = circularBuffer.Capacity;
 				_count = circularBuffer.Count;
 				_version = circularBuffer._version;
 				Current = default(T);
@@ -50,8 +49,8 @@ namespace essentialMix.Collections
 				if (_version == _circularBuffer._version && _index < _count - 1)
 				{
 					_position = _position < 0
-									? _position = _read
-									: _position = (_position + 1) % _capacity;
+						? _position = _head
+						: _position = (_position + 1) % _capacity;
 					Current = _circularBuffer._items[_position];
 					_index++;
 					return true;
@@ -61,7 +60,7 @@ namespace essentialMix.Collections
 
 			private bool MoveNextRare()
 			{
-				if (_version != _circularBuffer._version) throw new VersionChangedException();
+				if (_version != _circularBuffer._version) throw new InvalidOperationException();
 				_index = _count + 1;
 				_position = -1;
 				Current = default(T);
@@ -76,7 +75,10 @@ namespace essentialMix.Collections
 			{
 				get
 				{
-					if (!_index.InRangeRx(0, _count)) throw new InvalidOperationException();
+					if (_index < 0 || _index >= _count)
+					{
+						throw new InvalidOperationException();
+					}
 					return Current;
 				}
 			}
@@ -84,14 +86,16 @@ namespace essentialMix.Collections
 			/// <inheritdoc />
 			void IEnumerator.Reset()
 			{
-				if (_version != _circularBuffer._version) throw new VersionChangedException();
+				if (_version != _circularBuffer._version) throw new InvalidOperationException();
 				_index = _position = -1;
 				Current = default(T);
 			}
 		}
 
-		private int _read;
-		private int _write;
+		private readonly Action<T> _onItemDispose;
+
+		private int _head;
+		private int _tail;
 		private int _version;
 		private T[] _items;
 
@@ -103,10 +107,83 @@ namespace essentialMix.Collections
 		/// </summary>
 		/// <param name="capacity">The initial capacity. Must be greater than <c>0</c>.</param>
 		public CircularBuffer(int capacity)
+			: this(capacity, null)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CircularBuffer{T}" /> class with the specified capacity where capacity cannot be less than 1.
+		/// </summary>
+		/// <param name="capacity">The initial capacity. Must be greater than <c>0</c>.</param>
+		/// <param name="onItemReplace">A method to be called when an item is about to be overwritten.</param>
+		public CircularBuffer(int capacity, Action<T> onItemReplace)
 		{
 			if (capacity <= 0) throw new ArgumentOutOfRangeException(nameof(capacity));
-			_read = _write = -1;
+			_head = _tail = -1;
 			_items = new T[capacity];
+
+			Type type = typeof(T);
+
+			if (typeof(IDisposable).IsAssignableFrom(type))
+			{
+				_onItemDispose = onItemReplace != null
+									? item =>
+									{
+										try
+										{
+											onItemReplace(item);
+											((IDisposable)item)?.Dispose();
+										}
+										catch (ObjectDisposedException)
+										{
+											// ignored
+										}
+									}
+				: item =>
+				{
+					try
+					{
+						((IDisposable)item)?.Dispose();
+					}
+					catch (ObjectDisposedException)
+					{
+						// ignored
+					}
+				};
+			}
+			else if (type == typeof(object))
+			{
+				_onItemDispose = onItemReplace != null
+									? item =>
+									{
+										try
+										{
+											onItemReplace(item);
+											IDisposable disposable = item as IDisposable;
+											disposable?.Dispose();
+										}
+										catch (ObjectDisposedException)
+										{
+											// ignored
+										}
+									}
+				: item =>
+				{
+					try
+					{
+						IDisposable disposable = item as IDisposable;
+						disposable?.Dispose();
+					}
+					catch (ObjectDisposedException)
+					{
+						// ignored
+					}
+				};
+			}
+			else
+			{
+				_onItemDispose = null;
+			}
 		}
 
 		public int Capacity
@@ -119,15 +196,15 @@ namespace essentialMix.Collections
 				T[] newItems = new T[value];
 				CopyTo(newItems, 0);
 				_items = newItems;
-				_write = Count - 1;
-				_read = Count == 0
+				_tail = Count - 1;
+				_head = Count == 0
 							? -1
 							: 0;
 				_version++;
 			}
 		}
 
-		/// <inheritdoc cref="ICollection{T}" />
+		/// <inheritdoc cref="ICollection" />
 		[field: ContractPublicPropertyName("Count")]
 		public int Count { get; private set; }
 
@@ -152,34 +229,57 @@ namespace essentialMix.Collections
 
 		public void Enqueue(T item)
 		{
-			_write = (_write + 1) % _items.Length;
-			if (_read < 0) _read = 0;
-			_items[_write] = item;
-			if (Count < _items.Length) Count++;
-			else _read = _write;
+			if (_head < 0) _head = 0;
+			_tail = (_tail + 1) % Capacity;
+
+			if (Count == Capacity && _head == _tail)
+			{
+				if (_onItemDispose != null) _onItemDispose(_items[_head]);
+				_head = (_head + 1) % Capacity;
+			}
+
+			_items[_tail] = item;
+			if (Count < Capacity) Count++;
 			_version++;
 		}
 
 		public T Dequeue()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			T item = _items[_read];
+			T item = _items[_head];
 			Count--;
-			_read = (_read + 1) % _items.Length;
+			if (Count == 0) _tail = _head = -1;
+			else _head = (_head + 1) % Capacity;
+			return item;
+		}
+
+		public T Pop()
+		{
+			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			T item = _items[_tail];
+			Count--;
+			if (Count == 0) _tail = _head = -1;
+			else _tail = (_tail - 1) % Capacity;
 			return item;
 		}
 
 		public T Peek()
 		{
 			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
-			return _items[_read];
+			return _items[_head];
 		}
 
-		/// <inheritdoc cref="ICollection{T}" />
+		public T PeekTail()
+		{
+			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			return _items[_tail];
+		}
+
+		/// <inheritdoc cref="ICollection" />
 		public void Clear()
 		{
 			Count = 0;
-			_read = _write = -1;
+			_head = _tail = -1;
 			_version++;
 		}
 
@@ -193,9 +293,9 @@ namespace essentialMix.Collections
 		public bool Contains(T item)
 		{
 			if (Count == 0) return false;
-			if (_write >= _read) return Array.IndexOf(_items, item, _read, Count) > -1;
-			return Array.IndexOf(_items, item, _read, _items.Length - _read) > -1 
-					|| Array.IndexOf(_items, item, 0, _write) > -1;
+			if (_tail >= _head) return Array.IndexOf(_items, item, _head, Count) > -1;
+			return Array.IndexOf(_items, item, _head, _items.Length - _head) > -1
+					|| Array.IndexOf(_items, item, 0, _tail) > -1;
 		}
 
 		public void CopyTo(T[] array, int arrayIndex)
@@ -203,17 +303,17 @@ namespace essentialMix.Collections
 			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, Count);
 
-			if (_write < _read)
+			if (_tail < _head)
 			{
 				// The existing buffer is split, so we have to copy it in parts
-				int length = _items.Length - _read;
-				Array.Copy(_items, _read, array, arrayIndex, length);
+				int length = _items.Length - _head;
+				Array.Copy(_items, _head, array, arrayIndex, length);
 				Array.Copy(_items, 0, array, arrayIndex + length, Count - length);
 			}
 			else
 			{
 				// The existing buffer is whole
-				Array.Copy(_items, _read, array, arrayIndex, Count);
+				Array.Copy(_items, _head, array, arrayIndex, Count);
 			}
 		}
 
@@ -243,17 +343,17 @@ namespace essentialMix.Collections
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (array is not object[]) throw new ArgumentException("Invalid array type", nameof(array));
 
-			if (_write < _read)
+			if (_tail < _head)
 			{
 				// The existing buffer is split, so we have to copy it in parts
-				int length = _items.Length - _read;
-				Array.Copy(_items, _read, array, arrayIndex, length);
+				int length = _items.Length - _head;
+				Array.Copy(_items, _head, array, arrayIndex, length);
 				Array.Copy(_items, 0, array, arrayIndex + length, Count - length);
 			}
 			else
 			{
 				// The existing buffer is whole
-				Array.Copy(_items, _read, array, arrayIndex, Count);
+				Array.Copy(_items, _head, array, arrayIndex, Count);
 			}
 		}
 

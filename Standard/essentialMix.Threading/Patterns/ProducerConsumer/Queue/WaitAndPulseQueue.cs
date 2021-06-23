@@ -314,14 +314,14 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						_enqueue = list.Add;
 						_dequeue = () =>
 						{
-							if (list.Count == 0) throw new Exception("Collection is empty.");
+							if (list.Count == 0) throw new InvalidOperationException("Collection is empty.");
 							T item = list[0];
 							list.RemoveAt(0);
 							return item;
 						};
 						_peek = () =>
 						{
-							if (list.Count == 0) throw new Exception("Collection is empty.");
+							if (list.Count == 0) throw new InvalidOperationException("Collection is empty.");
 							return list[0];
 						};
 						_clear = list.Clear;

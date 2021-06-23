@@ -1486,8 +1486,8 @@ work with {HEAVY} items.");
 			bool more;
 			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, START);
-			CircularBuffer<int> circularBuffer = new CircularBuffer<int>(values.Length);
+			int[] values = Enumerable.Range(1, START).ToArray();
+			CircularBuffer<int> buffer = new CircularBuffer<int>(values.Length / 2);
 
 			do
 			{
@@ -1501,25 +1501,35 @@ work with {HEAVY} items.");
 				bool print = canPrint && Console.ReadKey(true).Key == ConsoleKey.Y;
 				Console.WriteLine();
 
-				DoTheTest(circularBuffer, values, circularBuffer.Enqueue, circularBuffer.Dequeue, print, clock);
-				Console.WriteLine();
+				// Queue test
+				Title("Testing CircularBuffer as a Queue...");
+				DoTheTest(buffer, values, buffer.Enqueue, buffer.Dequeue, print, clock);
+				Title("End testing CircularBuffer as a Queue...");
+				ConsoleHelper.Pause();
+
+				// Stack test
+				Title("Testing CircularBuffer as a Stack...");
+				DoTheTest(buffer, values, buffer.Enqueue, buffer.Pop, print, clock);
+				Title("End testing CircularBuffer as a Queue...");
+				ConsoleHelper.Pause();
 				
+				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 1) continue;
-				values = GetRandomIntegers(true,  tests == 0 ? START * 2 : HEAVY);
+				values = Enumerable.Range(1, tests == 0 ? START * 2 : HEAVY).ToArray();
 				tests++;
 			}
 			while (more);
 
 			clock.Stop();
 
-			static void DoTheTest(CircularBuffer<int> circularBuffer, int[] values, Action<int> add, Func<int> remove, bool print, Stopwatch clock)
+			static void DoTheTest(CircularBuffer<int> buffer, int[] values, Action<int> add, Func<int> remove, bool print, Stopwatch clock)
 			{
-				circularBuffer.Clear();
-				int count = circularBuffer.Count;
+				buffer.Clear();
+				int count = buffer.Count;
 				Debug.Assert(count == 0, "Values are not cleared correctly!");
 				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
 				if (print) Console.WriteLine(string.Join(", ", values));
@@ -1532,13 +1542,20 @@ work with {HEAVY} items.");
 				}
 
 				Console.WriteLine($"Added {count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
-				if (print) Console.WriteLine(string.Join(", ", circularBuffer));
+
+				if (values.Length >= buffer.Capacity && buffer.Count != buffer.Capacity)
+				{
+					Console.WriteLine(Bright.Red("Something went wrong, Count isn't right...!"));
+					return;
+				}
+
+				if (print) Console.WriteLine(string.Join(", ", buffer));
 
 				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
 				int missed = 0;
-				int offset = values.Length - circularBuffer.Count;
-				count = circularBuffer.Count / 4;
+				int offset = values.Length - buffer.Count;
+				count = buffer.Count;
 				clock.Restart();
 
 				// will just test for items not more than MAX_SEARCH
@@ -1546,7 +1563,7 @@ work with {HEAVY} items.");
 				{
 					int v = values[offset + i];
 
-					if (circularBuffer.Contains(v))
+					if (buffer.Contains(v))
 					{
 						found++;
 						continue;
@@ -1563,29 +1580,29 @@ work with {HEAVY} items.");
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine(Bright.Yellow("Test copy..."));
-				int[] array = new int[circularBuffer.Capacity];
-				circularBuffer.CopyTo(array, 0);
+				int[] array = new int[buffer.Capacity];
+				buffer.CopyTo(array, 0);
 				if (print) Console.WriteLine(string.Join(", ", array));
 
 				Console.WriteLine(Bright.Red("Test removing..."));
 		
 				int removed = 0;
-				count = circularBuffer.Count;
+				count = buffer.Count;
 				clock.Restart();
 
 				if (print)
 				{
-					while (circularBuffer.Count > 0 && count > 0)
+					while (buffer.Count > 0 && count > 0)
 					{
 						Console.Write(remove());
 						count--;
 						removed++;
-						if (circularBuffer.Count > 0) Console.Write(", ");
+						if (buffer.Count > 0) Console.Write(", ");
 					}
 				}
 				else
 				{
-					while (circularBuffer.Count > 0 && count > 0)
+					while (buffer.Count > 0 && count > 0)
 					{
 						remove();
 						count--;
@@ -1593,10 +1610,10 @@ work with {HEAVY} items.");
 					}
 				}
 
-				Debug.Assert(count == 0 && circularBuffer.Count == 0, $"Values are not cleared correctly! {count} != {circularBuffer.Count}.");
+				Debug.Assert(count == 0 && buffer.Count == 0, $"Values are not cleared correctly! {count} != {buffer.Count}.");
 				Console.WriteLine();
 				Console.WriteLine();
-				Console.WriteLine($"Removed {removed} of {circularBuffer.Capacity} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Removed {removed} of {buffer.Capacity} items in {clock.ElapsedMilliseconds} ms.");
 			}
 		}
 
