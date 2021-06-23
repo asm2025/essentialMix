@@ -278,6 +278,18 @@ namespace essentialMix.Collections
 		/// <inheritdoc cref="ICollection" />
 		public void Clear()
 		{
+			if (Count == 0) return;
+
+			if (_onItemDispose != null)
+			{
+				while (Count > 0)
+				{
+					_onItemDispose(_items[_head]);
+					Count--;
+					_head = (_head + 1) % Capacity;
+				}
+			}
+
 			Count = 0;
 			_head = _tail = -1;
 			_version++;
