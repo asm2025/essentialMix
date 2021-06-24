@@ -15,7 +15,7 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 	[Serializable]
-	public class CircularBuffer<T> : ICollection, IReadOnlyCollection<T>, IEnumerable
+	public class LinkedCircularBuffer<T> : ICollection, IReadOnlyCollection<T>, IEnumerable
 	{
 		[Serializable]
 		private struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
