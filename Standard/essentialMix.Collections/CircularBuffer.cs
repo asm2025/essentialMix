@@ -20,7 +20,7 @@ namespace essentialMix.Collections
 		[Serializable]
 		private struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
 		{
-			private readonly CircularBuffer<T> _circularBuffer;
+			private readonly CircularBuffer<T> _buffer;
 			private readonly int _version;
 
 			private readonly int _head;
@@ -28,16 +28,17 @@ namespace essentialMix.Collections
 			private readonly int _count;
 			private int _index;
 			private int _position;
+			private T _current;
 
-			internal Enumerator(CircularBuffer<T> circularBuffer)
+			internal Enumerator([NotNull] CircularBuffer<T> buffer)
 			{
-				_circularBuffer = circularBuffer;
+				_buffer = buffer;
 				_index = _position = -1;
-				_head = circularBuffer._head;
-				_capacity = circularBuffer.Capacity;
-				_count = circularBuffer.Count;
-				_version = circularBuffer._version;
-				Current = default(T);
+				_head = buffer._head;
+				_capacity = buffer.Capacity;
+				_count = buffer.Count;
+				_current = default(T);
+				_version = buffer._version;
 			}
 
 			/// <inheritdoc />
@@ -46,12 +47,12 @@ namespace essentialMix.Collections
 			/// <inheritdoc />
 			public bool MoveNext()
 			{
-				if (_version == _circularBuffer._version && _index < _count - 1)
+				if (_version == _buffer._version && _index < _count - 1)
 				{
 					_position = _position < 0
 						? _position = _head
 						: _position = (_position + 1) % _capacity;
-					Current = _circularBuffer._items[_position];
+					Current = _buffer._items[_position];
 					_index++;
 					return true;
 				}
@@ -60,33 +61,31 @@ namespace essentialMix.Collections
 
 			private bool MoveNextRare()
 			{
-				if (_version != _circularBuffer._version) throw new InvalidOperationException();
+				if (_version != _buffer._version) throw new InvalidOperationException();
 				_index = _count + 1;
 				_position = -1;
-				Current = default(T);
+				_current = default(T);
 				return false;
 			}
 
 			/// <inheritdoc />
-			public T Current { get; private set; }
-
-			/// <inheritdoc />
-			object IEnumerator.Current
+			public T Current
 			{
 				get
 				{
-					if (_index < 0 || _index >= _count)
-					{
-						throw new InvalidOperationException();
-					}
-					return Current;
+					if (_index < 0 || _index >= _count) throw new InvalidOperationException();
+					return _current;
 				}
+				private set => _current = value;
 			}
+
+			/// <inheritdoc />
+			object IEnumerator.Current => Current;
 
 			/// <inheritdoc />
 			void IEnumerator.Reset()
 			{
-				if (_version != _circularBuffer._version) throw new InvalidOperationException();
+				if (_version != _buffer._version) throw new InvalidOperationException();
 				_index = _position = -1;
 				Current = default(T);
 			}
