@@ -21,6 +21,8 @@ namespace essentialMix.Threading.Collections.MessageQueue
 		private ManualResetEventSlim _manualResetEventSlim = new ManualResetEventSlim(false);
 		private Thread _worker;
 		private CancellationTokenSource _cts;
+
+		[NonSerialized]
 		private object _syncRoot;
 
 		protected QueueBase([NotNull] Action<T> callback, CancellationToken token = default(CancellationToken))

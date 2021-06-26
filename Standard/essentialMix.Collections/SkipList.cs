@@ -136,6 +136,7 @@ namespace essentialMix.Collections
 
 		private readonly Random _random = new Random(Guid.NewGuid().GetHashCode());
 
+		[NonSerialized]
 		private object _syncRoot;
 
 		public SkipList()

@@ -410,6 +410,8 @@ namespace essentialMix.Collections
 		private int _freeCount;
 		private KeyCollection _keys;
 		private ValueCollection _values;
+
+		[NonSerialized]
 		private object _syncRoot;
 
 		private SimpleMonitor _monitor = new SimpleMonitor();

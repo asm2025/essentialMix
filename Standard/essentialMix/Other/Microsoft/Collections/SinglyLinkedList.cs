@@ -142,7 +142,9 @@ namespace Other.Microsoft.Collections
 		internal SinglyLinkedListNode<T> _tail;
 		internal int _count;
 
+		[NonSerialized]
 		private object _syncRoot;
+
 		private SerializationInfo siInfo; //A temporary variable which we need during deserialization.
 		
 		public SinglyLinkedList()

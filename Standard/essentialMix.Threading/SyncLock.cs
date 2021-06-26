@@ -54,6 +54,7 @@ namespace essentialMix.Threading
 		/// </summary>
 		private static int __defaultTimeout = TimeSpanHelper.INFINITE;
 
+		[NonSerialized]
 		private object _syncRoot;
 
 		/// <inheritdoc />

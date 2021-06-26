@@ -522,6 +522,7 @@ namespace essentialMix.Collections
 
 		internal int _version;
 
+		[NonSerialized]
 		private object _syncRoot;
 
 		/// <inheritdoc />

@@ -577,7 +577,10 @@ namespace essentialMix.Collections
 
 		private Node _root;
 		private int _version;
+
+		[NonSerialized]
 		private object _syncRoot;
+
 		private SerializationInfo _sinfo; //A temporary variable which we need during deserialization. 
 		private SimpleMonitor _monitor = new SimpleMonitor();
 		private int _count;

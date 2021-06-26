@@ -42,6 +42,20 @@ namespace essentialMix.Collections
 			}
 
 			/// <inheritdoc />
+			public T Current
+			{
+				get
+				{
+					if (_index < 0 || _index >= _count) throw new InvalidOperationException();
+					return _current;
+				}
+				private set => _current = value;
+			}
+
+			/// <inheritdoc />
+			object IEnumerator.Current => Current;
+
+			/// <inheritdoc />
 			public void Dispose() { }
 
 			/// <inheritdoc />
@@ -69,20 +83,6 @@ namespace essentialMix.Collections
 			}
 
 			/// <inheritdoc />
-			public T Current
-			{
-				get
-				{
-					if (_index < 0 || _index >= _count) throw new InvalidOperationException();
-					return _current;
-				}
-				private set => _current = value;
-			}
-
-			/// <inheritdoc />
-			object IEnumerator.Current => Current;
-
-			/// <inheritdoc />
 			void IEnumerator.Reset()
 			{
 				if (_version != _buffer._version) throw new InvalidOperationException();
@@ -91,12 +91,13 @@ namespace essentialMix.Collections
 			}
 		}
 
-		private readonly Action<T> _onItemDispose;
+		private readonly bool _isDisposable;
+		private readonly bool _isObject;
 
+		private T[] _items;
 		private int _head;
 		private int _tail;
 		private int _version;
-		private T[] _items;
 
 		[NonSerialized]
 		private object _syncRoot;
@@ -106,83 +107,13 @@ namespace essentialMix.Collections
 		/// </summary>
 		/// <param name="capacity">The initial capacity. Must be greater than <c>0</c>.</param>
 		public CircularBuffer(int capacity)
-			: this(capacity, null)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="CircularBuffer{T}" /> class with the specified capacity where capacity cannot be less than 1.
-		/// </summary>
-		/// <param name="capacity">The initial capacity. Must be greater than <c>0</c>.</param>
-		/// <param name="onItemReplace">A method to be called when an item is about to be overwritten.</param>
-		public CircularBuffer(int capacity, Action<T> onItemReplace)
 		{
 			if (capacity <= 0) throw new ArgumentOutOfRangeException(nameof(capacity));
 			_head = _tail = -1;
 			_items = new T[capacity];
-
 			Type type = typeof(T);
-
-			if (typeof(IDisposable).IsAssignableFrom(type))
-			{
-				_onItemDispose = onItemReplace != null
-									? item =>
-									{
-										try
-										{
-											onItemReplace(item);
-											((IDisposable)item)?.Dispose();
-										}
-										catch (ObjectDisposedException)
-										{
-											// ignored
-										}
-									}
-				: item =>
-				{
-					try
-					{
-						((IDisposable)item)?.Dispose();
-					}
-					catch (ObjectDisposedException)
-					{
-						// ignored
-					}
-				};
-			}
-			else if (type == typeof(object))
-			{
-				_onItemDispose = onItemReplace != null
-									? item =>
-									{
-										try
-										{
-											onItemReplace(item);
-											IDisposable disposable = item as IDisposable;
-											disposable?.Dispose();
-										}
-										catch (ObjectDisposedException)
-										{
-											// ignored
-										}
-									}
-				: item =>
-				{
-					try
-					{
-						IDisposable disposable = item as IDisposable;
-						disposable?.Dispose();
-					}
-					catch (ObjectDisposedException)
-					{
-						// ignored
-					}
-				};
-			}
-			else
-			{
-				_onItemDispose = null;
-			}
+			_isDisposable = typeof(IDisposable).IsAssignableFrom(type);
+			_isObject = type == typeof(object);
 		}
 
 		public int Capacity
@@ -233,7 +164,18 @@ namespace essentialMix.Collections
 
 			if (Count == Capacity && _head == _tail)
 			{
-				_onItemDispose?.Invoke(_items[_head]);
+				if ((_isDisposable || _isObject) && _items[_head] is IDisposable disposable)
+				{
+					try
+					{
+						disposable.Dispose();
+					}
+					catch (ObjectDisposedException)
+					{
+						// ignored
+					}
+				}
+
 				_head = (_head + 1) % Capacity;
 			}
 
@@ -279,11 +221,22 @@ namespace essentialMix.Collections
 		{
 			if (Count == 0) return;
 
-			if (_onItemDispose != null)
+			if (_isDisposable || _isObject)
 			{
 				while (Count > 0)
 				{
-					_onItemDispose(_items[_head]);
+					if (_items[_head] is IDisposable disposable)
+					{
+						try
+						{
+							disposable.Dispose();
+						}
+						catch (ObjectDisposedException)
+						{
+							// ignored
+						}
+					}
+
 					Count--;
 					_head = (_head + 1) % Capacity;
 				}
