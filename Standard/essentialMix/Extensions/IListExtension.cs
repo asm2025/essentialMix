@@ -36,32 +36,6 @@ namespace essentialMix.Extensions
 			}
 		}
 
-		public static T PickRandom<T>([NotNull] this IList<T> thisValue, int startIndex = 0, int count = -1)
-		{
-			thisValue.Count.ValidateRange(startIndex, ref count);
-			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
-
-			int max;
-			int n;
-
-			if (thisValue is ICollection collection)
-			{
-				lock (collection.SyncRoot)
-				{
-					max = count - 1;
-					n = RNGRandomHelper.Next(startIndex, max);
-					return thisValue[n];
-				}
-			}
-
-			lock (thisValue)
-			{
-				max = count - 1;
-				n = RNGRandomHelper.Next(startIndex, max);
-				return thisValue[n];
-			}
-		}
-
 		public static T PopRandom<T>([NotNull] this IList<T> thisValue, int startIndex = 0, int count = -1)
 		{
 			thisValue.Count.ValidateRange(startIndex, ref count);

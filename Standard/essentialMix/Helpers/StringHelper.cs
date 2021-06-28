@@ -17,7 +17,7 @@ namespace essentialMix.Helpers
 	{
 		private static readonly Regex __numericString = new Regex(@"\A\s*\d*\.?\d+\s*\z", RegexHelper.OPTIONS_I);
 		// memoization container for Random method
-		private static readonly ConcurrentDictionary<RandomStringType, IList<Func<char>>> __randomStringType = new ConcurrentDictionary<RandomStringType, IList<Func<char>>>();
+		private static readonly ConcurrentDictionary<RandomStringType, List<Func<char>>> __randomStringType = new ConcurrentDictionary<RandomStringType, List<Func<char>>>();
 
 		private static readonly char[] __invalidKeyChar;
 		private static readonly char[] __specialChar;
@@ -54,9 +54,9 @@ namespace essentialMix.Helpers
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
 			if (count == 0) return string.Empty;
 
-			IList<Func<char>> types = __randomStringType.GetOrAdd(type, t =>
+			List<Func<char>> types = __randomStringType.GetOrAdd(type, t =>
 			{
-				IList<Func<char>> list = new List<Func<char>>();
+				List<Func<char>> list = new List<Func<char>>();
 				if (t.HasFlag(RandomStringType.SmallLetters)) list.Add(RandomSmallLetter);
 				if (t.HasFlag(RandomStringType.CapitalLetters)) list.Add(RandomCapitalLetter);
 				if (t.HasFlag(RandomStringType.Numbers)) list.Add(RandomNumber);
@@ -75,7 +75,7 @@ namespace essentialMix.Helpers
 			StringBuilder sb = new StringBuilder(count);
 
 			for (int i = 0; i < count; i++) 
-				sb.Append(types.PickRandom()());
+				sb.Append(types.PickRandom());
 
 			return sb.ToString();
 		}

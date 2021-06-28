@@ -33,7 +33,7 @@ namespace essentialMix.Collections
 			{
 				_bitCollection = bitCollection;
 				_version = bitCollection._version;
-				_index = -1;
+				_index = 0;
 				_current = 0u;
 			}
 
@@ -58,17 +58,12 @@ namespace essentialMix.Collections
 			{
 				if (_version == _bitCollection._version && _index < _bitCollection.Count)
 				{
-					if (_index < 0)
-					{
-						_index++;
-						if (_bitCollection.Contains(_current)) return true;
-					}
-
 					while (_index < _bitCollection.Count && _current < _bitCollection.Maximum)
 					{
-						_index++;
 						_current++;
-						if (_bitCollection.Contains(_current)) return true;
+						if (!_bitCollection.Contains(_current)) continue;
+						_index++;
+						return true;
 					}
 				}
 				return MoveNextRare();
@@ -86,8 +81,8 @@ namespace essentialMix.Collections
 			void IEnumerator.Reset()
 			{
 				if (_version != _bitCollection._version) throw new InvalidOperationException();
+				_index = 0;
 				_current = 0u;
-				_index = -1;
 			}
 		}
 
