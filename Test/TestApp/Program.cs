@@ -96,14 +96,13 @@ work with {HEAVY} items.");
 
 			//TestLinkedQueue();
 			//TestMinMaxQueue();
-
 			//TestSinglyLinkedList();
 			//TestLinkedList();
-
 			//TestDeque();
 			//TestLinkedDeque();
 			//TestCircularBuffer();
-			TestLinkedCircularBuffer();
+			//TestLinkedCircularBuffer();
+			TestBitCollection();
 
 			//TestBinaryTreeFromTraversal();
 			
@@ -1512,7 +1511,6 @@ work with {HEAVY} items.");
 				Title("Testing CircularBuffer as a Stack...");
 				DoTheTest(buffer, values, buffer.Enqueue, buffer.Pop, print, clock);
 				Title("End testing CircularBuffer as a Queue...");
-				ConsoleHelper.Pause();
 				
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
@@ -1648,7 +1646,6 @@ work with {HEAVY} items.");
 				Title("Testing LinkedCircularBuffer as a Stack...");
 				DoTheTest(buffer, values, buffer.Enqueue, buffer.Pop, print, clock);
 				Title("End testing LinkedCircularBuffer as a Queue...");
-				ConsoleHelper.Pause();
 				
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
@@ -1751,6 +1748,117 @@ work with {HEAVY} items.");
 				Console.WriteLine();
 				Console.WriteLine();
 				Console.WriteLine($"Removed {removed} of {buffer.Capacity} items in {clock.ElapsedMilliseconds} ms.");
+			}
+		}
+
+		private static void TestBitCollection()
+		{
+			bool more;
+			int tests = 0;
+			Stopwatch clock = new Stopwatch();
+			uint[] values = Enumerable.Range(1, START).Select(e => (uint)e).ToArray();
+			BitCollection collection = new BitCollection(values.Max());
+
+			do
+			{
+				bool canPrint = values.Length <= START * 2;
+				Console.Clear();
+				Title("Testing BitCollection...");
+				CompilationHint();
+				Console.WriteLine($"Array has {values.Length} items.");
+
+				if (canPrint) Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
+				bool print = canPrint && Console.ReadKey(true).Key == ConsoleKey.Y;
+				Console.WriteLine();
+
+				DoTheTest(collection, values, print, clock);
+				
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+				if (!more || tests > 1) continue;
+				values = Enumerable.Range(1, tests == 0 ? START * 2 : HEAVY).Select(e => (uint)e).ToArray();
+				tests++;
+			}
+			while (more);
+
+			clock.Stop();
+
+			static void DoTheTest(BitCollection collection, uint[] values, bool print, Stopwatch clock)
+			{
+				collection.Clear();
+				int count = collection.Count;
+				Debug.Assert(count == 0, "Values are not cleared correctly!");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
+				if (print) Console.WriteLine(string.Join(", ", values));
+				clock.Restart();
+
+				foreach (uint v in values)
+				{
+					collection.Add(v);
+					count++;
+				}
+
+				Console.WriteLine($"Added {count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+
+				if (values.Length >= collection.Maximum && collection.Count != collection.Maximum)
+				{
+					Console.WriteLine(Bright.Red("Something went wrong, Count isn't right...!"));
+					return;
+				}
+
+				if (print) Console.WriteLine(string.Join(", ", collection));
+
+				Console.WriteLine(Bright.Yellow("Test search..."));
+				int found = 0;
+				int missed = 0;
+				count = collection.Count;
+				clock.Restart();
+
+				// will just test for items not more than MAX_SEARCH
+				for (int i = 0; i < count; i++)
+				{
+					uint v = values[i];
+
+					if (collection.Contains(v))
+					{
+						found++;
+						continue;
+					}
+
+					missed++;
+					Console.WriteLine(missed <= 3
+										? Bright.Red($"Find missed a value: {v} :((")
+										: Bright.Red("FIND MISSED A LOT :(("));
+					if (missed > 3) return;
+					//return;
+				}
+
+				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
+
+				Console.WriteLine(Bright.Yellow("Test copy..."));
+				uint[] array = new uint[collection.Maximum];
+				collection.CopyTo(array, 0);
+				if (print) Console.WriteLine(string.Join(", ", array));
+
+				Console.WriteLine(Bright.Red("Test removing..."));
+		
+				int removed = 0;
+				count = collection.Count;
+				clock.Restart();
+
+				foreach (uint value in values)
+				{
+					collection.Remove(value);
+					count--;
+					removed++;
+				}
+
+				Debug.Assert(count == 0 && collection.Count == 0, $"Values are not cleared correctly! {count} != {collection.Count}.");
+				Console.WriteLine();
+				Console.WriteLine($"Removed {removed} of {collection.Maximum} items in {clock.ElapsedMilliseconds} ms.");
 			}
 		}
 

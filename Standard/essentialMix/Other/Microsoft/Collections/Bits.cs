@@ -1,3 +1,4 @@
+using System.Security;
 using essentialMix;
 
 // ReSharper disable once CheckNamespace
@@ -11,7 +12,7 @@ namespace Other.Microsoft.Collections
 		private readonly int _length;
 
 		// ptr to stack alloc'd array of ints
-		[System.Security.SecurityCritical]
+		[SecurityCritical]
 		private readonly int* _arrayPtr;
 
 		// array of ints
@@ -29,7 +30,7 @@ namespace Other.Microsoft.Collections
 		// <UsesUnsafeCode Name="Field: m_arrayPtr" />
 		// <UsesUnsafeCode Name="Parameter bitArrayPtr of type: Int32*" />
 		// </SecurityKernel>
-		[System.Security.SecurityCritical]
+		[SecurityCritical]
 		public Bits(int* bitArrayPtr, int length)
 		{
 			_arrayPtr = bitArrayPtr;
@@ -55,20 +56,16 @@ namespace Other.Microsoft.Collections
 		// <SecurityKernel Critical="True" Ring="0">
 		// <UsesUnsafeCode Name="Field: m_arrayPtr" />
 		// </SecurityKernel>
-		[System.Security.SecurityCritical]
+		[SecurityCritical]
 		public void MarkBit(int bitPosition)
 		{
 			int bitArrayIndex = bitPosition / Constants.INT_SIZE;
 			if (bitArrayIndex >= _length || bitArrayIndex < 0) return;
 
 			if (_useStackAlloc)
-			{
 				_arrayPtr[bitArrayIndex] |= MARKED_BIT_FLAG << (bitPosition % Constants.INT_SIZE);
-			}
 			else
-			{
 				_array[bitArrayIndex] |= MARKED_BIT_FLAG << (bitPosition % Constants.INT_SIZE);
-			}
 		}
 
 		/// <summary>
@@ -79,7 +76,7 @@ namespace Other.Microsoft.Collections
 		// <SecurityKernel Critical="True" Ring="0">
 		// <UsesUnsafeCode Name="Field: m_arrayPtr" />
 		// </SecurityKernel>
-		[System.Security.SecurityCritical]
+		[SecurityCritical]
 		public bool IsMarked(int bitPosition)
 		{
 			if (_useStackAlloc)

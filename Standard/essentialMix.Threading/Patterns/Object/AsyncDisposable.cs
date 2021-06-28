@@ -134,7 +134,7 @@ namespace essentialMix.Threading.Patterns.Object
 		{
 			return !_countdown.TryAddCount()
 						? null
-						: Create (() => _countdown?.Signal());
+						: Create(() => _countdown?.Signal());
 		}
 
 		/// <summary>

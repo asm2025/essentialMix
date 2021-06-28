@@ -164,25 +164,26 @@ namespace Other.Microsoft.Collections
 			private readonly int _version;
 
 			private int _index;
+			private T _current;
 
 			internal Enumerator([NotNull] ListBase<T> list)
 			{
 				_list = list;
 				_version = list._version;
 				_index = 0;
-				Current = default(T);
+				_current = default(T);
 			}
 
-			public T Current { get; private set; }
-
-			object IEnumerator.Current
+			public T Current
 			{
 				get
 				{
 					if (!_index.InRange(0, _list.Count)) throw new InvalidOperationException();
-					return Current;
+					return _current;
 				}
 			}
+
+			object IEnumerator.Current => Current;
 
 			public void Dispose()
 			{
@@ -192,7 +193,7 @@ namespace Other.Microsoft.Collections
 			{
 				if (_version == _list._version && _index < _list.Count)
 				{
-					Current = _list.Items[_index];
+					_current = _list.Items[_index];
 					_index++;
 					return true;
 				}
@@ -203,7 +204,7 @@ namespace Other.Microsoft.Collections
 			{
 				if (_version != _list._version) throw new VersionChangedException();
 				_index = _list.Count + 1;
-				Current = default(T);
+				_current = default(T);
 				return false;
 			}
 
@@ -211,7 +212,7 @@ namespace Other.Microsoft.Collections
 			{
 				if (_version != _list._version) throw new VersionChangedException();
 				_index = 0;
-				Current = default(T);
+				_current = default(T);
 			}
 		}
 

@@ -18,7 +18,7 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 	[Serializable]
-	public class LinkedCircularBuffer<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, IEnumerable, ISerializable, IDeserializationCallback
+	public class LinkedCircularBuffer<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable, ISerializable, IDeserializationCallback
 	{
 		[ComVisible(false)]
 		[DebuggerDisplay("{Value}")]
@@ -136,7 +136,7 @@ namespace essentialMix.Collections
 				_version = siInfo.GetInt32(nameof(_version));
 				_current = (T)siInfo.GetValue(nameof(Current), typeof(T));
 				_index = siInfo.GetInt32(nameof(_index));
-				if (_buffer.siInfo != null) _buffer.OnDeserialization(sender);
+				if (_buffer.siInfo != null) ((IDeserializationCallback)_buffer).OnDeserialization(sender);
 
 				if (_index >= _buffer.Count)
 				{
@@ -188,6 +188,8 @@ namespace essentialMix.Collections
 			}
 		}
 
+		private const string ITEMS_NAME = "item[]";
+
 		private readonly bool _isDisposable;
 		private readonly bool _isObject;
 
@@ -206,7 +208,7 @@ namespace essentialMix.Collections
 		/// <param name="capacity">The initial capacity. Must be greater than <c>0</c>.</param>
 		public LinkedCircularBuffer(int capacity)
 		{
-			if (capacity <= 0) throw new ArgumentOutOfRangeException(nameof(capacity));
+			if (capacity < 1) throw new ArgumentOutOfRangeException(nameof(capacity));
 			_capacity = capacity;
 			Type type = typeof(T);
 			_isDisposable = typeof(IDisposable).IsAssignableFrom(type);
@@ -218,7 +220,7 @@ namespace essentialMix.Collections
 			get => _capacity;
 			set
 			{
-				if (value < Count || value <= 0) throw new ArgumentOutOfRangeException(nameof(value));
+				if (value < Count || value < 1) throw new ArgumentOutOfRangeException(nameof(value));
 				_capacity = value;
 				_version++;
 			}
@@ -250,7 +252,7 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-		public void GetObjectData(SerializationInfo info, StreamingContext context)
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			/*
 			 * Customized serialization for LinkedList.
@@ -259,22 +261,24 @@ namespace essentialMix.Collections
 			 */
 			if (info == null) throw new ArgumentNullException(nameof(info));
 			info.AddValue(nameof(_version), _version);
+			info.AddValue(nameof(Capacity), Capacity);
 			info.AddValue(nameof(Count), Count);
 			if (Count == 0) return;
 			T[] array = ToArray();
-			info.AddValue(nameof(Node), array);
+			info.AddValue(ITEMS_NAME, array);
 		}
 
-		public void OnDeserialization(object sender)
+		void IDeserializationCallback.OnDeserialization(object sender)
 		{
 			if (siInfo == null) return;
+			Capacity = siInfo.GetInt32(nameof(Capacity));
 
 			int version = siInfo.GetInt32(nameof(_version));
 			int count = siInfo.GetInt32(nameof(Count));
 
 			if (count > 0)
 			{
-				T[] array = (T[])siInfo.GetValue(nameof(Node), typeof(T[]));
+				T[] array = (T[])siInfo.GetValue(ITEMS_NAME, typeof(T[]));
 				if (array == null) throw new SerializationDataMissingException();
 
 				foreach (T value in array)
@@ -373,24 +377,36 @@ namespace essentialMix.Collections
 		{
 			Node current = _head;
 
-			while (current != null)
+			if (_isDisposable || _isObject)
 			{
-				Node tmp = current;
-				current = current.Next; // use Next the instead of "_next", otherwise it will loop forever
-
-				if ((_isDisposable || _isObject) && tmp.Value is IDisposable disposable)
+				while (current != null)
 				{
-					try
-					{
-						disposable.Dispose();
-					}
-					catch (ObjectDisposedException)
-					{
-						// ignored
-					}
-				}
+					Node tmp = current;
+					current = current.Next; // use Next the instead of "_next", otherwise it will loop forever
 
-				tmp.Invalidate();
+					if (tmp.Value is IDisposable disposable)
+					{
+						try
+						{
+							disposable.Dispose();
+						}
+						catch (ObjectDisposedException)
+						{
+							// ignored
+						}
+					}
+
+					tmp.Invalidate();
+				}
+			}
+			else
+			{
+				while (current != null)
+				{
+					Node tmp = current;
+					current = current.Next; // use Next the instead of "_next", otherwise it will loop forever
+					tmp.Invalidate();
+				}
 			}
 
 			_head = null;
