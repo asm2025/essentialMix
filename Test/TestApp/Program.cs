@@ -995,7 +995,7 @@ work with {HEAVY} items.");
 			bool more;
 			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, START);
+			IList<int> values = GetRandomIntegers(true, START);
 			SinglyLinkedList<int> list = new SinglyLinkedList<int>();
 
 			do
@@ -1003,13 +1003,13 @@ work with {HEAVY} items.");
 				Console.Clear();
 				Title("Testing SingleLinkedList...");
 				CompilationHint();
-				Console.WriteLine($"Array has {values.Length} items.");
+				Console.WriteLine($"Array has {values.Count} items.");
 				Console.WriteLine("Test adding...");
 
 				list.Clear();
 				int count = list.Count;
 				Debug.Assert(count == 0, "Values are not cleared correctly!");
-				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Count.ToString())}...");
 				clock.Restart();
 
 				foreach (int v in values)
@@ -1018,9 +1018,9 @@ work with {HEAVY} items.");
 					count++;
 				}
 
-				Console.WriteLine($"Added {count} items of {values.Length} in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Added {count} items of {values.Count} in {clock.ElapsedMilliseconds} ms.");
 
-				if (list.Count != values.Length)
+				if (list.Count != values.Count)
 				{
 					Console.WriteLine(Bright.Red("Something went wrong, Count isn't right...!"));
 					return;
@@ -1114,7 +1114,7 @@ work with {HEAVY} items.");
 			bool more;
 			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, START);
+			IList<int> values = GetRandomIntegers(true, START);
 			LinkedList<int> list = new LinkedList<int>();
 
 			do
@@ -1122,13 +1122,13 @@ work with {HEAVY} items.");
 				Console.Clear();
 				Title("Testing LinkedList...");
 				CompilationHint();
-				Console.WriteLine($"Array has {values.Length} items.");
+				Console.WriteLine($"Array has {values.Count} items.");
 				Console.WriteLine("Test adding...");
 
 				list.Clear();
 				int count = list.Count;
 				Debug.Assert(count == 0, "Values are not cleared correctly!");
-				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Count.ToString())}...");
 				clock.Restart();
 
 				foreach (int v in values)
@@ -1137,9 +1137,9 @@ work with {HEAVY} items.");
 					count++;
 				}
 
-				Console.WriteLine($"Added {count} items of {values.Length} in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Added {count} items of {values.Count} in {clock.ElapsedMilliseconds} ms.");
 
-				if (list.Count != values.Length)
+				if (list.Count != values.Count)
 				{
 					Console.WriteLine(Bright.Red("Something went wrong, Count isn't right...!"));
 					return;
@@ -1756,16 +1756,16 @@ work with {HEAVY} items.");
 			bool more;
 			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			uint[] values = Enumerable.Range(1, START).Select(e => (uint)e).ToArray();
+			IList<uint> values = Enumerable.Range(1, START).Select(e => (uint)e).ToArray();
 			BitCollection collection = new BitCollection(values.Max());
 
 			do
 			{
-				bool canPrint = values.Length <= START * 2;
+				bool canPrint = values.Count <= START * 2;
 				Console.Clear();
 				Title("Testing BitCollection...");
 				CompilationHint();
-				Console.WriteLine($"Array has {values.Length} items.");
+				Console.WriteLine($"Array has {values.Count} items.");
 
 				if (canPrint) Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
 				bool print = canPrint && Console.ReadKey(true).Key == ConsoleKey.Y;
@@ -1780,18 +1780,19 @@ work with {HEAVY} items.");
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 1) continue;
 				values = Enumerable.Range(1, tests == 0 ? START * 2 : HEAVY).Select(e => (uint)e).ToArray();
+				collection.Maximum = values.Max();
 				tests++;
 			}
 			while (more);
 
 			clock.Stop();
 
-			static void DoTheTest(BitCollection collection, uint[] values, bool print, Stopwatch clock)
+			static void DoTheTest(BitCollection collection, IList<uint> values, bool print, Stopwatch clock)
 			{
 				collection.Clear();
 				int count = collection.Count;
 				Debug.Assert(count == 0, "Values are not cleared correctly!");
-				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Count.ToString())}...");
 				if (print) Console.WriteLine(string.Join(", ", values));
 				clock.Restart();
 
@@ -1801,9 +1802,9 @@ work with {HEAVY} items.");
 					count++;
 				}
 
-				Console.WriteLine($"Added {count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Added {count} of {values.Count} items in {clock.ElapsedMilliseconds} ms.");
 
-				if (collection.Count != values.Length)
+				if (collection.Count != values.Count)
 				{
 					Console.WriteLine(Bright.Red("Something went wrong, Count isn't right...!"));
 					return;
@@ -2007,13 +2008,13 @@ work with {HEAVY} items.");
 				Console.Clear();
 				Title("Testing BinarySearchTree.Remove()...");
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(true, len);
+				IList<int> values = GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				Console.WriteLine(Bright.Green("Test adding..."));
 				tree.Clear();
 				tree.Add(values);
-				Debug.Assert(tree.Count == values.Length, $"Values are not added correctly! {values.Length} != {tree.Count}.");
+				Debug.Assert(tree.Count == values.Count, $"Values are not added correctly! {values.Count} != {tree.Count}.");
 				Console.WriteLine(Bright.Black("InOrder: ") + string.Join(", ", tree));
 				tree.PrintWithProps();
 
@@ -2044,7 +2045,7 @@ work with {HEAVY} items.");
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 				}
-				Console.WriteLine($"Found {found} of {values.Length} items.");
+				Console.WriteLine($"Found {found} of {values.Count} items.");
 
 				Console.WriteLine();
 				Console.WriteLine("Test removing a random value...");
@@ -2070,7 +2071,7 @@ work with {HEAVY} items.");
 					if (tree.Remove(v))
 					{
 						removed++;
-						Debug.Assert(values.Length - removed == tree.Count, $"Values are not removed correctly! {values.Length - removed} != {tree.Count}.");
+						Debug.Assert(values.Count - removed == tree.Count, $"Values are not removed correctly! {values.Count - removed} != {tree.Count}.");
 						continue;
 					}
 
@@ -2098,7 +2099,7 @@ work with {HEAVY} items.");
 				Console.Clear();
 				Title("Testing BinarySearchTree.Balance()...");
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(true, len);
+				IList<int> values = GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				Console.WriteLine(Bright.Green("Test adding..."));
@@ -2259,13 +2260,13 @@ work with {HEAVY} items.");
 				Title("Testing AVLTree.Remove()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(true, len);
+				IList<int> values = GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				Console.WriteLine(Bright.Green("Test adding..."));
 				tree.Clear();
 				tree.Add(values);
-				Debug.Assert(tree.Count == values.Length, $"Values are not added correctly! {values.Length} != {tree.Count}.");
+				Debug.Assert(tree.Count == values.Count, $"Values are not added correctly! {values.Count} != {tree.Count}.");
 				Console.WriteLine(Bright.Black("InOrder: ") + string.Join(", ", tree));
 				tree.PrintWithProps();
 
@@ -2296,7 +2297,7 @@ work with {HEAVY} items.");
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 				}
-				Console.WriteLine($"Found {found} of {values.Length} items.");
+				Console.WriteLine($"Found {found} of {values.Count} items.");
 
 				Console.WriteLine(Bright.Red("Test removing..."));
 				value = values.PickRandom();
@@ -2321,7 +2322,7 @@ work with {HEAVY} items.");
 					if (tree.Remove(v))
 					{
 						removed++;
-						Debug.Assert(values.Length - removed == tree.Count, $"Values are not removed correctly! {values.Length - removed} != {tree.Count}.");
+						Debug.Assert(values.Count - removed == tree.Count, $"Values are not removed correctly! {values.Count - removed} != {tree.Count}.");
 						continue;
 					}
 					Console.WriteLine(Bright.Red($"Remove missed a value: {v} :(("));
@@ -2383,13 +2384,13 @@ work with {HEAVY} items.");
 				Console.Clear();
 				Title("Testing RedBlackTree.Remove()...");
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(true, len);
+				IList<int> values = GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				Console.WriteLine(Bright.Green("Test adding..."));
 				tree.Clear();
 				tree.Add(values);
-				Debug.Assert(tree.Count == values.Length, $"Values are not added correctly! {values.Length} != {tree.Count}.");
+				Debug.Assert(tree.Count == values.Count, $"Values are not added correctly! {values.Count} != {tree.Count}.");
 				Console.WriteLine(Bright.Black("InOrder: ") + string.Join(", ", tree));
 				tree.PrintWithProps();
 
@@ -2421,7 +2422,7 @@ work with {HEAVY} items.");
 					ConsoleHelper.Pause();
 					Console.WriteLine();
 				}
-				Console.WriteLine($"Found {found} of {values.Length} items.");
+				Console.WriteLine($"Found {found} of {values.Count} items.");
 
 				Console.WriteLine();
 				Console.WriteLine(Bright.Red("Test removing..."));
@@ -2447,7 +2448,7 @@ work with {HEAVY} items.");
 					if (tree.Remove(v))
 					{
 						removed++;
-						Debug.Assert(values.Length - removed == tree.Count, $"Values are not removed correctly! {values.Length - removed} != {tree.Count}.");
+						Debug.Assert(values.Count - removed == tree.Count, $"Values are not removed correctly! {values.Count - removed} != {tree.Count}.");
 						continue;
 					}
 					Console.WriteLine(Bright.Red($"Remove missed a value: {v} :(("));
@@ -2477,7 +2478,7 @@ work with {HEAVY} items.");
 				Title("Testing all BinaryTrees...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(true, len);
+				IList<int> values = GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				DoTheTest(binarySearchTree, values);
@@ -2494,7 +2495,7 @@ work with {HEAVY} items.");
 			}
 			while (more);
 
-			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, int[] array)
+			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, IList<int> array)
 				where TNode : LinkedBinaryNode<TNode, int>
 			{
 				Console.WriteLine();
@@ -3195,13 +3196,13 @@ work with {HEAVY} items.");
 			bool more;
 			Stopwatch clock = new Stopwatch();
 			DisjointSet<int> disjointSet = new DisjointSet<int>();
-			int[] values = GetRandomIntegers(true, 12/*200_000*/);
+			IList<int> values = GetRandomIntegers(true, 12/*200_000*/);
 
 			do
 			{
 				Console.Clear();
 				Title("Testing DisjointSet...");
-				Console.WriteLine($"Array has {values.Length} items.");
+				Console.WriteLine($"Array has {values.Count} items.");
 				disjointSet.Clear();
 
 				clock.Restart();
@@ -3209,7 +3210,7 @@ work with {HEAVY} items.");
 				foreach (int v in values)
 					disjointSet.Add(v);
 
-				Console.WriteLine($"Added {disjointSet.Count} items of {values.Length} in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Added {disjointSet.Count} items of {values.Count} in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine(Bright.Yellow("Test search..."));
 				int found = 0;
@@ -3270,7 +3271,7 @@ work with {HEAVY} items.");
 					Console.WriteLine();
 					//return;
 				}
-				Console.WriteLine($"Removed {removed} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Removed {removed} of {values.Count} items in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine();
 				Console.WriteLine("Test to clear the list...");
@@ -3305,7 +3306,7 @@ work with {HEAVY} items.");
 				Title("Testing BinaryHeap.Add()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				IList<int> values = GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				BinaryHeap<int> heap = new MaxBinaryHeap<int>();
@@ -3329,7 +3330,7 @@ work with {HEAVY} items.");
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array)
+			static void DoTheTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, IList<TValue> array)
 				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -4551,7 +4552,7 @@ work with {HEAVY} items.");
 				Console.WriteLine(Bright.Green($"Added {count} characters to the set"));
 			}
 
-			static void DoTheTest<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, List<char> values)
+			static void DoTheTest<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, IList<char> values)
 				where TAdjacencyList : class, ICollection<TEdge>
 			{
 				Console.WriteLine("Test adding nodes...");
@@ -4642,7 +4643,7 @@ or press {Bright.Red("ESCAPE")} key to exit this test. ");
 				Console.WriteLine();
 			}
 
-			static bool DoTheTestWithValue<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, List<char> values, char value)
+			static bool DoTheTestWithValue<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, IList<char> values, char value)
 				where TAdjacencyList : class, ICollection<TEdge>
 			{
 				const string LINE_SEPARATOR = "*******************************************************************************";

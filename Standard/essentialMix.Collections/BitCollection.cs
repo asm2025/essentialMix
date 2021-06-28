@@ -87,8 +87,8 @@ namespace essentialMix.Collections
 		}
 
 		//32 bits for each int. bytes: 4, binary: 11111 (+1), mask: 0x1f, power: 2^5
-		private readonly int[] _flags;
-		
+		private int[] _flags;
+		private uint _maximum;
 		private int _version;
 
 		[NonSerialized]
@@ -96,14 +96,27 @@ namespace essentialMix.Collections
 
 		public BitCollection(uint maximum)
 		{
-			Maximum = maximum;
-			_flags = new int[(int)((maximum >> 5) + 1)];
+			_maximum = maximum;
+			_flags = new int[GetCapacity(maximum)];
 		}
 
 		/// <summary>
-		/// The maximum int allowed in the collection
+		/// The maximum value allowed in the collection
 		/// </summary>
-		public uint Maximum { get; private set; }
+		public uint Maximum
+		{
+			get => _maximum;
+			set
+			{
+				if (value < Count || value < 1) throw new ArgumentOutOfRangeException(nameof(value));
+				if (value == _maximum) return;
+				_maximum = value;
+				int[] newItems = new int[GetCapacity(_maximum)];
+				Array.Copy(_flags, newItems, _flags.Length);
+				_flags = newItems;
+				_version++;
+			}
+		}
 
 		/// <inheritdoc cref="ICollection" />
 		[field: ContractPublicPropertyName("Count")]
@@ -253,6 +266,12 @@ namespace essentialMix.Collections
 		private static (uint Index, int Offset) GetIndexOffset(uint n)
 		{
 			return (n >> 5, (int)(n & 0b11111));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.ForwardRef)]
+		private static int GetCapacity(uint n)
+		{
+			return (int)((n >> 5) + 1);
 		}
 	}
 }

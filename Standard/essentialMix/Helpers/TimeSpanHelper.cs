@@ -24,7 +24,6 @@ namespace essentialMix.Helpers
 		public const int FAST_SCHEDULE2 = 100;
 		public const int QUARTER_SCHEDULE = 250;
 		public const int HALF_SCHEDULE = 500;
-		public const int SCHEDULE = 1000;
 
 		public const int SECOND = 1000;
 		public const int MINUTE = SECOND * 60;
@@ -32,6 +31,11 @@ namespace essentialMix.Helpers
 		public const int DAY = HOUR * 24;
 		public const int WEEK = DAY * 7;
 
+		public static readonly TimeSpan MinimumSchedule = TimeSpan.FromMilliseconds(MINIMUM_SCHEDULE);
+		public static readonly TimeSpan FastSchedule = TimeSpan.FromMilliseconds(FAST_SCHEDULE);
+		public static readonly TimeSpan FastSchedule2 = TimeSpan.FromMilliseconds(FAST_SCHEDULE2);
+		public static readonly TimeSpan QuarterSchedule = TimeSpan.FromMilliseconds(QUARTER_SCHEDULE);
+		public static readonly TimeSpan HalfSchedule = TimeSpan.FromMilliseconds(HALF_SCHEDULE);
 		public static readonly TimeSpan Second = TimeSpan.FromSeconds(1);
 		public static readonly TimeSpan TwoSeconds = TimeSpan.FromSeconds(2);
 		public static readonly TimeSpan FiveSeconds = TimeSpan.FromSeconds(5);

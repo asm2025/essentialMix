@@ -54,7 +54,7 @@ namespace essentialMix.Helpers
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
 			if (count == 0) return string.Empty;
 
-			List<Func<char>> types = __randomStringType.GetOrAdd(type, t =>
+			IList<Func<char>> types = __randomStringType.GetOrAdd(type, t =>
 			{
 				List<Func<char>> list = new List<Func<char>>();
 				if (t.HasFlag(RandomStringType.SmallLetters)) list.Add(RandomSmallLetter);

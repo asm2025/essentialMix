@@ -108,7 +108,7 @@ namespace essentialMix.Collections
 		/// <param name="capacity">The initial capacity. Must be greater than <c>0</c>.</param>
 		public CircularBuffer(int capacity)
 		{
-			if (capacity <= 0) throw new ArgumentOutOfRangeException(nameof(capacity));
+			if (capacity < 1) throw new ArgumentOutOfRangeException(nameof(capacity));
 			_head = _tail = -1;
 			_items = new T[capacity];
 			Type type = typeof(T);
@@ -121,7 +121,7 @@ namespace essentialMix.Collections
 			get => _items.Length;
 			set
 			{
-				if (value < Count || value <= 0) throw new ArgumentOutOfRangeException(nameof(value));
+				if (value < Count || value < 1) throw new ArgumentOutOfRangeException(nameof(value));
 				if (value == _items.Length) return;
 				T[] newItems = new T[value];
 				CopyTo(newItems, 0);
