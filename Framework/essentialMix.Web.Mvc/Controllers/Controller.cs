@@ -9,7 +9,6 @@ using essentialMix.Extensions;
 using JetBrains.Annotations;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
-using essentialMix.Caching;
 using essentialMix.Helpers;
 using essentialMix.Web.Mvc.Models;
 
@@ -57,8 +56,6 @@ namespace essentialMix.Web.Mvc.Controllers
 			get => _userManager ??= Request?.GetOwinContext().GetUserManager<TUserManager>();
 			private set => _userManager = value;
 		}
-
-		protected ICacheProvider Cache { get; } = new MemoryCacheProvider();
 
 		protected override void Initialize(RequestContext requestContext)
 		{

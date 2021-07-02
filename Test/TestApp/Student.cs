@@ -34,5 +34,13 @@ namespace TestApp
 			if (ReferenceEquals(this, other)) return true;
 			return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) && Grade.Equals(other.Grade);
 		}
+
+		public void MethodWithInputs(int input1, string input2)
+		{
+		}
+
+		public void MethodWithArrayInputs(int[] input1, string[] input2)
+		{
+		}
 	}
 }

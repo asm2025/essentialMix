@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Principal;
@@ -81,6 +82,8 @@ work with {HEAVY} items.");
 
 			//TestDomainName();
 
+			TestExpressionExtension();
+
 			//TestFibonacci();
 			//TestGroupAnagrams();
 			//TestKadaneMaximum();
@@ -102,7 +105,7 @@ work with {HEAVY} items.");
 			//TestLinkedDeque();
 			//TestCircularBuffer();
 			//TestLinkedCircularBuffer();
-			TestBitCollection();
+			//TestBitCollection();
 
 			//TestBinaryTreeFromTraversal();
 			
@@ -225,6 +228,22 @@ work with {HEAVY} items.");
 				Console.WriteLine(tuple.Item1);
 				Console.WriteLine(tuple.Item2);
 				Console.WriteLine();
+			}
+		}
+
+		private static void TestExpressionExtension()
+		{
+			Expression[] expressions =
+			{
+				(Expression<Action<Student>>)(s => s.MethodWithInputs(1, "2")),
+				(Expression<Action<Student>>)(s => s.MethodWithArrayInputs(new[]{1, 2}, new[]{"3", "4"}))
+			};
+
+			Title("Testing expression extension...");
+
+			foreach (Expression expression in expressions)
+			{
+				Console.WriteLine($"{expression} => {string.Join(", ", expression.GetValues())}");
 			}
 		}
 

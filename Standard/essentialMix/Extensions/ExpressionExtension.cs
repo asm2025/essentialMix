@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -24,70 +25,188 @@ namespace essentialMix.Extensions
 				_expression = expression;
 			}
 
+			/// <inheritdoc />
+			public override Expression Visit(Expression node)
+			{
+				node = AddValue(node);
+				return base.Visit(node);
+			}
+
 			protected override Expression VisitMethodCall(MethodCallExpression node)
 			{
 				foreach (Expression argument in node.Arguments)
+					AddValue(argument);
+
+				return base.VisitMethodCall(node);
+			}
+
+			/// <inheritdoc />
+			protected override Expression VisitMember(MemberExpression node)
+			{
+				Type declaringType;
+				object declaringObject;
+
+				if (node.Expression is ConstantExpression constExpr)
 				{
-					object obj = GetValue(argument);
-					_list.Add(obj);
+					declaringType = constExpr.Type;
+					declaringObject = constExpr.Value;
+				}
+				else
+				{
+					declaringType = node.Member.DeclaringType;
+					declaringObject = node.Member.DeclaringType;
 				}
 
-				return node;
+				if (declaringType == null) throw new NotSupportedException();
+				
+				MemberInfo mi = declaringType.GetMember(node.Member.Name, MemberTypes.Field | MemberTypes.Property, Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE_STATIC).SingleOrDefault();
+				
+				if (mi != null)
+				{
+					if (mi.MemberType == MemberTypes.Field)
+					{
+						FieldInfo fi = (FieldInfo)mi;
+						_list.Add(fi.GetValue(declaringObject));
+					}
+					else
+					{
+						PropertyInfo pi = (PropertyInfo)mi;
+						MethodInfo pig = pi.GetGetMethod(true);
+						_list.Add(pig?.Invoke(declaringObject, null) ?? pi.PropertyType.Default());
+					}
+				}
+
+				return base.VisitMember(node);
+			}
+
+			/// <inheritdoc />
+			protected override Expression VisitUnary(UnaryExpression node)
+			{
+				return node.Operand;
+			}
+
+			/// <inheritdoc />
+			protected override Expression VisitNew(NewExpression node)
+			{
+				List<object> args = new List<object>(node.Arguments.Count);
+
+				foreach (Expression argument in node.Arguments)
+				{
+					object[] values = ExtractValues(argument);
+					args.AddRange(values);
+				}
+
+				object value = node.Constructor.Invoke(args.ToArray());
+				_list.Add(value);
+				return base.VisitNew(node);
+			}
+
+			/// <inheritdoc />
+			protected override Expression VisitNewArray(NewArrayExpression node)
+			{
+				Type type = node.Type.GetElementType();
+				if (type == null) return node;
+
+				IList list = type.CreateList();
+
+				if (typeof(IConvertible).IsAssignableFrom(type))
+				{
+					foreach (ConstantExpression expression in node.Expressions.Cast<ConstantExpression>()) 
+						list.Add(Convert.ChangeType(expression.Value, expression.Type));
+				}
+				else
+				{
+					foreach (Expression expression in node.Expressions)
+					{
+						if (expression is ConstantExpression constExpr)
+						{
+							list.Add(constExpr.Value);
+						}
+						else
+						{
+							object[] objects = ExtractValues(expression);
+
+							foreach (object obj in objects)
+								list.Add(obj);
+						}
+					}
+				}
+
+				_list.Add(list);
+				return base.VisitNewArray(node);
+			}
+
+			private Expression AddValue(Expression node)
+			{
+				Expression expression = Simplify(node);
+				if (expression == null) return node;
+				object value = GetValue(expression);
+				_list.Add(value);
+				return expression;
 			}
 
 			[NotNull]
-			private IReadOnlyCollection<object> ExtractValues()
+			private object[] ExtractValues()
 			{
 				_list.Clear();
 				Visit(_expression);
-				return _list.AsReadOnly();
+				return _list.Count == 0
+							? Array.Empty<object>()
+							: _list.ToArray();
 			}
 
-			public static IReadOnlyCollection<object> ExtractValues(Expression expression)
+			[NotNull]
+			public static object[] ExtractValues(Expression expression)
 			{
 				expression = expression.RemoveUnary();
-				if (expression == null)
-					return null;
+				if (expression == null) return Array.Empty<object>();
 				ArgumentExtractor visitor = new ArgumentExtractor(expression);
 				return visitor.ExtractValues();
 			}
 
-			private static object GetValue(Expression node)
+			private static object GetValue([NotNull] Expression expression)
 			{
-				return GetExpressionLocal(node);
-
-				object GetExpressionLocal(Expression expression)
+				if (expression is IArgumentProvider provider)
 				{
-					expression = Simplify(expression);
-					if (expression == null)
-						return null;
+					List<object> list = new List<object>(provider.ArgumentCount);
 
-					if (node is IArgumentProvider provider)
+					for (int i = 0; i < provider.ArgumentCount; i++)
 					{
-						List<object> list = new List<object>(provider.ArgumentCount);
+						Expression exp = provider.GetArgument(i);
+						if (exp == null) continue;
 
-						for (int i = 0; i < provider.ArgumentCount; i++)
-						{
-							Expression exp = provider.GetArgument(i);
-							list.Add(GetExpressionLocal(exp));
-						}
-
-						return list;
+						object[] values = ExtractValues(exp);
+						list.AddRange(values);
 					}
 
-					object value;
-
-					try
+					if (expression.Type.IsArray)
 					{
-						value = Compile(expression)();
-					}
-					catch
-					{
-						value = expression.Type.Default();
+						Type elementType = expression.Type.GetElementType() ?? typeof(object);
+						if (elementType == typeof(object)) return list.ToArray();
+						return typeof(IConvertible).IsAssignableFrom(elementType)
+									? list.Select(e => Convert.ChangeType(e, elementType)).ToArray()
+									: list.ToArray();
 					}
 
-					return value;
+					return typeof(IConvertible).IsAssignableFrom(expression.Type)
+								? Convert.ChangeType(list, expression.Type)
+								: list;
 				}
+
+				object value;
+
+				try
+				{
+					value = Compile(expression)();
+				}
+				catch
+				{
+					value = expression.Type.Default();
+				}
+
+				return typeof(IConvertible).IsAssignableFrom(expression.Type)
+							? Convert.ChangeType(value, expression.Type)
+							: value;
 			}
 
 			[NotNull]
@@ -673,12 +792,12 @@ namespace essentialMix.Extensions
 			return list.AsReadOnly();
 		}
 
-		public static IReadOnlyCollection<object> GetValues(this Expression thisValue)
+		[NotNull]
+		public static object[] GetValues(this Expression thisValue)
 		{
-			thisValue = Simplify(thisValue);
-			return thisValue is IArgumentProvider
-						? ArgumentExtractor.ExtractValues(thisValue)
-						: null;
+			return thisValue == null
+						? Array.Empty<object>()
+						: ArgumentExtractor.ExtractValues(thisValue);
 		}
 
 		[NotNull]

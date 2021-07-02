@@ -7,6 +7,9 @@ namespace essentialMix.Patterns.Threading
 	public class TimedCallback : Disposable
 	{
 		private readonly Action<TimedCallback> _action;
+
+		// MUST keep a reference to the timer callback function to prevent GC from collecting it.
+		private TimerCallback _timerCallback;
 		private uint _timerId;
 		private uint _interval;
 
@@ -16,12 +19,14 @@ namespace essentialMix.Patterns.Threading
 			if (interval < 1) throw new ArgumentOutOfRangeException(nameof(interval));
 			_action = action;
 			_interval = interval;
+			_timerCallback = TimerProc;
 		}
 
 		/// <inheritdoc />
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing) Enabled = false;
+			_timerCallback = null;
 			base.Dispose(disposing);
 		}
 
@@ -38,8 +43,9 @@ namespace essentialMix.Patterns.Threading
 						Win32.timeEndPeriod(1);
 					}
 
+					if (IsDisposed) return;
 					Win32.timeBeginPeriod(1);
-					_timerId = Win32.timeSetEvent(Interval, 0, TimerProc, UIntPtr.Zero, fuEvent.TIME_PERIODIC);
+					_timerId = Win32.timeSetEvent(Interval, 0, _timerCallback, UIntPtr.Zero, fuEvent.TIME_PERIODIC);
 					return;
 				}
 
@@ -62,17 +68,8 @@ namespace essentialMix.Patterns.Threading
 
 		private void TimerProc(uint uTimerId, uint uMsg, UIntPtr dwUser, UIntPtr dw1, UIntPtr dw2)
 		{
-			if (uTimerId == 0) return;
+			if (uTimerId == 0 || IsDisposed) return;
 			_action(this);
-		}
-
-		[NotNull]
-		public static TimedCallback Create([NotNull] Action<TimedCallback> action, uint interval)
-		{
-			return new TimedCallback(action, interval)
-			{
-				Enabled = true
-			};
 		}
 	}
 }
