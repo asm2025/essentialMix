@@ -54,6 +54,112 @@ namespace essentialMix.Threading.Helpers
 		}
 
 		[NotNull]
+		public static Task Run([NotNull] Action action, TaskCreationOptions options) { return Run(action, options, CancellationToken.None); }
+		/// <summary>
+		/// See these articles first to understand why this method exists, Then you can decide if you want to use it or not.
+		/// <para><see href="https://devblogs.microsoft.com/pfxteam/task-run-vs-task-factory-startnew/" /></para>
+		/// <para><see href="https://blog.stephencleary.com/2013/08/startnew-is-dangerous.html" /></para>
+		/// <para><see href="https://blog.i3arnon.com/2015/07/02/task-run-long-running/" /></para>
+		/// <para><see href="https://github.com/dotnet/runtime/issues/14978" /></para>
+		/// <para><see href="https://devblogs.microsoft.com/pfxteam/taskcreationoptions-preferfairness/" /></para>
+		/// <para>The only meaningful options here are <see cref="TaskCreationOptions.PreferFairness"/> or <see cref="TaskCreationOptions.LongRunning"/></para>
+		/// </summary>
+		[NotNull]
+		public static Task Run([NotNull] Action action, TaskCreationOptions options, CancellationToken token)
+		{
+			int c = 0;
+			TaskCreationOptions opt = TaskCreationOptions.DenyChildAttach;
+			
+			if ((options & TaskCreationOptions.LongRunning) == TaskCreationOptions.LongRunning)
+			{
+				c++;
+				opt |= TaskCreationOptions.LongRunning;
+			}
+			
+			if ((options & TaskCreationOptions.PreferFairness) == TaskCreationOptions.PreferFairness)
+			{
+				c++;
+				opt |= TaskCreationOptions.PreferFairness;
+			}
+			
+			if ((options & TaskCreationOptions.HideScheduler) == TaskCreationOptions.HideScheduler)
+			{
+				c++;
+				opt |= TaskCreationOptions.HideScheduler;
+			}
+			
+			if ((options & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously)
+			{
+				c++;
+				opt |= TaskCreationOptions.RunContinuationsAsynchronously;
+			}
+
+			return c > 0
+						? Task.Factory.StartNew(action, token, opt, TaskScheduler.Default)
+						: Task.Run(action, token);
+		}
+
+		[NotNull]
+		public static Task<T> Run<T>([NotNull] Func<T> func, TaskCreationOptions options) { return Run(func, options, CancellationToken.None); }
+		/// <summary>
+		/// See these articles first to understand why this method exists, Then you can decide if you want to use it or not.
+		/// <para><see href="https://devblogs.microsoft.com/pfxteam/task-run-vs-task-factory-startnew/" /></para>
+		/// <para><see href="https://blog.stephencleary.com/2013/08/startnew-is-dangerous.html" /></para>
+		/// <para><see href="https://blog.i3arnon.com/2015/07/02/task-run-long-running/" /></para>
+		/// <para><see href="https://github.com/dotnet/runtime/issues/14978" /></para>
+		/// <para><see href="https://devblogs.microsoft.com/pfxteam/taskcreationoptions-preferfairness/" /></para>
+		/// <para>The only meaningful options here are <see cref="TaskCreationOptions.PreferFairness"/> or <see cref="TaskCreationOptions.LongRunning"/></para>
+		/// </summary>
+		[NotNull]
+		public static Task<T> Run<T>([NotNull] Func<T> func, TaskCreationOptions options, CancellationToken token)
+		{
+			int c = 0;
+			TaskCreationOptions opt = TaskCreationOptions.DenyChildAttach;
+			
+			if ((options & TaskCreationOptions.LongRunning) == TaskCreationOptions.LongRunning)
+			{
+				c++;
+				opt |= TaskCreationOptions.LongRunning;
+			}
+			
+			if ((options & TaskCreationOptions.PreferFairness) == TaskCreationOptions.PreferFairness)
+			{
+				c++;
+				opt |= TaskCreationOptions.PreferFairness;
+			}
+			
+			if ((options & TaskCreationOptions.HideScheduler) == TaskCreationOptions.HideScheduler)
+			{
+				c++;
+				opt |= TaskCreationOptions.HideScheduler;
+			}
+			
+			if ((options & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously)
+			{
+				c++;
+				opt |= TaskCreationOptions.RunContinuationsAsynchronously;
+			}
+
+			return c > 0
+						? Task.Factory.StartNew(func, token, opt, TaskScheduler.Default)
+						: Task.Run(func, token);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static void Run([NotNull] Func<Task> func, CancellationToken token = default(CancellationToken))
+		{
+			token.ThrowIfCancellationRequested();
+			func().Wait(token);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static TResult Run<TResult>([NotNull] Func<Task<TResult>> func, CancellationToken token = default(CancellationToken))
+		{
+			token.ThrowIfCancellationRequested();
+			return func().Execute();
+		}
+
+		[NotNull]
 		public static Task RunAsync([NotNull] Action action, CancellationToken token = default(CancellationToken)) { return AsyncPattern(action, token); }
 
 		[NotNull]
@@ -106,20 +212,6 @@ namespace essentialMix.Threading.Helpers
 					ObjectHelper.Dispose(ref cts);
 					return t.Result;
 				}, mergedCts.Token);
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static void Run([NotNull] Func<Task> func, CancellationToken token = default(CancellationToken))
-		{
-			token.ThrowIfCancellationRequested();
-			func().Wait(token);
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static TResult Run<TResult>([NotNull] Func<Task<TResult>> func, CancellationToken token = default(CancellationToken))
-		{
-			token.ThrowIfCancellationRequested();
-			return func().Execute();
 		}
 
 		public static void Sequence([NotNull] params Action[] actions) { SequenceAsync(CancellationToken.None, actions).Execute(); }

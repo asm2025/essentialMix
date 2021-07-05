@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -236,14 +237,58 @@ work with {HEAVY} items.");
 			Expression[] expressions =
 			{
 				(Expression<Action<Student>>)(s => s.MethodWithInputs(1, "2")),
-				(Expression<Action<Student>>)(s => s.MethodWithArrayInputs(new[]{1, 2}, new[]{"3", "4"}))
+				(Expression<Action<Student>>)(s => s.MethodWithArrayInputs(new[]{1, 2}, new[]{"3", "4"})),
+				(Expression<Action<Student>>)(s => s.MethodWithInputs(1, new[]{2, 3}))
 			};
 
 			Title("Testing expression extension...");
 
+			StringBuilder sb = new StringBuilder();
+
 			foreach (Expression expression in expressions)
 			{
-				Console.WriteLine($"{expression} => {string.Join(", ", expression.GetValues())}");
+				object[] values = expression.GetValues();
+				sb.Length = 0;
+				sb.Append('{');
+
+				foreach (object value in values)
+				{
+					Add(sb, value);
+				}
+
+				sb.Append('}');
+				Console.WriteLine($"{expression} => {sb}");
+			}
+
+			static void Add(StringBuilder sb, object value)
+			{
+				if (sb.Length > 1 && sb[sb.Length - 1] != '{') sb.Append(", ");
+
+				if (value is null)
+				{
+					sb.Append("null");
+				}
+				else if (value is string s)
+				{
+					sb.Append($"\"{s}\"");
+				}
+				else if (value is char c)
+				{
+					sb.Append($"'{c}'");
+				}
+				else if (value is IEnumerable enumerable)
+				{
+					sb.Append('{');
+
+					foreach (object o in enumerable)
+						Add(sb, o);
+
+					sb.Append('}');
+				}
+				else
+				{
+					sb.Append(value);
+				}
 			}
 		}
 

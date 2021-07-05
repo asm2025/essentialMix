@@ -42,5 +42,9 @@ namespace TestApp
 		public void MethodWithArrayInputs(int[] input1, string[] input2)
 		{
 		}
+
+		public void MethodWithInputs(int input1, int[] input2)
+		{
+		}
 	}
 }

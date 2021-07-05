@@ -25,19 +25,12 @@ namespace essentialMix.Extensions
 				_expression = expression;
 			}
 
-			/// <inheritdoc />
-			public override Expression Visit(Expression node)
-			{
-				node = AddValue(node);
-				return base.Visit(node);
-			}
-
 			protected override Expression VisitMethodCall(MethodCallExpression node)
 			{
 				foreach (Expression argument in node.Arguments)
 					AddValue(argument);
 
-				return base.VisitMethodCall(node);
+				return node;
 			}
 
 			/// <inheritdoc />
@@ -76,7 +69,7 @@ namespace essentialMix.Extensions
 					}
 				}
 
-				return base.VisitMember(node);
+				return node;
 			}
 
 			/// <inheritdoc />
@@ -133,7 +126,7 @@ namespace essentialMix.Extensions
 				}
 
 				_list.Add(list);
-				return base.VisitNewArray(node);
+				return node;
 			}
 
 			private Expression AddValue(Expression node)
