@@ -92,13 +92,13 @@ namespace essentialMix.Extensions
 		public static Type GetUnderlyingType<T>(this T thisValue)
 			where T : struct, Enum, IComparable
 		{
-			return thisValue.AsType(true).GetUnderlyingType();
+			return thisValue.AsType().GetUnderlyingType();
 		}
 
 		public static TypeCode GetUnderlyingTypeCode<T>(this T thisValue)
 			where T : struct, Enum, IComparable
 		{
-			return thisValue.AsType(true).GetUnderlyingTypeCode();
+			return thisValue.AsType().GetUnderlyingTypeCode();
 		}
 
 		public static FieldInfo GetField<T>(this T thisValue)
@@ -158,11 +158,11 @@ namespace essentialMix.Extensions
 			return GetAttributes<T, TAttribute>(thisValue).FirstOrDefault();
 		}
 
-		public static bool HasAttribute<T, TAttribute>(this T thisValue)
+		public static bool HasAttribute<T, TAttribute>(this T thisValue, bool inherit = false)
 			where T : struct, Enum, IComparable
 			where TAttribute : Attribute
 		{
-			return GetAttribute<T, TAttribute>(thisValue) != null;
+			return typeof(T).IsDefined(typeof(TAttribute), inherit);
 		}
 
 		public static bool IsMemberOf<T>(this T thisValue, [NotNull] Type type)
@@ -175,7 +175,7 @@ namespace essentialMix.Extensions
 		public static bool FastHasFlag<T>(this T thisValue, T flag)
 			where T : struct, Enum, IComparable
 		{
-			return EnumHelper<T>.HasAllFlags(thisValue, flag);
+			return EnumHelper<T>.HasFlag(thisValue, flag);
 		}
 	}
 }

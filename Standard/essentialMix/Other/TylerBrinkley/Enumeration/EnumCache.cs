@@ -91,7 +91,6 @@ namespace Other.TylerBrinkley.Enumeration
 			_enumTypeName = enumType.Name;
 			EnumInfo = enumInfo;
 			_hasCustomValidator = enumInfo.HasCustomValidator;
-
 			IsFlagEnum = enumType.IsDefined(typeof(FlagsAttribute), false);
 
 			FieldInfo[] fields = enumType.GetFields(BindingFlags.Public | BindingFlags.Static);
@@ -196,8 +195,8 @@ namespace Other.TylerBrinkley.Enumeration
 					return _valueMap.Count + (_duplicateValues?.Count ?? 0);
 				default:
 					EnumHelper<EnumMemberSelection>.Validate(selection, nameof(selection));
-					if (EnumHelper<EnumMemberSelection>.HasAnyFlags(selection, EnumMemberSelection.Flags)) return GetFlagCount();
-					return EnumHelper<EnumMemberSelection>.HasAnyFlags(selection, EnumMemberSelection.Distinct)
+					if (EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.Flags)) return GetFlagCount();
+					return EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.Distinct)
 								? _valueMap.Count
 								: 0;
 			}
@@ -218,14 +217,14 @@ namespace Other.TylerBrinkley.Enumeration
 				default:
 					EnumHelper<EnumMemberSelection>.Validate(selection, nameof(selection));
 
-					if (EnumHelper<EnumMemberSelection>.HasAnyFlags(selection, EnumMemberSelection.Flags)) members = GetFlagMembers(AllFlags);
-					else if (EnumHelper<EnumMemberSelection>.HasAnyFlags(selection, EnumMemberSelection.Distinct)) members = _valueMap.Values;
+					if (EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.Flags)) members = GetFlagMembers(AllFlags);
+					else if (EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.Distinct)) members = _valueMap.Values;
 					else return null;
 
 					break;
 			}
 
-			return EnumHelper<EnumMemberSelection>.HasAnyFlags(selection, EnumMemberSelection.DisplayOrder)
+			return EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.DisplayOrder)
 						? members.OrderBy(member => member.Attributes.Get<DisplayAttribute>()?.GetOrder() ?? int.MaxValue)
 						: members;
 		}
@@ -475,7 +474,7 @@ namespace Other.TylerBrinkley.Enumeration
 			for (TInt currentValue = Provider.One; (isLessThanZero || !Provider.LessThan(validValue, currentValue)) && !currentValue.Equals(Provider.Zero);
 				currentValue = Provider.LeftShift(currentValue, 1))
 			{
-				if (HasAnyFlags(validValue, currentValue))
+				if (HasAnyFlag(validValue, currentValue))
 					yield return currentValue;
 			}
 		}
@@ -493,13 +492,13 @@ namespace Other.TylerBrinkley.Enumeration
 		public bool HasAnyFlags(TInt value) { return !value.Equals(Provider.Zero); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public bool HasAnyFlags(TInt value, TInt otherFlags) { return !Provider.And(value, otherFlags).Equals(Provider.Zero); }
+		public bool HasAnyFlag(TInt value, TInt otherFlags) { return !Provider.And(value, otherFlags).Equals(Provider.Zero); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public bool HasAllFlags(TInt value) { return HasAllFlags(value, AllFlags); }
+		public bool HasAllFlags(TInt value) { return HasFlag(value, AllFlags); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public bool HasAllFlags(TInt value, TInt otherFlags) { return Provider.And(value, otherFlags).Equals(otherFlags); }
+		public bool HasFlag(TInt value, TInt otherFlags) { return Provider.And(value, otherFlags).Equals(otherFlags); }
 
 		public TInt ToggleFlags(TInt value) { return Provider.Xor(value, AllFlags); }
 

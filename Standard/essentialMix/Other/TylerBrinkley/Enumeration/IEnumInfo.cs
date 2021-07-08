@@ -58,9 +58,9 @@ namespace Other.TylerBrinkley.Enumeration
 		object GetUnderlyingValue(Enum value);
 		IEnumerable<Enum> GetValues(EnumMemberSelection selection = EnumMemberSelection.All);
 		bool HasAllFlags(Enum value);
-		bool HasAllFlags(Enum value, Enum otherFlags);
+		bool HasFlag(Enum value, Enum otherFlags);
 		bool HasAnyFlags(Enum value);
-		bool HasAnyFlags(Enum value, Enum otherFlags);
+		bool HasAnyFlag(Enum value, Enum otherFlags);
 		bool IsDefined(Enum value);
 		bool IsValid(object value, EnumValidation validation = EnumValidation.Default);
 		bool IsValidFlagCombination(Enum value);
@@ -120,9 +120,9 @@ namespace Other.TylerBrinkley.Enumeration
 		object GetUnderlyingValue(TEnum value);
 		TEnum[] GetValues(EnumMemberSelection selection = EnumMemberSelection.All);
 		bool HasAllFlags(TEnum value);
-		bool HasAllFlags(TEnum value, TEnum otherFlags);
+		bool HasFlag(TEnum value, TEnum otherFlags);
 		bool HasAnyFlags(TEnum value);
-		bool HasAnyFlags(TEnum value, TEnum otherFlags);
+		bool HasAnyFlag(TEnum value, TEnum otherFlags);
 		bool IsDefined(TEnum value);
 		bool IsValid(object value, EnumValidation validation = EnumValidation.Default);
 		bool IsValidFlagCombination(TEnum value);

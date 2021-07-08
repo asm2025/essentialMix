@@ -410,17 +410,18 @@ namespace essentialMix.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static Type ResolveType<T>([NotNull] this T thisValue) { return thisValue.AsType().ResolveType(); }
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
-		public static Type AsType<T>(this T thisValue) { return AsType(thisValue, false); }
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static Type AsType<T>(this T thisValue) { return (thisValue as Type ?? thisValue?.GetType()) ?? typeof(T); }
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		[NotNull]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static Type AsType<T>(this T thisValue, bool resolveGenerics)
 		{
-			return (resolveGenerics
-						? thisValue.AsType().ResolveType()
-						: thisValue as Type ?? thisValue?.GetType()) ?? typeof(T);
+			Type type = (thisValue as Type ?? thisValue?.GetType()) ?? typeof(T);
+			return resolveGenerics
+						? type.ResolveType()
+						: type;
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -1415,18 +1416,18 @@ namespace essentialMix.Extensions
 		public static bool Is<T, TType>(this T thisValue) { return Is(thisValue, typeof(TType)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool Is<T>(this T thisValue, [NotNull] Type type) { return !ReferenceEquals(thisValue, null) && thisValue.AsType(true).Is(type); }
+		public static bool Is<T>(this T thisValue, [NotNull] Type type) { return !ReferenceEquals(thisValue, null) && thisValue.AsType().Is(type); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsAbstractOf<T, TType>([NotNull] this T thisValue) { return IsAbstractOf(thisValue, typeof(TType)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsAbstractOf<T>(this T thisValue, Type type) { return !ReferenceEquals(thisValue, null) && thisValue.AsType(true).IsAbstractOf(type); }
+		public static bool IsAbstractOf<T>(this T thisValue, Type type) { return !ReferenceEquals(thisValue, null) && thisValue.AsType().IsAbstractOf(type); }
 
 		public static bool IsConcreteOf<T, TType>([NotNull] this T thisValue) { return IsConcreteOf(thisValue, typeof(TType)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsConcreteOf<T>(this T thisValue, Type type) { return !ReferenceEquals(thisValue, null) && thisValue.AsType(true).IsConcreteOf(type); }
+		public static bool IsConcreteOf<T>(this T thisValue, Type type) { return !ReferenceEquals(thisValue, null) && thisValue.AsType().IsConcreteOf(type); }
 
 		[NotNull]
 		public static Type[] Types<T>(this T[] thisValue)

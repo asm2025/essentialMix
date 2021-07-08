@@ -1831,9 +1831,9 @@ namespace essentialMix.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> or <paramref name="otherFlags"/> is of an invalid type.</exception>
-		public static bool HasAnyFlags([NotNull] Type enumType, Enum value, Enum otherFlags)
+		public static bool HasAnyFlag([NotNull] Type enumType, Enum value, Enum otherFlags)
 		{
-			return GetInfo(enumType).HasAnyFlags(value, otherFlags);
+			return GetInfo(enumType).HasAnyFlag(value, otherFlags);
 		}
 
 		/// <summary>
@@ -1862,9 +1862,9 @@ namespace essentialMix.Helpers
 		/// <exception cref="ArgumentException"><paramref name="enumType"/> is not an enum type
 		/// -or-
 		/// <paramref name="value"/> or <paramref name="otherFlags"/> is of an invalid type.</exception>
-		public static bool HasAllFlags([NotNull] Type enumType, Enum value, Enum otherFlags)
+		public static bool HasFlag([NotNull] Type enumType, Enum value, Enum otherFlags)
 		{
-			return GetInfo(enumType).HasAllFlags(value, otherFlags);
+			return GetInfo(enumType).HasFlag(value, otherFlags);
 		}
 
 		/// <summary>
@@ -3312,11 +3312,11 @@ namespace essentialMix.Helpers
 
 		public static bool HasAnyFlags(TEnum value) { return Info.HasAnyFlags(value); }
 
-		public static bool HasAnyFlags(TEnum value, TEnum otherFlags) { return Info.HasAnyFlags(value, otherFlags); }
+		public static bool HasAnyFlag(TEnum value, TEnum otherFlags) { return Info.HasAnyFlag(value, otherFlags); }
 
 		public static bool HasAllFlags(TEnum value) { return Info.HasAllFlags(value); }
 
-		public static bool HasAllFlags(TEnum value, TEnum otherFlags) { return Info.HasAllFlags(value, otherFlags); }
+		public static bool HasFlag(TEnum value, TEnum otherFlags) { return Info.HasFlag(value, otherFlags); }
 
 		public static TEnum CommonFlags(TEnum value, TEnum otherFlags) { return Info.CommonFlags(value, otherFlags); }
 

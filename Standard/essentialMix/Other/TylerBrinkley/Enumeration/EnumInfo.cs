@@ -195,11 +195,11 @@ namespace Other.TylerBrinkley.Enumeration
 
 		public bool HasAnyFlags(Enum value) { return _cache.HasAnyFlags(ToInt(value)); }
 
-		public bool HasAnyFlags(Enum value, Enum otherFlags) { return _cache.HasAnyFlags(ToInt(value), ToInt(otherFlags)); }
+		public bool HasAnyFlag(Enum value, Enum otherFlags) { return _cache.HasAnyFlag(ToInt(value), ToInt(otherFlags)); }
 
 		public bool HasAllFlags(Enum value) { return _cache.HasAllFlags(ToInt(value)); }
 
-		public bool HasAllFlags(Enum value, Enum otherFlags) { return _cache.HasAllFlags(ToInt(value), ToInt(otherFlags)); }
+		public bool HasFlag(Enum value, Enum otherFlags) { return _cache.HasFlag(ToInt(value), ToInt(otherFlags)); }
 
 		public Enum ToggleFlags(Enum value) { return ToEnum(_cache.ToggleFlags(ToInt(value))); }
 
@@ -285,7 +285,7 @@ namespace Other.TylerBrinkley.Enumeration
 		{
 			Type validatorInterface = typeof(IEnumValidatorAttribute);
 			return (IEnumValidatorAttribute)enumType.GetCustomAttributes(false)
-														.FirstOrDefault(e => Enumerable.Any(e.GetType().GetInterfaces(), ai => ai == validatorInterface));
+														.FirstOrDefault(e => Enumerable.Any(e.GetType().GetInterfaces(), ai => validatorInterface.IsAssignableFrom(ai)));
 		}
 	}
 
@@ -466,11 +466,11 @@ namespace Other.TylerBrinkley.Enumeration
 
 		public bool HasAnyFlags(TEnum value) { return _cache.HasAnyFlags(ToInt(value)); }
 
-		public bool HasAnyFlags(TEnum value, TEnum otherFlags) { return _cache.HasAnyFlags(ToInt(value), ToInt(otherFlags)); }
+		public bool HasAnyFlag(TEnum value, TEnum otherFlags) { return _cache.HasAnyFlag(ToInt(value), ToInt(otherFlags)); }
 
 		public bool HasAllFlags(TEnum value) { return _cache.HasAllFlags(ToInt(value)); }
 
-		public bool HasAllFlags(TEnum value, TEnum otherFlags) { return _cache.HasAllFlags(ToInt(value), ToInt(otherFlags)); }
+		public bool HasFlag(TEnum value, TEnum otherFlags) { return _cache.HasFlag(ToInt(value), ToInt(otherFlags)); }
 
 		public TEnum ToggleFlags(TEnum value) { return ToEnum(_cache.ToggleFlags(ToInt(value))); }
 
@@ -560,11 +560,11 @@ namespace Other.TylerBrinkley.Enumeration
 
 		bool IEnumInfo.HasAllFlags([NotNull] Enum value) { return HasAllFlags(ToObject(value)); }
 
-		bool IEnumInfo.HasAllFlags([NotNull] Enum value, [NotNull] Enum otherFlags) { return HasAllFlags(ToObject(value), ToObject(otherFlags)); }
+		bool IEnumInfo.HasFlag([NotNull] Enum value, [NotNull] Enum otherFlags) { return HasFlag(ToObject(value), ToObject(otherFlags)); }
 
 		bool IEnumInfo.HasAnyFlags([NotNull] Enum value) { return HasAnyFlags(ToObject(value)); }
 
-		bool IEnumInfo.HasAnyFlags([NotNull] Enum value, [NotNull] Enum otherFlags) { return HasAnyFlags(ToObject(value), ToObject(otherFlags)); }
+		bool IEnumInfo.HasAnyFlag([NotNull] Enum value, [NotNull] Enum otherFlags) { return HasAnyFlag(ToObject(value), ToObject(otherFlags)); }
 
 		bool IEnumInfo.IsDefined([NotNull] Enum value) { return IsDefined(ToObject(value)); }
 
@@ -679,7 +679,7 @@ namespace Other.TylerBrinkley.Enumeration
 			Type type = typeof(TEnum);
 			Type validatorInterface = typeof(IEnumValidatorAttribute<>).MakeGenericType(type);
 			return (IEnumValidatorAttribute<TEnum>)type.GetCustomAttributes(false)
-														.FirstOrDefault(e => Enumerable.Any(e.GetType().GetInterfaces(), ai => ai == validatorInterface));
+														.FirstOrDefault(e => Enumerable.Any(e.GetType().GetInterfaces(), ai => validatorInterface.IsAssignableFrom(ai)));
 		}
 	}
 

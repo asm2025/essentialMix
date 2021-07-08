@@ -19,7 +19,7 @@ namespace essentialMix.Extensions
 			if (converters.IsReadOnly) throw new ReadOnlyException();
 			if (convertersToAdd == JsonSerializerSettingsConverters.Default) convertersToAdd = EnumHelper<JsonSerializerSettingsConverters>.GetAllFlags();
 
-			if (EnumHelper<JsonSerializerSettingsConverters>.HasAllFlags(convertersToAdd, JsonSerializerSettingsConverters.StringEnum | JsonSerializerSettingsConverters.StringEnumTranslation))
+			if (EnumHelper<JsonSerializerSettingsConverters>.HasFlag(convertersToAdd, JsonSerializerSettingsConverters.StringEnum | JsonSerializerSettingsConverters.StringEnumTranslation))
 				convertersToAdd &= ~JsonSerializerSettingsConverters.StringEnumTranslation;
 			
 			if (convertersToAdd.FastHasFlag(JsonSerializerSettingsConverters.Binary)) converters.Add(new BinaryConverter());
