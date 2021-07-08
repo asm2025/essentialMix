@@ -35,11 +35,11 @@ namespace essentialMix.Extensions
 
 		public static bool IsValid(this IDbConnection thisValue) { return thisValue != null && (IsOpen(thisValue) || IsBusy(thisValue)); }
 
-		public static bool IsOpen([NotNull] this IDbConnection thisValue) { return thisValue.State.HasFlag(ConnectionState.Open); }
+		public static bool IsOpen([NotNull] this IDbConnection thisValue) { return thisValue.State.FastHasFlag(ConnectionState.Open); }
 
 		public static bool IsBusy([NotNull] this IDbConnection thisValue)
 		{
-			return thisValue.State.HasFlag(ConnectionState.Executing) | thisValue.State.HasFlag(ConnectionState.Fetching);
+			return thisValue.State.FastHasFlag(ConnectionState.Executing) | thisValue.State.FastHasFlag(ConnectionState.Fetching);
 		}
 
 		[NotNull]

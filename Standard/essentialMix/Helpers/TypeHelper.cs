@@ -13,7 +13,7 @@ namespace essentialMix.Helpers
 	{
 		[NotNull]
 		internal static IReadOnlySet<Type> NumericTypes =>
-			new ReadOnlySet<Type>(new HashSet<Type>
+			new HashSet<Type>
 			{
 				typeof(bool),
 				typeof(char),
@@ -29,11 +29,11 @@ namespace essentialMix.Helpers
 				typeof(float),
 				typeof(double),
 				typeof(decimal)
-			});
+			}.AsReadOnly();
 
 		[NotNull]
 		internal static IReadOnlySet<Type> IntegralTypes =>
-			new ReadOnlySet<Type>(new HashSet<Type>
+			new HashSet<Type>
 			{
 				typeof(bool),
 				typeof(char),
@@ -46,16 +46,16 @@ namespace essentialMix.Helpers
 				typeof(long),
 				typeof(ulong),
 				typeof(BigInteger)
-			});
+			}.AsReadOnly();
 
 		[NotNull]
 		internal static IReadOnlySet<Type> FloatingTypes =>
-			new ReadOnlySet<Type>(new HashSet<Type>
+			new HashSet<Type>
 			{
 				typeof(float),
 				typeof(double),
 				typeof(decimal)
-			});
+			}.AsReadOnly();
 
 		private static readonly ConcurrentDictionary<Type, (object Minimum, object Maximum)> __typeBoundsCache =
 			new ConcurrentDictionary<Type, (object Minimum, object Maximum)>

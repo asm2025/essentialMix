@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
 using System.Numerics;
 using essentialMix.Collections;
@@ -11,7 +10,7 @@ namespace essentialMix.Data.Helpers
 {
 	public static class DbTypeHelper
 	{
-		public static ReadOnlyDictionary<Type, DbType> TypeToTDbType { get; } = new ReadOnlyDictionary<Type, DbType>(new Dictionary<Type, DbType>
+		public static IReadOnlyDictionary<Type, DbType> TypeToTDbType { get; } = new Dictionary<Type, DbType>
 		{
 			{typeof(bool), DbType.Boolean},
 			{typeof(sbyte), DbType.SByte},
@@ -33,9 +32,9 @@ namespace essentialMix.Data.Helpers
 			{typeof(DateTime), DbType.DateTime},
 			{typeof(DateTimeOffset), DbType.DateTimeOffset},
 			{typeof(byte[]), DbType.Binary}
-		});
+		}.AsReadOnly();
 
-		public static ReadOnlyDictionary<DbType, Type> TdbTypeToType { get; }  = new ReadOnlyDictionary<DbType, Type>(new Dictionary<DbType, Type>
+		public static IReadOnlyDictionary<DbType, Type> TdbTypeToType { get; } = new Dictionary<DbType, Type>
 		{
 			{DbType.Boolean, typeof(bool)},
 			{DbType.SByte, typeof(sbyte)},
@@ -64,9 +63,9 @@ namespace essentialMix.Data.Helpers
 			{DbType.DateTimeOffset, typeof(DateTimeOffset)},
 			{DbType.Binary, typeof(byte[])},
 			{DbType.Object, typeof(object)}
-		});
+		}.AsReadOnly();
 
-		public static ReadOnlySet<DbType> TextualTDbType { get; } = new ReadOnlySet<DbType>(new HashSet<DbType>
+		public static IReadOnlySet<DbType> TextualTDbType { get; } = new HashSet<DbType>
 		{
 			DbType.AnsiStringFixedLength,
 			DbType.StringFixedLength,
@@ -79,7 +78,7 @@ namespace essentialMix.Data.Helpers
 			DbType.Date,
 			DbType.Time,
 			DbType.DateTimeOffset
-		});
+		}.AsReadOnly();
 
 		[NotNull]
 		public static string FormatValue([NotNull] DataRow row, [NotNull] DataColumn column) { return FormatValue(row[column.ColumnName], MapType(column.DataType)); }

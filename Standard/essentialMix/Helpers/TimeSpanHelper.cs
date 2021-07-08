@@ -264,13 +264,13 @@ namespace essentialMix.Helpers
 		{
 			return part switch
 			{
-				TimeUnit.Second => format.HasFlag(TimeUnit.Minute)
+				TimeUnit.Second => format.FastHasFlag(TimeUnit.Minute)
 										? "ss"
 										: "%s",
-				TimeUnit.Minute => format.HasFlag(TimeUnit.Hour)
+				TimeUnit.Minute => format.FastHasFlag(TimeUnit.Hour)
 										? "mm"
 										: "%m",
-				TimeUnit.Hour => format.HasFlag(TimeUnit.Day)
+				TimeUnit.Hour => format.FastHasFlag(TimeUnit.Day)
 									? "HH"
 									: "%H",
 				TimeUnit.Day => "%d",
@@ -282,9 +282,9 @@ namespace essentialMix.Helpers
 		{
 			return part switch
 			{
-				TimeUnit.Second => format.HasFlag(TimeUnit.Minute),
-				TimeUnit.Minute => format.HasFlag(TimeUnit.Hour),
-				TimeUnit.Hour => format.HasFlag(TimeUnit.Day),
+				TimeUnit.Second => format.FastHasFlag(TimeUnit.Minute),
+				TimeUnit.Minute => format.FastHasFlag(TimeUnit.Hour),
+				TimeUnit.Hour => format.FastHasFlag(TimeUnit.Day),
 				TimeUnit.Day => false,
 				_ => throw new ArgumentOutOfRangeException(nameof(part))
 			};
@@ -402,23 +402,23 @@ namespace essentialMix.Helpers
 			TimeSpan userOperationValue = ToUserOperationValue(value, out bool isNegativeZero);
 
 			string displayText = string.Empty;
-			if (allowedInput.HasFlag(TimeUnit.Day)) displayText = GetHigherPartToString(userOperationValue.TotalDays);
+			if (allowedInput.FastHasFlag(TimeUnit.Day)) displayText = GetHigherPartToString(userOperationValue.TotalDays);
 
-			if (allowedInput.HasFlag(TimeUnit.Hour))
+			if (allowedInput.FastHasFlag(TimeUnit.Hour))
 			{
-				if (allowedInput.HasFlag(TimeUnit.Day)) displayText += $"{DaySeparator}{GetNoHigherPartToString(userOperationValue.Hours)}";
+				if (allowedInput.FastHasFlag(TimeUnit.Day)) displayText += $"{DaySeparator}{GetNoHigherPartToString(userOperationValue.Hours)}";
 				else displayText += GetHigherPartToString(userOperationValue.TotalHours);
 			}
 
-			if (allowedInput.HasFlag(TimeUnit.Minute))
+			if (allowedInput.FastHasFlag(TimeUnit.Minute))
 			{
-				if (allowedInput.HasFlag(TimeUnit.Hour)) displayText += $"{TimeSeparator}{GetNoHigherPartToString(userOperationValue.Minutes)}";
+				if (allowedInput.FastHasFlag(TimeUnit.Hour)) displayText += $"{TimeSeparator}{GetNoHigherPartToString(userOperationValue.Minutes)}";
 				else displayText += GetHigherPartToString(userOperationValue.TotalMinutes);
 			}
 
-			if (allowedInput.HasFlag(TimeUnit.Second))
+			if (allowedInput.FastHasFlag(TimeUnit.Second))
 			{
-				if (allowedInput.HasFlag(TimeUnit.Minute)) displayText += $"{TimeSeparator}{GetNoHigherPartToString(userOperationValue.Seconds)}";
+				if (allowedInput.FastHasFlag(TimeUnit.Minute)) displayText += $"{TimeSeparator}{GetNoHigherPartToString(userOperationValue.Seconds)}";
 				else displayText += GetHigherPartToString(userOperationValue.TotalSeconds);
 			}
 

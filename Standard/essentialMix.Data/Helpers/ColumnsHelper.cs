@@ -48,7 +48,7 @@ namespace essentialMix.Data.Helpers
 					properties = properties.Where(p =>
 												{
 													DataViewTypeAttribute dataViewType = p.GetAttribute<DataViewTypeAttribute>(true);
-													return dataViewType == null || dataViewType.ViewType.HasFlag(viewType);
+													return dataViewType == null || dataViewType.ViewType.FastHasFlag(viewType);
 												});
 				}
 

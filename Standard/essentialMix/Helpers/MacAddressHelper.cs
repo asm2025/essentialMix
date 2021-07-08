@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Management;
 using System.Net.NetworkInformation;
@@ -37,38 +36,46 @@ namespace essentialMix.Helpers
 		};
 
 		public static IReadOnlyDictionary<string, string> Masks { get; } =
-			new ReadOnlyDictionary<string, string>(new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+			new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
 			{
-				new KeyValuePair<string, string>(Formats[0], ">aa-aa-aa-aa-aa-aa"),
-				new KeyValuePair<string, string>(Formats[1], ">aa':'aa':'aa':'aa':'aa':'aa"),
-				new KeyValuePair<string, string>(Formats[2], ">aaaa.aaaa.aaaa"),
-				new KeyValuePair<string, string>(Formats[3], ">aaaaaaaaaaaa")
-			});
+				{Formats[0], ">aa-aa-aa-aa-aa-aa"},
+				{Formats[1], ">aa':'aa':'aa':'aa':'aa':'aa"},
+				{Formats[2], ">aaaa.aaaa.aaaa"},
+				{Formats[3], ">aaaaaaaaaaaa"}
+			}.AsReadOnly();
 
 		public static IReadOnlyCollection<Regex> AllFormatRegularExpressions { get; }
 
 		public static IReadOnlyDictionary<string, Regex[]> FormatRegularExpressions { get; } =
-			new ReadOnlyDictionary<string, Regex[]>(new Dictionary<string, Regex[]>(StringComparer.OrdinalIgnoreCase)
+			new Dictionary<string, Regex[]>(StringComparer.OrdinalIgnoreCase)
 			{
-				new KeyValuePair<string, Regex[]>(Formats[0], new[]
 				{
-					new Regex(@"\A(?<mac>[\dA-F]{2}(?<delimiter>-)(?:(?:[\dA-F]{2}-){1,3})(?:[\dA-F]{2}-?))(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I),
-					new Regex(@"\A(?<mac>[\dA-F]{2}(?<delimiter>-)(?:[\dA-F](?:[\dA-F]-?)?)?)(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I)
-				}),
-				new KeyValuePair<string, Regex[]>(Formats[1], new[]
+					Formats[0], new[]
+					{
+						new Regex(@"\A(?<mac>[\dA-F]{2}(?<delimiter>-)(?:(?:[\dA-F]{2}-){1,3})(?:[\dA-F]{2}-?))(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I),
+						new Regex(@"\A(?<mac>[\dA-F]{2}(?<delimiter>-)(?:[\dA-F](?:[\dA-F]-?)?)?)(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I)
+					}
+				},
 				{
-					new Regex(@"\A(?<mac>[\dA-F]{2}(?<delimiter>:)(?:(?:[\dA-F]{2}:){1,3})(?:[\dA-F]{2}:?))(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I),
-					new Regex(@"\A(?<mac>[\dA-F]{2}(?<delimiter>:)(?:[\dA-F](?:[\dA-F]:?)?)?)(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I)
-				}),
-				new KeyValuePair<string, Regex[]>(Formats[2], new[]
+					Formats[1], new[]
+					{
+						new Regex(@"\A(?<mac>[\dA-F]{2}(?<delimiter>:)(?:(?:[\dA-F]{2}:){1,3})(?:[\dA-F]{2}:?))(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I),
+						new Regex(@"\A(?<mac>[\dA-F]{2}(?<delimiter>:)(?:[\dA-F](?:[\dA-F]:?)?)?)(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I)
+					}
+				},
 				{
-					new Regex(@"\A(?<mac>(?:[\dA-F]{4}(?<delimiter>\.)){1,2}[\dA-F]{0,4})(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I)
-				}),
-				new KeyValuePair<string, Regex[]>(Formats[3], new[]
+					Formats[2], new[]
+					{
+						new Regex(@"\A(?<mac>(?:[\dA-F]{4}(?<delimiter>\.)){1,2}[\dA-F]{0,4})(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I)
+					}
+				},
 				{
-					new Regex(@"\A(?<mac>(?:[\dA-F]{1,12}(?<delimiter>)))(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I)
-				})
-			});
+					Formats[3], new[]
+					{
+						new Regex(@"\A(?<mac>(?:[\dA-F]{1,12}(?<delimiter>)))(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I)
+					}
+				}
+			}.AsReadOnly();
 
 		public static string GetFormatMask(string format)
 		{

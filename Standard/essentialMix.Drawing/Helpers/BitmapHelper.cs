@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -12,7 +11,7 @@ namespace essentialMix.Drawing.Helpers
 {
 	public static class BitmapHelper
 	{
-		private static readonly IReadOnlyDictionary<PixelFormat, PixelFormat> __formatTranslations = new ReadOnlyDictionary<PixelFormat, PixelFormat>(new Dictionary<PixelFormat, PixelFormat>
+		private static readonly IReadOnlyDictionary<PixelFormat, PixelFormat> __formatTranslations = new Dictionary<PixelFormat, PixelFormat>
 		{
 			{ PixelFormat.Format8bppIndexed, PixelFormat.Format8bppIndexed },
 			{ PixelFormat.Format24bppRgb, PixelFormat.Format24bppRgb },
@@ -21,7 +20,7 @@ namespace essentialMix.Drawing.Helpers
 			{ PixelFormat.Format16bppGrayScale, PixelFormat.Format16bppGrayScale },
 			{ PixelFormat.Format48bppRgb, PixelFormat.Format48bppRgb },
 			{ PixelFormat.Format64bppArgb, PixelFormat.Format64bppArgb }
-		});
+		}.AsReadOnly();
 
 		public static (Point TopLeft, Point BottomRight) FindImageBounds([NotNull] Bitmap value, Color backColor, DimensionRestriction restriction = DimensionRestriction.None, int unitWidthLimit = 0, int unitHeightLimit = 0)
 		{
@@ -35,8 +34,8 @@ namespace essentialMix.Drawing.Helpers
 			if (unitWidthLimit == width) restriction |= DimensionRestriction.KeepWidth;
 			if (unitHeightLimit == height) restriction |= DimensionRestriction.KeepHeight;
 
-			bool kw = restriction.HasFlag(DimensionRestriction.KeepWidth);
-			bool kh = restriction.HasFlag(DimensionRestriction.KeepHeight);
+			bool kw = restriction.FastHasFlag(DimensionRestriction.KeepWidth);
+			bool kh = restriction.FastHasFlag(DimensionRestriction.KeepHeight);
 			if (kw && kh) return (topLeft, bottomRight);
 
 			bool kuw = unitWidthLimit > 0;
@@ -107,13 +106,13 @@ namespace essentialMix.Drawing.Helpers
 
 			int width = value.Width, height = value.Height;
 
-			if (restriction.HasFlag(DimensionRestriction.KeepWidth))
+			if (restriction.FastHasFlag(DimensionRestriction.KeepWidth))
 			{
 				rectangle.X = 0;
 				rectangle.Width = width;
 			}
 
-			if (restriction.HasFlag(DimensionRestriction.KeepHeight))
+			if (restriction.FastHasFlag(DimensionRestriction.KeepHeight))
 			{
 				rectangle.Y = 0;
 				rectangle.Height = height;

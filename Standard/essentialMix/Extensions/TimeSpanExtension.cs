@@ -350,13 +350,13 @@ namespace essentialMix.Extensions
 				default:
 					string separator = COL_SEP;
 
-					if (input.HasFlag(TimeUnit.Day))
+					if (input.FastHasFlag(TimeUnit.Day))
 					{
 						sb.Append('d');
 						separator = DOT_SEP;
 					}
 
-					if (input.HasFlag(TimeUnit.Hour))
+					if (input.FastHasFlag(TimeUnit.Hour))
 					{
 						if (sb.Length > 0)
 						{
@@ -367,7 +367,7 @@ namespace essentialMix.Extensions
 						sb.Append("hh");
 					}
 
-					if (input.HasFlag(TimeUnit.Minute))
+					if (input.FastHasFlag(TimeUnit.Minute))
 					{
 						if (sb.Length > 0)
 						{
@@ -378,13 +378,13 @@ namespace essentialMix.Extensions
 						sb.Append("mm");
 					}
 
-					if (input.HasFlag(TimeUnit.Second))
+					if (input.FastHasFlag(TimeUnit.Second))
 					{
 						if (sb.Length > 0) sb.Append(separator);
 						sb.Append("ss");
 					}
 
-					if (input.HasFlag(TimeUnit.Millisecond))
+					if (input.FastHasFlag(TimeUnit.Millisecond))
 					{
 						if (millisecondsLength > 0)
 						{

@@ -1,4 +1,5 @@
 using System;
+using essentialMix.Extensions;
 
 namespace essentialMix.Patterns.Direction
 {
@@ -15,7 +16,7 @@ namespace essentialMix.Patterns.Direction
 		public static (bool Left, bool Right) GetDirections(this HorizontalDirectionFlags direction)
 		{
 			if (direction == HorizontalDirectionFlags.Default) direction = HorizontalDirectionFlags.Left | HorizontalDirectionFlags.Right;
-			return (direction.HasFlag(HorizontalDirectionFlags.Left), direction.HasFlag(HorizontalDirectionFlags.Right));
+			return (direction.FastHasFlag(HorizontalDirectionFlags.Left), direction.FastHasFlag(HorizontalDirectionFlags.Right));
 		}
 	}
 }

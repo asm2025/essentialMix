@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using essentialMix.Collections;
@@ -17,6 +18,12 @@ namespace essentialMix.Extensions
 		public static DictionaryEnumerator<TKey, TValue> Enumerate<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue)
 		{
 			return new DictionaryEnumerator<TKey, TValue>(thisValue);
+		}
+
+		[NotNull]
+		public static IReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue)
+		{
+			return new ReadOnlyDictionary<TKey, TValue>(thisValue);
 		}
 
 		public static TValue GetOrAdd<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] TKey key)

@@ -312,8 +312,8 @@ namespace essentialMix.Extensions
 		[NotNull]
 		public static UrlSearchResult Search([NotNull] this WebResponse thisValue, string searchFor, UrlSearchFlags flags, IOSettings settings = null)
 		{
-			bool hasTitleFlag = flags.HasFlag(UrlSearchFlags.Title);
-			bool hasBufferFlag = flags.HasFlag(UrlSearchFlags.Buffer);
+			bool hasTitleFlag = flags.FastHasFlag(UrlSearchFlags.Title);
+			bool hasBufferFlag = flags.FastHasFlag(UrlSearchFlags.Buffer);
 			bool hasSearchFlag = !string.IsNullOrEmpty(searchFor);
 
 			UrlSearchResult result = new UrlSearchResult();
@@ -325,7 +325,7 @@ namespace essentialMix.Extensions
 				if (hasTitleFlag || hasBufferFlag || hasSearchFlag)
 				{
 					StringBuilder sb = new StringBuilder();
-					StringComparison comparison = flags.HasFlag(UrlSearchFlags.IgnoreCase)
+					StringComparison comparison = flags.FastHasFlag(UrlSearchFlags.IgnoreCase)
 							? StringComparison.InvariantCultureIgnoreCase
 							: StringComparison.InvariantCulture;
 					onRead = (c, _) =>
@@ -406,8 +406,8 @@ namespace essentialMix.Extensions
 		public static Task<UrlSearchResult> SearchAsync([NotNull] this WebResponse thisValue, string searchFor, UrlSearchFlags flags, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			bool hasTitleFlag = flags.HasFlag(UrlSearchFlags.Title);
-			bool hasBufferFlag = flags.HasFlag(UrlSearchFlags.Buffer);
+			bool hasTitleFlag = flags.FastHasFlag(UrlSearchFlags.Title);
+			bool hasBufferFlag = flags.FastHasFlag(UrlSearchFlags.Buffer);
 			bool hasSearchFlag = !string.IsNullOrEmpty(searchFor);
 
 			UrlSearchResult result = new UrlSearchResult();
@@ -419,7 +419,7 @@ namespace essentialMix.Extensions
 				if (hasTitleFlag || hasBufferFlag || hasSearchFlag)
 				{
 					StringBuilder sb = new StringBuilder();
-					StringComparison comparison = flags.HasFlag(UrlSearchFlags.IgnoreCase)
+					StringComparison comparison = flags.FastHasFlag(UrlSearchFlags.IgnoreCase)
 							? StringComparison.InvariantCultureIgnoreCase
 							: StringComparison.InvariantCulture;
 					onRead = (c, _) =>

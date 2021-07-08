@@ -215,7 +215,7 @@ namespace essentialMix.Helpers
 
 			if (remove != ConsoleModesEnum.NONE)
 			{
-				if (remove.HasFlag(ConsoleModesEnum.ENABLE_QUICK_EDIT_MODE))
+				if (remove.FastHasFlag(ConsoleModesEnum.ENABLE_QUICK_EDIT_MODE))
 				{
 					remove &= ~ConsoleModesEnum.ENABLE_QUICK_EDIT_MODE;
 					remove |= ConsoleModesEnum.ENABLE_EXTENDED_FLAGS;
@@ -226,7 +226,7 @@ namespace essentialMix.Helpers
 
 			if (add != ConsoleModesEnum.NONE)
 			{
-				if (add.HasFlag(ConsoleModesEnum.ENABLE_QUICK_EDIT_MODE)) add |= ConsoleModesEnum.ENABLE_EXTENDED_FLAGS;
+				if (add.FastHasFlag(ConsoleModesEnum.ENABLE_QUICK_EDIT_MODE)) add |= ConsoleModesEnum.ENABLE_EXTENDED_FLAGS;
 				consoleMode |= add;
 			}
 
@@ -304,7 +304,7 @@ namespace essentialMix.Helpers
 		public static bool IsConsoleFontTrueType()
 		{
 			CONSOLE_FONT_INFO_EX fontInfoEx = GetCurrentFontEx();
-			return fontInfoEx != null && fontInfoEx.nFamily.HasFlag(FontMask.TRUETYPE_FONTTYPE);
+			return fontInfoEx != null && fontInfoEx.nFamily.FastHasFlag(FontMask.TRUETYPE_FONTTYPE);
 		}
 
 		public static void RegisterHandler([NotNull] ConsoleCtrlDelegate handler) { Win32.SetConsoleCtrlHandler(handler, true); }

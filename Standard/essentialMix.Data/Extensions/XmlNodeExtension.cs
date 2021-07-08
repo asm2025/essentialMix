@@ -25,8 +25,8 @@ namespace essentialMix.Extensions
 				return index;
 			}
 
-			bool matchT = matchType.HasFlag(XmlIndexMatchType.Type);
-			bool matchN = thisValue.NodeType == XmlNodeType.Element && matchType.HasFlag(XmlIndexMatchType.Name);
+			bool matchT = matchType.FastHasFlag(XmlIndexMatchType.Type);
+			bool matchN = thisValue.NodeType == XmlNodeType.Element && matchType.FastHasFlag(XmlIndexMatchType.Name);
 
 			if (matchN)
 			{

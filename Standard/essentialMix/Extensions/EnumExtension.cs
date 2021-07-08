@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
@@ -16,13 +17,13 @@ namespace essentialMix.Extensions
 		{
 			IEnumerable<T> flags = EnumHelper<T>.GetValues();
 			int lo = 0, hi = count + 1;
-			return flags.Count(e => thisValue.HasFlag(e) && ++lo < hi) >= count;
+			return flags.Count(e => FastHasFlag(thisValue, e) && ++lo < hi) >= count;
 		}
 
 		public static int Count<T>(this T thisValue, [NotNull] params T[] flags)
 			where T : struct, Enum, IComparable
 		{
-			return flags.Count(e => thisValue.HasFlag(e));
+			return flags.Count(e => FastHasFlag(thisValue, e));
 		}
 
 		public static T HighestFlag<T>(this T thisValue)
@@ -30,14 +31,13 @@ namespace essentialMix.Extensions
 		{
 			Type type = typeof(T);
 			T value = default(T);
-			if (!type.HasAttribute<FlagsAttribute>())
-				return value;
+			if (!type.HasAttribute<FlagsAttribute>()) return value;
 
 			T[] flags = EnumHelper<T>.GetValues();
 
 			foreach (T flag in flags)
 			{
-				if (thisValue.HasFlag(flag))
+				if (FastHasFlag(thisValue, flag))
 					value = flag;
 			}
 
@@ -49,12 +49,11 @@ namespace essentialMix.Extensions
 			where T : struct, Enum, IComparable
 		{
 			Type type = typeof(T);
-			if (!type.HasAttribute<FlagsAttribute>())
-				return Array.Empty<T>();
+			if (!type.HasAttribute<FlagsAttribute>()) return Array.Empty<T>();
 
 			T[] values = EnumHelper<T>.GetValues();
 			return exclude is { Length: > 0 }
-						? values.Where(e => !exclude.Contains(e) && thisValue.HasFlag(e)).ToArray()
+						? values.Where(e => !exclude.Contains(e) && FastHasFlag(thisValue, e)).ToArray()
 						: values;
 		}
 
@@ -170,6 +169,13 @@ namespace essentialMix.Extensions
 			where T : struct, Enum, IComparable
 		{
 			return type.IsDefined(thisValue);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static bool FastHasFlag<T>(this T thisValue, T flag)
+			where T : struct, Enum, IComparable
+		{
+			return EnumHelper<T>.HasAllFlags(thisValue, flag);
 		}
 	}
 }

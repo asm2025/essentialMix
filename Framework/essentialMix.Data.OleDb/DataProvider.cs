@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
@@ -54,35 +53,35 @@ namespace essentialMix.Data.OleDb
 		}
 
 		protected override IReadOnlyDictionary<Type, OleDbType> TypeToTDbType { get; } =
-			new ReadOnlyDictionary<Type, OleDbType>(new Dictionary<Type, OleDbType>
+			new Dictionary<Type, OleDbType>
 			{
-				new KeyValuePair<Type, OleDbType>(typeof(bool), OleDbType.Boolean),
-				new KeyValuePair<Type, OleDbType>(typeof(sbyte), OleDbType.TinyInt),
-				new KeyValuePair<Type, OleDbType>(typeof(byte), OleDbType.UnsignedTinyInt),
-				new KeyValuePair<Type, OleDbType>(typeof(short), OleDbType.SmallInt),
-				new KeyValuePair<Type, OleDbType>(typeof(ushort), OleDbType.UnsignedSmallInt),
-				new KeyValuePair<Type, OleDbType>(typeof(int), OleDbType.Integer),
-				new KeyValuePair<Type, OleDbType>(typeof(uint), OleDbType.UnsignedInt),
-				new KeyValuePair<Type, OleDbType>(typeof(long), OleDbType.BigInt),
-				new KeyValuePair<Type, OleDbType>(typeof(ulong), OleDbType.UnsignedBigInt),
-				new KeyValuePair<Type, OleDbType>(typeof(BigInteger), OleDbType.BigInt),
-				new KeyValuePair<Type, OleDbType>(typeof(float), OleDbType.Single),
-				new KeyValuePair<Type, OleDbType>(typeof(double), OleDbType.Double),
-				new KeyValuePair<Type, OleDbType>(typeof(decimal), OleDbType.Decimal),
-				new KeyValuePair<Type, OleDbType>(typeof(string), OleDbType.VarWChar),
-				new KeyValuePair<Type, OleDbType>(typeof(char[]), OleDbType.VarChar),
-				new KeyValuePair<Type, OleDbType>(typeof(char), OleDbType.Char),
-				new KeyValuePair<Type, OleDbType>(typeof(DateTime), OleDbType.DBTimeStamp),
-				new KeyValuePair<Type, OleDbType>(typeof(DateTimeOffset), OleDbType.Date),
-				new KeyValuePair<Type, OleDbType>(typeof(TimeSpan), OleDbType.DBTime),
-				new KeyValuePair<Type, OleDbType>(typeof(Guid), OleDbType.Guid),
-				new KeyValuePair<Type, OleDbType>(typeof(byte[]), OleDbType.Binary),
-				new KeyValuePair<Type, OleDbType>(typeof(Exception), OleDbType.Error),
-				new KeyValuePair<Type, OleDbType>(typeof(object), OleDbType.Variant)
-			});
+				{typeof(bool), OleDbType.Boolean},
+				{typeof(sbyte), OleDbType.TinyInt},
+				{typeof(byte), OleDbType.UnsignedTinyInt},
+				{typeof(short), OleDbType.SmallInt},
+				{typeof(ushort), OleDbType.UnsignedSmallInt},
+				{typeof(int), OleDbType.Integer},
+				{typeof(uint), OleDbType.UnsignedInt},
+				{typeof(long), OleDbType.BigInt},
+				{typeof(ulong), OleDbType.UnsignedBigInt},
+				{typeof(BigInteger), OleDbType.BigInt},
+				{typeof(float), OleDbType.Single},
+				{typeof(double), OleDbType.Double},
+				{typeof(decimal), OleDbType.Decimal},
+				{typeof(string), OleDbType.VarWChar},
+				{typeof(char[]), OleDbType.VarChar},
+				{typeof(char), OleDbType.Char},
+				{typeof(DateTime), OleDbType.DBTimeStamp},
+				{typeof(DateTimeOffset), OleDbType.Date},
+				{typeof(TimeSpan), OleDbType.DBTime},
+				{typeof(Guid), OleDbType.Guid},
+				{typeof(byte[]), OleDbType.Binary},
+				{typeof(Exception), OleDbType.Error},
+				{typeof(object), OleDbType.Variant}
+			}.AsReadOnly();
 
 		protected override IReadOnlyDictionary<OleDbType, Type> TdbTypeToType { get; } =
-			new ReadOnlyDictionary<OleDbType, Type>(new Dictionary<OleDbType, Type>
+			new Dictionary<OleDbType, Type>
 			{
 				new KeyValuePair<OleDbType, Type>(OleDbType.Boolean, typeof(bool)),
 				new KeyValuePair<OleDbType, Type>(OleDbType.TinyInt, typeof(sbyte)),
@@ -124,9 +123,9 @@ namespace essentialMix.Data.OleDb
 				new KeyValuePair<OleDbType, Type>(OleDbType.IUnknown, typeof(object)),
 				new KeyValuePair<OleDbType, Type>(OleDbType.IDispatch, typeof(object)),
 				new KeyValuePair<OleDbType, Type>(OleDbType.Empty, null)
-			});
+			}.AsReadOnly();
 
-		protected override IReadOnlySet<OleDbType> TextualTDbType { get; } = new ReadOnlySet<OleDbType>(new HashSet<OleDbType>
+		protected override IReadOnlySet<OleDbType> TextualTDbType { get; } = new HashSet<OleDbType>
 		{
 			OleDbType.BSTR,
 			OleDbType.VarChar,
@@ -139,6 +138,6 @@ namespace essentialMix.Data.OleDb
 			OleDbType.DBTimeStamp,
 			OleDbType.DBDate,
 			OleDbType.DBTime
-		});
+		}.AsReadOnly();
 	}
 }

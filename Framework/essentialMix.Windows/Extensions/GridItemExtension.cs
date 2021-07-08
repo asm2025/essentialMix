@@ -95,13 +95,13 @@ namespace essentialMix.Extensions
 							switch (item.GridItemType)
 							{
 								case GridItemType.Root:
-									return flags.HasFlag(GridItemFlags.Root);
+									return flags.FastHasFlag(GridItemFlags.Root);
 								case GridItemType.Category:
-									return flags.HasFlag(GridItemFlags.Category);
+									return flags.FastHasFlag(GridItemFlags.Category);
 								case GridItemType.ArrayValue:
-									return flags.HasFlag(GridItemFlags.Array);
+									return flags.FastHasFlag(GridItemFlags.Array);
 								case GridItemType.Property:
-									return flags.HasFlag(GridItemFlags.Property) && item.Expandable;
+									return flags.FastHasFlag(GridItemFlags.Property) && item.Expandable;
 								default:
 									return false;
 							}
@@ -114,16 +114,16 @@ namespace essentialMix.Extensions
 							switch (item.GridItemType)
 							{
 								case GridItemType.Root:
-									if (!flags.HasFlag(GridItemFlags.Root)) return false;
+									if (!flags.FastHasFlag(GridItemFlags.Root)) return false;
 									break;
 								case GridItemType.Category:
-									if (!flags.HasFlag(GridItemFlags.Category)) return false;
+									if (!flags.FastHasFlag(GridItemFlags.Category)) return false;
 									break;
 								case GridItemType.ArrayValue:
-									if (!flags.HasFlag(GridItemFlags.Array)) return false;
+									if (!flags.FastHasFlag(GridItemFlags.Array)) return false;
 									break;
 								case GridItemType.Property:
-									if (!flags.HasFlag(GridItemFlags.Property) || !item.Expandable) return false;
+									if (!flags.FastHasFlag(GridItemFlags.Property) || !item.Expandable) return false;
 									break;
 							}
 

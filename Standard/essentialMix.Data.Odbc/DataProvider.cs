@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Common;
 using System.Data.Odbc;
@@ -8,6 +7,7 @@ using System.Drawing;
 using System.Numerics;
 using essentialMix.Collections;
 using essentialMix.Data.Patterns.Provider;
+using essentialMix.Extensions;
 using JetBrains.Annotations;
 
 namespace essentialMix.Data.Odbc
@@ -32,7 +32,7 @@ namespace essentialMix.Data.Odbc
 		public override OdbcType DefaultDbType => OdbcType.VarBinary;
 
 		protected override IReadOnlyDictionary<Type, OdbcType> TypeToTDbType { get; } =
-			new ReadOnlyDictionary<Type, OdbcType>(new Dictionary<Type, OdbcType>
+			new Dictionary<Type, OdbcType>
 			{
 				{typeof(bool), OdbcType.Bit},
 				{typeof(sbyte), OdbcType.TinyInt},
@@ -57,10 +57,10 @@ namespace essentialMix.Data.Odbc
 				{typeof(Image), OdbcType.Image},
 				{typeof(Guid), OdbcType.UniqueIdentifier},
 				{typeof(object), OdbcType.VarBinary}
-			});
+			}.AsReadOnly();
 
 		protected override IReadOnlyDictionary<OdbcType, Type> TdbTypeToType { get; } =
-			new ReadOnlyDictionary<OdbcType, Type>(new Dictionary<OdbcType, Type>
+			new Dictionary<OdbcType, Type>
 			{
 				{OdbcType.Bit, typeof(bool)},
 				{OdbcType.TinyInt, typeof(byte)},
@@ -85,9 +85,9 @@ namespace essentialMix.Data.Odbc
 				{OdbcType.VarBinary, typeof(byte[])},
 				{OdbcType.Image, typeof(byte[])},
 				{OdbcType.Timestamp, typeof(byte[])}
-			});
+			}.AsReadOnly();
 
-		protected override IReadOnlySet<OdbcType> TextualTDbType { get; } = new ReadOnlySet<OdbcType>(new HashSet<OdbcType>
+		protected override IReadOnlySet<OdbcType> TextualTDbType { get; } = new HashSet<OdbcType>
 		{
 			OdbcType.Char,
 			OdbcType.NChar,
@@ -100,6 +100,6 @@ namespace essentialMix.Data.Odbc
 			OdbcType.SmallDateTime,
 			OdbcType.Date,
 			OdbcType.Time
-		});
+		}.AsReadOnly();
 	}
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Common;
 using System.Data.SQLite;
@@ -94,7 +93,7 @@ namespace essentialMix.Data.SQLite
 
 		protected override IReadOnlySet<DbType> TextualTDbType => DbTypeHelper.TextualTDbType;
 
-		protected IReadOnlyDictionary<string, Type> StringToTypeMapping = new ReadOnlyDictionary<string, Type>(new Dictionary<string, Type>(StringFunctionalComparer.StartsWithOrdinalIgnoreCase)
+		protected IReadOnlyDictionary<string, Type> StringToTypeMapping = new Dictionary<string, Type>(StringFunctionalComparer.StartsWithOrdinalIgnoreCase)
 		{
 			{"BOOLEAN", typeof(bool)},
 			{"INTEGER", typeof(int)},
@@ -127,6 +126,6 @@ namespace essentialMix.Data.SQLite
 			{"DATE", typeof(DateTime)},
 			{"TIMESTAMP", typeof(DateTime)},
 			{"BLOB", typeof(object)}
-		});
+		}.AsReadOnly();
 	}
 }

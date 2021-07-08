@@ -692,6 +692,12 @@ namespace essentialMix.Extensions
 						: thisValue.ToUniversalTime()) - DateTimeHelper.UnixEpoch).TotalLongMilliseconds();
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static DateTime AsUTC(this DateTime thisValue)
+		{
+			return DateTime.SpecifyKind(thisValue, DateTimeKind.Utc);
+		}
+
 		public static bool TryAdd(this DateTime thisValue, TimeSpan value, out DateTime result)
 		{
 			try

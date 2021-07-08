@@ -37,7 +37,7 @@ namespace essentialMix.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsFinished(this ThreadState thisValue) { return thisValue.HasFlag(ThreadState.Stopped) || thisValue.HasFlag(ThreadState.Aborted); }
+		public static bool IsFinished(this ThreadState thisValue) { return thisValue.FastHasFlag(ThreadState.Stopped) || thisValue.FastHasFlag(ThreadState.Aborted); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static ThreadState Simplify(this ThreadState thisValue)

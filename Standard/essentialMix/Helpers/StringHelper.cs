@@ -57,12 +57,12 @@ namespace essentialMix.Helpers
 			IList<Func<char>> types = __randomStringType.GetOrAdd(type, t =>
 			{
 				List<Func<char>> list = new List<Func<char>>();
-				if (t.HasFlag(RandomStringType.SmallLetters)) list.Add(RandomSmallLetter);
-				if (t.HasFlag(RandomStringType.CapitalLetters)) list.Add(RandomCapitalLetter);
-				if (t.HasFlag(RandomStringType.Numbers)) list.Add(RandomNumber);
-				if (!t.HasFlag(RandomStringType.SpecialCharacters)) return list;
+				if (t.FastHasFlag(RandomStringType.SmallLetters)) list.Add(RandomSmallLetter);
+				if (t.FastHasFlag(RandomStringType.CapitalLetters)) list.Add(RandomCapitalLetter);
+				if (t.FastHasFlag(RandomStringType.Numbers)) list.Add(RandomNumber);
+				if (!t.FastHasFlag(RandomStringType.SpecialCharacters)) return list;
 
-				if (t.HasFlag(RandomStringType.SafeCharacters))
+				if (t.FastHasFlag(RandomStringType.SafeCharacters))
 					list.Add(RandomSafeSpecialCharacter);
 				else
 					list.Add(RandomSpecialCharacter);

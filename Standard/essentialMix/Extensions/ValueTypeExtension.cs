@@ -795,6 +795,27 @@ namespace essentialMix.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static float Truncate(this float thisValue, byte digits)
+		{
+			int factor = (int)Math.Pow(10, digits);
+			return (float)(Math.Truncate(thisValue * factor) / factor);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static double Truncate(this double thisValue, byte digits)
+		{
+			int factor = (int)Math.Pow(10, digits);
+			return Math.Truncate(thisValue * factor) / factor;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+		public static decimal Truncate(this decimal thisValue, byte digits)
+		{
+			int factor = (int)Math.Pow(10, digits);
+			return Math.Truncate(thisValue * factor) / factor;
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static BitVector AsBitVector(this byte thisValue) { return new BitVector(thisValue); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

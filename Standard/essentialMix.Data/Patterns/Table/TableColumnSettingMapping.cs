@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Numerics;
 using essentialMix.Extensions;
 using essentialMix.Patterns.Text;
@@ -10,7 +9,7 @@ namespace essentialMix.Data.Patterns.Table
 {
 	public static class TableColumnSettingMapping
 	{
-		private static readonly IReadOnlyDictionary<Type, TableColumnSettings> __settings = new ReadOnlyDictionary<Type, TableColumnSettings>(new Dictionary<Type, TableColumnSettings>
+		private static readonly IReadOnlyDictionary<Type, TableColumnSettings> __settings = new Dictionary<Type, TableColumnSettings>
 		{
 			{
 				typeof(bool), new TableColumnSettings
@@ -174,7 +173,7 @@ namespace essentialMix.Data.Patterns.Table
 					Sortable = false
 				}
 			}
-		});
+		}.AsReadOnly();
 
 		[NotNull]
 		public static ITableColumnSettings GetSettings([NotNull] Type type)

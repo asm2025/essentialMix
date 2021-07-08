@@ -196,8 +196,8 @@ namespace essentialMix.IO
 		{
 			FileAccessEnum pipemode = 0;
 
-			if (mode.HasFlag(FileAccess.Read)) pipemode |= FileAccessEnum.FILE_GENERIC_READ;
-			if (mode.HasFlag(FileAccess.Write)) pipemode |= FileAccessEnum.FILE_GENERIC_WRITE;
+			if (mode.FastHasFlag(FileAccess.Read)) pipemode |= FileAccessEnum.FILE_GENERIC_READ;
+			if (mode.FastHasFlag(FileAccess.Write)) pipemode |= FileAccessEnum.FILE_GENERIC_WRITE;
 
 			SECURITY_ATTRIBUTES sa = new SECURITY_ATTRIBUTES();
 			IntPtr handle = Win32.CreateFile(Name, pipemode, 0, ref sa, CreationDispositionEnum.OpenExisting, 0, IntPtr.Zero);

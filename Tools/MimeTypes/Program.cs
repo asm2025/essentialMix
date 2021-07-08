@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -30,7 +29,7 @@ namespace MimeTypes
 			"deprecated"
 		};
 
-		private static readonly IReadOnlyDictionary<char, string> __numbers = new ReadOnlyDictionary<char, string>(new Dictionary<char, string>
+		private static readonly IReadOnlyDictionary<char, string> __numbers = new Dictionary<char, string>
 		{
 			{ '0', "Zero" },
 			{ '1', "One" },
@@ -42,7 +41,7 @@ namespace MimeTypes
 			{ '7', "Seven" },
 			{ '8', "Eight" },
 			{ '9', "Nine" }
-		});
+		}.AsReadOnly();
 
 		private static void Main()
 		{

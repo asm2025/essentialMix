@@ -51,7 +51,7 @@ namespace essentialMix.Helpers
 		public static bool IsConnectedToInternet()
 		{
 			InternetGetConnectedStateFlags flags = GetInternetConnectionState();
-			return flags.HasFlag(InternetGetConnectedStateFlags.INTERNET_CONNECTION_MODEM) || flags.HasFlag(InternetGetConnectedStateFlags.INTERNET_CONNECTION_LAN);
+			return flags.FastHasFlag(InternetGetConnectedStateFlags.INTERNET_CONNECTION_MODEM) || flags.FastHasFlag(InternetGetConnectedStateFlags.INTERNET_CONNECTION_LAN);
 		}
 
 		public static InternetGetConnectedStateFlags GetInternetConnectionState()

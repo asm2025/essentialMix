@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.UI;
+using essentialMix.Extensions;
 using HtmlAgilityPack;
 using JetBrains.Annotations;
 
@@ -196,7 +196,7 @@ namespace essentialMix.Web.Mvc
 		{
 			get
 			{
-				if (!TryGetValue("style", out string styles)) return new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
+				if (!TryGetValue("style", out string styles)) return new Dictionary<string, string>().AsReadOnly();
 
 				string[] styleRulesSplit = styles.Split(';');
 				var styleRuleStep1 =

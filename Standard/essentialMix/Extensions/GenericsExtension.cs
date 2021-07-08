@@ -1848,8 +1848,8 @@ namespace essentialMix.Extensions
 			{
 				PropertyInfo property = e.ComponentType.GetProperty(e.Name, Constants.BF_PUBLIC_INSTANCE);
 				return property != null &&
-						(!type.HasFlag(PropertyInfoType.Get) || property.CanRead) &&
-						(!type.HasFlag(PropertyInfoType.Set) || property.CanWrite);
+						(!type.FastHasFlag(PropertyInfoType.Get) || property.CanRead) &&
+						(!type.FastHasFlag(PropertyInfoType.Set) || property.CanWrite);
 			});
 		}
 
@@ -1864,8 +1864,8 @@ namespace essentialMix.Extensions
 														.Where(e => e != null);
 			return type == PropertyInfoType.Default
 						? enumerable
-						: enumerable.Where(e => (!type.HasFlag(PropertyInfoType.Get) || e.CanRead) &&
-												(!type.HasFlag(PropertyInfoType.Set) || e.CanWrite));
+						: enumerable.Where(e => (!type.FastHasFlag(PropertyInfoType.Get) || e.CanRead) &&
+												(!type.FastHasFlag(PropertyInfoType.Set) || e.CanWrite));
 		}
 
 		[NotNull]

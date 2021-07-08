@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using essentialMix.Collections;
+using essentialMix.Extensions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using essentialMix.Json.Abstraction;
 using JetBrains.Annotations;
@@ -10,10 +10,10 @@ namespace essentialMix.Core.Web.Http.ModelBinding
 {
 	public static class HyperModelBinderProvider
 	{
-		public static Collections.IReadOnlySet<Type> ExcludedTypes { get; } = new ReadOnlySet<Type>(new HashSet<Type>
+		public static Collections.IReadOnlySet<Type> ExcludedTypes { get; } = new HashSet<Type>
 		{
 			typeof(object)
-		});
+		}.AsReadOnly();
 
 		public static ConcurrentDictionary<Type, HyperModelBinder> Types { get; } = new ConcurrentDictionary<Type, HyperModelBinder>();
 	}

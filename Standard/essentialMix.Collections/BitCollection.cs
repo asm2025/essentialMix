@@ -256,19 +256,19 @@ namespace essentialMix.Collections
 			return result;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.ForwardRef)]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		private bool Contains(uint index, int offset)
 		{
 			return ((_flags[index] >> offset) & 1) == 1;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.ForwardRef)]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		private static (uint Index, int Offset) GetIndexOffset(uint n)
 		{
 			return (n >> 5, (int)(n & 0b11111));
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.ForwardRef)]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		private static int GetCapacity(uint n)
 		{
 			return (int)((n >> 5) + 1);

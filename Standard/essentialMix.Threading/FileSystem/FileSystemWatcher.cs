@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using essentialMix.Extensions;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
 
@@ -27,25 +28,25 @@ namespace essentialMix.Threading.FileSystem
 
 			_watcher.Created += (_, args) =>
 			{
-				if (!settings.ChangeType.HasFlag(WatcherChangeTypes.Created) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
+				if (!settings.ChangeType.FastHasFlag(WatcherChangeTypes.Created) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
 				OnCreated(args);
 			};
 
 			_watcher.Renamed += (_, args) =>
 			{
-				if (!settings.ChangeType.HasFlag(WatcherChangeTypes.Renamed) || rgxFilter != null && !rgxFilter.IsMatch(args.OldName) && !rgxFilter.IsMatch(args.Name)) return;
+				if (!settings.ChangeType.FastHasFlag(WatcherChangeTypes.Renamed) || rgxFilter != null && !rgxFilter.IsMatch(args.OldName) && !rgxFilter.IsMatch(args.Name)) return;
 				OnRenamed(args);
 			};
 
 			_watcher.Deleted += (_, args) =>
 			{
-				if (!settings.ChangeType.HasFlag(WatcherChangeTypes.Deleted) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
+				if (!settings.ChangeType.FastHasFlag(WatcherChangeTypes.Deleted) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
 				OnDeleted(args);
 			};
 
 			_watcher.Changed += (_, args) =>
 			{
-				if (!settings.ChangeType.HasFlag(WatcherChangeTypes.Changed) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
+				if (!settings.ChangeType.FastHasFlag(WatcherChangeTypes.Changed) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
 				OnChanged(args);
 			};
 		}

@@ -73,7 +73,7 @@ namespace essentialMix.Windows.Controls
 
 			if (item.Enabled)
 			{
-				if (e.State.HasFlag(DrawItemState.Selected))
+				if (e.State.FastHasFlag(DrawItemState.Selected))
 					b = SystemBrushes.HighlightText;
 				else
 				{
@@ -112,7 +112,7 @@ namespace essentialMix.Windows.Controls
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
 			base.OnMouseUp(e);
-			if (IsLoading || !e.Button.HasFlag(MouseButtons.Left)) return;
+			if (IsLoading || !e.Button.FastHasFlag(MouseButtons.Left)) return;
 			SelectedIndex = IndexFromPoint(e.Location);
 		}
 

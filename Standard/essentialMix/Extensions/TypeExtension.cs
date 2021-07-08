@@ -137,8 +137,8 @@ namespace essentialMix.Extensions
 		public static IEnumerable<PropertyInfo> GetProperties([NotNull] this Type thisValue, [NotNull] Predicate<PropertyInfo> selector, BindingFlags bindingAttributes = BindingFlags.Default, Type returnType = null)
 		{
 			Type type = thisValue;
-			if (returnType == null && !bindingAttributes.HasFlag(BindingFlags.IgnoreReturn)) bindingAttributes |= BindingFlags.IgnoreReturn;
-			bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+			if (returnType == null && !bindingAttributes.FastHasFlag(BindingFlags.IgnoreReturn)) bindingAttributes |= BindingFlags.IgnoreReturn;
+			bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 			do
 			{
@@ -169,7 +169,7 @@ namespace essentialMix.Extensions
 		public static IEnumerable<PropertyInfo> GetProperties([NotNull] this Type thisValue, BindingFlags bindingFlags, PropertyInfoType type, Type returnType)
 		{
 			if (type == PropertyInfoType.Default) type = PropertyInfoType.Get;
-			return GetProperties(thisValue, p => type.HasFlag(PropertyInfoType.Get) && p.GetGetMethod() != null || type.HasFlag(PropertyInfoType.Set) && p.GetSetMethod() != null, bindingFlags, returnType);
+			return GetProperties(thisValue, p => type.FastHasFlag(PropertyInfoType.Get) && p.GetGetMethod() != null || type.FastHasFlag(PropertyInfoType.Set) && p.GetSetMethod() != null, bindingFlags, returnType);
 		}
 
 		[NotNull]
@@ -482,7 +482,7 @@ namespace essentialMix.Extensions
 
 			Type type = thisValue;
 			Type nested = null;
-			bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+			bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 			do
 			{
@@ -513,7 +513,7 @@ namespace essentialMix.Extensions
 		public static IEnumerable<Type> GetNestedTypes([NotNull] this Type thisValue, [NotNull] Predicate<Type> selector, BindingFlags bindingAttributes = BindingFlags.Default, Type baseType = null)
 		{
 			Type type = thisValue;
-			bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+			bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 			do
 			{
@@ -537,7 +537,7 @@ namespace essentialMix.Extensions
 
 			Type type = thisValue;
 			FieldInfo info = null;
-			bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+			bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 			do
 			{
@@ -569,7 +569,7 @@ namespace essentialMix.Extensions
 			BindingFlags bindingAttributes = BindingFlags.Default, Type baseType = null)
 		{
 			Type type = thisValue;
-			bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+			bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 			do
 			{
@@ -593,7 +593,7 @@ namespace essentialMix.Extensions
 
 			Type type = thisValue;
 			EventInfo info = null;
-			bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+			bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 			do
 			{
@@ -624,7 +624,7 @@ namespace essentialMix.Extensions
 			BindingFlags bindingAttributes = BindingFlags.Default)
 		{
 			Type type = thisValue;
-			bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+			bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 			do
 			{
@@ -689,9 +689,9 @@ namespace essentialMix.Extensions
 			Type type = thisValue;
 			Type[] paramTypes = types ?? Type.EmptyTypes;
 			PropertyInfo info = null;
-			if (returnType == null && !bindingAttributes.HasFlag(BindingFlags.IgnoreReturn)) bindingAttributes |= BindingFlags.IgnoreReturn;
+			if (returnType == null && !bindingAttributes.FastHasFlag(BindingFlags.IgnoreReturn)) bindingAttributes |= BindingFlags.IgnoreReturn;
 
-			bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+			bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 			do
 			{
@@ -728,7 +728,7 @@ namespace essentialMix.Extensions
 		{
 			Type type = thisValue;
 			ConstructorInfo info = null;
-			bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+			bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 			do
 			{
@@ -784,7 +784,7 @@ namespace essentialMix.Extensions
 			BindingFlags bindingAttributes = BindingFlags.Default)
 		{
 			Type type = thisValue;
-			bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+			bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 			do
 			{
@@ -828,9 +828,9 @@ namespace essentialMix.Extensions
 			Type type = thisValue;
 			Type[] paramTypes = types ?? Type.EmptyTypes;
 			MethodInfo info = null;
-			if (returnType == null && !bindingAttributes.HasFlag(BindingFlags.IgnoreReturn)) bindingAttributes |= BindingFlags.IgnoreReturn;
+			if (returnType == null && !bindingAttributes.FastHasFlag(BindingFlags.IgnoreReturn)) bindingAttributes |= BindingFlags.IgnoreReturn;
 
-			bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+			bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 			do
 			{
@@ -887,7 +887,7 @@ namespace essentialMix.Extensions
 			BindingFlags bindingAttributes = BindingFlags.Default)
 		{
 			Type type = thisValue;
-			bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+			bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 			do
 			{
@@ -952,7 +952,7 @@ namespace essentialMix.Extensions
 					break;
 				default:
 					Type type = thisValue.AsType();
-					bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+					bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 					do
 					{
@@ -990,7 +990,7 @@ namespace essentialMix.Extensions
 		{
 			Type type = thisValue;
 			bool useReturnType = returnType != null;
-			bool declaredOnly = bindingAttributes.HasFlag(BindingFlags.DeclaredOnly);
+			bool declaredOnly = bindingAttributes.FastHasFlag(BindingFlags.DeclaredOnly);
 
 			do
 			{
@@ -1169,7 +1169,7 @@ namespace essentialMix.Extensions
 
 			bool OpFilter(MethodInfo m)
 			{
-				if (m.Name != "op_Explicit" && m.Name != "op_Implicit" || !m.Attributes.HasFlag(MethodAttributes.SpecialName)) return false;
+				if (m.Name != "op_Explicit" && m.Name != "op_Implicit" || !m.Attributes.FastHasFlag(MethodAttributes.SpecialName)) return false;
 
 				ParameterInfo[] parameters = m.GetParameters();
 				if (parameters.Length != 1) return false;

@@ -20,8 +20,8 @@ namespace essentialMix.Helpers
 		private static readonly Regex __validName = new Regex(@"^(?:\.*?(?!\.))[^\x00-\x1f\?*:\x22;|/<>]+(?<![\s.])$", RegexHelper.OPTIONS_I);
 		private static readonly Regex __validPath = new Regex(@"^(?:[a-z]:\\)?(?:(?:\.*?(?!\.))[^\x00-\x1f\?*:\x22;|/<>]+(?<![\s.])\\?)+$", RegexHelper.OPTIONS_I);
 
-		private static readonly Lazy<IReadOnlySet<char>> __defaultInvalidPathChars = new Lazy<IReadOnlySet<char>>(() => new ReadOnlySet<char>(new HashSet<char>(Path.GetInvalidPathChars())), LazyThreadSafetyMode.PublicationOnly);
-		private static readonly Lazy<IReadOnlySet<char>> __defaultInvalidNameChars = new Lazy<IReadOnlySet<char>>(() => new ReadOnlySet<char>(new HashSet<char>(Path.GetInvalidFileNameChars())), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly Lazy<IReadOnlySet<char>> __defaultInvalidPathChars = new Lazy<IReadOnlySet<char>>(() => new HashSet<char>(Path.GetInvalidPathChars()).AsReadOnly(), LazyThreadSafetyMode.PublicationOnly);
+		private static readonly Lazy<IReadOnlySet<char>> __defaultInvalidNameChars = new Lazy<IReadOnlySet<char>>(() => new HashSet<char>(Path.GetInvalidFileNameChars()).AsReadOnly(), LazyThreadSafetyMode.PublicationOnly);
 
 		public static int RemoveLines([NotNull] string fileName, int count, Encoding encoding = null, int startAtLine = 0)
 		{

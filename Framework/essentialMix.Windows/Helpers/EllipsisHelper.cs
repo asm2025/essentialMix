@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using essentialMix.Extensions;
 
 namespace essentialMix.Windows.Helpers
 {
@@ -62,7 +63,7 @@ namespace essentialMix.Windows.Helpers
 			if (string.IsNullOrEmpty(text)) return text;
 
 			// no alignment information
-			if (!options.HasFlag(EllipsisFormat.Start) && !options.HasFlag(EllipsisFormat.Middle) && !options.HasFlag(EllipsisFormat.End)) return text;
+			if (!options.FastHasFlag(EllipsisFormat.Start) && !options.FastHasFlag(EllipsisFormat.Middle) && !options.FastHasFlag(EllipsisFormat.End)) return text;
 
 			if (control == null) throw new ArgumentNullException(nameof(control));
 
@@ -77,11 +78,11 @@ namespace essentialMix.Windows.Helpers
 				string mid = text;
 				string post = string.Empty;
 
-				bool isWord = options.HasFlag(EllipsisFormat.Word);
-				bool isPath = options.HasFlag(EllipsisFormat.Path);
-				bool isStart = options.HasFlag(EllipsisFormat.Start);
-				bool isMiddle = options.HasFlag(EllipsisFormat.Middle);
-				bool isEnd = options.HasFlag(EllipsisFormat.End);
+				bool isWord = options.FastHasFlag(EllipsisFormat.Word);
+				bool isPath = options.FastHasFlag(EllipsisFormat.Path);
+				bool isStart = options.FastHasFlag(EllipsisFormat.Start);
+				bool isMiddle = options.FastHasFlag(EllipsisFormat.Middle);
+				bool isEnd = options.FastHasFlag(EllipsisFormat.End);
 
 				// split path string into <drive><directory><filename>
 				if (isPath)
