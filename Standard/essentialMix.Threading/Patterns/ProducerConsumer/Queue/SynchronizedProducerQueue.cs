@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,9 +11,10 @@ using JetBrains.Annotations;
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	[DebuggerDisplay("Count = {Count}")]
-	public sealed class SynchronizedProducerQueue<T> : Disposable, IProducerConsumer<T>, IProducerQueue<T>
+	public class SynchronizedProducerQueue<TQueue, T> : Disposable, IProducerConsumer<T>, IProducerQueue<TQueue, T>
+		where TQueue : ICollection, IReadOnlyCollection<T>
 	{
-		private readonly IProducerQueue<T> _producerQueue;
+		private readonly IProducerQueue<TQueue, T> _producerQueue;
 
 		private IProducerConsumer<T> _queue;
 
@@ -19,7 +22,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public SynchronizedProducerQueue(ThreadQueueMode mode, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 		{
 			_queue = ProducerConsumerQueue.Create(mode, options, token);
-			_producerQueue = _queue as IProducerQueue<T> ?? throw new NotSupportedException();
+			_producerQueue = _queue as IProducerQueue<TQueue, T> ?? throw new NotSupportedException();
 		}
 
 		/// <inheritdoc />
@@ -28,6 +31,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			if (disposing) ObjectHelper.Dispose(ref _queue);
 			base.Dispose(disposing);
 		}
+
+		/// <inheritdoc />
+		public TQueue Queue => _producerQueue.Queue;
+		
+		/// <inheritdoc />
+		public bool IsSynchronized => _producerQueue.IsSynchronized;
 
 		/// <inheritdoc />
 		public object SyncRoot => _producerQueue.SyncRoot;
@@ -126,7 +135,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		/// </summary>
 		public bool TryDequeue(out T item)
 		{
-			return _producerQueue.TryDequeue(out item);
+			lock(SyncRoot) 
+				return _producerQueue.TryDequeue(out item);
 		}
 
 		/// <inheritdoc />
@@ -135,7 +145,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		/// </summary>
 		public bool TryPeek(out T item)
 		{
-			return _producerQueue.TryPeek(out item);
+			lock(SyncRoot) 
+				return _producerQueue.TryPeek(out item);
 		}
 
 		/// <inheritdoc />
@@ -144,7 +155,17 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		/// </summary>
 		public void RemoveWhile(Predicate<T> predicate)
 		{
-			_producerQueue.RemoveWhile(predicate);
+			lock(SyncRoot) 
+				_producerQueue.RemoveWhile(predicate);
+		}
+	}
+
+	public sealed class SynchronizedProducerQueue<T> : SynchronizedProducerQueue<Queue<T>, T>, IProducerQueue<T>
+	{
+		/// <inheritdoc />
+		public SynchronizedProducerQueue(ThreadQueueMode mode, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+			: base(mode, options, token)
+		{
 		}
 	}
 }

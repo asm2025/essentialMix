@@ -164,12 +164,11 @@ namespace essentialMix.Threading.FileSystem
 			}
 			catch (OperationCanceledException)
 			{
+				// ignored
 			}
 			catch (TimeoutException)
 			{
-			}
-			catch (AggregateException ag) when (ag.InnerException is OperationCanceledException || ag.InnerException is TimeoutException)
-			{
+				// ignored
 			}
 
 			return false;
@@ -181,7 +180,6 @@ namespace essentialMix.Threading.FileSystem
 			// Wait for the consumer's thread to finish.
 			if (waitForQueue) WaitInternal(TimeSpanHelper.INFINITE);
 			ClearInternal();
-			ObjectHelper.Dispose(ref _worker);
 		}
 
 		protected void Cancel() { _cts.CancelIfNotDisposed(); }
@@ -229,13 +227,13 @@ namespace essentialMix.Threading.FileSystem
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !_queue.IsCompleted)
 				{
-					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out (EventType Type, FileSystemEventArgs Args) item, TimeSpanHelper.FAST_SCHEDULE, Token))
+					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out (EventType Type, FileSystemEventArgs Args) item, TimeSpanHelper.FAST, Token))
 						Process(item.Type, item.Args);
 				}
 
 				if (IsDisposed || Token.IsCancellationRequested) return;
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out (EventType Type, FileSystemEventArgs Args) item, TimeSpanHelper.FAST_SCHEDULE, Token))
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out (EventType Type, FileSystemEventArgs Args) item, TimeSpanHelper.FAST, Token))
 					Process(item.Type, item.Args);
 			}
 			catch (ObjectDisposedException) { }

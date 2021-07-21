@@ -290,10 +290,6 @@ namespace essentialMix.Threading
 			{
 				result = false;
 			}
-			catch (AggregateException ag) when (ag.InnerException is OperationCanceledException || ag.InnerException is TimeoutException)
-			{
-				result = false;
-			}
 
 			return result;
 		}

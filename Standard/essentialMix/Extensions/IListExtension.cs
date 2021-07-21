@@ -30,7 +30,7 @@ namespace essentialMix.Extensions
 			if (!index.InRangeRx(0, thisValue.Count)) throw new ArgumentOutOfRangeException(nameof(index));
 			if (thisValue is not ICollection collection) return thisValue[index];
 
-			lock (collection.SyncRoot)
+			lock(collection.SyncRoot)
 			{
 				return thisValue[index];
 			}
@@ -46,7 +46,7 @@ namespace essentialMix.Extensions
 
 			if (thisValue is ICollection collection)
 			{
-				lock (collection.SyncRoot)
+				lock(collection.SyncRoot)
 				{
 					max = count - 1;
 					if (max < 0) throw new InvalidOperationException("List is empty.");
@@ -74,7 +74,7 @@ namespace essentialMix.Extensions
 
 			if (thisValue is ICollection collection)
 			{
-				lock (collection.SyncRoot)
+				lock(collection.SyncRoot)
 				{
 					max = count - 1;
 					n = RNGRandomHelper.Next(startIndex, max);
@@ -84,7 +84,7 @@ namespace essentialMix.Extensions
 				}
 			}
 
-			lock (thisValue)
+			lock(thisValue)
 			{
 				max = count - 1;
 				n = RNGRandomHelper.Next(startIndex, max);
@@ -102,7 +102,7 @@ namespace essentialMix.Extensions
 
 			if (thisValue is ICollection { IsSynchronized: true } collection)
 			{
-				lock (collection.SyncRoot)
+				lock(collection.SyncRoot)
 				{
 					result = thisValue[0];
 					thisValue.RemoveAt(0);
@@ -110,7 +110,7 @@ namespace essentialMix.Extensions
 				}
 			}
 
-			lock (thisValue)
+			lock(thisValue)
 			{
 				result = thisValue[0];
 				thisValue.RemoveAt(0);
@@ -126,7 +126,7 @@ namespace essentialMix.Extensions
 
 			if (thisValue is ICollection { IsSynchronized: true } collection)
 			{
-				lock (collection.SyncRoot)
+				lock(collection.SyncRoot)
 				{
 					result = thisValue[thisValue.Count - 1];
 					thisValue.RemoveAt(thisValue.Count - 1);
@@ -134,7 +134,7 @@ namespace essentialMix.Extensions
 				}
 			}
 
-			lock (thisValue)
+			lock(thisValue)
 			{
 				result = thisValue[thisValue.Count - 1];
 				thisValue.RemoveAt(thisValue.Count - 1);

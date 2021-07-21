@@ -207,7 +207,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		public static IProducerConsumer<T> Create<T>(ThreadQueueMode mode, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-
 			return mode switch
 			{
 				ThreadQueueMode.Task => new TaskQueue<T>(options, token),

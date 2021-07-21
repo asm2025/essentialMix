@@ -6,18 +6,29 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections
 {
 	[Serializable]
-	public class LinkedQueue<T> : LinkedList<T>, IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
+	public class LinkedQueue<T> : LinkedList<T>, IQueue<T>, IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
 	{
-		private readonly Action<T> _enqueue;
+		private readonly Func<T> _dequeue;
 
 		public LinkedQueue(DequeuePriority priority)
 		{
 			Priority = priority;
-
-			_enqueue = priority switch
+			_dequeue = priority switch
 			{
-				DequeuePriority.FIFO => e => AddFirst(e),
-				DequeuePriority.LIFO => e => AddLast(e),
+				DequeuePriority.FIFO => () =>
+				{
+					AssertNotEmpty();
+					T value = First.Value;
+					RemoveFirst();
+					return value;
+				},
+				DequeuePriority.LIFO => () =>
+				{
+					AssertNotEmpty();
+					T value = Last.Value;
+					RemoveLast();
+					return value;
+				},
 				_ => throw new ArgumentOutOfRangeException(nameof(priority), priority, null)
 			};
 		}
@@ -34,20 +45,26 @@ namespace essentialMix.Collections
 
 		public DequeuePriority Priority { get; }
 
-		public void Enqueue(T item) { _enqueue(item); }
+		public void Enqueue(T item) { AddLast(item); }
 
-		public T Dequeue()
-		{
-			AssertNotEmpty();
-			T value = Last.Value;
-			RemoveLast();
-			return value;
-		}
+		public T Dequeue() { return _dequeue(); }
 
 		public T Peek()
 		{
 			AssertNotEmpty();
-			return Last.Value;
+			LinkedListNode<T> node = Priority == DequeuePriority.LIFO
+										? Last
+										: First;
+			return node.Value;
+		}
+
+		public T PeekTail()
+		{
+			AssertNotEmpty();
+			LinkedListNode<T> node = Priority == DequeuePriority.LIFO
+										? First
+										: Last;
+			return node.Value;
 		}
 
 		private void AssertNotEmpty()

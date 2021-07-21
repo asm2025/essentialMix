@@ -108,7 +108,7 @@ namespace essentialMix.Media
 
 		private void UpdateByValue()
 		{
-			lock (_lock)
+			lock(_lock)
 			{
 				switch (_value)
 				{
@@ -161,7 +161,7 @@ namespace essentialMix.Media
 
 		private void UpdateByWidthAndHeight()
 		{
-			lock (_lock)
+			lock(_lock)
 			{
 				if (_width < 0 && _height < 0)
 					_value = VideoSizeEnum.Empty;

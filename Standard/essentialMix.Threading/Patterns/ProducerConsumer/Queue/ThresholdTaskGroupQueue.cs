@@ -3,35 +3,34 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using essentialMix.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
-	public sealed class ThresholdTaskGroupQueue<T> : ProducerConsumerThresholdQueue<T>, IProducerQueue<T>
+	public class ThresholdTaskGroupQueue<TQueue, T> : ProducerConsumerThresholdQueue<T>, IProducerQueue<TQueue, T>
+		where TQueue : ICollection, IReadOnlyCollection<T>
 	{
-		private readonly Queue<T> _queue;
-		private readonly ICollection _collection;
+		private readonly QueueAdapter<TQueue, T> _queue;
 
 		private CountdownEvent _countdown;
-		private Thread _worker;
 
-		public ThresholdTaskGroupQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+		public ThresholdTaskGroupQueue([NotNull] TQueue queue, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			_queue = new Queue<T>();
-			_collection = _queue;
+			_queue = new QueueAdapter<TQueue, T>(queue);
 			_countdown = new CountdownEvent(1);
-			(_worker = new Thread(Consume)
+			new Thread(Consume)
 			{
 				IsBackground = IsBackground,
 				Priority = Priority
-			}).Start();
+			}.Start();
 		}
 
 		/// <inheritdoc />
-		protected override void Dispose(bool disposing)
+		protected sealed override void Dispose(bool disposing)
 		{
 			base.Dispose(disposing);
 			if (!disposing) return;
@@ -39,17 +38,23 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		}
 
 		/// <inheritdoc />
-		public object SyncRoot => _collection.SyncRoot;
+		public TQueue Queue => _queue.Queue;
+		
+		/// <inheritdoc />
+		public bool IsSynchronized => _queue.IsSynchronized;
 
-		public override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
+		/// <inheritdoc />
+		public object SyncRoot => _queue.SyncRoot;
 
-		public override bool IsBusy => Count > 0;
+		public sealed override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
 
-		protected override void EnqueueInternal(T item)
+		public sealed override bool IsBusy => Count > 0;
+
+		protected sealed override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 
-			lock (SyncRoot)
+			lock(SyncRoot)
 			{
 				if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 				_queue.Enqueue(item);
@@ -61,82 +66,36 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public bool TryDequeue(out T item)
 		{
 			ThrowIfDisposed();
-
-			if (_queue.Count == 0)
-			{
-				item = default(T);
-				return false;
-			}
-			
-			lock(SyncRoot)
-			{
-				ThrowIfDisposed();
-
-				if (_queue.Count == 0)
-				{
-					item = default(T);
-					return false;
-				}
-
-				item = _queue.Dequeue();
-				Monitor.Pulse(SyncRoot);
-				return true;
-			}
+			if (!_queue.TryDequeue(out item)) return false;
+			Monitor.Pulse(SyncRoot);
+			return true;
 		}
 
 		/// <inheritdoc />
 		public bool TryPeek(out T item)
 		{
 			ThrowIfDisposed();
-
-			if (_queue.Count == 0)
-			{
-				item = default(T);
-				return false;
-			}
-			
-			lock(SyncRoot)
-			{
-				ThrowIfDisposed();
-
-				if (_queue.Count == 0)
-				{
-					item = default(T);
-					return false;
-				}
-
-				item = _queue.Peek();
-				return true;
-			}
+			return _queue.TryPeek(out item);
 		}
 
 		/// <inheritdoc />
 		public void RemoveWhile(Predicate<T> predicate)
 		{
 			ThrowIfDisposed();
-			if (_queue.Count == 0) return;
 
-			lock(SyncRoot)
+			int n = 0;
+
+			while (_queue.TryPeek(out T item) && predicate(item))
 			{
-				ThrowIfDisposed();
-				if (_queue.Count == 0) return;
-
-				int n = 0;
-
-				while (_queue.Count > 0)
-				{
-					T item = _queue.Peek();
-					if (!predicate(item)) break;
-					_queue.Dequeue();
-					n++;
-				}
-
-				if (n == 0) return;
-				Monitor.Pulse(SyncRoot);
+				if (!_queue.TryDequeue(out _)) continue;
+				n++;
 			}
+
+			if (n == 0) return;
+			Monitor.Pulse(SyncRoot);
 		}
 
-		protected override void CompleteInternal()
+		protected sealed override void CompleteInternal()
 		{
 			lock(SyncRoot)
 			{
@@ -145,16 +104,16 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 		}
 
-		protected override void ClearInternal()
+		protected sealed override void ClearInternal()
 		{
-			lock (SyncRoot)
+			lock(SyncRoot)
 			{
 				_queue.Clear();
 				Monitor.PulseAll(SyncRoot);
 			}
 		}
 
-		protected override bool WaitInternal(int millisecondsTimeout)
+		protected sealed override bool WaitInternal(int millisecondsTimeout)
 		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 			if (!IsBusy) return true;
@@ -167,25 +126,23 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 			catch (OperationCanceledException)
 			{
+				// ignored
 			}
 			catch (TimeoutException)
 			{
-			}
-			catch (AggregateException ag) when (ag.InnerException is OperationCanceledException || ag.InnerException is TimeoutException)
-			{
+				// ignored
 			}
 
 			return false;
 		}
 
-		protected override void StopInternal(bool enforce)
+		protected sealed override void StopInternal(bool enforce)
 		{
 			CompleteInternal();
 			// Wait for the consumer's thread to finish.
 			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
 			Cancel();
 			ClearInternal();
-			ObjectHelper.Dispose(ref _worker);
 		}
 
 		private void Consume()
@@ -210,13 +167,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					{
 						lock(SyncRoot)
 						{
-							if (_queue.Count == 0) Monitor.Wait(SyncRoot, TimeSpanHelper.FAST_SCHEDULE);
+							if (_queue.Count == 0) Monitor.Wait(SyncRoot, TimeSpanHelper.FAST);
 							if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
 						}
 
-						while (_queue.Count > 0 && count < tasks.Length && !IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
+						while (_queue.Count > 0 && count < tasks.Length && !IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.TryDequeue(out T item))
 						{
-							T item = _queue.Dequeue();
 							_countdown.AddCount();
 							tasks[count++] = Task.Run(() =>
 							{
@@ -242,15 +198,14 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					Array.Clear(tasks, 0, tasks.Length);
 				}
 
-				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
+				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST);
 
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
 				{
 					if (HasThreshold && count == 0) tasks[count++] = Task.Delay(Threshold).ConfigureAwait();
 
-					while (_queue.Count > 0 && count < tasks.Length && !IsDisposed && !Token.IsCancellationRequested)
+					while (_queue.Count > 0 && count < tasks.Length && !IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out T item))
 					{
-						T item = _queue.Dequeue();
 						_countdown.AddCount();
 						tasks[count++] = Task.Run(() =>
 						{
@@ -287,6 +242,16 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				OnWorkCompleted(EventArgs.Empty);
 				_countdown.SignalAll();
 			}
+		}
+	}
+
+	/// <inheritdoc cref="ThresholdTaskGroupQueue{TQueue,T}"/>
+	public sealed class ThresholdTaskGroupQueue<T> : ThresholdTaskGroupQueue<Queue<T>, T>, IProducerQueue<T>
+	{
+		/// <inheritdoc />
+		public ThresholdTaskGroupQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+			: base(new Queue<T>(), options, token)
+		{
 		}
 	}
 }

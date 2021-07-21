@@ -203,12 +203,11 @@ namespace essentialMix.Threading.Collections.MessageQueue
 			}
 			catch (OperationCanceledException)
 			{
+				// ignored
 			}
 			catch (TimeoutException)
 			{
-			}
-			catch (AggregateException ag) when (ag.InnerException is OperationCanceledException || ag.InnerException is TimeoutException)
-			{
+				// ignored
 			}
 
 			return false;
@@ -220,7 +219,6 @@ namespace essentialMix.Threading.Collections.MessageQueue
 			// Wait for the consumer's thread to finish.
 			if (waitForQueue) WaitInternal(TimeSpanHelper.INFINITE);
 			ClearInternal();
-			ObjectHelper.Dispose(ref _worker);
 		}
 
 		protected void Cancel() { _cts.CancelIfNotDisposed(); }
@@ -234,13 +232,13 @@ namespace essentialMix.Threading.Collections.MessageQueue
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !_queue.IsCompleted)
 				{
-					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.FAST_SCHEDULE, Token))
+					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.FAST, Token))
 						Callback(item);
 				}
 
 				if (IsDisposed || Token.IsCancellationRequested) return;
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.FAST_SCHEDULE, Token))
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.FAST, Token))
 					Callback(item);
 			}
 			catch (ObjectDisposedException) { }

@@ -25,7 +25,7 @@ namespace essentialMix.Extensions
 
 			if (thisValue is ICollection collection)
 			{
-				lock (collection.SyncRoot)
+				lock(collection.SyncRoot)
 				{
 					max = count - 1;
 					if (max < 0) throw new InvalidOperationException("List is empty.");

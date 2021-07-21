@@ -225,4 +225,7 @@
   <data name="ArgumentHasNullValue" xml:space="preserve">
     <value>The argument included a null value.</value>
   </data>
+  <data name="CollectionIsEmpty" xml:space="preserve">
+    <value>Collection is empty.</value>
+  </data>
 </root>

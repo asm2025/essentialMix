@@ -179,7 +179,7 @@ namespace essentialMix.Threading.Helpers
 
 					if (!processReallyExited && process.IsAwaitable())
 					{
-						if (!process.WaitForExit(TimeSpanHelper.HALF_SCHEDULE)) ndx = -1;
+						if (!process.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
 					}
 
 					process.Die();
@@ -352,7 +352,7 @@ namespace essentialMix.Threading.Helpers
 
 						if (!processReallyExited && process.IsAwaitable())
 						{
-							if (!process.WaitForExit(TimeSpanHelper.HALF_SCHEDULE)) ndx = -1;
+							if (!process.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
 						}
 
 						process.Die();
@@ -484,7 +484,7 @@ namespace essentialMix.Threading.Helpers
 
 						if (!processReallyExited && process.IsAwaitable())
 						{
-							if (!process.WaitForExit(TimeSpanHelper.HALF_SCHEDULE)) ndx = -1;
+							if (!process.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
 						}
 
 						process.Die();
@@ -705,7 +705,7 @@ namespace essentialMix.Threading.Helpers
 
 				if (!processReallyExited && process.IsAwaitable())
 				{
-					if (!process.WaitForExit(TimeSpanHelper.HALF_SCHEDULE)) ndx = -1;
+					if (!process.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
 				}
 
 				return Task.FromResult(ndx == 0);

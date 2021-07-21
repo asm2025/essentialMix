@@ -15,7 +15,7 @@ namespace essentialMix.Threading.Patterns.Object
 	/// based on <see href="https://www.linqpad.net/RichClient/SampleLibraries.aspx">Joe Albahari's Samples for online presentation with SSW (April 2021)</see> for LinqPad
 	/// </para>
 	/// </summary>
-	public class AsyncDisposable : Disposable
+	public class AsyncDisposable : Disposable, IAsyncDisposable
 	{
 		private CancellationTokenSource _cts;
 		private CountdownEvent _countdown;
@@ -33,14 +33,33 @@ namespace essentialMix.Threading.Patterns.Object
 		{
 			base.Dispose(disposing);
 			if (!disposing) return;
-			Wait();
+			if (!IsAsyncDisposeRequested) Wait();
 			ObjectHelper.Dispose(ref _countdown);
 			ObjectHelper.Dispose(ref _cts);
 		}
 
-		public bool IsDisposeRequested { get; private set; }
 		public CancellationToken Token { get; }
-		public bool IsMarkedForDisposal => _countdown.IsSet;
+		protected bool IsAsyncDisposeRequested { get; private set; }
+		protected bool IsMarkedForAsyncDisposal => _countdown.IsSet;
+
+		/// <summary>
+		/// Starts disposal. If disposal has been deferred, disposal will not start 
+		/// until the deferral tokens have been released.
+		/// </summary>
+		public async ValueTask DisposeAsync()
+		{
+			lock(this)
+			{
+				if (!IsAsyncDisposeRequested)
+				{
+					IsAsyncDisposeRequested = true;
+					_countdown?.Signal();
+				}
+			}
+
+			await WaitAsync();
+			Dispose(true);
+		}
 
 		public void Cancel()
 		{
@@ -72,18 +91,18 @@ namespace essentialMix.Threading.Patterns.Object
 			return WaitInternal(millisecondsTimeout);
 		}
 
-		[NotNull] 
-		public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
+		public async ValueTask WaitAsync()
+		{
+			await WaitAsync(TimeSpanHelper.INFINITE);
+		}
 
-		[NotNull] 
-		public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
+		public ValueTask<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
 
-		[NotNull]
-		public Task<bool> WaitAsync(int millisecondsTimeout)
+		public ValueTask<bool> WaitAsync(int millisecondsTimeout)
 		{
 			ThrowIfDisposed();
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			return Task.Run(() => WaitInternal(millisecondsTimeout), Token);
+			return new ValueTask<bool>(Task.Run(() => WaitInternal(millisecondsTimeout), Token).ConfigureAwait());
 		}
 
 		protected virtual bool WaitInternal(int millisecondsTimeout)
@@ -98,12 +117,11 @@ namespace essentialMix.Threading.Patterns.Object
 			}
 			catch (OperationCanceledException)
 			{
+				// ignored
 			}
 			catch (TimeoutException)
 			{
-			}
-			catch (AggregateException ag) when (ag.InnerException is OperationCanceledException || ag.InnerException is TimeoutException)
-			{
+				// ignored
 			}
 
 			return false;
@@ -122,7 +140,7 @@ namespace essentialMix.Threading.Patterns.Object
 		[NotNull]
 		public IDisposable DeferDisposal()
 		{
-			if (!_countdown.TryAddCount()) throw new ObjectDisposedException (GetType().Name);
+			if (!_countdown.TryAddCount()) throw new ObjectDisposedException(GetType().Name);
 			return Create(() => _countdown?.Signal());
 		}
 
@@ -135,23 +153,6 @@ namespace essentialMix.Threading.Patterns.Object
 			return !_countdown.TryAddCount()
 						? null
 						: Create(() => _countdown?.Signal());
-		}
-
-		/// <summary>
-		/// Starts disposal. If disposal has been deferred, disposal will not start 
-		/// until the deferral tokens have been released.
-		/// </summary>
-		[NotNull]
-		public virtual Task DisposeAsync()
-		{
-			lock (this)
-			{
-				if (IsDisposeRequested) return WaitAsync();
-				IsDisposeRequested = true;
-				_countdown?.Signal();
-			}
-
-			return WaitAsync();
 		}
 	}
 }

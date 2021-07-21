@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions;
+using essentialMix.Exceptions.Collections;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections
@@ -18,7 +19,7 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 	[Serializable]
-	public class LinkedDeque<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
+	public class LinkedDeque<T> : IDeque<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
 	{
 		[Serializable]
 		internal class SynchronizedCollection : ICollection<T>
@@ -39,7 +40,7 @@ namespace essentialMix.Collections
 			{
 				get
 				{
-					lock (_root)
+					lock(_root)
 					{
 						return _deque.Count;
 					}
@@ -51,7 +52,7 @@ namespace essentialMix.Collections
 			{
 				get
 				{
-					lock (_root)
+					lock(_root)
 					{
 						return ((ICollection<T>)_collection).IsReadOnly;
 					}
@@ -61,7 +62,7 @@ namespace essentialMix.Collections
 			/// <inheritdoc />
 			public void Add(T item)
 			{
-				lock (_root)
+				lock(_root)
 				{
 					_deque.Add(item);
 				}
@@ -70,7 +71,7 @@ namespace essentialMix.Collections
 			/// <inheritdoc />
 			public bool Remove(T item)
 			{
-				lock (_root)
+				lock(_root)
 				{
 					return _deque.Remove(item);
 				}
@@ -79,7 +80,7 @@ namespace essentialMix.Collections
 			/// <inheritdoc />
 			public void Clear()
 			{
-				lock (_root)
+				lock(_root)
 				{
 					_deque.Clear();
 				}
@@ -88,7 +89,7 @@ namespace essentialMix.Collections
 			/// <inheritdoc />
 			public bool Contains(T item)
 			{
-				lock (_root)
+				lock(_root)
 				{
 					return _deque.Contains(item);
 				}
@@ -97,7 +98,7 @@ namespace essentialMix.Collections
 			/// <inheritdoc />
 			public void CopyTo(T[] array, int arrayIndex)
 			{
-				lock (_root)
+				lock(_root)
 				{
 					_deque.CopyTo(array, arrayIndex);
 				}
@@ -106,7 +107,7 @@ namespace essentialMix.Collections
 			/// <inheritdoc />
 			IEnumerator IEnumerable.GetEnumerator()
 			{
-				lock (_root)
+				lock(_root)
 				{
 					return _deque.GetEnumerator();
 				}
@@ -115,7 +116,7 @@ namespace essentialMix.Collections
 			/// <inheritdoc />
 			public IEnumerator<T> GetEnumerator()
 			{
-				lock (_root)
+				lock(_root)
 				{
 					return _deque.GetEnumerator();
 				}
@@ -193,7 +194,7 @@ namespace essentialMix.Collections
 
 		public T Dequeue()
 		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			T value = Items.First.Value;
 			Items.RemoveFirst();
 			return value;
@@ -233,21 +234,21 @@ namespace essentialMix.Collections
 
 		public T Pop()
 		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			T value = Items.Last.Value;
 			Items.RemoveLast();
 			return value;
 		}
 
-		public T PeekQueue()
+		public T Peek()
 		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			return Items.First.Value;
 		}
 
-		public T PeekStack()
+		public T PeekTail()
 		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			return Items.Last.Value;
 		}
 

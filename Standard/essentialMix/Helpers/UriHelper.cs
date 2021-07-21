@@ -752,7 +752,6 @@ namespace essentialMix.Helpers
 				ObjectHelper.Dispose(ref stream);
 				ObjectHelper.Dispose(ref responseStream);
 				ObjectHelper.Dispose(ref response);
-				ObjectHelper.Dispose(ref request);
 			}
 
 			return uri;
@@ -791,7 +790,6 @@ namespace essentialMix.Helpers
 				ObjectHelper.Dispose(ref stream);
 				ObjectHelper.Dispose(ref responseStream);
 				ObjectHelper.Dispose(ref response);
-				ObjectHelper.Dispose(ref request);
 			}
 
 			return uri;
@@ -885,7 +883,6 @@ namespace essentialMix.Helpers
 				ObjectHelper.Dispose(ref stream);
 				ObjectHelper.Dispose(ref responseStream);
 				ObjectHelper.Dispose(ref response);
-				ObjectHelper.Dispose(ref request);
 			}
 
 			return uri;
@@ -927,7 +924,6 @@ namespace essentialMix.Helpers
 				ObjectHelper.Dispose(ref stream);
 				ObjectHelper.Dispose(ref responseStream);
 				ObjectHelper.Dispose(ref response);
-				ObjectHelper.Dispose(ref request);
 			}
 
 			return uri;

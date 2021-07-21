@@ -40,8 +40,8 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<AssemblyVersion>12.31.1.0</AssemblyVersion>
-		<FileVersion>21.6.11.0</FileVersion>
+		<AssemblyVersion>12.32.0.0</AssemblyVersion>
+		<FileVersion>21.7.21.0</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 		<PackageVersion>$(Version)</PackageVersion>
@@ -64,7 +64,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
-		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="5.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="5.0.8" />
 	</ItemGroup>
 
 	<ItemGroup>

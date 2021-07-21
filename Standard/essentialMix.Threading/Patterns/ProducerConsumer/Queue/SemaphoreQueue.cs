@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using essentialMix.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
@@ -13,17 +13,16 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 	/// Not recommended because it's way too expensive unless you know what you're doing and need to
 	/// have items run on their own threads.
 	/// </summary>
-	public sealed class SemaphoreQueue<T> : NamedProducerConsumerThreadQueue<T>, IProducerQueue<T>
+	public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IProducerQueue<TQueue, T>
+		where TQueue : ICollection, IReadOnlyCollection<T>
 	{
-		private readonly ConcurrentQueue<T> _queue;
-		private readonly ICollection _collection;
+		private readonly QueueAdapter<TQueue, T> _queue;
 
 		private CountdownEvent _countdown;
 		private ManualResetEvent _allWorkDone;
 		private Semaphore _semaphore;
-		private Thread _worker;
 
-		public SemaphoreQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+		public SemaphoreQueue([NotNull] TQueue queue, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
 			bool createdNew;
@@ -53,14 +52,13 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 
 			IsOwner = createdNew;
-			_queue = new ConcurrentQueue<T>();
-			_collection = _queue;
+			_queue = new QueueAdapter<TQueue, T>(queue);
 			_allWorkDone = new ManualResetEvent(false);
-			(_worker = new Thread(Consume)
-					{
-						IsBackground = IsBackground,
-						Priority = Priority
-					}).Start();
+			new Thread(Consume)
+			{
+				IsBackground = IsBackground,
+				Priority = Priority
+			}.Start();
 		}
 
 		/// <inheritdoc />
@@ -80,13 +78,19 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		}
 
 		/// <inheritdoc />
-		public object SyncRoot => _collection.SyncRoot;
+		public TQueue Queue => _queue.Queue;
+		
+		/// <inheritdoc />
+		public bool IsSynchronized => _queue.IsSynchronized;
 
-		public override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
+		/// <inheritdoc />
+		public object SyncRoot => _queue.SyncRoot;
 
-		public override bool IsBusy => Count > 0;
+		public sealed override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
 
-		protected override void EnqueueInternal(T item)
+		public sealed override bool IsBusy => Count > 0;
+
+		protected sealed override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 			_queue.Enqueue(item);
@@ -117,17 +121,17 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 		}
 
-		protected override void CompleteInternal()
+		protected sealed override void CompleteInternal()
 		{
 			CompleteMarked = true;
 		}
 
-		protected override void ClearInternal()
+		protected sealed override void ClearInternal()
 		{
 			_queue.Clear();
 		}
 
-		protected override bool WaitInternal(int millisecondsTimeout)
+		protected sealed override bool WaitInternal(int millisecondsTimeout)
 		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 			if (!IsBusy) return true;
@@ -140,18 +144,17 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 			catch (OperationCanceledException)
 			{
+				// ignored
 			}
 			catch (TimeoutException)
 			{
-			}
-			catch (AggregateException ag) when (ag.InnerException is OperationCanceledException || ag.InnerException is TimeoutException)
-			{
+				// ignored
 			}
 
 			return false;
 		}
 
-		protected override void StopInternal(bool enforce)
+		protected sealed override void StopInternal(bool enforce)
 		{
 			CompleteInternal();
 			// Wait for the consumer's thread to finish.
@@ -159,7 +162,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			Cancel();
 			ClearInternal();
 			ObjectHelper.Dispose(ref _countdown);
-			ObjectHelper.Dispose(ref _worker);
 		}
 
 		private void Consume()
@@ -190,11 +192,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					if (threads.Count < Threads) continue;
 					_countdown.Signal();
 					_countdown.Wait(Token);
-					ClearThreads(threads);
+					threads.Clear();
 					ObjectHelper.Dispose(ref _countdown);
 				}
 
-				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
+				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST);
 
 				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item))
 				{
@@ -211,7 +213,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					if (threads.Count < Threads) continue;
 					_countdown.Signal();
 					_countdown.Wait(Token);
-					ClearThreads(threads);
+					threads.Clear();
 					ObjectHelper.Dispose(ref _countdown);
 				}
 
@@ -221,20 +223,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 			finally
 			{
-				ClearThreads(threads);
 				ObjectHelper.Dispose(ref _countdown);
 				OnWorkCompleted(EventArgs.Empty);
 				_allWorkDone.Set();
-			}
-
-			static void ClearThreads(IList<Thread> threads)
-			{
-				for (int i = threads.Count - 1; i >= 0; i--)
-				{
-					Thread thread = threads[i];
-					ObjectHelper.Dispose(ref thread);
-					threads.RemoveAt(i);
-				}
 			}
 		}
 
@@ -262,6 +253,16 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				if (entered) _semaphore?.Release();
 				_countdown?.Signal();
 			}
+		}
+	}
+
+	/// <inheritdoc cref="SemaphoreQueue{TQueue,T}"/>
+	public sealed class SemaphoreQueue<T> : SemaphoreQueue<Queue<T>, T>, IProducerQueue<T>
+	{
+		/// <inheritdoc />
+		public SemaphoreQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+			: base(new Queue<T>(), options, token)
+		{
 		}
 	}
 }

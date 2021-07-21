@@ -1,37 +1,36 @@
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using essentialMix.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
-	public sealed class SemaphoreSlimQueue<T> : ProducerConsumerThreadQueue<T>, IProducerQueue<T>
+	public class SemaphoreSlimQueue<TQueue, T> : ProducerConsumerThreadQueue<T>, IProducerQueue<TQueue, T>
+		where TQueue : ICollection, IReadOnlyCollection<T>
 	{
-		private readonly ConcurrentQueue<T> _queue;
-		private readonly ICollection _collection;
+		private readonly QueueAdapter<TQueue, T> _queue;
 
 		private ManualResetEvent _allWorkDone;
 		private SemaphoreSlim _semaphore;
-		private Thread _worker;
 
 		private volatile int _running;
 
-		public SemaphoreSlimQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+		public SemaphoreSlimQueue([NotNull] TQueue queue, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			_queue = new ConcurrentQueue<T>();
-			_collection = _queue;
+			_queue = new QueueAdapter<TQueue, T>(queue);
 			_allWorkDone = new ManualResetEvent(false);
 			_semaphore = new SemaphoreSlim(Threads);
-			(_worker = new Thread(Consume)
+			new Thread(Consume)
 			{
 				IsBackground = IsBackground,
 				Priority = Priority
-			}).Start();
+			}.Start();
 		}
 
 		/// <inheritdoc />
@@ -44,9 +43,15 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		}
 
 		/// <inheritdoc />
-		public object SyncRoot => _collection.SyncRoot;
+		public TQueue Queue => _queue.Queue;
+		
+		/// <inheritdoc />
+		public bool IsSynchronized => _queue.IsSynchronized;
 
-		public override int Count
+		/// <inheritdoc />
+		public object SyncRoot => _queue.SyncRoot;
+
+		public sealed override int Count
 		{
 			get
 			{
@@ -55,9 +60,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 		}
 
-		public override bool IsBusy => Count > 0;
+		public sealed override bool IsBusy => Count > 0;
 
-		protected override void EnqueueInternal(T item)
+		protected sealed override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 			_queue.Enqueue(item);
@@ -88,17 +93,17 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 		}
 
-		protected override void CompleteInternal()
+		protected sealed override void CompleteInternal()
 		{
 			CompleteMarked = true;
 		}
 
-		protected override void ClearInternal()
+		protected sealed override void ClearInternal()
 		{
 			_queue.Clear();
 		}
 
-		protected override bool WaitInternal(int millisecondsTimeout)
+		protected sealed override bool WaitInternal(int millisecondsTimeout)
 		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 			if (!IsBusy) return true;
@@ -111,25 +116,23 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 			catch (OperationCanceledException)
 			{
+				// ignored
 			}
 			catch (TimeoutException)
 			{
-			}
-			catch (AggregateException ag) when (ag.InnerException is OperationCanceledException || ag.InnerException is TimeoutException)
-			{
+				// ignored
 			}
 
 			return false;
 		}
 
-		protected override void StopInternal(bool enforce)
+		protected sealed override void StopInternal(bool enforce)
 		{
 			CompleteInternal();
 			// Wait for the consumer's thread to finish.
 			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
 			Cancel();
 			ClearInternal();
-			ObjectHelper.Dispose(ref _worker);
 		}
 
 		private void Consume()
@@ -142,12 +145,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 			try
 			{
-				T item;
-
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					if (!_queue.TryDequeue(out item)) continue;
-					T value = item;
+					if (!_queue.TryDequeue(out T item)) continue;
 					int index = Array.FindIndex(tasks,e => e == null || e.IsFinished());
 
 					if (tasks[index] != null)
@@ -158,7 +158,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						Interlocked.Decrement(ref _running);
 					}
 
-					tasks[index] = Task.Run(() => RunThread(value), Token).ConfigureAwait();
+					tasks[index] = Task.Run(() => RunThread(item), Token).ConfigureAwait();
 					Interlocked.Increment(ref _running);
 					// don't wait until all slots are filled
 					if (_running < Threads) continue;
@@ -166,11 +166,10 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				}
 
 				if (Token.IsCancellationRequested) return;
-				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST_SCHEDULE);
+				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST);
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item))
+				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out T item))
 				{
-					T value = item;
 					int index = Array.FindIndex(tasks,e => e == null || e.IsFinished());
 
 					if (tasks[index] != null)
@@ -181,7 +180,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						Interlocked.Decrement(ref _running);
 					}
 
-					tasks[index] = Task.Run(() => RunThread(value), Token).ConfigureAwait();
+					tasks[index] = Task.Run(() => RunThread(item), Token).ConfigureAwait();
 					Interlocked.Increment(ref _running);
 					// don't wait until all slots are filled
 					if (_running < Threads) continue;
@@ -218,6 +217,16 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			{
 				if (entered) _semaphore?.Release();
 			}
+		}
+	}
+
+	/// <inheritdoc cref="SemaphoreSlimQueue{TQueue,T}"/>
+	public sealed class SemaphoreSlimQueue<T> : SemaphoreSlimQueue<Queue<T>, T>, IProducerQueue<T>
+	{
+		/// <inheritdoc />
+		public SemaphoreSlimQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+			: base(new Queue<T>(), options, token)
+		{
 		}
 	}
 }

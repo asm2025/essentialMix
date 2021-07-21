@@ -15,7 +15,7 @@ namespace essentialMix.Collections
 	/// allows O(log n) search complexity as well as O(log n) insertion complexity within an ordered sequence of
 	/// n elements. It might be an alternative to a <see href="https://en.wikipedia.org/wiki/Linked_list">linked list</see>
 	/// to allow skipping items while searching for a value.
-	/// <para>This is just a basic implementation</para>
+	/// <para>This is a basic implementation</para>
 	/// </summary>
 	/// <typeparam name="T">The element type of the list</typeparam>
 	/*
@@ -29,7 +29,7 @@ namespace essentialMix.Collections
 	*/
 	[DebuggerDisplay("Count = {Count}, Level = {Level}")]
 	[Serializable]
-	public sealed class SkipList<T> : ICollection<T>, ICollection
+	public sealed class SkipList<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
 	{
 		private const int MAX_LEVEL = 32;
 		private const double PROBABILITY = 0.5d;

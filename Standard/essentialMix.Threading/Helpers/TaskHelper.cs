@@ -230,17 +230,15 @@ namespace essentialMix.Threading.Helpers
 				queue.Enqueue(action);
 			}
 
-			BufferBlock<Action> buffer = null;
-			ActionBlock<Action> processor = null;
 			IDisposable link = null;
 
 			try
 			{
-				buffer = new BufferBlock<Action>(new DataflowBlockOptions
+				BufferBlock<Action> buffer = new BufferBlock<Action>(new DataflowBlockOptions
 				{
 					CancellationToken = token
 				});
-				processor = new ActionBlock<Action>(ac => ac(), new ExecutionDataflowBlockOptions
+				ActionBlock<Action> processor = new ActionBlock<Action>(ac => ac(), new ExecutionDataflowBlockOptions
 				{
 					MaxDegreeOfParallelism = 1,
 					CancellationToken = token
@@ -263,8 +261,6 @@ namespace essentialMix.Threading.Helpers
 			finally
 			{
 				ObjectHelper.Dispose(ref link);
-				ObjectHelper.Dispose(ref processor);
-				ObjectHelper.Dispose(ref buffer);
 			}
 		}
 
@@ -296,8 +292,6 @@ namespace essentialMix.Threading.Helpers
 
 			TResult result = defaultValue;
 			CancellationTokenSource cts = null;
-			BufferBlock<Func<TResult, Task<TResult>>> buffer = null;
-			ActionBlock<Func<TResult, Task<TResult>>> processor = null;
 			IDisposable link = null;
 
 			try
@@ -310,13 +304,13 @@ namespace essentialMix.Threading.Helpers
 					token.Register(() => ctsReg.Cancel());
 				}
 
-				buffer = new BufferBlock<Func<TResult, Task<TResult>>>(new DataflowBlockOptions
+				BufferBlock<Func<TResult, Task<TResult>>> buffer = new BufferBlock<Func<TResult, Task<TResult>>>(new DataflowBlockOptions
 				{
 					CancellationToken = token
 				});
 
 				CancellationTokenSource ctsRef = cts;
-				processor = new ActionBlock<Func<TResult, Task<TResult>>>(func =>
+				ActionBlock<Func<TResult, Task<TResult>>> processor = new ActionBlock<Func<TResult, Task<TResult>>>(func =>
 				{
 					result = func(result).Execute();
 					if (!token.IsCancellationRequested && (evaluator == null || evaluator(result))) return;
@@ -346,8 +340,6 @@ namespace essentialMix.Threading.Helpers
 			finally
 			{
 				ObjectHelper.Dispose(ref link);
-				ObjectHelper.Dispose(ref processor);
-				ObjectHelper.Dispose(ref buffer);
 				ObjectHelper.Dispose(ref cts);
 			}
 		}

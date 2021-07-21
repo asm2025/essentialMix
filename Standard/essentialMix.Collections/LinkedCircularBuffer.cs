@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions;
+using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
@@ -18,7 +19,7 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 	[Serializable]
-	public class LinkedCircularBuffer<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable, ISerializable, IDeserializationCallback
+	public class LinkedCircularBuffer<T> : ICircularBuffer<T>, ICollection<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable, ISerializable, IDeserializationCallback
 	{
 		[ComVisible(false)]
 		[DebuggerDisplay("{Value}")]
@@ -337,7 +338,7 @@ namespace essentialMix.Collections
 
 		public T Dequeue()
 		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			T item = _head.Value;
 			RemoveNode(_head);
 			return item;
@@ -345,7 +346,7 @@ namespace essentialMix.Collections
 
 		public T Pop()
 		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			T item = Last().Value;
 			RemoveNode(_head._previous);
 			return item;
@@ -362,13 +363,13 @@ namespace essentialMix.Collections
 
 		public T Peek()
 		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			return _head.Value;
 		}
 
 		public T PeekTail()
 		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			return Last().Value;
 		}
 

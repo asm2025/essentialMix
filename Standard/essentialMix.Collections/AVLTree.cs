@@ -226,7 +226,7 @@ namespace essentialMix.Collections
 				// check the balance
 				if (Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR) continue;
 				parent = deque.Count > 0
-							? deque.PeekStack()
+							? deque.PeekTail()
 							: null;
 				bool isLeft = parent != null && ReferenceEquals(parent.Left, node);
 				node = Balance(node);

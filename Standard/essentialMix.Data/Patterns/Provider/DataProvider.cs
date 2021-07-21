@@ -126,23 +126,21 @@ namespace essentialMix.Data.Patterns.Provider
 			}
 
 			DataSet result = null;
-			IDbDataAdapter adapter = null;
+			IDbCommand cmd = null;
 
 			try
 			{
-				using (IDbCommand cmd = Connection.CreateCommand(commandText, commandType, transaction))
+				cmd = Connection.CreateCommand(commandText, commandType, transaction);
+				IDbDataAdapter adapter = GetAdapter(cmd);
+
+				if (adapter != null)
 				{
-					adapter = GetAdapter(cmd);
+					result = new DataSet();
+					adapter.FillSchema(result, SchemaType.Source);
+					adapter.Fill(result);
 
-					if (adapter != null)
-					{
-						result = new DataSet();
-						adapter.FillSchema(result, SchemaType.Source);
-						adapter.Fill(result);
-
-						if (!result.IsValid())
-							ObjectHelper.Dispose(ref result);
-					}
+					if (!result.IsValid())
+						ObjectHelper.Dispose(ref result);
 				}
 			}
 			catch
@@ -151,7 +149,7 @@ namespace essentialMix.Data.Patterns.Provider
 			}
 			finally
 			{
-				ObjectHelper.Dispose(ref adapter);
+				ObjectHelper.Dispose(ref cmd);
 				if (bMustClose) Connection.Close();
 			}
 

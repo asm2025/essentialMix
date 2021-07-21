@@ -63,10 +63,6 @@ namespace essentialMix.Threading
 			if (disposing)
 			{
 				StopInternal(WaitForQueuedItems);
-
-				for (int i = 0; i < _workers.Length; i++)
-					ObjectHelper.Dispose(ref _workers[i]);
-
 				ObjectHelper.Dispose(ref _mainWaitEvent);
 				ObjectHelper.Dispose(ref _workerWaitEvent);
 				ObjectHelper.Dispose(ref _countdown);
@@ -144,7 +140,7 @@ namespace essentialMix.Threading
 			ThrowIfDisposed();
 			if (IsBusyInternal) return;
 
-			lock (_lock)
+			lock(_lock)
 			{
 				OnWorkStarted(EventArgs.Empty);
 				_workers.ForEach(t =>
@@ -213,12 +209,11 @@ namespace essentialMix.Threading
 			}
 			catch (OperationCanceledException)
 			{
+				// ignored
 			}
 			catch (TimeoutException)
 			{
-			}
-			catch (AggregateException ag) when (ag.InnerException is OperationCanceledException || ag.InnerException is TimeoutException)
-			{
+				// ignored
 			}
 
 			return false;
@@ -226,7 +221,7 @@ namespace essentialMix.Threading
 
 		private void StopInternal(bool waitForQueue)
 		{
-			lock (_lock)
+			lock(_lock)
 			{
 				Cancel();
 				Monitor.PulseAll(_lock);

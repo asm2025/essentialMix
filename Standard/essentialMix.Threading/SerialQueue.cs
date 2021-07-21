@@ -33,7 +33,7 @@ namespace essentialMix.Threading
 		{
 			Task<T> task;
 
-			lock (_locker)
+			lock(_locker)
 			{
 				task = _lastTask != null && _lastTask.TryGetTarget(out Task lastTask) 
 					? lastTask.ContinueWith(_ => func()) 

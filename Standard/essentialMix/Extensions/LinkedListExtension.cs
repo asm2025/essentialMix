@@ -29,7 +29,7 @@ namespace essentialMix.Extensions
 
 			if (thisValue is ICollection { IsSynchronized: true } collection)
 			{
-				lock (collection.SyncRoot)
+				lock(collection.SyncRoot)
 				{
 					result = thisValue.First.Value;
 					thisValue.RemoveFirst();
@@ -37,7 +37,7 @@ namespace essentialMix.Extensions
 				}
 			}
 
-			lock (thisValue)
+			lock(thisValue)
 			{
 				result = thisValue.First.Value;
 				thisValue.RemoveFirst();
@@ -53,7 +53,7 @@ namespace essentialMix.Extensions
 
 			if (thisValue is ICollection { IsSynchronized: true } collection)
 			{
-				lock (collection.SyncRoot)
+				lock(collection.SyncRoot)
 				{
 					result = thisValue.Last.Value;
 					thisValue.RemoveLast();
@@ -61,7 +61,7 @@ namespace essentialMix.Extensions
 				}
 			}
 
-			lock (thisValue)
+			lock(thisValue)
 			{
 				result = thisValue.Last.Value;
 				thisValue.RemoveLast();

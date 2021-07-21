@@ -53,7 +53,7 @@ namespace essentialMix.Extensions
 
 			if (thisValue is ICollection collection)
 			{
-				lock (collection.SyncRoot)
+				lock(collection.SyncRoot)
 				{
 					max = thisValue.Count - 1;
 					n = RNGRandomHelper.Next(0, max);
@@ -61,7 +61,7 @@ namespace essentialMix.Extensions
 				}
 			}
 
-			lock (thisValue)
+			lock(thisValue)
 			{
 				max = thisValue.Count - 1;
 				n = RNGRandomHelper.Next(0, max);
@@ -79,7 +79,7 @@ namespace essentialMix.Extensions
 
 			if (thisValue is ICollection collection)
 			{
-				lock (collection.SyncRoot)
+				lock(collection.SyncRoot)
 				{
 					max = thisValue.Count - 1;
 					n = RNGRandomHelper.Next(0, max);
@@ -89,7 +89,7 @@ namespace essentialMix.Extensions
 				}
 			}
 
-			lock (thisValue)
+			lock(thisValue)
 			{
 				max = thisValue.Count - 1;
 				n = RNGRandomHelper.Next(0, max);
@@ -107,7 +107,7 @@ namespace essentialMix.Extensions
 
 			if (thisValue is ICollection { IsSynchronized: true } collection)
 			{
-				lock (collection.SyncRoot)
+				lock(collection.SyncRoot)
 				{
 					result = thisValue.First();
 					thisValue.Remove(result);
@@ -115,7 +115,7 @@ namespace essentialMix.Extensions
 				}
 			}
 
-			lock (thisValue)
+			lock(thisValue)
 			{
 				result = thisValue.First();
 				thisValue.Remove(result);
@@ -131,7 +131,7 @@ namespace essentialMix.Extensions
 
 			if (thisValue is ICollection { IsSynchronized: true } collection)
 			{
-				lock (collection.SyncRoot)
+				lock(collection.SyncRoot)
 				{
 					result = thisValue.Last();
 					thisValue.Remove(result);
@@ -139,7 +139,7 @@ namespace essentialMix.Extensions
 				}
 			}
 
-			lock (thisValue)
+			lock(thisValue)
 			{
 				result = thisValue.Last();
 				thisValue.Remove(result);

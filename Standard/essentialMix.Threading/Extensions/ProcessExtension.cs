@@ -150,9 +150,9 @@ namespace essentialMix.Extensions
 			Func<bool> predicate;
 
 			if (evalFunc == null)
-				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForInputIdle(TimeSpanHelper.HALF_SCHEDULE);
+				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForInputIdle(TimeSpanHelper.HALF);
 			else
-				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForInputIdle(TimeSpanHelper.HALF_SCHEDULE) || evalFunc();
+				predicate = () => !IsAwaitable(thisValue) || thisValue.WaitForInputIdle(TimeSpanHelper.HALF) || evalFunc();
 
 			return SpinWait.SpinUntil(predicate, millisecondsTimeout);
 		}

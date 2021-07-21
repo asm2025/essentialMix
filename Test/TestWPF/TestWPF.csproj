@@ -13,8 +13,8 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
-		<AssemblyVersion>12.31.1.0</AssemblyVersion>
-		<FileVersion>21.6.11.0</FileVersion>
+    <AssemblyVersion>12.32.0.0</AssemblyVersion>
+    <FileVersion>21.7.21.0</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 	</PropertyGroup>
@@ -43,7 +43,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="5.0.0" />

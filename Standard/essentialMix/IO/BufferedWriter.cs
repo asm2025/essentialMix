@@ -45,7 +45,7 @@ namespace essentialMix.IO
 			_bufferSize = BUFFER_DEFAULT;
 			_buffer = new StringBuilder(_bufferSize);
 			Writing = writing;
-			_timer = new Timer(TimeSpanHelper.QUARTER_SCHEDULE);
+			_timer = new Timer(TimeSpanHelper.QUARTER);
 			_timer.Elapsed += (_, _) =>
 			{
 				lock(_buffer)

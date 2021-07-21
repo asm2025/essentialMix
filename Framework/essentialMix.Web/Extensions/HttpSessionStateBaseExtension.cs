@@ -41,7 +41,7 @@ namespace essentialMix.Extensions
 
 		public static void Set<T>([NotNull] this HttpSessionState thisValue, [NotNull] string name, T value)
 		{
-			lock (thisValue.SyncRoot)
+			lock(thisValue.SyncRoot)
 			{
 				thisValue[name] = value;
 			}

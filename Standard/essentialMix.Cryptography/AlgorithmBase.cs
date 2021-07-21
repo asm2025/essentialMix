@@ -1,3 +1,4 @@
+using System;
 using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
@@ -17,7 +18,7 @@ namespace essentialMix.Cryptography
 		/// <inheritdoc />
 		protected override void Dispose(bool disposing)
 		{
-			if (disposing) ObjectHelper.Dispose(ref _algorithm);
+			if (disposing && _algorithm is IDisposable disposable) ObjectHelper.Dispose(ref disposable);
 			base.Dispose(disposing);
 		}
 

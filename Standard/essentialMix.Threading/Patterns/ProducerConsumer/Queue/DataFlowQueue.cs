@@ -10,32 +10,29 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	public sealed class DataFlowQueue<T> : ProducerConsumerThreadQueue<T>
 	{
-		private ManualResetEventSlim _manualResetEventSlim;
-		private BufferBlock<T> _queue;
-		private ActionBlock<T> _processor;
+		private readonly BufferBlock<T> _queue;
+		private readonly ActionBlock<T> _processor;
 		private IDisposable _link;
-
-		private Thread _worker;
+		private ManualResetEventSlim _workCompletedEventSlim;
 
 		public DataFlowQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			_manualResetEventSlim = new ManualResetEventSlim(false);
+			_workCompletedEventSlim = new ManualResetEventSlim(false);
 
 			// Define the mesh.
 			_queue = new BufferBlock<T>(new DataflowBlockOptions
 			{
 				CancellationToken = Token
 			});
-			_processor = new ActionBlock<T>(Run,
-				new ExecutionDataflowBlockOptions
-				{
-					MaxDegreeOfParallelism = Threads,
-					CancellationToken = Token
-				});
+			_processor = new ActionBlock<T>(Run, new ExecutionDataflowBlockOptions
+			{
+				MaxDegreeOfParallelism = Threads,
+				CancellationToken = Token
+			});
 			_link = _queue.LinkTo(_processor, new DataflowLinkOptions
 			{
-				PropagateCompletion = false
+				PropagateCompletion = true
 			});
 			Task.Run(Consume).ConfigureAwait();
 		}
@@ -46,9 +43,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			base.Dispose(disposing);
 			if (!disposing) return;
 			ObjectHelper.Dispose(ref _link);
-			ObjectHelper.Dispose(ref _processor);
-			ObjectHelper.Dispose(ref _queue);
-			ObjectHelper.Dispose(ref _manualResetEventSlim);
+			ObjectHelper.Dispose(ref _workCompletedEventSlim);
 		}
 
 		public override int Count => _queue.Count + _processor.InputCount;
@@ -64,7 +59,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		protected override void CompleteInternal()
 		{
 			CompleteMarked = true;
-			_queue.Completion.ContinueWith(_ => _processor.Complete());
 			_queue.Complete();
 		}
 
@@ -82,20 +76,19 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			try
 			{
 				if (millisecondsTimeout < TimeSpanHelper.ZERO)
-					_manualResetEventSlim.Wait(Token);
-				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
+					_workCompletedEventSlim.Wait(Token);
+				else if (!_workCompletedEventSlim.Wait(millisecondsTimeout, Token))
 					return false;
 
 				return true;
 			}
 			catch (OperationCanceledException)
 			{
+				// ignored
 			}
 			catch (TimeoutException)
 			{
-			}
-			catch (AggregateException ag) when (ag.InnerException is OperationCanceledException || ag.InnerException is TimeoutException)
-			{
+				// ignored
 			}
 
 			return false;
@@ -108,20 +101,19 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
 			Cancel();
 			ClearInternal();
-			ObjectHelper.Dispose(ref _worker);
 		}
 
 		[NotNull]
 		private Task Consume()
 		{
 			if (IsDisposed) return Task.CompletedTask;
-			_manualResetEventSlim.Reset();
+			_workCompletedEventSlim.Reset();
 			OnWorkStarted(EventArgs.Empty);
 			return Task.WhenAll(_queue.Completion, _processor.Completion)
 						.ContinueWith(_ =>
 						{
 							OnWorkCompleted(EventArgs.Empty);
-							_manualResetEventSlim.Set();
+							_workCompletedEventSlim.Set();
 						});
 		}
 	}

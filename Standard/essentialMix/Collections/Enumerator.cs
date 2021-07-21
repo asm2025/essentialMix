@@ -30,7 +30,6 @@ namespace essentialMix.Collections
 
 			IEnumerator im = Enumerable.GetEnumerator();
 			IsIterable = im.MoveNext();
-			ObjectHelper.Dispose(ref im);
 		}
 
 		public virtual object Current => Impl.Current;
@@ -73,12 +72,6 @@ namespace essentialMix.Collections
 			_impl = null;
 			Index = -1;
 			Done = false;
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing) ObjectHelper.Dispose(ref _impl);
-			base.Dispose(disposing);
 		}
 	}
 

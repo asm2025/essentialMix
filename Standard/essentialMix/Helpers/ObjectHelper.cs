@@ -5,31 +5,25 @@ namespace essentialMix.Helpers
 	public static class ObjectHelper
 	{
 		public static void Dispose<T>(ref T value)
-			where T : class
+			where T : IDisposable
 		{
-			if (value is IDisposable disposable)
+			try
 			{
-				try
-				{
-					disposable?.Dispose();
-				}
-				catch (ObjectDisposedException)
-				{
-					// ignored
-				}
+				value?.Dispose();
 			}
-
-			value = null;
+			catch (ObjectDisposedException)
+			{
+				// ignored
+			}
+			value = default(T);
 		}
 
 		public static void Dispose<T>(T value)
-			where T : class
+			where T : IDisposable
 		{
-			if (value is not IDisposable disposable) return;
-
 			try
 			{
-				disposable?.Dispose();
+				value?.Dispose();
 			}
 			catch (ObjectDisposedException)
 			{

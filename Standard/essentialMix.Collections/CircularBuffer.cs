@@ -6,6 +6,7 @@ using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Threading;
 using essentialMix.Collections.DebugView;
+using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
@@ -15,7 +16,7 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 	[Serializable]
-	public class CircularBuffer<T> : ICollection, IReadOnlyCollection<T>, IEnumerable
+	public class CircularBuffer<T> : ICircularBuffer<T>, ICollection, IReadOnlyCollection<T>, IEnumerable
 	{
 		[Serializable]
 		private struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
@@ -186,7 +187,7 @@ namespace essentialMix.Collections
 
 		public T Dequeue()
 		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			T item = _items[_head];
 			Count--;
 			if (Count == 0) _tail = _head = -1;
@@ -196,7 +197,7 @@ namespace essentialMix.Collections
 
 		public T Pop()
 		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			T item = _items[_tail];
 			Count--;
 			if (Count == 0) _tail = _head = -1;
@@ -206,13 +207,13 @@ namespace essentialMix.Collections
 
 		public T Peek()
 		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			return _items[_head];
 		}
 
 		public T PeekTail()
 		{
-			if (Count == 0) throw new InvalidOperationException("Collection is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			return _items[_tail];
 		}
 
@@ -220,7 +221,7 @@ namespace essentialMix.Collections
 		public void Clear()
 		{
 			if (Count == 0) return;
-
+			
 			if (_isDisposable || _isObject)
 			{
 				while (Count > 0)

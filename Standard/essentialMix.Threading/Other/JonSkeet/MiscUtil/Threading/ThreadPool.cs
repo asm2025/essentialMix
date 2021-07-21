@@ -270,7 +270,7 @@ namespace essentialMix.Threading.Other.JonSkeet.MiscUtil.Threading
 			{
 				if (value < 0 && value != Timeout.Infinite) throw new ArgumentException("IdlePeriod must be non-negative.", nameof(value));
 
-				lock (_stateLock)
+				lock(_stateLock)
 				{
 					_idlePeriod = value;
 				}
@@ -316,7 +316,7 @@ namespace essentialMix.Threading.Other.JonSkeet.MiscUtil.Threading
 			{
 				if (value < 0) throw new ArgumentException("MinThreads must be non-negative", nameof(value));
 
-				lock (_stateLock)
+				lock(_stateLock)
 				{
 					if (value > _maxThreads) throw new ArgumentOutOfRangeException(nameof(value), "MinThreads must be less than or equal to MaxThreads");
 					_minThreads = value;
@@ -341,7 +341,7 @@ namespace essentialMix.Threading.Other.JonSkeet.MiscUtil.Threading
 			{
 				if (value < 1) throw new ArgumentException("MaxThreads must be at least 1", nameof(MaxThreads));
 
-				lock (_stateLock)
+				lock(_stateLock)
 				{
 					if (value < _minThreads) throw new ArgumentOutOfRangeException(nameof(value), "MaxThreads must be greater than or equal to MinThreads");
 					_maxThreads = value;
@@ -500,7 +500,7 @@ namespace essentialMix.Threading.Other.JonSkeet.MiscUtil.Threading
 
 			bool startNewThread;
 
-			lock (_stateLock)
+			lock(_stateLock)
 			{
 				lock(_queueLock)
 				{
@@ -547,7 +547,7 @@ namespace essentialMix.Threading.Other.JonSkeet.MiscUtil.Threading
 		{
 			if (id == null) throw new ArgumentNullException(nameof(id));
 
-			lock (_queueLock)
+			lock(_queueLock)
 			{
 				for (int i = 0; i < _queue.Count; i++)
 				{
@@ -678,7 +678,7 @@ namespace essentialMix.Threading.Other.JonSkeet.MiscUtil.Threading
 		{
 			bool background;
 
-			lock (_stateLock)
+			lock(_stateLock)
 			{
 				_threadCounter++;
 				TotalThreads++;

@@ -26,7 +26,7 @@ namespace essentialMix.Threading.Patterns
 	/// 			bool lockTaken = false;
 	/// 	
 	/// 			while (!lockTaken && !Token.IsCancellationRequested) 
-	/// 				lockTaken = Monitor.TryEnter(SyncRoot, TimeSpanHelper.MINIMUM_SCHEDULE);
+	/// 				lockTaken = Monitor.TryEnter(SyncRoot, TimeSpanHelper.MINIMUM);
 	/// 	
 	/// 			Token.ThrowIfCancellationRequested();
 	/// 			if (!lockTaken) return;
@@ -57,7 +57,7 @@ namespace essentialMix.Threading.Patterns
 	/// 		bool lockTaken = false;
 	/// 	
 	/// 		while (!lockTaken && !Token.IsCancellationRequested) 
-	/// 			lockTaken = Monitor.TryEnter(SyncRoot, TimeSpanHelper.MINIMUM_SCHEDULE);
+	/// 			lockTaken = Monitor.TryEnter(SyncRoot, TimeSpanHelper.MINIMUM);
 	/// 	
 	/// 		Token.ThrowIfCancellationRequested();
 	/// 		if (!lockTaken) return;

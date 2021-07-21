@@ -97,6 +97,15 @@ namespace essentialMix.Exceptions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Collection is empty..
+        /// </summary>
+        internal static string CollectionIsEmpty {
+            get {
+                return ResourceManager.GetString("CollectionIsEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Collection is locked..
         /// </summary>
         internal static string CollectionLocked {

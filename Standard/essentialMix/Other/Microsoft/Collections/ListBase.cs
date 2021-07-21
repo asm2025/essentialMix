@@ -39,7 +39,7 @@ namespace Other.Microsoft.Collections
 			{
 				get
 				{
-					lock (_root)
+					lock(_root)
 					{
 						return _list.Count;
 					}
@@ -50,7 +50,7 @@ namespace Other.Microsoft.Collections
 			{
 				get
 				{
-					lock (_root)
+					lock(_root)
 					{
 						return ((ICollection<T>)_list).IsReadOnly;
 					}
@@ -59,7 +59,7 @@ namespace Other.Microsoft.Collections
 
 			public void Add(T item)
 			{
-				lock (_root)
+				lock(_root)
 				{
 					_list.Add(item);
 				}
@@ -67,7 +67,7 @@ namespace Other.Microsoft.Collections
 
 			public void Clear()
 			{
-				lock (_root)
+				lock(_root)
 				{
 					_list.Clear();
 				}
@@ -75,7 +75,7 @@ namespace Other.Microsoft.Collections
 
 			public bool Contains(T item)
 			{
-				lock (_root)
+				lock(_root)
 				{
 					return _list.Contains(item);
 				}
@@ -83,7 +83,7 @@ namespace Other.Microsoft.Collections
 
 			public void CopyTo(T[] array, int arrayIndex)
 			{
-				lock (_root)
+				lock(_root)
 				{
 					_list.CopyTo(array, arrayIndex);
 				}
@@ -91,7 +91,7 @@ namespace Other.Microsoft.Collections
 
 			public bool Remove(T item)
 			{
-				lock (_root)
+				lock(_root)
 				{
 					return _list.Remove(item);
 				}
@@ -99,7 +99,7 @@ namespace Other.Microsoft.Collections
 
 			IEnumerator IEnumerable.GetEnumerator()
 			{
-				lock (_root)
+				lock(_root)
 				{
 					return _list.GetEnumerator();
 				}
@@ -107,7 +107,7 @@ namespace Other.Microsoft.Collections
 
 			IEnumerator<T> IEnumerable<T>.GetEnumerator()
 			{
-				lock (_root)
+				lock(_root)
 				{
 					return ((IEnumerable<T>)_list).GetEnumerator();
 				}
@@ -117,14 +117,14 @@ namespace Other.Microsoft.Collections
 			{
 				get
 				{
-					lock (_root)
+					lock(_root)
 					{
 						return _list[index];
 					}
 				}
 				set
 				{
-					lock (_root)
+					lock(_root)
 					{
 						_list[index] = value;
 					}
@@ -133,7 +133,7 @@ namespace Other.Microsoft.Collections
 
 			public int IndexOf(T item)
 			{
-				lock (_root)
+				lock(_root)
 				{
 					return _list.IndexOf(item);
 				}
@@ -141,7 +141,7 @@ namespace Other.Microsoft.Collections
 
 			public void Insert(int index, T item)
 			{
-				lock (_root)
+				lock(_root)
 				{
 					_list.Insert(index, item);
 				}
@@ -149,7 +149,7 @@ namespace Other.Microsoft.Collections
 
 			public void RemoveAt(int index)
 			{
-				lock (_root)
+				lock(_root)
 				{
 					_list.RemoveAt(index);
 				}

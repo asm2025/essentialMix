@@ -24,7 +24,7 @@ namespace essentialMix.Cryptography.RandomNumber
 		{
 			if (data.Length == 0) return;
 
-			lock (_lock)
+			lock(_lock)
 			{
 				for (int i = 0; i < data.Length; i++)
 					data[i] = (byte)_random.Next(byte.MinValue, byte.MaxValue);
@@ -35,7 +35,7 @@ namespace essentialMix.Cryptography.RandomNumber
 		{
 			if (data.Length == 0) return;
 
-			lock (_lock)
+			lock(_lock)
 			{
 				for (int i = 0; i < data.Length; i++)
 					data[i] = (byte)_random.Next(1, byte.MaxValue);

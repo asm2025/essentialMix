@@ -12,7 +12,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		private readonly Thread[] _workers;
 
 		private BlockingCollection<T> _queue;
-		private AutoResetEvent _workEvent;
+		private AutoResetEvent _workStartedEvent;
 		private CountdownEvent _countdown;
 		private bool _workStarted;
 
@@ -20,7 +20,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			: base(options, token)
 		{
 			_queue = new BlockingCollection<T>();
-			_workEvent = new AutoResetEvent(false);
+			_workStartedEvent = new AutoResetEvent(false);
 			_countdown = new CountdownEvent(1);
 			_workers = new Thread[Threads];
 		}
@@ -30,7 +30,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			base.Dispose(disposing);
 			if (!disposing) return;
-			ObjectHelper.Dispose(ref _workEvent);
+			ObjectHelper.Dispose(ref _workStartedEvent);
 			ObjectHelper.Dispose(ref _queue);
 			ObjectHelper.Dispose(ref _countdown);
 		}
@@ -63,7 +63,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					}
 				}
 
-				if (!_workEvent.WaitOne(TimeSpanHelper.HALF_SCHEDULE)) throw new TimeoutException();
+				if (!_workStartedEvent.WaitOne()) throw new TimeoutException();
 				if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 				OnWorkStarted(EventArgs.Empty);
 			}
@@ -95,12 +95,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 			catch (OperationCanceledException)
 			{
+				// ignored
 			}
 			catch (TimeoutException)
 			{
-			}
-			catch (AggregateException ag) when (ag.InnerException is OperationCanceledException || ag.InnerException is TimeoutException)
-			{
+				// ignored
 			}
 
 			return false;
@@ -113,28 +112,24 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
 			Cancel();
 			ClearInternal();
-			if (!_workStarted) return;
-
-			for (int i = 0; i < _workers.Length; i++) 
-				ObjectHelper.Dispose(ref _workers[i]);
 		}
 
 		private void Consume()
 		{
-			_workEvent.Set();
+			_workStartedEvent.Set();
 			if (IsDisposed) return;
 
 			try
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !_queue.IsCompleted)
 				{
-					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.FAST_SCHEDULE, Token))
+					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.FAST, Token))
 						Run(item);
 				}
 
 				if (IsDisposed || Token.IsCancellationRequested) return;
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.FAST_SCHEDULE, Token))
+				foreach (T item in _queue.GetConsumingEnumerable(Token))
 					Run(item);
 			}
 			catch (ObjectDisposedException) { }

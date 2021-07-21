@@ -57,7 +57,7 @@ namespace essentialMix.Extensions
 		{
 			if (key == null) return false;
 
-			lock (thisValue.SyncRoot)
+			lock(thisValue.SyncRoot)
 			{
 				if (thisValue.Contains(key)) return false;
 				thisValue.Add(key, value);
@@ -81,7 +81,7 @@ namespace essentialMix.Extensions
 		{
 			if (entry.Length == 0) return 0;
 
-			lock (thisValue.SyncRoot)
+			lock(thisValue.SyncRoot)
 			{
 				int n = 0;
 
