@@ -82,16 +82,24 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				OnWorkStarted(EventArgs.Empty);
 			}
 
-			_queue.Enqueue(item);
-			_queueEvent.Set();
+			lock(SyncRoot)
+			{
+				_queue.Enqueue(item);
+				_queueEvent.Set();
+			}
 		}
 
 		/// <inheritdoc />
 		public bool TryDequeue(out T item)
 		{
 			ThrowIfDisposed();
-			if (!_queue.TryDequeue(out item)) return false;
-			_queueEvent.Set();
+
+			lock(SyncRoot)
+			{
+				if (!_queue.TryDequeue(out item)) return false;
+				_queueEvent.Set();
+			}
+
 			return true;
 		}
 
@@ -107,16 +115,19 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			ThrowIfDisposed();
 
-			int n = 0;
-
-			while (_queue.TryPeek(out T item) && predicate(item))
+			lock(SyncRoot)
 			{
-				if (!_queue.TryDequeue(out _)) continue;
-				n++;
-			}
+				int n = 0;
 
-			if (n == 0) return;
-			_queueEvent.Set();
+				while (_queue.TryPeek(out T item) && predicate(item))
+				{
+					if (!_queue.TryDequeue(out _)) continue;
+					n++;
+				}
+
+				if (n == 0) return;
+				_queueEvent.Set();
+			}
 		}
 
 		protected sealed override void CompleteInternal()
@@ -128,7 +139,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		protected sealed override void ClearInternal()
 		{
 			_queue.Clear();
-			_queueEvent.Set();
 		}
 
 		protected sealed override bool WaitInternal(int millisecondsTimeout)
@@ -179,12 +189,18 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 					if (IsDisposed || Token.IsCancellationRequested) return;
 					if (CompleteMarked) break;
-					if (!_queue.TryDequeue(out item)) continue;
+
+					lock(SyncRoot)
+					{
+						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
+					}
+
 					Run(item);
 				}
 
-				while (!IsDisposed && !Token.IsCancellationRequested)
+				while (!IsDisposed && !Token.IsCancellationRequested && !_queue.IsEmpty)
 				{
+					// no lock here
 					if (!_queue.TryDequeue(out item)) continue;
 					Run(item);
 				}

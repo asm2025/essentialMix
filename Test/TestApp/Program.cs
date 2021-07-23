@@ -90,7 +90,7 @@ work with {HEAVY} items.");
 			//TestDeepestPit();
 
 			//TestThreadQueue();
-			//TestThreadQueueWithPriorityQueue();
+			TestThreadQueueWithPriorityQueue();
 			//TestAsyncLock();
 
 			//TestSortAlgorithm();
@@ -105,7 +105,7 @@ work with {HEAVY} items.");
 			//TestCircularBuffer();
 			//TestLinkedCircularBuffer();
 			//TestBitCollection();
-			TestQueueAdapter();
+			//TestQueueAdapter();
 
 			//TestBinaryTreeFromTraversal();
 			
@@ -644,6 +644,7 @@ work with {HEAVY} items.");
 																.ToArray();
 			Queue<ThreadQueueMode> queueModes = new Queue<ThreadQueueMode>(modes);
 			Stopwatch clock = new Stopwatch();
+			int studentId = 0;
 
 			while (queueModes.Count > 0)
 			{
@@ -661,12 +662,22 @@ work with {HEAVY} items.");
 					CancellationToken token = cts?.Token ?? CancellationToken.None;
 					ProducerConsumerQueueOptions<Student> options = mode switch
 					{
-						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<Student>(threads, Exec)
+						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<Student>(threads, e =>
+						{
+							Interlocked.Increment(ref studentId);
+							e.Id = studentId;
+							return Exec(e);
+						})
 						{
 							// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
 							Threshold = TimeSpan.FromSeconds(1)
 						},
-						_ => new ProducerConsumerQueueOptions<Student>(threads, Exec)
+						_ => new ProducerConsumerQueueOptions<Student>(threads, e =>
+						{
+							Interlocked.Increment(ref studentId);
+							e.Id = studentId;
+							return Exec(e);
+						})
 					};
 			
 					// Create a priority queue
@@ -687,6 +698,7 @@ work with {HEAVY} items.");
 
 						queue.WorkCompleted += (_, _) =>
 						{
+							Interlocked.Exchange(ref studentId, 0);
 							long elapsed = clock.ElapsedMilliseconds;
 							Console.WriteLine();
 							Console.WriteLine();
@@ -694,11 +706,9 @@ work with {HEAVY} items.");
 							Console.WriteLine();
 						};
 
-						foreach (Student value in values)
-						{
+						foreach (Student value in values) 
 							queue.Enqueue(value);
-						}
-						
+
 						queue.Complete();
 						
 						/*
@@ -747,7 +757,7 @@ work with {HEAVY} items.");
 			static TaskResult Exec(Student e)
 			{
 				Task.Delay(50).Execute();
-				Console.Write($"{e.Id}. {e.Name}, Grade = {e.Grade:###.##}");
+				Console.WriteLine($"{e.Id}. {e.Name}, Grade = {e.Grade:###.##}");
 				return TaskResult.Success;
 			}
 		}
@@ -4596,21 +4606,22 @@ work with {HEAVY} items.");
 
 			static void DoHeapTest<T>(IHeap<T> heap, T[] values, Stopwatch clock)
 			{
+				ICollection collection = heap;
 				Console.WriteLine();
 				Console.WriteLine(Bright.Green($"Testing {heap.GetType().Name}..."));
 				heap.Clear();
 				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
-				Debug.Assert(heap.Count == 0, "Values are not cleared correctly!");
+				Debug.Assert(collection.Count == 0, "Values are not cleared correctly!");
 
 				clock.Restart();
 				heap.Add(values);
-				Console.WriteLine($"Added {heap.Count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Added {collection.Count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine(Bright.Red("Test removing..."));
 				int removed = 0;
 				clock.Restart();
 
-				while (heap.Count > 0)
+				while (collection.Count > 0)
 				{
 					heap.ExtractValue();
 					removed++;

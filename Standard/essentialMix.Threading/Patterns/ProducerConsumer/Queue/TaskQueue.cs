@@ -76,14 +76,17 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				OnWorkStarted(EventArgs.Empty);
 			}
 
-			_queue.Enqueue(item);
+			lock(SyncRoot) 
+				_queue.Enqueue(item);
 		}
 
 		/// <inheritdoc />
 		public bool TryDequeue(out T item)
 		{
 			ThrowIfDisposed();
-			return _queue.TryDequeue(out item);
+
+			lock(SyncRoot)
+				return _queue.TryDequeue(out item);
 		}
 
 		/// <inheritdoc />
@@ -98,9 +101,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			ThrowIfDisposed();
 
-			while (_queue.TryPeek(out T item) && predicate(item))
+			lock(SyncRoot)
 			{
-				_queue.TryDequeue(out _);
+				while (_queue.TryPeek(out T item) && predicate(item))
+				{
+					_queue.TryDequeue(out _);
+				}
 			}
 		}
 
@@ -157,14 +163,25 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					if (!_queue.TryDequeue(out item)) continue;
+					lock(SyncRoot)
+					{
+						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
+					}
+
 					Run(item);
 				}
 
 				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST);
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out item)) 
+				while (!IsDisposed && !Token.IsCancellationRequested)
+				{
+					lock(SyncRoot)
+					{
+						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) break;
+					}
+
 					Run(item);
+				}
 			}
 			finally
 			{

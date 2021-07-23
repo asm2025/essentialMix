@@ -221,12 +221,7 @@ namespace essentialMix.Threading
 
 		private void StopInternal(bool waitForQueue)
 		{
-			lock(_lock)
-			{
-				Cancel();
-				Monitor.PulseAll(_lock);
-			}
-
+			Cancel();
 			// Wait for the consumer's thread to finish.
 			if (waitForQueue) WaitInternal(TimeSpanHelper.INFINITE);
 		}

@@ -48,7 +48,7 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_BinaryHeapDebugView<,,>))]
 	[Serializable]
-	public abstract class BinaryHeap<TNode, TKey, TValue> : IKeyedHeap<TNode, TKey, TValue>, IReadOnlyCollection<TValue>, ICollection
+	public abstract class BinaryHeap<TNode, TKey, TValue> : IKeyedHeap<TNode, TKey, TValue>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
 		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 	{
 		/// <summary>
@@ -1174,7 +1174,7 @@ namespace essentialMix.Collections
 			return Count > 0 && RemoveNode(Array.IndexOf(Items, node, 0, Count));
 		}
 
-		/// <inheritdoc />
+		/// <inheritdoc cref="ICollection{T}" />
 		public void Clear()
 		{
 			if (Count == 0) return;

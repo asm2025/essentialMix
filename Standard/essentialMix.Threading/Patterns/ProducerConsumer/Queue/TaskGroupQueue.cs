@@ -53,14 +53,18 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		protected sealed override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
-			_queue.Enqueue(item);
+
+			lock(SyncRoot) 
+				_queue.Enqueue(item);
 		}
 
 		/// <inheritdoc />
 		public bool TryDequeue(out T item)
 		{
 			ThrowIfDisposed();
-			return _queue.TryDequeue(out item);
+
+			lock(SyncRoot)
+				return _queue.TryDequeue(out item);
 		}
 
 		/// <inheritdoc />
@@ -75,8 +79,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			ThrowIfDisposed();
 
-			while (_queue.TryPeek(out T item) && predicate(item)) 
-				_queue.TryDequeue(out _);
+			lock(SyncRoot)
+			{
+				while (_queue.TryPeek(out T item) && predicate(item)) 
+					_queue.TryDequeue(out _);
+			}
 		}
 
 		protected sealed override void CompleteInternal()
@@ -201,11 +208,15 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 			int read = 0;
 
-			while (count > 0 && _queue.TryDequeue(out T item))
+			while (count > 0 && !_queue.IsEmpty)
 			{
-				items[offset++] = item;
-				count--;
-				read++;
+				lock(SyncRoot)
+				{
+					if (_queue.IsEmpty || !_queue.TryDequeue(out T item)) continue;
+					items[offset++] = item;
+					count--;
+					read++;
+				}
 			}
 
 			return !IsDisposed && !Token.IsCancellationRequested && read > 0;

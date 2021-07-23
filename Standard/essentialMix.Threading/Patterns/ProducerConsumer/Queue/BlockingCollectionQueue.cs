@@ -123,8 +123,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !_queue.IsCompleted)
 				{
-					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out T item, TimeSpanHelper.FAST, Token))
+					while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
+					{
+						if (!_queue.TryTake(out T item, TimeSpanHelper.FAST, Token)) continue;
 						Run(item);
+					}
 				}
 
 				if (IsDisposed || Token.IsCancellationRequested) return;

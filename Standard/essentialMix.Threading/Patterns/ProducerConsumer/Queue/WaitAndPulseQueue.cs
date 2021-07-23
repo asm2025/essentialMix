@@ -100,6 +100,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public bool TryDequeue(out T item)
 		{
 			ThrowIfDisposed();
+
 			object lck = GetLock();
 
 			lock(lck)
@@ -114,27 +115,20 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public bool TryPeek(out T item)
 		{
 			ThrowIfDisposed();
-			object lck = GetLock();
-
-			lock(lck)
-			{
-				if (!_queue.TryPeek(out item)) return false;
-				Monitor.Pulse(lck);
-				return true;
-			}
+			return _queue.TryPeek(out item);
 		}
 
 		/// <inheritdoc />
 		public void RemoveWhile(Predicate<T> predicate)
 		{
 			ThrowIfDisposed();
-			if (_queue.Count == 0) return;
+			if (_queue.IsEmpty) return;
+
 			object lck = GetLock();
 
 			lock(lck)
 			{
-				ThrowIfDisposed();
-				if (_queue.Count == 0) return;
+				if (_queue.IsEmpty) return;
 
 				int n = 0;
 
@@ -142,7 +136,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				{
 					if (!_queue.TryPeek(out T item)) continue;
 					if (!predicate(item)) break;
-					_queue.TryDequeue(out _);
+					_queue.Dequeue();
 					n++;
 				}
 
@@ -154,7 +148,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		protected sealed override void CompleteInternal()
 		{
 			CompleteMarked = true;
+			
 			object lck = GetLock();
+			
 			lock(lck) 
 				Monitor.PulseAll(lck);
 		}
@@ -205,6 +201,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			_workStartedEvent.Set();
 			if (IsDisposed) return;
+			
 			object lck = GetLock();
 
 			try
@@ -226,17 +223,17 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					{
 						if (IsDisposed || Token.IsCancellationRequested) return;
 						if (CompleteMarked) break;
-						if (!_queue.TryDequeue(out item)) continue;
+						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
 					}
 					Run(item);
 				}
 
-				while (!IsDisposed && !Token.IsCancellationRequested)
+				while (!IsDisposed && !Token.IsCancellationRequested && !_queue.IsEmpty)
 				{
 					lock(lck)
 					{
 						if (IsDisposed || Token.IsCancellationRequested) return;
-						if (!_queue.TryDequeue(out item)) break;
+						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) break;
 					}
 					Run(item);
 				}

@@ -66,8 +66,13 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public bool TryDequeue(out T item)
 		{
 			ThrowIfDisposed();
-			if (!_queue.TryDequeue(out item)) return false;
-			Monitor.Pulse(SyncRoot);
+
+			lock(SyncRoot)
+			{
+				if (!_queue.TryDequeue(out item)) return false;
+				Monitor.Pulse(SyncRoot);
+			}
+
 			return true;
 		}
 
@@ -83,16 +88,19 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			ThrowIfDisposed();
 
-			int n = 0;
-
-			while (_queue.TryPeek(out T item) && predicate(item))
+			lock(SyncRoot)
 			{
-				if (!_queue.TryDequeue(out _)) continue;
-				n++;
-			}
+				int n = 0;
 
-			if (n == 0) return;
-			Monitor.Pulse(SyncRoot);
+				while (_queue.TryPeek(out T item) && predicate(item))
+				{
+					if (!_queue.TryDequeue(out _)) continue;
+					n++;
+				}
+
+				if (n == 0) return;
+				Monitor.Pulse(SyncRoot);
+			}
 		}
 
 		protected sealed override void CompleteInternal()
@@ -167,12 +175,19 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					{
 						lock(SyncRoot)
 						{
-							if (_queue.Count == 0) Monitor.Wait(SyncRoot, TimeSpanHelper.FAST);
-							if (IsDisposed || Token.IsCancellationRequested || _queue.Count == 0) continue;
+							if (_queue.IsEmpty) Monitor.Wait(SyncRoot, TimeSpanHelper.FAST);
+							if (IsDisposed || Token.IsCancellationRequested || _queue.IsEmpty) continue;
 						}
 
-						while (_queue.Count > 0 && count < tasks.Length && !IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.TryDequeue(out T item))
+						while (count < tasks.Length && !IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !_queue.IsEmpty)
 						{
+							T item;
+
+							lock(SyncRoot)
+							{
+								if (_queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
+							}
+
 							_countdown.AddCount();
 							tasks[count++] = Task.Run(() =>
 							{
@@ -200,12 +215,19 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST);
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
+				while (!IsDisposed && !Token.IsCancellationRequested && !_queue.IsEmpty)
 				{
 					if (HasThreshold && count == 0) tasks[count++] = Task.Delay(Threshold).ConfigureAwait();
 
-					while (_queue.Count > 0 && count < tasks.Length && !IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out T item))
+					while (count < tasks.Length && !IsDisposed && !Token.IsCancellationRequested && !_queue.IsEmpty)
 					{
+						T item;
+
+						lock(SyncRoot)
+						{
+							if (_queue.IsEmpty || !_queue.TryDequeue(out item)) break;
+						}
+
 						_countdown.AddCount();
 						tasks[count++] = Task.Run(() =>
 						{

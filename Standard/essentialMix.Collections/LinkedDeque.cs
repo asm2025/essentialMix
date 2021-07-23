@@ -19,7 +19,7 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 	[Serializable]
-	public class LinkedDeque<T> : IDeque<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
+	public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
 	{
 		[Serializable]
 		internal class SynchronizedCollection : ICollection<T>
@@ -125,12 +125,12 @@ namespace essentialMix.Collections
 
 		[NotNull]
 		[NonSerialized]
-		private ICollection _collectionRef;
+		private ICollection _collection;
 
 		public LinkedDeque()
 		{
 			Items = new LinkedList<T>();
-			_collectionRef = Items;
+			_collection = Items;
 		}
 
 		/// <inheritdoc cref="ICollection{T}" />
@@ -140,10 +140,10 @@ namespace essentialMix.Collections
 		bool ICollection<T>.IsReadOnly => false;
 
 		/// <inheritdoc />
-		public bool IsSynchronized => _collectionRef.IsSynchronized;
+		public bool IsSynchronized => _collection.IsSynchronized;
 
 		/// <inheritdoc />
-		object ICollection.SyncRoot => _collectionRef.SyncRoot;
+		object ICollection.SyncRoot => _collection.SyncRoot;
 
 		[NotNull]
 		protected LinkedList<T> Items { get; }
@@ -200,6 +200,19 @@ namespace essentialMix.Collections
 			return value;
 		}
 
+		/// <inheritdoc />
+		public bool TryDequeue(out T item)
+		{
+			if (Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+			item = Items.First.Value;
+			Items.RemoveFirst();
+			return true;
+		}
+
 		public void Push(T value) { Items.AddLast(value); }
 
 		public void Push([NotNull] IEnumerable<T> enumerable)
@@ -240,10 +253,34 @@ namespace essentialMix.Collections
 			return value;
 		}
 
+		/// <inheritdoc />
+		public bool TryPop(out T item)
+		{
+			if (Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+			item = Items.Last.Value;
+			return true;
+		}
+
 		public T Peek()
 		{
 			if (Count == 0) throw new CollectionIsEmptyException();
 			return Items.First.Value;
+		}
+
+		/// <inheritdoc />
+		public bool TryPeek(out T item)
+		{
+			if (Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+			item = Items.First.Value;
+			return true;
 		}
 
 		public T PeekTail()
@@ -253,6 +290,18 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
+		public bool TryPeekTail(out T item)
+		{
+			if (Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+			item = Items.Last.Value;
+			return true;
+		}
+
+		/// <inheritdoc cref="ICollection{T}" />
 		public void Clear() { Items.Clear(); }
 
 		/// <inheritdoc />
@@ -309,7 +358,7 @@ namespace essentialMix.Collections
 		public void CopyTo(T[] array, int arrayIndex) { Items.CopyTo(array, arrayIndex); }
 
 		/// <inheritdoc />
-		public void CopyTo(Array array, int index) { _collectionRef.CopyTo(array, index); }
+		public void CopyTo(Array array, int index) { _collection.CopyTo(array, index); }
 
 		[NotNull]
 		public static ICollection<T> Synchronized(LinkedDeque<T> list)

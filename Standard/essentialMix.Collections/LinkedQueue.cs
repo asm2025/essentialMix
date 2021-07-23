@@ -8,48 +8,9 @@ namespace essentialMix.Collections
 	[Serializable]
 	public class LinkedQueue<T> : LinkedList<T>, IDeque<T>, IReadOnlyCollection<T>, ICollection, IEnumerable<T>, IEnumerable
 	{
-		private readonly Func<T> _dequeue;
-		private readonly Func<T> _pop;
-
 		public LinkedQueue(DequeuePriority priority)
 		{
 			Priority = priority;
-			_dequeue = priority switch
-			{
-				DequeuePriority.FIFO => () =>
-				{
-					AssertNotEmpty();
-					T value = First.Value;
-					RemoveFirst();
-					return value;
-				},
-				DequeuePriority.LIFO => () =>
-				{
-					AssertNotEmpty();
-					T value = Last.Value;
-					RemoveLast();
-					return value;
-				},
-				_ => throw new ArgumentOutOfRangeException(nameof(priority), priority, null)
-			};
-			_pop = priority switch
-			{
-				DequeuePriority.FIFO => () =>
-				{
-					AssertNotEmpty();
-					T value = Last.Value;
-					RemoveLast();
-					return value;
-				},
-				DequeuePriority.LIFO => () =>
-				{
-					AssertNotEmpty();
-					T value = First.Value;
-					RemoveFirst();
-					return value;
-				},
-				_ => throw new ArgumentOutOfRangeException(nameof(priority), priority, null)
-			};
 		}
 
 		/// <inheritdoc />
@@ -66,11 +27,93 @@ namespace essentialMix.Collections
 
 		public void Enqueue(T item) { AddLast(item); }
 
-		public T Dequeue() { return _dequeue(); }
+		public T Dequeue()
+		{
+			AssertNotEmpty();
+			
+			T value;
+
+			if (Priority == DequeuePriority.LIFO)
+			{
+				value = Last.Value;
+				RemoveLast();
+			}
+			else
+			{
+				value = First.Value;
+				RemoveFirst();
+			}
+
+			return value;
+		}
+
+		/// <inheritdoc />
+		public bool TryDequeue(out T item)
+		{
+			if (Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+
+			if (Priority == DequeuePriority.LIFO)
+			{
+				item = Last.Value;
+				RemoveLast();
+			}
+			else
+			{
+				item = First.Value;
+				RemoveFirst();
+			}
+
+			return true;
+		}
 
 		public void Push(T item) { AddFirst(item); }
 
-		public T Pop() { return _pop(); }
+		public T Pop()
+		{
+			AssertNotEmpty();
+
+			T value;
+
+			if (Priority == DequeuePriority.LIFO)
+			{
+				value = First.Value;
+				RemoveFirst();
+			}
+			else
+			{
+				value = Last.Value;
+				RemoveLast();
+			}
+
+			return value;
+		}
+
+		/// <inheritdoc />
+		public bool TryPop(out T item)
+		{
+			if (Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+
+			if (Priority == DequeuePriority.LIFO)
+			{
+				item = First.Value;
+				RemoveFirst();
+			}
+			else
+			{
+				item = Last.Value;
+				RemoveLast();
+			}
+
+			return true;
+		}
 
 		public T Peek()
 		{
@@ -81,6 +124,21 @@ namespace essentialMix.Collections
 			return node.Value;
 		}
 
+		/// <inheritdoc />
+		public bool TryPeek(out T item)
+		{
+			if (Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+			LinkedListNode<T> node = Priority == DequeuePriority.LIFO
+										? Last
+										: First;
+			item = node.Value;
+			return true;
+		}
+
 		public T PeekTail()
 		{
 			AssertNotEmpty();
@@ -88,6 +146,21 @@ namespace essentialMix.Collections
 										? First
 										: Last;
 			return node.Value;
+		}
+
+		/// <inheritdoc />
+		public bool TryPeekTail(out T item)
+		{
+			if (Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+			LinkedListNode<T> node = Priority == DequeuePriority.LIFO
+										? First
+										: Last;
+			item = node.Value;
+			return true;
 		}
 
 		private void AssertNotEmpty()

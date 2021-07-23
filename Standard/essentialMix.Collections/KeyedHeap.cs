@@ -10,7 +10,7 @@ namespace essentialMix.Collections
 {
 	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
-	public abstract class KeyedHeap<TNode, TKey, TValue> : IKeyedHeap<TNode, TKey, TValue>, IReadOnlyCollection<TValue>, ICollection
+	public abstract class KeyedHeap<TNode, TKey, TValue> : IKeyedHeap<TNode, TKey, TValue>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
 		where TNode : class, IKeyedNode<TKey, TValue>
 	{
 		internal int _version;
@@ -141,7 +141,7 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		public abstract bool Remove(TNode node);
 
-		/// <inheritdoc />
+		/// <inheritdoc cref="ICollection{T}" />
 		public abstract void Clear();
 
 		/// <inheritdoc />

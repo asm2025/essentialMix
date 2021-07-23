@@ -65,14 +65,18 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		protected sealed override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
-			_queue.Enqueue(item);
+
+			lock(SyncRoot) 
+				_queue.Enqueue(item);
 		}
 
 		/// <inheritdoc />
 		public bool TryDequeue(out T item)
 		{
 			ThrowIfDisposed();
-			return _queue.TryDequeue(out item);
+
+			lock(SyncRoot)
+				return _queue.TryDequeue(out item);
 		}
 
 		/// <inheritdoc />
@@ -87,9 +91,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			ThrowIfDisposed();
 
-			while (_queue.TryPeek(out T item) && predicate(item))
+			lock(SyncRoot)
 			{
-				_queue.TryDequeue(out _);
+				while (_queue.TryPeek(out T item) && predicate(item))
+				{
+					_queue.TryDequeue(out _);
+				}
 			}
 		}
 
@@ -147,7 +154,13 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					if (!_queue.TryDequeue(out T item)) continue;
+					T item;
+
+					lock(SyncRoot)
+					{
+						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
+					}
+
 					int index = Array.FindIndex(tasks,e => e == null || e.IsFinished());
 
 					if (tasks[index] != null)
@@ -168,8 +181,15 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				if (Token.IsCancellationRequested) return;
 				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST);
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryDequeue(out T item))
+				while (!IsDisposed && !Token.IsCancellationRequested)
 				{
+					T item;
+
+					lock(SyncRoot)
+					{
+						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) break;
+					}
+
 					int index = Array.FindIndex(tasks,e => e == null || e.IsFinished());
 
 					if (tasks[index] != null)
@@ -196,7 +216,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			finally
 			{
 				OnWorkCompleted(EventArgs.Empty);
-				_allWorkDone.Set();
+				_allWorkDone?.Set();
 			}
 		}
 

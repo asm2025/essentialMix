@@ -413,6 +413,17 @@ namespace essentialMix.Collections
 			return RemoveAtInternal(0);
 		}
 
+		/// <inheritdoc />
+		public bool TryDequeue(out T item)
+		{
+			if (Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+			return TryRemoveAtInternal(0, out item);
+		}
+
 		public void Push(T item) { Insert(Count, item, true); }
 
 		public void Push([NotNull] IEnumerable<T> enumerable) { InsertRange(Count, enumerable.Reverse()); }
@@ -439,16 +450,51 @@ namespace essentialMix.Collections
 			return RemoveAtInternal(Count - 1);
 		}
 
+		/// <inheritdoc />
+		public bool TryPop(out T item)
+		{
+			if (Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+			return TryRemoveAtInternal(Count - 1, out item);
+		}
+
 		public T Peek()
 		{
 			if (Count == 0) throw new CollectionIsEmptyException();
 			return Items[0];
 		}
 
+		/// <inheritdoc />
+		public bool TryPeek(out T item)
+		{
+			if (Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+			item = Items[0];
+			return true;
+		}
+
 		public T PeekTail()
 		{
 			if (Count == 0) throw new CollectionIsEmptyException();
 			return Items[Count - 1];
+		}
+
+		/// <inheritdoc />
+		public bool TryPeekTail(out T item)
+		{
+			if (Count == 0)
+			{
+				item = default(T);
+				return false;
+			}
+			item = Items[Count - 1];
+			return true;
 		}
 
 		/// <inheritdoc cref="ICollection{T}" />
@@ -1000,6 +1046,16 @@ namespace essentialMix.Collections
 			Items[--Count] = default(T);
 			_version++;
 			return item;
+		}
+
+		private bool TryRemoveAtInternal(int index, out T item)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			item = Items[index];
+			if (index < Count - 1) Array.Copy(Items, index + 1, Items, index, Count - (index + 1));
+			Items[--Count] = default(T);
+			_version++;
+			return true;
 		}
 
 		[NotNull]
