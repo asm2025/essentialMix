@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using essentialMix.Delegation;
+using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
@@ -14,8 +15,10 @@ namespace essentialMix.Collections
 	{
 		private readonly ICollection _collection;
 		private readonly Action<T> _enqueue;
-		private readonly OutFunc<T, bool> _dequeue;
-		private readonly OutFunc<T, bool> _peek;
+		private readonly Func<T> _dequeue;
+		private readonly Func<T> _peek;
+		private readonly OutFunc<T, bool> _tryDequeue;
+		private readonly OutFunc<T, bool> _tryPeek;
 		private readonly Action _clear;
 
 		public QueueAdapter([NotNull] TQueue tQueue)
@@ -24,7 +27,9 @@ namespace essentialMix.Collections
 			{
 				case Queue<T> queue:
 					_enqueue = queue.Enqueue;
-					_dequeue = (out T item) =>
+					_dequeue = queue.Dequeue;
+					_peek = queue.Peek;
+					_tryDequeue = (out T item) =>
 					{
 						if (queue.Count == 0)
 						{
@@ -35,7 +40,7 @@ namespace essentialMix.Collections
 						item = queue.Dequeue();
 						return true;
 					};
-					_peek = (out T item) =>
+					_tryPeek = (out T item) =>
 					{
 						if (queue.Count == 0)
 						{
@@ -50,7 +55,9 @@ namespace essentialMix.Collections
 					break;
 				case Stack<T> stack:
 					_enqueue = stack.Push;
-					_dequeue = (out T item) =>
+					_dequeue = stack.Pop;
+					_peek = stack.Peek;
+					_tryDequeue = (out T item) =>
 					{
 						if (stack.Count == 0)
 						{
@@ -61,7 +68,7 @@ namespace essentialMix.Collections
 						item = stack.Pop();
 						return true;
 					};
-					_peek = (out T item) =>
+					_tryPeek = (out T item) =>
 					{
 						if (stack.Count == 0)
 						{
@@ -76,8 +83,18 @@ namespace essentialMix.Collections
 					break;
 				case ConcurrentQueue<T> concurrentQueue:
 					_enqueue = concurrentQueue.Enqueue;
-					_dequeue = concurrentQueue.TryDequeue;
-					_peek = concurrentQueue.TryPeek;
+					_dequeue = () =>
+					{
+						if (!concurrentQueue.TryDequeue(out T item)) throw new CollectionIsEmptyException();
+						return item;
+					};
+					_peek = () =>
+					{
+						if (!concurrentQueue.TryPeek(out T item)) throw new CollectionIsEmptyException();
+						return item;
+					};
+					_tryDequeue = concurrentQueue.TryDequeue;
+					_tryPeek = concurrentQueue.TryPeek;
 					MethodInfo miClear = typeof(TQueue).GetMethod("Clear", Constants.BF_PUBLIC_INSTANCE);
 					_clear = miClear != null
 								? () => miClear.Invoke(concurrentQueue, null)
@@ -90,19 +107,37 @@ namespace essentialMix.Collections
 					break;
 				case ConcurrentStack<T> concurrentStack:
 					_enqueue = concurrentStack.Push;
-					_dequeue = concurrentStack.TryPop;
-					_peek = concurrentStack.TryPeek;
+					_dequeue = () =>
+					{
+						if (!concurrentStack.TryPop(out T item)) throw new CollectionIsEmptyException();
+						return item;
+					};
+					_peek = () =>
+					{
+						if (!concurrentStack.TryPeek(out T item)) throw new CollectionIsEmptyException();
+						return item;
+					};
+					_tryDequeue = concurrentStack.TryPop;
+					_tryPeek = concurrentStack.TryPeek;
 					_clear = concurrentStack.Clear;
 					break;
 				case BlockingCollection<T> blockingCollection:
 					_enqueue = blockingCollection.Add;
-					_dequeue = blockingCollection.TryTake;
-					_peek = (out T item) => throw new NotSupportedException();
+					_dequeue = () =>
+					{
+						if (!blockingCollection.TryTake(out T item)) throw new CollectionIsEmptyException();
+						return item;
+					};
+					_peek = () => throw new NotSupportedException();
+					_tryDequeue = blockingCollection.TryTake;
+					_tryPeek = (out T item) => throw new NotSupportedException();
 					_clear = blockingCollection.Clear;
 					break;
 				case IDeque<T> deque:
 					_enqueue = deque.Enqueue;
-					_dequeue = (out T item) =>
+					_dequeue = deque.Dequeue;
+					_peek = deque.Peek;
+					_tryDequeue = (out T item) =>
 					{
 						if (deque.Count == 0)
 						{
@@ -113,7 +148,7 @@ namespace essentialMix.Collections
 						item = deque.Dequeue();
 						return true;
 					};
-					_peek = (out T item) =>
+					_tryPeek = (out T item) =>
 					{
 						if (deque.Count == 0)
 						{
@@ -128,7 +163,9 @@ namespace essentialMix.Collections
 					break;
 				case ICircularBuffer<T> circularBuffer:
 					_enqueue = circularBuffer.Enqueue;
-					_dequeue = (out T item) =>
+					_dequeue = circularBuffer.Dequeue;
+					_peek = circularBuffer.Peek;
+					_tryDequeue = (out T item) =>
 					{
 						if (circularBuffer.Count == 0)
 						{
@@ -139,7 +176,7 @@ namespace essentialMix.Collections
 						item = circularBuffer.Dequeue();
 						return true;
 					};
-					_peek = (out T item) =>
+					_tryPeek = (out T item) =>
 					{
 						if (circularBuffer.Count == 0)
 						{
@@ -154,7 +191,9 @@ namespace essentialMix.Collections
 					break;
 				case IHeap<T> heap:
 					_enqueue = heap.Add;
-					_dequeue = (out T item) =>
+					_dequeue = heap.ExtractValue;
+					_peek = heap.Value;
+					_tryDequeue = (out T item) =>
 					{
 						if (heap.Count == 0)
 						{
@@ -165,7 +204,7 @@ namespace essentialMix.Collections
 						item = heap.ExtractValue();
 						return true;
 					};
-					_peek = (out T item) =>
+					_tryPeek = (out T item) =>
 					{
 						if (heap.Count == 0)
 						{
@@ -180,7 +219,9 @@ namespace essentialMix.Collections
 					break;
 				case IQueue<T> queue:
 					_enqueue = queue.Enqueue;
-					_dequeue = (out T item) =>
+					_dequeue = queue.Dequeue;
+					_peek = queue.Peek;
+					_tryDequeue = (out T item) =>
 					{
 						if (queue.Count == 0)
 						{
@@ -191,7 +232,7 @@ namespace essentialMix.Collections
 						item = queue.Dequeue();
 						return true;
 					};
-					_peek = (out T item) =>
+					_tryPeek = (out T item) =>
 					{
 						if (queue.Count == 0)
 						{
@@ -204,9 +245,50 @@ namespace essentialMix.Collections
 					};
 					_clear = queue.Clear;
 					break;
+				case IStack<T> stack:
+					_enqueue = stack.Push;
+					_dequeue = stack.Pop;
+					_peek = stack.Peek;
+					_tryDequeue = (out T item) =>
+					{
+						if (stack.Count == 0)
+						{
+							item = default(T);
+							return false;
+						}
+
+						item = stack.Pop();
+						return true;
+					};
+					_tryPeek = (out T item) =>
+					{
+						if (stack.Count == 0)
+						{
+							item = default(T);
+							return false;
+						}
+
+						item = stack.Peek();
+						return true;
+					};
+					_clear = stack.Clear;
+					break;
 				case LinkedList<T> linkedList:
 					_enqueue = item => linkedList.AddLast(item);
-					_dequeue = (out T item) =>
+					_dequeue = () =>
+					{
+						if (linkedList.Count == 0) throw new CollectionIsEmptyException();
+						T item = linkedList.First.Value;
+						linkedList.RemoveFirst();
+						return item;
+					};
+					_peek = () =>
+					{
+						if (linkedList.Count == 0) throw new CollectionIsEmptyException();
+						T item = linkedList.First.Value;
+						return item;
+					};
+					_tryDequeue = (out T item) =>
 					{
 						if (linkedList.Count == 0)
 						{
@@ -218,7 +300,7 @@ namespace essentialMix.Collections
 						linkedList.RemoveFirst();
 						return true;
 					};
-					_peek = (out T item) =>
+					_tryPeek = (out T item) =>
 					{
 						if (linkedList.Count == 0)
 						{
@@ -233,7 +315,19 @@ namespace essentialMix.Collections
 					break;
 				case IList<T> list:
 					_enqueue = list.Add;
-					_dequeue = (out T item) =>
+					_dequeue = () =>
+					{
+						if (list.Count == 0) throw new CollectionIsEmptyException();
+						T item = list[0];
+						list.RemoveAt(0);
+						return item;
+					};
+					_peek = () =>
+					{
+						if (list.Count == 0) throw new CollectionIsEmptyException();
+						return list[0];
+					};
+					_tryDequeue = (out T item) =>
 					{
 						if (list.Count == 0)
 						{
@@ -245,7 +339,7 @@ namespace essentialMix.Collections
 						list.RemoveAt(0);
 						return true;
 					};
-					_peek = (out T item) =>
+					_tryPeek = (out T item) =>
 					{
 						if (list.Count == 0)
 						{
@@ -290,9 +384,13 @@ namespace essentialMix.Collections
 
 		public void Enqueue(T item) { _enqueue(item); }
 
-		public bool TryDequeue(out T item) { return _dequeue(out item); }
+		public T Dequeue() { return _dequeue(); }
 
-		public bool TryPeek(out T item) { return _peek(out item); }
+		public T Peek() { return _peek(); }
+
+		public bool TryDequeue(out T item) { return _tryDequeue(out item); }
+
+		public bool TryPeek(out T item) { return _tryPeek(out item); }
 
 		public void Clear() { _clear(); }
 	}

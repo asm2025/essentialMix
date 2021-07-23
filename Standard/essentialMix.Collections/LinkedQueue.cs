@@ -6,9 +6,10 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections
 {
 	[Serializable]
-	public class LinkedQueue<T> : LinkedList<T>, IQueue<T>, IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
+	public class LinkedQueue<T> : LinkedList<T>, IDeque<T>, IReadOnlyCollection<T>, ICollection, IEnumerable<T>, IEnumerable
 	{
 		private readonly Func<T> _dequeue;
+		private readonly Func<T> _pop;
 
 		public LinkedQueue(DequeuePriority priority)
 		{
@@ -31,6 +32,24 @@ namespace essentialMix.Collections
 				},
 				_ => throw new ArgumentOutOfRangeException(nameof(priority), priority, null)
 			};
+			_pop = priority switch
+			{
+				DequeuePriority.FIFO => () =>
+				{
+					AssertNotEmpty();
+					T value = Last.Value;
+					RemoveLast();
+					return value;
+				},
+				DequeuePriority.LIFO => () =>
+				{
+					AssertNotEmpty();
+					T value = First.Value;
+					RemoveFirst();
+					return value;
+				},
+				_ => throw new ArgumentOutOfRangeException(nameof(priority), priority, null)
+			};
 		}
 
 		/// <inheritdoc />
@@ -48,6 +67,10 @@ namespace essentialMix.Collections
 		public void Enqueue(T item) { AddLast(item); }
 
 		public T Dequeue() { return _dequeue(); }
+
+		public void Push(T item) { AddFirst(item); }
+
+		public T Pop() { return _pop(); }
 
 		public T Peek()
 		{

@@ -1,11 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace essentialMix.Collections
+﻿namespace essentialMix.Collections
 {
-	public interface IStack<T> : ICollection<T>
+	public interface IStack<T> : IStackBase<T>
 	{
-		void Push(T item);
-		T Pop();
 		T Peek();
 	}
 }

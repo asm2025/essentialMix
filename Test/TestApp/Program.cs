@@ -33,10 +33,9 @@ using Other.Microsoft.Collections;
 using essentialMix.Threading.Helpers;
 using essentialMix.Threading.Patterns.ProducerConsumer;
 using Newtonsoft.Json;
-
+using Other.JonSkeet.MiscUtil.Collections;
 using TimeoutException = System.TimeoutException;
 using Menu = EasyConsole.Menu;
-
 using static Crayon.Output;
 
 // ReSharper disable UnusedMember.Local
@@ -90,7 +89,8 @@ work with {HEAVY} items.");
 			//TestLevenshteinDistance();
 			//TestDeepestPit();
 
-			TestThreadQueue();
+			//TestThreadQueue();
+			//TestThreadQueueWithPriorityQueue();
 			//TestAsyncLock();
 
 			//TestSortAlgorithm();
@@ -105,6 +105,7 @@ work with {HEAVY} items.");
 			//TestCircularBuffer();
 			//TestLinkedCircularBuffer();
 			//TestBitCollection();
+			TestQueueAdapter();
 
 			//TestBinaryTreeFromTraversal();
 			
@@ -513,6 +514,7 @@ work with {HEAVY} items.");
 			{
 				Console.Clear();
 				Console.WriteLine();
+
 				ThreadQueueMode mode = queueModes.Dequeue();
 				Title($"Testing multi-thread queue in '{Bright.Cyan(mode.ToString())}' mode...");
 
@@ -608,6 +610,144 @@ work with {HEAVY} items.");
 			{
 				Task.Delay(50).Execute();
 				Console.Write($"{e:D4} ");
+				return TaskResult.Success;
+			}
+		}
+
+		private static void TestThreadQueueWithPriorityQueue()
+		{
+			int len = RNGRandomHelper.Next(16, 32);
+			Student[] values = GetRandomStudents(len);
+			int timeout = RNGRandomHelper.Next(0, 1);
+			string timeoutString = timeout > 0
+										? $"{timeout} minute(s)"
+										: "None";
+			int threads;
+
+			if (DebugHelper.DebugMode)
+			{
+				// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
+				threads = LimitThreads()
+							? 1
+							: RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
+			}
+			else
+			{
+				// Otherwise, use the default (Best to be TaskHelper.ProcessDefault which = Environment.ProcessorCount)
+				threads = RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
+			}
+
+			if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
+
+			ThreadQueueMode[] modes = EnumHelper<ThreadQueueMode>.GetValues()
+																.Where(e => e.SupportsProducerQueue())
+																.ToArray();
+			Queue<ThreadQueueMode> queueModes = new Queue<ThreadQueueMode>(modes);
+			Stopwatch clock = new Stopwatch();
+
+			while (queueModes.Count > 0)
+			{
+				Console.Clear();
+				Console.WriteLine();
+
+				ThreadQueueMode mode = queueModes.Dequeue();
+				Title($"Testing multi-thread queue in '{Bright.Cyan(mode.ToString())}' mode...");
+
+				// if there is a timeout, will use a CancellationTokenSource.
+				using (CancellationTokenSource cts = timeout > 0
+														? new CancellationTokenSource(TimeSpan.FromMinutes(timeout))
+														: null)
+				{
+					CancellationToken token = cts?.Token ?? CancellationToken.None;
+					ProducerConsumerQueueOptions<Student> options = mode switch
+					{
+						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<Student>(threads, Exec)
+						{
+							// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
+							Threshold = TimeSpan.FromSeconds(1)
+						},
+						_ => new ProducerConsumerQueueOptions<Student>(threads, Exec)
+					};
+			
+					// Create a priority queue
+					MinBinomialHeap<Student> pq = new MinBinomialHeap<Student>(ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade)));
+
+					// Create a generic queue producer
+					using (IProducerConsumer<Student> queue = ProducerConsumerQueue.Create(mode, pq, options, token))
+					{
+						queue.WorkStarted += (_, _) =>
+						{
+							Console.WriteLine();
+							Console.WriteLine($"Starting multi-thread test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Length.ToString())}, threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}...");
+							if (mode == ThreadQueueMode.ThresholdTaskGroup) Console.WriteLine($"in {mode} mode, {Bright.Cyan(threads.ToString())} tasks will be issued every {Bright.Cyan(((ProducerConsumerThresholdQueueOptions<Student>)options).Threshold.TotalSeconds.ToString("N0"))} second(s).");
+							Console.WriteLine();
+							Console.WriteLine();
+							clock.Restart();
+						};
+
+						queue.WorkCompleted += (_, _) =>
+						{
+							long elapsed = clock.ElapsedMilliseconds;
+							Console.WriteLine();
+							Console.WriteLine();
+							Console.WriteLine($"Finished test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Length.ToString())}, threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}, elapsed: {Bright.Cyan(elapsed.ToString())} ms.");
+							Console.WriteLine();
+						};
+
+						foreach (Student value in values)
+						{
+							queue.Enqueue(value);
+						}
+						
+						queue.Complete();
+						
+						/*
+						 * when the queue is being disposed, it will wait until the queued items are processed.
+						 * this works when queue.WaitOnDispose is true , which it is by default.
+						 * alternatively, the following can be done to wait for all items to be processed:
+						 *
+						 * // Important: marks the completion of queued items, no further items can be queued
+						 * // after this point. the queue will not to wait for more items other than the already queued.
+						 * queue.Complete();
+						 * // wait for the queue to finish
+						 * queue.Wait();
+						 *
+						 * another way to go about it, is not to call queue.Complete(); if this queue will
+						 * wait indefinitely and maybe use a CancellationTokenSource.
+						 *
+						 * for now, the queue will wait for the items to be finished once reached the next
+						 * dispose curly bracket.
+						 */
+					}
+				}
+
+				if (queueModes.Count == 0)
+				{
+					Console.WriteLine();
+					Console.Write($"Would you like to repeat the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to exit. ");
+
+					if (Console.ReadKey(true).Key == ConsoleKey.Y)
+					{
+						foreach (ThreadQueueMode m in modes) 
+							queueModes.Enqueue(m);
+					}
+
+					continue;
+				}
+
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				if (response.Key != ConsoleKey.Y) queueModes.Clear();
+			}
+
+			clock.Stop();
+
+			static TaskResult Exec(Student e)
+			{
+				Task.Delay(50).Execute();
+				Console.Write($"{e.Id}. {e.Name}, Grade = {e.Grade:###.##}");
 				return TaskResult.Success;
 			}
 		}
@@ -1785,6 +1925,122 @@ work with {HEAVY} items.");
 				Debug.Assert(count == 0 && collection.Count == 0, $"Values are not cleared correctly! {count} != {collection.Count}.");
 				Console.WriteLine();
 				Console.WriteLine($"Removed {removed} of {collectionCount} items in {clock.ElapsedMilliseconds} ms.");
+			}
+		}
+
+		private static void TestQueueAdapter()
+		{
+			bool more;
+			int tests = 0;
+			Stopwatch clock = new Stopwatch();
+			int[] values = GetRandomIntegers(true, START);
+			QueueAdapter<Queue<int>, int> adapter = new QueueAdapter<Queue<int>, int>(new Queue<int>());
+
+			do
+			{
+				bool canPrint = values.Length <= START * 2;
+				Console.Clear();
+				Title("Testing QueueAdapter...");
+				CompilationHint();
+				Console.WriteLine($"Array has {values.Length} items.");
+				Console.WriteLine("Test queue functionality...");
+				if (canPrint) Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
+				bool print = canPrint && Console.ReadKey(true).Key == ConsoleKey.Y;
+				Console.WriteLine();
+				DoTheTest(adapter, values, adapter.Enqueue, adapter.Dequeue, print, clock);
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+				if (!more || tests > 1) continue;
+				values = GetRandomIntegers(true, tests == 0 ? START * 2 : HEAVY);
+				tests++;
+			}
+			while (more);
+
+			clock.Stop();
+
+			static void DoTheTest(QueueAdapter<Queue<int>, int> adapter, int[] values, Action<int> add, Func<int> remove, bool print, Stopwatch clock)
+			{
+				adapter.Clear();
+				int count = adapter.Count;
+				Debug.Assert(count == 0, "Values are not cleared correctly!");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
+				if (print) Console.WriteLine(string.Join(", ", values));
+				clock.Restart();
+
+				foreach (int v in values)
+				{
+					add(v);
+					count++;
+				}
+
+				Console.WriteLine($"Added {count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+
+				if (adapter.Count != values.Length)
+				{
+					Console.WriteLine(Bright.Red("Something went wrong, Count isn't right...!"));
+					return;
+				}
+
+				Console.WriteLine(Bright.Yellow("Test search..."));
+				int found = 0;
+				int missed = 0;
+				count = adapter.Count / 4;
+				clock.Restart();
+
+				// will just test for items not more than MAX_SEARCH
+				for (int i = 0; i < count; i++)
+				{
+					int v = values[i];
+
+					if (adapter.Contains(v))
+					{
+						found++;
+						continue;
+					}
+
+					missed++;
+					Console.WriteLine(missed <= 3
+										? Bright.Red($"Find missed a value: {v} :((")
+										: Bright.Red("FIND MISSED A LOT :(("));
+					if (missed > 3) return;
+					//return;
+				}
+
+				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
+
+				Console.WriteLine(Bright.Red("Test removing..."));
+		
+				int removed = 0;
+				count = adapter.Count;
+				clock.Restart();
+
+				if (print)
+				{
+					while (adapter.Count > 0 && count > 0)
+					{
+						Console.Write(remove());
+						count--;
+						removed++;
+						if (adapter.Count > 0) Console.Write(", ");
+					}
+				}
+				else
+				{
+					while (adapter.Count > 0 && count > 0)
+					{
+						remove();
+						count--;
+						removed++;
+					}
+				}
+
+				Debug.Assert(count == 0 && adapter.Count == 0, $"Values are not cleared correctly! {count} != {adapter.Count}.");
+				Console.WriteLine();
+				Console.WriteLine();
+				Console.WriteLine($"Removed {removed} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 			}
 		}
 

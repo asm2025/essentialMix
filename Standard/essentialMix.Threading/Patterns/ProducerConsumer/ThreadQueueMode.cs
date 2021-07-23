@@ -13,4 +13,25 @@
 		Mutex,
 		ThresholdTaskGroup
 	}
+
+	public static class ThreadQueueModeExtension
+	{
+		public static bool SupportsProducerQueue(this ThreadQueueMode thisValue)
+		{
+			switch (thisValue)
+			{
+				case ThreadQueueMode.Task:
+				case ThreadQueueMode.WaitAndPulse:
+				case ThreadQueueMode.Event:
+				case ThreadQueueMode.TaskGroup:
+				case ThreadQueueMode.SemaphoreSlim:
+				case ThreadQueueMode.Semaphore:
+				case ThreadQueueMode.Mutex:
+				case ThreadQueueMode.ThresholdTaskGroup:
+					return true;
+				default:
+					return false;
+			}
+		}
+	}
 }

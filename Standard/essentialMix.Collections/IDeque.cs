@@ -1,9 +1,8 @@
 ﻿namespace essentialMix.Collections
 {
-	public interface IDeque<T> : IQueue<T>
+	public interface IDeque<T> : IQueueBase<T>, IStackBase<T>
 	{
-		void Push(T item);
-		T Pop();
+		T Peek();
 		T PeekTail();
 	}
 }

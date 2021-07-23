@@ -1,11 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace essentialMix.Collections
+﻿namespace essentialMix.Collections
 {
-	public interface IQueue<T> : ICollection<T>
+	public interface IQueue<T> : IQueueBase<T>
 	{
-		void Enqueue(T item);
-		T Dequeue();
 		T Peek();
 	}
 }

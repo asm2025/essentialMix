@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -209,16 +211,27 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			token.ThrowIfCancellationRequested();
 			return mode switch
 			{
-				ThreadQueueMode.Task => new TaskQueue<T>(options, token),
 				ThreadQueueMode.DataFlow => new DataFlowQueue<T>(options, token),
-				ThreadQueueMode.WaitAndPulse => new WaitAndPulseQueue<T>(options, token),
-				ThreadQueueMode.Event => new EventQueue<T>(options, token),
 				ThreadQueueMode.BlockingCollection => new BlockingCollectionQueue<T>(options, token),
-				ThreadQueueMode.TaskGroup => new TaskGroupQueue<T>(options, token),
-				ThreadQueueMode.SemaphoreSlim => new SemaphoreSlimQueue<T>(options, token),
-				ThreadQueueMode.Semaphore => new SemaphoreQueue<T>(options, token),
-				ThreadQueueMode.Mutex => new MutexQueue<T>(options, token),
-				ThreadQueueMode.ThresholdTaskGroup => new ThresholdTaskGroupQueue<T>(options, token),
+				_ => Create(mode, new Queue<T>(), options, token)
+			};
+		}
+		
+		[NotNull]
+		public static IProducerConsumer<T> Create<TQueue, T>(ThreadQueueMode mode, [NotNull] TQueue queue, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+			where TQueue : ICollection, IReadOnlyCollection<T>
+		{
+			token.ThrowIfCancellationRequested();
+			return mode switch
+			{
+				ThreadQueueMode.Task => new TaskQueue<TQueue, T>(queue, options, token),
+				ThreadQueueMode.WaitAndPulse => new WaitAndPulseQueue<TQueue, T>(queue, options, token),
+				ThreadQueueMode.Event => new EventQueue<TQueue, T>(queue, options, token),
+				ThreadQueueMode.TaskGroup => new TaskGroupQueue<TQueue, T>(queue, options, token),
+				ThreadQueueMode.SemaphoreSlim => new SemaphoreSlimQueue<TQueue, T>(queue, options, token),
+				ThreadQueueMode.Semaphore => new SemaphoreQueue<TQueue, T>(queue, options, token),
+				ThreadQueueMode.Mutex => new MutexQueue<TQueue, T>(queue, options, token),
+				ThreadQueueMode.ThresholdTaskGroup => new ThresholdTaskGroupQueue<TQueue, T>(queue, options, token),
 				_ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
 			};
 		}
