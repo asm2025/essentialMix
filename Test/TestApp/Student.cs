@@ -5,6 +5,7 @@ namespace TestApp
 	internal class Student : IComparable<Student>, IComparable, IEquatable<Student>
 	{
 		public int Id { get; set; }
+		public int External { get; set; }
 
 		public string Name { get; set; }
 

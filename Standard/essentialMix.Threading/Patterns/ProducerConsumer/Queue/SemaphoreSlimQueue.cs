@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using essentialMix.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
+using essentialMix.Threading.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
@@ -171,7 +172,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						Interlocked.Decrement(ref _running);
 					}
 
-					tasks[index] = Task.Run(() => RunThread(item), Token).ConfigureAwait();
+					ScheduledCallback?.Invoke(item);
+					tasks[index] = TaskHelper.Run(() => ExecRun(item), TaskCreationOptions.PreferFairness, Token).ConfigureAwait();
 					Interlocked.Increment(ref _running);
 					// don't wait until all slots are filled
 					if (_running < Threads) continue;
@@ -200,7 +202,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						Interlocked.Decrement(ref _running);
 					}
 
-					tasks[index] = Task.Run(() => RunThread(item), Token).ConfigureAwait();
+					ScheduledCallback?.Invoke(item);
+					tasks[index] = TaskHelper.Run(() => ExecRun(item), TaskCreationOptions.PreferFairness, Token).ConfigureAwait();
 					Interlocked.Increment(ref _running);
 					// don't wait until all slots are filled
 					if (_running < Threads) continue;
@@ -220,7 +223,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 		}
 
-		private void RunThread(T item)
+		private void ExecRun(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested) return;
 

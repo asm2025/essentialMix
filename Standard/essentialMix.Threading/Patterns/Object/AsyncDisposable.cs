@@ -91,18 +91,21 @@ namespace essentialMix.Threading.Patterns.Object
 			return WaitInternal(millisecondsTimeout);
 		}
 
-		public async ValueTask WaitAsync()
+		[NotNull]
+		public Task WaitAsync()
 		{
-			await WaitAsync(TimeSpanHelper.INFINITE);
+			return WaitAsync(TimeSpanHelper.INFINITE);
 		}
 
-		public ValueTask<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
+		[NotNull]
+		public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
 
-		public ValueTask<bool> WaitAsync(int millisecondsTimeout)
+		[NotNull]
+		public Task<bool> WaitAsync(int millisecondsTimeout)
 		{
 			ThrowIfDisposed();
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			return new ValueTask<bool>(Task.Run(() => WaitInternal(millisecondsTimeout), Token).ConfigureAwait());
+			return Task.Run(() => WaitInternal(millisecondsTimeout), Token).ConfigureAwait();
 		}
 
 		protected virtual bool WaitInternal(int millisecondsTimeout)

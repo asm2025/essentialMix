@@ -323,13 +323,13 @@ namespace Other.Microsoft.Collections
 
 		public void RemoveFirst()
 		{
-			if (_head == null) throw new InvalidOperationException("List is empty.");
+			if (_head == null) throw new CollectionIsEmptyException();
 			RemoveNodeInternal(_head);
 		}
 
 		public void RemoveLast()
 		{
-			if (_tail == null) throw new InvalidOperationException("List is empty.");
+			if (_tail == null) throw new CollectionIsEmptyException();
 			RemoveNodeInternal(_tail);
 		}
 

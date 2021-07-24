@@ -336,7 +336,7 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		public sealed override void DecreaseKey(TNode node, TKey newKey)
 		{
-			if (Head == null) throw new InvalidOperationException("Heap is empty.");
+			if (Head == null) throw new CollectionIsEmptyException();
 			if (Compare(node.Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
 			node.Key = newKey;
 			if (node == Head) return;
@@ -346,7 +346,7 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		public sealed override TValue Value()
 		{
-			if (Head == null) throw new InvalidOperationException("Heap is empty.");
+			if (Head == null) throw new CollectionIsEmptyException();
 
 			TNode node = Head;
 			if (node.Sibling == null) return node.Value;
@@ -363,7 +363,7 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		public sealed override TNode ExtractValue()
 		{
-			if (Head == null) throw new InvalidOperationException("Heap is empty.");
+			if (Head == null) throw new CollectionIsEmptyException();
 
 			TNode minPrev = null
 				, min = Head

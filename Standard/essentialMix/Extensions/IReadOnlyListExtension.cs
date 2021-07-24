@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using essentialMix.Exceptions.Collections;
 using JetBrains.Annotations;
 using essentialMix.Helpers;
 
@@ -18,7 +19,7 @@ namespace essentialMix.Extensions
 		public static T PickRandom<T>([NotNull] this IReadOnlyList<T> thisValue, int startIndex = 0, int count = -1)
 		{
 			thisValue.Count.ValidateRange(startIndex, ref count);
-			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
+			if (thisValue.Count == 0) throw new CollectionIsEmptyException();
 
 			int max;
 			int n;
@@ -28,7 +29,7 @@ namespace essentialMix.Extensions
 				lock(collection.SyncRoot)
 				{
 					max = count - 1;
-					if (max < 0) throw new InvalidOperationException("List is empty.");
+					if (max < 0) throw new CollectionIsEmptyException();
 					n = RNGRandomHelper.Next(startIndex, max);
 					return thisValue[n];
 				}

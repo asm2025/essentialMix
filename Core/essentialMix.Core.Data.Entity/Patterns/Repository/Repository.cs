@@ -129,16 +129,13 @@ namespace essentialMix.Core.Data.Entity.Patterns.Repository
 			return DeleteAsyncInternal(key, token);
 		}
 
-		protected virtual ValueTask DeleteAsyncInternal([NotNull] object[] key, CancellationToken token = default(CancellationToken))
+		protected virtual async ValueTask DeleteAsyncInternal([NotNull] object[] key, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			return new ValueTask(Task.Run(async () =>
-									{
-										TEntity entity = await DbSet.FindAsync(token, key);
-										token.ThrowIfCancellationRequested();
-										if (entity == null) throw new KeyNotFoundException();
-										await DeleteAsyncInternal(entity, token);
-									}, token));
+			TEntity entity = await DbSet.FindAsync(token, key);
+			if (entity == null) throw new KeyNotFoundException();
+			token.ThrowIfCancellationRequested();
+			await DeleteAsyncInternal(entity, token);
 		}
 
 		/// <inheritdoc />

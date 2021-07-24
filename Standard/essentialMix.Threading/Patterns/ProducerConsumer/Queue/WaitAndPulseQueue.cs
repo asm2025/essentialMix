@@ -225,6 +225,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						if (CompleteMarked) break;
 						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
 					}
+
+					ScheduledCallback?.Invoke(item);
 					Run(item);
 				}
 
@@ -235,6 +237,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						if (IsDisposed || Token.IsCancellationRequested) return;
 						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) break;
 					}
+
+					ScheduledCallback?.Invoke(item);
 					Run(item);
 				}
 			}

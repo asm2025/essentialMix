@@ -90,7 +90,7 @@ work with {HEAVY} items.");
 			//TestDeepestPit();
 
 			//TestThreadQueue();
-			TestThreadQueueWithPriorityQueue();
+			//TestThreadQueueWithPriorityQueue();
 			//TestAsyncLock();
 
 			//TestSortAlgorithm();
@@ -108,20 +108,16 @@ work with {HEAVY} items.");
 			//TestQueueAdapter();
 
 			//TestBinaryTreeFromTraversal();
-			
 			//TestBinarySearchTreeAdd();
 			//TestBinarySearchTreeRemove();
 			//TestBinarySearchTreeBalance();
 			//TestBinaryTreeFindClosest();
 			//TestBinaryTreeBranchSums();
 			//TestBinaryTreeInvert();
-
 			//TestAVLTreeAdd();
 			//TestAVLTreeRemove();
-			
 			//TestRedBlackTreeAdd();
 			//TestRedBlackTreeRemove();
-
 			//TestAllBinaryTrees();
 			//TestAllBinaryTreesFunctionality();
 			//TestAllBinaryTreesPerformance();
@@ -142,7 +138,7 @@ work with {HEAVY} items.");
 			//TestBinaryHeapElementAt();
 			//TestBinaryHeapDecreaseKey();
 		
-			//TestBinomialHeapAdd();
+			TestBinomialHeapAdd();
 			//TestBinomialHeapRemove();
 			//TestBinomialHeapElementAt();
 			//TestBinomialHeapDecreaseKey();
@@ -644,7 +640,7 @@ work with {HEAVY} items.");
 																.ToArray();
 			Queue<ThreadQueueMode> queueModes = new Queue<ThreadQueueMode>(modes);
 			Stopwatch clock = new Stopwatch();
-			int studentId = 0;
+			int externalId = 0;
 
 			while (queueModes.Count > 0)
 			{
@@ -662,22 +658,24 @@ work with {HEAVY} items.");
 					CancellationToken token = cts?.Token ?? CancellationToken.None;
 					ProducerConsumerQueueOptions<Student> options = mode switch
 					{
-						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<Student>(threads, e =>
-						{
-							Interlocked.Increment(ref studentId);
-							e.Id = studentId;
-							return Exec(e);
-						})
+						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<Student>(threads, Exec)
 						{
 							// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
-							Threshold = TimeSpan.FromSeconds(1)
+							Threshold = TimeSpan.FromSeconds(1),
+							ScheduledCallback = e =>
+							{
+								Interlocked.Increment(ref externalId);
+								e.External = externalId;
+							}
 						},
-						_ => new ProducerConsumerQueueOptions<Student>(threads, e =>
+						_ => new ProducerConsumerQueueOptions<Student>(threads, Exec)
 						{
-							Interlocked.Increment(ref studentId);
-							e.Id = studentId;
-							return Exec(e);
-						})
+							ScheduledCallback = e =>
+							{
+								Interlocked.Increment(ref externalId);
+								e.External = externalId;
+							}
+						}
 					};
 			
 					// Create a priority queue
@@ -698,7 +696,7 @@ work with {HEAVY} items.");
 
 						queue.WorkCompleted += (_, _) =>
 						{
-							Interlocked.Exchange(ref studentId, 0);
+							Interlocked.Exchange(ref externalId, 0);
 							long elapsed = clock.ElapsedMilliseconds;
 							Console.WriteLine();
 							Console.WriteLine();
@@ -757,7 +755,7 @@ work with {HEAVY} items.");
 			static TaskResult Exec(Student e)
 			{
 				Task.Delay(50).Execute();
-				Console.WriteLine($"{e.Id}. {e.Name}, Grade = {e.Grade:###.##}");
+				Console.WriteLine($"{e.External:D2}-{e.Id:D2}. {e.Name}, Grade = {e.Grade:###.##}");
 				return TaskResult.Success;
 			}
 		}
@@ -3766,7 +3764,7 @@ work with {HEAVY} items.");
 				foreach (TValue value in array)
 				{
 					heap.Add(value);
-					//heap.PrintWithProps();
+					heap.Print();
 				}
 
 				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
@@ -5653,7 +5651,7 @@ decrypted:
 			{
 				students[i] = new Student
 				{
-					Id = i,
+					Id = i + 1,
 					Name = __fakeGenerator.Value.Name.FirstName(__fakeGenerator.Value.PickRandom<Name.Gender>()),
 					Grade = __fakeGenerator.Value.Random.Double(0.0d, 100.0d)
 				};

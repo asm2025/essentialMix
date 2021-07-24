@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using essentialMix.Collections;
+using essentialMix.Exceptions.Collections;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
@@ -46,7 +47,7 @@ namespace essentialMix.Extensions
 
 		public static T PickRandom<T>([NotNull] this ISet<T> thisValue)
 		{
-			if (thisValue.Count == 0) throw new InvalidOperationException("Set is empty.");
+			if (thisValue.Count == 0) throw new CollectionIsEmptyException();
 
 			int max;
 			int n;
@@ -71,7 +72,7 @@ namespace essentialMix.Extensions
 
 		public static T PopRandom<T>([NotNull] this ISet<T> thisValue)
 		{
-			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
+			if (thisValue.Count == 0) throw new CollectionIsEmptyException();
 
 			int max;
 			int n;
@@ -101,7 +102,7 @@ namespace essentialMix.Extensions
 
 		public static T PopFirst<T>([NotNull] this ISet<T> thisValue)
 		{
-			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
+			if (thisValue.Count == 0) throw new CollectionIsEmptyException();
 
 			T result;
 
@@ -125,7 +126,7 @@ namespace essentialMix.Extensions
 
 		public static T PopLast<T>([NotNull] this ISet<T> thisValue)
 		{
-			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
+			if (thisValue.Count == 0) throw new CollectionIsEmptyException();
 
 			T result;
 

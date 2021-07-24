@@ -126,6 +126,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
 					{
 						if (!_queue.TryTake(out T item, TimeSpanHelper.FAST, Token)) continue;
+						ScheduledCallback?.Invoke(item);
 						Run(item);
 					}
 				}
@@ -133,7 +134,10 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				if (IsDisposed || Token.IsCancellationRequested) return;
 
 				foreach (T item in _queue.GetConsumingEnumerable(Token))
+				{
+					ScheduledCallback?.Invoke(item);
 					Run(item);
+				}
 			}
 			catch (ObjectDisposedException) { }
 			catch (OperationCanceledException) { }

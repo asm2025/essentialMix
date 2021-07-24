@@ -188,6 +188,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					{
 						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
 					}
+					ScheduledCallback?.Invoke(item);
 
 					Thread thread = new Thread(RunThread)
 					{
@@ -214,6 +215,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					{
 						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) break;
 					}
+					ScheduledCallback?.Invoke(item);
 
 					Thread thread = new Thread(RunThread)
 					{

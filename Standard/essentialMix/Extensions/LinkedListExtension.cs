@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using essentialMix.Exceptions.Collections;
 using JetBrains.Annotations;
 
 namespace essentialMix.Extensions
@@ -23,7 +24,7 @@ namespace essentialMix.Extensions
 
 		public static T PopFirst<T>([NotNull] this LinkedList<T> thisValue)
 		{
-			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
+			if (thisValue.Count == 0) throw new CollectionIsEmptyException();
 
 			T result;
 
@@ -47,7 +48,7 @@ namespace essentialMix.Extensions
 
 		public static T PopLast<T>([NotNull] this LinkedList<T> thisValue)
 		{
-			if (thisValue.Count == 0) throw new InvalidOperationException("List is empty.");
+			if (thisValue.Count == 0) throw new CollectionIsEmptyException();
 
 			T result;
 

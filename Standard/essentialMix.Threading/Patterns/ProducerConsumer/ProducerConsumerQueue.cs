@@ -20,14 +20,14 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 	public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T>
 	{
 		private CancellationTokenSource _cts;
-
-		private int _completeMarked;
+		private volatile int _completeMarked;
 
 		protected ProducerConsumerQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 		{
 			Threads = options.Threads;
 			ExecuteCallback = options.ExecuteCallback;
 			ResultCallback = options.ResultCallback;
+			ScheduledCallback = options.ScheduledCallback;
 			FinalizeCallback = options.FinalizeCallback;
 			_cts = new CancellationTokenSource();
 			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed());
@@ -61,20 +61,22 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 
 		public bool CompleteMarked
 		{
-			get => _completeMarked != 0;
-			protected set =>
-				Interlocked.CompareExchange(ref _completeMarked, value
-																	? 1
-																	: 0, _completeMarked);
+			get
+			{
+				int completeMarked = _completeMarked;
+				return completeMarked != 0;
+			}
+			protected set => Interlocked.CompareExchange(ref _completeMarked, value
+																				? 1
+																				: 0, _completeMarked);
 		}
 
 		public int SleepAfterEnqueue { get; set; } = TimeSpanHelper.INFINITE;
 
 		[NotNull]
 		protected Func<T, TaskResult> ExecuteCallback { get; }
-
 		protected Func<T, TaskResult, Exception, bool> ResultCallback { get; }
-
+		protected Action<T> ScheduledCallback { get; }
 		protected Action<T> FinalizeCallback { get; }
 
 		public void Stop()
@@ -175,15 +177,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			{
 				ResultCallback?.Invoke(item, TaskResult.Timeout, null);
 			}
-			catch (AggregateException aggTimeout) when(aggTimeout.InnerException is TimeoutException)
-			{
-				ResultCallback?.Invoke(item, TaskResult.Timeout, null);
-			}
 			catch (OperationCanceledException)
-			{
-				ResultCallback?.Invoke(item, TaskResult.Canceled, null);
-			}
-			catch (AggregateException aggCanceled) when(aggCanceled.InnerException is OperationCanceledException)
 			{
 				ResultCallback?.Invoke(item, TaskResult.Canceled, null);
 			}

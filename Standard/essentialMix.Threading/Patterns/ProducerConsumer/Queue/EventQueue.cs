@@ -195,6 +195,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
 					}
 
+					ScheduledCallback?.Invoke(item);
 					Run(item);
 				}
 
@@ -202,6 +203,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				{
 					// no lock here
 					if (!_queue.TryDequeue(out item)) continue;
+					ScheduledCallback?.Invoke(item);
 					Run(item);
 				}
 			}

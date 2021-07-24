@@ -1186,7 +1186,7 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		public void DecreaseKey(TNode node, TKey newKey)
 		{
-			if (Count == 0) throw new InvalidOperationException("Heap is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			int index = Array.IndexOf(Items, node, 0, Count);
 			if (index < 0) throw new NotFoundException();
 			DecreaseKeyInternal(index, newKey);
@@ -1194,7 +1194,7 @@ namespace essentialMix.Collections
 
 		public void DecreaseKey(int index, [NotNull] TKey newKey)
 		{
-			if (Count == 0) throw new InvalidOperationException("Heap is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 			DecreaseKeyInternal(index, newKey);
 		}
@@ -1202,7 +1202,7 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		public TValue Value()
 		{
-			if (Count == 0) throw new InvalidOperationException("Heap is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			return Items[0].Value;
 		}
 
@@ -1212,7 +1212,7 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		public TNode ExtractValue()
 		{
-			if (Count == 0) throw new InvalidOperationException("Heap is empty.");
+			if (Count == 0) throw new CollectionIsEmptyException();
 			TNode node = Items[0];
 			Items[0] = Items[Count - 1];
 			Count--;

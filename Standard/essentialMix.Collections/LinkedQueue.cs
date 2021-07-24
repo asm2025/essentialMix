@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using essentialMix.Exceptions.Collections;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections
@@ -166,7 +167,7 @@ namespace essentialMix.Collections
 		private void AssertNotEmpty()
 		{
 			if (Count > 0) return;
-			throw new InvalidOperationException("Queue is empty.");
+			throw new CollectionIsEmptyException();
 		}
 	}
 }

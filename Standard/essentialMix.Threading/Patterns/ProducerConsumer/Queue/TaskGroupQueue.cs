@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using essentialMix.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
+using essentialMix.Threading.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
@@ -146,8 +147,19 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					for (int i = 0; !IsDisposed && !Token.IsCancellationRequested && i < items.Length; i++)
 					{
 						T item = items[i];
+						ScheduledCallback?.Invoke(item);
 						_countdown.AddCount();
-						tasks[i] = RunAsync(item);
+						tasks[i] = TaskHelper.Run(() =>
+						{
+							try
+							{
+								Run(item);
+							}
+							finally
+							{
+								_countdown?.SignalOne();
+							}
+						}, TaskCreationOptions.PreferFairness, Token);
 					}
 
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitSilently(Token)) return;
@@ -165,8 +177,19 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					for (int i = 0; !IsDisposed && !Token.IsCancellationRequested && i < items.Length; i++)
 					{
 						T item = items[i];
+						ScheduledCallback?.Invoke(item);
 						_countdown.AddCount();
-						tasks[i] = RunAsync(item);
+						tasks[i] = TaskHelper.Run(() =>
+						{
+							try
+							{
+								Run(item);
+							}
+							finally
+							{
+								_countdown?.SignalOne();
+							}
+						}, TaskCreationOptions.PreferFairness, Token);
 					}
 
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitSilently(Token)) return;
@@ -184,8 +207,19 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				for (int i = 0; !IsDisposed && !Token.IsCancellationRequested && i < tasks.Length; i++)
 				{
 					T item = items[i];
+					ScheduledCallback?.Invoke(item);
 					_countdown.AddCount();
-					tasks[i] = RunAsync(item);
+					tasks[i] = TaskHelper.Run(() =>
+					{
+						try
+						{
+							Run(item);
+						}
+						finally
+						{
+							_countdown?.SignalOne();
+						}
+					}, TaskCreationOptions.PreferFairness, Token);
 				}
 
 				if (!tasks.WaitSilently(Token)) return;
@@ -220,23 +254,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 
 			return !IsDisposed && !Token.IsCancellationRequested && read > 0;
-		}
-
-		[NotNull]
-		private Task RunAsync(T item)
-		{
-			if (IsDisposed || Token.IsCancellationRequested) return Task.CompletedTask;
-			return Task.Run(() =>
-			{
-				try
-				{
-					Run(item);
-				}
-				finally
-				{
-					_countdown?.SignalOne();
-				}
-			}, Token);
 		}
 	}
 

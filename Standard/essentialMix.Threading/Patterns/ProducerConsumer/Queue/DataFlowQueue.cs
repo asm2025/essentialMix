@@ -25,7 +25,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			{
 				CancellationToken = Token
 			});
-			_processor = new ActionBlock<T>(Run, new ExecutionDataflowBlockOptions
+			_processor = new ActionBlock<T>(e =>
+			{
+				ScheduledCallback?.Invoke(e);
+				Run(e);
+			}, new ExecutionDataflowBlockOptions
 			{
 				MaxDegreeOfParallelism = Threads,
 				CancellationToken = Token

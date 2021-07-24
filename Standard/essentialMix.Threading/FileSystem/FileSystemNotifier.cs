@@ -21,7 +21,6 @@ namespace essentialMix.Threading.FileSystem
 
 		private BlockingCollection<(EventType Type, FileSystemEventArgs Args)> _queue;
 		private ManualResetEventSlim _manualResetEventSlim = new ManualResetEventSlim(false);
-		private Thread _worker;
 		private CancellationTokenSource _cts;
 
 		/// <inheritdoc />
@@ -46,11 +45,11 @@ namespace essentialMix.Threading.FileSystem
 			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed());
 			Token = _cts.Token;
 			_queue = new BlockingCollection<(EventType Type, FileSystemEventArgs Args)>();
-			(_worker = new Thread(Consume)
-					{
-						IsBackground = IsBackground,
-						Priority = Priority
-					}).Start();
+			new Thread(Consume)
+			{
+				IsBackground = IsBackground,
+				Priority = Priority
+			}.Start();
 		}
 
 		/// <inheritdoc />

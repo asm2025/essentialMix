@@ -67,36 +67,15 @@ namespace essentialMix.Threading.Helpers
 		[NotNull]
 		public static Task Run([NotNull] Action action, TaskCreationOptions options, CancellationToken token)
 		{
-			int c = 0;
-			TaskCreationOptions opt = TaskCreationOptions.DenyChildAttach;
-			
-			if ((options & TaskCreationOptions.LongRunning) == TaskCreationOptions.LongRunning)
-			{
-				c++;
-				opt |= TaskCreationOptions.LongRunning;
-			}
-			
-			if ((options & TaskCreationOptions.PreferFairness) == TaskCreationOptions.PreferFairness)
-			{
-				c++;
-				opt |= TaskCreationOptions.PreferFairness;
-			}
-			
-			if ((options & TaskCreationOptions.HideScheduler) == TaskCreationOptions.HideScheduler)
-			{
-				c++;
-				opt |= TaskCreationOptions.HideScheduler;
-			}
-			
-			if ((options & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously)
-			{
-				c++;
-				opt |= TaskCreationOptions.RunContinuationsAsynchronously;
-			}
-
-			return c > 0
-						? Task.Factory.StartNew(action, token, opt, TaskScheduler.Default)
-						: Task.Run(action, token);
+			token.ThrowIfCancellationRequested();
+			TaskCreationOptions opt = TaskCreationOptions.None;
+			if ((options & TaskCreationOptions.LongRunning) == TaskCreationOptions.LongRunning) opt |= TaskCreationOptions.LongRunning;
+			if ((options & TaskCreationOptions.PreferFairness) == TaskCreationOptions.PreferFairness) opt |= TaskCreationOptions.PreferFairness;
+			if ((options & TaskCreationOptions.HideScheduler) == TaskCreationOptions.HideScheduler) opt |= TaskCreationOptions.HideScheduler;
+			if ((options & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously) opt |= TaskCreationOptions.RunContinuationsAsynchronously;
+			if (opt == TaskCreationOptions.None) return Task.Run(action, token);
+			opt |= TaskCreationOptions.DenyChildAttach;
+			return Task.Factory.StartNew(action, token, opt, TaskScheduler.Default);
 		}
 
 		[NotNull]
@@ -113,36 +92,15 @@ namespace essentialMix.Threading.Helpers
 		[NotNull]
 		public static Task<T> Run<T>([NotNull] Func<T> func, TaskCreationOptions options, CancellationToken token)
 		{
-			int c = 0;
-			TaskCreationOptions opt = TaskCreationOptions.DenyChildAttach;
-			
-			if ((options & TaskCreationOptions.LongRunning) == TaskCreationOptions.LongRunning)
-			{
-				c++;
-				opt |= TaskCreationOptions.LongRunning;
-			}
-			
-			if ((options & TaskCreationOptions.PreferFairness) == TaskCreationOptions.PreferFairness)
-			{
-				c++;
-				opt |= TaskCreationOptions.PreferFairness;
-			}
-			
-			if ((options & TaskCreationOptions.HideScheduler) == TaskCreationOptions.HideScheduler)
-			{
-				c++;
-				opt |= TaskCreationOptions.HideScheduler;
-			}
-			
-			if ((options & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously)
-			{
-				c++;
-				opt |= TaskCreationOptions.RunContinuationsAsynchronously;
-			}
-
-			return c > 0
-						? Task.Factory.StartNew(func, token, opt, TaskScheduler.Default)
-						: Task.Run(func, token);
+			token.ThrowIfCancellationRequested();
+			TaskCreationOptions opt = TaskCreationOptions.None;
+			if ((options & TaskCreationOptions.LongRunning) == TaskCreationOptions.LongRunning) opt |= TaskCreationOptions.LongRunning;
+			if ((options & TaskCreationOptions.PreferFairness) == TaskCreationOptions.PreferFairness) opt |= TaskCreationOptions.PreferFairness;
+			if ((options & TaskCreationOptions.HideScheduler) == TaskCreationOptions.HideScheduler) opt |= TaskCreationOptions.HideScheduler;
+			if ((options & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously) opt |= TaskCreationOptions.RunContinuationsAsynchronously;
+			if (opt == TaskCreationOptions.None) return Task.Run(func, token);
+			opt |= TaskCreationOptions.DenyChildAttach;
+			return Task.Factory.StartNew(func, token, opt, TaskScheduler.Default);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

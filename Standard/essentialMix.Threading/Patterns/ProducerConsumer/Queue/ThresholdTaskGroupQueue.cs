@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using essentialMix.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
+using essentialMix.Threading.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
@@ -189,7 +190,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 							}
 
 							_countdown.AddCount();
-							tasks[count++] = Task.Run(() =>
+							tasks[count++] = TaskHelper.Run(() =>
 							{
 								try
 								{
@@ -199,7 +200,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 								{
 									_countdown?.SignalOne();
 								}
-							}, Token);
+							}, TaskCreationOptions.PreferFairness, Token);
 						}
 					}
 
@@ -229,7 +230,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						}
 
 						_countdown.AddCount();
-						tasks[count++] = Task.Run(() =>
+						tasks[count++] = TaskHelper.Run(() =>
 						{
 							try
 							{
@@ -239,7 +240,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 							{
 								_countdown?.SignalOne();
 							}
-						}, Token);
+						}, TaskCreationOptions.PreferFairness, Token);
 					}
 
 					if (count < tasks.Length) break;

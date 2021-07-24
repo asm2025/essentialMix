@@ -34,6 +34,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		[NotNull]
 		public Func<T, TaskResult> ExecuteCallback { get; }
 		public Func<T, TaskResult, Exception, bool> ResultCallback { get; set; }
+		public Action<T> ScheduledCallback { get; set; }
 		public Action<T> FinalizeCallback { get; set; }
 	}
 }
