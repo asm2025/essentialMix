@@ -6,10 +6,17 @@ using System.Threading.Tasks;
 using essentialMix.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
+using essentialMix.Threading.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
+	/// <summary>
+	/// ONLY use this queue when the life span duration of this whole queue object is generally short to do specific things and then get thrown away.
+	/// This queue uses dedicated Tasks to consume queued items which is Ok for a short time but not Ok for long running tasks because they will block
+	/// the default ThreadPool's threads. If this queue should have a long lifetime span, then consider using other <see cref="ProducerConsumerQueue{T}"/>
+	/// types which use dedicated threads to consume queued items such as <see cref="WaitAndPulseQueue{TQueue,T}" /> or <see cref="EventQueue{TQueue,T}" />
+	/// </summary>
 	public class TaskQueue<TQueue, T> : ProducerConsumerQueue<T>, IProducerQueue<TQueue, T>
 		where TQueue : ICollection, IReadOnlyCollection<T>
 	{
@@ -66,7 +73,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						for (int i = 0; i < _workers.Length; i++)
 						{
 							_countdown.AddCount();
-							_workers[i] = Task.Run(Consume, Token).ConfigureAwait();
+							_workers[i] = TaskHelper.Run(Consume, TaskCreationOptions.LongRunning, Token).ConfigureAwait();
 						}
 					}
 				}

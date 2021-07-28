@@ -6,10 +6,12 @@ using System.IO;
 using System.Text;
 using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions.Collections;
+using essentialMix.Extensions;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
+	// todo Fix add/remove issues
 	/// <summary>
 	/// <see href="https://en.wikipedia.org/wiki/Binomial_heap">Binomial heap</see> using the linked representation.
 	/// It is a data structure that acts as a priority queue but also allows pairs of heaps to be merged together.
@@ -750,16 +752,19 @@ namespace essentialMix.Collections
 			StringBuilder indent = new StringBuilder();
 			LinkedList<(Queue<TNode> Nodes, int Level)> nodesList = new LinkedList<(Queue<TNode> Nodes, int Level)>();
 			TNode root = thisValue.Head;
+			int level = 0;
+			bool addBlank = false;
 
 			while (root != null)
 			{
 				Queue<TNode> queue = new Queue<TNode>(1);
 				queue.Enqueue(root);
-				nodesList.AddFirst((queue, 0));
+				nodesList.AddFirst((queue, level));
 
 				while (nodesList.Count > 0)
 				{
-					(Queue<TNode> nodes, int level) = nodesList.Last.Value;
+					Queue<TNode> nodes;
+					(nodes, level) = nodesList.Last.Value;
 
 					if (nodes.Count == 0)
 					{
@@ -777,9 +782,14 @@ namespace essentialMix.Collections
 					{
 						indent.Length = 0;
 
-						foreach ((Queue<TNode> Nodes, int Level) tuple in nodesList)
+						if (addBlank)
 						{
-							if (tuple == nodesList.Last.Value) break;
+							indent.Append(STR_BLANK);
+							addBlank = false;
+						}
+
+						foreach ((Queue<TNode> Nodes, int Level) tuple in nodesList.SkipLast(1))
+						{
 							indent.Append(tuple.Nodes.Count > 0
 											? STR_EXT
 											: STR_BLANK);
@@ -796,7 +806,11 @@ namespace essentialMix.Collections
 						writer.WriteLine(node.ToString(level));
 					}
 
-					if (node.Child == null) continue;
+					if (node.Child == null)
+					{
+						if (node.Sibling != null) addBlank = true;
+						continue;
+					}
 
 					// Queue the next nodes.
 					queue = new Queue<TNode>();
@@ -812,6 +826,7 @@ namespace essentialMix.Collections
 				}
 
 				root = root.Sibling;
+				level++;
 			}
 		}
 	}
