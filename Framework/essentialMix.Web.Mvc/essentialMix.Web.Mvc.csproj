@@ -68,7 +68,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.34" />
-		<PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2021.2.0" />
 		<PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.3" />
 		<PackageReference Include="Microsoft.AspNet.Identity.Owin" Version="2.2.3" />
 		<PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.7" />

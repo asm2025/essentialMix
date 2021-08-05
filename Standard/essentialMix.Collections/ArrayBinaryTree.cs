@@ -48,7 +48,7 @@ namespace essentialMix.Collections
 		/// A node metadata used to navigate the tree and print it
 		/// </summary>
 		[DebuggerDisplay("{Value}")]
-		public struct Navigator
+		private struct Navigator : IArrayBinaryTreeNavigator<T>
 		{
 			[NotNull]
 			private readonly ArrayBinaryTree<T> _tree;
@@ -101,12 +101,11 @@ namespace essentialMix.Collections
 			public bool ParentIsLeft => ParentIndex > 0 && ParentIndex % 2 != 0;
 			public bool ParentIsRight => ParentIndex > 0 && ParentIndex % 2 == 0;
 
-			/// <inheritdoc />
 			[NotNull]
 			public override string ToString() { return Convert.ToString(Value); }
 
 			[NotNull]
-			internal string ToString(int level)
+			public string ToString(int level)
 			{
 				return $"{Value} :L{level}";
 			}
@@ -158,7 +157,7 @@ namespace essentialMix.Collections
 				_tree.Items[Index] = tmp;
 			}
 
-			private void Invalidate()
+			public void Invalidate()
 			{
 				_index = ParentIndex = LeftIndex = RightIndex = -1;
 			}
@@ -171,8 +170,8 @@ namespace essentialMix.Collections
 			private readonly int _index;
 			private readonly Queue<int> _queue;
 			private readonly bool _rightToLeft;
+			private readonly IArrayBinaryTreeNavigator<T> _current;
 
-			private Navigator _current;
 			private bool _started;
 			private bool _done;
 
@@ -183,7 +182,7 @@ namespace essentialMix.Collections
 				_index = index;
 				_queue = new Queue<int>(GetCapacityForQueueing(_tree));
 				_rightToLeft = rightToLeft;
-				_current = tree.NewNavigator(index);
+				_current = tree.CreateNavigator(index);
 				_started = false;
 				_done = !_index.InRangeRx(0, _tree.Count);
 			}
@@ -272,7 +271,7 @@ namespace essentialMix.Collections
 			private readonly Stack<int> _stack;
 			private readonly bool _rightToLeft;
 
-			private Navigator _current;
+			private readonly IArrayBinaryTreeNavigator<T> _current;
 			private bool _started;
 			private bool _done;
 
@@ -283,7 +282,7 @@ namespace essentialMix.Collections
 				_index = index;
 				_stack = new Stack<int>(GetCapacityForQueueing(_tree));
 				_rightToLeft = rightToLeft;
-				_current = tree.NewNavigator(index);
+				_current = tree.CreateNavigator(index);
 				_started = false;
 				_done = !_index.InRangeRx(0, _tree.Count);
 			}
@@ -373,7 +372,7 @@ namespace essentialMix.Collections
 			private readonly Stack<int> _stack;
 			private readonly bool _rightToLeft;
 
-			private Navigator _current;
+			private readonly IArrayBinaryTreeNavigator<T> _current;
 			private bool _started;
 			private bool _done;
 
@@ -384,7 +383,7 @@ namespace essentialMix.Collections
 				_index = index;
 				_stack = new Stack<int>(GetCapacityForQueueing(_tree));
 				_rightToLeft = rightToLeft;
-				_current = tree.NewNavigator(index);
+				_current = tree.CreateNavigator(index);
 				_started = false;
 				_done = !_index.InRangeRx(0, _tree.Count);
 			}
@@ -481,7 +480,7 @@ namespace essentialMix.Collections
 			private readonly Stack<int> _stack;
 			private readonly bool _rightToLeft;
 
-			private Navigator _current;
+			private readonly IArrayBinaryTreeNavigator<T> _current;
 			private bool _started;
 			private bool _done;
 
@@ -492,7 +491,7 @@ namespace essentialMix.Collections
 				_index = index;
 				_stack = new Stack<int>(GetCapacityForQueueing(_tree));
 				_rightToLeft = rightToLeft;
-				_current = tree.NewNavigator(index);
+				_current = tree.CreateNavigator(index);
 				_started = false;
 				_done = !_index.InRangeRx(0, _tree.Count);
 			}
@@ -705,7 +704,8 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-		public Navigator NewNavigator(int index = -1)
+		[NotNull]
+		public IArrayBinaryTreeNavigator<T> CreateNavigator(int index = -1)
 		{
 			return new Navigator(this, index);
 		}
@@ -924,7 +924,7 @@ namespace essentialMix.Collections
 			int level = 0;
 			Queue<int> queue = new Queue<int>(GetCapacityForLevelQueueing(this));
 			// Start at the root
-			Navigator current = NewNavigator(index);
+			IArrayBinaryTreeNavigator<T> current = CreateNavigator(index);
 			queue.Enqueue(current.Index);
 
 			while (queue.Count > 0)
@@ -988,7 +988,7 @@ namespace essentialMix.Collections
 			int level = 0;
 			Queue<int> queue = new Queue<int>(GetCapacityForLevelQueueing(this));
 			// Start at the root
-			Navigator current = NewNavigator(index);
+			IArrayBinaryTreeNavigator<T> current = CreateNavigator(index);
 			queue.Enqueue(current.Index);
 
 			while (queue.Count > 0)
@@ -1415,7 +1415,7 @@ namespace essentialMix.Collections
 			int version = _version;
 			// Root-Left-Right (Queue)
 			Queue<int> queue = new Queue<int>();
-			Navigator current = NewNavigator(index);
+			IArrayBinaryTreeNavigator<T> current = CreateNavigator(index);
 
 			// Start at the root
 			queue.Enqueue(current.Index);
@@ -1447,7 +1447,7 @@ namespace essentialMix.Collections
 			int version = _version;
 			// Root-Left-Right (Stack)
 			Stack<int> stack = new Stack<int>();
-			Navigator current = NewNavigator(index);
+			IArrayBinaryTreeNavigator<T> current = CreateNavigator(index);
 
 			// Start at the root
 			stack.Push(current.Index);
@@ -1480,7 +1480,7 @@ namespace essentialMix.Collections
 			// Left-Root-Right (Stack)
 			Stack<int> stack = new Stack<int>();
 			// Start at the root
-			Navigator current = NewNavigator(index);
+			IArrayBinaryTreeNavigator<T> current = CreateNavigator(index);
 
 			while (current.Index > -1 || stack.Count > 0)
 			{
@@ -1511,7 +1511,7 @@ namespace essentialMix.Collections
 			// Left-Right-Root (Stack)
 			Stack<int> stack = new Stack<int>();
 			// Start at the root
-			Navigator current = NewNavigator(index);
+			IArrayBinaryTreeNavigator<T> current = CreateNavigator(index);
 			int lastVisited = -1;
 
 			while (current.Index > -1 || stack.Count > 0)
@@ -1587,7 +1587,7 @@ namespace essentialMix.Collections
 			int version = _version;
 			// Root-Left-Right (Queue)
 			Queue<int> queue = new Queue<int>();
-			Navigator current = NewNavigator(index);
+			IArrayBinaryTreeNavigator<T> current = CreateNavigator(index);
 
 			// Start at the root
 			queue.Enqueue(current.Index);
@@ -1619,7 +1619,7 @@ namespace essentialMix.Collections
 			int version = _version;
 			// Root-Left-Right (Stack)
 			Stack<int> stack = new Stack<int>();
-			Navigator current = NewNavigator(index);
+			IArrayBinaryTreeNavigator<T> current = CreateNavigator(index);
 
 			// Start at the root
 			stack.Push(current.Index);
@@ -1651,7 +1651,7 @@ namespace essentialMix.Collections
 			// Left-Root-Right (Stack)
 			Stack<int> stack = new Stack<int>();
 			// Start at the root
-			Navigator current = NewNavigator(index);
+			IArrayBinaryTreeNavigator<T> current = CreateNavigator(index);
 
 			while (current.Index > -1 || stack.Count > 0)
 			{
@@ -1681,7 +1681,7 @@ namespace essentialMix.Collections
 			// Left-Right-Root (Stack)
 			Stack<int> stack = new Stack<int>();
 			// Start at the root
-			Navigator current = NewNavigator(index);
+			IArrayBinaryTreeNavigator<T> current = CreateNavigator(index);
 			int lastVisited = -1;
 
 			while (current.Index > -1 || stack.Count > 0)
@@ -1783,56 +1783,34 @@ namespace essentialMix.Collections
 	{
 		public static void WriteTo<T>([NotNull] this ArrayBinaryTree<T> thisValue, [NotNull] TextWriter writer)
 		{
-			const string STR_BLANK = "   ";
-			const string STR_EXT = "│  ";
-			const string STR_CONNECTOR_L = "└─ ";
-			const string STR_NULL = "<null>";
-
 			if (thisValue.Count == 0) return;
 
 			StringBuilder indent = new StringBuilder();
-			LinkedList<(Queue<int> Nodes, int Depth)> nodesList = new LinkedList<(Queue<int> Nodes, int Depth)>();
-			ArrayBinaryTree<T>.Navigator node = thisValue.NewNavigator();
-			Queue<int> rootQueue = new Queue<int>(1);
-			rootQueue.Enqueue(0);
-			nodesList.AddFirst((rootQueue, 0));
+			Stack<(int NodeIndex, int Level)> stack = new Stack<(int NodeIndex, int Level)>(1);
+			IArrayBinaryTreeNavigator<T> navigator = thisValue.CreateNavigator();
+			stack.Push((0, 0));
 
-			while (nodesList.Count > 0)
+			while (stack.Count > 0)
 			{
-				(Queue<int> nodes, int depth) = nodesList.Last.Value;
+				(int nodeIndex, int level) = stack.Pop();
+				int n = Constants.INDENT * level;
+				navigator.Index = nodeIndex;
+	
+				if (indent.Length > n) indent.Length = n;
+				else if (indent.Length < n) indent.Append(' ', n - indent.Length);
 
-				if (nodes.Count == 0)
+				writer.Write(indent);
+
+				if (navigator.Index < 0)
 				{
-					nodesList.RemoveLast();
+					writer.WriteLine(Constants.NULL);
 					continue;
 				}
 
-				node.Index = nodes.Dequeue();
-				indent.Length = 0;
-
-				foreach ((Queue<int> Nodes, int Depth) tuple in nodesList)
-				{
-					if (tuple == nodesList.Last.Value) break;
-					indent.Append(tuple.Nodes.Count > 0
-									? STR_EXT
-									: STR_BLANK);
-				}
-
-				writer.Write(indent + STR_CONNECTOR_L);
-
-				if (node.Index < 0)
-				{
-					writer.WriteLine(STR_NULL);
-					continue;
-				}
-
-				writer.WriteLine(node.ToString(depth));
-				if (node.IsLeaf) continue;
-
-				Queue<int> queue = new Queue<int>(2);
-				queue.Enqueue(node.LeftIndex);
-				queue.Enqueue(node.RightIndex);
-				nodesList.AddLast((queue, depth + 1));
+				writer.WriteLine(navigator.ToString(level));
+				if (navigator.IsLeaf) continue;
+				stack.Push((navigator.RightIndex, level + 1));
+				stack.Push((navigator.LeftIndex, level + 1));
 			}
 		}
 	}

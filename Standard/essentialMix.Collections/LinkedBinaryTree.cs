@@ -2210,55 +2210,32 @@ namespace essentialMix.Collections
 		public static void WriteTo<TNode, T>([NotNull] this LinkedBinaryTree<TNode, T> thisValue, [NotNull] TextWriter writer)
 			where TNode : LinkedBinaryNode<TNode, T>
 		{
-			const string STR_BLANK = "   ";
-			const string STR_EXT = "│  ";
-			const string STR_CONNECTOR_L = "└─ ";
-			const string STR_NULL = "<null>";
-
 			if (thisValue.Root == null) return;
 
 			StringBuilder indent = new StringBuilder();
-			LinkedList<(Queue<TNode> Nodes, int Depth)> nodesList = new LinkedList<(Queue<TNode> Nodes, int Depth)>();
-			Queue<TNode> rootQueue = new Queue<TNode>(1);
-			rootQueue.Enqueue(thisValue.Root);
-			nodesList.AddFirst((rootQueue, 0));
+			Stack<(TNode Node, int Level)> stack = new Stack<(TNode Node, int Level)>(1);
+			stack.Push((thisValue.Root, 0));
 
-			while (nodesList.Count > 0)
+			while (stack.Count > 0)
 			{
-				(Queue<TNode> nodes, int depth) = nodesList.Last.Value;
+				(TNode node, int level) = stack.Pop();
+				int n = Constants.INDENT * level;
 
-				if (nodes.Count == 0)
-				{
-					nodesList.RemoveLast();
-					continue;
-				}
+				if (indent.Length > n) indent.Length = n;
+				else if (indent.Length < n) indent.Append(' ', n - indent.Length);
 
-				TNode node = nodes.Dequeue();
-				indent.Length = 0;
-
-				foreach ((Queue<TNode> Nodes, int Depth) tuple in nodesList)
-				{
-					if (tuple == nodesList.Last.Value) break;
-					indent.Append(tuple.Nodes.Count > 0
-									? STR_EXT
-									: STR_BLANK);
-				}
-
-				writer.Write(indent + STR_CONNECTOR_L);
+				writer.Write(indent);
 
 				if (node == null)
 				{
-					writer.WriteLine(STR_NULL);
+					writer.WriteLine(Constants.NULL);
 					continue;
 				}
 
-				writer.WriteLine(node.ToString(depth));
+				writer.WriteLine(node.ToString(level));
 				if (node.IsLeaf) continue;
-
-				Queue<TNode> queue = new Queue<TNode>(2);
-				queue.Enqueue(node.Left);
-				queue.Enqueue(node.Right);
-				nodesList.AddLast((queue, depth + 1));
+				stack.Push((node.Right, level + 1));
+				stack.Push((node.Left, level + 1));
 			}
 		}
 

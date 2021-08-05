@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
+using essentialMix.Threading.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
@@ -38,7 +39,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			{
 				PropagateCompletion = true
 			});
-			Task.Run(Consume).ConfigureAwait();
+			TaskHelper.Run(Consume, TaskCreationOptions.LongRunning).ConfigureAwait();
 		}
 
 		/// <inheritdoc />

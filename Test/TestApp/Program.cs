@@ -34,8 +34,10 @@ using essentialMix.Threading.Helpers;
 using essentialMix.Threading.Patterns.ProducerConsumer;
 using Newtonsoft.Json;
 using Other.JonSkeet.MiscUtil.Collections;
+
 using TimeoutException = System.TimeoutException;
 using Menu = EasyConsole.Menu;
+
 using static Crayon.Output;
 
 // ReSharper disable UnusedMember.Local
@@ -138,8 +140,8 @@ work with {HEAVY} items.");
 			//TestBinaryHeapElementAt();
 			//TestBinaryHeapDecreaseKey();
 		
-			TestBinomialHeapAdd();
-			//TestBinomialHeapRemove();
+			//TestBinomialHeapAdd();
+			TestBinomialHeapRemove();
 			//TestBinomialHeapElementAt();
 			//TestBinomialHeapDecreaseKey();
 			
@@ -3764,7 +3766,7 @@ work with {HEAVY} items.");
 				foreach (TValue value in array)
 				{
 					heap.Add(value);
-					heap.Print();
+					//heap.Print();
 				}
 
 				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));

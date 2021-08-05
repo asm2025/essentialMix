@@ -80,6 +80,9 @@ namespace essentialMix
 		public const int DECIMAL_SIZE = sizeof(decimal);
 		public const int DECIMAL_BIT_SIZE = DECIMAL_SIZE * 8;
 
+		public const string NULL = "<null>";
+		public const int INDENT = 2;
+
 		public static int GetBufferKB(ushort value) { return BUFFER_KB * value; }
 
 		public static int GetBufferMB(ushort value) { return BUFFER_MB * value; }

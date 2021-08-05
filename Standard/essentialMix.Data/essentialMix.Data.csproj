@@ -67,7 +67,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2021.2.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
 	</ItemGroup>

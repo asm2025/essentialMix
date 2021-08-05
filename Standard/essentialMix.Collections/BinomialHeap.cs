@@ -6,12 +6,10 @@ using System.IO;
 using System.Text;
 using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions.Collections;
-using essentialMix.Extensions;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
-	// todo Fix add/remove issues
 	/// <summary>
 	/// <see href="https://en.wikipedia.org/wiki/Binomial_heap">Binomial heap</see> using the linked representation.
 	/// It is a data structure that acts as a priority queue but also allows pairs of heaps to be merged together.
@@ -741,92 +739,32 @@ namespace essentialMix.Collections
 		public static void WriteTo<TNode, TKey, TValue>([NotNull] this BinomialHeap<TNode, TKey, TValue> thisValue, [NotNull] TextWriter writer)
 			where TNode : BinomialNode<TNode, TKey, TValue>
 		{
-			const string STR_BLANK = "   ";
-			const string STR_EXT = "│  ";
-			const string STR_CONNECTOR_R = " ► ";
-			const string STR_CONNECTOR_C = "└─ ";
-			const string STR_NULL = "<null>";
-
 			if (thisValue.Head == null) return;
 
 			StringBuilder indent = new StringBuilder();
-			LinkedList<(Queue<TNode> Nodes, int Level)> nodesList = new LinkedList<(Queue<TNode> Nodes, int Level)>();
-			TNode root = thisValue.Head;
-			int level = 0;
-			bool addBlank = false;
+			Stack<(TNode Node, int Level)> stack = new Stack<(TNode Node, int Level)>(1);
+			stack.Push((thisValue.Head, 0));
 
-			while (root != null)
+			while (stack.Count > 0)
 			{
-				Queue<TNode> queue = new Queue<TNode>(1);
-				queue.Enqueue(root);
-				nodesList.AddFirst((queue, level));
+				(TNode node, int level) = stack.Pop();
+				int n = Constants.INDENT * level;
 
-				while (nodesList.Count > 0)
+				if (indent.Length > n) indent.Length = n;
+				else if (indent.Length < n) indent.Append(' ', n - indent.Length);
+
+				writer.Write(indent);
+
+				if (node == null)
 				{
-					Queue<TNode> nodes;
-					(nodes, level) = nodesList.Last.Value;
-
-					if (nodes.Count == 0)
-					{
-						nodesList.RemoveLast();
-						continue;
-					}
-
-					TNode node = nodes.Dequeue();
-
-					if (level == 0)
-					{
-						writer.WriteLine(STR_CONNECTOR_R + node.ToString(level));
-					}
-					else
-					{
-						indent.Length = 0;
-
-						if (addBlank)
-						{
-							indent.Append(STR_BLANK);
-							addBlank = false;
-						}
-
-						foreach ((Queue<TNode> Nodes, int Level) tuple in nodesList.SkipLast(1))
-						{
-							indent.Append(tuple.Nodes.Count > 0
-											? STR_EXT
-											: STR_BLANK);
-						}
-
-						writer.Write(indent + STR_CONNECTOR_C);
-
-						if (node == null)
-						{
-							writer.WriteLine(STR_NULL);
-							continue;
-						}
-
-						writer.WriteLine(node.ToString(level));
-					}
-
-					if (node.Child == null)
-					{
-						if (node.Sibling != null) addBlank = true;
-						continue;
-					}
-
-					// Queue the next nodes.
-					queue = new Queue<TNode>();
-					queue.Enqueue(node.Child);
-
-					if (node.Child.Sibling != null)
-					{
-						foreach (TNode sibling in node.Child.Siblings())
-							queue.Enqueue(sibling);
-					}
-
-					nodesList.AddLast((queue, level + 1));
+					writer.WriteLine(Constants.NULL);
+					continue;
 				}
 
-				root = root.Sibling;
-				level++;
+				writer.WriteLine(node.ToString(level));
+				if (node.IsLeaf) continue;
+				stack.Push((node.Sibling, level + 1));
+				stack.Push((node.Child, level + 1));
 			}
 		}
 	}
