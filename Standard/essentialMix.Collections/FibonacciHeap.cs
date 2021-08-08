@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Text;
 using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions.Collections;
 using JetBrains.Annotations;
@@ -77,7 +75,7 @@ namespace essentialMix.Collections
 	 * dequeueMin to extract it.
 	 */
 	[Serializable]
-	public abstract class FibonacciHeap<TNode, TKey, TValue> : RootedHeap<TNode, TKey, TValue>
+	public abstract class FibonacciHeap<TNode, TKey, TValue> : SiblingsHeap<TNode, TKey, TValue>
 		where TNode : FibonacciNode<TNode, TKey, TValue>
 	{
 		private struct BreadthFirstEnumerator : IEnumerableEnumerator<TValue>
@@ -889,10 +887,10 @@ namespace essentialMix.Collections
 	[Serializable]
 	public abstract class FibonacciHeap<TKey, TValue> : FibonacciHeap<FibonacciNode<TKey, TValue>, TKey, TValue>
 	{
-		internal sealed class DebugView : Dbg_RootedHeapDebugView<FibonacciNode<TKey, TValue>, TKey, TValue>
+		internal sealed class DebugView : Dbg_KeyedHeapBaseDebugView<FibonacciNode<TKey, TValue>, TKey, TValue>
 		{
 			/// <inheritdoc />
-			public DebugView([NotNull] RootedHeap<FibonacciNode<TKey, TValue>, TKey, TValue> heap)
+			public DebugView([NotNull] SiblingsHeap<FibonacciNode<TKey, TValue>, TKey, TValue> heap)
 				: base(heap)
 			{
 			}
@@ -932,10 +930,10 @@ namespace essentialMix.Collections
 	[Serializable]
 	public abstract class FibonacciHeap<T> : FibonacciHeap<FibonacciNode<T>, T, T>
 	{
-		internal sealed class DebugView : Dbg_RootedHeapDebugView<FibonacciNode<T>, T, T>
+		internal sealed class DebugView : Dbg_KeyedHeapBaseDebugView<FibonacciNode<T>, T, T>
 		{
 			/// <inheritdoc />
-			public DebugView([NotNull] RootedHeap<FibonacciNode<T>, T, T> heap)
+			public DebugView([NotNull] SiblingsHeap<FibonacciNode<T>, T, T> heap)
 				: base(heap)
 			{
 			}
@@ -964,89 +962,5 @@ namespace essentialMix.Collections
 
 		/// <inheritdoc />
 		public override FibonacciNode<T> MakeNode(T value) { return new FibonacciNode<T>(value); }
-	}
-
-	public static class FibonacciHeapExtension
-	{
-		public static void WriteTo<TNode, TKey, TValue>([NotNull] this FibonacciHeap<TNode, TKey, TValue> thisValue, [NotNull] TextWriter writer)
-			where TNode : FibonacciNode<TNode, TKey, TValue>
-		{
-			const string STR_BLANK = "   ";
-			const string STR_EXT = "│  ";
-			const string STR_CONNECTOR_R = " ► ";
-			const string STR_CONNECTOR_C = "└─ ";
-			const string STR_NULL = "<null>";
-
-			if (thisValue.Head == null) return;
-
-			StringBuilder indent = new StringBuilder();
-			LinkedList<(Queue<TNode> Nodes, int Level)> nodesList = new LinkedList<(Queue<TNode> Nodes, int Level)>();
-			TNode root = thisValue.Head;
-
-			while (root != null)
-			{
-				Queue<TNode> queue = new Queue<TNode>(1);
-				queue.Enqueue(root);
-				nodesList.AddFirst((queue, 0));
-
-				while (nodesList.Count > 0)
-				{
-					(Queue<TNode> nodes, int level) = nodesList.Last.Value;
-
-					if (nodes.Count == 0)
-					{
-						nodesList.RemoveLast();
-						continue;
-					}
-
-					TNode node = nodes.Dequeue();
-
-					if (level == 0)
-					{
-						writer.WriteLine(STR_CONNECTOR_R + node.ToString(level));
-					}
-					else
-					{
-						indent.Length = 0;
-
-						foreach ((Queue<TNode> Nodes, int Level) tuple in nodesList)
-						{
-							if (tuple == nodesList.Last.Value) break;
-							indent.Append(tuple.Nodes.Count > 0
-											? STR_EXT
-											: STR_BLANK);
-						}
-
-						writer.Write(indent + STR_CONNECTOR_C);
-
-						if (node == null)
-						{
-							writer.WriteLine(STR_NULL);
-							continue;
-						}
-
-						writer.WriteLine(node.ToString(level));
-					}
-
-					if (node.Child == null) continue;
-
-					// Queue the next nodes.
-					queue = new Queue<TNode>();
-					queue.Enqueue(node.Child);
-
-					if (node.Child.Next != null)
-					{
-						foreach (TNode sibling in node.Child.Forwards())
-							queue.Enqueue(sibling);
-					}
-
-					nodesList.AddLast((queue, level + 1));
-				}
-
-				root = root.Next == thisValue.Head
-							? null
-							: root.Next;
-			}
-		}
 	}
 }

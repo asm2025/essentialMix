@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Text;
 using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions.Collections;
 using JetBrains.Annotations;
@@ -39,7 +37,7 @@ namespace essentialMix.Collections
 	 * So, Maybe will try it some other time.
 	 */
 	[Serializable]
-	public abstract class BinomialHeap<TNode, TKey, TValue> : RootedHeap<TNode, TKey, TValue>
+	public abstract class BinomialHeap<TNode, TKey, TValue> : SiblingsHeap<TNode, TKey, TValue>
 		where TNode : BinomialNode<TNode, TKey, TValue>
 	{
 		private struct BreadthFirstEnumerator : IEnumerableEnumerator<TValue>
@@ -106,7 +104,7 @@ namespace essentialMix.Collections
 				// visit the next queued node
 				_current = _queue.Count > 0
 								? _queue.Dequeue()
-								: _current?.Sibling;
+								: null;
 
 				if (_current == null)
 				{
@@ -115,13 +113,8 @@ namespace essentialMix.Collections
 				}
 
 				// Queue the next nodes
-				if (_current.Child == null) return true;
-				_queue.Enqueue(_current.Child);
-				if (_current.Child.Sibling == null) return true;
-
-				foreach (TNode sibling in _current.Child.Siblings())
-					_queue.Enqueue(sibling);
-
+				if (_current.Child != null) _queue.Enqueue(_current.Child);
+				if (_current.Sibling != null) _queue.Enqueue(_current.Sibling);
 				return true;
 			}
 
@@ -202,7 +195,7 @@ namespace essentialMix.Collections
 				// visit the next queued node
 				_current = _stack.Count > 0
 								? _stack.Pop()
-								: _current?.Sibling;
+								: null;
 
 				if (_current == null)
 				{
@@ -211,13 +204,8 @@ namespace essentialMix.Collections
 				}
 
 				// Queue the next nodes
-				if (_current.Child == null) return true;
-				_stack.Push(_current.Child);
-				if (_current.Child.Sibling == null) return true;
-
-				foreach (TNode sibling in _current.Child.Siblings())
-					_stack.Push(sibling);
-
+				if (_current.Child != null) _stack.Push(_current.Child);
+				if (_current.Sibling != null) _stack.Push(_current.Sibling);
 				return true;
 			}
 
@@ -659,7 +647,7 @@ namespace essentialMix.Collections
 	[Serializable]
 	public abstract class BinomialHeap<TKey, TValue> : BinomialHeap<BinomialNode<TKey, TValue>, TKey, TValue>
 	{
-		internal sealed class DebugView : Dbg_RootedHeapDebugView<BinomialNode<TKey, TValue>, TKey, TValue>
+		internal sealed class DebugView : Dbg_KeyedHeapBaseDebugView<BinomialNode<TKey, TValue>, TKey, TValue>
 		{
 			public DebugView([NotNull] BinomialHeap<TKey, TValue> heap)
 				: base(heap)
@@ -701,7 +689,7 @@ namespace essentialMix.Collections
 	[Serializable]
 	public abstract class BinomialHeap<T> : BinomialHeap<BinomialNode<T>, T, T>
 	{
-		internal sealed class DebugView : Dbg_RootedHeapDebugView<BinomialNode<T>, T, T>
+		internal sealed class DebugView : Dbg_KeyedHeapBaseDebugView<BinomialNode<T>, T, T>
 		{
 			public DebugView([NotNull] BinomialHeap<T> heap)
 				: base(heap)
@@ -732,40 +720,5 @@ namespace essentialMix.Collections
 
 		/// <inheritdoc />
 		public override BinomialNode<T> MakeNode(T value) { return new BinomialNode<T>(value); }
-	}
-
-	public static class BinomialHeapExtension
-	{
-		public static void WriteTo<TNode, TKey, TValue>([NotNull] this BinomialHeap<TNode, TKey, TValue> thisValue, [NotNull] TextWriter writer)
-			where TNode : BinomialNode<TNode, TKey, TValue>
-		{
-			if (thisValue.Head == null) return;
-
-			StringBuilder indent = new StringBuilder();
-			Stack<(TNode Node, int Level)> stack = new Stack<(TNode Node, int Level)>(1);
-			stack.Push((thisValue.Head, 0));
-
-			while (stack.Count > 0)
-			{
-				(TNode node, int level) = stack.Pop();
-				int n = Constants.INDENT * level;
-
-				if (indent.Length > n) indent.Length = n;
-				else if (indent.Length < n) indent.Append(' ', n - indent.Length);
-
-				writer.Write(indent);
-
-				if (node == null)
-				{
-					writer.WriteLine(Constants.NULL);
-					continue;
-				}
-
-				writer.WriteLine(node.ToString(level));
-				if (node.IsLeaf) continue;
-				stack.Push((node.Sibling, level + 1));
-				stack.Push((node.Child, level + 1));
-			}
-		}
 	}
 }

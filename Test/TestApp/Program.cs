@@ -140,8 +140,8 @@ work with {HEAVY} items.");
 			//TestBinaryHeapElementAt();
 			//TestBinaryHeapDecreaseKey();
 		
-			//TestBinomialHeapAdd();
-			TestBinomialHeapRemove();
+			TestBinomialHeapAdd();
+			//TestBinomialHeapRemove();
 			//TestBinomialHeapElementAt();
 			//TestBinomialHeapDecreaseKey();
 			
@@ -3509,7 +3509,8 @@ work with {HEAVY} items.");
 					//heap.PrintWithProps();
 				}
 
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(InOrder - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(LevelOrder): ") + string.Join(", ", heap.Enumerate(TreeTraverseMethod.LevelOrder)));
 				heap.Print();
 			}
 		}
@@ -3553,7 +3554,8 @@ work with {HEAVY} items.");
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(InOrder - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(LevelOrder): ") + string.Join(", ", heap.Enumerate(TreeTraverseMethod.LevelOrder)));
 				heap.Print();
 				Console.WriteLine("Test removing...");
 				bool removeStarted = false;
@@ -3615,7 +3617,8 @@ work with {HEAVY} items.");
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(InOrder - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(LevelOrder): ") + string.Join(", ", heap.Enumerate(TreeTraverseMethod.LevelOrder)));
 				heap.Print();
 				Console.WriteLine($"Kth element at position {k} = {Bright.Cyan().Underline(heap.ElementAt(k).ToString())}");
 				Console.WriteLine();
@@ -3719,7 +3722,8 @@ work with {HEAVY} items.");
 					heap.Add(node);
 				}
 
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(InOrder - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(LevelOrder): ") + string.Join(", ", heap.Enumerate(TreeTraverseMethod.LevelOrder)));
 				heap.Print();
 			}
 		}
@@ -3769,7 +3773,8 @@ work with {HEAVY} items.");
 					//heap.Print();
 				}
 
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
 				heap.Print();
 			}
 		}
@@ -3815,7 +3820,8 @@ work with {HEAVY} items.");
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
 				heap.Print();
 				Console.WriteLine("Test removing...");
 				bool removeStarted = false;
@@ -3877,7 +3883,8 @@ work with {HEAVY} items.");
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
 				heap.Print();
 				Console.WriteLine($"Kth element at position {k} element = {Bright.Cyan().Underline(heap.ElementAt(k).ToString())}");
 				Console.WriteLine();
@@ -3981,7 +3988,8 @@ work with {HEAVY} items.");
 					heap.Add(node);
 				}
 
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
 				heap.Print();
 			}
 		}
@@ -4031,7 +4039,8 @@ work with {HEAVY} items.");
 					//heap.PrintWithProps();
 				}
 
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
 				heap.Print();
 			}
 		}
@@ -4077,7 +4086,8 @@ work with {HEAVY} items.");
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
 				heap.Print();
 				Console.WriteLine("Test removing...");
 				bool removeStarted = false;
@@ -4139,7 +4149,8 @@ work with {HEAVY} items.");
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
 				heap.Print();
 				Console.WriteLine($"Kth element at position {k} element = {Bright.Cyan().Underline(heap.ElementAt(k).ToString())}");
 				Console.WriteLine();
@@ -4243,7 +4254,8 @@ work with {HEAVY} items.");
 					heap.Add(node);
 				}
 
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
 				heap.Print();
 			}
 		}
@@ -4293,7 +4305,8 @@ work with {HEAVY} items.");
 					//heap.PrintWithProps();
 				}
 
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
 				heap.Print();
 			}
 		}
@@ -4339,7 +4352,8 @@ work with {HEAVY} items.");
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
 				heap.Print();
 				Console.WriteLine("Test removing...");
 				bool removeStarted = false;
@@ -4401,7 +4415,8 @@ work with {HEAVY} items.");
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
 				heap.Print();
 				Console.WriteLine($"Kth element at position {k} element = {Bright.Cyan().Underline(heap.ElementAt(k).ToString())}");
 				Console.WriteLine();
@@ -4505,7 +4520,8 @@ work with {HEAVY} items.");
 					heap.Add(node);
 				}
 
-				Console.WriteLine(Bright.Black("Enumeration: ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
 				heap.Print();
 			}
 		}

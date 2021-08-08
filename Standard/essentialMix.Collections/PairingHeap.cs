@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Text;
 using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions.Collections;
 using JetBrains.Annotations;
@@ -24,7 +22,7 @@ namespace essentialMix.Collections
 	// https://brilliant.org/wiki/pairing-heap/
 	// https://users.cs.fiu.edu/~weiss/dsaa_c++/code/PairingHeap.cpp <= actually nice one :)
 	[Serializable]
-	public abstract class PairingHeap<TNode, TKey, TValue> : RootedHeap<TNode, TKey, TValue>
+	public abstract class PairingHeap<TNode, TKey, TValue> : SiblingsHeap<TNode, TKey, TValue>
 		where TNode : PairingNode<TNode, TKey, TValue>
 	{
 		private struct BreadthFirstEnumerator : IEnumerableEnumerator<TValue>
@@ -582,7 +580,7 @@ namespace essentialMix.Collections
 	[Serializable]
 	public abstract class PairingHeap<TKey, TValue> : PairingHeap<PairingNode<TKey, TValue>, TKey, TValue>
 	{
-		internal sealed class DebugView : Dbg_RootedHeapDebugView<PairingNode<TKey, TValue>, TKey, TValue>
+		internal sealed class DebugView : Dbg_KeyedHeapBaseDebugView<PairingNode<TKey, TValue>, TKey, TValue>
 		{
 			/// <inheritdoc />
 			public DebugView([NotNull] PairingHeap<TKey, TValue> heap)
@@ -625,7 +623,7 @@ namespace essentialMix.Collections
 	[Serializable]
 	public abstract class PairingHeap<T> : PairingHeap<PairingNode<T>, T, T>
 	{
-		internal sealed class DebugView : Dbg_RootedHeapDebugView<PairingNode<T>, T, T>
+		internal sealed class DebugView : Dbg_KeyedHeapBaseDebugView<PairingNode<T>, T, T>
 		{
 			/// <inheritdoc />
 			public DebugView([NotNull] PairingHeap<T> heap)
@@ -657,87 +655,5 @@ namespace essentialMix.Collections
 
 		/// <inheritdoc />
 		public override PairingNode<T> MakeNode(T value) { return new PairingNode<T>(value); }
-	}
-
-	public static class PairingHeapExtension
-	{
-		public static void WriteTo<TNode, TKey, TValue>([NotNull] this PairingHeap<TNode, TKey, TValue> thisValue, [NotNull] TextWriter writer)
-			where TNode : PairingNode<TNode, TKey, TValue>
-		{
-			const string STR_BLANK = "   ";
-			const string STR_EXT = "│  ";
-			const string STR_CONNECTOR_R = " ► ";
-			const string STR_CONNECTOR_C = "└─ ";
-			const string STR_NULL = "<null>";
-
-			if (thisValue.Head == null) return;
-
-			StringBuilder indent = new StringBuilder();
-			LinkedList<(Queue<TNode> Nodes, int Level)> nodesList = new LinkedList<(Queue<TNode> Nodes, int Level)>();
-			TNode root = thisValue.Head;
-
-			while (root != null)
-			{
-				Queue<TNode> queue = new Queue<TNode>(1);
-				queue.Enqueue(root);
-				nodesList.AddFirst((queue, 0));
-
-				while (nodesList.Count > 0)
-				{
-					(Queue<TNode> nodes, int level) = nodesList.Last.Value;
-
-					if (nodes.Count == 0)
-					{
-						nodesList.RemoveLast();
-						continue;
-					}
-
-					TNode node = nodes.Dequeue();
-
-					if (level == 0)
-					{
-						writer.WriteLine(STR_CONNECTOR_R + node.ToString(level));
-					}
-					else
-					{
-						indent.Length = 0;
-
-						foreach ((Queue<TNode> Nodes, int Level) tuple in nodesList)
-						{
-							if (tuple == nodesList.Last.Value) break;
-							indent.Append(tuple.Nodes.Count > 0
-											? STR_EXT
-											: STR_BLANK);
-						}
-
-						writer.Write(indent + STR_CONNECTOR_C);
-
-						if (node == null)
-						{
-							writer.WriteLine(STR_NULL);
-							continue;
-						}
-
-						writer.WriteLine(node.ToString(level));
-					}
-
-					if (node.Child == null) continue;
-
-					// Queue the next nodes.
-					queue = new Queue<TNode>();
-					queue.Enqueue(node.Child);
-
-					if (node.Child.Sibling != null)
-					{
-						foreach (TNode sibling in node.Child.Siblings())
-							queue.Enqueue(sibling);
-					}
-
-					nodesList.AddLast((queue, level + 1));
-				}
-
-				root = root.Sibling;
-			}
-		}
 	}
 }

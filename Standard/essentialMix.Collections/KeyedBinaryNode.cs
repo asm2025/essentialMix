@@ -28,7 +28,7 @@ namespace essentialMix.Collections
 		public override string ToString() { return Convert.ToString(Value); }
 
 		[NotNull]
-		internal virtual string ToString(int level)
+		public virtual string ToString(int level)
 		{
 			return $"{Key} = {Value} :L{level}";
 		}
@@ -76,7 +76,7 @@ namespace essentialMix.Collections
 			set => Value = value;
 		}
 
-		internal override string ToString(int level)
+		public override string ToString(int level)
 		{
 			return $"{Value} :L{level}";
 		}

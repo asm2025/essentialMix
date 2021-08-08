@@ -179,8 +179,8 @@ namespace essentialMix.Collections
 			private readonly int _index;
 			private readonly Queue<int> _queue;
 			private readonly bool _rightToLeft;
+			private readonly IBinaryHeapNavigator<TNode, TKey, TValue> _current;
 
-			private IBinaryHeapNavigator<TNode, TKey, TValue> _current;
 			private bool _started;
 			private bool _done;
 
@@ -282,7 +282,7 @@ namespace essentialMix.Collections
 			private readonly Stack<int> _stack;
 			private readonly bool _rightToLeft;
 
-			private IBinaryHeapNavigator<TNode, TKey, TValue> _current;
+			private readonly IBinaryHeapNavigator<TNode, TKey, TValue> _current;
 			private bool _started;
 			private bool _done;
 
@@ -385,7 +385,7 @@ namespace essentialMix.Collections
 			private readonly Stack<int> _stack;
 			private readonly bool _rightToLeft;
 
-			private IBinaryHeapNavigator<TNode, TKey, TValue> _current;
+			private readonly IBinaryHeapNavigator<TNode, TKey, TValue> _current;
 			private bool _started;
 			private bool _done;
 
@@ -495,7 +495,7 @@ namespace essentialMix.Collections
 			private readonly Stack<int> _stack;
 			private readonly bool _rightToLeft;
 
-			private IBinaryHeapNavigator<TNode, TKey, TValue> _current;
+			private readonly IBinaryHeapNavigator<TNode, TKey, TValue> _current;
 			private bool _started;
 			private bool _done;
 

@@ -7,12 +7,12 @@ namespace essentialMix.Collections.DebugView
 	 * assembly. So we need to use different names for collection debug view for
 	 * collections in this solution assemblies.
 	 */
-	public class Dbg_RootedHeapDebugView<TNode, TKey, TValue>
+	public class Dbg_KeyedHeapBaseDebugView<TNode, TKey, TValue>
 		where TNode : class, IKeyedNode<TKey, TValue>
 	{
-		private readonly RootedHeap<TNode, TKey, TValue> _heap;
+		private readonly KeyedHeap<TNode, TKey, TValue> _heap;
 
-		public Dbg_RootedHeapDebugView([NotNull] RootedHeap<TNode, TKey, TValue> heap)
+		public Dbg_KeyedHeapBaseDebugView([NotNull] KeyedHeap<TNode, TKey, TValue> heap)
 		{
 			_heap = heap;
 		}

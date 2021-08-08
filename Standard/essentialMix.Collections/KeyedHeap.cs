@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using essentialMix.Collections.DebugView;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
+	[DebuggerTypeProxy(typeof(Dbg_KeyedHeapBaseDebugView<,,>))]
 	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public abstract class KeyedHeap<TNode, TKey, TValue> : IKeyedHeap<TNode, TKey, TValue>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
@@ -45,6 +47,8 @@ namespace essentialMix.Collections
 		[NotNull]
 		protected EqualityComparer<TValue> ValueComparer { get; } = EqualityComparer<TValue>.Default;
 
+		protected internal TNode Head { get; set; }
+
 		public int Count { get; protected internal set; }
 
 		/// <inheritdoc />
@@ -72,42 +76,52 @@ namespace essentialMix.Collections
 		/// <summary>
 		/// Enumerate nodes' values in a semi recursive approach
 		/// </summary>
+		/// <param name="root">The starting node</param>
 		/// <param name="method">The technique to use when traversing</param>
 		/// <returns>An <see cref="IEnumerableEnumerator{TValue}"/></returns>
 		[NotNull]
-		public abstract IEnumerableEnumerator<TValue> Enumerate(BreadthDepthTraversal method);
+		public abstract IEnumerableEnumerator<TValue> Enumerate(TNode root, BreadthDepthTraversal method);
 
 		#region Enumerate overloads
 		[NotNull]
 		public IEnumerableEnumerator<TValue> Enumerate() { return Enumerate(BreadthDepthTraversal.BreadthFirst); }
+		/// <summary>
+		/// Enumerate nodes' values in a semi recursive approach
+		/// </summary>
+		/// <param name="method">The technique to use when traversing</param>
+		/// <returns>An <see cref="IEnumerableEnumerator{TValue}"/></returns>
+		[NotNull]
+		public IEnumerableEnumerator<TValue> Enumerate(BreadthDepthTraversal method) { return Enumerate(Head, method); }
+		[NotNull]
+		public IEnumerableEnumerator<TValue> Enumerate(TNode root) { return Enumerate(root, BreadthDepthTraversal.BreadthFirst); }
 		#endregion
 
 		/// <summary>
 		/// Iterate over nodes with a callback action
 		/// </summary>
+		/// <param name="root">The starting node</param>
 		/// <param name="method">The technique to use when traversing</param>
 		/// <param name="visitCallback">callback action to handle the node</param>
-		public abstract void Iterate(BreadthDepthTraversal method, [NotNull] Action<TNode> visitCallback);
+		public abstract void Iterate(TNode root, BreadthDepthTraversal method, [NotNull] Action<TNode> visitCallback);
 
 		#region Iterate overloads - visitCallback action
-		public void Iterate([NotNull] Action<TNode> visitCallback)
-		{
-			Iterate(BreadthDepthTraversal.BreadthFirst, visitCallback);
-		}
+		public void Iterate([NotNull] Action<TNode> visitCallback) { Iterate(Head, BreadthDepthTraversal.BreadthFirst, visitCallback); }
+		public void Iterate(TNode root, [NotNull] Action<TNode> visitCallback) { Iterate(root, BreadthDepthTraversal.BreadthFirst, visitCallback); }
+		public void Iterate(BreadthDepthTraversal method, [NotNull] Action<TNode> visitCallback) { Iterate(Head, method, visitCallback); }
 		#endregion
 
 		/// <summary>
 		/// Iterate over nodes with a callback function
 		/// </summary>
+		/// <param name="root">The starting node</param>
 		/// <param name="method">The technique to use when traversing</param>
 		/// <param name="visitCallback">callback function to handle the node that can cancel the loop</param>
-		public abstract void Iterate(BreadthDepthTraversal method, [NotNull] Func<TNode, bool> visitCallback);
+		public abstract void Iterate(TNode root, BreadthDepthTraversal method, [NotNull] Func<TNode, bool> visitCallback);
 
 		#region Iterate overloads - visitCallback action
-		public void Iterate([NotNull] Func<TNode, bool> visitCallback)
-		{
-			Iterate(BreadthDepthTraversal.BreadthFirst, visitCallback);
-		}
+		public void Iterate([NotNull] Func<TNode, bool> visitCallback) { Iterate(Head, BreadthDepthTraversal.BreadthFirst, visitCallback); }
+		public void Iterate(BreadthDepthTraversal method, [NotNull] Func<TNode, bool> visitCallback) { Iterate(Head, method, visitCallback); }
+		public void Iterate(TNode root, [NotNull] Func<TNode, bool> visitCallback) { Iterate(root, BreadthDepthTraversal.BreadthFirst, visitCallback); }
 		#endregion
 
 		/// <inheritdoc />

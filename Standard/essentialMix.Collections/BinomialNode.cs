@@ -11,7 +11,7 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("{Key} = {Value} :D{Degree}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class BinomialNode<TNode, TKey, TValue> : IKeyedNode<TKey, TValue>
+	public abstract class BinomialNode<TNode, TKey, TValue> : ISiblingNode<TNode, TKey, TValue>
 		where TNode : BinomialNode<TNode, TKey, TValue>
 	{
 		private const int PARENT = 0;
@@ -70,7 +70,7 @@ namespace essentialMix.Collections
 		public override string ToString() { return Convert.ToString(Value); }
 
 		[NotNull]
-		internal virtual string ToString(int level)
+		public virtual string ToString(int level)
 		{
 			return $"{Key} = {Value} :D{Degree}L{level}";
 		}
@@ -178,7 +178,7 @@ namespace essentialMix.Collections
 			set => Value = value;
 		}
 
-		internal override string ToString(int level)
+		public override string ToString(int level)
 		{
 			return $"{Value} :D{Degree}L{level}";
 		}

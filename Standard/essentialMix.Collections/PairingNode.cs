@@ -11,7 +11,7 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("{Key} = {Value}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class PairingNode<TNode, TKey, TValue> : IKeyedNode<TKey, TValue>
+	public abstract class PairingNode<TNode, TKey, TValue> : ISiblingNode<TNode, TKey, TValue>
 		where TNode : PairingNode<TNode, TKey, TValue>
 	{
 		private const int CHILD = 0;
@@ -68,7 +68,7 @@ namespace essentialMix.Collections
 		public override string ToString() { return Convert.ToString(Value); }
 
 		[NotNull]
-		internal virtual string ToString(int level)
+		public virtual string ToString(int level)
 		{
 			return $"{Key} = {Value} :L{level}";
 		}
@@ -176,7 +176,7 @@ namespace essentialMix.Collections
 			set => Value = value;
 		}
 
-		internal override string ToString(int level)
+		public override string ToString(int level)
 		{
 			return $"{Value} :L{level}";
 		}

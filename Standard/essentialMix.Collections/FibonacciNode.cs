@@ -11,7 +11,7 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("{Key} = {Value} :D{Degree}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class FibonacciNode<TNode, TKey, TValue> : IKeyedNode<TKey, TValue>
+	public abstract class FibonacciNode<TNode, TKey, TValue> : ISiblingNode<TNode, TKey, TValue>
 		where TNode : FibonacciNode<TNode, TKey, TValue>
 	{
 		private const int PARENT = 0;
@@ -68,6 +68,9 @@ namespace essentialMix.Collections
 			internal set => _nodes[NEXT] = value;
 		}
 
+		/// <inheritdoc />
+		TNode ISiblingNode<TNode, TKey, TValue>.Sibling => Next;
+
 		[NotNull]
 		public abstract TKey Key { get; set; }
 
@@ -85,7 +88,7 @@ namespace essentialMix.Collections
 		public override string ToString() { return Convert.ToString(Value); }
 
 		[NotNull]
-		internal virtual string ToString(int level)
+		public virtual string ToString(int level)
 		{
 			return $"{Key} = {Value} :D{Degree}L{level}";
 		}
@@ -95,7 +98,7 @@ namespace essentialMix.Collections
 		{
 			TNode node = _nodes[PREVIOUS];
 
-			while (node != this && node != stopAt)
+			while (node != null && node != this && node != stopAt)
 			{
 				yield return node;
 				node = node._nodes[PREVIOUS];
@@ -107,7 +110,7 @@ namespace essentialMix.Collections
 		{
 			TNode node = _nodes[NEXT];
 
-			while (node != this && node != stopAt)
+			while (node != null && node != this && node != stopAt)
 			{
 				yield return node;
 				node = node._nodes[NEXT];
@@ -137,6 +140,9 @@ namespace essentialMix.Collections
 				child = child._nodes[CHILD];
 			}
 		}
+
+		/// <inheritdoc />
+		public IEnumerable<TNode> Siblings() { return Forwards(); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public void Swap([NotNull] TNode other)
@@ -207,7 +213,7 @@ namespace essentialMix.Collections
 			set => Value = value;
 		}
 
-		internal override string ToString(int level)
+		public override string ToString(int level)
 		{
 			return $"{Value} :D{Degree}L{level}";
 		}
