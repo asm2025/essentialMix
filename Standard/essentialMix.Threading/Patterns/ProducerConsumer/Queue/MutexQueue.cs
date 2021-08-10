@@ -73,14 +73,18 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		}
 	
 		/// <inheritdoc />
+		// ReSharper disable once InconsistentlySynchronizedField
 		public TQueue Queue => _queue.Queue;
 	
 		/// <inheritdoc />
+		// ReSharper disable once InconsistentlySynchronizedField
 		public bool IsSynchronized => _queue.IsSynchronized;
 
 		/// <inheritdoc />
+		// ReSharper disable once InconsistentlySynchronizedField
 		public object SyncRoot => _queue.SyncRoot;
 
+		// ReSharper disable once InconsistentlySynchronizedField
 		public sealed override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
 
 		public sealed override bool IsBusy => Count > 0;
@@ -106,7 +110,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public bool TryPeek(out T item)
 		{
 			ThrowIfDisposed();
-			return _queue.TryPeek(out item);
+
+			lock(SyncRoot)
+				return _queue.TryPeek(out item);
 		}
 
 		/// <inheritdoc />
@@ -116,10 +122,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 			lock(SyncRoot)
 			{
-				while (_queue.TryPeek(out T item) && predicate(item))
-				{
-					_queue.TryDequeue(out _);
-				}
+				while (!_queue.IsEmpty && _queue.TryPeek(out T item) && predicate(item)) 
+					_queue.Dequeue();
 			}
 		}
 
@@ -130,7 +134,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 		protected override void ClearInternal()
 		{
-			_queue.Clear();
+			lock(SyncRoot)
+				_queue.Clear();
 		}
 
 		protected sealed override bool WaitInternal(int millisecondsTimeout)
@@ -170,19 +175,19 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			if (IsDisposed) return;
 			OnWorkStarted(EventArgs.Empty);
-	
-			IList<Thread> threads = new List<Thread>(Threads);
-	
+			
 			try
 			{
-				T item;
-
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
+					if (IsPaused) continue;
+					T item;
+
 					lock(SyncRoot)
 					{
-						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
+						if (IsPaused || _queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
 					}
+
 					ScheduledCallback?.Invoke(item);
 
 					Thread thread = new Thread(RunThread)
@@ -194,22 +199,26 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					if (_countdown == null) _countdown = new CountdownEvent(2);
 					else _countdown.AddCount();
 					thread.Start(item);
-					threads.Add(thread);
-					if (threads.Count < Threads) continue;
+					if (_countdown.CurrentCount <= Threads) continue;
 					_countdown.Signal();
 					_countdown.Wait(Token);
-					threads.Clear();
 					ObjectHelper.Dispose(ref _countdown);
 				}
 
+				if (IsDisposed || Token.IsCancellationRequested) return;
 				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST);
 
 				while (!IsDisposed && !Token.IsCancellationRequested)
 				{
+					if (IsPaused) continue;
+					T item;
+
 					lock(SyncRoot)
 					{
+						if (IsPaused) continue;
 						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) break;
 					}
+
 					ScheduledCallback?.Invoke(item);
 
 					Thread thread = new Thread(RunThread)
@@ -221,11 +230,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					if (_countdown == null) _countdown = new CountdownEvent(2);
 					else _countdown.AddCount();
 					thread.Start(item);
-					threads.Add(thread);
-					if (threads.Count < Threads) continue;
+					if (_countdown.CurrentCount <= Threads) continue;
 					_countdown.Signal();
 					_countdown.Wait(Token);
-					threads.Clear();
 					ObjectHelper.Dispose(ref _countdown);
 				}
 
@@ -255,7 +262,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 			try
 			{
-				if (!_mutex.WaitOne(Token)) return;
+				if (!_mutex.WaitOne(TimeSpanHelper.INFINITE, Token)) return;
 				entered = true;
 				if (IsDisposed || Token.IsCancellationRequested) return;
 				Run((T)rawValue);

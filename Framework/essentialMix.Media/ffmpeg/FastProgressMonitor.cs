@@ -2,7 +2,7 @@ using System;
 using System.Text.RegularExpressions;
 using essentialMix.Helpers;
 using essentialMix.Media.Commands;
-using essentialMix.Threading.Collections.MessageQueue;
+using essentialMix.Threading.Patterns.ProducerConsumer;
 using JetBrains.Annotations;
 
 namespace essentialMix.Media.ffmpeg
@@ -13,7 +13,7 @@ namespace essentialMix.Media.ffmpeg
 		private static readonly Regex __completed = new Regex(@"^encoded\s+\d+(?:\.\d+)?\s+frames in\s+\d+(?:\.\d+)?s\s+(?:\(\d+(?:\.\d+)? fps\))", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
 
 		private readonly double _frames;
-		private readonly Queue<string> _messages;
+		private readonly IProducerConsumer<string> _messages;
 		
 		private bool _startCalled;
 		private bool _done;
@@ -21,7 +21,7 @@ namespace essentialMix.Media.ffmpeg
 		public FastProgressMonitor(long frames, [NotNull] Action onStart, [NotNull] Action<int> onProgress, [NotNull] Action onCompleted)
 		{
 			_frames = frames;
-			_messages = new Queue<string>(data =>
+			ProducerConsumerQueueOptions<string> options = new ProducerConsumerQueueOptions<string>(1, true, data =>
 			{
 				Match m = __progress.Match(data);
 
@@ -45,6 +45,7 @@ namespace essentialMix.Media.ffmpeg
 				OnProgressCompleted();
 				_done = true;
 			});
+			_messages = ProducerConsumerQueue.Create(ThreadQueueMode.WaitAndPulse, options);
 			OnProgressStart = onStart;
 			OnProgress = onProgress;
 			OnProgressCompleted = onCompleted;

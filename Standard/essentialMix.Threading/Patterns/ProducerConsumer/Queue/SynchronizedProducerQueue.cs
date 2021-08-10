@@ -42,6 +42,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public object SyncRoot => _producerQueue.SyncRoot;
 
 		/// <inheritdoc />
+		public bool IsPaused => _queue.IsPaused;
+
+		/// <inheritdoc />
 		public bool CompleteMarked => _queue.CompleteMarked;
 
 		/// <inheritdoc />
@@ -106,10 +109,22 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		}
 
 		/// <inheritdoc />
+		public void Pause() { _queue.Pause(); }
+
+		/// <inheritdoc />
+		public void Resume() { _queue.Resume(); }
+
+		/// <inheritdoc />
 		public void Stop() { _queue.Stop(); }
 
 		/// <inheritdoc />
 		public void Stop(bool enforce) { _queue.Stop(enforce); }
+
+		/// <inheritdoc />
+		public Task StopAsync() { return _queue.StopAsync(); }
+
+		/// <inheritdoc />
+		public Task StopAsync(bool enforce) { return _queue.StopAsync(enforce); }
 
 		/// <inheritdoc />
 		public bool Wait() { return _queue.Wait(); }

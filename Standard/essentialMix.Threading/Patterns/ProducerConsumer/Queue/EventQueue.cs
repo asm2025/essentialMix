@@ -107,7 +107,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public bool TryPeek(out T item)
 		{
 			ThrowIfDisposed();
-			return _queue.TryPeek(out item);
+
+			lock(SyncRoot)
+				return _queue.TryPeek(out item);
 		}
 
 		/// <inheritdoc />
@@ -117,15 +119,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 			lock(SyncRoot)
 			{
-				int n = 0;
+				int n = _queue.Count;
 
-				while (_queue.TryPeek(out T item) && predicate(item))
-				{
-					if (!_queue.TryDequeue(out _)) continue;
-					n++;
-				}
+				while (!_queue.IsEmpty && _queue.TryPeek(out T item) && predicate(item)) 
+					_queue.Dequeue();
 
-				if (n == 0) return;
+				if (n == _queue.Count) return;
 				_queueEvent.Set();
 			}
 		}
@@ -138,7 +137,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 		protected sealed override void ClearInternal()
 		{
-			_queue.Clear();
+			lock(SyncRoot)
+			{
+				_queue.Clear();
+				_queueEvent.Set();
+			}
 		}
 
 		protected sealed override bool WaitInternal(int millisecondsTimeout)
@@ -180,19 +183,24 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 			try
 			{
-				T item;
-
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.IsEmpty) 
+					if (IsPaused) continue;
+					T item;
+
+					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.IsEmpty)
+					{
+						if (IsPaused) continue;
 						_queueEvent.WaitOne(TimeSpanHelper.FAST, Token);
+					}
 
 					if (IsDisposed || Token.IsCancellationRequested) return;
 					if (CompleteMarked) break;
+					if (IsPaused) continue;
 
 					lock(SyncRoot)
 					{
-						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
+						if (IsPaused || _queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
 					}
 
 					ScheduledCallback?.Invoke(item);
@@ -201,8 +209,14 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !_queue.IsEmpty)
 				{
-					// no lock here
-					if (!_queue.TryDequeue(out item)) continue;
+					if (IsPaused) continue;
+					T item;
+
+					lock(SyncRoot)
+					{
+						if (IsPaused || _queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
+					}
+
 					ScheduledCallback?.Invoke(item);
 					Run(item);
 				}

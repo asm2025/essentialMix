@@ -157,8 +157,9 @@ namespace essentialMix.Threading.Patterns
 		{
 			get
 			{
-				int isBusy = _isBusy;
-				return isBusy != 0;
+				// ensure we have the latest value
+				Thread.MemoryBarrier();
+				return _isBusy != 0;
 			}
 			protected set => Interlocked.CompareExchange(ref _isBusy, value ? 1 : 0, _isBusy);
 		}

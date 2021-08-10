@@ -20,7 +20,7 @@ namespace essentialMix.Collections
 		{
 			private readonly IQueue<T> _queue;
 
-			public QueueProxy(Queue<T> queue)
+			public QueueProxy([NotNull] Queue<T> queue)
 				: this(new QueueWrapper<T>(queue))
 			{
 			}
@@ -88,7 +88,7 @@ namespace essentialMix.Collections
 		{
 			private readonly IStack<T> _stack;
 
-			public StackProxy(Stack<T> stack)
+			public StackProxy([NotNull] Stack<T> stack)
 				: this(new StackWrapper<T>(stack))
 			{
 			}
@@ -463,6 +463,7 @@ namespace essentialMix.Collections
 			public void Enqueue(T item) { _heap.Add(item); }
 
 			/// <inheritdoc />
+			[NotNull]
 			public T Dequeue() { return _heap.ExtractValue(); }
 
 			/// <inheritdoc />
@@ -479,6 +480,7 @@ namespace essentialMix.Collections
 			}
 
 			/// <inheritdoc />
+			[NotNull]
 			public T Peek() { return _heap.Value(); }
 
 			/// <inheritdoc />

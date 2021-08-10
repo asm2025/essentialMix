@@ -11,6 +11,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 	 */
 	public interface IProducerConsumer<in T> : IDisposable
 	{
+		bool IsPaused { get; }
 		bool CompleteMarked { get; }
 		int Count { get; }
 		bool IsBusy { get; }
@@ -25,8 +26,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		void Enqueue([NotNull] T item);
 		void Complete();
 		void Clear();
+		void Pause();
+		void Resume();
 		void Stop();
 		void Stop(bool enforce);
+		Task StopAsync();
+		Task StopAsync(bool enforce);
 		bool Wait();
 		bool Wait(TimeSpan timeout);
 		bool Wait(int millisecondsTimeout);

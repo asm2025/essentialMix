@@ -1,4 +1,4 @@
-namespace essentialMix.Threading.Collections.MessageQueue
+namespace essentialMix.Logging
 {
 	public class DiagnosticMessage
 	{

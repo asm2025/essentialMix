@@ -50,14 +50,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 		public sealed override bool IsBusy => Count > 0;
 
-		[NotNull]
-		protected object GetLock()
-		{
-			return IsSynchronized
-						? SyncRoot
-						: _queue;
-		}
-
 		protected sealed override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested) return;
@@ -87,12 +79,10 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				OnWorkStarted(EventArgs.Empty);
 			}
 
-			object lck = GetLock();
-
-			lock(lck)
+			lock(SyncRoot)
 			{
 				_queue.Enqueue(item);
-				Monitor.Pulse(lck);
+				Monitor.Pulse(SyncRoot);
 			}
 		}
 
@@ -101,12 +91,10 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			ThrowIfDisposed();
 
-			object lck = GetLock();
-
-			lock(lck)
+			lock(SyncRoot)
 			{
 				if (!_queue.TryDequeue(out item)) return false;
-				Monitor.Pulse(lck);
+				Monitor.Pulse(SyncRoot);
 				return true;
 			}
 		}
@@ -124,9 +112,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			ThrowIfDisposed();
 			if (_queue.IsEmpty) return;
 
-			object lck = GetLock();
-
-			lock(lck)
+			lock(SyncRoot)
 			{
 				if (_queue.IsEmpty) return;
 
@@ -141,7 +127,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				}
 
 				if (n == 0) return;
-				Monitor.Pulse(lck);
+				Monitor.Pulse(SyncRoot);
 			}
 		}
 
@@ -149,20 +135,16 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			CompleteMarked = true;
 			
-			object lck = GetLock();
-			
-			lock(lck) 
-				Monitor.PulseAll(lck);
+			lock(SyncRoot) 
+				Monitor.PulseAll(SyncRoot);
 		}
 
 		protected sealed override void ClearInternal()
 		{
-			object lck = GetLock();
-
-			lock(lck)
+			lock(SyncRoot)
 			{
 				_queue.Clear();
-				Monitor.PulseAll(lck);
+				Monitor.PulseAll(SyncRoot);
 			}
 		}
 
@@ -202,28 +184,33 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			_workStartedEvent.Set();
 			if (IsDisposed) return;
 			
-			object lck = GetLock();
-
 			try
 			{
 				T item;
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
+					if (IsPaused) continue;
+
 					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.IsEmpty)
 					{
-						lock(lck)
-							Monitor.Wait(lck, TimeSpanHelper.FAST);
+						if (IsPaused) continue;
+
+						lock(SyncRoot)
+						{
+							if (IsPaused) continue;
+							Monitor.Wait(SyncRoot, TimeSpanHelper.FAST);
+						}
 					}
 
 					if (IsDisposed || Token.IsCancellationRequested) return;
 					if (CompleteMarked) break;
 
-					lock(lck)
+					lock(SyncRoot)
 					{
 						if (IsDisposed || Token.IsCancellationRequested) return;
 						if (CompleteMarked) break;
-						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
+						if (IsPaused || _queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
 					}
 
 					ScheduledCallback?.Invoke(item);
@@ -232,9 +219,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !_queue.IsEmpty)
 				{
-					lock(lck)
+					if (IsPaused) continue;
+
+					lock(SyncRoot)
 					{
 						if (IsDisposed || Token.IsCancellationRequested) return;
+						if (IsPaused) continue;
 						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) break;
 					}
 

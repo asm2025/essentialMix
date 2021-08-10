@@ -2,7 +2,7 @@
 using System.Security.AccessControl;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
+namespace essentialMix.Threading.Patterns.ProducerConsumer
 {
 	public class SemaphoreQueueOptions<T> : ProducerConsumerThreadNamedQueueOptions<T>
 	{
@@ -13,8 +13,20 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		}
 
 		/// <inheritdoc />
+		public SemaphoreQueueOptions(bool waitOnDispose, [NotNull] Func<T, TaskResult> executeCallback)
+			: base(waitOnDispose, executeCallback)
+		{
+		}
+
+		/// <inheritdoc />
 		public SemaphoreQueueOptions(int threads, [NotNull] Func<T, TaskResult> executeCallback)
 			: base(threads, executeCallback)
+		{
+		}
+
+		/// <inheritdoc />
+		public SemaphoreQueueOptions(int threads, bool waitOnDispose, [NotNull] Func<T, TaskResult> executeCallback)
+			: base(threads, waitOnDispose, executeCallback)
 		{
 		}
 

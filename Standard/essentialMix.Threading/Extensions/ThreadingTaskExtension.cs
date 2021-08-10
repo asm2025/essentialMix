@@ -241,15 +241,19 @@ namespace essentialMix.Extensions
 
 				return !token.IsCancellationRequested && result && thisValue.IsCompleted;
 			}
-			catch
+			catch (OperationCanceledException)
+			{
+				return false;
+			}
+			catch (TimeoutException)
 			{
 				return false;
 			}
 		}
 
-		public static bool WaitSilently([NotNull] this Task[] thisValue, CancellationToken token = default(CancellationToken)) { return WaitSilently(thisValue, TimeSpanHelper.INFINITE, token); }
-		public static bool WaitSilently([NotNull] this Task[] thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return WaitSilently(thisValue, timeout.TotalIntMilliseconds(), token); }
-		public static bool WaitSilently([NotNull] this Task[] thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken))
+		public static bool WaitAllSilently([NotNull] this Task[] thisValue, CancellationToken token = default(CancellationToken)) { return WaitAllSilently(thisValue, TimeSpanHelper.INFINITE, token); }
+		public static bool WaitAllSilently([NotNull] this Task[] thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return WaitAllSilently(thisValue, timeout.TotalIntMilliseconds(), token); }
+		public static bool WaitAllSilently([NotNull] this Task[] thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken))
 		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 
@@ -284,9 +288,46 @@ namespace essentialMix.Extensions
 
 				return !token.IsCancellationRequested && result;
 			}
-			catch
+			catch (OperationCanceledException)
 			{
 				return false;
+			}
+			catch (TimeoutException)
+			{
+				return false;
+			}
+		}
+
+		public static int WaitAnySilently([NotNull] this Task[] thisValue, CancellationToken token = default(CancellationToken)) { return WaitAnySilently(thisValue, TimeSpanHelper.INFINITE, token); }
+		public static int WaitAnySilently([NotNull] this Task[] thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return WaitAnySilently(thisValue, timeout.TotalIntMilliseconds(), token); }
+		public static int WaitAnySilently([NotNull] this Task[] thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken))
+		{
+			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+
+			// Short-circuit #1: already cancelled
+			if (token.IsCancellationRequested) return -1;
+
+			// Short-circuit #2: task already completed/faulted
+			for (int i = 0; i < thisValue.Length; i++)
+			{
+				Task task = thisValue[i];
+				if (task == null) throw new ArgumentHasNullValueException(nameof(thisValue));
+				if (task.IsCompleted || task.IsCanceled || task.IsFaulted) return i;
+			}
+
+			try
+			{
+				return millisecondsTimeout == TimeSpanHelper.INFINITE
+							? Task.WaitAny(thisValue, token)
+							: Task.WaitAny(thisValue, millisecondsTimeout, token);
+			}
+			catch (OperationCanceledException)
+			{
+				return -1;
+			}
+			catch (TimeoutException)
+			{
+				return -1;
 			}
 		}
 

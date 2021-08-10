@@ -8,14 +8,50 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		private string _name;
 
 		/// <inheritdoc />
+		public ProducerConsumerThreadNamedQueueOptions([NotNull] Action<T> executeCallback)
+			: base(executeCallback)
+		{
+		}
+
+		/// <inheritdoc />
+		public ProducerConsumerThreadNamedQueueOptions(bool waitOnDispose, [NotNull] Action<T> executeCallback)
+			: base(waitOnDispose, executeCallback)
+		{
+		}
+
+		/// <inheritdoc />
+		public ProducerConsumerThreadNamedQueueOptions(int threads, [NotNull] Action<T> executeCallback)
+			: base(threads, executeCallback)
+		{
+		}
+
+		/// <inheritdoc />
+		public ProducerConsumerThreadNamedQueueOptions(int threads, bool waitOnDispose, [NotNull] Action<T> executeCallback)
+			: base(threads, waitOnDispose, executeCallback)
+		{
+		}
+
+		/// <inheritdoc />
 		public ProducerConsumerThreadNamedQueueOptions([NotNull] Func<T, TaskResult> executeCallback)
 			: base(executeCallback)
 		{
 		}
 
 		/// <inheritdoc />
+		public ProducerConsumerThreadNamedQueueOptions(bool waitOnDispose, [NotNull] Func<T, TaskResult> executeCallback)
+			: base(waitOnDispose, executeCallback)
+		{
+		}
+
+		/// <inheritdoc />
 		public ProducerConsumerThreadNamedQueueOptions(int threads, [NotNull] Func<T, TaskResult> executeCallback)
 			: base(threads, executeCallback)
+		{
+		}
+
+		/// <inheritdoc />
+		public ProducerConsumerThreadNamedQueueOptions(int threads, bool waitOnDispose, [NotNull] Func<T, TaskResult> executeCallback)
+			: base(threads, waitOnDispose, executeCallback)
 		{
 		}
 

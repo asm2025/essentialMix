@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
-using essentialMix.Threading.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
@@ -28,10 +27,17 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			});
 			_processor = new ActionBlock<T>(e =>
 			{
+				if (IsPaused)
+				{
+					CancellationToken tkn = Token;
+					SpinWait.SpinUntil(() => IsDisposed || tkn.IsCancellationRequested || !IsPaused);
+					if (IsDisposed || tkn.IsCancellationRequested) return;
+				}
 				ScheduledCallback?.Invoke(e);
 				Run(e);
 			}, new ExecutionDataflowBlockOptions
 			{
+				// SingleProducerConstrained = false by default therefore, BufferBlock<T>.SendAsync is thread safe
 				MaxDegreeOfParallelism = Threads,
 				CancellationToken = Token
 			});
@@ -39,7 +45,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			{
 				PropagateCompletion = true
 			});
-			TaskHelper.Run(Consume, TaskCreationOptions.LongRunning).ConfigureAwait();
+			new Thread(Consume)
+			{
+				IsBackground = IsBackground,
+				Priority = Priority
+			}.Start();
 		}
 
 		/// <inheritdoc />
@@ -58,7 +68,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		protected override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
-			_queue.SendAsync(item, Token);
+			_queue.Post(item);
 		}
 
 		protected override void CompleteInternal()
@@ -108,18 +118,20 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			ClearInternal();
 		}
 
-		[NotNull]
-		private Task Consume()
+		private void Consume()
 		{
-			if (IsDisposed) return Task.CompletedTask;
+			if (IsDisposed) return;
 			_workCompletedEventSlim.Reset();
 			OnWorkStarted(EventArgs.Empty);
-			return Task.WhenAll(_queue.Completion, _processor.Completion)
+			Task.WhenAll(_queue.Completion.ConfigureAwait(), _processor.Completion.ConfigureAwait())
 						.ContinueWith(_ =>
 						{
 							OnWorkCompleted(EventArgs.Empty);
 							_workCompletedEventSlim.Set();
-						});
+						})
+						.ConfigureAwait()
+						.GetAwaiter()
+						.GetResult();
 		}
 	}
 }

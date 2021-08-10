@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
+using essentialMix.Threading.Helpers;
 using essentialMix.Threading.Patterns.ProducerConsumer.Queue;
 using JetBrains.Annotations;
 
@@ -20,11 +21,13 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 	public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T>
 	{
 		private CancellationTokenSource _cts;
+		private volatile int _paused;
 		private volatile int _completeMarked;
 
 		protected ProducerConsumerQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 		{
 			Threads = options.Threads;
+			WaitOnDispose = options.WaitOnDispose;
 			ExecuteCallback = options.ExecuteCallback;
 			ResultCallback = options.ResultCallback;
 			ScheduledCallback = options.ScheduledCallback;
@@ -51,7 +54,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 
 		public abstract int Count { get; }
 
-		public bool WaitOnDispose { get; set; } = true;
+		public bool WaitOnDispose { get; set; }
 
 		public int Threads { get; }
 
@@ -59,12 +62,26 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 
 		public abstract bool IsBusy { get; }
 
+		public bool IsPaused
+		{
+			get
+			{
+				// ensure we have the latest value
+				Thread.MemoryBarrier();
+				return _paused != 0;
+			}
+			protected set => Interlocked.CompareExchange(ref _paused, value
+																		? 1
+																		: 0, _paused);
+		}
+
 		public bool CompleteMarked
 		{
 			get
 			{
-				int completeMarked = _completeMarked;
-				return completeMarked != 0;
+				// ensure we have the latest value
+				Thread.MemoryBarrier();
+				return _completeMarked != 0;
 			}
 			protected set => Interlocked.CompareExchange(ref _completeMarked, value
 																				? 1
@@ -79,18 +96,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		protected Action<T> ScheduledCallback { get; }
 		protected Action<T> FinalizeCallback { get; }
 
-		public void Stop()
-		{
-			ThrowIfDisposed();
-			StopInternal(!WaitOnDispose);
-		}
-
-		public void Stop(bool enforce)
-		{
-			ThrowIfDisposed();
-			StopInternal(enforce);
-		}
-
 		public void Enqueue(T item)
 		{
 			ThrowIfDisposed();
@@ -104,6 +109,43 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			ThrowIfDisposed();
 			if (CompleteMarked) return;
 			CompleteInternal();
+		}
+
+		public void Pause()
+		{
+			ThrowIfDisposed();
+			IsPaused = true;
+		}
+
+		public void Resume()
+		{
+			ThrowIfDisposed();
+			IsPaused = false;
+		}
+
+		public void Stop()
+		{
+			ThrowIfDisposed();
+			IsPaused = false;
+			StopInternal(!WaitOnDispose);
+		}
+
+		public void Stop(bool enforce)
+		{
+			ThrowIfDisposed();
+			IsPaused = false;
+			StopInternal(enforce);
+		}
+
+		[NotNull]
+		public Task StopAsync() { return StopAsync(!WaitOnDispose); }
+
+		[NotNull]
+		public Task StopAsync(bool enforce)
+		{
+			ThrowIfDisposed();
+			IsPaused = false;
+			return TaskHelper.Run(() => StopInternal(enforce), TaskCreationOptions.LongRunning, Token).ConfigureAwait();
 		}
 
 		public bool Wait()
@@ -135,7 +177,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		{
 			ThrowIfDisposed();
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			return Task.Run(() => WaitInternal(millisecondsTimeout), Token);
+			return TaskHelper.Run(() => WaitInternal(millisecondsTimeout), TaskCreationOptions.LongRunning, Token).ConfigureAwait();
 		}
 
 		public void Clear()

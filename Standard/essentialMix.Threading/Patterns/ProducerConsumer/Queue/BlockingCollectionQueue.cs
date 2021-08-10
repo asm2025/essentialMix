@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
@@ -68,6 +69,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				OnWorkStarted(EventArgs.Empty);
 			}
 
+			// BlockingCollection<T> is thread safe
 			_queue.Add(item, Token);
 		}
 
@@ -121,11 +123,14 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 			try
 			{
+				// BlockingCollection<T> is thread safe
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !_queue.IsCompleted)
 				{
+					if (IsPaused) continue;
+
 					while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
 					{
-						if (!_queue.TryTake(out T item, TimeSpanHelper.FAST, Token)) continue;
+						if (IsPaused || !_queue.TryTake(out T item, TimeSpanHelper.FAST, Token)) continue;
 						ScheduledCallback?.Invoke(item);
 						Run(item);
 					}
@@ -133,10 +138,24 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 				if (IsDisposed || Token.IsCancellationRequested) return;
 
-				foreach (T item in _queue.GetConsumingEnumerable(Token))
+				IEnumerator<T> enumerator = null;
+
+				try
 				{
-					ScheduledCallback?.Invoke(item);
-					Run(item);
+					enumerator = _queue.GetConsumingEnumerable(Token).GetEnumerator();
+
+					while (!IsDisposed && !Token.IsCancellationRequested)
+					{
+						if (IsPaused) continue;
+						if (!enumerator.MoveNext()) break;
+						T item = enumerator.Current ?? throw new InvalidOperationException();
+						ScheduledCallback?.Invoke(item);
+						Run(item);
+					}
+				}
+				finally
+				{
+					ObjectHelper.Dispose(ref enumerator);
 				}
 			}
 			catch (ObjectDisposedException) { }

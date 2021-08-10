@@ -91,7 +91,7 @@ work with {HEAVY} items.");
 			//TestLevenshteinDistance();
 			//TestDeepestPit();
 
-			//TestThreadQueue();
+			TestThreadQueue();
 			//TestThreadQueueWithPriorityQueue();
 			//TestAsyncLock();
 
@@ -477,6 +477,8 @@ work with {HEAVY} items.");
 
 		private static void TestThreadQueue()
 		{
+			const int PAUSE_TIMEOUT = 3000;
+
 			int len = RNGRandomHelper.Next(16, 32);
 			int[] values = new int[len];
 
@@ -524,14 +526,14 @@ work with {HEAVY} items.");
 					CancellationToken token = cts?.Token ?? CancellationToken.None;
 					ProducerConsumerQueueOptions<int> options = mode switch
 					{
-						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<int>(threads, Exec)
+						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<int>(threads, true, Exec)
 						{
 							// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
 							Threshold = TimeSpan.FromSeconds(1)
 						},
-						_ => new ProducerConsumerQueueOptions<int>(threads, Exec)
+						_ => new ProducerConsumerQueueOptions<int>(threads, true, Exec)
 					};
-			
+					
 					// Create a generic queue producer
 					using (IProducerConsumer<int> queue = ProducerConsumerQueue.Create(mode, options, token))
 					{
@@ -554,11 +556,25 @@ work with {HEAVY} items.");
 							Console.WriteLine();
 						};
 
-						foreach (int value in values)
+						int pauseThreshold = values.Length / 2;
+
+						for (int i = 0; i < values.Length; i++)
 						{
-							queue.Enqueue(value);
+							if (i == pauseThreshold)
+							{
+								Console.WriteLine(Bright.Red($"Queue will pause for {PAUSE_TIMEOUT / 1000} seconds."));
+								queue.Pause();
+								TimeSpanHelper.WasteTime(PAUSE_TIMEOUT, token);
+								Thread.Sleep(0);
+								Console.WriteLine();
+								Console.WriteLine(Bright.Red("Queue is done pausing."));
+							}
+
+							queue.Resume();
+							if (token.IsCancellationRequested) break;
+							queue.Enqueue(values[i]);
 						}
-						
+
 						queue.Complete();
 						
 						/*

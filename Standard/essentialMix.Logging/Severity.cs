@@ -1,4 +1,4 @@
-namespace essentialMix
+namespace essentialMix.Logging
 {
 	public enum Severity
 	{
