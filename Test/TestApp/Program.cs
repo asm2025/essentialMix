@@ -83,7 +83,7 @@ work with {HEAVY} items.");
 
 			//TestDomainName();
 
-			//todo TestExpressionExtension();
+			//TestExpressionExtension();
 
 			//TestFibonacci();
 			//TestGroupAnagrams();
@@ -140,7 +140,7 @@ work with {HEAVY} items.");
 			//TestBinaryHeapElementAt();
 			//TestBinaryHeapDecreaseKey();
 		
-			TestBinomialHeapAdd();
+			//TestBinomialHeapAdd();
 			//TestBinomialHeapRemove();
 			//TestBinomialHeapElementAt();
 			//TestBinomialHeapDecreaseKey();
