@@ -2,12 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
+	[DebuggerDisplay("Count = {Count}")]
 	public readonly struct QueueAdapter<TQueue, T> : ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
 		where TQueue : ICollection, IReadOnlyCollection<T>
 	{

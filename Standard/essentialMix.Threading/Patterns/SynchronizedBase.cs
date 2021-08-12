@@ -163,7 +163,7 @@ namespace essentialMix.Threading.Patterns
 			}
 			protected set => Interlocked.CompareExchange(ref _isBusy, value ? 1 : 0, _isBusy);
 		}
-	
+
 		protected CancellationToken Token { get; private set; }
 
 		protected abstract bool IsSynchronized { get; }

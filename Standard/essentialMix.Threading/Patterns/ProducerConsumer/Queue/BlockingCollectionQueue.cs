@@ -13,16 +13,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		private readonly Thread[] _workers;
 
 		private BlockingCollection<T> _queue;
-		private AutoResetEvent _workStartedEvent;
-		private CountdownEvent _countdown;
-		private bool _workStarted;
 
 		public BlockingCollectionQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
 			_queue = new BlockingCollection<T>();
-			_workStartedEvent = new AutoResetEvent(false);
-			_countdown = new CountdownEvent(1);
 			_workers = new Thread[Threads];
 		}
 
@@ -31,42 +26,55 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			base.Dispose(disposing);
 			if (!disposing) return;
-			ObjectHelper.Dispose(ref _workStartedEvent);
 			ObjectHelper.Dispose(ref _queue);
-			ObjectHelper.Dispose(ref _countdown);
 		}
 
-		public override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
+		/// <inheritdoc />
+		public override int Count => _queue.Count + Running;
 
-		public override bool IsBusy => Count > 0;
+		/// <inheritdoc />
+		public override bool IsEmpty => _queue.Count == 0;
+
+		/// <inheritdoc />
+		public override bool CanResume => true;
 
 		protected override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 
-			if (!_workStarted)
+			if (!WaitForWorkerStart())
 			{
+				bool invokeWorkStarted = false;
+
 				lock(_workers)
 				{
-					if (!_workStarted)
+					if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+
+					if (!WaitForWorkerStart())
 					{
-						_workStarted = true;
+						InitializeWorkerStart();
+						InitializeWorkersCountDown();
+						InitializeBatchClear();
+						InitializeTaskStart();
+						InitializeTaskComplete();
+						InitializeTasksCountDown();
 
 						for (int i = 0; i < _workers.Length; i++)
 						{
-							_countdown.AddCount();
 							(_workers[i] = new Thread(Consume)
 									{
 										IsBackground = IsBackground,
 										Priority = Priority
 									}).Start();
 						}
+					
+						invokeWorkStarted = true;
+						if (!WaitForWorkerStart()) throw new TimeoutException();
+						if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 					}
 				}
 
-				if (!_workStartedEvent.WaitOne()) throw new TimeoutException();
-				if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
-				OnWorkStarted(EventArgs.Empty);
+				if (invokeWorkStarted) OnWorkStarted(EventArgs.Empty);
 			}
 
 			// BlockingCollection<T> is thread safe
@@ -84,56 +92,20 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			_queue.Clear();
 		}
 
-		protected override bool WaitInternal(int millisecondsTimeout)
-		{
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (!IsBusy) return true;
-
-			try
-			{
-				if (millisecondsTimeout > TimeSpanHelper.INFINITE) return _countdown.Wait(millisecondsTimeout, Token);
-				_countdown.Wait(Token);
-				return !Token.IsCancellationRequested;
-			}
-			catch (OperationCanceledException)
-			{
-				// ignored
-			}
-			catch (TimeoutException)
-			{
-				// ignored
-			}
-
-			return false;
-		}
-
-		protected override void StopInternal(bool enforce)
-		{
-			CompleteInternal();
-			// Wait for the consumer's thread to finish.
-			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
-			Cancel();
-			ClearInternal();
-		}
-
 		private void Consume()
 		{
-			_workStartedEvent.Set();
-			if (IsDisposed) return;
-
+			if (IsDisposed || Token.IsCancellationRequested) return;
+			SignalWorkerStart();
+			
 			try
 			{
 				// BlockingCollection<T> is thread safe
-				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !_queue.IsCompleted)
+				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					if (IsPaused) continue;
-
-					while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0)
-					{
-						if (IsPaused || !_queue.TryTake(out T item, TimeSpanHelper.FAST, Token)) continue;
-						ScheduledCallback?.Invoke(item);
-						Run(item);
-					}
+					if (IsPaused || _queue.Count == 0 || !_queue.TryTake(out T item, TimeSpanHelper.FAST, Token)) continue;
+					if (ScheduledCallback != null && !ScheduledCallback(item)) continue;
+					AddTasksCountDown();
+					Run(item);
 				}
 
 				if (IsDisposed || Token.IsCancellationRequested) return;
@@ -148,8 +120,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					{
 						if (IsPaused) continue;
 						if (!enumerator.MoveNext()) break;
-						T item = enumerator.Current ?? throw new InvalidOperationException();
-						ScheduledCallback?.Invoke(item);
+						T item = enumerator.Current;
+						if (ScheduledCallback != null && !ScheduledCallback(item)) continue;
+						AddTasksCountDown();
 						Run(item);
 					}
 				}
@@ -162,34 +135,24 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			catch (OperationCanceledException) { }
 			finally
 			{
-				SignalAndCheck();
+				SignalWorkersCountDown();
 			}
 		}
 
-		private void SignalAndCheck()
+		/// <inheritdoc />
+		protected override void Run(T item)
 		{
-			if (IsDisposed || _countdown == null) return;
-			Monitor.Enter(_countdown);
-
-			bool completed;
-
 			try
 			{
-				if (IsDisposed || _countdown == null) return;
-				_countdown.Signal();
+				SignalTaskStart();
+				if (IsDisposed || Token.IsCancellationRequested) return;
+				base.Run(item);
 			}
 			finally
 			{
-				completed = _countdown is null or { CurrentCount: < 2 };
+				SignalTaskComplete();
+				SignalTasksCountDown();
 			}
-
-			if (completed)
-			{
-				OnWorkCompleted(EventArgs.Empty);
-				_countdown.SignalAll();
-			}
-
-			if (_countdown != null) Monitor.Exit(_countdown);
 		}
 	}
 }

@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using essentialMix.Collections;
 using essentialMix.Extensions;
-using essentialMix.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
@@ -15,26 +14,10 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 	{
 		private readonly QueueAdapter<TQueue, T> _queue;
 
-		private CountdownEvent _countdown;
-
 		public ThresholdTaskGroupQueue([NotNull] TQueue queue, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
 			_queue = new QueueAdapter<TQueue, T>(queue);
-			_countdown = new CountdownEvent(1);
-			new Thread(Consume)
-			{
-				IsBackground = IsBackground,
-				Priority = Priority
-			}.Start();
-		}
-
-		/// <inheritdoc />
-		protected sealed override void Dispose(bool disposing)
-		{
-			base.Dispose(disposing);
-			if (!disposing) return;
-			ObjectHelper.Dispose(ref _countdown);
 		}
 
 		/// <inheritdoc />
@@ -46,17 +29,53 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		/// <inheritdoc />
 		public object SyncRoot => _queue.SyncRoot;
 
-		public sealed override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
+		/// <inheritdoc />
+		public override int Count => _queue.Count + Running;
 
-		public sealed override bool IsBusy => Count > 0;
+		/// <inheritdoc />
+		public override bool IsEmpty => _queue.Count == 0;
 
-		protected sealed override void EnqueueInternal(T item)
+		/// <inheritdoc />
+		public override bool CanResume => true;
+
+		protected override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+			
+			if (!WaitForWorkerStart())
+			{
+				bool invokeWorkStarted = false;
+
+				lock(SyncRoot)
+				{
+					if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+
+					if (!WaitForWorkerStart())
+					{
+						InitializeWorkerStart();
+						InitializeWorkersCountDown(1);
+						InitializeBatchClear();
+						InitializeTaskStart();
+						InitializeTaskComplete();
+						InitializeTasksCountDown();
+
+						new Thread(Consume)
+						{
+							IsBackground = IsBackground,
+							Priority = Priority
+						}.Start();
+
+						invokeWorkStarted = true;
+						if (!WaitForWorkerStart()) throw new TimeoutException();
+						if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+					}
+				}
+
+				if (invokeWorkStarted) OnWorkStarted(EventArgs.Empty);
+			}
 
 			lock(SyncRoot)
 			{
-				if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 				_queue.Enqueue(item);
 				Monitor.Pulse(SyncRoot);
 			}
@@ -80,7 +99,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public bool TryPeek(out T item)
 		{
 			ThrowIfDisposed();
-			return _queue.TryPeek(out item);
+
+			lock(SyncRoot)
+				return _queue.TryPeek(out item);
 		}
 
 		/// <inheritdoc />
@@ -90,20 +111,19 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 			lock(SyncRoot)
 			{
-				int n = 0;
+				if (_queue.IsEmpty) return;
 
-				while (_queue.TryPeek(out T item) && predicate(item))
-				{
-					if (!_queue.TryDequeue(out _)) continue;
-					n++;
-				}
+				int n = _queue.Count;
 
-				if (n == 0) return;
+				while (!_queue.IsEmpty && _queue.TryPeek(out T item) && predicate(item)) 
+					_queue.Dequeue();
+
+				if (n == _queue.Count) return;
 				Monitor.Pulse(SyncRoot);
 			}
 		}
 
-		protected sealed override void CompleteInternal()
+		protected override void CompleteInternal()
 		{
 			lock(SyncRoot)
 			{
@@ -112,7 +132,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 		}
 
-		protected sealed override void ClearInternal()
+		protected override void ClearInternal()
 		{
 			lock(SyncRoot)
 			{
@@ -121,46 +141,13 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 		}
 
-		protected sealed override bool WaitInternal(int millisecondsTimeout)
-		{
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (!IsBusy) return true;
-			
-			try
-			{
-				if (millisecondsTimeout > TimeSpanHelper.INFINITE) return _countdown.Wait(millisecondsTimeout, Token);
-				_countdown.Wait(Token);
-				return !Token.IsCancellationRequested;
-			}
-			catch (OperationCanceledException)
-			{
-				// ignored
-			}
-			catch (TimeoutException)
-			{
-				// ignored
-			}
-
-			return false;
-		}
-
-		protected sealed override void StopInternal(bool enforce)
-		{
-			CompleteInternal();
-			// Wait for the consumer's thread to finish.
-			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
-			Cancel();
-			ClearInternal();
-		}
-
 		private void Consume()
 		{
 			if (IsDisposed || Token.IsCancellationRequested) return;
-			OnWorkStarted(EventArgs.Empty);
+			SignalWorkerStart();
 
 			try
 			{
-				int offset;
 				int count = 0;
 				int threads = Threads;
 				if (HasThreshold) threads++;
@@ -173,53 +160,23 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 					if (HasThreshold && count == 0)
 					{
-						int index = count++;
-						Task[] tasksRef = tasks;
-						_countdown.AddCount();
-						tasks[index] = Task.Delay(Threshold, Token)
-											.ContinueWith(_ =>
-											{
-												tasksRef[index].Dispose();
-												tasksRef[index] = null;
-												_countdown?.SignalOne();
-											}, Token)
+						AddTasksCountDown();
+						tasks[tasks.Length - 1] = Task.Delay(Threshold, Token)
+											.ContinueWith(_ => SignalTasksCountDown(), Token)
 											.ConfigureAwait();
 					}
 
-					offset = count;
-					if (!ReadItems(items, ref count)) break;
+					int offset = count;
+					if (!ReadItems(items, ref count, true)) break;
 					if (count < Threads) continue;
-
-					for (int i = offset; !IsDisposed && !Token.IsCancellationRequested && i < offset + count; i++)
-					{
-						// copy to local variables
-						int index = i;
-						T item = items[index];
-						Task[] tasksRef = tasks;
-						ScheduledCallback?.Invoke(item);
-						_countdown.AddCount();
-						tasks[i] = Task.Run(() =>
-										{
-											try
-											{
-												Run(item);
-											}
-											finally
-											{
-												tasksRef[index].Dispose();
-												tasksRef[index] = null;
-												_countdown?.SignalOne();
-											}
-										}, Token)
-										.ConfigureAwait();
-					}
-
+					ExecItems(items, tasks, offset, count);
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitAllSilently(Token)) return;
 					count = 0;
+					Array.Clear(items, 0, items.Length);
+					Array.Clear(tasks, 0, tasks.Length);
 				}
 
 				if (IsDisposed || Token.IsCancellationRequested) return;
-				TimeSpanHelper.WasteTime(TimeSpanHelper.FAST);
 
 				while (!IsDisposed && !Token.IsCancellationRequested)
 				{
@@ -227,89 +184,39 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 					if (HasThreshold && count == 0)
 					{
-						int index = count++;
-						Task[] tasksRef = tasks;
-						_countdown.AddCount();
-						tasks[index] = Task.Delay(Threshold, Token)
-											.ContinueWith(_ =>
-											{
-												tasksRef[index].Dispose();
-												tasksRef[index] = null;
-												_countdown?.SignalOne();
-											}, Token)
-											.ConfigureAwait();
+						AddTasksCountDown();
+						tasks[tasks.Length - 1] = Task.Delay(Threshold, Token)
+													.ContinueWith(_ => SignalTasksCountDown(), Token)
+													.ConfigureAwait();
 					}
 
-					offset = count;
-					if (!ReadItems(items, ref count) || count < items.Length) break;
-
-					for (int i = offset; !IsDisposed && !Token.IsCancellationRequested && i < offset + count; i++)
-					{
-						// copy to local variables
-						int index = i;
-						T item = items[index];
-						Task[] tasksRef = tasks;
-						ScheduledCallback?.Invoke(item);
-						_countdown.AddCount();
-						tasks[i] = Task.Run(() =>
-										{
-											try
-											{
-												Run(item);
-											}
-											finally
-											{
-												tasksRef[index].Dispose();
-												tasksRef[index] = null;
-												_countdown?.SignalOne();
-											}
-										}, Token)
-										.ConfigureAwait();
-					}
-
+					int offset = count;
+					if (!ReadItems(items, ref count, false) || count < items.Length) break;
+					ExecItems(items, tasks, offset, count);
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitAllSilently(Token)) return;
 					count = 0;
+					Array.Clear(items, 0, items.Length);
+					Array.Clear(tasks, 0, tasks.Length);
 				}
 
 				if (count < 1 || IsDisposed || Token.IsCancellationRequested) return;
-				offset = count;
-				Array.Resize(ref tasks, ++count);
-	
-				for (int i = offset; !IsDisposed && !Token.IsCancellationRequested && i < offset + count; i++)
-				{
-					// copy to local variables
-					int index = i;
-					T item = items[index];
-					Task[] tasksRef = tasks;
-					ScheduledCallback?.Invoke(item);
-					_countdown.AddCount();
-					tasks[i] = Task.Run(() =>
-									{
-										try
-										{
-											Run(item);
-										}
-										finally
-										{
-											tasksRef[index].Dispose();
-											tasksRef[index] = null;
-											_countdown?.SignalOne();
-										}
-									}, Token)
-									.ConfigureAwait();
-				}
-	
+				// it's not important for the last group to keep a threshold because they are the last group.
+				if (tasks.Length != count) Array.Resize(ref tasks, count);
+				ExecItems(items, tasks, 0, count);
 				if (IsDisposed || Token.IsCancellationRequested) return;
 				tasks.WaitAllSilently(Token);
+				Array.Clear(items, 0, items.Length);
+				Array.Clear(tasks, 0, tasks.Length);
 			}
+			catch (ObjectDisposedException) { }
+			catch (OperationCanceledException) { }
 			finally
 			{
-				OnWorkCompleted(EventArgs.Empty);
-				_countdown.SignalAll();
+				SignalWorkersCountDown();
 			}
 		}
 
-		private bool ReadItems([NotNull] IList<T> items, ref int offset)
+		private bool ReadItems([NotNull] IList<T> items, ref int offset, bool waitOnQueue)
 		{
 			if (IsDisposed || Token.IsCancellationRequested) return false;
 
@@ -321,18 +228,49 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			while (!IsDisposed && !Token.IsCancellationRequested && count > 0)
 			{
 				// ReSharper disable once InconsistentlySynchronizedField
-				if (IsPaused || _queue.IsEmpty) continue;
+				if (IsPaused || waitOnQueue && _queue.IsEmpty) continue;
+				// ReSharper disable once InconsistentlySynchronizedField
+				if (_queue.IsEmpty) break;
 
 				lock(SyncRoot)
 				{
 					if (IsPaused || _queue.IsEmpty || !_queue.TryDequeue(out T item)) continue;
-					items[offset++] = item;
+					items[read + offset] = item;
 					count--;
 					read++;
 				}
 			}
 
+			offset += read;
 			return !IsDisposed && !Token.IsCancellationRequested && read > 0;
+		}
+		
+		private void ExecItems(IReadOnlyList<T> items, IList<Task> tasks, int offset, int count)
+		{
+			for (int i = 0; !IsDisposed && !Token.IsCancellationRequested && i < count; i++)
+			{
+				T item = items[i];
+				if (ScheduledCallback != null && !ScheduledCallback(item)) continue;
+				AddTasksCountDown();
+				tasks[i + offset] = Task.Run(() => Run(item), Token)
+										.ConfigureAwait();
+			}
+		}
+
+		/// <inheritdoc />
+		protected override void Run(T item)
+		{
+			try
+			{
+				SignalTaskStart();
+				if (IsDisposed || Token.IsCancellationRequested) return;
+				base.Run(item);
+			}
+			finally
+			{
+				SignalTaskComplete();
+				SignalTasksCountDown();
+			}
 		}
 	}
 

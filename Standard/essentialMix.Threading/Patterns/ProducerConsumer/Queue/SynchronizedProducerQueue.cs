@@ -51,7 +51,16 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public int Count => _queue.Count;
 
 		/// <inheritdoc />
+		public bool IsEmpty => _queue.IsEmpty;
+
+		/// <inheritdoc />
+		public int Running => _queue.Running;
+
+		/// <inheritdoc />
 		public bool IsBusy => _queue.IsBusy;
+
+		/// <inheritdoc />
+		public bool CanResume => _queue.CanResume;
 
 		/// <inheritdoc />
 		public int Threads => _queue.Threads;
@@ -85,6 +94,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			add => _queue.WorkCompleted += value;
 			remove => _queue.WorkCompleted -= value;
+		}
+
+		/// <inheritdoc />
+		public void InitializeToken(CancellationToken token)
+		{
+			_queue.InitializeToken(token);
 		}
 
 		/// <inheritdoc />

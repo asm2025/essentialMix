@@ -7,25 +7,49 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 	public class SemaphoreQueueOptions<T> : ProducerConsumerThreadNamedQueueOptions<T>
 	{
 		/// <inheritdoc />
-		public SemaphoreQueueOptions([NotNull] Func<T, TaskResult> executeCallback)
+		public SemaphoreQueueOptions([NotNull] Action<IProducerConsumer<T>, T> executeCallback)
 			: base(executeCallback)
 		{
 		}
 
 		/// <inheritdoc />
-		public SemaphoreQueueOptions(bool waitOnDispose, [NotNull] Func<T, TaskResult> executeCallback)
+		public SemaphoreQueueOptions(bool waitOnDispose, [NotNull] Action<IProducerConsumer<T>, T> executeCallback)
 			: base(waitOnDispose, executeCallback)
 		{
 		}
 
 		/// <inheritdoc />
-		public SemaphoreQueueOptions(int threads, [NotNull] Func<T, TaskResult> executeCallback)
+		public SemaphoreQueueOptions(int threads, [NotNull] Action<IProducerConsumer<T>, T> executeCallback)
 			: base(threads, executeCallback)
 		{
 		}
 
 		/// <inheritdoc />
-		public SemaphoreQueueOptions(int threads, bool waitOnDispose, [NotNull] Func<T, TaskResult> executeCallback)
+		public SemaphoreQueueOptions(int threads, bool waitOnDispose, [NotNull] Action<IProducerConsumer<T>, T> executeCallback)
+			: base(threads, waitOnDispose, executeCallback)
+		{
+		}
+
+		/// <inheritdoc />
+		public SemaphoreQueueOptions([NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+			: base(executeCallback)
+		{
+		}
+
+		/// <inheritdoc />
+		public SemaphoreQueueOptions(bool waitOnDispose, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+			: base(waitOnDispose, executeCallback)
+		{
+		}
+
+		/// <inheritdoc />
+		public SemaphoreQueueOptions(int threads, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+			: base(threads, executeCallback)
+		{
+		}
+
+		/// <inheritdoc />
+		public SemaphoreQueueOptions(int threads, bool waitOnDispose, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
 			: base(threads, waitOnDispose, executeCallback)
 		{
 		}

@@ -14,7 +14,10 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		bool IsPaused { get; }
 		bool CompleteMarked { get; }
 		int Count { get; }
+		int Running { get; }
+		bool IsEmpty { get; }
 		bool IsBusy { get; }
+		bool CanResume { get; }
 		int Threads { get; }
 		CancellationToken Token { get; }
 		bool WaitOnDispose { get; set; }
@@ -23,6 +26,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		event EventHandler WorkStarted;
 		event EventHandler WorkCompleted;
 
+		void InitializeToken(CancellationToken token);
 		void Enqueue([NotNull] T item);
 		void Complete();
 		void Clear();

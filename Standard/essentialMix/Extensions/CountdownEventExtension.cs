@@ -9,13 +9,13 @@ namespace essentialMix.Extensions
 		public static bool SignalBy(this CountdownEvent thisValue, int count)
 		{
 			if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-			if (count == 0) return thisValue?.CurrentCount == 0;
-			return thisValue?.CurrentCount == 0 || thisValue?.Signal(count.NotAbove(thisValue.CurrentCount)) == true;
+			int current = thisValue?.CurrentCount ?? 0;
+			return current < 1 || thisValue?.Signal(count.NotAbove(current)) == true;
 		}
 
 		public static bool SignalAll(this CountdownEvent thisValue)
 		{
-			return thisValue?.CurrentCount == 0 || thisValue?.Signal(thisValue.CurrentCount) == true;
+			return thisValue == null || thisValue.CurrentCount < 1 || thisValue.Signal(thisValue.CurrentCount);
 		}
 	}
 }

@@ -49,6 +49,7 @@ namespace TestApp
 		private const int SMALL = 10_000;
 		private const int MEDIUM = 100_000;
 		private const int HEAVY = 1_000_000;
+		private const int PAUSE_TIMEOUT = 3000;
 
 		private static readonly string __compilationText = Yellow($@"
 This is C# (a compiled language), so the test needs to run at least
@@ -477,15 +478,17 @@ work with {HEAVY} items.");
 
 		private static void TestThreadQueue()
 		{
-			const int PAUSE_TIMEOUT = 3000;
-
 			int len = RNGRandomHelper.Next(16, 32);
 			int[] values = new int[len];
-
+			
 			for (int i = 0; i < values.Length; i++)
 				values[i] = i + 1;
 
-			int timeout = RNGRandomHelper.Next(0, 1);
+			Console.WriteLine();
+			Console.Write($"Would you like to use timeout for the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to skip timeout. ");
+			int timeout = Console.ReadKey(true).Key == ConsoleKey.Y
+							? 1
+							: 0;
 			string timeoutString = timeout > 0
 										? $"{timeout} minute(s)"
 										: "None";
@@ -508,6 +511,8 @@ work with {HEAVY} items.");
 
 			ThreadQueueMode[] modes = EnumHelper<ThreadQueueMode>.GetValues();
 			Queue<ThreadQueueMode> queueModes = new Queue<ThreadQueueMode>(modes);
+			HashSet<int> visited = new HashSet<int>();
+			List<int> duplicates = new List<int>();
 			Stopwatch clock = new Stopwatch();
 
 			while (queueModes.Count > 0)
@@ -524,76 +529,103 @@ work with {HEAVY} items.");
 														: null)
 				{
 					CancellationToken token = cts?.Token ?? CancellationToken.None;
-					ProducerConsumerQueueOptions<int> options = mode switch
+					int pauseThreshold = values.Length / 2;
+
+					using (CountdownEvent thresholdReachedEvent = new CountdownEvent(pauseThreshold))
 					{
-						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<int>(threads, true, Exec)
+						// copy to local variable
+						CountdownEvent cdeThreshold = thresholdReachedEvent;
+						int written = 0;
+						visited.Clear();
+						duplicates.Clear();
+						ProducerConsumerQueueOptions<int> options = mode switch
 						{
-							// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
-							Threshold = TimeSpan.FromSeconds(1)
-						},
-						_ => new ProducerConsumerQueueOptions<int>(threads, true, Exec)
-					};
-					
-					// Create a generic queue producer
-					using (IProducerConsumer<int> queue = ProducerConsumerQueue.Create(mode, options, token))
-					{
-						queue.WorkStarted += (_, _) =>
-						{
-							Console.WriteLine();
-							Console.WriteLine($"Starting multi-thread test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Length.ToString())}, threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}...");
-							if (mode == ThreadQueueMode.ThresholdTaskGroup) Console.WriteLine($"in {mode} mode, {Bright.Cyan(threads.ToString())} tasks will be issued every {Bright.Cyan(((ProducerConsumerThresholdQueueOptions<int>)options).Threshold.TotalSeconds.ToString("N0"))} second(s).");
-							Console.WriteLine();
-							Console.WriteLine();
-							clock.Restart();
-						};
-
-						queue.WorkCompleted += (_, _) =>
-						{
-							long elapsed = clock.ElapsedMilliseconds;
-							Console.WriteLine();
-							Console.WriteLine();
-							Console.WriteLine($"Finished test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Length.ToString())}, threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}, elapsed: {Bright.Cyan(elapsed.ToString())} ms.");
-							Console.WriteLine();
-						};
-
-						int pauseThreshold = values.Length / 2;
-
-						for (int i = 0; i < values.Length; i++)
-						{
-							if (i == pauseThreshold)
+							ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<int>(threads, true, (que, item) =>
 							{
-								Console.WriteLine(Bright.Red($"Queue will pause for {PAUSE_TIMEOUT / 1000} seconds."));
-								queue.Pause();
-								TimeSpanHelper.WasteTime(PAUSE_TIMEOUT, token);
-								Thread.Sleep(0);
+								Exec(item, ref written, visited, duplicates);
+								if (cdeThreshold.CurrentCount < 1) return;
+								cdeThreshold.SignalOne();
+								if (cdeThreshold.CurrentCount > 0) return;
+								Pause(que, token);
+							})
+							{
+								// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
+								Threshold = TimeSpan.FromSeconds(1)
+							},
+							_ => new ProducerConsumerQueueOptions<int>(threads, true, (que, item) =>
+							{
+								Exec(item, ref written, visited, duplicates);
+								if (cdeThreshold.CurrentCount < 1) return;
+								cdeThreshold.SignalOne();
+								if (cdeThreshold.CurrentCount > 0) return;
+								Pause(que, token);
+							})
+						};
+
+						// Create a generic queue producer
+						using (IProducerConsumer<int> queue = ProducerConsumerQueue.Create(mode, options, token))
+						{
+							queue.WorkStarted += (_, _) =>
+							{
 								Console.WriteLine();
-								Console.WriteLine(Bright.Red("Queue is done pausing."));
+								Console.WriteLine($"Starting multi-thread test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Length.ToString())}, threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}...");
+								if (mode == ThreadQueueMode.ThresholdTaskGroup) Console.WriteLine($"in {mode} mode, {Bright.Cyan(threads.ToString())} tasks will be issued every {Bright.Cyan(((ProducerConsumerThresholdQueueOptions<int>)options).Threshold.TotalSeconds.ToString("N0"))} second(s).");
+								Console.WriteLine();
+								Console.WriteLine();
+								clock.Restart();
+							};
+
+							queue.WorkCompleted += (_, _) =>
+							{
+								long elapsed = clock.ElapsedMilliseconds;
+								Console.WriteLine();
+								Console.WriteLine();
+								Console.WriteLine($"Finished test. mode: '{Bright.Cyan(mode.ToString())}', threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}, elapsed: {Bright.Cyan(elapsed.ToString())} ms.");
+								Console.WriteLine($"Values length: {Bright.Cyan(values.Length.ToString())}, written: {Bright.Cyan(written.ToString())}, visited length: {Bright.Cyan((visited.Count).ToString())}, sets length: {Bright.Cyan((visited.Count + duplicates.Count).ToString())}.");
+
+								bool badValues = written != values.Length || visited.Count != values.Length;
+								
+								if (badValues)
+								{
+									Console.WriteLine($"Values: {string.Join(", ", values.OrderBy(e => e))}.");
+									Console.WriteLine(Bright.Cyan($"Visited: {string.Join(", ", visited.OrderBy(e => e))}."));
+								}
+
+								if (duplicates.Count > 0)
+								{
+									if (!badValues) Console.WriteLine(Bright.Cyan($"Visited: {string.Join(", ", visited.OrderBy(e => e))}."));
+									Console.WriteLine(Bright.Red($"Duplicate entries: {string.Join(", ", duplicates.OrderBy(e => e))}."));
+								}
+
+								Console.WriteLine();
+							};
+
+							for (int i = 0; i < values.Length; i++)
+							{
+								if (token.IsCancellationRequested) break;
+								queue.Enqueue(values[i]);
 							}
 
-							queue.Resume();
-							if (token.IsCancellationRequested) break;
-							queue.Enqueue(values[i]);
+							queue.Complete();
+							
+							/*
+							 * when the queue is being disposed, it will wait until the queued items are processed.
+							 * this works when queue.WaitOnDispose is true , which it is by default.
+							 * alternatively, the following can be done to wait for all items to be processed:
+							 *
+							 * // Important: marks the completion of queued items, no further items can be queued
+							 * // after this point. the queue will not to wait for more items other than the already queued.
+							 * queue.Complete();
+							 * // wait for the queue to finish
+							 * queue.Wait();
+							 *
+							 * another way to go about it, is not to call queue.Complete(); if this queue will
+							 * wait indefinitely and maybe use a CancellationTokenSource.
+							 *
+							 * for now, the queue will wait for the items to be finished once reached the next
+							 * dispose curly bracket.
+							 */
 						}
-
-						queue.Complete();
-						
-						/*
-						 * when the queue is being disposed, it will wait until the queued items are processed.
-						 * this works when queue.WaitOnDispose is true , which it is by default.
-						 * alternatively, the following can be done to wait for all items to be processed:
-						 *
-						 * // Important: marks the completion of queued items, no further items can be queued
-						 * // after this point. the queue will not to wait for more items other than the already queued.
-						 * queue.Complete();
-						 * // wait for the queue to finish
-						 * queue.Wait();
-						 *
-						 * another way to go about it, is not to call queue.Complete(); if this queue will
-						 * wait indefinitely and maybe use a CancellationTokenSource.
-						 *
-						 * for now, the queue will wait for the items to be finished once reached the next
-						 * dispose curly bracket.
-						 */
 					}
 				}
 
@@ -620,11 +652,43 @@ work with {HEAVY} items.");
 
 			clock.Stop();
 
-			static TaskResult Exec(int e)
+			static void Exec(int e, ref int written, ISet<int> visited, IList<int> duplicates)
 			{
 				Task.Delay(50).Execute();
 				Console.Write($"{e:D4} ");
-				return TaskResult.Success;
+				Interlocked.Increment(ref written);
+
+				lock(visited)
+				{
+					if (visited.Add(e)) return;
+					
+					lock(duplicates)
+						duplicates.Add(e);
+				}
+			}
+
+			static void Pause<T>(IProducerConsumer<T> que, CancellationToken token)
+			{
+				if (!que.CanResume) return;
+				Task.Run(() =>
+					{
+						que.Pause();
+						SpinWait.SpinUntil(() => token.IsCancellationRequested || que.Running == 0);
+						Console.WriteLine();
+						Console.WriteLine(Bright.Red($"Queue is paused for {PAUSE_TIMEOUT / 1000} seconds."));
+						TimeSpanHelper.WasteTime(PAUSE_TIMEOUT, token);
+						Console.WriteLine(Bright.Red("Queue is done pausing."));
+
+						try
+						{
+							que.Resume();
+						}
+						catch (ObjectDisposedException)
+						{
+							// ignored
+						}
+					}, token)
+					.ConfigureAwait();
 			}
 		}
 
@@ -632,7 +696,11 @@ work with {HEAVY} items.");
 		{
 			int len = RNGRandomHelper.Next(16, 32);
 			Student[] values = GetRandomStudents(len);
-			int timeout = RNGRandomHelper.Next(0, 1);
+			Console.WriteLine();
+			Console.Write($"Would you like to use timeout for the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to skip timeout. ");
+			int timeout = Console.ReadKey(true).Key == ConsoleKey.Y
+							? 1
+							: 0;
 			string timeoutString = timeout > 0
 										? $"{timeout} minute(s)"
 										: "None";
@@ -657,6 +725,8 @@ work with {HEAVY} items.");
 																.Where(e => e.SupportsProducerQueue())
 																.ToArray();
 			Queue<ThreadQueueMode> queueModes = new Queue<ThreadQueueMode>(modes);
+			HashSet<Student> visited = new HashSet<Student>();
+			HashSet<Student> duplicates = new HashSet<Student>();
 			Stopwatch clock = new Stopwatch();
 			int externalId = 0;
 
@@ -674,76 +744,123 @@ work with {HEAVY} items.");
 														: null)
 				{
 					CancellationToken token = cts?.Token ?? CancellationToken.None;
-					ProducerConsumerQueueOptions<Student> options = mode switch
+					int pauseThreshold = values.Length / 2;
+
+					using (CountdownEvent thresholdReachedEvent = new CountdownEvent(pauseThreshold))
 					{
-						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<Student>(threads, Exec)
+						// copy to local variable
+						CountdownEvent cdeThreshold = thresholdReachedEvent;
+						int written = 0;
+						visited.Clear();
+						duplicates.Clear();
+						ProducerConsumerQueueOptions<Student> options = mode switch
 						{
-							// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
-							Threshold = TimeSpan.FromSeconds(1),
-							ScheduledCallback = e =>
+							ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<Student>(threads, true, (que, item) =>
 							{
-								Interlocked.Increment(ref externalId);
-								e.External = externalId;
+								Exec(item, ref written, visited, duplicates);
+								if (cdeThreshold.CurrentCount < 1) return;
+								cdeThreshold.SignalOne();
+								if (cdeThreshold.CurrentCount > 0) return;
+								Pause(que, token);
+							})
+							{
+								// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
+								Threshold = TimeSpan.FromSeconds(1),
+								ScheduledCallback = e =>
+								{
+									Interlocked.Increment(ref externalId);
+									e.External = externalId;
+									return true;
+								}
+							},
+							_ => new ProducerConsumerQueueOptions<Student>(threads, true, (que, item) =>
+							{
+								Exec(item, ref written, visited, duplicates);
+								if (cdeThreshold.CurrentCount < 1) return;
+								cdeThreshold.SignalOne();
+								if (cdeThreshold.CurrentCount > 0) return;
+								Pause(que, token);
+							})
+							{
+								ScheduledCallback = e =>
+								{
+									Interlocked.Increment(ref externalId);
+									e.External = externalId;
+									return true;
+								}
 							}
-						},
-						_ => new ProducerConsumerQueueOptions<Student>(threads, Exec)
+						};
+
+						// Create a priority queue
+						MinBinomialHeap<Student> pq = new MinBinomialHeap<Student>(ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade)));
+
+						// Create a generic queue producer
+						using (IProducerConsumer<Student> queue = ProducerConsumerQueue.Create(mode, pq, options, token))
 						{
-							ScheduledCallback = e =>
+							queue.WorkStarted += (_, _) =>
 							{
-								Interlocked.Increment(ref externalId);
-								e.External = externalId;
+								Console.WriteLine();
+								Console.WriteLine($"Starting multi-thread test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Length.ToString())}, threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}...");
+								if (mode == ThreadQueueMode.ThresholdTaskGroup)
+									Console.WriteLine($"in {mode} mode, {Bright.Cyan(threads.ToString())} tasks will be issued every {Bright.Cyan(((ProducerConsumerThresholdQueueOptions<Student>)options).Threshold.TotalSeconds.ToString("N0"))} second(s).");
+								Console.WriteLine();
+								Console.WriteLine();
+								clock.Restart();
+							};
+
+							queue.WorkCompleted += (_, _) =>
+							{
+								Interlocked.Exchange(ref externalId, 0);
+								long elapsed = clock.ElapsedMilliseconds;
+								Console.WriteLine();
+								Console.WriteLine();
+								Console.WriteLine($"Finished test. mode: '{Bright.Cyan(mode.ToString())}', threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}, elapsed: {Bright.Cyan(elapsed.ToString())} ms.");
+								Console.WriteLine($"Values length: {Bright.Cyan(values.Length.ToString())}, written: {Bright.Cyan(written.ToString())}, visited length: {Bright.Cyan((visited.Count).ToString())}, sets length: {Bright.Cyan((visited.Count + duplicates.Count).ToString())}.");
+
+								bool badValues = written != values.Length || visited.Count != values.Length;
+
+								if (badValues)
+								{
+									Console.WriteLine($"Values: {string.Join(", ", values.OrderBy(e => e.Id).Select(e => $"{e.External:D2}-{e.Id:D2}. {e.Name}"))}.");
+									Console.WriteLine(Bright.Cyan($"Visited: {string.Join(", ", visited.OrderBy(e => e).Select(e => $"{e.External:D2}-{e.Id:D2}. {e.Name}"))}."));
+								}
+
+								if (duplicates.Count > 0)
+								{
+									if (!badValues)
+										Console.WriteLine(Bright.Cyan($"Visited: {string.Join(", ", visited.OrderBy(e => e).Select(e => $"{e.External:D2}-{e.Id:D2}. {e.Name}"))}."));
+									Console.WriteLine(Bright.Red($"Duplicate entries: {string.Join(", ", duplicates.OrderBy(e => e.Id).Select(e => $"{e.External:D2}-{e.Id:D2}. {e.Name}"))}."));
+								}
+
+								Console.WriteLine();
+							};
+
+							foreach (Student value in values)
+							{
+								if (token.IsCancellationRequested) break;
+								queue.Enqueue(value);
 							}
+
+							queue.Complete();
+
+							/*
+							* when the queue is being disposed, it will wait until the queued items are processed.
+							* this works when queue.WaitOnDispose is true , which it is by default.
+							* alternatively, the following can be done to wait for all items to be processed:
+							*
+							* // Important: marks the completion of queued items, no further items can be queued
+							* // after this point. the queue will not to wait for more items other than the already queued.
+							* queue.Complete();
+							* // wait for the queue to finish
+							* queue.Wait();
+							*
+							* another way to go about it, is not to call queue.Complete(); if this queue will
+							* wait indefinitely and maybe use a CancellationTokenSource.
+							*
+							* for now, the queue will wait for the items to be finished once reached the next
+							* dispose curly bracket.
+							*/
 						}
-					};
-			
-					// Create a priority queue
-					MinBinomialHeap<Student> pq = new MinBinomialHeap<Student>(ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade)));
-
-					// Create a generic queue producer
-					using (IProducerConsumer<Student> queue = ProducerConsumerQueue.Create(mode, pq, options, token))
-					{
-						queue.WorkStarted += (_, _) =>
-						{
-							Console.WriteLine();
-							Console.WriteLine($"Starting multi-thread test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Length.ToString())}, threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}...");
-							if (mode == ThreadQueueMode.ThresholdTaskGroup) Console.WriteLine($"in {mode} mode, {Bright.Cyan(threads.ToString())} tasks will be issued every {Bright.Cyan(((ProducerConsumerThresholdQueueOptions<Student>)options).Threshold.TotalSeconds.ToString("N0"))} second(s).");
-							Console.WriteLine();
-							Console.WriteLine();
-							clock.Restart();
-						};
-
-						queue.WorkCompleted += (_, _) =>
-						{
-							Interlocked.Exchange(ref externalId, 0);
-							long elapsed = clock.ElapsedMilliseconds;
-							Console.WriteLine();
-							Console.WriteLine();
-							Console.WriteLine($"Finished test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Length.ToString())}, threads: {Bright.Cyan(options.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}, elapsed: {Bright.Cyan(elapsed.ToString())} ms.");
-							Console.WriteLine();
-						};
-
-						foreach (Student value in values) 
-							queue.Enqueue(value);
-
-						queue.Complete();
-						
-						/*
-						 * when the queue is being disposed, it will wait until the queued items are processed.
-						 * this works when queue.WaitOnDispose is true , which it is by default.
-						 * alternatively, the following can be done to wait for all items to be processed:
-						 *
-						 * // Important: marks the completion of queued items, no further items can be queued
-						 * // after this point. the queue will not to wait for more items other than the already queued.
-						 * queue.Complete();
-						 * // wait for the queue to finish
-						 * queue.Wait();
-						 *
-						 * another way to go about it, is not to call queue.Complete(); if this queue will
-						 * wait indefinitely and maybe use a CancellationTokenSource.
-						 *
-						 * for now, the queue will wait for the items to be finished once reached the next
-						 * dispose curly bracket.
-						 */
 					}
 				}
 
@@ -754,8 +871,7 @@ work with {HEAVY} items.");
 
 					if (Console.ReadKey(true).Key == ConsoleKey.Y)
 					{
-						foreach (ThreadQueueMode m in modes) 
-							queueModes.Enqueue(m);
+						foreach (ThreadQueueMode m in modes) queueModes.Enqueue(m);
 					}
 
 					continue;
@@ -770,14 +886,45 @@ work with {HEAVY} items.");
 
 			clock.Stop();
 
-			static TaskResult Exec(Student e)
+			static void Exec(Student e, ref int written, ISet<Student> visited, ISet<Student> duplicates)
 			{
 				Task.Delay(50).Execute();
 				Console.WriteLine($"{e.External:D2}-{e.Id:D2}. {e.Name}, Grade = {e.Grade:###.##}");
-				return TaskResult.Success;
+				Interlocked.Increment(ref written);
+
+				lock(visited)
+				{
+					if (visited.Add(e)) return;
+
+					lock(duplicates) duplicates.Add(e);
+				}
+			}
+
+			static void Pause<T>(IProducerConsumer<T> que, CancellationToken token)
+			{
+				if (!que.CanResume) return;
+				Task.Run(() =>
+					{
+						que.Pause();
+						SpinWait.SpinUntil(() => token.IsCancellationRequested || que.Running == 0);
+						Console.WriteLine();
+						Console.WriteLine(Bright.Red($"Queue is paused for {PAUSE_TIMEOUT / 1000} seconds."));
+						TimeSpanHelper.WasteTime(PAUSE_TIMEOUT, token);
+						Console.WriteLine(Bright.Red("Queue is done pausing."));
+
+						try
+						{
+							que.Resume();
+						}
+						catch (ObjectDisposedException)
+						{
+							// ignored
+						}
+					}, token)
+					.ConfigureAwait();
 			}
 		}
-	
+
 		private static void TestAsyncLock()
 		{
 			Title("Testing AsyncLock");

@@ -15,18 +15,13 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		private readonly QueueAdapter<TQueue, T> _queue;
 		private readonly Thread[] _workers;
 
-		private AutoResetEvent _workStartedEvent;
 		private AutoResetEvent _queueEvent;
-		private CountdownEvent _countdown;
-		private bool _workStarted;
 
 		public EventQueue([NotNull] TQueue queue, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
 			_queue = new QueueAdapter<TQueue, T>(queue);
-			_workStartedEvent = new AutoResetEvent(false);
 			_queueEvent = new AutoResetEvent(false);
-			_countdown = new CountdownEvent(1);
 			_workers = new Thread[Threads];
 		}
 
@@ -35,51 +30,69 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			base.Dispose(disposing);
 			if (!disposing) return;
-			ObjectHelper.Dispose(ref _workStartedEvent);
 			ObjectHelper.Dispose(ref _queueEvent);
-			ObjectHelper.Dispose(ref _countdown);
 		}
 
 		/// <inheritdoc />
+		// ReSharper disable once InconsistentlySynchronizedField
 		public TQueue Queue => _queue.Queue;
 		
 		/// <inheritdoc />
+		// ReSharper disable once InconsistentlySynchronizedField
 		public bool IsSynchronized => _queue.IsSynchronized;
 
 		/// <inheritdoc />
+		// ReSharper disable once InconsistentlySynchronizedField
 		public object SyncRoot => _queue.SyncRoot;
 
-		public sealed override int Count => _queue.Count + (_countdown?.CurrentCount ?? 1) - 1;
+		/// <inheritdoc />
+		// ReSharper disable once InconsistentlySynchronizedField
+		public override int Count => _queue.Count + Running;
 
-		public sealed override bool IsBusy => Count > 0;
+		/// <inheritdoc />
+		// ReSharper disable once InconsistentlySynchronizedField
+		public override bool IsEmpty => _queue.Count == 0;
 
-		protected sealed override void EnqueueInternal(T item)
+		/// <inheritdoc />
+		public override bool CanResume => true;
+
+		protected override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 
-			if (!_workStarted)
+			if (!WaitForWorkerStart())
 			{
+				bool invokeWorkStarted = false;
+
 				lock(_workers)
 				{
-					if (!_workStarted)
+					if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+
+					if (!WaitForWorkerStart())
 					{
-						_workStarted = true;
+						InitializeWorkerStart();
+						InitializeWorkersCountDown();
+						InitializeBatchClear();
+						InitializeTaskStart();
+						InitializeTaskComplete();
+						InitializeTasksCountDown();
 
 						for (int i = 0; i < _workers.Length; i++)
 						{
-							_countdown.AddCount();
 							(_workers[i] = new Thread(Consume)
 									{
 										IsBackground = IsBackground,
 										Priority = Priority
 									}).Start();
 						}
+					
+						invokeWorkStarted = true;
+						if (!WaitForWorkerStart()) throw new TimeoutException();
+						if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
 					}
 				}
 
-				if (!_workStartedEvent.WaitOne(TimeSpanHelper.HALF)) throw new TimeoutException();
-				if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
-				OnWorkStarted(EventArgs.Empty);
+				if (invokeWorkStarted) OnWorkStarted(EventArgs.Empty);
 			}
 
 			lock(SyncRoot)
@@ -119,6 +132,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 			lock(SyncRoot)
 			{
+				if (_queue.IsEmpty) return;
+
 				int n = _queue.Count;
 
 				while (!_queue.IsEmpty && _queue.TryPeek(out T item) && predicate(item)) 
@@ -129,13 +144,13 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 		}
 
-		protected sealed override void CompleteInternal()
+		protected override void CompleteInternal()
 		{
 			CompleteMarked = true;
 			_queueEvent.Set();
 		}
 
-		protected sealed override void ClearInternal()
+		protected override void ClearInternal()
 		{
 			lock(SyncRoot)
 			{
@@ -144,68 +159,30 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 		}
 
-		protected sealed override bool WaitInternal(int millisecondsTimeout)
-		{
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (!IsBusy) return true;
-
-			try
-			{
-				if (millisecondsTimeout > TimeSpanHelper.INFINITE) return _countdown.Wait(millisecondsTimeout, Token);
-				_countdown.Wait(Token);
-				return !Token.IsCancellationRequested;
-			}
-			catch (OperationCanceledException)
-			{
-				// ignored
-			}
-			catch (TimeoutException)
-			{
-				// ignored
-			}
-
-			return false;
-		}
-
-		protected sealed override void StopInternal(bool enforce)
-		{
-			CompleteInternal();
-			// Wait for the consumer's thread to finish.
-			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
-			Cancel();
-			ClearInternal();
-		}
-
 		private void Consume()
 		{
-			_workStartedEvent.Set();
-			if (IsDisposed) return;
+			if (IsDisposed || Token.IsCancellationRequested) return;
+			SignalWorkerStart();
 
 			try
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					if (IsPaused) continue;
-					T item;
-
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.IsEmpty)
-					{
-						if (IsPaused) continue;
-						_queueEvent.WaitOne(TimeSpanHelper.FAST, Token);
-					}
-
+					if (IsPaused || _queue.IsEmpty && !_queueEvent.WaitOne(TimeSpanHelper.FAST, Token)) continue;
 					if (IsDisposed || Token.IsCancellationRequested) return;
-					if (CompleteMarked) break;
-					if (IsPaused) continue;
+					T item;
 
 					lock(SyncRoot)
 					{
 						if (IsPaused || _queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
 					}
 
-					ScheduledCallback?.Invoke(item);
+					if (ScheduledCallback != null && !ScheduledCallback(item)) continue;
+					AddTasksCountDown();
 					Run(item);
 				}
+
+				if (IsDisposed || Token.IsCancellationRequested) return;
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !_queue.IsEmpty)
 				{
@@ -217,40 +194,33 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						if (IsPaused || _queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
 					}
 
-					ScheduledCallback?.Invoke(item);
+					if (ScheduledCallback != null && !ScheduledCallback(item)) continue;
+					AddTasksCountDown();
 					Run(item);
 				}
 			}
+			catch (ObjectDisposedException) { }
+			catch (OperationCanceledException) { }
 			finally
 			{
-				SignalAndCheck();
+				SignalWorkersCountDown();
 			}
 		}
 
-		private void SignalAndCheck()
+		/// <inheritdoc />
+		protected override void Run(T item)
 		{
-			if (IsDisposed || _countdown == null) return;
-			Monitor.Enter(_countdown);
-
-			bool completed;
-
 			try
 			{
-				if (IsDisposed || _countdown == null) return;
-				_countdown.Signal();
+				SignalTaskStart();
+				if (IsDisposed || Token.IsCancellationRequested) return;
+				base.Run(item);
 			}
 			finally
 			{
-				completed = _countdown is null or { CurrentCount: < 2 };
+				SignalTaskComplete();
+				SignalTasksCountDown();
 			}
-
-			if (completed)
-			{
-				OnWorkCompleted(EventArgs.Empty);
-				_countdown.SignalAll();
-			}
-
-			if (_countdown != null) Monitor.Exit(_countdown);
 		}
 	}
 

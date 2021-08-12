@@ -26,6 +26,13 @@ namespace essentialMix.Helpers
 		public const int HALF = 500;
 
 		public const int SECOND = 1000;
+		public const int TWO_SECONDS = SECOND * 2;
+		public const int THREE_SECONDS = SECOND * 3;
+		public const int FIVE_SECONDS = SECOND * 5;
+		public const int TEN_SECONDS = SECOND * 10;
+		public const int FIFTEEN_SECONDS = SECOND * 15;
+		public const int THIRTY_SECONDS = SECOND * 30;
+		public const int FORTY_FIVE_SECONDS = SECOND * 45;
 		public const int MINUTE = SECOND * 60;
 		public const int HOUR = MINUTE * 60;
 		public const int DAY = HOUR * 24;
@@ -38,6 +45,7 @@ namespace essentialMix.Helpers
 		public static readonly TimeSpan Half = TimeSpan.FromMilliseconds(HALF);
 		public static readonly TimeSpan Second = TimeSpan.FromSeconds(1);
 		public static readonly TimeSpan TwoSeconds = TimeSpan.FromSeconds(2);
+		public static readonly TimeSpan ThreeSeconds = TimeSpan.FromSeconds(3);
 		public static readonly TimeSpan FiveSeconds = TimeSpan.FromSeconds(5);
 		public static readonly TimeSpan TenSeconds = TimeSpan.FromSeconds(10);
 		public static readonly TimeSpan FifteenSeconds = TimeSpan.FromSeconds(15);
@@ -45,6 +53,7 @@ namespace essentialMix.Helpers
 		public static readonly TimeSpan FortyFiveSeconds = TimeSpan.FromSeconds(45);
 		public static readonly TimeSpan Minute = TimeSpan.FromMinutes(1);
 		public static readonly TimeSpan TwoMinutes = TimeSpan.FromMinutes(2);
+		public static readonly TimeSpan ThreeMinutes = TimeSpan.FromMinutes(3);
 		public static readonly TimeSpan FiveMinutes = TimeSpan.FromMinutes(5);
 		public static readonly TimeSpan TenMinutes = TimeSpan.FromMinutes(10);
 		public static readonly TimeSpan FifteenMinutes = TimeSpan.FromMinutes(15);

@@ -9,30 +9,30 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 	{
 		private int _threads;
 
-		public ProducerConsumerQueueOptions([NotNull] Action<T> executeCallback)
+		public ProducerConsumerQueueOptions([NotNull] Action<IProducerConsumer<T>, T> executeCallback)
 			: this(TaskHelper.ProcessDefault, false, executeCallback)
 		{
 		}
 
-		public ProducerConsumerQueueOptions(bool waitOnDispose, [NotNull] Action<T> executeCallback)
+		public ProducerConsumerQueueOptions(bool waitOnDispose, [NotNull] Action<IProducerConsumer<T>, T> executeCallback)
 			: this(TaskHelper.ProcessDefault, waitOnDispose, executeCallback)
 		{
 		}
 
-		public ProducerConsumerQueueOptions(int threads, [NotNull] Action<T> executeCallback)
+		public ProducerConsumerQueueOptions(int threads, [NotNull] Action<IProducerConsumer<T>, T> executeCallback)
 			: this(threads, false, executeCallback)
 		{
 		}
 
-		public ProducerConsumerQueueOptions(int threads, bool waitOnDispose, [NotNull] Action<T> executeCallback)
+		public ProducerConsumerQueueOptions(int threads, bool waitOnDispose, [NotNull] Action<IProducerConsumer<T>, T> executeCallback)
 		{
 			Threads = threads;
 			WaitOnDispose = waitOnDispose;
-			ExecuteCallback = item =>
+			ExecuteCallback = (q, i) =>
 			{
 				try
 				{
-					executeCallback(item);
+					executeCallback(q, i);
 					return TaskResult.Success;
 				}
 				catch (OperationCanceledException)
@@ -46,22 +46,22 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			};
 		}
 
-		public ProducerConsumerQueueOptions([NotNull] Func<T, TaskResult> executeCallback)
+		public ProducerConsumerQueueOptions([NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
 			: this(TaskHelper.ProcessDefault, false, executeCallback)
 		{
 		}
 
-		public ProducerConsumerQueueOptions(bool waitOnDispose, [NotNull] Func<T, TaskResult> executeCallback)
+		public ProducerConsumerQueueOptions(bool waitOnDispose, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
 			: this(TaskHelper.ProcessDefault, waitOnDispose, executeCallback)
 		{
 		}
 
-		public ProducerConsumerQueueOptions(int threads, [NotNull] Func<T, TaskResult> executeCallback)
+		public ProducerConsumerQueueOptions(int threads, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
 			: this(threads, false, executeCallback)
 		{
 		}
 
-		public ProducerConsumerQueueOptions(int threads, bool waitOnDispose, [NotNull] Func<T, TaskResult> executeCallback)
+		public ProducerConsumerQueueOptions(int threads, bool waitOnDispose, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
 		{
 			Threads = threads;
 			WaitOnDispose = waitOnDispose;
@@ -82,9 +82,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		public bool WaitOnDispose { get; set; }
 
 		[NotNull]
-		public Func<T, TaskResult> ExecuteCallback { get; }
-		public Func<T, TaskResult, Exception, bool> ResultCallback { get; set; }
-		public Action<T> ScheduledCallback { get; set; }
+		public Func<IProducerConsumer<T>, T, TaskResult> ExecuteCallback { get; }
+		public Func<IProducerConsumer<T>, T, TaskResult, Exception, bool> ResultCallback { get; set; }
+		public Func<T, bool> ScheduledCallback { get; set; }
 		public Action<T> FinalizeCallback { get; set; }
 	}
 }

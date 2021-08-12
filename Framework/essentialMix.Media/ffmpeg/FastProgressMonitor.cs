@@ -21,7 +21,7 @@ namespace essentialMix.Media.ffmpeg
 		public FastProgressMonitor(long frames, [NotNull] Action onStart, [NotNull] Action<int> onProgress, [NotNull] Action onCompleted)
 		{
 			_frames = frames;
-			ProducerConsumerQueueOptions<string> options = new ProducerConsumerQueueOptions<string>(1, true, data =>
+			ProducerConsumerQueueOptions<string> options = new ProducerConsumerQueueOptions<string>(1, true, (_, data) =>
 			{
 				Match m = __progress.Match(data);
 

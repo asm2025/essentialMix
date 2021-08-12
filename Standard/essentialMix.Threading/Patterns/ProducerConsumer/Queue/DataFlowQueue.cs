@@ -10,46 +10,15 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
 	public sealed class DataFlowQueue<T> : ProducerConsumerThreadQueue<T>
 	{
-		private readonly BufferBlock<T> _queue;
-		private readonly ActionBlock<T> _processor;
+		private readonly object _lock = new object();
+
+		private BufferBlock<T> _queue;
+		private ActionBlock<T> _processor;
 		private IDisposable _link;
-		private ManualResetEventSlim _workCompletedEventSlim;
 
 		public DataFlowQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
-			_workCompletedEventSlim = new ManualResetEventSlim(false);
-
-			// Define the mesh.
-			_queue = new BufferBlock<T>(new DataflowBlockOptions
-			{
-				CancellationToken = Token
-			});
-			_processor = new ActionBlock<T>(e =>
-			{
-				if (IsPaused)
-				{
-					CancellationToken tkn = Token;
-					SpinWait.SpinUntil(() => IsDisposed || tkn.IsCancellationRequested || !IsPaused);
-					if (IsDisposed || tkn.IsCancellationRequested) return;
-				}
-				ScheduledCallback?.Invoke(e);
-				Run(e);
-			}, new ExecutionDataflowBlockOptions
-			{
-				// SingleProducerConstrained = false by default therefore, BufferBlock<T>.SendAsync is thread safe
-				MaxDegreeOfParallelism = Threads,
-				CancellationToken = Token
-			});
-			_link = _queue.LinkTo(_processor, new DataflowLinkOptions
-			{
-				PropagateCompletion = true
-			});
-			new Thread(Consume)
-			{
-				IsBackground = IsBackground,
-				Priority = Priority
-			}.Start();
 		}
 
 		/// <inheritdoc />
@@ -58,17 +27,57 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			base.Dispose(disposing);
 			if (!disposing) return;
 			ObjectHelper.Dispose(ref _link);
-			ObjectHelper.Dispose(ref _workCompletedEventSlim);
 		}
 
-		public override int Count => _queue.Count + _processor.InputCount;
+		/// <inheritdoc />
+		public override int Count => _queue.Count + Running;
 
-		public override bool IsBusy => Count > 0;
+		/// <inheritdoc />
+		public override bool IsEmpty => _queue.Count == 0;
+
+		/// <inheritdoc />
+		public override bool CanResume => false;
 
 		protected override void EnqueueInternal(T item)
 		{
 			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+
+			bool invokeWorkStarted = false;
+
+			if (!WaitForWorkerStart())
+			{
+				lock(_lock)
+				{
+					if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+
+					if (!WaitForWorkerStart())
+					{
+						InitializeMesh();
+						InitializeWorkerStart();
+						InitializeWorkersCountDown(1);
+						InitializeBatchClear();
+						InitializeTaskStart();
+						InitializeTaskComplete();
+						InitializeTasksCountDown();
+
+						new Thread(Consume)
+						{
+							IsBackground = IsBackground,
+							Priority = Priority
+						}.Start();
+
+						invokeWorkStarted = true;
+						if (!WaitForWorkerStart()) throw new TimeoutException();
+						if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+					}
+				}
+
+				if (invokeWorkStarted) OnWorkStarted(EventArgs.Empty);
+			}
+
 			_queue.Post(item);
+			if (!invokeWorkStarted) return;
+			WaitForTaskStart();
 		}
 
 		protected override void CompleteInternal()
@@ -83,55 +92,54 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			_processor.Complete();
 		}
 
-		protected override bool WaitInternal(int millisecondsTimeout)
+		private void InitializeMesh()
 		{
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (!IsBusy) return true;
-			
-			try
+			_queue = new BufferBlock<T>(new DataflowBlockOptions
 			{
-				if (millisecondsTimeout < TimeSpanHelper.ZERO)
-					_workCompletedEventSlim.Wait(Token);
-				else if (!_workCompletedEventSlim.Wait(millisecondsTimeout, Token))
-					return false;
-
-				return true;
-			}
-			catch (OperationCanceledException)
+				CancellationToken = Token
+			});
+			_processor = new ActionBlock<T>(item =>
 			{
-				// ignored
-			}
-			catch (TimeoutException)
+				if (ScheduledCallback != null && !ScheduledCallback(item)) return;
+				AddTasksCountDown();
+				Run(item);
+			}, new ExecutionDataflowBlockOptions
 			{
-				// ignored
-			}
-
-			return false;
-		}
-
-		protected override void StopInternal(bool enforce)
-		{
-			CompleteInternal();
-			// Wait for the consumer's thread to finish.
-			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
-			Cancel();
-			ClearInternal();
+				// SingleProducerConstrained = false by default therefore, BufferBlock<T>.SendAsync is thread safe
+				MaxDegreeOfParallelism = Threads,
+				CancellationToken = Token
+			});
+			_link = _queue.LinkTo(_processor, new DataflowLinkOptions
+			{
+				PropagateCompletion = true
+			});
 		}
 
 		private void Consume()
 		{
-			if (IsDisposed) return;
-			_workCompletedEventSlim.Reset();
-			OnWorkStarted(EventArgs.Empty);
-			Task.WhenAll(_queue.Completion.ConfigureAwait(), _processor.Completion.ConfigureAwait())
-						.ContinueWith(_ =>
-						{
-							OnWorkCompleted(EventArgs.Empty);
-							_workCompletedEventSlim.Set();
-						})
-						.ConfigureAwait()
-						.GetAwaiter()
-						.GetResult();
+			if (IsDisposed || Token.IsCancellationRequested) return;
+			SignalWorkerStart();
+			Task.WhenAll(_queue.Completion, _processor.Completion)
+				.ContinueWith(_ => SignalWorkersCountDown())
+				.ConfigureAwait()
+				.GetAwaiter()
+				.GetResult();
+		}
+
+		/// <inheritdoc />
+		protected override void Run(T item)
+		{
+			try
+			{
+				SignalTaskStart();
+				if (IsDisposed || Token.IsCancellationRequested) return;
+				base.Run(item);
+			}
+			finally
+			{
+				SignalTaskComplete();
+				SignalTasksCountDown();
+			}
 		}
 	}
 }
