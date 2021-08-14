@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
+using essentialMix.Helpers;
 using JetBrains.Annotations;
 using Microsoft.AspNet.Identity;
-using essentialMix.Threading.Helpers;
 
 // ReSharper disable once CheckNamespace
 namespace essentialMix.Extensions

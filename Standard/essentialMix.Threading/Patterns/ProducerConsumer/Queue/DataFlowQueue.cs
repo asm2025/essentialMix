@@ -36,7 +36,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public override bool IsEmpty => _queue.Count == 0;
 
 		/// <inheritdoc />
-		public override bool CanResume => false;
+		public override bool CanPause => false;
 
 		protected override void EnqueueInternal(T item)
 		{
@@ -72,7 +72,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					}
 				}
 
-				if (invokeWorkStarted) OnWorkStarted(EventArgs.Empty);
+				if (invokeWorkStarted) WorkStartedCallback?.Invoke(this);
 			}
 
 			_queue.Post(item);
@@ -119,11 +119,10 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			if (IsDisposed || Token.IsCancellationRequested) return;
 			SignalWorkerStart();
-			Task.WhenAll(_queue.Completion, _processor.Completion)
-				.ContinueWith(_ => SignalWorkersCountDown())
+			Task.WhenAll(_queue.Completion.ConfigureAwait(), _processor.Completion.ConfigureAwait())
 				.ConfigureAwait()
-				.GetAwaiter()
-				.GetResult();
+				.ContinueWith(_ => SignalWorkersCountDown())
+				.Execute();
 		}
 
 		/// <inheritdoc />

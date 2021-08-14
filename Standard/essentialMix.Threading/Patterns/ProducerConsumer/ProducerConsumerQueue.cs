@@ -3,11 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
-using essentialMix.Threading.Helpers;
 using essentialMix.Threading.Patterns.ProducerConsumer.Queue;
 using JetBrains.Annotations;
 
@@ -20,6 +18,10 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 	[DebuggerDisplay("Count = {Count}")]
 	public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T>
 	{
+		private readonly SynchronizationContext _context;
+		private readonly CallbackDelegates<T> _workStartedCallback;
+		private readonly CallbackDelegates<T> _workCompletedCallback;
+
 		private CancellationTokenSource _cts;
 		private ManualResetEventSlim _workerStart;
 		private CountdownEvent _workersCountdown;
@@ -27,19 +29,39 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		private AutoResetEvent _taskComplete;
 		private AutoResetEvent _batchClear;
 		private CountdownEvent _tasksCountdown;
+
 		private volatile int _paused;
 		private volatile int _completeMarked;
 		private volatile int _workCompleted;
 		
 		protected ProducerConsumerQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 		{
+			InitializeToken(token);
 			Threads = options.Threads;
 			WaitOnDispose = options.WaitOnDispose;
 			ExecuteCallback = options.ExecuteCallback;
 			ResultCallback = options.ResultCallback;
 			ScheduledCallback = options.ScheduledCallback;
 			FinalizeCallback = options.FinalizeCallback;
-			InitializeToken(token);
+
+			_workStartedCallback = options.WorkStartedCallback;
+			_workCompletedCallback = options.WorkCompletedCallback;
+
+			_context = options.SynchronizeContext
+							? SynchronizationContext.Current
+							: null;
+			
+			if (_context != null)
+			{
+				_context.OperationStarted();
+				WorkStartedCallback = que => _context.Post(WorkStartedSendOrPostCallback, que);
+				WorkCompletedCallback = que => _context.Post(WorkCompletedSendOrPostCallback, que);
+			}
+			else
+			{
+				WorkStartedCallback = _workStartedCallback;
+				WorkCompletedCallback = _workCompletedCallback;
+			}
 		}
 
 		protected override void Dispose(bool disposing)
@@ -48,8 +70,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			{
 				CompleteInternal();
 
-				if (WaitOnDispose) WaitInternal(TimeSpanHelper.INFINITE);
-				else StopInternal(true);
+				if (WaitOnDispose) Wait(TimeSpanHelper.INFINITE);
+				else Stop(true);
 				
 				ReleaseWorkStart();
 				ReleaseTaskStart();
@@ -58,12 +80,10 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 				ReleaseTasksCountDown();
 				ReleaseWorkersCountDown();
 				ReleaseToken();
+				_context?.OperationCompleted();
 			}
 			base.Dispose(disposing);
 		}
-
-		public event EventHandler WorkStarted;
-		public event EventHandler WorkCompleted;
 
 		/// <inheritdoc />
 		public abstract int Count { get; }
@@ -85,7 +105,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		public CancellationToken Token { get; private set; }
 
 		/// <inheritdoc />
-		public abstract bool CanResume { get; }
+		public abstract bool CanPause { get; }
 
 		/// <inheritdoc />
 		public bool IsPaused
@@ -119,10 +139,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		public int SleepAfterEnqueue { get; set; } = TimeSpanHelper.INFINITE;
 
 		[NotNull]
-		protected Func<IProducerConsumer<T>, T, TaskResult> ExecuteCallback { get; }
-		protected Func<IProducerConsumer<T>, T, TaskResult, Exception, bool> ResultCallback { get; }
-		protected Func<T, bool> ScheduledCallback { get; }
-		protected Action<T> FinalizeCallback { get; }
+		protected ExecuteCallbackDelegates<T> ExecuteCallback { get; }
+		protected ResultCallbackDelegates<T> ResultCallback { get; }
+		protected ScheduledCallbackDelegates<T> ScheduledCallback { get; }
+		protected FinalizeCallbackDelegates<T> FinalizeCallback { get; }
+		protected CallbackDelegates<T> WorkStartedCallback { get; }
+		protected CallbackDelegates<T> WorkCompletedCallback { get; }
 
 		[NotNull]
 		protected CancellationTokenSource InitializeCancellationTokenSource()
@@ -209,12 +231,18 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		protected void SignalWorkersCountDown()
 		{
 			if (_workersCountdown is { CurrentCount: > 1 }) _workersCountdown.Signal();
-			if (_workersCountdown == null || !CompleteMarked || !IsEmpty || _workersCountdown is { CurrentCount: > 1 }) return;
+			if (!CompleteMarked || !IsEmpty || _workersCountdown is { CurrentCount: > 1 }) return;
 			if (_workCompleted != 0 || Interlocked.CompareExchange(ref _workCompleted, 1, 0) != 0) return;
 
-			if (Running > 0)
+			if (_workersCountdown == null)
 			{
-				SpinWait.SpinUntil(() => IsDisposed || Running == 0);
+				WorkCompletedCallback?.Invoke(this);
+				return;
+			}
+			
+			if (IsPaused || Running > 0)
+			{
+				SpinWait.SpinUntil(() => IsDisposed || !IsPaused && Running == 0);
 				if (IsDisposed) return;
 			}
 
@@ -233,7 +261,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 				}
 			}
 
-			OnWorkCompleted(EventArgs.Empty);
+			WorkCompletedCallback?.Invoke(this);
 			_workersCountdown.SignalAll();
 			ReleaseWorkStart();
 			ReleaseWorkersCountDown();
@@ -461,7 +489,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		public void Pause()
 		{
 			ThrowIfDisposed();
-			if (!CanResume) throw new NotSupportedException();
+			if (!CanPause) throw new NotSupportedException();
 			if (IsPaused) return;
 			IsPaused = true;
 			WaitForBatchClear();
@@ -471,75 +499,41 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		public void Resume()
 		{
 			ThrowIfDisposed();
-			if (!CanResume) throw new NotSupportedException();
+			if (!CanPause) throw new NotSupportedException();
 			IsPaused = false;
 		}
 
 		/// <inheritdoc />
-		public void Stop()
-		{
-			ThrowIfDisposed();
-			IsPaused = false;
-			StopInternal(!WaitOnDispose);
-		}
-
+		public void Stop() { Stop(!WaitOnDispose); }
 		/// <inheritdoc />
 		public void Stop(bool enforce)
 		{
 			ThrowIfDisposed();
 			IsPaused = false;
-			StopInternal(enforce);
-		}
-
-		/// <inheritdoc />
-		[NotNull]
-		public Task StopAsync() { return StopAsync(!WaitOnDispose); }
-
-		/// <inheritdoc />
-		[NotNull]
-		public Task StopAsync(bool enforce)
-		{
-			ThrowIfDisposed();
-			IsPaused = false;
-			return TaskHelper.Run(() => StopInternal(enforce), TaskCreationOptions.LongRunning, Token).ConfigureAwait();
+			CompleteInternal();
+			// Wait for the consumer's thread to finish.
+			if (!enforce) Wait(TimeSpanHelper.INFINITE);
+			Cancel();
+			ClearInternal();
 		}
 
 		/// <inheritdoc />
 		public bool Wait()
 		{
-			ThrowIfDisposed();
-			return WaitInternal(TimeSpanHelper.INFINITE);
+			return Wait(TimeSpanHelper.INFINITE);
 		}
 
 		/// <inheritdoc />
 		public bool Wait(TimeSpan timeout)
 		{
-			ThrowIfDisposed();
-			return WaitInternal(timeout.TotalIntMilliseconds());
+			return Wait(timeout.TotalIntMilliseconds());
 		}
 
 		/// <inheritdoc />
 		public bool Wait(int millisecondsTimeout)
 		{
 			ThrowIfDisposed();
-			return WaitInternal(millisecondsTimeout);
-		}
-
-		/// <inheritdoc />
-		[NotNull] 
-		public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
-
-		/// <inheritdoc />
-		[NotNull] 
-		public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
-
-		/// <inheritdoc />
-		[NotNull]
-		public Task<bool> WaitAsync(int millisecondsTimeout)
-		{
-			ThrowIfDisposed();
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			return TaskHelper.Run(() => WaitInternal(millisecondsTimeout), TaskCreationOptions.LongRunning, Token).ConfigureAwait();
+			return WaitForWorkersCountDown(millisecondsTimeout);
 		}
 
 		protected abstract void EnqueueInternal([NotNull] T item);
@@ -547,30 +541,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		protected abstract void CompleteInternal();
 
 		protected abstract void ClearInternal();
-
-		protected bool WaitInternal(int millisecondsTimeout)
-		{
-			return WaitForWorkersCountDown(millisecondsTimeout);
-		}
-
-		protected void StopInternal(bool enforce)
-		{
-			CompleteInternal();
-			// Wait for the consumer's thread to finish.
-			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
-			Cancel();
-			ClearInternal();
-		}
-
-		protected virtual void OnWorkStarted(EventArgs args)
-		{
-			WorkStarted?.Invoke(this, args);
-		}
-
-		protected virtual void OnWorkCompleted(EventArgs args)
-		{
-			WorkCompleted?.Invoke(this, args);
-		}
 
 		protected virtual void Run(T item)
 		{
@@ -598,6 +568,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 				FinalizeCallback?.Invoke(item);
 			}
 		}
+
+		private void WorkStartedSendOrPostCallback([NotNull] object state) { _workStartedCallback((IProducerConsumer<T>)state); }
+		private void WorkCompletedSendOrPostCallback([NotNull] object state) { _workCompletedCallback((IProducerConsumer<T>)state); }
 	}
 
 	public static class ProducerConsumerQueue

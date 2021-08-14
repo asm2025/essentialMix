@@ -7,7 +7,7 @@ using System.Security;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using essentialMix.Threading.Helpers;
+using essentialMix.Helpers;
 using essentialMix.Web.Entity.Model.Membership;
 using JetBrains.Annotations;
 using Microsoft.AspNet.Identity;

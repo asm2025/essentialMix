@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using essentialMix.Threading.Helpers;
+using essentialMix.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading

@@ -60,7 +60,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public bool IsBusy => _queue.IsBusy;
 
 		/// <inheritdoc />
-		public bool CanResume => _queue.CanResume;
+		public bool CanPause => _queue.CanPause;
 
 		/// <inheritdoc />
 		public int Threads => _queue.Threads;
@@ -80,20 +80,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			get => _queue.SleepAfterEnqueue;
 			set => _queue.SleepAfterEnqueue = value;
-		}
-
-		/// <inheritdoc />
-		public event EventHandler WorkStarted
-		{
-			add => _queue.WorkStarted += value;
-			remove => _queue.WorkStarted -= value;
-		}
-
-		/// <inheritdoc />
-		public event EventHandler WorkCompleted
-		{
-			add => _queue.WorkCompleted += value;
-			remove => _queue.WorkCompleted -= value;
 		}
 
 		/// <inheritdoc />
@@ -136,12 +122,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public void Stop(bool enforce) { _queue.Stop(enforce); }
 
 		/// <inheritdoc />
-		public Task StopAsync() { return _queue.StopAsync(); }
-
-		/// <inheritdoc />
-		public Task StopAsync(bool enforce) { return _queue.StopAsync(enforce); }
-
-		/// <inheritdoc />
 		public bool Wait() { return _queue.Wait(); }
 
 		/// <inheritdoc />
@@ -149,15 +129,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 		/// <inheritdoc />
 		public bool Wait(int millisecondsTimeout) { return _queue.Wait(millisecondsTimeout); }
-
-		/// <inheritdoc />
-		public Task<bool> WaitAsync() { return _queue.WaitAsync(); }
-
-		/// <inheritdoc />
-		public Task<bool> WaitAsync(TimeSpan timeout) { return _queue.WaitAsync(timeout); }
-
-		/// <inheritdoc />
-		public Task<bool> WaitAsync(int millisecondsTimeout) { return _queue.WaitAsync(millisecondsTimeout); }
 
 		/// <inheritdoc />
 		/// <summary>

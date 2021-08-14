@@ -31,25 +31,25 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		}
 
 		/// <inheritdoc />
-		public SemaphoreQueueOptions([NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+		public SemaphoreQueueOptions([NotNull] ExecuteCallbackDelegates<T> executeCallback)
 			: base(executeCallback)
 		{
 		}
 
 		/// <inheritdoc />
-		public SemaphoreQueueOptions(bool waitOnDispose, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+		public SemaphoreQueueOptions(bool waitOnDispose, [NotNull] ExecuteCallbackDelegates<T> executeCallback)
 			: base(waitOnDispose, executeCallback)
 		{
 		}
 
 		/// <inheritdoc />
-		public SemaphoreQueueOptions(int threads, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+		public SemaphoreQueueOptions(int threads, [NotNull] ExecuteCallbackDelegates<T> executeCallback)
 			: base(threads, executeCallback)
 		{
 		}
 
 		/// <inheritdoc />
-		public SemaphoreQueueOptions(int threads, bool waitOnDispose, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+		public SemaphoreQueueOptions(int threads, bool waitOnDispose, [NotNull] ExecuteCallbackDelegates<T> executeCallback)
 			: base(threads, waitOnDispose, executeCallback)
 		{
 		}

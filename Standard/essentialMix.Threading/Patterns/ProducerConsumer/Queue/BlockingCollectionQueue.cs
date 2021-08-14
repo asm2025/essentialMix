@@ -36,7 +36,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public override bool IsEmpty => _queue.Count == 0;
 
 		/// <inheritdoc />
-		public override bool CanResume => true;
+		public override bool CanPause => true;
 
 		protected override void EnqueueInternal(T item)
 		{
@@ -74,7 +74,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					}
 				}
 
-				if (invokeWorkStarted) OnWorkStarted(EventArgs.Empty);
+				if (invokeWorkStarted) WorkStartedCallback?.Invoke(this);
 			}
 
 			// BlockingCollection<T> is thread safe
@@ -102,7 +102,13 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				// BlockingCollection<T> is thread safe
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					if (IsPaused || _queue.Count == 0 || !_queue.TryTake(out T item, TimeSpanHelper.FAST, Token)) continue;
+					if (IsPaused)
+					{
+						SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+						continue;
+					}
+
+					if (_queue.Count == 0 || !_queue.TryTake(out T item, TimeSpanHelper.FAST, Token)) continue;
 					if (ScheduledCallback != null && !ScheduledCallback(item)) continue;
 					AddTasksCountDown();
 					Run(item);
@@ -118,7 +124,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 					while (!IsDisposed && !Token.IsCancellationRequested)
 					{
-						if (IsPaused) continue;
+						if (IsPaused)
+						{
+							SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+							if (IsDisposed || Token.IsCancellationRequested) return;
+						}
+
 						if (!enumerator.MoveNext()) break;
 						T item = enumerator.Current;
 						if (ScheduledCallback != null && !ScheduledCallback(item)) continue;

@@ -41,7 +41,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public override bool IsEmpty => _queue.Count == 0;
 		
 		/// <inheritdoc />
-		public override bool CanResume => true;
+		public override bool CanPause => true;
 
 		protected override void EnqueueInternal(T item)
 		{
@@ -76,7 +76,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					}
 				}
 
-				if (invokeWorkStarted) OnWorkStarted(EventArgs.Empty);
+				if (invokeWorkStarted) WorkStartedCallback?.Invoke(this);
 			}
 
 			lock(SyncRoot) 
@@ -137,40 +137,73 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					if (IsPaused) continue;
-					
+					if (IsPaused)
+					{
+						SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+						continue;
+					}
+
 					int offset = count;
 					if (!ReadItems(items, ref count, true)) break;
 					if (count < Threads) continue;
-					ExecItems(items, tasks, offset, count);
+					SetupTasks(items, tasks, offset, count);
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitAllSilently(Token)) return;
+					Array.Clear(items, 0, count);
+
+					for (int i = 0; i < count; i++)
+					{
+						Task task = tasks[i];
+						if (task == null) continue;
+						task.Dispose();
+						tasks[i] = null;
+					}
+
 					count = 0;
-					Array.Clear(items, 0, items.Length);
-					Array.Clear(tasks, 0, tasks.Length);
 				}
 
 				if (IsDisposed || Token.IsCancellationRequested) return;
 
 				while (!IsDisposed && !Token.IsCancellationRequested)
 				{
-					if (IsPaused) continue;
-					
+					if (IsPaused)
+					{
+						SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+						continue;
+					}
+
 					int offset = count;
 					if (!ReadItems(items, ref count, false) || count < items.Length) break;
-					ExecItems(items, tasks, offset, count);
+					SetupTasks(items, tasks, offset, count);
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitAllSilently(Token)) return;
+					Array.Clear(items, 0, count);
+
+					for (int i = 0; i < count; i++)
+					{
+						Task task = tasks[i];
+						if (task == null) continue;
+						task.Dispose();
+						tasks[i] = null;
+					}
+
 					count = 0;
-					Array.Clear(items, 0, items.Length);
-					Array.Clear(tasks, 0, tasks.Length);
 				}
 
 				if (count < 1 || IsDisposed || Token.IsCancellationRequested) return;
 				if (tasks.Length != count) Array.Resize(ref tasks, count);
-				ExecItems(items, tasks, 0, count);
+				SetupTasks(items, tasks, 0, count);
+				if (IsPaused) SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
 				if (IsDisposed || Token.IsCancellationRequested) return;
 				tasks.WaitAllSilently(Token);
-				Array.Clear(items, 0, items.Length);
-				Array.Clear(tasks, 0, tasks.Length);
+				Array.Clear(items, 0, count);
+
+				for (int i = 0; i < count; i++)
+				{
+					Task task = tasks[i];
+					if (task == null) continue;
+					task.Dispose();
+					tasks[i] = null;
+				}
+
 			}
 			catch (ObjectDisposedException) { }
 			catch (OperationCanceledException) { }
@@ -191,9 +224,13 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 			while (!IsDisposed && !Token.IsCancellationRequested && count > 0)
 			{
-				// ReSharper disable once InconsistentlySynchronizedField
-				if (IsPaused || waitOnQueue && _queue.IsEmpty) continue;
-				// ReSharper disable once InconsistentlySynchronizedField
+				if (IsPaused)
+				{
+					SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+					continue;
+				}
+
+				if (waitOnQueue && _queue.IsEmpty) continue;
 				if (_queue.IsEmpty) break;
 
 				lock(SyncRoot)
@@ -209,7 +246,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			return !IsDisposed && !Token.IsCancellationRequested && read > 0;
 		}
 		
-		private void ExecItems(IReadOnlyList<T> items, IList<Task> tasks, int offset, int count)
+		private void SetupTasks(IReadOnlyList<T> items, IList<Task> tasks, int offset, int count)
 		{
 			for (int i = 0; !IsDisposed && !Token.IsCancellationRequested && i < count; i++)
 			{

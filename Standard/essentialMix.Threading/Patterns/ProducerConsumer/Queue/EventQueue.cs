@@ -54,7 +54,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public override bool IsEmpty => _queue.Count == 0;
 
 		/// <inheritdoc />
-		public override bool CanResume => true;
+		public override bool CanPause => true;
 
 		protected override void EnqueueInternal(T item)
 		{
@@ -92,7 +92,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					}
 				}
 
-				if (invokeWorkStarted) OnWorkStarted(EventArgs.Empty);
+				if (invokeWorkStarted) WorkStartedCallback?.Invoke(this);
 			}
 
 			lock(SyncRoot)
@@ -168,8 +168,14 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					if (IsPaused || _queue.IsEmpty && !_queueEvent.WaitOne(TimeSpanHelper.FAST, Token)) continue;
-					if (IsDisposed || Token.IsCancellationRequested) return;
+					if (IsPaused)
+					{
+						SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+						continue;
+					}
+
+					if (_queue.IsEmpty && !_queueEvent.WaitOne(TimeSpanHelper.FAST, Token)) continue;
+					if (IsPaused || IsDisposed || Token.IsCancellationRequested || _queue.IsEmpty) continue;
 					T item;
 
 					lock(SyncRoot)
@@ -186,7 +192,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !_queue.IsEmpty)
 				{
-					if (IsPaused) continue;
+					if (IsPaused)
+					{
+						SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+						continue;
+					}
+
 					T item;
 
 					lock(SyncRoot)

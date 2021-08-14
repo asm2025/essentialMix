@@ -5,53 +5,22 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using essentialMix.Extensions;
-using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Helpers
+namespace essentialMix.Helpers
 {
 	public static class TaskHelper
 	{
-		public static int QueueMinimum { get; } = 1;
+		public static int QueueMinimum => 1;
+
 		public static int QueueMaximum { get; } = SystemInfo.IsHyperThreadingEnabled 
-			? Environment.ProcessorCount * 2
-			: Environment.ProcessorCount;
-		public static int QueueDefault { get; } = QueueMaximum;
+													? Environment.ProcessorCount * 2
+													: Environment.ProcessorCount;
+		public static int QueueDefault => QueueMaximum;
 
-		public static int ProcessMinimum { get; } = 1;
+		public static int ProcessMinimum => 1;
 		public static int ProcessMaximum { get; } = Environment.ProcessorCount;
-		public static int ProcessDefault { get; } = ProcessMaximum;
-
-		[NotNull]
-		public static Task AsyncPattern([NotNull] Action action, CancellationToken token = default(CancellationToken))
-		{
-			token.ThrowIfCancellationRequested();
-			
-			try
-			{
-				action();
-				return Task.CompletedTask;
-			}
-			catch (OperationCanceledException)
-			{
-				return Task.FromCanceled(token);
-			}
-		}
-
-		[NotNull]
-		public static Task<TResult> AsyncPattern<TResult>([NotNull] Func<TResult> func, CancellationToken token = default(CancellationToken))
-		{
-			token.ThrowIfCancellationRequested();
-			
-			try
-			{
-				return Task.FromResult(func());
-			}
-			catch (OperationCanceledException)
-			{
-				return Task.FromCanceled<TResult>(token);
-			}
-		}
+		public static int ProcessDefault => ProcessMaximum;
 
 		[NotNull]
 		public static Task Run([NotNull] Action action, TaskCreationOptions options) { return Run(action, options, CancellationToken.None); }
@@ -75,7 +44,7 @@ namespace essentialMix.Threading.Helpers
 			if ((options & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously) opt |= TaskCreationOptions.RunContinuationsAsynchronously;
 			if (opt == TaskCreationOptions.None) return Task.Run(action, token);
 			opt |= TaskCreationOptions.DenyChildAttach;
-			return Task.Factory.StartNew(action, token, opt, TaskScheduler.Default);
+			return Task.Factory.StartNew(action, token, opt, Task.Factory.Scheduler ?? TaskScheduler.Default);
 		}
 
 		[NotNull]
@@ -100,7 +69,7 @@ namespace essentialMix.Threading.Helpers
 			if ((options & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously) opt |= TaskCreationOptions.RunContinuationsAsynchronously;
 			if (opt == TaskCreationOptions.None) return Task.Run(func, token);
 			opt |= TaskCreationOptions.DenyChildAttach;
-			return Task.Factory.StartNew(func, token, opt, TaskScheduler.Default);
+			return Task.Factory.StartNew(func, token, opt, Task.Factory.Scheduler ?? TaskScheduler.Default);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -118,12 +87,6 @@ namespace essentialMix.Threading.Helpers
 		}
 
 		[NotNull]
-		public static Task RunAsync([NotNull] Action action, CancellationToken token = default(CancellationToken)) { return AsyncPattern(action, token); }
-
-		[NotNull]
-		public static Task<TResult> RunAsync<TResult>([NotNull] Func<TResult> func, CancellationToken token = default(CancellationToken)) { return AsyncPattern(func, token); }
-
-		[NotNull]
 		public static Task RunAsync([NotNull] Action<CancellationTokenSource> action, TimeSpan timeout, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
@@ -138,13 +101,15 @@ namespace essentialMix.Threading.Helpers
 			CancellationTokenSource mergedCts = !token.CanBeCanceled
 				? cts
 				: cts.Merge(token);
-			return Task.Run(() => action(mergedCts), mergedCts.Token)
-				.TimeoutAfter(millisecondsTimeout, mergedCts.Token)
-				.ContinueWith(_ =>
-				{
-					ObjectHelper.Dispose(ref mergedCts);
-					ObjectHelper.Dispose(ref cts);
-				}, mergedCts.Token);
+			// copy to local variable
+			CancellationToken tkn = mergedCts.Token;
+			return Task.Run(() => action(mergedCts), tkn)
+					.TimeoutAfter(millisecondsTimeout, tkn)
+					.ContinueWith(_ =>
+					{
+						ObjectHelper.Dispose(ref mergedCts);
+						ObjectHelper.Dispose(ref cts);
+					}, tkn);
 		}
 
 		[NotNull]
@@ -162,14 +127,16 @@ namespace essentialMix.Threading.Helpers
 			CancellationTokenSource mergedCts = !token.CanBeCanceled
 				? cts
 				: cts.Merge(token);
-			return Task.Run(() => func(mergedCts), mergedCts.Token)
-				.TimeoutAfter(millisecondsTimeout, mergedCts.Token)
-				.ContinueWith(t =>
-				{
-					ObjectHelper.Dispose(ref mergedCts);
-					ObjectHelper.Dispose(ref cts);
-					return t.Result;
-				}, mergedCts.Token);
+			// copy to local variable
+			CancellationToken tkn = mergedCts.Token;
+			return Task.Run(() => func(mergedCts), tkn)
+					.TimeoutAfter(millisecondsTimeout, tkn)
+					.ContinueWith(t =>
+					{
+						ObjectHelper.Dispose(ref mergedCts);
+						ObjectHelper.Dispose(ref cts);
+						return t.Result;
+					}, tkn);
 		}
 
 		public static void Sequence([NotNull] params Action[] actions) { SequenceAsync(CancellationToken.None, actions).Execute(); }

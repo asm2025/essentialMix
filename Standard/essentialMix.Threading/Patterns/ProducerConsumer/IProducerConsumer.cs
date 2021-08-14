@@ -17,14 +17,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		int Running { get; }
 		bool IsEmpty { get; }
 		bool IsBusy { get; }
-		bool CanResume { get; }
+		bool CanPause { get; }
 		int Threads { get; }
 		CancellationToken Token { get; }
 		bool WaitOnDispose { get; set; }
 		int SleepAfterEnqueue { get; set; }
-
-		event EventHandler WorkStarted;
-		event EventHandler WorkCompleted;
 
 		void InitializeToken(CancellationToken token);
 		void Enqueue([NotNull] T item);
@@ -34,13 +31,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		void Resume();
 		void Stop();
 		void Stop(bool enforce);
-		Task StopAsync();
-		Task StopAsync(bool enforce);
 		bool Wait();
 		bool Wait(TimeSpan timeout);
 		bool Wait(int millisecondsTimeout);
-		Task<bool> WaitAsync();
-		Task<bool> WaitAsync(TimeSpan timeout);
-		Task<bool> WaitAsync(int millisecondsTimeout);
 	}
 }

@@ -31,25 +31,25 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		}
 
 		/// <inheritdoc />
-		public ProducerConsumerThreadQueueOptions([NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+		public ProducerConsumerThreadQueueOptions([NotNull] ExecuteCallbackDelegates<T> executeCallback)
 			: base(executeCallback)
 		{
 		}
 
 		/// <inheritdoc />
-		public ProducerConsumerThreadQueueOptions(bool waitOnDispose, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+		public ProducerConsumerThreadQueueOptions(bool waitOnDispose, [NotNull] ExecuteCallbackDelegates<T> executeCallback)
 			: base(waitOnDispose, executeCallback)
 		{
 		}
 
 		/// <inheritdoc />
-		public ProducerConsumerThreadQueueOptions(int threads, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+		public ProducerConsumerThreadQueueOptions(int threads, [NotNull] ExecuteCallbackDelegates<T> executeCallback)
 			: base(threads, executeCallback)
 		{
 		}
 
 		/// <inheritdoc />
-		public ProducerConsumerThreadQueueOptions(int threads, bool waitOnDispose, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+		public ProducerConsumerThreadQueueOptions(int threads, bool waitOnDispose, [NotNull] ExecuteCallbackDelegates<T> executeCallback)
 			: base(threads, waitOnDispose, executeCallback)
 		{
 		}

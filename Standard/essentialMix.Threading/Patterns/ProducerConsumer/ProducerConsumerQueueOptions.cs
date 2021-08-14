@@ -1,6 +1,6 @@
 using System;
 using essentialMix.Extensions;
-using essentialMix.Threading.Helpers;
+using essentialMix.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer
@@ -28,11 +28,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		{
 			Threads = threads;
 			WaitOnDispose = waitOnDispose;
-			ExecuteCallback = (q, i) =>
+			ExecuteCallback = (que, item) =>
 			{
 				try
 				{
-					executeCallback(q, i);
+					executeCallback(que, item);
 					return TaskResult.Success;
 				}
 				catch (OperationCanceledException)
@@ -46,22 +46,22 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			};
 		}
 
-		public ProducerConsumerQueueOptions([NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+		public ProducerConsumerQueueOptions([NotNull] ExecuteCallbackDelegates<T> executeCallback)
 			: this(TaskHelper.ProcessDefault, false, executeCallback)
 		{
 		}
 
-		public ProducerConsumerQueueOptions(bool waitOnDispose, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+		public ProducerConsumerQueueOptions(bool waitOnDispose, [NotNull] ExecuteCallbackDelegates<T> executeCallback)
 			: this(TaskHelper.ProcessDefault, waitOnDispose, executeCallback)
 		{
 		}
 
-		public ProducerConsumerQueueOptions(int threads, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+		public ProducerConsumerQueueOptions(int threads, [NotNull] ExecuteCallbackDelegates<T> executeCallback)
 			: this(threads, false, executeCallback)
 		{
 		}
 
-		public ProducerConsumerQueueOptions(int threads, bool waitOnDispose, [NotNull] Func<IProducerConsumer<T>, T, TaskResult> executeCallback)
+		public ProducerConsumerQueueOptions(int threads, bool waitOnDispose, [NotNull] ExecuteCallbackDelegates<T> executeCallback)
 		{
 			Threads = threads;
 			WaitOnDispose = waitOnDispose;
@@ -81,10 +81,14 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 
 		public bool WaitOnDispose { get; set; }
 
+		public bool SynchronizeContext { get; set; }
+
 		[NotNull]
-		public Func<IProducerConsumer<T>, T, TaskResult> ExecuteCallback { get; }
-		public Func<IProducerConsumer<T>, T, TaskResult, Exception, bool> ResultCallback { get; set; }
-		public Func<T, bool> ScheduledCallback { get; set; }
-		public Action<T> FinalizeCallback { get; set; }
+		public ExecuteCallbackDelegates<T> ExecuteCallback { get; }
+		public ResultCallbackDelegates<T> ResultCallback { get; set; }
+		public ScheduledCallbackDelegates<T> ScheduledCallback { get; set; }
+		public FinalizeCallbackDelegates<T> FinalizeCallback { get; set; }
+		public CallbackDelegates<T> WorkStartedCallback { get; set; }
+		public CallbackDelegates<T> WorkCompletedCallback { get; set; }
 	}
 }

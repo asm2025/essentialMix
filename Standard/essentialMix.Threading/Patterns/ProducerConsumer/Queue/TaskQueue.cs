@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using essentialMix.Collections;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
-using essentialMix.Threading.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
@@ -61,7 +60,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public override bool IsEmpty => _queue.Count == 0;
 
 		/// <inheritdoc />
-		public override bool CanResume => true;
+		public override bool CanPause => true;
 
 		protected override void EnqueueInternal(T item)
 		{
@@ -94,7 +93,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					}
 				}
 
-				if (invokeWorkStarted) OnWorkStarted(EventArgs.Empty);
+				if (invokeWorkStarted) WorkStartedCallback?.Invoke(this);
 			}
 
 			lock(SyncRoot) 
@@ -151,7 +150,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
 				{
-					if (IsPaused) continue;
+					if (IsPaused)
+					{
+						SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+						continue;
+					}
+
 					T item;
 						
 					lock(SyncRoot)
@@ -163,28 +167,29 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					AddTasksCountDown();
 					TaskHelper.Run(() => RunThread(item), TaskCreationOptions.LongRunning, Token)
 							.ConfigureAwait();
-					// WaitForTaskStart won't return false unless this thing is being destroyed
-					if (!WaitForTaskStart()) return;
 				}
 
 				if (IsDisposed || Token.IsCancellationRequested) return;
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !_queue.IsEmpty)
 				{
-					if (IsPaused) continue;
+					if (IsPaused)
+					{
+						SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+						continue;
+					}
+
 					T item;
 						
 					lock(SyncRoot)
 					{
-						if (_queue.IsEmpty || !_queue.TryDequeue(out item)) break;
+						if (IsPaused || _queue.IsEmpty || !_queue.TryDequeue(out item)) break;
 					}
 
 					if (ScheduledCallback != null && !ScheduledCallback(item)) continue;
 					AddTasksCountDown();
 					TaskHelper.Run(() => RunThread(item), TaskCreationOptions.LongRunning, Token)
 								.ConfigureAwait();
-					// WaitForTaskStart won't return false unless this thing is being destroyed
-					if (!WaitForTaskStart()) return;
 				}
 			}
 			catch (ObjectDisposedException) { }
