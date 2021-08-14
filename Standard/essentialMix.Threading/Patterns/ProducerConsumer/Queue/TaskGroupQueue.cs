@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using essentialMix.Collections;
 using essentialMix.Extensions;
+using essentialMix.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
@@ -59,7 +60,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					{
 						InitializeWorkerStart();
 						InitializeWorkersCountDown(1);
-						InitializeBatchClear();
 						InitializeTaskStart();
 						InitializeTaskComplete();
 						InitializeTasksCountDown();
@@ -149,15 +149,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					SetupTasks(items, tasks, offset, count);
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitAllSilently(Token)) return;
 					Array.Clear(items, 0, count);
-
-					for (int i = 0; i < count; i++)
-					{
-						Task task = tasks[i];
-						if (task == null) continue;
-						task.Dispose();
-						tasks[i] = null;
-					}
-
+					Array.Clear(tasks, 0, count);
 					count = 0;
 				}
 
@@ -176,15 +168,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					SetupTasks(items, tasks, offset, count);
 					if (IsDisposed || Token.IsCancellationRequested || !tasks.WaitAllSilently(Token)) return;
 					Array.Clear(items, 0, count);
-
-					for (int i = 0; i < count; i++)
-					{
-						Task task = tasks[i];
-						if (task == null) continue;
-						task.Dispose();
-						tasks[i] = null;
-					}
-
+					Array.Clear(tasks, 0, count);
 					count = 0;
 				}
 
@@ -195,15 +179,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				if (IsDisposed || Token.IsCancellationRequested) return;
 				tasks.WaitAllSilently(Token);
 				Array.Clear(items, 0, count);
-
-				for (int i = 0; i < count; i++)
-				{
-					Task task = tasks[i];
-					if (task == null) continue;
-					task.Dispose();
-					tasks[i] = null;
-				}
-
+				Array.Clear(tasks, 0, count);
 			}
 			catch (ObjectDisposedException) { }
 			catch (OperationCanceledException) { }
@@ -235,7 +211,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 				lock(SyncRoot)
 				{
-					if (IsPaused || _queue.IsEmpty || !_queue.TryDequeue(out T item)) continue;
+					if (IsPaused || IsDisposed || Token.IsCancellationRequested || _queue.IsEmpty || !_queue.TryDequeue(out T item)) continue;
 					items[read + offset] = item;
 					count--;
 					read++;
@@ -253,7 +229,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				T item = items[i];
 				if (ScheduledCallback != null && !ScheduledCallback(item)) continue;
 				AddTasksCountDown();
-				tasks[i + offset] = Task.Run(() => Run(item), Token)
+				// this better be a real thread (which LongRunning is for), don't be tempted to use Task.Run.
+				tasks[i + offset] = TaskHelper.Run(() => Run(item), TaskCreationOptions.LongRunning, Token)
 										.ConfigureAwait();
 			}
 		}

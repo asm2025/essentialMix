@@ -27,11 +27,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		private CountdownEvent _workersCountdown;
 		private AutoResetEvent _taskStart;
 		private AutoResetEvent _taskComplete;
-		private AutoResetEvent _batchClear;
 		private CountdownEvent _tasksCountdown;
 
 		private volatile int _paused;
 		private volatile int _completeMarked;
+		private volatile int _tasksCompleted;
 		private volatile int _workCompleted;
 		
 		protected ProducerConsumerQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
@@ -76,7 +76,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 				ReleaseWorkStart();
 				ReleaseTaskStart();
 				ReleaseTaskComplete();
-				ReleaseBatchClear();
 				ReleaseTasksCountDown();
 				ReleaseWorkersCountDown();
 				ReleaseToken();
@@ -220,6 +219,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			ThrowIfDisposed();
 			if (_workersCountdown != null) return;
 			Interlocked.CompareExchange(ref _workersCountdown, new CountdownEvent((threads < 1 ? Threads : threads) + 1), null);
+			Interlocked.Exchange(ref _workCompleted, 0);
 		}
 
 		protected void AddWorkersCountDown()
@@ -244,6 +244,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			{
 				SpinWait.SpinUntil(() => IsDisposed || !IsPaused && Running == 0);
 				if (IsDisposed) return;
+				Thread.Sleep(0);
 			}
 
 			if (_tasksCountdown is { CurrentCount: 1 }) SignalTasksCountDown(true);
@@ -262,6 +263,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			}
 
 			WorkCompletedCallback?.Invoke(this);
+			Thread.Sleep(0);
 			_workersCountdown.SignalAll();
 			ReleaseWorkStart();
 			ReleaseWorkersCountDown();
@@ -271,7 +273,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		{
 			ThrowIfDisposed();
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (!IsBusy || _workersCountdown == null || _workersCountdown.IsSet) return true;
+			if (_workersCountdown == null || _workersCountdown.IsSet) return true;
 			
 			try
 			{
@@ -369,50 +371,13 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			Interlocked.Exchange(ref _taskComplete, null);
 		}
 
-		protected void InitializeBatchClear()
-		{
-			ThrowIfDisposed();
-			if (_batchClear != null) return;
-			Interlocked.CompareExchange(ref _batchClear, new AutoResetEvent(false), null);
-		}
-
-		protected void SignalBatchClear()
-		{
-			_batchClear?.Set();
-		}
-
-		protected bool WaitForBatchClear(int millisecondsTimeout = TimeSpanHelper.INFINITE)
-		{
-			ThrowIfDisposed();
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (_batchClear == null || _batchClear.WaitOne(0)) return true;
-			
-			try
-			{
-				return _batchClear.WaitOne(millisecondsTimeout, Token);
-			}
-			catch (OperationCanceledException)
-			{
-				return false;
-			}
-			catch (TimeoutException)
-			{
-				return false;
-			}
-		}
-
-		protected void ReleaseBatchClear()
-		{
-			if (_batchClear == null) return;
-			Interlocked.Exchange(ref _batchClear, null);
-		}
-
 		protected void InitializeTasksCountDown(int tasks = 0)
 		{
 			ThrowIfDisposed();
 			if (tasks < 0) throw new ArgumentOutOfRangeException(nameof(tasks));
 			if (_tasksCountdown != null) return;
 			Interlocked.CompareExchange(ref _tasksCountdown, new CountdownEvent(tasks + 1), null);
+			Interlocked.Exchange(ref _tasksCompleted, 0);
 		}
 
 		protected void AddTasksCountDown()
@@ -424,12 +389,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		protected void SignalTasksCountDown(bool signalAll = false)
 		{
 			if (_tasksCountdown is { CurrentCount: > 1 }) _tasksCountdown.Signal();
-			if (_tasksCountdown is { CurrentCount: < 2 }) SignalBatchClear();
-			if (_tasksCountdown == null || !signalAll || !CompleteMarked || !IsEmpty || _tasksCountdown is { CurrentCount: > 1 }) return;
+			if (_tasksCountdown is null or { CurrentCount: > 1 } || !signalAll || !CompleteMarked || !IsEmpty) return;
+			if (_tasksCompleted != 0 || Interlocked.CompareExchange(ref _tasksCompleted, 1, 0) != 0) return;
 			_tasksCountdown.SignalAll();
 			ReleaseTaskStart();
 			ReleaseTaskComplete();
-			ReleaseBatchClear();
 			ReleaseTasksCountDown();
 		}
 
@@ -437,7 +401,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		{
 			ThrowIfDisposed();
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (!IsBusy || _tasksCountdown == null || _tasksCountdown.IsSet) return true;
+			if (_tasksCountdown == null || _tasksCountdown.IsSet) return true;
 			
 			try
 			{
@@ -492,7 +456,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			if (!CanPause) throw new NotSupportedException();
 			if (IsPaused) return;
 			IsPaused = true;
-			WaitForBatchClear();
+			if (Running == 0) return;
+			SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || Running == 0);
 		}
 
 		/// <inheritdoc />
@@ -515,6 +480,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			if (!enforce) Wait(TimeSpanHelper.INFINITE);
 			Cancel();
 			ClearInternal();
+			if (Running == 0) return;
+			SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || Running == 0);
 		}
 
 		/// <inheritdoc />

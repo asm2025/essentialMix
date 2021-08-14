@@ -55,7 +55,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						InitializeMesh();
 						InitializeWorkerStart();
 						InitializeWorkersCountDown(1);
-						InitializeBatchClear();
 						InitializeTaskStart();
 						InitializeTaskComplete();
 						InitializeTasksCountDown();

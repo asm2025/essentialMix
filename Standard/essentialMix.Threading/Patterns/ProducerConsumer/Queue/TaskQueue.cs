@@ -76,7 +76,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					{
 						InitializeWorkerStart();
 						InitializeWorkersCountDown(1);
-						InitializeBatchClear();
 						InitializeTaskStart();
 						InitializeTaskComplete();
 						InitializeTasksCountDown();
@@ -165,6 +164,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 					if (ScheduledCallback != null && !ScheduledCallback(item)) continue;
 					AddTasksCountDown();
+					// this MUST be a real thread (which LongRunning is for) because of the semaphore, don't be tempted to use Task.Run
 					TaskHelper.Run(() => RunThread(item), TaskCreationOptions.LongRunning, Token)
 							.ConfigureAwait();
 				}
@@ -188,8 +188,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 					if (ScheduledCallback != null && !ScheduledCallback(item)) continue;
 					AddTasksCountDown();
+					// this MUST be a real thread (which LongRunning is for) because of the semaphore, don't be tempted to use Task.Run.
 					TaskHelper.Run(() => RunThread(item), TaskCreationOptions.LongRunning, Token)
-								.ConfigureAwait();
+							.ConfigureAwait();
 				}
 			}
 			catch (ObjectDisposedException) { }

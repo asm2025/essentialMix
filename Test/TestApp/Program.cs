@@ -573,14 +573,14 @@ work with {HEAVY} items.");
 					};
 					ProducerConsumerQueueOptions<int> options = mode switch
 					{
-						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<int>(threads, true, exec)
+						ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<int>(threads, exec)
 						{
 							// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
 							Threshold = TimeSpan.FromSeconds(1),
 							WorkStartedCallback = started,
 							WorkCompletedCallback = completed
 						},
-						_ => new ProducerConsumerQueueOptions<int>(threads, true, exec)
+						_ => new ProducerConsumerQueueOptions<int>(threads, exec)
 						{
 							WorkStartedCallback = started,
 							WorkCompletedCallback = completed
@@ -791,6 +791,7 @@ work with {HEAVY} items.");
 
 						ProducerConsumerQueueOptions<Student> options = mode switch
 						{
+							// this time will use waitOnDispose = true with the producer/consumer options
 							ThreadQueueMode.ThresholdTaskGroup => new ProducerConsumerThresholdQueueOptions<Student>(threads, true, exec)
 							{
 								// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
@@ -856,7 +857,6 @@ work with {HEAVY} items.");
 							 * to let the queue get disposed of.
 							 */
 							queue.Complete();
-							queue.Wait();
 						}
 					}
 				}

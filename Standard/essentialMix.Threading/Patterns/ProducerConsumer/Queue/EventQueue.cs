@@ -72,7 +72,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					{
 						InitializeWorkerStart();
 						InitializeWorkersCountDown();
-						InitializeBatchClear();
 						InitializeTaskStart();
 						InitializeTaskComplete();
 						InitializeTasksCountDown();
