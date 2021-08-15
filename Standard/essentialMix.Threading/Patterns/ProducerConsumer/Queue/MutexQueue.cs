@@ -93,8 +93,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					{
 						InitializeWorkerStart();
 						InitializeWorkersCountDown(1);
-						InitializeTaskStart();
-						InitializeTaskComplete();
 						InitializeTasksCountDown();
 
 						new Thread(Consume)
@@ -232,18 +230,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				if (!_mutex.WaitOne(TimeSpanHelper.INFINITE, Token)) return;
 				if (IsDisposed) return;
 				entered = true;
-				SignalTaskStart();
 				if (Token.IsCancellationRequested) return;
 				Run((T)rawValue);
 			}
 			finally
 			{
-				if (entered)
-				{
-					_mutex?.ReleaseMutex();
-					SignalTaskComplete();
-				}
-
+				if (entered) _mutex?.ReleaseMutex();
 				SignalTasksCountDown();
 			}
 		}

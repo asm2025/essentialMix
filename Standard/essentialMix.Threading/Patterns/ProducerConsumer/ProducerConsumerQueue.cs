@@ -25,8 +25,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		private CancellationTokenSource _cts;
 		private ManualResetEventSlim _workerStart;
 		private CountdownEvent _workersCountdown;
-		private AutoResetEvent _taskStart;
-		private AutoResetEvent _taskComplete;
 		private CountdownEvent _tasksCountdown;
 
 		private volatile int _paused;
@@ -74,8 +72,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 				else Stop(true);
 				
 				ReleaseWorkStart();
-				ReleaseTaskStart();
-				ReleaseTaskComplete();
 				ReleaseTasksCountDown();
 				ReleaseWorkersCountDown();
 				ReleaseToken();
@@ -297,80 +293,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			Interlocked.Exchange(ref _workersCountdown, null);
 		}
 
-		protected void InitializeTaskStart()
-		{
-			ThrowIfDisposed();
-			if (_taskStart != null) return;
-			Interlocked.CompareExchange(ref _taskStart, new AutoResetEvent(false), null);
-		}
-
-		protected void SignalTaskStart()
-		{
-			_taskStart?.Set();
-		}
-
-		protected bool WaitForTaskStart()
-		{
-			ThrowIfDisposed();
-			if (_taskStart == null || _taskStart.WaitOne(0)) return true;
-			
-			try
-			{
-				return _taskStart.WaitOne(TimeSpanHelper.INFINITE, Token);
-			}
-			catch (OperationCanceledException)
-			{
-				return false;
-			}
-			catch (TimeoutException)
-			{
-				return false;
-			}
-		}
-
-		protected void ReleaseTaskStart()
-		{
-			if (_taskStart == null) return;
-			Interlocked.Exchange(ref _taskStart, null);
-		}
-
-		protected void InitializeTaskComplete()
-		{
-			ThrowIfDisposed();
-			if (_taskComplete != null) return;
-			Interlocked.CompareExchange(ref _taskComplete, new AutoResetEvent(false), null);
-		}
-
-		protected void SignalTaskComplete()
-		{
-			_taskComplete?.Set();
-		}
-
-		protected bool WaitForTaskComplete()
-		{
-			ThrowIfDisposed();
-			if (_taskComplete == null || _taskComplete.WaitOne(0)) return true;
-			
-			try
-			{
-				return _taskComplete.WaitOne(TimeSpanHelper.INFINITE, Token);
-			}
-			catch (OperationCanceledException)
-			{
-				return false;
-			}
-			catch (TimeoutException)
-			{
-				return false;
-			}
-		}
-
-		protected void ReleaseTaskComplete()
-		{
-			if (_taskComplete == null) return;
-			Interlocked.Exchange(ref _taskComplete, null);
-		}
-
 		protected void InitializeTasksCountDown(int tasks = 0)
 		{
 			ThrowIfDisposed();
@@ -392,8 +314,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			if (_tasksCountdown is null or { CurrentCount: > 1 } || !signalAll || !CompleteMarked || !IsEmpty) return;
 			if (_tasksCompleted != 0 || Interlocked.CompareExchange(ref _tasksCompleted, 1, 0) != 0) return;
 			_tasksCountdown.SignalAll();
-			ReleaseTaskStart();
-			ReleaseTaskComplete();
 			ReleaseTasksCountDown();
 		}
 

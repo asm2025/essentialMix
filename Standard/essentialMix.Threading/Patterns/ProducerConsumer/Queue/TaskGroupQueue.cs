@@ -60,8 +60,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					{
 						InitializeWorkerStart();
 						InitializeWorkersCountDown(1);
-						InitializeTaskStart();
-						InitializeTaskComplete();
 						InitializeTasksCountDown();
 
 						new Thread(Consume)
@@ -240,13 +238,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			try
 			{
-				SignalTaskStart();
 				if (IsDisposed || Token.IsCancellationRequested) return;
 				base.Run(item);
 			}
 			finally
 			{
-				SignalTaskComplete();
 				SignalTasksCountDown();
 			}
 		}

@@ -67,8 +67,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					{
 						InitializeWorkerStart();
 						InitializeWorkersCountDown(1);
-						InitializeTaskStart();
-						InitializeTaskComplete();
 						InitializeTasksCountDown();
 
 						new Thread(Consume)
@@ -206,18 +204,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				if (!_semaphore.Wait(TimeSpanHelper.INFINITE, Token)) return;
 				if (IsDisposed) return;
 				entered = true;
-				SignalTaskStart();
 				if (Token.IsCancellationRequested) return;
 				Run((T)rawValue);
 			}
 			finally
 			{
-				if (entered)
-				{
-					_semaphore?.Release();
-					SignalTaskComplete();
-				}
-
+				if (entered) _semaphore?.Release();
 				SignalTasksCountDown();
 			}
 		}
