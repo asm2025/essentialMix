@@ -27,27 +27,28 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		private CountdownEvent _workersCountdown;
 		private CountdownEvent _tasksCountdown;
 
-		private volatile int _paused;
+		private volatile int _isPaused;
 		private volatile int _completeMarked;
 		private volatile int _tasksCompleted;
 		private volatile int _workCompleted;
 		
 		protected ProducerConsumerQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 		{
-			InitializeToken(token);
 			Threads = options.Threads;
 			WaitOnDispose = options.WaitOnDispose;
-			ExecuteCallback = options.ExecuteCallback;
-			ResultCallback = options.ResultCallback;
-			ScheduledCallback = options.ScheduledCallback;
-			FinalizeCallback = options.FinalizeCallback;
+			
+			_context = options.SynchronizeContext
+							? SynchronizationContext.Current
+							: null;
+			InitializeToken(token);
 
 			_workStartedCallback = options.WorkStartedCallback;
 			_workCompletedCallback = options.WorkCompletedCallback;
 
-			_context = options.SynchronizeContext
-							? SynchronizationContext.Current
-							: null;
+			ExecuteCallback = options.ExecuteCallback;
+			ResultCallback = options.ResultCallback;
+			ScheduledCallback = options.ScheduledCallback;
+			FinalizeCallback = options.FinalizeCallback;
 			
 			if (_context != null)
 			{
@@ -109,11 +110,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			{
 				// ensure we have the latest value
 				Thread.MemoryBarrier();
-				return _paused != 0;
+				return _isPaused != 0;
 			}
-			protected set => Interlocked.CompareExchange(ref _paused, value
+			protected set => Interlocked.CompareExchange(ref _isPaused, value
 																		? 1
-																		: 0, _paused);
+																		: 0, _isPaused);
 		}
 
 		/// <inheritdoc />

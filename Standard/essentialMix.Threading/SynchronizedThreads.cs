@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 using essentialMix.Helpers;
@@ -11,38 +10,46 @@ namespace essentialMix.Threading
 	// based on TwoWaySignaling
 	public sealed class SynchronizedThreads<T> : Disposable
 	{
-		private readonly object _lock = new object();
 		private readonly Thread[] _workers;
+		[NotNull]
+		private readonly Func<T, bool> _mainRoutine;
+		[NotNull]
+		private readonly Func<T, bool> _workerRoutine;
+
+		private readonly Action<SynchronizedThreads<T>> _workStartedCallback;
+		private readonly Action<SynchronizedThreads<T>> _workCompletedCallback;
+
 		private ManualResetEventSlim _mainWaitEvent = new ManualResetEventSlim(false);
 		private ManualResetEventSlim _workerWaitEvent = new ManualResetEventSlim(false);
-		private CountdownEvent _countdown;
+		private CountdownEvent _workersCountdown;
 		private CancellationTokenSource _cts;
 
-		private readonly CancellationToken _token;
-		private readonly bool _isBackground;
-		private readonly ThreadPriority _priority;
-		private bool _waitForQueuedItems = true;
+		private volatile int _isPaused;
+		private volatile int _workCompleted;
+
+		private object _syncRoot;
 
 		public SynchronizedThreads([NotNull] Func<T, bool> mainRoutine, [NotNull] Func<T, bool> workerRoutine, CancellationToken token = default(CancellationToken))
-			: this(mainRoutine, workerRoutine, ThreadPriority.Normal, false, token)
+			: this(null, mainRoutine, workerRoutine, token)
 		{
 		}
 
-		public SynchronizedThreads([NotNull] Func<T, bool> mainRoutine, [NotNull] Func<T, bool> workerRoutine, bool isBackground, CancellationToken token = default(CancellationToken))
-			: this(mainRoutine, workerRoutine, ThreadPriority.Normal, isBackground, token)
+		public SynchronizedThreads(SynchronizedThreadsOptions<T> options, [NotNull] Func<T, bool> mainRoutine, [NotNull] Func<T, bool> workerRoutine, CancellationToken token = default(CancellationToken))
 		{
-		}
+			options ??= new SynchronizedThreadsOptions<T>();
+			IsBackground = options.IsBackground;
+			Priority = options.Priority;
+			WaitOnDispose = options.WaitOnDispose;
 
-		public SynchronizedThreads([NotNull] Func<T, bool> mainRoutine, [NotNull] Func<T, bool> workerRoutine, ThreadPriority priority, bool isBackground, CancellationToken token = default(CancellationToken))
-		{
-			MainRoutine = mainRoutine;
-			WorkerRoutine = workerRoutine;
-			_isBackground = isBackground;
-			_priority = priority;
-			_cts = new CancellationTokenSource();
-			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed());
-			_token = _cts.Token;
-			_countdown = new CountdownEvent(1);
+			InitializeToken(token);
+			
+			_workStartedCallback = options.WorkStartedCallback;
+			_workCompletedCallback = options.WorkCompletedCallback;
+
+			_workersCountdown = new CountdownEvent(1);
+
+			_mainRoutine = mainRoutine;
+			_workerRoutine = workerRoutine;
 			_workers = new[]
 			{
 				new Thread(Main)
@@ -62,150 +69,107 @@ namespace essentialMix.Threading
 		{
 			if (disposing)
 			{
-				StopInternal(WaitForQueuedItems);
+				Stop(WaitOnDispose);
 				ObjectHelper.Dispose(ref _mainWaitEvent);
 				ObjectHelper.Dispose(ref _workerWaitEvent);
-				ObjectHelper.Dispose(ref _countdown);
+				ObjectHelper.Dispose(ref _workersCountdown);
 				ObjectHelper.Dispose(ref _cts);
 			}
 
 			base.Dispose(disposing);
 		}
 
-		public event EventHandler WorkStarted;
-		public event EventHandler WorkCompleted;
-
 		public T State { get; set; }
 
-		public bool IsBackground
+		public bool IsBackground { get; }
+
+		public ThreadPriority Priority { get; }
+
+		public bool WaitOnDispose { get; set; }
+
+		public CancellationToken Token { get; private set; }
+
+		public bool IsBusy => _workersCountdown is { CurrentCount: > 1 };
+
+		public object SyncRoot
 		{
 			get
 			{
-				ThrowIfDisposed();
-				return _isBackground;
+				if (_syncRoot == null) Interlocked.CompareExchange(ref _syncRoot, new object(), null);
+				return _syncRoot;
 			}
 		}
 
-		public ThreadPriority Priority
+		public bool IsPaused
 		{
 			get
 			{
-				ThrowIfDisposed();
-				return _priority;
+				// ensure we have the latest value
+				Thread.MemoryBarrier();
+				return _isPaused != 0;
 			}
+			private set => Interlocked.CompareExchange(ref _isPaused, value
+																			? 1
+																			: 0, _isPaused);
 		}
 
-		public bool WaitForQueuedItems
+		public void InitializeToken(CancellationToken token)
 		{
-			get
-			{
-				ThrowIfDisposed();
-				return _waitForQueuedItems;
-			}
-			set
-			{
-				ThrowIfDisposed();
-				_waitForQueuedItems = value;
-			}
+			ThrowIfDisposed();
+			if (_cts != null) Interlocked.Exchange(ref _cts, null);
+			Interlocked.CompareExchange(ref _cts, new CancellationTokenSource(), null);
+			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed());
+			Token = _cts.Token;
 		}
-
-		public CancellationToken Token
-		{
-			get
-			{
-				ThrowIfDisposed();
-				return _token;
-			}
-		}
-
-		public bool IsBusy
-		{
-			get
-			{
-				ThrowIfDisposed();
-				return IsBusyInternal;
-			}
-		}
-
-		[NotNull]
-		private Func<T, bool> MainRoutine { get; }
-
-		[NotNull]
-		private Func<T, bool> WorkerRoutine { get; }
-
-		private bool IsBusyInternal => _countdown is { CurrentCount: > 1 };
 
 		public void Start()
 		{
 			ThrowIfDisposed();
-			if (IsBusyInternal) return;
+			if (IsBusy) return;
 
-			lock(_lock)
+			lock(SyncRoot)
 			{
-				OnWorkStarted(EventArgs.Empty);
-				_workers.ForEach(t =>
-				{
-					_countdown.AddCount();
-					t.Start();
-				});
+				_workStartedCallback?.Invoke(this);
+				_workersCountdown.AddCount(_workers.Length);
+
+				foreach (Thread thread in _workers) 
+					thread.Start();
 			}
 		}
 
-		public void Stop()
-		{
-			ThrowIfDisposed();
-			StopInternal(WaitForQueuedItems);
-		}
-
+		public void Stop() { Stop(WaitOnDispose); }
 		public void Stop(bool waitForQueue)
 		{
 			ThrowIfDisposed();
-			StopInternal(waitForQueue);
+			Cancel();
+			// Wait for the consumer's thread to finish.
+			if (waitForQueue) Wait(TimeSpanHelper.INFINITE);
 		}
 
-		public bool Wait()
+		public void Pause()
 		{
 			ThrowIfDisposed();
-			return WaitInternal(TimeSpanHelper.INFINITE);
+			if (IsPaused) return;
+			IsPaused = true;
 		}
 
-		public bool Wait(TimeSpan timeout)
+		public void Resume()
 		{
 			ThrowIfDisposed();
-			return WaitInternal(timeout.TotalIntMilliseconds());
+			IsPaused = false;
 		}
 
+		public bool Wait() { return Wait(TimeSpanHelper.INFINITE); }
+		public bool Wait(TimeSpan timeout) { return Wait(timeout.TotalIntMilliseconds()); }
 		public bool Wait(int millisecondsTimeout)
 		{
 			ThrowIfDisposed();
-			return WaitInternal(millisecondsTimeout);
-		}
-
-		[NotNull]
-		public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
-
-		[NotNull]
-		public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
-
-		[NotNull]
-		public Task<bool> WaitAsync(int millisecondsTimeout)
-		{
-			ThrowIfDisposed();
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			return Task.Run(() => WaitInternal(millisecondsTimeout), Token);
-		}
-
-		private bool WaitInternal(int millisecondsTimeout)
-		{
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (!IsBusyInternal) return true;
+			if (_workersCountdown == null || _workersCountdown.IsSet) return true;
 
 			try
 			{
-				if (millisecondsTimeout > TimeSpanHelper.INFINITE) return _countdown.Wait(millisecondsTimeout, Token);
-				_countdown.Wait(Token);
-				return !Token.IsCancellationRequested;
-
+				return _workersCountdown.Wait(millisecondsTimeout, Token) && !Token.IsCancellationRequested;
 			}
 			catch (OperationCanceledException)
 			{
@@ -219,17 +183,6 @@ namespace essentialMix.Threading
 			return false;
 		}
 
-		private void StopInternal(bool waitForQueue)
-		{
-			Cancel();
-			// Wait for the consumer's thread to finish.
-			if (waitForQueue) WaitInternal(TimeSpanHelper.INFINITE);
-		}
-
-		private void OnWorkStarted(EventArgs args) { WorkStarted?.Invoke(this, args); }
-
-		private void OnWorkCompleted(EventArgs args) { WorkCompleted?.Invoke(this, args); }
-
 		private void Cancel()
 		{
 			_cts.CancelIfNotDisposed();
@@ -239,81 +192,88 @@ namespace essentialMix.Threading
 		{
 			if (Token.IsCancellationRequested)
 			{
-				SignalAndCheck();
+				SignalWorkersCountDown();
 				return;
 			}
 
-			bool more;
+			bool more = true;
 
 			do
 			{
+				if (IsPaused)
+				{
+					SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+					continue;
+				}
+
+				if (Token.IsCancellationRequested || IsDisposed) break;
 				_workerWaitEvent.Reset();
 				_workerWaitEvent.Wait(Token);
 				if (Token.IsCancellationRequested || IsDisposed) break;
 
-				lock(_lock)
+				lock(SyncRoot)
 				{
-					more = MainRoutine(State);
+					if (IsDisposed || Token.IsCancellationRequested || IsPaused) continue;
+					more = _mainRoutine(State);
 				}
 
 				_mainWaitEvent.Set();
 			}
 			while (more);
 
-			SignalAndCheck();
+			SignalWorkersCountDown();
 		}
 
 		private void Worker()
 		{
 			if (IsDisposed || Token.IsCancellationRequested)
 			{
-				SignalAndCheck();
+				SignalWorkersCountDown();
 				return;
 			}
 
-			bool more;
+			bool more = true;
 
 			do
 			{
+				if (IsPaused)
+				{
+					SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+					continue;
+				}
+
+				if (Token.IsCancellationRequested || IsDisposed) break;
 				_mainWaitEvent.Reset();
 				_workerWaitEvent.Set();
 				_mainWaitEvent.Wait(Token);
 				if (Token.IsCancellationRequested || IsDisposed) break;
 
-				lock(_lock)
+				lock(SyncRoot)
 				{
-					more = WorkerRoutine(State);
+					if (IsDisposed || Token.IsCancellationRequested || IsPaused) continue;
+					more = _workerRoutine(State);
 				}
 			}
 			while (more);
 
-			SignalAndCheck();
+			SignalWorkersCountDown();
 		}
 
-		private void SignalAndCheck()
+		private void SignalWorkersCountDown()
 		{
-			if (IsDisposed || _countdown == null) return;
-			Monitor.Enter(_countdown);
+			if (_workersCountdown is { CurrentCount: > 1 }) _workersCountdown.Signal();
+			if (_workersCountdown is { CurrentCount: > 1 }) return;
+			if (_workCompleted != 0 || Interlocked.CompareExchange(ref _workCompleted, 1, 0) != 0) return;
 
-			bool completed;
-
-			try
+			if (_workersCountdown == null)
 			{
-				if (IsDisposed || _countdown == null) return;
-				_countdown.Signal();
-			}
-			finally
-			{
-				completed = _countdown is null or { CurrentCount: < 2 };
+				_workCompletedCallback?.Invoke(this);
+				return;
 			}
 
-			if (completed)
-			{
-				OnWorkCompleted(EventArgs.Empty);
-				_countdown.SignalAll();
-			}
-
-			if (_countdown != null) Monitor.Exit(_countdown);
+			_workCompletedCallback?.Invoke(this);
+			Thread.Sleep(0);
+			_workersCountdown.SignalAll();
 		}
 	}
 }
