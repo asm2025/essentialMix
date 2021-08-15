@@ -1,10 +1,9 @@
-using System;
 using System.Threading;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer
 {
-	public abstract class ProducerConsumerThreadQueue<T> : ProducerConsumerQueue<T>, IProducerConsumerThreadQueue<T>, IDisposable
+	public abstract class ProducerConsumerThreadQueue<T> : ProducerConsumerQueue<T>, IProducerConsumerThreadQueue<T>
 	{
 		protected ProducerConsumerThreadQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)

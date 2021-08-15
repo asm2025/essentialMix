@@ -39,6 +39,7 @@ using TimeoutException = System.TimeoutException;
 using Menu = EasyConsole.Menu;
 
 using static Crayon.Output;
+using AutoResetEvent = essentialMix.Threading.AutoResetEvent;
 
 // ReSharper disable UnusedMember.Local
 namespace TestApp
@@ -97,7 +98,7 @@ work with {HEAVY} items.");
 			//TestDeepestPit();
 
 			//TestThreadQueue();
-			TestThreadQueueWithPriorityQueue();
+			//TestThreadQueueWithPriorityQueue();
 			//TestAsyncLock();
 
 			//TestSortAlgorithm();
@@ -130,7 +131,7 @@ work with {HEAVY} items.");
 			//TestAllBinaryTreesPerformance();
 
 			//TestSortedSetPerformance();
-
+			
 			//TestTreeEquality();
 
 			//TestTrie();
@@ -184,6 +185,8 @@ work with {HEAVY} items.");
 			//TestObservableCollections();
 
 			//TestEnumerateDirectoriesAndFiles();
+			
+			TestAutoResetEvent();
 
 			ConsoleHelper.Pause();
 		}
@@ -5722,6 +5725,71 @@ decrypted:
 					ObjectHelper.Dispose(ref enumerator);
 				}
 			}
+		}
+
+		private static void TestAutoResetEvent()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+
+				Title("Testing AutoResetEvent asynchronously.");
+				Console.Write($"Would you like to use timeout for the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to skip timeout. ");
+				int timeout = Console.ReadKey(true).Key == ConsoleKey.Y
+								? 30000
+								: 0;
+				string timeoutString = timeout > 0
+											? $"{(timeout / 1000.0d):##.##} second(s)"
+											: "None";
+
+				CancellationTokenSource cts = null;
+				AutoResetEvent autoResetEvent = null;
+
+				try
+				{
+					cts = timeout > 0
+							? new CancellationTokenSource(TimeSpan.FromMilliseconds(timeout))
+							: null;
+					autoResetEvent = new AutoResetEvent();
+					// copy to local variable
+					CancellationToken token = cts?.Token ?? CancellationToken.None;
+					Console.WriteLine();
+					Console.WriteLine($"Using timeout: {Bright.Cyan(timeoutString)}...");
+					
+					if (timeout > 0)
+					{
+						autoResetEvent.WaitOneAsync(token).GetAwaiter().GetResult();
+					}
+					else
+					{
+						autoResetEvent.WaitOneAsync(token);
+						Console.Write("Press any key to signal the event. ");
+						Console.ReadKey(true);
+						Console.WriteLine();
+						autoResetEvent.Set();
+					}
+
+					Console.WriteLine(autoResetEvent.IsSet
+										? Bright.Green("Event signaled.")
+										: Bright.Red("Some weird shit is going on there!"));
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine(e.CollectMessages());
+				}
+				finally
+				{
+					ObjectHelper.Dispose(ref autoResetEvent);
+					ObjectHelper.Dispose(ref cts);
+				}
+
+				Console.WriteLine();
+				Console.Write($"Would you like to repeat the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to exit. ");
+				more = Console.ReadKey(true).Key == ConsoleKey.Y;
+			}
+			while (more);
 		}
 
 		private static void Title(string title)

@@ -177,7 +177,7 @@ namespace essentialMix.Collections
 		}
 
 		[Serializable]
-		public struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
+		private struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
 		{
 			private readonly Deque<T> _deque;
 			private readonly int _version;

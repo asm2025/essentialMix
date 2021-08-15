@@ -53,7 +53,7 @@ namespace essentialMix.Collections
 			public override string ToString() { return Convert.ToString(Value); }
 		}
 
-		public struct Enumerator : IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable, IDisposable
+		private struct Enumerator : IEnumerableEnumerator<T>
 		{
 			private readonly SkipList<T> _list;
 			private readonly int _version;
@@ -184,7 +184,8 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 		
-		public Enumerator Enumerate(int level)
+		[NotNull]
+		public IEnumerableEnumerator<T> Enumerate(int level)
 		{
 			return new Enumerator(this, Header, level);
 		}

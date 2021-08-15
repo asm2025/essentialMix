@@ -195,7 +195,7 @@ namespace essentialMix.Logging
 		/// </summary>
 		private void ThrowIfDisposed()
 		{
-			if (Interlocked.CompareExchange(ref _disposeStage, DISPOSAL_COMPLETE, DISPOSAL_COMPLETE) == DISPOSAL_COMPLETE) return;
+			if (Interlocked.CompareExchange(ref _disposeStage, DISPOSAL_COMPLETE, DISPOSAL_COMPLETE) != DISPOSAL_COMPLETE) return;
 			throw new ObjectDisposedException(GetType().FullName);
 		}
 

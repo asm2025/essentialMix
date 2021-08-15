@@ -6,7 +6,7 @@ namespace essentialMix.Threading.Other.JonSkeet.MiscUtil
 	/// <summary>
 	/// Type of buffer returned by BufferManager.
 	/// </summary>
-	public class Buffer : Disposable, IBuffer, IDisposable
+	public class Buffer : Disposable, IBuffer
     {
 		private readonly bool _clearOnDispose;
 		private bool _available;
