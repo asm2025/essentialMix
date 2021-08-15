@@ -226,7 +226,7 @@ namespace essentialMix.Helpers
 				if (token.CanBeCanceled)
 				{
 					CancellationTokenSource ctsReg = cts;
-					token.Register(() => ctsReg.Cancel());
+					token.Register(() => ctsReg.CancelIfNotDisposed(), false);
 				}
 
 				BufferBlock<Func<TResult, Task<TResult>>> buffer = new BufferBlock<Func<TResult, Task<TResult>>>(new DataflowBlockOptions

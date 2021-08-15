@@ -118,7 +118,7 @@ namespace essentialMix.Threading
 			ThrowIfDisposed();
 			if (_cts != null) Interlocked.Exchange(ref _cts, null);
 			Interlocked.CompareExchange(ref _cts, new CancellationTokenSource(), null);
-			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed());
+			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed(), false);
 			Token = _cts.Token;
 		}
 

@@ -84,7 +84,7 @@ namespace essentialMix.Extensions
 			}
 
 			TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-			if (token.CanBeCanceled) token.Register(() => tcs.TrySetCanceled());
+			if (token.CanBeCanceled) token.Register(() => tcs.TrySetCanceled(), false);
 			return Task.WhenAny(thisValue, tcs.Task)
 						.ContinueWith(t =>
 						{
@@ -105,7 +105,7 @@ namespace essentialMix.Extensions
 			}
 
 			TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
-			if (token.CanBeCanceled) token.Register(() => tcs.TrySetCanceled());
+			if (token.CanBeCanceled) token.Register(() => tcs.TrySetCanceled(), false);
 			return Task.WhenAny(thisValue, tcs.Task)
 						.ContinueWith(t =>
 						{

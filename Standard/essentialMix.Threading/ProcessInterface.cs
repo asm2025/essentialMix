@@ -116,7 +116,7 @@ namespace essentialMix.Threading
 				//This is for the wait function, it's not used here
 				_cts = new CancellationTokenSource();
 				Token = _cts.Token;
-				if (_token.CanBeCanceled) _token.Register(() => _cts.Cancel());
+				if (_token.CanBeCanceled) _token.Register(() => _cts.CancelIfNotDisposed(), false);
 			}
 
 			_inputProcess.Exited += (sender, _) =>

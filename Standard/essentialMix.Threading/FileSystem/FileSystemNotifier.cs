@@ -42,7 +42,7 @@ namespace essentialMix.Threading.FileSystem
 			IsBackground = isBackground;
 			Priority = priority;
 			_cts = new CancellationTokenSource();
-			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed());
+			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed(), false);
 			Token = _cts.Token;
 			_queue = new BlockingCollection<(EventType Type, FileSystemEventArgs Args)>();
 			new Thread(Consume)
