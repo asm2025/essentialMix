@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+using System.Security.Permissions;
 using System.Threading;
-using System.Threading.Tasks;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
-using JetBrains.Annotations;
 
 namespace essentialMix.Threading
 {
+	[HostProtection(Synchronization=true, ExternalThreading=true)]
+	[ComVisible(true)]	
 	public abstract class EventWaitHandleBase : EventWaitHandle
 	{
 		private const int DISPOSAL_NOT_STARTED = 0;
@@ -42,27 +44,14 @@ namespace essentialMix.Threading
 			MarkAsDisposed();
 		}
 
-		public bool IsSet => WaitOne(0);
-
-		[NotNull]
-		public Task<bool> WaitOneAsync(CancellationToken token) { return WaitOneAsync(TimeSpanHelper.INFINITE, false, token); }
-
-		[NotNull]
-		public Task<bool> WaitOneAsync(TimeSpan timeout, CancellationToken token) { return WaitOneAsync(timeout.TotalIntMilliseconds(), false, token); }
-
-		[NotNull]
-		public Task<bool> WaitOneAsync(TimeSpan timeout, bool exitContext, CancellationToken token) { return WaitOneAsync(timeout.TotalIntMilliseconds(), exitContext, token); }
-
-		[NotNull]
-		public Task<bool> WaitOneAsync(int millisecondsTimeout, CancellationToken token) { return WaitOneAsync(millisecondsTimeout, false, token); }
-		
-		[NotNull]
-		public Task<bool> WaitOneAsync(int millisecondsTimeout, bool exitContext, CancellationToken token)
+		public bool WaitOne(CancellationToken token) { return WaitOne(TimeSpanHelper.INFINITE, false, token); }
+		public bool WaitOne(TimeSpan timeout, CancellationToken token) { return WaitOne(timeout.TotalIntMilliseconds(), false, token); }
+		public bool WaitOne(TimeSpan timeout, bool exitContext, CancellationToken token) { return WaitOne(timeout.TotalIntMilliseconds(), exitContext, token); }
+		public bool WaitOne(int millisecondsTimeout, CancellationToken token) { return WaitOne(millisecondsTimeout, false, token); }
+		public bool WaitOne(int millisecondsTimeout, bool exitContext, CancellationToken token)
 		{
 			ThrowIfDisposed();
-			return token.IsCancellationRequested
-						? Task.FromCanceled<bool>(token)
-						: Task.Run(() => this.WaitOne(millisecondsTimeout, true, exitContext, token), token);
+			return !token.IsCancellationRequested && this.WaitOne(millisecondsTimeout, true, exitContext, token);
 		}
 
 		protected void ThrowIfDisposed()

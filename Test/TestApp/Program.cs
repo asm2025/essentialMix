@@ -5782,29 +5782,32 @@ decrypted:
 					CancellationToken token = cts?.Token ?? CancellationToken.None;
 					Console.WriteLine($"Using timeout: {Bright.Cyan(timeoutString)}...");
 					
+					// copy to local variable
+					EventWaitHandleBase handle = waitHandle;
+
 					if (timeout > 0)
 					{
-						// copy to local variable
-						EventWaitHandleBase handle = waitHandle;
 						Console.WriteLine($"The automatic setup will signal the event in: {Bright.Cyan((timeout / 2 / 1000).ToString())} seconds...");
 						timedCallback = TimedCallback.Create(tcb =>
 						{
 							tcb.Enabled = false;
 							handle.Set();
 						}, timeout / 2);
-						waitHandle.WaitOneAsync(timeout, token);
-						TimeSpanHelper.WasteTime(timeout, token);
+						waitHandle.WaitOne(timeout, token);
 					}
 					else
 					{
-						waitHandle.WaitOneAsync(token);
+						Task.Run(() => handle.WaitOne(token), token);
 						Console.Write("Press any key to signal the event. ");
 						Console.ReadKey(true);
 						Console.WriteLine();
 						waitHandle.Set();
+						// for the stupid AutoReset
+						waitHandle.Set();
 					}
 
-					Console.WriteLine(waitHandle.IsSet
+					bool isSet = waitHandle.WaitOne(0);
+					Console.WriteLine(isSet
 										? Bright.Green("Event signaled.")
 										: Bright.Red("Some weird shit is going on there!"));
 				}

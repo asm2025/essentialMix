@@ -1,7 +1,11 @@
-﻿using System.Threading;
+﻿using System.Runtime.InteropServices;
+using System.Security.Permissions;
+using System.Threading;
 
 namespace essentialMix.Threading
 {
+	[HostProtection(Synchronization=true, ExternalThreading=true)]
+	[ComVisible(true)]	
 	public sealed class ManualResetEvent : EventWaitHandleBase
 	{
 		/// <inheritdoc />
