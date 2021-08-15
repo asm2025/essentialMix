@@ -69,7 +69,7 @@ namespace essentialMix.Extensions
 			else
 			{
 				int n = WaitHandle.WaitAny(new[] { thisValue, token.WaitHandle }, millisecondsTimeout, exitContext);
-				result = n == 0;
+				result = n == ResultWin32.WAIT_OBJECT_0;
 			}
 
 			if (result && setEvent && thisValue is EventWaitHandle evt) evt.Set();

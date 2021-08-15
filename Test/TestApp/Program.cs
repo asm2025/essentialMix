@@ -37,9 +37,10 @@ using Other.JonSkeet.MiscUtil.Collections;
 
 using TimeoutException = System.TimeoutException;
 using Menu = EasyConsole.Menu;
+using AutoResetEvent = essentialMix.Threading.AutoResetEvent;
+using ManualResetEvent = essentialMix.Threading.ManualResetEvent;
 
 using static Crayon.Output;
-using AutoResetEvent = essentialMix.Threading.AutoResetEvent;
 
 // ReSharper disable UnusedMember.Local
 namespace TestApp
@@ -186,7 +187,7 @@ work with {HEAVY} items.");
 
 			//TestEnumerateDirectoriesAndFiles();
 			
-			TestAutoResetEvent();
+			TestEventWaitHandle();
 
 			ConsoleHelper.Pause();
 		}
@@ -492,6 +493,8 @@ work with {HEAVY} items.");
 			int timeout = Console.ReadKey(true).Key == ConsoleKey.Y
 							? 1
 							: 0;
+			Console.WriteLine();
+
 			string timeoutString = timeout > 0
 										? $"{timeout} minute(s)"
 										: "None";
@@ -623,6 +626,8 @@ work with {HEAVY} items.");
 
 					if (Console.ReadKey(true).Key == ConsoleKey.Y)
 					{
+						Console.WriteLine();
+
 						foreach (ThreadQueueMode m in modes) 
 							queueModes.Enqueue(m);
 
@@ -703,6 +708,8 @@ work with {HEAVY} items.");
 			int timeout = Console.ReadKey(true).Key == ConsoleKey.Y
 							? 1
 							: 0;
+			Console.WriteLine();
+
 			string timeoutString = timeout > 0
 										? $"{timeout} minute(s)"
 										: "None";
@@ -753,6 +760,7 @@ work with {HEAVY} items.");
 					{
 						Console.Write($"Would you like to use Mi{Bright.Green("[n]")}Heap or Ma{Bright.Green("[x]")}Heap? Press {Bright.Red("ESCAPE")} key to exit this test. ");
 						heapKey = Console.ReadKey().Key;
+						Console.WriteLine();
 					}
 
 					if (heapKey == ConsoleKey.N)
@@ -887,6 +895,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 					if (Console.ReadKey(true).Key == ConsoleKey.Y)
 					{
+						Console.WriteLine();
+
 						foreach (ThreadQueueMode m in modes) 
 							queueModes.Enqueue(m);
 
@@ -5727,7 +5737,7 @@ decrypted:
 			}
 		}
 
-		private static void TestAutoResetEvent()
+		private static void TestEventWaitHandle()
 		{
 			bool more;
 
@@ -5735,43 +5745,66 @@ decrypted:
 			{
 				Console.Clear();
 
-				Title("Testing AutoResetEvent asynchronously.");
+				Title("Testing EventWaitHandle asynchronously.");
+				
+				ConsoleKey eventTypeKey = ConsoleKey.Clear;
+
+				while (eventTypeKey != ConsoleKey.A && eventTypeKey != ConsoleKey.M && eventTypeKey != ConsoleKey.Escape)
+				{
+					Console.Write($"Would you like to use {Bright.Green("[A]")}uto or {Bright.Green("[M]")}anual reset event? ");
+					eventTypeKey = Console.ReadKey().Key;
+					Console.WriteLine();
+				}
+
+				if (eventTypeKey == ConsoleKey.Escape) break;
 				Console.Write($"Would you like to use timeout for the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to skip timeout. ");
 				int timeout = Console.ReadKey(true).Key == ConsoleKey.Y
 								? 30000
 								: 0;
+				Console.WriteLine();
+
 				string timeoutString = timeout > 0
 											? $"{(timeout / 1000.0d):##.##} second(s)"
 											: "None";
-
 				CancellationTokenSource cts = null;
-				AutoResetEvent autoResetEvent = null;
+				EventWaitHandleBase waitHandle = null;
+				TimedCallback timedCallback = null;
 
 				try
 				{
 					cts = timeout > 0
 							? new CancellationTokenSource(TimeSpan.FromMilliseconds(timeout))
 							: null;
-					autoResetEvent = new AutoResetEvent();
+					waitHandle = eventTypeKey == ConsoleKey.A
+									? new AutoResetEvent()
+									: new ManualResetEvent();
 					// copy to local variable
 					CancellationToken token = cts?.Token ?? CancellationToken.None;
-					Console.WriteLine();
 					Console.WriteLine($"Using timeout: {Bright.Cyan(timeoutString)}...");
 					
 					if (timeout > 0)
 					{
-						autoResetEvent.WaitOneAsync(token).GetAwaiter().GetResult();
+						// copy to local variable
+						EventWaitHandleBase handle = waitHandle;
+						Console.WriteLine($"The automatic setup will signal the event in: {Bright.Cyan((timeout / 2 / 1000).ToString())} seconds...");
+						timedCallback = TimedCallback.Create(tcb =>
+						{
+							tcb.Enabled = false;
+							handle.Set();
+						}, timeout / 2);
+						waitHandle.WaitOneAsync(timeout, token);
+						TimeSpanHelper.WasteTime(timeout, token);
 					}
 					else
 					{
-						autoResetEvent.WaitOneAsync(token);
+						waitHandle.WaitOneAsync(token);
 						Console.Write("Press any key to signal the event. ");
 						Console.ReadKey(true);
 						Console.WriteLine();
-						autoResetEvent.Set();
+						waitHandle.Set();
 					}
 
-					Console.WriteLine(autoResetEvent.IsSet
+					Console.WriteLine(waitHandle.IsSet
 										? Bright.Green("Event signaled.")
 										: Bright.Red("Some weird shit is going on there!"));
 				}
@@ -5781,7 +5814,8 @@ decrypted:
 				}
 				finally
 				{
-					ObjectHelper.Dispose(ref autoResetEvent);
+					ObjectHelper.Dispose(ref timedCallback);
+					ObjectHelper.Dispose(ref waitHandle);
 					ObjectHelper.Dispose(ref cts);
 				}
 

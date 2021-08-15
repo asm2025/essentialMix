@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
 using JetBrains.Annotations;
 
@@ -11,10 +13,11 @@ namespace essentialMix.Patterns.Threading
 		// MUST keep a reference to the timer callback function to prevent GC from collecting it.
 		private TimerCallback _timerCallback;
 		private uint _timerId;
-		private uint _interval;
+		private int _interval;
+		private AutoResetEvent _event;
 
 		/// <inheritdoc />
-		public TimedCallback([NotNull] Action<TimedCallback> action, uint interval)
+		public TimedCallback([NotNull] Action<TimedCallback> action, int interval)
 		{
 			if (interval < 1) throw new ArgumentOutOfRangeException(nameof(interval));
 			_action = action;
@@ -25,7 +28,12 @@ namespace essentialMix.Patterns.Threading
 		/// <inheritdoc />
 		protected override void Dispose(bool disposing)
 		{
-			if (disposing) Enabled = false;
+			if (disposing)
+			{
+				Enabled = false;
+				ObjectHelper.Dispose(ref _event);
+			}
+
 			_timerCallback = null;
 			base.Dispose(disposing);
 		}
@@ -45,7 +53,7 @@ namespace essentialMix.Patterns.Threading
 
 					if (IsDisposed) return;
 					Win32.timeBeginPeriod(1);
-					_timerId = Win32.timeSetEvent(Interval, 0, _timerCallback, UIntPtr.Zero, fuEvent.TIME_PERIODIC);
+					_timerId = Win32.timeSetEvent((uint)Interval, 0, _timerCallback, UIntPtr.Zero, fuEvent.TIME_PERIODIC);
 					return;
 				}
 
@@ -56,7 +64,7 @@ namespace essentialMix.Patterns.Threading
 			}
 		}
 
-		public uint Interval
+		public int Interval
 		{
 			get => _interval;
 			set
@@ -66,10 +74,29 @@ namespace essentialMix.Patterns.Threading
 			}
 		}
 
+		public bool Wait() { return Wait(TimeSpanHelper.INFINITE, false); }
+		public bool Wait(int millisecondsTimeout) { return Wait(millisecondsTimeout, false); }
+		public bool Wait(int millisecondsTimeout, bool exitContext)
+		{
+			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+			if (_event == null) Interlocked.CompareExchange(ref _event, new AutoResetEvent(false), null);
+			return _event.WaitOne(millisecondsTimeout, exitContext);
+		}
+
 		private void TimerProc(uint uTimerId, uint uMsg, UIntPtr dwUser, UIntPtr dw1, UIntPtr dw2)
 		{
 			if (uTimerId == 0 || IsDisposed) return;
 			_action(this);
+			_event?.Set();
+		}
+
+		[NotNull]
+		public static TimedCallback Create([NotNull] Action<TimedCallback> action, int interval, bool enabled = true)
+		{
+			return new TimedCallback(action, interval)
+			{
+				Enabled = enabled
+			};
 		}
 	}
 }
