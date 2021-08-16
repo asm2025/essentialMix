@@ -11,6 +11,22 @@ namespace essentialMix.Helpers
 {
 	public static class TaskHelper
 	{
+		// based on Nito.AsyncEx.Interop
+		private sealed class ThreadPoolRegistration : IDisposable
+		{
+			private readonly RegisteredWaitHandle _handle;
+
+			public ThreadPoolRegistration([NotNull] WaitHandle handle, int millisecondsTimeout, TaskCompletionSource<bool> completionSource)
+			{
+				_handle = ThreadPool.RegisterWaitForSingleObject(handle, 
+																(state, timedOut) => ((TaskCompletionSource<bool>)state).TrySetResult(!timedOut), 
+																completionSource, millisecondsTimeout, true);
+			}
+
+			/// <inheritdoc />
+			void IDisposable.Dispose() { _handle.Unregister(null); }
+		}
+
 		public static int QueueMinimum => 1;
 
 		public static int QueueMaximum { get; } = SystemInfo.IsHyperThreadingEnabled 
@@ -266,6 +282,42 @@ namespace essentialMix.Helpers
 			{
 				ObjectHelper.Dispose(ref link);
 				ObjectHelper.Dispose(ref cts);
+			}
+		}
+
+		[NotNull]
+		public static Task<bool> FromWaitHandle([NotNull] WaitHandle handle) { return FromWaitHandle(handle, TimeSpanHelper.INFINITE, CancellationToken.None); }
+		[NotNull]
+		public static Task<bool> FromWaitHandle([NotNull] WaitHandle handle, CancellationToken token) { return FromWaitHandle(handle, TimeSpanHelper.INFINITE, token); }
+		[NotNull]
+		public static Task<bool> FromWaitHandle([NotNull] WaitHandle handle, TimeSpan timeout) { return FromWaitHandle(handle, timeout.TotalIntMilliseconds(), CancellationToken.None); }
+		[NotNull]
+		public static Task<bool> FromWaitHandle([NotNull] WaitHandle handle, TimeSpan timeout, CancellationToken token) { return FromWaitHandle(handle, timeout.TotalIntMilliseconds(), token); }
+		[NotNull]
+		public static Task<bool> FromWaitHandle([NotNull] WaitHandle handle, int millisecondsTimeout) { return FromWaitHandle(handle, millisecondsTimeout, CancellationToken.None); }
+		// based on Nito.AsyncEx.Interop
+		public static async Task<bool> FromWaitHandle([NotNull] WaitHandle handle, int millisecondsTimeout, CancellationToken token)
+		{
+			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+			
+			bool isSet = handle.WaitOne(0);
+			if (isSet) return true;
+			if (millisecondsTimeout == 0 || token.IsCancellationRequested) return false;
+
+			TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+			ThreadPoolRegistration registration = null;
+			IDisposable tokenRegistration = null;
+
+			try
+			{
+				registration = new ThreadPoolRegistration(handle, millisecondsTimeout, tcs);
+				if (token.CanBeCanceled) tokenRegistration = token.Register(state => ((TaskCompletionSource<bool>)state).TrySetCanceled(), tcs, false);
+				return await tcs.Task.ConfigureAwait();
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref registration);
+				ObjectHelper.Dispose(ref tokenRegistration);
 			}
 		}
 	}

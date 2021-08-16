@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
@@ -220,6 +221,22 @@ namespace essentialMix.Extensions
 
 			SpinWait.SpinUntil(predicate, millisecondsTimeout);
 			return index;
+		}
+
+		[NotNull]
+		public static Task<bool> ToTask([NotNull] this WaitHandle thisValue) { return ToTask(thisValue, TimeSpanHelper.INFINITE, CancellationToken.None); }
+		[NotNull]
+		public static Task<bool> ToTask([NotNull] this WaitHandle thisValue, CancellationToken token) { return ToTask(thisValue, TimeSpanHelper.INFINITE, token); }
+		[NotNull]
+		public static Task<bool> ToTask([NotNull] this WaitHandle thisValue, TimeSpan timeout) { return ToTask(thisValue, timeout.TotalIntMilliseconds(), CancellationToken.None); }
+		[NotNull]
+		public static Task<bool> ToTask([NotNull] this WaitHandle thisValue, TimeSpan timeout, CancellationToken token) { return ToTask(thisValue, timeout.TotalIntMilliseconds(), token); }
+		[NotNull]
+		public static Task<bool> ToTask([NotNull] this WaitHandle thisValue, int millisecondsTimeout) { return ToTask(thisValue, millisecondsTimeout, CancellationToken.None); }
+		// based on Nito.AsyncEx.Interop
+		public static Task<bool> ToTask([NotNull] this WaitHandle thisValue, int millisecondsTimeout, CancellationToken token)
+		{
+			return TaskHelper.FromWaitHandle(thisValue, millisecondsTimeout, token);
 		}
 	}
 }
