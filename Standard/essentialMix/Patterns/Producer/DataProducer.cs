@@ -15,7 +15,7 @@ namespace essentialMix.Patterns.Producer
 		{
 		}
 
-		public bool CompleteMarked { get; protected set; }
+		public bool IsCompleted { get; protected set; }
 
 		/// <inheritdoc />
 		/// <summary>
@@ -50,7 +50,7 @@ namespace essentialMix.Patterns.Producer
 		/// </summary>
 		public void Produce(T item)
 		{
-			if (CompleteMarked) throw new InvalidOperationException("Cannot produce data after completion of data has been marked.");
+			if (IsCompleted) throw new InvalidOperationException("Cannot produce data after completion of data has been marked.");
 			OnData(item);
 		}
 
@@ -123,8 +123,8 @@ namespace essentialMix.Patterns.Producer
 		/// </summary>
 		public void Complete()
 		{
-			if (CompleteMarked) throw new InvalidOperationException("Completion has been already marked.");
-			CompleteMarked = true;
+			if (IsCompleted) throw new InvalidOperationException("Completion has been already marked.");
+			IsCompleted = true;
 			OnCompleted();
 		}
 	}

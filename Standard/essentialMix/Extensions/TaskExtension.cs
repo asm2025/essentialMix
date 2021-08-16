@@ -77,20 +77,31 @@ namespace essentialMix.Extensions
 		{
 			token.ThrowIfCancellationRequested();
 
-			if (thisValue == null || thisValue.IsCanceled || thisValue.IsFaulted || thisValue.IsCompleted)
+			if (thisValue == null || thisValue.IsFinished())
 			{
 				// Either the task has already completed or timeout will never occur.
 				return thisValue;
 			}
 
-			TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-			if (token.CanBeCanceled) token.Register(() => tcs.TrySetCanceled(), false);
-			return Task.WhenAny(thisValue, tcs.Task)
-						.ContinueWith(t =>
-						{
-							if (t != tcs.Task) return;
-							throw new OperationCanceledException(token);
-						}, token);
+			return WithCancellationLocal(thisValue, token);
+
+			static async Task WithCancellationLocal(Task task, CancellationToken token)
+			{
+				TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+				IDisposable tokenRegistration = null;
+
+				try
+				{
+					if (token.CanBeCanceled) tokenRegistration = token.Register(state => ((TaskCompletionSource<object>)state).TrySetCanceled(), tcs, false);
+					Task finishedTask = await Task.WhenAny(task, tcs.Task);
+					if (finishedTask != tcs.Task) return;
+					throw new OperationCanceledException(token);
+				}
+				finally
+				{
+					ObjectHelper.Dispose(ref tokenRegistration);
+				}
+			}
 		}
 
 		public static Task<TResult> WithCancellation<TResult>(this Task<TResult> thisValue, CancellationToken token = default(CancellationToken))
@@ -104,15 +115,25 @@ namespace essentialMix.Extensions
 				return thisValue;
 			}
 
-			TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
-			if (token.CanBeCanceled) token.Register(() => tcs.TrySetCanceled(), false);
-			return Task.WhenAny(thisValue, tcs.Task)
-						.ContinueWith(t =>
-						{
-							Task<TResult> ts = t.Unwrap();
-							if (ts != tcs.Task) return ts.Result;
-							throw new OperationCanceledException(token);
-						}, token);
+			return WithCancellationLocal(thisValue, token);
+
+			static async Task<TResult> WithCancellationLocal(Task<TResult> task, CancellationToken token)
+			{
+				TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
+				IDisposable tokenRegistration = null;
+
+				try
+				{
+					if (token.CanBeCanceled) tokenRegistration = token.Register(state => ((TaskCompletionSource<TResult>)state).TrySetCanceled(), tcs, false);
+					Task<TResult> finishedTask = await Task.WhenAny(task, tcs.Task);
+					if (finishedTask != tcs.Task) return finishedTask.Result;
+					throw new OperationCanceledException(token);
+				}
+				finally
+				{
+					ObjectHelper.Dispose(ref tokenRegistration);
+				}
+			}
 		}
 
 		public static Task<T> WithResult<T>(this Task thisValue, T value, CancellationToken token = default(CancellationToken))
@@ -132,8 +153,9 @@ namespace essentialMix.Extensions
 			}
 
 			if (thisValue.IsCanceled) return Task.FromCanceled<T>(token);
-			if (thisValue.IsCompleted) return Task.FromResult(value);
-			return thisValue.ContinueWith(_ => value, token);
+			return thisValue.IsCompleted
+						? Task.FromResult(value)
+						: thisValue.ContinueWith(_ => value, token);
 		}
 
 		public static Task<T> WithResult<T>(this Task thisValue, [NotNull] Func<T> getValue, CancellationToken token = default(CancellationToken))

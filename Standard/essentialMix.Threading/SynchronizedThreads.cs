@@ -23,6 +23,7 @@ namespace essentialMix.Threading
 		private ManualResetEventSlim _workerWaitEvent = new ManualResetEventSlim(false);
 		private CountdownEvent _workersCountdown;
 		private CancellationTokenSource _cts;
+		private IDisposable _tokenRegistration;
 
 		private volatile int _isPaused;
 		private volatile int _workCompleted;
@@ -73,6 +74,7 @@ namespace essentialMix.Threading
 				ObjectHelper.Dispose(ref _mainWaitEvent);
 				ObjectHelper.Dispose(ref _workerWaitEvent);
 				ObjectHelper.Dispose(ref _workersCountdown);
+				ObjectHelper.Dispose(ref _tokenRegistration);
 				ObjectHelper.Dispose(ref _cts);
 			}
 
@@ -117,8 +119,9 @@ namespace essentialMix.Threading
 		{
 			ThrowIfDisposed();
 			if (_cts != null) Interlocked.Exchange(ref _cts, null);
+			ObjectHelper.Dispose(ref _tokenRegistration);
 			Interlocked.CompareExchange(ref _cts, new CancellationTokenSource(), null);
-			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed(), false);
+			if (token.CanBeCanceled) _tokenRegistration = token.Register(() => _cts.CancelIfNotDisposed(), false);
 			Token = _cts.Token;
 		}
 

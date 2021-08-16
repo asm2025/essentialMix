@@ -8,7 +8,7 @@ namespace essentialMix.Threading
 {
 	public sealed class CancellationTokenAwaiter : Disposable
 	{
-		private IDisposable _registration;
+		private IDisposable _tokenRegistration;
 
 		public CancellationTokenAwaiter(CancellationToken token = default(CancellationToken))
 		{
@@ -21,7 +21,7 @@ namespace essentialMix.Threading
 			}
 
 			TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-			if (token.CanBeCanceled) _registration = Token.Register(() => tcs.TrySetCanceled(Token), false);
+			if (token.CanBeCanceled) _tokenRegistration = Token.Register(state => ((TaskCompletionSource<bool>)state).TrySetCanceled(Token), tcs, false);
 			Task = tcs.Task;
 		}
 
@@ -41,7 +41,7 @@ namespace essentialMix.Threading
 		/// <inheritdoc />
 		protected override void Dispose(bool disposing)
 		{
-			if (disposing) ObjectHelper.Dispose(ref _registration);
+			if (disposing) ObjectHelper.Dispose(ref _tokenRegistration);
 			base.Dispose(disposing);
 		}
 	}

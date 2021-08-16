@@ -11,42 +11,42 @@ namespace essentialMix.Threading.FileSystem
 	{
 		private System.IO.FileSystemWatcher _watcher;
 
-		public FileSystemWatcher(FileSystemWatcherSettings settings)
+		public FileSystemWatcher(FileSystemWatcherSettings options)
 		{
-			if (!settings.Directory.Exists) throw new DirectoryNotFoundException();
+			if (!options.Directory.Exists) throw new DirectoryNotFoundException();
 
-			string filter = RegexHelper.FromFilePattern(settings.Filter);
+			string filter = RegexHelper.FromFilePattern(options.Filter);
 			Regex rgxFilter = RegexHelper.AllAsterisks.IsMatch(filter)
 								? null
 								: new Regex(filter, RegexHelper.OPTIONS_I);
-			_watcher = new System.IO.FileSystemWatcher(settings.Directory.FullName)
+			_watcher = new System.IO.FileSystemWatcher(options.Directory.FullName)
 			{
-				IncludeSubdirectories = settings.IncludeSubdirectories,
-				NotifyFilter = settings.NotifyFilter,
+				IncludeSubdirectories = options.IncludeSubdirectories,
+				NotifyFilter = options.NotifyFilter,
 				EnableRaisingEvents = false
 			};
 
 			_watcher.Created += (_, args) =>
 			{
-				if (!settings.ChangeType.FastHasFlag(WatcherChangeTypes.Created) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
+				if (!options.ChangeType.FastHasFlag(WatcherChangeTypes.Created) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
 				OnCreated(args);
 			};
 
 			_watcher.Renamed += (_, args) =>
 			{
-				if (!settings.ChangeType.FastHasFlag(WatcherChangeTypes.Renamed) || rgxFilter != null && !rgxFilter.IsMatch(args.OldName) && !rgxFilter.IsMatch(args.Name)) return;
+				if (!options.ChangeType.FastHasFlag(WatcherChangeTypes.Renamed) || rgxFilter != null && !rgxFilter.IsMatch(args.OldName) && !rgxFilter.IsMatch(args.Name)) return;
 				OnRenamed(args);
 			};
 
 			_watcher.Deleted += (_, args) =>
 			{
-				if (!settings.ChangeType.FastHasFlag(WatcherChangeTypes.Deleted) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
+				if (!options.ChangeType.FastHasFlag(WatcherChangeTypes.Deleted) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
 				OnDeleted(args);
 			};
 
 			_watcher.Changed += (_, args) =>
 			{
-				if (!settings.ChangeType.FastHasFlag(WatcherChangeTypes.Changed) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
+				if (!options.ChangeType.FastHasFlag(WatcherChangeTypes.Changed) || rgxFilter != null && !rgxFilter.IsMatch(args.Name)) return;
 				OnChanged(args);
 			};
 		}

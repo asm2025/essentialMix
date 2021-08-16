@@ -40,7 +40,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 		protected override void EnqueueInternal(T item)
 		{
-			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+			if (IsDisposed || Token.IsCancellationRequested || IsCompleted) return;
 
 			if (!WaitForWorkerStart())
 			{
@@ -48,7 +48,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 				lock(_workers)
 				{
-					if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+					if (IsDisposed || Token.IsCancellationRequested || IsCompleted) return;
 
 					if (!WaitForWorkerStart())
 					{
@@ -67,7 +67,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					
 						invokeWorkStarted = true;
 						if (!WaitForWorkerStart()) throw new TimeoutException();
-						if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+						if (IsDisposed || Token.IsCancellationRequested || IsCompleted) return;
 					}
 				}
 
@@ -80,7 +80,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 		protected override void CompleteInternal()
 		{
-			CompleteMarked = true;
+			IsCompleted = true;
 			_queue.CompleteAdding();
 		}
 
@@ -97,7 +97,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			try
 			{
 				// BlockingCollection<T> is thread safe
-				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
+				while (!IsDisposed && !Token.IsCancellationRequested && !IsCompleted)
 				{
 					if (IsPaused)
 					{

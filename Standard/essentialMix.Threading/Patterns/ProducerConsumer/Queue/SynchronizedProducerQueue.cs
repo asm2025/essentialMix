@@ -44,7 +44,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public bool IsPaused => _queue.IsPaused;
 
 		/// <inheritdoc />
-		public bool CompleteMarked => _queue.CompleteMarked;
+		public bool IsCompleted => _queue.IsCompleted;
 
 		/// <inheritdoc />
 		public int Count => _queue.Count;

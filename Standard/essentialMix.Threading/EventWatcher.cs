@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
@@ -12,11 +11,12 @@ namespace essentialMix.Threading
 	public class EventWatcher<TSource, TArgs> : Disposable
 		where TArgs : EventArgs
 	{
+		private readonly SynchronizationContext _context;
 		private readonly Delegate _listener;
+		private readonly Action<EventWatcher<TSource, TArgs>, TArgs> _watcherCallback;
 
-		private ManualResetEventSlim _manualResetEventSlim;
+		private ManualResetEventSlim _workCompletedEvent;
 		private CancellationTokenSource _cts;
-		private bool _completed;
 
 		/// <inheritdoc />
 		protected internal EventWatcher([NotNull] TSource target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<TSource, TArgs>, TArgs> watcherCallback)
@@ -25,19 +25,31 @@ namespace essentialMix.Threading
 			if (eventInfo.DeclaringType == null || !eventInfo.DeclaringType.IsAssignableFrom(type)) throw new MemberAccessException($"Type '{type}' does not contain a definition for event '{eventInfo.Name}'.");
 			Target = target;
 			EventInfo = eventInfo;
-			WatcherCallback = watcherCallback;
-			_manualResetEventSlim = new ManualResetEventSlim(false);
+			_context = SynchronizationContext.Current;
+			_watcherCallback = watcherCallback;
+
+			if (_context != null)
+			{
+				_context.OperationStarted();
+				WatcherCallback = (_, args) => SendWatcherCallback(args);
+			}
+			else
+			{
+				WatcherCallback = _watcherCallback;
+			}
+
+			_workCompletedEvent = new ManualResetEventSlim(false);
 			_cts = new CancellationTokenSource();
 			Token = _cts.Token;
 			_listener = typeof(TArgs) == typeof(EventArgs)
 							? EventInfo.CreateDelegate((_, args) =>
 							{
-								Completed = true;
+								_workCompletedEvent.Set();
 								WatcherCallback.Invoke(this, (TArgs)args);
 							})
 							: EventInfo.CreateDelegate<TArgs>((_, args) =>
 							{
-								Completed = true;
+								_workCompletedEvent.Set();
 								WatcherCallback.Invoke(this, args);
 							});
 			EventInfo.AddEventHandler(Target, _listener);
@@ -50,8 +62,9 @@ namespace essentialMix.Threading
 			{
 				Stop();
 				EventInfo.RemoveEventHandler(Target, _listener);
-				ObjectHelper.Dispose(ref _manualResetEventSlim);
+				ObjectHelper.Dispose(ref _workCompletedEvent);
 				ObjectHelper.Dispose(ref _cts);
+				_context?.OperationCompleted();
 			}
 			base.Dispose(disposing);
 		}
@@ -65,15 +78,7 @@ namespace essentialMix.Threading
 		[NotNull]
 		public EventInfo EventInfo { get; }
 
-		public bool Completed
-		{
-			get => _completed;
-			private set
-			{
-				_completed = value;
-				_manualResetEventSlim.Set();
-			}
-		}
+		public bool IsSignaled => _workCompletedEvent is { IsSet: true };
 
 		public CancellationToken Token { get; }
 
@@ -83,24 +88,26 @@ namespace essentialMix.Threading
 			_cts.CancelIfNotDisposed();
 		}
 
-		public bool Wait() { return Wait(TimeSpanHelper.INFINITE); }
-
-		public bool Wait(TimeSpan timeout) { return Wait(timeout.TotalIntMilliseconds()); }
-
-		public bool Wait(int millisecondsTimeout)
+		public bool Wait() { return Wait(TimeSpanHelper.INFINITE, CancellationToken.None); }
+		public bool Wait(TimeSpan timeout) { return Wait(timeout.TotalIntMilliseconds(), CancellationToken.None); }
+		public bool Wait(TimeSpan timeout, CancellationToken token) { return Wait(timeout.TotalIntMilliseconds(), token); }
+		public bool Wait(int millisecondsTimeout) { return Wait(millisecondsTimeout, CancellationToken.None); }
+		public bool Wait(int millisecondsTimeout, CancellationToken token)
 		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (Token.IsCancellationRequested) return false;
-			if (Completed) return true;
+			if (IsSignaled) return true;
+			if (Token.IsCancellationRequested || token.IsCancellationRequested) return false;
+
+			IDisposable tokenRegistration = null;
 
 			try
 			{
-				if (millisecondsTimeout < TimeSpanHelper.ZERO)
-					_manualResetEventSlim.Wait(Token);
-				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
-					return false;
+				if (token.CanBeCanceled) tokenRegistration = token.Register(() => _cts.CancelIfNotDisposed(), false);
 
-				return !Token.IsCancellationRequested && Completed;
+				if (millisecondsTimeout < TimeSpanHelper.ZERO) _workCompletedEvent.Wait(Token);
+				else if (!_workCompletedEvent.Wait(millisecondsTimeout, Token)) return false;
+
+				return !Token.IsCancellationRequested;
 			}
 			catch (OperationCanceledException)
 			{
@@ -110,24 +117,15 @@ namespace essentialMix.Threading
 			{
 				// ignored
 			}
+			finally
+			{
+				ObjectHelper.Dispose(ref tokenRegistration);
+			}
 
 			return false;
 		}
-
-		[NotNull] 
-		public Task<bool> WaitAsync(CancellationToken token = default(CancellationToken)) { return WaitAsync(TimeSpanHelper.INFINITE, token); }
-
-		[NotNull] 
-		public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return WaitAsync(timeout.TotalIntMilliseconds(), token); }
-
-		[NotNull]
-		public Task<bool> WaitAsync(int millisecondsTimeout, CancellationToken token = default(CancellationToken))
-		{
-			ThrowIfDisposed();
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed(), false);
-			return Task.Run(() => Wait(millisecondsTimeout), Token);
-		}
+		
+		private void SendWatcherCallback(object state) { _watcherCallback(this, (TArgs)state); }
 	}
 
 	public class EventWatcher<TSource> : EventWatcher<TSource, EventArgs>

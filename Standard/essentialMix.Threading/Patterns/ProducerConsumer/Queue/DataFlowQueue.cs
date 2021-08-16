@@ -40,7 +40,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 		protected override void EnqueueInternal(T item)
 		{
-			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+			if (IsDisposed || Token.IsCancellationRequested || IsCompleted) return;
 
 			bool invokeWorkStarted = false;
 
@@ -48,7 +48,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			{
 				lock(_lock)
 				{
-					if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+					if (IsDisposed || Token.IsCancellationRequested || IsCompleted) return;
 
 					if (!WaitForWorkerStart())
 					{
@@ -65,7 +65,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 						invokeWorkStarted = true;
 						if (!WaitForWorkerStart()) throw new TimeoutException();
-						if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+						if (IsDisposed || Token.IsCancellationRequested || IsCompleted) return;
 					}
 				}
 
@@ -77,7 +77,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 		protected override void CompleteInternal()
 		{
-			CompleteMarked = true;
+			IsCompleted = true;
 			_queue.Complete();
 		}
 

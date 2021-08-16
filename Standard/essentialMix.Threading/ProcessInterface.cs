@@ -13,14 +13,14 @@ namespace essentialMix.Threading
 {
 	public sealed class ProcessInterface : Disposable
 	{
-		private ManualResetEventSlim _manualResetEventSlim;
 		private Process _inputProcess;
 		private StreamWriter _input;
 		private AsyncStreamReader _output;
 		private AsyncStreamReader _error;
 		private CancellationTokenSource _cts;
-		// ReSharper disable once FieldCanBeMadeReadOnly.Local
+		private IDisposable _tokenRegistration;
 		private CancellationToken _token;
+		private ManualResetEventSlim _workCompletedEvent;
 
 		/// <inheritdoc />
 		public ProcessInterface(CancellationToken token = default(CancellationToken))
@@ -33,7 +33,7 @@ namespace essentialMix.Threading
 			DefaultRunSettings.RedirectOutput = true;
 			DefaultRunSettings.RedirectError = true;
 
-			_manualResetEventSlim = new ManualResetEventSlim(false);
+			_workCompletedEvent = new ManualResetEventSlim(false);
 		}
 
 		/// <inheritdoc />
@@ -42,7 +42,8 @@ namespace essentialMix.Threading
 			if (disposing)
 			{
 				Stop(WaitForProcess);
-				ObjectHelper.Dispose(ref _manualResetEventSlim);
+				ObjectHelper.Dispose(ref _tokenRegistration);
+				ObjectHelper.Dispose(ref _workCompletedEvent);
 			}
 			base.Dispose(disposing);
 		}
@@ -99,7 +100,7 @@ namespace essentialMix.Threading
 				ObjectHelper.Dispose(ref _inputProcess);
 			}
 
-			_manualResetEventSlim.Reset();
+			_workCompletedEvent.Reset();
 			_inputProcess = ProcessHelper.CreateForRunCore(fileName, arguments, settings);
 			if (_inputProcess == null) return false;
 			_inputProcess.EnableRaisingEvents = true;
@@ -115,8 +116,9 @@ namespace essentialMix.Threading
 			{
 				//This is for the wait function, it's not used here
 				_cts = new CancellationTokenSource();
+				ObjectHelper.Dispose(ref _tokenRegistration);
 				Token = _cts.Token;
-				if (_token.CanBeCanceled) _token.Register(() => _cts.CancelIfNotDisposed(), false);
+				if (_token.CanBeCanceled) _tokenRegistration = _token.Register(() => _cts.CancelIfNotDisposed(), false);
 			}
 
 			_inputProcess.Exited += (sender, _) =>
@@ -140,11 +142,12 @@ namespace essentialMix.Threading
 
 				OnExit(fileName, exitTime, exitCode);
 				ObjectHelper.Dispose(ref _inputProcess);
+				ObjectHelper.Dispose(ref _tokenRegistration);
 				ObjectHelper.Dispose(ref _cts);
 				FileName = null;
 				Arguments = null;
 				LastException = null;
-				_manualResetEventSlim.Set();
+				_workCompletedEvent.Set();
 			};
 
 			bool result;
@@ -183,6 +186,7 @@ namespace essentialMix.Threading
 			ObjectHelper.Dispose(ref _error);
 			_inputProcess.Die();
 			ObjectHelper.Dispose(ref _inputProcess);
+			ObjectHelper.Dispose(ref _tokenRegistration);
 			ObjectHelper.Dispose(ref _cts);
 			FileName = null;
 			Arguments = null;
@@ -209,10 +213,7 @@ namespace essentialMix.Threading
 
 		public bool RunAndWaitFor([NotNull] string execName, WaitHandle awaitableHandle) { return RunAndWaitFor(execName, null, null, awaitableHandle); }
 
-		public bool RunAndWaitFor([NotNull] string execName, RunAndWaitForSettings settings, WaitHandle awaitableHandle)
-		{
-			return RunAndWaitFor(execName, null, settings, awaitableHandle);
-		}
+		public bool RunAndWaitFor([NotNull] string execName, RunAndWaitForSettings settings, WaitHandle awaitableHandle) { return RunAndWaitFor(execName, null, settings, awaitableHandle); }
 
 		public bool RunAndWaitFor([NotNull] string execName, string arguments, WaitHandle awaitableHandle) { return RunAndWaitFor(execName, arguments, null, awaitableHandle); }
 
@@ -235,15 +236,9 @@ namespace essentialMix.Threading
 
 		public RunOutput RunAndGetOutput([NotNull] string execName, WaitHandle awaitableHandle) { return RunAndGetOutput(execName, null, null, awaitableHandle); }
 
-		public RunOutput RunAndGetOutput([NotNull] string execName, RunSettingsBase settings, WaitHandle awaitableHandle)
-		{
-			return RunAndGetOutput(execName, null, settings, awaitableHandle);
-		}
+		public RunOutput RunAndGetOutput([NotNull] string execName, RunSettingsBase settings, WaitHandle awaitableHandle) { return RunAndGetOutput(execName, null, settings, awaitableHandle); }
 
-		public RunOutput RunAndGetOutput([NotNull] string execName, string arguments, WaitHandle awaitableHandle)
-		{
-			return RunAndGetOutput(execName, arguments, null, awaitableHandle);
-		}
+		public RunOutput RunAndGetOutput([NotNull] string execName, string arguments, WaitHandle awaitableHandle) { return RunAndGetOutput(execName, arguments, null, awaitableHandle); }
 
 		public RunOutput RunAndGetOutput([NotNull] string execName, string arguments, RunSettingsBase settings, WaitHandle awaitableHandle)
 		{

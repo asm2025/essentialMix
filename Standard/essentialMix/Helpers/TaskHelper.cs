@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
@@ -14,17 +13,17 @@ namespace essentialMix.Helpers
 		// based on Nito.AsyncEx.Interop
 		private sealed class ThreadPoolRegistration : IDisposable
 		{
-			private readonly RegisteredWaitHandle _handle;
+			private readonly RegisteredWaitHandle _registeredWaitHandle;
 
 			public ThreadPoolRegistration([NotNull] WaitHandle handle, int millisecondsTimeout, TaskCompletionSource<bool> completionSource)
 			{
-				_handle = ThreadPool.RegisterWaitForSingleObject(handle, 
+				_registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(handle, 
 																(state, timedOut) => ((TaskCompletionSource<bool>)state).TrySetResult(!timedOut), 
 																completionSource, millisecondsTimeout, true);
 			}
 
 			/// <inheritdoc />
-			void IDisposable.Dispose() { _handle.Unregister(null); }
+			void IDisposable.Dispose() { _registeredWaitHandle.Unregister(null); }
 		}
 
 		public static int QueueMinimum => 1;
@@ -155,54 +154,40 @@ namespace essentialMix.Helpers
 					}, tkn);
 		}
 
-		public static void Sequence([NotNull] params Action[] actions) { SequenceAsync(CancellationToken.None, actions).Execute(); }
-		
-		[NotNull]
-		public static Task SequenceAsync([NotNull] params Action[] actions) { return SequenceAsync(CancellationToken.None, actions); }
-		public static async Task SequenceAsync(CancellationToken token, [NotNull] params Action[] actions)
+		public static void Sequence([NotNull] params Action[] actions)
 		{
 			if (actions.Length == 0) return;
 
-			Queue<Action> queue = new Queue<Action>(actions.Length);
+			foreach (Action action in actions)
+			{
+				if (action != null) continue;
+				throw new NullReferenceException($"{nameof(actions)} contains a null reference.");
+			}
+
+			foreach (Action action in actions) 
+				action();
+		}
+		
+		[NotNull]
+		public static Task SequenceAsync([NotNull] params Action[] actions) { return SequenceAsync(CancellationToken.None, actions); }
+		[NotNull]
+		public static Task SequenceAsync(CancellationToken token, [NotNull] params Action[] actions)
+		{
+			if (actions.Length == 0) return Task.CompletedTask;
 
 			foreach (Action action in actions)
 			{
-				if (action == null) throw new NullReferenceException($"{nameof(actions)} contains a null reference.");
-				queue.Enqueue(action);
+				if (action != null) continue;
+				throw new NullReferenceException($"{nameof(actions)} contains a null reference.");
 			}
 
-			IDisposable link = null;
+			Task firstTask = Task.CompletedTask;
+			Task task = firstTask;
 
-			try
-			{
-				BufferBlock<Action> buffer = new BufferBlock<Action>(new DataflowBlockOptions
-				{
-					CancellationToken = token
-				});
-				ActionBlock<Action> processor = new ActionBlock<Action>(ac => ac(), new ExecutionDataflowBlockOptions
-				{
-					MaxDegreeOfParallelism = 1,
-					CancellationToken = token
-				});
-				link = buffer.LinkTo(processor, new DataflowLinkOptions
-				{
-					PropagateCompletion = false
-				});
+			foreach (Action action in actions) 
+				task = task.ContinueWith(_ => action(), token, TaskContinuationOptions.RunContinuationsAsynchronously | TaskContinuationOptions.NotOnRanToCompletion, TaskScheduler.Default);
 
-				while (!token.IsCancellationRequested && queue.Count > 0)
-				{
-					Action action = queue.Dequeue();
-					await buffer.SendAsync(action, token).ConfigureAwait();
-				}
-
-				token.ThrowIfCancellationRequested();
-				buffer.Complete();
-				await Task.WhenAll(buffer.Completion, processor.Completion);
-			}
-			finally
-			{
-				ObjectHelper.Dispose(ref link);
-			}
+			return firstTask;
 		}
 
 		public static TResult Sequence<TResult>([NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, default(TResult), null, functions).Execute(); }
@@ -219,9 +204,9 @@ namespace essentialMix.Helpers
 		public static Task<TResult> SequenceAsync<TResult>(CancellationToken token, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(token, default(TResult), null, functions); }
 		[NotNull]
 		public static Task<TResult> SequenceAsync<TResult>(CancellationToken token, [NotNull] Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(token, default(TResult), evaluator, functions); }
-		public static async Task<TResult> SequenceAsync<TResult>(CancellationToken token, TResult defaultValue, Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions)
+		public static Task<TResult> SequenceAsync<TResult>(CancellationToken token, TResult defaultValue, Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions)
 		{
-			if (functions.Length == 0) return defaultValue;
+			if (functions.Length == 0) return Task.FromResult(defaultValue);
 
 			Queue<Func<TResult, Task<TResult>>> queue = new Queue<Func<TResult, Task<TResult>>>(functions.Length);
 
@@ -231,57 +216,34 @@ namespace essentialMix.Helpers
 				queue.Enqueue(func);
 			}
 
-			TResult result = defaultValue;
-			CancellationTokenSource cts = null;
-			IDisposable link = null;
+			return SequenceAsyncLocal(queue, evaluator, defaultValue, token);
 
-			try
+			static async Task<TResult> SequenceAsyncLocal(Queue<Func<TResult, Task<TResult>>> queue, Func<TResult, bool> evaluator, TResult defaultValue, CancellationToken token)
 			{
-				cts = new CancellationTokenSource();
+				TResult result = defaultValue;
+				CancellationTokenSource cts = null;
+				IDisposable tokenRegistration = null;
 
-				if (token.CanBeCanceled)
+				try
 				{
-					CancellationTokenSource ctsReg = cts;
-					token.Register(() => ctsReg.CancelIfNotDisposed(), false);
+					cts = new CancellationTokenSource();
+					if (token.CanBeCanceled) tokenRegistration = token.Register(state => ((CancellationTokenSource)state).CancelIfNotDisposed(), cts, false);
+
+					while (!token.IsCancellationRequested && queue.Count > 0)
+					{
+						Func<TResult, Task<TResult>> func = queue.Dequeue();
+						result = await func(result).ConfigureAwait();
+						if (token.IsCancellationRequested || evaluator != null && !evaluator(result)) continue;
+						return result;
+					}
+
+					return result;
 				}
-
-				BufferBlock<Func<TResult, Task<TResult>>> buffer = new BufferBlock<Func<TResult, Task<TResult>>>(new DataflowBlockOptions
+				finally
 				{
-					CancellationToken = token
-				});
-
-				CancellationTokenSource ctsRef = cts;
-				ActionBlock<Func<TResult, Task<TResult>>> processor = new ActionBlock<Func<TResult, Task<TResult>>>(func =>
-				{
-					result = func(result).Execute();
-					if (!token.IsCancellationRequested && (evaluator == null || evaluator(result))) return;
-					result = defaultValue;
-					ctsRef.Cancel();
-				}, new ExecutionDataflowBlockOptions
-				{
-					MaxDegreeOfParallelism = 1,
-					CancellationToken = token
-				});
-				link = buffer.LinkTo(processor, new DataflowLinkOptions
-				{
-					PropagateCompletion = false
-				});
-
-				while (!token.IsCancellationRequested && queue.Count > 0)
-				{
-					Func<TResult, Task<TResult>> func = queue.Dequeue();
-					await buffer.SendAsync(func, token).ConfigureAwait();
+					ObjectHelper.Dispose(ref tokenRegistration);
+					ObjectHelper.Dispose(ref cts);
 				}
-
-				token.ThrowIfCancellationRequested();
-				buffer.Complete();
-				await Task.WhenAll(buffer.Completion, processor.Completion);
-				return result;
-			}
-			finally
-			{
-				ObjectHelper.Dispose(ref link);
-				ObjectHelper.Dispose(ref cts);
 			}
 		}
 
@@ -295,29 +257,32 @@ namespace essentialMix.Helpers
 		public static Task<bool> FromWaitHandle([NotNull] WaitHandle handle, TimeSpan timeout, CancellationToken token) { return FromWaitHandle(handle, timeout.TotalIntMilliseconds(), token); }
 		[NotNull]
 		public static Task<bool> FromWaitHandle([NotNull] WaitHandle handle, int millisecondsTimeout) { return FromWaitHandle(handle, millisecondsTimeout, CancellationToken.None); }
-		// based on Nito.AsyncEx.Interop
-		public static async Task<bool> FromWaitHandle([NotNull] WaitHandle handle, int millisecondsTimeout, CancellationToken token)
+		public static Task<bool> FromWaitHandle([NotNull] WaitHandle handle, int millisecondsTimeout, CancellationToken token)
 		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 			
 			bool isSet = handle.WaitOne(0);
-			if (isSet) return true;
-			if (millisecondsTimeout == 0 || token.IsCancellationRequested) return false;
+			if (isSet) return Task.FromResult(true);
+			if (millisecondsTimeout == 0 || token.IsCancellationRequested) return Task.FromResult(false);
+			return FromWaitHandleLocal(handle, millisecondsTimeout, token);
 
-			TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-			ThreadPoolRegistration registration = null;
-			IDisposable tokenRegistration = null;
+			static async Task<bool> FromWaitHandleLocal(WaitHandle handle, int millisecondsTimeout, CancellationToken token)
+			{
+				TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+				ThreadPoolRegistration registration = null;
+				IDisposable tokenRegistration = null;
 
-			try
-			{
-				registration = new ThreadPoolRegistration(handle, millisecondsTimeout, tcs);
-				if (token.CanBeCanceled) tokenRegistration = token.Register(state => ((TaskCompletionSource<bool>)state).TrySetCanceled(), tcs, false);
-				return await tcs.Task.ConfigureAwait();
-			}
-			finally
-			{
-				ObjectHelper.Dispose(ref registration);
-				ObjectHelper.Dispose(ref tokenRegistration);
+				try
+				{
+					registration = new ThreadPoolRegistration(handle, millisecondsTimeout, tcs);
+					if (token.CanBeCanceled) tokenRegistration = token.Register(state => ((TaskCompletionSource<bool>)state).TrySetCanceled(), tcs, false);
+					return await tcs.Task.ConfigureAwait();
+				}
+				finally
+				{
+					ObjectHelper.Dispose(ref registration);
+					ObjectHelper.Dispose(ref tokenRegistration);
+				}
 			}
 		}
 	}

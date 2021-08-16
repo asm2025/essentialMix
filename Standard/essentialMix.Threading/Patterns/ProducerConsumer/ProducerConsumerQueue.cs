@@ -23,12 +23,13 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		private readonly CallbackDelegates<T> _workCompletedCallback;
 
 		private CancellationTokenSource _cts;
+		private IDisposable _tokenRegistration;
 		private ManualResetEventSlim _workerStart;
 		private CountdownEvent _workersCountdown;
 		private CountdownEvent _tasksCountdown;
 
 		private volatile int _isPaused;
-		private volatile int _completeMarked;
+		private volatile int _isCompleted;
 		private volatile int _tasksCompleted;
 		private volatile int _workCompleted;
 		
@@ -53,8 +54,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			if (_context != null)
 			{
 				_context.OperationStarted();
-				WorkStartedCallback = que => _context.Post(WorkStartedSendOrPostCallback, que);
-				WorkCompletedCallback = que => _context.Post(WorkCompletedSendOrPostCallback, que);
+				WorkStartedCallback = que => _context.Post(SendWorkStartedCallback, que);
+				WorkCompletedCallback = que => _context.Post(SendWorkCompletedCallback, que);
 			}
 			else
 			{
@@ -67,11 +68,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		{
 			if (disposing)
 			{
-				CompleteInternal();
-
-				if (WaitOnDispose) Wait(TimeSpanHelper.INFINITE);
-				else Stop(true);
-				
+				Stop();
 				ReleaseWorkStart();
 				ReleaseTasksCountDown();
 				ReleaseWorkersCountDown();
@@ -118,17 +115,17 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		}
 
 		/// <inheritdoc />
-		public bool CompleteMarked
+		public bool IsCompleted
 		{
 			get
 			{
 				// ensure we have the latest value
 				Thread.MemoryBarrier();
-				return _completeMarked != 0;
+				return _isCompleted != 0;
 			}
-			protected set => Interlocked.CompareExchange(ref _completeMarked, value
+			protected set => Interlocked.CompareExchange(ref _isCompleted, value
 																				? 1
-																				: 0, _completeMarked);
+																				: 0, _isCompleted);
 		}
 
 		/// <inheritdoc />
@@ -156,8 +153,9 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		{
 			ThrowIfDisposed();
 			if (_cts != null) Interlocked.Exchange(ref _cts, null);
+			ObjectHelper.Dispose(ref _tokenRegistration);
 			Interlocked.CompareExchange(ref _cts, new CancellationTokenSource(), null);
-			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed(), false);
+			if (token.CanBeCanceled) _tokenRegistration = token.Register(() => _cts.CancelIfNotDisposed(), false);
 			Token = _cts.Token;
 		}
 
@@ -165,6 +163,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		{
 			if (_cts == null) return;
 			Interlocked.Exchange(ref _cts, null);
+			ObjectHelper.Dispose(ref _tokenRegistration);
 			Token = CancellationToken.None;
 		}
 
@@ -228,7 +227,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		protected void SignalWorkersCountDown()
 		{
 			if (_workersCountdown is { CurrentCount: > 1 }) _workersCountdown.Signal();
-			if (!CompleteMarked || !IsEmpty || _workersCountdown is { CurrentCount: > 1 }) return;
+			if (!IsCompleted || !IsEmpty || _workersCountdown is { CurrentCount: > 1 }) return;
 			if (_workCompleted != 0 || Interlocked.CompareExchange(ref _workCompleted, 1, 0) != 0) return;
 
 			if (_workersCountdown == null)
@@ -312,7 +311,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		protected void SignalTasksCountDown(bool signalAll = false)
 		{
 			if (_tasksCountdown is { CurrentCount: > 1 }) _tasksCountdown.Signal();
-			if (_tasksCountdown is null or { CurrentCount: > 1 } || !signalAll || !CompleteMarked || !IsEmpty) return;
+			if (_tasksCountdown is null or { CurrentCount: > 1 } || !signalAll || !IsCompleted || !IsEmpty) return;
 			if (_tasksCompleted != 0 || Interlocked.CompareExchange(ref _tasksCompleted, 1, 0) != 0) return;
 			_tasksCountdown.SignalAll();
 			ReleaseTasksCountDown();
@@ -350,7 +349,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		public void Enqueue(T item)
 		{
 			ThrowIfDisposed();
-			if (CompleteMarked) throw new InvalidOperationException("Completion marked.");
+			if (IsCompleted) throw new InvalidOperationException("Completion marked.");
 			EnqueueInternal(item);
 			if (SleepAfterEnqueue > 0) TimeSpanHelper.WasteTime(SleepAfterEnqueue, Token);
 		}
@@ -366,7 +365,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		public void Complete()
 		{
 			ThrowIfDisposed();
-			if (CompleteMarked) return;
+			if (IsCompleted) return;
 			CompleteInternal();
 		}
 
@@ -457,8 +456,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			}
 		}
 
-		private void WorkStartedSendOrPostCallback([NotNull] object state) { _workStartedCallback((IProducerConsumer<T>)state); }
-		private void WorkCompletedSendOrPostCallback([NotNull] object state) { _workCompletedCallback((IProducerConsumer<T>)state); }
+		private void SendWorkStartedCallback([NotNull] object state) { _workStartedCallback((IProducerConsumer<T>)state); }
+		private void SendWorkCompletedCallback([NotNull] object state) { _workCompletedCallback((IProducerConsumer<T>)state); }
 	}
 
 	public static class ProducerConsumerQueue

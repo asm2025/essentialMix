@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
@@ -19,31 +19,45 @@ namespace essentialMix.Threading.FileSystem
 			Changed
 		}
 
+		private readonly SynchronizationContext _context;
+		private readonly Action<FileSystemNotifier> _workStartedCallback;
+		private readonly Action<FileSystemNotifier> _workCompletedCallback;
+
 		private BlockingCollection<(EventType Type, FileSystemEventArgs Args)> _queue;
-		private ManualResetEventSlim _manualResetEventSlim = new ManualResetEventSlim(false);
+		private ManualResetEventSlim _workCompletedEvent = new ManualResetEventSlim(false);
 		private CancellationTokenSource _cts;
+		private IDisposable _tokenRegistration;
 
 		/// <inheritdoc />
-		public FileSystemNotifier(FileSystemWatcherSettings settings, CancellationToken token = default(CancellationToken))
-			: this(settings, false, ThreadPriority.Normal, token)
+		public FileSystemNotifier(FileSystemWatcherSettings options, CancellationToken token = default(CancellationToken))
+			: base(options)
 		{
-		}
+			IsBackground = options.IsBackground;
+			Priority = options.Priority;
+			WaitOnDispose = options.WaitOnDispose;
+			
+			_context = options.SynchronizeContext
+							? SynchronizationContext.Current
+							: null;
+			_workStartedCallback = options.WorkStartedCallback;
+			_workCompletedCallback = options.WorkCompletedCallback;
+			
+			if (_context != null)
+			{
+				_context.OperationStarted();
+				WorkStartedCallback = fsn => _context.Post(SendWorkStartedCallback, fsn);
+				WorkCompletedCallback = fsn => _context.Post(SendWorkCompletedCallback, fsn);
+			}
+			else
+			{
+				WorkStartedCallback = _workStartedCallback;
+				WorkCompletedCallback = _workCompletedCallback;
+			}
 
-		/// <inheritdoc />
-		public FileSystemNotifier(FileSystemWatcherSettings settings, ThreadPriority priority, CancellationToken token = default(CancellationToken))
-			: this(settings, false, priority, token)
-		{
-		}
-
-		/// <inheritdoc />
-		public FileSystemNotifier(FileSystemWatcherSettings settings, bool isBackground, ThreadPriority priority, CancellationToken token = default(CancellationToken))
-			: base(settings)
-		{
-			IsBackground = isBackground;
-			Priority = priority;
 			_cts = new CancellationTokenSource();
-			if (token.CanBeCanceled) token.Register(() => _cts.CancelIfNotDisposed(), false);
+			if (token.CanBeCanceled) _tokenRegistration = token.Register(state => ((CancellationTokenSource)state).CancelIfNotDisposed(), _cts, false);
 			Token = _cts.Token;
+			
 			_queue = new BlockingCollection<(EventType Type, FileSystemEventArgs Args)>();
 			new Thread(Consume)
 			{
@@ -57,107 +71,67 @@ namespace essentialMix.Threading.FileSystem
 		{
 			if (disposing)
 			{
-				CompleteInternal();
-				StopInternal(WaitForQueuedItems);
+				Stop();
 				ObjectHelper.Dispose(ref _queue);
-				ObjectHelper.Dispose(ref _manualResetEventSlim);
+				ObjectHelper.Dispose(ref _workCompletedEvent);
+				ObjectHelper.Dispose(ref _tokenRegistration);
 				ObjectHelper.Dispose(ref _cts);
+				_context?.OperationCompleted();
 			}
 			base.Dispose(disposing);
 		}
 
-		public int Count => _queue.Count;
-
-		public bool WaitForQueuedItems { get; set; } = true;
-
 		public bool IsBackground { get; }
-
 		public ThreadPriority Priority { get; }
-
+		public int Count => _queue.Count;
+		public bool WaitOnDispose { get; set; }
 		public CancellationToken Token { get; }
-
-		public bool IsBusy => _manualResetEventSlim is { IsSet: false };
-
-		public bool CompleteMarked => _queue.IsAddingCompleted;
+		public bool IsBusy => _workCompletedEvent is { IsSet: false };
+		public bool IsCompleted => _queue.IsAddingCompleted;
+		protected Action<FileSystemNotifier> WorkStartedCallback { get; }
+		protected Action<FileSystemNotifier> WorkCompletedCallback { get; }
 
 		public void Complete()
 		{
 			ThrowIfDisposed();
-			if (CompleteMarked) return;
-			CompleteInternal();
-		}
-
-		public void Stop()
-		{
-			ThrowIfDisposed();
-			StopInternal(WaitForQueuedItems);
-		}
-
-		public void Stop(bool waitForQueue)
-		{
-			ThrowIfDisposed();
-			StopInternal(waitForQueue);
-		}
-
-		public bool Wait()
-		{
-			ThrowIfDisposed();
-			return WaitInternal(TimeSpanHelper.INFINITE);
-		}
-
-		public bool Wait(TimeSpan timeout)
-		{
-			ThrowIfDisposed();
-			return WaitInternal(timeout.TotalIntMilliseconds());
-		}
-
-		public bool Wait(int millisecondsTimeout)
-		{
-			ThrowIfDisposed();
-			return WaitInternal(millisecondsTimeout);
-		}
-
-		[NotNull]
-		public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
-
-		[NotNull]
-		public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
-
-		[NotNull]
-		public Task<bool> WaitAsync(int millisecondsTimeout)
-		{
-			ThrowIfDisposed();
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			return Task.Run(() => WaitInternal(millisecondsTimeout), Token);
-		}
-
-		public void Clear()
-		{
-			ThrowIfDisposed();
-			ClearInternal();
-		}
-
-		protected virtual void CompleteInternal()
-		{
+			if (IsCompleted) return;
 			_queue.CompleteAdding();
 		}
 
-		protected virtual void ClearInternal()
+		public void Stop() { Stop(WaitOnDispose); }
+
+		public void Stop(bool waitForQueue)
 		{
-			_queue.Clear();
+			Complete();
+			
+			if (waitForQueue)
+			{
+				Wait(TimeSpanHelper.INFINITE);
+			}
+			else
+			{
+				Clear();
+				Cancel();
+			}
 		}
 
-		protected virtual bool WaitInternal(int millisecondsTimeout)
+		public bool Wait() { return Wait(TimeSpanHelper.INFINITE, CancellationToken.None); }
+		public bool Wait(TimeSpan timeout) { return Wait(timeout.TotalIntMilliseconds(), CancellationToken.None); }
+		public bool Wait(TimeSpan timeout, CancellationToken token) { return Wait(timeout.TotalIntMilliseconds(), token); }
+		public bool Wait(int millisecondsTimeout) { return Wait(millisecondsTimeout, CancellationToken.None); }
+		public bool Wait(int millisecondsTimeout, CancellationToken token)
 		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (!IsBusy) return true;
+			if (Token.IsCancellationRequested || token.IsCancellationRequested) return false;
+
+			IDisposable tokenRegistration = null;
 
 			try
 			{
-				if (millisecondsTimeout < TimeSpanHelper.ZERO)
-					_manualResetEventSlim.Wait(Token);
-				else if (!_manualResetEventSlim.Wait(millisecondsTimeout, Token))
-					return false;
+				if (token.CanBeCanceled) tokenRegistration = token.Register(() => _cts.CancelIfNotDisposed(), false);
+
+				if (millisecondsTimeout < TimeSpanHelper.ZERO) _workCompletedEvent.Wait(Token);
+				else if (!_workCompletedEvent.Wait(millisecondsTimeout, Token)) return false;
 
 				return !Token.IsCancellationRequested;
 			}
@@ -169,16 +143,18 @@ namespace essentialMix.Threading.FileSystem
 			{
 				// ignored
 			}
+			finally
+			{
+				ObjectHelper.Dispose(ref tokenRegistration);
+			}
 
 			return false;
 		}
 
-		protected virtual void StopInternal(bool waitForQueue)
+		public void Clear()
 		{
-			CompleteInternal();
-			// Wait for the consumer's thread to finish.
-			if (waitForQueue) WaitInternal(TimeSpanHelper.INFINITE);
-			ClearInternal();
+			ThrowIfDisposed();
+			_queue.Clear();
 		}
 
 		protected void Cancel() { _cts.CancelIfNotDisposed(); }
@@ -212,34 +188,63 @@ namespace essentialMix.Threading.FileSystem
 
 		private void Enqueue(EventType type, FileSystemEventArgs args)
 		{
-			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+			ThrowIfDisposed();
+			if (IsCompleted) throw new InvalidOperationException("Completion marked.");
+			if (Token.IsCancellationRequested) return;
 			_queue.Add((type, args), Token);
 		}
 
 		private void Consume()
 		{
-			if (IsDisposed) return;
-
-			_manualResetEventSlim.Reset();
+			if (IsDisposed || Token.IsCancellationRequested) return;
+			_workCompletedEvent.Reset();
 
 			try
 			{
-				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && !_queue.IsCompleted)
+				// BlockingCollection<T> is thread safe
+				while (!IsDisposed && !Token.IsCancellationRequested && !IsCompleted)
 				{
-					while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out (EventType Type, FileSystemEventArgs Args) item, TimeSpanHelper.FAST, Token))
+					if (!Enabled)
+					{
+						SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || Enabled);
+						continue;
+					}
+
+					while (!IsDisposed && !Token.IsCancellationRequested && _queue.Count > 0 && _queue.TryTake(out (EventType Type, FileSystemEventArgs Args) item, TimeSpanHelper.FAST, Token))
 						Process(item.Type, item.Args);
 				}
 
 				if (IsDisposed || Token.IsCancellationRequested) return;
 
-				while (!IsDisposed && !Token.IsCancellationRequested && _queue.TryTake(out (EventType Type, FileSystemEventArgs Args) item, TimeSpanHelper.FAST, Token))
-					Process(item.Type, item.Args);
+				IEnumerator<(EventType Type, FileSystemEventArgs Args)> enumerator = null;
+
+				try
+				{
+					enumerator = _queue.GetConsumingEnumerable(Token).GetEnumerator();
+
+					while (!IsDisposed && !Token.IsCancellationRequested)
+					{
+						if (!Enabled)
+						{
+							SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !Enabled);
+							if (IsDisposed || Token.IsCancellationRequested) return;
+						}
+
+						if (!enumerator.MoveNext()) break;
+						(EventType type, FileSystemEventArgs args) = enumerator.Current;
+						Process(type, args);
+					}
+				}
+				finally
+				{
+					ObjectHelper.Dispose(ref enumerator);
+				}
 			}
 			catch (ObjectDisposedException) { }
 			catch (OperationCanceledException) { }
 			finally
 			{
-				_manualResetEventSlim.Set();
+				_workCompletedEvent?.Set();
 			}
 		}
 
@@ -259,7 +264,12 @@ namespace essentialMix.Threading.FileSystem
 				case EventType.Changed:
 					base.OnChanged(args);
 					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(type), type, null);
 			}
 		}
+
+		private void SendWorkStartedCallback([NotNull] object state) { _workStartedCallback((FileSystemNotifier)state); }
+		private void SendWorkCompletedCallback([NotNull] object state) { _workCompletedCallback((FileSystemNotifier)state); }
 	}
 }

@@ -11,7 +11,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 	public interface IProducerConsumer<in T> : IDisposable
 	{
 		bool IsPaused { get; }
-		bool CompleteMarked { get; }
+		bool IsCompleted { get; }
 		int Count { get; }
 		int Running { get; }
 		bool IsEmpty { get; }

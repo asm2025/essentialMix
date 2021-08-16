@@ -41,7 +41,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 		protected override void EnqueueInternal(T item)
 		{
-			if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+			if (IsDisposed || Token.IsCancellationRequested || IsCompleted) return;
 
 			if (!WaitForWorkerStart())
 			{
@@ -49,7 +49,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 				lock(_workers)
 				{
-					if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+					if (IsDisposed || Token.IsCancellationRequested || IsCompleted) return;
 
 					if (!WaitForWorkerStart())
 					{
@@ -68,7 +68,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					
 						invokeWorkStarted = true;
 						if (!WaitForWorkerStart()) throw new TimeoutException();
-						if (IsDisposed || Token.IsCancellationRequested || CompleteMarked) return;
+						if (IsDisposed || Token.IsCancellationRequested || IsCompleted) return;
 					}
 				}
 
@@ -128,7 +128,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			lock(SyncRoot)
 			{
-				CompleteMarked = true;
+				IsCompleted = true;
 				Monitor.PulseAll(SyncRoot);
 			}
 		}
@@ -149,7 +149,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 			try
 			{
-				while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked)
+				while (!IsDisposed && !Token.IsCancellationRequested && !IsCompleted)
 				{
 					if (IsPaused)
 					{
@@ -159,7 +159,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 					SpinWait spinner = new SpinWait();
 
-					while (!IsDisposed && !Token.IsCancellationRequested && !CompleteMarked && _queue.IsEmpty)
+					while (!IsDisposed && !Token.IsCancellationRequested && !IsCompleted && _queue.IsEmpty)
 					{
 						if (IsPaused)
 						{

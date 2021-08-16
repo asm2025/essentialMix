@@ -102,14 +102,7 @@ namespace essentialMix.Extensions
 			if (!token.IsAwaitable()) return WaitHandle.WaitAll(thisValue, millisecondsTimeout, exitContext);
 			if (token.IsCancellationRequested) return false;
 
-			bool result = false;
-			SpinWait.SpinUntil(() =>
-			{
-				result = WaitHandle.WaitAll(thisValue, millisecondsTimeout, exitContext);
-				return !result || token.IsCancellationRequested;
-			}, millisecondsTimeout);
-
-			return result && !token.IsCancellationRequested;
+			return WaitHandle.WaitAll(thisValue, millisecondsTimeout, exitContext) && !token.IsCancellationRequested;
 		}
 
 		public static int WaitAny([NotNull] this WaitHandle[] thisValue, CancellationToken token = default(CancellationToken)) { return WaitAny(thisValue, TimeSpanHelper.INFINITE, false, token); }
@@ -233,7 +226,7 @@ namespace essentialMix.Extensions
 		public static Task<bool> ToTask([NotNull] this WaitHandle thisValue, TimeSpan timeout, CancellationToken token) { return ToTask(thisValue, timeout.TotalIntMilliseconds(), token); }
 		[NotNull]
 		public static Task<bool> ToTask([NotNull] this WaitHandle thisValue, int millisecondsTimeout) { return ToTask(thisValue, millisecondsTimeout, CancellationToken.None); }
-		// based on Nito.AsyncEx.Interop
+		[NotNull]
 		public static Task<bool> ToTask([NotNull] this WaitHandle thisValue, int millisecondsTimeout, CancellationToken token)
 		{
 			return TaskHelper.FromWaitHandle(thisValue, millisecondsTimeout, token);
