@@ -1,4 +1,8 @@
-﻿namespace TestApp
+﻿using System;
+using System.Threading.Tasks;
+using essentialMix.Extensions;
+
+namespace TestApp
 {
 	internal class Student
 	{
@@ -12,6 +16,8 @@
 		/// <inheritdoc />
 		public override string ToString() { return $"{Id:D5} {Name} [{Grade:F2}]"; }
 
+		public event EventHandler Happened;
+
 		public void MethodWithInputs(int input1, string input2)
 		{
 		}
@@ -22,6 +28,12 @@
 
 		public void MethodWithInputs(int input1, int[] input2)
 		{
+		}
+
+		public void WillHappenIn(int millisecondTimeout)
+		{
+			if (millisecondTimeout < 1) throw new ArgumentOutOfRangeException(nameof(millisecondTimeout));
+			Task.Delay(millisecondTimeout).ConfigureAwait().ContinueWith(_ => Happened?.Invoke(this, EventArgs.Empty));
 		}
 	}
 }

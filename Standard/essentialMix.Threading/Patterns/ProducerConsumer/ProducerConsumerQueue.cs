@@ -54,8 +54,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			if (_context != null)
 			{
 				_context.OperationStarted();
-				WorkStartedCallback = que => _context.Post(SendWorkStartedCallback, que);
-				WorkCompletedCallback = que => _context.Post(SendWorkCompletedCallback, que);
+				if (_workStartedCallback != null) WorkStartedCallback = que => _context.Post(SendWorkStartedCallback, que);
+				if (_workCompletedCallback != null) WorkCompletedCallback = que => _context.Post(SendWorkCompletedCallback, que);
 			}
 			else
 			{
@@ -377,7 +377,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			if (IsPaused) return;
 			IsPaused = true;
 			if (Running == 0) return;
-			SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || Running == 0);
+			SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || Running == 0, TimeSpanHelper.SECOND);
 		}
 
 		/// <inheritdoc />

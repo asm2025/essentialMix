@@ -17,10 +17,7 @@ namespace essentialMix.Extensions
 		private static readonly Lazy<FieldInfo> __sourceField = new Lazy<FieldInfo>(() => typeof(CancellationToken).GetField("m_source", Constants.BF_NON_PUBLIC_INSTANCE), LazyThreadSafetyMode.PublicationOnly);
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsAwaitable(this CancellationToken thisValue) { return thisValue.CanBeCanceled; }
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsAwaitable(this CancellationToken? thisValue) { return thisValue != null && IsAwaitable(thisValue.Value); }
+		public static bool CanBeCanceled(this CancellationToken? thisValue) { return thisValue is { CanBeCanceled: true }; }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsCancelledOrDisposed(this CancellationToken? thisValue)

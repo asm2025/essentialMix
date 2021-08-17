@@ -199,16 +199,16 @@ namespace essentialMix.Threading
 
 		public Process Run([NotNull] string execName, string arguments, [NotNull] RunSettings settings) { return ProcessHelper.Run(execName, arguments, settings); }
 
-		public bool RunAndWaitFor([NotNull] string execName, CancellationToken token = default(CancellationToken)) { return RunAndWaitFor(execName, null, null, token); }
-
-		public bool RunAndWaitFor([NotNull] string execName, RunAndWaitForSettings settings, CancellationToken token = default(CancellationToken)) { return RunAndWaitFor(execName, null, settings, token); }
-
-		public bool RunAndWaitFor([NotNull] string execName, string arguments, CancellationToken token = default(CancellationToken)) { return RunAndWaitFor(execName, arguments, null, token); }
-
-		public bool RunAndWaitFor([NotNull] string execName, string arguments, RunAndWaitForSettings settings, CancellationToken token = default(CancellationToken))
+		[NotNull]
+		public Task<bool> RunAndWaitForAsync([NotNull] string execName, CancellationToken token = default(CancellationToken)) { return RunAndWaitForAsync(execName, null, null, token); }
+		[NotNull]
+		public Task<bool> RunAndWaitForAsync([NotNull] string execName, RunAndWaitForSettings settings, CancellationToken token = default(CancellationToken)) { return RunAndWaitForAsync(execName, null, settings, token); }
+		[NotNull]
+		public Task<bool> RunAndWaitForAsync([NotNull] string execName, string arguments, CancellationToken token = default(CancellationToken)) { return RunAndWaitForAsync(execName, arguments, null, token); }
+		[NotNull]
+		public Task<bool> RunAndWaitForAsync([NotNull] string execName, string arguments, RunAndWaitForSettings settings, CancellationToken token = default(CancellationToken))
 		{
-			token.ThrowIfCancellationRequested();
-			return RunAndWaitFor(execName, arguments, settings, token.WaitHandle);
+			return ProcessHelper.RunAndWaitForAsync(execName, arguments, settings, token);
 		}
 
 		public bool RunAndWaitFor([NotNull] string execName, WaitHandle awaitableHandle) { return RunAndWaitFor(execName, null, null, awaitableHandle); }
@@ -222,16 +222,16 @@ namespace essentialMix.Threading
 			return ProcessHelper.RunAndWaitFor(execName, arguments, settings, awaitableHandle);
 		}
 
-		public RunOutput RunAndGetOutput([NotNull] string execName, CancellationToken token = default(CancellationToken)) { return RunAndGetOutput(execName, null, null, token); }
-
-		public RunOutput RunAndGetOutput([NotNull] string execName, RunSettingsBase settings, CancellationToken token = default(CancellationToken)) { return RunAndGetOutput(execName, null, settings, token); }
-
-		public RunOutput RunAndGetOutput([NotNull] string execName, string arguments, CancellationToken token = default(CancellationToken)) { return RunAndGetOutput(execName, arguments, null, token); }
-
-		public RunOutput RunAndGetOutput([NotNull] string execName, string arguments, RunSettingsBase settings, CancellationToken token = default(CancellationToken))
+		[NotNull]
+		public Task<RunOutput> RunAndGetOutputAsync([NotNull] string execName, CancellationToken token = default(CancellationToken)) { return RunAndGetOutputAsync(execName, null, null, token); }
+		[NotNull]
+		public Task<RunOutput> RunAndGetOutputAsync([NotNull] string execName, RunSettingsBase settings, CancellationToken token = default(CancellationToken)) { return RunAndGetOutputAsync(execName, null, settings, token); }
+		[NotNull]
+		public Task<RunOutput> RunAndGetOutputAsync([NotNull] string execName, string arguments, CancellationToken token = default(CancellationToken)) { return RunAndGetOutputAsync(execName, arguments, null, token); }
+		[NotNull]
+		public Task<RunOutput> RunAndGetOutputAsync([NotNull] string execName, string arguments, RunSettingsBase settings, CancellationToken token = default(CancellationToken))
 		{
-			token.ThrowIfCancellationRequested();
-			return RunAndGetOutput(execName, arguments, settings, token.WaitHandle);
+			return ProcessHelper.RunAndGetOutputAsync(execName, arguments, settings, token);
 		}
 
 		public RunOutput RunAndGetOutput([NotNull] string execName, WaitHandle awaitableHandle) { return RunAndGetOutput(execName, null, null, awaitableHandle); }

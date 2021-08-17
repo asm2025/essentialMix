@@ -100,14 +100,8 @@ namespace essentialMix.Threading
 			}
 		}
 
-		[NotNull]
-		public Task<bool> RunAsync(CancellationToken token = default(CancellationToken))
-		{
-			token.ThrowIfCancellationRequested();
-			return Task.Run(() => Run(token), token);
-		}
-
-		public abstract bool Run(CancellationToken token = default(CancellationToken));
+		public abstract bool Run();
+		public abstract Task<bool> RunAsync(CancellationToken token = default(CancellationToken));
 		public abstract void Die();
 
 		protected virtual void OnCollectingArguments() { }
@@ -233,7 +227,53 @@ namespace essentialMix.Threading
 
 		protected abstract T GetSettingsOrDefault();
 
-		public override bool Run(CancellationToken token = default(CancellationToken))
+		public override bool Run()
+		{
+			ThrowIfDisposed();
+
+			string executableName = ExecutableName?.Trim();
+			if (string.IsNullOrEmpty(executableName)) throw new InvalidOperationException($"{nameof(ExecutableName)} is not set.");
+
+			CancellationTokenSource cts = null;
+
+			try
+			{
+				IsBusy = true;
+
+				string args = CollectArguments();
+				ExecutableSettingsBase settings = GetSettingsOrDefault() ?? (ExecutableSettingsBase)ShellSettings.Default;
+				if (Timeout.IsValid()) cts = new CancellationTokenSource(Timeout);
+				CancellationToken token = cts?.Token ?? CancellationToken.None;
+
+				switch (settings)
+				{
+					case RunAndWaitForSettings runAndWaitForSettings:
+						runAndWaitForSettings.OnCreate = OnCreate;
+						runAndWaitForSettings.OnStart = OnStart;
+						runAndWaitForSettings.OnOutput = OnOutput;
+						runAndWaitForSettings.OnError = OnError;
+						runAndWaitForSettings.OnExit = OnExit;
+						return ProcessHelper.RunAndWaitFor(executableName, args, runAndWaitForSettings, token.WaitHandle);
+					case RunSettingsBase runSettingsCore:
+						runSettingsCore.OnCreate = OnCreate;
+						runSettingsCore.OnStart = OnStart;
+						runSettingsCore.OnExit = OnExit;
+						RunOutput = ProcessHelper.RunAndGetOutput(executableName, args, runSettingsCore, token.WaitHandle);
+						return RunOutput != null;
+					case ShellSettings shellSettings:
+						return ProcessHelper.ShellExecAndWaitFor(executableName, args, shellSettings, token.WaitHandle);
+					default:
+						throw new InvalidOperationException($"Unknown settings type {settings.GetType()}.");
+				}
+			}
+			finally
+			{
+				IsBusy = false;
+				ObjectHelper.Dispose(ref cts);
+			}
+		}
+
+		public override Task<bool> RunAsync(CancellationToken token = default(CancellationToken))
 		{
 			ThrowIfDisposed();
 			token.ThrowIfCancellationRequested();
@@ -244,53 +284,64 @@ namespace essentialMix.Threading
 			CancellationTokenSource cts = null;
 			CancellationTokenSource ctsMerged = null;
 
-			try
+			IsBusy = true;
+
+			string args = CollectArguments();
+			ExecutableSettingsBase settings = GetSettingsOrDefault() ?? (ExecutableSettingsBase)ShellSettings.Default;
+			CancellationToken tokn;
+
+			if (Timeout.IsValid())
 			{
-				IsBusy = true;
-
-				string args = CollectArguments();
-				ExecutableSettingsBase settings = GetSettingsOrDefault() ?? (ExecutableSettingsBase)ShellSettings.Default;
-				CancellationToken tokn;
-
-				if (Timeout.IsValid())
-				{
-					cts = new CancellationTokenSource(Timeout);
-					ctsMerged = !token.CanBeCanceled
-						? cts
-						: cts.Merge(token);
-				}
-				else
-				{
-					tokn = token;
-				}
-
-				switch (settings)
-				{
-					case RunAndWaitForSettings runAndWaitForSettings:
-						runAndWaitForSettings.OnCreate = OnCreate;
-						runAndWaitForSettings.OnStart = OnStart;
-						runAndWaitForSettings.OnOutput = OnOutput;
-						runAndWaitForSettings.OnError = OnError;
-						runAndWaitForSettings.OnExit = OnExit;
-						return ProcessHelper.RunAndWaitFor(executableName, args, runAndWaitForSettings, tokn);
-					case RunSettingsBase runSettingsCore:
-						runSettingsCore.OnCreate = OnCreate;
-						runSettingsCore.OnStart = OnStart;
-						runSettingsCore.OnExit = OnExit;
-						RunOutput = ProcessHelper.RunAndGetOutput(executableName, args, runSettingsCore, tokn);
-						return RunOutput != null;
-					case ShellSettings shellSettings:
-						return ProcessHelper.ShellExecAndWaitFor(executableName, args, shellSettings, tokn);
-					default:
-						throw new InvalidOperationException($"Unknown settings type {settings.GetType()}.");
-				}
+				cts = new CancellationTokenSource(Timeout);
+				ctsMerged = !token.CanBeCanceled
+								? cts
+								: cts.Merge(token);
 			}
-			finally
+			else
 			{
-				IsBusy = false;
+				tokn = token;
+			}
+
+			Task<bool> task;
+
+			switch (settings)
+			{
+				case RunAndWaitForSettings runAndWaitForSettings:
+					runAndWaitForSettings.OnCreate = OnCreate;
+					runAndWaitForSettings.OnStart = OnStart;
+					runAndWaitForSettings.OnOutput = OnOutput;
+					runAndWaitForSettings.OnError = OnError;
+					runAndWaitForSettings.OnExit = OnExit;
+					task = ProcessHelper.RunAndWaitForAsync(executableName, args, runAndWaitForSettings, tokn);
+					break;
+				case RunSettingsBase runSettingsCore:
+					runSettingsCore.OnCreate = OnCreate;
+					runSettingsCore.OnStart = OnStart;
+					runSettingsCore.OnExit = OnExit;
+					task = ProcessHelper.RunAndGetOutputAsync(executableName, args, runSettingsCore, token)
+										.ContinueWith(t => t.IsCompleted && t.Result != null, tokn, TaskContinuationOptions.RunContinuationsAsynchronously, TaskScheduler.Default);
+					break;
+				case ShellSettings shellSettings:
+					task = ProcessHelper.ShellExecAndWaitForAsync(executableName, args, shellSettings, tokn)
+									.ContinueWith(t =>
+									{
+										ObjectHelper.Dispose(ref ctsMerged);
+										ObjectHelper.Dispose(ref cts);
+										IsBusy = false;
+										return t.IsCompleted && t.Result;
+									}, tokn, TaskContinuationOptions.RunContinuationsAsynchronously, TaskScheduler.Default);
+					break;
+				default:
+					throw new InvalidOperationException($"Unknown settings type {settings.GetType()}.");
+			}
+
+			return task.ContinueWith(t =>
+			{
 				ObjectHelper.Dispose(ref ctsMerged);
 				ObjectHelper.Dispose(ref cts);
-			}
+				IsBusy = false;
+				return t.IsCompleted && t.Result;
+			}, tokn, TaskContinuationOptions.RunContinuationsAsynchronously, TaskScheduler.Default);
 		}
 
 		public override void Die()

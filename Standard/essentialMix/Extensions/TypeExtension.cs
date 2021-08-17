@@ -1517,7 +1517,7 @@ namespace essentialMix.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static MethodInfo GetMethodInfoFromDelegate([NotNull] this Type thisValue)
 		{
-			if (!thisValue.IsSubclassOf(typeof(MulticastDelegate))) throw new InvalidOperationException("Type is not a subclass of MulticastDelegate.");
+			if (!typeof(MulticastDelegate).IsAssignableFrom(thisValue)) throw new InvalidOperationException("Type is not a subclass of MulticastDelegate.");
 			MethodInfo invoke = thisValue.GetMethod("Invoke") ?? throw new InvalidOperationException("Type is not a delegate.");
 			return invoke;
 		}
@@ -1529,7 +1529,7 @@ namespace essentialMix.Extensions
 			if (invoke.ReturnType != typeof(void)) throw new InvalidOperationException("Invalid signature.");
 
 			ParameterInfo[] parameters = invoke.GetParameters();
-			if (parameters.Length != 2 || parameters[0].ParameterType != typeof(object) || !parameters[1].ParameterType.IsSubclassOf(typeof(EventArgs))) throw new InvalidOperationException("Invalid signature.");
+			if (parameters.Length != 2 || parameters[0].ParameterType != typeof(object) || !typeof(EventArgs).IsAssignableFrom(parameters[1].ParameterType)) throw new InvalidOperationException("Invalid signature.");
 			return invoke;
 		}
 

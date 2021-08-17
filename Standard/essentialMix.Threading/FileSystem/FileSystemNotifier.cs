@@ -45,8 +45,8 @@ namespace essentialMix.Threading.FileSystem
 			if (_context != null)
 			{
 				_context.OperationStarted();
-				WorkStartedCallback = fsn => _context.Post(SendWorkStartedCallback, fsn);
-				WorkCompletedCallback = fsn => _context.Post(SendWorkCompletedCallback, fsn);
+				if (_workStartedCallback != null) WorkStartedCallback = fsn => _context.Post(SendWorkStartedCallback, fsn);
+				if (_workCompletedCallback != null) WorkCompletedCallback = fsn => _context.Post(SendWorkCompletedCallback, fsn);
 			}
 			else
 			{
@@ -116,6 +116,7 @@ namespace essentialMix.Threading.FileSystem
 		}
 
 		public bool Wait() { return Wait(TimeSpanHelper.INFINITE, CancellationToken.None); }
+		public bool Wait(CancellationToken token) { return Wait(TimeSpanHelper.INFINITE, token); }
 		public bool Wait(TimeSpan timeout) { return Wait(timeout.TotalIntMilliseconds(), CancellationToken.None); }
 		public bool Wait(TimeSpan timeout, CancellationToken token) { return Wait(timeout.TotalIntMilliseconds(), token); }
 		public bool Wait(int millisecondsTimeout) { return Wait(millisecondsTimeout, CancellationToken.None); }

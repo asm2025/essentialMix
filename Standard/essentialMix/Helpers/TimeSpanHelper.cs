@@ -16,10 +16,10 @@ namespace essentialMix.Helpers
 		}
 		
 		public const int ZERO = 0;
+		public const int MINIMUM = 10;
 		public const int MAXIMUM = int.MaxValue;
 		public const int INFINITE = Timeout.Infinite;
 
-		public const int MINIMUM = 10;
 		public const int FAST = 50;
 		public const int FAST2 = 100;
 		public const int QUARTER = 250;
@@ -38,11 +38,16 @@ namespace essentialMix.Helpers
 		public const int DAY = HOUR * 24;
 		public const int WEEK = DAY * 7;
 
+		public static readonly TimeSpan Zero = TimeSpan.Zero;
 		public static readonly TimeSpan Minimum = TimeSpan.FromMilliseconds(MINIMUM);
+		public static readonly TimeSpan Maximum = TimeSpan.FromMilliseconds(MAXIMUM);
+		public static readonly TimeSpan Infinite = TimeSpan.FromMilliseconds(INFINITE);
+
 		public static readonly TimeSpan Fast = TimeSpan.FromMilliseconds(FAST);
 		public static readonly TimeSpan Fast2 = TimeSpan.FromMilliseconds(FAST2);
 		public static readonly TimeSpan Quarter = TimeSpan.FromMilliseconds(QUARTER);
 		public static readonly TimeSpan Half = TimeSpan.FromMilliseconds(HALF);
+		
 		public static readonly TimeSpan Second = TimeSpan.FromSeconds(1);
 		public static readonly TimeSpan TwoSeconds = TimeSpan.FromSeconds(2);
 		public static readonly TimeSpan ThreeSeconds = TimeSpan.FromSeconds(3);

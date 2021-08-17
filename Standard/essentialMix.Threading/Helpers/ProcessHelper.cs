@@ -106,22 +106,70 @@ namespace essentialMix.Threading.Helpers
 			return InternalShellExec(info);
 		}
 
-		public static bool ShellExecAndWaitFor([NotNull] string execName, CancellationToken token = default(CancellationToken)) { return ShellExecAndWaitFor(execName, null, null, token); }
-
-		public static bool ShellExecAndWaitFor([NotNull] string execName, ShellSettings settings, CancellationToken token = default(CancellationToken))
-		{
-			return ShellExecAndWaitFor(execName, null, settings, token);
-		}
-
-		public static bool ShellExecAndWaitFor([NotNull] string execName, string arguments, CancellationToken token = default(CancellationToken))
-		{
-			return ShellExecAndWaitFor(execName, arguments, null, token);
-		}
-
-		public static bool ShellExecAndWaitFor([NotNull] string execName, string arguments, ShellSettings settings, CancellationToken token = default(CancellationToken))
+		[NotNull]
+		public static Task<bool> ShellExecAndWaitForAsync([NotNull] string execName, CancellationToken token = default(CancellationToken)) { return ShellExecAndWaitForAsync(execName, null, null, token); }
+		[NotNull]
+		public static Task<bool> ShellExecAndWaitForAsync([NotNull] string execName, ShellSettings settings, CancellationToken token = default(CancellationToken)) { return ShellExecAndWaitForAsync(execName, null, settings, token); }
+		[NotNull]
+		public static Task<bool> ShellExecAndWaitForAsync([NotNull] string execName, string arguments, CancellationToken token = default(CancellationToken)) { return ShellExecAndWaitForAsync(execName, arguments, null, token); }
+		[NotNull]
+		public static Task<bool> ShellExecAndWaitForAsync([NotNull] string execName, string arguments, ShellSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			return ShellExecAndWaitFor(execName, arguments, settings, token.WaitHandle);
+			execName = execName.Trim();
+			if (string.IsNullOrEmpty(execName)) throw new ArgumentNullException(nameof(execName));
+			settings ??= ShellSettings.Default;
+
+			SHELLEXECUTEINFO info = GetShellExecuteInfo(execName, arguments, settings);
+			Process process = null;
+			SafeWaitHandle waitHandle;
+			ManualResetEvent processFinishedEvent = null;
+
+			try
+			{
+				process = InternalShellExec(info);
+				if (process == null) return Task.FromResult(false);
+				if (!settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, process);
+
+				if (!token.CanBeCanceled)
+				{
+					process.WaitForExit();
+					return Task.FromResult(true);
+				}
+
+				bool processReallyExited = false;
+				process.Exited += (_, _) => processReallyExited = true;
+				waitHandle = new SafeWaitHandle(process.Handle, false);
+				if (!waitHandle.IsAwaitable()) return Task.FromResult(false);
+				processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
+				// copy to local variable
+				Process proc = process;
+				return TaskHelper.FromWaitHandle(processFinishedEvent, token)
+								.ConfigureAwait()
+								.ContinueWith(t =>
+								{
+									int ndx = t.IsCompleted && t.Result
+												? 0
+												: -1;
+
+									if (!processReallyExited && proc.IsAwaitable())
+									{
+										if (!proc.WaitForExit(TimeSpanHelper.FIVE_SECONDS)) ndx = -1;
+									}
+
+									proc.Die();
+									ObjectHelper.Dispose(ref proc);
+									processFinishedEvent?.Close();
+									ObjectHelper.Dispose(ref processFinishedEvent);
+									waitHandle?.Close();
+									ObjectHelper.Dispose(ref waitHandle);
+									return ndx == 0;
+								}, token, TaskContinuationOptions.RunContinuationsAsynchronously, TaskScheduler.Default);
+			}
+			finally
+			{
+				if (processFinishedEvent == null) ObjectHelper.Dispose(ref process);
+			}
 		}
 
 		public static bool ShellExecAndWaitFor([NotNull] string fileName, WaitHandle awaitableHandle) { return ShellExecAndWaitFor(fileName, null, null, awaitableHandle); }
@@ -143,9 +191,13 @@ namespace essentialMix.Threading.Helpers
 			settings ??= ShellSettings.Default;
 
 			SHELLEXECUTEINFO info = GetShellExecuteInfo(fileName, arguments, settings);
+			Process process = null;
+			SafeWaitHandle waitHandle = null;
+			ManualResetEvent processFinishedEvent = null;
 
-			using (Process process = InternalShellExec(info))
+			try
 			{
+				process = InternalShellExec(info);
 				if (process == null) return false;
 				if (!settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, process);
 
@@ -157,41 +209,35 @@ namespace essentialMix.Threading.Helpers
 
 				bool processReallyExited = false;
 				process.Exited += (_, _) => processReallyExited = true;
+				waitHandle = new SafeWaitHandle(process.Handle, false);
+				if (!waitHandle.IsAwaitable()) return false;
+				processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
+				if (!awaitableHandle.IsAwaitable()) return false;
 
-				SafeWaitHandle waitHandle = null;
-				ManualResetEvent processFinishedEvent = null;
-
-				try
+				WaitHandle[] waitHandles =
 				{
-					waitHandle = new SafeWaitHandle(process.Handle, false);
-					if (!waitHandle.IsAwaitable()) return false;
-					processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
-					if (!awaitableHandle.IsAwaitable()) return false;
+					processFinishedEvent,
+					awaitableHandle
+				};
 
-					WaitHandle[] waitHandles =
-					{
-						processFinishedEvent,
-						awaitableHandle
-					};
+				int ndx = waitHandles.WaitAny();
+				if (ndx != 0) return false;
 
-					int ndx = waitHandles.WaitAny();
-					if (ndx != 0) return false;
-
-					if (!processReallyExited && process.IsAwaitable())
-					{
-						if (!process.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
-					}
-
-					process.Die();
-					return ndx == 0;
-				}
-				finally
+				if (!processReallyExited && process.IsAwaitable())
 				{
-					processFinishedEvent?.Close();
-					ObjectHelper.Dispose(ref processFinishedEvent);
-					waitHandle?.Close();
-					ObjectHelper.Dispose(ref waitHandle);
+					if (!process.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
 				}
+
+				process.Die();
+				return ndx == 0;
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref process);
+				processFinishedEvent?.Close();
+				ObjectHelper.Dispose(ref processFinishedEvent);
+				waitHandle?.Close();
+				ObjectHelper.Dispose(ref waitHandle);
 			}
 		}
 
@@ -227,41 +273,27 @@ namespace essentialMix.Threading.Helpers
 			}
 		}
 
-		public static bool RunAndWaitFor([NotNull] string execName, CancellationToken token = default(CancellationToken)) { return RunAndWaitFor(execName, null, null, token); }
-
-		public static bool RunAndWaitFor([NotNull] string execName, RunAndWaitForSettings settings, CancellationToken token = default(CancellationToken))
-		{
-			return RunAndWaitFor(execName, null, settings, token);
-		}
-
-		public static bool RunAndWaitFor([NotNull] string execName, string arguments, CancellationToken token = default(CancellationToken)) { return RunAndWaitFor(execName, arguments, null, token); }
-
-		public static bool RunAndWaitFor([NotNull] string execName, string arguments, RunAndWaitForSettings settings, CancellationToken token = default(CancellationToken))
+		[NotNull]
+		public static Task<bool> RunAndWaitForAsync([NotNull] string execName, CancellationToken token = default(CancellationToken)) { return RunAndWaitForAsync(execName, null, null, token); }
+		[NotNull]
+		public static Task<bool> RunAndWaitForAsync([NotNull] string execName, RunAndWaitForSettings settings, CancellationToken token = default(CancellationToken)) { return RunAndWaitForAsync(execName, null, settings, token); }
+		[NotNull]
+		public static Task<bool> RunAndWaitForAsync([NotNull] string execName, string arguments, CancellationToken token = default(CancellationToken)) { return RunAndWaitForAsync(execName, arguments, null, token); }
+		[NotNull]
+		public static Task<bool> RunAndWaitForAsync([NotNull] string execName, string arguments, RunAndWaitForSettings settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			return RunAndWaitFor(execName, arguments, settings, token.WaitHandle);
-		}
-
-		public static bool RunAndWaitFor([NotNull] string execName, WaitHandle awaitableHandle) { return RunAndWaitFor(execName, null, null, awaitableHandle); }
-
-		public static bool RunAndWaitFor([NotNull] string execName, RunAndWaitForSettings settings, WaitHandle awaitableHandle)
-		{
-			return RunAndWaitFor(execName, null, settings, awaitableHandle);
-		}
-
-		public static bool RunAndWaitFor([NotNull] string execName, string arguments, WaitHandle awaitableHandle)
-		{
-			return RunAndWaitFor(execName, arguments, null, awaitableHandle);
-		}
-
-		public static bool RunAndWaitFor([NotNull] string execName, string arguments, RunAndWaitForSettings settings, WaitHandle awaitableHandle)
-		{
 			settings ??= RunAndWaitForSettings.Default;
 			if (settings.OnOutput != null) settings.RedirectOutput = true;
 			if (settings.OnError != null) settings.RedirectError = true;
 
-			using (Process process = CreateForRun(execName, arguments, settings))
+			Process process = null;
+			ManualResetEvent processFinishedEvent = null;
+
+			try
 			{
+				process = CreateForRun(execName, arguments, settings);
+
 				if (settings.RedirectOutput)
 				{
 					process.OutputDataReceived += (_, args) =>
@@ -305,113 +337,225 @@ namespace essentialMix.Threading.Helpers
 					settings.OnExit?.Invoke(execName, exitTime, exitCode);
 				};
 
-				try
+				bool result = process.Start();
+				if (!result) return Task.FromResult(false);
+				if (!settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, process);
+
+				if (settings.RedirectOutput && settings.OnOutput != null)
 				{
-					bool result = process.Start();
-					if (!result) return false;
-					if (!settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, process);
-
-					if (settings.RedirectOutput && settings.OnOutput != null)
-					{
-						AsyncStreamReader output = new AsyncStreamReader(process, process.StandardOutput.BaseStream, settings.OnOutput, process.StandardOutput.CurrentEncoding);
-						output.BeginRead();
-					}
-
-					if (settings.RedirectError && settings.OnError != null)
-					{
-						AsyncStreamReader error = new AsyncStreamReader(process, process.StandardError.BaseStream, settings.OnError, process.StandardError.CurrentEncoding);
-						error.BeginRead();
-					}
-
-					settings.OnStart?.Invoke(execName, process.StartTime);
-
-					if (!awaitableHandle.IsAwaitable())
-					{
-						process.WaitForExit();
-						return true;
-					}
-
-					SafeWaitHandle waitHandle = null;
-					ManualResetEvent processFinishedEvent = null;
-
-					try
-					{
-						waitHandle = new SafeWaitHandle(process.Handle, false);
-						if (!waitHandle.IsAwaitable()) return false;
-						processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
-						if (!awaitableHandle.IsAwaitable()) return false;
-
-						WaitHandle[] waitHandles =
-						{
-							processFinishedEvent,
-							awaitableHandle
-						};
-
-						int ndx = waitHandles.WaitAny();
-						if (ndx != 0) return false;
-
-						if (!processReallyExited && process.IsAwaitable())
-						{
-							if (!process.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
-						}
-
-						process.Die();
-						return ndx == 0;
-					}
-					finally
-					{
-						processFinishedEvent?.Close();
-						ObjectHelper.Dispose(ref processFinishedEvent);
-						waitHandle?.Close();
-						ObjectHelper.Dispose(ref waitHandle);
-					}
+					AsyncStreamReader output = new AsyncStreamReader(process, process.StandardOutput.BaseStream, settings.OnOutput, process.StandardOutput.CurrentEncoding);
+					output.BeginRead();
 				}
-				catch (Win32Exception e)
+
+				if (settings.RedirectError && settings.OnError != null)
 				{
-					throw new InvalidOperationException(e.CollectMessages(), e);
+					AsyncStreamReader error = new AsyncStreamReader(process, process.StandardError.BaseStream, settings.OnError, process.StandardError.CurrentEncoding);
+					error.BeginRead();
 				}
+
+				settings.OnStart?.Invoke(execName, process.StartTime);
+
+				if (!token.CanBeCanceled)
+				{
+					process.WaitForExit();
+					return Task.FromResult(true);
+				}
+
+				SafeWaitHandle waitHandle = new SafeWaitHandle(process.Handle, false);
+				if (!waitHandle.IsAwaitable()) return Task.FromResult(false);
+				processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
+				// copy to local variable
+				Process proc = process;
+				return TaskHelper.FromWaitHandle(processFinishedEvent, token)
+								.ConfigureAwait()
+								.ContinueWith(t =>
+								{
+									int ndx = t.IsCompleted && t.Result
+												? 0
+												: -1;
+
+									if (!processReallyExited && proc.IsAwaitable())
+									{
+										if (!proc.WaitForExit(TimeSpanHelper.FIVE_SECONDS)) ndx = -1;
+									}
+
+									proc.Die();
+									ObjectHelper.Dispose(ref proc);
+									processFinishedEvent?.Close();
+									ObjectHelper.Dispose(ref processFinishedEvent);
+									waitHandle?.Close();
+									ObjectHelper.Dispose(ref waitHandle);
+									return ndx == 0;
+								}, token, TaskContinuationOptions.RunContinuationsAsynchronously, TaskScheduler.Default);
+			}
+			catch (Win32Exception e)
+			{
+				throw new InvalidOperationException(e.CollectMessages(), e);
+			}
+			finally
+			{
+				if (processFinishedEvent == null) ObjectHelper.Dispose(ref process);
 			}
 		}
 
-		public static RunOutput RunAndGetOutput([NotNull] string execName, CancellationToken token = default(CancellationToken)) { return RunAndGetOutput(execName, null, null, token); }
+		public static bool RunAndWaitFor([NotNull] string execName, WaitHandle awaitableHandle) { return RunAndWaitFor(execName, null, null, awaitableHandle); }
 
-		public static RunOutput RunAndGetOutput([NotNull] string execName, RunSettingsBase settings, CancellationToken token = default(CancellationToken))
+		public static bool RunAndWaitFor([NotNull] string execName, RunAndWaitForSettings settings, WaitHandle awaitableHandle)
 		{
-			return RunAndGetOutput(execName, null, settings, token);
+			return RunAndWaitFor(execName, null, settings, awaitableHandle);
 		}
 
-		public static RunOutput RunAndGetOutput([NotNull] string execName, string arguments, CancellationToken token = default(CancellationToken)) { return RunAndGetOutput(execName, arguments, null, token); }
+		public static bool RunAndWaitFor([NotNull] string execName, string arguments, WaitHandle awaitableHandle)
+		{
+			return RunAndWaitFor(execName, arguments, null, awaitableHandle);
+		}
 
-		public static RunOutput RunAndGetOutput([NotNull] string execName, string arguments, RunSettingsBase settings, CancellationToken token = default(CancellationToken))
+		public static bool RunAndWaitFor([NotNull] string execName, string arguments, RunAndWaitForSettings settings, WaitHandle awaitableHandle)
+		{
+			settings ??= RunAndWaitForSettings.Default;
+			if (settings.OnOutput != null) settings.RedirectOutput = true;
+			if (settings.OnError != null) settings.RedirectError = true;
+
+			Process process = null;
+
+			try
+			{
+				process = CreateForRun(execName, arguments, settings);
+
+				if (settings.RedirectOutput)
+				{
+					process.OutputDataReceived += (_, args) =>
+					{
+						if (args.Data == null) return;
+						settings.OnOutput?.Invoke(args.Data);
+					};
+				}
+
+				if (settings.RedirectError)
+				{
+					process.ErrorDataReceived += (_, args) =>
+					{
+						if (args.Data == null) return;
+						settings.OnError?.Invoke(args.Data);
+					};
+				}
+
+				bool processReallyExited = false;
+
+				process.Exited += (sender, _) =>
+				{
+					Process p = (Process)sender;
+					DateTime? exitTime = null;
+					int? exitCode = null;
+
+					if (p.IsAssociated())
+					{
+						try
+						{
+							exitTime = p.ExitTime;
+							exitCode = p.ExitCode;
+						}
+						catch
+						{
+							// ignored
+						}
+					}
+
+					processReallyExited = true;
+					settings.OnExit?.Invoke(execName, exitTime, exitCode);
+				};
+
+				bool result = process.Start();
+				if (!result) return false;
+				if (!settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, process);
+
+				if (settings.RedirectOutput && settings.OnOutput != null)
+				{
+					AsyncStreamReader output = new AsyncStreamReader(process, process.StandardOutput.BaseStream, settings.OnOutput, process.StandardOutput.CurrentEncoding);
+					output.BeginRead();
+				}
+
+				if (settings.RedirectError && settings.OnError != null)
+				{
+					AsyncStreamReader error = new AsyncStreamReader(process, process.StandardError.BaseStream, settings.OnError, process.StandardError.CurrentEncoding);
+					error.BeginRead();
+				}
+
+				settings.OnStart?.Invoke(execName, process.StartTime);
+
+				if (!awaitableHandle.IsAwaitable())
+				{
+					process.WaitForExit();
+					return true;
+				}
+
+				SafeWaitHandle waitHandle = null;
+				ManualResetEvent processFinishedEvent = null;
+
+				try
+				{
+					waitHandle = new SafeWaitHandle(process.Handle, false);
+					if (!waitHandle.IsAwaitable()) return false;
+					processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
+					if (!awaitableHandle.IsAwaitable()) return false;
+
+					WaitHandle[] waitHandles =
+					{
+						processFinishedEvent,
+						awaitableHandle
+					};
+
+					int ndx = waitHandles.WaitAny();
+					if (ndx != 0) return false;
+
+					if (!processReallyExited && process.IsAwaitable())
+					{
+						if (!process.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
+					}
+
+					process.Die();
+					return ndx == 0;
+				}
+				finally
+				{
+					processFinishedEvent?.Close();
+					ObjectHelper.Dispose(ref processFinishedEvent);
+					waitHandle?.Close();
+					ObjectHelper.Dispose(ref waitHandle);
+				}
+			}
+			catch (Win32Exception e)
+			{
+				throw new InvalidOperationException(e.CollectMessages(), e);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref process);
+			}
+		}
+
+		[NotNull]
+		public static Task<RunOutput> RunAndGetOutputAsync([NotNull] string execName, CancellationToken token = default(CancellationToken)) { return RunAndGetOutputAsync(execName, null, null, token); }
+		[NotNull]
+		public static Task<RunOutput> RunAndGetOutputAsync([NotNull] string execName, RunSettingsBase settings, CancellationToken token = default(CancellationToken)) { return RunAndGetOutputAsync(execName, null, settings, token); }
+		[NotNull]
+		public static Task<RunOutput> RunAndGetOutputAsync([NotNull] string execName, string arguments, CancellationToken token = default(CancellationToken)) { return RunAndGetOutputAsync(execName, arguments, null, token); }
+		[NotNull]
+		public static Task<RunOutput> RunAndGetOutputAsync([NotNull] string execName, string arguments, RunSettingsBase settings, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
-			return RunAndGetOutput(execName, arguments, settings, token.WaitHandle);
-		}
-
-		public static RunOutput RunAndGetOutput([NotNull] string execName, WaitHandle awaitableHandle) { return RunAndGetOutput(execName, null, null, awaitableHandle); }
-
-		public static RunOutput RunAndGetOutput([NotNull] string execName, RunSettingsBase settings, WaitHandle awaitableHandle)
-		{
-			return RunAndGetOutput(execName, null, settings, awaitableHandle);
-		}
-
-		public static RunOutput RunAndGetOutput([NotNull] string execName, string arguments, WaitHandle awaitableHandle)
-		{
-			return RunAndGetOutput(execName, arguments, null, awaitableHandle);
-		}
-
-		public static RunOutput RunAndGetOutput([NotNull] string execName, string arguments, RunSettingsBase settings, WaitHandle awaitableHandle)
-		{
 			settings ??= RunSettingsBase.Default;
 			settings.RedirectOutput = true;
 			settings.RedirectError = true;
 
 			RunOutput output = new RunOutput();
+			Process process = null;
+			ManualResetEvent processFinishedEvent = null;
+			bool processReallyExited = false;
 
-			using (Process process = CreateForRun(execName, arguments, settings))
+			try
 			{
-				bool processReallyExited = false;
-
+				process = CreateForRun(execName, arguments, settings);
 				process.Exited += (sender, _) =>
 				{
 					Process p = (Process)sender;
@@ -433,75 +577,190 @@ namespace essentialMix.Threading.Helpers
 					settings.OnExit?.Invoke(execName, output.ExitTime, output.ExitCode);
 				};
 
+				bool result = process.Start();
+				if (!result) return Task.FromResult<RunOutput>(null);
+				if (!settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, process);
+				output.StartTime = process.StartTime;
+				settings.OnStart?.Invoke(execName, output.StartTime);
+
+				AsyncStreamReader outputReader = new AsyncStreamReader(process, process.StandardOutput.BaseStream, data =>
+				{
+					if (data == null) return;
+					output.Output.Append(data);
+					output.OutputBuilder.Append(data);
+				}, process.StandardOutput.CurrentEncoding);
+				outputReader.BeginRead();
+
+				AsyncStreamReader errorReader = new AsyncStreamReader(process, process.StandardError.BaseStream, data =>
+				{
+					if (data == null) return;
+					output.Error.Append(data);
+					output.OutputBuilder.Append(data);
+				}, process.StandardOutput.CurrentEncoding);
+				errorReader.BeginRead();
+
+				if (!token.CanBeCanceled)
+				{
+					process.WaitForExit();
+					return Task.FromResult(output);
+				}
+
+				SafeWaitHandle waitHandle = new SafeWaitHandle(process.Handle, false);
+				if (!waitHandle.IsAwaitable()) return Task.FromResult<RunOutput>(null);
+				processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
+				// copy to local variable
+				Process proc = process;
+				return TaskHelper.FromWaitHandle(processFinishedEvent, token)
+								.ContinueWith(t =>
+								{
+									int ndx = t.IsCompleted && t.Result
+												? 0
+												: -1;
+
+									if (!processReallyExited && proc.IsAwaitable())
+									{
+										if (!proc.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
+									}
+
+									proc.Die();
+									ObjectHelper.Dispose(ref proc);
+									processFinishedEvent?.Close();
+									ObjectHelper.Dispose(ref processFinishedEvent);
+									waitHandle?.Close();
+									ObjectHelper.Dispose(ref waitHandle);
+									return ndx != 0
+												? null
+												: output;
+								}, token, TaskContinuationOptions.RunContinuationsAsynchronously, TaskScheduler.Default);
+			}
+			catch (Win32Exception e)
+			{
+				throw new InvalidOperationException(e.CollectMessages(), e);
+			}
+			finally
+			{
+				if (processFinishedEvent == null) ObjectHelper.Dispose(ref process);
+			}
+		}
+
+		public static RunOutput RunAndGetOutput([NotNull] string execName, WaitHandle awaitableHandle) { return RunAndGetOutput(execName, null, null, awaitableHandle); }
+
+		public static RunOutput RunAndGetOutput([NotNull] string execName, RunSettingsBase settings, WaitHandle awaitableHandle)
+		{
+			return RunAndGetOutput(execName, null, settings, awaitableHandle);
+		}
+
+		public static RunOutput RunAndGetOutput([NotNull] string execName, string arguments, WaitHandle awaitableHandle)
+		{
+			return RunAndGetOutput(execName, arguments, null, awaitableHandle);
+		}
+
+		public static RunOutput RunAndGetOutput([NotNull] string execName, string arguments, RunSettingsBase settings, WaitHandle awaitableHandle)
+		{
+			settings ??= RunSettingsBase.Default;
+			settings.RedirectOutput = true;
+			settings.RedirectError = true;
+
+			RunOutput output = new RunOutput();
+			Process process = null;
+			bool processReallyExited = false;
+
+			try
+			{
+				process = CreateForRun(execName, arguments, settings);
+				process.Exited += (sender, _) =>
+				{
+					Process p = (Process)sender;
+
+					if (p.IsAssociated())
+					{
+						try
+						{
+							output.ExitTime = p.ExitTime;
+							output.ExitCode = p.ExitCode;
+						}
+						catch
+						{
+							// ignored
+						}
+					}
+
+					processReallyExited = true;
+					settings.OnExit?.Invoke(execName, output.ExitTime, output.ExitCode);
+				};
+
+				bool result = process.Start();
+				if (!result) return null;
+				if (!settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, process);
+				output.StartTime = process.StartTime;
+				settings.OnStart?.Invoke(execName, output.StartTime);
+
+				AsyncStreamReader outputReader = new AsyncStreamReader(process, process.StandardOutput.BaseStream, data =>
+				{
+					if (data == null) return;
+					output.Output.Append(data);
+					output.OutputBuilder.Append(data);
+				}, process.StandardOutput.CurrentEncoding);
+				outputReader.BeginRead();
+
+				AsyncStreamReader errorReader = new AsyncStreamReader(process, process.StandardError.BaseStream, data =>
+				{
+					if (data == null) return;
+					output.Error.Append(data);
+					output.OutputBuilder.Append(data);
+				}, process.StandardOutput.CurrentEncoding);
+				errorReader.BeginRead();
+
+				if (!awaitableHandle.IsAwaitable())
+				{
+					process.WaitForExit();
+					return output;
+				}
+
+				SafeWaitHandle waitHandle = null;
+				ManualResetEvent processFinishedEvent = null;
+
 				try
 				{
-					bool result = process.Start();
-					if (!result) return null;
-					if (!settings.JobHandle.IsInvalidHandle()) ProcessJob.AddProcess(settings.JobHandle, process);
-					output.StartTime = process.StartTime;
-					settings.OnStart?.Invoke(execName, output.StartTime);
+					waitHandle = new SafeWaitHandle(process.Handle, false);
+					if (!waitHandle.IsAwaitable()) return null;
+					processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
+					if (!awaitableHandle.IsAwaitable()) return null;
 
-					AsyncStreamReader outputReader = new AsyncStreamReader(process, process.StandardOutput.BaseStream, data =>
+					WaitHandle[] waitHandles =
 					{
-						if (data == null) return;
-						output.Output.Append(data);
-						output.OutputBuilder.Append(data);
-					}, process.StandardOutput.CurrentEncoding);
-					outputReader.BeginRead();
+						processFinishedEvent,
+						awaitableHandle
+					};
 
-					AsyncStreamReader errorReader = new AsyncStreamReader(process, process.StandardError.BaseStream, data =>
-					{
-						if (data == null) return;
-						output.Error.Append(data);
-						output.OutputBuilder.Append(data);
-					}, process.StandardOutput.CurrentEncoding);
-					errorReader.BeginRead();
+					int ndx = waitHandles.WaitAny();
+					if (ndx != 0) return null;
 
-					if (!awaitableHandle.IsAwaitable())
+					if (!processReallyExited && process.IsAwaitable())
 					{
-						process.WaitForExit();
-						return output;
+						if (!process.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
 					}
 
-					SafeWaitHandle waitHandle = null;
-					ManualResetEvent processFinishedEvent = null;
-
-					try
-					{
-						waitHandle = new SafeWaitHandle(process.Handle, false);
-						if (!waitHandle.IsAwaitable()) return null;
-						processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
-						if (!awaitableHandle.IsAwaitable()) return null;
-
-						WaitHandle[] waitHandles =
-						{
-							processFinishedEvent,
-							awaitableHandle
-						};
-
-						int ndx = waitHandles.WaitAny();
-						if (ndx != 0) return null;
-
-						if (!processReallyExited && process.IsAwaitable())
-						{
-							if (!process.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
-						}
-
-						process.Die();
-						return ndx != 0 ? null : output;
-					}
-					finally
-					{
-						processFinishedEvent?.Close();
-						ObjectHelper.Dispose(ref processFinishedEvent);
-						waitHandle?.Close();
-						ObjectHelper.Dispose(ref waitHandle);
-					}
+					process.Die();
+					return ndx != 0
+								? null
+								: output;
 				}
-				catch (Win32Exception e)
+				finally
 				{
-					throw new InvalidOperationException(e.CollectMessages(), e);
+					processFinishedEvent?.Close();
+					ObjectHelper.Dispose(ref processFinishedEvent);
+					waitHandle?.Close();
+					ObjectHelper.Dispose(ref waitHandle);
 				}
+			}
+			catch (Win32Exception e)
+			{
+				throw new InvalidOperationException(e.CollectMessages(), e);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref process);
 			}
 		}
 
@@ -651,9 +910,39 @@ namespace essentialMix.Threading.Helpers
 		[NotNull]
 		public static Task<bool> WaitForProcessExitAsync([NotNull] Process process, CancellationToken token = default(CancellationToken))
 		{
-			return !process.IsAwaitable()
-						? Task.FromResult(false)
-						: WaitForProcessExitAsync(process.Id, token.WaitHandle);
+			token.ThrowIfCancellationRequested();
+			if (!process.IsAwaitable()) return Task.FromResult(false);
+
+			if (!token.CanBeCanceled)
+			{
+				process.WaitForExit();
+				return Task.FromResult(true);
+			}
+
+			SafeWaitHandle waitHandle = new SafeWaitHandle(process.Handle, false);
+			if (!waitHandle.IsAwaitable()) return Task.FromResult(false);
+
+			bool processReallyExited = false;
+			process.Exited += (_, _) => processReallyExited = true;
+			ManualResetEvent processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
+			return TaskHelper.FromWaitHandle(processFinishedEvent, token)
+							.ContinueWith(t =>
+							{
+								int ndx = t.IsCompleted && t.Result
+											? 0
+											: -1;
+
+								if (!processReallyExited && process.IsAwaitable())
+								{
+									if (!process.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
+								}
+
+								processFinishedEvent?.Close();
+								ObjectHelper.Dispose(ref processFinishedEvent);
+								waitHandle?.Close();
+								ObjectHelper.Dispose(ref waitHandle);
+								return ndx == 0;
+							}, token, TaskContinuationOptions.RunContinuationsAsynchronously, TaskScheduler.Default);
 		}
 
 		[NotNull]

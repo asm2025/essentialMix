@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using essentialMix.Helpers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading
@@ -7,9 +8,9 @@ namespace essentialMix.Threading
 	public class WaitForEventSettings<TSource, TArgs>
 		where TArgs : EventArgs
 	{
-		private TimeSpan _timeout;
+		private TimeSpan _timeout = TimeSpanHelper.Infinite;
 
-		protected internal WaitForEventSettings([NotNull] TSource target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<TSource, TArgs>, TArgs> watcherCallback)
+		protected internal WaitForEventSettings([NotNull] TSource target, [NotNull] EventInfo eventInfo, Action<EventWatcher<TSource, TArgs>, TArgs> watcherCallback)
 		{
 			Target = target;
 			EventInfo = eventInfo;
@@ -22,7 +23,6 @@ namespace essentialMix.Threading
 		[NotNull]
 		public EventInfo EventInfo { get; set; }
 
-		[NotNull]
 		public Action<EventWatcher<TSource, TArgs>, TArgs> WatcherCallback { get; }
 
 		public TimeSpan Timeout
@@ -39,7 +39,7 @@ namespace essentialMix.Threading
 	public class WaitForEventSettings<TSource> : WaitForEventSettings<TSource, EventArgs>
 	{
 		/// <inheritdoc />
-		protected internal WaitForEventSettings([NotNull] TSource target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<TSource, EventArgs>, EventArgs> watcherCallback) 
+		protected internal WaitForEventSettings([NotNull] TSource target, [NotNull] EventInfo eventInfo, Action<EventWatcher<TSource, EventArgs>, EventArgs> watcherCallback) 
 			: base(target, eventInfo, watcherCallback)
 		{
 		}
@@ -48,9 +48,23 @@ namespace essentialMix.Threading
 	public class WaitForEventSettings : WaitForEventSettings<object, EventArgs>
 	{
 		/// <inheritdoc />
-		private protected WaitForEventSettings([NotNull] object target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<object, EventArgs>, EventArgs> watcherCallback) 
+		private protected WaitForEventSettings([NotNull] object target, [NotNull] EventInfo eventInfo, Action<EventWatcher<object, EventArgs>, EventArgs> watcherCallback) 
 			: base(target, eventInfo, watcherCallback)
 		{
+		}
+
+		[NotNull]
+		public static WaitForEventSettings<TSource, TArgs> Create<TSource, TArgs>([NotNull] TSource target, [NotNull] string eventName)
+			where TArgs : EventArgs
+		{
+			return Create<TSource, TArgs>(target, GetEventInfo(target, eventName));
+		}
+
+		[NotNull]
+		public static WaitForEventSettings<TSource, TArgs> Create<TSource, TArgs>([NotNull] TSource target, [NotNull] EventInfo eventInfo)
+			where TArgs : EventArgs
+		{
+			return new WaitForEventSettings<TSource, TArgs>(target, eventInfo, null);
 		}
 
 		[NotNull]
@@ -68,6 +82,18 @@ namespace essentialMix.Threading
 		}
 
 		[NotNull]
+		public static WaitForEventSettings<TSource> Create<TSource>([NotNull] TSource target, [NotNull] string eventName)
+		{
+			return Create(target, GetEventInfo(target, eventName));
+		}
+
+		[NotNull]
+		public static WaitForEventSettings<TSource> Create<TSource>([NotNull] TSource target, [NotNull] EventInfo eventInfo)
+		{
+			return new WaitForEventSettings<TSource>(target, eventInfo, null);
+		}
+
+		[NotNull]
 		public static WaitForEventSettings<TSource> Create<TSource>([NotNull] TSource target, [NotNull] string eventName, [NotNull] Action<EventWatcher<TSource, EventArgs>, EventArgs> watcherCallback)
 		{
 			return Create(target, GetEventInfo(target, eventName), watcherCallback);
@@ -77,6 +103,18 @@ namespace essentialMix.Threading
 		public static WaitForEventSettings<TSource> Create<TSource>([NotNull] TSource target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<TSource, EventArgs>, EventArgs> watcherCallback)
 		{
 			return new WaitForEventSettings<TSource>(target, eventInfo, watcherCallback);
+		}
+
+		[NotNull]
+		public static WaitForEventSettings Create([NotNull] object target, [NotNull] string eventName)
+		{
+			return Create(target, GetEventInfo(target, eventName));
+		}
+
+		[NotNull]
+		public static WaitForEventSettings Create([NotNull] object target, [NotNull] EventInfo eventInfo)
+		{
+			return new WaitForEventSettings(target, eventInfo, null);
 		}
 
 		[NotNull]

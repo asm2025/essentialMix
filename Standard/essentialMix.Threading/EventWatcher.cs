@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
@@ -19,7 +20,7 @@ namespace essentialMix.Threading
 		private CancellationTokenSource _cts;
 
 		/// <inheritdoc />
-		protected internal EventWatcher([NotNull] TSource target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<TSource, TArgs>, TArgs> watcherCallback)
+		protected internal EventWatcher([NotNull] TSource target, [NotNull] EventInfo eventInfo, Action<EventWatcher<TSource, TArgs>, TArgs> watcherCallback)
 		{
 			Type type = target.GetType();
 			if (eventInfo.DeclaringType == null || !eventInfo.DeclaringType.IsAssignableFrom(type)) throw new MemberAccessException($"Type '{type}' does not contain a definition for event '{eventInfo.Name}'.");
@@ -31,7 +32,7 @@ namespace essentialMix.Threading
 			if (_context != null)
 			{
 				_context.OperationStarted();
-				WatcherCallback = (_, args) => SendWatcherCallback(args);
+				if (_watcherCallback != null) WatcherCallback = (_, args) => SendWatcherCallback(args);
 			}
 			else
 			{
@@ -41,17 +42,28 @@ namespace essentialMix.Threading
 			_workCompletedEvent = new ManualResetEventSlim(false);
 			_cts = new CancellationTokenSource();
 			Token = _cts.Token;
-			_listener = typeof(TArgs) == typeof(EventArgs)
-							? EventInfo.CreateDelegate((_, args) =>
-							{
-								_workCompletedEvent.Set();
-								WatcherCallback.Invoke(this, (TArgs)args);
-							})
-							: EventInfo.CreateDelegate<TArgs>((_, args) =>
-							{
-								_workCompletedEvent.Set();
-								WatcherCallback.Invoke(this, args);
-							});
+
+			if (_watcherCallback != null)
+			{
+				_listener = typeof(TArgs) == typeof(EventArgs)
+								? EventInfo.CreateDelegate((_, args) =>
+								{
+									_workCompletedEvent.Set();
+									WatcherCallback.Invoke(this, (TArgs)args);
+								})
+								: EventInfo.CreateDelegate<TArgs>((_, args) =>
+								{
+									_workCompletedEvent.Set();
+									WatcherCallback.Invoke(this, args);
+								});
+			}
+			else
+			{
+				_listener = typeof(TArgs) == typeof(EventArgs)
+								? EventInfo.CreateDelegate((_, _) => _workCompletedEvent.Set())
+								: EventInfo.CreateDelegate<TArgs>((_, _) => _workCompletedEvent.Set());
+			}
+
 			EventInfo.AddEventHandler(Target, _listener);
 		}
 
@@ -69,7 +81,6 @@ namespace essentialMix.Threading
 			base.Dispose(disposing);
 		}
 
-		[NotNull]
 		protected Action<EventWatcher<TSource, TArgs>, TArgs> WatcherCallback { get; }
 		
 		[NotNull]
@@ -89,6 +100,7 @@ namespace essentialMix.Threading
 		}
 
 		public bool Wait() { return Wait(TimeSpanHelper.INFINITE, CancellationToken.None); }
+		public bool Wait(CancellationToken token) { return Wait(TimeSpanHelper.INFINITE, token); }
 		public bool Wait(TimeSpan timeout) { return Wait(timeout.TotalIntMilliseconds(), CancellationToken.None); }
 		public bool Wait(TimeSpan timeout, CancellationToken token) { return Wait(timeout.TotalIntMilliseconds(), token); }
 		public bool Wait(int millisecondsTimeout) { return Wait(millisecondsTimeout, CancellationToken.None); }
@@ -124,14 +136,29 @@ namespace essentialMix.Threading
 
 			return false;
 		}
-		
+
+		[NotNull]
+		public Task<bool> WatchAsync() { return WatchAsync(TimeSpanHelper.INFINITE, CancellationToken.None); }
+		[NotNull]
+		public Task<bool> WatchAsync(CancellationToken token) { return WatchAsync(TimeSpanHelper.INFINITE, token); }
+		[NotNull]
+		public Task<bool> WatchAsync(TimeSpan timeout, CancellationToken token) { return WatchAsync(timeout.TotalIntMilliseconds(), token); }
+		[NotNull]
+		public Task<bool> WatchAsync(int millisecondsTimeout, CancellationToken token)
+		{
+			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+			if (IsSignaled) return Task.FromResult(true);
+			if (Token.IsCancellationRequested || token.IsCancellationRequested) return Task.FromResult(false);
+			return TaskHelper.FromWaitHandle(_workCompletedEvent.WaitHandle, millisecondsTimeout, token);
+		}
+
 		private void SendWatcherCallback(object state) { _watcherCallback(this, (TArgs)state); }
 	}
 
 	public class EventWatcher<TSource> : EventWatcher<TSource, EventArgs>
 	{
 		/// <inheritdoc />
-		protected internal EventWatcher([NotNull] TSource target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<TSource, EventArgs>, EventArgs> watcherCallback)
+		protected internal EventWatcher([NotNull] TSource target, [NotNull] EventInfo eventInfo, Action<EventWatcher<TSource, EventArgs>, EventArgs> watcherCallback)
 			: base(target, eventInfo, watcherCallback)
 		{
 		}
@@ -140,7 +167,7 @@ namespace essentialMix.Threading
 	public class EventWatcher : EventWatcher<object, EventArgs>
 	{
 		/// <inheritdoc />
-		private protected EventWatcher([NotNull] object target, [NotNull] EventInfo eventInfo, [NotNull] Action<EventWatcher<object, EventArgs>, EventArgs> watcherCallback)
+		private protected EventWatcher([NotNull] object target, [NotNull] EventInfo eventInfo, Action<EventWatcher<object, EventArgs>, EventArgs> watcherCallback)
 			: base(target, eventInfo, watcherCallback)
 		{
 		}

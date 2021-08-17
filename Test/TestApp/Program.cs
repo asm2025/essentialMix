@@ -187,7 +187,9 @@ work with {HEAVY} items.");
 
 			//TestEnumerateDirectoriesAndFiles();
 			
-			TestEventWaitHandle();
+			//TestEventWaitHandle();
+			
+			TestWaitForEvent();
 
 			ConsoleHelper.Pause();
 		}
@@ -5821,6 +5823,50 @@ decrypted:
 					ObjectHelper.Dispose(ref waitHandle);
 					ObjectHelper.Dispose(ref cts);
 				}
+
+				Console.WriteLine();
+				Console.Write($"Would you like to repeat the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to exit. ");
+				more = Console.ReadKey(true).Key == ConsoleKey.Y;
+			}
+			while (more);
+		}
+
+		private static void TestWaitForEvent()
+		{
+			const int TIMEOUT = 3000;
+
+			bool more;
+			Student student = new Student
+			{
+				Id = 1,
+				Name = __fakeGenerator.Value.Name.FirstName(__fakeGenerator.Value.PickRandom<Name.Gender>()),
+				Grade = __fakeGenerator.Value.Random.Double(0.0d, 100.0d)
+			};
+			WaitForEventSettings<Student> settings = WaitForEventSettings.Create(student, nameof(Student.Happened));
+
+			do
+			{
+				Console.Clear();
+
+				Title("Testing WaitForEvent asynchronously.");
+
+				Console.Write($"Would you like to use timeout for the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to skip timeout. ");
+				int timeout = Console.ReadKey(true).Key == ConsoleKey.Y
+								? RNGRandomHelper.Next((int)(TIMEOUT / 1.2), (int)(TIMEOUT * 1.2))
+								: TimeSpanHelper.INFINITE;
+				Console.WriteLine();
+
+				string timeoutString = timeout > 0
+											? $"{(timeout / 1000.0d):##.##} second(s)"
+											: "None";
+				Console.WriteLine($"Event will be fired in: {Bright.Cyan((TIMEOUT / 1000).ToString())} seconds...");
+				Console.WriteLine($"Using timeout: {Bright.Cyan(timeoutString)}...");
+
+				settings.Timeout = TimeSpan.FromMilliseconds(timeout);
+				student.WillHappenIn(TIMEOUT);
+				Console.WriteLine(EventHelper.WatchEventAsync(settings).ConfigureAwait().Execute()
+									? Bright.Green("Ok")
+									: Bright.Red("Didn't occur in time or something shitty going on!"));
 
 				Console.WriteLine();
 				Console.Write($"Would you like to repeat the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to exit. ");

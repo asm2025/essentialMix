@@ -11,11 +11,11 @@ namespace essentialMix.Helpers
 	public static class TaskHelper
 	{
 		// based on Nito.AsyncEx.Interop
-		private sealed class ThreadPoolRegistration : IDisposable
+		private sealed class WaitHandleRegistration : IDisposable
 		{
 			private readonly RegisteredWaitHandle _registeredWaitHandle;
 
-			public ThreadPoolRegistration([NotNull] WaitHandle handle, int millisecondsTimeout, TaskCompletionSource<bool> completionSource)
+			public WaitHandleRegistration([NotNull] WaitHandle handle, int millisecondsTimeout, TaskCompletionSource<bool> completionSource)
 			{
 				_registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(handle, 
 																(state, timedOut) => ((TaskCompletionSource<bool>)state).TrySetResult(!timedOut), 
@@ -185,14 +185,41 @@ namespace essentialMix.Helpers
 			Task task = firstTask;
 
 			foreach (Action action in actions) 
-				task = task.ContinueWith(_ => action(), token, TaskContinuationOptions.RunContinuationsAsynchronously | TaskContinuationOptions.NotOnRanToCompletion, TaskScheduler.Default);
+				task = task.ContinueWith(_ => action(), token, TaskContinuationOptions.RunContinuationsAsynchronously | TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default).ConfigureAwait();
 
 			return firstTask;
 		}
 
-		public static TResult Sequence<TResult>([NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, default(TResult), null, functions).Execute(); }
-		public static TResult Sequence<TResult>([NotNull] Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, default(TResult), evaluator, functions).Execute(); }
-		public static TResult Sequence<TResult>(TResult defaultValue, [NotNull] Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, defaultValue, evaluator, functions).Execute(); }
+		public static TResult Sequence<TResult>([NotNull] params Func<TResult, TResult>[] functions) { return Sequence(default(TResult), null, functions); }
+		public static TResult Sequence<TResult>([NotNull] Func<TResult, bool> evaluator, [NotNull] params Func<TResult, TResult>[] functions) { return Sequence(default(TResult), evaluator, functions); }
+		public static TResult Sequence<TResult>(TResult defaultValue, Func<TResult, bool> evaluator, [NotNull] params Func<TResult, TResult>[] functions)
+		{
+			if (functions.Length == 0) return defaultValue;
+
+			foreach (Func<TResult, TResult> func in functions)
+			{
+				if (func != null) continue;
+				throw new NullReferenceException($"{nameof(functions)} contains a null reference.");
+			}
+
+			TResult result = defaultValue;
+
+			if (evaluator != null)
+			{
+				foreach (Func<TResult, TResult> func in functions)
+				{
+					result = func(result);
+					if (evaluator(result)) break;
+				}
+			}
+			else
+			{
+				foreach (Func<TResult, TResult> func in functions) 
+					result = func(result);
+			}
+
+			return result;
+		}
 
 		[NotNull]
 		public static Task<TResult> SequenceAsync<TResult>([NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, default(TResult), null, functions); }
@@ -269,12 +296,12 @@ namespace essentialMix.Helpers
 			static async Task<bool> FromWaitHandleLocal(WaitHandle handle, int millisecondsTimeout, CancellationToken token)
 			{
 				TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-				ThreadPoolRegistration registration = null;
+				WaitHandleRegistration registration = null;
 				IDisposable tokenRegistration = null;
 
 				try
 				{
-					registration = new ThreadPoolRegistration(handle, millisecondsTimeout, tcs);
+					registration = new WaitHandleRegistration(handle, millisecondsTimeout, tcs);
 					if (token.CanBeCanceled) tokenRegistration = token.Register(state => ((TaskCompletionSource<bool>)state).TrySetCanceled(), tcs, false);
 					return await tcs.Task.ConfigureAwait();
 				}

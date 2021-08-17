@@ -59,7 +59,7 @@ namespace essentialMix.Extensions
 
 			bool result;
 
-			if (!token.IsAwaitable())
+			if (!token.CanBeCanceled)
 			{
 				result = thisValue.WaitOne(millisecondsTimeout, exitContext);
 			}
@@ -75,6 +75,37 @@ namespace essentialMix.Extensions
 
 			if (result && setEvent && thisValue is EventWaitHandle evt) evt.Set();
 			return result;
+		}
+
+		[NotNull]
+		public static Task<bool> WaitOneAsync([NotNull] this WaitHandle thisValue, CancellationToken token = default(CancellationToken)) { return WaitOneAsync(thisValue, TimeSpanHelper.INFINITE, false, token); }
+		[NotNull]
+		public static Task<bool> WaitOneAsync([NotNull] this WaitHandle thisValue, bool setEvent, CancellationToken token = default(CancellationToken)) { return WaitOneAsync(thisValue, TimeSpanHelper.INFINITE, setEvent, token); }
+		[NotNull]
+		public static Task<bool> WaitOneAsync([NotNull] this WaitHandle thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return WaitOneAsync(thisValue, timeout.TotalIntMilliseconds(), false, token); }
+		[NotNull]
+		public static Task<bool> WaitOneAsync([NotNull] this WaitHandle thisValue, TimeSpan timeout, bool setEvent, CancellationToken token = default(CancellationToken)) { return WaitOneAsync(thisValue, timeout.TotalIntMilliseconds(), setEvent, token); }
+		[NotNull]
+		public static Task<bool> WaitOneAsync([NotNull] this WaitHandle thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken)) { return WaitOneAsync(thisValue, millisecondsTimeout, false, token); }
+		[NotNull]
+		public static Task<bool> WaitOneAsync([NotNull] this WaitHandle thisValue, int millisecondsTimeout, bool setEvent, CancellationToken token = default(CancellationToken))
+		{
+			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+			if (token.IsCancellationRequested) return Task.FromCanceled<bool>(token);
+
+			if (!token.CanBeCanceled)
+			{
+				bool result = thisValue.WaitOne(millisecondsTimeout);
+				if (result && setEvent && thisValue is EventWaitHandle evt) evt.Set();
+				return Task.FromResult(result);
+			}
+
+			return TaskHelper.FromWaitHandle(thisValue, millisecondsTimeout, token)
+							.ContinueWith(t =>
+							{
+								if (t.Result && setEvent && thisValue is EventWaitHandle evt) evt.Set();
+								return t.Result;
+							}, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
 		}
 
 		public static bool WaitAll([NotNull] this WaitHandle[] thisValue, CancellationToken token = default(CancellationToken)) { return WaitAll(thisValue, TimeSpanHelper.INFINITE, false, token); }
@@ -99,7 +130,7 @@ namespace essentialMix.Extensions
 			if (thisValue.Length == 0) throw new ArgumentNullException(nameof(thisValue));
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 
-			if (!token.IsAwaitable()) return WaitHandle.WaitAll(thisValue, millisecondsTimeout, exitContext);
+			if (!token.CanBeCanceled) return WaitHandle.WaitAll(thisValue, millisecondsTimeout, exitContext);
 			if (token.IsCancellationRequested) return false;
 
 			return WaitHandle.WaitAll(thisValue, millisecondsTimeout, exitContext) && !token.IsCancellationRequested;
@@ -126,7 +157,7 @@ namespace essentialMix.Extensions
 		{
 			if (thisValue.Length == 0) throw new ArgumentNullException(nameof(thisValue));
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (!token.IsAwaitable()) return WaitHandle.WaitAny(thisValue, millisecondsTimeout, exitContext);
+			if (!token.CanBeCanceled) return WaitHandle.WaitAny(thisValue, millisecondsTimeout, exitContext);
 
 			WaitHandle[] handles = thisValue.Append(token.WaitHandle);
 			return WaitHandle.WaitAny(handles, millisecondsTimeout, exitContext);
