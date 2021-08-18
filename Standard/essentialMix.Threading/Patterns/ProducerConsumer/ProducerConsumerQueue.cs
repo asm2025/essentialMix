@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
@@ -287,6 +288,14 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			return false;
 		}
 
+		protected Task<bool> WaitForWorkersCountDownAsync(int millisecondsTimeout = TimeSpanHelper.INFINITE)
+		{
+			ThrowIfDisposed();
+			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+			if (_workersCountdown == null || _workersCountdown.IsSet) return Task.FromResult(true);
+			return TaskHelper.FromWaitHandle(_workersCountdown.WaitHandle, millisecondsTimeout, Token);
+		}
+
 		protected void ReleaseWorkersCountDown()
 		{
 			if (_workersCountdown == null) return;
@@ -405,23 +414,22 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		}
 
 		/// <inheritdoc />
-		public bool Wait()
-		{
-			return Wait(TimeSpanHelper.INFINITE);
-		}
-
+		public bool Wait() { return Wait(TimeSpanHelper.INFINITE); }
 		/// <inheritdoc />
-		public bool Wait(TimeSpan timeout)
-		{
-			return Wait(timeout.TotalIntMilliseconds());
-		}
-
+		public bool Wait(TimeSpan timeout) { return Wait(timeout.TotalIntMilliseconds()); }
 		/// <inheritdoc />
 		public bool Wait(int millisecondsTimeout)
 		{
 			ThrowIfDisposed();
 			return WaitForWorkersCountDown(millisecondsTimeout);
 		}
+
+		/// <inheritdoc />
+		public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
+		/// <inheritdoc />
+		public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
+		/// <inheritdoc />
+		public Task<bool> WaitAsync(int millisecondsTimeout) { return WaitForWorkersCountDownAsync(millisecondsTimeout); }
 
 		protected abstract void EnqueueInternal([NotNull] T item);
 

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
 using JetBrains.Annotations;
@@ -128,6 +129,15 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 		/// <inheritdoc />
 		public bool Wait(int millisecondsTimeout) { return _queue.Wait(millisecondsTimeout); }
+
+		/// <inheritdoc />
+		public Task<bool> WaitAsync() { return _queue.WaitAsync(); }
+
+		/// <inheritdoc />
+		public Task<bool> WaitAsync(TimeSpan timeout) { return _queue.WaitAsync(timeout); }
+
+		/// <inheritdoc />
+		public Task<bool> WaitAsync(int millisecondsTimeout) { return _queue.WaitAsync(millisecondsTimeout); }
 
 		/// <inheritdoc />
 		/// <summary>

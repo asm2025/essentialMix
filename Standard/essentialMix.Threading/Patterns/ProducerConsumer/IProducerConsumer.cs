@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer
@@ -33,5 +34,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		bool Wait();
 		bool Wait(TimeSpan timeout);
 		bool Wait(int millisecondsTimeout);
+		[NotNull]
+		Task<bool> WaitAsync();
+		[NotNull]
+		Task<bool> WaitAsync(TimeSpan timeout);
+		[NotNull]
+		Task<bool> WaitAsync(int millisecondsTimeout);
 	}
 }

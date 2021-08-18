@@ -47,33 +47,33 @@ namespace essentialMix.Extensions
 		[NotNull]
 		public static Task<bool> WaitForExitAsync([NotNull] this Process thisValue, CancellationToken token = default(CancellationToken))
 		{
-			return WaitForExitAsync(thisValue, TimeSpanHelper.INFINITE, false, token);
+			return WaitForExitAsync(thisValue, TimeSpanHelper.INFINITE, token);
 		}
 
 		[NotNull]
 		public static Task<bool> WaitForExitAsync([NotNull] this Process thisValue, TimeSpan timeout, CancellationToken token = default(CancellationToken))
 		{
-			return WaitForExitAsync(thisValue, timeout.TotalIntMilliseconds(), false, token);
-		}
-
-		[NotNull]
-		public static Task<bool> WaitForExitAsync([NotNull] this Process thisValue, TimeSpan timeout, bool exitContext, CancellationToken token = default(CancellationToken))
-		{
-			return WaitForExitAsync(thisValue, timeout.TotalIntMilliseconds(), exitContext, token);
+			return WaitForExitAsync(thisValue, timeout.TotalIntMilliseconds(), token);
 		}
 
 		[NotNull]
 		public static Task<bool> WaitForExitAsync([NotNull] this Process thisValue, int millisecondsTimeout, CancellationToken token = default(CancellationToken))
 		{
-			return WaitForExitAsync(thisValue, millisecondsTimeout, false, token);
-		}
-
-		[NotNull]
-		public static Task<bool> WaitForExitAsync([NotNull] this Process thisValue, int millisecondsTimeout, bool exitContext, CancellationToken token = default(CancellationToken))
-		{
-			if (!IsAwaitable(thisValue)) return Task.FromResult(true);
+			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 			token.ThrowIfCancellationRequested();
-			return Task.Run(() => WaitForExit(thisValue, millisecondsTimeout, exitContext, token), token);
+			if (!IsAwaitable(thisValue)) return Task.FromResult(true);
+
+			SafeWaitHandle waitHandle = new SafeWaitHandle(thisValue.Handle, false);
+			if (!waitHandle.IsAwaitable()) return Task.FromResult(false);
+			ManualResetEvent processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
+			return TaskHelper.FromWaitHandle(processFinishedEvent, millisecondsTimeout, token)
+							.ConfigureAwait()
+							.ContinueWith(t =>
+							{
+								ObjectHelper.Dispose(ref processFinishedEvent);
+								ObjectHelper.Dispose(ref waitHandle);
+								return t.IsCompleted && t.Result;
+							}, token);
 		}
 
 		public static bool WaitForExit([NotNull] this Process thisValue, CancellationToken token = default(CancellationToken)) { return WaitForExit(thisValue, TimeSpanHelper.INFINITE, false, token); }
@@ -99,14 +99,20 @@ namespace essentialMix.Extensions
 			token.ThrowIfCancellationRequested();
 			if (!IsAwaitable(thisValue)) return true;
 
-			using (SafeWaitHandle waitHandle = new SafeWaitHandle(thisValue.Handle, false))
+			SafeWaitHandle waitHandle = null;
+			ManualResetEvent processFinishedEvent = null;
+
+			try
 			{
+				waitHandle = new SafeWaitHandle(thisValue.Handle, false);
 				if (!waitHandle.IsAwaitable()) return false;
-				
-				using (ManualResetEvent processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle })
-				{
-					return processFinishedEvent.WaitOne(millisecondsTimeout, true, exitContext, token);
-				}
+				processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
+				return processFinishedEvent.WaitOne(millisecondsTimeout, true, exitContext, token);
+			}
+			finally
+			{
+				ObjectHelper.Dispose(ref processFinishedEvent);
+				ObjectHelper.Dispose(ref waitHandle);
 			}
 		}
 

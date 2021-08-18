@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
 using essentialMix.Threading.Helpers;
+using Microsoft.Win32.SafeHandles;
 
 namespace essentialMix.Threading
 {
@@ -188,6 +189,7 @@ namespace essentialMix.Threading
 			ObjectHelper.Dispose(ref _inputProcess);
 			ObjectHelper.Dispose(ref _tokenRegistration);
 			ObjectHelper.Dispose(ref _cts);
+			Token = CancellationToken.None;
 			FileName = null;
 			Arguments = null;
 			LastException = null;
@@ -255,9 +257,20 @@ namespace essentialMix.Threading
 		public Task<bool> WaitAsync(int millisecondsTimeout)
 		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			return !_inputProcess.IsAwaitable()
-				? Task.FromResult(true) 
-				: Task.Run(() => Wait(millisecondsTimeout), _token);
+			Token.ThrowIfCancellationRequested();
+			if (!_inputProcess.IsAwaitable()) return Task.FromResult(true);
+
+			SafeWaitHandle waitHandle = new SafeWaitHandle(_inputProcess.Handle, false);
+			if (!waitHandle.IsAwaitable()) return Task.FromResult(false);
+			System.Threading.ManualResetEvent processFinishedEvent = new System.Threading.ManualResetEvent(false) { SafeWaitHandle = waitHandle };
+			return TaskHelper.FromWaitHandle(processFinishedEvent, millisecondsTimeout, Token)
+							.ConfigureAwait()
+							.ContinueWith(t =>
+							{
+								ObjectHelper.Dispose(ref processFinishedEvent);
+								ObjectHelper.Dispose(ref waitHandle);
+								return t.IsCompleted && t.Result;
+							}, Token);
 		}
 
 		public bool Wait() { return Wait(TimeSpanHelper.INFINITE); }
@@ -274,8 +287,8 @@ namespace essentialMix.Threading
 			try
 			{
 				result = millisecondsTimeout > TimeSpanHelper.INFINITE
-					? _inputProcess.WaitForExit(millisecondsTimeout, _cts.Token)
-					: _inputProcess.WaitForExit(_cts.Token);
+					? _inputProcess.WaitForExit(millisecondsTimeout, Token)
+					: _inputProcess.WaitForExit(Token);
 			}
 			catch (OperationCanceledException)
 			{
@@ -289,7 +302,7 @@ namespace essentialMix.Threading
 			return result;
 		}
 
-		private void Cancel() { _cts?.Cancel(); }
+		private void Cancel() { _cts.CancelIfNotDisposed(); }
 
 		private void OnOutput(string e)
 		{

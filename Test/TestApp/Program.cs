@@ -5800,7 +5800,7 @@ decrypted:
 					}
 					else
 					{
-						Task.Run(() => handle.WaitOne(token), token);
+						handle.WaitOneAsync(token);
 						Console.Write("Press any key to signal the event. ");
 						Console.ReadKey(true);
 						Console.WriteLine();

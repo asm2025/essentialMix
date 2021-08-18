@@ -73,43 +73,11 @@ namespace essentialMix.Threading.Patterns.Object
 			CancelInternal(enforce);
 		}
 
-		public bool Wait()
-		{
-			ThrowIfDisposed();
-			return WaitInternal(TimeSpanHelper.INFINITE);
-		}
-
-		public bool Wait(TimeSpan timeout)
-		{
-			ThrowIfDisposed();
-			return WaitInternal(timeout.TotalIntMilliseconds());
-		}
-
+		public bool Wait() { return Wait(TimeSpanHelper.INFINITE); }
+		public bool Wait(TimeSpan timeout) { return Wait(timeout.TotalIntMilliseconds()); }
 		public bool Wait(int millisecondsTimeout)
 		{
 			ThrowIfDisposed();
-			return WaitInternal(millisecondsTimeout);
-		}
-
-		[NotNull]
-		public Task WaitAsync()
-		{
-			return WaitAsync(TimeSpanHelper.INFINITE);
-		}
-
-		[NotNull]
-		public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
-
-		[NotNull]
-		public Task<bool> WaitAsync(int millisecondsTimeout)
-		{
-			ThrowIfDisposed();
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			return Task.Run(() => WaitInternal(millisecondsTimeout), Token).ConfigureAwait();
-		}
-
-		protected virtual bool WaitInternal(int millisecondsTimeout)
-		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
 			
 			try
@@ -118,21 +86,24 @@ namespace essentialMix.Threading.Patterns.Object
 				_countdown.Wait(Token);
 				return !Token.IsCancellationRequested;
 			}
-			catch (OperationCanceledException)
-			{
-				// ignored
-			}
-			catch (TimeoutException)
-			{
-				// ignored
-			}
+			catch (OperationCanceledException) { }
+			catch (TimeoutException) { }
 
 			return false;
 		}
 
+		public Task<bool> WaitAsync() { return WaitAsync(TimeSpanHelper.INFINITE); }
+		public Task<bool> WaitAsync(TimeSpan timeout) { return WaitAsync(timeout.TotalIntMilliseconds()); }
+		public Task<bool> WaitAsync(int millisecondsTimeout)
+		{
+			ThrowIfDisposed();
+			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+			return TaskHelper.FromWaitHandle(_countdown.WaitHandle, millisecondsTimeout, Token);
+		}
+
 		protected virtual void CancelInternal(bool enforce)
 		{
-			if (!enforce) WaitInternal(TimeSpanHelper.INFINITE);
+			if (!enforce) Wait(TimeSpanHelper.INFINITE);
 			_cts.CancelIfNotDisposed();
 		}
 
