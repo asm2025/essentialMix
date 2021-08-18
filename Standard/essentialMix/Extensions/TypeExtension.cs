@@ -64,7 +64,7 @@ namespace essentialMix.Extensions
 		public static MethodBase GetMethod([NotNull] this Type thisValue, [NotNull] LambdaExpression expression)
 		{
 			MethodBase result = expression.GetMethod();
-			if (result == null || result.ReflectedType == null || thisValue != result.ReflectedType && !thisValue.IsSubclassOf(result.ReflectedType))
+			if (result == null || result.ReflectedType == null || !result.ReflectedType.IsAssignableFrom(thisValue))
 				throw new ArgumentException($"Expression '{expression}' refers to a method that is not from type {thisValue}.");
 
 			return result;
@@ -74,7 +74,7 @@ namespace essentialMix.Extensions
 		public static EventInfo GetEvent([NotNull] this Type thisValue, [NotNull] LambdaExpression expression)
 		{
 			EventInfo result = expression.GetEvent();
-			if (result.ReflectedType == null || thisValue != result.ReflectedType && !thisValue.IsSubclassOf(result.ReflectedType))
+			if (result.ReflectedType == null || !result.ReflectedType.IsAssignableFrom(thisValue))
 				throw new ArgumentException($"Expression '{expression}' refers to an event that is not from type {thisValue}.");
 
 			return result;
@@ -84,7 +84,7 @@ namespace essentialMix.Extensions
 		public static PropertyInfo GetProperty([NotNull] this Type thisValue, [NotNull] LambdaExpression expression)
 		{
 			PropertyInfo result = expression.GetProperty();
-			if (result.ReflectedType == null || thisValue != result.ReflectedType && !thisValue.IsSubclassOf(result.ReflectedType))
+			if (result.ReflectedType == null || !result.ReflectedType.IsAssignableFrom(thisValue))
 				throw new ArgumentException($"Expression '{expression}' refers to a property that is not from type {thisValue}.");
 
 			return result;
@@ -179,7 +179,7 @@ namespace essentialMix.Extensions
 			foreach (Expression<Func<object, PropertyInfo>> expression in expressions)
 			{
 				PropertyInfo property = expression.GetProperty();
-				if (property.ReflectedType == null || thisValue != property.ReflectedType && !thisValue.IsSubclassOf(property.ReflectedType))
+				if (property.ReflectedType == null || !property.ReflectedType.IsAssignableFrom(thisValue))
 					throw new ArgumentException($"Expression '{expression}' refers to a property that is not from type {thisValue}.");
 				yield return property;
 			}
@@ -203,7 +203,7 @@ namespace essentialMix.Extensions
 		public static FieldInfo GetField([NotNull] this Type thisValue, [NotNull] LambdaExpression expression)
 		{
 			FieldInfo result = expression.GetField();
-			if (result.ReflectedType == null || thisValue != result.ReflectedType && !thisValue.IsSubclassOf(result.ReflectedType))
+			if (result.ReflectedType == null || !result.ReflectedType.IsAssignableFrom(thisValue))
 				throw new ArgumentException($"Expression '{expression}' refers to a field that is not from type {thisValue}.");
 
 			return result;
@@ -226,11 +226,11 @@ namespace essentialMix.Extensions
 		[NotNull]
 		public static MemberInfo GetMember([NotNull] this Type thisValue, [NotNull] LambdaExpression expression)
 		{
-			MemberInfo memberInfo = expression.GetMember();
-			if (memberInfo.ReflectedType == null || thisValue != memberInfo.ReflectedType && !thisValue.IsSubclassOf(memberInfo.ReflectedType))
+			MemberInfo result = expression.GetMember();
+			if (result.ReflectedType == null || !result.ReflectedType.IsAssignableFrom(thisValue))
 				throw new ArgumentException($"Expression '{expression}' refers to a property or field that is not from type {thisValue}.");
 
-			return memberInfo;
+			return result;
 		}
 
 		public static MemberInfo GetPropertyOrField([NotNull] this Type thisValue, string name, BindingFlags bindingAttributes = BindingFlags.Default)
@@ -1045,7 +1045,7 @@ namespace essentialMix.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsDerivedFrom([NotNull] this Type thisValue, Type type) { return type != null && (thisValue == type || thisValue.IsSubclassOf(type)); }
+		public static bool IsDerivedFrom([NotNull] this Type thisValue, Type type) { return type != null && type.IsAssignableFrom(thisValue); }
 
 		public static bool CanCastTo([NotNull] this Type thisValue, Type type)
 		{
@@ -1215,13 +1215,13 @@ namespace essentialMix.Extensions
 		public static bool IsAbstractOf<T>([NotNull] this Type thisValue) { return IsAbstractOf(thisValue, typeof(T)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsAbstractOf([NotNull] this Type thisValue, [NotNull] Type type) { return thisValue.IsAbstract && thisValue.IsSubclassOf(type); }
+		public static bool IsAbstractOf([NotNull] this Type thisValue, [NotNull] Type type) { return thisValue.IsAbstract && type.IsAssignableFrom(thisValue); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsConcreteOf<T>([NotNull] this Type thisValue) { return IsConcreteOf(thisValue, typeof(T)); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsConcreteOf([NotNull] this Type thisValue, [NotNull] Type type) { return !thisValue.IsAbstract && thisValue.IsSubclassOf(type); }
+		public static bool IsConcreteOf([NotNull] this Type thisValue, [NotNull] Type type) { return !thisValue.IsAbstract && type.IsAssignableFrom(thisValue); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsDelegate([NotNull] this Type thisValue) { return typeof(Delegate).IsAssignableFrom(thisValue); }

@@ -2,9 +2,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using essentialMix.Extensions;
+using essentialMix.Patterns.Events;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading.Helpers
+namespace essentialMix.Helpers
 {
 	public static class EventHelper
 	{

@@ -3,7 +3,7 @@ using System.Reflection;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading
+namespace essentialMix.Patterns.Events
 {
 	public class WaitForEventSettings<TSource, TArgs>
 		where TArgs : EventArgs

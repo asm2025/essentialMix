@@ -29,6 +29,7 @@ using essentialMix.Cryptography.Settings;
 using essentialMix.Exceptions;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
+using essentialMix.Patterns.Events;
 using Other.Microsoft.Collections;
 using essentialMix.Threading.Helpers;
 using essentialMix.Threading.Patterns.ProducerConsumer;
@@ -5866,7 +5867,9 @@ decrypted:
 				student.WillHappenIn(TIMEOUT);
 				Console.WriteLine(EventHelper.WatchEventAsync(settings).ConfigureAwait().Execute()
 									? Bright.Green("Ok")
-									: Bright.Red("Didn't occur in time or something shitty going on!"));
+									: timeout > 0
+										? Bright.Red("Didn't occur in time!")
+										: Bright.Red("Something shitty is going on!"));
 
 				Console.WriteLine();
 				Console.Write($"Would you like to repeat the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to exit. ");

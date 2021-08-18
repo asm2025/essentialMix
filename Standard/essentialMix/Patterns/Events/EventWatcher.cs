@@ -7,8 +7,9 @@ using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
 using JetBrains.Annotations;
 
-namespace essentialMix.Threading
+namespace essentialMix.Patterns.Events
 {
+	// based on https://stackoverflow.com/questions/35211/identify-an-event-via-a-linq-expression-tree#37315
 	public class EventWatcher<TSource, TArgs> : Disposable
 		where TArgs : EventArgs
 	{
@@ -155,19 +156,19 @@ namespace essentialMix.Threading
 		private void SendWatcherCallback(object state) { _watcherCallback(this, (TArgs)state); }
 	}
 
-	public class EventWatcher<TSource> : EventWatcher<TSource, EventArgs>
+	public sealed class EventWatcher<TSource> : EventWatcher<TSource, EventArgs>
 	{
 		/// <inheritdoc />
-		protected internal EventWatcher([NotNull] TSource target, [NotNull] EventInfo eventInfo, Action<EventWatcher<TSource, EventArgs>, EventArgs> watcherCallback)
+		internal EventWatcher([NotNull] TSource target, [NotNull] EventInfo eventInfo, Action<EventWatcher<TSource, EventArgs>, EventArgs> watcherCallback)
 			: base(target, eventInfo, watcherCallback)
 		{
 		}
 	}
 
-	public class EventWatcher : EventWatcher<object, EventArgs>
+	public sealed class EventWatcher : EventWatcher<object, EventArgs>
 	{
 		/// <inheritdoc />
-		private protected EventWatcher([NotNull] object target, [NotNull] EventInfo eventInfo, Action<EventWatcher<object, EventArgs>, EventArgs> watcherCallback)
+		private EventWatcher([NotNull] object target, [NotNull] EventInfo eventInfo, Action<EventWatcher<object, EventArgs>, EventArgs> watcherCallback)
 			: base(target, eventInfo, watcherCallback)
 		{
 		}
