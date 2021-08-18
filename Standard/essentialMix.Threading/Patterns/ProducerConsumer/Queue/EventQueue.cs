@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using essentialMix.Collections;
-using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
@@ -171,7 +170,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						continue;
 					}
 
-					if (_queue.IsEmpty && !WaitHandleExtension.WaitOne(_queueEvent, TimeSpanHelper.FAST, Token)) continue;
+					if (_queue.IsEmpty && !_queueEvent.WaitOne(TimeSpanHelper.FAST, Token)) continue;
 					if (IsPaused || IsDisposed || Token.IsCancellationRequested || _queue.IsEmpty) continue;
 					T item;
 

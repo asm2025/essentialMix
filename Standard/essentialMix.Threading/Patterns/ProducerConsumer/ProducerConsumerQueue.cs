@@ -468,7 +468,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			token.ThrowIfCancellationRequested();
 			return mode switch
 			{
-				ThreadQueueMode.DataFlow => new DataFlowQueue<T>(options, token),
 				ThreadQueueMode.BlockingCollection => new BlockingCollectionQueue<T>(options, token),
 				_ => Create(mode, new Queue<T>(), options, token)
 			};
@@ -482,6 +481,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 			return mode switch
 			{
 				ThreadQueueMode.Task => new TaskQueue<TQueue, T>(queue, options, token),
+				ThreadQueueMode.DataFlow => new DataFlowQueue<TQueue, T>(queue, options, token),
 				ThreadQueueMode.WaitAndPulse => new WaitAndPulseQueue<TQueue, T>(queue, options, token),
 				ThreadQueueMode.Event => new EventQueue<TQueue, T>(queue, options, token),
 				ThreadQueueMode.TaskGroup => new TaskGroupQueue<TQueue, T>(queue, options, token),

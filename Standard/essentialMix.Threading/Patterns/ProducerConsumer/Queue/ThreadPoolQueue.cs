@@ -170,33 +170,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						continue;
 					}
 
-					if (_queue.IsEmpty)
-					{
-						bool pausedBreak = false;
-						SpinWait spinner = new SpinWait();
-
-						while (!IsDisposed && !Token.IsCancellationRequested && !IsCompleted && _queue.IsEmpty)
-						{
-							if (IsPaused)
-							{
-								pausedBreak = true;
-								break;
-							}
-
-							lock(SyncRoot)
-							{
-								if (IsPaused || IsDisposed || Token.IsCancellationRequested || !_queue.IsEmpty) continue;
-								Monitor.Wait(SyncRoot, TimeSpanHelper.FAST);
-							}
-
-							spinner.SpinOnce();
-						}
-
-						if (pausedBreak) continue;
-					}
-					
+					if (!WaitForQueue()) continue;
 					if (IsDisposed || Token.IsCancellationRequested) return;
-
 					T item;
 
 					lock(SyncRoot)
@@ -251,6 +226,27 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			{
 				SignalTasksCountDown();
 			}
+		}
+
+		private bool WaitForQueue()
+		{
+			if (!_queue.IsEmpty) return true;
+			SpinWait spinner = new SpinWait();
+
+			while (!IsDisposed && !Token.IsCancellationRequested && !IsCompleted && _queue.IsEmpty)
+			{
+				if (IsPaused) return false;
+
+				lock(SyncRoot)
+				{
+					if (IsPaused || IsDisposed || Token.IsCancellationRequested || !_queue.IsEmpty) continue;
+					Monitor.Wait(SyncRoot, TimeSpanHelper.FAST);
+				}
+
+				spinner.SpinOnce();
+			}
+
+			return !IsDisposed && !Token.IsCancellationRequested && !IsCompleted && !_queue.IsEmpty;
 		}
 	}
 

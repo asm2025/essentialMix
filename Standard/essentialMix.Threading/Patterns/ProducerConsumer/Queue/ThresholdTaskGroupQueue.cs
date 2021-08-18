@@ -258,7 +258,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 				if (_queue.IsEmpty)
 				{
-					if (waitOnQueue && !IsCompleted) continue;
+					if (waitOnQueue && !WaitForQueue())
+					{
+						if (IsCompleted) return false;
+						continue;
+					}
+
 					break;
 				}
 
@@ -300,6 +305,27 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			{
 				SignalTasksCountDown();
 			}
+		}
+
+		private bool WaitForQueue()
+		{
+			if (!_queue.IsEmpty) return true;
+			SpinWait spinner = new SpinWait();
+
+			while (!IsDisposed && !Token.IsCancellationRequested && !IsCompleted && _queue.IsEmpty)
+			{
+				if (IsPaused) return false;
+
+				lock(SyncRoot)
+				{
+					if (IsPaused || IsDisposed || Token.IsCancellationRequested || !_queue.IsEmpty) continue;
+					Monitor.Wait(SyncRoot, TimeSpanHelper.FAST);
+				}
+
+				spinner.SpinOnce();
+			}
+
+			return !IsDisposed && !Token.IsCancellationRequested && !IsCompleted && !_queue.IsEmpty;
 		}
 	}
 

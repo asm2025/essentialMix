@@ -14,7 +14,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 	/// ONLY use this queue when the life span duration of this whole queue object is generally short to do specific things and then get thrown away.
 	/// This queue uses dedicated Tasks to consume queued items which is Ok for a short time but not Ok for long running tasks because they will block
 	/// the default ThreadPool's threads. If this queue should have a long lifetime span, then consider using other <see cref="ProducerConsumerQueue{T}"/>
-	/// types which use dedicated threads to consume queued items such as <see cref="WaitAndPulseQueue{TQueue,T}" /> or <see cref="EventQueue{TQueue,T}" />
+	/// types which use dedicated threads to consume queued items such as <see cref="WaitAndPulseQueue{TQueue, T}" /> or <see cref="EventQueue{TQueue,T}" />
 	/// </summary>
 	public class TaskQueue<TQueue, T> : ProducerConsumerThreadQueue<T>, IProducerQueue<TQueue, T>
 		where TQueue : ICollection, IReadOnlyCollection<T>
@@ -94,7 +94,10 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 
 			lock(SyncRoot) 
+			{
 				_queue.Enqueue(item);
+				Monitor.Pulse(SyncRoot);
+			}
 		}
 
 		/// <inheritdoc />
@@ -103,7 +106,12 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			ThrowIfDisposed();
 
 			lock(SyncRoot)
-				return _queue.TryDequeue(out item);
+			{
+				if (!_queue.TryDequeue(out item)) return false;
+				Monitor.Pulse(SyncRoot);
+			}
+
+			return true;
 		}
 
 		/// <inheritdoc />
@@ -122,20 +130,34 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 			lock(SyncRoot)
 			{
+				if (_queue.IsEmpty) return;
+
+				int n = _queue.Count;
+
 				while (!_queue.IsEmpty && _queue.TryPeek(out T item) && predicate(item)) 
 					_queue.Dequeue();
+
+				if (n == _queue.Count) return;
+				Monitor.Pulse(SyncRoot);
 			}
 		}
 
 		protected override void CompleteInternal()
 		{
-			IsCompleted = true;
+			lock(SyncRoot)
+			{
+				IsCompleted = true;
+				Monitor.PulseAll(SyncRoot);
+			}
 		}
 
 		protected override void ClearInternal()
 		{
 			lock(SyncRoot)
+			{
 				_queue.Clear();
+				Monitor.PulseAll(SyncRoot);
+			}
 		}
 
 		private void Consume()
@@ -153,6 +175,8 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						continue;
 					}
 
+					if (!WaitForQueue()) continue;
+					if (IsDisposed || Token.IsCancellationRequested) return;
 					T item;
 						
 					lock(SyncRoot)
@@ -217,6 +241,27 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				if (entered) _semaphore?.Release();
 				SignalTasksCountDown();
 			}
+		}
+
+		private bool WaitForQueue()
+		{
+			if (!_queue.IsEmpty) return true;
+			SpinWait spinner = new SpinWait();
+
+			while (!IsDisposed && !Token.IsCancellationRequested && !IsCompleted && _queue.IsEmpty)
+			{
+				if (IsPaused) return false;
+
+				lock(SyncRoot)
+				{
+					if (IsPaused || IsDisposed || Token.IsCancellationRequested || !_queue.IsEmpty) continue;
+					Monitor.Wait(SyncRoot, TimeSpanHelper.FAST);
+				}
+
+				spinner.SpinOnce();
+			}
+
+			return !IsDisposed && !Token.IsCancellationRequested && !IsCompleted && !_queue.IsEmpty;
 		}
 	}
 

@@ -22,6 +22,7 @@
 			switch (thisValue)
 			{
 				case ThreadQueueMode.Task:
+				case ThreadQueueMode.DataFlow:
 				case ThreadQueueMode.WaitAndPulse:
 				case ThreadQueueMode.Event:
 				case ThreadQueueMode.TaskGroup:
