@@ -87,7 +87,7 @@ namespace essentialMix.Extensions
 
 			static async Task WithCancellationLocal(Task task, CancellationToken token)
 			{
-				TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+				TaskCompletionSource<object> tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
 				IDisposable tokenRegistration = null;
 
 				try
@@ -119,7 +119,7 @@ namespace essentialMix.Extensions
 
 			static async Task<TResult> WithCancellationLocal(Task<TResult> task, CancellationToken token)
 			{
-				TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
+				TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>(TaskCreationOptions.RunContinuationsAsynchronously);
 				IDisposable tokenRegistration = null;
 
 				try
@@ -142,7 +142,7 @@ namespace essentialMix.Extensions
 
 			if (thisValue.IsFaulted)
 			{
-				TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
+				TaskCompletionSource<T> tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
 				
 				if (thisValue.Exception != null)
 					tcs.SetException(thisValue.Exception.InnerExceptions);
@@ -185,7 +185,7 @@ namespace essentialMix.Extensions
 			}
 
 			// tcs.Task will be returned as a proxy to the caller
-			TaskCompletionSource<VoidTypeStruct> tcs = new TaskCompletionSource<VoidTypeStruct>();
+			TaskCompletionSource<VoidTypeStruct> tcs = new TaskCompletionSource<VoidTypeStruct>(TaskCreationOptions.RunContinuationsAsynchronously);
 
 			// Short-circuit #2: zero timeout
 			if (millisecondsTimeout == 0)
@@ -237,7 +237,7 @@ namespace essentialMix.Extensions
 			}
 
 			// tcs.Task will be returned as a proxy to the caller
-			TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
+			TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>(TaskCreationOptions.RunContinuationsAsynchronously);
 
 			// Short-circuit #2: zero timeout
 			if (millisecondsTimeout == 0)
@@ -498,7 +498,7 @@ namespace essentialMix.Extensions
 			where T : TU
 		{
 			if (thisValue == null) return null;
-			TaskCompletionSource<TU> tcs = new TaskCompletionSource<TU>();
+			TaskCompletionSource<TU> tcs = new TaskCompletionSource<TU>(TaskCreationOptions.RunContinuationsAsynchronously);
 			thisValue.ContinueWith(t =>
 			{
 				if (t.IsFaulted)

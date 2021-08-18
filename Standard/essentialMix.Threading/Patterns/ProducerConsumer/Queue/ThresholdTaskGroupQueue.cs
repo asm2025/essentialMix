@@ -250,10 +250,17 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 			while (!IsDisposed && !Token.IsCancellationRequested && count > 0)
 			{
-				// ReSharper disable once InconsistentlySynchronizedField
-				if (IsPaused || waitOnQueue && _queue.IsEmpty) continue;
-				// ReSharper disable once InconsistentlySynchronizedField
-				if (_queue.IsEmpty) break;
+				if (IsPaused)
+				{
+					SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+					continue;
+				}
+
+				if (_queue.IsEmpty)
+				{
+					if (waitOnQueue && !IsCompleted) continue;
+					break;
+				}
 
 				lock(SyncRoot)
 				{

@@ -13,7 +13,7 @@ namespace essentialMix.Extensions
 		{
 			token.ThrowIfCancellationRequested();
 			Task.Yield();
-			TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+			TaskCompletionSource<object> tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
 
 			try
 			{
@@ -37,7 +37,7 @@ namespace essentialMix.Extensions
 		{
 			token.ThrowIfCancellationRequested();
 			Task.Yield();
-			TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
+			TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>(TaskCreationOptions.RunContinuationsAsynchronously);
 
 			try
 			{

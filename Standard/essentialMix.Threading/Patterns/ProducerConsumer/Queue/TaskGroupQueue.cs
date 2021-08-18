@@ -212,8 +212,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					continue;
 				}
 
-				if (waitOnQueue && _queue.IsEmpty) continue;
-				if (_queue.IsEmpty) break;
+				if (_queue.IsEmpty)
+				{
+					if (waitOnQueue && !IsCompleted) continue;
+					break;
+				}
 
 				lock(SyncRoot)
 				{

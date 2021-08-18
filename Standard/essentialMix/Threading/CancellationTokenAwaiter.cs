@@ -20,7 +20,7 @@ namespace essentialMix.Threading
 				return;
 			}
 
-			TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+			TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 			if (token.CanBeCanceled) _tokenRegistration = Token.Register(state => ((TaskCompletionSource<bool>)state).TrySetCanceled(Token), tcs, false);
 			Task = tcs.Task;
 		}

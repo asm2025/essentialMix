@@ -299,7 +299,7 @@ namespace essentialMix.Helpers
 
 			static async Task<bool> FromWaitHandleLocal(WaitHandle handle, int millisecondsTimeout, CancellationToken token)
 			{
-				TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+				TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 				WaitHandleRegistration registration = null;
 				IDisposable tokenRegistration = null;
 
