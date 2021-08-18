@@ -14,13 +14,27 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		where TQueue : ICollection, IReadOnlyCollection<T>
 	{
 		private readonly QueueAdapter<TQueue, T> _queue;
-
-		private ActionBlock<T> _processor;
+		private readonly ActionBlock<T> _processor;
 
 		public DataFlowQueue([NotNull] TQueue queue, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
 			_queue = new QueueAdapter<TQueue, T>(queue);
+			_processor = new ActionBlock<T>(item =>
+			{
+				if (ScheduledCallback != null && !ScheduledCallback(item)) return;
+				AddTasksCountDown();
+				Run(item);
+			}, new ExecutionDataflowBlockOptions
+			{
+				// SingleProducerConstrained = false by default therefore, BufferBlock<T>.SendAsync is thread safe
+				MaxDegreeOfParallelism = Threads,
+				CancellationToken = Token
+			});
+
+			_processor.Completion
+					.ConfigureAwait()
+					.ContinueWith(_ => SignalWorkersCountDown());
 		}
 
 		/// <inheritdoc />
@@ -61,9 +75,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 						InitializeWorkerStart();
 						InitializeWorkersCountDown(1);
 						InitializeTasksCountDown();
-
-						// configure the action block
-						InitializeMesh();
 
 						new Thread(Consume)
 						{
@@ -145,25 +156,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 				_queue.Clear();
 				Monitor.PulseAll(SyncRoot);
 			}
-		}
-
-		private void InitializeMesh()
-		{
-			_processor = new ActionBlock<T>(item =>
-			{
-				if (ScheduledCallback != null && !ScheduledCallback(item)) return;
-				AddTasksCountDown();
-				Run(item);
-			}, new ExecutionDataflowBlockOptions
-			{
-				// SingleProducerConstrained = false by default therefore, BufferBlock<T>.SendAsync is thread safe
-				MaxDegreeOfParallelism = Threads,
-				CancellationToken = Token
-			});
-
-			_processor.Completion
-					.ConfigureAwait()
-					.ContinueWith(_ => SignalWorkersCountDown());
 		}
 
 		private void Consume()
