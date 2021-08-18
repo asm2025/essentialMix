@@ -8,32 +8,48 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 {
-	public class WaitAndPulseQueue<TQueue, T> : ProducerConsumerThreadQueue<T>, IProducerQueue<TQueue, T>
+	/// <summary>
+	/// ONLY use this queue when the life span duration of this whole queue object is generally short to do specific things and then get thrown away.
+	/// This queue uses dedicated Tasks to consume queued items which is Ok for a short time but not Ok for long running tasks because they will block
+	/// the default ThreadPool's threads. If this queue should have a long lifetime span, then consider using other <see cref="ProducerConsumerQueue{T}"/>
+	/// types which use dedicated threads to consume queued items such as <see cref="WaitAndPulseQueue{TQueue,T}" /> or <see cref="EventQueue{TQueue,T}" />
+	/// <para>This queue uses ThreadPool.UnsafeQueueUserWorkItem.
+	/// For info about ThreadPool.UnsafeQueueUserWorkItem vs ThreadPool.QueueUserWorkItem, see <see href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.threadpool.unsafequeueuserworkitem">ThreadPool.UnsafeQueueUserWorkItem</see>
+	/// vs <see href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.threadpool.queueuserworkitem?view=net-5.0">ThreadPool.QueueUserWorkItem</see> documentation
+	/// or <see href="https://stackoverflow.com/questions/16926106/unsafequeueuserworkitem-and-what-exactly-does-does-not-propagate-the-calling-st#16928762">this answer</see> on <see href="https://stackoverflow.com/">StackOverflow.com</see> for explanation.</para>
+	/// <para>In summary, It's about CAS, Code Access Security, and the ExecutionContext. The ExecutionContext.Capture() method performs an essential role. It makes a copy of the context of the calling thread, including making a stack walk to create a "compressed"
+	/// stack of the security attributes discovered. ThreadPool.UnsafeQueueUserWorkItem() skips the Capture() call. The thread pool thread will run with the default execution context. This is an optimization, Capture() is not a cheap method. It matters in the kind
+	/// of program that depends on TP threads to get stuff done in a hurry.</para>
+	/// </summary>
+	public class ThreadPoolQueue<TQueue, T> : ProducerConsumerThreadQueue<T>, IProducerQueue<TQueue, T>
 		where TQueue : ICollection, IReadOnlyCollection<T>
 	{
 		private readonly QueueAdapter<TQueue, T> _queue;
-		private readonly Thread[] _workers;
 
-		public WaitAndPulseQueue([NotNull] TQueue queue, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+		public ThreadPoolQueue([NotNull] TQueue queue, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(options, token)
 		{
 			_queue = new QueueAdapter<TQueue, T>(queue);
-			_workers = new Thread[Threads];
 		}
 
 		/// <inheritdoc />
+		// ReSharper disable once InconsistentlySynchronizedField
 		public TQueue Queue => _queue.Queue;
 		
 		/// <inheritdoc />
+		// ReSharper disable once InconsistentlySynchronizedField
 		public bool IsSynchronized => _queue.IsSynchronized;
-		
+
 		/// <inheritdoc />
+		// ReSharper disable once InconsistentlySynchronizedField
 		public object SyncRoot => _queue.SyncRoot;
 
 		/// <inheritdoc />
+		// ReSharper disable once InconsistentlySynchronizedField
 		public override int Count => _queue.Count + Running;
 
 		/// <inheritdoc />
+		// ReSharper disable once InconsistentlySynchronizedField
 		public override bool IsEmpty => _queue.Count == 0;
 		
 		/// <inheritdoc />
@@ -47,24 +63,19 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			{
 				bool invokeWorkStarted = false;
 
-				lock(_workers)
+				lock(SyncRoot)
 				{
-					if (IsDisposed || Token.IsCancellationRequested || IsCompleted) return;
-
 					if (!WaitForWorkerStart())
 					{
 						InitializeWorkerStart();
-						InitializeWorkersCountDown();
+						InitializeWorkersCountDown(1);
 						InitializeTasksCountDown();
 
-						for (int i = 0; i < _workers.Length; i++)
+						new Thread(Consume)
 						{
-							(_workers[i] = new Thread(Consume)
-									{
-										IsBackground = IsBackground,
-										Priority = Priority
-									}).Start();
-						}
+							IsBackground = IsBackground,
+							Priority = Priority
+						}.Start();
 					
 						invokeWorkStarted = true;
 						if (!WaitForWorkerStart()) throw new TimeoutException();
@@ -100,7 +111,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		public bool TryPeek(out T item)
 		{
 			ThrowIfDisposed();
-			
+
 			lock(SyncRoot)
 				return _queue.TryPeek(out item);
 		}
@@ -146,14 +157,16 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		{
 			if (IsDisposed || Token.IsCancellationRequested) return;
 			SignalWorkerStart();
+			/*
+			*/
 
 			try
 			{
 				while (!IsDisposed && !Token.IsCancellationRequested && !IsCompleted)
 				{
-					if (IsPaused)
+					if (IsPaused || Running >= Threads)
 					{
-						SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+						SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || (!IsPaused && Running < Threads));
 						continue;
 					}
 
@@ -183,6 +196,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					}
 					
 					if (IsDisposed || Token.IsCancellationRequested) return;
+
 					T item;
 
 					lock(SyncRoot)
@@ -192,16 +206,16 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 					if (ScheduledCallback != null && !ScheduledCallback(item)) continue;
 					AddTasksCountDown();
-					Run(item);
+					ThreadPool.UnsafeQueueUserWorkItem(RunThread, item);
 				}
 
 				if (IsDisposed || Token.IsCancellationRequested) return;
 
 				while (!IsDisposed && !Token.IsCancellationRequested && !_queue.IsEmpty)
 				{
-					if (IsPaused)
+					if (IsPaused || Running >= Threads)
 					{
-						SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || !IsPaused);
+						SpinWait.SpinUntil(() => IsDisposed || Token.IsCancellationRequested || (!IsPaused && Running < Threads));
 						continue;
 					}
 
@@ -214,7 +228,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 					if (ScheduledCallback != null && !ScheduledCallback(item)) continue;
 					AddTasksCountDown();
-					Run(item);
+					ThreadPool.UnsafeQueueUserWorkItem(RunThread, item);
 				}
 			}
 			catch (ObjectDisposedException) { }
@@ -225,13 +239,13 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 			}
 		}
 
-		/// <inheritdoc />
-		protected override void Run(T item)
+		private void RunThread(object rawValue)
 		{
+			if (IsDisposed || Token.IsCancellationRequested) return;
+
 			try
 			{
-				if (IsDisposed || Token.IsCancellationRequested) return;
-				base.Run(item);
+				Run((T)rawValue);
 			}
 			finally
 			{
@@ -240,10 +254,11 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 		}
 	}
 
-	/// <inheritdoc cref="WaitAndPulseQueue{TQueue,T}" />
-	public sealed class WaitAndPulseQueue<T> : WaitAndPulseQueue<Queue<T>, T>, IProducerQueue<T>
+	/// <inheritdoc cref="SemaphoreSlimQueue{TQueue,T}"/>
+	public sealed class ThreadPoolQueue<T> : SemaphoreSlimQueue<Queue<T>, T>, IProducerQueue<T>
 	{
-		public WaitAndPulseQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
+		/// <inheritdoc />
+		public ThreadPoolQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 			: base(new Queue<T>(), options, token)
 		{
 		}

@@ -11,6 +11,7 @@
 		SemaphoreSlim,
 		Semaphore,
 		Mutex,
+		ThreadPool,
 		ThresholdTaskGroup
 	}
 
@@ -27,6 +28,7 @@
 				case ThreadQueueMode.SemaphoreSlim:
 				case ThreadQueueMode.Semaphore:
 				case ThreadQueueMode.Mutex:
+				case ThreadQueueMode.ThreadPool:
 				case ThreadQueueMode.ThresholdTaskGroup:
 					return true;
 				default:

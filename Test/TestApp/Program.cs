@@ -99,7 +99,7 @@ work with {HEAVY} items.");
 			//TestLevenshteinDistance();
 			//TestDeepestPit();
 
-			//TestThreadQueue();
+			TestThreadQueue();
 			//TestThreadQueueWithPriorityQueue();
 			//TestAsyncLock();
 
@@ -190,7 +190,7 @@ work with {HEAVY} items.");
 			
 			//TestEventWaitHandle();
 			
-			TestWaitForEvent();
+			//TestWaitForEvent();
 
 			ConsoleHelper.Pause();
 		}

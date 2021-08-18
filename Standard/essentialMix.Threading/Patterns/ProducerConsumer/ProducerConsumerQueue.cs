@@ -488,6 +488,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 				ThreadQueueMode.SemaphoreSlim => new SemaphoreSlimQueue<TQueue, T>(queue, options, token),
 				ThreadQueueMode.Semaphore => new SemaphoreQueue<TQueue, T>(queue, options, token),
 				ThreadQueueMode.Mutex => new MutexQueue<TQueue, T>(queue, options, token),
+				ThreadQueueMode.ThreadPool => new ThreadPoolQueue<TQueue, T>(queue, options, token),
 				ThreadQueueMode.ThresholdTaskGroup => new ThresholdTaskGroupQueue<TQueue, T>(queue, options, token),
 				_ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
 			};
