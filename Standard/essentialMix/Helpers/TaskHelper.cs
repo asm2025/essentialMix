@@ -10,7 +10,7 @@ namespace essentialMix.Helpers
 {
 	public static class TaskHelper
 	{
-		// based on Nito.AsyncEx.Interop
+		// based on Nito.AsyncEx.Interop.CancellationTokenRegistration
 		private sealed class WaitHandleRegistration : IDisposable
 		{
 			private readonly RegisteredWaitHandle _registeredWaitHandle;
@@ -284,6 +284,10 @@ namespace essentialMix.Helpers
 		public static Task<bool> FromWaitHandle([NotNull] WaitHandle handle, TimeSpan timeout, CancellationToken token) { return FromWaitHandle(handle, timeout.TotalIntMilliseconds(), token); }
 		[NotNull]
 		public static Task<bool> FromWaitHandle([NotNull] WaitHandle handle, int millisecondsTimeout) { return FromWaitHandle(handle, millisecondsTimeout, CancellationToken.None); }
+		/// <summary>
+		/// Registers a wait task in the thread pool.
+		/// <para>Based on <see href="https://github.com/StephenCleary/AsyncEx/blob/master/src/Nito.AsyncEx.Interop.WaitHandles/Interop/WaitHandleAsyncFactory.cs">Stephen Cleary's Nito.AsyncEx.Interop.WaitHandles/Interop.WaitHandleAsyncFactory</see></para>
+		/// </summary>
 		public static Task<bool> FromWaitHandle([NotNull] WaitHandle handle, int millisecondsTimeout, CancellationToken token)
 		{
 			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));

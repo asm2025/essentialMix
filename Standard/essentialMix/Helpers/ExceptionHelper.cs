@@ -15,7 +15,15 @@ namespace essentialMix.Helpers
 					return;
 				case AggregateException ae:
 					foreach (Exception inn in ae.InnerExceptions)
-						CollectMessages(inn, sb);
+					{
+						Exception ex = inn;
+
+						while (ex.InnerException != null) 
+							ex = ex.InnerException;
+
+						testAndCollect?.Invoke(ex);
+						sb.AppendWithLine(ex.Message);
+					}
 					break;
 				default:
 					while (value.InnerException != null)
@@ -26,8 +34,7 @@ namespace essentialMix.Helpers
 					break;
 			}
 
-			if (!DebugHelper.DebugMode) return;
-			sb.AppendWithLine(value.GetStackTrace());
+			sb.AppendWithLine(value.StackTrace);
 		}
 	}
 }

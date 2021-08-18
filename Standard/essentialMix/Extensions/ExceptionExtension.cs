@@ -1,25 +1,46 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using essentialMix.ComponentModel.DataAnnotations;
 using essentialMix.Helpers;
+using JetBrains.Annotations;
 
 namespace essentialMix.Extensions
 {
 	public static class ExceptionExtension
 	{
-		public static string GetStackTrace(this Exception thisValue)
+		[NotNull]
+		public static string GetStackTrace(this Exception thisValue, bool excludeHidden = false)
 		{
-			if (thisValue == null) return null;
+			if (thisValue == null) return string.Empty;
+			if (!excludeHidden) return thisValue.StackTrace;
 
-			StackFrame[] stackFrames = new StackTrace(thisValue, true).GetFrames();
-			if (stackFrames == null) return string.Empty;
-			
-			IEnumerable<string> frames = stackFrames.Where(f => !f.GetMethod().IsDefined<HideFromStackTraceAttribute>())
-				.Select(f => new StackTrace(f).ToString());
-			return string.Concat(frames);
+			StringBuilder sb = new StringBuilder();
+			AppendStackTrace(thisValue, sb, true);
+			return sb.ToString();
+		}
+
+		public static void AppendStackTrace(this Exception thisValue, [NotNull] StringBuilder sb, bool excludeHidden = false)
+		{
+			if (thisValue == null) return;
+
+			if (!excludeHidden)
+			{
+				sb.AppendWithLine(thisValue.StackTrace);
+				return;
+			}
+
+			StackTrace stackTrace = new StackTrace(thisValue, true);
+			if (stackTrace.FrameCount == 0) return;
+			if (sb.Length > 0) sb.AppendLine();
+
+			for (int i = 0; i < stackTrace.FrameCount; i++)
+			{
+				StackFrame frame = stackTrace.GetFrame(i);
+				if (frame ==  null || frame.GetMethod().IsDefined<HideFromStackTraceAttribute>()) continue;
+				sb.Append(new StackTrace(frame));
+			}
 		}
 
 		public static string CollectMessages(this Exception thisValue)
@@ -61,6 +82,13 @@ namespace essentialMix.Extensions
 					return thisValue.Message;
 				}
 			}
+		}
+
+		public static ExceptionDispatchInfo Capture(this Exception thisValue)
+		{
+			return thisValue == null
+						? null
+						: ExceptionDispatchInfo.Capture(thisValue);
 		}
 	}
 }
