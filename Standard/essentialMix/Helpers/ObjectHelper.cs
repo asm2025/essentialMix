@@ -29,13 +29,13 @@ namespace essentialMix.Helpers
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.ForwardRef)]
-		public static void MarshalDispose(ref object value)
+		public static void MarshalDispose<T>(ref T value)
 		{
 			MarshalDispose(value);
-			value = null;
+			value = default(T);
 		}
 
-		public static void MarshalDispose(object value)
+		public static void MarshalDispose<T>(T value)
 		{
 			if (value is null) return;
 
