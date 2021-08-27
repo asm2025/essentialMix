@@ -1769,5822 +1769,10716 @@ namespace essentialMix
 	#endregion
 
 	#region static classes
+	/// <summary>
+	/// See <see href="https://github.com/MicrosoftDocs/win32/blob/docs/desktop-src/com/com-error-codes.md">COM Error Codes</see>
+	/// </summary>
 	public static class ResultCom
 	{
+		#region Generic
 		/// <summary>
-		///     Not implemented
-		/// </summary>
-		public const int E_NOTIMPL = (int)(0x80000001 - 0x100000000);
-
-		/// <summary>
-		///     Ran out of memory
-		/// </summary>
-		public const int E_OUTOFMEMORY = (int)(0x80000002 - 0x100000000);
-
-		/// <summary>
-		///     One or more arguments are invalid
-		/// </summary>
-		public const int E_INVALIDARG = (int)(0x80000003 - 0x100000000);
-
-		/// <summary>
-		///     No such interface supported
-		/// </summary>
-		public const int E_NOINTERFACE = (int)(0x80000004 - 0x100000000);
-
-		/// <summary>
-		///     Invalid pointer
-		/// </summary>
-		public const int E_POINTER = (int)(0x80000005 - 0x100000000);
-
-		/// <summary>
-		///     Invalid handle
-		/// </summary>
-		public const int E_HANDLE = (int)(0x80000006 - 0x100000000);
-
-		/// <summary>
-		///     Operation aborted
-		/// </summary>
-		public const int E_ABORT = (int)(0x80000007 - 0x100000000);
-
-		/// <summary>
-		///     Unspecified error
-		/// </summary>
-		public const int E_FAIL = (int)(0x80000008 - 0x100000000);
-
-		/// <summary>
-		///     General access denied error
-		/// </summary>
-		public const int E_ACCESSDENIED = (int)(0x80000009 - 0x100000000);
-
-		/// <summary>
-		///     The data necessary to complete this operation is not yet available.
-		/// </summary>
-		public const int E_PENDING = (int)(0x8000000A - 0x100000000);
-
-		/// <summary>
-		///     Thread local storage failure
-		/// </summary>
-		public const int CO_E_INIT_TLS = (int)(0x80004006 - 0x100000000);
-
-		/// <summary>
-		///     Get shared memory allocator failure
-		/// </summary>
-		public const int CO_E_INIT_SHARED_ALLOCATOR = (int)(0x80004007 - 0x100000000);
-
-		/// <summary>
-		///     Get memory allocator failure
-		/// </summary>
-		public const int CO_E_INIT_MEMORY_ALLOCATOR = (int)(0x80004008 - 0x100000000);
-
-		/// <summary>
-		///     Unable to initialize class cache
-		/// </summary>
-		public const int CO_E_INIT_CLASS_CACHE = (int)(0x80004009 - 0x100000000);
-
-		/// <summary>
-		///     Unable to initialize RPC services
-		/// </summary>
-		public const int CO_E_INIT_RPC_CHANNEL = (int)(0x8000400A - 0x100000000);
-
-		/// <summary>
-		///     Cannot set thread local storage channel control
-		/// </summary>
-		public const int CO_E_INIT_TLS_SET_CHANNEL_CONTROL = (int)(0x8000400B - 0x100000000);
-
-		/// <summary>
-		///     Could not allocate thread local storage channel control
-		/// </summary>
-		public const int CO_E_INIT_TLS_CHANNEL_CONTROL = (int)(0x8000400C - 0x100000000);
-
-		/// <summary>
-		///     The user supplied memory allocator is unacceptable
-		/// </summary>
-		public const int CO_E_INIT_UNACCEPTED_USER_ALLOCATOR = (int)(0x8000400D - 0x100000000);
-
-		/// <summary>
-		///     The OLE service mutex already exists
-		/// </summary>
-		public const int CO_E_INIT_SCM_MUTEX_EXISTS = (int)(0x8000400E - 0x100000000);
-
-		/// <summary>
-		///     The OLE service file mapping already exists
-		/// </summary>
-		public const int CO_E_INIT_SCM_FILE_MAPPING_EXISTS = (int)(0x8000400F - 0x100000000);
-
-		/// <summary>
-		///     Unable to map view of file for OLE service
-		/// </summary>
-		public const int CO_E_INIT_SCM_MAP_VIEW_OF_FILE = (int)(0x80004010 - 0x100000000);
-
-		/// <summary>
-		///     Failure attempting to launch OLE service
-		/// </summary>
-		public const int CO_E_INIT_SCM_EXEC_FAILURE = (int)(0x80004011 - 0x100000000);
-
-		/// <summary>
-		///     There was an attempt to call CoInitialize a second time while single threaded
-		/// </summary>
-		public const int CO_E_INIT_ONLY_SINGLE_THREADED = (int)(0x80004012 - 0x100000000);
-
-		/// <summary>
-		///     A Remote activation was necessary but was not allowed
-		/// </summary>
-		public const int CO_E_CANT_REMOTE = (int)(0x80004013 - 0x100000000);
-
-		/// <summary>
-		///     A Remote activation was necessary but the server name provided was invalid
-		/// </summary>
-		public const int CO_E_BAD_SERVER_NAME = (int)(0x80004014 - 0x100000000);
-
-		/// <summary>
-		///     The class is configured to run as a security id different from the caller
-		/// </summary>
-		public const int CO_E_WRONG_SERVER_IDENTITY = (int)(0x80004015 - 0x100000000);
-
-		/// <summary>
-		///     Use of Ole1 services requiring DDE windows is disabled
-		/// </summary>
-		public const int CO_E_OLE1DDE_DISABLED = (int)(0x80004016 - 0x100000000);
-
-		/// <summary>
-		///     A RunAs specification must be [domain name]\[user name] or simply [user name]
-		/// </summary>
-		public const int CO_E_RUNAS_SYNTAX = (int)(0x80004017 - 0x100000000);
-
-		/// <summary>
-		///     The server process could not be started.  The pathname may be incorrect.
-		/// </summary>
-		public const int CO_E_CREATEPROCESS_FAILURE = (int)(0x80004018 - 0x100000000);
-
-		/// <summary>
-		///     The server process could not be started as the configured identity.  The pathname may be incorrect or unavailable.
-		/// </summary>
-		public const int CO_E_RUNAS_CREATEPROCESS_FAILURE = (int)(0x80004019 - 0x100000000);
-
-		/// <summary>
-		///     The server process could not be started because the configured identity is incorrect.  Check the username and
-		///     password.
-		/// </summary>
-		public const int CO_E_RUNAS_LOGON_FAILURE = (int)(0x8000401A - 0x100000000);
-
-		/// <summary>
-		///     The client is not allowed to launch this server.
-		/// </summary>
-		public const int CO_E_LAUNCH_PERMSSION_DENIED = (int)(0x8000401B - 0x100000000);
-
-		/// <summary>
-		///     The service providing this server could not be started.
-		/// </summary>
-		public const int CO_E_START_SERVICE_FAILURE = (int)(0x8000401C - 0x100000000);
-
-		/// <summary>
-		///     This computer was unable to communicate with the computer providing the server.
-		/// </summary>
-		public const int CO_E_REMOTE_COMMUNICATION_FAILURE = (int)(0x8000401D - 0x100000000);
-
-		/// <summary>
-		///     The server did not respond after being launched.
-		/// </summary>
-		public const int CO_E_SERVER_START_TIMEOUT = (int)(0x8000401E - 0x100000000);
-
-		/// <summary>
-		///     The registration information for this server is inconsistent or incomplete.
-		/// </summary>
-		public const int CO_E_CLSREG_INCONSISTENT = (int)(0x8000401F - 0x100000000);
-
-		/// <summary>
-		///     The registration information for this interface is inconsistent or incomplete.
-		/// </summary>
-		public const int CO_E_IIDREG_INCONSISTENT = (int)(0x80004020 - 0x100000000);
-
-		/// <summary>
-		///     The operation attempted is not supported.
-		/// </summary>
-		public const int CO_E_NOT_SUPPORTED = (int)(0x80004021 - 0x100000000);
-
-		/// <summary>
-		///     A dll must be loaded.
-		/// </summary>
-		public const int CO_E_RELOAD_DLL = (int)(0x80004022 - 0x100000000);
-
-		/// <summary>
-		///     A Microsoft Software Installer error was encountered.
-		/// </summary>
-		public const int CO_E_MSI_ERROR = (int)(0x80004023 - 0x100000000);
-
-		/// <summary>
-		///     The specified activation could not occur in the client context as specified.
-		/// </summary>
-		public const int CO_E_ATTEMPT_TO_CREATE_OUTSIDE_CLIENT_CONTEXT = (int)(0x80004024 - 0x100000000);
-
-		/// <summary>
-		///     Activations on the server are paused.
-		/// </summary>
-		public const int CO_E_SERVER_PAUSED = (int)(0x80004025 - 0x100000000);
-
-		/// <summary>
-		///     Activations on the server are not paused.
-		/// </summary>
-		public const int CO_E_SERVER_NOT_PAUSED = (int)(0x80004026 - 0x100000000);
-
-		/// <summary>
-		///     The component or application containing the component has been disabled.
-		/// </summary>
-		public const int CO_E_CLASS_DISABLED = (int)(0x80004027 - 0x100000000);
-
-		/// <summary>
-		///     The common language runtime is not available
-		/// </summary>
-		public const int CO_E_CLRNOTAVAILABLE = (int)(0x80004028 - 0x100000000);
-
-		/// <summary>
-		///     The thread-pool rejected the submitted asynchronous work.
-		/// </summary>
-		public const int CO_E_ASYNC_WORK_REJECTED = (int)(0x80004029 - 0x100000000);
-
-		/// <summary>
-		///     The server started, but did not finish initializing in a timely fashion.
-		/// </summary>
-		public const int CO_E_SERVER_INIT_TIMEOUT = (int)(0x8000402A - 0x100000000);
-
-		/// <summary>
-		///     Unable to complete the call since there is no COM+ security context inside IObjectControl.Activate.
-		/// </summary>
-		public const int CO_E_NO_SECCTX_IN_ACTIVATE = (int)(0x8000402B - 0x100000000);
-
-		/// <summary>
-		///     The provided tracker configuration is invalid
-		/// </summary>
-		public const int CO_E_TRACKER_CONFIG = (int)(0x80004030 - 0x100000000);
-
-		/// <summary>
-		///     The provided thread pool configuration is invalid
-		/// </summary>
-		public const int CO_E_THREADPOOL_CONFIG = (int)(0x80004031 - 0x100000000);
-
-		/// <summary>
-		///     The provided side-by-side configuration is invalid
-		/// </summary>
-		public const int CO_E_SXS_CONFIG = (int)(0x80004032 - 0x100000000);
-
-		/// <summary>
-		///     The server principal name (SPN) obtained during security negotiation is malformed.
-		/// </summary>
-		public const int CO_E_MALFORMED_SPN = (int)(0x80004033 - 0x100000000);
-
-		/// <summary>
-		///     The operation completed successfully.
+		/// Operation successful
 		/// </summary>
 		public const int S_OK = 0x00000000;
-
 		/// <summary>
-		///     Incorrect function.
+		/// Operation successful
 		/// </summary>
 		public const int S_FALSE = 0x00000001;
-
 		/// <summary>
-		///     Invalid OLEVERB structure
+		/// Catastrophic failure
 		/// </summary>
-		public const int OLE_E_FIRST = (int)(0x80040000 - 0x100000000);
-
+		public const int E_UNEXPECTED = unchecked((int)0x8000FFFF);
 		/// <summary>
-		///     No information avialable.
+		/// Not implemented
 		/// </summary>
-		public const int OLE_E_LAST = (int)(0x800400FF - 0x100000000);
-
+		public const int E_NOTIMPL = unchecked((int)0x80004001);
 		/// <summary>
-		///     Use the registry database to provide the requested information
+		/// Ran out of memory
 		/// </summary>
-		public const int OLE_S_FIRST = 0x00040000;
-
+		public const int E_OUTOFMEMORY = unchecked((int)0x8007000E);
 		/// <summary>
-		///     No information avialable.
+		/// One or more arguments are invalid
 		/// </summary>
-		public const int OLE_S_LAST = 0x000400FF;
-
+		public const int E_INVALIDARG = unchecked((int)0x80070057);
 		/// <summary>
-		///     Invalid OLEVERB structure
+		/// No such interface supported
 		/// </summary>
-		public const int OLE_E_OLEVERB = (int)(0x80040000 - 0x100000000);
-
+		public const int E_NOINTERFACE = unchecked((int)0x80004002);
 		/// <summary>
-		///     Invalid advise flags
+		/// Invalid pointer
 		/// </summary>
-		public const int OLE_E_ADVF = (int)(0x80040001 - 0x100000000);
-
+		public const int E_POINTER = unchecked((int)0x80004003);
 		/// <summary>
-		///     Can't enumerate any more, because the associated data is missing
+		/// Invalid handle
 		/// </summary>
-		public const int OLE_E_ENUM_NOMORE = (int)(0x80040002 - 0x100000000);
-
+		public const int E_HANDLE = unchecked((int)0x80070006);
 		/// <summary>
-		///     This implementation doesn't take advises
+		/// Operation aborted
 		/// </summary>
-		public const int OLE_E_ADVISENOTSUPPORTED = (int)(0x80040003 - 0x100000000);
-
+		public const int E_ABORT = unchecked((int)0x80004004);
 		/// <summary>
-		///     There is no connection for this connection ID
+		/// Unspecified error
 		/// </summary>
-		public const int OLE_E_NOCONNECTION = (int)(0x80040004 - 0x100000000);
-
+		public const int E_FAIL = unchecked((int)0x80004005);
 		/// <summary>
-		///     Need to run the object to perform this operation
+		/// General access denied error
 		/// </summary>
-		public const int OLE_E_NOTRUNNING = (int)(0x80040005 - 0x100000000);
-
+		public const int E_ACCESSDENIED = unchecked((int)0x80070005);
 		/// <summary>
-		///     There is no cache to operate on
+		/// The data necessary to complete this operation is not yet available.
 		/// </summary>
-		public const int OLE_E_NOCACHE = (int)(0x80040006 - 0x100000000);
-
+		public const int E_PENDING = unchecked((int)0x8000000A);
 		/// <summary>
-		///     Uninitialized object
+		/// The operation attempted to access data outside the valid range
 		/// </summary>
-		public const int OLE_E_BLANK = (int)(0x80040007 - 0x100000000);
-
+		public const int E_BOUNDS = unchecked((int)0x8000000B);
 		/// <summary>
-		///     Linked object's source class has changed
+		/// A concurrent or interleaved operation changed the state of the object, invalidating this operation.
 		/// </summary>
-		public const int OLE_E_CLASSDIFF = (int)(0x80040008 - 0x100000000);
-
+		public const int E_CHANGED_STATE = unchecked((int)0x8000000C);
 		/// <summary>
-		///     Not able to get the moniker of the object
+		/// An illegal state change was requested.
 		/// </summary>
-		public const int OLE_E_CANT_GETMONIKER = (int)(0x80040009 - 0x100000000);
-
+		public const int E_ILLEGAL_STATE_CHANGE = unchecked((int)0x8000000D);
 		/// <summary>
-		///     Not able to bind to the source
+		/// A method was called at an unexpected time.
 		/// </summary>
-		public const int OLE_E_CANT_BINDTOSOURCE = (int)(0x8004000A - 0x100000000);
-
+		public const int E_ILLEGAL_METHOD_CALL = unchecked((int)0x8000000E);
 		/// <summary>
-		///     Object is static; operation not allowed
+		/// Typename or Namespace was not found in metadata file.
 		/// </summary>
-		public const int OLE_E_STATIC = (int)(0x8004000B - 0x100000000);
-
+		public const int RO_E_METADATA_NAME_NOT_FOUND = unchecked((int)0x8000000F);
 		/// <summary>
-		///     User canceled out of save dialog
+		/// Name is an existing namespace rather than a typename.
 		/// </summary>
-		public const int OLE_E_PROMPTSAVECANCELLED = (int)(0x8004000C - 0x100000000);
-
+		public const int RO_E_METADATA_NAME_IS_NAMESPACE = unchecked((int)0x80000010);
 		/// <summary>
-		///     Invalid rectangle
+		/// Typename has an invalid format.
 		/// </summary>
-		public const int OLE_E_INVALIDRECT = (int)(0x8004000D - 0x100000000);
-
+		public const int RO_E_METADATA_INVALID_TYPE_FORMAT = unchecked((int)0x80000011);
 		/// <summary>
-		///     compobj.dll is too old for the ole2.dll initialized
+		/// Metadata file is invalid or corrupted.
 		/// </summary>
-		public const int OLE_E_WRONGCOMPOBJ = (int)(0x8004000E - 0x100000000);
-
+		public const int RO_E_INVALID_METADATA_FILE = unchecked((int)0x80000012);
 		/// <summary>
-		///     Invalid window handle
+		/// The object has been closed.
 		/// </summary>
-		public const int OLE_E_INVALIDHWND = (int)(0x8004000F - 0x100000000);
-
+		public const int RO_E_CLOSED = unchecked((int)0x80000013);
 		/// <summary>
-		///     Object is not in any of the inplace active states
+		/// Only one thread may access the object during a write operation.
 		/// </summary>
-		public const int OLE_E_NOT_INPLACEACTIVE = (int)(0x80040010 - 0x100000000);
-
+		public const int RO_E_EXCLUSIVE_WRITE = unchecked((int)0x80000014);
 		/// <summary>
-		///     Not able to convert object
+		/// Operation is prohibited during change notification.
 		/// </summary>
-		public const int OLE_E_CANTCONVERT = (int)(0x80040011 - 0x100000000);
-
+		public const int RO_E_CHANGE_NOTIFICATION_IN_PROGRESS = unchecked((int)0x80000015);
 		/// <summary>
-		///     Not able to perform the operation because object is not given storage yet
+		/// The text associated with this error code could not be found.
 		/// </summary>
-		public const int OLE_E_NOSTORAGE = (int)(0x80040012 - 0x100000000);
-
+		public const int RO_E_ERROR_STRING_NOT_FOUND = unchecked((int)0x80000016);
 		/// <summary>
-		///     Invalid FORMATETC structure
+		/// String not null terminated.
 		/// </summary>
-		public const int DV_E_FORMATETC = (int)(0x80040064 - 0x100000000);
-
+		public const int E_STRING_NOT_NULL_TERMINATED = unchecked((int)0x80000017);
 		/// <summary>
-		///     Invalid DVTARGETDEVICE structure
+		/// A delegate was assigned when not allowed.
 		/// </summary>
-		public const int DV_E_DVTARGETDEVICE = (int)(0x80040065 - 0x100000000);
-
+		public const int E_ILLEGAL_DELEGATE_ASSIGNMENT = unchecked((int)0x80000018);
 		/// <summary>
-		///     Invalid STDGMEDIUM structure
+		/// An async operation was not properly started.
 		/// </summary>
-		public const int DV_E_STGMEDIUM = (int)(0x80040066 - 0x100000000);
-
+		public const int E_ASYNC_OPERATION_NOT_STARTED = unchecked((int)0x80000019);
 		/// <summary>
-		///     Invalid STATDATA structure
+		/// The application is exiting and cannot service this request.
 		/// </summary>
-		public const int DV_E_STATDATA = (int)(0x80040067 - 0x100000000);
-
+		public const int E_APPLICATION_EXITING = unchecked((int)0x8000001A);
 		/// <summary>
-		///     Invalid lindex
+		/// The application view is exiting and cannot service this request.
 		/// </summary>
-		public const int DV_E_LINDEX = (int)(0x80040068 - 0x100000000);
-
+		public const int E_APPLICATION_VIEW_EXITING = unchecked((int)0x8000001B);
 		/// <summary>
-		///     Invalid tymed
+		/// The object must support the IAgileObject interface.
 		/// </summary>
-		public const int DV_E_TYMED = (int)(0x80040069 - 0x100000000);
-
+		public const int RO_E_MUST_BE_AGILE = unchecked((int)0x8000001C);
 		/// <summary>
-		///     Invalid clipboard format
+		/// Activating a single-threaded class from MTA is not supported.
 		/// </summary>
-		public const int DV_E_CLIPFORMAT = (int)(0x8004006A - 0x100000000);
-
+		public const int RO_E_UNSUPPORTED_FROM_MTA = unchecked((int)0x8000001D);
 		/// <summary>
-		///     Invalid aspect(s)
+		/// The object has been committed.
 		/// </summary>
-		public const int DV_E_DVASPECT = (int)(0x8004006B - 0x100000000);
-
+		public const int RO_E_COMMITTED = unchecked((int)0x8000001E);
 		/// <summary>
-		///     tdSize parameter of the DVTARGETDEVICE structure is invalid
+		/// Thread local storage failure
 		/// </summary>
-		public const int DV_E_DVTARGETDEVICE_SIZE = (int)(0x8004006C - 0x100000000);
-
+		public const int CO_E_INIT_TLS = unchecked((int)0x80004006);
 		/// <summary>
-		///     Object doesn't support IViewObject interface
+		/// Get shared memory allocator failure
 		/// </summary>
-		public const int DV_E_NOIVIEWOBJECT = (int)(0x8004006D - 0x100000000);
-
+		public const int CO_E_INIT_SHARED_ALLOCATOR = unchecked((int)0x80004007);
 		/// <summary>
-		///     Trying to revoke a drop target that has not been registered
+		/// Get memory allocator failure
 		/// </summary>
-		public const int DRAGDROP_E_FIRST = (int)(0x80040100 - 0x100000000);
-
+		public const int CO_E_INIT_MEMORY_ALLOCATOR = unchecked((int)0x80004008);
 		/// <summary>
-		///     No information avialable.
+		/// Unable to initialize class cache
 		/// </summary>
-		public const int DRAGDROP_E_LAST = (int)(0x8004010F - 0x100000000);
-
+		public const int CO_E_INIT_CLASS_CACHE = unchecked((int)0x80004009);
 		/// <summary>
-		///     Successful drop took place
+		/// Unable to initialize RPC services
 		/// </summary>
-		public const int DRAGDROP_S_FIRST = 0x00040100;
-
+		public const int CO_E_INIT_RPC_CHANNEL = unchecked((int)0x8000400A);
 		/// <summary>
-		///     No information avialable.
+		/// Cannot set thread local storage channel control
 		/// </summary>
-		public const int DRAGDROP_S_LAST = 0x0004010F;
-
+		public const int CO_E_INIT_TLS_SET_CHANNEL_CONTROL = unchecked((int)0x8000400B);
 		/// <summary>
-		///     Trying to revoke a drop target that has not been registered
+		/// Could not allocate thread local storage channel control
 		/// </summary>
-		public const int DRAGDROP_E_NOTREGISTERED = (int)(0x80040100 - 0x100000000);
-
+		public const int CO_E_INIT_TLS_CHANNEL_CONTROL = unchecked((int)0x8000400C);
 		/// <summary>
-		///     This window has already been registered as a drop target
+		/// The user supplied memory allocator is unacceptable
 		/// </summary>
-		public const int DRAGDROP_E_ALREADYREGISTERED = (int)(0x80040101 - 0x100000000);
-
+		public const int CO_E_INIT_UNACCEPTED_USER_ALLOCATOR = unchecked((int)0x8000400D);
 		/// <summary>
-		///     Invalid window handle
+		/// The OLE service mutex already exists
 		/// </summary>
-		public const int DRAGDROP_E_INVALIDHWND = (int)(0x80040102 - 0x100000000);
-
+		public const int CO_E_INIT_SCM_MUTEX_EXISTS = unchecked((int)0x8000400E);
 		/// <summary>
-		///     Class does not support aggregation (or class object is remote)
+		/// The OLE service file mapping already exists
 		/// </summary>
-		public const int CLASSFACTORY_E_FIRST = (int)(0x80040110 - 0x100000000);
-
+		public const int CO_E_INIT_SCM_FILE_MAPPING_EXISTS = unchecked((int)0x8000400F);
 		/// <summary>
-		///     No information avialable.
+		/// Unable to map view of file for OLE service
 		/// </summary>
-		public const int CLASSFACTORY_E_LAST = (int)(0x8004011F - 0x100000000);
-
+		public const int CO_E_INIT_SCM_MAP_VIEW_OF_FILE = unchecked((int)0x80004010);
 		/// <summary>
-		///     No information avialable.
+		/// Failure attempting to launch OLE service
 		/// </summary>
-		public const int CLASSFACTORY_S_FIRST = 0x00040110;
-
+		public const int CO_E_INIT_SCM_EXEC_FAILURE = unchecked((int)0x80004011);
 		/// <summary>
-		///     No information avialable.
+		/// There was an attempt to call CoInitialize a second time while single threaded
 		/// </summary>
-		public const int CLASSFACTORY_S_LAST = 0x0004011F;
-
+		public const int CO_E_INIT_ONLY_SINGLE_THREADED = unchecked((int)0x80004012);
 		/// <summary>
-		///     Class does not support aggregation (or class object is remote)
+		/// A Remote activation was necessary but was not allowed
 		/// </summary>
-		public const int CLASS_E_NOAGGREGATION = (int)(0x80040110 - 0x100000000);
-
+		public const int CO_E_CANT_REMOTE = unchecked((int)0x80004013);
 		/// <summary>
-		///     ClassFactory cannot supply requested class
+		/// A Remote activation was necessary but the server name provided was invalid
 		/// </summary>
-		public const int CLASS_E_CLASSNOTAVAILABLE = (int)(0x80040111 - 0x100000000);
-
+		public const int CO_E_BAD_SERVER_NAME = unchecked((int)0x80004014);
 		/// <summary>
-		///     Class is not licensed for use
+		/// The class is configured to run as a security id different from the caller
 		/// </summary>
-		public const int CLASS_E_NOTLICENSED = (int)(0x80040112 - 0x100000000);
-
+		public const int CO_E_WRONG_SERVER_IDENTITY = unchecked((int)0x80004015);
 		/// <summary>
-		///     No information avialable.
+		/// Use of Ole1 services requiring DDE windows is disabled
 		/// </summary>
-		public const int MARSHAL_E_FIRST = (int)(0x80040120 - 0x100000000);
-
+		public const int CO_E_OLE1DDE_DISABLED = unchecked((int)0x80004016);
 		/// <summary>
-		///     No information avialable.
+		/// A RunAs specification must be \ or simply . 
 		/// </summary>
-		public const int MARSHAL_E_LAST = (int)(0x8004012F - 0x100000000);
-
+		public const int CO_E_RUNAS_SYNTAX = unchecked((int)0x80004017);
 		/// <summary>
-		///     No information avialable.
+		/// The server process could not be started. The pathname may be incorrect.
 		/// </summary>
-		public const int MARSHAL_S_FIRST = 0x00040120;
-
+		public const int CO_E_CREATEPROCESS_FAILURE = unchecked((int)0x80004018);
 		/// <summary>
-		///     No information avialable.
+		/// The server process could not be started as the configured identity. The pathname may be incorrect or unavailable.
 		/// </summary>
-		public const int MARSHAL_S_LAST = 0x0004012F;
-
+		public const int CO_E_RUNAS_CREATEPROCESS_FAILURE = unchecked((int)0x80004019);
 		/// <summary>
-		///     No information avialable.
+		/// The server process could not be started because the configured identity is incorrect. Check the user name and password.
 		/// </summary>
-		public const int DATA_E_FIRST = (int)(0x80040130 - 0x100000000);
-
+		public const int CO_E_RUNAS_LOGON_FAILURE = unchecked((int)0x8000401A);
 		/// <summary>
-		///     No information avialable.
+		/// The client is not allowed to launch this server.
 		/// </summary>
-		public const int DATA_E_LAST = (int)(0x8004013F - 0x100000000);
-
+		public const int CO_E_LAUNCH_PERMSSION_DENIED = unchecked((int)0x8000401B);
 		/// <summary>
-		///     Data has same FORMATETC
+		/// The service providing this server could not be started.
 		/// </summary>
-		public const int DATA_S_FIRST = 0x00040130;
-
+		public const int CO_E_START_SERVICE_FAILURE = unchecked((int)0x8000401C);
 		/// <summary>
-		///     No information avialable.
+		/// This computer was unable to communicate with the computer providing the server.
 		/// </summary>
-		public const int DATA_S_LAST = 0x0004013F;
-
+		public const int CO_E_REMOTE_COMMUNICATION_FAILURE = unchecked((int)0x8000401D);
 		/// <summary>
-		///     Error drawing view
+		/// The server did not respond after being launched.
 		/// </summary>
-		public const int VIEW_E_FIRST = (int)(0x80040140 - 0x100000000);
-
+		public const int CO_E_SERVER_START_TIMEOUT = unchecked((int)0x8000401E);
 		/// <summary>
-		///     No information avialable.
+		/// The registration information for this server is inconsistent or incomplete.
 		/// </summary>
-		public const int VIEW_E_LAST = (int)(0x8004014F - 0x100000000);
-
+		public const int CO_E_CLSREG_INCONSISTENT = unchecked((int)0x8000401F);
 		/// <summary>
-		///     View is already frozen
+		/// The registration information for this interface is inconsistent or incomplete.
 		/// </summary>
-		public const int VIEW_S_FIRST = 0x00040140;
-
+		public const int CO_E_IIDREG_INCONSISTENT = unchecked((int)0x80004020);
 		/// <summary>
-		///     No information avialable.
+		/// The operation attempted is not supported.
 		/// </summary>
-		public const int VIEW_S_LAST = 0x0004014F;
-
+		public const int CO_E_NOT_SUPPORTED = unchecked((int)0x80004021);
 		/// <summary>
-		///     Error drawing view
+		/// A dll must be loaded.
 		/// </summary>
-		public const int VIEW_E_DRAW = (int)(0x80040140 - 0x100000000);
-
+		public const int CO_E_RELOAD_DLL = unchecked((int)0x80004022);
 		/// <summary>
-		///     Could not read key from registry
+		/// A Microsoft Software Installer error was encountered.
 		/// </summary>
-		public const int REGDB_E_FIRST = (int)(0x80040150 - 0x100000000);
-
+		public const int CO_E_MSI_ERROR = unchecked((int)0x80004023);
 		/// <summary>
-		///     No information avialable.
+		/// The specified activation could not occur in the client context as specified.
 		/// </summary>
-		public const int REGDB_E_LAST = (int)(0x8004015F - 0x100000000);
-
+		public const int CO_E_ATTEMPT_TO_CREATE_OUTSIDE_CLIENT_CONTEXT = unchecked((int)0x80004024);
 		/// <summary>
-		///     No information avialable.
+		/// Activations on the server are paused.
 		/// </summary>
-		public const int REGDB_S_FIRST = 0x00040150;
-
+		public const int CO_E_SERVER_PAUSED = unchecked((int)0x80004025);
 		/// <summary>
-		///     No information avialable.
+		/// Activations on the server are not paused.
 		/// </summary>
-		public const int REGDB_S_LAST = 0x0004015F;
-
+		public const int CO_E_SERVER_NOT_PAUSED = unchecked((int)0x80004026);
 		/// <summary>
-		///     Could not read key from registry
+		/// The component or application containing the component has been disabled.
 		/// </summary>
-		public const int REGDB_E_READREGDB = (int)(0x80040150 - 0x100000000);
-
+		public const int CO_E_CLASS_DISABLED = unchecked((int)0x80004027);
 		/// <summary>
-		///     Could not write key to registry
+		/// The common language runtime is not available
 		/// </summary>
-		public const int REGDB_E_WRITEREGDB = (int)(0x80040151 - 0x100000000);
-
+		public const int CO_E_CLRNOTAVAILABLE = unchecked((int)0x80004028);
 		/// <summary>
-		///     Could not find the key in the registry
+		/// The thread-pool rejected the submitted asynchronous work.
 		/// </summary>
-		public const int REGDB_E_KEYMISSING = (int)(0x80040152 - 0x100000000);
-
+		public const int CO_E_ASYNC_WORK_REJECTED = unchecked((int)0x80004029);
 		/// <summary>
-		///     Invalid value for registry
+		/// The server started, but did not finish initializing in a timely fashion.
 		/// </summary>
-		public const int REGDB_E_INVALIDVALUE = (int)(0x80040153 - 0x100000000);
-
+		public const int CO_E_SERVER_INIT_TIMEOUT = unchecked((int)0x8000402A);
 		/// <summary>
-		///     Class not registered
+		/// Unable to complete the call since there is no COM+ security context inside IObjectControl.Activate.
 		/// </summary>
-		public const int REGDB_E_CLASSNOTREG = (int)(0x80040154 - 0x100000000);
-
+		public const int CO_E_NO_SECCTX_IN_ACTIVATE = unchecked((int)0x8000402B);
 		/// <summary>
-		///     Interface not registered
+		/// The provided tracker configuration is invalid
 		/// </summary>
-		public const int REGDB_E_IIDNOTREG = (int)(0x80040155 - 0x100000000);
-
+		public const int CO_E_TRACKER_CONFIG = unchecked((int)0x80004030);
 		/// <summary>
-		///     Threading model entry is not valid
+		/// The provided thread pool configuration is invalid
 		/// </summary>
-		public const int REGDB_E_BADTHREADINGMODEL = (int)(0x80040156 - 0x100000000);
-
+		public const int CO_E_THREADPOOL_CONFIG = unchecked((int)0x80004031);
 		/// <summary>
-		///     CATID does not exist
+		/// The provided side-by-side configuration is invalid
 		/// </summary>
-		public const int CAT_E_FIRST = (int)(0x80040160 - 0x100000000);
-
+		public const int CO_E_SXS_CONFIG = unchecked((int)0x80004032);
 		/// <summary>
-		///     Description not found
+		/// The server principal name (SPN) obtained during security negotiation is malformed.
 		/// </summary>
-		public const int CAT_E_LAST = (int)(0x80040161 - 0x100000000);
-
+		public const int CO_E_MALFORMED_SPN = unchecked((int)0x80004033);
 		/// <summary>
-		///     CATID does not exist
+		/// Invalid OLEVERB structure
 		/// </summary>
-		public const int CAT_E_CATIDNOEXIST = (int)(0x80040160 - 0x100000000);
-
+		public const int OLE_E_OLEVERB = unchecked((int)0x80040000);
 		/// <summary>
-		///     Description not found
+		/// Invalid advise flags
 		/// </summary>
-		public const int CAT_E_NODESCRIPTION = (int)(0x80040161 - 0x100000000);
-
+		public const int OLE_E_ADVF = unchecked((int)0x80040001);
 		/// <summary>
-		///     No package in the software installation data in the Active Directory meets this criteria.
+		/// Can't enumerate any more, because the associated data is missing
 		/// </summary>
-		public const int CS_E_FIRST = (int)(0x80040164 - 0x100000000);
-
+		public const int OLE_E_ENUM_NOMORE = unchecked((int)0x80040002);
 		/// <summary>
-		///     An error occurred in the software installation data in the Active Directory.
+		/// This implementation doesn't take advises
 		/// </summary>
-		public const int CS_E_LAST = (int)(0x8004016F - 0x100000000);
-
+		public const int OLE_E_ADVISENOTSUPPORTED = unchecked((int)0x80040003);
 		/// <summary>
-		///     No package in the software installation data in the Active Directory meets this criteria.
+		/// There is no connection for this connection ID
 		/// </summary>
-		public const int CS_E_PACKAGE_NOTFOUND = (int)(0x80040164 - 0x100000000);
-
+		public const int OLE_E_NOCONNECTION = unchecked((int)0x80040004);
 		/// <summary>
-		///     Deleting this will break the referential integrity of the software installation data in the Active Directory.
+		/// Need to run the object to perform this operation
 		/// </summary>
-		public const int CS_E_NOT_DELETABLE = (int)(0x80040165 - 0x100000000);
-
+		public const int OLE_E_NOTRUNNING = unchecked((int)0x80040005);
 		/// <summary>
-		///     The CLSID was not found in the software installation data in the Active Directory.
+		/// There is no cache to operate on
 		/// </summary>
-		public const int CS_E_CLASS_NOTFOUND = (int)(0x80040166 - 0x100000000);
-
+		public const int OLE_E_NOCACHE = unchecked((int)0x80040006);
 		/// <summary>
-		///     The software installation data in the Active Directory is corrupt.
+		/// Uninitialized object
 		/// </summary>
-		public const int CS_E_INVALID_VERSION = (int)(0x80040167 - 0x100000000);
-
+		public const int OLE_E_BLANK = unchecked((int)0x80040007);
 		/// <summary>
-		///     There is no software installation data in the Active Directory.
+		/// Linked object's source class has changed
 		/// </summary>
-		public const int CS_E_NO_CLASSSTORE = (int)(0x80040168 - 0x100000000);
-
+		public const int OLE_E_CLASSDIFF = unchecked((int)0x80040008);
 		/// <summary>
-		///     There is no software installation data object in the Active Directory.
+		/// Not able to get the moniker of the object
 		/// </summary>
-		public const int CS_E_OBJECT_NOTFOUND = (int)(0x80040169 - 0x100000000);
-
+		public const int OLE_E_CANT_GETMONIKER = unchecked((int)0x80040009);
 		/// <summary>
-		///     The software installation data object in the Active Directory already exists.
+		/// Not able to bind to the source
 		/// </summary>
-		public const int CS_E_OBJECT_ALREADY_EXISTS = (int)(0x8004016A - 0x100000000);
-
+		public const int OLE_E_CANT_BINDTOSOURCE = unchecked((int)0x8004000A);
 		/// <summary>
-		///     The path to the software installation data in the Active Directory is not correct.
+		/// Object is static; operation not allowed
 		/// </summary>
-		public const int CS_E_INVALID_PATH = (int)(0x8004016B - 0x100000000);
-
+		public const int OLE_E_STATIC = unchecked((int)0x8004000B);
 		/// <summary>
-		///     A network error interrupted the operation.
+		/// User canceled out of save dialog
 		/// </summary>
-		public const int CS_E_NETWORK_ERROR = (int)(0x8004016C - 0x100000000);
-
+		public const int OLE_E_PROMPTSAVECANCELLED = unchecked((int)0x8004000C);
 		/// <summary>
-		///     The size of this object exceeds the maximum size set by the Administrator.
+		/// Invalid rectangle
 		/// </summary>
-		public const int CS_E_ADMIN_LIMIT_EXCEEDED = (int)(0x8004016D - 0x100000000);
-
+		public const int OLE_E_INVALIDRECT = unchecked((int)0x8004000D);
 		/// <summary>
-		///     The schema for the software installation data in the Active Directory does not match the required schema.
+		/// compobj.dll is too old for the ole2.dll initialized
 		/// </summary>
-		public const int CS_E_SCHEMA_MISMATCH = (int)(0x8004016E - 0x100000000);
-
+		public const int OLE_E_WRONGCOMPOBJ = unchecked((int)0x8004000E);
 		/// <summary>
-		///     An error occurred in the software installation data in the Active Directory.
+		/// Invalid window handle
 		/// </summary>
-		public const int CS_E_INTERNAL_ERROR = (int)(0x8004016F - 0x100000000);
-
+		public const int OLE_E_INVALIDHWND = unchecked((int)0x8004000F);
 		/// <summary>
-		///     Cache not updated
+		/// Object is not in any of the inplace active states
 		/// </summary>
-		public const int CACHE_E_FIRST = (int)(0x80040170 - 0x100000000);
-
+		public const int OLE_E_NOT_INPLACEACTIVE = unchecked((int)0x80040010);
 		/// <summary>
-		///     No information avialable.
+		/// Not able to convert object
 		/// </summary>
-		public const int CACHE_E_LAST = (int)(0x8004017F - 0x100000000);
-
+		public const int OLE_E_CANTCONVERT = unchecked((int)0x80040011);
 		/// <summary>
-		///     FORMATETC not supported
+		/// Not able to perform the operation because object is not given storage yet
 		/// </summary>
-		public const int CACHE_S_FIRST = 0x00040170;
-
+		public const int OLE_E_NOSTORAGE = unchecked((int)0x80040012);
 		/// <summary>
-		///     No information avialable.
+		/// Invalid FORMATETC structure
 		/// </summary>
-		public const int CACHE_S_LAST = 0x0004017F;
-
+		public const int DV_E_FORMATETC = unchecked((int)0x80040064);
 		/// <summary>
-		///     Cache not updated
+		/// Invalid DVTARGETDEVICE structure
 		/// </summary>
-		public const int CACHE_E_NOCACHE_UPDATED = (int)(0x80040170 - 0x100000000);
-
+		public const int DV_E_DVTARGETDEVICE = unchecked((int)0x80040065);
 		/// <summary>
-		///     No verbs for OLE object
+		/// Invalid STDGMEDIUM structure
 		/// </summary>
-		public const int OLEOBJ_E_FIRST = (int)(0x80040180 - 0x100000000);
-
+		public const int DV_E_STGMEDIUM = unchecked((int)0x80040066);
 		/// <summary>
-		///     No information avialable.
+		/// Invalid STATDATA structure
 		/// </summary>
-		public const int OLEOBJ_E_LAST = (int)(0x8004018F - 0x100000000);
-
+		public const int DV_E_STATDATA = unchecked((int)0x80040067);
 		/// <summary>
-		///     Invalid verb for OLE object
+		/// Invalid lindex
 		/// </summary>
-		public const int OLEOBJ_S_FIRST = 0x00040180;
-
+		public const int DV_E_LINDEX = unchecked((int)0x80040068);
 		/// <summary>
-		///     No information avialable.
+		/// Invalid tymed
 		/// </summary>
-		public const int OLEOBJ_S_LAST = 0x0004018F;
-
+		public const int DV_E_TYMED = unchecked((int)0x80040069);
 		/// <summary>
-		///     No verbs for OLE object
+		/// Invalid clipboard format
 		/// </summary>
-		public const int OLEOBJ_E_NOVERBS = (int)(0x80040180 - 0x100000000);
-
+		public const int DV_E_CLIPFORMAT = unchecked((int)0x8004006A);
 		/// <summary>
-		///     Invalid verb for OLE object
+		/// Invalid aspect(s)
 		/// </summary>
-		public const int OLEOBJ_E_INVALIDVERB = (int)(0x80040181 - 0x100000000);
-
+		public const int DV_E_DVASPECT = unchecked((int)0x8004006B);
 		/// <summary>
-		///     No information avialable.
+		/// tdSize parameter of the DVTARGETDEVICE structure is invalid
 		/// </summary>
-		public const int CLIENTSITE_E_FIRST = (int)(0x80040190 - 0x100000000);
-
+		public const int DV_E_DVTARGETDEVICE_SIZE = unchecked((int)0x8004006C);
 		/// <summary>
-		///     No information avialable.
+		/// Object doesn't support IViewObject interface
 		/// </summary>
-		public const int CLIENTSITE_E_LAST = (int)(0x8004019F - 0x100000000);
-
+		public const int DV_E_NOIVIEWOBJECT = unchecked((int)0x8004006D);
 		/// <summary>
-		///     No information avialable.
+		/// Trying to revoke a drop target that has not been registered
 		/// </summary>
-		public const int CLIENTSITE_S_FIRST = 0x00040190;
-
+		public const int DRAGDROP_E_NOTREGISTERED = unchecked((int)0x80040100);
 		/// <summary>
-		///     No information avialable.
+		/// This window has already been registered as a drop target
 		/// </summary>
-		public const int CLIENTSITE_S_LAST = 0x0004019F;
-
+		public const int DRAGDROP_E_ALREADYREGISTERED = unchecked((int)0x80040101);
 		/// <summary>
-		///     Undo is not available
+		/// Invalid window handle
 		/// </summary>
-		public const int INPLACE_E_NOTUNDOABLE = (int)(0x800401A0 - 0x100000000);
-
+		public const int DRAGDROP_E_INVALIDHWND = unchecked((int)0x80040102);
 		/// <summary>
-		///     Space for tools is not available
+		/// Class does not support aggregation (or class object is remote)
 		/// </summary>
-		public const int INPLACE_E_NOTOOLSPACE = (int)(0x800401A1 - 0x100000000);
-
+		public const int CLASS_E_NOAGGREGATION = unchecked((int)0x80040110);
 		/// <summary>
-		///     Undo is not available
+		/// ClassFactory cannot supply requested class
 		/// </summary>
-		public const int INPLACE_E_FIRST = (int)(0x800401A0 - 0x100000000);
-
+		public const int CLASS_E_CLASSNOTAVAILABLE = unchecked((int)0x80040111);
 		/// <summary>
-		///     No information avialable.
+		/// Class is not licensed for use
 		/// </summary>
-		public const int INPLACE_E_LAST = (int)(0x800401AF - 0x100000000);
-
+		public const int CLASS_E_NOTLICENSED = unchecked((int)0x80040112);
 		/// <summary>
-		///     Message is too long; some of it had to be truncated before displaying
+		/// Error drawing view
 		/// </summary>
-		public const int INPLACE_S_FIRST = 0x000401A0;
-
+		public const int VIEW_E_DRAW = unchecked((int)0x80040140);
 		/// <summary>
-		///     No information avialable.
+		/// Could not read key from registry
 		/// </summary>
-		public const int INPLACE_S_LAST = 0x000401AF;
-
+		public const int REGDB_E_READREGDB = unchecked((int)0x80040150);
 		/// <summary>
-		///     No information avialable.
+		/// Could not write key to registry
 		/// </summary>
-		public const int ENUM_E_FIRST = (int)(0x800401B0 - 0x100000000);
-
+		public const int REGDB_E_WRITEREGDB = unchecked((int)0x80040151);
 		/// <summary>
-		///     No information avialable.
+		/// Could not find the key in the registry
 		/// </summary>
-		public const int ENUM_E_LAST = (int)(0x800401BF - 0x100000000);
-
+		public const int REGDB_E_KEYMISSING = unchecked((int)0x80040152);
 		/// <summary>
-		///     No information avialable.
+		/// Invalid value for registry
 		/// </summary>
-		public const int ENUM_S_FIRST = 0x000401B0;
-
+		public const int REGDB_E_INVALIDVALUE = unchecked((int)0x80040153);
 		/// <summary>
-		///     No information avialable.
+		/// Class not registered
 		/// </summary>
-		public const int ENUM_S_LAST = 0x000401BF;
-
+		public const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
 		/// <summary>
-		///     OLESTREAM Get method failed
+		/// Interface not registered
 		/// </summary>
-		public const int CONVERT10_E_FIRST = (int)(0x800401C0 - 0x100000000);
-
+		public const int REGDB_E_IIDNOTREG = unchecked((int)0x80040155);
 		/// <summary>
-		///     No information avialable.
+		/// Threading model entry is not valid
 		/// </summary>
-		public const int CONVERT10_E_LAST = (int)(0x800401CF - 0x100000000);
-
+		public const int REGDB_E_BADTHREADINGMODEL = unchecked((int)0x80040156);
 		/// <summary>
-		///     Unable to convert OLESTREAM to IStorage
+		/// CATID does not exist
 		/// </summary>
-		public const int CONVERT10_S_FIRST = 0x000401C0;
-
+		public const int CAT_E_CATIDNOEXIST = unchecked((int)0x80040160);
 		/// <summary>
-		///     No information avialable.
+		/// Description not found
 		/// </summary>
-		public const int CONVERT10_S_LAST = 0x000401CF;
-
+		public const int CAT_E_NODESCRIPTION = unchecked((int)0x80040161);
 		/// <summary>
-		///     OLESTREAM Get method failed
+		/// No package in the software installation data in the Active Directory meets this criteria.
 		/// </summary>
-		public const int CONVERT10_E_OLESTREAM_GET = (int)(0x800401C0 - 0x100000000);
-
+		public const int CS_E_PACKAGE_NOTFOUND = unchecked((int)0x80040164);
 		/// <summary>
-		///     OLESTREAM Put method failed
+		/// Deleting this will break the referential integrity of the software installation data in the Active Directory.
 		/// </summary>
-		public const int CONVERT10_E_OLESTREAM_PUT = (int)(0x800401C1 - 0x100000000);
-
+		public const int CS_E_NOT_DELETABLE = unchecked((int)0x80040165);
 		/// <summary>
-		///     Contents of the OLESTREAM not in correct format
+		/// The CLSID was not found in the software installation data in the Active Directory.
 		/// </summary>
-		public const int CONVERT10_E_OLESTREAM_FMT = (int)(0x800401C2 - 0x100000000);
-
+		public const int CS_E_CLASS_NOTFOUND = unchecked((int)0x80040166);
 		/// <summary>
-		///     There was an error in a Windows GDI call while converting the bitmap to a DIB
+		/// The software installation data in the Active Directory is corrupt.
 		/// </summary>
-		public const int CONVERT10_E_OLESTREAM_BITMAP_TO_DIB = (int)(0x800401C3 - 0x100000000);
-
+		public const int CS_E_INVALID_VERSION = unchecked((int)0x80040167);
 		/// <summary>
-		///     Contents of the IStorage not in correct format
+		/// There is no software installation data in the Active Directory.
 		/// </summary>
-		public const int CONVERT10_E_STG_FMT = (int)(0x800401C4 - 0x100000000);
-
+		public const int CS_E_NO_CLASSSTORE = unchecked((int)0x80040168);
 		/// <summary>
-		///     Contents of IStorage is missing one of the standard streams
+		/// There is no software installation data object in the Active Directory.
 		/// </summary>
-		public const int CONVERT10_E_STG_NO_STD_STREAM = (int)(0x800401C5 - 0x100000000);
-
+		public const int CS_E_OBJECT_NOTFOUND = unchecked((int)0x80040169);
 		/// <summary>
-		///     There was an error in a Windows GDI call while converting the DIB to a bitmap.
+		/// The software installation data object in the Active Directory already exists.
 		/// </summary>
-		public const int CONVERT10_E_STG_DIB_TO_BITMAP = (int)(0x800401C6 - 0x100000000);
-
+		public const int CS_E_OBJECT_ALREADY_EXISTS = unchecked((int)0x8004016A);
 		/// <summary>
-		///     OpenClipboard Failed
+		/// The path to the software installation data in the Active Directory is not correct.
 		/// </summary>
-		public const int CLIPBRD_E_FIRST = (int)(0x800401D0 - 0x100000000);
-
+		public const int CS_E_INVALID_PATH = unchecked((int)0x8004016B);
 		/// <summary>
-		///     No information avialable.
+		/// A network error interrupted the operation.
 		/// </summary>
-		public const int CLIPBRD_E_LAST = (int)(0x800401DF - 0x100000000);
-
+		public const int CS_E_NETWORK_ERROR = unchecked((int)0x8004016C);
 		/// <summary>
-		///     No information avialable.
+		/// The size of this object exceeds the maximum size set by the Administrator.
 		/// </summary>
-		public const int CLIPBRD_S_FIRST = 0x000401D0;
-
+		public const int CS_E_ADMIN_LIMIT_EXCEEDED = unchecked((int)0x8004016D);
 		/// <summary>
-		///     No information avialable.
+		/// The schema for the software installation data in the Active Directory does not match the required schema.
 		/// </summary>
-		public const int CLIPBRD_S_LAST = 0x000401DF;
-
+		public const int CS_E_SCHEMA_MISMATCH = unchecked((int)0x8004016E);
 		/// <summary>
-		///     OpenClipboard Failed
+		/// An error occurred in the software installation data in the Active Directory.
 		/// </summary>
-		public const int CLIPBRD_E_CANT_OPEN = (int)(0x800401D0 - 0x100000000);
-
+		public const int CS_E_INTERNAL_ERROR = unchecked((int)0x8004016F);
 		/// <summary>
-		///     EmptyClipboard Failed
+		/// Cache not updated
 		/// </summary>
-		public const int CLIPBRD_E_CANT_EMPTY = (int)(0x800401D1 - 0x100000000);
-
+		public const int CACHE_E_NOCACHE_UPDATED = unchecked((int)0x80040170);
 		/// <summary>
-		///     SetClipboard Failed
+		/// No verbs for OLE object
 		/// </summary>
-		public const int CLIPBRD_E_CANT_SET = (int)(0x800401D2 - 0x100000000);
-
+		public const int OLEOBJ_E_NOVERBS = unchecked((int)0x80040180);
 		/// <summary>
-		///     Data on clipboard is invalid
+		/// Invalid verb for OLE object
 		/// </summary>
-		public const int CLIPBRD_E_BAD_DATA = (int)(0x800401D3 - 0x100000000);
-
+		public const int OLEOBJ_E_INVALIDVERB = unchecked((int)0x80040181);
 		/// <summary>
-		///     CloseClipboard Failed
+		/// Undo is not available
 		/// </summary>
-		public const int CLIPBRD_E_CANT_CLOSE = (int)(0x800401D4 - 0x100000000);
-
+		public const int INPLACE_E_NOTUNDOABLE = unchecked((int)0x800401A0);
 		/// <summary>
-		///     Moniker needs to be connected manually
+		/// Space for tools is not available
 		/// </summary>
-		public const int MK_E_FIRST = (int)(0x800401E0 - 0x100000000);
-
+		public const int INPLACE_E_NOTOOLSPACE = unchecked((int)0x800401A1);
 		/// <summary>
-		///     Moniker could not be enumerated
+		/// OLESTREAM Get method failed
 		/// </summary>
-		public const int MK_E_LAST = (int)(0x800401EF - 0x100000000);
-
+		public const int CONVERT10_E_OLESTREAM_GET = unchecked((int)0x800401C0);
 		/// <summary>
-		///     No information avialable.
+		/// OLESTREAM Put method failed
 		/// </summary>
-		public const int MK_S_FIRST = 0x000401E0;
-
+		public const int CONVERT10_E_OLESTREAM_PUT = unchecked((int)0x800401C1);
 		/// <summary>
-		///     No information avialable.
+		/// Contents of the OLESTREAM not in correct format
 		/// </summary>
-		public const int MK_S_LAST = 0x000401EF;
-
+		public const int CONVERT10_E_OLESTREAM_FMT = unchecked((int)0x800401C2);
 		/// <summary>
-		///     Moniker needs to be connected manually
+		/// There was an error in a Windows GDI call while converting the bitmap to a DIB
 		/// </summary>
-		public const int MK_E_CONNECTMANUALLY = (int)(0x800401E0 - 0x100000000);
-
+		public const int CONVERT10_E_OLESTREAM_BITMAP_TO_DIB = unchecked((int)0x800401C3);
 		/// <summary>
-		///     Operation exceeded deadline
+		/// Contents of the IStorage not in correct format
 		/// </summary>
-		public const int MK_E_EXCEEDEDDEADLINE = (int)(0x800401E1 - 0x100000000);
-
+		public const int CONVERT10_E_STG_FMT = unchecked((int)0x800401C4);
 		/// <summary>
-		///     Moniker needs to be generic
+		/// Contents of IStorage is missing one of the standard streams
 		/// </summary>
-		public const int MK_E_NEEDGENERIC = (int)(0x800401E2 - 0x100000000);
-
+		public const int CONVERT10_E_STG_NO_STD_STREAM = unchecked((int)0x800401C5);
 		/// <summary>
-		///     Operation unavailable
+		/// There was an error in a Windows GDI call while converting the DIB to a bitmap.
 		/// </summary>
-		public const int MK_E_UNAVAILABLE = (int)(0x800401E3 - 0x100000000);
-
+		public const int CONVERT10_E_STG_DIB_TO_BITMAP = unchecked((int)0x800401C6);
 		/// <summary>
-		///     Invalid syntax
+		/// OpenClipboard Failed
 		/// </summary>
-		public const int MK_E_SYNTAX = (int)(0x800401E4 - 0x100000000);
-
+		public const int CLIPBRD_E_CANT_OPEN = unchecked((int)0x800401D0);
 		/// <summary>
-		///     No object for moniker
+		/// EmptyClipboard Failed
 		/// </summary>
-		public const int MK_E_NOOBJECT = (int)(0x800401E5 - 0x100000000);
-
+		public const int CLIPBRD_E_CANT_EMPTY = unchecked((int)0x800401D1);
 		/// <summary>
-		///     Bad extension for file
+		/// SetClipboard Failed
 		/// </summary>
-		public const int MK_E_INVALIDEXTENSION = (int)(0x800401E6 - 0x100000000);
-
+		public const int CLIPBRD_E_CANT_SET = unchecked((int)0x800401D2);
 		/// <summary>
-		///     Intermediate operation failed
+		/// Data on clipboard is invalid
 		/// </summary>
-		public const int MK_E_INTERMEDIATEINTERFACENOTSUPPORTED = (int)(0x800401E7 - 0x100000000);
-
+		public const int CLIPBRD_E_BAD_DATA = unchecked((int)0x800401D3);
 		/// <summary>
-		///     Moniker is not bindable
+		/// CloseClipboard Failed
 		/// </summary>
-		public const int MK_E_NOTBINDABLE = (int)(0x800401E8 - 0x100000000);
-
+		public const int CLIPBRD_E_CANT_CLOSE = unchecked((int)0x800401D4);
 		/// <summary>
-		///     Moniker is not bound
+		/// Moniker needs to be connected manually
 		/// </summary>
-		public const int MK_E_NOTBOUND = (int)(0x800401E9 - 0x100000000);
-
+		public const int MK_E_CONNECTMANUALLY = unchecked((int)0x800401E0);
 		/// <summary>
-		///     Moniker cannot open file
+		/// Operation exceeded deadline
 		/// </summary>
-		public const int MK_E_CANTOPENFILE = (int)(0x800401EA - 0x100000000);
-
+		public const int MK_E_EXCEEDEDDEADLINE = unchecked((int)0x800401E1);
 		/// <summary>
-		///     User input required for operation to succeed
+		/// Moniker needs to be generic
 		/// </summary>
-		public const int MK_E_MUSTBOTHERUSER = (int)(0x800401EB - 0x100000000);
-
+		public const int MK_E_NEEDGENERIC = unchecked((int)0x800401E2);
 		/// <summary>
-		///     Moniker class has no inverse
+		/// Operation unavailable
 		/// </summary>
-		public const int MK_E_NOINVERSE = (int)(0x800401EC - 0x100000000);
-
+		public const int MK_E_UNAVAILABLE = unchecked((int)0x800401E3);
 		/// <summary>
-		///     Moniker does not refer to storage
+		/// Invalid syntax
 		/// </summary>
-		public const int MK_E_NOSTORAGE = (int)(0x800401ED - 0x100000000);
-
+		public const int MK_E_SYNTAX = unchecked((int)0x800401E4);
 		/// <summary>
-		///     No common prefix
+		/// No object for moniker
 		/// </summary>
-		public const int MK_E_NOPREFIX = (int)(0x800401EE - 0x100000000);
-
+		public const int MK_E_NOOBJECT = unchecked((int)0x800401E5);
 		/// <summary>
-		///     Moniker could not be enumerated
+		/// Bad extension for file
 		/// </summary>
-		public const int MK_E_ENUMERATION_FAILED = (int)(0x800401EF - 0x100000000);
-
+		public const int MK_E_INVALIDEXTENSION = unchecked((int)0x800401E6);
 		/// <summary>
-		///     CoInitialize has not been called.
+		/// Intermediate operation failed
 		/// </summary>
-		public const int CO_E_FIRST = (int)(0x800401F0 - 0x100000000);
-
+		public const int MK_E_INTERMEDIATEINTERFACENOTSUPPORTED = unchecked((int)0x800401E7);
 		/// <summary>
-		///     Object has been released
+		/// Moniker is not bindable
 		/// </summary>
-		public const int CO_E_LAST = (int)(0x800401FF - 0x100000000);
-
+		public const int MK_E_NOTBINDABLE = unchecked((int)0x800401E8);
 		/// <summary>
-		///     No information avialable.
+		/// Moniker is not bound
 		/// </summary>
-		public const int CO_S_FIRST = 0x000401F0;
-
+		public const int MK_E_NOTBOUND = unchecked((int)0x800401E9);
 		/// <summary>
-		///     No information avialable.
+		/// Moniker cannot open file
 		/// </summary>
-		public const int CO_S_LAST = 0x000401FF;
-
+		public const int MK_E_CANTOPENFILE = unchecked((int)0x800401EA);
 		/// <summary>
-		///     CoInitialize has not been called.
+		/// User input required for operation to succeed
 		/// </summary>
-		public const int CO_E_NOTINITIALIZED = (int)(0x800401F0 - 0x100000000);
-
+		public const int MK_E_MUSTBOTHERUSER = unchecked((int)0x800401EB);
 		/// <summary>
-		///     CoInitialize has already been called.
+		/// Moniker class has no inverse
 		/// </summary>
-		public const int CO_E_ALREADYINITIALIZED = (int)(0x800401F1 - 0x100000000);
-
+		public const int MK_E_NOINVERSE = unchecked((int)0x800401EC);
 		/// <summary>
-		///     Class of object cannot be determined
+		/// Moniker does not refer to storage
 		/// </summary>
-		public const int CO_E_CANTDETERMINECLASS = (int)(0x800401F2 - 0x100000000);
-
+		public const int MK_E_NOSTORAGE = unchecked((int)0x800401ED);
 		/// <summary>
-		///     Invalid class string
+		/// No common prefix
 		/// </summary>
-		public const int CO_E_CLASSSTRING = (int)(0x800401F3 - 0x100000000);
-
+		public const int MK_E_NOPREFIX = unchecked((int)0x800401EE);
 		/// <summary>
-		///     Invalid interface string
+		/// Moniker could not be enumerated
 		/// </summary>
-		public const int CO_E_IIDSTRING = (int)(0x800401F4 - 0x100000000);
-
+		public const int MK_E_ENUMERATION_FAILED = unchecked((int)0x800401EF);
 		/// <summary>
-		///     Application not found
+		/// CoInitialize has not been called.
 		/// </summary>
-		public const int CO_E_APPNOTFOUND = (int)(0x800401F5 - 0x100000000);
-
+		public const int CO_E_NOTINITIALIZED = unchecked((int)0x800401F0);
 		/// <summary>
-		///     Application cannot be run more than once
+		/// CoInitialize has already been called.
 		/// </summary>
-		public const int CO_E_APPSINGLEUSE = (int)(0x800401F6 - 0x100000000);
-
+		public const int CO_E_ALREADYINITIALIZED = unchecked((int)0x800401F1);
 		/// <summary>
-		///     Some error in application program
+		/// Class of object cannot be determined
 		/// </summary>
-		public const int CO_E_ERRORINAPP = (int)(0x800401F7 - 0x100000000);
-
+		public const int CO_E_CANTDETERMINECLASS = unchecked((int)0x800401F2);
 		/// <summary>
-		///     DLL for class not found
+		/// Invalid class string
 		/// </summary>
-		public const int CO_E_DLLNOTFOUND = (int)(0x800401F8 - 0x100000000);
-
+		public const int CO_E_CLASSSTRING = unchecked((int)0x800401F3);
 		/// <summary>
-		///     Error in the DLL
+		/// Invalid interface string
 		/// </summary>
-		public const int CO_E_ERRORINDLL = (int)(0x800401F9 - 0x100000000);
-
+		public const int CO_E_IIDSTRING = unchecked((int)0x800401F4);
 		/// <summary>
-		///     Wrong OS or OS version for application
+		/// Application not found
 		/// </summary>
-		public const int CO_E_WRONGOSFORAPP = (int)(0x800401FA - 0x100000000);
-
+		public const int CO_E_APPNOTFOUND = unchecked((int)0x800401F5);
 		/// <summary>
-		///     Object is not registered
+		/// Application cannot be run more than once
 		/// </summary>
-		public const int CO_E_OBJNOTREG = (int)(0x800401FB - 0x100000000);
-
+		public const int CO_E_APPSINGLEUSE = unchecked((int)0x800401F6);
 		/// <summary>
-		///     Object is already registered
+		/// Some error in application program
 		/// </summary>
-		public const int CO_E_OBJISREG = (int)(0x800401FC - 0x100000000);
-
+		public const int CO_E_ERRORINAPP = unchecked((int)0x800401F7);
 		/// <summary>
-		///     Object is not connected to server
+		/// DLL for class not found
 		/// </summary>
-		public const int CO_E_OBJNOTCONNECTED = (int)(0x800401FD - 0x100000000);
-
+		public const int CO_E_DLLNOTFOUND = unchecked((int)0x800401F8);
 		/// <summary>
-		///     Application was launched but it didn't register a class factory
+		/// Error in the DLL
 		/// </summary>
-		public const int CO_E_APPDIDNTREG = (int)(0x800401FE - 0x100000000);
-
+		public const int CO_E_ERRORINDLL = unchecked((int)0x800401F9);
 		/// <summary>
-		///     Object has been released
+		/// Wrong operating system or operating system version for the application
 		/// </summary>
-		public const int CO_E_RELEASED = (int)(0x800401FF - 0x100000000);
-
+		public const int CO_E_WRONGOSFORAPP = unchecked((int)0x800401FA);
 		/// <summary>
-		///     No information avialable.
+		/// Object is not registered
 		/// </summary>
-		public const int EVENT_E_FIRST = (int)(0x80040200 - 0x100000000);
-
+		public const int CO_E_OBJNOTREG = unchecked((int)0x800401FB);
 		/// <summary>
-		///     No information avialable.
+		/// Object is already registered
 		/// </summary>
-		public const int EVENT_E_LAST = (int)(0x8004021F - 0x100000000);
-
+		public const int CO_E_OBJISREG = unchecked((int)0x800401FC);
 		/// <summary>
-		///     An event was able to invoke some but not all of the subscribers
+		/// Object is not connected to server
 		/// </summary>
-		public const int EVENT_S_FIRST = 0x00040200;
-
+		public const int CO_E_OBJNOTCONNECTED = unchecked((int)0x800401FD);
 		/// <summary>
-		///     No information avialable.
+		/// Application was launched but it didn't register a class factory
 		/// </summary>
-		public const int EVENT_S_LAST = 0x0004021F;
-
+		public const int CO_E_APPDIDNTREG = unchecked((int)0x800401FE);
 		/// <summary>
-		///     An event was able to invoke some but not all of the subscribers
+		/// Object has been released
+		/// </summary>
+		public const int CO_E_RELEASED = unchecked((int)0x800401FF);
+		/// <summary>
+		/// An event was able to invoke some but not all of the subscribers
 		/// </summary>
 		public const int EVENT_S_SOME_SUBSCRIBERS_FAILED = 0x00040200;
-
 		/// <summary>
-		///     An event was unable to invoke any of the subscribers
+		/// An event was unable to invoke any of the subscribers
 		/// </summary>
-		public const int EVENT_E_ALL_SUBSCRIBERS_FAILED = (int)(0x80040201 - 0x100000000);
-
+		public const int EVENT_E_ALL_SUBSCRIBERS_FAILED = unchecked((int)0x80040201);
 		/// <summary>
-		///     An event was delivered but there were no subscribers
+		/// An event was delivered but there were no subscribers
 		/// </summary>
 		public const int EVENT_S_NOSUBSCRIBERS = 0x00040202;
-
-		/// <summary>
-		///     A syntax error occurred trying to evaluate a query string
-		/// </summary>
-		public const int EVENT_E_QUERYSYNTAX = (int)(0x80040203 - 0x100000000);
-
 		/// <summary>
-		///     An invalid field name was used in a query string
+		/// A syntax error occurred trying to evaluate a query string
 		/// </summary>
-		public const int EVENT_E_QUERYFIELD = (int)(0x80040204 - 0x100000000);
-
+		public const int EVENT_E_QUERYSYNTAX = unchecked((int)0x80040203);
 		/// <summary>
-		///     An unexpected exception was raised
+		/// An invalid field name was used in a query string
 		/// </summary>
-		public const int EVENT_E_INTERNALEXCEPTION = (int)(0x80040205 - 0x100000000);
-
+		public const int EVENT_E_QUERYFIELD = unchecked((int)0x80040204);
 		/// <summary>
-		///     An unexpected internal error was detected
+		/// An unexpected exception was raised
 		/// </summary>
-		public const int EVENT_E_INTERNALERROR = (int)(0x80040206 - 0x100000000);
-
+		public const int EVENT_E_INTERNALEXCEPTION = unchecked((int)0x80040205);
 		/// <summary>
-		///     The owner SID on a per-user subscription doesn't exist
+		/// An unexpected internal error was detected
 		/// </summary>
-		public const int EVENT_E_INVALID_PER_USER_SID = (int)(0x80040207 - 0x100000000);
-
+		public const int EVENT_E_INTERNALERROR = unchecked((int)0x80040206);
 		/// <summary>
-		///     A user-supplied component or subscriber raised an exception
+		/// The owner SID on a per-user subscription doesn't exist
 		/// </summary>
-		public const int EVENT_E_USER_EXCEPTION = (int)(0x80040208 - 0x100000000);
-
+		public const int EVENT_E_INVALID_PER_USER_SID = unchecked((int)0x80040207);
 		/// <summary>
-		///     An interface has too many methods to fire events from
+		/// A user-supplied component or subscriber raised an exception
 		/// </summary>
-		public const int EVENT_E_TOO_MANY_METHODS = (int)(0x80040209 - 0x100000000);
-
+		public const int EVENT_E_USER_EXCEPTION = unchecked((int)0x80040208);
 		/// <summary>
-		///     A subscription cannot be stored unless its event class already exists
+		/// An interface has too many methods to fire events from
 		/// </summary>
-		public const int EVENT_E_MISSING_EVENTCLASS = (int)(0x8004020A - 0x100000000);
-
+		public const int EVENT_E_TOO_MANY_METHODS = unchecked((int)0x80040209);
 		/// <summary>
-		///     Not all the objects requested could be removed
+		/// A subscription cannot be stored unless its event class already exists
 		/// </summary>
-		public const int EVENT_E_NOT_ALL_REMOVED = (int)(0x8004020B - 0x100000000);
-
+		public const int EVENT_E_MISSING_EVENTCLASS = unchecked((int)0x8004020A);
 		/// <summary>
-		///     COM+ is required for this operation, but is not installed
+		/// Not all the objects requested could be removed
 		/// </summary>
-		public const int EVENT_E_COMPLUS_NOT_INSTALLED = (int)(0x8004020C - 0x100000000);
-
+		public const int EVENT_E_NOT_ALL_REMOVED = unchecked((int)0x8004020B);
 		/// <summary>
-		///     Cannot modify or delete an object that was not added using the COM+ Admin SDK
+		/// COM+ is required for this operation, but is not installed
 		/// </summary>
-		public const int EVENT_E_CANT_MODIFY_OR_DELETE_UNCONFIGURED_OBJECT = (int)(0x8004020D - 0x100000000);
-
+		public const int EVENT_E_COMPLUS_NOT_INSTALLED = unchecked((int)0x8004020C);
 		/// <summary>
-		///     Cannot modify or delete an object that was added using the COM+ Admin SDK
+		/// Cannot modify or delete an object that was not added using the COM+ Admin SDK
 		/// </summary>
-		public const int EVENT_E_CANT_MODIFY_OR_DELETE_CONFIGURED_OBJECT = (int)(0x8004020E - 0x100000000);
-
+		public const int EVENT_E_CANT_MODIFY_OR_DELETE_UNCONFIGURED_OBJECT = unchecked((int)0x8004020D);
 		/// <summary>
-		///     The event class for this subscription is in an invalid partition
+		/// Cannot modify or delete an object that was added using the COM+ Admin SDK
 		/// </summary>
-		public const int EVENT_E_INVALID_EVENT_CLASS_PARTITION = (int)(0x8004020F - 0x100000000);
-
+		public const int EVENT_E_CANT_MODIFY_OR_DELETE_CONFIGURED_OBJECT = unchecked((int)0x8004020E);
 		/// <summary>
-		///     The owner of the PerUser subscription is not logged on to the system specified
+		/// The event class for this subscription is in an invalid partition
 		/// </summary>
-		public const int EVENT_E_PER_USER_SID_NOT_LOGGED_ON = (int)(0x80040210 - 0x100000000);
-
+		public const int EVENT_E_INVALID_EVENT_CLASS_PARTITION = unchecked((int)0x8004020F);
 		/// <summary>
-		///     Another single phase resource manager has already been enlisted in this transaction.
+		/// The owner of the PerUser subscription is not logged on to the system specified
 		/// </summary>
-		public const int XACT_E_FIRST = (int)(0x8004D000 - 0x100000000);
+		public const int EVENT_E_PER_USER_SID_NOT_LOGGED_ON = unchecked((int)0x80040210);
+		#endregion
 
+		#region XACT, SCHED, OLE
 		/// <summary>
-		///     The local transaction has aborted.
+		/// Another single phase resource manager has already been enlisted in this transaction.
 		/// </summary>
-		public const int XACT_E_LAST = (int)(0x8004D029 - 0x100000000);
-
+		public const int XACT_E_ALREADYOTHERSINGLEPHASE = unchecked((int)0x8004D000);
 		/// <summary>
-		///     An asynchronous operation was specified. The operation has begun, but its outcome is not known yet.
+		/// A retaining commit or abort is not supported
 		/// </summary>
-		public const int XACT_S_FIRST = 0x0004D000;
-
+		public const int XACT_E_CANTRETAIN = unchecked((int)0x8004D001);
 		/// <summary>
-		///     The resource manager has requested to be the coordinator (last resource manager) for the transaction.
+		/// The transaction failed to commit for an unknown reason. The transaction was aborted.
 		/// </summary>
-		public const int XACT_S_LAST = 0x0004D010;
-
+		public const int XACT_E_COMMITFAILED = unchecked((int)0x8004D002);
 		/// <summary>
-		///     Another single phase resource manager has already been enlisted in this transaction.
+		/// Cannot call commit on this transaction object because the calling application did not initiate the transaction.
 		/// </summary>
-		public const int XACT_E_ALREADYOTHERSINGLEPHASE = (int)(0x8004D000 - 0x100000000);
-
+		public const int XACT_E_COMMITPREVENTED = unchecked((int)0x8004D003);
 		/// <summary>
-		///     A retaining commit or abort is not supported
+		/// Instead of committing, the resource heuristically aborted.
 		/// </summary>
-		public const int XACT_E_CANTRETAIN = (int)(0x8004D001 - 0x100000000);
-
+		public const int XACT_E_HEURISTICABORT = unchecked((int)0x8004D004);
 		/// <summary>
-		///     The transaction failed to commit for an unknown reason. The transaction was aborted.
+		/// Instead of aborting, the resource heuristically committed.
 		/// </summary>
-		public const int XACT_E_COMMITFAILED = (int)(0x8004D002 - 0x100000000);
-
+		public const int XACT_E_HEURISTICCOMMIT = unchecked((int)0x8004D005);
 		/// <summary>
-		///     Cannot call commit on this transaction object because the calling application did not initiate the transaction.
+		/// Some of the states of the resource were committed while others were aborted, likely because of heuristic decisions.
 		/// </summary>
-		public const int XACT_E_COMMITPREVENTED = (int)(0x8004D003 - 0x100000000);
-
+		public const int XACT_E_HEURISTICDAMAGE = unchecked((int)0x8004D006);
 		/// <summary>
-		///     Instead of committing, the resource heuristically aborted.
+		/// Some of the states of the resource may have been committed while others may have been aborted, likely because of heuristic decisions.
 		/// </summary>
-		public const int XACT_E_HEURISTICABORT = (int)(0x8004D004 - 0x100000000);
-
+		public const int XACT_E_HEURISTICDANGER = unchecked((int)0x8004D007);
 		/// <summary>
-		///     Instead of aborting, the resource heuristically committed.
+		/// The requested isolation level is not valid or supported.
 		/// </summary>
-		public const int XACT_E_HEURISTICCOMMIT = (int)(0x8004D005 - 0x100000000);
-
+		public const int XACT_E_ISOLATIONLEVEL = unchecked((int)0x8004D008);
 		/// <summary>
-		///     Some of the states of the resource were committed while others were aborted, likely because of heuristic decisions.
+		/// The transaction manager doesn't support an asynchronous operation for this method.
 		/// </summary>
-		public const int XACT_E_HEURISTICDAMAGE = (int)(0x8004D006 - 0x100000000);
-
+		public const int XACT_E_NOASYNC = unchecked((int)0x8004D009);
 		/// <summary>
-		///     Some of the states of the resource may have been committed while others may have been aborted, likely because of
-		///     heuristic decisions.
+		/// Unable to enlist in the transaction.
 		/// </summary>
-		public const int XACT_E_HEURISTICDANGER = (int)(0x8004D007 - 0x100000000);
-
+		public const int XACT_E_NOENLIST = unchecked((int)0x8004D00A);
 		/// <summary>
-		///     The requested isolation level is not valid or supported.
+		/// The requested semantics of retention of isolation across retaining commit and abort boundaries cannot be supported by this transaction implementation, or isoFlags was not equal to zero.
 		/// </summary>
-		public const int XACT_E_ISOLATIONLEVEL = (int)(0x8004D008 - 0x100000000);
-
+		public const int XACT_E_NOISORETAIN = unchecked((int)0x8004D00B);
 		/// <summary>
-		///     The transaction manager doesn't support an asynchronous operation for this method.
+		/// There is no resource presently associated with this enlistment
 		/// </summary>
-		public const int XACT_E_NOASYNC = (int)(0x8004D009 - 0x100000000);
-
+		public const int XACT_E_NORESOURCE = unchecked((int)0x8004D00C);
 		/// <summary>
-		///     Unable to enlist in the transaction.
+		/// The transaction failed to commit due to the failure of optimistic concurrency control in at least one of the resource managers.
 		/// </summary>
-		public const int XACT_E_NOENLIST = (int)(0x8004D00A - 0x100000000);
-
+		public const int XACT_E_NOTCURRENT = unchecked((int)0x8004D00D);
 		/// <summary>
-		///     The requested semantics of retention of isolation across retaining commit and abort boundaries cannot be supported
-		///     by this transaction implementation, or isoFlags was not equal to zero.
+		/// The transaction has already been implicitly or explicitly committed or aborted
 		/// </summary>
-		public const int XACT_E_NOISORETAIN = (int)(0x8004D00B - 0x100000000);
-
+		public const int XACT_E_NOTRANSACTION = unchecked((int)0x8004D00E);
 		/// <summary>
-		///     There is no resource presently associated with this enlistment
+		/// An invalid combination of flags was specified
 		/// </summary>
-		public const int XACT_E_NORESOURCE = (int)(0x8004D00C - 0x100000000);
-
+		public const int XACT_E_NOTSUPPORTED = unchecked((int)0x8004D00F);
 		/// <summary>
-		///     The transaction failed to commit due to the failure of optimistic concurrency control in at least one of the
-		///     resource managers.
+		/// The resource manager id is not associated with this transaction or the transaction manager.
 		/// </summary>
-		public const int XACT_E_NOTCURRENT = (int)(0x8004D00D - 0x100000000);
-
+		public const int XACT_E_UNKNOWNRMGRID = unchecked((int)0x8004D010);
 		/// <summary>
-		///     The transaction has already been implicitly or explicitly committed or aborted
+		/// This method was called in the wrong state
 		/// </summary>
-		public const int XACT_E_NOTRANSACTION = (int)(0x8004D00E - 0x100000000);
-
+		public const int XACT_E_WRONGSTATE = unchecked((int)0x8004D011);
 		/// <summary>
-		///     An invalid combination of flags was specified
+		/// The indicated unit of work does not match the unit of work expected by the resource manager.
 		/// </summary>
-		public const int XACT_E_NOTSUPPORTED = (int)(0x8004D00F - 0x100000000);
-
+		public const int XACT_E_WRONGUOW = unchecked((int)0x8004D012);
 		/// <summary>
-		///     The resource manager id is not associated with this transaction or the transaction manager.
+		/// An enlistment in a transaction already exists.
 		/// </summary>
-		public const int XACT_E_UNKNOWNRMGRID = (int)(0x8004D010 - 0x100000000);
-
+		public const int XACT_E_XTIONEXISTS = unchecked((int)0x8004D013);
 		/// <summary>
-		///     This method was called in the wrong state
+		/// An import object for the transaction could not be found.
 		/// </summary>
-		public const int XACT_E_WRONGSTATE = (int)(0x8004D011 - 0x100000000);
-
+		public const int XACT_E_NOIMPORTOBJECT = unchecked((int)0x8004D014);
 		/// <summary>
-		///     The indicated unit of work does not match the unit of work expected by the resource manager.
+		/// The transaction cookie is invalid.
 		/// </summary>
-		public const int XACT_E_WRONGUOW = (int)(0x8004D012 - 0x100000000);
-
+		public const int XACT_E_INVALIDCOOKIE = unchecked((int)0x8004D015);
 		/// <summary>
-		///     An enlistment in a transaction already exists.
+		/// The transaction status is in doubt. A communication failure occurred, or a transaction manager or resource manager has failed
 		/// </summary>
-		public const int XACT_E_XTIONEXISTS = (int)(0x8004D013 - 0x100000000);
-
+		public const int XACT_E_INDOUBT = unchecked((int)0x8004D016);
 		/// <summary>
-		///     An import object for the transaction could not be found.
+		/// A time-out was specified, but time-outs are not supported.
 		/// </summary>
-		public const int XACT_E_NOIMPORTOBJECT = (int)(0x8004D014 - 0x100000000);
-
+		public const int XACT_E_NOTIMEOUT = unchecked((int)0x8004D017);
 		/// <summary>
-		///     The transaction cookie is invalid.
+		/// The requested operation is already in progress for the transaction.
 		/// </summary>
-		public const int XACT_E_INVALIDCOOKIE = (int)(0x8004D015 - 0x100000000);
-
+		public const int XACT_E_ALREADYINPROGRESS = unchecked((int)0x8004D018);
 		/// <summary>
-		///     The transaction status is in doubt. A communication failure occurred, or a transaction manager or resource manager
-		///     has failed
+		/// The transaction has already been aborted.
 		/// </summary>
-		public const int XACT_E_INDOUBT = (int)(0x8004D016 - 0x100000000);
-
+		public const int XACT_E_ABORTED = unchecked((int)0x8004D019);
 		/// <summary>
-		///     A time-out was specified, but time-outs are not supported.
+		/// The Transaction Manager returned a log full error.
 		/// </summary>
-		public const int XACT_E_NOTIMEOUT = (int)(0x8004D017 - 0x100000000);
-
+		public const int XACT_E_LOGFULL = unchecked((int)0x8004D01A);
 		/// <summary>
-		///     The requested operation is already in progress for the transaction.
+		/// The Transaction Manager is not available.
 		/// </summary>
-		public const int XACT_E_ALREADYINPROGRESS = (int)(0x8004D018 - 0x100000000);
-
+		public const int XACT_E_TMNOTAVAILABLE = unchecked((int)0x8004D01B);
 		/// <summary>
-		///     The transaction has already been aborted.
+		/// A connection with the transaction manager was lost.
 		/// </summary>
-		public const int XACT_E_ABORTED = (int)(0x8004D019 - 0x100000000);
-
+		public const int XACT_E_CONNECTION_DOWN = unchecked((int)0x8004D01C);
 		/// <summary>
-		///     The Transaction Manager returned a log full error.
+		/// A request to establish a connection with the transaction manager was denied.
 		/// </summary>
-		public const int XACT_E_LOGFULL = (int)(0x8004D01A - 0x100000000);
-
+		public const int XACT_E_CONNECTION_DENIED = unchecked((int)0x8004D01D);
 		/// <summary>
-		///     The Transaction Manager is not available.
+		/// Resource manager reenlistment to determine transaction status timed out.
 		/// </summary>
-		public const int XACT_E_TMNOTAVAILABLE = (int)(0x8004D01B - 0x100000000);
-
+		public const int XACT_E_REENLISTTIMEOUT = unchecked((int)0x8004D01E);
 		/// <summary>
-		///     A connection with the transaction manager was lost.
+		/// This transaction manager failed to establish a connection with another TIP transaction manager.
 		/// </summary>
-		public const int XACT_E_CONNECTION_DOWN = (int)(0x8004D01C - 0x100000000);
-
+		public const int XACT_E_TIP_CONNECT_FAILED = unchecked((int)0x8004D01F);
 		/// <summary>
-		///     A request to establish a connection with the transaction manager was denied.
+		/// This transaction manager encountered a protocol error with another TIP transaction manager.
 		/// </summary>
-		public const int XACT_E_CONNECTION_DENIED = (int)(0x8004D01D - 0x100000000);
-
+		public const int XACT_E_TIP_PROTOCOL_ERROR = unchecked((int)0x8004D020);
 		/// <summary>
-		///     Resource manager reenlistment to determine transaction status timed out.
+		/// This transaction manager could not propagate a transaction from another TIP transaction manager.
 		/// </summary>
-		public const int XACT_E_REENLISTTIMEOUT = (int)(0x8004D01E - 0x100000000);
-
+		public const int XACT_E_TIP_PULL_FAILED = unchecked((int)0x8004D021);
 		/// <summary>
-		///     This transaction manager failed to establish a connection with another TIP transaction manager.
+		/// The Transaction Manager on the destination machine is not available.
 		/// </summary>
-		public const int XACT_E_TIP_CONNECT_FAILED = (int)(0x8004D01F - 0x100000000);
-
+		public const int XACT_E_DEST_TMNOTAVAILABLE = unchecked((int)0x8004D022);
 		/// <summary>
-		///     This transaction manager encountered a protocol error with another TIP transaction manager.
+		/// The Transaction Manager has disabled its support for TIP.
 		/// </summary>
-		public const int XACT_E_TIP_PROTOCOL_ERROR = (int)(0x8004D020 - 0x100000000);
-
+		public const int XACT_E_TIP_DISABLED = unchecked((int)0x8004D023);
 		/// <summary>
-		///     This transaction manager could not propagate a transaction from another TIP transaction manager.
+		/// The transaction manager has disabled its support for remote/network transactions.
 		/// </summary>
-		public const int XACT_E_TIP_PULL_FAILED = (int)(0x8004D021 - 0x100000000);
-
+		public const int XACT_E_NETWORK_TX_DISABLED = unchecked((int)0x8004D024);
 		/// <summary>
-		///     The Transaction Manager on the destination machine is not available.
+		/// The partner transaction manager has disabled its support for remote/network transactions.
 		/// </summary>
-		public const int XACT_E_DEST_TMNOTAVAILABLE = (int)(0x8004D022 - 0x100000000);
-
+		public const int XACT_E_PARTNER_NETWORK_TX_DISABLED = unchecked((int)0x8004D025);
 		/// <summary>
-		///     The Transaction Manager has disabled its support for TIP.
+		/// The transaction manager has disabled its support for XA transactions.
 		/// </summary>
-		public const int XACT_E_TIP_DISABLED = (int)(0x8004D023 - 0x100000000);
-
+		public const int XACT_E_XA_TX_DISABLED = unchecked((int)0x8004D026);
 		/// <summary>
-		///     The transaction manager has disabled its support for remote/network transactions.
+		/// MSDTC was unable to read its configuration information.
 		/// </summary>
-		public const int XACT_E_NETWORK_TX_DISABLED = (int)(0x8004D024 - 0x100000000);
-
+		public const int XACT_E_UNABLE_TO_READ_DTC_CONFIG = unchecked((int)0x8004D027);
 		/// <summary>
-		///     The partner transaction manager has disabled its support for remote/network transactions.
+		/// MSDTC was unable to load the dtc proxy dll.
 		/// </summary>
-		public const int XACT_E_PARTNER_NETWORK_TX_DISABLED = (int)(0x8004D025 - 0x100000000);
-
+		public const int XACT_E_UNABLE_TO_LOAD_DTC_PROXY = unchecked((int)0x8004D028);
 		/// <summary>
-		///     The transaction manager has disabled its support for XA transactions.
+		/// The local transaction has aborted.
 		/// </summary>
-		public const int XACT_E_XA_TX_DISABLED = (int)(0x8004D026 - 0x100000000);
-
+		public const int XACT_E_ABORTING = unchecked((int)0x8004D029);
 		/// <summary>
-		///     MSDTC was unable to read its configuration information.
+		/// The MSDTC transaction manager was unable to push the transaction to the destination transaction manager due to communication problems. Possible causes are: a firewall is present and it doesn't have an exception for the MSDTC process, the two machines cannot find each other by their NetBIOS names, or the support for network transactions is not enabled for one of the two transaction managers.
 		/// </summary>
-		public const int XACT_E_UNABLE_TO_READ_DTC_CONFIG = (int)(0x8004D027 - 0x100000000);
-
+		public const int XACT_E_PUSH_COMM_FAILURE = unchecked((int)0x8004D02A);
 		/// <summary>
-		///     MSDTC was unable to load the dtc proxy dll.
+		/// The MSDTC transaction manager was unable to pull the transaction from the source transaction manager due to communication problems. Possible causes are: a firewall is present and it doesn't have an exception for the MSDTC process, the two machines cannot find each other by their NetBIOS names, or the support for network transactions is not enabled for one of the two transaction managers.
 		/// </summary>
-		public const int XACT_E_UNABLE_TO_LOAD_DTC_PROXY = (int)(0x8004D028 - 0x100000000);
-
+		public const int XACT_E_PULL_COMM_FAILURE = unchecked((int)0x8004D02B);
 		/// <summary>
-		///     The local transaction has aborted.
+		/// The MSDTC transaction manager has disabled its support for SNA LU 6.2 transactions.
 		/// </summary>
-		public const int XACT_E_ABORTING = (int)(0x8004D029 - 0x100000000);
-
+		public const int XACT_E_LU_TX_DISABLED = unchecked((int)0x8004D02C);
 		/// <summary>
-		///     XACT_E_CLERKNOTFOUND
+		/// XACT_E_CLERKNOTFOUND
 		/// </summary>
-		public const int XACT_E_CLERKNOTFOUND = (int)(0x8004D080 - 0x100000000);
-
+		public const int XACT_E_CLERKNOTFOUND = unchecked((int)0x8004D080);
 		/// <summary>
-		///     XACT_E_CLERKEXISTS
+		/// XACT_E_CLERKEXISTS
 		/// </summary>
-		public const int XACT_E_CLERKEXISTS = (int)(0x8004D081 - 0x100000000);
-
+		public const int XACT_E_CLERKEXISTS = unchecked((int)0x8004D081);
 		/// <summary>
-		///     XACT_E_RECOVERYINPROGRESS
+		/// XACT_E_RECOVERYINPROGRESS
 		/// </summary>
-		public const int XACT_E_RECOVERYINPROGRESS = (int)(0x8004D082 - 0x100000000);
-
+		public const int XACT_E_RECOVERYINPROGRESS = unchecked((int)0x8004D082);
 		/// <summary>
-		///     XACT_E_TRANSACTIONCLOSED
+		/// XACT_E_TRANSACTIONCLOSED
 		/// </summary>
-		public const int XACT_E_TRANSACTIONCLOSED = (int)(0x8004D083 - 0x100000000);
-
+		public const int XACT_E_TRANSACTIONCLOSED = unchecked((int)0x8004D083);
 		/// <summary>
-		///     XACT_E_INVALIDLSN
+		/// XACT_E_INVALIDLSN
 		/// </summary>
-		public const int XACT_E_INVALIDLSN = (int)(0x8004D084 - 0x100000000);
-
+		public const int XACT_E_INVALIDLSN = unchecked((int)0x8004D084);
 		/// <summary>
-		///     XACT_E_REPLAYREQUEST
+		/// XACT_E_REPLAYREQUEST
 		/// </summary>
-		public const int XACT_E_REPLAYREQUEST = (int)(0x8004D085 - 0x100000000);
-
+		public const int XACT_E_REPLAYREQUEST = unchecked((int)0x8004D085);
 		/// <summary>
-		///     An asynchronous operation was specified. The operation has begun, but its outcome is not known yet.
+		/// An asynchronous operation was specified. The operation has begun, but its outcome is not known yet.
 		/// </summary>
 		public const int XACT_S_ASYNC = 0x0004D000;
-
 		/// <summary>
-		///     XACT_S_DEFECT
+		/// XACT_S_DEFECT
 		/// </summary>
 		public const int XACT_S_DEFECT = 0x0004D001;
-
 		/// <summary>
-		///     The method call succeeded because the transaction was read-only.
+		/// The method call succeeded because the transaction was read-only.
 		/// </summary>
 		public const int XACT_S_READONLY = 0x0004D002;
-
 		/// <summary>
-		///     The transaction was successfully aborted. However, this is a coordinated transaction, and some number of enlisted
-		///     resources were aborted outright because they could not support abort-retaining semantics
+		/// The transaction was successfully aborted. However, this is a coordinated transaction, and some number of enlisted resources were aborted outright because they could not support abort-retaining semantics
 		/// </summary>
 		public const int XACT_S_SOMENORETAIN = 0x0004D003;
-
 		/// <summary>
-		///     No changes were made during this call, but the sink wants another chance to look if any other sinks make further
-		///     changes.
+		/// No changes were made during this call, but the sink wants another chance to look if any other sinks make further changes.
 		/// </summary>
 		public const int XACT_S_OKINFORM = 0x0004D004;
-
 		/// <summary>
-		///     The sink is content and wishes the transaction to proceed. Changes were made to one or more resources during this
-		///     call.
+		/// The sink is content and wishes the transaction to proceed. Changes were made to one or more resources during this call.
 		/// </summary>
 		public const int XACT_S_MADECHANGESCONTENT = 0x0004D005;
-
 		/// <summary>
-		///     The sink is for the moment and wishes the transaction to proceed, but if other changes are made following this
-		///     return by other event sinks then this sink wants another chance to look
+		/// The sink is for the moment and wishes the transaction to proceed, but if other changes are made following this return by other event sinks then this sink wants another chance to look
 		/// </summary>
 		public const int XACT_S_MADECHANGESINFORM = 0x0004D006;
-
 		/// <summary>
-		///     The transaction was successfully aborted. However, the abort was non-retaining.
+		/// The transaction was successfully aborted. However, the abort was non-retaining.
 		/// </summary>
 		public const int XACT_S_ALLNORETAIN = 0x0004D007;
-
 		/// <summary>
-		///     An abort operation was already in progress.
+		/// An abort operation was already in progress.
 		/// </summary>
 		public const int XACT_S_ABORTING = 0x0004D008;
-
 		/// <summary>
-		///     The resource manager has performed a single-phase commit of the transaction.
+		/// The resource manager has performed a single-phase commit of the transaction.
 		/// </summary>
 		public const int XACT_S_SINGLEPHASE = 0x0004D009;
-
 		/// <summary>
-		///     The local transaction has not aborted.
+		/// The local transaction has not aborted.
 		/// </summary>
 		public const int XACT_S_LOCALLY_OK = 0x0004D00A;
-
 		/// <summary>
-		///     The resource manager has requested to be the coordinator (last resource manager) for the transaction.
+		/// The resource manager has requested to be the coordinator (last resource manager) for the transaction.
 		/// </summary>
 		public const int XACT_S_LASTRESOURCEMANAGER = 0x0004D010;
-
 		/// <summary>
-		///     No information avialable.
+		/// The root transaction wanted to commit, but transaction aborted
 		/// </summary>
-		public const int CONTEXT_E_FIRST = (int)(0x8004E000 - 0x100000000);
-
+		public const int CONTEXT_E_ABORTED = unchecked((int)0x8004E002);
 		/// <summary>
-		///     The TxIsolation Level property for the COM+ component being created is stronger than the TxIsolationLevel for the
-		///     "root" component for the transaction.  The creation failed.
+		/// You made a method call on a COM+ component that has a transaction that has already aborted or in the process of aborting.
 		/// </summary>
-		public const int CONTEXT_E_LAST = (int)(0x8004E02F - 0x100000000);
-
+		public const int CONTEXT_E_ABORTING = unchecked((int)0x8004E003);
 		/// <summary>
-		///     No information avialable.
+		/// There is no MTS object context
 		/// </summary>
-		public const int CONTEXT_S_FIRST = 0x0004E000;
-
+		public const int CONTEXT_E_NOCONTEXT = unchecked((int)0x8004E004);
 		/// <summary>
-		///     No information avialable.
+		/// The component is configured to use synchronization and this method call would cause a deadlock to occur.
 		/// </summary>
-		public const int CONTEXT_S_LAST = 0x0004E02F;
-
+		public const int CONTEXT_E_WOULD_DEADLOCK = unchecked((int)0x8004E005);
 		/// <summary>
-		///     The root transaction wanted to commit, but transaction aborted
+		/// The component is configured to use synchronization and a thread has timed out waiting to enter the context.
 		/// </summary>
-		public const int CONTEXT_E_ABORTED = (int)(0x8004E002 - 0x100000000);
-
+		public const int CONTEXT_E_SYNCH_TIMEOUT = unchecked((int)0x8004E006);
 		/// <summary>
-		///     You made a method call on a COM+ component that has a transaction that has already aborted or in the process of
-		///     aborting.
+		/// You made a method call on a COM+ component that has a transaction that has already committed or aborted.
 		/// </summary>
-		public const int CONTEXT_E_ABORTING = (int)(0x8004E003 - 0x100000000);
-
+		public const int CONTEXT_E_OLDREF = unchecked((int)0x8004E007);
 		/// <summary>
-		///     There is no MTS object context
+		/// The specified role was not configured for the application
 		/// </summary>
-		public const int CONTEXT_E_NOCONTEXT = (int)(0x8004E004 - 0x100000000);
-
+		public const int CONTEXT_E_ROLENOTFOUND = unchecked((int)0x8004E00C);
 		/// <summary>
-		///     No information avialable.
+		/// COM+ was unable to talk to the Microsoft Distributed Transaction Coordinator
 		/// </summary>
-		public const int CONTEXT_E_WOULD_DEADLOCK = (int)(0x8004E005 - 0x100000000);
-
+		public const int CONTEXT_E_TMNOTAVAILABLE = unchecked((int)0x8004E00F);
 		/// <summary>
-		///     The component is configured to use synchronization and a thread has timed out waiting to enter the context.
+		/// An unexpected error occurred during COM+ Activation.
 		/// </summary>
-		public const int CONTEXT_E_SYNCH_TIMEOUT = (int)(0x8004E006 - 0x100000000);
-
+		public const int CO_E_ACTIVATIONFAILED = unchecked((int)0x8004E021);
 		/// <summary>
-		///     You made a method call on a COM+ component that has a transaction that has already committed or aborted.
+		/// COM+ Activation failed. Check the event log for more information
 		/// </summary>
-		public const int CONTEXT_E_OLDREF = (int)(0x8004E007 - 0x100000000);
-
+		public const int CO_E_ACTIVATIONFAILED_EVENTLOGGED = unchecked((int)0x8004E022);
 		/// <summary>
-		///     The specified role was not configured for the application
+		/// COM+ Activation failed due to a catalog or configuration error.
 		/// </summary>
-		public const int CONTEXT_E_ROLENOTFOUND = (int)(0x8004E00C - 0x100000000);
-
+		public const int CO_E_ACTIVATIONFAILED_CATALOGERROR = unchecked((int)0x8004E023);
 		/// <summary>
-		///     COM+ was unable to talk to the Microsoft Distributed Transaction Coordinator
+		/// COM+ activation failed because the activation could not be completed in the specified amount of time.
 		/// </summary>
-		public const int CONTEXT_E_TMNOTAVAILABLE = (int)(0x8004E00F - 0x100000000);
-
+		public const int CO_E_ACTIVATIONFAILED_TIMEOUT = unchecked((int)0x8004E024);
 		/// <summary>
-		///     An unexpected error occurred during COM+ Activation.
+		/// COM+ Activation failed because an initialization function failed. Check the event log for more information.
 		/// </summary>
-		public const int CO_E_ACTIVATIONFAILED = (int)(0x8004E021 - 0x100000000);
-
+		public const int CO_E_INITIALIZATIONFAILED = unchecked((int)0x8004E025);
 		/// <summary>
-		///     COM+ Activation failed. Check the event log for more information
+		/// The requested operation requires that JIT be in the current context and it is not
 		/// </summary>
-		public const int CO_E_ACTIVATIONFAILED_EVENTLOGGED = (int)(0x8004E022 - 0x100000000);
-
+		public const int CONTEXT_E_NOJIT = unchecked((int)0x8004E026);
 		/// <summary>
-		///     COM+ Activation failed due to a catalog or configuration error.
+		/// The requested operation requires that the current context have a Transaction, and it does not
 		/// </summary>
-		public const int CO_E_ACTIVATIONFAILED_CATALOGERROR = (int)(0x8004E023 - 0x100000000);
-
+		public const int CONTEXT_E_NOTRANSACTION = unchecked((int)0x8004E027);
 		/// <summary>
-		///     COM+ activation failed because the activation could not be completed in the specified amount of time.
+		/// The components threading model has changed after install into a COM+ Application. Please re-install component.
 		/// </summary>
-		public const int CO_E_ACTIVATIONFAILED_TIMEOUT = (int)(0x8004E024 - 0x100000000);
-
+		public const int CO_E_THREADINGMODEL_CHANGED = unchecked((int)0x8004E028);
 		/// <summary>
-		///     COM+ Activation failed because an initialization function failed.  Check the event log for more information.
+		/// IIS intrinsics not available. Start your work with IIS.
 		/// </summary>
-		public const int CO_E_INITIALIZATIONFAILED = (int)(0x8004E025 - 0x100000000);
-
+		public const int CO_E_NOIISINTRINSICS = unchecked((int)0x8004E029);
 		/// <summary>
-		///     The requested operation requires that JIT be in the current context and it is not
+		/// An attempt to write a cookie failed.
 		/// </summary>
-		public const int CONTEXT_E_NOJIT = (int)(0x8004E026 - 0x100000000);
-
+		public const int CO_E_NOCOOKIES = unchecked((int)0x8004E02A);
 		/// <summary>
-		///     The requested operation requires that the current context have a Transaction, and it does not
+		/// An attempt to use a database generated a database specific error.
 		/// </summary>
-		public const int CONTEXT_E_NOTRANSACTION = (int)(0x8004E027 - 0x100000000);
-
+		public const int CO_E_DBERROR = unchecked((int)0x8004E02B);
 		/// <summary>
-		///     The components threading model has changed after install into a COM+ Application.  Please re-install component.
+		/// The COM+ component you created must use object pooling to work.
 		/// </summary>
-		public const int CO_E_THREADINGMODEL_CHANGED = (int)(0x8004E028 - 0x100000000);
-
+		public const int CO_E_NOTPOOLED = unchecked((int)0x8004E02C);
 		/// <summary>
-		///     IIS intrinsics not available.  Start your work with IIS.
+		/// The COM+ component you created must use object construction to work correctly.
 		/// </summary>
-		public const int CO_E_NOIISINTRINSICS = (int)(0x8004E029 - 0x100000000);
-
+		public const int CO_E_NOTCONSTRUCTED = unchecked((int)0x8004E02D);
 		/// <summary>
-		///     An attempt to write a cookie failed.
+		/// The COM+ component requires synchronization, and it is not configured for it.
 		/// </summary>
-		public const int CO_E_NOCOOKIES = (int)(0x8004E02A - 0x100000000);
-
+		public const int CO_E_NOSYNCHRONIZATION = unchecked((int)0x8004E02E);
 		/// <summary>
-		///     An attempt to use a database generated a database specific error.
+		/// The TxIsolation Level property for the COM+ component being created is stronger than the TxIsolationLevel for the "root" component for the transaction. The creation failed.
 		/// </summary>
-		public const int CO_E_DBERROR = (int)(0x8004E02B - 0x100000000);
-
+		public const int CO_E_ISOLEVELMISMATCH = unchecked((int)0x8004E02F);
 		/// <summary>
-		///     The COM+ component you created must use object pooling to work.
+		/// The component attempted to make a cross-context call between invocations of EnterTransactionScopeand ExitTransactionScope. This is not allowed. Cross-context calls cannot be made while inside of a transaction scope.
 		/// </summary>
-		public const int CO_E_NOTPOOLED = (int)(0x8004E02C - 0x100000000);
-
+		public const int CO_E_CALL_OUT_OF_TX_SCOPE_NOT_ALLOWED = unchecked((int)0x8004E030);
 		/// <summary>
-		///     The COM+ component you created must use object construction to work correctly.
+		/// The component made a call to EnterTransactionScope, but did not make a corresponding call to ExitTransactionScope before returning.
 		/// </summary>
-		public const int CO_E_NOTCONSTRUCTED = (int)(0x8004E02D - 0x100000000);
-
+		public const int CO_E_EXIT_TRANSACTION_SCOPE_NOT_CALLED = unchecked((int)0x8004E031);
 		/// <summary>
-		///     The COM+ component requires synchronization, and it is not configured for it.
-		/// </summary>
-		public const int CO_E_NOSYNCHRONIZATION = (int)(0x8004E02E - 0x100000000);
-
-		/// <summary>
-		///     The TxIsolation Level property for the COM+ component being created is stronger than the TxIsolationLevel for the
-		///     "root" component for the transaction.  The creation failed.
-		/// </summary>
-		public const int CO_E_ISOLEVELMISMATCH = (int)(0x8004E02F - 0x100000000);
-
-		/// <summary>
-		///     Use the registry database to provide the requested information
+		/// Use the registry database to provide the requested information
 		/// </summary>
 		public const int OLE_S_USEREG = 0x00040000;
-
 		/// <summary>
-		///     Success, but static
+		/// Success, but static
 		/// </summary>
 		public const int OLE_S_STATIC = 0x00040001;
-
 		/// <summary>
-		///     Macintosh clipboard format
+		/// Macintosh clipboard format
 		/// </summary>
 		public const int OLE_S_MAC_CLIPFORMAT = 0x00040002;
-
 		/// <summary>
-		///     Successful drop took place
+		/// Successful drop took place
 		/// </summary>
 		public const int DRAGDROP_S_DROP = 0x00040100;
-
 		/// <summary>
-		///     Drag-drop operation canceled
+		/// Drag-drop operation canceled
 		/// </summary>
 		public const int DRAGDROP_S_CANCEL = 0x00040101;
-
 		/// <summary>
-		///     Use the default cursor
+		/// Use the default cursor
 		/// </summary>
 		public const int DRAGDROP_S_USEDEFAULTCURSORS = 0x00040102;
-
 		/// <summary>
-		///     Data has same FORMATETC
+		/// Data has same FORMATETC
 		/// </summary>
 		public const int DATA_S_SAMEFORMATETC = 0x00040130;
-
 		/// <summary>
-		///     View is already frozen
+		/// View is already frozen
 		/// </summary>
 		public const int VIEW_S_ALREADY_FROZEN = 0x00040140;
-
 		/// <summary>
-		///     FORMATETC not supported
+		/// FORMATETC not supported
 		/// </summary>
 		public const int CACHE_S_FORMATETC_NOTSUPPORTED = 0x00040170;
-
 		/// <summary>
-		///     Same cache
+		/// Same cache
 		/// </summary>
 		public const int CACHE_S_SAMECACHE = 0x00040171;
-
 		/// <summary>
-		///     Some cache(s) not updated
+		/// Some cache(s) not updated
 		/// </summary>
 		public const int CACHE_S_SOMECACHES_NOTUPDATED = 0x00040172;
-
 		/// <summary>
-		///     Invalid verb for OLE object
+		/// Invalid verb for OLE object
 		/// </summary>
 		public const int OLEOBJ_S_INVALIDVERB = 0x00040180;
-
 		/// <summary>
-		///     Verb number is valid but verb cannot be done now
+		/// Verb number is valid but verb cannot be done now
 		/// </summary>
 		public const int OLEOBJ_S_CANNOT_DOVERB_NOW = 0x00040181;
-
 		/// <summary>
-		///     Invalid window handle passed
+		/// Invalid window handle passed
 		/// </summary>
 		public const int OLEOBJ_S_INVALIDHWND = 0x00040182;
-
 		/// <summary>
-		///     Message is too long; some of it had to be truncated before displaying
+		/// Message is too long; some of it had to be truncated before displaying
 		/// </summary>
 		public const int INPLACE_S_TRUNCATED = 0x000401A0;
-
 		/// <summary>
-		///     Unable to convert OLESTREAM to IStorage
+		/// Unable to convert OLESTREAM to IStorage
 		/// </summary>
 		public const int CONVERT10_S_NO_PRESENTATION = 0x000401C0;
-
 		/// <summary>
-		///     Moniker reduced to itself
+		/// Moniker reduced to itself
 		/// </summary>
 		public const int MK_S_REDUCED_TO_SELF = 0x000401E2;
-
 		/// <summary>
-		///     Common prefix is this moniker
+		/// Common prefix is this moniker
 		/// </summary>
 		public const int MK_S_ME = 0x000401E4;
-
 		/// <summary>
-		///     Common prefix is input moniker
+		/// Common prefix is input moniker
 		/// </summary>
 		public const int MK_S_HIM = 0x000401E5;
-
 		/// <summary>
-		///     Common prefix is both monikers
+		/// Common prefix is both monikers
 		/// </summary>
 		public const int MK_S_US = 0x000401E6;
-
 		/// <summary>
-		///     Moniker is already registered in running object table
+		/// Moniker is already registered in running object table
 		/// </summary>
 		public const int MK_S_MONIKERALREADYREGISTERED = 0x000401E7;
-
 		/// <summary>
-		///     The task is ready to run at its next scheduled time.
+		/// The task is ready to run at its next scheduled time.
 		/// </summary>
 		public const int SCHED_S_TASK_READY = 0x00041300;
-
 		/// <summary>
-		///     The task is currently running.
+		/// The task is currently running.
 		/// </summary>
 		public const int SCHED_S_TASK_RUNNING = 0x00041301;
-
 		/// <summary>
-		///     The task will not run at the scheduled times because it has been disabled.
+		/// The task will not run at the scheduled times because it has been disabled.
 		/// </summary>
 		public const int SCHED_S_TASK_DISABLED = 0x00041302;
-
 		/// <summary>
-		///     The task has not yet run.
+		/// The task has not yet run.
 		/// </summary>
 		public const int SCHED_S_TASK_HAS_NOT_RUN = 0x00041303;
-
 		/// <summary>
-		///     There are no more runs scheduled for this task.
+		/// There are no more runs scheduled for this task.
 		/// </summary>
 		public const int SCHED_S_TASK_NO_MORE_RUNS = 0x00041304;
-
 		/// <summary>
-		///     One or more of the properties that are needed to run this task on a schedule have not been set.
+		/// One or more of the properties that are needed to run this task on a schedule have not been set.
 		/// </summary>
 		public const int SCHED_S_TASK_NOT_SCHEDULED = 0x00041305;
-
 		/// <summary>
-		///     The last run of the task was terminated by the user.
+		/// The last run of the task was terminated by the user.
 		/// </summary>
 		public const int SCHED_S_TASK_TERMINATED = 0x00041306;
-
 		/// <summary>
-		///     Either the task has no triggers or the existing triggers are disabled or not set.
+		/// Either the task has no triggers or the existing triggers are disabled or not set.
 		/// </summary>
 		public const int SCHED_S_TASK_NO_VALID_TRIGGERS = 0x00041307;
-
 		/// <summary>
-		///     Event triggers don't have set run times.
+		/// Event triggers don't have set run times.
 		/// </summary>
 		public const int SCHED_S_EVENT_TRIGGER = 0x00041308;
-
 		/// <summary>
-		///     Trigger not found.
+		/// Trigger not found.
 		/// </summary>
-		public const int SCHED_E_TRIGGER_NOT_FOUND = (int)(0x80041309 - 0x100000000);
-
+		public const int SCHED_E_TRIGGER_NOT_FOUND = unchecked((int)0x80041309);
 		/// <summary>
-		///     One or more of the properties that are needed to run this task have not been set.
+		/// One or more of the properties that are needed to run this task have not been set.
 		/// </summary>
-		public const int SCHED_E_TASK_NOT_READY = (int)(0x8004130A - 0x100000000);
-
+		public const int SCHED_E_TASK_NOT_READY = unchecked((int)0x8004130A);
 		/// <summary>
-		///     There is no running instance of the task to terminate.
+		/// There is no running instance of the task.
 		/// </summary>
-		public const int SCHED_E_TASK_NOT_RUNNING = (int)(0x8004130B - 0x100000000);
-
+		public const int SCHED_E_TASK_NOT_RUNNING = unchecked((int)0x8004130B);
 		/// <summary>
-		///     The Task Scheduler Service is not installed on this computer.
+		/// The Task Scheduler Service is not installed on this computer.
 		/// </summary>
-		public const int SCHED_E_SERVICE_NOT_INSTALLED = (int)(0x8004130C - 0x100000000);
-
+		public const int SCHED_E_SERVICE_NOT_INSTALLED = unchecked((int)0x8004130C);
 		/// <summary>
-		///     The task object could not be opened.
+		/// The task object could not be opened.
 		/// </summary>
-		public const int SCHED_E_CANNOT_OPEN_TASK = (int)(0x8004130D - 0x100000000);
-
+		public const int SCHED_E_CANNOT_OPEN_TASK = unchecked((int)0x8004130D);
 		/// <summary>
-		///     The object is either an invalid task object or is not a task object.
+		/// The object is either an invalid task object or is not a task object.
 		/// </summary>
-		public const int SCHED_E_INVALID_TASK = (int)(0x8004130E - 0x100000000);
-
+		public const int SCHED_E_INVALID_TASK = unchecked((int)0x8004130E);
 		/// <summary>
-		///     No account information could be found in the Task Scheduler security database for the task indicated.
+		/// No account information could be found in the Task Scheduler security database for the task indicated.
 		/// </summary>
-		public const int SCHED_E_ACCOUNT_INFORMATION_NOT_SET = (int)(0x8004130F - 0x100000000);
-
+		public const int SCHED_E_ACCOUNT_INFORMATION_NOT_SET = unchecked((int)0x8004130F);
 		/// <summary>
-		///     Unable to establish existence of the account specified.
+		/// Unable to establish existence of the account specified.
 		/// </summary>
-		public const int SCHED_E_ACCOUNT_NAME_NOT_FOUND = (int)(0x80041310 - 0x100000000);
-
+		public const int SCHED_E_ACCOUNT_NAME_NOT_FOUND = unchecked((int)0x80041310);
 		/// <summary>
-		///     Corruption was detected in the Task Scheduler security database; the database has been reset.
+		/// Corruption was detected in the Task Scheduler security database; the database has been reset.
 		/// </summary>
-		public const int SCHED_E_ACCOUNT_DBASE_CORRUPT = (int)(0x80041311 - 0x100000000);
-
+		public const int SCHED_E_ACCOUNT_DBASE_CORRUPT = unchecked((int)0x80041311);
 		/// <summary>
-		///     Task Scheduler security services are available only on Windows NT.
+		/// Task Scheduler security services are not available.
 		/// </summary>
-		public const int SCHED_E_NO_SECURITY_SERVICES = (int)(0x80041312 - 0x100000000);
-
+		public const int SCHED_E_NO_SECURITY_SERVICES = unchecked((int)0x80041312);
 		/// <summary>
-		///     The task object version is either unsupported or invalid.
+		/// The task object version is either unsupported or invalid.
 		/// </summary>
-		public const int SCHED_E_UNKNOWN_OBJECT_VERSION = (int)(0x80041313 - 0x100000000);
-
+		public const int SCHED_E_UNKNOWN_OBJECT_VERSION = unchecked((int)0x80041313);
 		/// <summary>
-		///     The task has been configured with an unsupported combination of account settings and run time options.
+		/// The task has been configured with an unsupported combination of account settings and run time options.
 		/// </summary>
-		public const int SCHED_E_UNSUPPORTED_ACCOUNT_OPTION = (int)(0x80041314 - 0x100000000);
-
+		public const int SCHED_E_UNSUPPORTED_ACCOUNT_OPTION = unchecked((int)0x80041314);
 		/// <summary>
-		///     The Task Scheduler Service is not running.
+		/// The Task Scheduler Service is not running.
 		/// </summary>
-		public const int SCHED_E_SERVICE_NOT_RUNNING = (int)(0x80041315 - 0x100000000);
-
+		public const int SCHED_E_SERVICE_NOT_RUNNING = unchecked((int)0x80041315);
 		/// <summary>
-		///     Attempt to create a class object failed
+		/// The task XML contains an unexpected node.
 		/// </summary>
-		public const int CO_E_CLASS_CREATE_FAILED = (int)(0x80080001 - 0x100000000);
-
+		public const int SCHED_E_UNEXPECTEDNODE = unchecked((int)0x80041316);
 		/// <summary>
-		///     OLE service could not bind object
+		/// The task XML contains an element or attribute from an unexpected namespace.
 		/// </summary>
-		public const int CO_E_SCM_ERROR = (int)(0x80080002 - 0x100000000);
-
+		public const int SCHED_E_NAMESPACE = unchecked((int)0x80041317);
 		/// <summary>
-		///     RPC communication failed with OLE service
+		/// The task XML contains a value which is incorrectly formatted or out of range.
 		/// </summary>
-		public const int CO_E_SCM_RPC_FAILURE = (int)(0x80080003 - 0x100000000);
-
+		public const int SCHED_E_INVALIDVALUE = unchecked((int)0x80041318);
 		/// <summary>
-		///     Bad path to object
+		/// The task XML is missing a required element or attribute.
 		/// </summary>
-		public const int CO_E_BAD_PATH = (int)(0x80080004 - 0x100000000);
-
+		public const int SCHED_E_MISSINGNODE = unchecked((int)0x80041319);
 		/// <summary>
-		///     Server execution failed
+		/// The task XML is malformed.
 		/// </summary>
-		public const int CO_E_SERVER_EXEC_FAILURE = (int)(0x80080005 - 0x100000000);
-
+		public const int SCHED_E_MALFORMEDXML = unchecked((int)0x8004131A);
 		/// <summary>
-		///     OLE service could not communicate with the object server
+		/// The task is registered, but not all specified triggers will start the task.
 		/// </summary>
-		public const int CO_E_OBJSRV_RPC_FAILURE = (int)(0x80080006 - 0x100000000);
-
+		public const int SCHED_S_SOME_TRIGGERS_FAILED = 0x0004131B;
 		/// <summary>
-		///     Moniker path could not be normalized
+		/// The task is registered, but may fail to start. Batch logon privilege needs to be enabled for the task principal.
 		/// </summary>
-		public const int MK_E_NO_NORMALIZED = (int)(0x80080007 - 0x100000000);
-
+		public const int SCHED_S_BATCH_LOGON_PROBLEM = 0x0004131C;
 		/// <summary>
-		///     Object server is stopping when OLE service contacts it
+		/// The task XML contains too many nodes of the same type.
 		/// </summary>
-		public const int CO_E_SERVER_STOPPING = (int)(0x80080008 - 0x100000000);
-
+		public const int SCHED_E_TOO_MANY_NODES = unchecked((int)0x8004131D);
 		/// <summary>
-		///     An invalid root block pointer was specified
+		/// The task cannot be started after the trigger's end boundary.
 		/// </summary>
-		public const int MEM_E_INVALID_ROOT = (int)(0x80080009 - 0x100000000);
-
+		public const int SCHED_E_PAST_END_BOUNDARY = unchecked((int)0x8004131E);
 		/// <summary>
-		///     An allocation chain contained an invalid link pointer
+		/// An instance of this task is already running.
 		/// </summary>
-		public const int MEM_E_INVALID_LINK = (int)(0x80080010 - 0x100000000);
-
+		public const int SCHED_E_ALREADY_RUNNING = unchecked((int)0x8004131F);
 		/// <summary>
-		///     The requested allocation size was too large
+		/// The task will not run because the user is not logged on.
 		/// </summary>
-		public const int MEM_E_INVALID_SIZE = (int)(0x80080011 - 0x100000000);
-
+		public const int SCHED_E_USER_NOT_LOGGED_ON = unchecked((int)0x80041320);
 		/// <summary>
-		///     Not all the requested interfaces were available
+		/// The task image is corrupt or has been tampered with.
+		/// </summary>
+		public const int SCHED_E_INVALID_TASK_HASH = unchecked((int)0x80041321);
+		/// <summary>
+		/// The Task Scheduler service is not available.
+		/// </summary>
+		public const int SCHED_E_SERVICE_NOT_AVAILABLE = unchecked((int)0x80041322);
+		/// <summary>
+		/// The Task Scheduler service is too busy to handle your request. Please try again later.
+		/// </summary>
+		public const int SCHED_E_SERVICE_TOO_BUSY = unchecked((int)0x80041323);
+		/// <summary>
+		/// The Task Scheduler service attempted to run the task, but the task did not run due to one of the constraints in the task definition.
+		/// </summary>
+		public const int SCHED_E_TASK_ATTEMPTED = unchecked((int)0x80041324);
+		/// <summary>
+		/// The Task Scheduler service has asked the task to run.
+		/// </summary>
+		public const int SCHED_S_TASK_QUEUED = 0x00041325;
+		/// <summary>
+		/// The task is disabled.
+		/// </summary>
+		public const int SCHED_E_TASK_DISABLED = unchecked((int)0x80041326);
+		/// <summary>
+		/// The task has properties that are not compatible with previous versions of Windows.
+		/// </summary>
+		public const int SCHED_E_TASK_NOT_V1_COMPAT = unchecked((int)0x80041327);
+		/// <summary>
+		/// The task settings do not allow the task to start on demand.
+		/// </summary>
+		public const int SCHED_E_START_ON_DEMAND = unchecked((int)0x80041328);
+		/// <summary>
+		/// The combination of properties that task is using is not compatible with the scheduling engine.
+		/// </summary>
+		public const int SCHED_E_TASK_NOT_UBPM_COMPAT = unchecked((int)0x80041329);
+		/// <summary>
+		/// Attempt to create a class object failed
+		/// </summary>
+		public const int CO_E_CLASS_CREATE_FAILED = unchecked((int)0x80080001);
+		/// <summary>
+		/// OLE service could not bind object
+		/// </summary>
+		public const int CO_E_SCM_ERROR = unchecked((int)0x80080002);
+		/// <summary>
+		/// RPC communication failed with OLE service
+		/// </summary>
+		public const int CO_E_SCM_RPC_FAILURE = unchecked((int)0x80080003);
+		/// <summary>
+		/// Bad path to object
+		/// </summary>
+		public const int CO_E_BAD_PATH = unchecked((int)0x80080004);
+		/// <summary>
+		/// Server execution failed
+		/// </summary>
+		public const int CO_E_SERVER_EXEC_FAILURE = unchecked((int)0x80080005);
+		/// <summary>
+		/// OLE service could not communicate with the object server
+		/// </summary>
+		public const int CO_E_OBJSRV_RPC_FAILURE = unchecked((int)0x80080006);
+		/// <summary>
+		/// Moniker path could not be normalized
+		/// </summary>
+		public const int MK_E_NO_NORMALIZED = unchecked((int)0x80080007);
+		/// <summary>
+		/// Object server is stopping when OLE service contacts it
+		/// </summary>
+		public const int CO_E_SERVER_STOPPING = unchecked((int)0x80080008);
+		/// <summary>
+		/// An invalid root block pointer was specified
+		/// </summary>
+		public const int MEM_E_INVALID_ROOT = unchecked((int)0x80080009);
+		/// <summary>
+		/// An allocation chain contained an invalid link pointer
+		/// </summary>
+		public const int MEM_E_INVALID_LINK = unchecked((int)0x80080010);
+		/// <summary>
+		/// The requested allocation size was too large
+		/// </summary>
+		public const int MEM_E_INVALID_SIZE = unchecked((int)0x80080011);
+		/// <summary>
+		/// Not all the requested interfaces were available
 		/// </summary>
 		public const int CO_S_NOTALLINTERFACES = 0x00080012;
-
 		/// <summary>
-		///     The specified machine name was not found in the cache.
+		/// The specified machine name was not found in the cache.
 		/// </summary>
 		public const int CO_S_MACHINENAMENOTFOUND = 0x00080013;
-
 		/// <summary>
-		///     Unknown interface.
+		/// The activation requires a display name to be present under the CLSID key.
 		/// </summary>
-		public const int DISP_E_UNKNOWNINTERFACE = (int)(0x80020001 - 0x100000000);
-
+		public const int CO_E_MISSING_DISPLAYNAME = unchecked((int)0x80080015);
 		/// <summary>
-		///     Member not found.
+		/// The activation requires that the RunAs value for the application is Activate As Activator.
 		/// </summary>
-		public const int DISP_E_MEMBERNOTFOUND = (int)(0x80020003 - 0x100000000);
-
+		public const int CO_E_RUNAS_VALUE_MUST_BE_AAA = unchecked((int)0x80080016);
 		/// <summary>
-		///     Parameter not found.
+		/// The class is not configured to support Elevated activation.
 		/// </summary>
-		public const int DISP_E_PARAMNOTFOUND = (int)(0x80020004 - 0x100000000);
-
+		public const int CO_E_ELEVATION_DISABLED = unchecked((int)0x80080017);
 		/// <summary>
-		///     Type mismatch.
+		/// Unknown interface.
 		/// </summary>
-		public const int DISP_E_TYPEMISMATCH = (int)(0x80020005 - 0x100000000);
-
+		public const int DISP_E_UNKNOWNINTERFACE = unchecked((int)0x80020001);
 		/// <summary>
-		///     Unknown name.
+		/// Member not found.
 		/// </summary>
-		public const int DISP_E_UNKNOWNNAME = (int)(0x80020006 - 0x100000000);
-
+		public const int DISP_E_MEMBERNOTFOUND = unchecked((int)0x80020003);
 		/// <summary>
-		///     No named arguments.
+		/// Parameter not found.
 		/// </summary>
-		public const int DISP_E_NONAMEDARGS = (int)(0x80020007 - 0x100000000);
-
+		public const int DISP_E_PARAMNOTFOUND = unchecked((int)0x80020004);
 		/// <summary>
-		///     Bad variable type.
+		/// Type mismatch.
 		/// </summary>
-		public const int DISP_E_BADVARTYPE = (int)(0x80020008 - 0x100000000);
-
+		public const int DISP_E_TYPEMISMATCH = unchecked((int)0x80020005);
 		/// <summary>
-		///     Exception occurred.
+		/// Unknown name.
 		/// </summary>
-		public const int DISP_E_EXCEPTION = (int)(0x80020009 - 0x100000000);
-
+		public const int DISP_E_UNKNOWNNAME = unchecked((int)0x80020006);
 		/// <summary>
-		///     Out of present range.
+		/// No named arguments.
 		/// </summary>
-		public const int DISP_E_OVERFLOW = (int)(0x8002000A - 0x100000000);
-
+		public const int DISP_E_NONAMEDARGS = unchecked((int)0x80020007);
 		/// <summary>
-		///     Invalid index.
+		/// Bad variable type.
 		/// </summary>
-		public const int DISP_E_BADINDEX = (int)(0x8002000B - 0x100000000);
-
+		public const int DISP_E_BADVARTYPE = unchecked((int)0x80020008);
 		/// <summary>
-		///     Unknown language.
+		/// Exception occurred.
 		/// </summary>
-		public const int DISP_E_UNKNOWNLCID = (int)(0x8002000C - 0x100000000);
-
+		public const int DISP_E_EXCEPTION = unchecked((int)0x80020009);
 		/// <summary>
-		///     Memory is locked.
+		/// Out of present range.
 		/// </summary>
-		public const int DISP_E_ARRAYISLOCKED = (int)(0x8002000D - 0x100000000);
-
+		public const int DISP_E_OVERFLOW = unchecked((int)0x8002000A);
 		/// <summary>
-		///     Invalid number of parameters.
+		/// Invalid index.
 		/// </summary>
-		public const int DISP_E_BADPARAMCOUNT = (int)(0x8002000E - 0x100000000);
-
+		public const int DISP_E_BADINDEX = unchecked((int)0x8002000B);
 		/// <summary>
-		///     Parameter not optional.
+		/// Unknown language.
 		/// </summary>
-		public const int DISP_E_PARAMNOTOPTIONAL = (int)(0x8002000F - 0x100000000);
-
+		public const int DISP_E_UNKNOWNLCID = unchecked((int)0x8002000C);
 		/// <summary>
-		///     Invalid callee.
+		/// Memory is locked.
 		/// </summary>
-		public const int DISP_E_BADCALLEE = (int)(0x80020010 - 0x100000000);
-
+		public const int DISP_E_ARRAYISLOCKED = unchecked((int)0x8002000D);
 		/// <summary>
-		///     Does not support a collection.
+		/// Invalid number of parameters.
 		/// </summary>
-		public const int DISP_E_NOTACOLLECTION = (int)(0x80020011 - 0x100000000);
-
+		public const int DISP_E_BADPARAMCOUNT = unchecked((int)0x8002000E);
 		/// <summary>
-		///     Division by zero.
+		/// Parameter not optional.
 		/// </summary>
-		public const int DISP_E_DIVBYZERO = (int)(0x80020012 - 0x100000000);
-
+		public const int DISP_E_PARAMNOTOPTIONAL = unchecked((int)0x8002000F);
 		/// <summary>
-		///     Buffer too small
+		/// Invalid callee.
 		/// </summary>
-		public const int DISP_E_BUFFERTOOSMALL = (int)(0x80020013 - 0x100000000);
-
+		public const int DISP_E_BADCALLEE = unchecked((int)0x80020010);
 		/// <summary>
-		///     Buffer too small.
+		/// Does not support a collection.
 		/// </summary>
-		public const int TYPE_E_BUFFERTOOSMALL = (int)(0x80028016 - 0x100000000);
-
+		public const int DISP_E_NOTACOLLECTION = unchecked((int)0x80020011);
 		/// <summary>
-		///     Field name not defined in the record.
+		/// Division by zero.
 		/// </summary>
-		public const int TYPE_E_FIELDNOTFOUND = (int)(0x80028017 - 0x100000000);
-
+		public const int DISP_E_DIVBYZERO = unchecked((int)0x80020012);
 		/// <summary>
-		///     Old format or invalid type library.
+		/// Buffer too small
 		/// </summary>
-		public const int TYPE_E_INVDATAREAD = (int)(0x80028018 - 0x100000000);
-
+		public const int DISP_E_BUFFERTOOSMALL = unchecked((int)0x80020013);
 		/// <summary>
-		///     Old format or invalid type library.
+		/// Buffer too small.
 		/// </summary>
-		public const int TYPE_E_UNSUPFORMAT = (int)(0x80028019 - 0x100000000);
-
+		public const int TYPE_E_BUFFERTOOSMALL = unchecked((int)0x80028016);
 		/// <summary>
-		///     Error accessing the OLE registry.
+		/// Field name not defined in the record.
 		/// </summary>
-		public const int TYPE_E_REGISTRYACCESS = (int)(0x8002801C - 0x100000000);
-
+		public const int TYPE_E_FIELDNOTFOUND = unchecked((int)0x80028017);
 		/// <summary>
-		///     Library not registered.
+		/// Old format or invalid type library.
 		/// </summary>
-		public const int TYPE_E_LIBNOTREGISTERED = (int)(0x8002801D - 0x100000000);
-
+		public const int TYPE_E_INVDATAREAD = unchecked((int)0x80028018);
 		/// <summary>
-		///     Bound to unknown type.
+		/// Old format or invalid type library.
 		/// </summary>
-		public const int TYPE_E_UNDEFINEDTYPE = (int)(0x80028027 - 0x100000000);
-
+		public const int TYPE_E_UNSUPFORMAT = unchecked((int)0x80028019);
 		/// <summary>
-		///     Qualified name disallowed.
+		/// Error accessing the OLE registry.
 		/// </summary>
-		public const int TYPE_E_QUALIFIEDNAMEDISALLOWED = (int)(0x80028028 - 0x100000000);
-
+		public const int TYPE_E_REGISTRYACCESS = unchecked((int)0x8002801C);
 		/// <summary>
-		///     Invalid forward reference, or reference to uncompiled type.
+		/// Library not registered.
 		/// </summary>
-		public const int TYPE_E_INVALIDSTATE = (int)(0x80028029 - 0x100000000);
-
+		public const int TYPE_E_LIBNOTREGISTERED = unchecked((int)0x8002801D);
 		/// <summary>
-		///     Type mismatch.
+		/// Bound to unknown type.
 		/// </summary>
-		public const int TYPE_E_WRONGTYPEKIND = (int)(0x8002802A - 0x100000000);
-
+		public const int TYPE_E_UNDEFINEDTYPE = unchecked((int)0x80028027);
 		/// <summary>
-		///     Element not found.
+		/// Qualified name disallowed.
 		/// </summary>
-		public const int TYPE_E_ELEMENTNOTFOUND = (int)(0x8002802B - 0x100000000);
-
+		public const int TYPE_E_QUALIFIEDNAMEDISALLOWED = unchecked((int)0x80028028);
 		/// <summary>
-		///     Ambiguous name.
+		/// Invalid forward reference, or reference to uncompiled type.
 		/// </summary>
-		public const int TYPE_E_AMBIGUOUSNAME = (int)(0x8002802C - 0x100000000);
-
+		public const int TYPE_E_INVALIDSTATE = unchecked((int)0x80028029);
 		/// <summary>
-		///     Name already exists in the library.
+		/// Type mismatch.
 		/// </summary>
-		public const int TYPE_E_NAMECONFLICT = (int)(0x8002802D - 0x100000000);
-
+		public const int TYPE_E_WRONGTYPEKIND = unchecked((int)0x8002802A);
 		/// <summary>
-		///     Unknown LCID.
+		/// Element not found.
 		/// </summary>
-		public const int TYPE_E_UNKNOWNLCID = (int)(0x8002802E - 0x100000000);
-
+		public const int TYPE_E_ELEMENTNOTFOUND = unchecked((int)0x8002802B);
 		/// <summary>
-		///     Function not defined in specified DLL.
+		/// Ambiguous name.
 		/// </summary>
-		public const int TYPE_E_DLLFUNCTIONNOTFOUND = (int)(0x8002802F - 0x100000000);
-
+		public const int TYPE_E_AMBIGUOUSNAME = unchecked((int)0x8002802C);
 		/// <summary>
-		///     Wrong module kind for the operation.
+		/// Name already exists in the library.
 		/// </summary>
-		public const int TYPE_E_BADMODULEKIND = (int)(0x800288BD - 0x100000000);
-
+		public const int TYPE_E_NAMECONFLICT = unchecked((int)0x8002802D);
 		/// <summary>
-		///     Size may not exceed 64K.
+		/// Unknown LCID.
 		/// </summary>
-		public const int TYPE_E_SIZETOOBIG = (int)(0x800288C5 - 0x100000000);
-
+		public const int TYPE_E_UNKNOWNLCID = unchecked((int)0x8002802E);
 		/// <summary>
-		///     Duplicate ID in inheritance hierarchy.
+		/// Function not defined in specified DLL.
 		/// </summary>
-		public const int TYPE_E_DUPLICATEID = (int)(0x800288C6 - 0x100000000);
-
+		public const int TYPE_E_DLLFUNCTIONNOTFOUND = unchecked((int)0x8002802F);
 		/// <summary>
-		///     Incorrect inheritance depth in standard OLE hmember.
+		/// Wrong module kind for the operation.
 		/// </summary>
-		public const int TYPE_E_INVALIDID = (int)(0x800288CF - 0x100000000);
-
+		public const int TYPE_E_BADMODULEKIND = unchecked((int)0x800288BD);
 		/// <summary>
-		///     Type mismatch.
+		/// Size may not exceed 64K.
 		/// </summary>
-		public const int TYPE_E_TYPEMISMATCH = (int)(0x80028CA0 - 0x100000000);
-
+		public const int TYPE_E_SIZETOOBIG = unchecked((int)0x800288C5);
 		/// <summary>
-		///     Invalid number of arguments.
+		/// Duplicate ID in inheritance hierarchy.
 		/// </summary>
-		public const int TYPE_E_OUTOFBOUNDS = (int)(0x80028CA1 - 0x100000000);
-
+		public const int TYPE_E_DUPLICATEID = unchecked((int)0x800288C6);
 		/// <summary>
-		///     I/O Error.
+		/// Incorrect inheritance depth in standard OLE hmember.
 		/// </summary>
-		public const int TYPE_E_IOERROR = (int)(0x80028CA2 - 0x100000000);
-
+		public const int TYPE_E_INVALIDID = unchecked((int)0x800288CF);
 		/// <summary>
-		///     Error creating unique tmp file.
+		/// Type mismatch.
 		/// </summary>
-		public const int TYPE_E_CANTCREATETMPFILE = (int)(0x80028CA3 - 0x100000000);
-
+		public const int TYPE_E_TYPEMISMATCH = unchecked((int)0x80028CA0);
 		/// <summary>
-		///     Error loading type library/DLL.
+		/// Invalid number of arguments.
 		/// </summary>
-		public const int TYPE_E_CANTLOADLIBRARY = (int)(0x80029C4A - 0x100000000);
-
+		public const int TYPE_E_OUTOFBOUNDS = unchecked((int)0x80028CA1);
 		/// <summary>
-		///     Inconsistent property functions.
+		/// I/O Error.
 		/// </summary>
-		public const int TYPE_E_INCONSISTENTPROPFUNCS = (int)(0x80029C83 - 0x100000000);
-
+		public const int TYPE_E_IOERROR = unchecked((int)0x80028CA2);
 		/// <summary>
-		///     Circular dependency between types/modules.
+		/// Error creating unique tmp file.
 		/// </summary>
-		public const int TYPE_E_CIRCULARTYPE = (int)(0x80029C84 - 0x100000000);
-
+		public const int TYPE_E_CANTCREATETMPFILE = unchecked((int)0x80028CA3);
 		/// <summary>
-		///     Unable to perform requested operation.
+		/// Error loading type library/DLL.
 		/// </summary>
-		public const int STG_E_INVALIDFUNCTION = (int)(0x80030001 - 0x100000000);
-
+		public const int TYPE_E_CANTLOADLIBRARY = unchecked((int)0x80029C4A);
 		/// <summary>
-		///     %1 could not be found.
+		/// Inconsistent property functions.
 		/// </summary>
-		public const int STG_E_FILENOTFOUND = (int)(0x80030002 - 0x100000000);
-
+		public const int TYPE_E_INCONSISTENTPROPFUNCS = unchecked((int)0x80029C83);
 		/// <summary>
-		///     The path %1 could not be found.
+		/// Circular dependency between types/modules.
 		/// </summary>
-		public const int STG_E_PATHNOTFOUND = (int)(0x80030003 - 0x100000000);
+		public const int TYPE_E_CIRCULARTYPE = unchecked((int)0x80029C84);
+		#endregion
 
+		#region STG, RPC
 		/// <summary>
-		///     There are insufficient resources to open another file.
+		/// Unable to perform requested operation.
 		/// </summary>
-		public const int STG_E_TOOMANYOPENFILES = (int)(0x80030004 - 0x100000000);
-
+		public const int STG_E_INVALIDFUNCTION = unchecked((int)0x80030001);
 		/// <summary>
-		///     Access Denied.
+		/// could not be found.
 		/// </summary>
-		public const int STG_E_ACCESSDENIED = (int)(0x80030005 - 0x100000000);
-
+		public const int STG_E_FILENOTFOUND = unchecked((int)0x80030002);
 		/// <summary>
-		///     Attempted an operation on an invalid object.
+		/// The path %1 could not be found.
 		/// </summary>
-		public const int STG_E_INVALIDHANDLE = (int)(0x80030006 - 0x100000000);
-
+		public const int STG_E_PATHNOTFOUND = unchecked((int)0x80030003);
 		/// <summary>
-		///     There is insufficient memory available to complete operation.
+		/// There are insufficient resources to open another file.
 		/// </summary>
-		public const int STG_E_INSUFFICIENTMEMORY = (int)(0x80030008 - 0x100000000);
-
+		public const int STG_E_TOOMANYOPENFILES = unchecked((int)0x80030004);
 		/// <summary>
-		///     Invalid pointer error.
+		/// Access Denied.
 		/// </summary>
-		public const int STG_E_INVALIDPOINTER = (int)(0x80030009 - 0x100000000);
-
+		public const int STG_E_ACCESSDENIED = unchecked((int)0x80030005);
 		/// <summary>
-		///     There are no more entries to return.
+		/// Attempted an operation on an invalid object.
 		/// </summary>
-		public const int STG_E_NOMOREFILES = (int)(0x80030012 - 0x100000000);
-
+		public const int STG_E_INVALIDHANDLE = unchecked((int)0x80030006);
 		/// <summary>
-		///     Disk is write-protected.
+		/// There is insufficient memory available to complete operation.
 		/// </summary>
-		public const int STG_E_DISKISWRITEPROTECTED = (int)(0x80030013 - 0x100000000);
-
+		public const int STG_E_INSUFFICIENTMEMORY = unchecked((int)0x80030008);
 		/// <summary>
-		///     An error occurred during a seek operation.
+		/// Invalid pointer error.
 		/// </summary>
-		public const int STG_E_SEEKERROR = (int)(0x80030019 - 0x100000000);
-
+		public const int STG_E_INVALIDPOINTER = unchecked((int)0x80030009);
 		/// <summary>
-		///     A disk error occurred during a write operation.
+		/// There are no more entries to return.
 		/// </summary>
-		public const int STG_E_WRITEFAULT = (int)(0x8003001D - 0x100000000);
-
+		public const int STG_E_NOMOREFILES = unchecked((int)0x80030012);
 		/// <summary>
-		///     A disk error occurred during a read operation.
+		/// Disk is write-protected.
 		/// </summary>
-		public const int STG_E_READFAULT = (int)(0x8003001E - 0x100000000);
-
+		public const int STG_E_DISKISWRITEPROTECTED = unchecked((int)0x80030013);
 		/// <summary>
-		///     A share violation has occurred.
+		/// An error occurred during a seek operation.
 		/// </summary>
-		public const int STG_E_SHAREVIOLATION = (int)(0x80030020 - 0x100000000);
-
+		public const int STG_E_SEEKERROR = unchecked((int)0x80030019);
 		/// <summary>
-		///     A lock violation has occurred.
+		/// A disk error occurred during a write operation.
 		/// </summary>
-		public const int STG_E_LOCKVIOLATION = (int)(0x80030021 - 0x100000000);
-
+		public const int STG_E_WRITEFAULT = unchecked((int)0x8003001D);
 		/// <summary>
-		///     %1 already exists.
+		/// A disk error occurred during a read operation.
 		/// </summary>
-		public const int STG_E_FILEALREADYEXISTS = (int)(0x80030050 - 0x100000000);
-
+		public const int STG_E_READFAULT = unchecked((int)0x8003001E);
 		/// <summary>
-		///     Invalid parameter error.
+		/// A share violation has occurred.
 		/// </summary>
-		public const int STG_E_INVALIDPARAMETER = (int)(0x80030057 - 0x100000000);
-
+		public const int STG_E_SHAREVIOLATION = unchecked((int)0x80030020);
 		/// <summary>
-		///     There is insufficient disk space to complete operation.
+		/// A lock violation has occurred.
 		/// </summary>
-		public const int STG_E_MEDIUMFULL = (int)(0x80030070 - 0x100000000);
-
+		public const int STG_E_LOCKVIOLATION = unchecked((int)0x80030021);
 		/// <summary>
-		///     Illegal write of non-simple property to simple property set.
+		/// already exists.
 		/// </summary>
-		public const int STG_E_PROPSETMISMATCHED = (int)(0x800300F0 - 0x100000000);
-
+		public const int STG_E_FILEALREADYEXISTS = unchecked((int)0x80030050);
 		/// <summary>
-		///     An API call exited abnormally.
+		/// Invalid parameter error.
 		/// </summary>
-		public const int STG_E_ABNORMALAPIEXIT = (int)(0x800300FA - 0x100000000);
-
+		public const int STG_E_INVALIDPARAMETER = unchecked((int)0x80030057);
 		/// <summary>
-		///     The file %1 is not a valid compound file.
+		/// There is insufficient disk space to complete operation.
 		/// </summary>
-		public const int STG_E_INVALIDHEADER = (int)(0x800300FB - 0x100000000);
-
+		public const int STG_E_MEDIUMFULL = unchecked((int)0x80030070);
 		/// <summary>
-		///     The name %1 is not valid.
+		/// Illegal write of non-simple property to simple property set.
 		/// </summary>
-		public const int STG_E_INVALIDNAME = (int)(0x800300FC - 0x100000000);
-
+		public const int STG_E_PROPSETMISMATCHED = unchecked((int)0x800300F0);
 		/// <summary>
-		///     An unexpected error occurred.
+		/// An API call exited abnormally.
 		/// </summary>
-		public const int STG_E_UNKNOWN = (int)(0x800300FD - 0x100000000);
-
+		public const int STG_E_ABNORMALAPIEXIT = unchecked((int)0x800300FA);
 		/// <summary>
-		///     That function is not implemented.
+		/// The file %1 is not a valid compound file.
 		/// </summary>
-		public const int STG_E_UNIMPLEMENTEDFUNCTION = (int)(0x800300FE - 0x100000000);
-
+		public const int STG_E_INVALIDHEADER = unchecked((int)0x800300FB);
 		/// <summary>
-		///     Invalid flag error.
+		/// The name %1 is not valid.
 		/// </summary>
-		public const int STG_E_INVALIDFLAG = (int)(0x800300FF - 0x100000000);
-
+		public const int STG_E_INVALIDNAME = unchecked((int)0x800300FC);
 		/// <summary>
-		///     Attempted to use an object that is busy.
+		/// An unexpected error occurred.
 		/// </summary>
-		public const int STG_E_INUSE = (int)(0x80030100 - 0x100000000);
-
+		public const int STG_E_UNKNOWN = unchecked((int)0x800300FD);
 		/// <summary>
-		///     The storage has been changed since the last commit.
+		/// That function is not implemented.
 		/// </summary>
-		public const int STG_E_NOTCURRENT = (int)(0x80030101 - 0x100000000);
-
+		public const int STG_E_UNIMPLEMENTEDFUNCTION = unchecked((int)0x800300FE);
 		/// <summary>
-		///     Attempted to use an object that has ceased to exist.
+		/// Invalid flag error.
 		/// </summary>
-		public const int STG_E_REVERTED = (int)(0x80030102 - 0x100000000);
-
+		public const int STG_E_INVALIDFLAG = unchecked((int)0x800300FF);
 		/// <summary>
-		///     Can't save.
+		/// Attempted to use an object that is busy.
 		/// </summary>
-		public const int STG_E_CANTSAVE = (int)(0x80030103 - 0x100000000);
-
+		public const int STG_E_INUSE = unchecked((int)0x80030100);
 		/// <summary>
-		///     The compound file %1 was produced with an incompatible version of storage.
+		/// The storage has been changed since the last commit.
 		/// </summary>
-		public const int STG_E_OLDFORMAT = (int)(0x80030104 - 0x100000000);
-
+		public const int STG_E_NOTCURRENT = unchecked((int)0x80030101);
 		/// <summary>
-		///     The compound file %1 was produced with a newer version of storage.
+		/// Attempted to use an object that has ceased to exist.
 		/// </summary>
-		public const int STG_E_OLDDLL = (int)(0x80030105 - 0x100000000);
-
+		public const int STG_E_REVERTED = unchecked((int)0x80030102);
 		/// <summary>
-		///     Share.exe or equivalent is required for operation.
+		/// Can't save.
 		/// </summary>
-		public const int STG_E_SHAREREQUIRED = (int)(0x80030106 - 0x100000000);
-
+		public const int STG_E_CANTSAVE = unchecked((int)0x80030103);
 		/// <summary>
-		///     Illegal operation called on non-file based storage.
+		/// The compound file %1 was produced with an incompatible version of storage.
 		/// </summary>
-		public const int STG_E_NOTFILEBASEDSTORAGE = (int)(0x80030107 - 0x100000000);
-
+		public const int STG_E_OLDFORMAT = unchecked((int)0x80030104);
 		/// <summary>
-		///     Illegal operation called on object with extant marshallings.
+		/// The compound file %1 was produced with a newer version of storage.
 		/// </summary>
-		public const int STG_E_EXTANTMARSHALLINGS = (int)(0x80030108 - 0x100000000);
-
+		public const int STG_E_OLDDLL = unchecked((int)0x80030105);
 		/// <summary>
-		///     The docfile has been corrupted.
+		/// Share.exe or equivalent is required for operation.
 		/// </summary>
-		public const int STG_E_DOCFILECORRUPT = (int)(0x80030109 - 0x100000000);
-
+		public const int STG_E_SHAREREQUIRED = unchecked((int)0x80030106);
 		/// <summary>
-		///     OLE32.DLL has been loaded at the wrong address.
+		/// Illegal operation called on non-file based storage.
 		/// </summary>
-		public const int STG_E_BADBASEADDRESS = (int)(0x80030110 - 0x100000000);
-
+		public const int STG_E_NOTFILEBASEDSTORAGE = unchecked((int)0x80030107);
 		/// <summary>
-		///     The compound file is too large for the current implementation
+		/// Illegal operation called on object with extant marshallings.
 		/// </summary>
-		public const int STG_E_DOCFILETOOLARGE = (int)(0x80030111 - 0x100000000);
-
+		public const int STG_E_EXTANTMARSHALLINGS = unchecked((int)0x80030108);
 		/// <summary>
-		///     The compound file was not created with the STGM_SIMPLE flag
+		/// The docfile has been corrupted.
 		/// </summary>
-		public const int STG_E_NOTSIMPLEFORMAT = (int)(0x80030112 - 0x100000000);
-
+		public const int STG_E_DOCFILECORRUPT = unchecked((int)0x80030109);
 		/// <summary>
-		///     The file download was aborted abnormally.  The file is incomplete.
+		/// OLE32.DLL has been loaded at the wrong address.
 		/// </summary>
-		public const int STG_E_INCOMPLETE = (int)(0x80030201 - 0x100000000);
-
+		public const int STG_E_BADBASEADDRESS = unchecked((int)0x80030110);
 		/// <summary>
-		///     The file download has been terminated.
+		/// The compound file is too large for the current implementation
 		/// </summary>
-		public const int STG_E_TERMINATED = (int)(0x80030202 - 0x100000000);
-
+		public const int STG_E_DOCFILETOOLARGE = unchecked((int)0x80030111);
+		/// <summary>
+		/// The compound file was not created with the STGM_SIMPLE flag
+		/// </summary>
+		public const int STG_E_NOTSIMPLEFORMAT = unchecked((int)0x80030112);
+		/// <summary>
+		/// The file download was aborted abnormally. The file is incomplete.
+		/// </summary>
+		public const int STG_E_INCOMPLETE = unchecked((int)0x80030201);
+		/// <summary>
+		/// The file download has been terminated.
+		/// </summary>
+		public const int STG_E_TERMINATED = unchecked((int)0x80030202);
 		/// <summary>
-		///     The underlying file was converted to compound file format.
+		/// The underlying file was converted to compound file format.
 		/// </summary>
 		public const int STG_S_CONVERTED = 0x00030200;
-
 		/// <summary>
-		///     The storage operation should block until more data is available.
+		/// The storage operation should block until more data is available.
 		/// </summary>
 		public const int STG_S_BLOCK = 0x00030201;
-
 		/// <summary>
-		///     The storage operation should retry immediately.
+		/// The storage operation should retry immediately.
 		/// </summary>
 		public const int STG_S_RETRYNOW = 0x00030202;
-
 		/// <summary>
-		///     The notified event sink will not influence the storage operation.
+		/// The notified event sink will not influence the storage operation.
 		/// </summary>
 		public const int STG_S_MONITORING = 0x00030203;
-
 		/// <summary>
-		///     Multiple opens prevent consolidated. (commit succeeded).
+		/// Multiple opens prevent consolidated. (commit succeeded).
 		/// </summary>
 		public const int STG_S_MULTIPLEOPENS = 0x00030204;
-
 		/// <summary>
-		///     Consolidation of the storage file failed. (commit succeeded).
+		/// Consolidation of the storage file failed. (commit succeeded).
 		/// </summary>
 		public const int STG_S_CONSOLIDATIONFAILED = 0x00030205;
-
 		/// <summary>
-		///     Consolidation of the storage file is inappropriate. (commit succeeded).
+		/// Consolidation of the storage file is inappropriate. (commit succeeded).
 		/// </summary>
 		public const int STG_S_CANNOTCONSOLIDATE = 0x00030206;
-
 		/// <summary>
-		///     Generic Copy Protection Error.
+		/// Generic Copy Protection Error.
 		/// </summary>
-		public const int STG_E_STATUS_COPY_PROTECTION_FAILURE = (int)(0x80030305 - 0x100000000);
-
+		public const int STG_E_STATUS_COPY_PROTECTION_FAILURE = unchecked((int)0x80030305);
 		/// <summary>
-		///     Copy Protection Error - DVD CSS Authentication failed.
+		/// Copy Protection Error - DVD CSS Authentication failed.
 		/// </summary>
-		public const int STG_E_CSS_AUTHENTICATION_FAILURE = (int)(0x80030306 - 0x100000000);
-
+		public const int STG_E_CSS_AUTHENTICATION_FAILURE = unchecked((int)0x80030306);
 		/// <summary>
-		///     Copy Protection Error - The given sector does not have a valid CSS key.
+		/// Copy Protection Error - The given sector does not have a valid CSS key.
 		/// </summary>
-		public const int STG_E_CSS_KEY_NOT_PRESENT = (int)(0x80030307 - 0x100000000);
-
+		public const int STG_E_CSS_KEY_NOT_PRESENT = unchecked((int)0x80030307);
 		/// <summary>
-		///     Copy Protection Error - DVD session key not established.
+		/// Copy Protection Error - DVD session key not established.
 		/// </summary>
-		public const int STG_E_CSS_KEY_NOT_ESTABLISHED = (int)(0x80030308 - 0x100000000);
-
+		public const int STG_E_CSS_KEY_NOT_ESTABLISHED = unchecked((int)0x80030308);
 		/// <summary>
-		///     Copy Protection Error - The read failed because the sector is encrypted.
+		/// Copy Protection Error - The read failed because the sector is encrypted.
 		/// </summary>
-		public const int STG_E_CSS_SCRAMBLED_SECTOR = (int)(0x80030309 - 0x100000000);
-
+		public const int STG_E_CSS_SCRAMBLED_SECTOR = unchecked((int)0x80030309);
 		/// <summary>
-		///     Copy Protection Error - The current DVD's region does not correspond to the region setting of the drive.
+		/// Copy Protection Error - The current DVD's region does not correspond to the region setting of the drive.
 		/// </summary>
-		public const int STG_E_CSS_REGION_MISMATCH = (int)(0x8003030A - 0x100000000);
-
+		public const int STG_E_CSS_REGION_MISMATCH = unchecked((int)0x8003030A);
 		/// <summary>
-		///     Copy Protection Error - The drive's region setting may be permanent or the number of user resets has been
-		///     exhausted.
+		/// Copy Protection Error - The drive's region setting may be permanent or the number of user resets has been exhausted.
 		/// </summary>
-		public const int STG_E_RESETS_EXHAUSTED = (int)(0x8003030B - 0x100000000);
-
+		public const int STG_E_RESETS_EXHAUSTED = unchecked((int)0x8003030B);
 		/// <summary>
-		///     Call was rejected by callee.
+		/// Call was rejected by callee.
 		/// </summary>
-		public const int RPC_E_CALL_REJECTED = (int)(0x80010001 - 0x100000000);
-
+		public const int RPC_E_CALL_REJECTED = unchecked((int)0x80010001);
 		/// <summary>
-		///     Call was canceled by the message filter.
+		/// Call was canceled by the message filter.
 		/// </summary>
-		public const int RPC_E_CALL_CANCELED = (int)(0x80010002 - 0x100000000);
-
+		public const int RPC_E_CALL_CANCELED = unchecked((int)0x80010002);
 		/// <summary>
-		///     The caller is dispatching an intertask SendMessage call and cannot call out via PostMessage.
+		/// The caller is dispatching an intertask SendMessage call and cannot call out via PostMessage.
 		/// </summary>
-		public const int RPC_E_CANTPOST_INSENDCALL = (int)(0x80010003 - 0x100000000);
-
+		public const int RPC_E_CANTPOST_INSENDCALL = unchecked((int)0x80010003);
 		/// <summary>
-		///     The caller is dispatching an asynchronous call and cannot make an outgoing call on behalf of this call.
+		/// The caller is dispatching an asynchronous call and cannot make an outgoing call on behalf of this call.
 		/// </summary>
-		public const int RPC_E_CANTCALLOUT_INASYNCCALL = (int)(0x80010004 - 0x100000000);
-
+		public const int RPC_E_CANTCALLOUT_INASYNCCALL = unchecked((int)0x80010004);
 		/// <summary>
-		///     It is illegal to call out while inside message filter.
+		/// It is illegal to call out while inside message filter.
 		/// </summary>
-		public const int RPC_E_CANTCALLOUT_INEXTERNALCALL = (int)(0x80010005 - 0x100000000);
-
+		public const int RPC_E_CANTCALLOUT_INEXTERNALCALL = unchecked((int)0x80010005);
 		/// <summary>
-		///     The connection terminated or is in a bogus state and cannot be used any more. Other connections are still valid.
+		/// The connection terminated or is in a bogus state and cannot be used any more. Other connections are still valid.
 		/// </summary>
-		public const int RPC_E_CONNECTION_TERMINATED = (int)(0x80010006 - 0x100000000);
-
+		public const int RPC_E_CONNECTION_TERMINATED = unchecked((int)0x80010006);
 		/// <summary>
-		///     The callee (server [not server application]) is not available and disappeared; all connections are invalid. The
-		///     call may have executed.
+		/// The callee (server [not server application]) is not available and disappeared; all connections are invalid. The call may have executed.
 		/// </summary>
-		public const int RPC_E_SERVER_DIED = (int)(0x80010007 - 0x100000000);
-
+		public const int RPC_E_SERVER_DIED = unchecked((int)0x80010007);
 		/// <summary>
-		///     The caller (client) disappeared while the callee (server) was processing a call.
+		/// The caller (client) disappeared while the callee (server) was processing a call.
 		/// </summary>
-		public const int RPC_E_CLIENT_DIED = (int)(0x80010008 - 0x100000000);
-
+		public const int RPC_E_CLIENT_DIED = unchecked((int)0x80010008);
 		/// <summary>
-		///     The data packet with the marshalled parameter data is incorrect.
+		/// The data packet with the marshalled parameter data is incorrect.
 		/// </summary>
-		public const int RPC_E_INVALID_DATAPACKET = (int)(0x80010009 - 0x100000000);
-
+		public const int RPC_E_INVALID_DATAPACKET = unchecked((int)0x80010009);
 		/// <summary>
-		///     The call was not transmitted properly; the message queue was full and was not emptied after yielding.
+		/// The call was not transmitted properly; the message queue was full and was not emptied after yielding.
 		/// </summary>
-		public const int RPC_E_CANTTRANSMIT_CALL = (int)(0x8001000A - 0x100000000);
-
+		public const int RPC_E_CANTTRANSMIT_CALL = unchecked((int)0x8001000A);
 		/// <summary>
-		///     The client (caller) cannot marshall the parameter data - low memory, etc.
+		/// The client (caller) cannot marshal the parameter data - low memory, etc.
 		/// </summary>
-		public const int RPC_E_CLIENT_CANTMARSHAL_DATA = (int)(0x8001000B - 0x100000000);
-
+		public const int RPC_E_CLIENT_CANTMARSHAL_DATA = unchecked((int)0x8001000B);
 		/// <summary>
-		///     The client (caller) cannot unmarshall the return data - low memory, etc.
+		/// The client (caller) cannot unmarshal the return data - low memory, etc.
 		/// </summary>
-		public const int RPC_E_CLIENT_CANTUNMARSHAL_DATA = (int)(0x8001000C - 0x100000000);
-
+		public const int RPC_E_CLIENT_CANTUNMARSHAL_DATA = unchecked((int)0x8001000C);
 		/// <summary>
-		///     The server (callee) cannot marshall the return data - low memory, etc.
+		/// The server (callee) cannot marshal the return data - low memory, etc.
 		/// </summary>
-		public const int RPC_E_SERVER_CANTMARSHAL_DATA = (int)(0x8001000D - 0x100000000);
-
+		public const int RPC_E_SERVER_CANTMARSHAL_DATA = unchecked((int)0x8001000D);
 		/// <summary>
-		///     The server (callee) cannot unmarshall the parameter data - low memory, etc.
+		/// The server (callee) cannot unmarshal the parameter data - low memory, etc.
 		/// </summary>
-		public const int RPC_E_SERVER_CANTUNMARSHAL_DATA = (int)(0x8001000E - 0x100000000);
-
+		public const int RPC_E_SERVER_CANTUNMARSHAL_DATA = unchecked((int)0x8001000E);
 		/// <summary>
-		///     Received data is invalid; could be server or client data.
+		/// Received data is invalid; could be server or client data.
 		/// </summary>
-		public const int RPC_E_INVALID_DATA = (int)(0x8001000F - 0x100000000);
-
+		public const int RPC_E_INVALID_DATA = unchecked((int)0x8001000F);
 		/// <summary>
-		///     A particular parameter is invalid and cannot be (un)marshalled.
+		/// A particular parameter is invalid and cannot be (un)marshalled.
 		/// </summary>
-		public const int RPC_E_INVALID_PARAMETER = (int)(0x80010010 - 0x100000000);
-
+		public const int RPC_E_INVALID_PARAMETER = unchecked((int)0x80010010);
 		/// <summary>
-		///     There is no second outgoing call on same channel in DDE conversation.
+		/// There is no second outgoing call on same channel in DDE conversation.
 		/// </summary>
-		public const int RPC_E_CANTCALLOUT_AGAIN = (int)(0x80010011 - 0x100000000);
-
+		public const int RPC_E_CANTCALLOUT_AGAIN = unchecked((int)0x80010011);
 		/// <summary>
-		///     The callee (server [not server application]) is not available and disappeared; all connections are invalid. The
-		///     call did not execute.
+		/// The callee (server [not server application]) is not available and disappeared; all connections are invalid. The call did not execute.
 		/// </summary>
-		public const int RPC_E_SERVER_DIED_DNE = (int)(0x80010012 - 0x100000000);
-
+		public const int RPC_E_SERVER_DIED_DNE = unchecked((int)0x80010012);
 		/// <summary>
-		///     System call failed.
+		/// System call failed.
 		/// </summary>
-		public const int RPC_E_SYS_CALL_FAILED = (int)(0x80010100 - 0x100000000);
-
+		public const int RPC_E_SYS_CALL_FAILED = unchecked((int)0x80010100);
 		/// <summary>
-		///     Could not allocate some required resource (memory, events, ...)
+		/// Could not allocate some required resource (memory, events, ...)
 		/// </summary>
-		public const int RPC_E_OUT_OF_RESOURCES = (int)(0x80010101 - 0x100000000);
-
+		public const int RPC_E_OUT_OF_RESOURCES = unchecked((int)0x80010101);
 		/// <summary>
-		///     Attempted to make calls on more than one thread in single threaded mode.
+		/// Attempted to make calls on more than one thread in single threaded mode.
 		/// </summary>
-		public const int RPC_E_ATTEMPTED_MULTITHREAD = (int)(0x80010102 - 0x100000000);
-
+		public const int RPC_E_ATTEMPTED_MULTITHREAD = unchecked((int)0x80010102);
 		/// <summary>
-		///     The requested interface is not registered on the server object.
+		/// The requested interface is not registered on the server object.
 		/// </summary>
-		public const int RPC_E_NOT_REGISTERED = (int)(0x80010103 - 0x100000000);
-
+		public const int RPC_E_NOT_REGISTERED = unchecked((int)0x80010103);
 		/// <summary>
-		///     RPC could not call the server or could not return the results of calling the server.
+		/// RPC could not call the server or could not return the results of calling the server.
 		/// </summary>
-		public const int RPC_E_FAULT = (int)(0x80010104 - 0x100000000);
-
+		public const int RPC_E_FAULT = unchecked((int)0x80010104);
 		/// <summary>
-		///     The server threw an exception.
+		/// The server threw an exception.
 		/// </summary>
-		public const int RPC_E_SERVERFAULT = (int)(0x80010105 - 0x100000000);
-
+		public const int RPC_E_SERVERFAULT = unchecked((int)0x80010105);
 		/// <summary>
-		///     Cannot change thread mode after it is set.
+		/// Cannot change thread mode after it is set.
 		/// </summary>
-		public const int RPC_E_CHANGED_MODE = (int)(0x80010106 - 0x100000000);
-
+		public const int RPC_E_CHANGED_MODE = unchecked((int)0x80010106);
 		/// <summary>
-		///     The method called does not exist on the server.
+		/// The method called does not exist on the server.
 		/// </summary>
-		public const int RPC_E_INVALIDMETHOD = (int)(0x80010107 - 0x100000000);
-
+		public const int RPC_E_INVALIDMETHOD = unchecked((int)0x80010107);
 		/// <summary>
-		///     The object invoked has disconnected from its clients.
+		/// The object invoked has disconnected from its clients.
 		/// </summary>
-		public const int RPC_E_DISCONNECTED = (int)(0x80010108 - 0x100000000);
-
+		public const int RPC_E_DISCONNECTED = unchecked((int)0x80010108);
 		/// <summary>
-		///     The object invoked chose not to process the call now.  Try again later.
+		/// The object invoked chose not to process the call now. Try again later.
 		/// </summary>
-		public const int RPC_E_RETRY = (int)(0x80010109 - 0x100000000);
-
+		public const int RPC_E_RETRY = unchecked((int)0x80010109);
 		/// <summary>
-		///     The message filter indicated that the application is busy.
+		/// The message filter indicated that the application is busy.
 		/// </summary>
-		public const int RPC_E_SERVERCALL_RETRYLATER = (int)(0x8001010A - 0x100000000);
-
+		public const int RPC_E_SERVERCALL_RETRYLATER = unchecked((int)0x8001010A);
 		/// <summary>
-		///     The message filter rejected the call.
+		/// The message filter rejected the call.
 		/// </summary>
-		public const int RPC_E_SERVERCALL_REJECTED = (int)(0x8001010B - 0x100000000);
-
+		public const int RPC_E_SERVERCALL_REJECTED = unchecked((int)0x8001010B);
 		/// <summary>
-		///     A call control interfaces was called with invalid data.
+		/// A call control interfaces was called with invalid data.
 		/// </summary>
-		public const int RPC_E_INVALID_CALLDATA = (int)(0x8001010C - 0x100000000);
-
+		public const int RPC_E_INVALID_CALLDATA = unchecked((int)0x8001010C);
 		/// <summary>
-		///     An outgoing call cannot be made since the application is dispatching an input-synchronous call.
+		/// An outgoing call cannot be made since the application is dispatching an input-synchronous call.
 		/// </summary>
-		public const int RPC_E_CANTCALLOUT_ININPUTSYNCCALL = (int)(0x8001010D - 0x100000000);
-
+		public const int RPC_E_CANTCALLOUT_ININPUTSYNCCALL = unchecked((int)0x8001010D);
 		/// <summary>
-		///     The application called an interface that was marshalled for a different thread.
+		/// The application called an interface that was marshalled for a different thread.
 		/// </summary>
-		public const int RPC_E_WRONG_THREAD = (int)(0x8001010E - 0x100000000);
-
+		public const int RPC_E_WRONG_THREAD = unchecked((int)0x8001010E);
 		/// <summary>
-		///     CoInitialize has not been called on the current thread.
+		/// CoInitialize has not been called on the current thread.
 		/// </summary>
-		public const int RPC_E_THREAD_NOT_INIT = (int)(0x8001010F - 0x100000000);
-
+		public const int RPC_E_THREAD_NOT_INIT = unchecked((int)0x8001010F);
 		/// <summary>
-		///     The version of OLE on the client and server machines does not match.
+		/// The version of OLE on the client and server machines does not match.
 		/// </summary>
-		public const int RPC_E_VERSION_MISMATCH = (int)(0x80010110 - 0x100000000);
-
+		public const int RPC_E_VERSION_MISMATCH = unchecked((int)0x80010110);
 		/// <summary>
-		///     OLE received a packet with an invalid header.
+		/// OLE received a packet with an invalid header.
 		/// </summary>
-		public const int RPC_E_INVALID_HEADER = (int)(0x80010111 - 0x100000000);
-
+		public const int RPC_E_INVALID_HEADER = unchecked((int)0x80010111);
 		/// <summary>
-		///     OLE received a packet with an invalid extension.
+		/// OLE received a packet with an invalid extension.
 		/// </summary>
-		public const int RPC_E_INVALID_EXTENSION = (int)(0x80010112 - 0x100000000);
-
+		public const int RPC_E_INVALID_EXTENSION = unchecked((int)0x80010112);
 		/// <summary>
-		///     The requested object or interface does not exist.
+		/// The requested object or interface does not exist.
 		/// </summary>
-		public const int RPC_E_INVALID_IPID = (int)(0x80010113 - 0x100000000);
-
+		public const int RPC_E_INVALID_IPID = unchecked((int)0x80010113);
 		/// <summary>
-		///     The requested object does not exist.
+		/// The requested object does not exist.
 		/// </summary>
-		public const int RPC_E_INVALID_OBJECT = (int)(0x80010114 - 0x100000000);
-
+		public const int RPC_E_INVALID_OBJECT = unchecked((int)0x80010114);
 		/// <summary>
-		///     OLE has sent a request and is waiting for a reply.
+		/// OLE has sent a request and is waiting for a reply.
 		/// </summary>
-		public const int RPC_S_CALLPENDING = (int)(0x80010115 - 0x100000000);
-
+		public const int RPC_S_CALLPENDING = unchecked((int)0x80010115);
 		/// <summary>
-		///     OLE is waiting before retrying a request.
+		/// OLE is waiting before retrying a request.
 		/// </summary>
-		public const int RPC_S_WAITONTIMER = (int)(0x80010116 - 0x100000000);
-
+		public const int RPC_S_WAITONTIMER = unchecked((int)0x80010116);
 		/// <summary>
-		///     Call context cannot be accessed after call completed.
+		/// Call context cannot be accessed after call completed.
 		/// </summary>
-		public const int RPC_E_CALL_COMPLETE = (int)(0x80010117 - 0x100000000);
-
+		public const int RPC_E_CALL_COMPLETE = unchecked((int)0x80010117);
 		/// <summary>
-		///     Impersonate on unsecure calls is not supported.
+		/// Impersonate on unsecure calls is not supported.
 		/// </summary>
-		public const int RPC_E_UNSECURE_CALL = (int)(0x80010118 - 0x100000000);
-
+		public const int RPC_E_UNSECURE_CALL = unchecked((int)0x80010118);
 		/// <summary>
-		///     Security must be initialized before any interfaces are marshalled or unmarshalled. It cannot be changed once
-		///     initialized.
+		/// Security must be initialized before any interfaces are marshalled or unmarshalled. It cannot be changed once initialized.
 		/// </summary>
-		public const int RPC_E_TOO_LATE = (int)(0x80010119 - 0x100000000);
-
+		public const int RPC_E_TOO_LATE = unchecked((int)0x80010119);
 		/// <summary>
-		///     No security packages are installed on this machine or the user is not logged on or there are no compatible security
-		///     packages between the client and server.
+		/// No security packages are installed on this machine or the user is not logged on or there are no compatible security packages between the client and server.
 		/// </summary>
-		public const int RPC_E_NO_GOOD_SECURITY_PACKAGES = (int)(0x8001011A - 0x100000000);
-
+		public const int RPC_E_NO_GOOD_SECURITY_PACKAGES = unchecked((int)0x8001011A);
 		/// <summary>
-		///     Access is denied.
+		/// Access is denied.
 		/// </summary>
-		public const int RPC_E_ACCESS_DENIED = (int)(0x8001011B - 0x100000000);
-
+		public const int RPC_E_ACCESS_DENIED = unchecked((int)0x8001011B);
 		/// <summary>
-		///     Remote calls are not allowed for this process.
+		/// Remote calls are not allowed for this process.
 		/// </summary>
-		public const int RPC_E_REMOTE_DISABLED = (int)(0x8001011C - 0x100000000);
-
+		public const int RPC_E_REMOTE_DISABLED = unchecked((int)0x8001011C);
 		/// <summary>
-		///     The marshaled interface data packet (OBJREF) has an invalid or unknown format.
+		/// The marshaled interface data packet (OBJREF) has an invalid or unknown format.
 		/// </summary>
-		public const int RPC_E_INVALID_OBJREF = (int)(0x8001011D - 0x100000000);
-
+		public const int RPC_E_INVALID_OBJREF = unchecked((int)0x8001011D);
 		/// <summary>
-		///     No context is associated with this call. This happens for some custom marshalled calls and on the client side of
-		///     the call.
+		/// No context is associated with this call. This happens for some custom marshalled calls and on the client side of the call.
 		/// </summary>
-		public const int RPC_E_NO_CONTEXT = (int)(0x8001011E - 0x100000000);
-
+		public const int RPC_E_NO_CONTEXT = unchecked((int)0x8001011E);
 		/// <summary>
-		///     This operation returned because the timeout period expired.
+		/// This operation returned because the timeout period expired.
 		/// </summary>
-		public const int RPC_E_TIMEOUT = (int)(0x8001011F - 0x100000000);
-
+		public const int RPC_E_TIMEOUT = unchecked((int)0x8001011F);
 		/// <summary>
-		///     There are no synchronize objects to wait on.
+		/// There are no synchronize objects to wait on.
 		/// </summary>
-		public const int RPC_E_NO_SYNC = (int)(0x80010120 - 0x100000000);
-
+		public const int RPC_E_NO_SYNC = unchecked((int)0x80010120);
 		/// <summary>
-		///     Full subject issuer chain SSL principal name expected from the server.
+		/// Full subject issuer chain SSL principal name expected from the server.
 		/// </summary>
-		public const int RPC_E_FULLSIC_REQUIRED = (int)(0x80010121 - 0x100000000);
-
+		public const int RPC_E_FULLSIC_REQUIRED = unchecked((int)0x80010121);
 		/// <summary>
-		///     Principal name is not a valid MSSTD name.
+		/// Principal name is not a valid MSSTD name.
 		/// </summary>
-		public const int RPC_E_INVALID_STD_NAME = (int)(0x80010122 - 0x100000000);
-
+		public const int RPC_E_INVALID_STD_NAME = unchecked((int)0x80010122);
 		/// <summary>
-		///     Unable to impersonate DCOM client
+		/// Unable to impersonate DCOM client
 		/// </summary>
-		public const int CO_E_FAILEDTOIMPERSONATE = (int)(0x80010123 - 0x100000000);
-
+		public const int CO_E_FAILEDTOIMPERSONATE = unchecked((int)0x80010123);
 		/// <summary>
-		///     Unable to obtain server's security context
+		/// Unable to obtain server's security context
 		/// </summary>
-		public const int CO_E_FAILEDTOGETSECCTX = (int)(0x80010124 - 0x100000000);
-
+		public const int CO_E_FAILEDTOGETSECCTX = unchecked((int)0x80010124);
 		/// <summary>
-		///     Unable to open the access token of the current thread
+		/// Unable to open the access token of the current thread
 		/// </summary>
-		public const int CO_E_FAILEDTOOPENTHREADTOKEN = (int)(0x80010125 - 0x100000000);
-
+		public const int CO_E_FAILEDTOOPENTHREADTOKEN = unchecked((int)0x80010125);
 		/// <summary>
-		///     Unable to obtain user info from an access token
+		/// Unable to obtain user info from an access token
 		/// </summary>
-		public const int CO_E_FAILEDTOGETTOKENINFO = (int)(0x80010126 - 0x100000000);
-
+		public const int CO_E_FAILEDTOGETTOKENINFO = unchecked((int)0x80010126);
 		/// <summary>
-		///     The client who called IAccessControl::IsAccessPermitted was not the trustee provided to the method
+		/// The client who called IAccessControl::IsAccessPermitted was not the trustee provided to the method
 		/// </summary>
-		public const int CO_E_TRUSTEEDOESNTMATCHCLIENT = (int)(0x80010127 - 0x100000000);
-
+		public const int CO_E_TRUSTEEDOESNTMATCHCLIENT = unchecked((int)0x80010127);
 		/// <summary>
-		///     Unable to obtain the client's security blanket
+		/// Unable to obtain the client's security blanket
 		/// </summary>
-		public const int CO_E_FAILEDTOQUERYCLIENTBLANKET = (int)(0x80010128 - 0x100000000);
-
+		public const int CO_E_FAILEDTOQUERYCLIENTBLANKET = unchecked((int)0x80010128);
 		/// <summary>
-		///     Unable to set a discretionary ACL into a security descriptor
+		/// Unable to set a discretionary ACL into a security descriptor
 		/// </summary>
-		public const int CO_E_FAILEDTOSETDACL = (int)(0x80010129 - 0x100000000);
-
+		public const int CO_E_FAILEDTOSETDACL = unchecked((int)0x80010129);
 		/// <summary>
-		///     The system function, AccessCheck, returned false
+		/// The system function, AccessCheck, returned false
 		/// </summary>
-		public const int CO_E_ACCESSCHECKFAILED = (int)(0x8001012A - 0x100000000);
-
+		public const int CO_E_ACCESSCHECKFAILED = unchecked((int)0x8001012A);
 		/// <summary>
-		///     Either NetAccessDel or NetAccessAdd returned an error code.
+		/// Either NetAccessDel or NetAccessAdd returned an error code.
 		/// </summary>
-		public const int CO_E_NETACCESSAPIFAILED = (int)(0x8001012B - 0x100000000);
-
+		public const int CO_E_NETACCESSAPIFAILED = unchecked((int)0x8001012B);
 		/// <summary>
-		///     One of the trustee strings provided by the user did not conform to the
-		///     [Domain]\[Name] syntax and it was not the "*" string
+		/// One of the trustee strings provided by the user did not conform to the &lt;Domain&gt;\&lt;Name&gt; syntax and it was not the "*" string
 		/// </summary>
-		public const int CO_E_WRONGTRUSTEENAMESYNTAX = (int)(0x8001012C - 0x100000000);
-
+		public const int CO_E_WRONGTRUSTEENAMESYNTAX = unchecked((int)0x8001012C);
 		/// <summary>
-		///     One of the security identifiers provided by the user was invalid
+		/// One of the security identifiers provided by the user was invalid
 		/// </summary>
-		public const int CO_E_INVALIDSID = (int)(0x8001012D - 0x100000000);
-
+		public const int CO_E_INVALIDSID = unchecked((int)0x8001012D);
 		/// <summary>
-		///     Unable to convert a wide character trustee string to a multibyte trustee string
+		/// Unable to convert a wide character trustee string to a multibyte trustee string
 		/// </summary>
-		public const int CO_E_CONVERSIONFAILED = (int)(0x8001012E - 0x100000000);
-
+		public const int CO_E_CONVERSIONFAILED = unchecked((int)0x8001012E);
 		/// <summary>
-		///     Unable to find a security identifier that corresponds to a trustee string provided by the user
+		/// Unable to find a security identifier that corresponds to a trustee string provided by the user
 		/// </summary>
-		public const int CO_E_NOMATCHINGSIDFOUND = (int)(0x8001012F - 0x100000000);
-
+		public const int CO_E_NOMATCHINGSIDFOUND = unchecked((int)0x8001012F);
 		/// <summary>
-		///     The system function, LookupAccountSID, failed
+		/// The system function, LookupAccountSID, failed
 		/// </summary>
-		public const int CO_E_LOOKUPACCSIDFAILED = (int)(0x80010130 - 0x100000000);
-
+		public const int CO_E_LOOKUPACCSIDFAILED = unchecked((int)0x80010130);
 		/// <summary>
-		///     Unable to find a trustee name that corresponds to a security identifier provided by the user
+		/// Unable to find a trustee name that corresponds to a security identifier provided by the user
 		/// </summary>
-		public const int CO_E_NOMATCHINGNAMEFOUND = (int)(0x80010131 - 0x100000000);
-
+		public const int CO_E_NOMATCHINGNAMEFOUND = unchecked((int)0x80010131);
 		/// <summary>
-		///     The system function, LookupAccountName, failed
+		/// The system function, LookupAccountName, failed
 		/// </summary>
-		public const int CO_E_LOOKUPACCNAMEFAILED = (int)(0x80010132 - 0x100000000);
-
+		public const int CO_E_LOOKUPACCNAMEFAILED = unchecked((int)0x80010132);
 		/// <summary>
-		///     Unable to set or reset a serialization handle
+		/// Unable to set or reset a serialization handle
 		/// </summary>
-		public const int CO_E_SETSERLHNDLFAILED = (int)(0x80010133 - 0x100000000);
-
+		public const int CO_E_SETSERLHNDLFAILED = unchecked((int)0x80010133);
 		/// <summary>
-		///     Unable to obtain the Windows directory
+		/// Unable to obtain the Windows directory
 		/// </summary>
-		public const int CO_E_FAILEDTOGETWINDIR = (int)(0x80010134 - 0x100000000);
-
+		public const int CO_E_FAILEDTOGETWINDIR = unchecked((int)0x80010134);
 		/// <summary>
-		///     Path too long
+		/// Path too long
 		/// </summary>
-		public const int CO_E_PATHTOOInt32 = (int)(0x80010135 - 0x100000000);
-
+		public const int CO_E_PATHTOOLONG = unchecked((int)0x80010135);
 		/// <summary>
-		///     Unable to generate a uuid.
+		/// Unable to generate a uuid.
 		/// </summary>
-		public const int CO_E_FAILEDTOGENUUID = (int)(0x80010136 - 0x100000000);
-
+		public const int CO_E_FAILEDTOGENUUID = unchecked((int)0x80010136);
 		/// <summary>
-		///     Unable to create file
+		/// Unable to create file
 		/// </summary>
-		public const int CO_E_FAILEDTOCREATEFILE = (int)(0x80010137 - 0x100000000);
-
+		public const int CO_E_FAILEDTOCREATEFILE = unchecked((int)0x80010137);
 		/// <summary>
-		///     Unable to close a serialization handle or a file handle.
+		/// Unable to close a serialization handle or a file handle.
 		/// </summary>
-		public const int CO_E_FAILEDTOCLOSEHANDLE = (int)(0x80010138 - 0x100000000);
-
+		public const int CO_E_FAILEDTOCLOSEHANDLE = unchecked((int)0x80010138);
 		/// <summary>
-		///     The number of ACEs in an ACL exceeds the system limit.
+		/// The number of ACEs in an ACL exceeds the system limit.
 		/// </summary>
-		public const int CO_E_EXCEEDSYSACLLIMIT = (int)(0x80010139 - 0x100000000);
-
+		public const int CO_E_EXCEEDSYSACLLIMIT = unchecked((int)0x80010139);
 		/// <summary>
-		///     Not all the DENY_ACCESS ACEs are arranged in front of the GRANT_ACCESS ACEs in the stream.
+		/// Not all the DENY_ACCESS ACEs are arranged in front of the GRANT_ACCESS ACEs in the stream.
 		/// </summary>
-		public const int CO_E_ACESINWRONGORDER = (int)(0x8001013A - 0x100000000);
-
+		public const int CO_E_ACESINWRONGORDER = unchecked((int)0x8001013A);
 		/// <summary>
-		///     The version of ACL format in the stream is not supported by this implementation of IAccessControl
+		/// The version of ACL format in the stream is not supported by this implementation of IAccessControl
 		/// </summary>
-		public const int CO_E_INCOMPATIBLESTREAMVERSION = (int)(0x8001013B - 0x100000000);
-
+		public const int CO_E_INCOMPATIBLESTREAMVERSION = unchecked((int)0x8001013B);
 		/// <summary>
-		///     Unable to open the access token of the server process
+		/// Unable to open the access token of the server process
 		/// </summary>
-		public const int CO_E_FAILEDTOOPENPROCESSTOKEN = (int)(0x8001013C - 0x100000000);
-
+		public const int CO_E_FAILEDTOOPENPROCESSTOKEN = unchecked((int)0x8001013C);
 		/// <summary>
-		///     Unable to decode the ACL in the stream provided by the user
+		/// Unable to decode the ACL in the stream provided by the user
 		/// </summary>
-		public const int CO_E_DECODEFAILED = (int)(0x8001013D - 0x100000000);
-
+		public const int CO_E_DECODEFAILED = unchecked((int)0x8001013D);
 		/// <summary>
-		///     The COM IAccessControl object is not initialized
+		/// The COM IAccessControl object is not initialized
 		/// </summary>
-		public const int CO_E_ACNOTINITIALIZED = (int)(0x8001013F - 0x100000000);
-
+		public const int CO_E_ACNOTINITIALIZED = unchecked((int)0x8001013F);
 		/// <summary>
-		///     Call Cancellation is disabled
+		/// Call Cancellation is disabled
 		/// </summary>
-		public const int CO_E_CANCEL_DISABLED = (int)(0x80010140 - 0x100000000);
-
+		public const int CO_E_CANCEL_DISABLED = unchecked((int)0x80010140);
 		/// <summary>
-		///     An internal error occurred.
+		/// An internal error occurred.
 		/// </summary>
-		public const int RPC_E_UNEXPECTED = (int)(0x8001FFFF - 0x100000000);
+		public const int RPC_E_UNEXPECTED = unchecked((int)0x8001FFFF);
+		#endregion
 
+		#region Security and Setup
 		/// <summary>
-		///     The specified event is currently not being audited.
+		/// The specified event is currently not being audited.
 		/// </summary>
-		public const int ERROR_AUDITING_DISABLED = (int)(0xC0090001 - 0x100000000);
-
+		public const int ERROR_AUDITING_DISABLED = unchecked((int)0xC0090001);
 		/// <summary>
-		///     The SID filtering operation removed all SIDs.
+		/// The SID filtering operation removed all SIDs.
 		/// </summary>
-		public const int ERROR_ALL_SIDS_FILTERED = (int)(0xC0090002 - 0x100000000);
-
+		public const int ERROR_ALL_SIDS_FILTERED = unchecked((int)0xC0090002);
 		/// <summary>
-		///     Bad UID.
+		/// Business rule scripts are disabled for the calling application.
 		/// </summary>
-		public const int NTE_BAD_UID = (int)(0x80090001 - 0x100000000);
-
+		public const int ERROR_BIZRULES_NOT_ENABLED = unchecked((int)0xC0090003);
 		/// <summary>
-		///     Bad Hash.
+		/// The packaging API has encountered an internal error.
 		/// </summary>
-		public const int NTE_BAD_HASH = (int)(0x80090002 - 0x100000000);
-
+		public const int APPX_E_PACKAGING_INTERNAL = unchecked((int)0x80080200);
 		/// <summary>
-		///     Bad Key.
+		/// The file is not a valid package because its contents are interleaved.
 		/// </summary>
-		public const int NTE_BAD_KEY = (int)(0x80090003 - 0x100000000);
-
+		public const int APPX_E_INTERLEAVING_NOT_ALLOWED = unchecked((int)0x80080201);
 		/// <summary>
-		///     Bad Length.
+		/// The file is not a valid package because it contains OPC relationships.
 		/// </summary>
-		public const int NTE_BAD_LEN = (int)(0x80090004 - 0x100000000);
-
+		public const int APPX_E_RELATIONSHIPS_NOT_ALLOWED = unchecked((int)0x80080202);
 		/// <summary>
-		///     Bad Data.
+		/// The file is not a valid package because it is missing a manifest or block map, or missing a signature file when the code integrity file is present.
 		/// </summary>
-		public const int NTE_BAD_DATA = (int)(0x80090005 - 0x100000000);
-
+		public const int APPX_E_MISSING_REQUIRED_FILE = unchecked((int)0x80080203);
 		/// <summary>
-		///     Invalid Signature.
+		/// The package's manifest is invalid.
 		/// </summary>
-		public const int NTE_BAD_SIGNATURE = (int)(0x80090006 - 0x100000000);
-
+		public const int APPX_E_INVALID_MANIFEST = unchecked((int)0x80080204);
 		/// <summary>
-		///     Bad Version of provider.
+		/// The package's block map is invalid.
 		/// </summary>
-		public const int NTE_BAD_VER = (int)(0x80090007 - 0x100000000);
-
+		public const int APPX_E_INVALID_BLOCKMAP = unchecked((int)0x80080205);
 		/// <summary>
-		///     Invalid algorithm specified.
+		/// The package's content cannot be read because it is corrupt.
 		/// </summary>
-		public const int NTE_BAD_ALGID = (int)(0x80090008 - 0x100000000);
-
+		public const int APPX_E_CORRUPT_CONTENT = unchecked((int)0x80080206);
 		/// <summary>
-		///     Invalid flags specified.
+		/// The computed hash value of the block does not match the one stored in the block map.
 		/// </summary>
-		public const int NTE_BAD_FLAGS = (int)(0x80090009 - 0x100000000);
-
+		public const int APPX_E_BLOCK_HASH_INVALID = unchecked((int)0x80080207);
 		/// <summary>
-		///     Invalid type specified.
+		/// The requested byte range is over 4GB when translated to byte range of blocks.
 		/// </summary>
-		public const int NTE_BAD_TYPE = (int)(0x8009000A - 0x100000000);
-
+		public const int APPX_E_REQUESTED_RANGE_TOO_LARGE = unchecked((int)0x80080208);
 		/// <summary>
-		///     Key not valid for use in specified state.
+		/// The SIP_SUBJECTINFO structure used to sign the package didn't contain the required data.
 		/// </summary>
-		public const int NTE_BAD_KEY_STATE = (int)(0x8009000B - 0x100000000);
-
+		public const int APPX_E_INVALID_SIP_CLIENT_DATA = unchecked((int)0x80080209);
 		/// <summary>
-		///     Hash not valid for use in specified state.
+		/// The app didn't start in the required time.
 		/// </summary>
-		public const int NTE_BAD_HASH_STATE = (int)(0x8009000C - 0x100000000);
-
+		public const int E_APPLICATION_ACTIVATION_TIMED_OUT = unchecked((int)0x8027025A);
 		/// <summary>
-		///     Key does not exist.
+		/// The app didn't start.
 		/// </summary>
-		public const int NTE_NO_KEY = (int)(0x8009000D - 0x100000000);
-
+		public const int E_APPLICATION_ACTIVATION_EXEC_FAILURE = unchecked((int)0x8027025B);
 		/// <summary>
-		///     Insufficient memory available for the operation.
+		/// This app failed to launch because of an issue with its license. Please try again in a moment.
 		/// </summary>
-		public const int NTE_NO_MEMORY = (int)(0x8009000E - 0x100000000);
-
+		public const int E_APPLICATION_TEMPORARY_LICENSE_ERROR = unchecked((int)0x8027025C);
 		/// <summary>
-		///     Object already exists.
+		/// Bad UID.
 		/// </summary>
-		public const int NTE_EXISTS = (int)(0x8009000F - 0x100000000);
-
+		public const int NTE_BAD_UID = unchecked((int)0x80090001);
 		/// <summary>
-		///     Access denied.
+		/// Bad Hash.
 		/// </summary>
-		public const int NTE_PERM = (int)(0x80090010 - 0x100000000);
-
+		public const int NTE_BAD_HASH = unchecked((int)0x80090002);
 		/// <summary>
-		///     Object was not found.
+		/// Bad Key.
 		/// </summary>
-		public const int NTE_NOT_FOUND = (int)(0x80090011 - 0x100000000);
-
+		public const int NTE_BAD_KEY = unchecked((int)0x80090003);
 		/// <summary>
-		///     Data already encrypted.
+		/// Bad Length.
 		/// </summary>
-		public const int NTE_DOUBLE_ENCRYPT = (int)(0x80090012 - 0x100000000);
-
+		public const int NTE_BAD_LEN = unchecked((int)0x80090004);
 		/// <summary>
-		///     Invalid provider specified.
+		/// Bad Data.
 		/// </summary>
-		public const int NTE_BAD_PROVIDER = (int)(0x80090013 - 0x100000000);
-
+		public const int NTE_BAD_DATA = unchecked((int)0x80090005);
 		/// <summary>
-		///     Invalid provider type specified.
+		/// Invalid Signature.
 		/// </summary>
-		public const int NTE_BAD_PROV_TYPE = (int)(0x80090014 - 0x100000000);
-
+		public const int NTE_BAD_SIGNATURE = unchecked((int)0x80090006);
 		/// <summary>
-		///     Provider's public key is invalid.
+		/// Bad Version of provider.
 		/// </summary>
-		public const int NTE_BAD_PUBLIC_KEY = (int)(0x80090015 - 0x100000000);
-
+		public const int NTE_BAD_VER = unchecked((int)0x80090007);
 		/// <summary>
-		///     Keyset does not exist
+		/// Invalid algorithm specified.
 		/// </summary>
-		public const int NTE_BAD_KEYSET = (int)(0x80090016 - 0x100000000);
-
+		public const int NTE_BAD_ALGID = unchecked((int)0x80090008);
 		/// <summary>
-		///     Provider type not defined.
+		/// Invalid flags specified.
 		/// </summary>
-		public const int NTE_PROV_TYPE_NOT_DEF = (int)(0x80090017 - 0x100000000);
-
+		public const int NTE_BAD_FLAGS = unchecked((int)0x80090009);
 		/// <summary>
-		///     Provider type as registered is invalid.
+		/// Invalid type specified.
 		/// </summary>
-		public const int NTE_PROV_TYPE_ENTRY_BAD = (int)(0x80090018 - 0x100000000);
-
+		public const int NTE_BAD_TYPE = unchecked((int)0x8009000A);
 		/// <summary>
-		///     The keyset is not defined.
+		/// Key not valid for use in specified state.
 		/// </summary>
-		public const int NTE_KEYSET_NOT_DEF = (int)(0x80090019 - 0x100000000);
-
+		public const int NTE_BAD_KEY_STATE = unchecked((int)0x8009000B);
 		/// <summary>
-		///     Keyset as registered is invalid.
+		/// Hash not valid for use in specified state.
 		/// </summary>
-		public const int NTE_KEYSET_ENTRY_BAD = (int)(0x8009001A - 0x100000000);
-
+		public const int NTE_BAD_HASH_STATE = unchecked((int)0x8009000C);
 		/// <summary>
-		///     Provider type does not match registered value.
+		/// Key does not exist.
 		/// </summary>
-		public const int NTE_PROV_TYPE_NO_MATCH = (int)(0x8009001B - 0x100000000);
-
+		public const int NTE_NO_KEY = unchecked((int)0x8009000D);
 		/// <summary>
-		///     The digital signature file is corrupt.
+		/// Insufficient memory available for the operation.
 		/// </summary>
-		public const int NTE_SIGNATURE_FILE_BAD = (int)(0x8009001C - 0x100000000);
-
+		public const int NTE_NO_MEMORY = unchecked((int)0x8009000E);
 		/// <summary>
-		///     Provider DLL failed to initialize correctly.
+		/// Object already exists.
 		/// </summary>
-		public const int NTE_PROVIDER_DLL_FAIL = (int)(0x8009001D - 0x100000000);
-
+		public const int NTE_EXISTS = unchecked((int)0x8009000F);
 		/// <summary>
-		///     Provider DLL could not be found.
+		/// Access denied.
 		/// </summary>
-		public const int NTE_PROV_DLL_NOT_FOUND = (int)(0x8009001E - 0x100000000);
-
+		public const int NTE_PERM = unchecked((int)0x80090010);
 		/// <summary>
-		///     The Keyset parameter is invalid.
+		/// Object was not found.
 		/// </summary>
-		public const int NTE_BAD_KEYSET_PARAM = (int)(0x8009001F - 0x100000000);
-
+		public const int NTE_NOT_FOUND = unchecked((int)0x80090011);
 		/// <summary>
-		///     An internal error occurred.
+		/// Data already encrypted.
 		/// </summary>
-		public const int NTE_FAIL = (int)(0x80090020 - 0x100000000);
-
+		public const int NTE_DOUBLE_ENCRYPT = unchecked((int)0x80090012);
 		/// <summary>
-		///     A base error occurred.
+		/// Invalid provider specified.
 		/// </summary>
-		public const int NTE_SYS_ERR = (int)(0x80090021 - 0x100000000);
-
+		public const int NTE_BAD_PROVIDER = unchecked((int)0x80090013);
 		/// <summary>
-		///     Provider could not perform the action since the context was acquired as silent.
+		/// Invalid provider type specified.
 		/// </summary>
-		public const int NTE_SILENT_CONTEXT = (int)(0x80090022 - 0x100000000);
-
+		public const int NTE_BAD_PROV_TYPE = unchecked((int)0x80090014);
 		/// <summary>
-		///     The security token does not have storage space available for an additional container.
+		/// Provider's public key is invalid.
 		/// </summary>
-		public const int NTE_TOKEN_KEYSET_STORAGE_FULL = (int)(0x80090023 - 0x100000000);
-
+		public const int NTE_BAD_PUBLIC_KEY = unchecked((int)0x80090015);
 		/// <summary>
-		///     The profile for the user is a temporary profile.
+		/// Keyset does not exist
 		/// </summary>
-		public const int NTE_TEMPORARY_PROFILE = (int)(0x80090024 - 0x100000000);
-
+		public const int NTE_BAD_KEYSET = unchecked((int)0x80090016);
 		/// <summary>
-		///     The key parameters could not be set because the CSP uses fixed parameters.
+		/// Provider type not defined.
 		/// </summary>
-		public const int NTE_FIXEDPARAMETER = (int)(0x80090025 - 0x100000000);
-
+		public const int NTE_PROV_TYPE_NOT_DEF = unchecked((int)0x80090017);
 		/// <summary>
-		///     Not enough memory is available to complete this request
+		/// Provider type as registered is invalid.
 		/// </summary>
-		public const int SEC_E_INSUFFICIENT_MEMORY = (int)(0x80090300 - 0x100000000);
-
+		public const int NTE_PROV_TYPE_ENTRY_BAD = unchecked((int)0x80090018);
 		/// <summary>
-		///     The handle specified is invalid
+		/// The keyset is not defined.
 		/// </summary>
-		public const int SEC_E_INVALID_HANDLE = (int)(0x80090301 - 0x100000000);
-
+		public const int NTE_KEYSET_NOT_DEF = unchecked((int)0x80090019);
 		/// <summary>
-		///     The function requested is not supported
+		/// Keyset as registered is invalid.
 		/// </summary>
-		public const int SEC_E_UNSUPPORTED_FUNCTION = (int)(0x80090302 - 0x100000000);
-
+		public const int NTE_KEYSET_ENTRY_BAD = unchecked((int)0x8009001A);
 		/// <summary>
-		///     The specified target is unknown or unreachable
+		/// Provider type does not match registered value.
 		/// </summary>
-		public const int SEC_E_TARGET_UNKNOWN = (int)(0x80090303 - 0x100000000);
-
+		public const int NTE_PROV_TYPE_NO_MATCH = unchecked((int)0x8009001B);
 		/// <summary>
-		///     The Local Security Authority cannot be contacted
+		/// The digital signature file is corrupt.
 		/// </summary>
-		public const int SEC_E_INTERNAL_ERROR = (int)(0x80090304 - 0x100000000);
-
+		public const int NTE_SIGNATURE_FILE_BAD = unchecked((int)0x8009001C);
 		/// <summary>
-		///     The requested security package does not exist
+		/// Provider DLL failed to initialize correctly.
 		/// </summary>
-		public const int SEC_E_SECPKG_NOT_FOUND = (int)(0x80090305 - 0x100000000);
-
+		public const int NTE_PROVIDER_DLL_FAIL = unchecked((int)0x8009001D);
 		/// <summary>
-		///     The caller is not the owner of the desired credentials
+		/// Provider DLL could not be found.
 		/// </summary>
-		public const int SEC_E_NOT_OWNER = (int)(0x80090306 - 0x100000000);
-
+		public const int NTE_PROV_DLL_NOT_FOUND = unchecked((int)0x8009001E);
 		/// <summary>
-		///     The security package failed to initialize, and cannot be installed
+		/// The Keyset parameter is invalid.
 		/// </summary>
-		public const int SEC_E_CANNOT_INSTALL = (int)(0x80090307 - 0x100000000);
-
+		public const int NTE_BAD_KEYSET_PARAM = unchecked((int)0x8009001F);
 		/// <summary>
-		///     The token supplied to the function is invalid
+		/// An internal error occurred.
 		/// </summary>
-		public const int SEC_E_INVALID_TOKEN = (int)(0x80090308 - 0x100000000);
-
+		public const int NTE_FAIL = unchecked((int)0x80090020);
 		/// <summary>
-		///     The security package is not able to marshall the logon buffer, so the logon attempt has failed
+		/// A base error occurred.
 		/// </summary>
-		public const int SEC_E_CANNOT_PACK = (int)(0x80090309 - 0x100000000);
-
+		public const int NTE_SYS_ERR = unchecked((int)0x80090021);
 		/// <summary>
-		///     The per-message Quality of Protection is not supported by the security package
+		/// Provider could not perform the action since the context was acquired as silent.
 		/// </summary>
-		public const int SEC_E_QOP_NOT_SUPPORTED = (int)(0x8009030A - 0x100000000);
-
+		public const int NTE_SILENT_CONTEXT = unchecked((int)0x80090022);
 		/// <summary>
-		///     The security context does not allow impersonation of the client
+		/// The security token does not have storage space available for an additional container.
 		/// </summary>
-		public const int SEC_E_NO_IMPERSONATION = (int)(0x8009030B - 0x100000000);
-
+		public const int NTE_TOKEN_KEYSET_STORAGE_FULL = unchecked((int)0x80090023);
 		/// <summary>
-		///     The logon attempt failed
+		/// The profile for the user is a temporary profile.
 		/// </summary>
-		public const int SEC_E_LOGON_DENIED = (int)(0x8009030C - 0x100000000);
-
+		public const int NTE_TEMPORARY_PROFILE = unchecked((int)0x80090024);
 		/// <summary>
-		///     The credentials supplied to the package were not recognized
+		/// The key parameters could not be set because the CSP uses fixed parameters.
 		/// </summary>
-		public const int SEC_E_UNKNOWN_CREDENTIALS = (int)(0x8009030D - 0x100000000);
-
+		public const int NTE_FIXEDPARAMETER = unchecked((int)0x80090025);
 		/// <summary>
-		///     No credentials are available in the security package
+		/// The supplied handle is invalid.
 		/// </summary>
-		public const int SEC_E_NO_CREDENTIALS = (int)(0x8009030E - 0x100000000);
-
+		public const int NTE_INVALID_HANDLE = unchecked((int)0x80090026);
 		/// <summary>
-		///     The message or signature supplied for verification has been altered
+		/// The parameter is incorrect.
 		/// </summary>
-		public const int SEC_E_MESSAGE_ALTERED = (int)(0x8009030F - 0x100000000);
-
+		public const int NTE_INVALID_PARAMETER = unchecked((int)0x80090027);
 		/// <summary>
-		///     The message supplied for verification is out of sequence
+		/// The buffer supplied to a function was too small.
 		/// </summary>
-		public const int SEC_E_OUT_OF_SEQUENCE = (int)(0x80090310 - 0x100000000);
-
+		public const int NTE_BUFFER_TOO_SMALL = unchecked((int)0x80090028);
 		/// <summary>
-		///     No authority could be contacted for authentication.
+		/// The requested operation is not supported.
 		/// </summary>
-		public const int SEC_E_NO_AUTHENTICATING_AUTHORITY = (int)(0x80090311 - 0x100000000);
-
+		public const int NTE_NOT_SUPPORTED = unchecked((int)0x80090029);
+		/// <summary>
+		/// No more data is available.
+		/// </summary>
+		public const int NTE_NO_MORE_ITEMS = unchecked((int)0x8009002A);
+		/// <summary>
+		/// The supplied buffers overlap incorrectly.
+		/// </summary>
+		public const int NTE_BUFFERS_OVERLAP = unchecked((int)0x8009002B);
+		/// <summary>
+		/// The specified data could not be decrypted.
+		/// </summary>
+		public const int NTE_DECRYPTION_FAILURE = unchecked((int)0x8009002C);
+		/// <summary>
+		/// An internal consistency check failed.
+		/// </summary>
+		public const int NTE_INTERNAL_ERROR = unchecked((int)0x8009002D);
+		/// <summary>
+		/// This operation requires input from the user.
+		/// </summary>
+		public const int NTE_UI_REQUIRED = unchecked((int)0x8009002E);
+		/// <summary>
+		/// The cryptographic provider does not support HMAC.
+		/// </summary>
+		public const int NTE_HMAC_NOT_SUPPORTED = unchecked((int)0x8009002F);
+		/// <summary>
+		/// The device that is required by this cryptographic provider is not ready for use.
+		/// </summary>
+		public const int NTE_DEVICE_NOT_READY = unchecked((int)0x80090030);
+		/// <summary>
+		/// The dictionary attack mitigation is triggered and the provided authorization was ignored by the provider.
+		/// </summary>
+		public const int NTE_AUTHENTICATION_IGNORED = unchecked((int)0x80090031);
+		/// <summary>
+		/// The validation of the provided data failed the integrity or signature validation.
+		/// </summary>
+		public const int NTE_VALIDATION_FAILED = unchecked((int)0x80090032);
+		/// <summary>
+		/// Incorrect password.
+		/// </summary>
+		public const int NTE_INCORRECT_PASSWORD = unchecked((int)0x80090033);
+		/// <summary>
+		/// Encryption failed.
+		/// </summary>
+		public const int NTE_ENCRYPTION_FAILURE = unchecked((int)0x80090034);
+		/// <summary>
+		/// Not enough memory is available to complete this request
+		/// </summary>
+		public const int SEC_E_INSUFFICIENT_MEMORY = unchecked((int)0x80090300);
+		/// <summary>
+		/// The handle specified is invalid
+		/// </summary>
+		public const int SEC_E_INVALID_HANDLE = unchecked((int)0x80090301);
+		/// <summary>
+		/// The function requested is not supported
+		/// </summary>
+		public const int SEC_E_UNSUPPORTED_FUNCTION = unchecked((int)0x80090302);
+		/// <summary>
+		/// The specified target is unknown or unreachable
+		/// </summary>
+		public const int SEC_E_TARGET_UNKNOWN = unchecked((int)0x80090303);
+		/// <summary>
+		/// The Local Security Authority cannot be contacted
+		/// </summary>
+		public const int SEC_E_INTERNAL_ERROR = unchecked((int)0x80090304);
+		/// <summary>
+		/// The requested security package does not exist
+		/// </summary>
+		public const int SEC_E_SECPKG_NOT_FOUND = unchecked((int)0x80090305);
+		/// <summary>
+		/// The caller is not the owner of the desired credentials
+		/// </summary>
+		public const int SEC_E_NOT_OWNER = unchecked((int)0x80090306);
+		/// <summary>
+		/// The security package failed to initialize, and cannot be installed
+		/// </summary>
+		public const int SEC_E_CANNOT_INSTALL = unchecked((int)0x80090307);
+		/// <summary>
+		/// The token supplied to the function is invalid
+		/// </summary>
+		public const int SEC_E_INVALID_TOKEN = unchecked((int)0x80090308);
+		/// <summary>
+		/// The security package is not able to marshal the logon buffer, so the logon attempt has failed
+		/// </summary>
+		public const int SEC_E_CANNOT_PACK = unchecked((int)0x80090309);
+		/// <summary>
+		/// The per-message Quality of Protection is not supported by the security package
+		/// </summary>
+		public const int SEC_E_QOP_NOT_SUPPORTED = unchecked((int)0x8009030A);
+		/// <summary>
+		/// The security context does not allow impersonation of the client
+		/// </summary>
+		public const int SEC_E_NO_IMPERSONATION = unchecked((int)0x8009030B);
+		/// <summary>
+		/// The logon attempt failed
+		/// </summary>
+		public const int SEC_E_LOGON_DENIED = unchecked((int)0x8009030C);
+		/// <summary>
+		/// The credentials supplied to the package were not recognized
+		/// </summary>
+		public const int SEC_E_UNKNOWN_CREDENTIALS = unchecked((int)0x8009030D);
+		/// <summary>
+		/// No credentials are available in the security package
+		/// </summary>
+		public const int SEC_E_NO_CREDENTIALS = unchecked((int)0x8009030E);
+		/// <summary>
+		/// The message or signature supplied for verification has been altered
+		/// </summary>
+		public const int SEC_E_MESSAGE_ALTERED = unchecked((int)0x8009030F);
+		/// <summary>
+		/// The message supplied for verification is out of sequence
+		/// </summary>
+		public const int SEC_E_OUT_OF_SEQUENCE = unchecked((int)0x80090310);
+		/// <summary>
+		/// No authority could be contacted for authentication.
+		/// </summary>
+		public const int SEC_E_NO_AUTHENTICATING_AUTHORITY = unchecked((int)0x80090311);
 		/// <summary>
-		///     The function completed successfully, but must be called again to complete the context
+		/// The function completed successfully, but must be called again to complete the context
 		/// </summary>
 		public const int SEC_I_CONTINUE_NEEDED = 0x00090312;
-
 		/// <summary>
-		///     The function completed successfully, but CompleteToken must be called
+		/// The function completed successfully, but CompleteToken must be called
 		/// </summary>
 		public const int SEC_I_COMPLETE_NEEDED = 0x00090313;
-
 		/// <summary>
-		///     The function completed successfully, but both CompleteToken and this function must be called to complete the
-		///     context
+		/// The function completed successfully, but both CompleteToken and this function must be called to complete the context
 		/// </summary>
 		public const int SEC_I_COMPLETE_AND_CONTINUE = 0x00090314;
-
 		/// <summary>
-		///     The logon was completed, but no network authority was available. The logon was made using locally known information
+		/// The logon was completed, but no network authority was available. The logon was made using locally known information
 		/// </summary>
 		public const int SEC_I_LOCAL_LOGON = 0x00090315;
-
 		/// <summary>
-		///     The requested security package does not exist
+		/// The requested security package does not exist
 		/// </summary>
-		public const int SEC_E_BAD_PKGID = (int)(0x80090316 - 0x100000000);
-
+		public const int SEC_E_BAD_PKGID = unchecked((int)0x80090316);
 		/// <summary>
-		///     The context has expired and can no longer be used.
+		/// The context has expired and can no longer be used.
 		/// </summary>
-		public const int SEC_E_CONTEXT_EXPIRED = (int)(0x80090317 - 0x100000000);
-
+		public const int SEC_E_CONTEXT_EXPIRED = unchecked((int)0x80090317);
 		/// <summary>
-		///     The context has expired and can no longer be used.
+		/// The context has expired and can no longer be used.
 		/// </summary>
 		public const int SEC_I_CONTEXT_EXPIRED = 0x00090317;
-
 		/// <summary>
-		///     The supplied message is incomplete.  The signature was not verified.
+		/// The supplied message is incomplete. The signature was not verified.
 		/// </summary>
-		public const int SEC_E_INCOMPLETE_MESSAGE = (int)(0x80090318 - 0x100000000);
-
+		public const int SEC_E_INCOMPLETE_MESSAGE = unchecked((int)0x80090318);
 		/// <summary>
-		///     The credentials supplied were not complete, and could not be verified. The context could not be initialized.
+		/// The credentials supplied were not complete, and could not be verified. The context could not be initialized.
 		/// </summary>
-		public const int SEC_E_INCOMPLETE_CREDENTIALS = (int)(0x80090320 - 0x100000000);
-
+		public const int SEC_E_INCOMPLETE_CREDENTIALS = unchecked((int)0x80090320);
 		/// <summary>
-		///     The buffers supplied to a function was too small.
+		/// The buffers supplied to a function was too small.
 		/// </summary>
-		public const int SEC_E_BUFFER_TOO_SMALL = (int)(0x80090321 - 0x100000000);
-
+		public const int SEC_E_BUFFER_TOO_SMALL = unchecked((int)0x80090321);
 		/// <summary>
-		///     The credentials supplied were not complete, and could not be verified. Additional information can be returned from
-		///     the context.
+		/// The credentials supplied were not complete, and could not be verified. Additional information can be returned from the context.
 		/// </summary>
 		public const int SEC_I_INCOMPLETE_CREDENTIALS = 0x00090320;
-
 		/// <summary>
-		///     The context data must be renegotiated with the peer.
+		/// The context data must be renegotiated with the peer.
 		/// </summary>
 		public const int SEC_I_RENEGOTIATE = 0x00090321;
-
 		/// <summary>
-		///     The target principal name is incorrect.
+		/// The target principal name is incorrect.
 		/// </summary>
-		public const int SEC_E_WRONG_PRINCIPAL = (int)(0x80090322 - 0x100000000);
-
+		public const int SEC_E_WRONG_PRINCIPAL = unchecked((int)0x80090322);
 		/// <summary>
-		///     There is no LSA mode context associated with this context.
+		/// There is no LSA mode context associated with this context.
 		/// </summary>
 		public const int SEC_I_NO_LSA_CONTEXT = 0x00090323;
-
 		/// <summary>
-		///     The clocks on the client and server machines are skewed.
+		/// The clocks on the client and server machines are skewed.
 		/// </summary>
-		public const int SEC_E_TIME_SKEW = (int)(0x80090324 - 0x100000000);
-
+		public const int SEC_E_TIME_SKEW = unchecked((int)0x80090324);
 		/// <summary>
-		///     The certificate chain was issued by an authority that is not trusted.
+		/// The certificate chain was issued by an authority that is not trusted.
 		/// </summary>
-		public const int SEC_E_UNTRUSTED_ROOT = (int)(0x80090325 - 0x100000000);
-
+		public const int SEC_E_UNTRUSTED_ROOT = unchecked((int)0x80090325);
 		/// <summary>
-		///     The message received was unexpected or badly formatted.
+		/// The message received was unexpected or badly formatted.
 		/// </summary>
-		public const int SEC_E_ILLEGAL_MESSAGE = (int)(0x80090326 - 0x100000000);
-
+		public const int SEC_E_ILLEGAL_MESSAGE = unchecked((int)0x80090326);
 		/// <summary>
-		///     An unknown error occurred while processing the certificate.
+		/// An unknown error occurred while processing the certificate.
 		/// </summary>
-		public const int SEC_E_CERT_UNKNOWN = (int)(0x80090327 - 0x100000000);
-
+		public const int SEC_E_CERT_UNKNOWN = unchecked((int)0x80090327);
 		/// <summary>
-		///     The received certificate has expired.
+		/// The received certificate has expired.
 		/// </summary>
-		public const int SEC_E_CERT_EXPIRED = (int)(0x80090328 - 0x100000000);
-
+		public const int SEC_E_CERT_EXPIRED = unchecked((int)0x80090328);
 		/// <summary>
-		///     The specified data could not be encrypted.
+		/// The specified data could not be encrypted.
 		/// </summary>
-		public const int SEC_E_ENCRYPT_FAILURE = (int)(0x80090329 - 0x100000000);
-
+		public const int SEC_E_ENCRYPT_FAILURE = unchecked((int)0x80090329);
 		/// <summary>
-		///     The specified data could not be decrypted.
+		/// The specified data could not be decrypted.
 		/// </summary>
-		public const int SEC_E_DECRYPT_FAILURE = (int)(0x80090330 - 0x100000000);
-
+		public const int SEC_E_DECRYPT_FAILURE = unchecked((int)0x80090330);
 		/// <summary>
-		///     The client and server cannot communicate, because they do not possess a common algorithm.
+		/// The client and server cannot communicate, because they do not possess a common algorithm.
 		/// </summary>
-		public const int SEC_E_ALGORITHM_MISMATCH = (int)(0x80090331 - 0x100000000);
-
+		public const int SEC_E_ALGORITHM_MISMATCH = unchecked((int)0x80090331);
 		/// <summary>
-		///     The security context could not be established due to a failure in the requested quality of service (e.g. mutual
-		///     authentication or delegation).
+		/// The security context could not be established due to a failure in the requested quality of service (e.g. mutual authentication or delegation).
 		/// </summary>
-		public const int SEC_E_SECURITY_QOS_FAILED = (int)(0x80090332 - 0x100000000);
-
+		public const int SEC_E_SECURITY_QOS_FAILED = unchecked((int)0x80090332);
 		/// <summary>
-		///     A security context was deleted before the context was completed.  This is considered a logon failure.
+		/// A security context was deleted before the context was completed. This is considered a logon failure.
 		/// </summary>
-		public const int SEC_E_UNFINISHED_CONTEXT_DELETED = (int)(0x80090333 - 0x100000000);
-
+		public const int SEC_E_UNFINISHED_CONTEXT_DELETED = unchecked((int)0x80090333);
 		/// <summary>
-		///     The client is trying to negotiate a context and the server requires user-to-user but didn't send a TGT reply.
+		/// The client is trying to negotiate a context and the server requires user-to-user but didn't send a TGT reply.
 		/// </summary>
-		public const int SEC_E_NO_TGT_REPLY = (int)(0x80090334 - 0x100000000);
-
+		public const int SEC_E_NO_TGT_REPLY = unchecked((int)0x80090334);
 		/// <summary>
-		///     Unable to accomplish the requested task because the local machine does not have any IP addresses.
+		/// Unable to accomplish the requested task because the local machine does not have any IP addresses.
 		/// </summary>
-		public const int SEC_E_NO_IP_ADDRESSES = (int)(0x80090335 - 0x100000000);
-
+		public const int SEC_E_NO_IP_ADDRESSES = unchecked((int)0x80090335);
 		/// <summary>
-		///     The supplied credential handle does not match the credential associated with the security context.
+		/// The supplied credential handle does not match the credential associated with the security context.
 		/// </summary>
-		public const int SEC_E_WRONG_CREDENTIAL_HANDLE = (int)(0x80090336 - 0x100000000);
-
+		public const int SEC_E_WRONG_CREDENTIAL_HANDLE = unchecked((int)0x80090336);
 		/// <summary>
-		///     The crypto system or checksum function is invalid because a required function is unavailable.
+		/// The crypto system or checksum function is invalid because a required function is unavailable.
 		/// </summary>
-		public const int SEC_E_CRYPTO_SYSTEM_INVALID = (int)(0x80090337 - 0x100000000);
-
+		public const int SEC_E_CRYPTO_SYSTEM_INVALID = unchecked((int)0x80090337);
 		/// <summary>
-		///     The number of maximum ticket referrals has been exceeded.
+		/// The number of maximum ticket referrals has been exceeded.
 		/// </summary>
-		public const int SEC_E_MAX_REFERRALS_EXCEEDED = (int)(0x80090338 - 0x100000000);
-
+		public const int SEC_E_MAX_REFERRALS_EXCEEDED = unchecked((int)0x80090338);
 		/// <summary>
-		///     The local machine must be a Kerberos KDC (domain controller) and it is not.
+		/// The local machine must be a Kerberos KDC (domain controller) and it is not.
 		/// </summary>
-		public const int SEC_E_MUST_BE_KDC = (int)(0x80090339 - 0x100000000);
-
+		public const int SEC_E_MUST_BE_KDC = unchecked((int)0x80090339);
 		/// <summary>
-		///     The other end of the security negotiation is requires strong crypto but it is not supported on the local machine.
+		/// The other end of the security negotiation is requires strong crypto but it is not supported on the local machine.
 		/// </summary>
-		public const int SEC_E_STRONG_CRYPTO_NOT_SUPPORTED = (int)(0x8009033A - 0x100000000);
-
+		public const int SEC_E_STRONG_CRYPTO_NOT_SUPPORTED = unchecked((int)0x8009033A);
 		/// <summary>
-		///     The KDC reply contained more than one principal name.
+		/// The KDC reply contained more than one principal name.
 		/// </summary>
-		public const int SEC_E_TOO_MANY_PRINCIPALS = (int)(0x8009033B - 0x100000000);
-
+		public const int SEC_E_TOO_MANY_PRINCIPALS = unchecked((int)0x8009033B);
 		/// <summary>
-		///     Expected to find PA data for a hint of what etype to use, but it was not found.
+		/// Expected to find PA data for a hint of what etype to use, but it was not found.
 		/// </summary>
-		public const int SEC_E_NO_PA_DATA = (int)(0x8009033C - 0x100000000);
-
+		public const int SEC_E_NO_PA_DATA = unchecked((int)0x8009033C);
 		/// <summary>
-		///     The client cert name does not matches the user name or the KDC name is incorrect.
+		/// The client certificate does not contain a valid UPN, or does not match the client name in the logon request. Please contact your administrator.
 		/// </summary>
-		public const int SEC_E_PKINIT_NAME_MISMATCH = (int)(0x8009033D - 0x100000000);
-
+		public const int SEC_E_PKINIT_NAME_MISMATCH = unchecked((int)0x8009033D);
 		/// <summary>
-		///     Smartcard logon is required and was not used.
+		/// Smartcard logon is required and was not used.
 		/// </summary>
-		public const int SEC_E_SMARTCARD_LOGON_REQUIRED = (int)(0x8009033E - 0x100000000);
-
+		public const int SEC_E_SMARTCARD_LOGON_REQUIRED = unchecked((int)0x8009033E);
 		/// <summary>
-		///     A system shutdown is in progress.
+		/// A system shutdown is in progress.
 		/// </summary>
-		public const int SEC_E_SHUTDOWN_IN_PROGRESS = (int)(0x8009033F - 0x100000000);
-
+		public const int SEC_E_SHUTDOWN_IN_PROGRESS = unchecked((int)0x8009033F);
 		/// <summary>
-		///     An invalid request was sent to the KDC.
+		/// An invalid request was sent to the KDC.
 		/// </summary>
-		public const int SEC_E_KDC_INVALID_REQUEST = (int)(0x80090340 - 0x100000000);
-
+		public const int SEC_E_KDC_INVALID_REQUEST = unchecked((int)0x80090340);
 		/// <summary>
-		///     The KDC was unable to generate a referral for the service requested.
+		/// The KDC was unable to generate a referral for the service requested.
 		/// </summary>
-		public const int SEC_E_KDC_UNABLE_TO_REFER = (int)(0x80090341 - 0x100000000);
-
+		public const int SEC_E_KDC_UNABLE_TO_REFER = unchecked((int)0x80090341);
 		/// <summary>
-		///     The encryption type requested is not supported by the KDC.
+		/// The encryption type requested is not supported by the KDC.
 		/// </summary>
-		public const int SEC_E_KDC_UNKNOWN_ETYPE = (int)(0x80090342 - 0x100000000);
-
+		public const int SEC_E_KDC_UNKNOWN_ETYPE = unchecked((int)0x80090342);
 		/// <summary>
-		///     An unsupported preauthentication mechanism was presented to the kerberos package.
+		/// An unsupported preauthentication mechanism was presented to the Kerberos package.
 		/// </summary>
-		public const int SEC_E_UNSUPPORTED_PREAUTH = (int)(0x80090343 - 0x100000000);
-
+		public const int SEC_E_UNSUPPORTED_PREAUTH = unchecked((int)0x80090343);
 		/// <summary>
-		///     The requested operation requires delegation to be enabled on the machine.
+		/// The requested operation cannot be completed. The computer must be trusted for delegation and the current user account must be configured to allow delegation.
 		/// </summary>
-		public const int SEC_E_DELEGATION_REQUIRED = (int)(0x80090345 - 0x100000000);
-
+		public const int SEC_E_DELEGATION_REQUIRED = unchecked((int)0x80090345);
 		/// <summary>
-		///     Client's supplied SSPI channel bindings were incorrect.
+		/// Client's supplied SSPI channel bindings were incorrect.
 		/// </summary>
-		public const int SEC_E_BAD_BINDINGS = (int)(0x80090346 - 0x100000000);
-
+		public const int SEC_E_BAD_BINDINGS = unchecked((int)0x80090346);
 		/// <summary>
-		///     The received certificate was mapped to multiple accounts.
+		/// The received certificate was mapped to multiple accounts.
 		/// </summary>
-		public const int SEC_E_MULTIPLE_ACCOUNTS = (int)(0x80090347 - 0x100000000);
-
+		public const int SEC_E_MULTIPLE_ACCOUNTS = unchecked((int)0x80090347);
 		/// <summary>
-		///     SEC_E_NO_KERB_KEY
+		/// SEC_E_NO_KERB_KEY
 		/// </summary>
-		public const int SEC_E_NO_KERB_KEY = (int)(0x80090348 - 0x100000000);
-
+		public const int SEC_E_NO_KERB_KEY = unchecked((int)0x80090348);
 		/// <summary>
-		///     No information avialable.
+		/// The certificate is not valid for the requested usage.
 		/// </summary>
-		public const int SEC_E_CERT_WRONG_USAGE = (int)(0x80090349 - 0x100000000);
-
+		public const int SEC_E_CERT_WRONG_USAGE = unchecked((int)0x80090349);
 		/// <summary>
-		///     No information avialable.
+		/// The system cannot contact a domain controller to service the authentication request. Please try again later.
 		/// </summary>
-		public const int SEC_E_DOWNGRADE_DETECTED = (int)(0x80090350 - 0x100000000);
-
+		public const int SEC_E_DOWNGRADE_DETECTED = unchecked((int)0x80090350);
 		/// <summary>
-		///     No information avialable.
+		/// The smartcard certificate used for authentication has been revoked. Please contact your system administrator. There may be additional information in the event log.
 		/// </summary>
-		public const int SEC_E_SMARTCARD_CERT_REVOKED = (int)(0x80090351 - 0x100000000);
-
+		public const int SEC_E_SMARTCARD_CERT_REVOKED = unchecked((int)0x80090351);
 		/// <summary>
-		///     No information avialable.
+		/// An untrusted certificate authority was detected While processing the smartcard certificate used for authentication. Please contact your system administrator.
 		/// </summary>
-		public const int SEC_E_ISSUING_CA_UNTRUSTED = (int)(0x80090352 - 0x100000000);
-
+		public const int SEC_E_ISSUING_CA_UNTRUSTED = unchecked((int)0x80090352);
 		/// <summary>
-		///     No information avialable.
+		/// The revocation status of the smartcard certificate used for authentication could not be determined. Please contact your system administrator.
 		/// </summary>
-		public const int SEC_E_REVOCATION_OFFLINE_C = (int)(0x80090353 - 0x100000000);
-
+		public const int SEC_E_REVOCATION_OFFLINE_C = unchecked((int)0x80090353);
 		/// <summary>
-		///     No information avialable.
+		/// The smartcard certificate used for authentication was not trusted. Please contact your system administrator.
 		/// </summary>
-		public const int SEC_E_PKINIT_CLIENT_FAILURE = (int)(0x80090354 - 0x100000000);
-
+		public const int SEC_E_PKINIT_CLIENT_FAILURE = unchecked((int)0x80090354);
 		/// <summary>
-		///     No information avialable.
+		/// The smartcard certificate used for authentication has expired. Please contact your system administrator.
 		/// </summary>
-		public const int SEC_E_SMARTCARD_CERT_EXPIRED = (int)(0x80090355 - 0x100000000);
-
+		public const int SEC_E_SMARTCARD_CERT_EXPIRED = unchecked((int)0x80090355);
 		/// <summary>
-		///     No information avialable.
+		/// The Kerberos subsystem encountered an error. A service for user protocol request was made against a domain controller which does not support service for user.
 		/// </summary>
-		public const int SEC_E_NO_S4U_PROT_SUPPORT = (int)(0x80090356 - 0x100000000);
-
+		public const int SEC_E_NO_S4U_PROT_SUPPORT = unchecked((int)0x80090356);
 		/// <summary>
-		///     No information avialable.
+		/// An attempt was made by this server to make a Kerberos constrained delegation request for a target outside of the server's realm. This is not supported, and indicates a misconfiguration on this server's allowed to delegate to list. Please contact your administrator.
 		/// </summary>
-		public const int SEC_E_CROSSREALM_DELEGATION_FAILURE = (int)(0x80090357 - 0x100000000);
-
+		public const int SEC_E_CROSSREALM_DELEGATION_FAILURE = unchecked((int)0x80090357);
 		/// <summary>
-		///     No information avialable.
+		/// The revocation status of the domain controller certificate used for smartcard authentication could not be determined. There is additional information in the system event log. Please contact your system administrator.
 		/// </summary>
-		public const int SEC_E_NO_SPM = SEC_E_INTERNAL_ERROR;
-
+		public const int SEC_E_REVOCATION_OFFLINE_KDC = unchecked((int)0x80090358);
 		/// <summary>
-		///     No information avialable.
+		/// An untrusted certificate authority was detected while processing the domain controller certificate used for authentication. There is additional information in the system event log. Please contact your system administrator.
 		/// </summary>
-		public const int SEC_E_NOT_SUPPORTED = SEC_E_UNSUPPORTED_FUNCTION;
-
+		public const int SEC_E_ISSUING_CA_UNTRUSTED_KDC = unchecked((int)0x80090359);
 		/// <summary>
-		///     An error occurred while performing an operation on a cryptographic message.
+		/// The domain controller certificate used for smartcard logon has expired. Please contact your system administrator with the contents of your system event log.
 		/// </summary>
-		public const int CRYPT_E_MSG_ERROR = (int)(0x80091001 - 0x100000000);
-
+		public const int SEC_E_KDC_CERT_EXPIRED = unchecked((int)0x8009035A);
 		/// <summary>
-		///     Unknown cryptographic algorithm.
+		/// The domain controller certificate used for smartcard logon has been revoked. Please contact your system administrator with the contents of your system event log.
 		/// </summary>
-		public const int CRYPT_E_UNKNOWN_ALGO = (int)(0x80091002 - 0x100000000);
-
+		public const int SEC_E_KDC_CERT_REVOKED = unchecked((int)0x8009035B);
 		/// <summary>
-		///     The object identifier is poorly formatted.
+		/// A signature operation must be performed before the user can authenticate.
 		/// </summary>
-		public const int CRYPT_E_OID_FORMAT = (int)(0x80091003 - 0x100000000);
-
+		public const int SEC_I_SIGNATURE_NEEDED = 0x0009035C;
 		/// <summary>
-		///     Invalid cryptographic message type.
+		/// One or more of the parameters passed to the function was invalid.
 		/// </summary>
-		public const int CRYPT_E_INVALID_MSG_TYPE = (int)(0x80091004 - 0x100000000);
-
+		public const int SEC_E_INVALID_PARAMETER = unchecked((int)0x8009035D);
 		/// <summary>
-		///     Unexpected cryptographic message encoding.
+		/// Client policy does not allow credential delegation to target server.
 		/// </summary>
-		public const int CRYPT_E_UNEXPECTED_ENCODING = (int)(0x80091005 - 0x100000000);
-
+		public const int SEC_E_DELEGATION_POLICY = unchecked((int)0x8009035E);
 		/// <summary>
-		///     The cryptographic message does not contain an expected authenticated attribute.
+		/// Client policy does not allow credential delegation to target server with NLTM only authentication.
 		/// </summary>
-		public const int CRYPT_E_AUTH_ATTR_MISSING = (int)(0x80091006 - 0x100000000);
-
+		public const int SEC_E_POLICY_NLTM_ONLY = unchecked((int)0x8009035F);
 		/// <summary>
-		///     The hash value is not correct.
+		/// The recipient rejected the renegotiation request.
 		/// </summary>
-		public const int CRYPT_E_HASH_VALUE = (int)(0x80091007 - 0x100000000);
-
+		public const int SEC_I_NO_RENEGOTIATION = 0x00090360;
 		/// <summary>
-		///     The index value is not valid.
+		/// The required security context does not exist.
 		/// </summary>
-		public const int CRYPT_E_INVALID_INDEX = (int)(0x80091008 - 0x100000000);
-
+		public const int SEC_E_NO_CONTEXT = unchecked((int)0x80090361);
 		/// <summary>
-		///     The content of the cryptographic message has already been decrypted.
+		/// The PKU2U protocol encountered an error while attempting to utilize the associated certificates.
 		/// </summary>
-		public const int CRYPT_E_ALREADY_DECRYPTED = (int)(0x80091009 - 0x100000000);
-
+		public const int SEC_E_PKU2U_CERT_FAILURE = unchecked((int)0x80090362);
 		/// <summary>
-		///     The content of the cryptographic message has not been decrypted yet.
+		/// The identity of the server computer could not be verified.
 		/// </summary>
-		public const int CRYPT_E_NOT_DECRYPTED = (int)(0x8009100A - 0x100000000);
-
+		public const int SEC_E_MUTUAL_AUTH_FAILED = unchecked((int)0x80090363);
 		/// <summary>
-		///     The enveloped-data message does not contain the specified recipient.
+		/// The returned buffer is only a fragment of the message. More fragments need to be returned.
 		/// </summary>
-		public const int CRYPT_E_RECIPIENT_NOT_FOUND = (int)(0x8009100B - 0x100000000);
-
+		public const int SEC_I_MESSAGE_FRAGMENT = 0x00090364;
 		/// <summary>
-		///     Invalid control type.
+		/// Only https scheme is allowed.
 		/// </summary>
-		public const int CRYPT_E_CONTROL_TYPE = (int)(0x8009100C - 0x100000000);
-
+		public const int SEC_E_ONLY_HTTPS_ALLOWED = unchecked((int)0x80090365);
 		/// <summary>
-		///     Invalid issuer and/or serial number.
+		/// The function completed successfully, but must be called again to complete the context. Early start can be used.
 		/// </summary>
-		public const int CRYPT_E_ISSUER_SERIALNUMBER = (int)(0x8009100D - 0x100000000);
-
+		public const int SEC_I_CONTINUE_NEEDED_MESSAGE_OK = unchecked((int)0x80090366);
 		/// <summary>
-		///     Cannot find the original signer.
+		/// An error occurred while performing an operation on a cryptographic message.
 		/// </summary>
-		public const int CRYPT_E_SIGNER_NOT_FOUND = (int)(0x8009100E - 0x100000000);
-
+		public const int CRYPT_E_MSG_ERROR = unchecked((int)0x80091001);
 		/// <summary>
-		///     The cryptographic message does not contain all of the requested attributes.
+		/// Unknown cryptographic algorithm.
 		/// </summary>
-		public const int CRYPT_E_ATTRIBUTES_MISSING = (int)(0x8009100F - 0x100000000);
-
+		public const int CRYPT_E_UNKNOWN_ALGO = unchecked((int)0x80091002);
 		/// <summary>
-		///     The streamed cryptographic message is not ready to return data.
+		/// The object identifier is poorly formatted.
 		/// </summary>
-		public const int CRYPT_E_STREAM_MSG_NOT_READY = (int)(0x80091010 - 0x100000000);
-
+		public const int CRYPT_E_OID_FORMAT = unchecked((int)0x80091003);
 		/// <summary>
-		///     The streamed cryptographic message requires more data to complete the decode operation.
+		/// Invalid cryptographic message type.
 		/// </summary>
-		public const int CRYPT_E_STREAM_INSUFFICIENT_DATA = (int)(0x80091011 - 0x100000000);
-
+		public const int CRYPT_E_INVALID_MSG_TYPE = unchecked((int)0x80091004);
 		/// <summary>
-		///     The protected data needs to be re-protected.
+		/// Unexpected cryptographic message encoding.
+		/// </summary>
+		public const int CRYPT_E_UNEXPECTED_ENCODING = unchecked((int)0x80091005);
+		/// <summary>
+		/// The cryptographic message does not contain an expected authenticated attribute.
+		/// </summary>
+		public const int CRYPT_E_AUTH_ATTR_MISSING = unchecked((int)0x80091006);
+		/// <summary>
+		/// The hash value is not correct.
+		/// </summary>
+		public const int CRYPT_E_HASH_VALUE = unchecked((int)0x80091007);
+		/// <summary>
+		/// The index value is not valid.
+		/// </summary>
+		public const int CRYPT_E_INVALID_INDEX = unchecked((int)0x80091008);
+		/// <summary>
+		/// The content of the cryptographic message has already been decrypted.
+		/// </summary>
+		public const int CRYPT_E_ALREADY_DECRYPTED = unchecked((int)0x80091009);
+		/// <summary>
+		/// The content of the cryptographic message has not been decrypted yet.
+		/// </summary>
+		public const int CRYPT_E_NOT_DECRYPTED = unchecked((int)0x8009100A);
+		/// <summary>
+		/// The enveloped-data message does not contain the specified recipient.
+		/// </summary>
+		public const int CRYPT_E_RECIPIENT_NOT_FOUND = unchecked((int)0x8009100B);
+		/// <summary>
+		/// Invalid control type.
+		/// </summary>
+		public const int CRYPT_E_CONTROL_TYPE = unchecked((int)0x8009100C);
+		/// <summary>
+		/// Invalid issuer and/or serial number.
+		/// </summary>
+		public const int CRYPT_E_ISSUER_SERIALNUMBER = unchecked((int)0x8009100D);
+		/// <summary>
+		/// Cannot find the original signer.
+		/// </summary>
+		public const int CRYPT_E_SIGNER_NOT_FOUND = unchecked((int)0x8009100E);
+		/// <summary>
+		/// The cryptographic message does not contain all of the requested attributes.
+		/// </summary>
+		public const int CRYPT_E_ATTRIBUTES_MISSING = unchecked((int)0x8009100F);
+		/// <summary>
+		/// The streamed cryptographic message is not ready to return data.
+		/// </summary>
+		public const int CRYPT_E_STREAM_MSG_NOT_READY = unchecked((int)0x80091010);
+		/// <summary>
+		/// The streamed cryptographic message requires more data to complete the decode operation.
+		/// </summary>
+		public const int CRYPT_E_STREAM_INSUFFICIENT_DATA = unchecked((int)0x80091011);
+		/// <summary>
+		/// The protected data needs to be re-protected.
 		/// </summary>
 		public const int CRYPT_I_NEW_PROTECTION_REQUIRED = 0x00091012;
+		/// <summary>
+		/// The length specified for the output data was insufficient.
+		/// </summary>
+		public const int CRYPT_E_BAD_LEN = unchecked((int)0x80092001);
+		/// <summary>
+		/// An error occurred during encode or decode operation.
+		/// </summary>
+		public const int CRYPT_E_BAD_ENCODE = unchecked((int)0x80092002);
+		/// <summary>
+		/// An error occurred while reading or writing to a file.
+		/// </summary>
+		public const int CRYPT_E_FILE_ERROR = unchecked((int)0x80092003);
+		/// <summary>
+		/// Cannot find object or property.
+		/// </summary>
+		public const int CRYPT_E_NOT_FOUND = unchecked((int)0x80092004);
+		/// <summary>
+		/// The object or property already exists.
+		/// </summary>
+		public const int CRYPT_E_EXISTS = unchecked((int)0x80092005);
+		/// <summary>
+		/// No provider was specified for the store or object.
+		/// </summary>
+		public const int CRYPT_E_NO_PROVIDER = unchecked((int)0x80092006);
+		/// <summary>
+		/// The specified certificate is self signed.
+		/// </summary>
+		public const int CRYPT_E_SELF_SIGNED = unchecked((int)0x80092007);
+		/// <summary>
+		/// The previous certificate or CRL context was deleted.
+		/// </summary>
+		public const int CRYPT_E_DELETED_PREV = unchecked((int)0x80092008);
+		/// <summary>
+		/// Cannot find the requested object.
+		/// </summary>
+		public const int CRYPT_E_NO_MATCH = unchecked((int)0x80092009);
+		/// <summary>
+		/// The certificate does not have a property that references a private key.
+		/// </summary>
+		public const int CRYPT_E_UNEXPECTED_MSG_TYPE = unchecked((int)0x8009200A);
+		/// <summary>
+		/// Cannot find the certificate and private key for decryption.
+		/// </summary>
+		public const int CRYPT_E_NO_KEY_PROPERTY = unchecked((int)0x8009200B);
+		/// <summary>
+		/// Cannot find the certificate and private key to use for decryption.
+		/// </summary>
+		public const int CRYPT_E_NO_DECRYPT_CERT = unchecked((int)0x8009200C);
+		/// <summary>
+		/// Not a cryptographic message or the cryptographic message is not formatted correctly.
+		/// </summary>
+		public const int CRYPT_E_BAD_MSG = unchecked((int)0x8009200D);
+		/// <summary>
+		/// The signed cryptographic message does not have a signer for the specified signer index.
+		/// </summary>
+		public const int CRYPT_E_NO_SIGNER = unchecked((int)0x8009200E);
+		/// <summary>
+		/// Final closure is pending until additional frees or closes.
+		/// </summary>
+		public const int CRYPT_E_PENDING_CLOSE = unchecked((int)0x8009200F);
+		/// <summary>
+		/// The certificate is revoked.
+		/// </summary>
+		public const int CRYPT_E_REVOKED = unchecked((int)0x80092010);
+		/// <summary>
+		/// No Dll or exported function was found to verify revocation.
+		/// </summary>
+		public const int CRYPT_E_NO_REVOCATION_DLL = unchecked((int)0x80092011);
+		/// <summary>
+		/// The revocation function was unable to check revocation for the certificate.
+		/// </summary>
+		public const int CRYPT_E_NO_REVOCATION_CHECK = unchecked((int)0x80092012);
+		/// <summary>
+		/// The revocation function was unable to check revocation because the revocation server was offline.
+		/// </summary>
+		public const int CRYPT_E_REVOCATION_OFFLINE = unchecked((int)0x80092013);
+		/// <summary>
+		/// The certificate is not in the revocation server's database.
+		/// </summary>
+		public const int CRYPT_E_NOT_IN_REVOCATION_DATABASE = unchecked((int)0x80092014);
+		/// <summary>
+		/// The string contains a non-numeric character.
+		/// </summary>
+		public const int CRYPT_E_INVALID_NUMERIC_STRING = unchecked((int)0x80092020);
+		/// <summary>
+		/// The string contains a non-printable character.
+		/// </summary>
+		public const int CRYPT_E_INVALID_PRINTABLE_STRING = unchecked((int)0x80092021);
+		/// <summary>
+		/// The string contains a character not in the 7 bit ASCII character set.
+		/// </summary>
+		public const int CRYPT_E_INVALID_IA5_STRING = unchecked((int)0x80092022);
+		/// <summary>
+		/// The string contains an invalid X500 name attribute key, oid, value or delimiter.
+		/// </summary>
+		public const int CRYPT_E_INVALID_X500_STRING = unchecked((int)0x80092023);
+		/// <summary>
+		/// The dwValueType for the CERT_NAME_VALUE is not one of the character strings. Most likely it is either a CERT_RDN_ENCODED_BLOB or CERT_RDN_OCTET_STRING.
+		/// </summary>
+		public const int CRYPT_E_NOT_CHAR_STRING = unchecked((int)0x80092024);
+		/// <summary>
+		/// The Put operation cannot continue. The file needs to be resized. However, there is already a signature present. A complete signing operation must be done.
+		/// </summary>
+		public const int CRYPT_E_FILERESIZED = unchecked((int)0x80092025);
+		/// <summary>
+		/// The cryptographic operation failed due to a local security option setting.
+		/// </summary>
+		public const int CRYPT_E_SECURITY_SETTINGS = unchecked((int)0x80092026);
+		/// <summary>
+		/// No DLL or exported function was found to verify subject usage.
+		/// </summary>
+		public const int CRYPT_E_NO_VERIFY_USAGE_DLL = unchecked((int)0x80092027);
+		/// <summary>
+		/// The called function was unable to do a usage check on the subject.
+		/// </summary>
+		public const int CRYPT_E_NO_VERIFY_USAGE_CHECK = unchecked((int)0x80092028);
+		/// <summary>
+		/// Since the server was offline, the called function was unable to complete the usage check.
+		/// </summary>
+		public const int CRYPT_E_VERIFY_USAGE_OFFLINE = unchecked((int)0x80092029);
+		/// <summary>
+		/// The subject was not found in a Certificate Trust List (CTL).
+		/// </summary>
+		public const int CRYPT_E_NOT_IN_CTL = unchecked((int)0x8009202A);
+		/// <summary>
+		/// None of the signers of the cryptographic message or certificate trust list is trusted.
+		/// </summary>
+		public const int CRYPT_E_NO_TRUSTED_SIGNER = unchecked((int)0x8009202B);
+		/// <summary>
+		/// The public key's algorithm parameters are missing.
+		/// </summary>
+		public const int CRYPT_E_MISSING_PUBKEY_PARA = unchecked((int)0x8009202C);
+		/// <summary>
+		/// An object could not be located using the object locator infrastructure with the given name.
+		/// </summary>
+		public const int CRYPT_E_OBJECT_LOCATOR_NOT_FOUND = unchecked((int)0x8009202d);
+		/// <summary>
+		/// OSS Certificate encode/decode error code base See asn1code.h for a definition of the OSS runtime errors. The OSS error values are offset by CRYPT_E_OSS_ERROR.
+		/// </summary>
+		public const int CRYPT_E_OSS_ERROR = unchecked((int)0x80093000);
+		/// <summary>
+		/// OSS ASN.1 Error: Output Buffer is too small.
+		/// </summary>
+		public const int OSS_MORE_BUF = unchecked((int)0x80093001);
+		/// <summary>
+		/// OSS ASN.1 Error: Signed integer is encoded as a unsigned integer.
+		/// </summary>
+		public const int OSS_NEGATIVE_UINTEGER = unchecked((int)0x80093002);
+		/// <summary>
+		/// OSS ASN.1 Error: Unknown ASN.1 data type.
+		/// </summary>
+		public const int OSS_PDU_RANGE = unchecked((int)0x80093003);
+		/// <summary>
+		/// OSS ASN.1 Error: Output buffer is too small, the decoded data has been truncated.
+		/// </summary>
+		public const int OSS_MORE_INPUT = unchecked((int)0x80093004);
+		/// <summary>
+		/// OSS ASN.1 Error: Invalid data.
+		/// </summary>
+		public const int OSS_DATA_ERROR = unchecked((int)0x80093005);
+		/// <summary>
+		/// OSS ASN.1 Error: Invalid argument.
+		/// </summary>
+		public const int OSS_BAD_ARG = unchecked((int)0x80093006);
+		/// <summary>
+		/// OSS ASN.1 Error: Encode/Decode version mismatch.
+		/// </summary>
+		public const int OSS_BAD_VERSION = unchecked((int)0x80093007);
+		/// <summary>
+		/// OSS ASN.1 Error: Out of memory.
+		/// </summary>
+		public const int OSS_OUT_MEMORY = unchecked((int)0x80093008);
+		/// <summary>
+		/// OSS ASN.1 Error: Encode/Decode Error.
+		/// </summary>
+		public const int OSS_PDU_MISMATCH = unchecked((int)0x80093009);
+		/// <summary>
+		/// OSS ASN.1 Error: Internal Error.
+		/// </summary>
+		public const int OSS_LIMITED = unchecked((int)0x8009300A);
+		/// <summary>
+		/// OSS ASN.1 Error: Invalid data.
+		/// </summary>
+		public const int OSS_BAD_PTR = unchecked((int)0x8009300B);
+		/// <summary>
+		/// OSS ASN.1 Error: Invalid data.
+		/// </summary>
+		public const int OSS_BAD_TIME = unchecked((int)0x8009300C);
+		/// <summary>
+		/// OSS ASN.1 Error: Unsupported BER indefinite-length encoding.
+		/// </summary>
+		public const int OSS_INDEFINITE_NOT_SUPPORTED = unchecked((int)0x8009300D);
+		/// <summary>
+		/// OSS ASN.1 Error: Access violation.
+		/// </summary>
+		public const int OSS_MEM_ERROR = unchecked((int)0x8009300E);
+		/// <summary>
+		/// OSS ASN.1 Error: Invalid data.
+		/// </summary>
+		public const int OSS_BAD_TABLE = unchecked((int)0x8009300F);
+		/// <summary>
+		/// OSS ASN.1 Error: Invalid data.
+		/// </summary>
+		public const int OSS_TOO_LONG = unchecked((int)0x80093010);
+		/// <summary>
+		/// OSS ASN.1 Error: Invalid data.
+		/// </summary>
+		public const int OSS_CONSTRAINT_VIOLATED = unchecked((int)0x80093011);
+		/// <summary>
+		/// OSS ASN.1 Error: Internal Error.
+		/// </summary>
+		public const int OSS_FATAL_ERROR = unchecked((int)0x80093012);
+		/// <summary>
+		/// OSS ASN.1 Error: Multi-threading conflict.
+		/// </summary>
+		public const int OSS_ACCESS_SERIALIZATION_ERROR = unchecked((int)0x80093013);
+		/// <summary>
+		/// OSS ASN.1 Error: Invalid data.
+		/// </summary>
+		public const int OSS_NULL_TBL = unchecked((int)0x80093014);
+		/// <summary>
+		/// OSS ASN.1 Error: Invalid data.
+		/// </summary>
+		public const int OSS_NULL_FCN = unchecked((int)0x80093015);
+		/// <summary>
+		/// OSS ASN.1 Error: Invalid data.
+		/// </summary>
+		public const int OSS_BAD_ENCRULES = unchecked((int)0x80093016);
+		/// <summary>
+		/// OSS ASN.1 Error: Encode/Decode function not implemented.
+		/// </summary>
+		public const int OSS_UNAVAIL_ENCRULES = unchecked((int)0x80093017);
+		/// <summary>
+		/// OSS ASN.1 Error: Trace file error.
+		/// </summary>
+		public const int OSS_CANT_OPEN_TRACE_WINDOW = unchecked((int)0x80093018);
+		/// <summary>
+		/// OSS ASN.1 Error: Function not implemented.
+		/// </summary>
+		public const int OSS_UNIMPLEMENTED = unchecked((int)0x80093019);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_OID_DLL_NOT_LINKED = unchecked((int)0x8009301A);
+		/// <summary>
+		/// OSS ASN.1 Error: Trace file error.
+		/// </summary>
+		public const int OSS_CANT_OPEN_TRACE_FILE = unchecked((int)0x8009301B);
+		/// <summary>
+		/// OSS ASN.1 Error: Trace file error.
+		/// </summary>
+		public const int OSS_TRACE_FILE_ALREADY_OPEN = unchecked((int)0x8009301C);
+		/// <summary>
+		/// OSS ASN.1 Error: Invalid data.
+		/// </summary>
+		public const int OSS_TABLE_MISMATCH = unchecked((int)0x8009301D);
+		/// <summary>
+		/// OSS ASN.1 Error: Invalid data.
+		/// </summary>
+		public const int OSS_TYPE_NOT_SUPPORTED = unchecked((int)0x8009301E);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_REAL_DLL_NOT_LINKED = unchecked((int)0x8009301F);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_REAL_CODE_NOT_LINKED = unchecked((int)0x80093020);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_OUT_OF_RANGE = unchecked((int)0x80093021);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_COPIER_DLL_NOT_LINKED = unchecked((int)0x80093022);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_CONSTRAINT_DLL_NOT_LINKED = unchecked((int)0x80093023);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_COMPARATOR_DLL_NOT_LINKED = unchecked((int)0x80093024);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_COMPARATOR_CODE_NOT_LINKED = unchecked((int)0x80093025);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_MEM_MGR_DLL_NOT_LINKED = unchecked((int)0x80093026);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_PDV_DLL_NOT_LINKED = unchecked((int)0x80093027);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_PDV_CODE_NOT_LINKED = unchecked((int)0x80093028);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_API_DLL_NOT_LINKED = unchecked((int)0x80093029);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_BERDER_DLL_NOT_LINKED = unchecked((int)0x8009302A);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_PER_DLL_NOT_LINKED = unchecked((int)0x8009302B);
+		/// <summary>
+		/// OSS ASN.1 Error: Program link error.
+		/// </summary>
+		public const int OSS_OPEN_TYPE_ERROR = unchecked((int)0x8009302C);
+		/// <summary>
+		/// OSS ASN.1 Error: System resource error.
+		/// </summary>
+		public const int OSS_MUTEX_NOT_CREATED = unchecked((int)0x8009302D);
+		/// <summary>
+		/// OSS ASN.1 Error: Trace file error.
+		/// </summary>
+		public const int OSS_CANT_CLOSE_TRACE_FILE = unchecked((int)0x8009302E);
+		/// <summary>
+		/// ASN1 Certificate encode/decode error code base. The ASN1 error values are offset by CRYPT_E_ASN1_ERROR.
+		/// </summary>
+		public const int CRYPT_E_ASN1_ERROR = unchecked((int)0x80093100);
+		/// <summary>
+		/// ASN1 internal encode or decode error.
+		/// </summary>
+		public const int CRYPT_E_ASN1_INTERNAL = unchecked((int)0x80093101);
+		/// <summary>
+		/// ASN1 unexpected end of data.
+		/// </summary>
+		public const int CRYPT_E_ASN1_EOD = unchecked((int)0x80093102);
+		/// <summary>
+		/// ASN1 corrupted data.
+		/// </summary>
+		public const int CRYPT_E_ASN1_CORRUPT = unchecked((int)0x80093103);
+		/// <summary>
+		/// ASN1 value too large.
+		/// </summary>
+		public const int CRYPT_E_ASN1_LARGE = unchecked((int)0x80093104);
+		/// <summary>
+		/// ASN1 constraint violated.
+		/// </summary>
+		public const int CRYPT_E_ASN1_CONSTRAINT = unchecked((int)0x80093105);
+		/// <summary>
+		/// ASN1 out of memory.
+		/// </summary>
+		public const int CRYPT_E_ASN1_MEMORY = unchecked((int)0x80093106);
+		/// <summary>
+		/// ASN1 buffer overflow.
+		/// </summary>
+		public const int CRYPT_E_ASN1_OVERFLOW = unchecked((int)0x80093107);
+		/// <summary>
+		/// ASN1 function not supported for this PDU.
+		/// </summary>
+		public const int CRYPT_E_ASN1_BADPDU = unchecked((int)0x80093108);
+		/// <summary>
+		/// ASN1 bad arguments to function call.
+		/// </summary>
+		public const int CRYPT_E_ASN1_BADARGS = unchecked((int)0x80093109);
+		/// <summary>
+		/// ASN1 bad real value.
+		/// </summary>
+		public const int CRYPT_E_ASN1_BADREAL = unchecked((int)0x8009310A);
+		/// <summary>
+		/// ASN1 bad tag value met.
+		/// </summary>
+		public const int CRYPT_E_ASN1_BADTAG = unchecked((int)0x8009310B);
+		/// <summary>
+		/// ASN1 bad choice value.
+		/// </summary>
+		public const int CRYPT_E_ASN1_CHOICE = unchecked((int)0x8009310C);
+		/// <summary>
+		/// ASN1 bad encoding rule.
+		/// </summary>
+		public const int CRYPT_E_ASN1_RULE = unchecked((int)0x8009310D);
+		/// <summary>
+		/// ASN1 bad unicode (UTF8).
+		/// </summary>
+		public const int CRYPT_E_ASN1_UTF8 = unchecked((int)0x8009310E);
+		/// <summary>
+		/// ASN1 bad PDU type.
+		/// </summary>
+		public const int CRYPT_E_ASN1_PDU_TYPE = unchecked((int)0x80093133);
+		/// <summary>
+		/// ASN1 not yet implemented.
+		/// </summary>
+		public const int CRYPT_E_ASN1_NYI = unchecked((int)0x80093134);
+		/// <summary>
+		/// ASN1 skipped unknown extension(s).
+		/// </summary>
+		public const int CRYPT_E_ASN1_EXTENDED = unchecked((int)0x80093201);
+		/// <summary>
+		/// ASN1 end of data expected
+		/// </summary>
+		public const int CRYPT_E_ASN1_NOEOD = unchecked((int)0x80093202);
+		/// <summary>
+		/// The request subject name is invalid or too long.
+		/// </summary>
+		public const int CERTSRV_E_BAD_REQUESTSUBJECT = unchecked((int)0x80094001);
+		/// <summary>
+		/// The request does not exist.
+		/// </summary>
+		public const int CERTSRV_E_NO_REQUEST = unchecked((int)0x80094002);
+		/// <summary>
+		/// The request's current status does not allow this operation.
+		/// </summary>
+		public const int CERTSRV_E_BAD_REQUESTSTATUS = unchecked((int)0x80094003);
+		/// <summary>
+		/// The requested property value is empty.
+		/// </summary>
+		public const int CERTSRV_E_PROPERTY_EMPTY = unchecked((int)0x80094004);
+		/// <summary>
+		/// The certification authority's certificate contains invalid data.
+		/// </summary>
+		public const int CERTSRV_E_INVALID_CA_CERTIFICATE = unchecked((int)0x80094005);
+		/// <summary>
+		/// Certificate service has been suspended for a database restore operation.
+		/// </summary>
+		public const int CERTSRV_E_SERVER_SUSPENDED = unchecked((int)0x80094006);
+		/// <summary>
+		/// The certificate contains an encoded length that is potentially incompatible with older enrollment software.
+		/// </summary>
+		public const int CERTSRV_E_ENCODING_LENGTH = unchecked((int)0x80094007);
+		/// <summary>
+		/// The operation is denied. The user has multiple roles assigned and the certification authority is configured to enforce role separation.
+		/// </summary>
+		public const int CERTSRV_E_ROLECONFLICT = unchecked((int)0x80094008);
+		/// <summary>
+		/// The operation is denied. It can only be performed by a certificate manager that is allowed to manage certificates for the current requester.
+		/// </summary>
+		public const int CERTSRV_E_RESTRICTEDOFFICER = unchecked((int)0x80094009);
+		/// <summary>
+		/// Cannot archive private key. The certification authority is not configured for key archival.
+		/// </summary>
+		public const int CERTSRV_E_KEY_ARCHIVAL_NOT_CONFIGURED = unchecked((int)0x8009400A);
+		/// <summary>
+		/// Cannot archive private key. The certification authority could not verify one or more key recovery certificates.
+		/// </summary>
+		public const int CERTSRV_E_NO_VALID_KRA = unchecked((int)0x8009400B);
+		/// <summary>
+		/// The request is incorrectly formatted. The encrypted private key must be in an unauthenticated attribute in an outermost signature.
+		/// </summary>
+		public const int CERTSRV_E_BAD_REQUEST_KEY_ARCHIVAL = unchecked((int)0x8009400C);
+		/// <summary>
+		/// At least one security principal must have the permission to manage this CA.
+		/// </summary>
+		public const int CERTSRV_E_NO_CAADMIN_DEFINED = unchecked((int)0x8009400D);
+		/// <summary>
+		/// The request contains an invalid renewal certificate attribute.
+		/// </summary>
+		public const int CERTSRV_E_BAD_RENEWAL_CERT_ATTRIBUTE = unchecked((int)0x8009400E);
+		/// <summary>
+		/// An attempt was made to open a Certification Authority database session, but there are already too many active sessions. The server may need to be configured to allow additional sessions.
+		/// </summary>
+		public const int CERTSRV_E_NO_DB_SESSIONS = unchecked((int)0x8009400F);
+		/// <summary>
+		/// A memory reference caused a data alignment fault.
+		/// </summary>
+		public const int CERTSRV_E_ALIGNMENT_FAULT = unchecked((int)0x80094010);
+		/// <summary>
+		/// The permissions on this certification authority do not allow the current user to enroll for certificates.
+		/// </summary>
+		public const int CERTSRV_E_ENROLL_DENIED = unchecked((int)0x80094011);
+		/// <summary>
+		/// The permissions on the certificate template do not allow the current user to enroll for this type of certificate.
+		/// </summary>
+		public const int CERTSRV_E_TEMPLATE_DENIED = unchecked((int)0x80094012);
+		/// <summary>
+		/// The contacted domain controller cannot support signed LDAP traffic. Update the domain controller or configure Certificate Services to use SSL for Active Directory access.
+		/// </summary>
+		public const int CERTSRV_E_DOWNLEVEL_DC_SSL_OR_UPGRADE = unchecked((int)0x80094013);
+		/// <summary>
+		/// The request was denied by a certificate manager or CA administrator.
+		/// </summary>
+		public const int CERTSRV_E_ADMIN_DENIED_REQUEST = unchecked((int)0x80094014);
+		/// <summary>
+		/// An enrollment policy server cannot be located.
+		/// </summary>
+		public const int CERTSRV_E_NO_POLICY_SERVER = unchecked((int)0x80094015);
+		/// <summary>
+		/// The requested certificate template is not supported by this CA.
+		/// </summary>
+		public const int CERTSRV_E_UNSUPPORTED_CERT_TYPE = unchecked((int)0x80094800);
+		/// <summary>
+		/// The request contains no certificate template information.
+		/// </summary>
+		public const int CERTSRV_E_NO_CERT_TYPE = unchecked((int)0x80094801);
+		/// <summary>
+		/// The request contains conflicting template information.
+		/// </summary>
+		public const int CERTSRV_E_TEMPLATE_CONFLICT = unchecked((int)0x80094802);
+		/// <summary>
+		/// The request is missing a required Subject Alternate name extension.
+		/// </summary>
+		public const int CERTSRV_E_SUBJECT_ALT_NAME_REQUIRED = unchecked((int)0x80094803);
+		/// <summary>
+		/// The request is missing a required private key for archival by the server.
+		/// </summary>
+		public const int CERTSRV_E_ARCHIVED_KEY_REQUIRED = unchecked((int)0x80094804);
+		/// <summary>
+		/// The request is missing a required SMIME capabilities extension.
+		/// </summary>
+		public const int CERTSRV_E_SMIME_REQUIRED = unchecked((int)0x80094805);
+		/// <summary>
+		/// The request was made on behalf of a subject other than the caller. The certificate template must be configured to require at least one signature to authorize the request.
+		/// </summary>
+		public const int CERTSRV_E_BAD_RENEWAL_SUBJECT = unchecked((int)0x80094806);
+		/// <summary>
+		/// The request template version is newer than the supported template version.
+		/// </summary>
+		public const int CERTSRV_E_BAD_TEMPLATE_VERSION = unchecked((int)0x80094807);
+		/// <summary>
+		/// The template is missing a required signature policy attribute.
+		/// </summary>
+		public const int CERTSRV_E_TEMPLATE_POLICY_REQUIRED = unchecked((int)0x80094808);
+		/// <summary>
+		/// The request is missing required signature policy information.
+		/// </summary>
+		public const int CERTSRV_E_SIGNATURE_POLICY_REQUIRED = unchecked((int)0x80094809);
+		/// <summary>
+		/// The request is missing one or more required signatures.
+		/// </summary>
+		public const int CERTSRV_E_SIGNATURE_COUNT = unchecked((int)0x8009480A);
+		/// <summary>
+		/// One or more signatures did not include the required application or issuance policies. The request is missing one or more required valid signatures.
+		/// </summary>
+		public const int CERTSRV_E_SIGNATURE_REJECTED = unchecked((int)0x8009480B);
+		/// <summary>
+		/// The request is missing one or more required signature issuance policies.
+		/// </summary>
+		public const int CERTSRV_E_ISSUANCE_POLICY_REQUIRED = unchecked((int)0x8009480C);
+		/// <summary>
+		/// The UPN is unavailable and cannot be added to the Subject Alternate name.
+		/// </summary>
+		public const int CERTSRV_E_SUBJECT_UPN_REQUIRED = unchecked((int)0x8009480D);
+		/// <summary>
+		/// The Active Directory GUID is unavailable and cannot be added to the Subject Alternate name.
+		/// </summary>
+		public const int CERTSRV_E_SUBJECT_DIRECTORY_GUID_REQUIRED = unchecked((int)0x8009480E);
+		/// <summary>
+		/// The DNS name is unavailable and cannot be added to the Subject Alternate name.
+		/// </summary>
+		public const int CERTSRV_E_SUBJECT_DNS_REQUIRED = unchecked((int)0x8009480F);
+		/// <summary>
+		/// The request includes a private key for archival by the server, but key archival is not enabled for the specified certificate template.
+		/// </summary>
+		public const int CERTSRV_E_ARCHIVED_KEY_UNEXPECTED = unchecked((int)0x80094810);
+		/// <summary>
+		/// The public key does not meet the minimum size required by the specified certificate template.
+		/// </summary>
+		public const int CERTSRV_E_KEY_LENGTH = unchecked((int)0x80094811);
+		/// <summary>
+		/// The EMail name is unavailable and cannot be added to the Subject or Subject Alternate name.
+		/// </summary>
+		public const int CERTSRV_E_SUBJECT_EMAIL_REQUIRED = unchecked((int)0x80094812);
+		/// <summary>
+		/// One or more certificate templates to be enabled on this certification authority could not be found.
+		/// </summary>
+		public const int CERTSRV_E_UNKNOWN_CERT_TYPE = unchecked((int)0x80094813);
+		/// <summary>
+		/// The certificate template renewal period is longer than the certificate validity period. The template should be reconfigured or the CA certificate renewed.
+		/// </summary>
+		public const int CERTSRV_E_CERT_TYPE_OVERLAP = unchecked((int)0x80094814);
+		/// <summary>
+		/// The certificate template requires too many RA signatures. Only one RA signature is allowed.
+		/// </summary>
+		public const int CERTSRV_E_TOO_MANY_SIGNATURES = unchecked((int)0x80094815);
+		/// <summary>
+		/// The certificate template requires renewal with the same public key, but the request uses a different public key.
+		/// </summary>
+		public const int CERTSRV_E_RENEWAL_BAD_PUBLIC_KEY = unchecked((int)0x80094816);
+		/// <summary>
+		/// The key is not exportable.
+		/// </summary>
+		public const int XENROLL_E_KEY_NOT_EXPORTABLE = unchecked((int)0x80095000);
+		/// <summary>
+		/// You cannot add the root CA certificate into your local store.
+		/// </summary>
+		public const int XENROLL_E_CANNOT_ADD_ROOT_CERT = unchecked((int)0x80095001);
+		/// <summary>
+		/// The key archival hash attribute was not found in the response.
+		/// </summary>
+		public const int XENROLL_E_RESPONSE_KA_HASH_NOT_FOUND = unchecked((int)0x80095002);
+		/// <summary>
+		/// An unexpected key archival hash attribute was found in the response.
+		/// </summary>
+		public const int XENROLL_E_RESPONSE_UNEXPECTED_KA_HASH = unchecked((int)0x80095003);
+		/// <summary>
+		/// There is a key archival hash mismatch between the request and the response.
+		/// </summary>
+		public const int XENROLL_E_RESPONSE_KA_HASH_MISMATCH = unchecked((int)0x80095004);
+		/// <summary>
+		/// Signing certificate cannot include SMIME extension.
+		/// </summary>
+		public const int XENROLL_E_KEYSPEC_SMIME_MISMATCH = unchecked((int)0x80095005);
+		/// <summary>
+		/// A system-level error occurred while verifying trust.
+		/// </summary>
+		public const int TRUST_E_SYSTEM_ERROR = unchecked((int)0x80096001);
+		/// <summary>
+		/// The certificate for the signer of the message is invalid or not found.
+		/// </summary>
+		public const int TRUST_E_NO_SIGNER_CERT = unchecked((int)0x80096002);
+		/// <summary>
+		/// One of the counter signatures was invalid.
+		/// </summary>
+		public const int TRUST_E_COUNTER_SIGNER = unchecked((int)0x80096003);
+		/// <summary>
+		/// The signature of the certificate cannot be verified.
+		/// </summary>
+		public const int TRUST_E_CERT_SIGNATURE = unchecked((int)0x80096004);
+		/// <summary>
+		/// The timestamp signature and/or certificate could not be verified or is malformed.
+		/// </summary>
+		public const int TRUST_E_TIME_STAMP = unchecked((int)0x80096005);
+		/// <summary>
+		/// The digital signature of the object did not verify.
+		/// </summary>
+		public const int TRUST_E_BAD_DIGEST = unchecked((int)0x80096010);
+		/// <summary>
+		/// A certificate's basic constraint extension has not been observed.
+		/// </summary>
+		public const int TRUST_E_BASIC_CONSTRAINTS = unchecked((int)0x80096019);
+		/// <summary>
+		/// The certificate does not meet or contain the Authenticode(tm) financial extensions.
+		/// </summary>
+		public const int TRUST_E_FINANCIAL_CRITERIA = unchecked((int)0x8009601E);
+		/// <summary>
+		/// Tried to reference a part of the file outside the proper range.
+		/// </summary>
+		public const int MSSIPOTF_E_OUTOFMEMRANGE = unchecked((int)0x80097001);
+		/// <summary>
+		/// Could not retrieve an object from the file.
+		/// </summary>
+		public const int MSSIPOTF_E_CANTGETOBJECT = unchecked((int)0x80097002);
+		/// <summary>
+		/// Could not find the head table in the file.
+		/// </summary>
+		public const int MSSIPOTF_E_NOHEADTABLE = unchecked((int)0x80097003);
+		/// <summary>
+		/// The magic number in the head table is incorrect.
+		/// </summary>
+		public const int MSSIPOTF_E_BAD_MAGICNUMBER = unchecked((int)0x80097004);
+		/// <summary>
+		/// The offset table has incorrect values.
+		/// </summary>
+		public const int MSSIPOTF_E_BAD_OFFSET_TABLE = unchecked((int)0x80097005);
+		/// <summary>
+		/// Duplicate table tags or tags out of alphabetical order.
+		/// </summary>
+		public const int MSSIPOTF_E_TABLE_TAGORDER = unchecked((int)0x80097006);
+		/// <summary>
+		/// A table does not start on a long word boundary.
+		/// </summary>
+		public const int MSSIPOTF_E_TABLE_LONGWORD = unchecked((int)0x80097007);
+		/// <summary>
+		/// First table does not appear after header information.
+		/// </summary>
+		public const int MSSIPOTF_E_BAD_FIRST_TABLE_PLACEMENT = unchecked((int)0x80097008);
+		/// <summary>
+		/// Two or more tables overlap.
+		/// </summary>
+		public const int MSSIPOTF_E_TABLES_OVERLAP = unchecked((int)0x80097009);
+		/// <summary>
+		/// Too many pad bytes between tables or pad bytes are not 0.
+		/// </summary>
+		public const int MSSIPOTF_E_TABLE_PADBYTES = unchecked((int)0x8009700A);
+		/// <summary>
+		/// File is too small to contain the last table.
+		/// </summary>
+		public const int MSSIPOTF_E_FILETOOSMALL = unchecked((int)0x8009700B);
+		/// <summary>
+		/// A table checksum is incorrect.
+		/// </summary>
+		public const int MSSIPOTF_E_TABLE_CHECKSUM = unchecked((int)0x8009700C);
+		/// <summary>
+		/// The file checksum is incorrect.
+		/// </summary>
+		public const int MSSIPOTF_E_FILE_CHECKSUM = unchecked((int)0x8009700D);
+		/// <summary>
+		/// The signature does not have the correct attributes for the policy.
+		/// </summary>
+		public const int MSSIPOTF_E_FAILED_POLICY = unchecked((int)0x80097010);
+		/// <summary>
+		/// The file did not pass the hints check.
+		/// </summary>
+		public const int MSSIPOTF_E_FAILED_HINTS_CHECK = unchecked((int)0x80097011);
+		/// <summary>
+		/// The file is not an OpenType file.
+		/// </summary>
+		public const int MSSIPOTF_E_NOT_OPENTYPE = unchecked((int)0x80097012);
+		/// <summary>
+		/// Failed on a file operation (open, map, read, write).
+		/// </summary>
+		public const int MSSIPOTF_E_FILE = unchecked((int)0x80097013);
+		/// <summary>
+		/// A call to a CryptoAPI function failed.
+		/// </summary>
+		public const int MSSIPOTF_E_CRYPT = unchecked((int)0x80097014);
+		/// <summary>
+		/// There is a bad version number in the file.
+		/// </summary>
+		public const int MSSIPOTF_E_BADVERSION = unchecked((int)0x80097015);
+		/// <summary>
+		/// The structure of the DSIG table is incorrect.
+		/// </summary>
+		public const int MSSIPOTF_E_DSIG_STRUCTURE = unchecked((int)0x80097016);
+		/// <summary>
+		/// A check failed in a partially constant table.
+		/// </summary>
+		public const int MSSIPOTF_E_PCONST_CHECK = unchecked((int)0x80097017);
+		/// <summary>
+		/// Some kind of structural error.
+		/// </summary>
+		public const int MSSIPOTF_E_STRUCTURE = unchecked((int)0x80097018);
+		/// <summary>
+		/// The requested credential requires confirmation.
+		/// </summary>
+		public const int ERROR_CRED_REQUIRES_CONFIRMATION = unchecked((int)0x80097019);
+		/// <summary>
+		/// Unknown trust provider.
+		/// </summary>
+		public const int TRUST_E_PROVIDER_UNKNOWN = unchecked((int)0x800B0001);
+		/// <summary>
+		/// The trust verification action specified is not supported by the specified trust provider.
+		/// </summary>
+		public const int TRUST_E_ACTION_UNKNOWN = unchecked((int)0x800B0002);
+		/// <summary>
+		/// The form specified for the subject is not one supported or known by the specified trust provider.
+		/// </summary>
+		public const int TRUST_E_SUBJECT_FORM_UNKNOWN = unchecked((int)0x800B0003);
+		/// <summary>
+		/// The subject is not trusted for the specified action.
+		/// </summary>
+		public const int TRUST_E_SUBJECT_NOT_TRUSTED = unchecked((int)0x800B0004);
+		/// <summary>
+		/// Error due to problem in ASN.1 encoding process.
+		/// </summary>
+		public const int DIGSIG_E_ENCODE = unchecked((int)0x800B0005);
+		/// <summary>
+		/// Error due to problem in ASN.1 decoding process.
+		/// </summary>
+		public const int DIGSIG_E_DECODE = unchecked((int)0x800B0006);
+		/// <summary>
+		/// Reading / writing Extensions where Attributes are appropriate, and visa versa.
+		/// </summary>
+		public const int DIGSIG_E_EXTENSIBILITY = unchecked((int)0x800B0007);
+		/// <summary>
+		/// Unspecified cryptographic failure.
+		/// </summary>
+		public const int DIGSIG_E_CRYPTO = unchecked((int)0x800B0008);
+		/// <summary>
+		/// The size of the data could not be determined.
+		/// </summary>
+		public const int PERSIST_E_SIZEDEFINITE = unchecked((int)0x800B0009);
+		/// <summary>
+		/// The size of the indefinite-sized data could not be determined.
+		/// </summary>
+		public const int PERSIST_E_SIZEINDEFINITE = unchecked((int)0x800B000A);
+		/// <summary>
+		/// This object does not read and write self-sizing data.
+		/// </summary>
+		public const int PERSIST_E_NOTSELFSIZING = unchecked((int)0x800B000B);
+		/// <summary>
+		/// No signature was present in the subject.
+		/// </summary>
+		public const int TRUST_E_NOSIGNATURE = unchecked((int)0x800B0100);
+		/// <summary>
+		/// A required certificate is not within its validity period when verifying against the current system clock or the timestamp in the signed file.
+		/// </summary>
+		public const int CERT_E_EXPIRED = unchecked((int)0x800B0101);
+		/// <summary>
+		/// The validity periods of the certification chain do not nest correctly.
+		/// </summary>
+		public const int CERT_E_VALIDITYPERIODNESTING = unchecked((int)0x800B0102);
+		/// <summary>
+		/// A certificate that can only be used as an end-entity is being used as a CA or visa versa.
+		/// </summary>
+		public const int CERT_E_ROLE = unchecked((int)0x800B0103);
+		/// <summary>
+		/// A path length constraint in the certification chain has been violated.
+		/// </summary>
+		public const int CERT_E_PATHLENCONST = unchecked((int)0x800B0104);
+		/// <summary>
+		/// A certificate contains an unknown extension that is marked 'critical'.
+		/// </summary>
+		public const int CERT_E_CRITICAL = unchecked((int)0x800B0105);
+		/// <summary>
+		/// A certificate being used for a purpose other than the ones specified by its CA.
+		/// </summary>
+		public const int CERT_E_PURPOSE = unchecked((int)0x800B0106);
+		/// <summary>
+		/// A parent of a given certificate in fact did not issue that child certificate.
+		/// </summary>
+		public const int CERT_E_ISSUERCHAINING = unchecked((int)0x800B0107);
+		/// <summary>
+		/// A certificate is missing or has an empty value for an important field, such as a subject or issuer name.
+		/// </summary>
+		public const int CERT_E_MALFORMED = unchecked((int)0x800B0108);
+		/// <summary>
+		/// A certificate chain processed, but terminated in a root certificate which is not trusted by the trust provider.
+		/// </summary>
+		public const int CERT_E_UNTRUSTEDROOT = unchecked((int)0x800B0109);
+		/// <summary>
+		/// A certificate chain could not be built to a trusted root authority.
+		/// </summary>
+		public const int CERT_E_CHAINING = unchecked((int)0x800B010A);
+		/// <summary>
+		/// Generic trust failure.
+		/// </summary>
+		public const int TRUST_E_FAIL = unchecked((int)0x800B010B);
+		/// <summary>
+		/// A certificate was explicitly revoked by its issuer.
+		/// </summary>
+		public const int CERT_E_REVOKED = unchecked((int)0x800B010C);
+		/// <summary>
+		/// The certification path terminates with the test root which is not trusted with the current policy settings.
+		/// </summary>
+		public const int CERT_E_UNTRUSTEDTESTROOT = unchecked((int)0x800B010D);
+		/// <summary>
+		/// The revocation process could not continue - the certificate(s) could not be checked.
+		/// </summary>
+		public const int CERT_E_REVOCATION_FAILURE = unchecked((int)0x800B010E);
+		/// <summary>
+		/// The certificate's CN name does not match the passed value.
+		/// </summary>
+		public const int CERT_E_CN_NO_MATCH = unchecked((int)0x800B010F);
+		/// <summary>
+		/// The certificate is not valid for the requested usage.
+		/// </summary>
+		public const int CERT_E_WRONG_USAGE = unchecked((int)0x800B0110);
+		/// <summary>
+		/// The certificate was explicitly marked as untrusted by the user.
+		/// </summary>
+		public const int TRUST_E_EXPLICIT_DISTRUST = unchecked((int)0x800B0111);
+		/// <summary>
+		/// A certification chain processed correctly, but one of the CA certificates is not trusted by the policy provider.
+		/// </summary>
+		public const int CERT_E_UNTRUSTEDCA = unchecked((int)0x800B0112);
+		/// <summary>
+		/// The certificate has invalid policy.
+		/// </summary>
+		public const int CERT_E_INVALID_POLICY = unchecked((int)0x800B0113);
+		/// <summary>
+		/// The certificate has an invalid name. The name is not included in the permitted list or is explicitly excluded.
+		/// </summary>
+		public const int CERT_E_INVALID_NAME = unchecked((int)0x800B0114);
+		/// <summary>
+		/// A non-empty line was encountered in the INF before the start of a section.
+		/// </summary>
+		public const int SPAPI_E_EXPECTED_SECTION_NAME = unchecked((int)0x800F0000);
+		/// <summary>
+		/// A section name marker in the INF is not complete, or does not exist on a line by itself.
+		/// </summary>
+		public const int SPAPI_E_BAD_SECTION_NAME_LINE = unchecked((int)0x800F0001);
+		/// <summary>
+		/// An INF section was encountered whose name exceeds the maximum section name length.
+		/// </summary>
+		public const int SPAPI_E_SECTION_NAME_TOO_LONG = unchecked((int)0x800F0002);
+		/// <summary>
+		/// The syntax of the INF is invalid.
+		/// </summary>
+		public const int SPAPI_E_GENERAL_SYNTAX = unchecked((int)0x800F0003);
+		/// <summary>
+		/// The style of the INF is different than what was requested.
+		/// </summary>
+		public const int SPAPI_E_WRONG_INF_STYLE = unchecked((int)0x800F0100);
+		/// <summary>
+		/// The required section was not found in the INF.
+		/// </summary>
+		public const int SPAPI_E_SECTION_NOT_FOUND = unchecked((int)0x800F0101);
+		/// <summary>
+		/// The required line was not found in the INF.
+		/// </summary>
+		public const int SPAPI_E_LINE_NOT_FOUND = unchecked((int)0x800F0102);
+		/// <summary>
+		/// The files affected by the installation of this file queue have not been backed up for uninstall.
+		/// </summary>
+		public const int SPAPI_E_NO_BACKUP = unchecked((int)0x800F0103);
+		/// <summary>
+		/// The INF or the device information set or element does not have an associated install class.
+		/// </summary>
+		public const int SPAPI_E_NO_ASSOCIATED_CLASS = unchecked((int)0x800F0200);
+		/// <summary>
+		/// The INF or the device information set or element does not match the specified install class.
+		/// </summary>
+		public const int SPAPI_E_CLASS_MISMATCH = unchecked((int)0x800F0201);
+		/// <summary>
+		/// An existing device was found that is a duplicate of the device being manually installed.
+		/// </summary>
+		public const int SPAPI_E_DUPLICATE_FOUND = unchecked((int)0x800F0202);
+		/// <summary>
+		/// There is no driver selected for the device information set or element.
+		/// </summary>
+		public const int SPAPI_E_NO_DRIVER_SELECTED = unchecked((int)0x800F0203);
+		/// <summary>
+		/// The requested device registry key does not exist.
+		/// </summary>
+		public const int SPAPI_E_KEY_DOES_NOT_EXIST = unchecked((int)0x800F0204);
+		/// <summary>
+		/// The device instance name is invalid.
+		/// </summary>
+		public const int SPAPI_E_INVALID_DEVINST_NAME = unchecked((int)0x800F0205);
+		/// <summary>
+		/// The install class is not present or is invalid.
+		/// </summary>
+		public const int SPAPI_E_INVALID_CLASS = unchecked((int)0x800F0206);
+		/// <summary>
+		/// The device instance cannot be created because it already exists.
+		/// </summary>
+		public const int SPAPI_E_DEVINST_ALREADY_EXISTS = unchecked((int)0x800F0207);
+		/// <summary>
+		/// The operation cannot be performed on a device information element that has not been registered.
+		/// </summary>
+		public const int SPAPI_E_DEVINFO_NOT_REGISTERED = unchecked((int)0x800F0208);
+		/// <summary>
+		/// The device property code is invalid.
+		/// </summary>
+		public const int SPAPI_E_INVALID_REG_PROPERTY = unchecked((int)0x800F0209);
+		/// <summary>
+		/// The INF from which a driver list is to be built does not exist.
+		/// </summary>
+		public const int SPAPI_E_NO_INF = unchecked((int)0x800F020A);
+		/// <summary>
+		/// The device instance does not exist in the hardware tree.
+		/// </summary>
+		public const int SPAPI_E_NO_SUCH_DEVINST = unchecked((int)0x800F020B);
+		/// <summary>
+		/// The icon representing this install class cannot be loaded.
+		/// </summary>
+		public const int SPAPI_E_CANT_LOAD_CLASS_ICON = unchecked((int)0x800F020C);
+		/// <summary>
+		/// The class installer registry entry is invalid.
+		/// </summary>
+		public const int SPAPI_E_INVALID_CLASS_INSTALLER = unchecked((int)0x800F020D);
+		/// <summary>
+		/// The class installer has indicated that the default action should be performed for this installation request.
+		/// </summary>
+		public const int SPAPI_E_DI_DO_DEFAULT = unchecked((int)0x800F020E);
+		/// <summary>
+		/// The operation does not require any files to be copied.
+		/// </summary>
+		public const int SPAPI_E_DI_NOFILECOPY = unchecked((int)0x800F020F);
+		/// <summary>
+		/// The specified hardware profile does not exist.
+		/// </summary>
+		public const int SPAPI_E_INVALID_HWPROFILE = unchecked((int)0x800F0210);
+		/// <summary>
+		/// There is no device information element currently selected for this device information set.
+		/// </summary>
+		public const int SPAPI_E_NO_DEVICE_SELECTED = unchecked((int)0x800F0211);
+		/// <summary>
+		/// The operation cannot be performed because the device information set is locked.
+		/// </summary>
+		public const int SPAPI_E_DEVINFO_LIST_LOCKED = unchecked((int)0x800F0212);
+		/// <summary>
+		/// The operation cannot be performed because the device information element is locked.
+		/// </summary>
+		public const int SPAPI_E_DEVINFO_DATA_LOCKED = unchecked((int)0x800F0213);
+		/// <summary>
+		/// The specified path does not contain any applicable device INFs.
+		/// </summary>
+		public const int SPAPI_E_DI_BAD_PATH = unchecked((int)0x800F0214);
+		/// <summary>
+		/// No class installer parameters have been set for the device information set or element.
+		/// </summary>
+		public const int SPAPI_E_NO_CLASSINSTALL_PARAMS = unchecked((int)0x800F0215);
+		/// <summary>
+		/// The operation cannot be performed because the file queue is locked.
+		/// </summary>
+		public const int SPAPI_E_FILEQUEUE_LOCKED = unchecked((int)0x800F0216);
+		/// <summary>
+		/// A service installation section in this INF is invalid.
+		/// </summary>
+		public const int SPAPI_E_BAD_SERVICE_INSTALLSECT = unchecked((int)0x800F0217);
+		/// <summary>
+		/// There is no class driver list for the device information element.
+		/// </summary>
+		public const int SPAPI_E_NO_CLASS_DRIVER_LIST = unchecked((int)0x800F0218);
+		/// <summary>
+		/// The installation failed because a function driver was not specified for this device instance.
+		/// </summary>
+		public const int SPAPI_E_NO_ASSOCIATED_SERVICE = unchecked((int)0x800F0219);
+		/// <summary>
+		/// There is presently no default device interface designated for this interface class.
+		/// </summary>
+		public const int SPAPI_E_NO_DEFAULT_DEVICE_INTERFACE = unchecked((int)0x800F021A);
+		/// <summary>
+		/// The operation cannot be performed because the device interface is currently active.
+		/// </summary>
+		public const int SPAPI_E_DEVICE_INTERFACE_ACTIVE = unchecked((int)0x800F021B);
+		/// <summary>
+		/// The operation cannot be performed because the device interface has been removed from the system.
+		/// </summary>
+		public const int SPAPI_E_DEVICE_INTERFACE_REMOVED = unchecked((int)0x800F021C);
+		/// <summary>
+		/// An interface installation section in this INF is invalid.
+		/// </summary>
+		public const int SPAPI_E_BAD_INTERFACE_INSTALLSECT = unchecked((int)0x800F021D);
+		/// <summary>
+		/// This interface class does not exist in the system.
+		/// </summary>
+		public const int SPAPI_E_NO_SUCH_INTERFACE_CLASS = unchecked((int)0x800F021E);
+		/// <summary>
+		/// The reference string supplied for this interface device is invalid.
+		/// </summary>
+		public const int SPAPI_E_INVALID_REFERENCE_STRING = unchecked((int)0x800F021F);
+		/// <summary>
+		/// The specified machine name does not conform to UNC naming conventions.
+		/// </summary>
+		public const int SPAPI_E_INVALID_MACHINENAME = unchecked((int)0x800F0220);
+		/// <summary>
+		/// A general remote communication error occurred.
+		/// </summary>
+		public const int SPAPI_E_REMOTE_COMM_FAILURE = unchecked((int)0x800F0221);
+		/// <summary>
+		/// The machine selected for remote communication is not available at this time.
+		/// </summary>
+		public const int SPAPI_E_MACHINE_UNAVAILABLE = unchecked((int)0x800F0222);
+		/// <summary>
+		/// The Plug and Play service is not available on the remote machine.
+		/// </summary>
+		public const int SPAPI_E_NO_CONFIGMGR_SERVICES = unchecked((int)0x800F0223);
+		/// <summary>
+		/// The property page provider registry entry is invalid.
+		/// </summary>
+		public const int SPAPI_E_INVALID_PROPPAGE_PROVIDER = unchecked((int)0x800F0224);
+		/// <summary>
+		/// The requested device interface is not present in the system.
+		/// </summary>
+		public const int SPAPI_E_NO_SUCH_DEVICE_INTERFACE = unchecked((int)0x800F0225);
+		/// <summary>
+		/// The device's co-installer has additional work to perform after installation is complete.
+		/// </summary>
+		public const int SPAPI_E_DI_POSTPROCESSING_REQUIRED = unchecked((int)0x800F0226);
+		/// <summary>
+		/// The device's co-installer is invalid.
+		/// </summary>
+		public const int SPAPI_E_INVALID_COINSTALLER = unchecked((int)0x800F0227);
+		/// <summary>
+		/// There are no compatible drivers for this device.
+		/// </summary>
+		public const int SPAPI_E_NO_COMPAT_DRIVERS = unchecked((int)0x800F0228);
+		/// <summary>
+		/// There is no icon that represents this device or device type.
+		/// </summary>
+		public const int SPAPI_E_NO_DEVICE_ICON = unchecked((int)0x800F0229);
+		/// <summary>
+		/// A logical configuration specified in this INF is invalid.
+		/// </summary>
+		public const int SPAPI_E_INVALID_INF_LOGCONFIG = unchecked((int)0x800F022A);
+		/// <summary>
+		/// The class installer has denied the request to install or upgrade this device.
+		/// </summary>
+		public const int SPAPI_E_DI_DONT_INSTALL = unchecked((int)0x800F022B);
+		/// <summary>
+		/// One of the filter drivers installed for this device is invalid.
+		/// </summary>
+		public const int SPAPI_E_INVALID_FILTER_DRIVER = unchecked((int)0x800F022C);
+		/// <summary>
+		/// The driver selected for this device does not support this version of Windows.
+		/// </summary>
+		public const int SPAPI_E_NON_WINDOWS_NT_DRIVER = unchecked((int)0x800F022D);
+		/// <summary>
+		/// The driver selected for this device does not support Windows.
+		/// </summary>
+		public const int SPAPI_E_NON_WINDOWS_DRIVER = unchecked((int)0x800F022E);
+		/// <summary>
+		/// The third-party INF does not contain digital signature information.
+		/// </summary>
+		public const int SPAPI_E_NO_CATALOG_FOR_OEM_INF = unchecked((int)0x800F022F);
+		/// <summary>
+		/// An invalid attempt was made to use a device installation file queue for verification of digital signatures relative to other platforms.
+		/// </summary>
+		public const int SPAPI_E_DEVINSTALL_QUEUE_NONNATIVE = unchecked((int)0x800F0230);
+		/// <summary>
+		/// The device cannot be disabled.
+		/// </summary>
+		public const int SPAPI_E_NOT_DISABLEABLE = unchecked((int)0x800F0231);
+		/// <summary>
+		/// The device could not be dynamically removed.
+		/// </summary>
+		public const int SPAPI_E_CANT_REMOVE_DEVINST = unchecked((int)0x800F0232);
+		/// <summary>
+		/// Cannot copy to specified target.
+		/// </summary>
+		public const int SPAPI_E_INVALID_TARGET = unchecked((int)0x800F0233);
+		/// <summary>
+		/// Driver is not intended for this platform.
+		/// </summary>
+		public const int SPAPI_E_DRIVER_NONNATIVE = unchecked((int)0x800F0234);
+		/// <summary>
+		/// Operation not allowed in WOW64.
+		/// </summary>
+		public const int SPAPI_E_IN_WOW64 = unchecked((int)0x800F0235);
+		/// <summary>
+		/// The operation involving unsigned file copying was rolled back, so that a system restore point could be set.
+		/// </summary>
+		public const int SPAPI_E_SET_SYSTEM_RESTORE_POINT = unchecked((int)0x800F0236);
+		/// <summary>
+		/// An INF was copied into the Windows INF directory in an improper manner.
+		/// </summary>
+		public const int SPAPI_E_INCORRECTLY_COPIED_INF = unchecked((int)0x800F0237);
+		/// <summary>
+		/// The Security Configuration Editor (SCE) APIs have been disabled on this Embedded product.
+		/// </summary>
+		public const int SPAPI_E_SCE_DISABLED = unchecked((int)0x800F0238);
+		/// <summary>
+		/// An unknown exception was encountered.
+		/// </summary>
+		public const int SPAPI_E_UNKNOWN_EXCEPTION = unchecked((int)0x800F0239);
+		/// <summary>
+		/// A problem was encountered when accessing the Plug and Play registry database.
+		/// </summary>
+		public const int SPAPI_E_PNP_REGISTRY_ERROR = unchecked((int)0x800F023A);
+		/// <summary>
+		/// The requested operation is not supported for a remote machine.
+		/// </summary>
+		public const int SPAPI_E_REMOTE_REQUEST_UNSUPPORTED = unchecked((int)0x800F023B);
+		/// <summary>
+		/// The specified file is not an installed OEM INF.
+		/// </summary>
+		public const int SPAPI_E_NOT_AN_INSTALLED_OEM_INF = unchecked((int)0x800F023C);
+		/// <summary>
+		/// One or more devices are presently installed using the specified INF.
+		/// </summary>
+		public const int SPAPI_E_INF_IN_USE_BY_DEVICES = unchecked((int)0x800F023D);
+		/// <summary>
+		/// The requested device install operation is obsolete.
+		/// </summary>
+		public const int SPAPI_E_DI_FUNCTION_OBSOLETE = unchecked((int)0x800F023E);
+		/// <summary>
+		/// A file could not be verified because it does not have an associated catalog signed via Authenticode(tm).
+		/// </summary>
+		public const int SPAPI_E_NO_AUTHENTICODE_CATALOG = unchecked((int)0x800F023F);
+		/// <summary>
+		/// Authenticode(tm) signature verification is not supported for the specified INF.
+		/// </summary>
+		public const int SPAPI_E_AUTHENTICODE_DISALLOWED = unchecked((int)0x800F0240);
+		/// <summary>
+		/// The INF was signed with an Authenticode(tm) catalog from a trusted publisher.
+		/// </summary>
+		public const int SPAPI_E_AUTHENTICODE_TRUSTED_PUBLISHER = unchecked((int)0x800F0241);
+		/// <summary>
+		/// The publisher of an Authenticode(tm) signed catalog has not yet been established as trusted.
+		/// </summary>
+		public const int SPAPI_E_AUTHENTICODE_TRUST_NOT_ESTABLISHED = unchecked((int)0x800F0242);
+		/// <summary>
+		/// The publisher of an Authenticode(tm) signed catalog was not established as trusted.
+		/// </summary>
+		public const int SPAPI_E_AUTHENTICODE_PUBLISHER_NOT_TRUSTED = unchecked((int)0x800F0243);
+		/// <summary>
+		/// The software was tested for compliance with Windows Logo requirements on a different version of Windows, and may not be compatible with this version.
+		/// </summary>
+		public const int SPAPI_E_SIGNATURE_OSATTRIBUTE_MISMATCH = unchecked((int)0x800F0244);
+		/// <summary>
+		/// The file may only be validated by a catalog signed via Authenticode(tm).
+		/// </summary>
+		public const int SPAPI_E_ONLY_VALIDATE_VIA_AUTHENTICODE = unchecked((int)0x800F0245);
+		/// <summary>
+		/// One of the installers for this device cannot perform the installation at this time.
+		/// </summary>
+		public const int SPAPI_E_DEVICE_INSTALLER_NOT_READY = unchecked((int)0x800F0246);
+		/// <summary>
+		/// A problem was encountered while attempting to add the driver to the store.
+		/// </summary>
+		public const int SPAPI_E_DRIVER_STORE_ADD_FAILED = unchecked((int)0x800F0247);
+		/// <summary>
+		/// The installation of this device is forbidden by system policy. Contact your system administrator.
+		/// </summary>
+		public const int SPAPI_E_DEVICE_INSTALL_BLOCKED = unchecked((int)0x800F0248);
+		/// <summary>
+		/// The installation of this driver is forbidden by system policy. Contact your system administrator.
+		/// </summary>
+		public const int SPAPI_E_DRIVER_INSTALL_BLOCKED = unchecked((int)0x800F0249);
+		/// <summary>
+		/// The specified INF is the wrong type for this operation.
+		/// </summary>
+		public const int SPAPI_E_WRONG_INF_TYPE = unchecked((int)0x800F024A);
+		/// <summary>
+		/// The hash for the file is not present in the specified catalog file. The file is likely corrupt or the victim of tampering.
+		/// </summary>
+		public const int SPAPI_E_FILE_HASH_NOT_IN_CATALOG = unchecked((int)0x800F024B);
+		/// <summary>
+		/// A problem was encountered while attempting to delete the driver from the store.
+		/// </summary>
+		public const int SPAPI_E_DRIVER_STORE_DELETE_FAILED = unchecked((int)0x800F024C);
+		/// <summary>
+		/// An unrecoverable stack overflow was encountered.
+		/// </summary>
+		public const int SPAPI_E_UNRECOVERABLE_STACK_OVERFLOW = unchecked((int)0x800F0300);
+		/// <summary>
+		/// No installed components were detected.
+		/// </summary>
+		public const int SPAPI_E_ERROR_NOT_INSTALLED = unchecked((int)0x800F1000);
+		/// <summary>
+		/// An internal consistency check failed.
+		/// </summary>
+		public const int SCARD_F_INTERNAL_ERROR = unchecked((int)0x80100001);
+		/// <summary>
+		/// The action was canceled by an SCardCancel request.
+		/// </summary>
+		public const int SCARD_E_CANCELLED = unchecked((int)0x80100002);
+		/// <summary>
+		/// The supplied handle was invalid.
+		/// </summary>
+		public const int SCARD_E_INVALID_HANDLE = unchecked((int)0x80100003);
+		/// <summary>
+		/// One or more of the supplied parameters could not be properly interpreted.
+		/// </summary>
+		public const int SCARD_E_INVALID_PARAMETER = unchecked((int)0x80100004);
+		/// <summary>
+		/// Registry startup information is missing or invalid.
+		/// </summary>
+		public const int SCARD_E_INVALID_TARGET = unchecked((int)0x80100005);
+		/// <summary>
+		/// Not enough memory available to complete this command.
+		/// </summary>
+		public const int SCARD_E_NO_MEMORY = unchecked((int)0x80100006);
+		/// <summary>
+		/// An internal consistency timer has expired.
+		/// </summary>
+		public const int SCARD_F_WAITED_TOO_LONG = unchecked((int)0x80100007);
+		/// <summary>
+		/// The data buffer to receive returned data is too small for the returned data.
+		/// </summary>
+		public const int SCARD_E_INSUFFICIENT_BUFFER = unchecked((int)0x80100008);
+		/// <summary>
+		/// The specified reader name is not recognized.
+		/// </summary>
+		public const int SCARD_E_UNKNOWN_READER = unchecked((int)0x80100009);
+		/// <summary>
+		/// The user-specified timeout value has expired.
+		/// </summary>
+		public const int SCARD_E_TIMEOUT = unchecked((int)0x8010000A);
+		/// <summary>
+		/// The smart card cannot be accessed because of other connections outstanding.
+		/// </summary>
+		public const int SCARD_E_SHARING_VIOLATION = unchecked((int)0x8010000B);
+		/// <summary>
+		/// The operation requires a Smart Card, but no Smart Card is currently in the device.
+		/// </summary>
+		public const int SCARD_E_NO_SMARTCARD = unchecked((int)0x8010000C);
+		/// <summary>
+		/// The specified smart card name is not recognized.
+		/// </summary>
+		public const int SCARD_E_UNKNOWN_CARD = unchecked((int)0x8010000D);
+		/// <summary>
+		/// The system could not dispose of the media in the requested manner.
+		/// </summary>
+		public const int SCARD_E_CANT_DISPOSE = unchecked((int)0x8010000E);
+		/// <summary>
+		/// The requested protocols are incompatible with the protocol currently in use with the smart card.
+		/// </summary>
+		public const int SCARD_E_PROTO_MISMATCH = unchecked((int)0x8010000F);
+		/// <summary>
+		/// The reader or smart card is not ready to accept commands.
+		/// </summary>
+		public const int SCARD_E_NOT_READY = unchecked((int)0x80100010);
+		/// <summary>
+		/// One or more of the supplied parameters values could not be properly interpreted.
+		/// </summary>
+		public const int SCARD_E_INVALID_VALUE = unchecked((int)0x80100011);
+		/// <summary>
+		/// The action was canceled by the system, presumably to log off or shut down.
+		/// </summary>
+		public const int SCARD_E_SYSTEM_CANCELLED = unchecked((int)0x80100012);
+		/// <summary>
+		/// An internal communications error has been detected.
+		/// </summary>
+		public const int SCARD_F_COMM_ERROR = unchecked((int)0x80100013);
+		/// <summary>
+		/// An internal error has been detected, but the source is unknown.
+		/// </summary>
+		public const int SCARD_F_UNKNOWN_ERROR = unchecked((int)0x80100014);
+		/// <summary>
+		/// An ATR obtained from the registry is not a valid ATR string.
+		/// </summary>
+		public const int SCARD_E_INVALID_ATR = unchecked((int)0x80100015);
+		/// <summary>
+		/// An attempt was made to end a non-existent transaction.
+		/// </summary>
+		public const int SCARD_E_NOT_TRANSACTED = unchecked((int)0x80100016);
+		/// <summary>
+		/// The specified reader is not currently available for use.
+		/// </summary>
+		public const int SCARD_E_READER_UNAVAILABLE = unchecked((int)0x80100017);
+		/// <summary>
+		/// The operation has been aborted to allow the server application to exit.
+		/// </summary>
+		public const int SCARD_P_SHUTDOWN = unchecked((int)0x80100018);
+		/// <summary>
+		/// The PCI Receive buffer was too small.
+		/// </summary>
+		public const int SCARD_E_PCI_TOO_SMALL = unchecked((int)0x80100019);
+		/// <summary>
+		/// The reader driver does not meet minimal requirements for support.
+		/// </summary>
+		public const int SCARD_E_READER_UNSUPPORTED = unchecked((int)0x8010001A);
+		/// <summary>
+		/// The reader driver did not produce a unique reader name.
+		/// </summary>
+		public const int SCARD_E_DUPLICATE_READER = unchecked((int)0x8010001B);
+		/// <summary>
+		/// The smart card does not meet minimal requirements for support.
+		/// </summary>
+		public const int SCARD_E_CARD_UNSUPPORTED = unchecked((int)0x8010001C);
+		/// <summary>
+		/// The Smart card resource manager is not running.
+		/// </summary>
+		public const int SCARD_E_NO_SERVICE = unchecked((int)0x8010001D);
+		/// <summary>
+		/// The Smart card resource manager has shut down.
+		/// </summary>
+		public const int SCARD_E_SERVICE_STOPPED = unchecked((int)0x8010001E);
+		/// <summary>
+		/// An unexpected card error has occurred.
+		/// </summary>
+		public const int SCARD_E_UNEXPECTED = unchecked((int)0x8010001F);
+		/// <summary>
+		/// No Primary Provider can be found for the smart card.
+		/// </summary>
+		public const int SCARD_E_ICC_INSTALLATION = unchecked((int)0x80100020);
+		/// <summary>
+		/// The requested order of object creation is not supported.
+		/// </summary>
+		public const int SCARD_E_ICC_CREATEORDER = unchecked((int)0x80100021);
+		/// <summary>
+		/// This smart card does not support the requested feature.
+		/// </summary>
+		public const int SCARD_E_UNSUPPORTED_FEATURE = unchecked((int)0x80100022);
+		/// <summary>
+		/// The identified directory does not exist in the smart card.
+		/// </summary>
+		public const int SCARD_E_DIR_NOT_FOUND = unchecked((int)0x80100023);
+		/// <summary>
+		/// The identified file does not exist in the smart card.
+		/// </summary>
+		public const int SCARD_E_FILE_NOT_FOUND = unchecked((int)0x80100024);
+		/// <summary>
+		/// The supplied path does not represent a smart card directory.
+		/// </summary>
+		public const int SCARD_E_NO_DIR = unchecked((int)0x80100025);
+		/// <summary>
+		/// The supplied path does not represent a smart card file.
+		/// </summary>
+		public const int SCARD_E_NO_FILE = unchecked((int)0x80100026);
+		/// <summary>
+		/// Access is denied to this file.
+		/// </summary>
+		public const int SCARD_E_NO_ACCESS = unchecked((int)0x80100027);
+		/// <summary>
+		/// The smartcard does not have enough memory to store the information.
+		/// </summary>
+		public const int SCARD_E_WRITE_TOO_MANY = unchecked((int)0x80100028);
+		/// <summary>
+		/// There was an error trying to set the smart card file object pointer.
+		/// </summary>
+		public const int SCARD_E_BAD_SEEK = unchecked((int)0x80100029);
+		/// <summary>
+		/// The supplied PIN is incorrect.
+		/// </summary>
+		public const int SCARD_E_INVALID_CHV = unchecked((int)0x8010002A);
+		/// <summary>
+		/// An unrecognized error code was returned from a layered component.
+		/// </summary>
+		public const int SCARD_E_UNKNOWN_RES_MNG = unchecked((int)0x8010002B);
+		/// <summary>
+		/// The requested certificate does not exist.
+		/// </summary>
+		public const int SCARD_E_NO_SUCH_CERTIFICATE = unchecked((int)0x8010002C);
+		/// <summary>
+		/// The requested certificate could not be obtained.
+		/// </summary>
+		public const int SCARD_E_CERTIFICATE_UNAVAILABLE = unchecked((int)0x8010002D);
+		/// <summary>
+		/// Cannot find a smart card reader.
+		/// </summary>
+		public const int SCARD_E_NO_READERS_AVAILABLE = unchecked((int)0x8010002E);
+		/// <summary>
+		/// A communications error with the smart card has been detected. Retry the operation.
+		/// </summary>
+		public const int SCARD_E_COMM_DATA_LOST = unchecked((int)0x8010002F);
+		/// <summary>
+		/// The requested key container does not exist on the smart card.
+		/// </summary>
+		public const int SCARD_E_NO_KEY_CONTAINER = unchecked((int)0x80100030);
+		/// <summary>
+		/// The Smart card resource manager is too busy to complete this operation.
+		/// </summary>
+		public const int SCARD_E_SERVER_TOO_BUSY = unchecked((int)0x80100031);
+		/// <summary>
+		/// The smart card PIN cache has expired.
+		/// </summary>
+		public const int SCARD_E_PIN_CACHE_EXPIRED = unchecked((int)0x80100032);
+		/// <summary>
+		/// The smart card PIN cannot be cached.
+		/// </summary>
+		public const int SCARD_E_NO_PIN_CACHE = unchecked((int)0x80100033);
+		/// <summary>
+		/// The smart card is read only and cannot be written to.
+		/// </summary>
+		public const int SCARD_E_READ_ONLY_CARD = unchecked((int)0x80100034);
+		/// <summary>
+		/// The reader cannot communicate with the smart card, due to ATR configuration conflicts.
+		/// </summary>
+		public const int SCARD_W_UNSUPPORTED_CARD = unchecked((int)0x80100065);
+		/// <summary>
+		/// The smart card is not responding to a reset.
+		/// </summary>
+		public const int SCARD_W_UNRESPONSIVE_CARD = unchecked((int)0x80100066);
+		/// <summary>
+		/// Power has been removed from the smart card, so that further communication is not possible.
+		/// </summary>
+		public const int SCARD_W_UNPOWERED_CARD = unchecked((int)0x80100067);
+		/// <summary>
+		/// The smart card has been reset, so any shared state information is invalid.
+		/// </summary>
+		public const int SCARD_W_RESET_CARD = unchecked((int)0x80100068);
+		/// <summary>
+		/// The smart card has been removed, so that further communication is not possible.
+		/// </summary>
+		public const int SCARD_W_REMOVED_CARD = unchecked((int)0x80100069);
+		/// <summary>
+		/// Access was denied because of a security violation.
+		/// </summary>
+		public const int SCARD_W_SECURITY_VIOLATION = unchecked((int)0x8010006A);
+		/// <summary>
+		/// The card cannot be accessed because the wrong PIN was presented.
+		/// </summary>
+		public const int SCARD_W_WRONG_CHV = unchecked((int)0x8010006B);
+		/// <summary>
+		/// The card cannot be accessed because the maximum number of PIN entry attempts has been reached.
+		/// </summary>
+		public const int SCARD_W_CHV_BLOCKED = unchecked((int)0x8010006C);
+		/// <summary>
+		/// The end of the smart card file has been reached.
+		/// </summary>
+		public const int SCARD_W_EOF = unchecked((int)0x8010006D);
+		/// <summary>
+		/// The action was canceled by the user.
+		/// </summary>
+		public const int SCARD_W_CANCELLED_BY_USER = unchecked((int)0x8010006E);
+		/// <summary>
+		/// No PIN was presented to the smart card.
+		/// </summary>
+		public const int SCARD_W_CARD_NOT_AUTHENTICATED = unchecked((int)0x8010006F);
+		/// <summary>
+		/// The requested item could not be found in the cache.
+		/// </summary>
+		public const int SCARD_W_CACHE_ITEM_NOT_FOUND = unchecked((int)0x80100070);
+		/// <summary>
+		/// The requested cache item is too old and was deleted from the cache.
+		/// </summary>
+		public const int SCARD_W_CACHE_ITEM_STALE = unchecked((int)0x80100071);
+		/// <summary>
+		/// The new cache item exceeds the maximum per-item size defined for the cache.
+		/// </summary>
+		public const int SCARD_W_CACHE_ITEM_TOO_BIG = unchecked((int)0x80100072);
+		/// <summary>
+		/// Authentication target is invalid or not configured correctly.
+		/// </summary>
+		public const int ONL_E_INVALID_AUTHENTICATION_TARGET = unchecked((int)0x8A020001);
+		/// <summary>
+		/// Your application cannot get the Online Id properties due to the Terms of Use accepted by the user.
+		/// </summary>
+		public const int ONL_E_ACCESS_DENIED_BY_TOU = unchecked((int)0x8A020002);
+		#endregion
+
+		#region COMADMIN, FILTER, GRAPHICS
+		/// <summary>
+		/// Errors occurred accessing one or more objects - the ErrorInfo collection may have more detail
+		/// </summary>
+		public const int COMADMIN_E_OBJECTERRORS = unchecked((int)0x80110401);
+		/// <summary>
+		/// One or more of the object's properties are missing or invalid
+		/// </summary>
+		public const int COMADMIN_E_OBJECTINVALID = unchecked((int)0x80110402);
+		/// <summary>
+		/// The object was not found in the catalog
+		/// </summary>
+		public const int COMADMIN_E_KEYMISSING = unchecked((int)0x80110403);
+		/// <summary>
+		/// The object is already registered
+		/// </summary>
+		public const int COMADMIN_E_ALREADYINSTALLED = unchecked((int)0x80110404);
+		/// <summary>
+		/// Error occurred writing to the application file
+		/// </summary>
+		public const int COMADMIN_E_APP_FILE_WRITEFAIL = unchecked((int)0x80110407);
+		/// <summary>
+		/// Error occurred reading the application file
+		/// </summary>
+		public const int COMADMIN_E_APP_FILE_READFAIL = unchecked((int)0x80110408);
+		/// <summary>
+		/// Invalid version number in application file
+		/// </summary>
+		public const int COMADMIN_E_APP_FILE_VERSION = unchecked((int)0x80110409);
+		/// <summary>
+		/// The file path is invalid
+		/// </summary>
+		public const int COMADMIN_E_BADPATH = unchecked((int)0x8011040A);
+		/// <summary>
+		/// The application is already installed
+		/// </summary>
+		public const int COMADMIN_E_APPLICATIONEXISTS = unchecked((int)0x8011040B);
+		/// <summary>
+		/// The role already exists
+		/// </summary>
+		public const int COMADMIN_E_ROLEEXISTS = unchecked((int)0x8011040C);
+		/// <summary>
+		/// An error occurred copying the file
+		/// </summary>
+		public const int COMADMIN_E_CANTCOPYFILE = unchecked((int)0x8011040D);
+		/// <summary>
+		/// One or more users are not valid
+		/// </summary>
+		public const int COMADMIN_E_NOUSER = unchecked((int)0x8011040F);
+		/// <summary>
+		/// One or more users in the application file are not valid
+		/// </summary>
+		public const int COMADMIN_E_INVALIDUSERIDS = unchecked((int)0x80110410);
+		/// <summary>
+		/// The component's CLSID is missing or corrupt
+		/// </summary>
+		public const int COMADMIN_E_NOREGISTRYCLSID = unchecked((int)0x80110411);
+		/// <summary>
+		/// The component's progID is missing or corrupt
+		/// </summary>
+		public const int COMADMIN_E_BADREGISTRYPROGID = unchecked((int)0x80110412);
+		/// <summary>
+		/// Unable to set required authentication level for update request
+		/// </summary>
+		public const int COMADMIN_E_AUTHENTICATIONLEVEL = unchecked((int)0x80110413);
+		/// <summary>
+		/// The identity or password set on the application is not valid
+		/// </summary>
+		public const int COMADMIN_E_USERPASSWDNOTVALID = unchecked((int)0x80110414);
+		/// <summary>
+		/// Application file CLSIDs or IIDs do not match corresponding DLLs
+		/// </summary>
+		public const int COMADMIN_E_CLSIDORIIDMISMATCH = unchecked((int)0x80110418);
+		/// <summary>
+		/// Interface information is either missing or changed
+		/// </summary>
+		public const int COMADMIN_E_REMOTEINTERFACE = unchecked((int)0x80110419);
+		/// <summary>
+		/// DllRegisterServer failed on component install
+		/// </summary>
+		public const int COMADMIN_E_DLLREGISTERSERVER = unchecked((int)0x8011041A);
+		/// <summary>
+		/// No server file share available
+		/// </summary>
+		public const int COMADMIN_E_NOSERVERSHARE = unchecked((int)0x8011041B);
+		/// <summary>
+		/// DLL could not be loaded
+		/// </summary>
+		public const int COMADMIN_E_DLLLOADFAILED = unchecked((int)0x8011041D);
+		/// <summary>
+		/// The registered TypeLib ID is not valid
+		/// </summary>
+		public const int COMADMIN_E_BADREGISTRYLIBID = unchecked((int)0x8011041E);
+		/// <summary>
+		/// Application install directory not found
+		/// </summary>
+		public const int COMADMIN_E_APPDIRNOTFOUND = unchecked((int)0x8011041F);
+		/// <summary>
+		/// Errors occurred while in the component registrar
+		/// </summary>
+		public const int COMADMIN_E_REGISTRARFAILED = unchecked((int)0x80110423);
+		/// <summary>
+		/// The file does not exist
+		/// </summary>
+		public const int COMADMIN_E_COMPFILE_DOESNOTEXIST = unchecked((int)0x80110424);
+		/// <summary>
+		/// The DLL could not be loaded
+		/// </summary>
+		public const int COMADMIN_E_COMPFILE_LOADDLLFAIL = unchecked((int)0x80110425);
+		/// <summary>
+		/// GetClassObject failed in the DLL
+		/// </summary>
+		public const int COMADMIN_E_COMPFILE_GETCLASSOBJ = unchecked((int)0x80110426);
+		/// <summary>
+		/// The DLL does not support the components listed in the TypeLib
+		/// </summary>
+		public const int COMADMIN_E_COMPFILE_CLASSNOTAVAIL = unchecked((int)0x80110427);
+		/// <summary>
+		/// The TypeLib could not be loaded
+		/// </summary>
+		public const int COMADMIN_E_COMPFILE_BADTLB = unchecked((int)0x80110428);
+		/// <summary>
+		/// The file does not contain components or component information
+		/// </summary>
+		public const int COMADMIN_E_COMPFILE_NOTINSTALLABLE = unchecked((int)0x80110429);
+		/// <summary>
+		/// Changes to this object and its sub-objects have been disabled
+		/// </summary>
+		public const int COMADMIN_E_NOTCHANGEABLE = unchecked((int)0x8011042A);
+		/// <summary>
+		/// The delete function has been disabled for this object
+		/// </summary>
+		public const int COMADMIN_E_NOTDELETEABLE = unchecked((int)0x8011042B);
+		/// <summary>
+		/// The server catalog version is not supported
+		/// </summary>
+		public const int COMADMIN_E_SESSION = unchecked((int)0x8011042C);
+		/// <summary>
+		/// The component move was disallowed, because the source or destination application is either a system application or currently locked against changes
+		/// </summary>
+		public const int COMADMIN_E_COMP_MOVE_LOCKED = unchecked((int)0x8011042D);
+		/// <summary>
+		/// The component move failed because the destination application no longer exists
+		/// </summary>
+		public const int COMADMIN_E_COMP_MOVE_BAD_DEST = unchecked((int)0x8011042E);
+		/// <summary>
+		/// The system was unable to register the TypeLib
+		/// </summary>
+		public const int COMADMIN_E_REGISTERTLB = unchecked((int)0x80110430);
+		/// <summary>
+		/// This operation cannot be performed on the system application
+		/// </summary>
+		public const int COMADMIN_E_SYSTEMAPP = unchecked((int)0x80110433);
+		/// <summary>
+		/// The component registrar referenced in this file is not available
+		/// </summary>
+		public const int COMADMIN_E_COMPFILE_NOREGISTRAR = unchecked((int)0x80110434);
+		/// <summary>
+		/// A component in the same DLL is already installed
+		/// </summary>
+		public const int COMADMIN_E_COREQCOMPINSTALLED = unchecked((int)0x80110435);
+		/// <summary>
+		/// The service is not installed
+		/// </summary>
+		public const int COMADMIN_E_SERVICENOTINSTALLED = unchecked((int)0x80110436);
+		/// <summary>
+		/// One or more property settings are either invalid or in conflict with each other
+		/// </summary>
+		public const int COMADMIN_E_PROPERTYSAVEFAILED = unchecked((int)0x80110437);
+		/// <summary>
+		/// The object you are attempting to add or rename already exists
+		/// </summary>
+		public const int COMADMIN_E_OBJECTEXISTS = unchecked((int)0x80110438);
+		/// <summary>
+		/// The component already exists
+		/// </summary>
+		public const int COMADMIN_E_COMPONENTEXISTS = unchecked((int)0x80110439);
+		/// <summary>
+		/// The registration file is corrupt
+		/// </summary>
+		public const int COMADMIN_E_REGFILE_CORRUPT = unchecked((int)0x8011043B);
+		/// <summary>
+		/// The property value is too large
+		/// </summary>
+		public const int COMADMIN_E_PROPERTY_OVERFLOW = unchecked((int)0x8011043C);
+		/// <summary>
+		/// Object was not found in registry
+		/// </summary>
+		public const int COMADMIN_E_NOTINREGISTRY = unchecked((int)0x8011043E);
+		/// <summary>
+		/// This object is not poolable
+		/// </summary>
+		public const int COMADMIN_E_OBJECTNOTPOOLABLE = unchecked((int)0x8011043F);
+		/// <summary>
+		/// A CLSID with the same GUID as the new application ID is already installed on this machine
+		/// </summary>
+		public const int COMADMIN_E_APPLID_MATCHES_CLSID = unchecked((int)0x80110446);
+		/// <summary>
+		/// A role assigned to a component, interface, or method did not exist in the application
+		/// </summary>
+		public const int COMADMIN_E_ROLE_DOES_NOT_EXIST = unchecked((int)0x80110447);
+		/// <summary>
+		/// You must have components in an application in order to start the application
+		/// </summary>
+		public const int COMADMIN_E_START_APP_NEEDS_COMPONENTS = unchecked((int)0x80110448);
+		/// <summary>
+		/// This operation is not enabled on this platform
+		/// </summary>
+		public const int COMADMIN_E_REQUIRES_DIFFERENT_PLATFORM = unchecked((int)0x80110449);
+		/// <summary>
+		/// Application Proxy is not exportable
+		/// </summary>
+		public const int COMADMIN_E_CAN_NOT_EXPORT_APP_PROXY = unchecked((int)0x8011044A);
+		/// <summary>
+		/// Failed to start application because it is either a library application or an application proxy
+		/// </summary>
+		public const int COMADMIN_E_CAN_NOT_START_APP = unchecked((int)0x8011044B);
+		/// <summary>
+		/// System application is not exportable
+		/// </summary>
+		public const int COMADMIN_E_CAN_NOT_EXPORT_SYS_APP = unchecked((int)0x8011044C);
+		/// <summary>
+		/// Cannot subscribe to this component (the component may have been imported)
+		/// </summary>
+		public const int COMADMIN_E_CANT_SUBSCRIBE_TO_COMPONENT = unchecked((int)0x8011044D);
+		/// <summary>
+		/// An event class cannot also be a subscriber component
+		/// </summary>
+		public const int COMADMIN_E_EVENTCLASS_CANT_BE_SUBSCRIBER = unchecked((int)0x8011044E);
+		/// <summary>
+		/// Library applications and application proxies are incompatible
+		/// </summary>
+		public const int COMADMIN_E_LIB_APP_PROXY_INCOMPATIBLE = unchecked((int)0x8011044F);
+		/// <summary>
+		/// This function is valid for the base partition only
+		/// </summary>
+		public const int COMADMIN_E_BASE_PARTITION_ONLY = unchecked((int)0x80110450);
+		/// <summary>
+		/// You cannot start an application that has been disabled
+		/// </summary>
+		public const int COMADMIN_E_START_APP_DISABLED = unchecked((int)0x80110451);
+		/// <summary>
+		/// The specified partition name is already in use on this computer
+		/// </summary>
+		public const int COMADMIN_E_CAT_DUPLICATE_PARTITION_NAME = unchecked((int)0x80110457);
+		/// <summary>
+		/// The specified partition name is invalid. Check that the name contains at least one visible character
+		/// </summary>
+		public const int COMADMIN_E_CAT_INVALID_PARTITION_NAME = unchecked((int)0x80110458);
+		/// <summary>
+		/// The partition cannot be deleted because it is the default partition for one or more users
+		/// </summary>
+		public const int COMADMIN_E_CAT_PARTITION_IN_USE = unchecked((int)0x80110459);
+		/// <summary>
+		/// The partition cannot be exported, because one or more components in the partition have the same file name
+		/// </summary>
+		public const int COMADMIN_E_FILE_PARTITION_DUPLICATE_FILES = unchecked((int)0x8011045A);
+		/// <summary>
+		/// Applications that contain one or more imported components cannot be installed into a non-base partition
+		/// </summary>
+		public const int COMADMIN_E_CAT_IMPORTED_COMPONENTS_NOT_ALLOWED = unchecked((int)0x8011045B);
+		/// <summary>
+		/// The application name is not unique and cannot be resolved to an application id
+		/// </summary>
+		public const int COMADMIN_E_AMBIGUOUS_APPLICATION_NAME = unchecked((int)0x8011045C);
+		/// <summary>
+		/// The partition name is not unique and cannot be resolved to a partition id
+		/// </summary>
+		public const int COMADMIN_E_AMBIGUOUS_PARTITION_NAME = unchecked((int)0x8011045D);
+		/// <summary>
+		/// The COM+ registry database has not been initialized
+		/// </summary>
+		public const int COMADMIN_E_REGDB_NOTINITIALIZED = unchecked((int)0x80110472);
+		/// <summary>
+		/// The COM+ registry database is not open
+		/// </summary>
+		public const int COMADMIN_E_REGDB_NOTOPEN = unchecked((int)0x80110473);
+		/// <summary>
+		/// The COM+ registry database detected a system error
+		/// </summary>
+		public const int COMADMIN_E_REGDB_SYSTEMERR = unchecked((int)0x80110474);
+		/// <summary>
+		/// The COM+ registry database is already running
+		/// </summary>
+		public const int COMADMIN_E_REGDB_ALREADYRUNNING = unchecked((int)0x80110475);
+		/// <summary>
+		/// This version of the COM+ registry database cannot be migrated
+		/// </summary>
+		public const int COMADMIN_E_MIG_VERSIONNOTSUPPORTED = unchecked((int)0x80110480);
+		/// <summary>
+		/// The schema version to be migrated could not be found in the COM+ registry database
+		/// </summary>
+		public const int COMADMIN_E_MIG_SCHEMANOTFOUND = unchecked((int)0x80110481);
+		/// <summary>
+		/// There was a type mismatch between binaries
+		/// </summary>
+		public const int COMADMIN_E_CAT_BITNESSMISMATCH = unchecked((int)0x80110482);
+		/// <summary>
+		/// A binary of unknown or invalid type was provided
+		/// </summary>
+		public const int COMADMIN_E_CAT_UNACCEPTABLEBITNESS = unchecked((int)0x80110483);
+		/// <summary>
+		/// There was a type mismatch between a binary and an application
+		/// </summary>
+		public const int COMADMIN_E_CAT_WRONGAPPBITNESS = unchecked((int)0x80110484);
+		/// <summary>
+		/// The application cannot be paused or resumed
+		/// </summary>
+		public const int COMADMIN_E_CAT_PAUSE_RESUME_NOT_SUPPORTED = unchecked((int)0x80110485);
+		/// <summary>
+		/// The COM+ Catalog Server threw an exception during execution
+		/// </summary>
+		public const int COMADMIN_E_CAT_SERVERFAULT = unchecked((int)0x80110486);
+		/// <summary>
+		/// Only COM+ Applications marked "queued" can be invoked using the "queue" moniker
+		/// </summary>
+		public const int COMQC_E_APPLICATION_NOT_QUEUED = unchecked((int)0x80110600);
+		/// <summary>
+		/// At least one interface must be marked "queued" in order to create a queued component instance with the "queue" moniker
+		/// </summary>
+		public const int COMQC_E_NO_QUEUEABLE_INTERFACES = unchecked((int)0x80110601);
+		/// <summary>
+		/// MSMQ is required for the requested operation and is not installed
+		/// </summary>
+		public const int COMQC_E_QUEUING_SERVICE_NOT_AVAILABLE = unchecked((int)0x80110602);
+		/// <summary>
+		/// Unable to marshal an interface that does not support IPersistStream
+		/// </summary>
+		public const int COMQC_E_NO_IPERSISTSTREAM = unchecked((int)0x80110603);
+		/// <summary>
+		/// The message is improperly formatted or was damaged in transit
+		/// </summary>
+		public const int COMQC_E_BAD_MESSAGE = unchecked((int)0x80110604);
+		/// <summary>
+		/// An unauthenticated message was received by an application that accepts only authenticated messages
+		/// </summary>
+		public const int COMQC_E_UNAUTHENTICATED = unchecked((int)0x80110605);
+		/// <summary>
+		/// The message was requeued or moved by a user not in the "QC Trusted User" role
+		/// </summary>
+		public const int COMQC_E_UNTRUSTED_ENQUEUER = unchecked((int)0x80110606);
+		/// <summary>
+		/// Cannot create a duplicate resource of type Distributed Transaction Coordinator
+		/// </summary>
+		public const int MSDTC_E_DUPLICATE_RESOURCE = unchecked((int)0x80110701);
+		/// <summary>
+		/// One of the objects being inserted or updated does not belong to a valid parent collection
+		/// </summary>
+		public const int COMADMIN_E_OBJECT_PARENT_MISSING = unchecked((int)0x80110808);
+		/// <summary>
+		/// One of the specified objects cannot be found
+		/// </summary>
+		public const int COMADMIN_E_OBJECT_DOES_NOT_EXIST = unchecked((int)0x80110809);
+		/// <summary>
+		/// The specified application is not currently running
+		/// </summary>
+		public const int COMADMIN_E_APP_NOT_RUNNING = unchecked((int)0x8011080A);
+		/// <summary>
+		/// The partition(s) specified are not valid.
+		/// </summary>
+		public const int COMADMIN_E_INVALID_PARTITION = unchecked((int)0x8011080B);
+		/// <summary>
+		/// COM+ applications that run as NT service may not be pooled or recycled
+		/// </summary>
+		public const int COMADMIN_E_SVCAPP_NOT_POOLABLE_OR_RECYCLABLE = unchecked((int)0x8011080D);
+		/// <summary>
+		/// One or more users are already assigned to a local partition set.
+		/// </summary>
+		public const int COMADMIN_E_USER_IN_SET = unchecked((int)0x8011080E);
+		/// <summary>
+		/// Library applications may not be recycled.
+		/// </summary>
+		public const int COMADMIN_E_CANTRECYCLELIBRARYAPPS = unchecked((int)0x8011080F);
+		/// <summary>
+		/// Applications running as NT services may not be recycled.
+		/// </summary>
+		public const int COMADMIN_E_CANTRECYCLESERVICEAPPS = unchecked((int)0x80110811);
+		/// <summary>
+		/// The process has already been recycled.
+		/// </summary>
+		public const int COMADMIN_E_PROCESSALREADYRECYCLED = unchecked((int)0x80110812);
+		/// <summary>
+		/// A paused process may not be recycled.
+		/// </summary>
+		public const int COMADMIN_E_PAUSEDPROCESSMAYNOTBERECYCLED = unchecked((int)0x80110813);
+		/// <summary>
+		/// Library applications may not be NT services.
+		/// </summary>
+		public const int COMADMIN_E_CANTMAKEINPROCSERVICE = unchecked((int)0x80110814);
+		/// <summary>
+		/// The ProgID provided to the copy operation is invalid. The ProgID is in use by another registered CLSID.
+		/// </summary>
+		public const int COMADMIN_E_PROGIDINUSEBYCLSID = unchecked((int)0x80110815);
+		/// <summary>
+		/// The partition specified as default is not a member of the partition set.
+		/// </summary>
+		public const int COMADMIN_E_DEFAULT_PARTITION_NOT_IN_SET = unchecked((int)0x80110816);
+		/// <summary>
+		/// A recycled process may not be paused.
+		/// </summary>
+		public const int COMADMIN_E_RECYCLEDPROCESSMAYNOTBEPAUSED = unchecked((int)0x80110817);
+		/// <summary>
+		/// Access to the specified partition is denied.
+		/// </summary>
+		public const int COMADMIN_E_PARTITION_ACCESSDENIED = unchecked((int)0x80110818);
+		/// <summary>
+		/// Only Application Files (*.MSI files) can be installed into partitions.
+		/// </summary>
+		public const int COMADMIN_E_PARTITION_MSI_ONLY = unchecked((int)0x80110819);
+		/// <summary>
+		/// Applications containing one or more legacy components may not be exported to 1.0 format.
+		/// </summary>
+		public const int COMADMIN_E_LEGACYCOMPS_NOT_ALLOWED_IN_1_0_FORMAT = unchecked((int)0x8011081A);
+		/// <summary>
+		/// Legacy components may not exist in non-base partitions.
+		/// </summary>
+		public const int COMADMIN_E_LEGACYCOMPS_NOT_ALLOWED_IN_NONBASE_PARTITIONS = unchecked((int)0x8011081B);
+		/// <summary>
+		/// A component cannot be moved (or copied) from the System Application, an application proxy or a non-changeable application
+		/// </summary>
+		public const int COMADMIN_E_COMP_MOVE_SOURCE = unchecked((int)0x8011081C);
+		/// <summary>
+		/// A component cannot be moved (or copied) to the System Application, an application proxy or a non-changeable application
+		/// </summary>
+		public const int COMADMIN_E_COMP_MOVE_DEST = unchecked((int)0x8011081D);
+		/// <summary>
+		/// A private component cannot be moved (or copied) to a library application or to the base partition
+		/// </summary>
+		public const int COMADMIN_E_COMP_MOVE_PRIVATE = unchecked((int)0x8011081E);
+		/// <summary>
+		/// The Base Application Partition exists in all partition sets and cannot be removed.
+		/// </summary>
+		public const int COMADMIN_E_BASEPARTITION_REQUIRED_IN_SET = unchecked((int)0x8011081F);
+		/// <summary>
+		/// Event Class components cannot be aliased.
+		/// </summary>
+		public const int COMADMIN_E_CANNOT_ALIAS_EVENTCLASS = unchecked((int)0x80110820);
+		/// <summary>
+		/// Access is denied because the component is private.
+		/// </summary>
+		public const int COMADMIN_E_PRIVATE_ACCESSDENIED = unchecked((int)0x80110821);
+		/// <summary>
+		/// The specified SAFER level is invalid.
+		/// </summary>
+		public const int COMADMIN_E_SAFERINVALID = unchecked((int)0x80110822);
+		/// <summary>
+		/// The specified user cannot write to the system registry
+		/// </summary>
+		public const int COMADMIN_E_REGISTRY_ACCESSDENIED = unchecked((int)0x80110823);
+		/// <summary>
+		/// COM+ partitions are currently disabled.
+		/// </summary>
+		public const int COMADMIN_E_PARTITIONS_DISABLED = unchecked((int)0x80110824);
+		/// <summary>
+		/// The IO was completed by a filter.
+		/// </summary>
+		public const int ERROR_FLT_IO_COMPLETE = 0x001F0001;
+		/// <summary>
+		/// A handler was not defined by the filter for this operation.
+		/// </summary>
+		public const int ERROR_FLT_NO_HANDLER_DEFINED = unchecked((int)0x801F0001);
+		/// <summary>
+		/// A context is already defined for this object.
+		/// </summary>
+		public const int ERROR_FLT_CONTEXT_ALREADY_DEFINED = unchecked((int)0x801F0002);
+		/// <summary>
+		/// Asynchronous requests are not valid for this operation.
+		/// </summary>
+		public const int ERROR_FLT_INVALID_ASYNCHRONOUS_REQUEST = unchecked((int)0x801F0003);
+		/// <summary>
+		/// Disallow the Fast IO path for this operation.
+		/// </summary>
+		public const int ERROR_FLT_DISALLOW_FAST_IO = unchecked((int)0x801F0004);
+		/// <summary>
+		/// An invalid name request was made. The name requested cannot be retrieved at this time.
+		/// </summary>
+		public const int ERROR_FLT_INVALID_NAME_REQUEST = unchecked((int)0x801F0005);
+		/// <summary>
+		/// Posting this operation to a worker thread for further processing is not safe at this time because it could lead to a system deadlock.
+		/// </summary>
+		public const int ERROR_FLT_NOT_SAFE_TO_POST_OPERATION = unchecked((int)0x801F0006);
+		/// <summary>
+		/// The Filter Manager was not initialized when a filter tried to register. Make sure that the Filter Manager is getting loaded as a driver.
+		/// </summary>
+		public const int ERROR_FLT_NOT_INITIALIZED = unchecked((int)0x801F0007);
+		/// <summary>
+		/// The filter is not ready for attachment to volumes because it has not finished initializing (FltStartFiltering has not been called).
+		/// </summary>
+		public const int ERROR_FLT_FILTER_NOT_READY = unchecked((int)0x801F0008);
+		/// <summary>
+		/// The filter must cleanup any operation specific context at this time because it is being removed from the system before the operation is completed by the lower drivers.
+		/// </summary>
+		public const int ERROR_FLT_POST_OPERATION_CLEANUP = unchecked((int)0x801F0009);
+		/// <summary>
+		/// The Filter Manager had an internal error from which it cannot recover, therefore the operation has been failed. This is usually the result of a filter returning an invalid value from a pre-operation callback.
+		/// </summary>
+		public const int ERROR_FLT_INTERNAL_ERROR = unchecked((int)0x801F000A);
+		/// <summary>
+		/// The object specified for this action is in the process of being deleted, therefore the action requested cannot be completed at this time.
+		/// </summary>
+		public const int ERROR_FLT_DELETING_OBJECT = unchecked((int)0x801F000B);
+		/// <summary>
+		/// Non-paged pool must be used for this type of context.
+		/// </summary>
+		public const int ERROR_FLT_MUST_BE_NONPAGED_POOL = unchecked((int)0x801F000C);
+		/// <summary>
+		/// A duplicate handler definition has been provided for an operation.
+		/// </summary>
+		public const int ERROR_FLT_DUPLICATE_ENTRY = unchecked((int)0x801F000D);
+		/// <summary>
+		/// The callback data queue has been disabled.
+		/// </summary>
+		public const int ERROR_FLT_CBDQ_DISABLED = unchecked((int)0x801F000E);
+		/// <summary>
+		/// Do not attach the filter to the volume at this time.
+		/// </summary>
+		public const int ERROR_FLT_DO_NOT_ATTACH = unchecked((int)0x801F000F);
+		/// <summary>
+		/// Do not detach the filter from the volume at this time.
+		/// </summary>
+		public const int ERROR_FLT_DO_NOT_DETACH = unchecked((int)0x801F0010);
+		/// <summary>
+		/// An instance already exists at this altitude on the volume specified.
+		/// </summary>
+		public const int ERROR_FLT_INSTANCE_ALTITUDE_COLLISION = unchecked((int)0x801F0011);
+		/// <summary>
+		/// An instance already exists with this name on the volume specified.
+		/// </summary>
+		public const int ERROR_FLT_INSTANCE_NAME_COLLISION = unchecked((int)0x801F0012);
+		/// <summary>
+		/// The system could not find the filter specified.
+		/// </summary>
+		public const int ERROR_FLT_FILTER_NOT_FOUND = unchecked((int)0x801F0013);
+		/// <summary>
+		/// The system could not find the volume specified.
+		/// </summary>
+		public const int ERROR_FLT_VOLUME_NOT_FOUND = unchecked((int)0x801F0014);
+		/// <summary>
+		/// The system could not find the instance specified.
+		/// </summary>
+		public const int ERROR_FLT_INSTANCE_NOT_FOUND = unchecked((int)0x801F0015);
+		/// <summary>
+		/// No registered context allocation definition was found for the given request.
+		/// </summary>
+		public const int ERROR_FLT_CONTEXT_ALLOCATION_NOT_FOUND = unchecked((int)0x801F0016);
+		/// <summary>
+		/// An invalid parameter was specified during context registration.
+		/// </summary>
+		public const int ERROR_FLT_INVALID_CONTEXT_REGISTRATION = unchecked((int)0x801F0017);
+		/// <summary>
+		/// The name requested was not found in Filter Manager's name cache and could not be retrieved from the file system.
+		/// </summary>
+		public const int ERROR_FLT_NAME_CACHE_MISS = unchecked((int)0x801F0018);
+		/// <summary>
+		/// The requested device object does not exist for the given volume.
+		/// </summary>
+		public const int ERROR_FLT_NO_DEVICE_OBJECT = unchecked((int)0x801F0019);
+		/// <summary>
+		/// The specified volume is already mounted.
+		/// </summary>
+		public const int ERROR_FLT_VOLUME_ALREADY_MOUNTED = unchecked((int)0x801F001A);
+		/// <summary>
+		/// The specified Transaction Context is already enlisted in a transaction
+		/// </summary>
+		public const int ERROR_FLT_ALREADY_ENLISTED = unchecked((int)0x801F001B);
+		/// <summary>
+		/// The specified context is already attached to another object
+		/// </summary>
+		public const int ERROR_FLT_CONTEXT_ALREADY_LINKED = unchecked((int)0x801F001C);
+		/// <summary>
+		/// No waiter is present for the filter's reply to this message.
+		/// </summary>
+		public const int ERROR_FLT_NO_WAITER_FOR_REPLY = unchecked((int)0x801F0020);
+		/// <summary>
+		/// The filesystem database resource is in use. Registration cannot complete at this time.
+		/// </summary>
+		public const int ERROR_FLT_REGISTRATION_BUSY = unchecked((int)0x801F0023);
+		/// <summary>
+		/// Display Driver Stopped Responding} The %hs display driver has stopped working normally. Save your work and reboot the system to restore full display functionality. The next time you reboot the machine a dialog will be displayed giving you a chance to report this failure to Microsoft.
+		/// </summary>
+		public const int ERROR_HUNG_DISPLAY_DRIVER_THREAD = unchecked((int)0x80260001);
+		/// <summary>
+		/// Desktop composition is disabled} The operation could not be completed because desktop composition is disabled.
+		/// </summary>
+		public const int DWM_E_COMPOSITIONDISABLED = unchecked((int)0x80263001);
+		/// <summary>
+		/// Some desktop composition APIs are not supported while remoting} The operation is not supported while running in a remote session.
+		/// </summary>
+		public const int DWM_E_REMOTING_NOT_SUPPORTED = unchecked((int)0x80263002);
+		/// <summary>
+		/// No DWM redirection surface is available} The DWM was unable to provide a redireciton surface to complete the DirectX present.
+		/// </summary>
+		public const int DWM_E_NO_REDIRECTION_SURFACE_AVAILABLE = unchecked((int)0x80263003);
+		/// <summary>
+		/// DWM is not queuing presents for the specified window} The window specified is not currently using queued presents.
+		/// </summary>
+		public const int DWM_E_NOT_QUEUING_PRESENTS = unchecked((int)0x80263004);
+		/// <summary>
+		/// The adapter specified by the LUID is not found} DWM cannot find the adapter specified by the LUID.
+		/// </summary>
+		public const int DWM_E_ADAPTER_NOT_FOUND = unchecked((int)0x80263005);
+		/// <summary>
+		/// GDI redirection surface was returned} GDI redirection surface of the top level window was returned.
+		/// </summary>
+		public const int DWM_S_GDI_REDIRECTION_SURFACE = 0x00263005;
+		/// <summary>
+		/// Redirection surface can not be created. The size of the surface is larger than what is supported on this machine} Redirection surface can not be created. The size of the surface is larger than what is supported on this machine.
+		/// </summary>
+		public const int DWM_E_TEXTURE_TOO_LARGE = unchecked((int)0x80263007);
+		/// <summary>
+		/// Monitor descriptor could not be obtained.
+		/// </summary>
+		public const int ERROR_MONITOR_NO_DESCRIPTOR = unchecked((int)0x80261001);
+		/// <summary>
+		/// Format of the obtained monitor descriptor is not supported by this release.
+		/// </summary>
+		public const int ERROR_MONITOR_UNKNOWN_DESCRIPTOR_FORMAT = unchecked((int)0x80261002);
+		/// <summary>
+		/// Checksum of the obtained monitor descriptor is invalid.
+		/// </summary>
+		public const int ERROR_MONITOR_INVALID_DESCRIPTOR_CHECKSUM = unchecked((int)0xC0261003);
+		/// <summary>
+		/// Monitor descriptor contains an invalid standard timing block.
+		/// </summary>
+		public const int ERROR_MONITOR_INVALID_STANDARD_TIMING_BLOCK = unchecked((int)0xC0261004);
+		/// <summary>
+		/// WMI data block registration failed for one of the MSMonitorClass WMI subclasses.
+		/// </summary>
+		public const int ERROR_MONITOR_WMI_DATABLOCK_REGISTRATION_FAILED = unchecked((int)0xC0261005);
+		/// <summary>
+		/// Provided monitor descriptor block is either corrupted or does not contain monitor's detailed serial number.
+		/// </summary>
+		public const int ERROR_MONITOR_INVALID_SERIAL_NUMBER_MONDSC_BLOCK = unchecked((int)0xC0261006);
+		/// <summary>
+		/// Provided monitor descriptor block is either corrupted or does not contain monitor's user friendly name.
+		/// </summary>
+		public const int ERROR_MONITOR_INVALID_USER_FRIENDLY_MONDSC_BLOCK = unchecked((int)0xC0261007);
+		/// <summary>
+		/// There is no monitor descriptor data at the specified (offset, size) region.
+		/// </summary>
+		public const int ERROR_MONITOR_NO_MORE_DESCRIPTOR_DATA = unchecked((int)0xC0261008);
+		/// <summary>
+		/// Monitor descriptor contains an invalid detailed timing block.
+		/// </summary>
+		public const int ERROR_MONITOR_INVALID_DETAILED_TIMING_BLOCK = unchecked((int)0xC0261009);
+		/// <summary>
+		/// Monitor descriptor contains invalid manufacture date.
+		/// </summary>
+		public const int ERROR_MONITOR_INVALID_MANUFACTURE_DATE = unchecked((int)0xC026100A);
+		/// <summary>
+		/// Exclusive mode ownership is needed to create unmanaged primary allocation.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NOT_EXCLUSIVE_MODE_OWNER = unchecked((int)0xC0262000);
+		/// <summary>
+		/// The driver needs more DMA buffer space in order to complete the requested operation.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INSUFFICIENT_DMA_BUFFER = unchecked((int)0xC0262001);
+		/// <summary>
+		/// Specified display adapter handle is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_DISPLAY_ADAPTER = unchecked((int)0xC0262002);
+		/// <summary>
+		/// Specified display adapter and all of its state has been reset.
+		/// </summary>
+		public const int ERROR_GRAPHICS_ADAPTER_WAS_RESET = unchecked((int)0xC0262003);
+		/// <summary>
+		/// The driver stack doesn't match the expected driver model.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_DRIVER_MODEL = unchecked((int)0xC0262004);
+		/// <summary>
+		/// Present happened but ended up in the changed desktop
+		/// </summary>
+		public const int ERROR_GRAPHICS_PRESENT_MODE_CHANGED = unchecked((int)0xC0262005);
+		/// <summary>
+		/// Nothing to present due to desktop occlusion
+		/// </summary>
+		public const int ERROR_GRAPHICS_PRESENT_OCCLUDED = unchecked((int)0xC0262006);
+		/// <summary>
+		/// Not able to present due to denial of desktop access
+		/// </summary>
+		public const int ERROR_GRAPHICS_PRESENT_DENIED = unchecked((int)0xC0262007);
+		/// <summary>
+		/// Not able to present with color convertion
+		/// </summary>
+		public const int ERROR_GRAPHICS_CANNOTCOLORCONVERT = unchecked((int)0xC0262008);
+		/// <summary>
+		/// The kernel driver detected a version mismatch between it and the user mode driver.
+		/// </summary>
+		public const int ERROR_GRAPHICS_DRIVER_MISMATCH = unchecked((int)0xC0262009);
+		/// <summary>
+		/// Specified buffer is not big enough to contain entire requested dataset. Partial data populated up to the size of the buffer. Caller needs to provide buffer of size as specified in the partially populated buffer's content (interface specific).
+		/// </summary>
+		public const int ERROR_GRAPHICS_PARTIAL_DATA_POPULATED = 0x4026200A;
+		/// <summary>
+		/// Present redirection is disabled (desktop windowing management subsystem is off).
+		/// </summary>
+		public const int ERROR_GRAPHICS_PRESENT_REDIRECTION_DISABLED = unchecked((int)0xC026200B);
+		/// <summary>
+		/// Previous exclusive VidPn source owner has released its ownership
+		/// </summary>
+		public const int ERROR_GRAPHICS_PRESENT_UNOCCLUDED = unchecked((int)0xC026200C);
+		/// <summary>
+		/// Window DC is not available for presentation
+		/// </summary>
+		public const int ERROR_GRAPHICS_WINDOWDC_NOT_AVAILABLE = unchecked((int)0xC026200D);
+		/// <summary>
+		/// Not enough video memory available to complete the operation.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NO_VIDEO_MEMORY = unchecked((int)0xC0262100);
+		/// <summary>
+		/// Couldn't probe and lock the underlying memory of an allocation.
+		/// </summary>
+		public const int ERROR_GRAPHICS_CANT_LOCK_MEMORY = unchecked((int)0xC0262101);
+		/// <summary>
+		/// The allocation is currently busy.
+		/// </summary>
+		public const int ERROR_GRAPHICS_ALLOCATION_BUSY = unchecked((int)0xC0262102);
+		/// <summary>
+		/// An object being referenced has reach the maximum reference count already and can't be reference further.
+		/// </summary>
+		public const int ERROR_GRAPHICS_TOO_MANY_REFERENCES = unchecked((int)0xC0262103);
+		/// <summary>
+		/// A problem couldn't be solved due to some currently existing condition. The problem should be tried again later.
+		/// </summary>
+		public const int ERROR_GRAPHICS_TRY_AGAIN_LATER = unchecked((int)0xC0262104);
+		/// <summary>
+		/// A problem couldn't be solved due to some currently existing condition. The problem should be tried again immediately.
+		/// </summary>
+		public const int ERROR_GRAPHICS_TRY_AGAIN_NOW = unchecked((int)0xC0262105);
+		/// <summary>
+		/// The allocation is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_ALLOCATION_INVALID = unchecked((int)0xC0262106);
+		/// <summary>
+		/// No more unswizzling aperture are currently available.
+		/// </summary>
+		public const int ERROR_GRAPHICS_UNSWIZZLING_APERTURE_UNAVAILABLE = unchecked((int)0xC0262107);
+		/// <summary>
+		/// The current allocation can't be unswizzled by an aperture.
+		/// </summary>
+		public const int ERROR_GRAPHICS_UNSWIZZLING_APERTURE_UNSUPPORTED = unchecked((int)0xC0262108);
+		/// <summary>
+		/// The request failed because a pinned allocation can't be evicted.
+		/// </summary>
+		public const int ERROR_GRAPHICS_CANT_EVICT_PINNED_ALLOCATION = unchecked((int)0xC0262109);
+		/// <summary>
+		/// The allocation can't be used from its current segment location for the specified operation.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_ALLOCATION_USAGE = unchecked((int)0xC0262110);
+		/// <summary>
+		/// A locked allocation can't be used in the current command buffer.
+		/// </summary>
+		public const int ERROR_GRAPHICS_CANT_RENDER_LOCKED_ALLOCATION = unchecked((int)0xC0262111);
+		/// <summary>
+		/// The allocation being referenced has been closed permanently.
+		/// </summary>
+		public const int ERROR_GRAPHICS_ALLOCATION_CLOSED = unchecked((int)0xC0262112);
+		/// <summary>
+		/// An invalid allocation instance is being referenced.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_ALLOCATION_INSTANCE = unchecked((int)0xC0262113);
+		/// <summary>
+		/// An invalid allocation handle is being referenced.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_ALLOCATION_HANDLE = unchecked((int)0xC0262114);
+		/// <summary>
+		/// The allocation being referenced doesn't belong to the current device.
+		/// </summary>
+		public const int ERROR_GRAPHICS_WRONG_ALLOCATION_DEVICE = unchecked((int)0xC0262115);
+		/// <summary>
+		/// The specified allocation lost its content.
+		/// </summary>
+		public const int ERROR_GRAPHICS_ALLOCATION_CONTENT_LOST = unchecked((int)0xC0262116);
+		/// <summary>
+		/// GPU exception is detected on the given device. The device is not able to be scheduled.
+		/// </summary>
+		public const int ERROR_GRAPHICS_GPU_EXCEPTION_ON_DEVICE = unchecked((int)0xC0262200);
+		/// <summary>
+		/// Skip preparation of allocations referenced by the DMA buffer.
+		/// </summary>
+		public const int ERROR_GRAPHICS_SKIP_ALLOCATION_PREPARATION = 0x40262201;
+		/// <summary>
+		/// Specified VidPN topology is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VIDPN_TOPOLOGY = unchecked((int)0xC0262300);
+		/// <summary>
+		/// Specified VidPN topology is valid but is not supported by this model of the display adapter.
+		/// </summary>
+		public const int ERROR_GRAPHICS_VIDPN_TOPOLOGY_NOT_SUPPORTED = unchecked((int)0xC0262301);
+		/// <summary>
+		/// Specified VidPN topology is valid but is not supported by the display adapter at this time, due to current allocation of its resources.
+		/// </summary>
+		public const int ERROR_GRAPHICS_VIDPN_TOPOLOGY_CURRENTLY_NOT_SUPPORTED = unchecked((int)0xC0262302);
+		/// <summary>
+		/// Specified VidPN handle is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VIDPN = unchecked((int)0xC0262303);
+		/// <summary>
+		/// Specified video present source is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VIDEO_PRESENT_SOURCE = unchecked((int)0xC0262304);
+		/// <summary>
+		/// Specified video present target is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VIDEO_PRESENT_TARGET = unchecked((int)0xC0262305);
+		/// <summary>
+		/// Specified VidPN modality is not supported (e.g. at least two of the pinned modes are not cofunctional).
+		/// </summary>
+		public const int ERROR_GRAPHICS_VIDPN_MODALITY_NOT_SUPPORTED = unchecked((int)0xC0262306);
+		/// <summary>
+		/// No mode is pinned on the specified VidPN source/target.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MODE_NOT_PINNED = 0x00262307;
+		/// <summary>
+		/// Specified VidPN source mode set is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VIDPN_SOURCEMODESET = unchecked((int)0xC0262308);
+		/// <summary>
+		/// Specified VidPN target mode set is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VIDPN_TARGETMODESET = unchecked((int)0xC0262309);
+		/// <summary>
+		/// Specified video signal frequency is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_FREQUENCY = unchecked((int)0xC026230A);
+		/// <summary>
+		/// Specified video signal active region is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_ACTIVE_REGION = unchecked((int)0xC026230B);
+		/// <summary>
+		/// Specified video signal total region is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_TOTAL_REGION = unchecked((int)0xC026230C);
+		/// <summary>
+		/// Specified video present source mode is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VIDEO_PRESENT_SOURCE_MODE = unchecked((int)0xC0262310);
+		/// <summary>
+		/// Specified video present target mode is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VIDEO_PRESENT_TARGET_MODE = unchecked((int)0xC0262311);
+		/// <summary>
+		/// Pinned mode must remain in the set on VidPN's cofunctional modality enumeration.
+		/// </summary>
+		public const int ERROR_GRAPHICS_PINNED_MODE_MUST_REMAIN_IN_SET = unchecked((int)0xC0262312);
+		/// <summary>
+		/// Specified video present path is already in VidPN's topology.
+		/// </summary>
+		public const int ERROR_GRAPHICS_PATH_ALREADY_IN_TOPOLOGY = unchecked((int)0xC0262313);
+		/// <summary>
+		/// Specified mode is already in the mode set.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MODE_ALREADY_IN_MODESET = unchecked((int)0xC0262314);
+		/// <summary>
+		/// Specified video present source set is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VIDEOPRESENTSOURCESET = unchecked((int)0xC0262315);
+		/// <summary>
+		/// Specified video present target set is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VIDEOPRESENTTARGETSET = unchecked((int)0xC0262316);
+		/// <summary>
+		/// Specified video present source is already in the video present source set.
+		/// </summary>
+		public const int ERROR_GRAPHICS_SOURCE_ALREADY_IN_SET = unchecked((int)0xC0262317);
+		/// <summary>
+		/// Specified video present target is already in the video present target set.
+		/// </summary>
+		public const int ERROR_GRAPHICS_TARGET_ALREADY_IN_SET = unchecked((int)0xC0262318);
+		/// <summary>
+		/// Specified VidPN present path is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VIDPN_PRESENT_PATH = unchecked((int)0xC0262319);
+		/// <summary>
+		/// Miniport has no recommendation for augmentation of the specified VidPN's topology.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NO_RECOMMENDED_VIDPN_TOPOLOGY = unchecked((int)0xC026231A);
+		/// <summary>
+		/// Specified monitor frequency range set is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_MONITOR_FREQUENCYRANGESET = unchecked((int)0xC026231B);
+		/// <summary>
+		/// Specified monitor frequency range is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_MONITOR_FREQUENCYRANGE = unchecked((int)0xC026231C);
+		/// <summary>
+		/// Specified frequency range is not in the specified monitor frequency range set.
+		/// </summary>
+		public const int ERROR_GRAPHICS_FREQUENCYRANGE_NOT_IN_SET = unchecked((int)0xC026231D);
+		/// <summary>
+		/// Specified mode set does not specify preference for one of its modes.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NO_PREFERRED_MODE = 0x0026231E;
+		/// <summary>
+		/// Specified frequency range is already in the specified monitor frequency range set.
+		/// </summary>
+		public const int ERROR_GRAPHICS_FREQUENCYRANGE_ALREADY_IN_SET = unchecked((int)0xC026231F);
+		/// <summary>
+		/// Specified mode set is stale. Please reacquire the new mode set.
+		/// </summary>
+		public const int ERROR_GRAPHICS_STALE_MODESET = unchecked((int)0xC0262320);
+		/// <summary>
+		/// Specified monitor source mode set is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_MONITOR_SOURCEMODESET = unchecked((int)0xC0262321);
+		/// <summary>
+		/// Specified monitor source mode is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_MONITOR_SOURCE_MODE = unchecked((int)0xC0262322);
+		/// <summary>
+		/// Miniport does not have any recommendation regarding the request to provide a functional VidPN given the current display adapter configuration.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NO_RECOMMENDED_FUNCTIONAL_VIDPN = unchecked((int)0xC0262323);
+		/// <summary>
+		/// ID of the specified mode is already used by another mode in the set.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MODE_ID_MUST_BE_UNIQUE = unchecked((int)0xC0262324);
+		/// <summary>
+		/// System failed to determine a mode that is supported by both the display adapter and the monitor connected to it.
+		/// </summary>
+		public const int ERROR_GRAPHICS_EMPTY_ADAPTER_MONITOR_MODE_SUPPORT_INTERSECTION = unchecked((int)0xC0262325);
+		/// <summary>
+		/// Number of video present targets must be greater than or equal to the number of video present sources.
+		/// </summary>
+		public const int ERROR_GRAPHICS_VIDEO_PRESENT_TARGETS_LESS_THAN_SOURCES = unchecked((int)0xC0262326);
+		/// <summary>
+		/// Specified present path is not in VidPN's topology.
+		/// </summary>
+		public const int ERROR_GRAPHICS_PATH_NOT_IN_TOPOLOGY = unchecked((int)0xC0262327);
+		/// <summary>
+		/// Display adapter must have at least one video present source.
+		/// </summary>
+		public const int ERROR_GRAPHICS_ADAPTER_MUST_HAVE_AT_LEAST_ONE_SOURCE = unchecked((int)0xC0262328);
+		/// <summary>
+		/// Display adapter must have at least one video present target.
+		/// </summary>
+		public const int ERROR_GRAPHICS_ADAPTER_MUST_HAVE_AT_LEAST_ONE_TARGET = unchecked((int)0xC0262329);
+		/// <summary>
+		/// Specified monitor descriptor set is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_MONITORDESCRIPTORSET = unchecked((int)0xC026232A);
+		/// <summary>
+		/// Specified monitor descriptor is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_MONITORDESCRIPTOR = unchecked((int)0xC026232B);
+		/// <summary>
+		/// Specified descriptor is not in the specified monitor descriptor set.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MONITORDESCRIPTOR_NOT_IN_SET = unchecked((int)0xC026232C);
+		/// <summary>
+		/// Specified descriptor is already in the specified monitor descriptor set.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MONITORDESCRIPTOR_ALREADY_IN_SET = unchecked((int)0xC026232D);
+		/// <summary>
+		/// ID of the specified monitor descriptor is already used by another descriptor in the set.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MONITORDESCRIPTOR_ID_MUST_BE_UNIQUE = unchecked((int)0xC026232E);
+		/// <summary>
+		/// Specified video present target subset type is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VIDPN_TARGET_SUBSET_TYPE = unchecked((int)0xC026232F);
+		/// <summary>
+		/// Two or more of the specified resources are not related to each other, as defined by the interface semantics.
+		/// </summary>
+		public const int ERROR_GRAPHICS_RESOURCES_NOT_RELATED = unchecked((int)0xC0262330);
+		/// <summary>
+		/// ID of the specified video present source is already used by another source in the set.
+		/// </summary>
+		public const int ERROR_GRAPHICS_SOURCE_ID_MUST_BE_UNIQUE = unchecked((int)0xC0262331);
+		/// <summary>
+		/// ID of the specified video present target is already used by another target in the set.
+		/// </summary>
+		public const int ERROR_GRAPHICS_TARGET_ID_MUST_BE_UNIQUE = unchecked((int)0xC0262332);
+		/// <summary>
+		/// Specified VidPN source cannot be used because there is no available VidPN target to connect it to.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NO_AVAILABLE_VIDPN_TARGET = unchecked((int)0xC0262333);
+		/// <summary>
+		/// Newly arrived monitor could not be associated with a display adapter.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MONITOR_COULD_NOT_BE_ASSOCIATED_WITH_ADAPTER = unchecked((int)0xC0262334);
+		/// <summary>
+		/// Display adapter in question does not have an associated VidPN manager.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NO_VIDPNMGR = unchecked((int)0xC0262335);
+		/// <summary>
+		/// VidPN manager of the display adapter in question does not have an active VidPN.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NO_ACTIVE_VIDPN = unchecked((int)0xC0262336);
+		/// <summary>
+		/// Specified VidPN topology is stale. Please reacquire the new topology.
+		/// </summary>
+		public const int ERROR_GRAPHICS_STALE_VIDPN_TOPOLOGY = unchecked((int)0xC0262337);
+		/// <summary>
+		/// There is no monitor connected on the specified video present target.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MONITOR_NOT_CONNECTED = unchecked((int)0xC0262338);
+		/// <summary>
+		/// Specified source is not part of the specified VidPN's topology.
+		/// </summary>
+		public const int ERROR_GRAPHICS_SOURCE_NOT_IN_TOPOLOGY = unchecked((int)0xC0262339);
+		/// <summary>
+		/// Specified primary surface size is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_PRIMARYSURFACE_SIZE = unchecked((int)0xC026233A);
+		/// <summary>
+		/// Specified visible region size is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VISIBLEREGION_SIZE = unchecked((int)0xC026233B);
+		/// <summary>
+		/// Specified stride is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_STRIDE = unchecked((int)0xC026233C);
+		/// <summary>
+		/// Specified pixel format is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_PIXELFORMAT = unchecked((int)0xC026233D);
+		/// <summary>
+		/// Specified color basis is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_COLORBASIS = unchecked((int)0xC026233E);
+		/// <summary>
+		/// Specified pixel value access mode is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_PIXELVALUEACCESSMODE = unchecked((int)0xC026233F);
+		/// <summary>
+		/// Specified target is not part of the specified VidPN's topology.
+		/// </summary>
+		public const int ERROR_GRAPHICS_TARGET_NOT_IN_TOPOLOGY = unchecked((int)0xC0262340);
+		/// <summary>
+		/// Failed to acquire display mode management interface.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NO_DISPLAY_MODE_MANAGEMENT_SUPPORT = unchecked((int)0xC0262341);
+		/// <summary>
+		/// Specified VidPN source is already owned by a DMM client and cannot be used until that client releases it.
+		/// </summary>
+		public const int ERROR_GRAPHICS_VIDPN_SOURCE_IN_USE = unchecked((int)0xC0262342);
+		/// <summary>
+		/// Specified VidPN is active and cannot be accessed.
+		/// </summary>
+		public const int ERROR_GRAPHICS_CANT_ACCESS_ACTIVE_VIDPN = unchecked((int)0xC0262343);
+		/// <summary>
+		/// Specified VidPN present path importance ordinal is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_PATH_IMPORTANCE_ORDINAL = unchecked((int)0xC0262344);
+		/// <summary>
+		/// Specified VidPN present path content geometry transformation is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_PATH_CONTENT_GEOMETRY_TRANSFORMATION = unchecked((int)0xC0262345);
+		/// <summary>
+		/// Specified content geometry transformation is not supported on the respective VidPN present path.
+		/// </summary>
+		public const int ERROR_GRAPHICS_PATH_CONTENT_GEOMETRY_TRANSFORMATION_NOT_SUPPORTED = unchecked((int)0xC0262346);
+		/// <summary>
+		/// Specified gamma ramp is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_GAMMA_RAMP = unchecked((int)0xC0262347);
+		/// <summary>
+		/// Specified gamma ramp is not supported on the respective VidPN present path.
+		/// </summary>
+		public const int ERROR_GRAPHICS_GAMMA_RAMP_NOT_SUPPORTED = unchecked((int)0xC0262348);
+		/// <summary>
+		/// Multi-sampling is not supported on the respective VidPN present path.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MULTISAMPLING_NOT_SUPPORTED = unchecked((int)0xC0262349);
+		/// <summary>
+		/// Specified mode is not in the specified mode set.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MODE_NOT_IN_MODESET = unchecked((int)0xC026234A);
+		/// <summary>
+		/// Specified data set (e.g. mode set, frequency range set, descriptor set, topology, etc.) is empty.
+		/// </summary>
+		public const int ERROR_GRAPHICS_DATASET_IS_EMPTY = 0x0026234B;
+		/// <summary>
+		/// Specified data set (e.g. mode set, frequency range set, descriptor set, topology, etc.) does not contain any more elements.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NO_MORE_ELEMENTS_IN_DATASET = 0x0026234C;
+		/// <summary>
+		/// Specified VidPN topology recommendation reason is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_VIDPN_TOPOLOGY_RECOMMENDATION_REASON = unchecked((int)0xC026234D);
+		/// <summary>
+		/// Specified VidPN present path content type is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_PATH_CONTENT_TYPE = unchecked((int)0xC026234E);
+		/// <summary>
+		/// Specified VidPN present path copy protection type is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_COPYPROTECTION_TYPE = unchecked((int)0xC026234F);
+		/// <summary>
+		/// No more than one unassigned mode set can exist at any given time for a given VidPN source/target.
+		/// </summary>
+		public const int ERROR_GRAPHICS_UNASSIGNED_MODESET_ALREADY_EXISTS = unchecked((int)0xC0262350);
+		/// <summary>
+		/// Specified content transformation is not pinned on the specified VidPN present path.
+		/// </summary>
+		public const int ERROR_GRAPHICS_PATH_CONTENT_GEOMETRY_TRANSFORMATION_NOT_PINNED = 0x00262351;
+		/// <summary>
+		/// Specified scanline ordering type is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_SCANLINE_ORDERING = unchecked((int)0xC0262352);
+		/// <summary>
+		/// Topology changes are not allowed for the specified VidPN.
+		/// </summary>
+		public const int ERROR_GRAPHICS_TOPOLOGY_CHANGES_NOT_ALLOWED = unchecked((int)0xC0262353);
+		/// <summary>
+		/// All available importance ordinals are already used in specified topology.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NO_AVAILABLE_IMPORTANCE_ORDINALS = unchecked((int)0xC0262354);
+		/// <summary>
+		/// Specified primary surface has a different private format attribute than the current primary surface
+		/// </summary>
+		public const int ERROR_GRAPHICS_INCOMPATIBLE_PRIVATE_FORMAT = unchecked((int)0xC0262355);
+		/// <summary>
+		/// Specified mode pruning algorithm is invalid
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_MODE_PRUNING_ALGORITHM = unchecked((int)0xC0262356);
+		/// <summary>
+		/// Specified monitor capability origin is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_MONITOR_CAPABILITY_ORIGIN = unchecked((int)0xC0262357);
+		/// <summary>
+		/// Specified monitor frequency range constraint is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_MONITOR_FREQUENCYRANGE_CONSTRAINT = unchecked((int)0xC0262358);
+		/// <summary>
+		/// Maximum supported number of present paths has been reached.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MAX_NUM_PATHS_REACHED = unchecked((int)0xC0262359);
+		/// <summary>
+		/// Miniport requested that augmentation be canceled for the specified source of the specified VidPN's topology.
+		/// </summary>
+		public const int ERROR_GRAPHICS_CANCEL_VIDPN_TOPOLOGY_AUGMENTATION = unchecked((int)0xC026235A);
+		/// <summary>
+		/// Specified client type was not recognized.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_CLIENT_TYPE = unchecked((int)0xC026235B);
+		/// <summary>
+		/// Client VidPN is not set on this adapter (e.g. no user mode initiated mode changes took place on this adapter yet).
+		/// </summary>
+		public const int ERROR_GRAPHICS_CLIENTVIDPN_NOT_SET = unchecked((int)0xC026235C);
+		/// <summary>
+		/// Specified display adapter child device already has an external device connected to it.
+		/// </summary>
+		public const int ERROR_GRAPHICS_SPECIFIED_CHILD_ALREADY_CONNECTED = unchecked((int)0xC0262400);
+		/// <summary>
+		/// Specified display adapter child device does not support descriptor exposure.
+		/// </summary>
+		public const int ERROR_GRAPHICS_CHILD_DESCRIPTOR_NOT_SUPPORTED = unchecked((int)0xC0262401);
+		/// <summary>
+		/// Child device presence was not reliably detected.
+		/// </summary>
+		public const int ERROR_GRAPHICS_UNKNOWN_CHILD_STATUS = 0x4026242F;
+		/// <summary>
+		/// The display adapter is not linked to any other adapters.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NOT_A_LINKED_ADAPTER = unchecked((int)0xC0262430);
+		/// <summary>
+		/// Lead adapter in a linked configuration was not enumerated yet.
+		/// </summary>
+		public const int ERROR_GRAPHICS_LEADLINK_NOT_ENUMERATED = unchecked((int)0xC0262431);
+		/// <summary>
+		/// Some chain adapters in a linked configuration were not enumerated yet.
+		/// </summary>
+		public const int ERROR_GRAPHICS_CHAINLINKS_NOT_ENUMERATED = unchecked((int)0xC0262432);
+		/// <summary>
+		/// The chain of linked adapters is not ready to start because of an unknown failure.
+		/// </summary>
+		public const int ERROR_GRAPHICS_ADAPTER_CHAIN_NOT_READY = unchecked((int)0xC0262433);
+		/// <summary>
+		/// An attempt was made to start a lead link display adapter when the chain links were not started yet.
+		/// </summary>
+		public const int ERROR_GRAPHICS_CHAINLINKS_NOT_STARTED = unchecked((int)0xC0262434);
+		/// <summary>
+		/// An attempt was made to power up a lead link display adapter when the chain links were powered down.
+		/// </summary>
+		public const int ERROR_GRAPHICS_CHAINLINKS_NOT_POWERED_ON = unchecked((int)0xC0262435);
+		/// <summary>
+		/// The adapter link was found to be in an inconsistent state. Not all adapters are in an expected PNP/Power state.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INCONSISTENT_DEVICE_LINK_STATE = unchecked((int)0xC0262436);
+		/// <summary>
+		/// Starting the leadlink adapter has been deferred temporarily.
+		/// </summary>
+		public const int ERROR_GRAPHICS_LEADLINK_START_DEFERRED = 0x40262437;
+		/// <summary>
+		/// The driver trying to start is not the same as the driver for the POSTed display adapter.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NOT_POST_DEVICE_DRIVER = unchecked((int)0xC0262438);
+		/// <summary>
+		/// The display adapter is being polled for children too frequently at the same polling level.
+		/// </summary>
+		public const int ERROR_GRAPHICS_POLLING_TOO_FREQUENTLY = 0x40262439;
+		/// <summary>
+		/// Starting the adapter has been deferred temporarily.
+		/// </summary>
+		public const int ERROR_GRAPHICS_START_DEFERRED = 0x4026243A;
+		/// <summary>
+		/// An operation is being attempted that requires the display adapter to be in a quiescent state.
+		/// </summary>
+		public const int ERROR_GRAPHICS_ADAPTER_ACCESS_NOT_EXCLUDED = unchecked((int)0xC026243B);
+		/// <summary>
+		/// The driver does not support OPM.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_NOT_SUPPORTED = unchecked((int)0xC0262500);
+		/// <summary>
+		/// The driver does not support COPP.
+		/// </summary>
+		public const int ERROR_GRAPHICS_COPP_NOT_SUPPORTED = unchecked((int)0xC0262501);
+		/// <summary>
+		/// The driver does not support UAB.
+		/// </summary>
+		public const int ERROR_GRAPHICS_UAB_NOT_SUPPORTED = unchecked((int)0xC0262502);
+		/// <summary>
+		/// The specified encrypted parameters are invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_INVALID_ENCRYPTED_PARAMETERS = unchecked((int)0xC0262503);
+		/// <summary>
+		/// The GDI display device passed to this function does not have any active video outputs.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_NO_VIDEO_OUTPUTS_EXIST = unchecked((int)0xC0262505);
+		/// <summary>
+		/// An internal error caused this operation to fail.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_INTERNAL_ERROR = unchecked((int)0xC026250B);
+		/// <summary>
+		/// The function failed because the caller passed in an invalid OPM user mode handle.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_INVALID_HANDLE = unchecked((int)0xC026250C);
+		/// <summary>
+		/// A certificate could not be returned because the certificate buffer passed to the function was too small.
+		/// </summary>
+		public const int ERROR_GRAPHICS_PVP_INVALID_CERTIFICATE_LENGTH = unchecked((int)0xC026250E);
+		/// <summary>
+		/// A video output could not be created because the frame buffer is in spanning mode.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_SPANNING_MODE_ENABLED = unchecked((int)0xC026250F);
+		/// <summary>
+		/// A video output could not be created because the frame buffer is in theater mode.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_THEATER_MODE_ENABLED = unchecked((int)0xC0262510);
+		/// <summary>
+		/// The function failed because the display adapter's Hardware Functionality Scan failed to validate the graphics hardware.
+		/// </summary>
+		public const int ERROR_GRAPHICS_PVP_HFS_FAILED = unchecked((int)0xC0262511);
+		/// <summary>
+		/// The HDCP System Renewability Message passed to this function did not comply with section 5 of the HDCP 1.1 specification.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_INVALID_SRM = unchecked((int)0xC0262512);
+		/// <summary>
+		/// The video output cannot enable the High-bandwidth Digital Content Protection (HDCP) System because it does not support HDCP.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_OUTPUT_DOES_NOT_SUPPORT_HDCP = unchecked((int)0xC0262513);
+		/// <summary>
+		/// The video output cannot enable Analog Copy Protection (ACP) because it does not support ACP.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_OUTPUT_DOES_NOT_SUPPORT_ACP = unchecked((int)0xC0262514);
+		/// <summary>
+		/// The video output cannot enable the Content Generation Management System Analog (CGMS-A) protection technology because it does not support CGMS-A.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_OUTPUT_DOES_NOT_SUPPORT_CGMSA = unchecked((int)0xC0262515);
+		/// <summary>
+		/// The IOPMVideoOutput::GetInformation method cannot return the version of the SRM being used because the application never successfully passed an SRM to the video output.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_HDCP_SRM_NEVER_SET = unchecked((int)0xC0262516);
+		/// <summary>
+		/// The IOPMVideoOutput::Configure method cannot enable the specified output protection technology because the output's screen resolution is too high.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_RESOLUTION_TOO_HIGH = unchecked((int)0xC0262517);
+		/// <summary>
+		/// The IOPMVideoOutput::Configure method cannot enable HDCP because the display adapter's HDCP hardware is already being used by other physical outputs.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_ALL_HDCP_HARDWARE_ALREADY_IN_USE = unchecked((int)0xC0262518);
+		/// <summary>
+		/// The operating system asynchronously destroyed this OPM video output because the operating system's state changed. This error typically occurs because the monitor PDO associated with this video output was removed, the monitor PDO associated with this video output was stopped, the video output's session became a non-console session or the video output's desktop became an inactive desktop.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_VIDEO_OUTPUT_NO_LONGER_EXISTS = unchecked((int)0xC026251A);
+		/// <summary>
+		/// The method failed because the session is changing its type. No IOPMVideoOutput methods can be called when a session is changing its type. There are currently three types of sessions: console, disconnected and remote.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_SESSION_TYPE_CHANGE_IN_PROGRESS = unchecked((int)0xC026251B);
+		/// <summary>
+		/// Either the IOPMVideoOutput::COPPCompatibleGetInformation, IOPMVideoOutput::GetInformation, or IOPMVideoOutput::Configure method failed. This error is returned when the caller tries to use a COPP specific command while the video output has OPM semantics only.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_VIDEO_OUTPUT_DOES_NOT_HAVE_COPP_SEMANTICS = unchecked((int)0xC026251C);
+		/// <summary>
+		/// The IOPMVideoOutput::GetInformation and IOPMVideoOutput::COPPCompatibleGetInformation methods return this error if the passed in sequence number is not the expected sequence number or the passed in OMAC value is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_INVALID_INFORMATION_REQUEST = unchecked((int)0xC026251D);
+		/// <summary>
+		/// The method failed because an unexpected error occurred inside of a display driver.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_DRIVER_INTERNAL_ERROR = unchecked((int)0xC026251E);
+		/// <summary>
+		/// Either the IOPMVideoOutput::COPPCompatibleGetInformation, IOPMVideoOutput::GetInformation, or IOPMVideoOutput::Configure method failed. This error is returned when the caller tries to use an OPM specific command while the video output has COPP semantics only.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_VIDEO_OUTPUT_DOES_NOT_HAVE_OPM_SEMANTICS = unchecked((int)0xC026251F);
+		/// <summary>
+		/// The IOPMVideoOutput::COPPCompatibleGetInformation or IOPMVideoOutput::Configure method failed because the display driver does not support the OPM_GET_ACP_AND_CGMSA_SIGNALING and OPM_SET_ACP_AND_CGMSA_SIGNALING GUIDs.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_SIGNALING_NOT_SUPPORTED = unchecked((int)0xC0262520);
+		/// <summary>
+		/// The IOPMVideoOutput::Configure function returns this error code if the passed in sequence number is not the expected sequence number or the passed in OMAC value is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_OPM_INVALID_CONFIGURATION_REQUEST = unchecked((int)0xC0262521);
+		/// <summary>
+		/// The monitor connected to the specified video output does not have an I2C bus.
+		/// </summary>
+		public const int ERROR_GRAPHICS_I2C_NOT_SUPPORTED = unchecked((int)0xC0262580);
+		/// <summary>
+		/// No device on the I2C bus has the specified address.
+		/// </summary>
+		public const int ERROR_GRAPHICS_I2C_DEVICE_DOES_NOT_EXIST = unchecked((int)0xC0262581);
+		/// <summary>
+		/// An error occurred while transmitting data to the device on the I2C bus.
+		/// </summary>
+		public const int ERROR_GRAPHICS_I2C_ERROR_TRANSMITTING_DATA = unchecked((int)0xC0262582);
+		/// <summary>
+		/// An error occurred while receiving data from the device on the I2C bus.
+		/// </summary>
+		public const int ERROR_GRAPHICS_I2C_ERROR_RECEIVING_DATA = unchecked((int)0xC0262583);
+		/// <summary>
+		/// The monitor does not support the specified VCP code.
+		/// </summary>
+		public const int ERROR_GRAPHICS_DDCCI_VCP_NOT_SUPPORTED = unchecked((int)0xC0262584);
+		/// <summary>
+		/// The data received from the monitor is invalid.
+		/// </summary>
+		public const int ERROR_GRAPHICS_DDCCI_INVALID_DATA = unchecked((int)0xC0262585);
+		/// <summary>
+		/// The function failed because a monitor returned an invalid Timing Status byte when the operating system used the DDC/CI Get Timing Report &amp; Timing Message command to get a timing report from a monitor.
+		/// </summary>
+		public const int ERROR_GRAPHICS_DDCCI_MONITOR_RETURNED_INVALID_TIMING_STATUS_BYTE = unchecked((int)0xC0262586);
+		/// <summary>
+		/// The monitor returned a DDC/CI capabilities string which did not comply with the ACCESS.bus 3.0, DDC/CI 1.1, or MCCS 2 Revision 1 specification.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MCA_INVALID_CAPABILITIES_STRING = unchecked((int)0xC0262587);
+		/// <summary>
+		/// An internal Monitor Configuration API error occurred.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MCA_INTERNAL_ERROR = unchecked((int)0xC0262588);
+		/// <summary>
+		/// An operation failed because a DDC/CI message had an invalid value in its command field.
+		/// </summary>
+		public const int ERROR_GRAPHICS_DDCCI_INVALID_MESSAGE_COMMAND = unchecked((int)0xC0262589);
+		/// <summary>
+		/// An error occurred because the field length of a DDC/CI message contained an invalid value.
+		/// </summary>
+		public const int ERROR_GRAPHICS_DDCCI_INVALID_MESSAGE_LENGTH = unchecked((int)0xC026258A);
+		/// <summary>
+		/// An error occurred because the checksum field in a DDC/CI message did not match the message's computed checksum value. This error implies that the data was corrupted while it was being transmitted from a monitor to a computer.
+		/// </summary>
+		public const int ERROR_GRAPHICS_DDCCI_INVALID_MESSAGE_CHECKSUM = unchecked((int)0xC026258B);
+		/// <summary>
+		/// This function failed because an invalid monitor handle was passed to it.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_PHYSICAL_MONITOR_HANDLE = unchecked((int)0xC026258C);
+		/// <summary>
+		/// The operating system asynchronously destroyed the monitor which corresponds to this handle because the operating system's state changed. This error typically occurs because the monitor PDO associated with this handle was removed, the monitor PDO associated with this handle was stopped, or a display mode change occurred. A display mode change occurs when windows sends a WM_DISPLAYCHANGE windows message to applications.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MONITOR_NO_LONGER_EXISTS = unchecked((int)0xC026258D);
+		/// <summary>
+		/// A continuous VCP code's current value is greater than its maximum value. This error code indicates that a monitor returned an invalid value.
+		/// </summary>
+		public const int ERROR_GRAPHICS_DDCCI_CURRENT_CURRENT_VALUE_GREATER_THAN_MAXIMUM_VALUE = unchecked((int)0xC02625D8);
+		/// <summary>
+		/// The monitor's VCP Version (0xDF) VCP code returned an invalid version value.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MCA_INVALID_VCP_VERSION = unchecked((int)0xC02625D9);
+		/// <summary>
+		/// The monitor does not comply with the MCCS specification it claims to support.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MCA_MONITOR_VIOLATES_MCCS_SPECIFICATION = unchecked((int)0xC02625DA);
+		/// <summary>
+		/// The MCCS version in a monitor's mccs_ver capability does not match the MCCS version the monitor reports when the VCP Version (0xDF) VCP code is used.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MCA_MCCS_VERSION_MISMATCH = unchecked((int)0xC02625DB);
+		/// <summary>
+		/// The Monitor Configuration API only works with monitors which support the MCCS 1.0 specification, MCCS 2.0 specification or the MCCS 2.0 Revision 1 specification.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MCA_UNSUPPORTED_MCCS_VERSION = unchecked((int)0xC02625DC);
+		/// <summary>
+		/// The monitor returned an invalid monitor technology type. CRT, Plasma and LCD (TFT) are examples of monitor technology types. This error implies that the monitor violated the MCCS 2.0 or MCCS 2.0 Revision 1 specification.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MCA_INVALID_TECHNOLOGY_TYPE_RETURNED = unchecked((int)0xC02625DE);
+		/// <summary>
+		/// SetMonitorColorTemperature()'s caller passed a color temperature to it which the current monitor did not support. This error implies that the monitor violated the MCCS 2.0 or MCCS 2.0 Revision 1 specification.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MCA_UNSUPPORTED_COLOR_TEMPERATURE = unchecked((int)0xC02625DF);
+		/// <summary>
+		/// This function can only be used if a program is running in the local console session. It cannot be used if the program is running on a remote desktop session or on a terminal server session.
+		/// </summary>
+		public const int ERROR_GRAPHICS_ONLY_CONSOLE_SESSION_SUPPORTED = unchecked((int)0xC02625E0);
+		/// <summary>
+		/// This function cannot find an actual GDI display device which corresponds to the specified GDI display device name.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NO_DISPLAY_DEVICE_CORRESPONDS_TO_NAME = unchecked((int)0xC02625E1);
+		/// <summary>
+		/// The function failed because the specified GDI display device was not attached to the Windows desktop.
+		/// </summary>
+		public const int ERROR_GRAPHICS_DISPLAY_DEVICE_NOT_ATTACHED_TO_DESKTOP = unchecked((int)0xC02625E2);
+		/// <summary>
+		/// This function does not support GDI mirroring display devices because GDI mirroring display devices do not have any physical monitors associated with them.
+		/// </summary>
+		public const int ERROR_GRAPHICS_MIRRORING_DEVICES_NOT_SUPPORTED = unchecked((int)0xC02625E3);
+		/// <summary>
+		/// The function failed because an invalid pointer parameter was passed to it. A pointer parameter is invalid if it is <strong>NULL</strong>, points to an invalid address, points to a kernel mode address, or is not correctly aligned.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INVALID_POINTER = unchecked((int)0xC02625E4);
+		/// <summary>
+		/// The function failed because the specified GDI device did not have any monitors associated with it.
+		/// </summary>
+		public const int ERROR_GRAPHICS_NO_MONITORS_CORRESPOND_TO_DISPLAY_DEVICE = unchecked((int)0xC02625E5);
+		/// <summary>
+		/// An array passed to the function cannot hold all of the data that the function must copy into the array.
+		/// </summary>
+		public const int ERROR_GRAPHICS_PARAMETER_ARRAY_TOO_SMALL = unchecked((int)0xC02625E6);
+		/// <summary>
+		/// An internal error caused an operation to fail.
+		/// </summary>
+		public const int ERROR_GRAPHICS_INTERNAL_ERROR = unchecked((int)0xC02625E7);
+		/// <summary>
+		/// The function failed because the current session is changing its type. This function cannot be called when the current session is changing its type. There are currently three types of sessions: console, disconnected and remote.
+		/// </summary>
+		public const int ERROR_GRAPHICS_SESSION_TYPE_CHANGE_IN_PROGRESS = unchecked((int)0xC02605E8);
+		#endregion
+
+		#region TPM, PLA, FVE
+		/// <summary>
+		/// This is an error mask to convert TPM hardware errors to win errors.
+		/// </summary>
+		public const int TPM_E_ERROR_MASK = unchecked((int)0x80280000);
+		/// <summary>
+		/// Authentication failed.
+		/// </summary>
+		public const int TPM_E_AUTHFAIL = unchecked((int)0x80280001);
+		/// <summary>
+		/// The index to a PCR, DIR or other register is incorrect.
+		/// </summary>
+		public const int TPM_E_BADINDEX = unchecked((int)0x80280002);
+		/// <summary>
+		/// One or more parameter is bad.
+		/// </summary>
+		public const int TPM_E_BAD_PARAMETER = unchecked((int)0x80280003);
+		/// <summary>
+		/// An operation completed successfully but the auditing of that operation failed.
+		/// </summary>
+		public const int TPM_E_AUDITFAILURE = unchecked((int)0x80280004);
+		/// <summary>
+		/// The clear disable flag is set and all clear operations now require physical access.
+		/// </summary>
+		public const int TPM_E_CLEAR_DISABLED = unchecked((int)0x80280005);
+		/// <summary>
+		/// Activate the Trusted Platform Module (TPM).
+		/// </summary>
+		public const int TPM_E_DEACTIVATED = unchecked((int)0x80280006);
+		/// <summary>
+		/// Enable the Trusted Platform Module (TPM).
+		/// </summary>
+		public const int TPM_E_DISABLED = unchecked((int)0x80280007);
+		/// <summary>
+		/// The target command has been disabled.
+		/// </summary>
+		public const int TPM_E_DISABLED_CMD = unchecked((int)0x80280008);
+		/// <summary>
+		/// The operation failed.
+		/// </summary>
+		public const int TPM_E_FAIL = unchecked((int)0x80280009);
+		/// <summary>
+		/// The ordinal was unknown or inconsistent.
+		/// </summary>
+		public const int TPM_E_BAD_ORDINAL = unchecked((int)0x8028000A);
+		/// <summary>
+		/// The ability to install an owner is disabled.
+		/// </summary>
+		public const int TPM_E_INSTALL_DISABLED = unchecked((int)0x8028000B);
+		/// <summary>
+		/// The key handle cannot be interpreted.
+		/// </summary>
+		public const int TPM_E_INVALID_KEYHANDLE = unchecked((int)0x8028000C);
+		/// <summary>
+		/// The key handle points to an invalid key.
+		/// </summary>
+		public const int TPM_E_KEYNOTFOUND = unchecked((int)0x8028000D);
+		/// <summary>
+		/// Unacceptable encryption scheme.
+		/// </summary>
+		public const int TPM_E_INAPPROPRIATE_ENC = unchecked((int)0x8028000E);
+		/// <summary>
+		/// Migration authorization failed.
+		/// </summary>
+		public const int TPM_E_MIGRATEFAIL = unchecked((int)0x8028000F);
+		/// <summary>
+		/// PCR information could not be interpreted.
+		/// </summary>
+		public const int TPM_E_INVALID_PCR_INFO = unchecked((int)0x80280010);
+		/// <summary>
+		/// No room to load key.
+		/// </summary>
+		public const int TPM_E_NOSPACE = unchecked((int)0x80280011);
+		/// <summary>
+		/// There is no Storage Root Key (SRK) set.
+		/// </summary>
+		public const int TPM_E_NOSRK = unchecked((int)0x80280012);
+		/// <summary>
+		/// An encrypted blob is invalid or was not created by this TPM.
+		/// </summary>
+		public const int TPM_E_NOTSEALED_BLOB = unchecked((int)0x80280013);
+		/// <summary>
+		/// The Trusted Platform Module (TPM) already has an owner.
+		/// </summary>
+		public const int TPM_E_OWNER_SET = unchecked((int)0x80280014);
+		/// <summary>
+		/// The TPM has insufficient internal resources to perform the requested action.
+		/// </summary>
+		public const int TPM_E_RESOURCES = unchecked((int)0x80280015);
+		/// <summary>
+		/// A random string was too short.
+		/// </summary>
+		public const int TPM_E_SHORTRANDOM = unchecked((int)0x80280016);
+		/// <summary>
+		/// The TPM does not have the space to perform the operation.
+		/// </summary>
+		public const int TPM_E_SIZE = unchecked((int)0x80280017);
+		/// <summary>
+		/// The named PCR value does not match the current PCR value.
+		/// </summary>
+		public const int TPM_E_WRONGPCRVAL = unchecked((int)0x80280018);
+		/// <summary>
+		/// The paramSize argument to the command has the incorrect value .
+		/// </summary>
+		public const int TPM_E_BAD_PARAM_SIZE = unchecked((int)0x80280019);
+		/// <summary>
+		/// There is no existing SHA-1 thread.
+		/// </summary>
+		public const int TPM_E_SHA_THREAD = unchecked((int)0x8028001A);
+		/// <summary>
+		/// The calculation is unable to proceed because the existing SHA-1 thread has already encountered an error.
+		/// </summary>
+		public const int TPM_E_SHA_ERROR = unchecked((int)0x8028001B);
+		/// <summary>
+		/// The TPM hardware device reported a failure during its internal self test. Try restarting the computer to resolve the problem. If the problem continues, you might need to replace your TPM hardware or motherboard.
+		/// </summary>
+		public const int TPM_E_FAILEDSELFTEST = unchecked((int)0x8028001C);
+		/// <summary>
+		/// The authorization for the second key in a 2 key function failed authorization.
+		/// </summary>
+		public const int TPM_E_AUTH2FAIL = unchecked((int)0x8028001D);
+		/// <summary>
+		/// The tag value sent to for a command is invalid.
+		/// </summary>
+		public const int TPM_E_BADTAG = unchecked((int)0x8028001E);
+		/// <summary>
+		/// An IO error occurred transmitting information to the TPM.
+		/// </summary>
+		public const int TPM_E_IOERROR = unchecked((int)0x8028001F);
+		/// <summary>
+		/// The encryption process had a problem.
+		/// </summary>
+		public const int TPM_E_ENCRYPT_ERROR = unchecked((int)0x80280020);
+		/// <summary>
+		/// The decryption process did not complete.
+		/// </summary>
+		public const int TPM_E_DECRYPT_ERROR = unchecked((int)0x80280021);
+		/// <summary>
+		/// An invalid handle was used.
+		/// </summary>
+		public const int TPM_E_INVALID_AUTHHANDLE = unchecked((int)0x80280022);
+		/// <summary>
+		/// The TPM does not have an Endorsement Key (EK) installed.
+		/// </summary>
+		public const int TPM_E_NO_ENDORSEMENT = unchecked((int)0x80280023);
+		/// <summary>
+		/// The usage of a key is not allowed.
+		/// </summary>
+		public const int TPM_E_INVALID_KEYUSAGE = unchecked((int)0x80280024);
+		/// <summary>
+		/// The submitted entity type is not allowed.
+		/// </summary>
+		public const int TPM_E_WRONG_ENTITYTYPE = unchecked((int)0x80280025);
+		/// <summary>
+		/// The command was received in the wrong sequence relative to TPM_Init and a subsequent TPM_Startup.
+		/// </summary>
+		public const int TPM_E_INVALID_POSTINIT = unchecked((int)0x80280026);
+		/// <summary>
+		/// Signed data cannot include additional DER information.
+		/// </summary>
+		public const int TPM_E_INAPPROPRIATE_SIG = unchecked((int)0x80280027);
+		/// <summary>
+		/// The key properties in TPM_KEY_PARMs are not supported by this TPM.
+		/// </summary>
+		public const int TPM_E_BAD_KEY_PROPERTY = unchecked((int)0x80280028);
+		/// <summary>
+		/// The migration properties of this key are incorrect.
+		/// </summary>
+		public const int TPM_E_BAD_MIGRATION = unchecked((int)0x80280029);
+		/// <summary>
+		/// The signature or encryption scheme for this key is incorrect or not permitted in this situation.
+		/// </summary>
+		public const int TPM_E_BAD_SCHEME = unchecked((int)0x8028002A);
+		/// <summary>
+		/// The size of the data (or blob) parameter is bad or inconsistent with the referenced key.
+		/// </summary>
+		public const int TPM_E_BAD_DATASIZE = unchecked((int)0x8028002B);
+		/// <summary>
+		/// A mode parameter is bad, such as capArea or subCapArea for TPM_GetCapability, phsicalPresence parameter for TPM_PhysicalPresence, or migrationType for TPM_CreateMigrationBlob.
+		/// </summary>
+		public const int TPM_E_BAD_MODE = unchecked((int)0x8028002C);
+		/// <summary>
+		/// Either the physicalPresence or physicalPresenceLock bits have the wrong value.
+		/// </summary>
+		public const int TPM_E_BAD_PRESENCE = unchecked((int)0x8028002D);
+		/// <summary>
+		/// The TPM cannot perform this version of the capability.
+		/// </summary>
+		public const int TPM_E_BAD_VERSION = unchecked((int)0x8028002E);
+		/// <summary>
+		/// The TPM does not allow for wrapped transport sessions.
+		/// </summary>
+		public const int TPM_E_NO_WRAP_TRANSPORT = unchecked((int)0x8028002F);
+		/// <summary>
+		/// TPM audit construction failed and the underlying command was returning a failure code also.
+		/// </summary>
+		public const int TPM_E_AUDITFAIL_UNSUCCESSFUL = unchecked((int)0x80280030);
+		/// <summary>
+		/// TPM audit construction failed and the underlying command was returning success.
+		/// </summary>
+		public const int TPM_E_AUDITFAIL_SUCCESSFUL = unchecked((int)0x80280031);
+		/// <summary>
+		/// Attempt to reset a PCR register that does not have the resettable attribute.
+		/// </summary>
+		public const int TPM_E_NOTRESETABLE = unchecked((int)0x80280032);
+		/// <summary>
+		/// Attempt to reset a PCR register that requires locality and locality modifier not part of command transport.
+		/// </summary>
+		public const int TPM_E_NOTLOCAL = unchecked((int)0x80280033);
+		/// <summary>
+		/// Make identity blob not properly typed.
+		/// </summary>
+		public const int TPM_E_BAD_TYPE = unchecked((int)0x80280034);
+		/// <summary>
+		/// When saving context identified resource type does not match actual resource.
+		/// </summary>
+		public const int TPM_E_INVALID_RESOURCE = unchecked((int)0x80280035);
+		/// <summary>
+		/// The TPM is attempting to execute a command only available when in FIPS mode.
+		/// </summary>
+		public const int TPM_E_NOTFIPS = unchecked((int)0x80280036);
+		/// <summary>
+		/// The command is attempting to use an invalid family ID.
+		/// </summary>
+		public const int TPM_E_INVALID_FAMILY = unchecked((int)0x80280037);
+		/// <summary>
+		/// The permission to manipulate the NV storage is not available.
+		/// </summary>
+		public const int TPM_E_NO_NV_PERMISSION = unchecked((int)0x80280038);
+		/// <summary>
+		/// The operation requires a signed command.
+		/// </summary>
+		public const int TPM_E_REQUIRES_SIGN = unchecked((int)0x80280039);
+		/// <summary>
+		/// Wrong operation to load an NV key.
+		/// </summary>
+		public const int TPM_E_KEY_NOTSUPPORTED = unchecked((int)0x8028003A);
+		/// <summary>
+		/// NV_LoadKey blob requires both owner and blob authorization.
+		/// </summary>
+		public const int TPM_E_AUTH_CONFLICT = unchecked((int)0x8028003B);
+		/// <summary>
+		/// The NV area is locked and not writtable.
+		/// </summary>
+		public const int TPM_E_AREA_LOCKED = unchecked((int)0x8028003C);
+		/// <summary>
+		/// The locality is incorrect for the attempted operation.
+		/// </summary>
+		public const int TPM_E_BAD_LOCALITY = unchecked((int)0x8028003D);
+		/// <summary>
+		/// The NV area is read only and can't be written to.
+		/// </summary>
+		public const int TPM_E_READ_ONLY = unchecked((int)0x8028003E);
+		/// <summary>
+		/// There is no protection on the write to the NV area.
+		/// </summary>
+		public const int TPM_E_PER_NOWRITE = unchecked((int)0x8028003F);
+		/// <summary>
+		/// The family count value does not match.
+		/// </summary>
+		public const int TPM_E_FAMILYCOUNT = unchecked((int)0x80280040);
+		/// <summary>
+		/// The NV area has already been written to.
+		/// </summary>
+		public const int TPM_E_WRITE_LOCKED = unchecked((int)0x80280041);
+		/// <summary>
+		/// The NV area attributes conflict.
+		/// </summary>
+		public const int TPM_E_BAD_ATTRIBUTES = unchecked((int)0x80280042);
+		/// <summary>
+		/// The structure tag and version are invalid or inconsistent.
+		/// </summary>
+		public const int TPM_E_INVALID_STRUCTURE = unchecked((int)0x80280043);
+		/// <summary>
+		/// The key is under control of the TPM Owner and can only be evicted by the TPM Owner.
+		/// </summary>
+		public const int TPM_E_KEY_OWNER_CONTROL = unchecked((int)0x80280044);
+		/// <summary>
+		/// The counter handle is incorrect.
+		/// </summary>
+		public const int TPM_E_BAD_COUNTER = unchecked((int)0x80280045);
+		/// <summary>
+		/// The write is not a complete write of the area.
+		/// </summary>
+		public const int TPM_E_NOT_FULLWRITE = unchecked((int)0x80280046);
+		/// <summary>
+		/// The gap between saved context counts is too large.
+		/// </summary>
+		public const int TPM_E_CONTEXT_GAP = unchecked((int)0x80280047);
+		/// <summary>
+		/// The maximum number of NV writes without an owner has been exceeded.
+		/// </summary>
+		public const int TPM_E_MAXNVWRITES = unchecked((int)0x80280048);
+		/// <summary>
+		/// No operator AuthData value is set.
+		/// </summary>
+		public const int TPM_E_NOOPERATOR = unchecked((int)0x80280049);
+		/// <summary>
+		/// The resource pointed to by context is not loaded.
+		/// </summary>
+		public const int TPM_E_RESOURCEMISSING = unchecked((int)0x8028004A);
+		/// <summary>
+		/// The delegate administration is locked.
+		/// </summary>
+		public const int TPM_E_DELEGATE_LOCK = unchecked((int)0x8028004B);
+		/// <summary>
+		/// Attempt to manage a family other than the delegated family.
+		/// </summary>
+		public const int TPM_E_DELEGATE_FAMILY = unchecked((int)0x8028004C);
+		/// <summary>
+		/// Delegation table management not enabled.
+		/// </summary>
+		public const int TPM_E_DELEGATE_ADMIN = unchecked((int)0x8028004D);
+		/// <summary>
+		/// There was a command executed outside of an exclusive transport session.
+		/// </summary>
+		public const int TPM_E_TRANSPORT_NOTEXCLUSIVE = unchecked((int)0x8028004E);
+		/// <summary>
+		/// Attempt to context save a owner evict controlled key.
+		/// </summary>
+		public const int TPM_E_OWNER_CONTROL = unchecked((int)0x8028004F);
+		/// <summary>
+		/// The DAA command has no resources availble to execute the command.
+		/// </summary>
+		public const int TPM_E_DAA_RESOURCES = unchecked((int)0x80280050);
+		/// <summary>
+		/// The consistency check on DAA parameter inputData0 has failed.
+		/// </summary>
+		public const int TPM_E_DAA_INPUT_DATA0 = unchecked((int)0x80280051);
+		/// <summary>
+		/// The consistency check on DAA parameter inputData1 has failed.
+		/// </summary>
+		public const int TPM_E_DAA_INPUT_DATA1 = unchecked((int)0x80280052);
+		/// <summary>
+		/// The consistency check on DAA_issuerSettings has failed.
+		/// </summary>
+		public const int TPM_E_DAA_ISSUER_SETTINGS = unchecked((int)0x80280053);
+		/// <summary>
+		/// The consistency check on DAA_tpmSpecific has failed.
+		/// </summary>
+		public const int TPM_E_DAA_TPM_SETTINGS = unchecked((int)0x80280054);
+		/// <summary>
+		/// The atomic process indicated by the submitted DAA command is not the expected process.
+		/// </summary>
+		public const int TPM_E_DAA_STAGE = unchecked((int)0x80280055);
+		/// <summary>
+		/// The issuer's validity check has detected an inconsistency.
+		/// </summary>
+		public const int TPM_E_DAA_ISSUER_VALIDITY = unchecked((int)0x80280056);
+		/// <summary>
+		/// The consistency check on w has failed.
+		/// </summary>
+		public const int TPM_E_DAA_WRONG_W = unchecked((int)0x80280057);
+		/// <summary>
+		/// The handle is incorrect.
+		/// </summary>
+		public const int TPM_E_BAD_HANDLE = unchecked((int)0x80280058);
+		/// <summary>
+		/// Delegation is not correct.
+		/// </summary>
+		public const int TPM_E_BAD_DELEGATE = unchecked((int)0x80280059);
+		/// <summary>
+		/// The context blob is invalid.
+		/// </summary>
+		public const int TPM_E_BADCONTEXT = unchecked((int)0x8028005A);
+		/// <summary>
+		/// Too many contexts held by the TPM.
+		/// </summary>
+		public const int TPM_E_TOOMANYCONTEXTS = unchecked((int)0x8028005B);
+		/// <summary>
+		/// Migration authority signature validation failure.
+		/// </summary>
+		public const int TPM_E_MA_TICKET_SIGNATURE = unchecked((int)0x8028005C);
+		/// <summary>
+		/// Migration destination not authenticated.
+		/// </summary>
+		public const int TPM_E_MA_DESTINATION = unchecked((int)0x8028005D);
+		/// <summary>
+		/// Migration source incorrect.
+		/// </summary>
+		public const int TPM_E_MA_SOURCE = unchecked((int)0x8028005E);
+		/// <summary>
+		/// Incorrect migration authority.
+		/// </summary>
+		public const int TPM_E_MA_AUTHORITY = unchecked((int)0x8028005F);
+		/// <summary>
+		/// Attempt to revoke the EK and the EK is not revocable.
+		/// </summary>
+		public const int TPM_E_PERMANENTEK = unchecked((int)0x80280061);
+		/// <summary>
+		/// Bad signature of CMK ticket.
+		/// </summary>
+		public const int TPM_E_BAD_SIGNATURE = unchecked((int)0x80280062);
+		/// <summary>
+		/// There is no room in the context list for additional contexts.
+		/// </summary>
+		public const int TPM_E_NOCONTEXTSPACE = unchecked((int)0x80280063);
+		/// <summary>
+		/// The command was blocked.
+		/// </summary>
+		public const int TPM_E_COMMAND_BLOCKED = unchecked((int)0x80280400);
+		/// <summary>
+		/// The specified handle was not found.
+		/// </summary>
+		public const int TPM_E_INVALID_HANDLE = unchecked((int)0x80280401);
+		/// <summary>
+		/// The TPM returned a duplicate handle and the command needs to be resubmitted.
+		/// </summary>
+		public const int TPM_E_DUPLICATE_VHANDLE = unchecked((int)0x80280402);
+		/// <summary>
+		/// The command within the transport was blocked.
+		/// </summary>
+		public const int TPM_E_EMBEDDED_COMMAND_BLOCKED = unchecked((int)0x80280403);
+		/// <summary>
+		/// The command within the transport is not supported.
+		/// </summary>
+		public const int TPM_E_EMBEDDED_COMMAND_UNSUPPORTED = unchecked((int)0x80280404);
+		/// <summary>
+		/// The TPM is too busy to respond to the command immediately, but the command could be resubmitted at a later time.
+		/// </summary>
+		public const int TPM_E_RETRY = unchecked((int)0x80280800);
+		/// <summary>
+		/// SelfTestFull has not been run.
+		/// </summary>
+		public const int TPM_E_NEEDS_SELFTEST = unchecked((int)0x80280801);
+		/// <summary>
+		/// The TPM is currently executing a full selftest.
+		/// </summary>
+		public const int TPM_E_DOING_SELFTEST = unchecked((int)0x80280802);
+		/// <summary>
+		/// The TPM is defending against dictionary attacks and is in a time-out period.
+		/// </summary>
+		public const int TPM_E_DEFEND_LOCK_RUNNING = unchecked((int)0x80280803);
+		/// <summary>
+		/// TPM 2.0: Inconsistent attributes.
+		/// </summary>
+		public const int TPM_20_E_ATTRIBUTES = unchecked((int)0x80280082);
+		/// <summary>
+		/// TPM 2.0: Hash algorithm not supported or not appropriate.
+		/// </summary>
+		public const int TPM_20_E_HASH = unchecked((int)0x80280083);
+		/// <summary>
+		/// TPM 2.0: Value is out of range or is not correct for the context.
+		/// </summary>
+		public const int TPM_20_E_VALUE = unchecked((int)0x80280084);
+		/// <summary>
+		/// TPM 2.0: Hierarchy is not enabled or is not correct for the use.
+		/// </summary>
+		public const int TPM_20_E_HIERARCHY = unchecked((int)0x80280085);
+		/// <summary>
+		/// TPM 2.0: Key size is not supported.
+		/// </summary>
+		public const int TPM_20_E_KEY_SIZE = unchecked((int)0x80280086);
+		/// <summary>
+		/// TPM 2.0: Mask generation function not supported.
+		/// </summary>
+		public const int TPM_20_E_MGF = unchecked((int)0x80280087);
+		/// <summary>
+		/// TPM 2.0: Mode of operation not supported.
+		/// </summary>
+		public const int TPM_20_E_MODE = unchecked((int)0x80280089);
+		/// <summary>
+		/// TPM 2.0: The type of the value is not appropriate for the use.
+		/// </summary>
+		public const int TPM_20_E_TYPE = unchecked((int)0x8028008A);
+		/// <summary>
+		/// TPM 2.0: The Handle is not correct for the use.
+		/// </summary>
+		public const int TPM_20_E_HANDLE = unchecked((int)0x8028008B);
+		/// <summary>
+		/// TPM 2.0: Unsupported key derivation function or function not appropriate for use.
+		/// </summary>
+		public const int TPM_20_E_KDF = unchecked((int)0x8028008C);
+		/// <summary>
+		/// TPM 2.0: Value was out of allowed range.
+		/// </summary>
+		public const int TPM_20_E_RANGE = unchecked((int)0x8028008D);
+		/// <summary>
+		/// TPM 2.0: The authorization HMAC check failed and DA counter incremented.
+		/// </summary>
+		public const int TPM_20_E_AUTH_FAIL = unchecked((int)0x8028008E);
+		/// <summary>
+		/// TPM 2.0: Invalid nonce size.
+		/// </summary>
+		public const int TPM_20_E_NONCE = unchecked((int)0x8028008F);
+		/// <summary>
+		/// TPM 2.0: Unsupported or incompatible scheme.
+		/// </summary>
+		public const int TPM_20_E_SCHEME = unchecked((int)0x80280092);
+		/// <summary>
+		/// TPM 2.0: Structure is wrong size..
+		/// </summary>
+		public const int TPM_20_E_SIZE = unchecked((int)0x80280095);
+		/// <summary>
+		/// TPM 2.0: Incorrect structure tag.
+		/// </summary>
+		public const int TPM_20_E_TAG = unchecked((int)0x80280097);
+		/// <summary>
+		/// TPM 2.0: Union selector is incorrect.
+		/// </summary>
+		public const int TPM_20_E_SELECTOR = unchecked((int)0x80280098);
+		/// <summary>
+		/// TPM 2.0: The signature is not valid.
+		/// </summary>
+		public const int TPM_20_E_SIGNATURE = unchecked((int)0x8028009B);
+		/// <summary>
+		/// TPM 2.0: Key fields are not compatible with the selected use.
+		/// </summary>
+		public const int TPM_20_E_KEY = unchecked((int)0x80280087);
+		/// <summary>
+		/// TPM 2.0: A policy check failed.
+		/// </summary>
+		public const int TPM_20_E_POLICY_FAIL = unchecked((int)0x8028009D);
+		/// <summary>
+		/// TPM 2.0: Integrity check failed.
+		/// </summary>
+		public const int TPM_20_E_INTEGRITY = unchecked((int)0x8028009F);
+		/// <summary>
+		/// TPM 2.0: Invalid ticket.
+		/// </summary>
+		public const int TPM_20_E_TICKET = unchecked((int)0x802800A0);
+		/// <summary>
+		/// TPM 2.0: Reserved bits not set to zero as required.
+		/// </summary>
+		public const int TPM_20_E_RESERVED_BITS = unchecked((int)0x802800A1);
+		/// <summary>
+		/// TPM 2.0: Authorization failure without DA implications.
+		/// </summary>
+		public const int TPM_20_E_BAD_AUTH = unchecked((int)0x802800A2);
+		/// <summary>
+		/// TPM 2.0: The policy has expired.
+		/// </summary>
+		public const int TPM_20_E_EXPIRED = unchecked((int)0x802800A3);
+		/// <summary>
+		/// TPM 2.0: The command code in the policy is not the command code of the command or the command code in a policy command references a command that is not implemented.
+		/// </summary>
+		public const int TPM_20_E_POLICY_CC = unchecked((int)0x802800A4);
+		/// <summary>
+		/// TPM 2.0: Public and sensitive portions of an object are not cryptographically bound.
+		/// </summary>
+		public const int TPM_20_E_BINDING = unchecked((int)0x802800A5);
+		/// <summary>
+		/// TPM 2.0: Curve not supported.
+		/// </summary>
+		public const int TPM_20_E_CURVE = unchecked((int)0x802800A6);
+		/// <summary>
+		/// TPM 2.0: Point is not on the required curve.
+		/// </summary>
+		public const int TPM_20_E_ECC_POINT = unchecked((int)0x802800A7);
+		/// <summary>
+		/// TPM 2.0: TPM not initialized.
+		/// </summary>
+		public const int TPM_20_E_INITIALIZE = unchecked((int)0x80280100);
+		/// <summary>
+		/// TPM 2.0: Commands not being accepted because of a TPM failure.
+		/// </summary>
+		public const int TPM_20_E_FAILURE = unchecked((int)0x80280101);
+		/// <summary>
+		/// TPM 2.0: Improper use of a sequence handle.
+		/// </summary>
+		public const int TPM_20_E_SEQUENCE = unchecked((int)0x80280103);
+		/// <summary>
+		/// TPM 2.0: TPM_RC_PRIVATE error.
+		/// </summary>
+		public const int TPM_20_E_PRIVATE = unchecked((int)0x80280010B);
+		/// <summary>
+		/// TPM 2.0: TPM_RC_HMAC.
+		/// </summary>
+		public const int TPM_20_E_HMAC = unchecked((int)0x80280119);
+		/// <summary>
+		/// TPM 2.0: TPM_RC_DISABLED.
+		/// </summary>
+		public const int TPM_20_E_DISABLED = unchecked((int)0x80280120);
+		/// <summary>
+		/// TPM 2.0: Command failed because audit sequence required exclusivity.
+		/// </summary>
+		public const int TPM_20_E_EXCLUSIVE = unchecked((int)0x80280121);
+		/// <summary>
+		/// TPM 2.0: Unsupported ECC curve.
+		/// </summary>
+		public const int TPM_20_E_ECC_CURVE = unchecked((int)0x80280123);
+		/// <summary>
+		/// TPM 2.0: Authorization handle is not correct for command.
+		/// </summary>
+		public const int TPM_20_E_AUTH_TYPE = unchecked((int)0x80280124);
+		/// <summary>
+		/// TPM 2.0: Command requires an authorization session for handle and is not present.
+		/// </summary>
+		public const int TPM_20_E_AUTH_MISSING = unchecked((int)0x80280125);
+		/// <summary>
+		/// TPM 2.0: Policy failure in Math Operation or an invalid authPolicy value.
+		/// </summary>
+		public const int TPM_20_E_POLICY = unchecked((int)0x80280126);
+		/// <summary>
+		/// TPM 2.0: PCR check fail.
+		/// </summary>
+		public const int TPM_20_E_PCR = unchecked((int)0x80280127);
+		/// <summary>
+		/// TPM 2.0: PCR have changed since checked.
+		/// </summary>
+		public const int TPM_20_E_PCR_CHANGED = unchecked((int)0x80280128);
+		/// <summary>
+		/// TPM 2.0: The TPM is not in the right mode for upgrade.
+		/// </summary>
+		public const int TPM_20_E_UPGRADE = unchecked((int)0x8028012D);
+		/// <summary>
+		/// TPM 2.0: Context ID counter is at maximum.
+		/// </summary>
+		public const int TPM_20_E_TOO_MANY_CONTEXTS = unchecked((int)0x8028012E);
+		/// <summary>
+		/// TPM 2.0: authValue or authPolicy is not available for selected entity.
+		/// </summary>
+		public const int TPM_20_E_AUTH_UNAVAILABLE = unchecked((int)0x8028012F);
+		/// <summary>
+		/// TPM 2.0: A _TPM_Init and Startup(CLEAR) is required before the TPM can resume operation.
+		/// </summary>
+		public const int TPM_20_E_REBOOT = unchecked((int)0x80280130);
+		/// <summary>
+		/// TPM 2.0: The protection algorithms (hash and symmetric) are not reasonably balanced. The digest size of the hash must be larger than the key size of the symmetric algorithm.
+		/// </summary>
+		public const int TPM_20_E_UNBALANCED = unchecked((int)0x80280131);
+		/// <summary>
+		/// TPM 2.0: The TPM command's commandSize value is inconsistent with contents of the command buffer; either the size is not the same as the bytes loaded by the hardware interface layer or the value is not large enough to hold a command header.
+		/// </summary>
+		public const int TPM_20_E_COMMAND_SIZE = unchecked((int)0x80280142);
+		/// <summary>
+		/// TPM 2.0: Command code not supported.
+		/// </summary>
+		public const int TPM_20_E_COMMAND_CODE = unchecked((int)0x80280143);
+		/// <summary>
+		/// TPM 2.0: The value of authorizationSize is out of range or the number of octets in the authorization Area is greater than required.
+		/// </summary>
+		public const int TPM_20_E_AUTHSIZE = unchecked((int)0x80280144);
+		/// <summary>
+		/// TPM 2.0: Use of an authorization session with a context command or another command that cannot have an authorization session.
+		/// </summary>
+		public const int TPM_20_E_AUTH_CONTEXT = unchecked((int)0x80280145);
+		/// <summary>
+		/// TPM 2.0: NV offset+size is out of range.
+		/// </summary>
+		public const int TPM_20_E_NV_RANGE = unchecked((int)0x80280146);
+		/// <summary>
+		/// TPM 2.0: Requested allocation size is larger than allowed.
+		/// </summary>
+		public const int TPM_20_E_NV_SIZE = unchecked((int)0x80280147);
+		/// <summary>
+		/// TPM 2.0: NV access locked.
+		/// </summary>
+		public const int TPM_20_E_NV_LOCKED = unchecked((int)0x80280148);
+		/// <summary>
+		/// TPM 2.0: NV access authorization fails in command actions
+		/// </summary>
+		public const int TPM_20_E_NV_AUTHORIZATION = unchecked((int)0x80280149);
+		/// <summary>
+		/// TPM 2.0: An NV index is used before being initialized or the state saved by TPM2_Shutdown(STATE) could not be restored.
+		/// </summary>
+		public const int TPM_20_E_NV_UNINITIALIZED = unchecked((int)0x8028014A);
+		/// <summary>
+		/// TPM 2.0: Insufficient space for NV allocation.
+		/// </summary>
+		public const int TPM_20_E_NV_SPACE = unchecked((int)0x8028014B);
+		/// <summary>
+		/// TPM 2.0: NV index or persistent object already defined.
+		/// </summary>
+		public const int TPM_20_E_NV_DEFINED = unchecked((int)0x8028014C);
+		/// <summary>
+		/// TPM 2.0: Context in TPM2_ContextLoad() is not valid.
+		/// </summary>
+		public const int TPM_20_E_BAD_CONTEXT = unchecked((int)0x80280150);
+		/// <summary>
+		/// TPM 2.0: chHash value already set or not correct for use.
+		/// </summary>
+		public const int TPM_20_E_CPHASH = unchecked((int)0x80280151);
+		/// <summary>
+		/// TPM 2.0: Handle for parent is not a valid parent.
+		/// </summary>
+		public const int TPM_20_E_PARENT = unchecked((int)0x80280152);
+		/// <summary>
+		/// TPM 2.0: Some function needs testing.
+		/// </summary>
+		public const int TPM_20_E_NEEDS_TEST = unchecked((int)0x80280153);
+		/// <summary>
+		/// TPM 2.0: returned when an internal function cannot process a request due to an unspecified problem. This code is usually related to invalid parameters that are not properly filtered by the input unmarshaling code.
+		/// </summary>
+		public const int TPM_20_E_NO_RESULT = unchecked((int)0x80280154);
+		/// <summary>
+		/// TPM 2.0: The sensitive area did not unmarshal correctly after decryption - this code is used in lieu of the other unmarshaling errors so that an attacker cannot determine where the unmarshaling error occurred.
+		/// </summary>
+		public const int TPM_20_E_SENSITIVE = unchecked((int)0x80280155);
+		/// <summary>
+		/// TPM 2.0: Gap for context ID is too large.
+		/// </summary>
+		public const int TPM_20_E_CONTEXT_GAP = unchecked((int)0x80280901);
+		/// <summary>
+		/// TPM 2.0: Out of memory for object contexts.
+		/// </summary>
+		public const int TPM_20_E_OBJECT_MEMORY = unchecked((int)0x80280902);
+		/// <summary>
+		/// TPM 2.0: Out of memory for session contexts.
+		/// </summary>
+		public const int TPM_20_E_SESSION_MEMORY = unchecked((int)0x80280903);
+		/// <summary>
+		/// TPM 2.0: Out of shared object/session memory or need space for internal operations.
+		/// </summary>
+		public const int TPM_20_E_MEMORY = unchecked((int)0x80280904);
+		/// <summary>
+		/// TPM 2.0: Out of session handles - a session must be flushed before a new session may be created.
+		/// </summary>
+		public const int TPM_20_E_SESSION_HANDLES = unchecked((int)0x80280905);
+		/// <summary>
+		/// TPM 2.0: Out of object handles - the handle space for objects is depleted and a reboot is required.
+		/// </summary>
+		public const int TPM_20_E_OBJECT_HANDLES = unchecked((int)0x80280906);
+		/// <summary>
+		/// TPM 2.0: Bad locality.
+		/// </summary>
+		public const int TPM_20_E_LOCALITY = unchecked((int)0x80280907);
+		/// <summary>
+		/// TPM 2.0: The TPM has suspended operation on the command; forward progress was made and the command may be retried.
+		/// </summary>
+		public const int TPM_20_E_YIELDED = unchecked((int)0x80280908);
+		/// <summary>
+		/// TPM 2.0: The command was canceled.
+		/// </summary>
+		public const int TPM_20_E_CANCELED = unchecked((int)0x80280909);
+		/// <summary>
+		/// TPM 2.0: TPM is performing self-tests.
+		/// </summary>
+		public const int TPM_20_E_TESTING = unchecked((int)0x8028090A);
+		/// <summary>
+		/// TPM 2.0: The TPM is rate-limiting accesses to prevent wearout of NV.
+		/// </summary>
+		public const int TPM_20_E_NV_RATE = unchecked((int)0x80280920);
+		/// <summary>
+		/// TPM 2.0: Authorization for objects subject to DA protection are not allowed at this time because the TPM is in DA lockout mode.
+		/// </summary>
+		public const int TPM_20_E_LOCKOUT = unchecked((int)0x80280921);
+		/// <summary>
+		/// TPM 2.0: The TPM was not able to start the command.
+		/// </summary>
+		public const int TPM_20_E_RETRY = unchecked((int)0x80280922);
+		/// <summary>
+		/// TPM 2.0: the command may require writing of NV and NV is not current accessible..
+		/// </summary>
+		public const int TPM_20_E_NV_UNAVAILABLE = unchecked((int)0x80280923);
+		/// <summary>
+		/// An internal software error has been detected.
+		/// </summary>
+		public const int TBS_E_INTERNAL_ERROR = unchecked((int)0x80284001);
+		/// <summary>
+		/// One or more input parameters is bad.
+		/// </summary>
+		public const int TBS_E_BAD_PARAMETER = unchecked((int)0x80284002);
+		/// <summary>
+		/// A specified output pointer is bad.
+		/// </summary>
+		public const int TBS_E_INVALID_OUTPUT_POINTER = unchecked((int)0x80284003);
+		/// <summary>
+		/// The specified context handle does not refer to a valid context.
+		/// </summary>
+		public const int TBS_E_INVALID_CONTEXT = unchecked((int)0x80284004);
+		/// <summary>
+		/// A specified output buffer is too small.
+		/// </summary>
+		public const int TBS_E_INSUFFICIENT_BUFFER = unchecked((int)0x80284005);
+		/// <summary>
+		/// An error occurred while communicating with the TPM.
+		/// </summary>
+		public const int TBS_E_IOERROR = unchecked((int)0x80284006);
+		/// <summary>
+		/// One or more context parameters is invalid.
+		/// </summary>
+		public const int TBS_E_INVALID_CONTEXT_PARAM = unchecked((int)0x80284007);
+		/// <summary>
+		/// The TBS service is not running and could not be started.
+		/// </summary>
+		public const int TBS_E_SERVICE_NOT_RUNNING = unchecked((int)0x80284008);
+		/// <summary>
+		/// A new context could not be created because there are too many open contexts.
+		/// </summary>
+		public const int TBS_E_TOO_MANY_TBS_CONTEXTS = unchecked((int)0x80284009);
+		/// <summary>
+		/// A new virtual resource could not be created because there are too many open virtual resources.
+		/// </summary>
+		public const int TBS_E_TOO_MANY_RESOURCES = unchecked((int)0x8028400A);
+		/// <summary>
+		/// The TBS service has been started but is not yet running.
+		/// </summary>
+		public const int TBS_E_SERVICE_START_PENDING = unchecked((int)0x8028400B);
+		/// <summary>
+		/// The physical presence interface is not supported.
+		/// </summary>
+		public const int TBS_E_PPI_NOT_SUPPORTED = unchecked((int)0x8028400C);
+		/// <summary>
+		/// The command was canceled.
+		/// </summary>
+		public const int TBS_E_COMMAND_CANCELED = unchecked((int)0x8028400D);
+		/// <summary>
+		/// The input or output buffer is too large.
+		/// </summary>
+		public const int TBS_E_BUFFER_TOO_LARGE = unchecked((int)0x8028400E);
+		/// <summary>
+		/// A compatible Trusted Platform Module (TPM) Security Device cannot be found on this computer.
+		/// </summary>
+		public const int TBS_E_TPM_NOT_FOUND = unchecked((int)0x8028400F);
+		/// <summary>
+		/// The TBS service has been disabled.
+		/// </summary>
+		public const int TBS_E_SERVICE_DISABLED = unchecked((int)0x80284010);
+		/// <summary>
+		/// No TCG event log is available.
+		/// </summary>
+		public const int TBS_E_NO_EVENT_LOG = unchecked((int)0x80284011);
+		/// <summary>
+		/// The caller does not have the appropriate rights to perform the requested operation.
+		/// </summary>
+		public const int TBS_E_ACCESS_DENIED = unchecked((int)0x80284012);
+		/// <summary>
+		/// The TPM provisioning action is not allowed by the specified flags. For provisioning to be successful, one of several actions may be required. The TPM management console (tpm.msc) action to make the TPM Ready may help. For further information, see the documentation for the Win32_Tpm WMI method 'Provision'. (The actions that may be required include importing the TPM Owner Authorization value into the system, calling the Win32_Tpm WMI method for provisioning the TPM and specifying TRUE for either 'ForceClear_Allowed' or 'PhysicalPresencePrompts_Allowed' (as indicated by the value returned in the Additional Information), or enabling the TPM in the system BIOS.)
+		/// </summary>
+		public const int TBS_E_PROVISIONING_NOT_ALLOWED = unchecked((int)0x80284013);
+		/// <summary>
+		/// The Physical Presence Interface of this firmware does not support the requested method.
+		/// </summary>
+		public const int TBS_E_PPI_FUNCTION_UNSUPPORTED = unchecked((int)0x80284014);
+		/// <summary>
+		/// The requested TPM OwnerAuth value was not found.
+		/// </summary>
+		public const int TBS_E_OWNERAUTH_NOT_FOUND = unchecked((int)0x80284015);
+		/// <summary>
+		/// The TPM provisioning did not complete. For more information on completing the provisioning, call the Win32_Tpm WMI method for provisioning the TPM ('Provision') and check the returned Information.
+		/// </summary>
+		public const int TBS_E_PROVISIONING_INCOMPLETE = unchecked((int)0x80284016);
+		/// <summary>
+		/// The command buffer is not in the correct state.
+		/// </summary>
+		public const int TPMAPI_E_INVALID_STATE = unchecked((int)0x80290100);
+		/// <summary>
+		/// The command buffer does not contain enough data to satisfy the request.
+		/// </summary>
+		public const int TPMAPI_E_NOT_ENOUGH_DATA = unchecked((int)0x80290101);
+		/// <summary>
+		/// The command buffer cannot contain any more data.
+		/// </summary>
+		public const int TPMAPI_E_TOO_MUCH_DATA = unchecked((int)0x80290102);
+		/// <summary>
+		/// One or more output parameters was <strong>NULL</strong> or invalid.
+		/// </summary>
+		public const int TPMAPI_E_INVALID_OUTPUT_POINTER = unchecked((int)0x80290103);
+		/// <summary>
+		/// One or more input parameters is invalid.
+		/// </summary>
+		public const int TPMAPI_E_INVALID_PARAMETER = unchecked((int)0x80290104);
+		/// <summary>
+		/// Not enough memory was available to satisfy the request.
+		/// </summary>
+		public const int TPMAPI_E_OUT_OF_MEMORY = unchecked((int)0x80290105);
+		/// <summary>
+		/// The specified buffer was too small.
+		/// </summary>
+		public const int TPMAPI_E_BUFFER_TOO_SMALL = unchecked((int)0x80290106);
+		/// <summary>
+		/// An internal error was detected.
+		/// </summary>
+		public const int TPMAPI_E_INTERNAL_ERROR = unchecked((int)0x80290107);
+		/// <summary>
+		/// The caller does not have the appropriate rights to perform the requested operation.
+		/// </summary>
+		public const int TPMAPI_E_ACCESS_DENIED = unchecked((int)0x80290108);
+		/// <summary>
+		/// The specified authorization information was invalid.
+		/// </summary>
+		public const int TPMAPI_E_AUTHORIZATION_FAILED = unchecked((int)0x80290109);
+		/// <summary>
+		/// The specified context handle was not valid.
+		/// </summary>
+		public const int TPMAPI_E_INVALID_CONTEXT_HANDLE = unchecked((int)0x8029010A);
+		/// <summary>
+		/// An error occurred while communicating with the TBS.
+		/// </summary>
+		public const int TPMAPI_E_TBS_COMMUNICATION_ERROR = unchecked((int)0x8029010B);
+		/// <summary>
+		/// The TPM returned an unexpected result.
+		/// </summary>
+		public const int TPMAPI_E_TPM_COMMAND_ERROR = unchecked((int)0x8029010C);
+		/// <summary>
+		/// The message was too large for the encoding scheme.
+		/// </summary>
+		public const int TPMAPI_E_MESSAGE_TOO_LARGE = unchecked((int)0x8029010D);
+		/// <summary>
+		/// The encoding in the blob was not recognized.
+		/// </summary>
+		public const int TPMAPI_E_INVALID_ENCODING = unchecked((int)0x8029010E);
+		/// <summary>
+		/// The key size is not valid.
+		/// </summary>
+		public const int TPMAPI_E_INVALID_KEY_SIZE = unchecked((int)0x8029010F);
+		/// <summary>
+		/// The encryption operation failed.
+		/// </summary>
+		public const int TPMAPI_E_ENCRYPTION_FAILED = unchecked((int)0x80290110);
+		/// <summary>
+		/// The key parameters structure was not valid
+		/// </summary>
+		public const int TPMAPI_E_INVALID_KEY_PARAMS = unchecked((int)0x80290111);
+		/// <summary>
+		/// The requested supplied data does not appear to be a valid migration authorization blob.
+		/// </summary>
+		public const int TPMAPI_E_INVALID_MIGRATION_AUTHORIZATION_BLOB = unchecked((int)0x80290112);
+		/// <summary>
+		/// The specified PCR index was invalid
+		/// </summary>
+		public const int TPMAPI_E_INVALID_PCR_INDEX = unchecked((int)0x80290113);
+		/// <summary>
+		/// The data given does not appear to be a valid delegate blob.
+		/// </summary>
+		public const int TPMAPI_E_INVALID_DELEGATE_BLOB = unchecked((int)0x80290114);
+		/// <summary>
+		/// One or more of the specified context parameters was not valid.
+		/// </summary>
+		public const int TPMAPI_E_INVALID_CONTEXT_PARAMS = unchecked((int)0x80290115);
+		/// <summary>
+		/// The data given does not appear to be a valid key blob
+		/// </summary>
+		public const int TPMAPI_E_INVALID_KEY_BLOB = unchecked((int)0x80290116);
+		/// <summary>
+		/// The specified PCR data was invalid.
+		/// </summary>
+		public const int TPMAPI_E_INVALID_PCR_DATA = unchecked((int)0x80290117);
+		/// <summary>
+		/// The format of the owner auth data was invalid.
+		/// </summary>
+		public const int TPMAPI_E_INVALID_OWNER_AUTH = unchecked((int)0x80290118);
+		/// <summary>
+		/// The random number generated did not pass FIPS RNG check.
+		/// </summary>
+		public const int TPMAPI_E_FIPS_RNG_CHECK_FAILED = unchecked((int)0x80290119);
+		/// <summary>
+		/// The TCG Event Log does not contain any data.
+		/// </summary>
+		public const int TPMAPI_E_EMPTY_TCG_LOG = unchecked((int)0x8029011A);
+		/// <summary>
+		/// An entry in the TCG Event Log was invalid.
+		/// </summary>
+		public const int TPMAPI_E_INVALID_TCG_LOG_ENTRY = unchecked((int)0x8029011B);
+		/// <summary>
+		/// A TCG Separator was not found.
+		/// </summary>
+		public const int TPMAPI_E_TCG_SEPARATOR_ABSENT = unchecked((int)0x8029011C);
+		/// <summary>
+		/// A digest value in a TCG Log entry did not match hashed data.
+		/// </summary>
+		public const int TPMAPI_E_TCG_INVALID_DIGEST_ENTRY = unchecked((int)0x8029011D);
+		/// <summary>
+		/// The requested operation was blocked by current TPM policy. Please contact your system administrator for assistance.
+		/// </summary>
+		public const int TPMAPI_E_POLICY_DENIES_OPERATION = unchecked((int)0x8029011E);
+		/// <summary>
+		/// The specified buffer was too small.
+		/// </summary>
+		public const int TBSIMP_E_BUFFER_TOO_SMALL = unchecked((int)0x80290200);
+		/// <summary>
+		/// The context could not be cleaned up.
+		/// </summary>
+		public const int TBSIMP_E_CLEANUP_FAILED = unchecked((int)0x80290201);
+		/// <summary>
+		/// The specified context handle is invalid.
+		/// </summary>
+		public const int TBSIMP_E_INVALID_CONTEXT_HANDLE = unchecked((int)0x80290202);
+		/// <summary>
+		/// An invalid context parameter was specified.
+		/// </summary>
+		public const int TBSIMP_E_INVALID_CONTEXT_PARAM = unchecked((int)0x80290203);
+		/// <summary>
+		/// An error occurred while communicating with the TPM
+		/// </summary>
+		public const int TBSIMP_E_TPM_ERROR = unchecked((int)0x80290204);
+		/// <summary>
+		/// No entry with the specified key was found.
+		/// </summary>
+		public const int TBSIMP_E_HASH_BAD_KEY = unchecked((int)0x80290205);
+		/// <summary>
+		/// The specified virtual handle matches a virtual handle already in use.
+		/// </summary>
+		public const int TBSIMP_E_DUPLICATE_VHANDLE = unchecked((int)0x80290206);
+		/// <summary>
+		/// The pointer to the returned handle location was <strong>NULL</strong> or invalid
+		/// </summary>
+		public const int TBSIMP_E_INVALID_OUTPUT_POINTER = unchecked((int)0x80290207);
+		/// <summary>
+		/// One or more parameters is invalid
+		/// </summary>
+		public const int TBSIMP_E_INVALID_PARAMETER = unchecked((int)0x80290208);
+		/// <summary>
+		/// The RPC subsystem could not be initialized.
+		/// </summary>
+		public const int TBSIMP_E_RPC_INIT_FAILED = unchecked((int)0x80290209);
+		/// <summary>
+		/// The TBS scheduler is not running.
+		/// </summary>
+		public const int TBSIMP_E_SCHEDULER_NOT_RUNNING = unchecked((int)0x8029020A);
+		/// <summary>
+		/// The command was canceled.
+		/// </summary>
+		public const int TBSIMP_E_COMMAND_CANCELED = unchecked((int)0x8029020B);
+		/// <summary>
+		/// There was not enough memory to fulfill the request
+		/// </summary>
+		public const int TBSIMP_E_OUT_OF_MEMORY = unchecked((int)0x8029020C);
+		/// <summary>
+		/// The specified list is empty, or the iteration has reached the end of the list.
+		/// </summary>
+		public const int TBSIMP_E_LIST_NO_MORE_ITEMS = unchecked((int)0x8029020D);
+		/// <summary>
+		/// The specified item was not found in the list.
+		/// </summary>
+		public const int TBSIMP_E_LIST_NOT_FOUND = unchecked((int)0x8029020E);
+		/// <summary>
+		/// The TPM does not have enough space to load the requested resource.
+		/// </summary>
+		public const int TBSIMP_E_NOT_ENOUGH_SPACE = unchecked((int)0x8029020F);
+		/// <summary>
+		/// There are too many TPM contexts in use.
+		/// </summary>
+		public const int TBSIMP_E_NOT_ENOUGH_TPM_CONTEXTS = unchecked((int)0x80290210);
+		/// <summary>
+		/// The TPM command failed.
+		/// </summary>
+		public const int TBSIMP_E_COMMAND_FAILED = unchecked((int)0x80290211);
+		/// <summary>
+		/// The TBS does not recognize the specified ordinal.
+		/// </summary>
+		public const int TBSIMP_E_UNKNOWN_ORDINAL = unchecked((int)0x80290212);
+		/// <summary>
+		/// The requested resource is no longer available.
+		/// </summary>
+		public const int TBSIMP_E_RESOURCE_EXPIRED = unchecked((int)0x80290213);
+		/// <summary>
+		/// The resource type did not match.
+		/// </summary>
+		public const int TBSIMP_E_INVALID_RESOURCE = unchecked((int)0x80290214);
+		/// <summary>
+		/// No resources can be unloaded.
+		/// </summary>
+		public const int TBSIMP_E_NOTHING_TO_UNLOAD = unchecked((int)0x80290215);
+		/// <summary>
+		/// No new entries can be added to the hash table.
+		/// </summary>
+		public const int TBSIMP_E_HASH_TABLE_FULL = unchecked((int)0x80290216);
+		/// <summary>
+		/// A new TBS context could not be created because there are too many open contexts.
+		/// </summary>
+		public const int TBSIMP_E_TOO_MANY_TBS_CONTEXTS = unchecked((int)0x80290217);
+		/// <summary>
+		/// A new virtual resource could not be created because there are too many open virtual resources.
+		/// </summary>
+		public const int TBSIMP_E_TOO_MANY_RESOURCES = unchecked((int)0x80290218);
+		/// <summary>
+		/// The physical presence interface is not supported.
+		/// </summary>
+		public const int TBSIMP_E_PPI_NOT_SUPPORTED = unchecked((int)0x80290219);
+		/// <summary>
+		/// TBS is not compatible with the version of TPM found on the system.
+		/// </summary>
+		public const int TBSIMP_E_TPM_INCOMPATIBLE = unchecked((int)0x8029021A);
+		/// <summary>
+		/// No TCG event log is available.
+		/// </summary>
+		public const int TBSIMP_E_NO_EVENT_LOG = unchecked((int)0x8029021B);
+		/// <summary>
+		/// A general error was detected when attempting to acquire the BIOS's response to a Physical Presence command.
+		/// </summary>
+		public const int TPM_E_PPI_ACPI_FAILURE = unchecked((int)0x80290300);
+		/// <summary>
+		/// The user failed to confirm the TPM operation request.
+		/// </summary>
+		public const int TPM_E_PPI_USER_ABORT = unchecked((int)0x80290301);
+		/// <summary>
+		/// The BIOS failure prevented the successful execution of the requested TPM operation (e.g. invalid TPM operation request, BIOS communication error with the TPM).
+		/// </summary>
+		public const int TPM_E_PPI_BIOS_FAILURE = unchecked((int)0x80290302);
+		/// <summary>
+		/// The BIOS does not support the physical presence interface.
+		/// </summary>
+		public const int TPM_E_PPI_NOT_SUPPORTED = unchecked((int)0x80290303);
+		/// <summary>
+		/// The Physical Presence command was blocked by current BIOS settings. The system owner may be able to reconfigure the BIOS settings to allow the command.
+		/// </summary>
+		public const int TPM_E_PPI_BLOCKED_IN_BIOS = unchecked((int)0x80290304);
+		/// <summary>
+		/// This is an error mask to convert Platform Crypto Provider errors to win errors.
+		/// </summary>
+		public const int TPM_E_PCP_ERROR_MASK = unchecked((int)0x80290400);
+		/// <summary>
+		/// The Platform Crypto Device is currently not ready. It needs to be fully provisioned to be operational.
+		/// </summary>
+		public const int TPM_E_PCP_DEVICE_NOT_READY = unchecked((int)0x80290401);
+		/// <summary>
+		/// The handle provided to the Platform Crypto Provider is invalid.
+		/// </summary>
+		public const int TPM_E_PCP_INVALID_HANDLE = unchecked((int)0x80290402);
+		/// <summary>
+		/// A parameter provided to the Platform Crypto Provider is invalid.
+		/// </summary>
+		public const int TPM_E_PCP_INVALID_PARAMETER = unchecked((int)0x80290403);
+		/// <summary>
+		/// A provided flag to the Platform Crypto Provider is not supported.
+		/// </summary>
+		public const int TPM_E_PCP_FLAG_NOT_SUPPORTED = unchecked((int)0x80290404);
+		/// <summary>
+		/// The requested operation is not supported by this Platform Crypto Provider.
+		/// </summary>
+		public const int TPM_E_PCP_NOT_SUPPORTED = unchecked((int)0x80290405);
+		/// <summary>
+		/// The buffer is too small to contain all data. No information has been written to the buffer.
+		/// </summary>
+		public const int TPM_E_PCP_BUFFER_TOO_SMALL = unchecked((int)0x80290406);
+		/// <summary>
+		/// An unexpected internal error has occurred in the Platform Crypto Provider.
+		/// </summary>
+		public const int TPM_E_PCP_INTERNAL_ERROR = unchecked((int)0x80290407);
+		/// <summary>
+		/// The authorization to use a provider object has failed.
+		/// </summary>
+		public const int TPM_E_PCP_AUTHENTICATION_FAILED = unchecked((int)0x80290408);
+		/// <summary>
+		/// The Platform Crypto Device has ignored the authorization for the provider object, to mitigate against a dictionary attack.
+		/// </summary>
+		public const int TPM_E_PCP_AUTHENTICATION_IGNORED = unchecked((int)0x80290409);
+		/// <summary>
+		/// The referenced policy was not found.
+		/// </summary>
+		public const int TPM_E_PCP_POLICY_NOT_FOUND = unchecked((int)0x8029040A);
+		/// <summary>
+		/// The referenced profile was not found.
+		/// </summary>
+		public const int TPM_E_PCP_PROFILE_NOT_FOUND = unchecked((int)0x8029040B);
+		/// <summary>
+		/// The validation was not successful.
+		/// </summary>
+		public const int TPM_E_PCP_VALIDATION_FAILED = unchecked((int)0x8029040C);
+		/// <summary>
+		/// An attempt was made to import or load a key under an incorrect storage parent.
+		/// </summary>
+		public const int TPM_E_PCP_WRONG_PARENT = unchecked((int)0x8029040E);
+		/// <summary>
+		/// The TPM key is not loaded.
+		/// </summary>
+		public const int TPM_E_KEY_NOT_LOADED = unchecked((int)0x8029040F);
+		/// <summary>
+		/// The TPM key certification has not been generated.
+		/// </summary>
+		public const int TPM_E_NO_KEY_CERTIFICATION = unchecked((int)0x80290410);
+		/// <summary>
+		/// The TPM key is not yet finalized.
+		/// </summary>
+		public const int TPM_E_KEY_NOT_FINALIZED = unchecked((int)0x80290411);
+		/// <summary>
+		/// The TPM attestation challenge is not set.
+		/// </summary>
+		public const int TPM_E_ATTESTATION_CHALLENGE_NOT_SET = unchecked((int)0x80290412);
+		/// <summary>
+		/// The TPM PCR info is not available.
+		/// </summary>
+		public const int TPM_E_NOT_PCR_BOUND = unchecked((int)0x80290413);
+		/// <summary>
+		/// The TPM key is already finalized.
+		/// </summary>
+		public const int TPM_E_KEY_ALREADY_FINALIZED = unchecked((int)0x80290414);
+		/// <summary>
+		/// The TPM key usage policy is not supported.
+		/// </summary>
+		public const int TPM_E_KEY_USAGE_POLICY_NOT_SUPPORTED = unchecked((int)0x80290415);
+		/// <summary>
+		/// The TPM key usage policy is invalid.
+		/// </summary>
+		public const int TPM_E_KEY_USAGE_POLICY_INVALID = unchecked((int)0x80290416);
+		/// <summary>
+		/// There was a problem with the software key being imported into the TPM.
+		/// </summary>
+		public const int TPM_E_SOFT_KEY_ERROR = unchecked((int)0x80290417);
+		/// <summary>
+		/// The TPM key is not authenticated.
+		/// </summary>
+		public const int TPM_E_KEY_NOT_AUTHENTICATED = unchecked((int)0x80290418);
+		/// <summary>
+		/// The TPM key is not an AIK.
+		/// </summary>
+		public const int TPM_E_PCP_KEY_NOT_AIK = unchecked((int)0x80290419);
+		/// <summary>
+		/// The TPM key is not a signing key.
+		/// </summary>
+		public const int TPM_E_KEY_NOT_SIGNING_KEY = unchecked((int)0x8029041A);
+		/// <summary>
+		/// The TPM is locked out.
+		/// </summary>
+		public const int TPM_E_LOCKED_OUT = unchecked((int)0x8029041B);
+		/// <summary>
+		/// The claim type requested is not supported.
+		/// </summary>
+		public const int TPM_E_CLAIM_TYPE_NOT_SUPPORTED = unchecked((int)0x8029041C);
+		/// <summary>
+		/// TPM version is not supported.
+		/// </summary>
+		public const int TPM_E_VERSION_NOT_SUPPORTED = unchecked((int)0x8029041D);
+		/// <summary>
+		/// The buffer lengths do not match.
+		/// </summary>
+		public const int TPM_E_BUFFER_LENGTH_MISMATCH = unchecked((int)0x8029041E);
+		/// <summary>
+		/// The RSA key creation is blocked on this TPM due to known security vulnerabilities.
+		/// </summary>
+		public const int TPM_E_PCP_IFX_RSA_KEY_CREATION_BLOCKED = unchecked((int)0x8029041F);
+		/// <summary>
+		/// A ticket required to use a key was not provided.
+		/// </summary>
+		public const int TPM_E_PCP_TICKET_MISSING = unchecked((int)0x80290420);
+		/// <summary>
+		/// This key has a raw policy so the KSP can't authenticate against it.
+		/// </summary>
+		public const int TPM_E_PCP_RAW_POLICY_NOT_SUPPORTED = unchecked((int)0x80290421);
+		/// <summary>
+		/// The TPM key's handle was unexpectedly invalidated due to a hardware or firmware issue.
+		/// </summary>
+		public const int TPM_E_PCP_KEY_HANDLE_INVALIDATED = unchecked((int)0x80290422);
+		/// <summary>
+		/// The requested salt size for signing with RSAPSS does not match what the TPM uses.
+		/// </summary>
+		public const int TPM_E_PCP_UNSUPPORTED_PSS_SALT = 0x40290423;
+		/// <summary>
+		/// Validation of the platform claim failed.
+		/// </summary>
+		public const int TPM_E_PCP_PLATFORM_CLAIM_MAY_BE_OUTDATED = 0x40290424;
+		/// <summary>
+		/// The requested platform claim is for a previous boot.
+		/// </summary>
+		public const int TPM_E_PCP_PLATFORM_CLAIM_OUTDATED = 0x40290425;
+		/// <summary>
+		/// The platform claim is for a previous boot, and cannot be created without reboot.
+		/// </summary>
+		public const int TPM_E_PCP_PLATFORM_CLAIM_REBOOT = 0x40290426;
+		/// <summary>
+		/// TPM related network operations are blocked as Zero Exhaust mode is enabled on client.
+		/// </summary>
+		public const int TPM_E_EXHAUST_ENABLED = unchecked((int)0x80290500);
+		/// <summary>
+		/// TPM provisioning did not run to completion.
+		/// </summary>
+		public const int TPM_E_PROVISIONING_INCOMPLETE = unchecked((int)0x80290600);
+		/// <summary>
+		/// An invalid owner authorization value was specified.
+		/// </summary>
+		public const int TPM_E_INVALID_OWNER_AUTH = unchecked((int)0x80290601);
+		/// <summary>
+		/// TPM command returned too much data.
+		/// </summary>
+		public const int TPM_E_TOO_MUCH_DATA = unchecked((int)0x80290602);
+		/// <summary>
+		/// Data Collector Set was not found.
+		/// </summary>
+		public const int PLA_E_DCS_NOT_FOUND = unchecked((int)0x80300002);
+		/// <summary>
+		/// The Data Collector Set or one of its dependencies is already in use.
+		/// </summary>
+		public const int PLA_E_DCS_IN_USE = unchecked((int)0x803000AA);
+		/// <summary>
+		/// Unable to start Data Collector Set because there are too many folders.
+		/// </summary>
+		public const int PLA_E_TOO_MANY_FOLDERS = unchecked((int)0x80300045);
+		/// <summary>
+		/// Not enough free disk space to start Data Collector Set.
+		/// </summary>
+		public const int PLA_E_NO_MIN_DISK = unchecked((int)0x80300070);
+		/// <summary>
+		/// Data Collector Set already exists.
+		/// </summary>
+		public const int PLA_E_DCS_ALREADY_EXISTS = unchecked((int)0x803000B7);
+		/// <summary>
+		/// Property value will be ignored.
+		/// </summary>
+		public const int PLA_S_PROPERTY_IGNORED = 0x00300100;
+		/// <summary>
+		/// Property value conflict.
+		/// </summary>
+		public const int PLA_E_PROPERTY_CONFLICT = unchecked((int)0x80300101);
+		/// <summary>
+		/// The current configuration for this Data Collector Set requires that it contain exactly one Data Collector.
+		/// </summary>
+		public const int PLA_E_DCS_SINGLETON_REQUIRED = unchecked((int)0x80300102);
+		/// <summary>
+		/// A user account is required in order to commit the current Data Collector Set properties.
+		/// </summary>
+		public const int PLA_E_CREDENTIALS_REQUIRED = unchecked((int)0x80300103);
+		/// <summary>
+		/// Data Collector Set is not running.
+		/// </summary>
+		public const int PLA_E_DCS_NOT_RUNNING = unchecked((int)0x80300104);
+		/// <summary>
+		/// A conflict was detected in the list of include/exclude APIs. Do not specify the same API in both the include list and the exclude list.
+		/// </summary>
+		public const int PLA_E_CONFLICT_INCL_EXCL_API = unchecked((int)0x80300105);
+		/// <summary>
+		/// The executable path you have specified refers to a network share or UNC path.
+		/// </summary>
+		public const int PLA_E_NETWORK_EXE_NOT_VALID = unchecked((int)0x80300106);
+		/// <summary>
+		/// The executable path you have specified is already configured for API tracing.
+		/// </summary>
+		public const int PLA_E_EXE_ALREADY_CONFIGURED = unchecked((int)0x80300107);
+		/// <summary>
+		/// The executable path you have specified does not exist. Verify that the specified path is correct.
+		/// </summary>
+		public const int PLA_E_EXE_PATH_NOT_VALID = unchecked((int)0x80300108);
+		/// <summary>
+		/// Data Collector already exists.
+		/// </summary>
+		public const int PLA_E_DC_ALREADY_EXISTS = unchecked((int)0x80300109);
+		/// <summary>
+		/// The wait for the Data Collector Set start notification has timed out.
+		/// </summary>
+		public const int PLA_E_DCS_START_WAIT_TIMEOUT = unchecked((int)0x8030010A);
+		/// <summary>
+		/// The wait for the Data Collector to start has timed out.
+		/// </summary>
+		public const int PLA_E_DC_START_WAIT_TIMEOUT = unchecked((int)0x8030010B);
+		/// <summary>
+		/// The wait for the report generation tool to finish has timed out.
+		/// </summary>
+		public const int PLA_E_REPORT_WAIT_TIMEOUT = unchecked((int)0x8030010C);
+		/// <summary>
+		/// Duplicate items are not allowed.
+		/// </summary>
+		public const int PLA_E_NO_DUPLICATES = unchecked((int)0x8030010D);
+		/// <summary>
+		/// When specifying the executable that you want to trace, you must specify a full path to the executable and not just a filename.
+		/// </summary>
+		public const int PLA_E_EXE_FULL_PATH_REQUIRED = unchecked((int)0x8030010E);
+		/// <summary>
+		/// The session name provided is invalid.
+		/// </summary>
+		public const int PLA_E_INVALID_SESSION_NAME = unchecked((int)0x8030010F);
+		/// <summary>
+		/// The Event Log channel Microsoft-Windows-Diagnosis-PLA/Operational must be enabled to perform this operation.
+		/// </summary>
+		public const int PLA_E_PLA_CHANNEL_NOT_ENABLED = unchecked((int)0x80300110);
+		/// <summary>
+		/// The Event Log channel Microsoft-Windows-TaskScheduler must be enabled to perform this operation.
+		/// </summary>
+		public const int PLA_E_TASKSCHED_CHANNEL_NOT_ENABLED = unchecked((int)0x80300111);
+		/// <summary>
+		/// The execution of the Rules Manager failed.
+		/// </summary>
+		public const int PLA_E_RULES_MANAGER_FAILED = unchecked((int)0x80300112);
+		/// <summary>
+		/// An error occurred while attempting to compress or extract the data.
+		/// </summary>
+		public const int PLA_E_CABAPI_FAILURE = unchecked((int)0x80300113);
+		/// <summary>
+		/// This drive is locked by BitLocker Drive Encryption. You must unlock this drive from Control Panel.
+		/// </summary>
+		public const int FVE_E_LOCKED_VOLUME = unchecked((int)0x80310000);
+		/// <summary>
+		/// The drive is not encrypted.
+		/// </summary>
+		public const int FVE_E_NOT_ENCRYPTED = unchecked((int)0x80310001);
+		/// <summary>
+		/// The BIOS did not correctly communicate with the Trusted Platform Module (TPM). Contact the computer manufacturer for BIOS upgrade instructions.
+		/// </summary>
+		public const int FVE_E_NO_TPM_BIOS = unchecked((int)0x80310002);
+		/// <summary>
+		/// The BIOS did not correctly communicate with the master boot record (MBR). Contact the computer manufacturer for BIOS upgrade instructions.
+		/// </summary>
+		public const int FVE_E_NO_MBR_METRIC = unchecked((int)0x80310003);
+		/// <summary>
+		/// A required TPM measurement is missing. If there is a bootable CD or DVD in your computer, remove it, restart the computer, and turn on BitLocker again. If the problem persists, ensure the master boot record is up to date.
+		/// </summary>
+		public const int FVE_E_NO_BOOTSECTOR_METRIC = unchecked((int)0x80310004);
+		/// <summary>
+		/// The boot sector of this drive is not compatible with BitLocker Drive Encryption. Use the Bootrec.exe tool in the Windows Recovery Environment to update or repair the boot manager (BOOTMGR).
+		/// </summary>
+		public const int FVE_E_NO_BOOTMGR_METRIC = unchecked((int)0x80310005);
+		/// <summary>
+		/// The boot manager of this operating system is not compatible with BitLocker Drive Encryption. Use the Bootrec.exe tool in the Windows Recovery Environment to update or repair the boot manager (BOOTMGR).
+		/// </summary>
+		public const int FVE_E_WRONG_BOOTMGR = unchecked((int)0x80310006);
+		/// <summary>
+		/// At least one secure key protector is required for this operation to be performed.
+		/// </summary>
+		public const int FVE_E_SECURE_KEY_REQUIRED = unchecked((int)0x80310007);
+		/// <summary>
+		/// BitLocker Drive Encryption is not enabled on this drive. Turn on BitLocker.
+		/// </summary>
+		public const int FVE_E_NOT_ACTIVATED = unchecked((int)0x80310008);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot perform requested action. This condition may occur when two requests are issued at the same time. Wait a few moments and then try the action again.
+		/// </summary>
+		public const int FVE_E_ACTION_NOT_ALLOWED = unchecked((int)0x80310009);
+		/// <summary>
+		/// The Active Directory Domain Services forest does not contain the required attributes and classes to host BitLocker Drive Encryption or Trusted Platform Module information. Contact your domain administrator to verify that any required BitLocker Active Directory schema extensions have been installed.
+		/// </summary>
+		public const int FVE_E_AD_SCHEMA_NOT_INSTALLED = unchecked((int)0x8031000A);
+		/// <summary>
+		/// The type of the data obtained from Active Directory was not expected. The BitLocker recovery information may be missing or corrupted.
+		/// </summary>
+		public const int FVE_E_AD_INVALID_DATATYPE = unchecked((int)0x8031000B);
+		/// <summary>
+		/// The size of the data obtained from Active Directory was not expected. The BitLocker recovery information may be missing or corrupted.
+		/// </summary>
+		public const int FVE_E_AD_INVALID_DATASIZE = unchecked((int)0x8031000C);
+		/// <summary>
+		/// The attribute read from Active Directory does not contain any values. The BitLocker recovery information may be missing or corrupted.
+		/// </summary>
+		public const int FVE_E_AD_NO_VALUES = unchecked((int)0x8031000D);
+		/// <summary>
+		/// The attribute was not set. Verify that you are logged on with a domain account that has the ability to write information to Active Directory objects.
+		/// </summary>
+		public const int FVE_E_AD_ATTR_NOT_SET = unchecked((int)0x8031000E);
+		/// <summary>
+		/// The specified attribute cannot be found in Active Directory Domain Services. Contact your domain administrator to verify that any required BitLocker Active Directory schema extensions have been installed.
+		/// </summary>
+		public const int FVE_E_AD_GUID_NOT_FOUND = unchecked((int)0x8031000F);
+		/// <summary>
+		/// The BitLocker metadata for the encrypted drive is not valid. You can attempt to repair the drive to restore access.
+		/// </summary>
+		public const int FVE_E_BAD_INFORMATION = unchecked((int)0x80310010);
+		/// <summary>
+		/// The drive cannot be encrypted because it does not have enough free space. Delete any unnecessary data on the drive to create additional free space and then try again.
+		/// </summary>
+		public const int FVE_E_TOO_SMALL = unchecked((int)0x80310011);
+		/// <summary>
+		/// The drive cannot be encrypted because it contains system boot information. Create a separate partition for use as the system drive that contains the boot information and a second partition for use as the operating system drive and then encrypt the operating system drive.
+		/// </summary>
+		public const int FVE_E_SYSTEM_VOLUME = unchecked((int)0x80310012);
+		/// <summary>
+		/// The drive cannot be encrypted because the file system is not supported.
+		/// </summary>
+		public const int FVE_E_FAILED_WRONG_FS = unchecked((int)0x80310013);
+		/// <summary>
+		/// The file system size is larger than the partition size in the partition table. This drive may be corrupt or may have been tampered with. To use it with BitLocker, you must reformat the partition.
+		/// </summary>
+		public const int FVE_E_BAD_PARTITION_SIZE = unchecked((int)0x80310014);
+		/// <summary>
+		/// This drive cannot be encrypted.
+		/// </summary>
+		public const int FVE_E_NOT_SUPPORTED = unchecked((int)0x80310015);
+		/// <summary>
+		/// The data is not valid.
+		/// </summary>
+		public const int FVE_E_BAD_DATA = unchecked((int)0x80310016);
+		/// <summary>
+		/// The data drive specified is not set to automatically unlock on the current computer and cannot be unlocked automatically.
+		/// </summary>
+		public const int FVE_E_VOLUME_NOT_BOUND = unchecked((int)0x80310017);
+		/// <summary>
+		/// You must initialize the Trusted Platform Module (TPM) before you can use BitLocker Drive Encryption.
+		/// </summary>
+		public const int FVE_E_TPM_NOT_OWNED = unchecked((int)0x80310018);
+		/// <summary>
+		/// The operation attempted cannot be performed on an operating system drive. 
+		/// </summary>
+		public const int FVE_E_NOT_DATA_VOLUME = unchecked((int)0x80310019);
+		/// <summary>
+		/// The buffer supplied to a function was insufficient to contain the returned data. Increase the buffer size before running the function again.
+		/// </summary>
+		public const int FVE_E_AD_INSUFFICIENT_BUFFER = unchecked((int)0x8031001A);
+		/// <summary>
+		/// A read operation failed while converting the drive. The drive was not converted. Please re-enable BitLocker.
+		/// </summary>
+		public const int FVE_E_CONV_READ = unchecked((int)0x8031001B);
+		/// <summary>
+		/// A write operation failed while converting the drive. The drive was not converted. Please re-enable BitLocker.
+		/// </summary>
+		public const int FVE_E_CONV_WRITE = unchecked((int)0x8031001C);
+		/// <summary>
+		/// One or more BitLocker key protectors are required. You cannot delete the last key on this drive.
+		/// </summary>
+		public const int FVE_E_KEY_REQUIRED = unchecked((int)0x8031001D);
+		/// <summary>
+		/// Cluster configurations are not supported by BitLocker Drive Encryption.
+		/// </summary>
+		public const int FVE_E_CLUSTERING_NOT_SUPPORTED = unchecked((int)0x8031001E);
+		/// <summary>
+		/// The drive specified is already configured to be automatically unlocked on the current computer.
+		/// </summary>
+		public const int FVE_E_VOLUME_BOUND_ALREADY = unchecked((int)0x8031001F);
+		/// <summary>
+		/// The operating system drive is not protected by BitLocker Drive Encryption.
+		/// </summary>
+		public const int FVE_E_OS_NOT_PROTECTED = unchecked((int)0x80310020);
+		/// <summary>
+		/// BitLocker Drive Encryption has been suspended on this drive. All BitLocker key protectors configured for this drive are effectively disabled, and the drive will be automatically unlocked using an unencrypted (clear) key.
+		/// </summary>
+		public const int FVE_E_PROTECTION_DISABLED = unchecked((int)0x80310021);
+		/// <summary>
+		/// The drive you are attempting to lock does not have any key protectors available for encryption because BitLocker protection is currently suspended. Re-enable BitLocker to lock this drive.
+		/// </summary>
+		public const int FVE_E_RECOVERY_KEY_REQUIRED = unchecked((int)0x80310022);
+		/// <summary>
+		/// BitLocker cannot use the Trusted Platform Module (TPM) to protect a data drive. TPM protection can only be used with the operating system drive.
+		/// </summary>
+		public const int FVE_E_FOREIGN_VOLUME = unchecked((int)0x80310023);
+		/// <summary>
+		/// The BitLocker metadata for the encrypted drive cannot be updated because it was locked for updating by another process. Please try this process again.
+		/// </summary>
+		public const int FVE_E_OVERLAPPED_UPDATE = unchecked((int)0x80310024);
+		/// <summary>
+		/// The authorization data for the storage root key (SRK) of the Trusted Platform Module (TPM) is not zero and is therefore incompatible with BitLocker. Please initialize the TPM before attempting to use it with BitLocker.
+		/// </summary>
+		public const int FVE_E_TPM_SRK_AUTH_NOT_ZERO = unchecked((int)0x80310025);
+		/// <summary>
+		/// The drive encryption algorithm cannot be used on this sector size.
+		/// </summary>
+		public const int FVE_E_FAILED_SECTOR_SIZE = unchecked((int)0x80310026);
+		/// <summary>
+		/// The drive cannot be unlocked with the key provided. Confirm that you have provided the correct key and try again.
+		/// </summary>
+		public const int FVE_E_FAILED_AUTHENTICATION = unchecked((int)0x80310027);
+		/// <summary>
+		/// The drive specified is not the operating system drive.
+		/// </summary>
+		public const int FVE_E_NOT_OS_VOLUME = unchecked((int)0x80310028);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot be turned off on the operating system drive until the auto unlock feature has been disabled for the fixed data drives and removable data drives associated with this computer.
+		/// </summary>
+		public const int FVE_E_AUTOUNLOCK_ENABLED = unchecked((int)0x80310029);
+		/// <summary>
+		/// The system partition boot sector does not perform Trusted Platform Module (TPM) measurements. Use the Bootrec.exe tool in the Windows Recovery Environment to update or repair the boot sector.
+		/// </summary>
+		public const int FVE_E_WRONG_BOOTSECTOR = unchecked((int)0x8031002A);
+		/// <summary>
+		/// BitLocker Drive Encryption operating system drives must be formatted with the NTFS file system in order to be encrypted. Convert the drive to NTFS, and then turn on BitLocker.
+		/// </summary>
+		public const int FVE_E_WRONG_SYSTEM_FS = unchecked((int)0x8031002B);
+		/// <summary>
+		/// Group Policy settings require that a recovery password be specified before encrypting the drive.
+		/// </summary>
+		public const int FVE_E_POLICY_PASSWORD_REQUIRED = unchecked((int)0x8031002C);
+		/// <summary>
+		/// The drive encryption algorithm and key cannot be set on a previously encrypted drive. To encrypt this drive with BitLocker Drive Encryption, remove the previous encryption and then turn on BitLocker.
+		/// </summary>
+		public const int FVE_E_CANNOT_SET_FVEK_ENCRYPTED = unchecked((int)0x8031002D);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot encrypt the specified drive because an encryption key is not available. Add a key protector to encrypt this drive.
+		/// </summary>
+		public const int FVE_E_CANNOT_ENCRYPT_NO_KEY = unchecked((int)0x8031002E);
+		/// <summary>
+		/// BitLocker Drive Encryption detected bootable media (CD or DVD) in the computer. Remove the media and restart the computer before configuring BitLocker.
+		/// </summary>
+		public const int FVE_E_BOOTABLE_CDDVD = unchecked((int)0x80310030);
+		/// <summary>
+		/// This key protector cannot be added. Only one key protector of this type is allowed for this drive.
+		/// </summary>
+		public const int FVE_E_PROTECTOR_EXISTS = unchecked((int)0x80310031);
+		/// <summary>
+		/// The recovery password file was not found because a relative path was specified. Recovery passwords must be saved to a fully qualified path. Environment variables configured on the computer can be used in the path.
+		/// </summary>
+		public const int FVE_E_RELATIVE_PATH = unchecked((int)0x80310032);
+		/// <summary>
+		/// The specified key protector was not found on the drive. Try another key protector.
+		/// </summary>
+		public const int FVE_E_PROTECTOR_NOT_FOUND = unchecked((int)0x80310033);
+		/// <summary>
+		/// The recovery key provided is corrupt and cannot be used to access the drive. An alternative recovery method, such as recovery password, a data recovery agent, or a backup version of the recovery key must be used to recover access to the drive.
+		/// </summary>
+		public const int FVE_E_INVALID_KEY_FORMAT = unchecked((int)0x80310034);
+		/// <summary>
+		/// The format of the recovery password provided is invalid. BitLocker recovery passwords are 48 digits. Verify that the recovery password is in the correct format and then try again.
+		/// </summary>
+		public const int FVE_E_INVALID_PASSWORD_FORMAT = unchecked((int)0x80310035);
+		/// <summary>
+		/// The random number generator check test failed.
+		/// </summary>
+		public const int FVE_E_FIPS_RNG_CHECK_FAILED = unchecked((int)0x80310036);
+		/// <summary>
+		/// The Group Policy setting requiring FIPS compliance prevents a local recovery password from being generated or used by BitLocker Drive Encryption. When operating in FIPS-compliant mode, BitLocker recovery options can be either a recovery key stored on a USB drive or recovery through a data recovery agent.
+		/// </summary>
+		public const int FVE_E_FIPS_PREVENTS_RECOVERY_PASSWORD = unchecked((int)0x80310037);
+		/// <summary>
+		/// The Group Policy setting requiring FIPS compliance prevents the recovery password from being saved to Active Directory. When operating in FIPS-compliant mode, BitLocker recovery options can be either a recovery key stored on a USB drive or recovery through a data recovery agent. Check your Group Policy settings configuration.
+		/// </summary>
+		public const int FVE_E_FIPS_PREVENTS_EXTERNAL_KEY_EXPORT = unchecked((int)0x80310038);
+		/// <summary>
+		/// The drive must be fully decrypted to complete this operation.
+		/// </summary>
+		public const int FVE_E_NOT_DECRYPTED = unchecked((int)0x80310039);
+		/// <summary>
+		/// The key protector specified cannot be used for this operation.
+		/// </summary>
+		public const int FVE_E_INVALID_PROTECTOR_TYPE = unchecked((int)0x8031003A);
+		/// <summary>
+		/// No key protectors exist on the drive to perform the hardware test.
+		/// </summary>
+		public const int FVE_E_NO_PROTECTORS_TO_TEST = unchecked((int)0x8031003B);
+		/// <summary>
+		/// The BitLocker startup key or recovery password cannot be found on the USB device. Verify that you have the correct USB device, that the USB device is plugged into the computer on an active USB port, restart the computer, and then try again. If the problem persists, contact the computer manufacturer for BIOS upgrade instructions.
+		/// </summary>
+		public const int FVE_E_KEYFILE_NOT_FOUND = unchecked((int)0x8031003C);
+		/// <summary>
+		/// The BitLocker startup key or recovery password file provided is corrupt or invalid. Verify that you have the correct startup key or recovery password file and try again.
+		/// </summary>
+		public const int FVE_E_KEYFILE_INVALID = unchecked((int)0x8031003D);
+		/// <summary>
+		/// The BitLocker encryption key cannot be obtained from the startup key or recovery password. Verify that you have the correct startup key or recovery password and try again.
+		/// </summary>
+		public const int FVE_E_KEYFILE_NO_VMK = unchecked((int)0x8031003E);
+		/// <summary>
+		/// The Trusted Platform Module (TPM) is disabled. The TPM must be enabled, initialized, and have valid ownership before it can be used with BitLocker Drive Encryption.
+		/// </summary>
+		public const int FVE_E_TPM_DISABLED = unchecked((int)0x8031003F);
+		/// <summary>
+		/// The BitLocker configuration of the specified drive cannot be managed because this computer is currently operating in Safe Mode. While in Safe Mode, BitLocker Drive Encryption can only be used for recovery purposes.
+		/// </summary>
+		public const int FVE_E_NOT_ALLOWED_IN_SAFE_MODE = unchecked((int)0x80310040);
+		/// <summary>
+		/// The Trusted Platform Module (TPM) was not able to unlock the drive because the system boot information has changed or a PIN was not provided correctly. Verify that the drive has not been tampered with and that changes to the system boot information were caused by a trusted source. After verifying that the drive is safe to access, use the BitLocker recovery console to unlock the drive and then suspend and resume BitLocker to update system boot information that BitLocker associates with this drive.
+		/// </summary>
+		public const int FVE_E_TPM_INVALID_PCR = unchecked((int)0x80310041);
+		/// <summary>
+		/// The BitLocker encryption key cannot be obtained from the Trusted Platform Module (TPM).
+		/// </summary>
+		public const int FVE_E_TPM_NO_VMK = unchecked((int)0x80310042);
+		/// <summary>
+		/// The BitLocker encryption key cannot be obtained from the Trusted Platform Module (TPM) and PIN.
+		/// </summary>
+		public const int FVE_E_PIN_INVALID = unchecked((int)0x80310043);
+		/// <summary>
+		/// A boot application has changed since BitLocker Drive Encryption was enabled.
+		/// </summary>
+		public const int FVE_E_AUTH_INVALID_APPLICATION = unchecked((int)0x80310044);
+		/// <summary>
+		/// The Boot Configuration Data (BCD) settings have changed since BitLocker Drive Encryption was enabled.
+		/// </summary>
+		public const int FVE_E_AUTH_INVALID_CONFIG = unchecked((int)0x80310045);
+		/// <summary>
+		/// The Group Policy setting requiring FIPS compliance prohibits the use of unencrypted keys, which prevents BitLocker from being suspended on this drive. Please contact your domain administrator for more information.
+		/// </summary>
+		public const int FVE_E_FIPS_DISABLE_PROTECTION_NOT_ALLOWED = unchecked((int)0x80310046);
+		/// <summary>
+		/// This drive cannot be encrypted by BitLocker Drive Encryption because the file system does not extend to the end of the drive. Repartition this drive and then try again.
+		/// </summary>
+		public const int FVE_E_FS_NOT_EXTENDED = unchecked((int)0x80310047);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot be enabled on the operating system drive. Contact the computer manufacturer for BIOS upgrade instructions.
+		/// </summary>
+		public const int FVE_E_FIRMWARE_TYPE_NOT_SUPPORTED = unchecked((int)0x80310048);
+		/// <summary>
+		/// This version of Windows does not include BitLocker Drive Encryption. To use BitLocker Drive Encryption, please upgrade the operating system.
+		/// </summary>
+		public const int FVE_E_NO_LICENSE = unchecked((int)0x80310049);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot be used because critical BitLocker system files are missing or corrupted. Use Windows Startup Repair to restore these files to your computer.
+		/// </summary>
+		public const int FVE_E_NOT_ON_STACK = unchecked((int)0x8031004A);
+		/// <summary>
+		/// The drive cannot be locked when the drive is in use.
+		/// </summary>
+		public const int FVE_E_FS_MOUNTED = unchecked((int)0x8031004B);
+		/// <summary>
+		/// The access token associated with the current thread is not an impersonated token.
+		/// </summary>
+		public const int FVE_E_TOKEN_NOT_IMPERSONATED = unchecked((int)0x8031004C);
+		/// <summary>
+		/// The BitLocker encryption key cannot be obtained. Verify that the Trusted Platform Module (TPM) is enabled and ownership has been taken. If this computer does not have a TPM, verify that the USB drive is inserted and available.
+		/// </summary>
+		public const int FVE_E_DRY_RUN_FAILED = unchecked((int)0x8031004D);
+		/// <summary>
+		/// You must restart your computer before continuing with BitLocker Drive Encryption.
+		/// </summary>
+		public const int FVE_E_REBOOT_REQUIRED = unchecked((int)0x8031004E);
+		/// <summary>
+		/// Drive encryption cannot occur while boot debugging is enabled. Use the bcdedit command-line tool to turn off boot debugging.
+		/// </summary>
+		public const int FVE_E_DEBUGGER_ENABLED = unchecked((int)0x8031004F);
+		/// <summary>
+		/// No action was taken as BitLocker Drive Encryption is in raw access mode.
+		/// </summary>
+		public const int FVE_E_RAW_ACCESS = unchecked((int)0x80310050);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot enter raw access mode for this drive because the drive is currently in use.
+		/// </summary>
+		public const int FVE_E_RAW_BLOCKED = unchecked((int)0x80310051);
+		/// <summary>
+		/// The path specified in the Boot Configuration Data (BCD) for a BitLocker Drive Encryption integrity-protected application is incorrect. Please verify and correct your BCD settings and try again.
+		/// </summary>
+		public const int FVE_E_BCD_APPLICATIONS_PATH_INCORRECT = unchecked((int)0x80310052);
+		/// <summary>
+		/// BitLocker Drive Encryption can only be used for limited provisioning or recovery purposes when the computer is running in pre-installation or recovery environments.
+		/// </summary>
+		public const int FVE_E_NOT_ALLOWED_IN_VERSION = unchecked((int)0x80310053);
+		/// <summary>
+		/// The auto-unlock master key was not available from the operating system drive.
+		/// </summary>
+		public const int FVE_E_NO_AUTOUNLOCK_MASTER_KEY = unchecked((int)0x80310054);
+		/// <summary>
+		/// The system firmware failed to enable clearing of system memory when the computer was restarted.
+		/// </summary>
+		public const int FVE_E_MOR_FAILED = unchecked((int)0x80310055);
+		/// <summary>
+		/// The hidden drive cannot be encrypted.
+		/// </summary>
+		public const int FVE_E_HIDDEN_VOLUME = unchecked((int)0x80310056);
+		/// <summary>
+		/// BitLocker encryption keys were ignored because the drive was in a transient state.
+		/// </summary>
+		public const int FVE_E_TRANSIENT_STATE = unchecked((int)0x80310057);
+		/// <summary>
+		/// Public key based protectors are not allowed on this drive.
+		/// </summary>
+		public const int FVE_E_PUBKEY_NOT_ALLOWED = unchecked((int)0x80310058);
+		/// <summary>
+		/// BitLocker Drive Encryption is already performing an operation on this drive. Please complete all operations before continuing.
+		/// </summary>
+		public const int FVE_E_VOLUME_HANDLE_OPEN = unchecked((int)0x80310059);
+		/// <summary>
+		/// This version of Windows does not support this feature of BitLocker Drive Encryption. To use this feature, upgrade the operating system.
+		/// </summary>
+		public const int FVE_E_NO_FEATURE_LICENSE = unchecked((int)0x8031005A);
+		/// <summary>
+		/// The Group Policy settings for BitLocker startup options are in conflict and cannot be applied. Contact your system administrator for more information.
+		/// </summary>
+		public const int FVE_E_INVALID_STARTUP_OPTIONS = unchecked((int)0x8031005B);
+		/// <summary>
+		/// Group policy settings do not permit the creation of a recovery password.
+		/// </summary>
+		public const int FVE_E_POLICY_RECOVERY_PASSWORD_NOT_ALLOWED = unchecked((int)0x8031005C);
+		/// <summary>
+		/// Group policy settings require the creation of a recovery password.
+		/// </summary>
+		public const int FVE_E_POLICY_RECOVERY_PASSWORD_REQUIRED = unchecked((int)0x8031005D);
+		/// <summary>
+		/// Group policy settings do not permit the creation of a recovery key.
+		/// </summary>
+		public const int FVE_E_POLICY_RECOVERY_KEY_NOT_ALLOWED = unchecked((int)0x8031005E);
+		/// <summary>
+		/// Group policy settings require the creation of a recovery key.
+		/// </summary>
+		public const int FVE_E_POLICY_RECOVERY_KEY_REQUIRED = unchecked((int)0x8031005F);
+		/// <summary>
+		/// Group policy settings do not permit the use of a PIN at startup. Please choose a different BitLocker startup option.
+		/// </summary>
+		public const int FVE_E_POLICY_STARTUP_PIN_NOT_ALLOWED = unchecked((int)0x80310060);
+		/// <summary>
+		/// Group policy settings require the use of a PIN at startup. Please choose this BitLocker startup option.
+		/// </summary>
+		public const int FVE_E_POLICY_STARTUP_PIN_REQUIRED = unchecked((int)0x80310061);
+		/// <summary>
+		/// Group policy settings do not permit the use of a startup key. Please choose a different BitLocker startup option.
+		/// </summary>
+		public const int FVE_E_POLICY_STARTUP_KEY_NOT_ALLOWED = unchecked((int)0x80310062);
+		/// <summary>
+		/// Group policy settings require the use of a startup key. Please choose this BitLocker startup option.
+		/// </summary>
+		public const int FVE_E_POLICY_STARTUP_KEY_REQUIRED = unchecked((int)0x80310063);
+		/// <summary>
+		/// Group policy settings do not permit the use of a startup key and PIN. Please choose a different BitLocker startup option.
+		/// </summary>
+		public const int FVE_E_POLICY_STARTUP_PIN_KEY_NOT_ALLOWED = unchecked((int)0x80310064);
+		/// <summary>
+		/// Group policy settings require the use of a startup key and PIN. Please choose this BitLocker startup option.
+		/// </summary>
+		public const int FVE_E_POLICY_STARTUP_PIN_KEY_REQUIRED = unchecked((int)0x80310065);
+		/// <summary>
+		/// Group policy does not permit the use of TPM-only at startup. Please choose a different BitLocker startup option.
+		/// </summary>
+		public const int FVE_E_POLICY_STARTUP_TPM_NOT_ALLOWED = unchecked((int)0x80310066);
+		/// <summary>
+		/// Group policy settings require the use of TPM-only at startup. Please choose this BitLocker startup option.
+		/// </summary>
+		public const int FVE_E_POLICY_STARTUP_TPM_REQUIRED = unchecked((int)0x80310067);
+		/// <summary>
+		/// The PIN provided does not meet minimum or maximum length requirements.
+		/// </summary>
+		public const int FVE_E_POLICY_INVALID_PIN_LENGTH = unchecked((int)0x80310068);
+		/// <summary>
+		/// The key protector is not supported by the version of BitLocker Drive Encryption currently on the drive. Upgrade the drive to add the key protector.
+		/// </summary>
+		public const int FVE_E_KEY_PROTECTOR_NOT_SUPPORTED = unchecked((int)0x80310069);
+		/// <summary>
+		/// Group policy settings do not permit the creation of a password.
+		/// </summary>
+		public const int FVE_E_POLICY_PASSPHRASE_NOT_ALLOWED = unchecked((int)0x8031006A);
+		/// <summary>
+		/// Group policy settings require the creation of a password.
+		/// </summary>
+		public const int FVE_E_POLICY_PASSPHRASE_REQUIRED = unchecked((int)0x8031006B);
+		/// <summary>
+		/// The group policy setting requiring FIPS compliance prevented the password from being generated or used. Please contact your domain administrator for more information.
+		/// </summary>
+		public const int FVE_E_FIPS_PREVENTS_PASSPHRASE = unchecked((int)0x8031006C);
+		/// <summary>
+		/// A password cannot be added to the operating system drive.
+		/// </summary>
+		public const int FVE_E_OS_VOLUME_PASSPHRASE_NOT_ALLOWED = unchecked((int)0x8031006D);
+		/// <summary>
+		/// The BitLocker object identifier (OID) on the drive appears to be invalid or corrupt. Use manage-BDE to reset the OID on this drive.
+		/// </summary>
+		public const int FVE_E_INVALID_BITLOCKER_OID = unchecked((int)0x8031006E);
+		/// <summary>
+		/// The drive is too small to be protected using BitLocker Drive Encryption.
+		/// </summary>
+		public const int FVE_E_VOLUME_TOO_SMALL = unchecked((int)0x8031006F);
+		/// <summary>
+		/// The selected discovery drive type is incompatible with the file system on the drive. BitLocker To Go discovery drives must be created on FAT formatted drives.
+		/// </summary>
+		public const int FVE_E_DV_NOT_SUPPORTED_ON_FS = unchecked((int)0x80310070);
+		/// <summary>
+		/// The selected discovery drive type is not allowed by the computer's Group Policy settings. Verify that Group Policy settings allow the creation of discovery drives for use with BitLocker To Go.
+		/// </summary>
+		public const int FVE_E_DV_NOT_ALLOWED_BY_GP = unchecked((int)0x80310071);
+		/// <summary>
+		/// Group Policy settings do not permit user certificates such as smart cards to be used with BitLocker Drive Encryption.
+		/// </summary>
+		public const int FVE_E_POLICY_USER_CERTIFICATE_NOT_ALLOWED = unchecked((int)0x80310072);
+		/// <summary>
+		/// Group Policy settings require that you have a valid user certificate, such as a smart card, to be used with BitLocker Drive Encryption.
+		/// </summary>
+		public const int FVE_E_POLICY_USER_CERTIFICATE_REQUIRED = unchecked((int)0x80310073);
+		/// <summary>
+		/// Group Policy settings requires that you use a smart card-based key protector with BitLocker Drive Encryption.
+		/// </summary>
+		public const int FVE_E_POLICY_USER_CERT_MUST_BE_HW = unchecked((int)0x80310074);
+		/// <summary>
+		/// Group Policy settings do not permit BitLocker-protected fixed data drives to be automatically unlocked.
+		/// </summary>
+		public const int FVE_E_POLICY_USER_CONFIGURE_FDV_AUTOUNLOCK_NOT_ALLOWED = unchecked((int)0x80310075);
+		/// <summary>
+		/// Group Policy settings do not permit BitLocker-protected removable data drives to be automatically unlocked.
+		/// </summary>
+		public const int FVE_E_POLICY_USER_CONFIGURE_RDV_AUTOUNLOCK_NOT_ALLOWED = unchecked((int)0x80310076);
+		/// <summary>
+		/// Group Policy settings do not permit you to configure BitLocker Drive Encryption on removable data drives.
+		/// </summary>
+		public const int FVE_E_POLICY_USER_CONFIGURE_RDV_NOT_ALLOWED = unchecked((int)0x80310077);
+		/// <summary>
+		/// Group Policy settings do not permit you to turn on BitLocker Drive Encryption on removable data drives. Please contact your system administrator if you need to turn on BitLocker.
+		/// </summary>
+		public const int FVE_E_POLICY_USER_ENABLE_RDV_NOT_ALLOWED = unchecked((int)0x80310078);
+		/// <summary>
+		/// Group Policy settings do not permit turning off BitLocker Drive Encryption on removable data drives. Please contact your system administrator if you need to turn off BitLocker.
+		/// </summary>
+		public const int FVE_E_POLICY_USER_DISABLE_RDV_NOT_ALLOWED = unchecked((int)0x80310079);
+		/// <summary>
+		/// Your password does not meet minimum password length requirements. By default, passwords must be at least 8 characters in length. Check with your system administrator for the password length requirement in your organization.
+		/// </summary>
+		public const int FVE_E_POLICY_INVALID_PASSPHRASE_LENGTH = unchecked((int)0x80310080);
+		/// <summary>
+		/// Your password does not meet the complexity requirements set by your system administrator. Try adding upper and lowercase characters, numbers, and symbols.
+		/// </summary>
+		public const int FVE_E_POLICY_PASSPHRASE_TOO_SIMPLE = unchecked((int)0x80310081);
+		/// <summary>
+		/// This drive cannot be encrypted because it is reserved for Windows System Recovery Options.
+		/// </summary>
+		public const int FVE_E_RECOVERY_PARTITION = unchecked((int)0x80310082);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot be applied to this drive because of conflicting Group Policy settings. BitLocker cannot be configured to automatically unlock fixed data drives when user recovery options are disabled. If you want BitLocker-protected fixed data drives to be automatically unlocked after key validation has occurred, please ask your system administrator to resolve the settings conflict before enabling BitLocker.
+		/// </summary>
+		public const int FVE_E_POLICY_CONFLICT_FDV_RK_OFF_AUK_ON = unchecked((int)0x80310083);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot be applied to this drive because of conflicting Group Policy settings. BitLocker cannot be configured to automatically unlock removable data drives when user recovery option are disabled. If you want BitLocker-protected removable data drives to be automatically unlocked after key validation has occured, please ask your system administrator to resolve the settings conflict before enabling BitLocker.
+		/// </summary>
+		public const int FVE_E_POLICY_CONFLICT_RDV_RK_OFF_AUK_ON = unchecked((int)0x80310084);
+		/// <summary>
+		/// The Enhanced Key Usage (EKU) attribute of the specified certificate does not permit it to be used for BitLocker Drive Encryption. BitLocker does not require that a certificate have an EKU attribute, but if one is configured it must be set to an object identifier (OID) that matches the OID configured for BitLocker.
+		/// </summary>
+		public const int FVE_E_NON_BITLOCKER_OID = unchecked((int)0x80310085);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot be applied to this drive as currently configured because of Group Policy settings. The certificate you provided for drive encryption is self-signed. Current Group Policy settings do not permit the use of self-signed certificates. Obtain a new certificate from your certification authority before attempting to enable BitLocker. 
+		/// </summary>
+		public const int FVE_E_POLICY_PROHIBITS_SELFSIGNED = unchecked((int)0x80310086);
+		/// <summary>
+		/// BitLocker Encryption cannot be applied to this drive because of conflicting Group Policy settings. When write access to drives not protected by BitLocker is denied, the use of a USB startup key cannot be required. Please have your system administrator resolve these policy conflicts before attempting to enable BitLocker. 
+		/// </summary>
+		public const int FVE_E_POLICY_CONFLICT_RO_AND_STARTUP_KEY_REQUIRED = unchecked((int)0x80310087);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot be applied to this drive because there are conflicting Group Policy settings for recovery options on operating system drives. Storing recovery information to Active Directory Domain Services cannot be required when the generation of recovery passwords is not permitted. Please have your system administrator resolve these policy conflicts before attempting to enable BitLocker. 
+		/// </summary>
+		public const int FVE_E_CONV_RECOVERY_FAILED = unchecked((int)0x80310088);
+		/// <summary>
+		/// The requested virtualization size is too big.
+		/// </summary>
+		public const int FVE_E_VIRTUALIZED_SPACE_TOO_BIG = unchecked((int)0x80310089);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot be applied to this drive because there are conflicting Group Policy settings for recovery options on operating system drives. Storing recovery information to Active Directory Domain Services cannot be required when the generation of recovery passwords is not permitted. Please have your system administrator resolve these policy conflicts before attempting to enable BitLocker.
+		/// </summary>
+		public const int FVE_E_POLICY_CONFLICT_OSV_RP_OFF_ADB_ON = unchecked((int)0x80310090);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot be applied to this drive because there are conflicting Group Policy settings for recovery options on fixed data drives. Storing recovery information to Active Directory Domain Services cannot be required when the generation of recovery passwords is not permitted. Please have your system administrator resolve these policy conflicts before attempting to enable BitLocker.
+		/// </summary>
+		public const int FVE_E_POLICY_CONFLICT_FDV_RP_OFF_ADB_ON = unchecked((int)0x80310091);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot be applied to this drive because there are conflicting Group Policy settings for recovery options on removable data drives. Storing recovery information to Active Directory Domain Services cannot be required when the generation of recovery passwords is not permitted. Please have your system administrator resolve these policy conflicts before attempting to enable BitLocker. 
+		/// </summary>
+		public const int FVE_E_POLICY_CONFLICT_RDV_RP_OFF_ADB_ON = unchecked((int)0x80310092);
+		/// <summary>
+		/// The Key Usage (KU) attribute of the specified certificate does not permit it to be used for BitLocker Drive Encryption. BitLocker does not require that a certificate have a KU attribute, but if one is configured it must be set to either Key Encipherment or Key Agreement.
+		/// </summary>
+		public const int FVE_E_NON_BITLOCKER_KU = unchecked((int)0x80310093);
+		/// <summary>
+		/// The private key associated with the specified certificate cannot be authorized. The private key authorization was either not provided or the provided authorization was invalid.
+		/// </summary>
+		public const int FVE_E_PRIVATEKEY_AUTH_FAILED = unchecked((int)0x80310094);
+		/// <summary>
+		/// Removal of the data recovery agent certificate must be done using the Certificates snap-in.
+		/// </summary>
+		public const int FVE_E_REMOVAL_OF_DRA_FAILED = unchecked((int)0x80310095);
+		/// <summary>
+		/// This drive was encrypted using the version of BitLocker Drive Encryption included with Windows Vista and Windows Server 2008 which does not support organizational identifiers. To specify organizational identifiers for this drive upgrade the drive encryption to the latest version using the "manage-bde -upgrade" command.
+		/// </summary>
+		public const int FVE_E_OPERATION_NOT_SUPPORTED_ON_VISTA_VOLUME = unchecked((int)0x80310096);
+		/// <summary>
+		/// The drive cannot be locked because it is automatically unlocked on this computer. Remove the automatic unlock protector to lock this drive.
+		/// </summary>
+		public const int FVE_E_CANT_LOCK_AUTOUNLOCK_ENABLED_VOLUME = unchecked((int)0x80310097);
+		/// <summary>
+		/// The default Bitlocker Key Derivation Function SP800-56A for ECC smart cards is not supported by your smart card. The Group Policy setting requiring FIPS-compliance prevents BitLocker from using any other key derivation function for encryption. You have to use a FIPS compliant smart card in FIPS restricted environments.
+		/// </summary>
+		public const int FVE_E_FIPS_HASH_KDF_NOT_ALLOWED = unchecked((int)0x80310098);
+		/// <summary>
+		/// The BitLocker encryption key could not be obtained from the Trusted Platform Module (TPM) and enhanced PIN. Try using a PIN containing only numerals.
+		/// </summary>
+		public const int FVE_E_ENH_PIN_INVALID = unchecked((int)0x80310099);
+		/// <summary>
+		/// The requested TPM PIN contains invalid characters.
+		/// </summary>
+		public const int FVE_E_INVALID_PIN_CHARS = unchecked((int)0x8031009A);
+		/// <summary>
+		/// The management information stored on the drive contained an unknown type. If you are using an old version of Windows, try accessing the drive from the latest version.
+		/// </summary>
+		public const int FVE_E_INVALID_DATUM_TYPE = unchecked((int)0x8031009B);
+		/// <summary>
+		/// The feature is only supported on EFI systems.
+		/// </summary>
+		public const int FVE_E_EFI_ONLY = unchecked((int)0x8031009C);
+		/// <summary>
+		/// More than one Network Key Protector certificate has been found on the system.
+		/// </summary>
+		public const int FVE_E_MULTIPLE_NKP_CERTS = unchecked((int)0x8031009D);
+		/// <summary>
+		/// Removal of the Network Key Protector certificate must be done using the Certificates snap-in.
+		/// </summary>
+		public const int FVE_E_REMOVAL_OF_NKP_FAILED = unchecked((int)0x8031009E);
+		/// <summary>
+		/// An invalid certificate has been found in the Network Key Protector certificate store.
+		/// </summary>
+		public const int FVE_E_INVALID_NKP_CERT = unchecked((int)0x8031009F);
+		/// <summary>
+		/// This drive isn't protected with a PIN.
+		/// </summary>
+		public const int FVE_E_NO_EXISTING_PIN = unchecked((int)0x803100A0);
+		/// <summary>
+		/// Please enter the correct current PIN.
+		/// </summary>
+		public const int FVE_E_PROTECTOR_CHANGE_PIN_MISMATCH = unchecked((int)0x803100A1);
+		/// <summary>
+		/// You must be logged on with an administrator account to change the PIN or password. Click the link to reset the PIN or password as an administrator.
+		/// </summary>
+		public const int FVE_E_PROTECTOR_CHANGE_BY_STD_USER_DISALLOWED = unchecked((int)0x803100A2);
+		/// <summary>
+		/// BitLocker has disabled PIN and password changes after too many failed requests. Click the link to reset the PIN or password as an administrator.
+		/// </summary>
+		public const int FVE_E_PROTECTOR_CHANGE_MAX_PIN_CHANGE_ATTEMPTS_REACHED = unchecked((int)0x803100A3);
+		/// <summary>
+		/// Your system administrator requires that passwords contain only printable ASCII characters. This includes unaccented letters (A-Z, a-z), numbers (0-9), space, arithmetic signs, common punctuation, separators, and the following symbols: # $ &amp; @ ^ _ ~ .
+		/// </summary>
+		public const int FVE_E_POLICY_PASSPHRASE_REQUIRES_ASCII = unchecked((int)0x803100A4);
+		/// <summary>
+		/// BitLocker Drive Encryption only supports used space only encryption on thin provisioned storage.
+		/// </summary>
+		public const int FVE_E_FULL_ENCRYPTION_NOT_ALLOWED_ON_TP_STORAGE = unchecked((int)0x803100A5);
+		/// <summary>
+		/// BitLocker Drive Encryption does not support wiping free space on thin provisioned storage.
+		/// </summary>
+		public const int FVE_E_WIPE_NOT_ALLOWED_ON_TP_STORAGE = unchecked((int)0x803100A6);
+		/// <summary>
+		/// The required authentication key length is not supported by the drive.
+		/// </summary>
+		public const int FVE_E_KEY_LENGTH_NOT_SUPPORTED_BY_EDRIVE = unchecked((int)0x803100A7);
+		/// <summary>
+		/// This drive isn't protected with a password.
+		/// </summary>
+		public const int FVE_E_NO_EXISTING_PASSPHRASE = unchecked((int)0x803100A8);
+		/// <summary>
+		/// Please enter the correct current password.
+		/// </summary>
+		public const int FVE_E_PROTECTOR_CHANGE_PASSPHRASE_MISMATCH = unchecked((int)0x803100A9);
+		/// <summary>
+		/// The password cannot exceed 256 characters.
+		/// </summary>
+		public const int FVE_E_PASSPHRASE_TOO_LONG = unchecked((int)0x803100AA);
+		/// <summary>
+		/// A password key protector cannot be added because a TPM protector exists on the drive.
+		/// </summary>
+		public const int FVE_E_NO_PASSPHRASE_WITH_TPM = unchecked((int)0x803100AB);
+		/// <summary>
+		/// A TPM key protector cannot be added because a password protector exists on the drive.
+		/// </summary>
+		public const int FVE_E_NO_TPM_WITH_PASSPHRASE = unchecked((int)0x803100AC);
+		/// <summary>
+		/// This command can only be performed from the coordinator node for the specified CSV volume.
+		/// </summary>
+		public const int FVE_E_NOT_ALLOWED_ON_CSV_STACK = unchecked((int)0x803100AD);
+		/// <summary>
+		/// This command cannot be performed on a volume when it is part of a cluster.
+		/// </summary>
+		public const int FVE_E_NOT_ALLOWED_ON_CLUSTER = unchecked((int)0x803100AE);
+		/// <summary>
+		/// BitLocker did not revert to using BitLocker software encryption due to group policy configuration.
+		/// </summary>
+		public const int FVE_E_EDRIVE_NO_FAILOVER_TO_SW = unchecked((int)0x803100AF);
+		/// <summary>
+		/// The drive cannot be managed by BitLocker because the drive's hardware encryption feature is already in use.
+		/// </summary>
+		public const int FVE_E_EDRIVE_BAND_IN_USE = unchecked((int)0x803100B0);
+		/// <summary>
+		/// Group Policy settings do not allow the use of hardware-based encryption.
+		/// </summary>
+		public const int FVE_E_EDRIVE_DISALLOWED_BY_GP = unchecked((int)0x803100B1);
+		/// <summary>
+		/// The drive specified does not support hardware-based encryption.
+		/// </summary>
+		public const int FVE_E_EDRIVE_INCOMPATIBLE_VOLUME = unchecked((int)0x803100B2);
+		/// <summary>
+		/// BitLocker cannot be upgraded during disk encryption or decryption.
+		/// </summary>
+		public const int FVE_E_NOT_ALLOWED_TO_UPGRADE_WHILE_CONVERTING = unchecked((int)0x803100B3);
+		/// <summary>
+		/// Discovery Volumes are not supported for volumes using hardware encryption.
+		/// </summary>
+		public const int FVE_E_EDRIVE_DV_NOT_SUPPORTED = unchecked((int)0x803100B4);
+		/// <summary>
+		/// No pre-boot keyboard detected. The user may not be able to provide required input to unlock the volume.
+		/// </summary>
+		public const int FVE_E_NO_PREBOOT_KEYBOARD_DETECTED = unchecked((int)0x803100B5);
+		/// <summary>
+		/// No pre-boot keyboard or Windows Recovery Environment detected. The user may not be able to provide required input to unlock the volume.
+		/// </summary>
+		public const int FVE_E_NO_PREBOOT_KEYBOARD_OR_WINRE_DETECTED = unchecked((int)0x803100B6);
+		/// <summary>
+		/// Group Policy settings require the creation of a startup PIN, but a pre-boot keyboard is not available on this device. The user may not be able to provide required input to unlock the volume.
+		/// </summary>
+		public const int FVE_E_POLICY_REQUIRES_STARTUP_PIN_ON_TOUCH_DEVICE = unchecked((int)0x803100B7);
+		/// <summary>
+		/// Group Policy settings require the creation of a recovery password, but neither a pre-boot keyboard nor Windows Recovery Environment is available on this device. The user may not be able to provide required input to unlock the volume.
+		/// </summary>
+		public const int FVE_E_POLICY_REQUIRES_RECOVERY_PASSWORD_ON_TOUCH_DEVICE = unchecked((int)0x803100B8);
+		/// <summary>
+		/// Wipe of free space is not currently taking place.
+		/// </summary>
+		public const int FVE_E_WIPE_CANCEL_NOT_APPLICABLE = unchecked((int)0x803100B9);
+		/// <summary>
+		/// BitLocker cannot use Secure Boot for platform integrity because Secure Boot has been disabled.
+		/// </summary>
+		public const int FVE_E_SECUREBOOT_DISABLED = unchecked((int)0x803100BA);
+		/// <summary>
+		/// BitLocker cannot use Secure Boot for platform integrity because the Secure Boot configuration does not meet the requirements for BitLocker.
+		/// </summary>
+		public const int FVE_E_SECUREBOOT_CONFIGURATION_INVALID = unchecked((int)0x803100BB);
+		/// <summary>
+		/// Your computer doesn't support BitLocker hardware-based encryption. Check with your computer manufacturer for firmware updates.
+		/// </summary>
+		public const int FVE_E_EDRIVE_DRY_RUN_FAILED = unchecked((int)0x803100BC);
+		/// <summary>
+		/// BitLocker cannot be enabled on the volume because it contains a Volume Shadow Copy. Remove all Volume Shadow Copies before encrypting the volume.
+		/// </summary>
+		public const int FVE_E_SHADOW_COPY_PRESENT = unchecked((int)0x803100BD);
+		/// <summary>
+		/// BitLocker Drive Encryption cannot be applied to this drive because the Group Policy setting for Enhanced Boot Configuration Data contains invalid data. Please have your system administrator resolve this invalid configuration before attempting to enable BitLocker.
+		/// </summary>
+		public const int FVE_E_POLICY_INVALID_ENHANCED_BCD_SETTINGS = unchecked((int)0x803100BE);
+		/// <summary>
+		/// This PC's firmware is not capable of supporting hardware encryption.
+		/// </summary>
+		public const int FVE_E_EDRIVE_INCOMPATIBLE_FIRMWARE = unchecked((int)0x803100BF);
+		/// <summary>
+		/// BitLocker has disabled password changes after too many failed requests. Click the link to reset the password as an administrator.
+		/// </summary>
+		public const int FVE_E_PROTECTOR_CHANGE_MAX_PASSPHRASE_CHANGE_ATTEMPTS_REACHED = unchecked((int)0x803100C0);
+		/// <summary>
+		/// You must be logged on with an administrator account to change the password. Click the link to reset the password as an administrator.
+		/// </summary>
+		public const int FVE_E_PASSPHRASE_PROTECTOR_CHANGE_BY_STD_USER_DISALLOWED = unchecked((int)0x803100C1);
+		/// <summary>
+		/// BitLocker cannot save the recovery password because the specified Microsoft account is Suspended.
+		/// </summary>
+		public const int FVE_E_LIVEID_ACCOUNT_SUSPENDED = unchecked((int)0x803100C2);
+		/// <summary>
+		/// BitLocker cannot save the recovery password because the specified MIcrosoft account is Blocked.
+		/// </summary>
+		public const int FVE_E_LIVEID_ACCOUNT_BLOCKED = unchecked((int)0x803100C3);
+		/// <summary>
+		/// This PC is not provisioned to support device encryption. Please enable BitLocker on all volumes to comply with device encryption policy.
+		/// </summary>
+		public const int FVE_E_NOT_PROVISIONED_ON_ALL_VOLUMES = unchecked((int)0x803100C4);
+		/// <summary>
+		/// This PC cannot support device encryption because unencrypted fixed data volumes are present.
+		/// </summary>
+		public const int FVE_E_DE_FIXED_DATA_NOT_SUPPORTED = unchecked((int)0x803100C5);
+		/// <summary>
+		/// This PC does not meet the hardware requirements to support device encryption.
+		/// </summary>
+		public const int FVE_E_DE_HARDWARE_NOT_COMPLIANT = unchecked((int)0x803100C6);
+		/// <summary>
+		/// This PC cannot support device encryption because WinRE is not properly configured.
+		/// </summary>
+		public const int FVE_E_DE_WINRE_NOT_CONFIGURED = unchecked((int)0x803100C7);
+		/// <summary>
+		/// Protection is enabled on the volume but has been suspended. This is likely to have happened due to an update being applied to your system. Please try again after a reboot.
+		/// </summary>
+		public const int FVE_E_DE_PROTECTION_SUSPENDED = unchecked((int)0x803100C8);
+		/// <summary>
+		/// This PC is not provisioned to support device encryption.
+		/// </summary>
+		public const int FVE_E_DE_OS_VOLUME_NOT_PROTECTED = unchecked((int)0x803100C9);
+		/// <summary>
+		/// Device Lock has been triggered due to too many incorrect password attempts.
+		/// </summary>
+		public const int FVE_E_DE_DEVICE_LOCKEDOUT = unchecked((int)0x803100CA);
+		/// <summary>
+		/// Protection has not been enabled on the volume. Enabling protection requires a connected account. If you already have a connected account and are seeing this error, please refer to the event log for more information.
+		/// </summary>
+		public const int FVE_E_DE_PROTECTION_NOT_YET_ENABLED = unchecked((int)0x803100CB);
+		/// <summary>
+		/// Your PIN can only contain numbers from 0 to 9.
+		/// </summary>
+		public const int FVE_E_INVALID_PIN_CHARS_DETAILED = unchecked((int)0x803100CC);
+		/// <summary>
+		/// BitLocker cannot use hardware replay protection because no counter is available on your PC.
+		/// </summary>
+		public const int FVE_E_DEVICE_LOCKOUT_COUNTER_UNAVAILABLE = unchecked((int)0x803100CD);
+		/// <summary>
+		/// Device Lockout state validation failed due to counter mismatch.
+		/// </summary>
+		public const int FVE_E_DEVICELOCKOUT_COUNTER_MISMATCH = unchecked((int)0x803100CE);
+		/// <summary>
+		/// The input buffer is too large.
+		/// </summary>
+		public const int FVE_E_BUFFER_TOO_LARGE = unchecked((int)0x803100CF);
+		#endregion
 
+		#region FWP, WS, NDIS, HyperV
+		/// <summary>
+		/// The callout does not exist.
+		/// </summary>
+		public const int FWP_E_CALLOUT_NOT_FOUND = unchecked((int)0x80320001);
+		/// <summary>
+		/// The filter condition does not exist.
+		/// </summary>
+		public const int FWP_E_CONDITION_NOT_FOUND = unchecked((int)0x80320002);
+		/// <summary>
+		/// The filter does not exist.
+		/// </summary>
+		public const int FWP_E_FILTER_NOT_FOUND = unchecked((int)0x80320003);
+		/// <summary>
+		/// The layer does not exist.
+		/// </summary>
+		public const int FWP_E_LAYER_NOT_FOUND = unchecked((int)0x80320004);
+		/// <summary>
+		/// The provider does not exist.
+		/// </summary>
+		public const int FWP_E_PROVIDER_NOT_FOUND = unchecked((int)0x80320005);
+		/// <summary>
+		/// The provider context does not exist.
+		/// </summary>
+		public const int FWP_E_PROVIDER_CONTEXT_NOT_FOUND = unchecked((int)0x80320006);
+		/// <summary>
+		/// The sublayer does not exist.
+		/// </summary>
+		public const int FWP_E_SUBLAYER_NOT_FOUND = unchecked((int)0x80320007);
+		/// <summary>
+		/// The object does not exist.
+		/// </summary>
+		public const int FWP_E_NOT_FOUND = unchecked((int)0x80320008);
+		/// <summary>
+		/// An object with that GUID or LUID already exists.
+		/// </summary>
+		public const int FWP_E_ALREADY_EXISTS = unchecked((int)0x80320009);
+		/// <summary>
+		/// The object is referenced by other objects so cannot be deleted.
+		/// </summary>
+		public const int FWP_E_IN_USE = unchecked((int)0x8032000A);
+		/// <summary>
+		/// The call is not allowed from within a dynamic session.
+		/// </summary>
+		public const int FWP_E_DYNAMIC_SESSION_IN_PROGRESS = unchecked((int)0x8032000B);
+		/// <summary>
+		/// The call was made from the wrong session so cannot be completed.
+		/// </summary>
+		public const int FWP_E_WRONG_SESSION = unchecked((int)0x8032000C);
+		/// <summary>
+		/// The call must be made from within an explicit transaction.
+		/// </summary>
+		public const int FWP_E_NO_TXN_IN_PROGRESS = unchecked((int)0x8032000D);
+		/// <summary>
+		/// The call is not allowed from within an explicit transaction.
+		/// </summary>
+		public const int FWP_E_TXN_IN_PROGRESS = unchecked((int)0x8032000E);
+		/// <summary>
+		/// The explicit transaction has been forcibly canceled.
+		/// </summary>
+		public const int FWP_E_TXN_ABORTED = unchecked((int)0x8032000F);
+		/// <summary>
+		/// The session has been canceled.
+		/// </summary>
+		public const int FWP_E_SESSION_ABORTED = unchecked((int)0x80320010);
+		/// <summary>
+		/// The call is not allowed from within a read-only transaction.
+		/// </summary>
+		public const int FWP_E_INCOMPATIBLE_TXN = unchecked((int)0x80320011);
+		/// <summary>
+		/// The call timed out while waiting to acquire the transaction lock.
+		/// </summary>
+		public const int FWP_E_TIMEOUT = unchecked((int)0x80320012);
+		/// <summary>
+		/// Collection of network diagnostic events is disabled.
+		/// </summary>
+		public const int FWP_E_NET_EVENTS_DISABLED = unchecked((int)0x80320013);
+		/// <summary>
+		/// The operation is not supported by the specified layer.
+		/// </summary>
+		public const int FWP_E_INCOMPATIBLE_LAYER = unchecked((int)0x80320014);
+		/// <summary>
+		/// The call is allowed for kernel-mode callers only.
+		/// </summary>
+		public const int FWP_E_KM_CLIENTS_ONLY = unchecked((int)0x80320015);
+		/// <summary>
+		/// The call tried to associate two objects with incompatible lifetimes.
+		/// </summary>
+		public const int FWP_E_LIFETIME_MISMATCH = unchecked((int)0x80320016);
+		/// <summary>
+		/// The object is built in so cannot be deleted.
+		/// </summary>
+		public const int FWP_E_BUILTIN_OBJECT = unchecked((int)0x80320017);
+		/// <summary>
+		/// The maximum number of callouts has been reached.
+		/// </summary>
+		public const int FWP_E_TOO_MANY_CALLOUTS = unchecked((int)0x80320018);
+		/// <summary>
+		/// A notification could not be delivered because a message queue is at its maximum capacity.
+		/// </summary>
+		public const int FWP_E_NOTIFICATION_DROPPED = unchecked((int)0x80320019);
+		/// <summary>
+		/// The traffic parameters do not match those for the security association context.
+		/// </summary>
+		public const int FWP_E_TRAFFIC_MISMATCH = unchecked((int)0x8032001A);
+		/// <summary>
+		/// The call is not allowed for the current security association state.
+		/// </summary>
+		public const int FWP_E_INCOMPATIBLE_SA_STATE = unchecked((int)0x8032001B);
+		/// <summary>
+		/// A required pointer is null.
+		/// </summary>
+		public const int FWP_E_NULL_POINTER = unchecked((int)0x8032001C);
+		/// <summary>
+		/// An enumerator is not valid.
+		/// </summary>
+		public const int FWP_E_INVALID_ENUMERATOR = unchecked((int)0x8032001D);
+		/// <summary>
+		/// The flags field contains an invalid value.
+		/// </summary>
+		public const int FWP_E_INVALID_FLAGS = unchecked((int)0x8032001E);
+		/// <summary>
+		/// A network mask is not valid.
+		/// </summary>
+		public const int FWP_E_INVALID_NET_MASK = unchecked((int)0x8032001F);
+		/// <summary>
+		/// An FWP_RANGE is not valid.
+		/// </summary>
+		public const int FWP_E_INVALID_RANGE = unchecked((int)0x80320020);
+		/// <summary>
+		/// The time interval is not valid.
+		/// </summary>
+		public const int FWP_E_INVALID_INTERVAL = unchecked((int)0x80320021);
+		/// <summary>
+		/// An array that must contain at least one element is zero length.
+		/// </summary>
+		public const int FWP_E_ZERO_LENGTH_ARRAY = unchecked((int)0x80320022);
+		/// <summary>
+		/// The displayData.name field cannot be null.
+		/// </summary>
+		public const int FWP_E_NULL_DISPLAY_NAME = unchecked((int)0x80320023);
+		/// <summary>
+		/// The action type is not one of the allowed action types for a filter.
+		/// </summary>
+		public const int FWP_E_INVALID_ACTION_TYPE = unchecked((int)0x80320024);
+		/// <summary>
+		/// The filter weight is not valid.
+		/// </summary>
+		public const int FWP_E_INVALID_WEIGHT = unchecked((int)0x80320025);
+		/// <summary>
+		/// A filter condition contains a match type that is not compatible with the operands.
+		/// </summary>
+		public const int FWP_E_MATCH_TYPE_MISMATCH = unchecked((int)0x80320026);
+		/// <summary>
+		/// An FWP_VALUE or FWPM_CONDITION_VALUE is of the wrong type.
+		/// </summary>
+		public const int FWP_E_TYPE_MISMATCH = unchecked((int)0x80320027);
+		/// <summary>
+		/// An integer value is outside the allowed range.
+		/// </summary>
+		public const int FWP_E_OUT_OF_BOUNDS = unchecked((int)0x80320028);
+		/// <summary>
+		/// A reserved field is nonzero.
+		/// </summary>
+		public const int FWP_E_RESERVED = unchecked((int)0x80320029);
+		/// <summary>
+		/// A filter cannot contain multiple conditions operating on a single field.
+		/// </summary>
+		public const int FWP_E_DUPLICATE_CONDITION = unchecked((int)0x8032002A);
+		/// <summary>
+		/// A policy cannot contain the same keying module more than once.
+		/// </summary>
+		public const int FWP_E_DUPLICATE_KEYMOD = unchecked((int)0x8032002B);
+		/// <summary>
+		/// The action type is not compatible with the layer.
+		/// </summary>
+		public const int FWP_E_ACTION_INCOMPATIBLE_WITH_LAYER = unchecked((int)0x8032002C);
+		/// <summary>
+		/// The action type is not compatible with the sublayer.
+		/// </summary>
+		public const int FWP_E_ACTION_INCOMPATIBLE_WITH_SUBLAYER = unchecked((int)0x8032002D);
+		/// <summary>
+		/// The raw context or the provider context is not compatible with the layer.
+		/// </summary>
+		public const int FWP_E_CONTEXT_INCOMPATIBLE_WITH_LAYER = unchecked((int)0x8032002E);
+		/// <summary>
+		/// The raw context or the provider context is not compatible with the callout.
+		/// </summary>
+		public const int FWP_E_CONTEXT_INCOMPATIBLE_WITH_CALLOUT = unchecked((int)0x8032002F);
+		/// <summary>
+		/// The authentication method is not compatible with the policy type.
+		/// </summary>
+		public const int FWP_E_INCOMPATIBLE_AUTH_METHOD = unchecked((int)0x80320030);
+		/// <summary>
+		/// The Diffie-Hellman group is not compatible with the policy type.
+		/// </summary>
+		public const int FWP_E_INCOMPATIBLE_DH_GROUP = unchecked((int)0x80320031);
+		/// <summary>
+		/// An IKE policy cannot contain an Extended Mode policy.
+		/// </summary>
+		public const int FWP_E_EM_NOT_SUPPORTED = unchecked((int)0x80320032);
+		/// <summary>
+		/// The enumeration template or subscription will never match any objects.
+		/// </summary>
+		public const int FWP_E_NEVER_MATCH = unchecked((int)0x80320033);
+		/// <summary>
+		/// The provider context is of the wrong type.
+		/// </summary>
+		public const int FWP_E_PROVIDER_CONTEXT_MISMATCH = unchecked((int)0x80320034);
+		/// <summary>
+		/// The parameter is incorrect.
+		/// </summary>
+		public const int FWP_E_INVALID_PARAMETER = unchecked((int)0x80320035);
+		/// <summary>
+		/// The maximum number of sublayers has been reached.
+		/// </summary>
+		public const int FWP_E_TOO_MANY_SUBLAYERS = unchecked((int)0x80320036);
+		/// <summary>
+		/// The notification function for a callout returned an error.
+		/// </summary>
+		public const int FWP_E_CALLOUT_NOTIFICATION_FAILED = unchecked((int)0x80320037);
+		/// <summary>
+		/// The IPsec authentication transform is not valid.
+		/// </summary>
+		public const int FWP_E_INVALID_AUTH_TRANSFORM = unchecked((int)0x80320038);
+		/// <summary>
+		/// The IPsec cipher transform is not valid.
+		/// </summary>
+		public const int FWP_E_INVALID_CIPHER_TRANSFORM = unchecked((int)0x80320039);
+		/// <summary>
+		/// The IPsec cipher transform is not compatible with the policy.
+		/// </summary>
+		public const int FWP_E_INCOMPATIBLE_CIPHER_TRANSFORM = unchecked((int)0x8032003A);
+		/// <summary>
+		/// The combination of IPsec transform types is not valid.
+		/// </summary>
+		public const int FWP_E_INVALID_TRANSFORM_COMBINATION = unchecked((int)0x8032003B);
+		/// <summary>
+		/// A policy cannot contain the same auth method more than once.
+		/// </summary>
+		public const int FWP_E_DUPLICATE_AUTH_METHOD = unchecked((int)0x8032003C);
+		/// <summary>
+		/// A tunnel endpoint configuration is invalid.
+		/// </summary>
+		public const int FWP_E_INVALID_TUNNEL_ENDPOINT = unchecked((int)0x8032003D);
+		/// <summary>
+		/// The WFP MAC Layers are not ready.
+		/// </summary>
+		public const int FWP_E_L2_DRIVER_NOT_READY = unchecked((int)0x8032003E);
+		/// <summary>
+		/// A key manager capable of key dictation is already registered
+		/// </summary>
+		public const int FWP_E_KEY_DICTATOR_ALREADY_REGISTERED = unchecked((int)0x8032003F);
+		/// <summary>
+		/// A key manager dictated invalid keys
+		/// </summary>
+		public const int FWP_E_KEY_DICTATION_INVALID_KEYING_MATERIAL = unchecked((int)0x80320040);
+		/// <summary>
+		/// The BFE IPsec Connection Tracking is disabled.
+		/// </summary>
+		public const int FWP_E_CONNECTIONS_DISABLED = unchecked((int)0x80320041);
+		/// <summary>
+		/// The DNS name is invalid.
+		/// </summary>
+		public const int FWP_E_INVALID_DNS_NAME = unchecked((int)0x80320042);
+		/// <summary>
+		/// The engine option is still enabled due to other configuration settings.
+		/// </summary>
+		public const int FWP_E_STILL_ON = unchecked((int)0x80320043);
+		/// <summary>
+		/// The IKEEXT service is not running. This service only runs when there is IPsec policy applied to the machine.
+		/// </summary>
+		public const int FWP_E_IKEEXT_NOT_RUNNING = unchecked((int)0x80320044);
+		/// <summary>
+		/// The packet should be dropped, no ICMP should be sent.
+		/// </summary>
+		public const int FWP_E_DROP_NOICMP = unchecked((int)0x80320104);
+		/// <summary>
+		/// The function call is completing asynchronously.
+		/// </summary>
+		public const int WS_S_ASYNC = 0x003D0000;
+		/// <summary>
+		/// There are no more messages available on the channel.
+		/// </summary>
+		public const int WS_S_END = 0x003D0001;
+		/// <summary>
+		/// The input data was not in the expected format or did not have the expected value.
+		/// </summary>
+		public const int WS_E_INVALID_FORMAT = unchecked((int)0x803D0000);
+		/// <summary>
+		/// The operation could not be completed because the object is in a faulted state due to a previous error.
+		/// </summary>
+		public const int WS_E_OBJECT_FAULTED = unchecked((int)0x803D0001);
+		/// <summary>
+		/// The operation could not be completed because it would lead to numeric overflow.
+		/// </summary>
+		public const int WS_E_NUMERIC_OVERFLOW = unchecked((int)0x803D0002);
+		/// <summary>
+		/// The operation is not allowed due to the current state of the object.
+		/// </summary>
+		public const int WS_E_INVALID_OPERATION = unchecked((int)0x803D0003);
+		/// <summary>
+		/// The operation was aborted.
+		/// </summary>
+		public const int WS_E_OPERATION_ABORTED = unchecked((int)0x803D0004);
+		/// <summary>
+		/// Access was denied by the remote endpoint.
+		/// </summary>
+		public const int WS_E_ENDPOINT_ACCESS_DENIED = unchecked((int)0x803D0005);
+		/// <summary>
+		/// The operation did not complete within the time allotted.
+		/// </summary>
+		public const int WS_E_OPERATION_TIMED_OUT = unchecked((int)0x803D0006);
+		/// <summary>
+		/// The operation was abandoned.
+		/// </summary>
+		public const int WS_E_OPERATION_ABANDONED = unchecked((int)0x803D0007);
+		/// <summary>
+		/// A quota was exceeded.
+		/// </summary>
+		public const int WS_E_QUOTA_EXCEEDED = unchecked((int)0x803D0008);
+		/// <summary>
+		/// The information was not available in the specified language.
+		/// </summary>
+		public const int WS_E_NO_TRANSLATION_AVAILABLE = unchecked((int)0x803D0009);
+		/// <summary>
+		/// Security verification was not successful for the received data.
+		/// </summary>
+		public const int WS_E_SECURITY_VERIFICATION_FAILURE = unchecked((int)0x803D000A);
+		/// <summary>
+		/// The address is already being used.
+		/// </summary>
+		public const int WS_E_ADDRESS_IN_USE = unchecked((int)0x803D000B);
+		/// <summary>
+		/// The address is not valid for this context.
+		/// </summary>
+		public const int WS_E_ADDRESS_NOT_AVAILABLE = unchecked((int)0x803D000C);
+		/// <summary>
+		/// The remote endpoint does not exist or could not be located.
+		/// </summary>
+		public const int WS_E_ENDPOINT_NOT_FOUND = unchecked((int)0x803D000D);
+		/// <summary>
+		/// The remote endpoint is not currently in service at this location.
+		/// </summary>
+		public const int WS_E_ENDPOINT_NOT_AVAILABLE = unchecked((int)0x803D000E);
+		/// <summary>
+		/// The remote endpoint could not process the request.
+		/// </summary>
+		public const int WS_E_ENDPOINT_FAILURE = unchecked((int)0x803D000F);
+		/// <summary>
+		/// The remote endpoint was not reachable.
+		/// </summary>
+		public const int WS_E_ENDPOINT_UNREACHABLE = unchecked((int)0x803D0010);
+		/// <summary>
+		/// The operation was not supported by the remote endpoint.
+		/// </summary>
+		public const int WS_E_ENDPOINT_ACTION_NOT_SUPPORTED = unchecked((int)0x803D0011);
+		/// <summary>
+		/// The remote endpoint is unable to process the request due to being overloaded.
+		/// </summary>
+		public const int WS_E_ENDPOINT_TOO_BUSY = unchecked((int)0x803D0012);
+		/// <summary>
+		/// A message containing a fault was received from the remote endpoint.
+		/// </summary>
+		public const int WS_E_ENDPOINT_FAULT_RECEIVED = unchecked((int)0x803D0013);
+		/// <summary>
+		/// The connection with the remote endpoint was terminated.
+		/// </summary>
+		public const int WS_E_ENDPOINT_DISCONNECTED = unchecked((int)0x803D0014);
+		/// <summary>
+		/// The HTTP proxy server could not process the request.
+		/// </summary>
+		public const int WS_E_PROXY_FAILURE = unchecked((int)0x803D0015);
+		/// <summary>
+		/// Access was denied by the HTTP proxy server.
+		/// </summary>
+		public const int WS_E_PROXY_ACCESS_DENIED = unchecked((int)0x803D0016);
+		/// <summary>
+		/// The requested feature is not available on this platform.
+		/// </summary>
+		public const int WS_E_NOT_SUPPORTED = unchecked((int)0x803D0017);
+		/// <summary>
+		/// The HTTP proxy server requires HTTP authentication scheme 'basic'.
+		/// </summary>
+		public const int WS_E_PROXY_REQUIRES_BASIC_AUTH = unchecked((int)0x803D0018);
+		/// <summary>
+		/// The HTTP proxy server requires HTTP authentication scheme 'digest'.
+		/// </summary>
+		public const int WS_E_PROXY_REQUIRES_DIGEST_AUTH = unchecked((int)0x803D0019);
+		/// <summary>
+		/// The HTTP proxy server requires HTTP authentication scheme 'NTLM'.
+		/// </summary>
+		public const int WS_E_PROXY_REQUIRES_NTLM_AUTH = unchecked((int)0x803D001A);
+		/// <summary>
+		/// The HTTP proxy server requires HTTP authentication scheme 'negotiate'.
+		/// </summary>
+		public const int WS_E_PROXY_REQUIRES_NEGOTIATE_AUTH = unchecked((int)0x803D001B);
+		/// <summary>
+		/// The remote endpoint requires HTTP authentication scheme 'basic'.
+		/// </summary>
+		public const int WS_E_SERVER_REQUIRES_BASIC_AUTH = unchecked((int)0x803D001C);
+		/// <summary>
+		/// The remote endpoint requires HTTP authentication scheme 'digest'.
+		/// </summary>
+		public const int WS_E_SERVER_REQUIRES_DIGEST_AUTH = unchecked((int)0x803D001D);
+		/// <summary>
+		/// The remote endpoint requires HTTP authentication scheme 'NTLM'.
+		/// </summary>
+		public const int WS_E_SERVER_REQUIRES_NTLM_AUTH = unchecked((int)0x803D001E);
+		/// <summary>
+		/// The remote endpoint requires HTTP authentication scheme 'negotiate'.
+		/// </summary>
+		public const int WS_E_SERVER_REQUIRES_NEGOTIATE_AUTH = unchecked((int)0x803D001F);
+		/// <summary>
+		/// The endpoint address URL is invalid.
+		/// </summary>
+		public const int WS_E_INVALID_ENDPOINT_URL = unchecked((int)0x803D0020);
+		/// <summary>
+		/// Unrecognized error occurred in the Windows Web Services framework.
+		/// </summary>
+		public const int WS_E_OTHER = unchecked((int)0x803D0021);
+		/// <summary>
+		/// A security token was rejected by the server because it has expired.
+		/// </summary>
+		public const int WS_E_SECURITY_TOKEN_EXPIRED = unchecked((int)0x803D0022);
+		/// <summary>
+		/// A security operation failed in the Windows Web Services framework.
+		/// </summary>
+		public const int WS_E_SECURITY_SYSTEM_FAILURE = unchecked((int)0x803D0023);
+		/// <summary>
+		/// The binding to the network interface is being closed.
+		/// </summary>
+		public const int ERROR_NDIS_INTERFACE_CLOSING = unchecked((int)0x80340002);
+		/// <summary>
+		/// An invalid version was specified.
+		/// </summary>
+		public const int ERROR_NDIS_BAD_VERSION = unchecked((int)0x80340004);
+		/// <summary>
+		/// An invalid characteristics table was used.
+		/// </summary>
+		public const int ERROR_NDIS_BAD_CHARACTERISTICS = unchecked((int)0x80340005);
+		/// <summary>
+		/// Failed to find the network interface or network interface is not ready.
+		/// </summary>
+		public const int ERROR_NDIS_ADAPTER_NOT_FOUND = unchecked((int)0x80340006);
+		/// <summary>
+		/// Failed to open the network interface.
+		/// </summary>
+		public const int ERROR_NDIS_OPEN_FAILED = unchecked((int)0x80340007);
+		/// <summary>
+		/// Network interface has encountered an internal unrecoverable failure.
+		/// </summary>
+		public const int ERROR_NDIS_DEVICE_FAILED = unchecked((int)0x80340008);
+		/// <summary>
+		/// The multicast list on the network interface is full.
+		/// </summary>
+		public const int ERROR_NDIS_MULTICAST_FULL = unchecked((int)0x80340009);
+		/// <summary>
+		/// An attempt was made to add a duplicate multicast address to the list.
+		/// </summary>
+		public const int ERROR_NDIS_MULTICAST_EXISTS = unchecked((int)0x8034000A);
+		/// <summary>
+		/// At attempt was made to remove a multicast address that was never added.
+		/// </summary>
+		public const int ERROR_NDIS_MULTICAST_NOT_FOUND = unchecked((int)0x8034000B);
+		/// <summary>
+		/// Netowork interface aborted the request.
+		/// </summary>
+		public const int ERROR_NDIS_REQUEST_ABORTED = unchecked((int)0x8034000C);
+		/// <summary>
+		/// Network interface cannot process the request because it is being reset.
+		/// </summary>
+		public const int ERROR_NDIS_RESET_IN_PROGRESS = unchecked((int)0x8034000D);
+		/// <summary>
+		/// Netword interface does not support this request.
+		/// </summary>
+		public const int ERROR_NDIS_NOT_SUPPORTED = unchecked((int)0x803400BB);
+		/// <summary>
+		/// An attempt was made to send an invalid packet on a network interface.
+		/// </summary>
+		public const int ERROR_NDIS_INVALID_PACKET = unchecked((int)0x8034000F);
+		/// <summary>
+		/// Network interface is not ready to complete this operation.
+		/// </summary>
+		public const int ERROR_NDIS_ADAPTER_NOT_READY = unchecked((int)0x80340011);
+		/// <summary>
+		/// The length of the buffer submitted for this operation is not valid.
+		/// </summary>
+		public const int ERROR_NDIS_INVALID_LENGTH = unchecked((int)0x80340014);
+		/// <summary>
+		/// The data used for this operation is not valid.
+		/// </summary>
+		public const int ERROR_NDIS_INVALID_DATA = unchecked((int)0x80340015);
+		/// <summary>
+		/// The length of buffer submitted for this operation is too small.
+		/// </summary>
+		public const int ERROR_NDIS_BUFFER_TOO_SHORT = unchecked((int)0x80340016);
+		/// <summary>
+		/// Network interface does not support this OID (Object Identifier)
+		/// </summary>
+		public const int ERROR_NDIS_INVALID_OID = unchecked((int)0x80340017);
+		/// <summary>
+		/// The network interface has been removed.
+		/// </summary>
+		public const int ERROR_NDIS_ADAPTER_REMOVED = unchecked((int)0x80340018);
+		/// <summary>
+		/// Network interface does not support this media type.
+		/// </summary>
+		public const int ERROR_NDIS_UNSUPPORTED_MEDIA = unchecked((int)0x80340019);
+		/// <summary>
+		/// An attempt was made to remove a token ring group address that is in use by other components.
+		/// </summary>
+		public const int ERROR_NDIS_GROUP_ADDRESS_IN_USE = unchecked((int)0x8034001A);
+		/// <summary>
+		/// An attempt was made to map a file that cannot be found.
+		/// </summary>
+		public const int ERROR_NDIS_FILE_NOT_FOUND = unchecked((int)0x8034001B);
+		/// <summary>
+		/// An error occurred while NDIS tried to map the file.
+		/// </summary>
+		public const int ERROR_NDIS_ERROR_READING_FILE = unchecked((int)0x8034001C);
+		/// <summary>
+		/// An attempt was made to map a file that is alreay mapped.
+		/// </summary>
+		public const int ERROR_NDIS_ALREADY_MAPPED = unchecked((int)0x8034001D);
+		/// <summary>
+		/// An attempt to allocate a hardware resource failed because the resource is used by another component.
+		/// </summary>
+		public const int ERROR_NDIS_RESOURCE_CONFLICT = unchecked((int)0x8034001E);
+		/// <summary>
+		/// The I/O operation failed because network media is disconnected or wireless access point is out of range.
+		/// </summary>
+		public const int ERROR_NDIS_MEDIA_DISCONNECTED = unchecked((int)0x8034001F);
+		/// <summary>
+		/// The network address used in the request is invalid.
+		/// </summary>
+		public const int ERROR_NDIS_INVALID_ADDRESS = unchecked((int)0x80340022);
+		/// <summary>
+		/// The specified request is not a valid operation for the target device.
+		/// </summary>
+		public const int ERROR_NDIS_INVALID_DEVICE_REQUEST = unchecked((int)0x80340010);
+		/// <summary>
+		/// The offload operation on the network interface has been paused.
+		/// </summary>
+		public const int ERROR_NDIS_PAUSED = unchecked((int)0x8034002A);
+		/// <summary>
+		/// Network interface was not found.
+		/// </summary>
+		public const int ERROR_NDIS_INTERFACE_NOT_FOUND = unchecked((int)0x8034002B);
+		/// <summary>
+		/// The revision number specified in the structure is not supported.
+		/// </summary>
+		public const int ERROR_NDIS_UNSUPPORTED_REVISION = unchecked((int)0x8034002C);
+		/// <summary>
+		/// The specified port does not exist on this network interface.
+		/// </summary>
+		public const int ERROR_NDIS_INVALID_PORT = unchecked((int)0x8034002D);
+		/// <summary>
+		/// The current state of the specified port on this network interface does not support the requested operation.
+		/// </summary>
+		public const int ERROR_NDIS_INVALID_PORT_STATE = unchecked((int)0x8034002E);
+		/// <summary>
+		/// The miniport adapter is in low power state.
+		/// </summary>
+		public const int ERROR_NDIS_LOW_POWER_STATE = unchecked((int)0x8034002F);
+		/// <summary>
+		/// This operation requires the miniport adapter to be reinitialized.
+		/// </summary>
+		public const int ERROR_NDIS_REINIT_REQUIRED = unchecked((int)0x80340030);
+		/// <summary>
+		/// The wireless local area network interface is in auto configuration mode and doesn't support the requested parameter change operation.
+		/// </summary>
+		public const int ERROR_NDIS_DOT11_AUTO_CONFIG_ENABLED = unchecked((int)0x80342000);
+		/// <summary>
+		/// The wireless local area network interface is busy and cannot perform the requested operation.
+		/// </summary>
+		public const int ERROR_NDIS_DOT11_MEDIA_IN_USE = unchecked((int)0x80342001);
+		/// <summary>
+		/// The wireless local area network interface is powered down and doesn't support the requested operation.
+		/// </summary>
+		public const int ERROR_NDIS_DOT11_POWER_STATE_INVALID = unchecked((int)0x80342002);
+		/// <summary>
+		/// The list of wake on LAN patterns is full.
+		/// </summary>
+		public const int ERROR_NDIS_PM_WOL_PATTERN_LIST_FULL = unchecked((int)0x80342003);
+		/// <summary>
+		/// The list of low power protocol offloads is full.
+		/// </summary>
+		public const int ERROR_NDIS_PM_PROTOCOL_OFFLOAD_LIST_FULL = unchecked((int)0x80342004);
+		/// <summary>
+		/// The request will be completed later by NDIS status indication.
+		/// </summary>
+		public const int ERROR_NDIS_INDICATION_REQUIRED = 0x00340001;
+		/// <summary>
+		/// The TCP connection is not offloadable because of a local policy setting.
+		/// </summary>
+		public const int ERROR_NDIS_OFFLOAD_POLICY = unchecked((int)0xC034100F);
+		/// <summary>
+		/// The TCP connection is not offloadable by the Chimney Offload target.
+		/// </summary>
+		public const int ERROR_NDIS_OFFLOAD_CONNECTION_REJECTED = unchecked((int)0xC0341012);
+		/// <summary>
+		/// The IP Path object is not in an offloadable state.
+		/// </summary>
+		public const int ERROR_NDIS_OFFLOAD_PATH_REJECTED = unchecked((int)0xC0341013);
+		/// <summary>
+		/// The hypervisor does not support the operation because the specified hypercall code is not supported.
+		/// </summary>
+		public const int ERROR_HV_INVALID_HYPERCALL_CODE = unchecked((int)0xC0350002);
+		/// <summary>
+		/// The hypervisor does not support the operation because the encoding for the hypercall input register is not supported.
+		/// </summary>
+		public const int ERROR_HV_INVALID_HYPERCALL_INPUT = unchecked((int)0xC0350003);
+		/// <summary>
+		/// The hypervisor could not perform the operation because a parameter has an invalid alignment.
+		/// </summary>
+		public const int ERROR_HV_INVALID_ALIGNMENT = unchecked((int)0xC0350004);
+		/// <summary>
+		/// The hypervisor could not perform the operation because an invalid parameter was specified.
+		/// </summary>
+		public const int ERROR_HV_INVALID_PARAMETER = unchecked((int)0xC0350005);
+		/// <summary>
+		/// Access to the specified object was denied.
+		/// </summary>
+		public const int ERROR_HV_ACCESS_DENIED = unchecked((int)0xC0350006);
+		/// <summary>
+		/// The hypervisor could not perform the operation because the partition is entering or in an invalid state.
+		/// </summary>
+		public const int ERROR_HV_INVALID_PARTITION_STATE = unchecked((int)0xC0350007);
+		/// <summary>
+		/// The operation is not allowed in the current state.
+		/// </summary>
+		public const int ERROR_HV_OPERATION_DENIED = unchecked((int)0xC0350008);
+		/// <summary>
+		/// The hypervisor does not recognize the specified partition property.
+		/// </summary>
+		public const int ERROR_HV_UNKNOWN_PROPERTY = unchecked((int)0xC0350009);
+		/// <summary>
+		/// The specified value of a partition property is out of range or violates an invariant.
+		/// </summary>
+		public const int ERROR_HV_PROPERTY_VALUE_OUT_OF_RANGE = unchecked((int)0xC035000A);
+		/// <summary>
+		/// There is not enough memory in the hypervisor pool to complete the operation.
+		/// </summary>
+		public const int ERROR_HV_INSUFFICIENT_MEMORY = unchecked((int)0xC035000B);
+		/// <summary>
+		/// The maximum partition depth has been exceeded for the partition hierarchy.
+		/// </summary>
+		public const int ERROR_HV_PARTITION_TOO_DEEP = unchecked((int)0xC035000C);
+		/// <summary>
+		/// A partition with the specified partition Id does not exist.
+		/// </summary>
+		public const int ERROR_HV_INVALID_PARTITION_ID = unchecked((int)0xC035000D);
+		/// <summary>
+		/// The hypervisor could not perform the operation because the specified VP index is invalid.
+		/// </summary>
+		public const int ERROR_HV_INVALID_VP_INDEX = unchecked((int)0xC035000E);
+		/// <summary>
+		/// The hypervisor could not perform the operation because the specified port identifier is invalid.
+		/// </summary>
+		public const int ERROR_HV_INVALID_PORT_ID = unchecked((int)0xC0350011);
+		/// <summary>
+		/// The hypervisor could not perform the operation because the specified connection identifier is invalid.
+		/// </summary>
+		public const int ERROR_HV_INVALID_CONNECTION_ID = unchecked((int)0xC0350012);
+		/// <summary>
+		/// Not enough buffers were supplied to send a message.
+		/// </summary>
+		public const int ERROR_HV_INSUFFICIENT_BUFFERS = unchecked((int)0xC0350013);
+		/// <summary>
+		/// The previous virtual interrupt has not been acknowledged.
+		/// </summary>
+		public const int ERROR_HV_NOT_ACKNOWLEDGED = unchecked((int)0xC0350014);
+		/// <summary>
+		/// The previous virtual interrupt has already been acknowledged.
+		/// </summary>
+		public const int ERROR_HV_ACKNOWLEDGED = unchecked((int)0xC0350016);
+		/// <summary>
+		/// The indicated partition is not in a valid state for saving or restoring.
+		/// </summary>
+		public const int ERROR_HV_INVALID_SAVE_RESTORE_STATE = unchecked((int)0xC0350017);
+		/// <summary>
+		/// The hypervisor could not complete the operation because a required feature of the synthetic interrupt controller (SynIC) was disabled.
+		/// </summary>
+		public const int ERROR_HV_INVALID_SYNIC_STATE = unchecked((int)0xC0350018);
+		/// <summary>
+		/// The hypervisor could not perform the operation because the object or value was either already in use or being used for a purpose that would not permit completing the operation.
+		/// </summary>
+		public const int ERROR_HV_OBJECT_IN_USE = unchecked((int)0xC0350019);
+		/// <summary>
+		/// The proximity domain information is invalid.
+		/// </summary>
+		public const int ERROR_HV_INVALID_PROXIMITY_DOMAIN_INFO = unchecked((int)0xC035001A);
+		/// <summary>
+		/// An attempt to retrieve debugging data failed because none was available.
+		/// </summary>
+		public const int ERROR_HV_NO_DATA = unchecked((int)0xC035001B);
+		/// <summary>
+		/// The physical connection being used for debugging has not recorded any receive activity since the last operation.
+		/// </summary>
+		public const int ERROR_HV_INACTIVE = unchecked((int)0xC035001C);
+		/// <summary>
+		/// There are not enough resources to complete the operation.
+		/// </summary>
+		public const int ERROR_HV_NO_RESOURCES = unchecked((int)0xC035001D);
+		/// <summary>
+		/// A hypervisor feature is not available to the user.
+		/// </summary>
+		public const int ERROR_HV_FEATURE_UNAVAILABLE = unchecked((int)0xC035001E);
+		/// <summary>
+		/// The maximum number of domains supported by the platform I/O remapping hardware is currently in use. No domains are available to assign this device to this partition.
+		/// </summary>
+		public const int ERROR_HV_INSUFFICIENT_DEVICE_DOMAINS = unchecked((int)0xC0350038);
+		/// <summary>
+		/// The hypervisor could not perform the operation because the specified LP index is invalid.
+		/// </summary>
+		public const int ERROR_HV_INVALID_LP_INDEX = unchecked((int)0xC0350041);
+		/// <summary>
+		/// No hypervisor is present on this system.
+		/// </summary>
+		public const int ERROR_HV_NOT_PRESENT = unchecked((int)0xC0351000);
+		/// <summary>
+		/// The handler for the virtualization infrastructure driver is already registered. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_DUPLICATE_HANDLER = unchecked((int)0xC0370001);
+		/// <summary>
+		/// The number of registered handlers for the virtualization infrastructure driver exceeded the maximum. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_TOO_MANY_HANDLERS = unchecked((int)0xC0370002);
+		/// <summary>
+		/// The message queue for the virtualization infrastructure driver is full and cannot accept new messages. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_QUEUE_FULL = unchecked((int)0xC0370003);
+		/// <summary>
+		/// No handler exists to handle the message for the virtualization infrastructure driver. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_HANDLER_NOT_PRESENT = unchecked((int)0xC0370004);
+		/// <summary>
+		/// The name of the partition or message queue for the virtualization infrastructure driver is invalid. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_INVALID_OBJECT_NAME = unchecked((int)0xC0370005);
+		/// <summary>
+		/// The partition name of the virtualization infrastructure driver exceeds the maximum.
+		/// </summary>
+		public const int ERROR_VID_PARTITION_NAME_TOO_LONG = unchecked((int)0xC0370006);
+		/// <summary>
+		/// The message queue name of the virtualization infrastructure driver exceeds the maximum.
+		/// </summary>
+		public const int ERROR_VID_MESSAGE_QUEUE_NAME_TOO_LONG = unchecked((int)0xC0370007);
+		/// <summary>
+		/// Cannot create the partition for the virtualization infrastructure driver because another partition with the same name already exists.
+		/// </summary>
+		public const int ERROR_VID_PARTITION_ALREADY_EXISTS = unchecked((int)0xC0370008);
+		/// <summary>
+		/// The virtualization infrastructure driver has encountered an error. The requested partition does not exist. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_PARTITION_DOES_NOT_EXIST = unchecked((int)0xC0370009);
+		/// <summary>
+		/// The virtualization infrastructure driver has encountered an error. Could not find the requested partition. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_PARTITION_NAME_NOT_FOUND = unchecked((int)0xC037000A);
+		/// <summary>
+		/// A message queue with the same name already exists for the virtualization infrastructure driver.
+		/// </summary>
+		public const int ERROR_VID_MESSAGE_QUEUE_ALREADY_EXISTS = unchecked((int)0xC037000B);
+		/// <summary>
+		/// The memory block page for the virtualization infrastructure driver cannot be mapped because the page map limit has been reached. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_EXCEEDED_MBP_ENTRY_MAP_LIMIT = unchecked((int)0xC037000C);
+		/// <summary>
+		/// The memory block for the virtualization infrastructure driver is still being used and cannot be destroyed.
+		/// </summary>
+		public const int ERROR_VID_MB_STILL_REFERENCED = unchecked((int)0xC037000D);
+		/// <summary>
+		/// Cannot unlock the page array for the guest operating system memory address because it does not match a previous lock request. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_CHILD_GPA_PAGE_SET_CORRUPTED = unchecked((int)0xC037000E);
+		/// <summary>
+		/// The non-uniform memory access (NUMA) node settings do not match the system NUMA topology. In order to start the virtual machine, you will need to modify the NUMA configuration.
+		/// </summary>
+		public const int ERROR_VID_INVALID_NUMA_SETTINGS = unchecked((int)0xC037000F);
+		/// <summary>
+		/// The non-uniform memory access (NUMA) node index does not match a valid index in the system NUMA topology.
+		/// </summary>
+		public const int ERROR_VID_INVALID_NUMA_NODE_INDEX = unchecked((int)0xC0370010);
+		/// <summary>
+		/// The memory block for the virtualization infrastructure driver is already associated with a message queue.
+		/// </summary>
+		public const int ERROR_VID_NOTIFICATION_QUEUE_ALREADY_ASSOCIATED = unchecked((int)0xC0370011);
+		/// <summary>
+		/// The handle is not a valid memory block handle for the virtualization infrastructure driver.
+		/// </summary>
+		public const int ERROR_VID_INVALID_MEMORY_BLOCK_HANDLE = unchecked((int)0xC0370012);
+		/// <summary>
+		/// The request exceeded the memory block page limit for the virtualization infrastructure driver. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_PAGE_RANGE_OVERFLOW = unchecked((int)0xC0370013);
+		/// <summary>
+		/// The handle is not a valid message queue handle for the virtualization infrastructure driver.
+		/// </summary>
+		public const int ERROR_VID_INVALID_MESSAGE_QUEUE_HANDLE = unchecked((int)0xC0370014);
+		/// <summary>
+		/// The handle is not a valid page range handle for the virtualization infrastructure driver.
+		/// </summary>
+		public const int ERROR_VID_INVALID_GPA_RANGE_HANDLE = unchecked((int)0xC0370015);
+		/// <summary>
+		/// Cannot install client notifications because no message queue for the virtualization infrastructure driver is associated with the memory block.
+		/// </summary>
+		public const int ERROR_VID_NO_MEMORY_BLOCK_NOTIFICATION_QUEUE = unchecked((int)0xC0370016);
+		/// <summary>
+		/// The request to lock or map a memory block page failed because the virtualization infrastructure driver memory block limit has been reached. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_MEMORY_BLOCK_LOCK_COUNT_EXCEEDED = unchecked((int)0xC0370017);
+		/// <summary>
+		/// The handle is not a valid parent partition mapping handle for the virtualization infrastructure driver.
+		/// </summary>
+		public const int ERROR_VID_INVALID_PPM_HANDLE = unchecked((int)0xC0370018);
+		/// <summary>
+		/// Notifications cannot be created on the memory block because it is use.
+		/// </summary>
+		public const int ERROR_VID_MBPS_ARE_LOCKED = unchecked((int)0xC0370019);
+		/// <summary>
+		/// The message queue for the virtualization infrastructure driver has been closed. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_MESSAGE_QUEUE_CLOSED = unchecked((int)0xC037001A);
+		/// <summary>
+		/// Cannot add a virtual processor to the partition because the maximum has been reached.
+		/// </summary>
+		public const int ERROR_VID_VIRTUAL_PROCESSOR_LIMIT_EXCEEDED = unchecked((int)0xC037001B);
+		/// <summary>
+		/// Cannot stop the virtual processor immediately because of a pending intercept.
+		/// </summary>
+		public const int ERROR_VID_STOP_PENDING = unchecked((int)0xC037001C);
+		/// <summary>
+		/// Invalid state for the virtual processor. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_INVALID_PROCESSOR_STATE = unchecked((int)0xC037001D);
+		/// <summary>
+		/// The maximum number of kernel mode clients for the virtualization infrastructure driver has been reached. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
+		/// </summary>
+		public const int ERROR_VID_EXCEEDED_KM_CONTEXT_COUNT_LIMIT = unchecked((int)0xC037001E);
 		/// <summary>
-		///     The length specified for the output data was insufficient.
+		/// This kernel mode interface for the virtualization infrastructure driver has already been initialized. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
 		/// </summary>
-		public const int CRYPT_E_BAD_LEN = (int)(0x80092001 - 0x100000000);
-
+		public const int ERROR_VID_KM_INTERFACE_ALREADY_INITIALIZED = unchecked((int)0xC037001F);
 		/// <summary>
-		///     An error occurred during encode or decode operation.
+		/// Cannot set or reset the memory block property more than once for the virtualization infrastructure driver. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
 		/// </summary>
-		public const int CRYPT_E_BAD_ENCODE = (int)(0x80092002 - 0x100000000);
-
+		public const int ERROR_VID_MB_PROPERTY_ALREADY_SET_RESET = unchecked((int)0xC0370020);
 		/// <summary>
-		///     An error occurred while reading or writing to a file.
+		/// The memory mapped I/O for this page range no longer exists. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
 		/// </summary>
-		public const int CRYPT_E_FILE_ERROR = (int)(0x80092003 - 0x100000000);
-
+		public const int ERROR_VID_MMIO_RANGE_DESTROYED = unchecked((int)0xC0370021);
 		/// <summary>
-		///     Cannot find object or property.
+		/// The lock or unlock request uses an invalid guest operating system memory address. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
 		/// </summary>
-		public const int CRYPT_E_NOT_FOUND = (int)(0x80092004 - 0x100000000);
-
+		public const int ERROR_VID_INVALID_CHILD_GPA_PAGE_SET = unchecked((int)0xC0370022);
 		/// <summary>
-		///     The object or property already exists.
+		/// Cannot destroy or reuse the reserve page set for the virtualization infrastructure driver because it is in use. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
 		/// </summary>
-		public const int CRYPT_E_EXISTS = (int)(0x80092005 - 0x100000000);
-
+		public const int ERROR_VID_RESERVE_PAGE_SET_IS_BEING_USED = unchecked((int)0xC0370023);
 		/// <summary>
-		///     No provider was specified for the store or object.
+		/// The reserve page set for the virtualization infrastructure driver is too small to use in the lock request. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
 		/// </summary>
-		public const int CRYPT_E_NO_PROVIDER = (int)(0x80092006 - 0x100000000);
-
+		public const int ERROR_VID_RESERVE_PAGE_SET_TOO_SMALL = unchecked((int)0xC0370024);
 		/// <summary>
-		///     The specified certificate is self signed.
+		/// Cannot lock or map the memory block page for the virtualization infrastructure driver because it has already been locked using a reserve page set page. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
 		/// </summary>
-		public const int CRYPT_E_SELF_SIGNED = (int)(0x80092007 - 0x100000000);
-
+		public const int ERROR_VID_MBP_ALREADY_LOCKED_USING_RESERVED_PAGE = unchecked((int)0xC0370025);
 		/// <summary>
-		///     The previous certificate or CRL context was deleted.
+		/// Cannot create the memory block for the virtualization infrastructure driver because the requested number of pages exceeded the limit. Restarting the virtual machine may fix the problem. If the problem persists, try restarting the physical computer.
 		/// </summary>
-		public const int CRYPT_E_DELETED_PREV = (int)(0x80092008 - 0x100000000);
-
+		public const int ERROR_VID_MBP_COUNT_EXCEEDED_LIMIT = unchecked((int)0xC0370026);
 		/// <summary>
-		///     Cannot find the requested object.
+		/// Cannot restore this virtual machine because the saved state data cannot be read. Delete the saved state data and then try to start the virtual machine.
 		/// </summary>
-		public const int CRYPT_E_NO_MATCH = (int)(0x80092009 - 0x100000000);
-
+		public const int ERROR_VID_SAVED_STATE_CORRUPT = unchecked((int)0xC0370027);
 		/// <summary>
-		///     The certificate does not have a property that references a private key.
+		/// Cannot restore this virtual machine because an item read from the saved state data is not recognized. Delete the saved state data and then try to start the virtual machine.
 		/// </summary>
-		public const int CRYPT_E_UNEXPECTED_MSG_TYPE = (int)(0x8009200A - 0x100000000);
-
+		public const int ERROR_VID_SAVED_STATE_UNRECOGNIZED_ITEM = unchecked((int)0xC0370028);
 		/// <summary>
-		///     Cannot find the certificate and private key for decryption.
+		/// Cannot restore this virtual machine to the saved state because of hypervisor incompatibility. Delete the saved state data and then try to start the virtual machine.
 		/// </summary>
-		public const int CRYPT_E_NO_KEY_PROPERTY = (int)(0x8009200B - 0x100000000);
-
+		public const int ERROR_VID_SAVED_STATE_INCOMPATIBLE = unchecked((int)0xC0370029);
 		/// <summary>
-		///     Cannot find the certificate and private key to use for decryption.
+		/// A virtual machine is running with its memory allocated across multiple NUMA nodes. This does not indicate a problem unless the performance of your virtual machine is unusually slow. If you are experiencing performance problems, you may need to modify the NUMA configuration.
 		/// </summary>
-		public const int CRYPT_E_NO_DECRYPT_CERT = (int)(0x8009200C - 0x100000000);
+		public const int ERROR_VID_REMOTE_NODE_PARENT_GPA_PAGES_USED = unchecked((int)0x80370001);
+		#endregion
 
+		#region VOLMGR, BCD, VHD, SDIAG
 		/// <summary>
-		///     Not a cryptographic message or the cryptographic message is not formatted correctly.
+		/// The regeneration operation was not able to copy all data from the active plexes due to bad sectors.
 		/// </summary>
-		public const int CRYPT_E_BAD_MSG = (int)(0x8009200D - 0x100000000);
-
+		public const int ERROR_VOLMGR_INCOMPLETE_REGENERATION = unchecked((int)0x80380001);
 		/// <summary>
-		///     The signed cryptographic message does not have a signer for the specified signer index.
+		/// One or more disks were not fully migrated to the target pack. They may or may not require reimport after fixing the hardware problems.
 		/// </summary>
-		public const int CRYPT_E_NO_SIGNER = (int)(0x8009200E - 0x100000000);
-
+		public const int ERROR_VOLMGR_INCOMPLETE_DISK_MIGRATION = unchecked((int)0x80380002);
 		/// <summary>
-		///     Final closure is pending until additional frees or closes.
+		/// The configuration database is full.
 		/// </summary>
-		public const int CRYPT_E_PENDING_CLOSE = (int)(0x8009200F - 0x100000000);
-
+		public const int ERROR_VOLMGR_DATABASE_FULL = unchecked((int)0xC0380001);
 		/// <summary>
-		///     The certificate is revoked.
+		/// The configuration data on the disk is corrupted.
 		/// </summary>
-		public const int CRYPT_E_REVOKED = (int)(0x80092010 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_CONFIGURATION_CORRUPTED = unchecked((int)0xC0380002);
 		/// <summary>
-		///     No Dll or exported function was found to verify revocation.
+		/// The configuration on the disk is not insync with the in-memory configuration.
 		/// </summary>
-		public const int CRYPT_E_NO_REVOCATION_DLL = (int)(0x80092011 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_CONFIGURATION_NOT_IN_SYNC = unchecked((int)0xC0380003);
 		/// <summary>
-		///     The revocation function was unable to check revocation for the certificate.
+		/// A majority of disks failed to be updated with the new configuration.
 		/// </summary>
-		public const int CRYPT_E_NO_REVOCATION_CHECK = (int)(0x80092012 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PACK_CONFIG_UPDATE_FAILED = unchecked((int)0xC0380004);
 		/// <summary>
-		///     The revocation function was unable to check revocation because the revocation server was offline.
+		/// The disk contains non-simple volumes.
 		/// </summary>
-		public const int CRYPT_E_REVOCATION_OFFLINE = (int)(0x80092013 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_CONTAINS_NON_SIMPLE_VOLUME = unchecked((int)0xC0380005);
 		/// <summary>
-		///     The certificate is not in the revocation server's database.
+		/// The same disk was specified more than once in the migration list.
 		/// </summary>
-		public const int CRYPT_E_NOT_IN_REVOCATION_DATABASE = (int)(0x80092014 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_DUPLICATE = unchecked((int)0xC0380006);
 		/// <summary>
-		///     The string contains a non-numeric character.
+		/// The disk is already dynamic.
 		/// </summary>
-		public const int CRYPT_E_INVALID_NUMERIC_STRING = (int)(0x80092020 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_DYNAMIC = unchecked((int)0xC0380007);
 		/// <summary>
-		///     The string contains a non-printable character.
+		/// The specified disk id is invalid. There are no disks with the specified disk id.
 		/// </summary>
-		public const int CRYPT_E_INVALID_PRINTABLE_STRING = (int)(0x80092021 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_ID_INVALID = unchecked((int)0xC0380008);
 		/// <summary>
-		///     The string contains a character not in the 7 bit ASCII character set.
+		/// The specified disk is an invalid disk. Operation cannot complete on an invalid disk.
 		/// </summary>
-		public const int CRYPT_E_INVALID_IA5_STRING = (int)(0x80092022 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_INVALID = unchecked((int)0xC0380009);
 		/// <summary>
-		///     The string contains an invalid X500 name attribute key, oid, value or delimiter.
+		/// The specified disk(s) cannot be removed since it is the last remaining voter.
 		/// </summary>
-		public const int CRYPT_E_INVALID_X500_STRING = (int)(0x80092023 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_LAST_VOTER = unchecked((int)0xC038000A);
 		/// <summary>
-		///     The dwValueType for the CERT_NAME_VALUE is not one of the character strings.  Most likely it is either a
-		///     CERT_RDN_ENCODED_BLOB or CERT_TDN_OCTED_STRING.
+		/// The specified disk has an invalid disk layout.
 		/// </summary>
-		public const int CRYPT_E_NOT_CHAR_STRING = (int)(0x80092024 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_LAYOUT_INVALID = unchecked((int)0xC038000B);
 		/// <summary>
-		///     The Put operation can not continue.  The file needs to be resized.  However, there is already a signature present.
-		///     A complete signing operation must be done.
+		/// The disk layout contains non-basic partitions which appear after basic paritions. This is an invalid disk layout.
 		/// </summary>
-		public const int CRYPT_E_FILERESIZED = (int)(0x80092025 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_LAYOUT_NON_BASIC_BETWEEN_BASIC_PARTITIONS = unchecked((int)0xC038000C);
 		/// <summary>
-		///     The cryptographic operation failed due to a local security option setting.
+		/// The disk layout contains partitions which are not cylinder aligned.
 		/// </summary>
-		public const int CRYPT_E_SECURITY_SETTINGS = (int)(0x80092026 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_LAYOUT_NOT_CYLINDER_ALIGNED = unchecked((int)0xC038000D);
 		/// <summary>
-		///     No DLL or exported function was found to verify subject usage.
+		/// The disk layout contains partitions which are samller than the minimum size.
 		/// </summary>
-		public const int CRYPT_E_NO_VERIFY_USAGE_DLL = (int)(0x80092027 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_LAYOUT_PARTITIONS_TOO_SMALL = unchecked((int)0xC038000E);
 		/// <summary>
-		///     The called function was unable to do a usage check on the subject.
+		/// The disk layout contains primary partitions in between logical drives. This is an invalid disk layout.
 		/// </summary>
-		public const int CRYPT_E_NO_VERIFY_USAGE_CHECK = (int)(0x80092028 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_LAYOUT_PRIMARY_BETWEEN_LOGICAL_PARTITIONS = unchecked((int)0xC038000F);
 		/// <summary>
-		///     Since the server was offline, the called function was unable to complete the usage check.
+		/// The disk layout contains more than the maximum number of supported partitions.
 		/// </summary>
-		public const int CRYPT_E_VERIFY_USAGE_OFFLINE = (int)(0x80092029 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_LAYOUT_TOO_MANY_PARTITIONS = unchecked((int)0xC0380010);
 		/// <summary>
-		///     The subject was not found in a Certificate Trust List (CTL).
+		/// The specified disk is missing. The operation cannot complete on a missing disk.
 		/// </summary>
-		public const int CRYPT_E_NOT_IN_CTL = (int)(0x8009202A - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_MISSING = unchecked((int)0xC0380011);
 		/// <summary>
-		///     None of the signers of the cryptographic message or certificate trust list is trusted.
+		/// The specified disk is not empty.
 		/// </summary>
-		public const int CRYPT_E_NO_TRUSTED_SIGNER = (int)(0x8009202B - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_NOT_EMPTY = unchecked((int)0xC0380012);
 		/// <summary>
-		///     The public key's algorithm parameters are missing.
+		/// There is not enough usable space for this operation.
 		/// </summary>
-		public const int CRYPT_E_MISSING_PUBKEY_PARA = (int)(0x8009202C - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_NOT_ENOUGH_SPACE = unchecked((int)0xC0380013);
 		/// <summary>
-		///     OSS Certificate encode/decode error code base
-		///     See asn1code.h for a definition of the OSS runtime errors. The OSS
-		///     error values are offset by CRYPT_E_OSS_ERROR.
+		/// The force revectoring of bad sectors failed.
 		/// </summary>
-		public const int CRYPT_E_OSS_ERROR = (int)(0x80093000 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_REVECTORING_FAILED = unchecked((int)0xC0380014);
 		/// <summary>
-		///     OSS ASN.1 Error: Output Buffer is too small.
+		/// The specified disk has an invalid sector size.
 		/// </summary>
-		public const int OSS_MORE_BUF = (int)(0x80093001 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_SECTOR_SIZE_INVALID = unchecked((int)0xC0380015);
 		/// <summary>
-		///     OSS ASN.1 Error: Signed integer is encoded as a unsigned integer.
+		/// The specified disk set contains volumes which exist on disks outside of the set.
 		/// </summary>
-		public const int OSS_NEGATIVE_UINTEGER = (int)(0x80093002 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_SET_NOT_CONTAINED = unchecked((int)0xC0380016);
 		/// <summary>
-		///     OSS ASN.1 Error: Unknown ASN.1 data type.
+		/// A disk in the volume layout provides extents to more than one member of a plex.
 		/// </summary>
-		public const int OSS_PDU_RANGE = (int)(0x80093003 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_USED_BY_MULTIPLE_MEMBERS = unchecked((int)0xC0380017);
 		/// <summary>
-		///     OSS ASN.1 Error: Output buffer is too small, the decoded data has been truncated.
+		/// A disk in the volume layout provides extents to more than one plex.
 		/// </summary>
-		public const int OSS_MORE_INPUT = (int)(0x80093004 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DISK_USED_BY_MULTIPLE_PLEXES = unchecked((int)0xC0380018);
 		/// <summary>
-		///     OSS ASN.1 Error: Invalid data.
+		/// Dynamic disks are not supported on this system.
 		/// </summary>
-		public const int OSS_DATA_ERROR = (int)(0x80093005 - 0x100000000);
-
+		public const int ERROR_VOLMGR_DYNAMIC_DISK_NOT_SUPPORTED = unchecked((int)0xC0380019);
 		/// <summary>
-		///     OSS ASN.1 Error: Invalid argument.
+		/// The specified extent is already used by other volumes.
 		/// </summary>
-		public const int OSS_BAD_ARG = (int)(0x80093006 - 0x100000000);
-
+		public const int ERROR_VOLMGR_EXTENT_ALREADY_USED = unchecked((int)0xC038001A);
 		/// <summary>
-		///     OSS ASN.1 Error: Encode/Decode version mismatch.
+		/// The specified volume is retained and can only be extended into a contiguous extent. The specified extent to grow the volume is not contiguous with the specified volume.
 		/// </summary>
-		public const int OSS_BAD_VERSION = (int)(0x80093007 - 0x100000000);
-
+		public const int ERROR_VOLMGR_EXTENT_NOT_CONTIGUOUS = unchecked((int)0xC038001B);
 		/// <summary>
-		///     OSS ASN.1 Error: Out of memory.
+		/// The specified volume extent is not within the public region of the disk.
 		/// </summary>
-		public const int OSS_OUT_MEMORY = (int)(0x80093008 - 0x100000000);
-
+		public const int ERROR_VOLMGR_EXTENT_NOT_IN_PUBLIC_REGION = unchecked((int)0xC038001C);
 		/// <summary>
-		///     OSS ASN.1 Error: Encode/Decode Error.
+		/// The specified volume extent is not sector aligned.
 		/// </summary>
-		public const int OSS_PDU_MISMATCH = (int)(0x80093009 - 0x100000000);
-
+		public const int ERROR_VOLMGR_EXTENT_NOT_SECTOR_ALIGNED = unchecked((int)0xC038001D);
 		/// <summary>
-		///     OSS ASN.1 Error: Internal Error.
+		/// The specified parition overlaps an EBR (the first track of an extended partition on a MBR disks).
 		/// </summary>
-		public const int OSS_LIMITED = (int)(0x8009300A - 0x100000000);
-
+		public const int ERROR_VOLMGR_EXTENT_OVERLAPS_EBR_PARTITION = unchecked((int)0xC038001E);
 		/// <summary>
-		///     OSS ASN.1 Error: Invalid data.
+		/// The specified extent lengths cannot be used to construct a volume with specified length.
 		/// </summary>
-		public const int OSS_BAD_PTR = (int)(0x8009300B - 0x100000000);
-
+		public const int ERROR_VOLMGR_EXTENT_VOLUME_LENGTHS_DO_NOT_MATCH = unchecked((int)0xC038001F);
 		/// <summary>
-		///     OSS ASN.1 Error: Invalid data.
+		/// The system does not support fault tolerant volumes.
 		/// </summary>
-		public const int OSS_BAD_TIME = (int)(0x8009300C - 0x100000000);
-
+		public const int ERROR_VOLMGR_FAULT_TOLERANT_NOT_SUPPORTED = unchecked((int)0xC0380020);
 		/// <summary>
-		///     OSS ASN.1 Error: Unsupported BER indefinite-length encoding.
+		/// The specified interleave length is invalid.
 		/// </summary>
-		public const int OSS_INDEFINITE_NOT_SUPPORTED = (int)(0x8009300D - 0x100000000);
-
+		public const int ERROR_VOLMGR_INTERLEAVE_LENGTH_INVALID = unchecked((int)0xC0380021);
 		/// <summary>
-		///     OSS ASN.1 Error: Access violation.
+		/// There is already a maximum number of registered users.
 		/// </summary>
-		public const int OSS_MEM_ERROR = (int)(0x8009300E - 0x100000000);
-
+		public const int ERROR_VOLMGR_MAXIMUM_REGISTERED_USERS = unchecked((int)0xC0380022);
 		/// <summary>
-		///     OSS ASN.1 Error: Invalid data.
+		/// The specified member is already in-sync with the other active members. It does not need to be regenerated.
 		/// </summary>
-		public const int OSS_BAD_TABLE = (int)(0x8009300F - 0x100000000);
-
+		public const int ERROR_VOLMGR_MEMBER_IN_SYNC = unchecked((int)0xC0380023);
 		/// <summary>
-		///     OSS ASN.1 Error: Invalid data.
+		/// The same member index was specified more than once.
 		/// </summary>
-		public const int OSS_TOO_Int32 = (int)(0x80093010 - 0x100000000);
-
+		public const int ERROR_VOLMGR_MEMBER_INDEX_DUPLICATE = unchecked((int)0xC0380024);
 		/// <summary>
-		///     OSS ASN.1 Error: Invalid data.
+		/// The specified member index is greater or equal than the number of members in the volume plex.
 		/// </summary>
-		public const int OSS_CONSTRAINT_VIOLATED = (int)(0x80093011 - 0x100000000);
-
+		public const int ERROR_VOLMGR_MEMBER_INDEX_INVALID = unchecked((int)0xC0380025);
 		/// <summary>
-		///     OSS ASN.1 Error: Internal Error.
+		/// The specified member is missing. It cannot be regenerated.
 		/// </summary>
-		public const int OSS_FATAL_ERROR = (int)(0x80093012 - 0x100000000);
-
+		public const int ERROR_VOLMGR_MEMBER_MISSING = unchecked((int)0xC0380026);
 		/// <summary>
-		///     OSS ASN.1 Error: Multi-threading conflict.
+		/// The specified member is not detached. Cannot replace a member which is not detached.
 		/// </summary>
-		public const int OSS_ACCESS_SERIALIZATION_ERROR = (int)(0x80093013 - 0x100000000);
-
+		public const int ERROR_VOLMGR_MEMBER_NOT_DETACHED = unchecked((int)0xC0380027);
 		/// <summary>
-		///     OSS ASN.1 Error: Invalid data.
+		/// The specified member is already regenerating.
 		/// </summary>
-		public const int OSS_NULL_TBL = (int)(0x80093014 - 0x100000000);
-
+		public const int ERROR_VOLMGR_MEMBER_REGENERATING = unchecked((int)0xC0380028);
 		/// <summary>
-		///     OSS ASN.1 Error: Invalid data.
+		/// All disks belonging to the pack failed.
 		/// </summary>
-		public const int OSS_NULL_FCN = (int)(0x80093015 - 0x100000000);
-
+		public const int ERROR_VOLMGR_ALL_DISKS_FAILED = unchecked((int)0xC0380029);
 		/// <summary>
-		///     OSS ASN.1 Error: Invalid data.
+		/// There are currently no registered users for notifications. The task number is irrelevant unless there are registered users.
 		/// </summary>
-		public const int OSS_BAD_ENCRULES = (int)(0x80093016 - 0x100000000);
-
+		public const int ERROR_VOLMGR_NO_REGISTERED_USERS = unchecked((int)0xC038002A);
 		/// <summary>
-		///     OSS ASN.1 Error: Encode/Decode function not implemented.
+		/// The specified notification user does not exist. Failed to unregister user for notifications.
 		/// </summary>
-		public const int OSS_UNAVAIL_ENCRULES = (int)(0x80093017 - 0x100000000);
-
+		public const int ERROR_VOLMGR_NO_SUCH_USER = unchecked((int)0xC038002B);
 		/// <summary>
-		///     OSS ASN.1 Error: Trace file error.
+		/// The notifications have been reset. Notifications for the current user are invalid. Unregister and re-register for notifications.
 		/// </summary>
-		public const int OSS_CANT_OPEN_TRACE_WINDOW = (int)(0x80093018 - 0x100000000);
-
+		public const int ERROR_VOLMGR_NOTIFICATION_RESET = unchecked((int)0xC038002C);
 		/// <summary>
-		///     OSS ASN.1 Error: Function not implemented.
+		/// The specified number of members is invalid.
 		/// </summary>
-		public const int OSS_UNIMPLEMENTED = (int)(0x80093019 - 0x100000000);
-
+		public const int ERROR_VOLMGR_NUMBER_OF_MEMBERS_INVALID = unchecked((int)0xC038002D);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The specified number of plexes is invalid.
 		/// </summary>
-		public const int OSS_OID_DLL_NOT_LINKED = (int)(0x8009301A - 0x100000000);
-
+		public const int ERROR_VOLMGR_NUMBER_OF_PLEXES_INVALID = unchecked((int)0xC038002E);
 		/// <summary>
-		///     OSS ASN.1 Error: Trace file error.
+		/// The specified source and target packs are identical.
 		/// </summary>
-		public const int OSS_CANT_OPEN_TRACE_FILE = (int)(0x8009301B - 0x100000000);
-
+		public const int ERROR_VOLMGR_PACK_DUPLICATE = unchecked((int)0xC038002F);
 		/// <summary>
-		///     OSS ASN.1 Error: Trace file error.
+		/// The specified pack id is invalid. There are no packs with the specified pack id.
 		/// </summary>
-		public const int OSS_TRACE_FILE_ALREADY_OPEN = (int)(0x8009301C - 0x100000000);
-
+		public const int ERROR_VOLMGR_PACK_ID_INVALID = unchecked((int)0xC0380030);
 		/// <summary>
-		///     OSS ASN.1 Error: Invalid data.
+		/// The specified pack is the invalid pack. The operation cannot complete with the invalid pack.
 		/// </summary>
-		public const int OSS_TABLE_MISMATCH = (int)(0x8009301D - 0x100000000);
-
+		public const int ERROR_VOLMGR_PACK_INVALID = unchecked((int)0xC0380031);
 		/// <summary>
-		///     OSS ASN.1 Error: Invalid data.
+		/// The specified pack name is invalid.
 		/// </summary>
-		public const int OSS_TYPE_NOT_SUPPORTED = (int)(0x8009301E - 0x100000000);
-
+		public const int ERROR_VOLMGR_PACK_NAME_INVALID = unchecked((int)0xC0380032);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The specified pack is offline.
 		/// </summary>
-		public const int OSS_REAL_DLL_NOT_LINKED = (int)(0x8009301F - 0x100000000);
-
+		public const int ERROR_VOLMGR_PACK_OFFLINE = unchecked((int)0xC0380033);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The specified pack already has a quorum of healthy disks.
 		/// </summary>
-		public const int OSS_REAL_CODE_NOT_LINKED = (int)(0x80093020 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PACK_HAS_QUORUM = unchecked((int)0xC0380034);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The pack does not have a quorum of healthy disks.
 		/// </summary>
-		public const int OSS_OUT_OF_RANGE = (int)(0x80093021 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PACK_WITHOUT_QUORUM = unchecked((int)0xC0380035);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The specified disk has an unsupported partition style. Only MBR and GPT partition styles are supported.
 		/// </summary>
-		public const int OSS_COPIER_DLL_NOT_LINKED = (int)(0x80093022 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PARTITION_STYLE_INVALID = unchecked((int)0xC0380036);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// Failed to update the disk's partition layout.
 		/// </summary>
-		public const int OSS_CONSTRAINT_DLL_NOT_LINKED = (int)(0x80093023 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PARTITION_UPDATE_FAILED = unchecked((int)0xC0380037);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The specified plex is already in-sync with the other active plexes. It does not need to be regenerated.
 		/// </summary>
-		public const int OSS_COMPARATOR_DLL_NOT_LINKED = (int)(0x80093024 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PLEX_IN_SYNC = unchecked((int)0xC0380038);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The same plex index was specified more than once.
 		/// </summary>
-		public const int OSS_COMPARATOR_CODE_NOT_LINKED = (int)(0x80093025 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PLEX_INDEX_DUPLICATE = unchecked((int)0xC0380039);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The specified plex index is greater or equal than the number of plexes in the volume.
 		/// </summary>
-		public const int OSS_MEM_MGR_DLL_NOT_LINKED = (int)(0x80093026 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PLEX_INDEX_INVALID = unchecked((int)0xC038003A);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The specified plex is the last active plex in the volume. The plex cannot be removed or else the volume will go offline.
 		/// </summary>
-		public const int OSS_PDV_DLL_NOT_LINKED = (int)(0x80093027 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PLEX_LAST_ACTIVE = unchecked((int)0xC038003B);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The specified plex is missing.
 		/// </summary>
-		public const int OSS_PDV_CODE_NOT_LINKED = (int)(0x80093028 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PLEX_MISSING = unchecked((int)0xC038003C);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The specified plex is currently regenerating.
 		/// </summary>
-		public const int OSS_API_DLL_NOT_LINKED = (int)(0x80093029 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PLEX_REGENERATING = unchecked((int)0xC038003D);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The specified plex type is invalid.
 		/// </summary>
-		public const int OSS_BERDER_DLL_NOT_LINKED = (int)(0x8009302A - 0x100000000);
-
+		public const int ERROR_VOLMGR_PLEX_TYPE_INVALID = unchecked((int)0xC038003E);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The operation is only supported on RAID-5 plexes.
 		/// </summary>
-		public const int OSS_PER_DLL_NOT_LINKED = (int)(0x8009302B - 0x100000000);
-
+		public const int ERROR_VOLMGR_PLEX_NOT_RAID5 = unchecked((int)0xC038003F);
 		/// <summary>
-		///     OSS ASN.1 Error: Program link error.
+		/// The operation is only supported on simple plexes.
 		/// </summary>
-		public const int OSS_OPEN_TYPE_ERROR = (int)(0x8009302C - 0x100000000);
-
+		public const int ERROR_VOLMGR_PLEX_NOT_SIMPLE = unchecked((int)0xC0380040);
 		/// <summary>
-		///     OSS ASN.1 Error: System resource error.
+		/// The Size fields in the VM_VOLUME_LAYOUT input structure are incorrectly set.
 		/// </summary>
-		public const int OSS_MUTEX_NOT_CREATED = (int)(0x8009302D - 0x100000000);
-
+		public const int ERROR_VOLMGR_STRUCTURE_SIZE_INVALID = unchecked((int)0xC0380041);
 		/// <summary>
-		///     OSS ASN.1 Error: Trace file error.
+		/// There is already a pending request for notifications. Wait for the existing request to return before requesting for more notifications.
 		/// </summary>
-		public const int OSS_CANT_CLOSE_TRACE_FILE = (int)(0x8009302E - 0x100000000);
-
+		public const int ERROR_VOLMGR_TOO_MANY_NOTIFICATION_REQUESTS = unchecked((int)0xC0380042);
 		/// <summary>
-		///     ASN1 Certificate encode/decode error code base.
-		///     The ASN1 error values are offset by CRYPT_E_ASN1_ERROR.
+		/// There is currently a transaction in process.
 		/// </summary>
-		public const int CRYPT_E_ASN1_ERROR = (int)(0x80093100 - 0x100000000);
-
+		public const int ERROR_VOLMGR_TRANSACTION_IN_PROGRESS = unchecked((int)0xC0380043);
 		/// <summary>
-		///     ASN1 internal encode or decode error.
+		/// An unexpected layout change occurred outside of the volume manager.
 		/// </summary>
-		public const int CRYPT_E_ASN1_INTERNAL = (int)(0x80093101 - 0x100000000);
-
+		public const int ERROR_VOLMGR_UNEXPECTED_DISK_LAYOUT_CHANGE = unchecked((int)0xC0380044);
 		/// <summary>
-		///     ASN1 unexpected end of data.
+		/// The specified volume contains a missing disk.
 		/// </summary>
-		public const int CRYPT_E_ASN1_EOD = (int)(0x80093102 - 0x100000000);
-
+		public const int ERROR_VOLMGR_VOLUME_CONTAINS_MISSING_DISK = unchecked((int)0xC0380045);
 		/// <summary>
-		///     ASN1 corrupted data.
+		/// The specified volume id is invalid. There are no volumes with the specified volume id.
 		/// </summary>
-		public const int CRYPT_E_ASN1_CORRUPT = (int)(0x80093103 - 0x100000000);
-
+		public const int ERROR_VOLMGR_VOLUME_ID_INVALID = unchecked((int)0xC0380046);
 		/// <summary>
-		///     ASN1 value too large.
+		/// The specified volume length is invalid.
 		/// </summary>
-		public const int CRYPT_E_ASN1_LARGE = (int)(0x80093104 - 0x100000000);
-
+		public const int ERROR_VOLMGR_VOLUME_LENGTH_INVALID = unchecked((int)0xC0380047);
 		/// <summary>
-		///     ASN1 constraint violated.
+		/// The specified size for the volume is not a multiple of the sector size.
 		/// </summary>
-		public const int CRYPT_E_ASN1_CONSTRAINT = (int)(0x80093105 - 0x100000000);
-
+		public const int ERROR_VOLMGR_VOLUME_LENGTH_NOT_SECTOR_SIZE_MULTIPLE = unchecked((int)0xC0380048);
 		/// <summary>
-		///     ASN1 out of memory.
+		/// The operation is only supported on mirrored volumes.
 		/// </summary>
-		public const int CRYPT_E_ASN1_MEMORY = (int)(0x80093106 - 0x100000000);
-
+		public const int ERROR_VOLMGR_VOLUME_NOT_MIRRORED = unchecked((int)0xC0380049);
 		/// <summary>
-		///     ASN1 buffer overflow.
+		/// The specified volume does not have a retain partition.
 		/// </summary>
-		public const int CRYPT_E_ASN1_OVERFLOW = (int)(0x80093107 - 0x100000000);
-
+		public const int ERROR_VOLMGR_VOLUME_NOT_RETAINED = unchecked((int)0xC038004A);
 		/// <summary>
-		///     ASN1 function not supported for this PDU.
+		/// The specified volume is offline.
 		/// </summary>
-		public const int CRYPT_E_ASN1_BADPDU = (int)(0x80093108 - 0x100000000);
-
+		public const int ERROR_VOLMGR_VOLUME_OFFLINE = unchecked((int)0xC038004B);
 		/// <summary>
-		///     ASN1 bad arguments to function call.
+		/// The specified volume already has a retain partition.
 		/// </summary>
-		public const int CRYPT_E_ASN1_BADARGS = (int)(0x80093109 - 0x100000000);
-
+		public const int ERROR_VOLMGR_VOLUME_RETAINED = unchecked((int)0xC038004C);
 		/// <summary>
-		///     ASN1 bad real value.
+		/// The specified number of extents is invalid.
 		/// </summary>
-		public const int CRYPT_E_ASN1_BADREAL = (int)(0x8009310A - 0x100000000);
-
+		public const int ERROR_VOLMGR_NUMBER_OF_EXTENTS_INVALID = unchecked((int)0xC038004D);
 		/// <summary>
-		///     ASN1 bad tag value met.
+		/// All disks participating to the volume must have the same sector size.
 		/// </summary>
-		public const int CRYPT_E_ASN1_BADTAG = (int)(0x8009310B - 0x100000000);
-
+		public const int ERROR_VOLMGR_DIFFERENT_SECTOR_SIZE = unchecked((int)0xC038004E);
 		/// <summary>
-		///     ASN1 bad choice value.
+		/// The boot disk experienced failures.
 		/// </summary>
-		public const int CRYPT_E_ASN1_CHOICE = (int)(0x8009310C - 0x100000000);
-
+		public const int ERROR_VOLMGR_BAD_BOOT_DISK = unchecked((int)0xC038004F);
 		/// <summary>
-		///     ASN1 bad encoding rule.
+		/// The configuration of the pack is offline.
 		/// </summary>
-		public const int CRYPT_E_ASN1_RULE = (int)(0x8009310D - 0x100000000);
-
+		public const int ERROR_VOLMGR_PACK_CONFIG_OFFLINE = unchecked((int)0xC0380050);
 		/// <summary>
-		///     ASN1 bad unicode (UTF8).
+		/// The configuration of the pack is online.
 		/// </summary>
-		public const int CRYPT_E_ASN1_UTF8 = (int)(0x8009310E - 0x100000000);
-
+		public const int ERROR_VOLMGR_PACK_CONFIG_ONLINE = unchecked((int)0xC0380051);
 		/// <summary>
-		///     ASN1 bad PDU type.
+		/// The specified pack is not the primary pack.
 		/// </summary>
-		public const int CRYPT_E_ASN1_PDU_TYPE = (int)(0x80093133 - 0x100000000);
-
+		public const int ERROR_VOLMGR_NOT_PRIMARY_PACK = unchecked((int)0xC0380052);
 		/// <summary>
-		///     ASN1 not yet implemented.
+		/// All disks failed to be updated with the new content of the log.
 		/// </summary>
-		public const int CRYPT_E_ASN1_NYI = (int)(0x80093134 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PACK_LOG_UPDATE_FAILED = unchecked((int)0xC0380053);
 		/// <summary>
-		///     ASN1 skipped unknown extension(s).
+		/// The specified number of disks in a plex is invalid.
 		/// </summary>
-		public const int CRYPT_E_ASN1_EXTENDED = (int)(0x80093201 - 0x100000000);
-
+		public const int ERROR_VOLMGR_NUMBER_OF_DISKS_IN_PLEX_INVALID = unchecked((int)0xC0380054);
 		/// <summary>
-		///     ASN1 end of data expected
+		/// The specified number of disks in a plex member is invalid.
 		/// </summary>
-		public const int CRYPT_E_ASN1_NOEOD = (int)(0x80093202 - 0x100000000);
-
+		public const int ERROR_VOLMGR_NUMBER_OF_DISKS_IN_MEMBER_INVALID = unchecked((int)0xC0380055);
 		/// <summary>
-		///     The request subject name is invalid or too long.
+		/// The operation is not supported on mirrored volumes.
 		/// </summary>
-		public const int CERTSRV_E_BAD_REQUESTSUBJECT = (int)(0x80094001 - 0x100000000);
-
+		public const int ERROR_VOLMGR_VOLUME_MIRRORED = unchecked((int)0xC0380056);
 		/// <summary>
-		///     The request does not exist.
+		/// The operation is only supported on simple and spanned plexes.
 		/// </summary>
-		public const int CERTSRV_E_NO_REQUEST = (int)(0x80094002 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PLEX_NOT_SIMPLE_SPANNED = unchecked((int)0xC0380057);
 		/// <summary>
-		///     The request's current status does not allow this operation.
+		/// The pack has no valid log copies.
 		/// </summary>
-		public const int CERTSRV_E_BAD_REQUESTSTATUS = (int)(0x80094003 - 0x100000000);
-
+		public const int ERROR_VOLMGR_NO_VALID_LOG_COPIES = unchecked((int)0xC0380058);
 		/// <summary>
-		///     The requested property value is empty.
+		/// A primary pack is already present.
 		/// </summary>
-		public const int CERTSRV_E_PROPERTY_EMPTY = (int)(0x80094004 - 0x100000000);
-
+		public const int ERROR_VOLMGR_PRIMARY_PACK_PRESENT = unchecked((int)0xC0380059);
 		/// <summary>
-		///     The certification authority's certificate contains invalid data.
+		/// The specified number of disks is invalid.
 		/// </summary>
-		public const int CERTSRV_E_INVALID_CA_CERTIFICATE = (int)(0x80094005 - 0x100000000);
-
+		public const int ERROR_VOLMGR_NUMBER_OF_DISKS_INVALID = unchecked((int)0xC038005A);
 		/// <summary>
-		///     Certificate service has been suspended for a database restore operation.
+		/// The system does not support mirrored volumes.
 		/// </summary>
-		public const int CERTSRV_E_SERVER_SUSPENDED = (int)(0x80094006 - 0x100000000);
-
+		public const int ERROR_VOLMGR_MIRROR_NOT_SUPPORTED = unchecked((int)0xC038005B);
 		/// <summary>
-		///     The certificate contains an encoded length that is potentially incompatible with older enrollment software.
+		/// The system does not support RAID-5 volumes.
 		/// </summary>
-		public const int CERTSRV_E_ENCODING_LENGTH = (int)(0x80094007 - 0x100000000);
-
+		public const int ERROR_VOLMGR_RAID5_NOT_SUPPORTED = unchecked((int)0xC038005C);
 		/// <summary>
-		///     The operation is denied. The user has multiple roles assigned and the certification authority is configured to
-		///     enforce role separation.
+		/// Some BCD entries were not imported correctly from the BCD store.
 		/// </summary>
-		public const int CERTSRV_E_ROLECONFLICT = (int)(0x80094008 - 0x100000000);
-
+		public const int ERROR_BCD_NOT_ALL_ENTRIES_IMPORTED = unchecked((int)0x80390001);
 		/// <summary>
-		///     The operation is denied. It can only be performed by a certificate manager that is allowed to manage certificates
-		///     for the current requester.
+		/// Entries enumerated have exceeded the allowed threshold.
 		/// </summary>
-		public const int CERTSRV_E_RESTRICTEDOFFICER = (int)(0x80094009 - 0x100000000);
-
+		public const int ERROR_BCD_TOO_MANY_ELEMENTS = unchecked((int)0xC0390002);
 		/// <summary>
-		///     Cannot archive private key.  The certification authority is not configured for key archival.
+		/// Some BCD entries were not synchronized correctly with the firmware.
 		/// </summary>
-		public const int CERTSRV_E_KEY_ARCHIVAL_NOT_CONFIGURED = (int)(0x8009400A - 0x100000000);
-
+		public const int ERROR_BCD_NOT_ALL_ENTRIES_SYNCHRONIZED = unchecked((int)0x80390003);
 		/// <summary>
-		///     Cannot archive private key.  The certification authority could not verify one or more key recovery certificates.
+		/// The virtual hard disk is corrupted. The virtual hard disk drive footer is missing.
 		/// </summary>
-		public const int CERTSRV_E_NO_VALID_KRA = (int)(0x8009400B - 0x100000000);
-
+		public const int ERROR_VHD_DRIVE_FOOTER_MISSING = unchecked((int)0xC03A0001);
 		/// <summary>
-		///     The request is incorrectly formatted.  The encrypted private key must be in an unauthenticated attribute in an
-		///     outermost signature.
+		/// The virtual hard disk is corrupted. The virtual hard disk drive footer checksum does not match the on-disk checksum.
 		/// </summary>
-		public const int CERTSRV_E_BAD_REQUEST_KEY_ARCHIVAL = (int)(0x8009400C - 0x100000000);
-
+		public const int ERROR_VHD_DRIVE_FOOTER_CHECKSUM_MISMATCH = unchecked((int)0xC03A0002);
 		/// <summary>
-		///     At least one security principal must have the permission to manage this CA.
+		/// The virtual hard disk is corrupted. The virtual hard disk drive footer in the virtual hard disk is corrupted.
 		/// </summary>
-		public const int CERTSRV_E_NO_CAADMIN_DEFINED = (int)(0x8009400D - 0x100000000);
-
+		public const int ERROR_VHD_DRIVE_FOOTER_CORRUPT = unchecked((int)0xC03A0003);
 		/// <summary>
-		///     The request contains an invalid renewal certificate attribute.
+		/// The system does not recognize the file format of this virtual hard disk.
 		/// </summary>
-		public const int CERTSRV_E_BAD_RENEWAL_CERT_ATTRIBUTE = (int)(0x8009400E - 0x100000000);
-
+		public const int ERROR_VHD_FORMAT_UNKNOWN = unchecked((int)0xC03A0004);
 		/// <summary>
-		///     An attempt was made to open a Certification Authority database session, but there are already too many active
-		///     sessions.  The server may need to be configured to allow additional sessions.
+		/// The version does not support this version of the file format.
 		/// </summary>
-		public const int CERTSRV_E_NO_DB_SESSIONS = (int)(0x8009400F - 0x100000000);
-
+		public const int ERROR_VHD_FORMAT_UNSUPPORTED_VERSION = unchecked((int)0xC03A0005);
 		/// <summary>
-		///     A memory reference caused a data alignment fault.
+		/// The virtual hard disk is corrupted. The sparse header checksum does not match the on-disk checksum.
 		/// </summary>
-		public const int CERTSRV_E_ALIGNMENT_FAULT = (int)(0x80094010 - 0x100000000);
-
+		public const int ERROR_VHD_SPARSE_HEADER_CHECKSUM_MISMATCH = unchecked((int)0xC03A0006);
 		/// <summary>
-		///     The permissions on this certification authority do not allow the current user to enroll for certificates.
+		/// The system does not support this version of the virtual hard disk.This version of the sparse header is not supported.
 		/// </summary>
-		public const int CERTSRV_E_ENROLL_DENIED = (int)(0x80094011 - 0x100000000);
-
+		public const int ERROR_VHD_SPARSE_HEADER_UNSUPPORTED_VERSION = unchecked((int)0xC03A0007);
 		/// <summary>
-		///     The permissions on the certificate template do not allow the current user to enroll for this type of certificate.
+		/// The virtual hard disk is corrupted. The sparse header in the virtual hard disk is corrupt.
 		/// </summary>
-		public const int CERTSRV_E_TEMPLATE_DENIED = (int)(0x80094012 - 0x100000000);
-
+		public const int ERROR_VHD_SPARSE_HEADER_CORRUPT = unchecked((int)0xC03A0008);
 		/// <summary>
-		///     No information avialable.
+		/// Failed to write to the virtual hard disk failed because the system failed to allocate a new block in the virtual hard disk.
 		/// </summary>
-		public const int CERTSRV_E_DOWNLEVEL_DC_SSL_OR_UPGRADE = (int)(0x80094013 - 0x100000000);
-
+		public const int ERROR_VHD_BLOCK_ALLOCATION_FAILURE = unchecked((int)0xC03A0009);
 		/// <summary>
-		///     The requested certificate template is not supported by this CA.
+		/// The virtual hard disk is corrupted. The block allocation table in the virtual hard disk is corrupt.
 		/// </summary>
-		public const int CERTSRV_E_UNSUPPORTED_CERT_TYPE = (int)(0x80094800 - 0x100000000);
-
+		public const int ERROR_VHD_BLOCK_ALLOCATION_TABLE_CORRUPT = unchecked((int)0xC03A000A);
 		/// <summary>
-		///     The request contains no certificate template information.
+		/// The system does not support this version of the virtual hard disk. The block size is invalid.
 		/// </summary>
-		public const int CERTSRV_E_NO_CERT_TYPE = (int)(0x80094801 - 0x100000000);
-
+		public const int ERROR_VHD_INVALID_BLOCK_SIZE = unchecked((int)0xC03A000B);
 		/// <summary>
-		///     The request contains conflicting template information.
+		/// The virtual hard disk is corrupted. The block bitmap does not match with the block data present in the virtual hard disk.
 		/// </summary>
-		public const int CERTSRV_E_TEMPLATE_CONFLICT = (int)(0x80094802 - 0x100000000);
-
+		public const int ERROR_VHD_BITMAP_MISMATCH = unchecked((int)0xC03A000C);
 		/// <summary>
-		///     The request is missing a required Subject Alternate name extension.
+		/// The chain of virtual hard disks is broken. The system cannot locate the parent virtual hard disk for the differencing disk.
 		/// </summary>
-		public const int CERTSRV_E_SUBJECT_ALT_NAME_REQUIRED = (int)(0x80094803 - 0x100000000);
-
+		public const int ERROR_VHD_PARENT_VHD_NOT_FOUND = unchecked((int)0xC03A000D);
 		/// <summary>
-		///     The request is missing a required private key for archival by the server.
+		/// The chain of virtual hard disks is corrupted. There is a mismatch in the identifiers of the parent virtual hard disk and differencing disk.
 		/// </summary>
-		public const int CERTSRV_E_ARCHIVED_KEY_REQUIRED = (int)(0x80094804 - 0x100000000);
-
+		public const int ERROR_VHD_CHILD_PARENT_ID_MISMATCH = unchecked((int)0xC03A000E);
 		/// <summary>
-		///     The request is missing a required SMIME capabilities extension.
+		/// The chain of virtual hard disks is corrupted. The time stamp of the parent virtual hard disk does not match the time stamp of the differencing disk.
 		/// </summary>
-		public const int CERTSRV_E_SMIME_REQUIRED = (int)(0x80094805 - 0x100000000);
-
+		public const int ERROR_VHD_CHILD_PARENT_TIMESTAMP_MISMATCH = unchecked((int)0xC03A000F);
 		/// <summary>
-		///     The request was made on behalf of a subject other than the caller.  The certificate template must be configured to
-		///     require at least one signature to authorize the request.
+		/// Failed to read the metadata of the virtual hard disk.
 		/// </summary>
-		public const int CERTSRV_E_BAD_RENEWAL_SUBJECT = (int)(0x80094806 - 0x100000000);
-
+		public const int ERROR_VHD_METADATA_READ_FAILURE = unchecked((int)0xC03A0010);
 		/// <summary>
-		///     The request template version is newer than the supported template version.
+		/// Failed to write to the metadata of the virtual hard disk.
 		/// </summary>
-		public const int CERTSRV_E_BAD_TEMPLATE_VERSION = (int)(0x80094807 - 0x100000000);
-
+		public const int ERROR_VHD_METADATA_WRITE_FAILURE = unchecked((int)0xC03A0011);
 		/// <summary>
-		///     The template is missing a required signature policy attribute.
+		/// The size of the virtual hard disk is not valid.
 		/// </summary>
-		public const int CERTSRV_E_TEMPLATE_POLICY_REQUIRED = (int)(0x80094808 - 0x100000000);
-
+		public const int ERROR_VHD_INVALID_SIZE = unchecked((int)0xC03A0012);
 		/// <summary>
-		///     The request is missing required signature policy information.
+		/// The file size of this virtual hard disk is not valid.
 		/// </summary>
-		public const int CERTSRV_E_SIGNATURE_POLICY_REQUIRED = (int)(0x80094809 - 0x100000000);
-
+		public const int ERROR_VHD_INVALID_FILE_SIZE = unchecked((int)0xC03A0013);
 		/// <summary>
-		///     The request is missing one or more required signatures.
+		/// A virtual disk support provider for the specified file was not found.
 		/// </summary>
-		public const int CERTSRV_E_SIGNATURE_COUNT = (int)(0x8009480A - 0x100000000);
-
+		public const int ERROR_VIRTDISK_PROVIDER_NOT_FOUND = unchecked((int)0xC03A0014);
 		/// <summary>
-		///     One or more signatures did not include the required application or issuance policies.  The request is missing one
-		///     or more required valid signatures.
+		/// The specified disk is not a virtual disk.
 		/// </summary>
-		public const int CERTSRV_E_SIGNATURE_REJECTED = (int)(0x8009480B - 0x100000000);
-
+		public const int ERROR_VIRTDISK_NOT_VIRTUAL_DISK = unchecked((int)0xC03A0015);
 		/// <summary>
-		///     The request is missing one or more required signature issuance policies.
+		/// The chain of virtual hard disks is inaccessible. The process has not been granted access rights to the parent virtual hard disk for the differencing disk.
 		/// </summary>
-		public const int CERTSRV_E_ISSUANCE_POLICY_REQUIRED = (int)(0x8009480C - 0x100000000);
-
+		public const int ERROR_VHD_PARENT_VHD_ACCESS_DENIED = unchecked((int)0xC03A0016);
 		/// <summary>
-		///     The UPN is unavailable and cannot be added to the Subject Alternate name.
+		/// The chain of virtual hard disks is corrupted. There is a mismatch in the virtual sizes of the parent virtual hard disk and differencing disk.
 		/// </summary>
-		public const int CERTSRV_E_SUBJECT_UPN_REQUIRED = (int)(0x8009480D - 0x100000000);
-
+		public const int ERROR_VHD_CHILD_PARENT_SIZE_MISMATCH = unchecked((int)0xC03A0017);
 		/// <summary>
-		///     The Active Directory GUID is unavailable and cannot be added to the Subject Alternate name.
+		/// The chain of virtual hard disks is corrupted. A differencing disk is indicated in its own parent chain.
 		/// </summary>
-		public const int CERTSRV_E_SUBJECT_DIRECTORY_GUID_REQUIRED = (int)(0x8009480E - 0x100000000);
-
+		public const int ERROR_VHD_DIFFERENCING_CHAIN_CYCLE_DETECTED = unchecked((int)0xC03A0018);
 		/// <summary>
-		///     The DNS name is unavailable and cannot be added to the Subject Alternate name.
+		/// The chain of virtual hard disks is inaccessible. There was an error opening a virtual hard disk further up the chain.
 		/// </summary>
-		public const int CERTSRV_E_SUBJECT_DNS_REQUIRED = (int)(0x8009480F - 0x100000000);
-
+		public const int ERROR_VHD_DIFFERENCING_CHAIN_ERROR_IN_PARENT = unchecked((int)0xC03A0019);
 		/// <summary>
-		///     The request includes a private key for archival by the server, but key archival is not enabled for the specified
-		///     certificate template.
+		/// The requested operation could not be completed due to a virtual disk system limitation. On NTFS, virtual hard disk files must be uncompressed and unencrypted. On ReFS, virtual hard disk files must not have the integrity bit set.
 		/// </summary>
-		public const int CERTSRV_E_ARCHIVED_KEY_UNEXPECTED = (int)(0x80094810 - 0x100000000);
-
+		public const int ERROR_VIRTUAL_DISK_LIMITATION = unchecked((int)0xC03A001A);
 		/// <summary>
-		///     The public key does not meet the minimum size required by the specified certificate template.
+		/// The requested operation cannot be performed on a virtual disk of this type.
 		/// </summary>
-		public const int CERTSRV_E_KEY_LENGTH = (int)(0x80094811 - 0x100000000);
-
+		public const int ERROR_VHD_INVALID_TYPE = unchecked((int)0xC03A001B);
 		/// <summary>
-		///     No information avialable.
+		/// The requested operation cannot be performed on the virtual disk in its current state.
 		/// </summary>
-		public const int CERTSRV_E_SUBJECT_EMAIL_REQUIRED = (int)(0x80094812 - 0x100000000);
-
+		public const int ERROR_VHD_INVALID_STATE = unchecked((int)0xC03A001C);
 		/// <summary>
-		///     No information avialable.
+		/// The sector size of the physical disk on which the virtual disk resides is not supported.
 		/// </summary>
-		public const int CERTSRV_E_UNKNOWN_CERT_TYPE = (int)(0x80094813 - 0x100000000);
-
+		public const int ERROR_VIRTDISK_UNSUPPORTED_DISK_SECTOR_SIZE = unchecked((int)0xC03A001D);
 		/// <summary>
-		///     No information avialable.
+		/// The disk is already owned by a different owner.
 		/// </summary>
-		public const int CERTSRV_E_CERT_TYPE_OVERLAP = (int)(0x80094814 - 0x100000000);
-
+		public const int ERROR_VIRTDISK_DISK_ALREADY_OWNED = unchecked((int)0xC03A001E);
 		/// <summary>
-		///     The key is not exportable.
+		/// The disk must be offline or read-only.
 		/// </summary>
-		public const int XENROLL_E_KEY_NOT_EXPORTABLE = (int)(0x80095000 - 0x100000000);
-
+		public const int ERROR_VIRTDISK_DISK_ONLINE_AND_WRITABLE = unchecked((int)0xC03A001F);
 		/// <summary>
-		///     You cannot add the root CA certificate into your local store.
+		/// Change Tracking is not initialized for this Virtual Disk.
 		/// </summary>
-		public const int XENROLL_E_CANNOT_ADD_ROOT_CERT = (int)(0x80095001 - 0x100000000);
-
+		public const int ERROR_CTLOG_TRACKING_NOT_INITIALIZED = unchecked((int)0xC03A0020);
 		/// <summary>
-		///     The key archival hash attribute was not found in the response.
+		/// Size of change tracking file exceeded the maximum size limit
 		/// </summary>
-		public const int XENROLL_E_RESPONSE_KA_HASH_NOT_FOUND = (int)(0x80095002 - 0x100000000);
-
+		public const int ERROR_CTLOG_LOGFILE_SIZE_EXCEEDED_MAXSIZE = unchecked((int)0xC03A0021);
 		/// <summary>
-		///     An unexpetced key archival hash attribute was found in the response.
+		/// VHD file is changed due to compaction, expansion or offline patching
 		/// </summary>
-		public const int XENROLL_E_RESPONSE_UNEXPECTED_KA_HASH = (int)(0x80095003 - 0x100000000);
-
+		public const int ERROR_CTLOG_VHD_CHANGED_OFFLINE = unchecked((int)0xC03A0022);
 		/// <summary>
-		///     There is a key archival hash mismatch between the request and the response.
+		/// Change Tracking for the virtual disk is not in a valid state to perform this request. Change tracking could be discontinued or already in the requested state.
 		/// </summary>
-		public const int XENROLL_E_RESPONSE_KA_HASH_MISMATCH = (int)(0x80095004 - 0x100000000);
-
+		public const int ERROR_CTLOG_INVALID_TRACKING_STATE = unchecked((int)0xC03A0023);
 		/// <summary>
-		///     Signing certificate cannot include SMIME extension.
+		/// Change Tracking file for the virtual disk is not in a valid state.
 		/// </summary>
-		public const int XENROLL_E_KEYSPEC_SMIME_MISMATCH = (int)(0x80095005 - 0x100000000);
-
+		public const int ERROR_CTLOG_INCONSISTANT_TRACKING_FILE = unchecked((int)0xC03A0024);
 		/// <summary>
-		///     A system-level error occurred while verifying trust.
+		/// The requested resize operation could not be completed because it might truncate user data residing on the virtual disk.
 		/// </summary>
-		public const int TRUST_E_SYSTEM_ERROR = (int)(0x80096001 - 0x100000000);
-
+		public const int ERROR_VHD_RESIZE_WOULD_TRUNCATE_DATA = unchecked((int)0xC03A0025);
 		/// <summary>
-		///     The certificate for the signer of the message is invalid or not found.
+		/// The requested operation could not be completed because the virtual disk's minimum safe size could not be determined. This may be due to a missing or corrupt partition table.
 		/// </summary>
-		public const int TRUST_E_NO_SIGNER_CERT = (int)(0x80096002 - 0x100000000);
-
+		public const int ERROR_VHD_COULD_NOT_COMPUTE_MINIMUM_VIRTUAL_SIZE = unchecked((int)0xC03A0026);
 		/// <summary>
-		///     One of the counter signatures was invalid.
+		/// The requested operation could not be completed because the virtual disk's size cannot be safely reduced further.
 		/// </summary>
-		public const int TRUST_E_COUNTER_SIGNER = (int)(0x80096003 - 0x100000000);
-
+		public const int ERROR_VHD_ALREADY_AT_OR_BELOW_MINIMUM_VIRTUAL_SIZE = unchecked((int)0xC03A0027);
 		/// <summary>
-		///     The signature of the certificate can not be verified.
+		/// There is not enough space in the virtual disk file for the provided metadata item.
 		/// </summary>
-		public const int TRUST_E_CERT_SIGNATURE = (int)(0x80096004 - 0x100000000);
-
+		public const int ERROR_VHD_METADATA_FULL = unchecked((int)0xC03A0028);
 		/// <summary>
-		///     The timestamp signature and/or certificate could not be verified or is malformed.
+		/// The virtualization storage subsystem has generated an error.
 		/// </summary>
-		public const int TRUST_E_TIME_STAMP = (int)(0x80096005 - 0x100000000);
-
+		public const int ERROR_QUERY_STORAGE_ERROR = unchecked((int)0x803A0001);
 		/// <summary>
-		///     The digital signature of the object did not verify.
+		/// The operation was canceled.
 		/// </summary>
-		public const int TRUST_E_BAD_DIGEST = (int)(0x80096010 - 0x100000000);
-
+		public const int SDIAG_E_CANCELLED = unchecked((int)0x803C0100);
 		/// <summary>
-		///     A certificate's basic constraint extension has not been observed.
+		/// An error occurred when running a PowerShell script.
 		/// </summary>
-		public const int TRUST_E_BASIC_CONSTRAINTS = (int)(0x80096019 - 0x100000000);
-
+		public const int SDIAG_E_SCRIPT = unchecked((int)0x803C0101);
 		/// <summary>
-		///     The certificate does not meet or contain the Authenticode financial extensions.
+		/// An error occurred when interacting with PowerShell runtime.
 		/// </summary>
-		public const int TRUST_E_FINANCIAL_CRITERIA = (int)(0x8009601E - 0x100000000);
-
+		public const int SDIAG_E_POWERSHELL = unchecked((int)0x803C0102);
 		/// <summary>
-		///     Tried to reference a part of the file outside the proper range.
+		/// An error occurred in the Scripted Diagnostic Managed Host.
 		/// </summary>
-		public const int MSSIPOTF_E_OUTOFMEMRANGE = (int)(0x80097001 - 0x100000000);
-
+		public const int SDIAG_E_MANAGEDHOST = unchecked((int)0x803C0103);
 		/// <summary>
-		///     Could not retrieve an object from the file.
+		/// The troubleshooting pack does not contain a required verifier to complete the verification.
 		/// </summary>
-		public const int MSSIPOTF_E_CANTGETOBJECT = (int)(0x80097002 - 0x100000000);
-
+		public const int SDIAG_E_NOVERIFIER = unchecked((int)0x803C0104);
 		/// <summary>
-		///     Could not find the head table in the file.
+		/// The troubleshooting pack cannot be executed on this system.
 		/// </summary>
-		public const int MSSIPOTF_E_NOHEADTABLE = (int)(0x80097003 - 0x100000000);
-
+		public const int SDIAG_S_CANNOTRUN = 0x003C0105;
 		/// <summary>
-		///     The magic number in the head table is incorrect.
+		/// Scripted diagnostics is disabled by group policy.
 		/// </summary>
-		public const int MSSIPOTF_E_BAD_MAGICNUMBER = (int)(0x80097004 - 0x100000000);
-
+		public const int SDIAG_E_DISABLED = unchecked((int)0x803C0106);
 		/// <summary>
-		///     The offset table has incorrect values.
+		/// Trust validation of the diagnostic package failed.
 		/// </summary>
-		public const int MSSIPOTF_E_BAD_OFFSET_TABLE = (int)(0x80097005 - 0x100000000);
-
+		public const int SDIAG_E_TRUST = unchecked((int)0x803C0107);
 		/// <summary>
-		///     Duplicate table tags or tags out of alphabetical order.
+		/// The troubleshooting pack cannot be executed on this system.
 		/// </summary>
-		public const int MSSIPOTF_E_TABLE_TAGORDER = (int)(0x80097006 - 0x100000000);
-
+		public const int SDIAG_E_CANNOTRUN = unchecked((int)0x803C0108);
 		/// <summary>
-		///     A table does not start on a long word boundary.
+		/// This version of the troubleshooting pack is not supported.
 		/// </summary>
-		public const int MSSIPOTF_E_TABLE_Int32UInt16 = (int)(0x80097007 - 0x100000000);
-
+		public const int SDIAG_E_VERSION = unchecked((int)0x803C0109);
 		/// <summary>
-		///     First table does not appear after header information.
+		/// A required resource cannot be loaded.
 		/// </summary>
-		public const int MSSIPOTF_E_BAD_FIRST_TABLE_PLACEMENT = (int)(0x80097008 - 0x100000000);
-
+		public const int SDIAG_E_RESOURCE = unchecked((int)0x803C010A);
 		/// <summary>
-		///     Two or more tables overlap.
+		/// The troubleshooting pack reported information for a root cause without adding the root cause.
 		/// </summary>
-		public const int MSSIPOTF_E_TABLES_OVERLAP = (int)(0x80097009 - 0x100000000);
+		public const int SDIAG_E_ROOTCAUSE = unchecked((int)0x803C010B);
+		#endregion
 
+		#region WPN, MBN, P2P, Bluetooth
 		/// <summary>
-		///     Too many pad bytes between tables or pad bytes are not 0.
+		/// The notification channel has already been closed.
 		/// </summary>
-		public const int MSSIPOTF_E_TABLE_PADBYTES = (int)(0x8009700A - 0x100000000);
-
+		public const int WPN_E_CHANNEL_CLOSED = unchecked((int)0x803E0100);
 		/// <summary>
-		///     File is too small to contain the last table.
+		/// The notification channel request did not complete successfully.
 		/// </summary>
-		public const int MSSIPOTF_E_FILETOOSMALL = (int)(0x8009700B - 0x100000000);
-
+		public const int WPN_E_CHANNEL_REQUEST_NOT_COMPLETE = unchecked((int)0x803E0101);
 		/// <summary>
-		///     A table checksum is incorrect.
+		/// The application identifier provided is invalid.
 		/// </summary>
-		public const int MSSIPOTF_E_TABLE_CHECKSUM = (int)(0x8009700C - 0x100000000);
-
+		public const int WPN_E_INVALID_APP = unchecked((int)0x803E0102);
 		/// <summary>
-		///     The file checksum is incorrect.
+		/// A notification channel request for the provided application identifier is in progress.
 		/// </summary>
-		public const int MSSIPOTF_E_FILE_CHECKSUM = (int)(0x8009700D - 0x100000000);
-
+		public const int WPN_E_OUTSTANDING_CHANNEL_REQUEST = unchecked((int)0x803E0103);
 		/// <summary>
-		///     The signature does not have the correct attributes for the policy.
+		/// The channel identifier is already tied to another application endpoint.
 		/// </summary>
-		public const int MSSIPOTF_E_FAILED_POLICY = (int)(0x80097010 - 0x100000000);
-
+		public const int WPN_E_DUPLICATE_CHANNEL = unchecked((int)0x803E0104);
 		/// <summary>
-		///     The file did not pass the hints check.
+		/// The notification platform is unavailable.
 		/// </summary>
-		public const int MSSIPOTF_E_FAILED_HINTS_CHECK = (int)(0x80097011 - 0x100000000);
-
+		public const int WPN_E_PLATFORM_UNAVAILABLE = unchecked((int)0x803E0105);
 		/// <summary>
-		///     The file is not an OpenType file.
+		/// The notification has already been posted.
 		/// </summary>
-		public const int MSSIPOTF_E_NOT_OPENTYPE = (int)(0x80097012 - 0x100000000);
-
+		public const int WPN_E_NOTIFICATION_POSTED = unchecked((int)0x803E0106);
 		/// <summary>
-		///     Failed on a file operation (open, map, read, write).
+		/// The notification has already been hidden.
 		/// </summary>
-		public const int MSSIPOTF_E_FILE = (int)(0x80097013 - 0x100000000);
-
+		public const int WPN_E_NOTIFICATION_HIDDEN = unchecked((int)0x803E0107);
 		/// <summary>
-		///     A call to a CryptoAPI function failed.
+		/// The notification cannot be hidden until it has been shown.
 		/// </summary>
-		public const int MSSIPOTF_E_CRYPT = (int)(0x80097014 - 0x100000000);
-
+		public const int WPN_E_NOTIFICATION_NOT_POSTED = unchecked((int)0x803E0108);
 		/// <summary>
-		///     There is a bad version number in the file.
+		/// Cloud notifications have been turned off.
 		/// </summary>
-		public const int MSSIPOTF_E_BADVERSION = (int)(0x80097015 - 0x100000000);
-
+		public const int WPN_E_CLOUD_DISABLED = unchecked((int)0x803E0109);
 		/// <summary>
-		///     The structure of the DSIG table is incorrect.
+		/// The application does not have the cloud notification capability.
 		/// </summary>
-		public const int MSSIPOTF_E_DSIG_STRUCTURE = (int)(0x80097016 - 0x100000000);
-
+		public const int WPN_E_CLOUD_INCAPABLE = unchecked((int)0x803E0110);
 		/// <summary>
-		///     A check failed in a partially constant table.
+		/// Settings prevent the notification from being delivered.
 		/// </summary>
-		public const int MSSIPOTF_E_PCONST_CHECK = (int)(0x80097017 - 0x100000000);
-
+		public const int WPN_E_NOTIFICATION_DISABLED = unchecked((int)0x803E0111);
 		/// <summary>
-		///     Some kind of structural error.
+		/// Application capabilities prevent the notification from being delivered.
 		/// </summary>
-		public const int MSSIPOTF_E_STRUCTURE = (int)(0x80097018 - 0x100000000);
-
+		public const int WPN_E_NOTIFICATION_INCAPABLE = unchecked((int)0x803E0112);
 		/// <summary>
-		///     The operation completed successfully.
+		/// The application does not have the internet access capability.
 		/// </summary>
-		public const int NTE_OP_OK = 0;
-
+		public const int WPN_E_INTERNET_INCAPABLE = unchecked((int)0x803E0113);
 		/// <summary>
-		///     Unknown trust provider.
+		/// Settings prevent the notification type from being delivered.
 		/// </summary>
-		public const int TRUST_E_PROVIDER_UNKNOWN = (int)(0x800B0001 - 0x100000000);
-
+		public const int WPN_E_NOTIFICATION_TYPE_DISABLED = unchecked((int)0x803E0114);
 		/// <summary>
-		///     The trust verification action specified is not supported by the specified trust provider.
+		/// The size of the notification content is too large.
 		/// </summary>
-		public const int TRUST_E_ACTION_UNKNOWN = (int)(0x800B0002 - 0x100000000);
-
+		public const int WPN_E_NOTIFICATION_SIZE = unchecked((int)0x803E0115);
 		/// <summary>
-		///     The form specified for the subject is not one supported or known by the specified trust provider.
+		/// The size of the notification tag is too large.
 		/// </summary>
-		public const int TRUST_E_SUBJECT_FORM_UNKNOWN = (int)(0x800B0003 - 0x100000000);
-
+		public const int WPN_E_TAG_SIZE = unchecked((int)0x803E0116);
 		/// <summary>
-		///     The subject is not trusted for the specified action.
+		/// The notification platform doesn't have appropriate privilege on resources.
 		/// </summary>
-		public const int TRUST_E_SUBJECT_NOT_TRUSTED = (int)(0x800B0004 - 0x100000000);
-
+		public const int WPN_E_ACCESS_DENIED = unchecked((int)0x803E0117);
 		/// <summary>
-		///     Error due to problem in ASN.1 encoding process.
+		/// The notification platform found application is already registered.
 		/// </summary>
-		public const int DIGSIG_E_ENCODE = (int)(0x800B0005 - 0x100000000);
-
+		public const int WPN_E_DUPLICATE_REGISTRATION = unchecked((int)0x803E0118);
 		/// <summary>
-		///     Error due to problem in ASN.1 decoding process.
+		/// The notification platform has run out of presentation layer sessions.
 		/// </summary>
-		public const int DIGSIG_E_DECODE = (int)(0x800B0006 - 0x100000000);
-
+		public const int WPN_E_OUT_OF_SESSION = unchecked((int)0x803E0200);
 		/// <summary>
-		///     Reading / writing Extensions where Attributes are appropriate, and visa versa.
+		/// The notification platform rejects image download request due to system in power save mode.
 		/// </summary>
-		public const int DIGSIG_E_EXTENSIBILITY = (int)(0x800B0007 - 0x100000000);
-
+		public const int WPN_E_POWER_SAVE = unchecked((int)0x803E0201);
 		/// <summary>
-		///     Unspecified cryptographic failure.
+		/// The notification platform doesn't have the requested image in its cache.
 		/// </summary>
-		public const int DIGSIG_E_CRYPTO = (int)(0x800B0008 - 0x100000000);
-
+		public const int WPN_E_IMAGE_NOT_FOUND_IN_CACHE = unchecked((int)0x803E0202);
 		/// <summary>
-		///     The size of the data could not be determined.
+		/// The notification platform cannot complete all of requested image.
 		/// </summary>
-		public const int PERSIST_E_SIZEDEFINITE = (int)(0x800B0009 - 0x100000000);
-
+		public const int WPN_E_ALL_URL_NOT_COMPLETED = unchecked((int)0x803E0203);
 		/// <summary>
-		///     The size of the indefinite-sized data could not be determined.
+		/// A cloud image downloaded from the notification platform is invalid.
 		/// </summary>
-		public const int PERSIST_E_SIZEINDEFINITE = (int)(0x800B000A - 0x100000000);
-
+		public const int WPN_E_INVALID_CLOUD_IMAGE = unchecked((int)0x803E0204);
 		/// <summary>
-		///     This object does not read and write self-sizing data.
+		/// Notification Id provided as filter is matched with what the notification platform maintains.
 		/// </summary>
-		public const int PERSIST_E_NOTSELFSIZING = (int)(0x800B000B - 0x100000000);
-
+		public const int WPN_E_NOTIFICATION_ID_MATCHED = unchecked((int)0x803E0205);
 		/// <summary>
-		///     No signature was present in the subject.
+		/// Notification callback interface is already registered.
 		/// </summary>
-		public const int TRUST_E_NOSIGNATURE = (int)(0x800B0100 - 0x100000000);
-
+		public const int WPN_E_CALLBACK_ALREADY_REGISTERED = unchecked((int)0x803E0206);
 		/// <summary>
-		///     A required certificate is not within its validity period when verifying against the current system clock or the
-		///     timestamp in the signed file.
+		/// Toast Notification was dropped without being displayed to the user.
 		/// </summary>
-		public const int CERT_E_EXPIRED = (int)(0x800B0101 - 0x100000000);
-
+		public const int WPN_E_TOAST_NOTIFICATION_DROPPED = unchecked((int)0x803E0207);
+		/// <summary>
+		/// The notification platform does not have the proper privileges to complete the request.
+		/// </summary>
+		public const int WPN_E_STORAGE_LOCKED = unchecked((int)0x803E0208);
+		/// <summary>
+		/// Context is not activated.
+		/// </summary>
+		public const int E_MBN_CONTEXT_NOT_ACTIVATED = unchecked((int)0x80548201);
+		/// <summary>
+		/// Bad SIM is inserted.
+		/// </summary>
+		public const int E_MBN_BAD_SIM = unchecked((int)0x80548202);
+		/// <summary>
+		/// Requested data class is not available.
+		/// </summary>
+		public const int E_MBN_DATA_CLASS_NOT_AVAILABLE = unchecked((int)0x80548203);
+		/// <summary>
+		/// Access point name (APN) or Access string is incorrect.
+		/// </summary>
+		public const int E_MBN_INVALID_ACCESS_STRING = unchecked((int)0x80548204);
+		/// <summary>
+		/// Max activated contexts have reached.
+		/// </summary>
+		public const int E_MBN_MAX_ACTIVATED_CONTEXTS = unchecked((int)0x80548205);
+		/// <summary>
+		/// Device is in packet detach state.
+		/// </summary>
+		public const int E_MBN_PACKET_SVC_DETACHED = unchecked((int)0x80548206);
+		/// <summary>
+		/// Provider is not visible.
+		/// </summary>
+		public const int E_MBN_PROVIDER_NOT_VISIBLE = unchecked((int)0x80548207);
+		/// <summary>
+		/// Radio is powered off.
+		/// </summary>
+		public const int E_MBN_RADIO_POWER_OFF = unchecked((int)0x80548208);
+		/// <summary>
+		/// MBN subscription is not activated.
+		/// </summary>
+		public const int E_MBN_SERVICE_NOT_ACTIVATED = unchecked((int)0x80548209);
+		/// <summary>
+		/// SIM is not inserted.
+		/// </summary>
+		public const int E_MBN_SIM_NOT_INSERTED = unchecked((int)0x8054820A);
+		/// <summary>
+		/// Voice call in progress.
+		/// </summary>
+		public const int E_MBN_VOICE_CALL_IN_PROGRESS = unchecked((int)0x8054820B);
+		/// <summary>
+		/// Visible provider cache is invalid.
+		/// </summary>
+		public const int E_MBN_INVALID_CACHE = unchecked((int)0x8054820C);
+		/// <summary>
+		/// Device is not registered.
+		/// </summary>
+		public const int E_MBN_NOT_REGISTERED = unchecked((int)0x8054820D);
+		/// <summary>
+		/// Providers not found.
+		/// </summary>
+		public const int E_MBN_PROVIDERS_NOT_FOUND = unchecked((int)0x8054820E);
+		/// <summary>
+		/// Pin is not supported.
+		/// </summary>
+		public const int E_MBN_PIN_NOT_SUPPORTED = unchecked((int)0x8054820F);
+		/// <summary>
+		/// Pin is required.
+		/// </summary>
+		public const int E_MBN_PIN_REQUIRED = unchecked((int)0x80548210);
+		/// <summary>
+		/// PIN is disabled.
+		/// </summary>
+		public const int E_MBN_PIN_DISABLED = unchecked((int)0x80548211);
+		/// <summary>
+		/// Generic Failure.
+		/// </summary>
+		public const int E_MBN_FAILURE = unchecked((int)0x80548212);
+		/// <summary>
+		/// Profile is invalid.
+		/// </summary>
+		public const int E_MBN_INVALID_PROFILE = unchecked((int)0x80548218);
+		/// <summary>
+		/// Default profile exist.
+		/// </summary>
+		public const int E_MBN_DEFAULT_PROFILE_EXIST = unchecked((int)0x80548219);
+		/// <summary>
+		/// SMS encoding is not supported.
+		/// </summary>
+		public const int E_MBN_SMS_ENCODING_NOT_SUPPORTED = unchecked((int)0x80548220);
+		/// <summary>
+		/// SMS filter is not supported.
+		/// </summary>
+		public const int E_MBN_SMS_FILTER_NOT_SUPPORTED = unchecked((int)0x80548221);
+		/// <summary>
+		/// Invalid SMS memory index is used.
+		/// </summary>
+		public const int E_MBN_SMS_INVALID_MEMORY_INDEX = unchecked((int)0x80548222);
+		/// <summary>
+		/// SMS language is not supported.
+		/// </summary>
+		public const int E_MBN_SMS_LANG_NOT_SUPPORTED = unchecked((int)0x80548223);
+		/// <summary>
+		/// SMS memory failure occurred.
+		/// </summary>
+		public const int E_MBN_SMS_MEMORY_FAILURE = unchecked((int)0x80548224);
+		/// <summary>
+		/// SMS network timeout happened.
+		/// </summary>
+		public const int E_MBN_SMS_NETWORK_TIMEOUT = unchecked((int)0x80548225);
+		/// <summary>
+		/// Unknown SMSC address is used.
+		/// </summary>
+		public const int E_MBN_SMS_UNKNOWN_SMSC_ADDRESS = unchecked((int)0x80548226);
+		/// <summary>
+		/// SMS format is not supported.
+		/// </summary>
+		public const int E_MBN_SMS_FORMAT_NOT_SUPPORTED = unchecked((int)0x80548227);
+		/// <summary>
+		/// SMS operation is not allowed.
+		/// </summary>
+		public const int E_MBN_SMS_OPERATION_NOT_ALLOWED = unchecked((int)0x80548228);
+		/// <summary>
+		/// Device SMS memory is full.
+		/// </summary>
+		public const int E_MBN_SMS_MEMORY_FULL = unchecked((int)0x80548229);
+		/// <summary>
+		/// The IPv6 protocol is not installed.
+		/// </summary>
+		public const int PEER_E_IPV6_NOT_INSTALLED = unchecked((int)0x80630001);
+		/// <summary>
+		/// The component has not been initialized.
+		/// </summary>
+		public const int PEER_E_NOT_INITIALIZED = unchecked((int)0x80630002);
+		/// <summary>
+		/// The required service canot be started.
+		/// </summary>
+		public const int PEER_E_CANNOT_START_SERVICE = unchecked((int)0x80630003);
+		/// <summary>
+		/// The P2P protocol is not licensed to run on this OS.
+		/// </summary>
+		public const int PEER_E_NOT_LICENSED = unchecked((int)0x80630004);
 		/// <summary>
-		///     The validity periods of the certification chain do not nest correctly.
+		/// The graph handle is invalid.
 		/// </summary>
-		public const int CERT_E_VALIDITYPERIODNESTING = (int)(0x800B0102 - 0x100000000);
-
+		public const int PEER_E_INVALID_GRAPH = unchecked((int)0x80630010);
 		/// <summary>
-		///     A certificate that can only be used as an end-entity is being used as a CA or visa versa.
+		/// The GRaphing database name has changed.
 		/// </summary>
-		public const int CERT_E_ROLE = (int)(0x800B0103 - 0x100000000);
-
+		public const int PEER_E_DBNAME_CHANGED = unchecked((int)0x80630011);
 		/// <summary>
-		///     A path length constraint in the certification chain has been violated.
+		/// A graph with the same ID already exists.
 		/// </summary>
-		public const int CERT_E_PATHLENCONST = (int)(0x800B0104 - 0x100000000);
-
+		public const int PEER_E_DUPLICATE_GRAPH = unchecked((int)0x80630012);
 		/// <summary>
-		///     A certificate contains an unknown extension that is marked 'critical'.
+		/// The graph is not ready.
 		/// </summary>
-		public const int CERT_E_CRITICAL = (int)(0x800B0105 - 0x100000000);
-
+		public const int PEER_E_GRAPH_NOT_READY = unchecked((int)0x80630013);
 		/// <summary>
-		///     A certificate being used for a purpose other than the ones specified by its CA.
+		/// The graph is shutting down.
 		/// </summary>
-		public const int CERT_E_PURPOSE = (int)(0x800B0106 - 0x100000000);
-
+		public const int PEER_E_GRAPH_SHUTTING_DOWN = unchecked((int)0x80630014);
 		/// <summary>
-		///     A parent of a given certificate in fact did not issue that child certificate.
+		/// The graph is still in use.
 		/// </summary>
-		public const int CERT_E_ISSUERCHAINING = (int)(0x800B0107 - 0x100000000);
-
+		public const int PEER_E_GRAPH_IN_USE = unchecked((int)0x80630015);
 		/// <summary>
-		///     A certificate is missing or has an empty value for an important field, such as a subject or issuer name.
+		/// The graph database is corrupt.
 		/// </summary>
-		public const int CERT_E_MALFORMED = (int)(0x800B0108 - 0x100000000);
-
+		public const int PEER_E_INVALID_DATABASE = unchecked((int)0x80630016);
 		/// <summary>
-		///     A certificate chain processed, but terminated in a root certificate which is not trusted by the trust provider.
+		/// Too many attributes have been used.
 		/// </summary>
-		public const int CERT_E_UNTRUSTEDROOT = (int)(0x800B0109 - 0x100000000);
-
+		public const int PEER_E_TOO_MANY_ATTRIBUTES = unchecked((int)0x80630017);
 		/// <summary>
-		///     An internal certificate chaining error has occurred.
+		/// The connection can not be found.
 		/// </summary>
-		public const int CERT_E_CHAINING = (int)(0x800B010A - 0x100000000);
-
+		public const int PEER_E_CONNECTION_NOT_FOUND = unchecked((int)0x80630103);
 		/// <summary>
-		///     Generic trust failure.
+		/// The peer attempted to connect to itself.
 		/// </summary>
-		public const int TRUST_E_FAIL = (int)(0x800B010B - 0x100000000);
-
+		public const int PEER_E_CONNECT_SELF = unchecked((int)0x80630106);
 		/// <summary>
-		///     A certificate was explicitly revoked by its issuer.
+		/// The peer is already listening for connections.
 		/// </summary>
-		public const int CERT_E_REVOKED = (int)(0x800B010C - 0x100000000);
-
+		public const int PEER_E_ALREADY_LISTENING = unchecked((int)0x80630107);
 		/// <summary>
-		///     The certification path terminates with the test root which is not trusted with the current policy settings.
+		/// The node was not found.
 		/// </summary>
-		public const int CERT_E_UNTRUSTEDTESTROOT = (int)(0x800B010D - 0x100000000);
-
+		public const int PEER_E_NODE_NOT_FOUND = unchecked((int)0x80630108);
 		/// <summary>
-		///     The revocation process could not continue - the certificate(s) could not be checked.
+		/// The Connection attempt failed.
 		/// </summary>
-		public const int CERT_E_REVOCATION_FAILURE = (int)(0x800B010E - 0x100000000);
-
+		public const int PEER_E_CONNECTION_FAILED = unchecked((int)0x80630109);
 		/// <summary>
-		///     The certificate's CN name does not match the passed value.
+		/// The peer connection could not be authenticated.
 		/// </summary>
-		public const int CERT_E_CN_NO_MATCH = (int)(0x800B010F - 0x100000000);
-
+		public const int PEER_E_CONNECTION_NOT_AUTHENTICATED = unchecked((int)0x8063010A);
 		/// <summary>
-		///     The certificate is not valid for the requested usage.
+		/// The connection was refused.
 		/// </summary>
-		public const int CERT_E_WRONG_USAGE = (int)(0x800B0110 - 0x100000000);
-
+		public const int PEER_E_CONNECTION_REFUSED = unchecked((int)0x8063010B);
 		/// <summary>
-		///     The certificate was explicitly marked as untrusted by the user.
+		/// The peer name classifier is too long.
 		/// </summary>
-		public const int TRUST_E_EXPLICIT_DISTRUST = (int)(0x800B0111 - 0x100000000);
-
+		public const int PEER_E_CLASSIFIER_TOO_LONG = unchecked((int)0x80630201);
 		/// <summary>
-		///     A certification chain processed correctly, but one of the CA certificates is not trusted by the policy provider.
+		/// The maximum number of identies have been created.
 		/// </summary>
-		public const int CERT_E_UNTRUSTEDCA = (int)(0x800B0112 - 0x100000000);
-
+		public const int PEER_E_TOO_MANY_IDENTITIES = unchecked((int)0x80630202);
 		/// <summary>
-		///     The certificate has invalid policy.
+		/// Unable to access a key.
 		/// </summary>
-		public const int CERT_E_INVALID_POLICY = (int)(0x800B0113 - 0x100000000);
-
+		public const int PEER_E_NO_KEY_ACCESS = unchecked((int)0x80630203);
 		/// <summary>
-		///     The certificate has an invalid name. The name is not included in the permitted list or is explicitly excluded.
+		/// The group already exists.
 		/// </summary>
-		public const int CERT_E_INVALID_NAME = (int)(0x800B0114 - 0x100000000);
-
+		public const int PEER_E_GROUPS_EXIST = unchecked((int)0x80630204);
 		/// <summary>
-		///     A non-empty line was encountered in the INF before the start of a section.
+		/// The requested record could not be found.
 		/// </summary>
-		public const int SPAPI_E_EXPECTED_SECTION_NAME = (int)(0x800F0000 - 0x100000000);
-
+		public const int PEER_E_RECORD_NOT_FOUND = unchecked((int)0x80630301);
 		/// <summary>
-		///     A section name marker in the INF is not complete, or does not exist on a line by itself.
+		/// Access to the database was denied.
 		/// </summary>
-		public const int SPAPI_E_BAD_SECTION_NAME_LINE = (int)(0x800F0001 - 0x100000000);
-
+		public const int PEER_E_DATABASE_ACCESSDENIED = unchecked((int)0x80630302);
 		/// <summary>
-		///     An INF section was encountered whose name exceeds the maximum section name length.
+		/// The Database could not be initialized.
 		/// </summary>
-		public const int SPAPI_E_SECTION_NAME_TOO_Int32 = (int)(0x800F0002 - 0x100000000);
-
+		public const int PEER_E_DBINITIALIZATION_FAILED = unchecked((int)0x80630303);
 		/// <summary>
-		///     The syntax of the INF is invalid.
+		/// The record is too big.
 		/// </summary>
-		public const int SPAPI_E_GENERAL_SYNTAX = (int)(0x800F0003 - 0x100000000);
-
+		public const int PEER_E_MAX_RECORD_SIZE_EXCEEDED = unchecked((int)0x80630304);
 		/// <summary>
-		///     The style of the INF is different than what was requested.
+		/// The database already exists.
 		/// </summary>
-		public const int SPAPI_E_WRONG_INF_STYLE = (int)(0x800F0100 - 0x100000000);
-
+		public const int PEER_E_DATABASE_ALREADY_PRESENT = unchecked((int)0x80630305);
 		/// <summary>
-		///     The required section was not found in the INF.
+		/// The database could not be found.
 		/// </summary>
-		public const int SPAPI_E_SECTION_NOT_FOUND = (int)(0x800F0101 - 0x100000000);
-
+		public const int PEER_E_DATABASE_NOT_PRESENT = unchecked((int)0x80630306);
 		/// <summary>
-		///     The required line was not found in the INF.
+		/// The identity could not be found.
 		/// </summary>
-		public const int SPAPI_E_LINE_NOT_FOUND = (int)(0x800F0102 - 0x100000000);
-
+		public const int PEER_E_IDENTITY_NOT_FOUND = unchecked((int)0x80630401);
 		/// <summary>
-		///     The files affected by the installation of this file queue have not been backed up for uninstall.
+		/// The event handle could not be found.
 		/// </summary>
-		public const int SPAPI_E_NO_BACKUP = (int)(0x800F0103 - 0x100000000);
-
+		public const int PEER_E_EVENT_HANDLE_NOT_FOUND = unchecked((int)0x80630501);
 		/// <summary>
-		///     The INF or the device information set or element does not have an associated install class.
+		/// Invalid search.
 		/// </summary>
-		public const int SPAPI_E_NO_ASSOCIATED_CLASS = (int)(0x800F0200 - 0x100000000);
-
+		public const int PEER_E_INVALID_SEARCH = unchecked((int)0x80630601);
 		/// <summary>
-		///     The INF or the device information set or element does not match the specified install class.
+		/// The search attributes are invalid.
 		/// </summary>
-		public const int SPAPI_E_CLASS_MISMATCH = (int)(0x800F0201 - 0x100000000);
-
+		public const int PEER_E_INVALID_ATTRIBUTES = unchecked((int)0x80630602);
 		/// <summary>
-		///     An existing device was found that is a duplicate of the device being manually installed.
+		/// The invitiation is not trusted.
 		/// </summary>
-		public const int SPAPI_E_DUPLICATE_FOUND = (int)(0x800F0202 - 0x100000000);
-
+		public const int PEER_E_INVITATION_NOT_TRUSTED = unchecked((int)0x80630701);
 		/// <summary>
-		///     There is no driver selected for the device information set or element.
+		/// The certchain is too long.
 		/// </summary>
-		public const int SPAPI_E_NO_DRIVER_SELECTED = (int)(0x800F0203 - 0x100000000);
-
+		public const int PEER_E_CHAIN_TOO_LONG = unchecked((int)0x80630703);
 		/// <summary>
-		///     The requested device registry key does not exist.
+		/// The time period is invalid.
 		/// </summary>
-		public const int SPAPI_E_KEY_DOES_NOT_EXIST = (int)(0x800F0204 - 0x100000000);
-
+		public const int PEER_E_INVALID_TIME_PERIOD = unchecked((int)0x80630705);
 		/// <summary>
-		///     The device instance name is invalid.
+		/// A circular cert chain was detected.
 		/// </summary>
-		public const int SPAPI_E_INVALID_DEVINST_NAME = (int)(0x800F0205 - 0x100000000);
-
+		public const int PEER_E_CIRCULAR_CHAIN_DETECTED = unchecked((int)0x80630706);
 		/// <summary>
-		///     The install class is not present or is invalid.
+		/// The certstore is corrupted.
 		/// </summary>
-		public const int SPAPI_E_INVALID_CLASS = (int)(0x800F0206 - 0x100000000);
-
+		public const int PEER_E_CERT_STORE_CORRUPTED = unchecked((int)0x80630801);
 		/// <summary>
-		///     The device instance cannot be created because it already exists.
+		/// The specified PNRP cloud deos not exist.
 		/// </summary>
-		public const int SPAPI_E_DEVINST_ALREADY_EXISTS = (int)(0x800F0207 - 0x100000000);
-
+		public const int PEER_E_NO_CLOUD = unchecked((int)0x80631001);
 		/// <summary>
-		///     The operation cannot be performed on a device information element that has not been registered.
+		/// The cloud name is ambiguous.
 		/// </summary>
-		public const int SPAPI_E_DEVINFO_NOT_REGISTERED = (int)(0x800F0208 - 0x100000000);
-
+		public const int PEER_E_CLOUD_NAME_AMBIGUOUS = unchecked((int)0x80631005);
 		/// <summary>
-		///     The device property code is invalid.
+		/// The record is invlaid.
 		/// </summary>
-		public const int SPAPI_E_INVALID_REG_PROPERTY = (int)(0x800F0209 - 0x100000000);
-
+		public const int PEER_E_INVALID_RECORD = unchecked((int)0x80632010);
 		/// <summary>
-		///     The INF from which a driver list is to be built does not exist.
+		/// Not authorized.
 		/// </summary>
-		public const int SPAPI_E_NO_INF = (int)(0x800F020A - 0x100000000);
-
+		public const int PEER_E_NOT_AUTHORIZED = unchecked((int)0x80632020);
 		/// <summary>
-		///     The device instance does not exist in the hardware tree.
+		/// The password does not meet policy requirements.
 		/// </summary>
-		public const int SPAPI_E_NO_SUCH_DEVINST = (int)(0x800F020B - 0x100000000);
-
+		public const int PEER_E_PASSWORD_DOES_NOT_MEET_POLICY = unchecked((int)0x80632021);
 		/// <summary>
-		///     The icon representing this install class cannot be loaded.
+		/// The record validation has been defered.
 		/// </summary>
-		public const int SPAPI_E_CANT_LOAD_CLASS_ICON = (int)(0x800F020C - 0x100000000);
-
+		public const int PEER_E_DEFERRED_VALIDATION = unchecked((int)0x80632030);
 		/// <summary>
-		///     The class installer registry entry is invalid.
+		/// The group properies are invalid.
 		/// </summary>
-		public const int SPAPI_E_INVALID_CLASS_INSTALLER = (int)(0x800F020D - 0x100000000);
-
+		public const int PEER_E_INVALID_GROUP_PROPERTIES = unchecked((int)0x80632040);
 		/// <summary>
-		///     The class installer has indicated that the default action should be performed for this installation request.
+		/// The peername is invalid.
 		/// </summary>
-		public const int SPAPI_E_DI_DO_DEFAULT = (int)(0x800F020E - 0x100000000);
-
+		public const int PEER_E_INVALID_PEER_NAME = unchecked((int)0x80632050);
 		/// <summary>
-		///     The operation does not require any files to be copied.
+		/// The classifier is invalid.
 		/// </summary>
-		public const int SPAPI_E_DI_NOFILECOPY = (int)(0x800F020F - 0x100000000);
-
+		public const int PEER_E_INVALID_CLASSIFIER = unchecked((int)0x80632060);
 		/// <summary>
-		///     The specified hardware profile does not exist.
+		/// The friendly name is invalid.
 		/// </summary>
-		public const int SPAPI_E_INVALID_HWPROFILE = (int)(0x800F0210 - 0x100000000);
-
+		public const int PEER_E_INVALID_FRIENDLY_NAME = unchecked((int)0x80632070);
 		/// <summary>
-		///     There is no device information element currently selected for this device information set.
+		/// Invalid role property.
 		/// </summary>
-		public const int SPAPI_E_NO_DEVICE_SELECTED = (int)(0x800F0211 - 0x100000000);
-
+		public const int PEER_E_INVALID_ROLE_PROPERTY = unchecked((int)0x80632071);
 		/// <summary>
-		///     The operation cannot be performed because the device information set is locked.
+		/// Invalid classifier protopery.
 		/// </summary>
-		public const int SPAPI_E_DEVINFO_LIST_LOCKED = (int)(0x800F0212 - 0x100000000);
-
+		public const int PEER_E_INVALID_CLASSIFIER_PROPERTY = unchecked((int)0x80632072);
 		/// <summary>
-		///     The operation cannot be performed because the device information element is locked.
+		/// Invlaid record expiration.
 		/// </summary>
-		public const int SPAPI_E_DEVINFO_DATA_LOCKED = (int)(0x800F0213 - 0x100000000);
-
+		public const int PEER_E_INVALID_RECORD_EXPIRATION = unchecked((int)0x80632080);
 		/// <summary>
-		///     The specified path does not contain any applicable device INFs.
+		/// Invlaid credential info.
 		/// </summary>
-		public const int SPAPI_E_DI_BAD_PATH = (int)(0x800F0214 - 0x100000000);
-
+		public const int PEER_E_INVALID_CREDENTIAL_INFO = unchecked((int)0x80632081);
 		/// <summary>
-		///     No class installer parameters have been set for the device information set or element.
+		/// Invalid credential.
 		/// </summary>
-		public const int SPAPI_E_NO_CLASSINSTALL_PARAMS = (int)(0x800F0215 - 0x100000000);
-
+		public const int PEER_E_INVALID_CREDENTIAL = unchecked((int)0x80632082);
 		/// <summary>
-		///     The operation cannot be performed because the file queue is locked.
+		/// Invalid record size.
 		/// </summary>
-		public const int SPAPI_E_FILEQUEUE_LOCKED = (int)(0x800F0216 - 0x100000000);
-
+		public const int PEER_E_INVALID_RECORD_SIZE = unchecked((int)0x80632083);
 		/// <summary>
-		///     A service installation section in this INF is invalid.
+		/// Unsupported version.
 		/// </summary>
-		public const int SPAPI_E_BAD_SERVICE_INSTALLSECT = (int)(0x800F0217 - 0x100000000);
-
+		public const int PEER_E_UNSUPPORTED_VERSION = unchecked((int)0x80632090);
 		/// <summary>
-		///     There is no class driver list for the device information element.
+		/// The group is not ready.
 		/// </summary>
-		public const int SPAPI_E_NO_CLASS_DRIVER_LIST = (int)(0x800F0218 - 0x100000000);
-
+		public const int PEER_E_GROUP_NOT_READY = unchecked((int)0x80632091);
 		/// <summary>
-		///     The installation failed because a function driver was not specified for this device instance.
+		/// The group is still in use.
 		/// </summary>
-		public const int SPAPI_E_NO_ASSOCIATED_SERVICE = (int)(0x800F0219 - 0x100000000);
-
+		public const int PEER_E_GROUP_IN_USE = unchecked((int)0x80632092);
 		/// <summary>
-		///     There is presently no default device interface designated for this interface class.
+		/// The group is invalid.
 		/// </summary>
-		public const int SPAPI_E_NO_DEFAULT_DEVICE_INTERFACE = (int)(0x800F021A - 0x100000000);
-
+		public const int PEER_E_INVALID_GROUP = unchecked((int)0x80632093);
 		/// <summary>
-		///     The operation cannot be performed because the device interface is currently active.
+		/// No members were found.
 		/// </summary>
-		public const int SPAPI_E_DEVICE_INTERFACE_ACTIVE = (int)(0x800F021B - 0x100000000);
-
+		public const int PEER_E_NO_MEMBERS_FOUND = unchecked((int)0x80632094);
 		/// <summary>
-		///     The operation cannot be performed because the device interface has been removed from the system.
+		/// There are no member connections.
 		/// </summary>
-		public const int SPAPI_E_DEVICE_INTERFACE_REMOVED = (int)(0x800F021C - 0x100000000);
-
+		public const int PEER_E_NO_MEMBER_CONNECTIONS = unchecked((int)0x80632095);
 		/// <summary>
-		///     An interface installation section in this INF is invalid.
+		/// Unable to listen.
 		/// </summary>
-		public const int SPAPI_E_BAD_INTERFACE_INSTALLSECT = (int)(0x800F021D - 0x100000000);
-
+		public const int PEER_E_UNABLE_TO_LISTEN = unchecked((int)0x80632096);
 		/// <summary>
-		///     This interface class does not exist in the system.
+		/// The identity does not exist.
 		/// </summary>
-		public const int SPAPI_E_NO_SUCH_INTERFACE_CLASS = (int)(0x800F021E - 0x100000000);
-
+		public const int PEER_E_IDENTITY_DELETED = unchecked((int)0x806320A0);
 		/// <summary>
-		///     The reference string supplied for this interface device is invalid.
+		/// The service is not availible.
 		/// </summary>
-		public const int SPAPI_E_INVALID_REFERENCE_STRING = (int)(0x800F021F - 0x100000000);
-
+		public const int PEER_E_SERVICE_NOT_AVAILABLE = unchecked((int)0x806320A1);
 		/// <summary>
-		///     The specified machine name does not conform to UNC naming conventions.
+		/// The contact could not be found.
 		/// </summary>
-		public const int SPAPI_E_INVALID_MACHINENAME = (int)(0x800F0220 - 0x100000000);
-
+		public const int PEER_E_CONTACT_NOT_FOUND = unchecked((int)0x80636001);
 		/// <summary>
-		///     A general remote communication error occurred.
+		/// The graph data was created.
 		/// </summary>
-		public const int SPAPI_E_REMOTE_COMM_FAILURE = (int)(0x800F0221 - 0x100000000);
-
+		public const int PEER_S_GRAPH_DATA_CREATED = 0x00630001;
 		/// <summary>
-		///     The machine selected for remote communication is not available at this time.
+		/// There is not more event data.
 		/// </summary>
-		public const int SPAPI_E_MACHINE_UNAVAILABLE = (int)(0x800F0222 - 0x100000000);
-
+		public const int PEER_S_NO_EVENT_DATA = 0x00630002;
 		/// <summary>
-		///     The Plug and Play service is not available on the remote machine.
+		/// The graph is already connect.
 		/// </summary>
-		public const int SPAPI_E_NO_CONFIGMGR_SERVICES = (int)(0x800F0223 - 0x100000000);
-
+		public const int PEER_S_ALREADY_CONNECTED = 0x00632000;
 		/// <summary>
-		///     The property page provider registry entry is invalid.
+		/// The subscription already exists.
 		/// </summary>
-		public const int SPAPI_E_INVALID_PROPPAGE_PROVIDER = (int)(0x800F0224 - 0x100000000);
-
+		public const int PEER_S_SUBSCRIPTION_EXISTS = 0x00636000;
 		/// <summary>
-		///     The requested device interface is not present in the system.
+		/// No connectivity.
 		/// </summary>
-		public const int SPAPI_E_NO_SUCH_DEVICE_INTERFACE = (int)(0x800F0225 - 0x100000000);
-
+		public const int PEER_S_NO_CONNECTIVITY = 0x00630005;
 		/// <summary>
-		///     The device's co-installer has additional work to perform after installation is complete.
+		/// Already a member.
 		/// </summary>
-		public const int SPAPI_E_DI_POSTPROCESSING_REQUIRED = (int)(0x800F0226 - 0x100000000);
-
+		public const int PEER_S_ALREADY_A_MEMBER = 0x00630006;
 		/// <summary>
-		///     The device's co-installer is invalid.
+		/// The peername could not be converted to a DNS pnrp name.
 		/// </summary>
-		public const int SPAPI_E_INVALID_COINSTALLER = (int)(0x800F0227 - 0x100000000);
-
+		public const int PEER_E_CANNOT_CONVERT_PEER_NAME = unchecked((int)0x80634001);
 		/// <summary>
-		///     There are no compatible drivers for this device.
+		/// Invalid peer host name.
 		/// </summary>
-		public const int SPAPI_E_NO_COMPAT_DRIVERS = (int)(0x800F0228 - 0x100000000);
-
+		public const int PEER_E_INVALID_PEER_HOST_NAME = unchecked((int)0x80634002);
 		/// <summary>
-		///     There is no icon that represents this device or device type.
+		/// No more data could be found.
 		/// </summary>
-		public const int SPAPI_E_NO_DEVICE_ICON = (int)(0x800F0229 - 0x100000000);
-
+		public const int PEER_E_NO_MORE = unchecked((int)0x80634003);
 		/// <summary>
-		///     A logical configuration specified in this INF is invalid.
+		/// The existing peer name is already registered.
 		/// </summary>
-		public const int SPAPI_E_INVALID_INF_LOGCONFIG = (int)(0x800F022A - 0x100000000);
-
+		public const int PEER_E_PNRP_DUPLICATE_PEER_NAME = unchecked((int)0x80634005);
 		/// <summary>
-		///     The class installer has denied the request to install or upgrade this device.
+		/// The app invite request was canceld by the user.
 		/// </summary>
-		public const int SPAPI_E_DI_DONT_INSTALL = (int)(0x800F022B - 0x100000000);
-
+		public const int PEER_E_INVITE_CANCELLED = unchecked((int)0x80637000);
 		/// <summary>
-		///     One of the filter drivers installed for this device is invalid.
+		/// No respose ot the invite was received.
 		/// </summary>
-		public const int SPAPI_E_INVALID_FILTER_DRIVER = (int)(0x800F022C - 0x100000000);
-
+		public const int PEER_E_INVITE_RESPONSE_NOT_AVAILABLE = unchecked((int)0x80637001);
 		/// <summary>
-		///     The driver selected for this device does not support Windows XP.
+		/// User is not siged into serverless presence.
 		/// </summary>
-		public const int SPAPI_E_NON_WINDOWS_NT_DRIVER = (int)(0x800F022D - 0x100000000);
-
+		public const int PEER_E_NOT_SIGNED_IN = unchecked((int)0x80637003);
 		/// <summary>
-		///     The driver selected for this device does not support Windows.
+		/// The user declinded the privacy policy prompt.
 		/// </summary>
-		public const int SPAPI_E_NON_WINDOWS_DRIVER = (int)(0x800F022E - 0x100000000);
-
+		public const int PEER_E_PRIVACY_DECLINED = unchecked((int)0x80637004);
 		/// <summary>
-		///     The third-party INF does not contain digital signature information.
+		/// A timeout occured.
 		/// </summary>
-		public const int SPAPI_E_NO_CATALOG_FOR_OEM_INF = (int)(0x800F022F - 0x100000000);
-
+		public const int PEER_E_TIMEOUT = unchecked((int)0x80637005);
 		/// <summary>
-		///     An invalid attempt was made to use a device installation file queue for verification of digital signatures relative
-		///     to other platforms.
+		/// The address is invalid.
 		/// </summary>
-		public const int SPAPI_E_DEVINSTALL_QUEUE_NONNATIVE = (int)(0x800F0230 - 0x100000000);
-
+		public const int PEER_E_INVALID_ADDRESS = unchecked((int)0x80637007);
 		/// <summary>
-		///     The device cannot be disabled.
+		/// A required firewall exception is disabled.
 		/// </summary>
-		public const int SPAPI_E_NOT_DISABLEABLE = (int)(0x800F0231 - 0x100000000);
-
+		public const int PEER_E_FW_EXCEPTION_DISABLED = unchecked((int)0x80637008);
 		/// <summary>
-		///     The device could not be dynamically removed.
+		/// The service is block by a firewall policy.
 		/// </summary>
-		public const int SPAPI_E_CANT_REMOVE_DEVINST = (int)(0x800F0232 - 0x100000000);
-
+		public const int PEER_E_FW_BLOCKED_BY_POLICY = unchecked((int)0x80637009);
 		/// <summary>
-		///     Cannot copy to specified target.
+		/// Firewall exceptions are disabled.
 		/// </summary>
-		public const int SPAPI_E_INVALID_TARGET = (int)(0x800F0233 - 0x100000000);
-
+		public const int PEER_E_FW_BLOCKED_BY_SHIELDS_UP = unchecked((int)0x8063700A);
 		/// <summary>
-		///     Driver is not intended for this platform.
+		/// The user declinded to enable the firewall exceptions.
 		/// </summary>
-		public const int SPAPI_E_DRIVER_NONNATIVE = (int)(0x800F0234 - 0x100000000);
-
+		public const int PEER_E_FW_DECLINED = unchecked((int)0x8063700B);
 		/// <summary>
-		///     Operation not allowed in WOW64.
+		/// The attribute handle given was not valid on this server.
 		/// </summary>
-		public const int SPAPI_E_IN_WOW64 = (int)(0x800F0235 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_INVALID_HANDLE = unchecked((int)0x80650001);
 		/// <summary>
-		///     The operation involving unsigned file copying was rolled back, so that a system restore point could be set.
+		/// The attribute cannot be read.
 		/// </summary>
-		public const int SPAPI_E_SET_SYSTEM_RESTORE_POINT = (int)(0x800F0236 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_READ_NOT_PERMITTED = unchecked((int)0x80650002);
 		/// <summary>
-		///     An INF was copied into the Windows INF directory in an improper manner.
+		/// The attribute cannot be written.
 		/// </summary>
-		public const int SPAPI_E_INCORRECTLY_COPIED_INF = (int)(0x800F0237 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_WRITE_NOT_PERMITTED = unchecked((int)0x80650003);
 		/// <summary>
-		///     The Security Configuration Editor (SCE) APIs have been disabled on this Embedded product.
+		/// The attribute PDU was invalid.
 		/// </summary>
-		public const int SPAPI_E_SCE_DISABLED = (int)(0x800F0238 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_INVALID_PDU = unchecked((int)0x80650004);
 		/// <summary>
-		///     No installed components were detected.
+		/// The attribute requires authentication before it can be read or written.
 		/// </summary>
-		public const int SPAPI_E_ERROR_NOT_INSTALLED = (int)(0x800F1000 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_INSUFFICIENT_AUTHENTICATION = unchecked((int)0x80650005);
 		/// <summary>
-		///     An internal consistency check failed.
+		/// Attribute server does not support the request received from the client.
 		/// </summary>
-		public const int SCARD_F_INTERNAL_ERROR = (int)(0x80100001 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_REQUEST_NOT_SUPPORTED = unchecked((int)0x80650006);
 		/// <summary>
-		///     The action was cancelled by an SCardCancel request.
+		/// Offset specified was past the end of the attribute.
 		/// </summary>
-		public const int SCARD_E_CANCELLED = (int)(0x80100002 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_INVALID_OFFSET = unchecked((int)0x80650007);
 		/// <summary>
-		///     The supplied handle was invalid.
+		/// The attribute requires authorization before it can be read or written.
 		/// </summary>
-		public const int SCARD_E_INVALID_HANDLE = (int)(0x80100003 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_INSUFFICIENT_AUTHORIZATION = unchecked((int)0x80650008);
 		/// <summary>
-		///     One or more of the supplied parameters could not be properly interpreted.
+		/// Too many prepare writes have been queued.
 		/// </summary>
-		public const int SCARD_E_INVALID_PARAMETER = (int)(0x80100004 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_PREPARE_QUEUE_FULL = unchecked((int)0x80650009);
 		/// <summary>
-		///     Registry startup information is missing or invalid.
+		/// No attribute found within the given attribute handle range.
 		/// </summary>
-		public const int SCARD_E_INVALID_TARGET = (int)(0x80100005 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_ATTRIBUTE_NOT_FOUND = unchecked((int)0x8065000A);
 		/// <summary>
-		///     Not enough memory available to complete this command.
+		/// The attribute cannot be read or written using the Read Blob Request.
 		/// </summary>
-		public const int SCARD_E_NO_MEMORY = (int)(0x80100006 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_ATTRIBUTE_NOT_LONG = unchecked((int)0x8065000B);
 		/// <summary>
-		///     An internal consistency timer has expired.
+		/// The Encryption Key Size used for encrypting this link is insufficient.
 		/// </summary>
-		public const int SCARD_F_WAITED_TOO_Int32 = (int)(0x80100007 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_INSUFFICIENT_ENCRYPTION_KEY_SIZE = unchecked((int)0x8065000C);
 		/// <summary>
-		///     The data buffer to receive returned data is too small for the returned data.
+		/// The attribute value length is invalid for the operation.
 		/// </summary>
-		public const int SCARD_E_INSUFFICIENT_BUFFER = (int)(0x80100008 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_INVALID_ATTRIBUTE_VALUE_LENGTH = unchecked((int)0x8065000D);
 		/// <summary>
-		///     The specified reader name is not recognized.
+		/// The attribute request that was requested has encountered an error that was unlikely, and therefore could not be completed as requested.
 		/// </summary>
-		public const int SCARD_E_UNKNOWN_READER = (int)(0x80100009 - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_UNLIKELY = unchecked((int)0x8065000E);
 		/// <summary>
-		///     The user-specified timeout value has expired.
+		/// The attribute requires encryption before it can be read or written.
 		/// </summary>
-		public const int SCARD_E_TIMEOUT = (int)(0x8010000A - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_INSUFFICIENT_ENCRYPTION = unchecked((int)0x8065000F);
 		/// <summary>
-		///     The smart card cannot be accessed because of other connections outstanding.
+		/// The attribute type is not a supported grouping attribute as defined by a higher layer specification.
 		/// </summary>
-		public const int SCARD_E_SHARING_VIOLATION = (int)(0x8010000B - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_UNSUPPORTED_GROUP_TYPE = unchecked((int)0x80650010);
 		/// <summary>
-		///     The operation requires a Smart Card, but no Smart Card is currently in the device.
+		/// Insufficient Resources to complete the request.
 		/// </summary>
-		public const int SCARD_E_NO_SMARTCARD = (int)(0x8010000C - 0x100000000);
-
+		public const int E_BLUETOOTH_ATT_INSUFFICIENT_RESOURCES = unchecked((int)0x80650011);
 		/// <summary>
-		///     The specified smart card name is not recognized.
+		/// An error that lies in the reserved range has been received.
 		/// </summary>
-		public const int SCARD_E_UNKNOWN_CARD = (int)(0x8010000D - 0x100000000);
+		public const int E_BLUETOOTH_ATT_UNKNOWN_ERROR = unchecked((int)0x80651000);
+		#endregion
 
+		#region UI, Audio, DirectX, Codec
 		/// <summary>
-		///     The system could not dispose of the media in the requested manner.
+		/// The object could not be created.
 		/// </summary>
-		public const int SCARD_E_CANT_DISPOSE = (int)(0x8010000E - 0x100000000);
-
+		public const int UI_E_CREATE_FAILED = unchecked((int)0x802A0001);
 		/// <summary>
-		///     The requested protocols are incompatible with the protocol currently in use with the smart card.
+		/// Shutdown was already called on this object or the object that owns it.
 		/// </summary>
-		public const int SCARD_E_PROTO_MISMATCH = (int)(0x8010000F - 0x100000000);
-
+		public const int UI_E_SHUTDOWN_CALLED = unchecked((int)0x802A0002);
 		/// <summary>
-		///     The reader or smart card is not ready to accept commands.
+		/// This method cannot be called during this type of callback.
 		/// </summary>
-		public const int SCARD_E_NOT_READY = (int)(0x80100010 - 0x100000000);
-
+		public const int UI_E_ILLEGAL_REENTRANCY = unchecked((int)0x802A0003);
 		/// <summary>
-		///     One or more of the supplied parameters values could not be properly interpreted.
+		/// This object has been sealed, so this change is no longer allowed.
 		/// </summary>
-		public const int SCARD_E_INVALID_VALUE = (int)(0x80100011 - 0x100000000);
-
+		public const int UI_E_OBJECT_SEALED = unchecked((int)0x802A0004);
 		/// <summary>
-		///     The action was cancelled by the system, presumably to log off or shut down.
+		/// The requested value was never set.
 		/// </summary>
-		public const int SCARD_E_SYSTEM_CANCELLED = (int)(0x80100012 - 0x100000000);
-
+		public const int UI_E_VALUE_NOT_SET = unchecked((int)0x802A0005);
 		/// <summary>
-		///     An internal communications error has been detected.
+		/// The requested value cannot be determined.
 		/// </summary>
-		public const int SCARD_F_COMM_ERROR = (int)(0x80100013 - 0x100000000);
-
+		public const int UI_E_VALUE_NOT_DETERMINED = unchecked((int)0x802A0006);
 		/// <summary>
-		///     An internal error has been detected, but the source is unknown.
+		/// A callback returned an invalid output parameter.
 		/// </summary>
-		public const int SCARD_F_UNKNOWN_ERROR = (int)(0x80100014 - 0x100000000);
-
+		public const int UI_E_INVALID_OUTPUT = unchecked((int)0x802A0007);
 		/// <summary>
-		///     An ATR obtained from the registry is not a valid ATR string.
+		/// A callback returned a success code other than S_OK or S_FALSE.
 		/// </summary>
-		public const int SCARD_E_INVALID_ATR = (int)(0x80100015 - 0x100000000);
-
+		public const int UI_E_BOOLEAN_EXPECTED = unchecked((int)0x802A0008);
 		/// <summary>
-		///     An attempt was made to end a non-existent transaction.
+		/// A parameter that should be owned by this object is owned by a different object.
 		/// </summary>
-		public const int SCARD_E_NOT_TRANSACTED = (int)(0x80100016 - 0x100000000);
-
+		public const int UI_E_DIFFERENT_OWNER = unchecked((int)0x802A0009);
 		/// <summary>
-		///     The specified reader is not currently available for use.
+		/// More than one item matched the search criteria.
 		/// </summary>
-		public const int SCARD_E_READER_UNAVAILABLE = (int)(0x80100017 - 0x100000000);
-
+		public const int UI_E_AMBIGUOUS_MATCH = unchecked((int)0x802A000A);
 		/// <summary>
-		///     The operation has been aborted to allow the server application to exit.
+		/// A floating-point overflow occurred.
 		/// </summary>
-		public const int SCARD_P_SHUTDOWN = (int)(0x80100018 - 0x100000000);
-
+		public const int UI_E_FP_OVERFLOW = unchecked((int)0x802A000B);
 		/// <summary>
-		///     The PCI Receive buffer was too small.
+		/// This method can only be called from the thread that created the object.
 		/// </summary>
-		public const int SCARD_E_PCI_TOO_SMALL = (int)(0x80100019 - 0x100000000);
-
+		public const int UI_E_WRONG_THREAD = unchecked((int)0x802A000C);
 		/// <summary>
-		///     The reader driver does not meet minimal requirements for support.
+		/// The storyboard is currently in the schedule.
 		/// </summary>
-		public const int SCARD_E_READER_UNSUPPORTED = (int)(0x8010001A - 0x100000000);
-
+		public const int UI_E_STORYBOARD_ACTIVE = unchecked((int)0x802A0101);
 		/// <summary>
-		///     The reader driver did not produce a unique reader name.
+		/// The storyboard is not playing.
 		/// </summary>
-		public const int SCARD_E_DUPLICATE_READER = (int)(0x8010001B - 0x100000000);
-
+		public const int UI_E_STORYBOARD_NOT_PLAYING = unchecked((int)0x802A0102);
 		/// <summary>
-		///     The smart card does not meet minimal requirements for support.
+		/// The start keyframe might occur after the end keyframe.
 		/// </summary>
-		public const int SCARD_E_CARD_UNSUPPORTED = (int)(0x8010001C - 0x100000000);
-
+		public const int UI_E_START_KEYFRAME_AFTER_END = unchecked((int)0x802A0103);
 		/// <summary>
-		///     The Smart card resource manager is not running.
+		/// It might not be possible to determine the end keyframe time when the start keyframe is reached.
 		/// </summary>
-		public const int SCARD_E_NO_SERVICE = (int)(0x8010001D - 0x100000000);
-
+		public const int UI_E_END_KEYFRAME_NOT_DETERMINED = unchecked((int)0x802A0104);
 		/// <summary>
-		///     The Smart card resource manager has shut down.
+		/// Two repeated portions of a storyboard might overlap.
 		/// </summary>
-		public const int SCARD_E_SERVICE_STOPPED = (int)(0x8010001E - 0x100000000);
-
+		public const int UI_E_LOOPS_OVERLAP = unchecked((int)0x802A0105);
 		/// <summary>
-		///     An unexpected card error has occurred.
+		/// The transition has already been added to a storyboard.
 		/// </summary>
-		public const int SCARD_E_UNEXPECTED = (int)(0x8010001F - 0x100000000);
-
+		public const int UI_E_TRANSITION_ALREADY_USED = unchecked((int)0x802A0106);
 		/// <summary>
-		///     No Primary Provider can be found for the smart card.
+		/// The transition has not been added to a storyboard.
 		/// </summary>
-		public const int SCARD_E_ICC_INSTALLATION = (int)(0x80100020 - 0x100000000);
-
+		public const int UI_E_TRANSITION_NOT_IN_STORYBOARD = unchecked((int)0x802A0107);
 		/// <summary>
-		///     The requested order of object creation is not supported.
+		/// The transition might eclipse the beginning of another transition in the storyboard.
 		/// </summary>
-		public const int SCARD_E_ICC_CREATEORDER = (int)(0x80100021 - 0x100000000);
-
+		public const int UI_E_TRANSITION_ECLIPSED = unchecked((int)0x802A0108);
 		/// <summary>
-		///     This smart card does not support the requested feature.
+		/// The given time is earlier than the time passed to the last update.
 		/// </summary>
-		public const int SCARD_E_UNSUPPORTED_FEATURE = (int)(0x80100022 - 0x100000000);
-
+		public const int UI_E_TIME_BEFORE_LAST_UPDATE = unchecked((int)0x802A0109);
 		/// <summary>
-		///     The identified directory does not exist in the smart card.
+		/// This client is already connected to a timer.
 		/// </summary>
-		public const int SCARD_E_DIR_NOT_FOUND = (int)(0x80100023 - 0x100000000);
-
+		public const int UI_E_TIMER_CLIENT_ALREADY_CONNECTED = unchecked((int)0x802A010A);
 		/// <summary>
-		///     The identified file does not exist in the smart card.
+		/// The passed dimension is invalid or does not match the object's dimension.
 		/// </summary>
-		public const int SCARD_E_FILE_NOT_FOUND = (int)(0x80100024 - 0x100000000);
-
+		public const int UI_E_INVALID_DIMENSION = unchecked((int)0x802A010B);
 		/// <summary>
-		///     The supplied path does not represent a smart card directory.
+		/// The added primitive begins at or beyond the duration of the interpolator.
 		/// </summary>
-		public const int SCARD_E_NO_DIR = (int)(0x80100025 - 0x100000000);
-
+		public const int UI_E_PRIMITIVE_OUT_OF_BOUNDS = unchecked((int)0x802A010C);
 		/// <summary>
-		///     The supplied path does not represent a smart card file.
+		/// The operation cannot be completed because the window is being closed.
 		/// </summary>
-		public const int SCARD_E_NO_FILE = (int)(0x80100026 - 0x100000000);
-
+		public const int UI_E_WINDOW_CLOSED = unchecked((int)0x802A0201);
 		/// <summary>
-		///     Access is denied to this file.
+		/// PortCls could not find an audio engine node exposed by a miniport driver claiming support for IMiniportAudioEngineNode.
 		/// </summary>
-		public const int SCARD_E_NO_ACCESS = (int)(0x80100027 - 0x100000000);
-
+		public const int E_AUDIO_ENGINE_NODE_NOT_FOUND = unchecked((int)0x80660001);
 		/// <summary>
-		///     The smartcard does not have enough memory to store the information.
+		/// The Present operation was invisible to the user.
 		/// </summary>
-		public const int SCARD_E_WRITE_TOO_MANY = (int)(0x80100028 - 0x100000000);
-
+		public const int DXGI_STATUS_OCCLUDED = 0x087A0001;
 		/// <summary>
-		///     There was an error trying to set the smart card file object pointer.
+		/// The Present operation was partially invisible to the user.
 		/// </summary>
-		public const int SCARD_E_BAD_SEEK = (int)(0x80100029 - 0x100000000);
-
+		public const int DXGI_STATUS_CLIPPED = 0x087A0002;
 		/// <summary>
-		///     The supplied PIN is incorrect.
+		/// The driver is requesting that the DXGI runtime not use shared resources to communicate with the Desktop Window Manager.
 		/// </summary>
-		public const int SCARD_E_INVALID_CHV = (int)(0x8010002A - 0x100000000);
-
+		public const int DXGI_STATUS_NO_REDIRECTION = 0x087A0004;
 		/// <summary>
-		///     An unrecognized error code was returned from a layered component.
+		/// The Present operation was not visible because the Windows session has switched to another desktop (for example, ctrl-alt-del).
 		/// </summary>
-		public const int SCARD_E_UNKNOWN_RES_MNG = (int)(0x8010002B - 0x100000000);
-
+		public const int DXGI_STATUS_NO_DESKTOP_ACCESS = 0x087A0005;
 		/// <summary>
-		///     The requested certificate does not exist.
+		/// The Present operation was not visible because the target monitor was being used for some other purpose.
 		/// </summary>
-		public const int SCARD_E_NO_SUCH_CERTIFICATE = (int)(0x8010002C - 0x100000000);
-
+		public const int DXGI_STATUS_GRAPHICS_VIDPN_SOURCE_IN_USE = 0x087A0006;
 		/// <summary>
-		///     The requested certificate could not be obtained.
+		/// The Present operation was not visible because the display mode changed. DXGI will have re-attempted the presentation.
 		/// </summary>
-		public const int SCARD_E_CERTIFICATE_UNAVAILABLE = (int)(0x8010002D - 0x100000000);
-
+		public const int DXGI_STATUS_MODE_CHANGED = 0x087A0007;
 		/// <summary>
-		///     Cannot find a smart card reader.
+		/// The Present operation was not visible because another Direct3D device was attempting to take fullscreen mode at the time.
 		/// </summary>
-		public const int SCARD_E_NO_READERS_AVAILABLE = (int)(0x8010002E - 0x100000000);
-
+		public const int DXGI_STATUS_MODE_CHANGE_IN_PROGRESS = 0x087A0008;
 		/// <summary>
-		///     A communications error with the smart card has been detected.  Retry the operation.
+		/// The application made a call that is invalid. Either the parameters of the call or the state of some object was incorrect. Enable the D3D debug layer in order to see details via debug messages.
 		/// </summary>
-		public const int SCARD_E_COMM_DATA_LOST = (int)(0x8010002F - 0x100000000);
-
+		public const int DXGI_ERROR_INVALID_CALL = unchecked((int)0x887A0001);
 		/// <summary>
-		///     The requested key container does not exist on the smart card.
+		/// The object was not found. If calling IDXGIFactory::EnumAdaptes, there is no adapter with the specified ordinal.
 		/// </summary>
-		public const int SCARD_E_NO_KEY_CONTAINER = (int)(0x80100030 - 0x100000000);
-
+		public const int DXGI_ERROR_NOT_FOUND = unchecked((int)0x887A0002);
 		/// <summary>
-		///     No information avialable.
+		/// The caller did not supply a sufficiently large buffer.
 		/// </summary>
-		public const int SCARD_E_SERVER_TOO_BUSY = (int)(0x80100031 - 0x100000000);
-
+		public const int DXGI_ERROR_MORE_DATA = unchecked((int)0x887A0003);
 		/// <summary>
-		///     The reader cannot communicate with the smart card, due to ATR configuration conflicts.
+		/// The specified device interface or feature level is not supported on this system.
 		/// </summary>
-		public const int SCARD_W_UNSUPPORTED_CARD = (int)(0x80100065 - 0x100000000);
-
+		public const int DXGI_ERROR_UNSUPPORTED = unchecked((int)0x887A0004);
 		/// <summary>
-		///     The smart card is not responding to a reset.
+		/// The GPU device instance has been suspended. Use GetDeviceRemovedReason to determine the appropriate action.
 		/// </summary>
-		public const int SCARD_W_UNRESPONSIVE_CARD = (int)(0x80100066 - 0x100000000);
-
+		public const int DXGI_ERROR_DEVICE_REMOVED = unchecked((int)0x887A0005);
 		/// <summary>
-		///     Power has been removed from the smart card, so that further communication is not possible.
+		/// The GPU will not respond to more commands, most likely because of an invalid command passed by the calling application.
 		/// </summary>
-		public const int SCARD_W_UNPOWERED_CARD = (int)(0x80100067 - 0x100000000);
-
+		public const int DXGI_ERROR_DEVICE_HUNG = unchecked((int)0x887A0006);
 		/// <summary>
-		///     The smart card has been reset, so any shared state information is invalid.
+		/// The GPU will not respond to more commands, most likely because some other application submitted invalid commands. The calling application should re-create the device and continue.
 		/// </summary>
-		public const int SCARD_W_RESET_CARD = (int)(0x80100068 - 0x100000000);
-
+		public const int DXGI_ERROR_DEVICE_RESET = unchecked((int)0x887A0007);
 		/// <summary>
-		///     The smart card has been removed, so that further communication is not possible.
+		/// The GPU was busy at the moment when the call was made, and the call was neither executed nor scheduled.
 		/// </summary>
-		public const int SCARD_W_REMOVED_CARD = (int)(0x80100069 - 0x100000000);
-
+		public const int DXGI_ERROR_WAS_STILL_DRAWING = unchecked((int)0x887A000A);
 		/// <summary>
-		///     Access was denied because of a security violation.
+		/// An event (such as power cycle) interrupted the gathering of presentation statistics. Any previous statistics should be considered invalid.
 		/// </summary>
-		public const int SCARD_W_SECURITY_VIOLATION = (int)(0x8010006A - 0x100000000);
-
+		public const int DXGI_ERROR_FRAME_STATISTICS_DISJOINT = unchecked((int)0x887A000B);
 		/// <summary>
-		///     The card cannot be accessed because the wrong PIN was presented.
+		/// Fullscreen mode could not be achieved because the specified output was already in use.
 		/// </summary>
-		public const int SCARD_W_WRONG_CHV = (int)(0x8010006B - 0x100000000);
-
+		public const int DXGI_ERROR_GRAPHICS_VIDPN_SOURCE_IN_USE = unchecked((int)0x887A000C);
 		/// <summary>
-		///     The card cannot be accessed because the maximum number of PIN entry attempts has been reached.
+		/// An internal issue prevented the driver from carrying out the specified operation. The driver's state is probably suspect, and the application should not continue.
 		/// </summary>
-		public const int SCARD_W_CHV_BLOCKED = (int)(0x8010006C - 0x100000000);
-
+		public const int DXGI_ERROR_DRIVER_INTERNAL_ERROR = unchecked((int)0x887A0020);
 		/// <summary>
-		///     The end of the smart card file has been reached.
+		/// A global counter resource was in use, and the specified counter cannot be used by this Direct3D device at this time.
 		/// </summary>
-		public const int SCARD_W_EOF = (int)(0x8010006D - 0x100000000);
-
+		public const int DXGI_ERROR_NONEXCLUSIVE = unchecked((int)0x887A0021);
 		/// <summary>
-		///     The action was cancelled by the user.
+		/// A resource is not available at the time of the call, but may become available later.
 		/// </summary>
-		public const int SCARD_W_CANCELLED_BY_USER = (int)(0x8010006E - 0x100000000);
-
+		public const int DXGI_ERROR_NOT_CURRENTLY_AVAILABLE = unchecked((int)0x887A0022);
 		/// <summary>
-		///     No PIN was presented to the smart card.
+		/// The application's remote device has been removed due to session disconnect or network disconnect. The application should call IDXGIFactory1::IsCurrent to find out when the remote device becomes available again.
 		/// </summary>
-		public const int SCARD_W_CARD_NOT_AUTHENTICATED = (int)(0x8010006F - 0x100000000);
-
+		public const int DXGI_ERROR_REMOTE_CLIENT_DISCONNECTED = unchecked((int)0x887A0023);
 		/// <summary>
-		///     Errors occurred accessing one or more objects - the ErrorInfo collection may have more detail
+		/// The device has been removed during a remote session because the remote computer ran out of memory.
 		/// </summary>
-		public const int COMADMIN_E_OBJECTERRORS = (int)(0x80110401 - 0x100000000);
-
+		public const int DXGI_ERROR_REMOTE_OUTOFMEMORY = unchecked((int)0x887A0024);
 		/// <summary>
-		///     One or more of the object's properties are missing or invalid
+		/// The keyed mutex was abandoned.
 		/// </summary>
-		public const int COMADMIN_E_OBJECTINVALID = (int)(0x80110402 - 0x100000000);
-
+		public const int DXGI_ERROR_ACCESS_LOST = unchecked((int)0x887A0026);
 		/// <summary>
-		///     The object was not found in the catalog
+		/// The timeout value has elapsed and the resource is not yet available.
 		/// </summary>
-		public const int COMADMIN_E_KEYMISSING = (int)(0x80110403 - 0x100000000);
-
+		public const int DXGI_ERROR_WAIT_TIMEOUT = unchecked((int)0x887A0027);
 		/// <summary>
-		///     The object is already registered
+		/// The output duplication has been turned off because the Windows session ended or was disconnected. This happens when a remote user disconnects, or when "switch user" is used locally.
 		/// </summary>
-		public const int COMADMIN_E_ALREADYINSTALLED = (int)(0x80110404 - 0x100000000);
-
+		public const int DXGI_ERROR_SESSION_DISCONNECTED = unchecked((int)0x887A0028);
 		/// <summary>
-		///     Error occurred writing to the application file
+		/// The DXGI outuput (monitor) to which the swapchain content was restricted, has been disconnected or changed.
 		/// </summary>
-		public const int COMADMIN_E_APP_FILE_WRITEFAIL = (int)(0x80110407 - 0x100000000);
-
+		public const int DXGI_ERROR_RESTRICT_TO_OUTPUT_STALE = unchecked((int)0x887A0029);
 		/// <summary>
-		///     Error occurred reading the application file
+		/// DXGI is unable to provide content protection on the swapchain. This is typically caused by an older driver, or by the application using a swapchain that is incompatible with content protection.
 		/// </summary>
-		public const int COMADMIN_E_APP_FILE_READFAIL = (int)(0x80110408 - 0x100000000);
-
+		public const int DXGI_ERROR_CANNOT_PROTECT_CONTENT = unchecked((int)0x887A002A);
 		/// <summary>
-		///     Invalid version number in application file
+		/// The application is trying to use a resource to which it does not have the required access privileges. This is most commonly caused by writing to a shared resource with read-only access.
 		/// </summary>
-		public const int COMADMIN_E_APP_FILE_VERSION = (int)(0x80110409 - 0x100000000);
-
+		public const int DXGI_ERROR_ACCESS_DENIED = unchecked((int)0x887A002B);
 		/// <summary>
-		///     The file path is invalid
+		/// The swapchain has become unoccluded.
 		/// </summary>
-		public const int COMADMIN_E_BADPATH = (int)(0x8011040A - 0x100000000);
-
+		public const int DXGI_STATUS_UNOCCLUDED = 0x087A0009;
 		/// <summary>
-		///     The application is already installed
+		/// The adapter did not have access to the required resources to complete the Desktop Duplication Present() call, the Present() call needs to be made again.
 		/// </summary>
-		public const int COMADMIN_E_APPLICATIONEXISTS = (int)(0x8011040B - 0x100000000);
-
+		public const int DXGI_STATUS_DDA_WAS_STILL_DRAWING = 0x087A000A;
 		/// <summary>
-		///     The role already exists
+		/// An on-going mode change prevented completion of the call. The call may succeed if attempted later.
 		/// </summary>
-		public const int COMADMIN_E_ROLEEXISTS = (int)(0x8011040C - 0x100000000);
-
+		public const int DXGI_ERROR_MODE_CHANGE_IN_PROGRESS = unchecked((int)0x887A0025);
 		/// <summary>
-		///     An error occurred copying the file
+		/// The GPU was busy when the operation was requested.
 		/// </summary>
-		public const int COMADMIN_E_CANTCOPYFILE = (int)(0x8011040D - 0x100000000);
-
+		public const int DXGI_DDI_ERR_WASSTILLDRAWING = unchecked((int)0x887B0001);
 		/// <summary>
-		///     One or more users are not valid
+		/// The driver has rejected the creation of this resource.
 		/// </summary>
-		public const int COMADMIN_E_NOUSER = (int)(0x8011040F - 0x100000000);
-
+		public const int DXGI_DDI_ERR_UNSUPPORTED = unchecked((int)0x887B0002);
 		/// <summary>
-		///     One or more users in the application file are not valid
+		/// The GPU counter was in use by another process or d3d device when application requested access to it.
 		/// </summary>
-		public const int COMADMIN_E_INVALIDUSERIDS = (int)(0x80110410 - 0x100000000);
-
+		public const int DXGI_DDI_ERR_NONEXCLUSIVE = unchecked((int)0x887B0003);
 		/// <summary>
-		///     The component's CLSID is missing or corrupt
+		/// The application has exceeded the maximum number of unique state objects per Direct3D device. The limit is 4096 for feature levels up to 11.1.
 		/// </summary>
-		public const int COMADMIN_E_NOREGISTRYCLSID = (int)(0x80110411 - 0x100000000);
-
+		public const int D3D10_ERROR_TOO_MANY_UNIQUE_STATE_OBJECTS = unchecked((int)0x88790001);
 		/// <summary>
-		///     The component's progID is missing or corrupt
+		/// The specified file was not found.
 		/// </summary>
-		public const int COMADMIN_E_BADREGISTRYPROGID = (int)(0x80110412 - 0x100000000);
-
+		public const int D3D10_ERROR_FILE_NOT_FOUND = unchecked((int)0x88790002);
 		/// <summary>
-		///     Unable to set required authentication level for update request
+		/// The application has exceeded the maximum number of unique state objects per Direct3D device. The limit is 4096 for feature levels up to 11.1.
 		/// </summary>
-		public const int COMADMIN_E_AUTHENTICATIONLEVEL = (int)(0x80110413 - 0x100000000);
-
+		public const int D3D11_ERROR_TOO_MANY_UNIQUE_STATE_OBJECTS = unchecked((int)0x887C0001);
 		/// <summary>
-		///     The identity or password set on the application is not valid
+		/// The specified file was not found.
 		/// </summary>
-		public const int COMADMIN_E_USERPASSWDNOTVALID = (int)(0x80110414 - 0x100000000);
-
+		public const int D3D11_ERROR_FILE_NOT_FOUND = unchecked((int)0x887C0002);
 		/// <summary>
-		///     Application file CLSIDs or IIDs do not match corresponding DLLs
+		/// The application has exceeded the maximum number of unique view objects per Direct3D device. The limit is 2^20 for feature levels up to 11.1.
 		/// </summary>
-		public const int COMADMIN_E_CLSIDORIIDMISMATCH = (int)(0x80110418 - 0x100000000);
-
+		public const int D3D11_ERROR_TOO_MANY_UNIQUE_VIEW_OBJECTS = unchecked((int)0x887C0003);
 		/// <summary>
-		///     Interface information is either missing or changed
+		/// The application's first call per command list to Map on a deferred context did not use D3D11_MAP_WRITE_DISCARD.
 		/// </summary>
-		public const int COMADMIN_E_REMOTEINTERFACE = (int)(0x80110419 - 0x100000000);
-
+		public const int D3D11_ERROR_DEFERRED_CONTEXT_MAP_WITHOUT_INITIAL_DISCARD = unchecked((int)0x887C0004);
 		/// <summary>
-		///     DllRegisterServer failed on component install
+		/// The object was not in the correct state to process the method.
 		/// </summary>
-		public const int COMADMIN_E_DLLREGISTERSERVER = (int)(0x8011041A - 0x100000000);
-
+		public const int D2DERR_WRONG_STATE = unchecked((int)0x88990001);
 		/// <summary>
-		///     No server file share available
+		/// The object has not yet been initialized.
 		/// </summary>
-		public const int COMADMIN_E_NOSERVERSHARE = (int)(0x8011041B - 0x100000000);
-
+		public const int D2DERR_NOT_INITIALIZED = unchecked((int)0x88990002);
 		/// <summary>
-		///     DLL could not be loaded
+		/// The requested operation is not supported.
 		/// </summary>
-		public const int COMADMIN_E_DLLLOADFAILED = (int)(0x8011041D - 0x100000000);
-
+		public const int D2DERR_UNSUPPORTED_OPERATION = unchecked((int)0x88990003);
 		/// <summary>
-		///     The registered TypeLib ID is not valid
+		/// The geometry scanner failed to process the data.
 		/// </summary>
-		public const int COMADMIN_E_BADREGISTRYLIBID = (int)(0x8011041E - 0x100000000);
-
+		public const int D2DERR_SCANNER_FAILED = unchecked((int)0x88990004);
 		/// <summary>
-		///     Application install directory not found
+		/// Direct2D could not access the screen.
 		/// </summary>
-		public const int COMADMIN_E_APPDIRNOTFOUND = (int)(0x8011041F - 0x100000000);
-
+		public const int D2DERR_SCREEN_ACCESS_DENIED = unchecked((int)0x88990005);
 		/// <summary>
-		///     Errors occurred while in the component registrar
+		/// A valid display state could not be determined.
 		/// </summary>
-		public const int COMADMIN_E_REGISTRARFAILED = (int)(0x80110423 - 0x100000000);
-
+		public const int D2DERR_DISPLAY_STATE_INVALID = unchecked((int)0x88990006);
 		/// <summary>
-		///     The file does not exist
+		/// The supplied vector is zero.
 		/// </summary>
-		public const int COMADMIN_E_COMPFILE_DOESNOTEXIST = (int)(0x80110424 - 0x100000000);
-
+		public const int D2DERR_ZERO_VECTOR = unchecked((int)0x88990007);
 		/// <summary>
-		///     The DLL could not be loaded
+		/// An internal error (Direct2D bug) occurred. On checked builds, we would assert. The application should close this instance of Direct2D and should consider restarting its process.
 		/// </summary>
-		public const int COMADMIN_E_COMPFILE_LOADDLLFAIL = (int)(0x80110425 - 0x100000000);
-
+		public const int D2DERR_INTERNAL_ERROR = unchecked((int)0x88990008);
 		/// <summary>
-		///     GetClassObject failed in the DLL
+		/// The display format Direct2D needs to render is not supported by the hardware device.
 		/// </summary>
-		public const int COMADMIN_E_COMPFILE_GETCLASSOBJ = (int)(0x80110426 - 0x100000000);
-
+		public const int D2DERR_DISPLAY_FORMAT_NOT_SUPPORTED = unchecked((int)0x88990009);
 		/// <summary>
-		///     The DLL does not support the components listed in the TypeLib
+		/// A call to this method is invalid.
 		/// </summary>
-		public const int COMADMIN_E_COMPFILE_CLASSNOTAVAIL = (int)(0x80110427 - 0x100000000);
-
+		public const int D2DERR_INVALID_CALL = unchecked((int)0x8899000A);
 		/// <summary>
-		///     The TypeLib could not be loaded
+		/// No hardware rendering device is available for this operation.
 		/// </summary>
-		public const int COMADMIN_E_COMPFILE_BADTLB = (int)(0x80110428 - 0x100000000);
-
+		public const int D2DERR_NO_HARDWARE_DEVICE = unchecked((int)0x8899000B);
 		/// <summary>
-		///     The file does not contain components or component information
+		/// There has been a presentation error that may be recoverable. The caller needs to recreate, rerender the entire frame, and reattempt present.
 		/// </summary>
-		public const int COMADMIN_E_COMPFILE_NOTINSTALLABLE = (int)(0x80110429 - 0x100000000);
-
+		public const int D2DERR_RECREATE_TARGET = unchecked((int)0x8899000C);
 		/// <summary>
-		///     Changes to this object and its sub-objects have been disabled
+		/// Shader construction failed because it was too complex.
 		/// </summary>
-		public const int COMADMIN_E_NOTCHANGEABLE = (int)(0x8011042A - 0x100000000);
-
+		public const int D2DERR_TOO_MANY_SHADER_ELEMENTS = unchecked((int)0x8899000D);
 		/// <summary>
-		///     The delete function has been disabled for this object
+		/// Shader compilation failed.
 		/// </summary>
-		public const int COMADMIN_E_NOTDELETEABLE = (int)(0x8011042B - 0x100000000);
-
+		public const int D2DERR_SHADER_COMPILE_FAILED = unchecked((int)0x8899000E);
 		/// <summary>
-		///     The server catalog version is not supported
+		/// Requested DirectX surface size exceeded maximum texture size.
 		/// </summary>
-		public const int COMADMIN_E_SESSION = (int)(0x8011042C - 0x100000000);
-
+		public const int D2DERR_MAX_TEXTURE_SIZE_EXCEEDED = unchecked((int)0x8899000F);
 		/// <summary>
-		///     The component move was disallowed, because the source or destination application is either a system application or
-		///     currently locked against changes
+		/// The requested Direct2D version is not supported.
 		/// </summary>
-		public const int COMADMIN_E_COMP_MOVE_LOCKED = (int)(0x8011042D - 0x100000000);
-
+		public const int D2DERR_UNSUPPORTED_VERSION = unchecked((int)0x88990010);
 		/// <summary>
-		///     The component move failed because the destination application no longer exists
+		/// Invalid number.
 		/// </summary>
-		public const int COMADMIN_E_COMP_MOVE_BAD_DEST = (int)(0x8011042E - 0x100000000);
-
+		public const int D2DERR_BAD_NUMBER = unchecked((int)0x88990011);
 		/// <summary>
-		///     The system was unable to register the TypeLib
+		/// Objects used together must be created from the same factory instance.
 		/// </summary>
-		public const int COMADMIN_E_REGISTERTLB = (int)(0x80110430 - 0x100000000);
-
+		public const int D2DERR_WRONG_FACTORY = unchecked((int)0x88990012);
 		/// <summary>
-		///     This operation can not be performed on the system application
+		/// A layer resource can only be in use once at any point in time.
 		/// </summary>
-		public const int COMADMIN_E_SYSTEMAPP = (int)(0x80110433 - 0x100000000);
-
+		public const int D2DERR_LAYER_ALREADY_IN_USE = unchecked((int)0x88990013);
 		/// <summary>
-		///     The component registrar referenced in this file is not available
+		/// The pop call did not match the corresponding push call.
 		/// </summary>
-		public const int COMADMIN_E_COMPFILE_NOREGISTRAR = (int)(0x80110434 - 0x100000000);
-
+		public const int D2DERR_POP_CALL_DID_NOT_MATCH_PUSH = unchecked((int)0x88990014);
 		/// <summary>
-		///     A component in the same DLL is already installed
+		/// The resource was realized on the wrong render target.
 		/// </summary>
-		public const int COMADMIN_E_COREQCOMPINSTALLED = (int)(0x80110435 - 0x100000000);
-
+		public const int D2DERR_WRONG_RESOURCE_DOMAIN = unchecked((int)0x88990015);
 		/// <summary>
-		///     The service is not installed
+		/// The push and pop calls were unbalanced.
 		/// </summary>
-		public const int COMADMIN_E_SERVICENOTINSTALLED = (int)(0x80110436 - 0x100000000);
-
+		public const int D2DERR_PUSH_POP_UNBALANCED = unchecked((int)0x88990016);
 		/// <summary>
-		///     One or more property settings are either invalid or in conflict with each other
+		/// Attempt to copy from a render target while a layer or clip rect is applied.
 		/// </summary>
-		public const int COMADMIN_E_PROPERTYSAVEFAILED = (int)(0x80110437 - 0x100000000);
-
+		public const int D2DERR_RENDER_TARGET_HAS_LAYER_OR_CLIPRECT = unchecked((int)0x88990017);
 		/// <summary>
-		///     The object you are attempting to add or rename already exists
+		/// The brush types are incompatible for the call.
 		/// </summary>
-		public const int COMADMIN_E_OBJECTEXISTS = (int)(0x80110438 - 0x100000000);
-
+		public const int D2DERR_INCOMPATIBLE_BRUSH_TYPES = unchecked((int)0x88990018);
 		/// <summary>
-		///     The component already exists
+		/// An unknown win32 failure occurred.
 		/// </summary>
-		public const int COMADMIN_E_COMPONENTEXISTS = (int)(0x80110439 - 0x100000000);
-
+		public const int D2DERR_WIN32_ERROR = unchecked((int)0x88990019);
 		/// <summary>
-		///     The registration file is corrupt
+		/// The render target is not compatible with GDI.
 		/// </summary>
-		public const int COMADMIN_E_REGFILE_CORRUPT = (int)(0x8011043B - 0x100000000);
-
+		public const int D2DERR_TARGET_NOT_GDI_COMPATIBLE = unchecked((int)0x8899001A);
 		/// <summary>
-		///     The property value is too large
+		/// A text client drawing effect object is of the wrong type.
 		/// </summary>
-		public const int COMADMIN_E_PROPERTY_OVERFLOW = (int)(0x8011043C - 0x100000000);
-
+		public const int D2DERR_TEXT_EFFECT_IS_WRONG_TYPE = unchecked((int)0x8899001B);
 		/// <summary>
-		///     Object was not found in registry
+		/// The application is holding a reference to the IDWriteTextRenderer interface after the corresponding DrawText or DrawTextLayout call has returned. The IDWriteTextRenderer instance will be invalid.
 		/// </summary>
-		public const int COMADMIN_E_NOTINREGISTRY = (int)(0x8011043E - 0x100000000);
-
+		public const int D2DERR_TEXT_RENDERER_NOT_RELEASED = unchecked((int)0x8899001C);
 		/// <summary>
-		///     This object is not poolable
+		/// The requested size is larger than the guaranteed supported texture size at the Direct3D device's current feature level.
 		/// </summary>
-		public const int COMADMIN_E_OBJECTNOTPOOLABLE = (int)(0x8011043F - 0x100000000);
-
+		public const int D2DERR_EXCEEDS_MAX_BITMAP_SIZE = unchecked((int)0x8899001D);
 		/// <summary>
-		///     A CLSID with the same GUID as the new application ID is already installed on this machine
+		/// There was a configuration error in the graph.
 		/// </summary>
-		public const int COMADMIN_E_APPLID_MATCHES_CLSID = (int)(0x80110446 - 0x100000000);
-
+		public const int D2DERR_INVALID_GRAPH_CONFIGURATION = unchecked((int)0x8899001E);
 		/// <summary>
-		///     A role assigned to a component, interface, or method did not exist in the application
+		/// There was a internal configuration error in the graph.
 		/// </summary>
-		public const int COMADMIN_E_ROLE_DOES_NOT_EXIST = (int)(0x80110447 - 0x100000000);
-
+		public const int D2DERR_INVALID_INTERNAL_GRAPH_CONFIGURATION = unchecked((int)0x8899001F);
 		/// <summary>
-		///     You must have components in an application in order to start the application
+		/// There was a cycle in the graph.
 		/// </summary>
-		public const int COMADMIN_E_START_APP_NEEDS_COMPONENTS = (int)(0x80110448 - 0x100000000);
-
+		public const int D2DERR_CYCLIC_GRAPH = unchecked((int)0x88990020);
 		/// <summary>
-		///     This operation is not enabled on this platform
+		/// Cannot draw with a bitmap that has the D2D1_BITMAP_OPTIONS_CANNOT_DRAW option.
 		/// </summary>
-		public const int COMADMIN_E_REQUIRES_DIFFERENT_PLATFORM = (int)(0x80110449 - 0x100000000);
-
+		public const int D2DERR_BITMAP_CANNOT_DRAW = unchecked((int)0x88990021);
 		/// <summary>
-		///     Application Proxy is not exportable
+		/// The operation cannot complete while there are outstanding references to the target bitmap.
 		/// </summary>
-		public const int COMADMIN_E_CAN_NOT_EXPORT_APP_PROXY = (int)(0x8011044A - 0x100000000);
-
+		public const int D2DERR_OUTSTANDING_BITMAP_REFERENCES = unchecked((int)0x88990022);
 		/// <summary>
-		///     Failed to start application because it is either a library application or an application proxy
+		/// The operation failed because the original target is not currently bound as a target.
 		/// </summary>
-		public const int COMADMIN_E_CAN_NOT_START_APP = (int)(0x8011044B - 0x100000000);
-
+		public const int D2DERR_ORIGINAL_TARGET_NOT_BOUND = unchecked((int)0x88990023);
 		/// <summary>
-		///     System application is not exportable
+		/// Cannot set the image as a target because it is either an effect or is a bitmap that does not have the D2D1_BITMAP_OPTIONS_TARGET flag set.
 		/// </summary>
-		public const int COMADMIN_E_CAN_NOT_EXPORT_SYS_APP = (int)(0x8011044C - 0x100000000);
-
+		public const int D2DERR_INVALID_TARGET = unchecked((int)0x88990024);
 		/// <summary>
-		///     Can not subscribe to this component (the component may have been imported)
+		/// Cannot draw with a bitmap that is currently bound as the target bitmap.
 		/// </summary>
-		public const int COMADMIN_E_CANT_SUBSCRIBE_TO_COMPONENT = (int)(0x8011044D - 0x100000000);
-
+		public const int D2DERR_BITMAP_BOUND_AS_TARGET = unchecked((int)0x88990025);
 		/// <summary>
-		///     An event class cannot also be a subscriber component
+		/// D3D Device does not have sufficient capabilities to perform the requested action.
 		/// </summary>
-		public const int COMADMIN_E_EVENTCLASS_CANT_BE_SUBSCRIBER = (int)(0x8011044E - 0x100000000);
-
+		public const int D2DERR_INSUFFICIENT_DEVICE_CAPABILITIES = unchecked((int)0x88990026);
 		/// <summary>
-		///     Library applications and application proxies are incompatible
+		/// The graph could not be rendered with the context's current tiling settings.
 		/// </summary>
-		public const int COMADMIN_E_LIB_APP_PROXY_INCOMPATIBLE = (int)(0x8011044F - 0x100000000);
-
+		public const int D2DERR_INTERMEDIATE_TOO_LARGE = unchecked((int)0x88990027);
 		/// <summary>
-		///     This function is valid for the base partition only
+		/// The CLSID provided to Unregister did not correspond to a registered effect.
 		/// </summary>
-		public const int COMADMIN_E_BASE_PARTITION_ONLY = (int)(0x80110450 - 0x100000000);
-
+		public const int D2DERR_EFFECT_IS_NOT_REGISTERED = unchecked((int)0x88990028);
 		/// <summary>
-		///     You cannot start an application that has been disabled
+		/// The specified property does not exist.
 		/// </summary>
-		public const int COMADMIN_E_START_APP_DISABLED = (int)(0x80110451 - 0x100000000);
-
+		public const int D2DERR_INVALID_PROPERTY = unchecked((int)0x88990029);
 		/// <summary>
-		///     The specified partition name is already in use on this computer
+		/// The specified sub-property does not exist.
 		/// </summary>
-		public const int COMADMIN_E_CAT_DUPLICATE_PARTITION_NAME = (int)(0x80110457 - 0x100000000);
-
+		public const int D2DERR_NO_SUBPROPERTIES = unchecked((int)0x8899002A);
 		/// <summary>
-		///     The specified partition name is invalid. Check that the name contains at least one visible character
+		/// AddPage or Close called after print job is already closed.
 		/// </summary>
-		public const int COMADMIN_E_CAT_INVALID_PARTITION_NAME = (int)(0x80110458 - 0x100000000);
-
+		public const int D2DERR_PRINT_JOB_CLOSED = unchecked((int)0x8899002B);
 		/// <summary>
-		///     The partition cannot be deleted because it is the default partition for one or more users
+		/// Error during print control creation. Indicates that none of the package target types (representing printer formats) are supported by Direct2D print control.
 		/// </summary>
-		public const int COMADMIN_E_CAT_PARTITION_IN_USE = (int)(0x80110459 - 0x100000000);
-
+		public const int D2DERR_PRINT_FORMAT_NOT_SUPPORTED = unchecked((int)0x8899002C);
 		/// <summary>
-		///     The partition cannot be exported, because one or more components in the partition have the same file name
+		/// An effect attempted to use a transform with too many inputs.
 		/// </summary>
-		public const int COMADMIN_E_FILE_PARTITION_DUPLICATE_FILES = (int)(0x8011045A - 0x100000000);
-
+		public const int D2DERR_TOO_MANY_TRANSFORM_INPUTS = unchecked((int)0x8899002D);
 		/// <summary>
-		///     Applications that contain one or more imported components cannot be installed into a non-base partition
+		/// Indicates an error in an input file such as a font file.
 		/// </summary>
-		public const int COMADMIN_E_CAT_IMPORTED_COMPONENTS_NOT_ALLOWED = (int)(0x8011045B - 0x100000000);
-
+		public const int DWRITE_E_FILEFORMAT = unchecked((int)0x88985000);
 		/// <summary>
-		///     The application name is not unique and cannot be resolved to an application id
+		/// Indicates an error originating in DirectWrite code, which is not expected to occur but is safe to recover from.
 		/// </summary>
-		public const int COMADMIN_E_AMBIGUOUS_APPLICATION_NAME = (int)(0x8011045C - 0x100000000);
-
+		public const int DWRITE_E_UNEXPECTED = unchecked((int)0x88985001);
 		/// <summary>
-		///     The partition name is not unique and cannot be resolved to a partition id
+		/// Indicates the specified font does not exist.
 		/// </summary>
-		public const int COMADMIN_E_AMBIGUOUS_PARTITION_NAME = (int)(0x8011045D - 0x100000000);
-
+		public const int DWRITE_E_NOFONT = unchecked((int)0x88985002);
 		/// <summary>
-		///     The COM+ registry database has not been initialized
+		/// A font file could not be opened because the file, directory, network location, drive, or other storage location does not exist or is unavailable.
 		/// </summary>
-		public const int COMADMIN_E_REGDB_NOTINITIALIZED = (int)(0x80110472 - 0x100000000);
-
+		public const int DWRITE_E_FILENOTFOUND = unchecked((int)0x88985003);
 		/// <summary>
-		///     The COM+ registry database is not open
+		/// A font file exists but could not be opened due to access denied, sharing violation, or similar error.
 		/// </summary>
-		public const int COMADMIN_E_REGDB_NOTOPEN = (int)(0x80110473 - 0x100000000);
-
+		public const int DWRITE_E_FILEACCESS = unchecked((int)0x88985004);
 		/// <summary>
-		///     The COM+ registry database detected a system error
+		/// A font collection is obsolete due to changes in the system.
 		/// </summary>
-		public const int COMADMIN_E_REGDB_SYSTEMERR = (int)(0x80110474 - 0x100000000);
-
+		public const int DWRITE_E_FONTCOLLECTIONOBSOLETE = unchecked((int)0x88985005);
 		/// <summary>
-		///     The COM+ registry database is already running
+		/// The given interface is already registered.
 		/// </summary>
-		public const int COMADMIN_E_REGDB_ALREADYRUNNING = (int)(0x80110475 - 0x100000000);
-
+		public const int DWRITE_E_ALREADYREGISTERED = unchecked((int)0x88985006);
 		/// <summary>
-		///     This version of the COM+ registry database cannot be migrated
+		/// The font cache contains invalid data.
 		/// </summary>
-		public const int COMADMIN_E_MIG_VERSIONNOTSUPPORTED = (int)(0x80110480 - 0x100000000);
-
+		public const int DWRITE_E_CACHEFORMAT = unchecked((int)0x88985007);
 		/// <summary>
-		///     The schema version to be migrated could not be found in the COM+ registry database
+		/// A font cache file corresponds to a different version of DirectWrite.
 		/// </summary>
-		public const int COMADMIN_E_MIG_SCHEMANOTFOUND = (int)(0x80110481 - 0x100000000);
-
+		public const int DWRITE_E_CACHEVERSION = unchecked((int)0x88985008);
 		/// <summary>
-		///     There was a type mismatch between binaries
+		/// The operation is not supported for this type of font.
 		/// </summary>
-		public const int COMADMIN_E_CAT_BITNESSMISMATCH = (int)(0x80110482 - 0x100000000);
-
+		public const int DWRITE_E_UNSUPPORTEDOPERATION = unchecked((int)0x88985009);
 		/// <summary>
-		///     A binary of unknown or invalid type was provided
+		/// The codec is in the wrong state.
 		/// </summary>
-		public const int COMADMIN_E_CAT_UNACCEPTABLEBITNESS = (int)(0x80110483 - 0x100000000);
-
+		public const int WINCODEC_ERR_WRONGSTATE = unchecked((int)0x88982F04);
 		/// <summary>
-		///     There was a type mismatch between a binary and an application
+		/// The value is out of range.
 		/// </summary>
-		public const int COMADMIN_E_CAT_WRONGAPPBITNESS = (int)(0x80110484 - 0x100000000);
-
+		public const int WINCODEC_ERR_VALUEOUTOFRANGE = unchecked((int)0x88982F05);
 		/// <summary>
-		///     The application cannot be paused or resumed
+		/// The image format is unknown.
 		/// </summary>
-		public const int COMADMIN_E_CAT_PAUSE_RESUME_NOT_SUPPORTED = (int)(0x80110485 - 0x100000000);
-
+		public const int WINCODEC_ERR_UNKNOWNIMAGEFORMAT = unchecked((int)0x88982F07);
 		/// <summary>
-		///     The COM+ Catalog Server threw an exception during execution
+		/// The SDK version is unsupported.
 		/// </summary>
-		public const int COMADMIN_E_CAT_SERVERFAULT = (int)(0x80110486 - 0x100000000);
-
+		public const int WINCODEC_ERR_UNSUPPORTEDVERSION = unchecked((int)0x88982F0B);
 		/// <summary>
-		///     Only COM+ Applications marked "queued" can be invoked using the "queue" moniker
+		/// The component is not initialized.
 		/// </summary>
-		public const int COMQC_E_APPLICATION_NOT_QUEUED = (int)(0x80110600 - 0x100000000);
-
+		public const int WINCODEC_ERR_NOTINITIALIZED = unchecked((int)0x88982F0C);
 		/// <summary>
-		///     At least one interface must be marked "queued" in order to create a queued component instance with the "queue"
-		///     moniker
+		/// There is already an outstanding read or write lock.
 		/// </summary>
-		public const int COMQC_E_NO_QUEUEABLE_INTERFACES = (int)(0x80110601 - 0x100000000);
-
+		public const int WINCODEC_ERR_ALREADYLOCKED = unchecked((int)0x88982F0D);
 		/// <summary>
-		///     MSMQ is required for the requested operation and is not installed
+		/// The specified bitmap property cannot be found.
 		/// </summary>
-		public const int COMQC_E_QUEUING_SERVICE_NOT_AVAILABLE = (int)(0x80110602 - 0x100000000);
-
+		public const int WINCODEC_ERR_PROPERTYNOTFOUND = unchecked((int)0x88982F40);
 		/// <summary>
-		///     Unable to marshal an interface that does not support IPersistStream
+		/// The bitmap codec does not support the bitmap property.
 		/// </summary>
-		public const int COMQC_E_NO_IPERSISTSTREAM = (int)(0x80110603 - 0x100000000);
-
+		public const int WINCODEC_ERR_PROPERTYNOTSUPPORTED = unchecked((int)0x88982F41);
 		/// <summary>
-		///     The message is improperly formatted or was damaged in transit
+		/// The bitmap property size is invalid.
 		/// </summary>
-		public const int COMQC_E_BAD_MESSAGE = (int)(0x80110604 - 0x100000000);
-
+		public const int WINCODEC_ERR_PROPERTYSIZE = unchecked((int)0x88982F42);
 		/// <summary>
-		///     An unauthenticated message was received by an application that accepts only authenticated messages
+		/// An unknown error has occurred.
 		/// </summary>
-		public const int COMQC_E_UNAUTHENTICATED = (int)(0x80110605 - 0x100000000);
-
+		public const int WINCODEC_ERR_CODECPRESENT = unchecked((int)0x88982F43);
 		/// <summary>
-		///     The message was requeued or moved by a user not in the "QC Trusted User" role
+		/// The bitmap codec does not support a thumbnail.
 		/// </summary>
-		public const int COMQC_E_UNTRUSTED_ENQUEUER = (int)(0x80110606 - 0x100000000);
-
+		public const int WINCODEC_ERR_CODECNOTHUMBNAIL = unchecked((int)0x88982F44);
 		/// <summary>
-		///     Cannot create a duplicate resource of type Distributed Transaction Coordinator
+		/// The bitmap palette is unavailable.
 		/// </summary>
-		public const int MSDTC_E_DUPLICATE_RESOURCE = (int)(0x80110701 - 0x100000000);
-
+		public const int WINCODEC_ERR_PALETTEUNAVAILABLE = unchecked((int)0x88982F45);
 		/// <summary>
-		///     One of the objects being inserted or updated does not belong to a valid parent collection
+		/// Too many scanlines were requested.
 		/// </summary>
-		public const int COMADMIN_E_OBJECT_PARENT_MISSING = (int)(0x80110808 - 0x100000000);
-
+		public const int WINCODEC_ERR_CODECTOOMANYSCANLINES = unchecked((int)0x88982F46);
 		/// <summary>
-		///     One of the specified objects cannot be found
+		/// An internal error occurred.
 		/// </summary>
-		public const int COMADMIN_E_OBJECT_DOES_NOT_EXIST = (int)(0x80110809 - 0x100000000);
-
+		public const int WINCODEC_ERR_INTERNALERROR = unchecked((int)0x88982F48);
 		/// <summary>
-		///     The specified application is not currently running
+		/// The bitmap bounds do not match the bitmap dimensions.
 		/// </summary>
-		public const int COMADMIN_E_APP_NOT_RUNNING = (int)(0x8011080A - 0x100000000);
-
+		public const int WINCODEC_ERR_SOURCERECTDOESNOTMATCHDIMENSIONS = unchecked((int)0x88982F49);
 		/// <summary>
-		///     The partition(s) specified are not valid.
+		/// The component cannot be found.
 		/// </summary>
-		public const int COMADMIN_E_INVALID_PARTITION = (int)(0x8011080B - 0x100000000);
-
+		public const int WINCODEC_ERR_COMPONENTNOTFOUND = unchecked((int)0x88982F50);
 		/// <summary>
-		///     COM+ applications that run as NT service may not be pooled or recycled
+		/// The bitmap size is outside the valid range.
 		/// </summary>
-		public const int COMADMIN_E_SVCAPP_NOT_POOLABLE_OR_RECYCLABLE = (int)(0x8011080D - 0x100000000);
-
+		public const int WINCODEC_ERR_IMAGESIZEOUTOFRANGE = unchecked((int)0x88982F51);
 		/// <summary>
-		///     One or more users are already assigned to a local partition set.
+		/// There is too much metadata to be written to the bitmap.
 		/// </summary>
-		public const int COMADMIN_E_USER_IN_SET = (int)(0x8011080E - 0x100000000);
-
+		public const int WINCODEC_ERR_TOOMUCHMETADATA = unchecked((int)0x88982F52);
 		/// <summary>
-		///     Library applications may not be recycled.
+		/// The image is unrecognized.
 		/// </summary>
-		public const int COMADMIN_E_CANTRECYCLELIBRARYAPPS = (int)(0x8011080F - 0x100000000);
-
+		public const int WINCODEC_ERR_BADIMAGE = unchecked((int)0x88982F60);
 		/// <summary>
-		///     Applications running as NT services may not be recycled.
+		/// The image header is unrecognized.
 		/// </summary>
-		public const int COMADMIN_E_CANTRECYCLESERVICEAPPS = (int)(0x80110811 - 0x100000000);
-
+		public const int WINCODEC_ERR_BADHEADER = unchecked((int)0x88982F61);
 		/// <summary>
-		///     The process has already been recycled.
+		/// The bitmap frame is missing.
 		/// </summary>
-		public const int COMADMIN_E_PROCESSALREADYRECYCLED = (int)(0x80110812 - 0x100000000);
-
+		public const int WINCODEC_ERR_FRAMEMISSING = unchecked((int)0x88982F62);
 		/// <summary>
-		///     A paused process may not be recycled.
+		/// The image metadata header is unrecognized.
 		/// </summary>
-		public const int COMADMIN_E_PAUSEDPROCESSMAYNOTBERECYCLED = (int)(0x80110813 - 0x100000000);
-
+		public const int WINCODEC_ERR_BADMETADATAHEADER = unchecked((int)0x88982F63);
 		/// <summary>
-		///     Library applications may not be NT services.
+		/// The stream data is unrecognized.
 		/// </summary>
-		public const int COMADMIN_E_CANTMAKEINPROCSERVICE = (int)(0x80110814 - 0x100000000);
-
+		public const int WINCODEC_ERR_BADSTREAMDATA = unchecked((int)0x88982F70);
 		/// <summary>
-		///     The ProgID provided to the copy operation is invalid. The ProgID is in use by another registered CLSID.
+		/// Failed to write to the stream.
 		/// </summary>
-		public const int COMADMIN_E_PROGIDINUSEBYCLSID = (int)(0x80110815 - 0x100000000);
-
+		public const int WINCODEC_ERR_STREAMWRITE = unchecked((int)0x88982F71);
 		/// <summary>
-		///     The partition specified as default is not a member of the partition set.
+		/// Failed to read from the stream.
 		/// </summary>
-		public const int COMADMIN_E_DEFAULT_PARTITION_NOT_IN_SET = (int)(0x80110816 - 0x100000000);
-
+		public const int WINCODEC_ERR_STREAMREAD = unchecked((int)0x88982F72);
 		/// <summary>
-		///     A recycled process may not be paused.
+		/// The stream is not available.
 		/// </summary>
-		public const int COMADMIN_E_RECYCLEDPROCESSMAYNOTBEPAUSED = (int)(0x80110817 - 0x100000000);
-
+		public const int WINCODEC_ERR_STREAMNOTAVAILABLE = unchecked((int)0x88982F73);
 		/// <summary>
-		///     Access to the specified partition is denied.
+		/// The bitmap pixel format is unsupported.
 		/// </summary>
-		public const int COMADMIN_E_PARTITION_ACCESSDENIED = (int)(0x80110818 - 0x100000000);
-
+		public const int WINCODEC_ERR_UNSUPPORTEDPIXELFORMAT = unchecked((int)0x88982F80);
 		/// <summary>
-		///     Only Application Files (*.MSI files) can be installed into partitions.
+		/// The operation is unsupported.
 		/// </summary>
-		public const int COMADMIN_E_PARTITION_MSI_ONLY = (int)(0x80110819 - 0x100000000);
-
+		public const int WINCODEC_ERR_UNSUPPORTEDOPERATION = unchecked((int)0x88982F81);
 		/// <summary>
-		///     Applications containing one or more legacy components may not be exported to 1.0 format.
+		/// The component registration is invalid.
 		/// </summary>
-		public const int COMADMIN_E_LEGACYCOMPS_NOT_ALLOWED_IN_1_0_FORMAT = (int)(0x8011081A - 0x100000000);
-
+		public const int WINCODEC_ERR_INVALIDREGISTRATION = unchecked((int)0x88982F8A);
 		/// <summary>
-		///     Legacy components may not exist in non-base partitions.
+		/// The component initialization has failed.
 		/// </summary>
-		public const int COMADMIN_E_LEGACYCOMPS_NOT_ALLOWED_IN_NONBASE_PARTITIONS = (int)(0x8011081B - 0x100000000);
-
+		public const int WINCODEC_ERR_COMPONENTINITIALIZEFAILURE = unchecked((int)0x88982F8B);
 		/// <summary>
-		///     A component cannot be moved (or copied) from the System Application, an application proxy or a non-changeable
-		///     application
+		/// The buffer allocated is insufficient.
 		/// </summary>
-		public const int COMADMIN_E_COMP_MOVE_SOURCE = (int)(0x8011081C - 0x100000000);
-
+		public const int WINCODEC_ERR_INSUFFICIENTBUFFER = unchecked((int)0x88982F8C);
 		/// <summary>
-		///     A component cannot be moved (or copied) to the System Application, an application proxy or a non-changeable
-		///     application
+		/// Duplicate metadata is present.
 		/// </summary>
-		public const int COMADMIN_E_COMP_MOVE_DEST = (int)(0x8011081D - 0x100000000);
-
+		public const int WINCODEC_ERR_DUPLICATEMETADATAPRESENT = unchecked((int)0x88982F8D);
 		/// <summary>
-		///     A private component cannot be moved (or copied) to a library application or to the base partition
+		/// The bitmap property type is unexpected.
 		/// </summary>
-		public const int COMADMIN_E_COMP_MOVE_PRIVATE = (int)(0x8011081E - 0x100000000);
-
+		public const int WINCODEC_ERR_PROPERTYUNEXPECTEDTYPE = unchecked((int)0x88982F8E);
 		/// <summary>
-		///     The Base Application Partition exists in all partition sets and cannot be removed.
+		/// The size is unexpected.
 		/// </summary>
-		public const int COMADMIN_E_BASEPARTITION_REQUIRED_IN_SET = (int)(0x8011081F - 0x100000000);
-
+		public const int WINCODEC_ERR_UNEXPECTEDSIZE = unchecked((int)0x88982F8F);
 		/// <summary>
-		///     Alas, Event Class components cannot be aliased.
+		/// The property query is invalid.
 		/// </summary>
-		public const int COMADMIN_E_CANNOT_ALIAS_EVENTCLASS = (int)(0x80110820 - 0x100000000);
-
+		public const int WINCODEC_ERR_INVALIDQUERYREQUEST = unchecked((int)0x88982F90);
 		/// <summary>
-		///     Access is denied because the component is private.
+		/// The metadata type is unexpected.
 		/// </summary>
-		public const int COMADMIN_E_PRIVATE_ACCESSDENIED = (int)(0x80110821 - 0x100000000);
-
+		public const int WINCODEC_ERR_UNEXPECTEDMETADATATYPE = unchecked((int)0x88982F91);
 		/// <summary>
-		///     The specified SAFER level is invalid.
+		/// The specified bitmap property is only valid at root level.
 		/// </summary>
-		public const int COMADMIN_E_SAFERINVALID = (int)(0x80110822 - 0x100000000);
-
+		public const int WINCODEC_ERR_REQUESTONLYVALIDATMETADATAROOT = unchecked((int)0x88982F92);
 		/// <summary>
-		///     The specified user cannot write to the system registry
+		/// The query string contains an invalid character.
 		/// </summary>
-		public const int COMADMIN_E_REGISTRY_ACCESSDENIED = (int)(0x80110823 - 0x100000000);
-
+		public const int WINCODEC_ERR_INVALIDQUERYCHARACTER = unchecked((int)0x88982F93);
 		/// <summary>
-		///     No information avialable.
+		/// Windows Codecs received an error from the Win32 system.
 		/// </summary>
-		public const int COMADMIN_E_PARTITIONS_DISABLED = (int)(0x80110824 - 0x100000000);
-
+		public const int WINCODEC_ERR_WIN32ERROR = unchecked((int)0x88982F94);
 		/// <summary>
-		///     Failed to open a file.
+		/// The requested level of detail is not present.
 		/// </summary>
-		public const int NS_E_FILE_OPEN_FAILED = (int)(0xC00D001DL - 0x100000000);
+		public const int WINCODEC_ERR_INVALIDPROGRESSIVELEVEL = unchecked((int)0x88982F95);
+		#endregion
 
 		public static bool Succeeded(int result) { return result >= 0; }
 
@@ -16123,7 +21017,7 @@ namespace essentialMix
 
 		/// <summary>
 		///     The manifest has a default namespace specified on the assembly element but its value is not
-		///     "urn:schemas-microsoft-com:asm.v1".
+		///     "urn:schemas-microsoft-com:essentialMix.v1".
 		/// </summary>
 		public const int ERROR_SXS_MANIFEST_INVALID_REQUIRED_DEFAULT_NAMESPACE = 14019;
 
@@ -17121,7 +22015,7 @@ namespace essentialMix
 		public const int DEVICE_NOTIFY_WINDOW_HANDLE = 0x00000000;
 		public const int DEVICE_NOTIFY_SERVICE_HANDLE = 0x00000001;
 		public const int DEVICE_NOTIFY_ALL_INTERFACE_CLASSES = 0x00000004;
-		
+
 		public const string GUID_DEVINTERFACE_USB_DEVICE = "A5DCBF10-6530-11D2-901F-00C04FB951ED";
 		public const string GUID_DEVINTERFACE_USB_HOST_CONTROLLER = "3ABF6F2D-71C4-462A-8A92-1E6861E6AF27";
 

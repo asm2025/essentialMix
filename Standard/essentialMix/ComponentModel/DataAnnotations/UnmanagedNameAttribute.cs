@@ -1,8 +1,8 @@
 ﻿using System;
-using ATCommon.Extensions;
+using essentialMix.Extensions;
 using JetBrains.Annotations;
 
-namespace ATCommon.ComponentModel.DataAnnotations
+namespace essentialMix.ComponentModel.DataAnnotations
 {
 	[AttributeUsage(AttributeTargets.Enum | AttributeTargets.Struct | AttributeTargets.Class)]
 	public class UnmanagedNameAttribute : Attribute

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace ATCommon.Helpers
+namespace essentialMix.Helpers
 {
 	public static class ObjectHelper
 	{
