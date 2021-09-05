@@ -164,10 +164,10 @@ namespace essentialMix.Helpers
 				int steps = 256 / input.Length;
 
 				for (int i = 0; i < steps; i++)
-					Array.Copy(input, 0, newInput, input.Length * i, input.Length);
+					Buffer.BlockCopy(input, 0, newInput, input.Length * i, input.Length);
 
 				int rest = 256 % input.Length;
-				if (rest > 0) Array.Copy(input, 0, newInput, steps * input.Length, rest);
+				if (rest > 0) Buffer.BlockCopy(input, 0, newInput, steps * input.Length, rest);
 				input = newInput;
 			}
 

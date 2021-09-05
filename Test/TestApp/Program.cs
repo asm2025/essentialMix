@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Security;
@@ -32,6 +33,7 @@ using essentialMix.Helpers;
 using essentialMix.Patterns.Events;
 using Other.Microsoft.Collections;
 using essentialMix.Threading.Helpers;
+using essentialMix.Threading.IO;
 using essentialMix.Threading.Patterns.ProducerConsumer;
 using Newtonsoft.Json;
 using Other.JonSkeet.MiscUtil.Collections;
@@ -99,7 +101,7 @@ work with {HEAVY} items.");
 			//TestLevenshteinDistance();
 			//TestDeepestPit();
 
-			TestThreadQueue();
+			//TestThreadQueue();
 			//TestThreadQueueWithPriorityQueue();
 			//TestAsyncLock();
 
@@ -191,6 +193,10 @@ work with {HEAVY} items.");
 			//TestEventWaitHandle();
 			
 			//TestWaitForEvent();
+
+			//TestBlockingStream();
+			TestConsumerStream();
+			//TestConsumerPipe();
 
 			ConsoleHelper.Pause();
 		}
@@ -5769,6 +5775,8 @@ decrypted:
 				string timeoutString = timeout > 0
 											? $"{(timeout / 1000.0d):##.##} second(s)"
 											: "None";
+				Console.WriteLine($"Using timeout: {Bright.Cyan(timeoutString)}...");
+
 				CancellationTokenSource cts = null;
 				EventWaitHandleBase waitHandle = null;
 				TimedCallback timedCallback = null;
@@ -5781,11 +5789,9 @@ decrypted:
 					waitHandle = eventTypeKey == ConsoleKey.A
 									? new AutoResetEvent()
 									: new ManualResetEvent();
-					// copy to local variable
-					CancellationToken token = cts?.Token ?? CancellationToken.None;
-					Console.WriteLine($"Using timeout: {Bright.Cyan(timeoutString)}...");
 					
 					// copy to local variable
+					CancellationToken token = cts?.Token ?? CancellationToken.None;
 					EventWaitHandleBase handle = waitHandle;
 
 					if (timeout > 0)
@@ -5878,6 +5884,293 @@ decrypted:
 			while (more);
 		}
 
+		private static void TestBlockingStream()
+		{
+			const int TIMEOUT = 3000;
+
+			bool more;
+			Student student = new Student
+			{
+				Id = 1,
+				Name = __fakeGenerator.Value.Name.FirstName(__fakeGenerator.Value.PickRandom<Name.Gender>()),
+				Grade = __fakeGenerator.Value.Random.Double(0.0d, 100.0d)
+			};
+			CancellationTokenSource cts = null;
+			TimedCallback timedCallback = null;
+			BlockingStream stream = null;
+
+			do
+			{
+				Console.Clear();
+
+				Title("Testing BlockingStream.");
+
+				Console.Write($"Would you like to use timeout for the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to skip timeout. ");
+				int timeout = Console.ReadKey(true).Key == ConsoleKey.Y
+								? TIMEOUT
+								: TimeSpanHelper.INFINITE;
+				Console.WriteLine();
+
+				string timeoutString = timeout > 0
+											? $"{(timeout / 1000.0d):##.##} second(s)"
+											: "None";
+				Console.WriteLine($"Using timeout: {Bright.Cyan(timeoutString)}...");
+
+				try
+				{
+					cts = timeout > 0
+							? new CancellationTokenSource(TimeSpan.FromMilliseconds(timeout))
+							: new CancellationTokenSource();
+					stream = new BlockingStream
+					{
+						ReadTimeout = TIMEOUT
+					};
+
+					// copy to local variable
+					CancellationTokenSource ctsLocal = cts;
+					CancellationToken token = cts.Token;
+					byte[] buffer = new byte[1024];
+					stream.ReadAsync(buffer, 0, buffer.Length, token)
+						.ContinueWith(t =>
+						{
+							if (!t.IsCompleted)
+							{
+								Console.WriteLine(Bright.Red("Task is not complete."));
+								return;
+							}
+
+							string str = Encoding.Default.GetString(buffer);
+							Console.WriteLine($"Received: '{str}'.");
+						}, token);
+
+					string json = JsonConvert.SerializeObject(student);
+					stream.Write(Encoding.Default.GetBytes(json));
+
+					if (timeout > 0)
+					{
+						Console.WriteLine($"The automatic setup will timeout in: {Bright.Cyan((timeout / 2 / 1000).ToString())} seconds...");
+						timedCallback = TimedCallback.Create(tcb =>
+						{
+							tcb.Enabled = false;
+							ctsLocal.Cancel();
+						}, timeout / 2);
+						token.WaitHandle.WaitOne();
+					}
+					else
+					{
+						Console.Write("Press any key to stop. ");
+						ReadKey(true, token);
+						Console.WriteLine();
+						ctsLocal.Cancel();
+					}
+				}
+				finally
+				{
+					ObjectHelper.Dispose(ref timedCallback);
+					ObjectHelper.Dispose(ref stream);
+					ObjectHelper.Dispose(ref cts);
+				}
+
+				Console.WriteLine();
+				Console.Write($"Would you like to repeat the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to exit. ");
+				more = Console.ReadKey(true).Key == ConsoleKey.Y;
+				Console.WriteLine();
+			}
+			while (more);
+		}
+
+		private static void TestConsumerStream()
+		{
+			const int TIMEOUT = 3000;
+
+			bool more;
+			Student student = new Student
+			{
+				Id = 1,
+				Name = __fakeGenerator.Value.Name.FirstName(__fakeGenerator.Value.PickRandom<Name.Gender>()),
+				Grade = __fakeGenerator.Value.Random.Double(0.0d, 100.0d)
+			};
+			CancellationTokenSource cts = null;
+			TimedCallback timedCallback = null;
+			ConsumerStream stream = null;
+
+			do
+			{
+				Console.Clear();
+
+				Title("Testing ConsumerStream.");
+
+				Console.Write($"Would you like to use timeout for the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to skip timeout. ");
+				int timeout = Console.ReadKey(true).Key == ConsoleKey.Y
+								? TIMEOUT
+								: TimeSpanHelper.INFINITE;
+				Console.WriteLine();
+
+				string timeoutString = timeout > 0
+											? $"{(timeout / 1000.0d):##.##} second(s)"
+											: "None";
+				Console.WriteLine($"Using timeout: {Bright.Cyan(timeoutString)}...");
+
+				try
+				{
+					cts = timeout > 0
+							? new CancellationTokenSource(TimeSpan.FromMilliseconds(timeout))
+							: new CancellationTokenSource();
+					stream = new ConsumerStream
+					{
+						ReadTimeout = TIMEOUT
+					};
+
+					// copy to local variable
+					CancellationTokenSource ctsLocal = cts;
+					CancellationToken token = cts.Token;
+					stream.ReadSampleAsync(token)
+						.ContinueWith(t =>
+						{
+							if (!t.IsCompleted)
+							{
+								Console.WriteLine(Bright.Red("Task is not complete."));
+								return;
+							}
+
+							string str = Encoding.Default.GetString(t.Result);
+							Console.WriteLine($"Received: '{str}'.");
+						}, token);
+
+					string json = JsonConvert.SerializeObject(student);
+					stream.Write(Encoding.Default.GetBytes(json));
+
+					if (timeout > 0)
+					{
+						Console.WriteLine($"The automatic setup will timeout in: {Bright.Cyan((timeout / 2 / 1000).ToString())} seconds...");
+						timedCallback = TimedCallback.Create(tcb =>
+						{
+							tcb.Enabled = false;
+							ctsLocal.Cancel();
+						}, timeout / 2);
+						token.WaitHandle.WaitOne();
+					}
+					else
+					{
+						Console.Write("Press any key to stop. ");
+						ReadKey(true, token);
+						Console.WriteLine();
+						ctsLocal.Cancel();
+					}
+				}
+				finally
+				{
+					ObjectHelper.Dispose(ref timedCallback);
+					ObjectHelper.Dispose(ref stream);
+					ObjectHelper.Dispose(ref cts);
+				}
+
+				Console.WriteLine();
+				Console.Write($"Would you like to repeat the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to exit. ");
+				more = Console.ReadKey(true).Key == ConsoleKey.Y;
+				Console.WriteLine();
+			}
+			while (more);
+		}
+
+		private static void TestConsumerPipe()
+		{
+			const int TIMEOUT = 3000;
+
+			bool more;
+			Student student = new Student
+			{
+				Id = 1,
+				Name = __fakeGenerator.Value.Name.FirstName(__fakeGenerator.Value.PickRandom<Name.Gender>()),
+				Grade = __fakeGenerator.Value.Random.Double(0.0d, 100.0d)
+			};
+			CancellationTokenSource cts = null;
+			TimedCallback timedCallback = null;
+			PipeStream producerPipe = null;
+			ConsumerPipe consumerPipe = null;
+
+			do
+			{
+				Console.Clear();
+
+				Title("Testing ConsumerPipe.");
+
+				Console.Write($"Would you like to use timeout for the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to skip timeout. ");
+				int timeout = Console.ReadKey(true).Key == ConsoleKey.Y
+								? TIMEOUT
+								: TimeSpanHelper.INFINITE;
+				Console.WriteLine();
+
+				string timeoutString = timeout > 0
+											? $"{(timeout / 1000.0d):##.##} second(s)"
+											: "None";
+				Console.WriteLine($"Using timeout: {Bright.Cyan(timeoutString)}...");
+
+				try
+				{
+					cts = timeout > 0
+							? new CancellationTokenSource(TimeSpan.FromMilliseconds(timeout))
+							: new CancellationTokenSource();
+					// copy to local variable
+					CancellationTokenSource ctsLocal = cts;
+					CancellationToken token = cts.Token;
+
+					producerPipe = ConsumerPipe.CreateProducer();
+					consumerPipe = new ConsumerPipe(producerPipe.SafePipeHandle)
+					{
+						ReadTimeout = TIMEOUT
+					};
+
+					byte[] buffer = new byte[1024];
+					consumerPipe.ReadAsync(buffer, 0, buffer.Length, token)
+								.ContinueWith(t =>
+								{
+									if (!t.IsCompleted)
+									{
+										Console.WriteLine(Bright.Red("Task is not complete."));
+										return;
+									}
+
+									string str = Encoding.Default.GetString(buffer);
+									Console.WriteLine($"Received: '{str}'.");
+								}, token);
+
+					string json = JsonConvert.SerializeObject(student);
+					consumerPipe.Write(Encoding.Default.GetBytes(json));
+
+					if (timeout > 0)
+					{
+						Console.WriteLine($"The automatic setup will timeout in: {Bright.Cyan((timeout / 2 / 1000).ToString())} seconds...");
+						timedCallback = TimedCallback.Create(tcb =>
+						{
+							tcb.Enabled = false;
+							ctsLocal.Cancel();
+						}, timeout / 2);
+						token.WaitHandle.WaitOne();
+					}
+					else
+					{
+						Console.Write("Press any key to stop. ");
+						ReadKey(true, token);
+						Console.WriteLine();
+						ctsLocal.Cancel();
+					}
+				}
+				finally
+				{
+					ObjectHelper.Dispose(ref timedCallback);
+					ObjectHelper.Dispose(ref consumerPipe);
+					ObjectHelper.Dispose(ref cts);
+				}
+
+				Console.WriteLine();
+				Console.Write($"Would you like to repeat the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to exit. ");
+				more = Console.ReadKey(true).Key == ConsoleKey.Y;
+				Console.WriteLine();
+			}
+			while (more);
+		}
+
 		private static void Title(string title)
 		{
 			Console.WriteLine();
@@ -5889,6 +6182,14 @@ decrypted:
 		{
 			Console.WriteLine(__compilationText);
 			Console.WriteLine();
+		}
+
+		private static ConsoleKeyInfo ReadKey(bool intercept, CancellationToken token)
+		{
+			SpinWait.SpinUntil(() => token.IsCancellationRequested || Console.KeyAvailable);
+			return token.IsCancellationRequested
+						? default(ConsoleKeyInfo)
+						: Console.ReadKey(intercept);
 		}
 
 		[NotNull]

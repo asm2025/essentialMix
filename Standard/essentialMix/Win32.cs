@@ -22023,637 +22023,835 @@ namespace essentialMix
 
 		public static readonly HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern FileType GetFileType(IntPtr hFile);
 
+		[SecurityCritical]
+		[DllImport("kernel32.dll")]
+		public static extern FileType GetFileType(SafeHandle handle);
+
+		[SecurityCritical]
 		[DllImport("shlwapi.dll", SetLastError = true, EntryPoint = "#437")]
 		public static extern bool IsOS(int value);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern void GetSystemTime(ref SystemTime sysTime);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetSystemTime(ref SystemTime sysTime);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern ErrorModesEnum SetErrorMode(ErrorModesEnum uMode);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern ErrorModesEnum GetErrorMode();
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern bool SetThreadErrorMode(ErrorModesEnum dwNewMode, out ErrorModesEnum lpOldMode);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern ErrorModesEnum GetThreadErrorMode();
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetThreadTimes(IntPtr hThread, out long lpCreationTime, out long lpExitTime, out long lpKernelTime, out long lpUserTime);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool EnumWindows(EnumWindowsProcessor lpEnumFunc, IntPtr lParam);
 
+		[SecurityCritical]
 		[DllImport("user32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = false, ExactSpelling = true)]
 		public static extern IntPtr SetFocus(IntPtr hWnd);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool EnumChildWindows(IntPtr hWndParent, EnumWindowsProcessor lpEnumFunc, IntPtr lParam);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool EnumChildWindows(IntPtr hWndParent, IntPtr lpEnumFunc, IntPtr lParam);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool EnumThreadWindows(int dwThreadId, EnumWindowsProcessor lpfn, IntPtr lParam);
 
+		[SecurityCritical]
 		[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
 		public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
+		[SecurityCritical]
 		[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
 		public static extern int GetWindowTextLength(IntPtr hWnd);
 
+		[SecurityCritical]
 		[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
 		public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern IntPtr GetDlgItem(IntPtr hDlg, int nIDDlgItem);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern bool ShowWindowAsync(IntPtr hWnd, ShowWindowEnum nCmdShow);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern bool ShowWindow(IntPtr hWnd, ShowWindowEnum nCmdShow);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool IsWindow(IntPtr hWnd);
 
+		[SecurityCritical]
 		[DllImport("user32.dll", CharSet = CharSet.Auto)]
 		public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern bool MoveWindow(IntPtr hWnd, int x, int y, int cx, int cy, bool repaint);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int y, int cx, int cy, WindowPositionFlagsEnum uFlags);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern uint GetWindowLong(IntPtr hWnd, WindowLongSettingIndexEnum nIndex);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern uint SetWindowLong(IntPtr hWnd, WindowLongSettingIndexEnum nIndex, uint dwNewLong);
 
+		[SecurityCritical]
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
 
+		[SecurityCritical]
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
 
+		[SecurityCritical]
 		[DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
 		public static extern IntPtr GetParent(IntPtr hWnd);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern void DisableProcessWindowsGhosting();
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", CharSet = CharSet.Auto)]
 		public static extern IntPtr CreateJobObject(IntPtr lpJobAttributes, string name);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern bool SetInformationJobObject(IntPtr job, JobObjectInfoTypeEnum infoType, IntPtr lpJobObjectInfo, uint cbJobObjectInfoLength);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern int MapVirtualKey(uint uCode, uint uMapType);
 
 		public static bool IsKeyPressed(int keyCode) { return (GetAsyncKeyState(keyCode) & 0x0800) == 0; }
 
+		[SecurityCritical]
 		[DllImport("user32.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
 		public static extern short GetAsyncKeyState(int vKey);
 
+		[SecurityCritical]
 		[DllImport("user32.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr GetDesktopWindow();
 
+		[SecurityCritical]
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool GetWindowRect(HandleRef hWnd, out RECT lpRect);
 
+		[SecurityCritical]
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool GetClientRect(HandleRef hWnd, out RECT lpRect);
 
+		[SecurityCritical]
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern IntPtr SetActiveWindow(IntPtr hWnd);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern IntPtr SetCapture(IntPtr hWnd);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern IntPtr GetCapture();
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern bool ReleaseCapture();
 
+		[SecurityCritical]
 		[DllImport("user32", ExactSpelling = true, SetLastError = true)]
 		public static extern int MapWindowPoints(IntPtr hWndFrom, IntPtr hWndTo, [In][Out] ref RECT rect, [MarshalAs(UnmanagedType.U4)]
 			int cPoints);
 
+		[SecurityCritical]
 		[DllImport("user32", ExactSpelling = true, SetLastError = true)]
 		public static extern int MapWindowPoints(IntPtr hWndFrom, IntPtr hWndTo, [In][Out] ref POINT pt, [MarshalAs(UnmanagedType.U4)]
 			int cPoints);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern IntPtr GetConsoleWindow();
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern bool GetConsoleMode(IntPtr hConsoleHandle, out ConsoleModesEnum lpMode);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern bool SetConsoleMode(IntPtr hConsoleHandle, ConsoleModesEnum dwMode);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern bool ReadConsoleInput(IntPtr hConsoleInput, [Out] INPUT_RECORD[] lpBuffer, uint nLength, out uint lpNumberOfEventsRead);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool ReadConsoleOutput(IntPtr hConsoleOutput, [Out] CHAR_INFO[] lpBuffer, COORD dwBufferSize, COORD dwBufferCoord,
 			ref SMALL_RECT lpReadRegion);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern IntPtr GetStdHandle(int handle);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern IntPtr GetForegroundWindow();
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool CreatePipe(out IntPtr hReadPipe, out IntPtr hWritePipe, ref SECURITY_ATTRIBUTES lpPipeAttributes, uint nSize);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern IntPtr CreateNamedPipe(string lpName, uint dwOpenMode, uint dwPipeMode, uint nMaxInstances, uint nOutBufferSize, uint nInBufferSize,
 			uint nDefaultTimeOut, ref SECURITY_ATTRIBUTES lpPipeAttributes);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool ConnectNamedPipe(IntPtr hHandle, IntPtr lpOverlapped);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool DisconnectNamedPipe(IntPtr hHandle);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool PeekNamedPipe(IntPtr hHandle, byte[] buffer, uint nBufferSize, ref uint bytesRead, ref uint bytesAvail,
 			ref uint BytesLeftThisMessage);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetHandleInformation(IntPtr hObject, HandleFlagsEnum dwMask, HandleFlagsEnum dwFlags);
 
+		[SecurityCritical]
 		[DllImport("Kernel32.dll", EntryPoint = "RtlZeroMemory", SetLastError = false)]
 		public static extern void ZeroMemory(IntPtr dest, IntPtr size);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
 		public static extern bool CreateProcess(string lpApplicationName, string lpCommandLine, ref SECURITY_ATTRIBUTES lpProcessAttributes,
 			ref SECURITY_ATTRIBUTES lpThreadAttributes, bool bInheritHandles, CreateProcessFlagsEnum dwCreationFlags, IntPtr lpEnvironment, string lpCurrentDirectory,
 			[In] ref STARTUPINFO lpStartupInfo, out PROCESS_INFORMATION lpProcessInformation);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
 		public static extern bool CreateProcess(string lpApplicationName, string lpCommandLine, ref SECURITY_ATTRIBUTES lpProcessAttributes,
 			ref SECURITY_ATTRIBUTES lpThreadAttributes, bool bInheritHandles, CreateProcessFlagsEnum dwCreationFlags, IntPtr lpEnvironment, string lpCurrentDirectory,
 			[In] ref STARTUPINFOEX lpStartupInfo, out PROCESS_INFORMATION lpProcessInformation);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true, ExactSpelling = true)]
 		public static extern IntPtr OpenProcess(ProcessAccessFlags dwDesiredAccess, int bInheritHandle, int dwProcessId);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool UpdateProcThreadAttribute(IntPtr lpAttributeList, uint dwFlags, IntPtr Attribute, IntPtr lpValue, IntPtr cbSize,
 			IntPtr lpPreviousValue, IntPtr lpReturnSize);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool InitializeProcThreadAttributeList(IntPtr lpAttributeList, int dwAttributeCount, int dwFlags, ref IntPtr lpSize);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool DeleteProcThreadAttributeList(IntPtr lpAttributeList);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool TerminateProcess(IntPtr hProcess, uint uExitCode);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", EntryPoint = "CreateFile", SetLastError = true)]
 		public static extern IntPtr CreateFile(string lpFileName, FileAccessEnum dwDesiredAccess, FileShareEnum dwShareMode,
 			ref SECURITY_ATTRIBUTES lpSecurityAttributes, CreationDispositionEnum dwCreationDisposition, FileAttributesEnum dwFlagsAndAttributes, IntPtr hTemplateFile);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", EntryPoint = "CreateFile", SetLastError = true)]
 		public static extern IntPtr CreateFile(string lpFileName, FileAccessEnum dwDesiredAccess, FileShareEnum dwShareMode, IntPtr lpSecurityAttributes,
 			CreationDispositionEnum dwCreationDisposition, FileAttributesEnum dwFlagsAndAttributes, IntPtr hTemplateFile);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool ReadFile(IntPtr hFile, [Out] byte[] lpBuffer, uint nNumberOfBytesToRead, out uint lpNumberOfBytesRead, IntPtr lpOverlapped);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool ReadFile(IntPtr hFile, [Out] StringBuilder lpBuffer, uint nNumberOfBytesToRead, out uint lpNumberOfBytesRead, IntPtr lpOverlapped);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool WriteFile(IntPtr hFile, byte[] lpBuffer, uint nNumberOfBytesToWrite, out uint written, IntPtr lpOverlapped);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool WriteFile(IntPtr hFile, StringBuilder lpBuffer, uint nNumberOfBytesToWrite, out uint written, IntPtr lpOverlapped);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool FlushFileBuffers(IntPtr handle);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern uint GetTempFileName(string lpPathName, string lpPrefixString, uint uUnique, [Out] StringBuilder lpTempFileName);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern int WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern int WaitForMultipleObjects(uint nCount, IntPtr[] lpHandles, bool bWaitAll, uint dwMilliseconds);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SuppressUnmanagedCodeSecurity]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool CloseHandle(IntPtr hObject);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool GetExitCodeProcess(IntPtr hProcess, out uint lpExitCode);
 
+		[SecurityCritical]
 		[DllImport("shell32.dll", SetLastError = true, CharSet = CharSet.Auto)]
 		public static extern bool ShellExecuteEx(SHELLEXECUTEINFO lpExecInfo);
 
+		[SecurityCritical]
 		[DllImport("netapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
 		public static extern int NetGetJoinInformation(string computerName, ref IntPtr buffer, ref NetworkJoinStatus status);
 
+		[SecurityCritical]
 		[DllImport("netapi32.dll", SetLastError = true)]
 		public static extern int NetApiBufferFree(IntPtr buffer);
 
+		[SecurityCritical]
 		[DllImport("shlwapi.dll", SetLastError = true, CharSet = CharSet.Auto)]
 		public static extern IntPtr PathAddBackslash([MarshalAs(UnmanagedType.LPTStr)]
 			StringBuilder lpszPath);
 
+		[SecurityCritical]
 		[DllImport("shlwapi.dll", CharSet = CharSet.Auto)]
 		public static extern bool PathCompactPathEx([Out] StringBuilder pszOut, string szPath, uint cchMax, int dwFlags);
 
+		[SecurityCritical]
 		[DllImport("shlwapi.dll", CharSet = CharSet.Auto)]
 		public static extern int PathCommonPrefix([In] string pszFile1, [In] string pszFile2, [Out] StringBuilder pszPath);
 
+		[SecurityCritical]
 		[DllImport("shlwapi.dll", SetLastError = true)]
 		public static extern int PathCreateFromUrl([In] string url, [Out] StringBuilder path, [In][Out] ref uint pathLength, [In] uint reserved);
 
+		[SecurityCritical]
 		[DllImport("shlwapi.dll", CharSet = CharSet.Auto)]
 		public static extern string PathFindNextComponent([In] string pszPath);
 
+		[SecurityCritical]
 		[DllImport("shlwapi.dll", CharSet = CharSet.Auto)]
 		public static extern bool PathIsSameRoot([In] string pszPath1, [In] string pszPath2);
 
+		[SecurityCritical]
 		[DllImport("shlwapi.dll", CharSet = CharSet.Auto)]
 		public static extern int UrlCreateFromPath([In] string path, [Out] StringBuilder url, [In][Out] ref uint urlLength, [In] uint reserved);
 
+		[SecurityCritical]
 		[DllImport("shlwapi.dll", CharSet = CharSet.Auto)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool PathIsUNC([MarshalAs(UnmanagedType.LPWStr)][In]
 			string pszPath);
 
+		[SecurityCritical]
 		[DllImport("shlwapi.dll", CharSet = CharSet.Auto)]
 		public static extern bool PathRelativePathTo([Out] StringBuilder pszPath, [In] string pszFrom, [In] FileAttributes dwAttrFrom, [In] string pszTo,
 			[In] FileAttributes dwAttrTo);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern int GetThreadId(IntPtr thread);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern int GetProcessId(IntPtr process);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern IntPtr CreateDesktop(string lpszDesktop, IntPtr lpszDevice, IntPtr pDevmode, int dwFlags, DesktopAccessRightsEnum dwDesiredAccess,
 			IntPtr lpsa);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern bool CloseDesktop(IntPtr hDesktop);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern IntPtr OpenDesktop(string lpszDesktop, int dwFlags, bool fInherit, DesktopAccessRightsEnum dwDesiredAccess);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern IntPtr OpenInputDesktop(int dwFlags, bool fInherit, DesktopAccessRightsEnum dwDesiredAccess);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern bool SwitchDesktop(IntPtr hDesktop);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern bool EnumDesktops(IntPtr hwinsta, EnumDesktopProc lpEnumFunc, IntPtr lParam);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern IntPtr GetProcessWindowStation();
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern bool EnumDesktopWindows(IntPtr hDesktop, EnumDesktopWindowsProc lpfn, IntPtr lParam);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern bool SetThreadDesktop(IntPtr hDesktop);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern IntPtr GetThreadDesktop(int dwThreadId);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern bool GetUserObjectInformation(IntPtr hObj, int nIndex, IntPtr pvInfo, int nLength, ref int lpnLengthNeeded);
 
+		[SecurityCritical]
 		[DllImport("wininet.dll", SetLastError = true)]
 		public static extern bool InternetGetConnectedState(out int lpdwFlags, int dwReserved);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern COORD GetConsoleFontSize(IntPtr hConsoleOutput, int nFont);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern int SetConsoleFont(IntPtr hOut, uint dwFontNum);
 
+		[SecurityCritical]
 		[DllImport("kernel32")]
 		public static extern bool GetConsoleFontInfo(IntPtr hOutput, bool bMaximize, uint count, [MarshalAs(UnmanagedType.LPArray)][Out]
 			ConsoleFont[] fonts);
 
+		[SecurityCritical]
 		[DllImport("kernel32")]
 		public static extern uint GetNumberOfConsoleFonts();
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll")]
 		public static extern bool GetCurrentConsoleFont(IntPtr hConsoleOutput, bool bMaximumWindow, out CONSOLE_FONT_INFO lpConsoleCurrentFont);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 		public static extern bool GetCurrentConsoleFontEx(IntPtr hConsoleOutput, bool bMaximumWindow, [In][Out] CONSOLE_FONT_INFO_EX lpConsoleCurrentFont);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetCurrentConsoleFontEx(IntPtr hConsoleOutput, bool bMaximumWindow, ref CONSOLE_FONT_INFO_EX lpConsoleCurrentFontEx);
 
+		[SecurityCritical]
 		[DllImport("kernel32", SetLastError = true)]
 		public static extern bool AddConsoleAlias(string source, string target, string exeName);
 
+		[SecurityCritical]
 		[DllImport("kernel32", SetLastError = true)]
 		public static extern bool AllocConsole();
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool AttachConsole(uint dwProcessId);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern IntPtr CreateConsoleScreenBuffer(uint dwDesiredAccess, uint dwShareMode, IntPtr lpSecurityAttributes, uint dwFlags,
 			IntPtr lpScreenBufferData);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool FillConsoleOutputAttribute(IntPtr hConsoleOutput, ushort wAttribute, uint nLength, COORD dwWriteCoord,
 			out uint lpNumberOfAttrsWritten);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool FillConsoleOutputCharacter(IntPtr hConsoleOutput, char cCharacter, uint nLength, COORD dwWriteCoord,
 			out uint lpNumberOfCharsWritten);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool FlushConsoleInputBuffer(IntPtr hConsoleInput);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
 		public static extern bool FreeConsole();
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GenerateConsoleCtrlEvent(CTRL_EVENT dwCtrlEvent, uint dwProcessGroupId);
 
+		[SecurityCritical]
 		[DllImport("kernel32", SetLastError = true)]
 		public static extern bool GetConsoleAlias(string Source, out StringBuilder targetBuffer, uint targetBufferLength, string exeName);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern uint GetConsoleAliases(StringBuilder[] lpTargetBuffer, uint targetBufferLength, string lpExeName);
 
+		[SecurityCritical]
 		[DllImport("kernel32", SetLastError = true)]
 		public static extern uint GetConsoleAliasesLength(string exeName);
 
+		[SecurityCritical]
 		[DllImport("kernel32", SetLastError = true)]
 		public static extern uint GetConsoleAliasExes(out StringBuilder ExeNameBuffer, uint exeNameBufferLength);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern uint GetConsoleAliasExesLength();
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern uint GetConsoleCP();
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetConsoleCursorInfo(IntPtr hConsoleOutput, out CONSOLE_CURSOR_INFO lpConsoleCursorInfo);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetConsoleDisplayMode(out uint ModeFlags);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetConsoleHistoryInfo(out CONSOLE_HISTORY_INFO ConsoleHistoryInfo);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern uint GetConsoleOriginalTitle(out StringBuilder ConsoleTitle, uint size);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern uint GetConsoleOutputCP();
 
 		// http://pinvoke.net/default.aspx/kernel32/GetConsoleProcessList.html
 		// TODO: Test - what's an out uint[] during interop? This probably isn't quite right, but provides a starting point:
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern uint GetConsoleProcessList(out uint[] processList, uint processCount);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetConsoleScreenBufferInfo(IntPtr hConsoleOutput, out CONSOLE_SCREEN_BUFFER_INFO lpConsoleScreenBufferInfo);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX ConsoleScreenBufferInfo);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetConsoleSelectionInfo(CONSOLE_SELECTION_INFO consoleSelectionInfo);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern uint GetConsoleTitle([Out] StringBuilder lpConsoleTitle, uint nSize);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern COORD GetLargestConsoleWindowSize(IntPtr hConsoleOutput);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetNumberOfConsoleInputEvents(IntPtr hConsoleInput, out uint lpcNumberOfEvents);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetNumberOfConsoleMouseButtons(ref uint lpNumberOfMouseButtons);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool PeekConsoleInput(IntPtr hConsoleInput, [Out] INPUT_RECORD[] lpBuffer, uint nLength, out uint lpNumberOfEventsRead);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool ReadConsole(IntPtr hConsoleInput, [Out] StringBuilder lpBuffer, uint nNumberOfCharsToRead, out uint lpNumberOfCharsRead,
 			IntPtr lpReserved);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool WriteConsole(IntPtr hConsoleOutput, StringBuilder lpBuffer, uint nNumberOfCharsToWrite, out uint lpNumberOfCharsWritten,
 			IntPtr lpReserved);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool WriteConsole(IntPtr hConsoleOutput, string lpBuffer, uint nNumberOfCharsToWrite, out uint lpNumberOfCharsWritten,
 			IntPtr lpReserved);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool ReadConsoleOutputAttribute(IntPtr hConsoleOutput, [Out] ushort[] lpAttribute, uint nLength, COORD dwReadCoord,
 			out uint lpNumberOfAttrsRead);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool ReadConsoleOutputCharacter(IntPtr hConsoleOutput, [Out] StringBuilder lpCharacter, uint nLength, COORD dwReadCoord,
 			out uint lpNumberOfCharsRead);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool ScrollConsoleScreenBuffer(IntPtr hConsoleOutput, [In] ref SMALL_RECT lpScrollRectangle, IntPtr lpClipRectangle,
 			COORD dwDestinationOrigin, [In] ref CHAR_INFO lpFill);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleActiveScreenBuffer(IntPtr hConsoleOutput);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleCP(uint wCodePageID);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleCtrlHandler(ConsoleCtrlDelegate handlerRoutine, bool add);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleCursorInfo(IntPtr hConsoleOutput, [In] ref CONSOLE_CURSOR_INFO lpConsoleCursorInfo);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleCursorPosition(IntPtr hConsoleOutput, COORD dwCursorPosition);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleDisplayMode(IntPtr ConsoleOutput, uint flags, out COORD newScreenBufferDimensions);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleHistoryInfo(CONSOLE_HISTORY_INFO ConsoleHistoryInfo);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleOutputCP(uint wCodePageID);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleScreenBufferInfoEx(IntPtr ConsoleOutput, CONSOLE_SCREEN_BUFFER_INFO_EX consoleScreenBufferInfoEx);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleScreenBufferSize(IntPtr hConsoleOutput, COORD dwSize);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleTextAttribute(IntPtr hConsoleOutput, ushort wAttributes);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleTitle(string lpConsoleTitle);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleWindowInfo(IntPtr hConsoleOutput, bool bAbsolute, [In] ref SMALL_RECT lpConsoleWindow);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetStdHandle(IntPtr hConsole, IntPtr hHandle);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool WriteConsoleInput(IntPtr hConsoleInput, INPUT_RECORD[] lpBuffer, uint nLength, out uint lpNumberOfEventsWritten);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool WriteConsoleOutput(IntPtr hConsoleOutput, CHAR_INFO[] lpBuffer, COORD dwBufferSize, COORD dwBufferCoord,
 			ref SMALL_RECT lpWriteRegion);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool WriteConsoleOutputAttribute(IntPtr hConsoleOutput, ushort[] lpAttribute, uint nLength, COORD dwWriteCoord,
 			out uint lpNumberOfAttrsWritten);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool WriteConsoleOutputCharacter(IntPtr hConsoleOutput, string lpCharacter, uint nLength, COORD dwWriteCoord,
 			out uint lpNumberOfCharsWritten);
 
+		[SecurityCritical]
 		[DllImport("kernel32")]
 		public static extern bool SetConsoleIcon(IntPtr hIcon);
 
+		[SecurityCritical]
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern bool LockWindowUpdate(IntPtr hWnd);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern IntPtr LocalFree(IntPtr hMem);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern int FormatMessage(FormatMessageFlags dwFlags, IntPtr lpSource, uint dwMessageId, uint dwLanguageId, ref IntPtr lpBuffer, uint nSize,
 			IntPtr pArguments);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", CharSet = CharSet.Auto, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
 		public static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)]
 			string fileName);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", CharSet = CharSet.Auto)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool FreeLibrary(IntPtr hModule);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true, CharSet = CharSet.Auto)]
 		public static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
 		public static extern void CopyMemory(IntPtr dest, IntPtr src, int length);
 
+		[SecurityCritical]
 		[DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false, CallingConvention = CallingConvention.Cdecl)]
 		public static extern unsafe byte* CopyMemory(byte* dst, byte* src, int length);
 
+		[SecurityCritical]
 		[DllImport("ntdll.dll", CallingConvention = CallingConvention.Cdecl)]
 		public static extern unsafe byte* memset(byte* dst, byte c, int count);
 
+		[SecurityCritical]
 		[DllImport("advapi32.dll", SetLastError = true)]
 		public static extern bool LogonUser(string lpszUsername, string lpszDomain, string lpszPassword, LogonType dwLogonType, int dwLogonProvider, out IntPtr phToken);
 
+		[SecurityCritical]
 		[DllImport("advapi32.dll", SetLastError = true)]
 		public static extern bool LogonUser(string lpszUsername, string lpszDomain, IntPtr phPassword, LogonType dwLogonType, int dwLogonProvider, out IntPtr phToken);
 
+		[SecurityCritical]
 		[DllImport("advapi32.dll", SetLastError = true)]
 		public static extern bool RevertToSelf();
 
+		[SecurityCritical]
 		[DllImport("advapi32.dll", SetLastError = true)]
 		public static extern bool DuplicateToken(IntPtr existingTokenHandle, SecurityImpersonationLevel securityImpersonationLevel, out IntPtr duplicateTokenHandle);
 
+		[SecurityCritical]
 		[DllImport("Winmm.dll", CharSet = CharSet.Auto)]
 		public static extern uint timeKillEvent(uint uTimerID);
 
+		[SecurityCritical]
 		[DllImport("Winmm.dll", CharSet = CharSet.Auto)]
 		public static extern uint timeGetTime();
 
+		[SecurityCritical]
 		[DllImport("Winmm.dll", CharSet = CharSet.Auto)]
 		public static extern uint timeBeginPeriod(uint uPeriod);
 
+		[SecurityCritical]
 		[DllImport("Winmm.dll", CharSet = CharSet.Auto)]
 		public static extern uint timeEndPeriod(uint uPeriod);
 
+		[SecurityCritical]
 		[DllImport("Winmm.dll", CharSet = CharSet.Auto)]
 		public static extern uint timeSetEvent(uint uDelay, uint uResolution, TimerCallback lpTimeProc, UIntPtr dwUser, fuEvent fuEvent);
 
+		[SecurityCritical]
 		[DllImport("rpcrt4.dll", SetLastError = true)]
 		public static extern int UuidCreateSequential(out Guid guid);
 
+		[SecurityCritical]
 		[DllImport("advapi32.dll", SetLastError = true)]
 		public static extern bool GetTokenInformation(IntPtr tokenHandle, TokenInformationClass tokenInformationClass, IntPtr tokenInformation, int tokenInformationLength, out int returnLength);
 
+		[SecurityCritical]
 		[DllImport("advapi32.dll")]
 		public static extern uint GetEffectiveRightsFromAcl(byte[] pacl, ref TRUSTEE pTrustee, ref uint pAccessRights);
 
+		[SecurityCritical]
 		[DllImport("advapi32.dll", SetLastError = true)]
 		public static extern void BuildTrusteeWithSid(ref TRUSTEE pTrustee, byte[] sid);
 
+		[SecurityCritical]
 		[DllImport("advapi32.dll", SetLastError = true)]
 		public static extern bool QueryServiceObjectSecurity(SafeHandle serviceHandle, SecurityInfos secInfo, byte[] lpSecDesrBuf, uint bufSize, out uint bufSizeNeeded);
 
+		[SecurityCritical]
 		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
 		public static extern IntPtr RegisterDeviceNotification(IntPtr recipient, IntPtr notificationFilter, int flags);
 
+		[SecurityCritical]
 		[DllImport("user32.dll")]
 		public static extern bool UnregisterDeviceNotification(IntPtr handle);
 

@@ -83,7 +83,7 @@ namespace essentialMix.Collections
 			int lastIndex = index + count - 1;
 
 			for (int i = index, j = 0; i <= lastIndex; i++, j += Constants.UINT_SIZE)
-				Array.Copy(BitConverter.GetBytes(this[i]), 0, array, j, Constants.UINT_SIZE);
+				Buffer.BlockCopy(BitConverter.GetBytes(this[i]), 0, array, j, Constants.UINT_SIZE);
 		}
 
 		[NotNull]

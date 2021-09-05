@@ -35,6 +35,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
+using System.Security;
 using System.Text;
 using JetBrains.Annotations;
 
@@ -220,6 +221,7 @@ namespace essentialMix.Helpers
 		/// </summary>
 		/// <param name="ppAsmCache">Pointer to return IAssemblyCache</param>
 		/// <param name="dwReserved">must be 0</param>
+		[SecurityCritical]
 		[DllImport("fusion.dll", SetLastError=true, PreserveSig=false)]
 		public static extern void CreateAssemblyCache(out IAssemblyCache ppAsmCache, uint dwReserved);
 
@@ -231,6 +233,7 @@ namespace essentialMix.Helpers
 		/// determined by dwFlags. The string representation can be null.</param>
 		/// <param name="dwFlags">Zero or more of the bits that are defined in the CREATE_ASM_NAME_OBJ_FLAGS enumeration.</param>
 		/// <param name="pvReserved"> Must be null.</param>
+		[SecurityCritical]
 		[DllImport("fusion.dll", SetLastError=true, CharSet=CharSet.Unicode, PreserveSig=false)]
 		public static extern void CreateAssemblyNameObject(out IAssemblyName ppAssemblyNameObj, string szAssemblyName,
 			uint dwFlags, IntPtr pvReserved);
@@ -243,6 +246,7 @@ namespace essentialMix.Helpers
 		/// <param name="pName">An assembly name that is used to filter the enumeration. Can be null to enumerate all assemblies in the GAC.</param>
 		/// <param name="dwFlags">Exactly one bit from the ASM_CACHE_FLAGS enumeration.</param>
 		/// <param name="pvReserved">Must be NULL.</param>
+		[SecurityCritical]
 		[DllImport("fusion.dll", SetLastError=true, PreserveSig=false)]
 		public static extern void CreateAssemblyEnum(out IAssemblyEnum pEnum, IntPtr pUnkReserved, IAssemblyName pName,
 			AsmCacheFlags dwFlags, IntPtr pvReserved);
@@ -254,6 +258,7 @@ namespace essentialMix.Helpers
 		/// <param name="pName">The assembly name for which the references are enumerated.</param>
 		/// <param name="dwFlags"> Must be zero.</param>
 		/// <param name="pvReserved">Must be null.</param>
+		[SecurityCritical]
 		[DllImport("fusion.dll", SetLastError=true, PreserveSig=false)]
 		public static extern void CreateInstallReferenceEnum(out IInstallReferenceEnum ppRefEnum, IAssemblyName pName,
 			uint dwFlags, IntPtr pvReserved);
@@ -264,6 +269,7 @@ namespace essentialMix.Helpers
 		/// <param name="dwCacheFlags">Exactly one of the bits defined in the ASM_CACHE_FLAGS enumeration.</param>
 		/// <param name="pwzCachePath">Pointer to a buffer that is to receive the path of the GAC as a Unicode string.</param>
 		/// <param name="pcchPath">Length of the pwszCachePath buffer, in Unicode characters.</param>
+		[SecurityCritical]
 		[DllImport("fusion.dll", SetLastError=true, CharSet=CharSet.Unicode, PreserveSig=false)]
 		public static extern void GetCachePath(AsmCacheFlags dwCacheFlags, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwzCachePath,
 			ref uint pcchPath);

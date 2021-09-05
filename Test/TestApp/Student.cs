@@ -4,6 +4,7 @@ using essentialMix.Extensions;
 
 namespace TestApp
 {
+	[Serializable]
 	internal class Student
 	{
 		public int Id { get; set; }

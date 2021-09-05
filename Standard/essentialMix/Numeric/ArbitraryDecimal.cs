@@ -76,7 +76,7 @@ namespace essentialMix.Numeric
 			}
 
 			if (result[0] != 0) _digits = result;
-			else Array.Copy(result, 1, _digits, 0, _digits.Length);
+			else Buffer.BlockCopy(result, 1, _digits, 0, _digits.Length);
 
 			Normalize();
 		}

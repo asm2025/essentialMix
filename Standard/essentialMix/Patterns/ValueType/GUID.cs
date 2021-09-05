@@ -64,7 +64,7 @@ namespace essentialMix.Patterns.ValueType
 			position += sizeof(ushort);
 			guid.Data3 = BitConverter.ToUInt16(bytes, position);
 			position += sizeof(ushort);
-			Array.Copy(bytes, position, guid.Data4, 0, LAST_BYTES_LEN);
+			Buffer.BlockCopy(bytes, position, guid.Data4, 0, LAST_BYTES_LEN);
 			return guid;
 		}
 	}

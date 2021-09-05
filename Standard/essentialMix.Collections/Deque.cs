@@ -262,6 +262,17 @@ namespace essentialMix.Collections
 						: new T[capacity];
 		}
 
+		public Deque([NotNull] IEnumerable<T> collection)
+		{
+			if (!collection.FastCount(out int capacity)) capacity = Constants.DEFAULT_CAPACITY;
+			Items = new T[capacity];
+
+			foreach (T item in collection)
+				Insert(Count, item, true);
+
+			_version = 0;
+		}
+
 		public int Capacity
 		{
 			get => Items.Length;

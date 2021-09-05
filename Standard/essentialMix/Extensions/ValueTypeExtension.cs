@@ -363,7 +363,7 @@ namespace essentialMix.Extensions
 						break;
 				}
 
-				Array.Copy(buffer, 0, bytes, i * Constants.INT_SIZE, Constants.INT_SIZE);
+				Buffer.BlockCopy(buffer, 0, bytes, i * Constants.INT_SIZE, Constants.INT_SIZE);
 			}
 
 			return bytes;
@@ -586,7 +586,7 @@ namespace essentialMix.Extensions
 			else
 			{
 				buffer = new byte[count];
-				Array.Copy(thisValue, startIndex, buffer, 0, count);
+				Buffer.BlockCopy(thisValue, startIndex, buffer, 0, count);
 			}
 			
 			using (MemoryStream stream = new MemoryStream(buffer))
@@ -719,7 +719,7 @@ namespace essentialMix.Extensions
 			byte[] bytes = new byte[bits.Length * Constants.INT_SIZE];
 
 			for (int i = 0; i < bits.Length; i++)
-				Array.Copy(BitConverter.GetBytes(bits[i]), 0, bytes, i * Constants.INT_SIZE, Constants.INT_SIZE);
+				Buffer.BlockCopy(BitConverter.GetBytes(bits[i]), 0, bytes, i * Constants.INT_SIZE, Constants.INT_SIZE);
 
 			return bytes;
 		}

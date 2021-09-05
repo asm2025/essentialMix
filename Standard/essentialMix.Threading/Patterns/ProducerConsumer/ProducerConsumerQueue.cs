@@ -140,15 +140,6 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer
 		protected CallbackDelegates<T> WorkStartedCallback { get; }
 		protected CallbackDelegates<T> WorkCompletedCallback { get; }
 
-		[NotNull]
-		protected CancellationTokenSource InitializeCancellationTokenSource()
-		{
-			if (_cts != null) return _cts;
-			Interlocked.CompareExchange(ref _cts, new CancellationTokenSource(), null);
-			Token = _cts.Token;
-			return _cts;
-		}
-
 		/// <inheritdoc />
 		public void InitializeToken(CancellationToken token)
 		{

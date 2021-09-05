@@ -169,7 +169,7 @@ namespace essentialMix.Helpers
 
 			if (shiftA == 0)
 			{
-				Array.Copy(bytes, startByte, dst, 0, dst.Length);
+				Buffer.BlockCopy(bytes, startByte, dst, 0, dst.Length);
 			}
 			else
 			{
@@ -187,7 +187,7 @@ namespace essentialMix.Helpers
 			return dst;
 		}
 
-		public static void CopyBytes([NotNull] byte[] dst, int dstOffset, [NotNull] byte[] src) { Array.Copy(src, 0, dst, dstOffset, src.Length); }
+		public static void CopyBytes([NotNull] byte[] dst, int dstOffset, [NotNull] byte[] src) { Buffer.BlockCopy(src, 0, dst, dstOffset, src.Length); }
 
 		public static int Read(ref ulong x, int length)
 		{

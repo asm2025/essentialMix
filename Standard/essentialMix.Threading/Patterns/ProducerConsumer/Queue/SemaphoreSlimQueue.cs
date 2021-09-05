@@ -249,7 +249,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 
 				lock(SyncRoot)
 				{
-					if (IsPaused || IsDisposed || Token.IsCancellationRequested || !_queue.IsEmpty) continue;
+					if (IsPaused || IsDisposed || Token.IsCancellationRequested || IsCompleted || !_queue.IsEmpty) continue;
 					Monitor.Wait(SyncRoot, TimeSpanHelper.FAST);
 				}
 

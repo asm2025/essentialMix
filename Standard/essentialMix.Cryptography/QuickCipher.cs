@@ -569,7 +569,7 @@ namespace essentialMix.Cryptography
 				string passphraseStr = symmetric.RandomString(keySize);
 				symmetric.GenerateKey(passphraseStr.Secure(), settings.SaltSize, settings.RFC2898Iterations);
 				keyBytes = new byte[ByteHelper.GetByteSize(symmetric.KeySize)];
-				Array.Copy(symmetric.Key, keyBytes, keyBytes.Length);
+				Buffer.BlockCopy(symmetric.Key, 0, keyBytes, 0, keyBytes.Length);
 			}
 
 			return keyBytes;

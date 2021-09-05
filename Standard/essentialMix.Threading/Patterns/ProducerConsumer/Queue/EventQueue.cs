@@ -171,7 +171,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					}
 
 					if (_queue.IsEmpty && !_queueEvent.WaitOne(TimeSpanHelper.FAST, Token)) continue;
-					if (IsPaused || IsDisposed || Token.IsCancellationRequested || _queue.IsEmpty) continue;
+					if (IsPaused || IsDisposed || Token.IsCancellationRequested || IsCompleted || _queue.IsEmpty) continue;
 					T item;
 
 					lock(SyncRoot)

@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 using JetBrains.Annotations;
 
@@ -6,7 +7,7 @@ namespace essentialMix
 {
 	public static class MSVCRT
 	{
-
+		[SecurityCritical]
 		[DllImport("msvcrt.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
 		private static extern int _snwprintf_s([MarshalAs(UnmanagedType.LPWStr)] StringBuilder str, int sizeOfBuffer, int count, string format, __arglist);
 

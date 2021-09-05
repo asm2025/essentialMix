@@ -106,6 +106,7 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue
 					}
 
 					if (_queue.Count == 0 || !_queue.TryTake(out T item, TimeSpanHelper.FAST, Token)) continue;
+					if (IsPaused || IsDisposed || Token.IsCancellationRequested || IsCompleted || _queue.Count == 0) continue;
 					if (ScheduledCallback != null && !ScheduledCallback(item)) continue;
 					AddTasksCountDown();
 					Run(item);

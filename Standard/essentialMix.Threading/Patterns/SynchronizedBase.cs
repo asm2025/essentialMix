@@ -23,17 +23,12 @@ namespace essentialMix.Threading.Patterns
 	/// 	{
 	/// 		if (Token.CanBeCanceled)
 	/// 		{
-	/// 			bool lockTaken = false;
-	/// 	
-	/// 			while (!lockTaken && !Token.IsCancellationRequested) 
-	/// 				lockTaken = Monitor.TryEnter(SyncRoot, TimeSpanHelper.MINIMUM);
-	/// 	
-	/// 			Token.ThrowIfCancellationRequested();
-	/// 			if (!lockTaken) return;
+	/// 			wait for the lock and check Token
 	/// 		}
 	/// 		else
 	/// 		{
-	/// 			Monitor.Enter(SyncRoot);
+	///				if (!Monitor.TryEnter(SyncRoot, [Some timeout here])
+	/// 				return;
 	/// 		}
 	/// 	}
 	/// 
@@ -64,7 +59,7 @@ namespace essentialMix.Threading.Patterns
 	/// 	}
 	/// 	else
 	/// 	{
-	/// 		Monitor.Enter(SyncRoot);
+	/// 		if (!Monitor.TryEnter(SyncRoot, Timeout)) return
 	/// 	}
 	///
 	///		if (IsBusy || !WaitForWorkerToFinish())
@@ -122,7 +117,8 @@ namespace essentialMix.Threading.Patterns
 		private object _syncRoot;
 		private ManualResetEventSlim _workerStarted;
 		private ManualResetEventSlim _workerDone;
-		private CancellationTokenSource _ctx;
+		private CancellationTokenSource _cts;
+		private IDisposable _tokenRegistration;
 
 		private volatile int _isBusy;
 
@@ -138,7 +134,7 @@ namespace essentialMix.Threading.Patterns
 			{
 				ReleaseStartEvent();
 				ReleaseFinishEvent();
-				ReleaseCancellationTokenSource();
+				ReleaseToken();
 			}
 
 			base.Dispose(disposing);
@@ -242,28 +238,30 @@ namespace essentialMix.Threading.Patterns
 
 		protected bool HasPendingWait()
 		{
-			return IsBusy || _ctx != null || _workerStarted != null || _workerDone != null;
+			return IsBusy || _cts != null || _workerStarted != null || _workerDone != null;
 		}
 
-		[NotNull]
-		protected CancellationTokenSource InitializeCancellationTokenSource()
+		public void InitializeToken(CancellationToken token)
 		{
-			if (_ctx != null) return _ctx;
-			Interlocked.CompareExchange(ref _ctx, new CancellationTokenSource(), null);
-			Token = _ctx.Token;
-			return _ctx;
+			ThrowIfDisposed();
+			if (_cts != null) Interlocked.Exchange(ref _cts, null);
+			ObjectHelper.Dispose(ref _tokenRegistration);
+			Interlocked.CompareExchange(ref _cts, new CancellationTokenSource(), null);
+			if (token.CanBeCanceled) _tokenRegistration = token.Register(() => _cts.CancelIfNotDisposed(), false);
+			Token = _cts.Token;
 		}
 
-		protected void ReleaseCancellationTokenSource()
+		protected void ReleaseToken()
 		{
-			if (_ctx == null) return;
-			Interlocked.Exchange(ref _ctx, null);
+			if (_cts == null) return;
+			Interlocked.Exchange(ref _cts, null);
+			ObjectHelper.Dispose(ref _tokenRegistration);
 			Token = CancellationToken.None;
 		}
 
 		protected virtual void Cancel()
 		{
-			_ctx.CancelIfNotDisposed();
+			_cts.CancelIfNotDisposed();
 		}
 	}
 }

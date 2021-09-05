@@ -21,7 +21,7 @@ namespace essentialMix.Helpers
 			encoding ??= DefaultEncoding;
 			byte[] bytes = encoding.GetBytes(key);
 			byte[] buffer = new byte[size / 8];
-			Array.Copy(bytes, buffer, Math.Min(bytes.Length, buffer.Length));
+			Buffer.BlockCopy(bytes, 0, buffer, 0, Math.Min(bytes.Length, buffer.Length));
 			return new SymmetricSecurityKey(buffer);
 		}
 	}
