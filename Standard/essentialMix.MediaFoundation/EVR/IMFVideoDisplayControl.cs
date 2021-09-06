@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Security;
+using essentialMix.MediaFoundation.Infrastrcture;
 
 namespace essentialMix.MediaFoundation.EVR
 {

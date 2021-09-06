@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using essentialMix.MediaFoundation.EVR;
+using essentialMix.MediaFoundation.Infrastrcture;
 using essentialMix.MediaFoundation.Internal;
 using essentialMix.MediaFoundation.IO;
 using essentialMix.MediaFoundation.MFPlayer;

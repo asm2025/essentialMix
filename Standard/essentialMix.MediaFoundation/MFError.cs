@@ -10,6 +10,8 @@ namespace essentialMix.MediaFoundation
 {
 	public class MFError
 	{
+		private const string MESSAGE_FILE = "mferror.dll";
+
 		#region externs
 
 		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, EntryPoint = "FormatMessageW", ExactSpelling = true, SetLastError = true)]
@@ -59,10 +61,8 @@ namespace essentialMix.MediaFoundation
 		#endregion
 
 		private static IntPtr s_hModule = IntPtr.Zero;
-		private static readonly string MESSAGEFILE = "mferror.dll";
-		private static readonly MFError s_OK = new MFError();
 
-		private readonly int LastError;
+		private readonly int _lastError;
 
 		/// <summary>
 		/// Construct an empty MFError
@@ -78,14 +78,15 @@ namespace essentialMix.MediaFoundation
 		/// <param name="hr">an int to turn into an MFError</param>
 		public MFError(int hr)
 		{
-			LastError = hr;
+			_lastError = hr;
 		}
 
+		[NotNull]
 		private static MFError MakeOne(int hr)
 		{
 			MFError m = hr switch
 			{
-				0 => s_OK,
+				0 => new MFError(),
 				< 0 => throw new MFException(hr),
 				_ => new MFError(hr)
 			};
@@ -104,6 +105,7 @@ namespace essentialMix.MediaFoundation
 		/// </example>
 		/// <param name="hr">The value from which to construct the MFError.</param>
 		/// <returns>The new MFError</returns>
+		[NotNull]
 		public static implicit operator MFError(int hr)
 		{
 			return MakeOne(hr);
@@ -116,7 +118,7 @@ namespace essentialMix.MediaFoundation
 		/// <returns>The MFError as an integer</returns>
 		public static implicit operator int([NotNull] MFError hr)
 		{
-			return hr.LastError;
+			return hr._lastError;
 		}
 
 		/// <summary>
@@ -126,14 +128,14 @@ namespace essentialMix.MediaFoundation
 		[NotNull]
 		public override string ToString()
 		{
-			return GetErrorText(LastError);
+			return GetErrorText(_lastError);
 		}
 
 		#region static methods
 
 		public bool Failed()
 		{
-			return Failed(LastError);
+			return Failed(_lastError);
 		}
 		public static bool Failed(int hr)
 		{
@@ -142,7 +144,7 @@ namespace essentialMix.MediaFoundation
 
 		public bool Succeeded()
 		{
-			return Succeeded(LastError);
+			return Succeeded(_lastError);
 		}
 
 		public static bool Succeeded(int hr)
@@ -153,7 +155,7 @@ namespace essentialMix.MediaFoundation
 		[NotNull]
 		public string GetErrorText()
 		{
-			return GetErrorText(LastError);
+			return GetErrorText(_lastError);
 		}
 
 		[SecurityCritical]
@@ -164,20 +166,20 @@ namespace essentialMix.MediaFoundation
 			if (s_hModule == IntPtr.Zero)
 			{
 				// Deal with possible multi-threading problems
-				lock (MESSAGEFILE)
+				lock (MESSAGE_FILE)
 				{
 					// Make sure it didn't get set while we waited for the lock
 					if (s_hModule == IntPtr.Zero)
 					{
 						LoadLibraryExFlags f = LoadLibraryExFlags.LoadLibraryAsDataFile | LoadLibraryExFlags.LoadLibrarySearchSystem32;
 						// Load the Media Foundation error message dll
-						s_hModule = LoadLibraryEx(MESSAGEFILE, IntPtr.Zero, f);
+						s_hModule = LoadLibraryEx(MESSAGE_FILE, IntPtr.Zero, f);
 
 						// LoadLibraryExFlags.LoadLibrarySearchSystem32 may not be supported
 						if (s_hModule == IntPtr.Zero && Marshal.GetLastWin32Error() == 87)
 						{
 							// Perhaps KB2533623 is not installed.  Try again.
-							s_hModule = LoadLibraryEx(MESSAGEFILE, IntPtr.Zero, LoadLibraryExFlags.LoadLibraryAsDataFile);
+							s_hModule = LoadLibraryEx(MESSAGE_FILE, IntPtr.Zero, LoadLibraryExFlags.LoadLibraryAsDataFile);
 						}
 					}
 				}
@@ -232,7 +234,7 @@ namespace essentialMix.MediaFoundation
 
 		public void ThrowExceptionForHR()
 		{
-			ThrowExceptionForHR(LastError);
+			ThrowExceptionForHR(_lastError);
 		}
 
 		/// <summary>

@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using essentialMix.MediaFoundation.Alt;
+using essentialMix.MediaFoundation.Infrastrcture;
 using essentialMix.MediaFoundation.IO;
 using essentialMix.MediaFoundation.Transform;
+using essentialMix.Patterns.Object;
 using JetBrains.Annotations;
 
 namespace essentialMix.MediaFoundation
 {
-	public class MFCapture : COMBase, IMFSourceReaderCallback
+	public class MFCapture : Disposable, IMFSourceReaderCallback
 	{
 		private const int TARGET_BIT_RATE = 240 * 1000;
 
@@ -135,17 +138,7 @@ namespace essentialMix.MediaFoundation
 				// todo remove this and send the bytes
 				hr = MFAPI.MFCreateTempFile(MFFileAccessMode.ReadWrite, MFFileOpenMode.DeleteIfExist, MFFileFlags.None, out _byteStream);
 				if (ResultCom.Failed(hr)) return hr;
-
-				/*
-				 * tracing the temp file name/path.
-				 * Casting from a COM object to another COM interface will cause .Net to marshal the interface
-				 * and call C++ QueryInterface. The returned type MUST be checked for null in case it does not support it.
-				 */
-				// ReSharper disable once SuspiciousTypeConversion.Global
-				IMFAttributes bsAttributes = (IMFAttributes)_byteStream;
-				
-				if (bsAttributes != null && ResultCom.Succeeded(MFAPI.MFGetAttributeString(bsAttributes, MFAttributesClsid.MF_BYTESTREAM_ORIGIN_NAME, out string tempPath)))
-					Trace($"IMFByteStreamPath: '{tempPath}'");
+				TraceIMFBytePath(_byteStream);
 
 				hr = MFAPI.MFCreateSinkWriterFromURL(null, _byteStream, attributes, out _writer);
 				if (ResultCom.Failed(hr)) return hr;
@@ -416,6 +409,23 @@ namespace essentialMix.MediaFoundation
 			int hr = source.GetItem(key, variant);
 			if (ResultCom.Succeeded(hr)) hr = target.SetItem(key, variant);
 			return hr;
+		}
+
+		[Conditional("DEBUG")]
+		private static void TraceIMFBytePath(IMFByteStream stream)
+		{
+			if (stream == null) return;
+
+			/*
+			* tracing the temp file name/path.
+			* Casting from a COM object to another COM interface will cause .Net to marshal the interface
+			* and call C++ QueryInterface. The returned type MUST be checked for null in case it does not support it.
+			*/
+			// ReSharper disable once SuspiciousTypeConversion.Global
+			IMFAttributes bsAttributes = (IMFAttributes)stream;
+				
+			if (ResultCom.Failed(MFAPI.MFGetAttributeString(bsAttributes, MFAttributesClsid.MF_BYTESTREAM_ORIGIN_NAME, out string tempPath))) return;
+			Trace.TraceInformation($"IMFByteStreamPath: '{tempPath}'");
 		}
 	}
 }
