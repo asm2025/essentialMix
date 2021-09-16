@@ -37,46 +37,38 @@ namespace essentialMix.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T As<T>(this T thisValue) { return thisValue; }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T To<TSource, T>(this TSource thisValue) { return To(thisValue, default(T)); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T To<TSource, T>(this TSource thisValue, T defaultValue) { return To(thisValue, defaultValue, null); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T To<TSource, T>(this TSource thisValue, Func<string, T, T> whenFailed) { return To(thisValue, default(T), whenFailed); }
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T To<TSource, T>(this TSource thisValue, T defaultValue, Func<string, T, T> whenFailed) { return To(thisValue, defaultValue, null, whenFailed); }
 
 		public static T To<TSource, T>(this TSource thisValue, T defaultValue, OutWithDefaultFunc<string, T, bool> beforeParse, Func<string, T, T> whenFailed)
 		{
-			if (thisValue is T)
-				return (T)(object)thisValue;
-			if (thisValue.IsNull())
-				return whenFailed != null ? whenFailed(null, defaultValue) : defaultValue;
+			if (thisValue is T) return (T)(object)thisValue;
+			if (thisValue.IsNull()) return whenFailed != null ? whenFailed(null, defaultValue) : defaultValue;
 
 			Type target = ResolveType(typeof(T)), source = AsType(thisValue, true);
-			if (target.IsAssignableFrom(source))
-				return (T)Convert.ChangeType(thisValue, target);
+			if (target.IsAssignableFrom(source)) return (T)Convert.ChangeType(thisValue, target);
 
 			T value;
 
-			if (target.IsValueType)
+			if (target.IsValueType && source.IsValueType)
 			{
-				if (source.IsValueType)
+				try
 				{
-					try
-					{
-						value = (T)Convert.ChangeType(thisValue, target);
-						return value;
-					}
-					catch
-					{
-						// ignored
-					}
+					value = (T)Convert.ChangeType(thisValue, target);
+					return value;
 				}
-				else if (target == typeof(bool) && thisValue is string s)
+				catch
 				{
-					return (T)(object)(string.Equals(s, bool.TrueString, StringComparison.OrdinalIgnoreCase)
-										|| string.Equals(s, "yes", StringComparison.OrdinalIgnoreCase)
-										|| string.Equals(s, "on", StringComparison.OrdinalIgnoreCase));
+					// ignored
 				}
 			}
 

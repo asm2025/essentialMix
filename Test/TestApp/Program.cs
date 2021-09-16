@@ -25,6 +25,7 @@ using essentialMix.Patterns.Threading;
 using essentialMix.Threading;
 using essentialMix.Collections;
 using essentialMix.Comparers;
+using essentialMix.ComponentModel;
 using essentialMix.Cryptography;
 using essentialMix.Cryptography.Settings;
 using essentialMix.Exceptions;
@@ -189,7 +190,7 @@ work with {HEAVY} items.");
 			//TestAppInfo();
 
 			//TestObservableCollections();
-
+			
 			//TestEnumerateDirectoriesAndFiles();
 			
 			//TestEventWaitHandle();
@@ -213,10 +214,16 @@ work with {HEAVY} items.");
 				"yes",
 				"hi",
 				"on",
-				"hey"
+				"hey",
+				"enable",
+				"enabled",
+				"allow",
+				"allowed",
+				"dfgfdgfdg"
 			};
 
 			Title("Testing bool conversion...");
+			BooleanTypeDescriptionProvider.Register();
 
 			foreach (string value in values) 
 				Console.WriteLine($"'{value}' evaluates to {value.To(false).ToYesNo()}");

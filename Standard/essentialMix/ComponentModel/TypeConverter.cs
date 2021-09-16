@@ -21,15 +21,12 @@ namespace essentialMix.ComponentModel
 		/// <inheritdoc />
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			switch (value)
+			return value switch
 			{
-				case null:
-					return null;
-				case T t:
-					return t;
-				default:
-					return CustomConvertFrom(context, culture, value);
-			}
+				null => null,
+				T t => t,
+				_ => CustomConvertFrom(context, culture, value)
+			};
 		}
 
 		/// <inheritdoc />
@@ -41,10 +38,11 @@ namespace essentialMix.ComponentModel
 		/// <inheritdoc />
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
-			if (value == null) return destinationType.Default();
-			return destinationType.Is<T>()
-				? (T)value
-				: CustomConvertTo(context, culture, value, destinationType);
+			return value == null
+						? destinationType.Default()
+						: destinationType is T tv
+							? tv
+							: CustomConvertTo(context, culture, value, destinationType);
 		}
 
 		protected virtual object CustomConvertFrom([NotNull] ITypeDescriptorContext context, [NotNull] CultureInfo culture, object value) { return base.ConvertFrom(context, culture, value); }
