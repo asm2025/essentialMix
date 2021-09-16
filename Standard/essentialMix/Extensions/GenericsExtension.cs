@@ -58,16 +58,25 @@ namespace essentialMix.Extensions
 
 			T value;
 
-			if (target.IsValueType && source.IsValueType)
+			if (target.IsValueType)
 			{
-				try
+				if (source.IsValueType)
 				{
-					value = (T)Convert.ChangeType(thisValue, target);
-					return value;
+					try
+					{
+						value = (T)Convert.ChangeType(thisValue, target);
+						return value;
+					}
+					catch
+					{
+						// ignored
+					}
 				}
-				catch
+				else if (target == typeof(bool) && thisValue is string s)
 				{
-					// ignored
+					return (T)(object)(string.Equals(s, bool.TrueString, StringComparison.OrdinalIgnoreCase)
+										|| string.Equals(s, "yes", StringComparison.OrdinalIgnoreCase)
+										|| string.Equals(s, "on", StringComparison.OrdinalIgnoreCase));
 				}
 			}
 

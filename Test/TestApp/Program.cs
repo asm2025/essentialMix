@@ -91,6 +91,8 @@ work with {HEAVY} items.");
 		{
 			Console.OutputEncoding = Encoding.UTF8;
 
+			TestBool();
+
 			//TestDomainName();
 
 			//TestExpressionExtension();
@@ -195,10 +197,29 @@ work with {HEAVY} items.");
 			//TestWaitForEvent();
 
 			//TestBlockingStream();
-			TestConsumerStream();
+			//TestConsumerStream();
 			//TestConsumerPipe();
 
 			ConsoleHelper.Pause();
+		}
+
+		private static void TestBool()
+		{
+			string[] values =
+			{
+				"true",
+				"anything",
+				"off",
+				"yes",
+				"hi",
+				"on",
+				"hey"
+			};
+
+			Title("Testing bool conversion...");
+
+			foreach (string value in values) 
+				Console.WriteLine($"'{value}' evaluates to {value.To(false).ToYesNo()}");
 		}
 
 		private static void TestDomainName()
