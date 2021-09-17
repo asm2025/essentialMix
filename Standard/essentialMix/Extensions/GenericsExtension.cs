@@ -101,15 +101,10 @@ namespace essentialMix.Extensions
 		public static T To<TSource, T, TCheck>(this TSource thisValue, T defaultValue, OutWithDefaultFunc<TCheck, T, bool> beforeConvert,
 			OutWithDefaultFunc<string, T, bool> beforeParse, Func<string, T, T> whenFailed)
 		{
-			if (thisValue is T)
-				return (T)(object)thisValue;
-			if (thisValue.IsNull())
-				return whenFailed != null ? whenFailed(null, defaultValue) : defaultValue;
-
+			if (thisValue is T) return (T)(object)thisValue;
+			if (thisValue.IsNull()) return whenFailed != null ? whenFailed(null, defaultValue) : defaultValue;
 			Type target = ResolveType(typeof(T)), source = AsType(thisValue, true);
-			if (target.IsAssignableFrom(source))
-				return (T)Convert.ChangeType(thisValue, target);
-
+			if (target.IsAssignableFrom(source)) return (T)Convert.ChangeType(thisValue, target);
 			return beforeConvert != null && thisValue is TCheck && beforeConvert((TCheck)(object)thisValue, defaultValue, out T value)
 						? value
 						: To(thisValue, defaultValue, beforeParse, whenFailed);
