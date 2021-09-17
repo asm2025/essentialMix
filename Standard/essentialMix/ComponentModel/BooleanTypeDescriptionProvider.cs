@@ -59,6 +59,7 @@ namespace essentialMix.ComponentModel
 		public override IDictionary GetCache(object instance) { return _tail.GetCache(instance); }
 
 		/// <inheritdoc />
+		[NotNull]
 		public override ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance)
 		{
 			return new WrappedTypeDescriptor(_tail.GetTypeDescriptor(objectType, instance));
