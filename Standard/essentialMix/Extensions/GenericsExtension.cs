@@ -93,6 +93,7 @@ namespace essentialMix.Extensions
 						: Parse(thisValue, defaultValue, whenFailed);
 		}
 
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T To<TSource, T, TCheck>(this TSource thisValue, T defaultValue, OutWithDefaultFunc<TCheck, T, bool> beforeConvert, Func<string, T, T> whenFailed)
 		{
 			return To(thisValue, defaultValue, beforeConvert, null, whenFailed);
