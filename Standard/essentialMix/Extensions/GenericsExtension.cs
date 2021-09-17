@@ -38,10 +38,10 @@ namespace essentialMix.Extensions
 		public static T As<T>(this T thisValue) { return thisValue; }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static T To<TSource, T>(this TSource thisValue) { return To(thisValue, default(T)); }
+		public static T To<TSource, T>(this TSource thisValue) { return To(thisValue, default(T), null, null); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static T To<TSource, T>(this TSource thisValue, T defaultValue) { return To(thisValue, defaultValue, null); }
+		public static T To<TSource, T>(this TSource thisValue, T defaultValue) { return To(thisValue, defaultValue, null, null); }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static T To<TSource, T>(this TSource thisValue, Func<string, T, T> whenFailed) { return To(thisValue, default(T), whenFailed); }
