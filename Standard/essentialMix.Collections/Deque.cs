@@ -556,12 +556,12 @@ namespace essentialMix.Collections
 			return result;
 		}
 
-		public int BinarySearch([NotNull] T item)
+		public int BinarySearch(T item)
 		{
 			return BinarySearch(0, Count, item, null);
 		}
 
-		public int BinarySearch([NotNull] T item, IComparer<T> comparer)
+		public int BinarySearch(T item, IComparer<T> comparer)
 		{
 			return BinarySearch(0, Count, item, comparer);
 		}
@@ -586,7 +586,7 @@ namespace essentialMix.Collections
 		/// 
 		/// The method uses the Array.BinarySearch method to perform the search.
 		/// </summary>
-		public int BinarySearch(int index, int count, [NotNull] T item, IComparer<T> comparer)
+		public int BinarySearch(int index, int count, T item, IComparer<T> comparer)
 		{
 			Count.ValidateRange(index, ref count);
 			return Array.BinarySearch(Items, index, count, item, comparer);

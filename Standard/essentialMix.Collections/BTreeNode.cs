@@ -10,10 +10,10 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("{Key} = {Value}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class KeyedBinaryNode<TNode, TKey, TValue> : IKeyedNode<TKey, TValue>
-		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+	public abstract class BTreeNode<TNode, TKey, TValue> : IKeyedNode<TKey, TValue>
+		where TNode : BTreeNode<TNode, TKey, TValue>
 	{
-		protected KeyedBinaryNode(TValue value)
+		protected BTreeNode(TValue value)
 		{
 			Value = value;
 		}
@@ -42,17 +42,16 @@ namespace essentialMix.Collections
 			(other.Value, Value) = (Value, other.Value);
 		}
 
-		public static implicit operator TValue([NotNull] KeyedBinaryNode<TNode, TKey, TValue> node) { return node.Value; }
+		public static implicit operator TValue([NotNull] BTreeNode<TNode, TKey, TValue> node) { return node.Value; }
 	}
-
+	
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public sealed class KeyedBinaryNode<TKey, TValue> : KeyedBinaryNode<KeyedBinaryNode<TKey, TValue>, TKey, TValue>
+	public sealed class BTreeNode<TKey, TValue> : BTreeNode<BTreeNode<TKey, TValue>, TKey, TValue>
 	{
 		private TKey _key;
 
-		/// <inheritdoc />
-		public KeyedBinaryNode([NotNull] TKey key, TValue value)
+		public BTreeNode([NotNull] TKey key, TValue value)
 			: base(value)
 		{
 			_key = key;
@@ -65,14 +64,13 @@ namespace essentialMix.Collections
 			set => _key = value;
 		}
 	}
-
+	
 	[DebuggerDisplay("{Value}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public sealed class KeyedBinaryNode<T> : KeyedBinaryNode<KeyedBinaryNode<T>, T, T>
+	public sealed class BTreeNode<T> : BTreeNode<BTreeNode<T>, T, T>
 	{
-		/// <inheritdoc />
-		public KeyedBinaryNode(T value)
+		public BTreeNode(T value)
 			: base(value)
 		{
 		}

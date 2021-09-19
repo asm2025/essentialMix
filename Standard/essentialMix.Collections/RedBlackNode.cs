@@ -35,9 +35,7 @@ namespace essentialMix.Collections
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public void SwapColor([NotNull] RedBlackNode<T> other)
 		{
-			bool tmp = other.Color;
-			other.Color = Color;
-			Color = tmp;
+			(other.Color, Color) = (Color, other.Color);
 		}
 	}
 }

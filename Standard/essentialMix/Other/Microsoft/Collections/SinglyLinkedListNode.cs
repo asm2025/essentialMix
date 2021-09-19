@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using essentialMix.Collections;
+using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
 namespace Other.Microsoft.Collections
@@ -41,5 +42,7 @@ namespace Other.Microsoft.Collections
 			_list = null;
 			_next = null;
 		}
+
+		public static implicit operator T([NotNull] SinglyLinkedListNode<T> node) { return node.Value; }
 	}
 }

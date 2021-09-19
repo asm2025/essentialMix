@@ -2337,9 +2337,7 @@ namespace essentialMix.Collections
 
 			static void SwapChildren(TNode node)
 			{
-				TNode left = node.Left;
-				node.Left = node.Right;
-				node.Right = left;
+				(node.Left, node.Right) = (node.Right, node.Left);
 			}
 		}
 	}

@@ -7,7 +7,7 @@ namespace essentialMix.Helpers
 {
 	public static class ObjectHelper
 	{
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.ForwardRef)]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static void Dispose<T>(ref T value)
 			where T : IDisposable
 		{
@@ -28,7 +28,7 @@ namespace essentialMix.Helpers
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.ForwardRef)]
+		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static void MarshalDispose<T>(ref T value)
 		{
 			MarshalDispose(value);

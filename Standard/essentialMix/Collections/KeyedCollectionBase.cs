@@ -7,21 +7,15 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections
 {
 	[Serializable]
-	public abstract class KeyedCollectionBase<TKey, TValue> : System.Collections.ObjectModel.KeyedCollection<TKey, TValue>, IReadOnlyKeyedCollection<TKey, TValue>, IReadOnlyList<TValue>, IReadOnlyCollection<TValue>, IList<TValue>, IList
+	public abstract class KeyedCollectionBase<TKey, TValue> : System.Collections.ObjectModel.KeyedCollection<TKey, TValue>, IReadOnlyKeyedCollection<TKey, TValue>, IList<TValue>, IList, IReadOnlyList<TValue>, IReadOnlyCollection<TValue>
 	{
 		protected KeyedCollectionBase()
-			: this(null, 0)
+			: this((IEqualityComparer<TKey>)null)
 		{
 		}
 
 		protected KeyedCollectionBase(IEqualityComparer<TKey> comparer)
-			: this(comparer, 0)
-		{
-		}
-
-		/// <inheritdoc />
-		protected KeyedCollectionBase(IEqualityComparer<TKey> comparer, int dictionaryCreationThreshold)
-			: base(comparer ?? EqualityComparer<TKey>.Default, dictionaryCreationThreshold)
+			: base(comparer ?? EqualityComparer<TKey>.Default, 0)
 		{
 		}
 
@@ -31,7 +25,7 @@ namespace essentialMix.Collections
 		}
 
 		protected KeyedCollectionBase([NotNull] IEnumerable<TValue> collection, IEqualityComparer<TKey> comparer)
-			: base(comparer ?? EqualityComparer<TKey>.Default)
+			: base(comparer ?? EqualityComparer<TKey>.Default, 0)
 		{
 			if (collection == null) throw new ArgumentNullException(nameof(collection));
 			
@@ -84,9 +78,7 @@ namespace essentialMix.Collections
 
 		public bool TryGetValue(TKey key, out TValue value)
 		{
-			if (Dictionary != null) return Dictionary.TryGetValue(key, out value);
-			value = default(TValue);
-			return false;
+			return Dictionary.TryGetValue(key, out value);
 		}
 	}
 }

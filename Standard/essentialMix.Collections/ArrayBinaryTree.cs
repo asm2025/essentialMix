@@ -95,7 +95,7 @@ namespace essentialMix.Collections
 			public bool IsLeaf => LeftIndex < 0 && RightIndex < 0;
 			public bool IsNode => LeftIndex > 0 && RightIndex > 0;
 			public bool HasOneChild => (LeftIndex > 0) ^ (RightIndex > 0);
-			public bool IsFull => !HasOneChild;
+			public bool IsFull => LeftIndex > 0 && RightIndex > 0;
 
 			public bool ParentIsRoot => ParentIndex == 0;
 			public bool ParentIsLeft => ParentIndex > 0 && ParentIndex % 2 != 0;
@@ -1371,9 +1371,7 @@ namespace essentialMix.Collections
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		protected internal void Swap(int first, int second)
 		{
-			T tmp = Items[first];
-			Items[first] = Items[second];
-			Items[second] = tmp;
+			(Items[first], Items[second]) = (Items[second], Items[first]);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

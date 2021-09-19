@@ -105,7 +105,7 @@ namespace essentialMix.Collections
 			public bool IsLeaf => LeftIndex < 0 && RightIndex < 0;
 			public bool IsNode => LeftIndex > 0 && RightIndex > 0;
 			public bool HasOneChild => (LeftIndex > 0) ^ (RightIndex > 0);
-			public bool IsFull => !HasOneChild;
+			public bool IsFull => LeftIndex > 0 && RightIndex > 0;
 
 			public bool ParentIsRoot => ParentIndex == 0;
 			public bool ParentIsLeft => ParentIndex > 0 && ParentIndex % 2 != 0;
@@ -161,9 +161,7 @@ namespace essentialMix.Collections
 
 			public void Swap(int other)
 			{
-				TNode tmp = _heap.Items[other];
-				_heap.Items[other] = _heap.Items[Index];
-				_heap.Items[Index] = tmp;
+				(_heap.Items[other], _heap.Items[Index]) = (_heap.Items[Index], _heap.Items[other]);
 			}
 
 			public void Invalidate()
@@ -1103,7 +1101,7 @@ namespace essentialMix.Collections
 		/// </summary>
 		/// <param name="value">The value to search for</param>
 		/// <returns>The found node's index or -1 if no match is found</returns>
-		public int IndexOf([NotNull] TValue value)
+		public int IndexOf(TValue value)
 		{
 			return Count == 0
 						? -1
@@ -1543,9 +1541,7 @@ namespace essentialMix.Collections
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		protected internal void Swap(int x, int y)
 		{
-			TNode tmp = Items[x];
-			Items[x] = Items[y];
-			Items[y] = tmp;
+			(Items[x], Items[y]) = (Items[y], Items[x]);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

@@ -29,34 +29,41 @@ namespace essentialMix.Extensions
 		public static TValue GetOrAdd<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] TKey key)
 			where TValue : new()
 		{
-			if (thisValue.TryGetValue(key, out TValue value)) return value;
-			value = new TValue();
-			thisValue[key] = value;
-			return value;
+			lock(thisValue)
+			{
+				if (thisValue.TryGetValue(key, out TValue value)) return value;
+				value = new TValue();
+				thisValue[key] = value;
+				return value;
+			}
 		}
 
 		public static TValue GetOrAdd<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] TKey key, TValue missingValue)
 			where TValue : struct, IComparable
 		{
-			if (thisValue.TryGetValue(key, out TValue value)) return value;
-			thisValue[key] = missingValue;
-			return missingValue;
+			lock(thisValue)
+			{
+				if (thisValue.TryGetValue(key, out TValue value)) return value;
+				thisValue[key] = missingValue;
+				return missingValue;
+			}
 		}
 
 		public static TValue GetOrAdd<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] TKey key, [NotNull] Func<TKey, TValue> onNotFound)
 		{
-			if (thisValue.TryGetValue(key, out TValue value)) return value;
-			value = onNotFound(key);
-			thisValue[key] = value;
-			return value;
+			lock(thisValue)
+			{
+				if (thisValue.TryGetValue(key, out TValue value)) return value;
+				value = onNotFound(key);
+				thisValue[key] = value;
+				return value;
+			}
 		}
 
 		public static bool TryAdd([NotNull] this IDictionary thisValue, DictionaryEntry entry) { return TryAdd(thisValue, entry.Key, entry.Value); }
 
-		public static bool TryAdd([NotNull] this IDictionary thisValue, object key, object value)
+		public static bool TryAdd([NotNull] this IDictionary thisValue, [NotNull] object key, object value)
 		{
-			if (key == null) return false;
-
 			lock(thisValue.SyncRoot)
 			{
 				if (thisValue.Contains(key)) return false;
@@ -72,9 +79,14 @@ namespace essentialMix.Extensions
 
 		public static bool TryAdd<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, TKey key, TValue value)
 		{
-			if (key == null || thisValue.ContainsKey(key)) return false;
-			thisValue.Add(key, value);
-			return true;
+			if (key == null) return false;
+
+			lock(thisValue)
+			{
+				if (thisValue.ContainsKey(key)) return false;
+				thisValue.Add(key, value);
+				return true;
+			}
 		}
 
 		public static int Add([NotNull] this IDictionary thisValue, [NotNull] params DictionaryEntry[] entry)
@@ -99,10 +111,13 @@ namespace essentialMix.Extensions
 		{
 			if (pair.Length == 0) return 0;
 
-			foreach (KeyValuePair<TKey, TValue> p in pair)
-				thisValue.Add(p);
+			lock(thisValue)
+			{
+				foreach (KeyValuePair<TKey, TValue> p in pair)
+					thisValue.Add(p);
 
-			return pair.Length;
+				return pair.Length;
+			}
 		}
 
 		public static int AddRange([NotNull] this IDictionary thisValue, [NotNull] IEnumerable<DictionaryEntry> source, bool skipExisting = false)

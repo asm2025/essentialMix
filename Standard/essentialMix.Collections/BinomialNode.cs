@@ -20,7 +20,7 @@ namespace essentialMix.Collections
 
 		private readonly TNode[] _nodes = new TNode[3];
 
-		protected BinomialNode([NotNull] TValue value)
+		protected BinomialNode(TValue value)
 		{
 			Value = value;
 		}
@@ -58,7 +58,6 @@ namespace essentialMix.Collections
 		[NotNull]
 		public abstract TKey Key { get; set; }
 
-		[NotNull]
 		public TValue Value { get; set; }
 
 		public int Degree { get; internal set; }
@@ -114,12 +113,8 @@ namespace essentialMix.Collections
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public void Swap([NotNull] TNode other)
 		{
-			TKey otherKey = other.Key;
-			TValue otherValue = other.Value;
-			other.Key = Key;
-			other.Value = Value;
-			Key = otherKey;
-			Value = otherValue;
+			(other.Key, Key) = (Key, other.Key);
+			(other.Value, Value) = (Value, other.Value);
 		}
 
 		internal void Invalidate()
@@ -134,6 +129,8 @@ namespace essentialMix.Collections
 			if (!ReferenceEquals(this, node)) return;
 			throw new InvalidOperationException("Circular reference detected.");
 		}
+
+		public static implicit operator TValue([NotNull] BinomialNode<TNode, TKey, TValue> node) { return node.Value; }
 	}
 
 	[Serializable]
@@ -143,7 +140,7 @@ namespace essentialMix.Collections
 		private TKey _key;
 
 		/// <inheritdoc />
-		public BinomialNode([NotNull] TKey key, [NotNull] TValue value)
+		public BinomialNode([NotNull] TKey key, TValue value)
 			: base(value)
 		{
 			_key = key;
@@ -163,7 +160,7 @@ namespace essentialMix.Collections
 	public sealed class BinomialNode<T> : BinomialNode<BinomialNode<T>, T, T>
 	{
 		/// <inheritdoc />
-		public BinomialNode([NotNull] T value)
+		public BinomialNode(T value)
 			: base(value)
 		{
 		}

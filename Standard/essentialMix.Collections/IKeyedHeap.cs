@@ -10,14 +10,14 @@ namespace essentialMix.Collections
 		IComparer<TKey> Comparer { get; }
 
 		[NotNull]
-		TNode MakeNode([NotNull] TValue value);
+		TNode MakeNode(TValue value);
 
 		[NotNull]
 		TNode Add([NotNull] TNode node);
 		
 		bool Remove([NotNull] TNode node);
 		
-		TNode Find([NotNull] TValue value);
+		TNode Find(TValue value);
 		
 		TNode FindByKey([NotNull] TKey key);
 		

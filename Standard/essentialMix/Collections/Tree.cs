@@ -11,26 +11,26 @@ namespace essentialMix.Collections
 	public class Tree<T> : KeyedDictionaryBase<T, Tree<T>>
 	{
 		/// <inheritdoc />
-		public Tree([NotNull] T value) 
+		public Tree(T value) 
 			: this(value, (IEqualityComparer<T>)null)
 		{
 		}
 
 		/// <inheritdoc />
-		public Tree([NotNull] T value, IEqualityComparer<T> comparer)
+		public Tree(T value, IEqualityComparer<T> comparer)
 			: base(comparer)
 		{
 			Value = value;
 		}
 
 		/// <inheritdoc />
-		public Tree([NotNull] T value, [NotNull] IEnumerable<Tree<T>> collection)
+		public Tree(T value, [NotNull] IEnumerable<Tree<T>> collection)
 			: this(value, collection, null)
 		{
 		}
 
 		/// <inheritdoc />
-		public Tree([NotNull] T value, [NotNull] IEnumerable<Tree<T>> collection, IEqualityComparer<T> comparer)
+		public Tree(T value, [NotNull] IEnumerable<Tree<T>> collection, IEqualityComparer<T> comparer)
 			: base(collection, comparer)
 		{
 			Value = value;

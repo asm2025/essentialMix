@@ -336,7 +336,7 @@ namespace essentialMix.Collections
 			return lvl;
 		}
 
-		private Node GetNode([NotNull] T value, Node[] update = null)
+		private Node GetNode(T value, Node[] update = null)
 		{
 			Node node = Header;
 			/*

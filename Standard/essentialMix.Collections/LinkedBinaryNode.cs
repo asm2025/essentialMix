@@ -50,7 +50,7 @@ namespace essentialMix.Collections
 
 		public bool HasOneChild => (_nodes[LEFT] != null) ^ (_nodes[RIGHT] != null);
 
-		public bool IsFull => !HasOneChild;
+		public bool IsFull => _nodes[LEFT] != null && _nodes[RIGHT] != null;
 
 		/// <inheritdoc />
 		[NotNull]
@@ -109,10 +109,10 @@ namespace essentialMix.Collections
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public void Swap([NotNull] TNode other)
 		{
-			T tmp = other.Value;
-			other.Value = Value;
-			Value = tmp;
+			(other.Value, Value) = (Value, other.Value);
 		}
+
+		public static implicit operator T([NotNull] LinkedBinaryNode<TNode, T> node) { return node.Value; }
 	}
 
 	[DebuggerDisplay("{Value} :H{Height}B{BalanceFactor}")]
