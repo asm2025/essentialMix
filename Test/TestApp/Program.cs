@@ -4273,6 +4273,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 					TKey key = queue.Dequeue();
 					BinomialNode<TKey, TValue> node = heap.FindByKey(key);
 					Debug.Assert(node != null, $"Node for key {key} is not found.");
+					// todo fix this error: succeeded = false, why? extracted != key
 					heap.DecreaseKey(node, newKeyValue);
 					TKey extracted = heap.ExtractValue().Key;
 					bool succeeded = heap.Comparer.IsEqual(extracted, key);
