@@ -14,7 +14,6 @@ namespace essentialMix.Collections
 	/// It is implemented as a heap similar to a binary heap but using a special tree structure that is different
 	/// from the complete binary trees used by binary heaps.
 	/// </summary>
-	/// <typeparam name="TNode">The node type. This is just for abstraction purposes and shouldn't be dealt with directly.</typeparam>
 	/// <typeparam name="TKey">The key assigned to the element. It should have its value from the value at first but changing
 	/// this later will not affect the value itself, except for primitive value types. Changing the key will of course affect the
 	/// priority of the item.</typeparam>
@@ -36,27 +35,35 @@ namespace essentialMix.Collections
 	 * trees list and does not implement a few essential functions such as remove a node or DecreaseKey!
 	 * So, Maybe will try it some other time.
 	 */
+	[DebuggerTypeProxy(typeof(BinomialHeap<,>.DebugView))]
 	[Serializable]
-	public abstract class BinomialHeap<TNode, TKey, TValue> : SiblingsHeap<TNode, TKey, TValue>
-		where TNode : BinomialNode<TNode, TKey, TValue>
+	public abstract class BinomialHeap<TKey, TValue> : SiblingsHeap<BinomialNode<TKey, TValue>, TKey, TValue>
 	{
+		internal sealed class DebugView : Dbg_KeyedHeapBaseDebugView<BinomialNode<TKey, TValue>, TKey, TValue>
+		{
+			public DebugView([NotNull] BinomialHeap<TKey, TValue> heap)
+				: base(heap)
+			{
+			}
+		}
+
 		private struct BreadthFirstEnumerator : IEnumerableEnumerator<TValue>
 		{
-			private readonly BinomialHeap<TNode, TKey, TValue> _heap;
+			private readonly BinomialHeap<TKey, TValue> _heap;
 			private readonly int _version;
-			private readonly TNode _root;
-			private readonly Queue<TNode> _queue;
+			private readonly BinomialNode<TKey, TValue> _root;
+			private readonly Queue<BinomialNode<TKey, TValue>> _queue;
 
-			private TNode _current;
+			private BinomialNode<TKey, TValue> _current;
 			private bool _started;
 			private bool _done;
 
-			internal BreadthFirstEnumerator([NotNull] BinomialHeap<TNode, TKey, TValue> heap, TNode root)
+			internal BreadthFirstEnumerator([NotNull] BinomialHeap<TKey, TValue> heap, BinomialNode<TKey, TValue> root)
 			{
 				_heap = heap;
 				_version = _heap._version;
 				_root = root;
-				_queue = new Queue<TNode>();
+				_queue = new Queue<BinomialNode<TKey, TValue>>();
 				_current = null;
 				_started = false;
 				_done = _heap.Count == 0 || _root == null;
@@ -133,21 +140,21 @@ namespace essentialMix.Collections
 
 		private struct DepthFirstEnumerator : IEnumerableEnumerator<TValue>
 		{
-			private readonly BinomialHeap<TNode, TKey, TValue> _heap;
+			private readonly BinomialHeap<TKey, TValue> _heap;
 			private readonly int _version;
-			private readonly TNode _root;
-			private readonly Stack<TNode> _stack;
+			private readonly BinomialNode<TKey, TValue> _root;
+			private readonly Stack<BinomialNode<TKey, TValue>> _stack;
 
-			private TNode _current;
+			private BinomialNode<TKey, TValue> _current;
 			private bool _started;
 			private bool _done;
 
-			internal DepthFirstEnumerator([NotNull] BinomialHeap<TNode, TKey, TValue> heap, TNode root)
+			internal DepthFirstEnumerator([NotNull] BinomialHeap<TKey, TValue> heap, BinomialNode<TKey, TValue> root)
 			{
 				_heap = heap;
 				_version = _heap._version;
 				_root = root;
-				_stack = new Stack<TNode>();
+				_stack = new Stack<BinomialNode<TKey, TValue>>();
 				_current = null;
 				_started = false;
 				_done = _heap.Count == 0 || _root == null;
@@ -222,32 +229,37 @@ namespace essentialMix.Collections
 			public void Dispose() { }
 		}
 
+		[NotNull]
+		protected Func<TValue, TKey> _getKeyForItem;
+
 		/// <inheritdoc />
-		protected BinomialHeap()
-			: this((IComparer<TKey>)null)
+		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem)
+			: this(getKeyForItem, (IComparer<TKey>)null)
 		{
 		}
 
-		/// <inheritdoc />
-		protected BinomialHeap(IComparer<TKey> comparer)
+		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
 			: base(comparer)
 		{
+			_getKeyForItem = getKeyForItem;
 		}
 
-		/// <inheritdoc />
-		protected BinomialHeap([NotNull] IEnumerable<TValue> enumerable)
-			: this(enumerable, null)
+		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
+			: this(getKeyForItem, enumerable, null)
 		{
 		}
 
-		/// <inheritdoc />
-		protected BinomialHeap([NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: base(enumerable, comparer)
+		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
+			: this(getKeyForItem, comparer)
 		{
+			Add(enumerable);
 		}
 
 		/// <inheritdoc />
-		public sealed override IEnumerableEnumerator<TValue> Enumerate(TNode root, BreadthDepthTraversal method)
+		public override BinomialNode<TKey, TValue> MakeNode(TValue value) { return new BinomialNode<TKey, TValue>(_getKeyForItem(value), value); }
+
+		/// <inheritdoc />
+		public sealed override IEnumerableEnumerator<TValue> Enumerate(BinomialNode<TKey, TValue> root, BreadthDepthTraversal method)
 		{
 			return method switch
 			{
@@ -258,7 +270,7 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override void Iterate(TNode root, BreadthDepthTraversal method, Action<TNode> visitCallback)
+		public sealed override void Iterate(BinomialNode<TKey, TValue> root, BreadthDepthTraversal method, Action<BinomialNode<TKey, TValue>> visitCallback)
 		{
 			if (Count == 0 || root == null) return;
 
@@ -276,7 +288,7 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override void Iterate(TNode root, BreadthDepthTraversal method, Func<TNode, bool> visitCallback)
+		public sealed override void Iterate(BinomialNode<TKey, TValue> root, BreadthDepthTraversal method, Func<BinomialNode<TKey, TValue>, bool> visitCallback)
 		{
 			if (Count == 0 || root == null) return;
 
@@ -294,7 +306,7 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override TNode Add(TNode node)
+		public sealed override BinomialNode<TKey, TValue> Add(BinomialNode<TKey, TValue> node)
 		{
 			node.Invalidate();
 			Head = Head == null
@@ -306,7 +318,7 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override bool Remove(TNode node)
+		public sealed override bool Remove(BinomialNode<TKey, TValue> node)
 		{
 			BubbleUp(node, true);
 			ExtractValue();
@@ -322,7 +334,7 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override void DecreaseKey(TNode node, TKey newKey)
+		public sealed override void DecreaseKey(BinomialNode<TKey, TValue> node, TKey newKey)
 		{
 			if (Head == null) throw new CollectionIsEmptyException();
 			if (Compare(node.Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
@@ -336,10 +348,10 @@ namespace essentialMix.Collections
 		{
 			if (Head == null) throw new CollectionIsEmptyException();
 
-			TNode node = Head;
+			BinomialNode<TKey, TValue> node = Head;
 			if (node.Sibling == null) return node.Value;
 
-			foreach (TNode sibling in node.Siblings())
+			foreach (BinomialNode<TKey, TValue> sibling in node.Siblings())
 			{
 				if (Compare(sibling.Key, node.Key) >= 0) continue;
 				node = sibling;
@@ -349,11 +361,11 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override TNode ExtractValue()
+		public sealed override BinomialNode<TKey, TValue> ExtractValue()
 		{
 			if (Head == null) throw new CollectionIsEmptyException();
 
-			TNode minPrev = null
+			BinomialNode<TKey, TValue> minPrev = null
 				, min = Head
 				, nextPrev = min
 				, next = min.Sibling;
@@ -374,8 +386,8 @@ namespace essentialMix.Collections
 			if (Head == min) Head = min.Sibling;
 			else if (minPrev != null) minPrev.Sibling = min.Sibling;
 			
-			TNode head = null;
-			TNode child = min.Child;
+			BinomialNode<TKey, TValue> head = null;
+			BinomialNode<TKey, TValue> child = min.Child;
 
 			while (child != null)
 			{
@@ -394,11 +406,11 @@ namespace essentialMix.Collections
 		}
 
 		[NotNull]
-		private TNode BubbleUp([NotNull] TNode node, bool toRoot = false)
+		private BinomialNode<TKey, TValue> BubbleUp([NotNull] BinomialNode<TKey, TValue> node, bool toRoot = false)
 		{
 			if (node == Head) return node;
 
-			TNode parent = node.Parent;
+			BinomialNode<TKey, TValue> parent = node.Parent;
 
 			while (parent != null && (toRoot || Compare(node.Key, parent.Key) < 0))
 			{
@@ -410,7 +422,7 @@ namespace essentialMix.Collections
 			return node;
 		}
 
-		private void Link([NotNull] TNode x, [NotNull] TNode y)
+		private void Link([NotNull] BinomialNode<TKey, TValue> x, [NotNull] BinomialNode<TKey, TValue> y)
 		{
 			y.Parent = x;
 			y.Sibling = x.Child;
@@ -418,13 +430,13 @@ namespace essentialMix.Collections
 			x.Degree++;
 		}
 
-		private TNode Merge(TNode x, TNode y)
+		private BinomialNode<TKey, TValue> Merge(BinomialNode<TKey, TValue> x, BinomialNode<TKey, TValue> y)
 		{
 			if (ReferenceEquals(x, y)) return x;
 			if (x == null) return y;
 			if (y == null) return x;
 
-			TNode head;
+			BinomialNode<TKey, TValue> head;
 
 			if (x.Degree <= y.Degree)
 			{
@@ -437,7 +449,7 @@ namespace essentialMix.Collections
 				y = y.Sibling;
 			}
 
-			TNode tail = head;
+			BinomialNode<TKey, TValue> tail = head;
 
 			/*
 			 * merge two heaps without taking care of trees with same degree the roots of the tree must be in
@@ -463,12 +475,12 @@ namespace essentialMix.Collections
 			return head;
 		}
 
-		private TNode Union(TNode x, TNode y)
+		private BinomialNode<TKey, TValue> Union(BinomialNode<TKey, TValue> x, BinomialNode<TKey, TValue> y)
 		{
-			TNode head = Merge(x, y);
+			BinomialNode<TKey, TValue> head = Merge(x, y);
 			if (head == null) return null;
 
-			TNode prev = null
+			BinomialNode<TKey, TValue> prev = null
 				, node = head
 				, next = node.Sibling;
 
@@ -508,12 +520,12 @@ namespace essentialMix.Collections
 			return head;
 		}
 
-		#region Iterator Traversal for Action<TNode>
-		private void BreadthFirst([NotNull] TNode root, [NotNull] Action<TNode> visitCallback)
+		#region Iterator Traversal for Action<BinomialNode<TKey, TValue>>
+		private void BreadthFirst([NotNull] BinomialNode<TKey, TValue> root, [NotNull] Action<BinomialNode<TKey, TValue>> visitCallback)
 		{
 			int version = _version;
 			// Head-Sibling-Child (Queue)
-			Queue<TNode> queue = new Queue<TNode>();
+			Queue<BinomialNode<TKey, TValue>> queue = new Queue<BinomialNode<TKey, TValue>>();
 
 			while (root != null)
 			{
@@ -526,7 +538,7 @@ namespace essentialMix.Collections
 					if (version != _version) throw new VersionChangedException();
 
 					// visit the next queued node
-					TNode current = queue.Dequeue();
+					BinomialNode<TKey, TValue> current = queue.Dequeue();
 					visitCallback(current);
 					if (current.Child == null) continue;
 
@@ -534,7 +546,7 @@ namespace essentialMix.Collections
 					queue.Enqueue(current.Child);
 					if (current.Child.Sibling == null) continue;
 
-					foreach (TNode sibling in current.Child.Siblings())
+					foreach (BinomialNode<TKey, TValue> sibling in current.Child.Siblings())
 						queue.Enqueue(sibling);
 				}
 
@@ -542,11 +554,11 @@ namespace essentialMix.Collections
 			}
 		}
 
-		private void DepthFirst([NotNull] TNode root, [NotNull] Action<TNode> visitCallback)
+		private void DepthFirst([NotNull] BinomialNode<TKey, TValue> root, [NotNull] Action<BinomialNode<TKey, TValue>> visitCallback)
 		{
 			int version = _version;
 			// Head-Sibling-Child (Stack)
-			Stack<TNode> stack = new Stack<TNode>();
+			Stack<BinomialNode<TKey, TValue>> stack = new Stack<BinomialNode<TKey, TValue>>();
 
 			while (root != null)
 			{
@@ -559,14 +571,14 @@ namespace essentialMix.Collections
 					if (version != _version) throw new VersionChangedException();
 
 					// visit the next queued node
-					TNode current = stack.Pop();
+					BinomialNode<TKey, TValue> current = stack.Pop();
 					visitCallback(current);
 					if (current.Child == null) continue;
 
 					// Queue the next nodes
 					if (current.Child.Sibling != null) stack.Push(current.Child.Sibling);
 
-					foreach (TNode child in current.Child.Children())
+					foreach (BinomialNode<TKey, TValue> child in current.Child.Children())
 						stack.Push(child);
 				}
 
@@ -575,12 +587,12 @@ namespace essentialMix.Collections
 		}
 		#endregion
 
-		#region Iterator Traversal for Func<TNode, bool>
-		private void BreadthFirst([NotNull] TNode root, [NotNull] Func<TNode, bool> visitCallback)
+		#region Iterator Traversal for Func<BinomialNode<TKey, TValue>, bool>
+		private void BreadthFirst([NotNull] BinomialNode<TKey, TValue> root, [NotNull] Func<BinomialNode<TKey, TValue>, bool> visitCallback)
 		{
 			int version = _version;
 			// Head-Sibling-Child (Queue)
-			Queue<TNode> queue = new Queue<TNode>();
+			Queue<BinomialNode<TKey, TValue>> queue = new Queue<BinomialNode<TKey, TValue>>();
 
 			while (root != null)
 			{
@@ -593,7 +605,7 @@ namespace essentialMix.Collections
 					if (version != _version) throw new VersionChangedException();
 
 					// visit the next queued node
-					TNode current = queue.Dequeue();
+					BinomialNode<TKey, TValue> current = queue.Dequeue();
 					if (!visitCallback(current)) return;
 					if (current.Child == null) continue;
 
@@ -601,7 +613,7 @@ namespace essentialMix.Collections
 					queue.Enqueue(current.Child);
 					if (current.Child.Sibling == null) continue;
 
-					foreach (TNode sibling in current.Child.Siblings())
+					foreach (BinomialNode<TKey, TValue> sibling in current.Child.Siblings())
 						queue.Enqueue(sibling);
 				}
 
@@ -609,11 +621,11 @@ namespace essentialMix.Collections
 			}
 		}
 
-		private void DepthFirst([NotNull] TNode root, [NotNull] Func<TNode, bool> visitCallback)
+		private void DepthFirst([NotNull] BinomialNode<TKey, TValue> root, [NotNull] Func<BinomialNode<TKey, TValue>, bool> visitCallback)
 		{
 			int version = _version;
 			// Head-Child-Sibling (Stack)
-			Stack<TNode> stack = new Stack<TNode>();
+			Stack<BinomialNode<TKey, TValue>> stack = new Stack<BinomialNode<TKey, TValue>>();
 
 			while (root != null)
 			{
@@ -626,14 +638,14 @@ namespace essentialMix.Collections
 					if (version != _version) throw new VersionChangedException();
 
 					// visit the next queued node
-					TNode current = stack.Pop();
+					BinomialNode<TKey, TValue> current = stack.Pop();
 					if (!visitCallback(current)) return;
 					if (current.Child == null) continue;
 
 					// Queue the next nodes
 					if (current.Child.Sibling != null) stack.Push(current.Child.Sibling);
 
-					foreach (TNode child in current.Child.Children())
+					foreach (BinomialNode<TKey, TValue> child in current.Child.Children())
 						stack.Push(child);
 				}
 
@@ -643,59 +655,207 @@ namespace essentialMix.Collections
 		#endregion
 	}
 
-	[DebuggerTypeProxy(typeof(BinomialHeap<,>.DebugView))]
-	[Serializable]
-	public abstract class BinomialHeap<TKey, TValue> : BinomialHeap<BinomialNode<TKey, TValue>, TKey, TValue>
-	{
-		internal sealed class DebugView : Dbg_KeyedHeapBaseDebugView<BinomialNode<TKey, TValue>, TKey, TValue>
-		{
-			public DebugView([NotNull] BinomialHeap<TKey, TValue> heap)
-				: base(heap)
-			{
-			}
-		}
-
-		[NotNull]
-		protected Func<TValue, TKey> _getKeyForItem;
-
-		/// <inheritdoc />
-		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem)
-			: this(getKeyForItem, (IComparer<TKey>)null)
-		{
-		}
-
-		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
-			: base(comparer)
-		{
-			_getKeyForItem = getKeyForItem;
-		}
-
-		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
-			: this(getKeyForItem, enumerable, null)
-		{
-		}
-
-		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: this(getKeyForItem, comparer)
-		{
-			Add(enumerable);
-		}
-
-		/// <inheritdoc />
-		public override BinomialNode<TKey, TValue> MakeNode(TValue value) { return new BinomialNode<TKey, TValue>(_getKeyForItem(value), value); }
-	}
-
+	/// <summary>
+	/// <see href="https://en.wikipedia.org/wiki/Binomial_heap">Binomial heap</see> using the linked representation.
+	/// It is a data structure that acts as a priority queue but also allows pairs of heaps to be merged together.
+	/// It is implemented as a heap similar to a binary heap but using a special tree structure that is different
+	/// from the complete binary trees used by binary heaps.
+	/// </summary>
+	/// <typeparam name="T">The element type of the heap</typeparam>
 	[DebuggerTypeProxy(typeof(BinomialHeap<>.DebugView))]
 	[Serializable]
-	public abstract class BinomialHeap<T> : BinomialHeap<BinomialNode<T>, T, T>
+	public abstract class BinomialHeap<T> : SiblingsHeap<BinomialNode<T>, T>
 	{
-		internal sealed class DebugView : Dbg_KeyedHeapBaseDebugView<BinomialNode<T>, T, T>
+		internal sealed class DebugView : Dbg_HeapBaseDebugView<BinomialNode<T>, T>
 		{
 			public DebugView([NotNull] BinomialHeap<T> heap)
 				: base(heap)
 			{
 			}
 		}
+		
+		private struct BreadthFirstEnumerator : IEnumerableEnumerator<T>
+		{
+			private readonly BinomialHeap<T> _heap;
+			private readonly int _version;
+			private readonly BinomialNode<T> _root;
+			private readonly Queue<BinomialNode<T>> _queue;
+
+			private BinomialNode<T> _current;
+			private bool _started;
+			private bool _done;
+
+			internal BreadthFirstEnumerator([NotNull] BinomialHeap<T> heap, BinomialNode<T> root)
+			{
+				_heap = heap;
+				_version = _heap._version;
+				_root = root;
+				_queue = new Queue<BinomialNode<T>>();
+				_current = null;
+				_started = false;
+				_done = _heap.Count == 0 || _root == null;
+			}
+
+			/// <inheritdoc />
+			[NotNull]
+			public T Current
+			{
+				get
+				{
+					if (!_started || _current == null) throw new InvalidOperationException();
+					return _current.Value;
+				}
+			}
+
+			/// <inheritdoc />
+			[NotNull]
+			object IEnumerator.Current => Current;
+
+			/// <inheritdoc />
+			public IEnumerator<T> GetEnumerator()
+			{
+				IEnumerator enumerator = this;
+				enumerator.Reset();
+				return this;
+			}
+
+			/// <inheritdoc />
+			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+			public bool MoveNext()
+			{
+				if (_version != _heap._version) throw new VersionChangedException();
+				// Head-Sibling-Child (Queue)
+				if (_done) return false;
+
+				if (!_started)
+				{
+					_started = true;
+					// Start at the root
+					_queue.Enqueue(_root);
+				}
+
+				// visit the next queued node
+				_current = _queue.Count > 0
+								? _queue.Dequeue()
+								: null;
+
+				if (_current == null)
+				{
+					_done = true;
+					return false;
+				}
+
+				// Queue the next nodes
+				if (_current.Child != null) _queue.Enqueue(_current.Child);
+				if (_current.Sibling != null) _queue.Enqueue(_current.Sibling);
+				return true;
+			}
+
+			void IEnumerator.Reset()
+			{
+				if (_version != _heap._version) throw new VersionChangedException();
+				_current = null;
+				_started = false;
+				_queue.Clear();
+				_done = _heap.Count == 0 || _root == null;
+			}
+
+			/// <inheritdoc />
+			public void Dispose() { }
+		}
+
+		private struct DepthFirstEnumerator : IEnumerableEnumerator<T>
+		{
+			private readonly BinomialHeap<T> _heap;
+			private readonly int _version;
+			private readonly BinomialNode<T> _root;
+			private readonly Stack<BinomialNode<T>> _stack;
+
+			private BinomialNode<T> _current;
+			private bool _started;
+			private bool _done;
+
+			internal DepthFirstEnumerator([NotNull] BinomialHeap<T> heap, BinomialNode<T> root)
+			{
+				_heap = heap;
+				_version = _heap._version;
+				_root = root;
+				_stack = new Stack<BinomialNode<T>>();
+				_current = null;
+				_started = false;
+				_done = _heap.Count == 0 || _root == null;
+			}
+
+			/// <inheritdoc />
+			[NotNull]
+			public T Current
+			{
+				get
+				{
+					if (!_started || _current == null) throw new InvalidOperationException();
+					return _current.Value;
+				}
+			}
+
+			/// <inheritdoc />
+			[NotNull]
+			object IEnumerator.Current => Current;
+
+			/// <inheritdoc />
+			public IEnumerator<T> GetEnumerator()
+			{
+				IEnumerator enumerator = this;
+				enumerator.Reset();
+				return this;
+			}
+
+			/// <inheritdoc />
+			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+			public bool MoveNext()
+			{
+				if (_version != _heap._version) throw new VersionChangedException();
+				// Head-Child-Sibling (Stack)
+				if (_done) return false;
+
+				if (!_started)
+				{
+					_started = true;
+					// Start at the root
+					_stack.Push(_root);
+				}
+
+				// visit the next queued node
+				_current = _stack.Count > 0
+								? _stack.Pop()
+								: null;
+
+				if (_current == null)
+				{
+					_done = true;
+					return false;
+				}
+
+				// Queue the next nodes
+				if (_current.Child != null) _stack.Push(_current.Child);
+				if (_current.Sibling != null) _stack.Push(_current.Sibling);
+				return true;
+			}
+
+			void IEnumerator.Reset()
+			{
+				if (_version != _heap._version) throw new VersionChangedException();
+				_current = null;
+				_started = false;
+				_stack.Clear();
+				_done = _heap.Count == 0 || _root == null;
+			}
+
+			/// <inheritdoc />
+			public void Dispose() { }
+		}
+
 
 		/// <inheritdoc />
 		protected BinomialHeap()
@@ -720,5 +880,401 @@ namespace essentialMix.Collections
 
 		/// <inheritdoc />
 		public override BinomialNode<T> MakeNode(T value) { return new BinomialNode<T>(value); }
+
+		/// <inheritdoc />
+		public sealed override IEnumerableEnumerator<T> Enumerate(BinomialNode<T> root, BreadthDepthTraversal method)
+		{
+			return method switch
+			{
+				BreadthDepthTraversal.BreadthFirst => new BreadthFirstEnumerator(this, root),
+				BreadthDepthTraversal.DepthFirst => new DepthFirstEnumerator(this, root),
+				_ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
+			};
+		}
+
+		/// <inheritdoc />
+		public sealed override void Iterate(BinomialNode<T> root, BreadthDepthTraversal method, Action<BinomialNode<T>> visitCallback)
+		{
+			if (Count == 0 || root == null) return;
+
+			switch (method)
+			{
+				case BreadthDepthTraversal.BreadthFirst:
+					BreadthFirst(root, visitCallback);
+					break;
+				case BreadthDepthTraversal.DepthFirst:
+					DepthFirst(root, visitCallback);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(method), method, null);
+			}
+		}
+
+		/// <inheritdoc />
+		public sealed override void Iterate(BinomialNode<T> root, BreadthDepthTraversal method, Func<BinomialNode<T>, bool> visitCallback)
+		{
+			if (Count == 0 || root == null) return;
+
+			switch (method)
+			{
+				case BreadthDepthTraversal.BreadthFirst:
+					BreadthFirst(root, visitCallback);
+					break;
+				case BreadthDepthTraversal.DepthFirst:
+					DepthFirst(root, visitCallback);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(method), method, null);
+			}
+		}
+
+		/// <inheritdoc />
+		public sealed override BinomialNode<T> Add(BinomialNode<T> node)
+		{
+			node.Invalidate();
+			Head = Head == null
+						? node
+						: Union(Head, node);
+			Count++;
+			_version++;
+			return node;
+		}
+
+		/// <inheritdoc />
+		public sealed override bool Remove(BinomialNode<T> node)
+		{
+			BubbleUp(node, true);
+			ExtractValue();
+			return true;
+		}
+
+		/// <inheritdoc />
+		public sealed override void Clear()
+		{
+			Head = null;
+			Count = 0;
+			_version++;
+		}
+
+		/// <inheritdoc />
+		public sealed override void DecreaseKey(BinomialNode<T> node, T newKey)
+		{
+			if (Head == null) throw new CollectionIsEmptyException();
+			if (Compare(node.Value, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
+			node.Value = newKey;
+			if (node == Head) return;
+			BubbleUp(node);
+		}
+
+		/// <inheritdoc />
+		public sealed override T Value()
+		{
+			if (Head == null) throw new CollectionIsEmptyException();
+
+			BinomialNode<T> node = Head;
+			if (node.Sibling == null) return node.Value;
+
+			foreach (BinomialNode<T> sibling in node.Siblings())
+			{
+				if (Compare(sibling.Value, node.Value) >= 0) continue;
+				node = sibling;
+			}
+
+			return node.Value;
+		}
+
+		/// <inheritdoc />
+		public sealed override BinomialNode<T> ExtractValue()
+		{
+			if (Head == null) throw new CollectionIsEmptyException();
+
+			BinomialNode<T> minPrev = null
+				, min = Head
+				, nextPrev = min
+				, next = min.Sibling;
+
+			// search root nodes for the value (min/max)
+			while (next != null)
+			{
+				if (Compare(next.Value, min.Value) < 0)
+				{
+					minPrev = nextPrev;
+					min = next;
+				}
+
+				nextPrev = next;
+				next = next.Sibling;
+			}
+
+			if (Head == min) Head = min.Sibling;
+			else if (minPrev != null) minPrev.Sibling = min.Sibling;
+			
+			BinomialNode<T> head = null;
+			BinomialNode<T> child = min.Child;
+
+			while (child != null)
+			{
+				next = child.Sibling;
+				child.Sibling = head;
+				child.Parent = null;
+				head = child;
+				child = next;
+			}
+
+			Head = Union(Head, head);
+			Count--;
+			_version++;
+			min.Invalidate();
+			return min;
+		}
+
+		[NotNull]
+		private BinomialNode<T> BubbleUp([NotNull] BinomialNode<T> node, bool toRoot = false)
+		{
+			if (node == Head) return node;
+
+			BinomialNode<T> parent = node.Parent;
+
+			while (parent != null && (toRoot || Compare(node.Value, parent.Value) < 0))
+			{
+				node.Swap(parent);
+				node = parent;
+				parent = node.Parent;
+			}
+
+			return node;
+		}
+
+		private void Link([NotNull] BinomialNode<T> x, [NotNull] BinomialNode<T> y)
+		{
+			y.Parent = x;
+			y.Sibling = x.Child;
+			x.Child = y;
+			x.Degree++;
+		}
+
+		private BinomialNode<T> Merge(BinomialNode<T> x, BinomialNode<T> y)
+		{
+			if (ReferenceEquals(x, y)) return x;
+			if (x == null) return y;
+			if (y == null) return x;
+
+			BinomialNode<T> head;
+
+			if (x.Degree <= y.Degree)
+			{
+				head = x;
+				x = x.Sibling;
+			}
+			else
+			{
+				head = y;
+				y = y.Sibling;
+			}
+
+			BinomialNode<T> tail = head;
+
+			/*
+			 * merge two heaps without taking care of trees with same degree the roots of the tree must be in
+			 * ascending order of degree from left to right.
+			 */
+			while (x != null && y != null)
+			{
+				if (x.Degree <= y.Degree)
+				{
+					tail.Sibling = x;
+					x = x.Sibling;
+				}
+				else
+				{
+					tail.Sibling = y;
+					y = y.Sibling;
+				}
+
+				tail = tail.Sibling;
+			}
+
+			tail.Sibling = x ?? y;
+			return head;
+		}
+
+		private BinomialNode<T> Union(BinomialNode<T> x, BinomialNode<T> y)
+		{
+			BinomialNode<T> head = Merge(x, y);
+			if (head == null) return null;
+
+			BinomialNode<T> prev = null
+				, node = head
+				, next = node.Sibling;
+
+			// scan the merged list and merge binomial trees with same degree
+			while (next != null)
+			{
+				/*
+				 * if two adjacent tree roots have different degree or 3 consecutive roots
+				 * have same degree move to the next tree.
+				 */
+				if (node.Degree != next.Degree || next.Sibling != null && node.Degree == next.Sibling.Degree)
+				{
+					prev = node;
+					node = next;
+				}
+				else
+				{
+					// otherwise merge binomial trees with same degree
+					if (Compare(node.Value, next.Value) < 0)
+					{
+						node.Sibling = next.Sibling;
+						Link(node, next);
+					}
+					else
+					{
+						if (prev == null) head = next;
+						else prev.Sibling = next;
+
+						Link(next, node);
+						node = next;
+					}
+				}
+
+				next = node.Sibling;
+			}
+
+			return head;
+		}
+
+		#region Iterator Traversal for Action<BinomialNode<T>>
+		private void BreadthFirst([NotNull] BinomialNode<T> root, [NotNull] Action<BinomialNode<T>> visitCallback)
+		{
+			int version = _version;
+			// Head-Sibling-Child (Queue)
+			Queue<BinomialNode<T>> queue = new Queue<BinomialNode<T>>();
+
+			while (root != null)
+			{
+				if (version != _version) throw new VersionChangedException();
+				// Start at the root
+				queue.Enqueue(root);
+
+				while (queue.Count > 0)
+				{
+					if (version != _version) throw new VersionChangedException();
+
+					// visit the next queued node
+					BinomialNode<T> current = queue.Dequeue();
+					visitCallback(current);
+					if (current.Child == null) continue;
+
+					// Queue the next nodes
+					queue.Enqueue(current.Child);
+					if (current.Child.Sibling == null) continue;
+
+					foreach (BinomialNode<T> sibling in current.Child.Siblings())
+						queue.Enqueue(sibling);
+				}
+
+				root = root.Sibling;
+			}
+		}
+
+		private void DepthFirst([NotNull] BinomialNode<T> root, [NotNull] Action<BinomialNode<T>> visitCallback)
+		{
+			int version = _version;
+			// Head-Sibling-Child (Stack)
+			Stack<BinomialNode<T>> stack = new Stack<BinomialNode<T>>();
+
+			while (root != null)
+			{
+				if (version != _version) throw new VersionChangedException();
+				// Start at the root
+				stack.Push(root);
+
+				while (stack.Count > 0)
+				{
+					if (version != _version) throw new VersionChangedException();
+
+					// visit the next queued node
+					BinomialNode<T> current = stack.Pop();
+					visitCallback(current);
+					if (current.Child == null) continue;
+
+					// Queue the next nodes
+					if (current.Child.Sibling != null) stack.Push(current.Child.Sibling);
+
+					foreach (BinomialNode<T> child in current.Child.Children())
+						stack.Push(child);
+				}
+
+				root = root.Sibling;
+			}
+		}
+		#endregion
+
+		#region Iterator Traversal for Func<BinomialNode<T>, bool>
+		private void BreadthFirst([NotNull] BinomialNode<T> root, [NotNull] Func<BinomialNode<T>, bool> visitCallback)
+		{
+			int version = _version;
+			// Head-Sibling-Child (Queue)
+			Queue<BinomialNode<T>> queue = new Queue<BinomialNode<T>>();
+
+			while (root != null)
+			{
+				if (version != _version) throw new VersionChangedException();
+				// Start at the root
+				queue.Enqueue(root);
+
+				while (queue.Count > 0)
+				{
+					if (version != _version) throw new VersionChangedException();
+
+					// visit the next queued node
+					BinomialNode<T> current = queue.Dequeue();
+					if (!visitCallback(current)) return;
+					if (current.Child == null) continue;
+
+					// Queue the next nodes
+					queue.Enqueue(current.Child);
+					if (current.Child.Sibling == null) continue;
+
+					foreach (BinomialNode<T> sibling in current.Child.Siblings())
+						queue.Enqueue(sibling);
+				}
+
+				root = root.Sibling;
+			}
+		}
+
+		private void DepthFirst([NotNull] BinomialNode<T> root, [NotNull] Func<BinomialNode<T>, bool> visitCallback)
+		{
+			int version = _version;
+			// Head-Child-Sibling (Stack)
+			Stack<BinomialNode<T>> stack = new Stack<BinomialNode<T>>();
+
+			while (root != null)
+			{
+				if (version != _version) throw new VersionChangedException();
+				// Start at the root
+				stack.Push(root);
+
+				while (stack.Count > 0)
+				{
+					if (version != _version) throw new VersionChangedException();
+
+					// visit the next queued node
+					BinomialNode<T> current = stack.Pop();
+					if (!visitCallback(current)) return;
+					if (current.Child == null) continue;
+
+					// Queue the next nodes
+					if (current.Child.Sibling != null) stack.Push(current.Child.Sibling);
+
+					foreach (BinomialNode<T> child in current.Child.Children())
+						stack.Push(child);
+				}
+
+				root = root.Sibling;
+			}
+		}
+		#endregion
 	}
 }

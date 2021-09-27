@@ -91,8 +91,15 @@ namespace TestApp
 			thisValue.WriteTo(Console.Out);
 		}
 
-		public static void Print<TNode, TKey, TValue>([NotNull] this BinomialHeap<TNode, TKey, TValue> thisValue)
-			where TNode : BinomialNode<TNode, TKey, TValue>
+		public static void Print<TKey, TValue>([NotNull] this BinomialHeap<TKey, TValue> thisValue)
+		{
+			Console.WriteLine();
+			Console.WriteLine("Count: " + thisValue.Count);
+			Console.WriteLine();
+			thisValue.WriteTo(Console.Out);
+		}
+
+		public static void Print<T>([NotNull] this BinomialHeap<T> thisValue)
 		{
 			Console.WriteLine();
 			Console.WriteLine("Count: " + thisValue.Count);

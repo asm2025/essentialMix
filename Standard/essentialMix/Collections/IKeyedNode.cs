@@ -1,8 +1,7 @@
 ﻿namespace essentialMix.Collections
 {
-	public interface IKeyedNode<TKey, TValue> : INode<TValue>
+	public interface IKeyedNode<TKey, TValue> : ITreeNode<TValue>
 	{
 		TKey Key { get; set; }
-		string ToString(int level);
 	}
 }

@@ -9,7 +9,7 @@ namespace essentialMix.Collections
 	[DebuggerDisplay("{Value}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class LinkedBinaryNode<TNode, T> : INode<T>
+	public abstract class LinkedBinaryNode<TNode, T> : ITreeNode<T>
 		where TNode : LinkedBinaryNode<TNode, T>
 	{
 		private const int LEFT = 0;
@@ -57,7 +57,7 @@ namespace essentialMix.Collections
 		public override string ToString() { return Convert.ToString(Value); }
 
 		[NotNull]
-		protected internal virtual string ToString(int level)
+		public virtual string ToString(int level)
 		{
 			return $"{Value} :L{level}";
 		}
@@ -126,7 +126,7 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		protected internal override string ToString(int level)
+		public override string ToString(int level)
 		{
 			return $"{Value} :L{level}H{Height}B{BalanceFactor}";
 		}
