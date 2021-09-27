@@ -446,17 +446,17 @@ namespace essentialMix.Collections
 			public HeapProxy(IHeap<T> heap)
 			{
 				_heap = heap;
-				_collection = heap;
+				_collection = heap as ICollection ?? throw new NotSupportedException();
 			}
 
 			/// <inheritdoc />
 			public int Count => _collection.Count;
 
 			/// <inheritdoc />
-			public bool IsSynchronized => _heap.IsSynchronized;
+			public bool IsSynchronized => _collection.IsSynchronized;
 
 			/// <inheritdoc />
-			public object SyncRoot => _heap.SyncRoot;
+			public object SyncRoot => _collection.SyncRoot;
 
 			/// <inheritdoc />
 			IEnumerator IEnumerable.GetEnumerator() { return _heap.GetEnumerator(); }
@@ -471,7 +471,7 @@ namespace essentialMix.Collections
 			/// <inheritdoc />
 			public bool TryDequeue(out T item)
 			{
-				if (_collection.Count == 0)
+				if (_heap.Count == 0)
 				{
 					item = default(T);
 					return false;
@@ -488,7 +488,7 @@ namespace essentialMix.Collections
 			/// <inheritdoc />
 			public bool TryPeek(out T item)
 			{
-				if (_collection.Count == 0)
+				if (_heap.Count == 0)
 				{
 					item = default(T);
 					return false;
@@ -502,7 +502,7 @@ namespace essentialMix.Collections
 			public void Clear() { _heap.Clear(); }
 
 			/// <inheritdoc />
-			public void CopyTo(Array array, int index) { _heap.CopyTo(array, index); }
+			public void CopyTo(Array array, int index) { _collection.CopyTo(array, index); }
 		}
 
 		private readonly struct LinkedListProxy : IQueueAdapter

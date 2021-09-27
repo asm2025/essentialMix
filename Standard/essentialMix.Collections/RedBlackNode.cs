@@ -27,7 +27,7 @@ namespace essentialMix.Collections
 				: 'B';
 
 		/// <inheritdoc />
-		protected internal override string ToString(int level)
+		public override string ToString(int level)
 		{
 			return $"{Value} {ColorC}";
 		}

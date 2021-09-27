@@ -153,10 +153,10 @@ work with {HEAVY} items.");
 			//TestBinaryHeapElementAt();
 			//TestBinaryHeapDecreaseKey();
 		
-			TestBinomialHeapAdd();
+			//TestBinomialHeapAdd();
 			//TestBinomialHeapRemove();
 			//TestBinomialHeapElementAt();
-			//TestBinomialHeapDecreaseKey();
+			TestBinomialHeapDecreaseKey();
 			
 			//TestPairingHeapAdd();
 			//TestPairingHeapRemove();
@@ -4912,22 +4912,21 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			static void DoHeapTest<T>(IHeap<T> heap, T[] values, Stopwatch clock)
 			{
-				ICollection collection = heap;
 				Console.WriteLine();
 				Console.WriteLine(Bright.Green($"Testing {heap.GetType().Name}..."));
 				heap.Clear();
 				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
-				Debug.Assert(collection.Count == 0, "Values are not cleared correctly!");
+				Debug.Assert(heap.Count == 0, "Values are not cleared correctly!");
 
 				clock.Restart();
 				heap.Add(values);
-				Console.WriteLine($"Added {collection.Count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+				Console.WriteLine($"Added {heap.Count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine(Bright.Red("Test removing..."));
 				int removed = 0;
 				clock.Restart();
 
-				while (collection.Count > 0)
+				while (heap.Count > 0)
 				{
 					heap.ExtractValue();
 					removed++;

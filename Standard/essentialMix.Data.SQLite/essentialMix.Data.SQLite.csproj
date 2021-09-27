@@ -68,7 +68,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2021.2.0" />
-		<PackageReference Include="System.Data.SQLite.Core" Version="1.0.114.3" />
+		<PackageReference Include="System.Data.SQLite.Core" Version="1.0.115" />
 	</ItemGroup>
 
 	<ItemGroup>

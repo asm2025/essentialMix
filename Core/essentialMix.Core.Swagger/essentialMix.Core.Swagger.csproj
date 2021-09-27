@@ -68,9 +68,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2021.2.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.9" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.1.5" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.1.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.10" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.2.2" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.2.2" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -106,10 +106,7 @@ namespace essentialMix.Collections
 			}
 		}
 
-		public virtual void Swap([NotNull] TNode other)
-		{
-			(other.Value, Value) = (Value, other.Value);
-		}
+		public abstract void Swap([NotNull] TNode other);
 
 		internal void Invalidate()
 		{

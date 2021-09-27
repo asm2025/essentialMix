@@ -23,6 +23,13 @@ namespace essentialMix.Collections
 			get => _key;
 			set => _key = value;
 		}
+
+		/// <inheritdoc />
+		public override void Swap(BinomialNode<TKey, TValue> other)
+		{
+			(other.Key, Key) = (Key, other.Key);
+			(other.Value, Value) = (Value, other.Value);
+		}
 	}
 
 	[Serializable]
@@ -38,6 +45,12 @@ namespace essentialMix.Collections
 		public override string ToString(int level)
 		{
 			return $"{Value} :D{Degree}L{level}";
+		}
+
+		/// <inheritdoc />
+		public override void Swap(BinomialNode<T> other)
+		{
+			(other.Value, Value) = (Value, other.Value);
 		}
 	}
 }
