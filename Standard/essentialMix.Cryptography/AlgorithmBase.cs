@@ -7,7 +7,7 @@ namespace essentialMix.Cryptography
 {
 	public abstract class AlgorithmBase : Disposable, IAlgorithmBase
 	{
-		private object _algorithm;
+		private readonly object _algorithm;
 
 		protected AlgorithmBase([NotNull] object algorithm)
 		{

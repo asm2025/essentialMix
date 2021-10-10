@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using essentialMix.Helpers;
 using JetBrains.Annotations;
 using Microsoft.AspNet.Identity;
 
@@ -13,19 +12,17 @@ namespace essentialMix.Extensions
 			where TUser : class, IUser<TKey>
 			where TKey : IEquatable<TKey>
 		{
-			return TaskHelper.Run(() => FindByNameOrEmailAsync(thisValue, userName, email));
+			TUser user = thisValue.FindByNameAsync(userName).Execute();
+			return user ?? FindByNameOrEmailAsync(thisValue, userName, email).Execute();
 		}
 
 		[NotNull]
-		public static Task<TUser> FindByNameOrEmailAsync<TUser, TKey>([NotNull] this UserManager<TUser, TKey> thisValue, string userName, string email)
+		public static async Task<TUser> FindByNameOrEmailAsync<TUser, TKey>([NotNull] this UserManager<TUser, TKey> thisValue, string userName, string email)
 			where TUser : class, IUser<TKey>
 			where TKey : IEquatable<TKey>
 		{
-			Func<TUser, Task<TUser>>[] functions = {
-				_ => thisValue.FindByNameAsync(userName),
-				_ => thisValue.FindByEmailAsync(email)
-			};
-			return TaskHelper.SequenceAsync(default(TUser), user => user != null, functions);
+			TUser user = await thisValue.FindByNameAsync(userName);
+			return user ?? await thisValue.FindByEmailAsync(email);
 		}
 	}
 }

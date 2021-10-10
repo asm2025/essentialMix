@@ -402,7 +402,7 @@ work with {HEAVY} items.");
 		{
 			int[][] allNumbers =
 			{
-				new int[0], //0
+				Array.Empty<int>(), //0
 				new []{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, //55
 				new []{-1, -2, -3, -4, -5, -6, -7, -8, -9, -10}, //-1
 				new []{-10, -2, -9, -4, -8, -6, -7, -1, -3, -5}, //-1
@@ -6240,6 +6240,7 @@ decrypted:
 				{
 					ObjectHelper.Dispose(ref timedCallback);
 					ObjectHelper.Dispose(ref consumerPipe);
+					ObjectHelper.Dispose(ref producerPipe);
 					ObjectHelper.Dispose(ref cts);
 				}
 

@@ -71,7 +71,7 @@ namespace essentialMix.Data.Entity.Patterns.Repository
 		{
 			token.ThrowIfCancellationRequested();
 			settings ??= new Pagination();
-			return new ValueTask<IList<TEntity>>(PrepareListQuery(settings).Paginate(settings).ToListAsync(token).As<List<TEntity>, IList<TEntity>>());
+			return new ValueTask<IList<TEntity>>(PrepareListQuery(settings).Paginate(settings).ToListAsync(token).As<List<TEntity>, IList<TEntity>>(token: token));
 		}
 
 		/// <inheritdoc />

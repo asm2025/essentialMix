@@ -177,8 +177,10 @@ inline std::string GetGUIDName(const GUID& guid)
 	return name;
 }
 
-std::string GetMediaTypeDescription(const IMFMediaType* mediaType)
+inline std::string GetMediaTypeDescription(const IMFMediaType* mediaType)
 {
 	HRESULT hr = S_OK;
-	GUID majprType;
+	GUID majorType;
+	std::string desc{};
+	return desc;
 }

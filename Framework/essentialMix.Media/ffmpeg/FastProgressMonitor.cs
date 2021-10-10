@@ -21,6 +21,9 @@ namespace essentialMix.Media.ffmpeg
 		public FastProgressMonitor(long frames, [NotNull] Action onStart, [NotNull] Action<int> onProgress, [NotNull] Action onCompleted)
 		{
 			_frames = frames;
+			OnProgressStart = onStart;
+			OnProgress = onProgress;
+			OnProgressCompleted = onCompleted;
 			ProducerConsumerQueueOptions<string> options = new ProducerConsumerQueueOptions<string>(1, true, (_, data) =>
 			{
 				Match m = __progress.Match(data);
@@ -46,9 +49,6 @@ namespace essentialMix.Media.ffmpeg
 				_done = true;
 			});
 			_messages = ProducerConsumerQueue.Create(ThreadQueueMode.WaitAndPulse, options);
-			OnProgressStart = onStart;
-			OnProgress = onProgress;
-			OnProgressCompleted = onCompleted;
 			Reset();
 		}
 

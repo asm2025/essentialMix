@@ -17,8 +17,8 @@ namespace essentialMix.Patterns.Producer
 		{
 			Key = key;
 			Source = source;
-			Source.Data += Data;
-			Source.Completed += Completed;
+			Source.Data += (_, element) => OnDataProduced(element);
+			Source.Completed += (_, _) => OnEndOfData();
 		}
 
 		/// <inheritdoc />

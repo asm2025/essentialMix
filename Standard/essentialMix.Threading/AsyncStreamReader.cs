@@ -110,7 +110,7 @@ namespace essentialMix.Threading
 
 			try
 			{
-				byteLen = BaseStream?.EndRead(ar) ?? 0;
+				byteLen = (int)BaseStream?.EndRead(ar);
 			}
 			catch (IOException)
 			{

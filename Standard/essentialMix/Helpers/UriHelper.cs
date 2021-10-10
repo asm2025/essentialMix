@@ -221,7 +221,7 @@ namespace essentialMix.Helpers
 		{
 			return UserAgents.Count == 0
 						? null
-						: UserAgents.Values[RandomHelper.Default.Next(0, UserAgents.Values.Count - 1)];
+						: UserAgents.Values[RNGRandomHelper.Default.Next(0, UserAgents.Values.Count - 1)];
 		}
 
 		public static WebRequest MakeHttpWebRequest([NotNull] string url, IOHttpRequestSettings settings) { return MakeHttpWebRequest<HttpWebRequest>(url, settings); }

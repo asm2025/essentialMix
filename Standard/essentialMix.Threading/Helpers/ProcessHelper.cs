@@ -41,7 +41,7 @@ namespace essentialMix.Threading.Helpers
 			if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentNullException(nameof(fileName));
 
 			string extension = Path.GetExtension(fileName);
-			if (string.IsNullOrEmpty(extension)) return new string[0];
+			if (string.IsNullOrEmpty(extension)) return Array.Empty<string>();
 
 			ArrayList arrayList = new ArrayList();
 			RegistryKey registryKey = null;

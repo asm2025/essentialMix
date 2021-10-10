@@ -28,7 +28,7 @@ namespace Other.JonSkeet.MiscUtil.Text
 		/// <summary>
 		/// An empty UTF-32 string.
 		/// </summary>
-		public static readonly UTF32String Empty = new UTF32String(new int[0]);
+		public static readonly UTF32String Empty = new UTF32String(Array.Empty<int>());
 
 		/// <summary>
 		/// UTF-32 characters making up the string.

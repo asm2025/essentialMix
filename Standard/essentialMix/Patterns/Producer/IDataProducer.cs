@@ -1451,7 +1451,7 @@ namespace essentialMix.Patterns.Producer
 				}
 			}
 
-			void Completion(object sender, EventArgs args) { throw new ArgumentOutOfRangeException(nameof(index), "Specified index never reached"); }
+			static void Completion(object sender, EventArgs args) { throw new ArgumentOutOfRangeException(nameof(index), "Specified index never reached"); }
 		}
 
 		/// <summary>

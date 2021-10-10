@@ -126,8 +126,8 @@
 			try {
 				decodedKey = decodeURIComponent(key);
 			} catch (e) {
-				if (console && typeof console.error === "function") {
-					console.error('Could not decode cookie with key "' + key + '"', e);
+				if (window.console && typeof window.console.error === "function") {
+					window.console.error('Could not decode cookie with key "' + key + '"', e);
 				}
 			}
 
@@ -156,8 +156,8 @@
 	var cookiesExport = (global && typeof global.document === "object") ? factory(global) : factory;
 
 	// AMD support
-	if (typeof define === "function" && define.amd) {
-		define(function () { return cookiesExport; });
+	if (typeof window.define === "function" && window.define.amd) {
+		window.define(function () { return cookiesExport; });
 		// CommonJS/Node.js support
 	} else if (typeof exports === "object") {
 		// Support Node.js specific `module.exports` (which can be a function)

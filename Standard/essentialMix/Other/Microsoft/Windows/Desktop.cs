@@ -371,7 +371,7 @@ namespace Other.Microsoft.Windows
 			IntPtr windowStation = Win32.GetProcessWindowStation();
 
 			// check we got a valid handle.
-			if (windowStation == IntPtr.Zero) return new string[0];
+			if (windowStation == IntPtr.Zero) return Array.Empty<string>();
 
 			string[] desktops;
 
@@ -381,7 +381,7 @@ namespace Other.Microsoft.Windows
 				bool result = Win32.EnumDesktops(windowStation, DesktopProc, IntPtr.Zero);
 
 				// something went wrong.
-				if (!result) return new string[0];
+				if (!result) return Array.Empty<string>();
 
 				//	// turn the collection into an array.
 				desktops = new string[__stringCollection.Count];

@@ -1551,7 +1551,7 @@ namespace essentialMix.Extensions
 			if (length == -1) length = thisValue.Length - startIndex;
 			if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
 			if (startIndex + length > thisValue.Length) length = thisValue.Length - startIndex;
-			if (length == 0) return new char[0];
+			if (length == 0) return Array.Empty<char>();
 
 			char[] chArray = new char[length];
 			if (length > 0) thisValue.CopyTo(startIndex, chArray, 0, length);

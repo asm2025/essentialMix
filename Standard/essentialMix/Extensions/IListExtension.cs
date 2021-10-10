@@ -233,9 +233,7 @@ namespace essentialMix.Extensions
 			{
 				int x = index + count - (i + 1);
 				int y = index + i;
-				object tmp = thisValue[x];
-				thisValue[x] = thisValue[y];
-				thisValue[y] = tmp;
+				(thisValue[x], thisValue[y]) = (thisValue[y], thisValue[x]);
 			}
 		}
 
@@ -251,9 +249,7 @@ namespace essentialMix.Extensions
 			{
 				int x = index + count - (i + 1);
 				int y = index + i;
-				T tmp = thisValue[x];
-				thisValue[x] = thisValue[y];
-				thisValue[y] = tmp;
+				(thisValue[x], thisValue[y]) = (thisValue[y], thisValue[x]);
 			}
 		}
 
@@ -975,18 +971,14 @@ namespace essentialMix.Extensions
 			thisValue.Count.ValidateRange(index2);
 			if (index1 == index2) return;
 
-			T tmp = thisValue[index1];
-			thisValue[index1] = thisValue[index2];
-			thisValue[index2] = tmp;
+			(thisValue[index1], thisValue[index2]) = (thisValue[index2], thisValue[index1]);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static void FastSwap<T>([NotNull] this IList<T> thisValue, int index1, int index2)
 		{
 			if (index1 == index2) return;
-			T tmp = thisValue[index1];
-			thisValue[index1] = thisValue[index2];
-			thisValue[index2] = tmp;
+			(thisValue[index1], thisValue[index2]) = (thisValue[index2], thisValue[index1]);
 		}
 
 		public static void LeftShift<T>([NotNull] this IList<T> thisValue, int index, int count)

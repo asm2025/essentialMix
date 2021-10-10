@@ -36,7 +36,7 @@ namespace essentialMix.Helpers
 
 		private static readonly ConcurrentDictionary<Type, IEnumInfo> __enumInfo = new ConcurrentDictionary<Type, IEnumInfo>();
 
-		private static Func<EnumMember, string>[] __customEnumMemberFormatters = new Func<EnumMember, string>[0];
+		private static Func<EnumMember, string>[] __customEnumMemberFormatters = Array.Empty<Func<EnumMember, string>>();
 
 		/// <summary>
 		///     Retrieves the underlying type of <paramref name="enumType" />.

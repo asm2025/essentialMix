@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using essentialMix.Extensions;
@@ -37,8 +35,49 @@ namespace essentialMix.Helpers
 		public static int ProcessMaximum { get; } = Environment.ProcessorCount;
 		public static int ProcessDefault => ProcessMaximum;
 
-		[NotNull]
-		public static Task Run([NotNull] Action action, TaskCreationOptions options) { return Run(action, options, CancellationToken.None); }
+		public static void Run([NotNull] Action action, TimeSpan timeout, CancellationToken token = default(CancellationToken)) { Run(action, timeout.TotalIntMilliseconds(), TaskCreationOptions.None, null, token); }
+		public static void Run([NotNull] Action action, TimeSpan timeout, Action onTimeout, CancellationToken token = default(CancellationToken)) { Run(action, timeout.TotalIntMilliseconds(), TaskCreationOptions.None, onTimeout, token); }
+		public static void Run([NotNull] Action action, TimeSpan timeout, TaskCreationOptions options, CancellationToken token = default(CancellationToken)) { Run(action, timeout.TotalIntMilliseconds(), options, null, token); }
+		public static void Run([NotNull] Action action, TimeSpan timeout, TaskCreationOptions options, Action onTimeout, CancellationToken token = default(CancellationToken)) { Run(action, timeout.TotalIntMilliseconds(), options, onTimeout, token); }
+		public static void Run([NotNull] Action action, int millisecondTimeout, CancellationToken token = default(CancellationToken)) { Run(action, millisecondTimeout, TaskCreationOptions.None, null, token); }
+		public static void Run([NotNull] Action action, int millisecondTimeout, Action onTimeout, CancellationToken token = default(CancellationToken)) { Run(action, millisecondTimeout, TaskCreationOptions.None, onTimeout, token); }
+		public static void Run([NotNull] Action action, int millisecondTimeout, TaskCreationOptions options, CancellationToken token = default(CancellationToken)) { Run(action, millisecondTimeout, options, null, token); }
+		public static void Run([NotNull] Action action, int millisecondTimeout, TaskCreationOptions options, Action onTimeout, CancellationToken token = default(CancellationToken))
+		{
+			if (millisecondTimeout < 0) throw new ArgumentOutOfRangeException(nameof(millisecondTimeout));
+			token.ThrowIfCancellationRequested();
+			Task task = Run(action, options, token).ConfigureAwait();
+			if (task.Wait(millisecondTimeout)) return;
+			token.ThrowIfCancellationRequested();
+			if (onTimeout == null) throw new TimeoutException();
+			onTimeout();
+		}
+
+		public static T Run<T>([NotNull] Func<T> func, TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return Run(func, default(T), timeout.TotalIntMilliseconds(), TaskCreationOptions.None, null, token); }
+		public static T Run<T>([NotNull] Func<T> func, TimeSpan timeout, Action onTimeout, CancellationToken token = default(CancellationToken)) { return Run(func, default(T), timeout.TotalIntMilliseconds(), TaskCreationOptions.None, onTimeout, token); }
+		public static T Run<T>([NotNull] Func<T> func, TimeSpan timeout, TaskCreationOptions options, CancellationToken token = default(CancellationToken)) { return Run(func, default(T), timeout.TotalIntMilliseconds(), options, null, token); }
+		public static T Run<T>([NotNull] Func<T> func, T defaultValue, TimeSpan timeout, CancellationToken token = default(CancellationToken)) { return Run(func, defaultValue, timeout.TotalIntMilliseconds(), TaskCreationOptions.None, null, token); }
+		public static T Run<T>([NotNull] Func<T> func, T defaultValue, TimeSpan timeout, Action onTimeout, CancellationToken token = default(CancellationToken)) { return Run(func, defaultValue, timeout.TotalIntMilliseconds(), TaskCreationOptions.None, onTimeout, token); }
+		public static T Run<T>([NotNull] Func<T> func, T defaultValue, TimeSpan timeout, TaskCreationOptions options, CancellationToken token = default(CancellationToken)) { return Run(func, defaultValue, timeout.TotalIntMilliseconds(), options, null, token); }
+		public static T Run<T>([NotNull] Func<T> func, T defaultValue, TimeSpan timeout, TaskCreationOptions options, Action onTimeout, CancellationToken token = default(CancellationToken)) { return Run(func, defaultValue, timeout.TotalIntMilliseconds(), options, onTimeout, token); }
+		public static T Run<T>([NotNull] Func<T> func, int millisecondTimeout, CancellationToken token = default(CancellationToken)) { return Run(func, default(T), millisecondTimeout, TaskCreationOptions.None, null, token); }
+		public static T Run<T>([NotNull] Func<T> func, int millisecondTimeout, Action onTimeout, CancellationToken token = default(CancellationToken)) { return Run(func, default(T), millisecondTimeout, TaskCreationOptions.None, onTimeout, token); }
+		public static T Run<T>([NotNull] Func<T> func, int millisecondTimeout, TaskCreationOptions options, CancellationToken token = default(CancellationToken)) { return Run(func, default(T), millisecondTimeout, options, null, token); }
+		public static T Run<T>([NotNull] Func<T> func, T defaultValue, int millisecondTimeout, CancellationToken token = default(CancellationToken)) { return Run(func, defaultValue, millisecondTimeout, TaskCreationOptions.None, null, token); }
+		public static T Run<T>([NotNull] Func<T> func, T defaultValue, int millisecondTimeout, Action onTimeout, CancellationToken token = default(CancellationToken)) { return Run(func, defaultValue, millisecondTimeout, TaskCreationOptions.None, onTimeout, token); }
+		public static T Run<T>([NotNull] Func<T> func, T defaultValue, int millisecondTimeout, TaskCreationOptions options, CancellationToken token = default(CancellationToken)) { return Run(func, defaultValue, millisecondTimeout, options, null, token); }
+		public static T Run<T>([NotNull] Func<T> func, T defaultValue, int millisecondTimeout, TaskCreationOptions options, Action onTimeout, CancellationToken token = default(CancellationToken))
+		{
+			if (millisecondTimeout < 0) throw new ArgumentOutOfRangeException(nameof(millisecondTimeout));
+			token.ThrowIfCancellationRequested();
+			Task<T> task = Run(func, options, token).ConfigureAwait();
+			if (task.Wait(millisecondTimeout)) return task.Result;
+			token.ThrowIfCancellationRequested();
+			if (onTimeout == null) throw new TimeoutException();
+			onTimeout();
+			return defaultValue;
+		}
+
 		/// <summary>
 		/// See these articles first to understand why this method exists, Then you can decide if you want to use it or not.
 		/// <para><see href="https://devblogs.microsoft.com/pfxteam/task-run-vs-task-factory-startnew/" /></para>
@@ -49,21 +88,24 @@ namespace essentialMix.Helpers
 		/// <para>The only meaningful options here are <see cref="TaskCreationOptions.PreferFairness"/> or <see cref="TaskCreationOptions.LongRunning"/></para>
 		/// </summary>
 		[NotNull]
-		public static Task Run([NotNull] Action action, TaskCreationOptions options, CancellationToken token)
+		public static Task Run([NotNull] Action action, TaskCreationOptions options, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			TaskCreationOptions opt = TaskCreationOptions.None;
-			if ((options & TaskCreationOptions.LongRunning) == TaskCreationOptions.LongRunning) opt |= TaskCreationOptions.LongRunning;
-			if ((options & TaskCreationOptions.PreferFairness) == TaskCreationOptions.PreferFairness) opt |= TaskCreationOptions.PreferFairness;
-			if ((options & TaskCreationOptions.HideScheduler) == TaskCreationOptions.HideScheduler) opt |= TaskCreationOptions.HideScheduler;
-			if ((options & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously) opt |= TaskCreationOptions.RunContinuationsAsynchronously;
-			if (opt == TaskCreationOptions.None) return Task.Run(action, token);
+
+			if (options != TaskCreationOptions.None)
+			{
+				if ((options & TaskCreationOptions.LongRunning) == TaskCreationOptions.LongRunning) opt |= TaskCreationOptions.LongRunning;
+				if ((options & TaskCreationOptions.PreferFairness) == TaskCreationOptions.PreferFairness) opt |= TaskCreationOptions.PreferFairness;
+				if ((options & TaskCreationOptions.HideScheduler) == TaskCreationOptions.HideScheduler) opt |= TaskCreationOptions.HideScheduler;
+				if ((options & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously) opt |= TaskCreationOptions.RunContinuationsAsynchronously;
+				if (opt == TaskCreationOptions.None) return Task.Run(action, token);
+			}
+
 			opt |= TaskCreationOptions.DenyChildAttach;
 			return Task.Factory.StartNew(action, token, opt, Task.Factory.Scheduler ?? TaskScheduler.Default);
 		}
 
-		[NotNull]
-		public static Task<T> Run<T>([NotNull] Func<T> func, TaskCreationOptions options) { return Run(func, options, CancellationToken.None); }
 		/// <summary>
 		/// See these articles first to understand why this method exists, Then you can decide if you want to use it or not.
 		/// <para><see href="https://devblogs.microsoft.com/pfxteam/task-run-vs-task-factory-startnew/" /></para>
@@ -74,31 +116,22 @@ namespace essentialMix.Helpers
 		/// <para>The only meaningful options here are <see cref="TaskCreationOptions.PreferFairness"/> or <see cref="TaskCreationOptions.LongRunning"/></para>
 		/// </summary>
 		[NotNull]
-		public static Task<T> Run<T>([NotNull] Func<T> func, TaskCreationOptions options, CancellationToken token)
+		public static Task<T> Run<T>([NotNull] Func<T> func, TaskCreationOptions options, CancellationToken token = default(CancellationToken))
 		{
 			token.ThrowIfCancellationRequested();
 			TaskCreationOptions opt = TaskCreationOptions.None;
-			if ((options & TaskCreationOptions.LongRunning) == TaskCreationOptions.LongRunning) opt |= TaskCreationOptions.LongRunning;
-			if ((options & TaskCreationOptions.PreferFairness) == TaskCreationOptions.PreferFairness) opt |= TaskCreationOptions.PreferFairness;
-			if ((options & TaskCreationOptions.HideScheduler) == TaskCreationOptions.HideScheduler) opt |= TaskCreationOptions.HideScheduler;
-			if ((options & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously) opt |= TaskCreationOptions.RunContinuationsAsynchronously;
-			if (opt == TaskCreationOptions.None) return Task.Run(func, token);
+
+			if (options != TaskCreationOptions.None)
+			{
+				if ((options & TaskCreationOptions.LongRunning) == TaskCreationOptions.LongRunning) opt |= TaskCreationOptions.LongRunning;
+				if ((options & TaskCreationOptions.PreferFairness) == TaskCreationOptions.PreferFairness) opt |= TaskCreationOptions.PreferFairness;
+				if ((options & TaskCreationOptions.HideScheduler) == TaskCreationOptions.HideScheduler) opt |= TaskCreationOptions.HideScheduler;
+				if ((options & TaskCreationOptions.RunContinuationsAsynchronously) == TaskCreationOptions.RunContinuationsAsynchronously) opt |= TaskCreationOptions.RunContinuationsAsynchronously;
+				if (opt == TaskCreationOptions.None) return Task.Run(func, token);
+			}
+
 			opt |= TaskCreationOptions.DenyChildAttach;
 			return Task.Factory.StartNew(func, token, opt, Task.Factory.Scheduler ?? TaskScheduler.Default);
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static void Run([NotNull] Func<Task> func, CancellationToken token = default(CancellationToken))
-		{
-			token.ThrowIfCancellationRequested();
-			func().Wait(token);
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static TResult Run<TResult>([NotNull] Func<Task<TResult>> func, CancellationToken token = default(CancellationToken))
-		{
-			token.ThrowIfCancellationRequested();
-			return func().Execute();
 		}
 
 		[NotNull]
@@ -154,124 +187,349 @@ namespace essentialMix.Helpers
 					}, tkn);
 		}
 
-		public static void Sequence([NotNull] params Action[] actions)
+		[NotNull]
+		public static Task SequenceAsync([NotNull] Task action1, [NotNull] Task actions2) { return SequenceAsync(CancellationToken.None, action1, actions2); }
+		public static async Task SequenceAsync(CancellationToken token, [NotNull] Task action1, [NotNull] Task action2)
 		{
-			if (actions.Length == 0) return;
-
-			foreach (Action action in actions)
+			if (!token.CanBeCanceled)
 			{
-				if (action != null) continue;
+				await action1;
+				await action2;
+				return;
+			}
+
+			token.ThrowIfCancellationRequested();
+			await action1;
+			token.ThrowIfCancellationRequested();
+			await action2;
+		}
+
+		[NotNull]
+		public static Task SequenceAsync([NotNull] Task action1, [NotNull] Task actions2, [NotNull] Task actions3) { return SequenceAsync(CancellationToken.None, action1, actions2, actions3); }
+		public static async Task SequenceAsync(CancellationToken token, [NotNull] Task action1, [NotNull] Task action2, [NotNull] Task action3)
+		{
+			if (!token.CanBeCanceled)
+			{
+				await action1;
+				await action2;
+				await action3;
+				return;
+			}
+
+			token.ThrowIfCancellationRequested();
+			await action1;
+			token.ThrowIfCancellationRequested();
+			await action2;
+			token.ThrowIfCancellationRequested();
+			await action3;
+		}
+
+		[NotNull]
+		public static Task SequenceAsync([NotNull] Task action1, [NotNull] Task actions2, [NotNull] Task actions3, [NotNull] Task actions4) { return SequenceAsync(CancellationToken.None, action1, actions2, actions3, actions4); }
+		public static async Task SequenceAsync(CancellationToken token, [NotNull] Task action1, [NotNull] Task action2, [NotNull] Task action3, [NotNull] Task action4)
+		{
+			if (!token.CanBeCanceled)
+			{
+				await action1;
+				await action2;
+				await action3;
+				await action4;
+				return;
+			}
+
+			token.ThrowIfCancellationRequested();
+			await action1;
+			token.ThrowIfCancellationRequested();
+			await action2;
+			token.ThrowIfCancellationRequested();
+			await action3;
+			token.ThrowIfCancellationRequested();
+			await action4;
+		}
+
+		[NotNull]
+		public static Task SequenceAsync([NotNull] Task action1, [NotNull] Task actions2, [NotNull] Task actions3, [NotNull] Task actions4, [NotNull] Task actions5) { return SequenceAsync(CancellationToken.None, action1, actions2, actions3, actions4, actions5); }
+		public static async Task SequenceAsync(CancellationToken token, [NotNull] Task action1, [NotNull] Task action2, [NotNull] Task action3, [NotNull] Task action4, [NotNull] Task action5)
+		{
+			if (!token.CanBeCanceled)
+			{
+				await action1;
+				await action2;
+				await action3;
+				await action4;
+				await action5;
+				return;
+			}
+
+			token.ThrowIfCancellationRequested();
+			await action1;
+			token.ThrowIfCancellationRequested();
+			await action2;
+			token.ThrowIfCancellationRequested();
+			await action3;
+			token.ThrowIfCancellationRequested();
+			await action4;
+			token.ThrowIfCancellationRequested();
+			await action5;
+		}
+
+		[NotNull]
+		public static Task SequenceAsync([NotNull] Task action, [NotNull] params Task[] actions) { return SequenceAsync(CancellationToken.None, action, actions); }
+		public static async Task SequenceAsync(CancellationToken token, [NotNull] Task action, [NotNull] params Task[] actions)
+		{
+			token.ThrowIfCancellationRequested();
+
+			foreach (Task act in actions)
+			{
+				if (act != null) continue;
 				throw new NullReferenceException($"{nameof(actions)} contains a null reference.");
 			}
 
-			foreach (Action action in actions) 
-				action();
-		}
-		
-		[NotNull]
-		public static Task SequenceAsync([NotNull] params Action[] actions) { return SequenceAsync(CancellationToken.None, actions); }
-		[NotNull]
-		public static Task SequenceAsync(CancellationToken token, [NotNull] params Action[] actions)
-		{
-			if (actions.Length == 0) return Task.CompletedTask;
+			await action;
 
-			foreach (Action action in actions)
+			foreach (Task act in actions)
 			{
-				if (action != null) continue;
-				throw new NullReferenceException($"{nameof(actions)} contains a null reference.");
+				token.ThrowIfCancellationRequested();
+				await act;
+			}
+		}
+
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>([NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2) { return SequenceAsync(CancellationToken.None, null, function1, function2); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>(Predicate<TResult> predicate, [NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2) { return SequenceAsync(CancellationToken.None, predicate, function1, function2); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>(CancellationToken token, [NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2) { return SequenceAsync(token, null, function1, function2); }
+		public static async Task<TResult> SequenceAsync<TResult>(CancellationToken token, Predicate<TResult> predicate, [NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2)
+		{
+			TResult result;
+
+			if (!token.CanBeCanceled)
+			{
+				result = await function1;
+				return predicate == null
+							? await function2(result)
+							: !predicate(result)
+								? result
+								: await function2(result);
 			}
 
-			Task firstTask = Task.CompletedTask;
-			Task task = firstTask;
-
-			foreach (Action action in actions) 
-				task = task.ContinueWith(_ => action(), token, TaskContinuationOptions.RunContinuationsAsynchronously | TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default).ConfigureAwait();
-
-			return firstTask;
+			token.ThrowIfCancellationRequested();
+			result = await function1;
+			token.ThrowIfCancellationRequested();
+			if (predicate == null) return await function2(result);
+			if (!predicate(result)) return result;
+			token.ThrowIfCancellationRequested();
+			return await function2(result);
 		}
 
-		public static TResult Sequence<TResult>([NotNull] params Func<TResult, TResult>[] functions) { return Sequence(default(TResult), null, functions); }
-		public static TResult Sequence<TResult>([NotNull] Func<TResult, bool> evaluator, [NotNull] params Func<TResult, TResult>[] functions) { return Sequence(default(TResult), evaluator, functions); }
-		public static TResult Sequence<TResult>(TResult defaultValue, Func<TResult, bool> evaluator, [NotNull] params Func<TResult, TResult>[] functions)
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>([NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2, [NotNull] Func<TResult, Task<TResult>> function3) { return SequenceAsync(CancellationToken.None, null, function1, function2, function3); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>(Predicate<TResult> predicate, [NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2, [NotNull] Func<TResult, Task<TResult>> function3) { return SequenceAsync(CancellationToken.None, predicate, function1, function2, function3); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>(CancellationToken token, [NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2, [NotNull] Func<TResult, Task<TResult>> function3) { return SequenceAsync(token, null, function1, function2, function3); }
+		public static async Task<TResult> SequenceAsync<TResult>(CancellationToken token, Predicate<TResult> predicate, [NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2, [NotNull] Func<TResult, Task<TResult>> function3)
 		{
-			if (functions.Length == 0) return defaultValue;
+			TResult result;
 
-			foreach (Func<TResult, TResult> func in functions)
+			if (!token.CanBeCanceled)
+			{
+				result = await function1;
+
+				if (predicate == null)
+				{
+					result = await function2(result);
+					return await function3(result);
+				}
+
+				if (!predicate(result)) return result;
+				result = await function2(result);
+				return !predicate(result)
+							? result
+							: await function3(result);
+			}
+
+			token.ThrowIfCancellationRequested();
+			result = await function1;
+			token.ThrowIfCancellationRequested();
+
+			if (predicate == null)
+			{
+				result = await function2(result);
+				token.ThrowIfCancellationRequested();
+				return await function3(result);
+			}
+
+			if (!predicate(result)) return result;
+			token.ThrowIfCancellationRequested();
+			result = await function2(result);
+			token.ThrowIfCancellationRequested();
+			if (!predicate(result)) return result;
+			token.ThrowIfCancellationRequested();
+			return await function3(result);
+		}
+
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>([NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2, [NotNull] Func<TResult, Task<TResult>> function3, [NotNull] Func<TResult, Task<TResult>> function4) { return SequenceAsync(CancellationToken.None, null, function1, function2, function3, function4); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>(Predicate<TResult> predicate, [NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2, [NotNull] Func<TResult, Task<TResult>> function3, [NotNull] Func<TResult, Task<TResult>> function4) { return SequenceAsync(CancellationToken.None, predicate, function1, function2, function3, function4); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>(CancellationToken token, [NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2, [NotNull] Func<TResult, Task<TResult>> function3, [NotNull] Func<TResult, Task<TResult>> function4) { return SequenceAsync(token, null, function1, function2, function3, function4); }
+		public static async Task<TResult> SequenceAsync<TResult>(CancellationToken token, Predicate<TResult> predicate, [NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2, [NotNull] Func<TResult, Task<TResult>> function3, [NotNull] Func<TResult, Task<TResult>> function4)
+		{
+			TResult result;
+
+			if (!token.CanBeCanceled)
+			{
+				result = await function1;
+
+				if (predicate == null)
+				{
+					result = await function2(result);
+					result = await function3(result);
+					return await function4(result);
+				}
+
+				if (!predicate(result)) return result;
+				result = await function2(result);
+				if (!predicate(result)) return result;
+				result = await function3(result);
+				return !predicate(result)
+							? result
+							: await function4(result);
+			}
+
+			token.ThrowIfCancellationRequested();
+			result = await function1;
+			token.ThrowIfCancellationRequested();
+
+			if (predicate == null)
+			{
+				result = await function2(result);
+				token.ThrowIfCancellationRequested();
+				result = await function3(result);
+				token.ThrowIfCancellationRequested();
+				return await function4(result);
+			}
+
+			if (!predicate(result)) return result;
+			token.ThrowIfCancellationRequested();
+			result = await function2(result);
+			token.ThrowIfCancellationRequested();
+			if (!predicate(result)) return result;
+			token.ThrowIfCancellationRequested();
+			result = await function3(result);
+			token.ThrowIfCancellationRequested();
+			if (!predicate(result)) return result;
+			token.ThrowIfCancellationRequested();
+			return await function4(result);
+		}
+
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>([NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2, [NotNull] Func<TResult, Task<TResult>> function3, [NotNull] Func<TResult, Task<TResult>> function4, [NotNull] Func<TResult, Task<TResult>> function5) { return SequenceAsync(CancellationToken.None, null, function1, function2, function3, function4, function5); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>(Predicate<TResult> predicate, [NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2, [NotNull] Func<TResult, Task<TResult>> function3, [NotNull] Func<TResult, Task<TResult>> function4, [NotNull] Func<TResult, Task<TResult>> function5) { return SequenceAsync(CancellationToken.None, predicate, function1, function2, function3, function4, function5); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>(CancellationToken token, [NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2, [NotNull] Func<TResult, Task<TResult>> function3, [NotNull] Func<TResult, Task<TResult>> function4, [NotNull] Func<TResult, Task<TResult>> function5) { return SequenceAsync(token, null, function1, function2, function3, function4, function5); }
+		public static async Task<TResult> SequenceAsync<TResult>(CancellationToken token, Predicate<TResult> predicate, [NotNull] Task<TResult> function1, [NotNull] Func<TResult, Task<TResult>> function2, [NotNull] Func<TResult, Task<TResult>> function3, [NotNull] Func<TResult, Task<TResult>> function4, [NotNull] Func<TResult, Task<TResult>> function5)
+		{
+			TResult result;
+
+			if (!token.CanBeCanceled)
+			{
+				result = await function1;
+
+				if (predicate == null)
+				{
+					result = await function2(result);
+					result = await function3(result);
+					result = await function4(result);
+					return await function5(result);
+				}
+
+				if (!predicate(result)) return result;
+				result = await function2(result);
+				if (!predicate(result)) return result;
+				result = await function3(result);
+				if (!predicate(result)) return result;
+				result = await function4(result);
+				return !predicate(result)
+							? result
+							: await function5(result);
+			}
+
+			token.ThrowIfCancellationRequested();
+			result = await function1;
+			token.ThrowIfCancellationRequested();
+
+			if (predicate == null)
+			{
+				result = await function2(result);
+				token.ThrowIfCancellationRequested();
+				result = await function3(result);
+				token.ThrowIfCancellationRequested();
+				result = await function4(result);
+				token.ThrowIfCancellationRequested();
+				return await function5(result);
+			}
+
+			if (!predicate(result)) return result;
+			token.ThrowIfCancellationRequested();
+			result = await function2(result);
+			token.ThrowIfCancellationRequested();
+			if (!predicate(result)) return result;
+			token.ThrowIfCancellationRequested();
+			result = await function3(result);
+			token.ThrowIfCancellationRequested();
+			if (!predicate(result)) return result;
+			token.ThrowIfCancellationRequested();
+			result = await function4(result);
+			token.ThrowIfCancellationRequested();
+			if (!predicate(result)) return result;
+			token.ThrowIfCancellationRequested();
+			return await function5(result);
+		}
+
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>([NotNull] Task<TResult> function, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, null, function, functions); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>(Predicate<TResult> predicate, [NotNull] Task<TResult> function, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, predicate, function, functions); }
+		[NotNull]
+		public static Task<TResult> SequenceAsync<TResult>(CancellationToken token, [NotNull] Task<TResult> function, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(token, null, function, functions); }
+		public static async Task<TResult> SequenceAsync<TResult>(CancellationToken token, Predicate<TResult> predicate, [NotNull] Task<TResult> function, [NotNull] params Func<TResult, Task<TResult>>[] functions)
+		{
+			token.ThrowIfCancellationRequested();
+			
+			foreach (Func<TResult, Task<TResult>> func in functions)
 			{
 				if (func != null) continue;
 				throw new NullReferenceException($"{nameof(functions)} contains a null reference.");
 			}
 
-			TResult result = defaultValue;
+			TResult result = await function;
 
-			if (evaluator != null)
+			if (predicate != null)
 			{
-				foreach (Func<TResult, TResult> func in functions)
+				if (predicate(result)) return result;
+
+				foreach (Func<TResult, Task<TResult>> func in functions)
 				{
-					result = func(result);
-					if (evaluator(result)) break;
+					token.ThrowIfCancellationRequested();
+					result = await func(result);
+					if (predicate(result)) break;
 				}
 			}
 			else
 			{
-				foreach (Func<TResult, TResult> func in functions) 
-					result = func(result);
+				foreach (Func<TResult, Task<TResult>> func in functions)
+				{
+					token.ThrowIfCancellationRequested();
+					result = await func(result);
+				}
 			}
 
 			return result;
-		}
-
-		[NotNull]
-		public static Task<TResult> SequenceAsync<TResult>([NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, default(TResult), null, functions); }
-		[NotNull]
-		public static Task<TResult> SequenceAsync<TResult>([NotNull] Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, default(TResult), evaluator, functions); }
-		[NotNull]
-		public static Task<TResult> SequenceAsync<TResult>(TResult defaultValue, Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(CancellationToken.None, defaultValue, evaluator, functions); }
-		[NotNull]
-		public static Task<TResult> SequenceAsync<TResult>(CancellationToken token, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(token, default(TResult), null, functions); }
-		[NotNull]
-		public static Task<TResult> SequenceAsync<TResult>(CancellationToken token, [NotNull] Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions) { return SequenceAsync(token, default(TResult), evaluator, functions); }
-		public static Task<TResult> SequenceAsync<TResult>(CancellationToken token, TResult defaultValue, Func<TResult, bool> evaluator, [NotNull] params Func<TResult, Task<TResult>>[] functions)
-		{
-			if (functions.Length == 0) return Task.FromResult(defaultValue);
-
-			Queue<Func<TResult, Task<TResult>>> queue = new Queue<Func<TResult, Task<TResult>>>(functions.Length);
-
-			foreach (Func<TResult, Task<TResult>> func in functions)
-			{
-				if (func == null) throw new NullReferenceException($"{nameof(functions)} contains a null reference.");
-				queue.Enqueue(func);
-			}
-
-			return SequenceAsyncLocal(queue, evaluator, defaultValue, token);
-
-			static async Task<TResult> SequenceAsyncLocal(Queue<Func<TResult, Task<TResult>>> queue, Func<TResult, bool> evaluator, TResult defaultValue, CancellationToken token)
-			{
-				TResult result = defaultValue;
-				CancellationTokenSource cts = null;
-				IDisposable tokenRegistration = null;
-
-				try
-				{
-					cts = new CancellationTokenSource();
-					if (token.CanBeCanceled) tokenRegistration = token.Register(state => ((CancellationTokenSource)state).CancelIfNotDisposed(), cts, false);
-
-					while (!token.IsCancellationRequested && queue.Count > 0)
-					{
-						Func<TResult, Task<TResult>> func = queue.Dequeue();
-						result = await func(result).ConfigureAwait();
-						if (token.IsCancellationRequested || evaluator != null && !evaluator(result)) continue;
-						return result;
-					}
-
-					return result;
-				}
-				finally
-				{
-					ObjectHelper.Dispose(ref tokenRegistration);
-					ObjectHelper.Dispose(ref cts);
-				}
-			}
 		}
 
 		[NotNull]

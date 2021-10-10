@@ -7,7 +7,6 @@ using System.Security;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using essentialMix.Helpers;
 using essentialMix.Web.Entity.Model.Membership;
 using JetBrains.Annotations;
 using Microsoft.AspNet.Identity;
@@ -21,73 +20,73 @@ namespace essentialMix.Extensions
 		public static bool CreateRolesAndUsers<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities)
 			where TUser : IdentityUser
 		{
-			return TaskHelper.Run(() => CreateRolesAndUsersAsync(thisValue, roleIdentities));
+			return CreateRolesAndUsersAsync(thisValue, roleIdentities).Execute();
 		}
 
-		public static async Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities)
+		public static Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities)
 			where TUser : IdentityUser
 		{
-			return await CreateRolesAndUsersAsync(thisValue, false, roleIdentities, null, false, false);
+			return CreateRolesAndUsersAsync(thisValue, false, roleIdentities, null, false, false);
 		}
 
 		public static bool CreateRolesAndUsers<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities,  Func<UserManager<TUser>, TUser, bool> onUserAdded)
 			where TUser : IdentityUser
 		{
-			return TaskHelper.Run(() => CreateRolesAndUsersAsync(thisValue, roleIdentities, onUserAdded));
+			return CreateRolesAndUsersAsync(thisValue, roleIdentities, onUserAdded).Execute();
 		}
 
-		public static async Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities,  Func<UserManager<TUser>, TUser, bool> onUserAdded)
+		public static Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities,  Func<UserManager<TUser>, TUser, bool> onUserAdded)
 			where TUser : IdentityUser
 		{
-			return await CreateRolesAndUsersAsync(thisValue, false, roleIdentities, onUserAdded, false, false);
+			return CreateRolesAndUsersAsync(thisValue, false, roleIdentities, onUserAdded, false, false);
 		}
 
 		public static bool CreateRolesAndUsers<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities, bool continueOnRoleError, bool continueOnUserError)
 			where TUser : IdentityUser
 		{
-			return TaskHelper.Run(() => CreateRolesAndUsersAsync(thisValue, roleIdentities, continueOnRoleError, continueOnUserError));
+			return CreateRolesAndUsersAsync(thisValue, roleIdentities, continueOnRoleError, continueOnUserError).Execute();
 		}
 
-		public static async Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities, bool continueOnRoleError, bool continueOnUserError)
+		public static Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities, bool continueOnRoleError, bool continueOnUserError)
 			where TUser : IdentityUser
 		{
-			return await CreateRolesAndUsersAsync(thisValue, false, roleIdentities, null, continueOnRoleError, continueOnUserError);
+			return CreateRolesAndUsersAsync(thisValue, false, roleIdentities, null, continueOnRoleError, continueOnUserError);
 		}
 
 		public static bool CreateRolesAndUsers<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities)
 			where TUser : IdentityUser
 		{
-			return TaskHelper.Run(() => CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities));
+			return CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities).Execute();
 		}
 
-		public static async Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities)
+		public static Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities)
 			where TUser : IdentityUser
 		{
-			return await CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities, null, false, false);
+			return CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities, null, false, false);
 		}
 
 		public static bool CreateRolesAndUsers<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities,  Func<UserManager<TUser>, TUser, bool> onUserAdded)
 			where TUser : IdentityUser
 		{
-			return TaskHelper.Run(() => CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities, onUserAdded));
+			return CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities, onUserAdded).Execute();
 		}
 
-		public static async Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities,  Func<UserManager<TUser>, TUser, bool> onUserAdded)
+		public static Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities,  Func<UserManager<TUser>, TUser, bool> onUserAdded)
 			where TUser : IdentityUser
 		{
-			return await CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities, onUserAdded, false, false);
+			return CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities, onUserAdded, false, false);
 		}
 
 		public static bool CreateRolesAndUsers<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities, bool continueOnRoleError, bool continueOnUserError)
 			where TUser : IdentityUser
 		{
-			return TaskHelper.Run(() => CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities, continueOnRoleError, continueOnUserError));
+			return CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities, continueOnRoleError, continueOnUserError).Execute();
 		}
 
-		public static async Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities, bool continueOnRoleError, bool continueOnUserError)
+		public static Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities, bool continueOnRoleError, bool continueOnUserError)
 			where TUser : IdentityUser
 		{
-			return await CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities, null, continueOnRoleError, continueOnUserError);
+			return CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities, null, continueOnRoleError, continueOnUserError);
 		}
 
 		public static bool CreateRolesAndUsers<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail,
@@ -95,7 +94,7 @@ namespace essentialMix.Extensions
 			bool continueOnRoleError, bool continueOnUserError)
 			where TUser : IdentityUser
 		{
-			return TaskHelper.Run(() => CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities, onUserAdded, continueOnRoleError, continueOnUserError));
+			return CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities, onUserAdded, continueOnRoleError, continueOnUserError).Execute();
 		}
 
 		public static async Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] IDictionary<string, IRoleIdentity<TUser>[]> roleIdentities,  Func<UserManager<TUser>, TUser, bool> onUserAdded, bool continueOnRoleError, bool continueOnUserError)
@@ -149,7 +148,7 @@ namespace essentialMix.Extensions
 
 			return true;
 
-			static async Task<IdentityRole> CreateRoleLocal(IdentityDbContext<TUser> context, string roleName)
+			static async Task<IdentityRole> CreateRoleLocal(IdentityDbContext<TUser, IdentityRole, string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim> context, string roleName)
 			{
 				IdentityRole role;
 
@@ -166,7 +165,7 @@ namespace essentialMix.Extensions
 				return role;
 			}
 
-			static async Task<TUser> FindUserLocal(UserManager<TUser> userManager, TUser user, bool tryNameAndEmail, bool continueOnUserError)
+			static async Task<TUser> FindUserLocal(UserManager<TUser, string> userManager, TUser user, bool tryNameAndEmail, bool continueOnUserError)
 			{
 				if (tryNameAndEmail)
 				{
@@ -190,14 +189,14 @@ namespace essentialMix.Extensions
 							: await userManager.FindByNameAsync(user.UserName);
 			}
 
-			static async Task<TUser> CreateUserLocal(UserManager<TUser> userManager, TUser user, SecureString password)
+			static async Task<TUser> CreateUserLocal(UserManager<TUser, string> userManager, TUser user, SecureString password)
 			{
 				return await userManager.CreateAsync(user, password.UnSecure()) == IdentityResult.Success
 							? user
 							: null;
 			}
 
-			static async Task AddUserClaimsLocal(UserManager<TUser> userManager, TUser user, IdentityRole role, PropertyInfo firstNameProperty, PropertyInfo lastNameProperty)
+			static async Task AddUserClaimsLocal(UserManager<TUser, string> userManager, TUser user, IdentityRole role, PropertyInfo firstNameProperty, PropertyInfo lastNameProperty)
 			{
 				if (firstNameProperty != null)
 				{
@@ -220,7 +219,7 @@ namespace essentialMix.Extensions
 		public static bool CreateRolesAndUsers<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] params IRoleIdentity<TUser>[] roleIdentities)
 			where TUser : IdentityUser
 		{
-			return TaskHelper.Run(() => CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities));
+			return CreateRolesAndUsersAsync(thisValue, tryNameAndEmail, roleIdentities).Execute();
 		}
 
 		public static async Task<bool> CreateRolesAndUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] params IRoleIdentity<TUser>[] roleIdentities)
@@ -228,7 +227,11 @@ namespace essentialMix.Extensions
 		{
 			if (roleIdentities.Length == 0) return true;
 
-			string[] allRoleNames = roleIdentities.Where(u => u?.RoleNames.Count > 0).SelectMany(u => u.RoleNames).Where(r => !string.IsNullOrEmpty(r)).Distinct().ToArray();
+			string[] allRoleNames = roleIdentities.Where(u => u?.RoleNames.Count > 0)
+												.SelectMany(u => u.RoleNames)
+												.Where(r => !string.IsNullOrEmpty(r))
+												.Distinct()
+												.ToArray();
 			if (allRoleNames.Length > 0 && !await CreateRolesAsync(thisValue, allRoleNames)) return false;
 			return await CreateUsersAsync(thisValue, tryNameAndEmail, roleIdentities);
 		}
@@ -236,7 +239,7 @@ namespace essentialMix.Extensions
 		public static bool CreateRoles<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, [NotNull] params string[] roleNames)
 			where TUser : IdentityUser
 		{
-			return TaskHelper.Run(() => CreateRolesAsync(thisValue, roleNames));
+			return CreateRolesAsync(thisValue, roleNames).Execute();
 		}
 
 		public static async Task<bool> CreateRolesAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, [NotNull] params string[] roleNames)
@@ -263,7 +266,7 @@ namespace essentialMix.Extensions
 		public static bool CreateUsers<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] params IRoleIdentity<TUser>[] roleIdentities)
 			where TUser : IdentityUser
 		{
-			return TaskHelper.Run(() => CreateUsersAsync(thisValue, tryNameAndEmail, roleIdentities));
+			return CreateUsersAsync(thisValue, tryNameAndEmail, roleIdentities).Execute();
 		}
 
 		public static async Task<bool> CreateUsersAsync<TUser>([NotNull] this IdentityDbContext<TUser> thisValue, bool tryNameAndEmail, [NotNull] params IRoleIdentity<TUser>[] roleIdentities)

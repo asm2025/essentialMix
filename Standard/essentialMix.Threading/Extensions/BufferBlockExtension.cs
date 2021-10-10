@@ -95,64 +95,71 @@ namespace essentialMix.Extensions
 		{
 			BufferBlock<T> target = new BufferBlock<T>();
 
-			Action receiveAndSend;
-
 			if (delay <= TimeSpan.Zero)
 			{
 				if (timeout <= TimeSpan.Zero)
 				{
-					receiveAndSend = async () =>
-					{
-						if (token.IsCancellationRequested) return;
-						T item = await thisValue.ReceiveAsync(token).ConfigureAwait();
-						if (token.IsCancellationRequested) return;
-						await target.SendAsync(item, token).ConfigureAwait();
-					};
+					while (await thisValue.OutputAvailableAsync(token).ConfigureAwait())
+						await ReceiveAndSend(thisValue, target, token);
 				}
 				else
 				{
-					receiveAndSend = async () =>
-					{
-						if (token.IsCancellationRequested) return;
-						T item = await thisValue.ReceiveAsync(timeout, token).ConfigureAwait();
-						if (token.IsCancellationRequested) return;
-						await target.SendAsync(item, token).ConfigureAwait();
-					};
+					while (await thisValue.OutputAvailableAsync(token).ConfigureAwait())
+						await ReceiveAndSendWithTimeout(thisValue, target, timeout, token);
 				}
 			}
 			else
 			{
 				if (timeout <= TimeSpan.Zero)
 				{
-					receiveAndSend = async () =>
-					{
-						if (token.IsCancellationRequested) return;
-						T item = await thisValue.ReceiveAsync(token).ConfigureAwait();
-						if (token.IsCancellationRequested) return;
-						await Task.Delay(delay, token).ConfigureAwait();
-						if (token.IsCancellationRequested) return;
-						await target.SendAsync(item, token).ConfigureAwait();
-					};
+					while (await thisValue.OutputAvailableAsync(token).ConfigureAwait())
+						await ReceiveAndSendWithDelay(thisValue, target, delay, token);
 				}
 				else
 				{
-					receiveAndSend = async () =>
-					{
-						if (token.IsCancellationRequested) return;
-						T item = await thisValue.ReceiveAsync(timeout, token).ConfigureAwait();
-						if (token.IsCancellationRequested) return;
-						await Task.Delay(delay, token).ConfigureAwait();
-						if (token.IsCancellationRequested) return;
-						await target.SendAsync(item, token).ConfigureAwait();
-					};
+					while (await thisValue.OutputAvailableAsync(token).ConfigureAwait())
+						await ReceiveAndSendWithDelayAndTimeout(thisValue, target, delay, timeout, token);
 				}
 			}
 
-			while (await thisValue.OutputAvailableAsync(token).ConfigureAwait())
-				receiveAndSend();
-
 			target.Complete();
 			return DataflowBlock.Encapsulate(thisValue, target);
+
+			static async Task ReceiveAndSend(BufferBlock<T> source, BufferBlock<T> target, CancellationToken token)
+			{
+				if (token.IsCancellationRequested) return;
+				T item = await source.ReceiveAsync(token).ConfigureAwait();
+				if (token.IsCancellationRequested) return;
+				await target.SendAsync(item, token).ConfigureAwait();
+			}
+
+			static async Task ReceiveAndSendWithTimeout(BufferBlock<T> source, BufferBlock<T> target, TimeSpan timeout, CancellationToken token)
+			{
+				if (token.IsCancellationRequested) return;
+				T item = await source.ReceiveAsync(timeout, token).ConfigureAwait();
+				if (token.IsCancellationRequested) return;
+				await target.SendAsync(item, token).ConfigureAwait();
+			}
+
+			static async Task ReceiveAndSendWithDelay(BufferBlock<T> source, BufferBlock<T> target, TimeSpan delay, CancellationToken token)
+			{
+				if (token.IsCancellationRequested) return;
+				T item = await source.ReceiveAsync(token).ConfigureAwait();
+				if (token.IsCancellationRequested) return;
+				await Task.Delay(delay, token).ConfigureAwait();
+				if (token.IsCancellationRequested) return;
+				await target.SendAsync(item, token).ConfigureAwait();
+			}
+
+			static async Task ReceiveAndSendWithDelayAndTimeout(BufferBlock<T> source, BufferBlock<T> target, TimeSpan delay, TimeSpan timeout, CancellationToken token)
+			{
+				if (token.IsCancellationRequested) return;
+				T item = await source.ReceiveAsync(timeout, token).ConfigureAwait();
+				if (token.IsCancellationRequested) return;
+				await Task.Delay(delay, token).ConfigureAwait();
+				if (token.IsCancellationRequested) return;
+				await target.SendAsync(item, token).ConfigureAwait();
+			}
 		}
 	}
 }

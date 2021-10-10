@@ -1,14 +1,13 @@
+using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.ComponentModel;
-using System.Threading;
 using JetBrains.Annotations;
 
 namespace essentialMix.ComponentModel
 {
 	public abstract class DropDownTypeConverter<T> : TypeConverter<T>
 	{
-		private static volatile StandardValuesCollection __values;
-
 		protected DropDownTypeConverter()
 		{
 		}
@@ -18,11 +17,20 @@ namespace essentialMix.ComponentModel
 		[NotNull]
 		public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
 		{
-			if (__values == null) Interlocked.CompareExchange(ref __values, new StandardValuesCollection(GetValues()), null);
-			return __values;
+			return DropDownTypeConverter.GetValues<T>(GetValues);
 		}
 
 		[NotNull]
 		protected abstract ICollection GetValues();
+	}
+
+	internal static class DropDownTypeConverter
+	{
+		private static readonly ConcurrentDictionary<Type, TypeConverter.StandardValuesCollection> __cache = new ConcurrentDictionary<Type, TypeConverter.StandardValuesCollection>();
+
+		public static TypeConverter.StandardValuesCollection GetValues<T>([NotNull] Func<ICollection> getValues)
+		{
+			return __cache.GetOrAdd(typeof(T), _ => new TypeConverter.StandardValuesCollection(getValues()));
+		}
 	}
 }

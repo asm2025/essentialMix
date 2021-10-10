@@ -1105,7 +1105,7 @@ namespace essentialMix.Extensions
 					return (bool)expr.Method
 									.GetGenericMethodDefinition()
 									.MakeGenericMethod(thisValue, value)
-									.Invoke(null, new object[0]);
+									.Invoke(null, Array.Empty<object>());
 				}
 				catch
 				{
