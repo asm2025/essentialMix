@@ -763,8 +763,7 @@ namespace essentialMix.Threading.Other.JonSkeet.MiscUtil.Threading
 				}
 
 				// Do we need to lower the waiting period?
-				if (waitPeriod > MAX_WAIT_PERIOD ||
-					waitPeriod == Timeout.Infinite)
+				if (waitPeriod is > MAX_WAIT_PERIOD or Timeout.Infinite)
 				{
 					waitPeriod = MAX_WAIT_PERIOD;
 				}

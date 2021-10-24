@@ -24,7 +24,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
 using JetBrains.Annotations;
@@ -406,8 +405,7 @@ namespace Other.TylerBrinkley.Enumeration
 		public string Name { get; }
 
 		public string DisplayName =>
-			_displayName ??= Attributes.Get<DisplayAttribute>()?.Name
-							?? Attributes.Get<DisplayNameAttribute>()?.DisplayName
+			_displayName ??= Attributes.Get<DisplayNameAttribute>()?.DisplayName
 							?? Name;
 
 		public Collections.AttributeCollection Attributes { get; }

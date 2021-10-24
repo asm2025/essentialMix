@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -188,45 +187,34 @@ namespace Other.TylerBrinkley.Enumeration
 
 		public int GetMemberCount(EnumMemberSelection selection)
 		{
-			switch (selection)
-			{
-				case EnumMemberSelection.All:
-				case EnumMemberSelection.DisplayOrder:
-					return _valueMap.Count + (_duplicateValues?.Count ?? 0);
-				default:
-					EnumHelper<EnumMemberSelection>.Validate(selection, nameof(selection));
-					if (EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.Flags)) return GetFlagCount();
-					return EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.Distinct)
-								? _valueMap.Count
-								: 0;
-			}
+			if (selection == EnumMemberSelection.All) return _valueMap.Count + (_duplicateValues?.Count ?? 0);
+			EnumHelper<EnumMemberSelection>.Validate(selection, nameof(selection));
+			if (EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.Flags)) return GetFlagCount();
+			return EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.Distinct)
+						? _valueMap.Count
+						: 0;
 		}
 
 		public IEnumerable<EnumMember<TInt, TIntProvider>> GetMembers(EnumMemberSelection selection)
 		{
 			IEnumerable<EnumMember<TInt, TIntProvider>> members;
 
-			switch (selection)
+			if (selection == EnumMemberSelection.All)
 			{
-				case EnumMemberSelection.All:
-				case EnumMemberSelection.DisplayOrder:
-					members = _duplicateValues == null
-								? _valueMap.Values
-								: GetMembersInternal();
-					break;
-				default:
-					EnumHelper<EnumMemberSelection>.Validate(selection, nameof(selection));
+				members = _duplicateValues == null
+							? _valueMap.Values
+							: GetMembersInternal();
+			}
+			else
+			{
+				EnumHelper<EnumMemberSelection>.Validate(selection, nameof(selection));
 
-					if (EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.Flags)) members = GetFlagMembers(AllFlags);
-					else if (EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.Distinct)) members = _valueMap.Values;
-					else return null;
-
-					break;
+				if (EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.Flags)) members = GetFlagMembers(AllFlags);
+				else if (EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.Distinct)) members = _valueMap.Values;
+				else return null;
 			}
 
-			return EnumHelper<EnumMemberSelection>.HasAnyFlag(selection, EnumMemberSelection.DisplayOrder)
-						? members.OrderBy(member => member.Attributes.Get<DisplayAttribute>()?.GetOrder() ?? int.MaxValue)
-						: members;
+			return members;
 		}
 
 		[NotNull]
@@ -667,8 +655,6 @@ namespace Other.TylerBrinkley.Enumeration
 					return member?.Attributes.Get<DescriptionAttribute>()?.Description;
 				case EnumFormat.EnumMemberValue:
 					return member?.Attributes.Get<EnumMemberAttribute>()?.Value;
-				case EnumFormat.DisplayName:
-					return member?.Attributes.Get<DisplayAttribute>()?.GetName();
 				default:
 					EnumHelper<EnumFormat>.Validate(format, nameof(format));
 					return member != null
@@ -815,7 +801,7 @@ namespace Other.TylerBrinkley.Enumeration
 		private static bool IsNumeric([NotNull] string value)
 		{
 			char firstChar;
-			return value.Length > 0 && (char.IsDigit(firstChar = value[0]) || firstChar == '-' || firstChar == '+');
+			return value.Length > 0 && (char.IsDigit(firstChar = value[0]) || firstChar is '-' or '+');
 		}
 	}
 }

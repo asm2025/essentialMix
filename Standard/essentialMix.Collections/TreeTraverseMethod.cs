@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace essentialMix.Collections
+﻿namespace essentialMix.Collections
 {
 	/// <summary>
 	/// <para>
@@ -24,13 +22,9 @@ namespace essentialMix.Collections
 	/// </summary>
 	public enum TreeTraverseMethod
 	{
-		[Display(Name = "Breadth First (Level Order)")]
 		LevelOrder, // Root-Left-Right (Queue)
-		[Display(Name = "Depth First - PreOrder")]
 		PreOrder, // Root-Left-Right (Stack)
-		[Display(Name = "Depth First - InOrder")]
 		InOrder, // Left-Root-Right (Stack)
-		[Display(Name = "Depth First - PostOrder")]
 		PostOrder, // Left-Right-Root (Stack)
 	}
 }

@@ -68,7 +68,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2021.2.0" />
-		<PackageReference Include="System.Security.Principal.Windows" Version="5.0.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

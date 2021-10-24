@@ -154,7 +154,7 @@ namespace essentialMix.Media.Helpers
 			foreach (VideoSize size in AllSizes.Values.Where(e => e.Enabled && e.Value <= maxVideoSize))
 			{
 				//Fill VideoSize, MaxBitRate (=VideoSize.BitRate * 1.5~2)
-				if (restriction == ConversionSearchRestriction.None || restriction == ConversionSearchRestriction.MP4)
+				if (restriction is ConversionSearchRestriction.None or ConversionSearchRestriction.MP4)
 				{
 					ConversionOptions mp4 = ConversionOptions.Mp4;
 					mp4.AspectRatio = VideoAspectRatio.R16T9;
@@ -165,7 +165,7 @@ namespace essentialMix.Media.Helpers
 					yield return mp4;
 				}
 
-				if (restriction == ConversionSearchRestriction.None || restriction == ConversionSearchRestriction.WebMedia)
+				if (restriction is ConversionSearchRestriction.None or ConversionSearchRestriction.WebMedia)
 				{
 					ConversionOptions webM = ConversionOptions.WebM;
 					webM.AspectRatio = VideoAspectRatio.R16T9;
@@ -200,7 +200,7 @@ namespace essentialMix.Media.Helpers
 			foreach (VideoSize size in AllSizes.Values.Where(e => e.Enabled && e.Value <= maxVideoSize))
 			{
 				//Fill VideoSize, MaxBitRate (=VideoSize.BitRate * 1.5~2)
-				if (restriction == ConversionSearchRestriction.None || restriction == ConversionSearchRestriction.MP4)
+				if (restriction is ConversionSearchRestriction.None or ConversionSearchRestriction.MP4)
 				{
 					ConversionOptions[] mp4Opt = new ConversionOptions[2];
 					ConversionOptions mp4 = ConversionOptions.Mp4Pass1;
@@ -221,7 +221,7 @@ namespace essentialMix.Media.Helpers
 					yield return mp4Opt;
 				}
 
-				if (restriction == ConversionSearchRestriction.None || restriction == ConversionSearchRestriction.WebMedia)
+				if (restriction is ConversionSearchRestriction.None or ConversionSearchRestriction.WebMedia)
 				{
 					ConversionOptions[] webmOpt = new ConversionOptions[2];
 					ConversionOptions webM = ConversionOptions.WebMPass1;

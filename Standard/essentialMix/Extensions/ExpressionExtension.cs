@@ -487,7 +487,7 @@ namespace essentialMix.Extensions
 					return;
 				types.Add(t);
 			})
-			.Where(e => e.NodeType == ExpressionType.Parameter || e.NodeType == ExpressionType.MemberAccess)
+			.Where(e => e.NodeType is ExpressionType.Parameter or ExpressionType.MemberAccess)
 			.ToList();
 
 			if (expressions.Count == 0)
@@ -595,7 +595,7 @@ namespace essentialMix.Extensions
 				.Where(e => e.NodeType == ExpressionType.MemberAccess)
 				.Cast<MemberExpression>()
 				.Select(e => e.Member)
-				.Where(e => e.MemberType == MemberTypes.Property || e.MemberType == MemberTypes.Field);
+				.Where(e => e.MemberType is MemberTypes.Property or MemberTypes.Field);
 			if (predicate != null) enumerable = enumerable.Where(e => predicate(e));
 			return enumerable;
 		}

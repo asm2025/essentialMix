@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace essentialMix.Patterns.Imaging
+﻿namespace essentialMix.Patterns.Imaging
 {
 	public enum ImageSize
 	{
@@ -9,7 +7,6 @@ namespace essentialMix.Patterns.Imaging
 		Small,
 		Medium,
 		Large,
-		[Display(Name = "Extra Large")]
 		ExtraLarge
 	}
 }

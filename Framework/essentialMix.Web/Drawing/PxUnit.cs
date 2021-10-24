@@ -92,7 +92,7 @@ namespace essentialMix.Web.Drawing
 				{
 					char ch = str[i];
 
-					if ((ch < '0' || ch > '9') && ch != '-' && ch != '.' && ch != ',') break;
+					if (ch is < '0' or > '9' && ch != '-' && ch != '.' && ch != ',') break;
 					num2 = i;
 				}
 

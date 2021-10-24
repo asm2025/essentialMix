@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -70,14 +69,6 @@ namespace essentialMix.Extensions
 			return thisValue.GetType()
 				.GetField(name)
 				.GetDisplayName(name);
-		}
-
-		public static DisplayAttribute GetDisplay<T>(this T thisValue)
-			where T : struct, Enum, IComparable
-		{
-			return thisValue.GetType()
-							.GetField(GetName(thisValue))
-							.GetDisplay();
 		}
 
 		public static string GetDescription<T>(this T thisValue)

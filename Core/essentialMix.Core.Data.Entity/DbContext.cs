@@ -40,7 +40,7 @@ namespace essentialMix.Core.Data.Entity
 		protected virtual void Validate()
 		{
 			IEnumerable<EntityEntry> entries = ChangeTracker.Entries()
-															.Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+															.Where(e => e.State is EntityState.Added or EntityState.Modified);
 
 			foreach (EntityEntry entry in entries)
 			{

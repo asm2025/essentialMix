@@ -37,7 +37,7 @@ namespace essentialMix.Extensions
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool CanRead(this XmlReader thisValue)
 		{
-			return IsValid(thisValue) && (thisValue.ReadState == ReadState.Initial || thisValue.ReadState == ReadState.Interactive);
+			return IsValid(thisValue) && thisValue.ReadState is ReadState.Initial or ReadState.Interactive;
 		}
 
 		public static void CollectAttributes(this XmlReader thisValue, XmlElement element) { CollectAttributes(thisValue, element, true); }

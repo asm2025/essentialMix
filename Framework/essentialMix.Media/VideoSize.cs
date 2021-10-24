@@ -1,10 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using essentialMix.Extensions;
-using essentialMix.Helpers;
 using essentialMix.Numeric;
 
 namespace essentialMix.Media
@@ -12,28 +7,11 @@ namespace essentialMix.Media
 	[DebuggerDisplay("{DisplayName}")]
 	public sealed class VideoSize
 	{
-		private static readonly IReadOnlyDictionary<string, VideoSizeEnum> __videoSizeStringCache;
-
 		private readonly object _lock = new object();
 
 		private VideoSizeEnum _value;
 		private int _width;
 		private int _height;
-
-		static VideoSize()
-		{
-			VideoSizeEnum[] values = EnumHelper<VideoSizeEnum>.GetValues();
-			Dictionary<string, VideoSizeEnum> dictionary = new Dictionary<string, VideoSizeEnum>(values.Length, StringComparer.OrdinalIgnoreCase);
-
-			foreach (VideoSizeEnum value in values)
-			{
-				DisplayAttribute displayAttribute = value.GetAttribute<VideoSizeEnum, DisplayAttribute>();
-				if (string.IsNullOrEmpty(displayAttribute?.Description)) continue;
-				dictionary.Add(displayAttribute.Description, value);
-			}
-
-			__videoSizeStringCache = new ReadOnlyDictionary<string, VideoSizeEnum>(dictionary);
-		}
 
 		public VideoSize()
 			: this(VideoSizeEnum.Empty)
@@ -120,26 +98,10 @@ namespace essentialMix.Media
 						break;
 				}
 
-				DisplayAttribute da = _value.GetAttribute<VideoSizeEnum, DisplayAttribute>();
-
-				if (da != null)
-				{
-					DisplayName = da.Name;
-					ffmpeg = string.IsNullOrEmpty(da.ShortName) ? null : da.ShortName;
-
-					if (!string.IsNullOrEmpty(da.Description))
-					{
-						string[] parts = da.Description.Split('x');
-						_width = parts[0].To(0);
-						_height = parts[1].To(0);
-					}
-				}
-				else
-				{
-					DisplayName = _value == VideoSizeEnum.Automatic || _value == VideoSizeEnum.Empty ? _value.ToString() : $"{_width}x{_height}";
-					ffmpeg = null;
-				}
-
+				DisplayName = _value is VideoSizeEnum.Automatic or VideoSizeEnum.Empty
+								? _value.ToString()
+								: $"{_width}x{_height}";
+				ffmpeg = null;
 				Name = _value.ToString();
 
 				if (_width > 0 && _height > 0)
@@ -170,7 +132,9 @@ namespace essentialMix.Media
 				else
 				{
 					string searchString = $"{_width}x{_height}";
-					_value = __videoSizeStringCache.TryGetValue(searchString, out VideoSizeEnum v) ? v : VideoSizeEnum.Custom;
+					_value = Enum.TryParse(searchString, out VideoSizeEnum v)
+								? v
+								: VideoSizeEnum.Custom;
 				}
 			}
 

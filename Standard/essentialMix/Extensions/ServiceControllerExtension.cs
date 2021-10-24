@@ -65,7 +65,7 @@ namespace essentialMix.Extensions
 					return SpinWait.SpinUntil(() =>
 					{
 						controller.Refresh();
-						return controller.Status == ServiceControllerStatus.Stopped || controller.Status == ServiceControllerStatus.Paused;
+						return controller.Status is ServiceControllerStatus.Stopped or ServiceControllerStatus.Paused;
 					}, timeout);
 				case ServiceControllerStatus.Stopped:
 				case ServiceControllerStatus.Paused:

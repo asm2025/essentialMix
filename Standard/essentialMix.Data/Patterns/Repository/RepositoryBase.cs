@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -43,8 +41,6 @@ namespace essentialMix.Data.Patterns.Repository
 	public abstract class RepositoryBase<TEntity> : RepositoryBase, IRepositoryBase<TEntity>
 		where TEntity : class, IEntity
 	{
-		private PropertyInfo[] _keyProperties;
-
 		/// <inheritdoc />
 		protected RepositoryBase([NotNull] IConfiguration configuration) 
 			: this(configuration, null)
@@ -61,7 +57,7 @@ namespace essentialMix.Data.Patterns.Repository
 		public Type EntityType { get; } = typeof(TEntity);
 
 		[NotNull]
-		protected virtual PropertyInfo[] KeyProperties => _keyProperties ??= GetKeyProperties();
+		protected abstract PropertyInfo[] KeyProperties { get; }
 
 		/// <inheritdoc />
 		[NotNull]
@@ -210,32 +206,5 @@ namespace essentialMix.Data.Patterns.Repository
 
 		[NotNull]
 		protected abstract IQueryable<TEntity> PrepareGetQuery([NotNull] IGetSettings settings);
-
-		[NotNull]
-		private static PropertyInfo[] GetKeyProperties()
-		{
-			Type entityType = typeof(TEntity);
-			PropertyInfo[] properties = entityType.GetProperties(essentialMix.Constants.BF_PUBLIC_INSTANCE);
-			List<(PropertyInfo Property, int Order)> list = new List<(PropertyInfo, int)>();
-			ISet<int> columnOrders = new HashSet<int>();
-
-			foreach (PropertyInfo property in properties)
-			{
-				object[] attributes = property.GetCustomAttributes(true);
-				if (attributes.Length == 0 || !attributes.Exists(e => e is KeyAttribute)) continue;
-
-				ColumnAttribute column = attributes.OfType<ColumnAttribute>().FirstOrDefault();
-				int order = column?.Order ?? list.Count;
-
-				while (columnOrders.Contains(order))
-					order++;
-
-				columnOrders.Add(order);
-				list.Add((property, order));
-			}
-
-			if (list.Count > 0) list.Sort((x, y) => x.Order.CompareTo(y.Order));
-			return list.OrderBy(e => e.Order).Select(e => e.Property).ToArray();
-		}
 	}
 }

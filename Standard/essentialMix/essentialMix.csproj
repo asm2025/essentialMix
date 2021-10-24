@@ -73,10 +73,6 @@
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Net.Http.Headers" Version="2.2.8" />
 		<PackageReference Include="Microsoft.Windows.Compatibility" Version="5.0.2" />
-		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-		<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
-		<PackageReference Include="System.Threading.AccessControl" Version="5.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

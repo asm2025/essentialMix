@@ -32,7 +32,7 @@ namespace essentialMix.Helpers
 			EnumFormat.Name
 		};
 
-		private const int S_STARTING_CUSTOM_ENUM_FORMAT_VALUE = (int)EnumFormat.DisplayName + 1;
+		private const int S_STARTING_CUSTOM_ENUM_FORMAT_VALUE = (int)EnumFormat.Description;
 
 		private static readonly ConcurrentDictionary<Type, IEnumInfo> __enumInfo = new ConcurrentDictionary<Type, IEnumInfo>();
 

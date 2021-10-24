@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -193,13 +192,6 @@ namespace essentialMix.Extensions
 		}
 
 		[NotNull]
-		public static DisplayAttribute GetPropertyDisplay([NotNull] this Type thisValue, [NotNull] LambdaExpression expression)
-		{
-			PropertyInfo property = GetProperty(thisValue, expression);
-			return property.GetDisplay();
-		}
-
-		[NotNull]
 		public static FieldInfo GetField([NotNull] this Type thisValue, [NotNull] LambdaExpression expression)
 		{
 			FieldInfo result = expression.GetField();
@@ -214,13 +206,6 @@ namespace essentialMix.Extensions
 		{
 			FieldInfo field = GetField(thisValue, expression);
 			return field.GetDisplayName(field.Name);
-		}
-
-		[NotNull]
-		public static DisplayAttribute GetFieldDisplay<TField>([NotNull] this Type thisValue, [NotNull] Expression<Func<TField>> expression)
-		{
-			FieldInfo field = GetField(thisValue, expression);
-			return field.GetDisplay();
 		}
 
 		[NotNull]
@@ -282,7 +267,7 @@ namespace essentialMix.Extensions
 					Type type = queue.Dequeue();
 					yield return type;
 
-					foreach (MemberInfo neighbor in type.GetMembers(Constants.BF_PUBLIC_INSTANCE).Where(e => e.MemberType == MemberTypes.Property || e.MemberType == MemberTypes.Field))
+					foreach (MemberInfo neighbor in type.GetMembers(Constants.BF_PUBLIC_INSTANCE).Where(e => e.MemberType is MemberTypes.Property or MemberTypes.Field))
 					{
 						switch (neighbor.MemberType)
 						{
@@ -307,7 +292,7 @@ namespace essentialMix.Extensions
 					Type type = stack.Pop();
 					yield return type;
 
-					foreach (MemberInfo neighbor in type.GetMembers(Constants.BF_PUBLIC_INSTANCE).Where(e => e.MemberType == MemberTypes.Property || e.MemberType == MemberTypes.Field))
+					foreach (MemberInfo neighbor in type.GetMembers(Constants.BF_PUBLIC_INSTANCE).Where(e => e.MemberType is MemberTypes.Property or MemberTypes.Field))
 					{
 						switch (neighbor.MemberType)
 						{

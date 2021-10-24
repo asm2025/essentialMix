@@ -44,7 +44,7 @@ namespace essentialMix.Cryptography.RandomNumber
 		[NotNull]
 		public byte[] GetUniqueValues(int length)
 		{
-			if (length < 0 || length > 10) throw new ArgumentOutOfRangeException(nameof(length), $"Length {length} cannot yield unique values.");
+			if (length is < 0 or > 10) throw new ArgumentOutOfRangeException(nameof(length), $"Length {length} cannot yield unique values.");
 			
 			switch (length)
 			{

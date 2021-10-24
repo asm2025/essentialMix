@@ -172,7 +172,7 @@ namespace MimeTypes
 					bool atSentence = sb.Length == 0 || sb[sb.Length - 1] == '.';
 					bool atWord = atSentence || char.IsWhiteSpace(sb[sb.Length - 1]);
 
-					if ((c == '-' || c == '_') && !atWord && char.IsDigit(sb[sb.Length - 1]) && i < name.Length - 1 && char.IsDigit(name[i + 1]))
+					if (c is '-' or '_' && !atWord && char.IsDigit(sb[sb.Length - 1]) && i < name.Length - 1 && char.IsDigit(name[i + 1]))
 					{
 						sb.Append('_');
 						continue;

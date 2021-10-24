@@ -633,7 +633,7 @@ namespace essentialMix.Numeric
 
 		public static Fraction<int> RationalApproximation(float value, float accuracy = (float)0.001)
 		{
-			if (accuracy <= (float)0.0 || accuracy >= (float)1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
+			if (accuracy is <= (float)0.0 or >= (float)1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
 
 			int sign = Math.Sign(value);
 			if (sign == -1) value = Math.Abs(value);
@@ -677,7 +677,7 @@ namespace essentialMix.Numeric
 		/// <returns></returns>
 		public static Fraction<int> RationalApproximation(double value, double accuracy = 0.001)
 		{
-			if (accuracy <= 0.0 || accuracy >= 1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
+			if (accuracy is <= 0.0 or >= 1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
 
 			int sign = Math.Sign(value);
 			if (sign == -1) value = Math.Abs(value);
@@ -721,7 +721,7 @@ namespace essentialMix.Numeric
 		/// <returns></returns>
 		public static Fraction<int> RationalApproximation(decimal value, decimal accuracy = (decimal)0.001)
 		{
-			if (accuracy <= (decimal)0.0 || accuracy >= (decimal)1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
+			if (accuracy is <= (decimal)0.0 or >= (decimal)1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
 
 			int sign = Math.Sign(value);
 			if (sign == -1) value = Math.Abs(value);
@@ -765,7 +765,7 @@ namespace essentialMix.Numeric
 		/// <returns></returns>
 		public static Fraction<int> RationalApproximationSternBrocot(float value, float accuracy = (float)0.001)
 		{
-			if (accuracy <= (float)0.0 || accuracy >= (float)1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
+			if (accuracy is <= (float)0.0 or >= (float)1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
 
 			int sign = Math.Sign(value);
 			if (sign == -1) value = Math.Abs(value);
@@ -827,7 +827,7 @@ namespace essentialMix.Numeric
 		/// <returns></returns>
 		public static Fraction<int> RationalApproximationSternBrocot(double value, double accuracy = 0.001)
 		{
-			if (accuracy <= 0.0 || accuracy >= 1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
+			if (accuracy is <= 0.0 or >= 1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
 
 			int sign = Math.Sign(value);
 			if (sign == -1) value = Math.Abs(value);
@@ -889,7 +889,7 @@ namespace essentialMix.Numeric
 		/// <returns></returns>
 		public static Fraction<int> RationalApproximationSternBrocot(decimal value, decimal accuracy = (decimal)0.001)
 		{
-			if (accuracy <= (decimal)0.0 || accuracy >= (decimal)1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
+			if (accuracy is <= (decimal)0.0 or >= (decimal)1.0) throw new ArgumentOutOfRangeException(nameof(accuracy), "Must be greater than 0 and less than 1.");
 
 			int sign = Math.Sign(value);
 			if (sign == -1) value = Math.Abs(value);

@@ -22,7 +22,6 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
-using System.ComponentModel.DataAnnotations;
 
 // ReSharper disable once CheckNamespace
 namespace Other.TylerBrinkley.Enumeration
@@ -44,10 +43,6 @@ namespace Other.TylerBrinkley.Enumeration
         /// <summary>
         /// Include each flag enum member.
         /// </summary>
-        Flags = 1 << 1,
-        /// <summary>
-        /// Include enum members in display order using <see cref="DisplayAttribute.Order"/>.
-        /// </summary>
-        DisplayOrder = 1 << 2
+        Flags = 1 << 1
     }
 }

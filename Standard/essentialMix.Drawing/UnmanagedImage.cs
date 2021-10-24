@@ -672,7 +672,7 @@ namespace essentialMix.Drawing
 		{
 			int pixelSize = Image.GetPixelFormatSize(PixelFormat) / 8;
 
-			if (PixelFormat == PixelFormat.Format8bppIndexed || pixelSize == 3 || pixelSize == 4)
+			if (PixelFormat == PixelFormat.Format8bppIndexed || pixelSize is 3 or 4)
 				throw new UnsupportedImageFormatException("Unsupported pixel format of the source image. Use Collect8bppPixelValues() method for it.");
 
 			ushort[] pixelValues = new ushort[points.Count * (PixelFormat == PixelFormat.Format16bppGrayScale ? 1 : 3)];

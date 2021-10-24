@@ -60,7 +60,7 @@ namespace essentialMix.Windows.Html
 			while (_idx < _sourceLen)
 			{
 				char ch = _sourceWithGuards[_idx];
-				if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '=' || ch == '>') // optimization, do not use isWhiteSpace
+				if (ch is ' ' or '\t' or '\n' or '\r' or '=' or '>') // optimization, do not use isWhiteSpace
 					break;
 
 				_idx++;
@@ -82,7 +82,7 @@ namespace essentialMix.Windows.Html
 			string value;
 			char ch = _sourceWithGuards[_idx];
 
-			if (ch == '\'' || ch == '\"')
+			if (ch is '\'' or '\"')
 			{
 				char valueDelimiter = ch;
 				_idx++;
@@ -145,7 +145,7 @@ namespace essentialMix.Windows.Html
 			while (_idx < _sourceLen)
 			{
 				char ch = _sourceWithGuards[_idx];
-				if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '>') // optimization, do not use isWhiteSpace
+				if (ch is ' ' or '\t' or '\n' or '\r' or '>') // optimization, do not use isWhiteSpace
 					break;
 				++_idx;
 			}
@@ -183,7 +183,7 @@ namespace essentialMix.Windows.Html
 			if (_sourceWithGuards[_idx] == '<')
 			{
 				char ch = char.ToUpper(_sourceWithGuards[_idx + 1]);
-				if (ch is >= 'A' and <= 'Z' || ch == '!' || ch == '/')
+				if (ch is >= 'A' and <= 'Z' or '!' or '/')
 				{
 					++_idx;
 					return ParseTag();

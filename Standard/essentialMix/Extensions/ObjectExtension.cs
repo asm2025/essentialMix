@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -143,13 +142,6 @@ namespace essentialMix.Extensions
 			return property.GetDisplayName(property.Name);
 		}
 
-		[NotNull]
-		public static DisplayAttribute GetPropertyDisplay([NotNull] this object thisValue, [NotNull] LambdaExpression expression)
-		{
-			PropertyInfo property = GetProperty(thisValue, expression);
-			return property.GetDisplay();
-		}
-
 		public static int FieldCount([NotNull] this object thisValue, BindingFlags bindingAttributes = BindingFlags.Default, Type baseType = null)
 		{
 			return thisValue.AsType()
@@ -168,13 +160,6 @@ namespace essentialMix.Extensions
 		{
 			FieldInfo field = GetField(thisValue, expression);
 			return field.GetDisplayName(field.Name);
-		}
-
-		[NotNull]
-		public static DisplayAttribute GetFieldDisplay([NotNull] this object thisValue, [NotNull] LambdaExpression expression)
-		{
-			FieldInfo field = GetField(thisValue, expression);
-			return field.GetDisplay();
 		}
 
 		[NotNull]

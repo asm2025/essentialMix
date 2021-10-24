@@ -248,7 +248,7 @@ namespace essentialMix.Extensions
 					char cc = chars[i];
 					if (cc == Constants.CHAR_NULL) continue;
 
-					if (cc == Constants.CR || cc == Constants.LF)
+					if (cc is Constants.CR or Constants.LF)
 					{
 						if (prev == Constants.CR && cc == Constants.LF) continue;
 						len++;

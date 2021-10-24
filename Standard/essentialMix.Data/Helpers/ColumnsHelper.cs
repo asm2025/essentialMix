@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Linq;
 using System.Reflection;
@@ -41,8 +40,8 @@ namespace essentialMix.Data.Helpers
 			IEnumerable<TColumn> Properties()
 			{
 				Type templateType = obj.AsType();
-				IEnumerable<PropertyInfo> properties = templateType.GetProperties(essentialMix.Constants.BF_PUBLIC_INSTANCE)
-					.Where(p => !p.HasAttribute<NotMappedAttribute>(true));
+				IEnumerable<PropertyInfo> properties = templateType.GetProperties(essentialMix.Constants.BF_PUBLIC_INSTANCE);
+				
 				if (viewType != DataViewType.None)
 				{
 					properties = properties.Where(p =>

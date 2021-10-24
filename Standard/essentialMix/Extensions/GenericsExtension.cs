@@ -1017,7 +1017,7 @@ namespace essentialMix.Extensions
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool IsNull<T>(this T thisValue) { return ReferenceEquals(thisValue, null) || thisValue is DBNull; }
+		public static bool IsNull<T>(this T thisValue) { return thisValue is null or DBNull; }
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsNull<T>(this T? thisValue)

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
@@ -12,15 +11,9 @@ namespace essentialMix.Extensions
 	{
 		public static string GetDisplayName([NotNull] this ICustomAttributeProvider thisValue, string defaultValue = null)
 		{
-			DisplayAttribute displayAttribute = (DisplayAttribute)GetAttribute(thisValue, typeof(DisplayAttribute));
-			string displayName = displayAttribute?.Name;
-			if (displayName != null) return displayName;
-
 			DisplayNameAttribute displayNameAttribute = (DisplayNameAttribute)GetAttribute(thisValue, typeof(DisplayNameAttribute));
 			return displayNameAttribute?.DisplayName ?? defaultValue;
 		}
-
-		public static DisplayAttribute GetDisplay([NotNull] this ICustomAttributeProvider thisValue) { return (DisplayAttribute)GetAttribute(thisValue, typeof(DisplayAttribute)); }
 
 		public static string GetDescription([NotNull] this ICustomAttributeProvider thisValue, string defaultValue = null)
 		{

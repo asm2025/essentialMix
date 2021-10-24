@@ -93,12 +93,7 @@ namespace essentialMix.Helpers
 		public static bool IsLoopback(string value)
 		{
 			return string.IsNullOrEmpty(value)
-				|| value == "::1"
-				|| value == "0.0.0.1"
-				|| value == "0.0.0.0"
-				|| value == "127.0.0.1"
-				|| value.StartsWith("localhost:", StringComparison.OrdinalIgnoreCase)
-				|| value.Equals("localhost", StringComparison.OrdinalIgnoreCase);
+					|| value is "::1" or "0.0.0.1" or "0.0.0.0" or "127.0.0.1" || value.StartsWith("localhost:", StringComparison.OrdinalIgnoreCase) || value.Equals("localhost", StringComparison.OrdinalIgnoreCase);
 		}
 
 		public static bool IsIPv4Url(string value)
@@ -176,9 +171,7 @@ namespace essentialMix.Helpers
 
 		public static IPAddress GetLocalIP()
 		{
-			return GetLocalIP(nit => nit == NetworkInterfaceType.Ethernet
-									|| nit == NetworkInterfaceType.Wireless80211
-									|| nit == NetworkInterfaceType.GenericModem).FirstOrDefault();
+			return GetLocalIP(nit => nit is NetworkInterfaceType.Ethernet or NetworkInterfaceType.Wireless80211 or NetworkInterfaceType.GenericModem).FirstOrDefault();
 		}
 
 		public static IPAddress GetLocalIP([NotNull] params NetworkInterfaceType[] types)
@@ -207,8 +200,7 @@ namespace essentialMix.Helpers
 						address.Address.Equals(IPAddress.IPv6Any) ||
 						address.Address.Equals(IPAddress.IPv6Loopback) ||
 						address.Address.Equals(IPAddress.IPv6None)) continue;
-					if (address.DuplicateAddressDetectionState == DuplicateAddressDetectionState.Invalid ||
-						address.DuplicateAddressDetectionState == DuplicateAddressDetectionState.Duplicate) continue;
+					if (address.DuplicateAddressDetectionState is DuplicateAddressDetectionState.Invalid or DuplicateAddressDetectionState.Duplicate) continue;
 					yield return address.Address;
 				}
 			}

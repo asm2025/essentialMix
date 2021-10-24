@@ -23,7 +23,6 @@
 
 using System;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using essentialMix.Helpers;
 
@@ -59,11 +58,7 @@ namespace Other.TylerBrinkley.Enumeration
 		/// <summary>
 		/// Enum is represented by its <see cref="EnumMemberAttribute.Value"/>.
 		/// </summary>
-		EnumMemberValue = 5,
-		/// <summary>
-		/// Enum is represented by its <see cref="DisplayAttribute.Name"/>.
-		/// </summary>
-		DisplayName = 6
+		EnumMemberValue = 5
 	}
 
 	internal sealed class EnumFormatValidatorAttribute : Attribute, IEnumValidatorAttribute<EnumFormat>

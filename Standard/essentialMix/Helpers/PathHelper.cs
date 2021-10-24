@@ -191,7 +191,7 @@ namespace essentialMix.Helpers
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		public static bool IsDirectorySeparator(char value) { return value == Path.DirectorySeparatorChar || value == Path.AltDirectorySeparatorChar; }
 
-		public static bool IsValidDriveChar(char value) { return value is >= 'A' and <= 'Z' || value is >= 'a' and <= 'z'; }
+		public static bool IsValidDriveChar(char value) { return value is >= 'A' and <= 'Z' or >= 'a' and <= 'z'; }
 
 		public static bool IsValidPathChar(char value) { return !Path.GetInvalidPathChars().Contains(value); }
 		
@@ -199,7 +199,7 @@ namespace essentialMix.Helpers
         {
             if (string.IsNullOrEmpty(path)) return false;
             char c = path[path.Length - 1];
-            return c == ' ' || c == '.';
+            return c is ' ' or '.';
         }
 
         /// <summary>
@@ -312,7 +312,7 @@ namespace essentialMix.Helpers
 
                 if (c <= '?') // fast path for common case - '?' is highest wildcard character
                 {
-                    if (c == '\"' || c == '<' || c == '>' || c == '*' || c == '?')
+                    if (c is '\"' or '<' or '>' or '*' or '?')
                         return true;
                 }
             }
@@ -590,11 +590,11 @@ namespace essentialMix.Helpers
 					continue;
 				}
 		
-				if ((c == '\\' || c == '/') && s + 1 <= e)
+				if (c is '\\' or '/' && s + 1 <= e)
 				{
 					c = path[s + 1];
 
-					if (c == '\\' || c == '/' || c == ' ')
+					if (c is '\\' or '/' or ' ')
 					{
 						s++;
 						continue;
@@ -616,11 +616,11 @@ namespace essentialMix.Helpers
 					continue;
 				}
 		
-				if ((c == '\\' || c == '/') && e - 1 >= s)
+				if (c is '\\' or '/' && e - 1 >= s)
 				{
 					c = path[e - 1];
 
-					if (c == '\\' || c == '/' || c == ' ')
+					if (c is '\\' or '/' or ' ')
 					{
 						e--;
 						continue;
@@ -635,7 +635,7 @@ namespace essentialMix.Helpers
 			path = e < 1
 						? null
 						: path.Substring(s, e);
-			if (path == "." || path == "..") path = null;
+			if (path is "." or "..") path = null;
 			return path;
 		}
 	}

@@ -1122,7 +1122,7 @@ namespace essentialMix.Threading.Helpers
 					}
 				}
 
-				if (errCode == 193 || errCode == 216) throw new Win32Exception(errCode);
+				if (errCode is 193 or 216) throw new Win32Exception(errCode);
 				throw new Win32Exception(errCode);
 			}
 

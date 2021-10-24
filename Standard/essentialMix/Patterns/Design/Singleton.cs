@@ -12,7 +12,7 @@ namespace essentialMix.Patterns.Design
 		{
 			Type type = typeof(T);
 			ConstructorInfo[] ctors = type.GetConstructors(Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE);
-			if (ctors.Length == 0 || ctors.Length > 1) throw new ArgumentException(CTOR_ERR, type.FullName);
+			if (ctors.Length is 0 or > 1) throw new ArgumentException(CTOR_ERR, type.FullName);
 
 			ConstructorInfo ctor = ctors[0];
 			if (ctor.GetParameters().Length > 0) throw new ArgumentException(CTOR_ERR, type.FullName);
