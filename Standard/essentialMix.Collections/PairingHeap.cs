@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions.Collections;
 using JetBrains.Annotations;
 
@@ -13,7 +10,6 @@ namespace essentialMix.Collections
 	/// be considered simplified Fibonacci heaps. They are considered a "robust choice" for implementing such algorithms as Prim's MST
 	/// algorithm because they have fast running time for their operations. They are modification of Pairing Heaps.
 	/// </summary>
-	/// <typeparam name="TNode">The node type. This is just for abstraction purposes and shouldn't be dealt with directly.</typeparam>
 	/// <typeparam name="TKey">The key assigned to the element. It should have its value from the value at first but changing
 	/// this later will not affect the value itself, except for primitive value types. Changing the key will of course affect the
 	/// priority of the item.</typeparam>
@@ -22,271 +18,39 @@ namespace essentialMix.Collections
 	// https://brilliant.org/wiki/pairing-heap/
 	// https://users.cs.fiu.edu/~weiss/dsaa_c++/code/PairingHeap.cpp <= actually nice one :)
 	[Serializable]
-	public abstract class PairingHeap<TNode, TKey, TValue> : SiblingsHeap<TNode, TKey, TValue>
-		where TNode : PairingNode<TNode, TKey, TValue>
+	public abstract class PairingHeap<TKey, TValue> : SiblingsHeap<PairingNode<TKey, TValue>, TKey, TValue>
 	{
-		private struct BreadthFirstEnumerator : IEnumerableEnumerator<TValue>
-		{
-			private readonly PairingHeap<TNode, TKey, TValue> _heap;
-			private readonly int _version;
-			private readonly TNode _root;
-			private readonly Queue<TNode> _queue;
-
-			private TNode _current;
-			private bool _started;
-			private bool _done;
-
-			internal BreadthFirstEnumerator([NotNull] PairingHeap<TNode, TKey, TValue> heap, TNode root)
-			{
-				_heap = heap;
-				_version = _heap._version;
-				_root = root;
-				_queue = new Queue<TNode>();
-				_current = null;
-				_started = false;
-				_done = _heap.Count == 0 || _root == null;
-			}
-
-			/// <inheritdoc />
-			[NotNull]
-			public TValue Current
-			{
-				get
-				{
-					if (!_started || _current == null) throw new InvalidOperationException();
-					return _current.Value;
-				}
-			}
-
-			/// <inheritdoc />
-			[NotNull]
-			object IEnumerator.Current => Current;
-
-			/// <inheritdoc />
-			public IEnumerator<TValue> GetEnumerator()
-			{
-				IEnumerator enumerator = this;
-				enumerator.Reset();
-				return this;
-			}
-
-			/// <inheritdoc />
-			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-			public bool MoveNext()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-				// Head-Sibling-Child (Queue)
-				if (_done) return false;
-
-				if (!_started)
-				{
-					_started = true;
-					// Start at the root
-					_queue.Enqueue(_root);
-				}
-
-				// visit the next queued node
-				_current = _queue.Count > 0
-								? _queue.Dequeue()
-								: _current?.Sibling;
-
-				if (_current == null)
-				{
-					_done = true;
-					return false;
-				}
-
-				// Queue the next nodes
-				if (_current.Child == null) return true;
-				_queue.Enqueue(_current.Child);
-				if (_current.Child.Sibling == null) return true;
-
-				foreach (TNode sibling in _current.Child.Siblings())
-					_queue.Enqueue(sibling);
-
-				return true;
-			}
-
-			void IEnumerator.Reset()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-				_current = null;
-				_started = false;
-				_queue.Clear();
-				_done = _heap.Count == 0 || _root == null;
-			}
-
-			/// <inheritdoc />
-			public void Dispose() { }
-		}
-
-		private struct DepthFirstEnumerator : IEnumerableEnumerator<TValue>
-		{
-			private readonly PairingHeap<TNode, TKey, TValue> _heap;
-			private readonly int _version;
-			private readonly TNode _root;
-			private readonly Stack<TNode> _stack;
-
-			private TNode _current;
-			private bool _started;
-			private bool _done;
-
-			internal DepthFirstEnumerator([NotNull] PairingHeap<TNode, TKey, TValue> heap, TNode root)
-			{
-				_heap = heap;
-				_version = _heap._version;
-				_root = root;
-				_stack = new Stack<TNode>();
-				_current = null;
-				_started = false;
-				_done = _heap.Count == 0 || _root == null;
-			}
-
-			/// <inheritdoc />
-			[NotNull]
-			public TValue Current
-			{
-				get
-				{
-					if (!_started || _current == null) throw new InvalidOperationException();
-					return _current.Value;
-				}
-			}
-
-			/// <inheritdoc />
-			[NotNull]
-			object IEnumerator.Current => Current;
-
-			/// <inheritdoc />
-			public IEnumerator<TValue> GetEnumerator()
-			{
-				IEnumerator enumerator = this;
-				enumerator.Reset();
-				return this;
-			}
-
-			/// <inheritdoc />
-			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-			public bool MoveNext()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-				// Head-Child-Sibling (Stack)
-				if (_done) return false;
-
-				if (!_started)
-				{
-					_started = true;
-					// Start at the root
-					_stack.Push(_root);
-				}
-
-				// visit the next queued node
-				_current = _stack.Count > 0
-								? _stack.Pop()
-								: _current?.Sibling;
-
-				if (_current == null)
-				{
-					_done = true;
-					return false;
-				}
-
-				// Queue the next nodes
-				if (_current.Child == null) return true;
-				_stack.Push(_current.Child);
-				if (_current.Child.Sibling == null) return true;
-
-				foreach (TNode sibling in _current.Child.Siblings())
-					_stack.Push(sibling);
-
-				return true;
-			}
-
-			void IEnumerator.Reset()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-				_current = null;
-				_started = false;
-				_stack.Clear();
-				_done = _heap.Count == 0 || _root == null;
-			}
-
-			/// <inheritdoc />
-			public void Dispose() { }
-		}
+		[NotNull]
+		protected Func<TValue, TKey> _getKeyForItem;
 
 		/// <inheritdoc />
-		protected PairingHeap()
-			: this((IComparer<TKey>)null)
+		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem)
+			: this(getKeyForItem, (IComparer<TKey>)null)
 		{
 		}
 
-		protected PairingHeap(IComparer<TKey> comparer)
+		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
 			: base(comparer)
 		{
+			_getKeyForItem = getKeyForItem;
 		}
 
-		protected PairingHeap([NotNull] IEnumerable<TValue> enumerable)
-			: this(enumerable, null)
+		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
+			: this(getKeyForItem, enumerable, null)
 		{
 		}
 
-		protected PairingHeap([NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: base(enumerable, comparer)
+		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
+			: this(getKeyForItem, comparer)
 		{
+			Add(enumerable);
 		}
 
 		/// <inheritdoc />
-		public sealed override IEnumerableEnumerator<TValue> Enumerate(TNode root, BreadthDepthTraversal method)
-		{
-			return method switch
-			{
-				BreadthDepthTraversal.BreadthFirst => new BreadthFirstEnumerator(this, root),
-				BreadthDepthTraversal.DepthFirst => new DepthFirstEnumerator(this, root),
-				_ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
-			};
-		}
+		public sealed override PairingNode<TKey, TValue> MakeNode(TValue value) { return new PairingNode<TKey, TValue>(_getKeyForItem(value), value); }
 
 		/// <inheritdoc />
-		public sealed override void Iterate(TNode root, BreadthDepthTraversal method, Action<TNode> visitCallback)
-		{
-			if (Count == 0 || root == null) return;
-
-			switch (method)
-			{
-				case BreadthDepthTraversal.BreadthFirst:
-					BreadthFirst(root, visitCallback);
-					break;
-				case BreadthDepthTraversal.DepthFirst:
-					DepthFirst(root, visitCallback);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(method), method, null);
-			}
-		}
-
-		/// <inheritdoc />
-		public sealed override void Iterate(TNode root, BreadthDepthTraversal method, Func<TNode, bool> visitCallback)
-		{
-			if (Count == 0 || root == null) return;
-
-			switch (method)
-			{
-				case BreadthDepthTraversal.BreadthFirst:
-					BreadthFirst(root, visitCallback);
-					break;
-				case BreadthDepthTraversal.DepthFirst:
-					DepthFirst(root, visitCallback);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(method), method, null);
-			}
-		}
-
-		/// <inheritdoc />
-		public sealed override TNode Add(TNode node)
+		public sealed override PairingNode<TKey, TValue> Add(PairingNode<TKey, TValue> node)
 		{
 			node.Invalidate();
 			Head = Head == null
@@ -298,11 +62,11 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override bool Remove(TNode node)
+		public sealed override bool Remove(PairingNode<TKey, TValue> node)
 		{
 			// https://www.geeksforgeeks.org/pairing-heap/
 			// https://brilliant.org/wiki/pairing-heap/
-			TNode mergedLeftMost = TwoPassMerge(node.LeftMostChild());
+			PairingNode<TKey, TValue> mergedLeftMost = TwoPassMerge(node.LeftMostChild());
 			Head = ReferenceEquals(node, Head)
 						? mergedLeftMost
 						: Meld(Head, mergedLeftMost);
@@ -320,7 +84,7 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override void DecreaseKey(TNode node, TKey newKey)
+		public sealed override void DecreaseKey(PairingNode<TKey, TValue> node, TKey newKey)
 		{
 			if (Head == null) throw new CollectionIsEmptyException();
 			if (Compare(node.Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
@@ -347,10 +111,10 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override TNode ExtractValue()
+		public sealed override PairingNode<TKey, TValue> ExtractNode()
 		{
 			if (Head == null) throw new CollectionIsEmptyException();
-			TNode node = Head;
+			PairingNode<TKey, TValue> node = Head;
 			Head = Head.Child == null
 						? null
 						: TwoPassMerge(Head.Child);
@@ -367,7 +131,7 @@ namespace essentialMix.Collections
 		/// <param name="x">The first node. Usually the Head node.</param>
 		/// <param name="y">The second node.</param>
 		/// <returns>The merged node. The value returned should be assigned back to whichever node was passed as the first node parameter.</returns>
-		private TNode Meld(TNode x, TNode y)
+		private PairingNode<TKey, TValue> Meld(PairingNode<TKey, TValue> x, PairingNode<TKey, TValue> y)
 		{
 			if (ReferenceEquals(x, y)) return x;
 			if (x == null) return y;
@@ -397,11 +161,11 @@ namespace essentialMix.Collections
 		/// </summary>
 		/// <param name="node"></param>
 		/// <returns>The new root node</returns>
-		private TNode TwoPassMerge(TNode node)
+		private PairingNode<TKey, TValue> TwoPassMerge(PairingNode<TKey, TValue> node)
 		{
 			if (node?.Sibling == null) return node;
 
-			List<TNode> nodes = new List<TNode>();
+			List<PairingNode<TKey, TValue>> nodes = new List<PairingNode<TKey, TValue>>();
 
 			do
 			{
@@ -440,198 +204,16 @@ namespace essentialMix.Collections
 
 			return nodes[0];
 		}
-
-		#region Iterator Traversal for Action<TNode>
-		private void BreadthFirst([NotNull] TNode root, [NotNull] Action<TNode> visitCallback)
-		{
-			int version = _version;
-			// Head-Sibling-Child (Queue)
-			Queue<TNode> queue = new Queue<TNode>();
-
-			while (root != null)
-			{
-				if (version != _version) throw new VersionChangedException();
-				// Start at the root
-				queue.Enqueue(root);
-
-				while (queue.Count > 0)
-				{
-					if (version != _version) throw new VersionChangedException();
-
-					// visit the next queued node
-					TNode current = queue.Dequeue();
-					visitCallback(current);
-					if (current.Child == null) continue;
-
-					// Queue the next nodes
-					queue.Enqueue(current.Child);
-					if (current.Child.Sibling == null) continue;
-
-					foreach (TNode sibling in current.Child.Siblings())
-						queue.Enqueue(sibling);
-				}
-
-				root = root.Sibling;
-			}
-		}
-
-		private void DepthFirst([NotNull] TNode root, [NotNull] Action<TNode> visitCallback)
-		{
-			int version = _version;
-			// Head-Sibling-Child (Stack)
-			Stack<TNode> stack = new Stack<TNode>();
-
-			while (root != null)
-			{
-				if (version != _version) throw new VersionChangedException();
-				// Start at the root
-				stack.Push(root);
-
-				while (stack.Count > 0)
-				{
-					if (version != _version) throw new VersionChangedException();
-
-					// visit the next queued node
-					TNode current = stack.Pop();
-					visitCallback(current);
-
-					// Queue the next nodes
-					if (current.Child == null) continue;
-					if (current.Child.Sibling != null) stack.Push(current.Child.Sibling);
-
-					foreach (TNode child in current.Child.Children())
-						stack.Push(child);
-				}
-
-				root = root.Sibling;
-			}
-		}
-		#endregion
-
-		#region Iterator Traversal for Func<TNode, bool>
-		private void BreadthFirst([NotNull] TNode root, [NotNull] Func<TNode, bool> visitCallback)
-		{
-			int version = _version;
-			// Head-Sibling-Child (Queue)
-			Queue<TNode> queue = new Queue<TNode>();
-
-			while (root != null)
-			{
-				if (version != _version) throw new VersionChangedException();
-				// Start at the root
-				queue.Enqueue(root);
-
-				while (queue.Count > 0)
-				{
-					if (version != _version) throw new VersionChangedException();
-
-					// visit the next queued node
-					TNode current = queue.Dequeue();
-					if (!visitCallback(current)) return;
-					if (current.Child == null) continue;
-
-					// Queue the next nodes
-					queue.Enqueue(current.Child);
-					if (current.Child.Sibling == null) continue;
-
-					foreach (TNode sibling in current.Child.Siblings())
-						queue.Enqueue(sibling);
-				}
-
-				root = root.Sibling;
-			}
-		}
-
-		private void DepthFirst([NotNull] TNode root, [NotNull] Func<TNode, bool> visitCallback)
-		{
-			int version = _version;
-			// Head-Child-Sibling (Stack)
-			Stack<TNode> stack = new Stack<TNode>();
-
-			while (root != null)
-			{
-				if (version != _version) throw new VersionChangedException();
-				// Start at the root
-				stack.Push(root);
-
-				while (stack.Count > 0)
-				{
-					if (version != _version) throw new VersionChangedException();
-
-					// visit the next queued node
-					TNode current = stack.Pop();
-					if (!visitCallback(current)) return;
-
-					// Queue the next nodes
-					if (current.Child == null) continue;
-					if (current.Child.Sibling != null) stack.Push(current.Child.Sibling);
-
-					foreach (TNode child in current.Child.Children())
-						stack.Push(child);
-				}
-
-				root = root.Sibling;
-			}
-		}
-		#endregion
 	}
 
-	[DebuggerTypeProxy(typeof(PairingHeap<,>.DebugView))]
+	/// <summary>
+	/// <see href="https://en.wikipedia.org/wiki/Pairing_heap">Pairing heap</see> are heap-ordered multi-way tree structures, and can
+	/// be considered simplified Fibonacci heaps. They are considered a "robust choice" for implementing such algorithms as Prim's MST
+	/// algorithm because they have fast running time for their operations. They are modification of Pairing Heaps.
+	/// </summary>
 	[Serializable]
-	public abstract class PairingHeap<TKey, TValue> : PairingHeap<PairingNode<TKey, TValue>, TKey, TValue>
+	public abstract class PairingHeap<T> : SiblingsHeap<PairingNode<T>, T>
 	{
-		internal sealed class DebugView : Dbg_KeyedHeapBaseDebugView<PairingNode<TKey, TValue>, TKey, TValue>
-		{
-			/// <inheritdoc />
-			public DebugView([NotNull] PairingHeap<TKey, TValue> heap)
-				: base(heap)
-			{
-			}
-		}
-
-		[NotNull]
-		protected Func<TValue, TKey> _getKeyForItem;
-
-		/// <inheritdoc />
-		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem)
-			: this(getKeyForItem, (IComparer<TKey>)null)
-		{
-		}
-
-		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
-			: base(comparer)
-		{
-			_getKeyForItem = getKeyForItem;
-		}
-
-		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
-			: this(getKeyForItem, enumerable, null)
-		{
-		}
-
-		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: this(getKeyForItem, comparer)
-		{
-			Add(enumerable);
-		}
-
-		/// <inheritdoc />
-		public override PairingNode<TKey, TValue> MakeNode(TValue value) { return new PairingNode<TKey, TValue>(_getKeyForItem(value), value); }
-	}
-
-	[DebuggerTypeProxy(typeof(PairingHeap<>.DebugView))]
-	[Serializable]
-	public abstract class PairingHeap<T> : PairingHeap<PairingNode<T>, T, T>
-	{
-		internal sealed class DebugView : Dbg_KeyedHeapBaseDebugView<PairingNode<T>, T, T>
-		{
-			/// <inheritdoc />
-			public DebugView([NotNull] PairingHeap<T> heap)
-				: base(heap)
-			{
-			}
-		}
-
 		/// <inheritdoc />
 		protected PairingHeap()
 			: this((IComparer<T>)null)
@@ -654,6 +236,7 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public override PairingNode<T> MakeNode(T value) { return new PairingNode<T>(value); }
+		public sealed override PairingNode<T> MakeNode(T value) { return new PairingNode<T>(value); }
+		??
 	}
 }

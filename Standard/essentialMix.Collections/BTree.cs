@@ -42,9 +42,9 @@ namespace essentialMix.Collections
 	 * DFS [InOrder]:    ABCDEFGHIJ => Left-Root-Right (Stack)
 	 * DFS [PostOrder]:   => Left-Right-Root (Stack)
 	 */
+	//[Serializable]
 	//[DebuggerDisplay("Count = {Count}")]
 	//[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
-	//[Serializable]
 	//public abstract class BTree<TBlock, TNode, TKey, TValue> : ICollection<T>, ICollection, IReadOnlyCollection<T>
 	//	where TBlock : BTreeBlock<TBlock, TNode, TKey, TValue>
 	//{

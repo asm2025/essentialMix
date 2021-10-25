@@ -7,10 +7,10 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
-	[DebuggerDisplay("{Key} = {Value}")]
 	[Serializable]
+	[DebuggerDisplay("{Key} = {Value}")]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class BTreeNode<TNode, TKey, TValue> : IKeyedNode<TKey, TValue>
+	public abstract class BTreeNode<TNode, TKey, TValue> : ILinkedBinaryNode<TKey, TValue>
 		where TNode : BTreeNode<TNode, TKey, TValue>
 	{
 		protected BTreeNode(TValue value)
@@ -65,8 +65,8 @@ namespace essentialMix.Collections
 		}
 	}
 	
-	[DebuggerDisplay("{Value}")]
 	[Serializable]
+	[DebuggerDisplay("{Value}")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class BTreeNode<T> : BTreeNode<BTreeNode<T>, T, T>
 	{

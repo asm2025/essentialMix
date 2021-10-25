@@ -8,31 +8,23 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections
 {
 	[Serializable]
-	[DebuggerDisplay("{Value} :D{Degree}")]
+	[DebuggerDisplay("{Value}")]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class BinomialNodeBase<TNode, T> : ISiblingNode<TNode, T>
-		where TNode : BinomialNodeBase<TNode, T>
+	public abstract class PairingNodeBase<TNode, TValue> : ISiblingNode<TNode, TValue>
+		where TNode : PairingNodeBase<TNode, TValue>
 	{
-		private const int PARENT = 0;
-		private const int CHILD = 1;
-		private const int SIBLING = 2;
+		private const int CHILD = 0;
+		private const int SIBLING = 1;
+		private const int PREVIOUS = 2;
 
 		private readonly TNode[] _nodes = new TNode[3];
 
-		protected BinomialNodeBase(T value)
+		protected PairingNodeBase(TValue value)
 		{
 			Value = value;
 		}
 
-		public TNode Parent
-		{
-			get => _nodes[PARENT];
-			internal set
-			{
-				AssertNotCircularRef(value);
-				_nodes[PARENT] = value;
-			}
-		}
+		public TValue Value { get; set; }
 
 		public TNode Child
 		{
@@ -54,9 +46,15 @@ namespace essentialMix.Collections
 			}
 		}
 
-		public T Value { get; set; }
-
-		public int Degree { get; internal set; }
+		public TNode Previous
+		{
+			get => _nodes[PREVIOUS];
+			internal set
+			{
+				AssertNotCircularRef(value);
+				_nodes[PREVIOUS] = value;
+			}
+		}
 
 		public bool IsLeaf => _nodes[SIBLING] == null && _nodes[CHILD] == null;
 
@@ -67,19 +65,20 @@ namespace essentialMix.Collections
 		[NotNull]
 		public virtual string ToString(int level)
 		{
-			return $"{Value} :D{Degree}L{level}";
+			return $"{Value} :L{level}";
 		}
 
-		[ItemNotNull]
-		public IEnumerable<TNode> Ancestors()
+		public TNode LeftMostChild()
 		{
-			TNode parent = _nodes[PARENT];
+			TNode node = null, next = _nodes[CHILD];
 
-			while (parent != null)
+			while (next != null)
 			{
-				yield return parent;
-				parent = parent._nodes[PARENT];
+				node = next;
+				next = next._nodes[CHILD];
 			}
+
+			return node;
 		}
 
 		[ItemNotNull]
@@ -110,17 +109,16 @@ namespace essentialMix.Collections
 
 		internal void Invalidate()
 		{
-			Degree = 0;
 			Array.Clear(_nodes, 0, _nodes.Length);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		private void AssertNotCircularRef(BinomialNodeBase<TNode, T> node)
+		private void AssertNotCircularRef(PairingNodeBase<TNode, TValue> node)
 		{
 			if (!ReferenceEquals(this, node)) return;
 			throw new InvalidOperationException("Circular reference detected.");
 		}
 
-		public static implicit operator T([NotNull] BinomialNodeBase<TNode, T> node) { return node.Value; }
+		public static implicit operator TValue([NotNull] PairingNodeBase<TNode, TValue> node) { return node.Value; }
 	}
 }

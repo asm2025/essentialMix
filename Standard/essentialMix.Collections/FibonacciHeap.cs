@@ -887,7 +887,7 @@ namespace essentialMix.Collections
 	[Serializable]
 	public abstract class FibonacciHeap<TKey, TValue> : FibonacciHeap<FibonacciNode<TKey, TValue>, TKey, TValue>
 	{
-		internal sealed class DebugView : Dbg_KeyedHeapBaseDebugView<FibonacciNode<TKey, TValue>, TKey, TValue>
+		internal sealed class DebugView : Dbg_HeapDebugView<FibonacciNode<TKey, TValue>, TKey, TValue>
 		{
 			/// <inheritdoc />
 			public DebugView([NotNull] SiblingsHeap<FibonacciNode<TKey, TValue>, TKey, TValue> heap)
@@ -930,7 +930,7 @@ namespace essentialMix.Collections
 	[Serializable]
 	public abstract class FibonacciHeap<T> : FibonacciHeap<FibonacciNode<T>, T, T>
 	{
-		internal sealed class DebugView : Dbg_KeyedHeapBaseDebugView<FibonacciNode<T>, T, T>
+		internal sealed class DebugView : Dbg_HeapDebugView<FibonacciNode<T>, T, T>
 		{
 			/// <inheritdoc />
 			public DebugView([NotNull] SiblingsHeap<FibonacciNode<T>, T, T> heap)

@@ -44,9 +44,9 @@ namespace essentialMix.Collections
 	 * DFS [InOrder]:    ABCDEFGHIJK => Left-Root-Right (Stack)
 	 * DFS [PostOrder]:  BAEDCHGKJIF => Left-Right-Root (Stack)
 	 */
+	[Serializable]
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_BinaryHeapDebugView<,,>))]
-	[Serializable]
 	public abstract class BinaryHeap<TNode, TKey, TValue> : IKeyedHeap<TNode, TKey, TValue>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
 		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
 	{
@@ -1930,11 +1930,11 @@ namespace essentialMix.Collections
 		}
 	}
 
-	[DebuggerTypeProxy(typeof(BinaryHeap<,>.DebugView))]
 	[Serializable]
-	public abstract class BinaryHeap<TKey, TValue> : BinaryHeap<KeyedBinaryNode<TKey, TValue>, TKey, TValue>
+	[DebuggerTypeProxy(typeof(BinaryHeap<,>.DebugView))]
+	public abstract class BinaryHeap<TKey, TValue> : BinaryHeap<BinaryNode<TKey, TValue>, TKey, TValue>
 	{
-		internal sealed class DebugView : Dbg_BinaryHeapDebugView<KeyedBinaryNode<TKey, TValue>, TKey, TValue>
+		internal sealed class DebugView : Dbg_BinaryHeapDebugView<BinaryNode<TKey, TValue>, TKey, TValue>
 		{
 			public DebugView([NotNull] BinaryHeap<TKey, TValue> heap)
 				: base(heap)
@@ -1980,7 +1980,7 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public override KeyedBinaryNode<TKey, TValue> MakeNode(TValue value) { return new KeyedBinaryNode<TKey, TValue>(_getKeyForItem(value), value); }
+		public override BinaryNode<TKey, TValue> MakeNode(TValue value) { return new BinaryNode<TKey, TValue>(_getKeyForItem(value), value); }
 	}
 
 	[DebuggerTypeProxy(typeof(BinaryHeap<>.DebugView))]

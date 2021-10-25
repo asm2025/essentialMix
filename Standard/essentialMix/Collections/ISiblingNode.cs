@@ -2,21 +2,23 @@
 
 namespace essentialMix.Collections
 {
-	public interface ISiblingNode<out TNode, T> : ITreeNode<T>
+	public interface ISiblingNode<TNode, T> : ITreeNode<TNode, T>
 		where TNode : ISiblingNode<TNode, T>
 	{
 		TNode Child { get;  }
 		TNode Sibling { get;  }
 		bool IsLeaf { get;  }
+		IEnumerable<TNode> Children();
 		IEnumerable<TNode> Siblings();
 	}
 
-	public interface ISiblingNode<out TNode, TKey, TValue> : IKeyedNode<TKey, TValue>
+	public interface ISiblingNode<TNode, TKey, TValue> : ITreeNode<TNode, TKey, TValue>
 		where TNode : ISiblingNode<TNode, TKey, TValue>
 	{
 		TNode Child { get;  }
 		TNode Sibling { get;  }
 		bool IsLeaf { get;  }
+		IEnumerable<TNode> Children();
 		IEnumerable<TNode> Siblings();
 	}
 }

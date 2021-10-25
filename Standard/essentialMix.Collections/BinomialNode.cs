@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
 	[Serializable]
+	[DebuggerDisplay("{Key} = {Value}")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class BinomialNode<TKey, TValue> : BinomialNodeBase<BinomialNode<TKey, TValue>, TValue>, ISiblingNode<BinomialNode<TKey, TValue>, TKey, TValue>
 	{
@@ -22,6 +24,12 @@ namespace essentialMix.Collections
 		{
 			get => _key;
 			set => _key = value;
+		}
+
+		/// <inheritdoc />
+		public override string ToString(int level)
+		{
+			return $"{Key} = {Value} :D{Degree}L{level}";
 		}
 
 		/// <inheritdoc />

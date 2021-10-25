@@ -40,9 +40,9 @@ namespace essentialMix.Collections
 	 * DFS [InOrder]:    ABCDEFGHIJK => Left-Root-Right (Stack)
 	 * DFS [PostOrder]:  BAEDCHGKJIF => Left-Right-Root (Stack)
 	 */
+	[Serializable]
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(LinkedBinaryTree<,>.DebugView))]
-	[Serializable]
 	public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, IReadOnlyCollection<T>
 		where TNode : LinkedBinaryNode<TNode, T>
 	{
@@ -2108,8 +2108,8 @@ namespace essentialMix.Collections
 	}
 
 	/// <inheritdoc />
-	[DebuggerTypeProxy(typeof(LinkedBinaryTree<>.DebugView))]
 	[Serializable]
+	[DebuggerTypeProxy(typeof(LinkedBinaryTree<>.DebugView))]
 	public abstract class LinkedBinaryTree<T> : LinkedBinaryTree<LinkedBinaryNode<T>, T>
 	{
 		internal new sealed class DebugView

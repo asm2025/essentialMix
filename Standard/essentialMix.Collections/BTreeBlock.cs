@@ -6,8 +6,8 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
-	//[DebuggerDisplay("{Degree}, Count = {Count}")]
 	//[Serializable]
+	//[DebuggerDisplay("{Degree}, Count = {Count}")]
 	//[StructLayout(LayoutKind.Sequential)]
 	//public abstract class BTreeBlock<TBlock, TEntry, TKey, TValue>
 	//	where TBlock : BTreeBlock<TBlock, TEntry, TKey, TValue>
@@ -33,6 +33,6 @@ namespace essentialMix.Collections
 	//		(other.Value, Value) = (Value, other.Value);
 	//	}
 
-	//	public static implicit operator TValue([NotNull] KeyedBinaryNode<TNode, TKey, TValue> node) { return node.Value; }
+	//	public static implicit operator TValue([NotNull] BinaryNode<TNode, TKey, TValue> node) { return node.Value; }
 	//}
 }

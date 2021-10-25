@@ -4320,7 +4320,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			while (more);
 
 			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array)
-				where TNode : PairingNode<TNode, TKey, TValue>
+				where TNode : PairingNodeBase<TNode, TKey, TValue>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
@@ -4373,7 +4373,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			while (more);
 
 			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array)
-				where TNode : PairingNode<TNode, TKey, TValue>
+				where TNode : PairingNodeBase<TNode, TKey, TValue>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
@@ -4436,7 +4436,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			while (more);
 
 			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
-				where TNode : PairingNode<TNode, TKey, TValue>
+				where TNode : PairingNodeBase<TNode, TKey, TValue>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
@@ -4488,7 +4488,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			while (more);
 
 			static void DoTheKeyTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue)
-				where TNode : PairingNode<TNode, TKey, TValue>
+				where TNode : PairingNodeBase<TNode, TKey, TValue>
 			{
 				Queue<TKey> queue = new Queue<TKey>();
 				DoTheTest(heap, array, queue);
@@ -4509,7 +4509,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 
 			static void DoTheValueTest<TNode, TValue>(PairingHeap<TNode, TValue, TValue> heap, TValue[] array, TValue newKeyValue)
-				where TNode : PairingNode<TNode, TValue, TValue>
+				where TNode : PairingNodeBase<TNode, TValue, TValue>
 			{
 				Queue<TValue> queue = new Queue<TValue>();
 				DoTheTest(heap, array, queue);
@@ -4530,7 +4530,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 
 			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, Queue<TKey> queue)
-				where TNode : PairingNode<TNode, TKey, TValue>
+				where TNode : PairingNodeBase<TNode, TKey, TValue>
 			{
 				const int MAX = 10;
 

@@ -85,7 +85,7 @@ namespace TestApp
 		}
 
 		public static void Print<TNode, TKey, TValue>([NotNull] this BinaryHeap<TNode, TKey, TValue> thisValue)
-			where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+			where TNode : BinaryNode<TNode, TKey, TValue>
 		{
 			Console.WriteLine();
 			thisValue.WriteTo(Console.Out);
@@ -117,7 +117,7 @@ namespace TestApp
 		}
 
 		public static void Print<TNode, TKey, TValue>([NotNull] this PairingHeap<TNode, TKey, TValue> thisValue)
-			where TNode : PairingNode<TNode, TKey, TValue>
+			where TNode : PairingNodeBase<TNode, TKey, TValue>
 		{
 			Console.WriteLine();
 			Console.WriteLine("Count: " + thisValue.Count);

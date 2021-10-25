@@ -9,7 +9,7 @@ namespace essentialMix.Collections.DebugView
 	 * collections in this solution assemblies.
 	 */
 	public class Dbg_BinaryHeapDebugView<TNode, TKey, TValue>
-		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+		where TNode : class, ITreeNode<TNode, TKey, TValue>
 	{
 		private readonly BinaryHeap<TNode, TKey, TValue> _heap;
 
@@ -18,8 +18,8 @@ namespace essentialMix.Collections.DebugView
 			_heap = heap;
 		}
 
-		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		[NotNull]
+		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		public TNode[] Nodes
 		{
 			get

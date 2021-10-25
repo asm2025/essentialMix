@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections
 {
 	[Serializable]
-	public abstract class LinkedHeap<TNode, TKey, TValue> : KeyedHeap<TNode, TKey, TValue>
+	public abstract class LinkedHeap<TNode, TKey, TValue> : Heap<TNode, TKey, TValue>
 		where TNode : class, ILinkedNode<TNode, TKey, TValue>
 	{
 		/// <inheritdoc />

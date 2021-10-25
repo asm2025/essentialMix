@@ -6,8 +6,8 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
-	[DebuggerDisplay("{Value}")]
 	[Serializable]
+	[DebuggerDisplay("{Value}")]
 	[StructLayout(LayoutKind.Sequential)]
 	public abstract class LinkedBinaryNode<TNode, T> : ITreeNode<T>
 		where TNode : LinkedBinaryNode<TNode, T>
@@ -115,8 +115,8 @@ namespace essentialMix.Collections
 		public static implicit operator T([NotNull] LinkedBinaryNode<TNode, T> node) { return node.Value; }
 	}
 
-	[DebuggerDisplay("{Value} :H{Height}B{BalanceFactor}")]
 	[Serializable]
+	[DebuggerDisplay("{Value} :H{Height}B{BalanceFactor}")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class LinkedBinaryNode<T> : LinkedBinaryNode<LinkedBinaryNode<T>, T>
 	{
