@@ -19,7 +19,7 @@ namespace essentialMix.Collections
 		
 		TNode Find(T value);
 		
-		void DecreaseKey([NotNull] TNode node, [NotNull] T newKey);
+		void DecreaseKey([NotNull] TNode node, [NotNull] T newValue);
 		
 		[NotNull]
 		TNode ExtractNode();

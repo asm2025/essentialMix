@@ -36,7 +36,7 @@ namespace essentialMix.Collections
 	public abstract class BinomialHeap<TKey, TValue> : SiblingsHeap<BinomialNode<TKey, TValue>, TKey, TValue>
 	{
 		[NotNull]
-		protected Func<TValue, TKey> _getKeyForItem;
+		private readonly Func<TValue, TKey> _getKeyForItem;
 
 		/// <inheritdoc />
 		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem)
@@ -343,11 +343,11 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override void DecreaseKey(BinomialNode<T> node, T newKey)
+		public sealed override void DecreaseKey(BinomialNode<T> node, T newValue)
 		{
 			if (Head == null) throw new CollectionIsEmptyException();
-			if (Compare(node.Value, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
-			node.Value = newKey;
+			if (Compare(node.Value, newValue) < 0) throw new InvalidOperationException("Invalid new key.");
+			node.Value = newValue;
 			if (node == Head) return;
 			BubbleUp(node);
 		}

@@ -21,7 +21,7 @@ namespace essentialMix.Collections
 	public abstract class PairingHeap<TKey, TValue> : SiblingsHeap<PairingNode<TKey, TValue>, TKey, TValue>
 	{
 		[NotNull]
-		protected Func<TValue, TKey> _getKeyForItem;
+		private readonly Func<TValue, TKey> _getKeyForItem;
 
 		/// <inheritdoc />
 		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem)
@@ -237,6 +237,161 @@ namespace essentialMix.Collections
 
 		/// <inheritdoc />
 		public sealed override PairingNode<T> MakeNode(T value) { return new PairingNode<T>(value); }
-		??
+
+		/// <inheritdoc />
+		public sealed override PairingNode<T> Add(PairingNode<T> node)
+		{
+			node.Invalidate();
+			Head = Head == null
+						? node
+						: Meld(Head, node);
+			Count++;
+			_version++;
+			return node;
+		}
+
+		/// <inheritdoc />
+		public sealed override bool Remove(PairingNode<T> node)
+		{
+			// https://www.geeksforgeeks.org/pairing-heap/
+			// https://brilliant.org/wiki/pairing-heap/
+			PairingNode<T> mergedLeftMost = TwoPassMerge(node.LeftMostChild());
+			Head = ReferenceEquals(node, Head)
+						? mergedLeftMost
+						: Meld(Head, mergedLeftMost);
+			Count--;
+			_version++;
+			return true;
+		}
+
+		/// <inheritdoc />
+		public sealed override void Clear()
+		{
+			Head = null;
+			Count = 0;
+			_version++;
+		}
+
+		/// <inheritdoc />
+		public sealed override void DecreaseKey(PairingNode<T> node, T newValue)
+		{
+			if (Head == null) throw new CollectionIsEmptyException();
+			if (Compare(node.Value, newValue) < 0) throw new InvalidOperationException("Invalid new key.");
+			node.Value = newValue;
+			if (ReferenceEquals(node, Head)) return;
+			if (node.Sibling != null) node.Sibling.Previous = node.Previous;
+			
+			if (node.Previous != null)
+			{
+				if (node.Previous.Child == node) node.Previous.Child = node.Sibling;
+				else node.Previous.Sibling = node.Sibling;
+			}
+
+			node.Sibling = null;
+			Head = Meld(Head, node);
+			_version++;
+		}
+
+		/// <inheritdoc />
+		public sealed override T Value()
+		{
+			if (Head == null) throw new CollectionIsEmptyException();
+			return Head.Value;
+		}
+
+		/// <inheritdoc />
+		public sealed override PairingNode<T> ExtractNode()
+		{
+			if (Head == null) throw new CollectionIsEmptyException();
+			PairingNode<T> node = Head;
+			Head = Head.Child == null
+						? null
+						: TwoPassMerge(Head.Child);
+			Count--;
+			_version++;
+			node.Invalidate();
+			return node;
+		}
+
+		/// <summary>
+		/// Maintains heap properties by comparing and linking a and b together to satisfy heap order.
+		/// x.Sibling MUST be NULL on entry.
+		/// </summary>
+		/// <param name="x">The first node. Usually the Head node.</param>
+		/// <param name="y">The second node.</param>
+		/// <returns>The merged node. The value returned should be assigned back to whichever node was passed as the first node parameter.</returns>
+		private PairingNode<T> Meld(PairingNode<T> x, PairingNode<T> y)
+		{
+			if (ReferenceEquals(x, y)) return x;
+			if (x == null) return y;
+			if (y == null) return x;
+
+			if (Compare(y.Value, x.Value) < 0)
+			{
+				y.Previous = x.Previous;
+				x.Previous = y;
+				x.Sibling = y.Child;
+				if (x.Sibling != null) x.Sibling.Previous = x;
+				y.Child = x;
+				return y;
+			}
+
+			y.Previous = x;
+			x.Sibling = y.Sibling;
+			if (x.Sibling != null) x.Sibling.Previous = x;
+			y.Sibling = x.Child;
+			if (y.Sibling != null) y.Sibling.Previous = y;
+			x.Child = y;
+			return x;
+		}
+
+		/// <summary>
+		/// Implements two-pass merging. It is usually used to delete the root node and combine the siblings.
+		/// </summary>
+		/// <param name="node"></param>
+		/// <returns>The new root node</returns>
+		private PairingNode<T> TwoPassMerge(PairingNode<T> node)
+		{
+			if (node?.Sibling == null) return node;
+
+			List<PairingNode<T>> nodes = new List<PairingNode<T>>();
+
+			do
+			{
+				nodes.Add(node);
+				// break links
+				node.Previous.Sibling = null;
+				node = node.Sibling;
+			}
+			while (node != null);
+
+			int i = 0;
+			/*
+			 * Combine subtrees two at a time, going left to right.
+			 * The 1st item will keep the merge result.
+			 */
+			while (i + 1 < nodes.Count)
+			{
+				nodes[i] = Meld(nodes[i], nodes[i + 1]);
+				i += 2;
+			}
+
+			// i has the result of last merge.
+			i -= 2;
+			// If an odd number of nodes, get the last one.
+			if (i == nodes.Count - 3) nodes[i] = Meld(nodes[i], nodes[i + 2]);
+
+			/*
+			 * Now go right to left, merging last node with next to last.
+			 * The result becomes the new last.
+			 */
+			while (i >= 2)
+			{
+				nodes[i - 2] = Meld(nodes[i - 2], nodes[i]);
+				i -= 2;
+			}
+
+			return nodes[0];
+		}
 	}
 }

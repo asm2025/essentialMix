@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions.Collections;
 using JetBrains.Annotations;
 
@@ -13,7 +10,6 @@ namespace essentialMix.Collections
 	/// queue operations, consisting of a collection of heap-ordered trees. It has a better amortized running time than
 	/// many other priority queue data structures including the binary heap and Fibonacci heap.
 	/// </summary>
-	/// <typeparam name="TNode">The node type. This is just for abstraction purposes and shouldn't be dealt with directly.</typeparam>
 	/// <typeparam name="TKey">The key assigned to the element. It should have its value from the value at first but changing
 	/// this later will not affect the value itself, except for primitive value types. Changing the key will of course affect the
 	/// priority of the item.</typeparam>
@@ -75,283 +71,39 @@ namespace essentialMix.Collections
 	 * dequeueMin to extract it.
 	 */
 	[Serializable]
-	public abstract class FibonacciHeap<TNode, TKey, TValue> : SiblingsHeap<TNode, TKey, TValue>
-		where TNode : FibonacciNode<TNode, TKey, TValue>
+	public abstract class FibonacciHeap<TKey, TValue> : SiblingsHeap<FibonacciNode<TKey, TValue>, TKey, TValue>
 	{
-		private struct BreadthFirstEnumerator : IEnumerableEnumerator<TValue>
-		{
-			private readonly FibonacciHeap<TNode, TKey, TValue> _heap;
-			private readonly int _version;
-			private readonly TNode _root;
-			private readonly Queue<TNode> _queue;
-
-			private TNode _current;
-			private bool _started;
-			private bool _done;
-
-			internal BreadthFirstEnumerator([NotNull] FibonacciHeap<TNode, TKey, TValue> heap, TNode root)
-			{
-				_heap = heap;
-				_version = _heap._version;
-				_root = root;
-				_queue = new Queue<TNode>();
-				_current = null;
-				_started = false;
-				_done = _heap.Count == 0 || _root == null;
-			}
-
-			/// <inheritdoc />
-			[NotNull]
-			public TValue Current
-			{
-				get
-				{
-					if (!_started || _current == null) throw new InvalidOperationException();
-					return _current.Value;
-				}
-			}
-
-			/// <inheritdoc />
-			[NotNull]
-			object IEnumerator.Current => Current;
-
-			/// <inheritdoc />
-			public IEnumerator<TValue> GetEnumerator()
-			{
-				IEnumerator enumerator = this;
-				enumerator.Reset();
-				return this;
-			}
-
-			/// <inheritdoc />
-			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-			public bool MoveNext()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-				// Head-Next-Child (Queue)
-				if (_done) return false;
-
-				if (!_started)
-				{
-					_started = true;
-					// Start at the root
-					_queue.Enqueue(_root);
-				}
-
-				// visit the next queued node
-				_current = _queue.Count > 0
-								? _queue.Dequeue()
-								/*
-								* The previous/next nodes are not exactly a doubly linked list but rather
-								* a circular reference so will have to watch out for this.
-								*/
-								: _current?.Next != null && !ReferenceEquals(_current.Next, _root)
-									? _current.Next
-									: null;
-				
-				if (_current == null)
-				{
-					_done = true;
-					return false;
-				}
-
-				// Queue the next nodes.
-				if (_current.Child == null) return true;
-				_queue.Enqueue(_current.Child);
-				if (_current.Child.Next == null) return true;
-
-				foreach (TNode forward in _current.Child.Forwards(_root))
-					_queue.Enqueue(forward);
-
-				return true;
-			}
-
-			void IEnumerator.Reset()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-				_current = null;
-				_started = false;
-				_queue.Clear();
-				_done = _heap.Count == 0 || _root == null;
-			}
-
-			/// <inheritdoc />
-			public void Dispose() { }
-		}
-
-		private struct DepthFirstEnumerator : IEnumerableEnumerator<TValue>
-		{
-			private readonly FibonacciHeap<TNode, TKey, TValue> _heap;
-			private readonly int _version;
-			private readonly TNode _root;
-			private readonly Stack<TNode> _stack;
-
-			private TNode _current;
-			private bool _started;
-			private bool _done;
-
-			internal DepthFirstEnumerator([NotNull] FibonacciHeap<TNode, TKey, TValue> heap, TNode root)
-			{
-				_heap = heap;
-				_version = _heap._version;
-				_root = root;
-				_stack = new Stack<TNode>();
-				_current = null;
-				_started = false;
-				_done = _heap.Count == 0 || _root == null;
-			}
-
-			/// <inheritdoc />
-			[NotNull]
-			public TValue Current
-			{
-				get
-				{
-					if (!_started || _current == null) throw new InvalidOperationException();
-					return _current.Value;
-				}
-			}
-
-			/// <inheritdoc />
-			[NotNull]
-			object IEnumerator.Current => Current;
-
-			/// <inheritdoc />
-			public IEnumerator<TValue> GetEnumerator()
-			{
-				IEnumerator enumerator = this;
-				enumerator.Reset();
-				return this;
-			}
-
-			/// <inheritdoc />
-			IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-			public bool MoveNext()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-				// Head-Child-Sibling (Stack)
-				if (_done) return false;
-
-				if (!_started)
-				{
-					_started = true;
-					// Start at the root
-					_stack.Push(_root);
-				}
-
-				// visit the next queued node
-				_current = _stack.Count > 0
-								? _stack.Pop()
-								/*
-								* The previous/next nodes are not exactly a doubly linked list but rather
-								* a circular reference so will have to watch out for this.
-								*/
-								: _current?.Next != null && !ReferenceEquals(_current.Next, _root)
-									? _current.Next
-									: null;
-
-				if (_current == null)
-				{
-					_done = true;
-					return false;
-				}
-
-				// Queue the next nodes
-				if (_current.Child == null) return true;
-				_stack.Push(_current.Child);
-				if (_current.Child.Next == null) return true;
-
-				foreach (TNode forward in _current.Child.Forwards(_root))
-					_stack.Push(forward);
-
-				return true;
-			}
-
-			void IEnumerator.Reset()
-			{
-				if (_version != _heap._version) throw new VersionChangedException();
-				_current = null;
-				_started = false;
-				_stack.Clear();
-				_done = _heap.Count == 0 || _root == null;
-			}
-
-			/// <inheritdoc />
-			public void Dispose() { }
-		}
+		[NotNull]
+		private readonly Func<TValue, TKey> _getKeyForItem;
 
 		/// <inheritdoc />
-		protected FibonacciHeap()
-			: this((IComparer<TKey>)null)
+		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem)
+			: this(getKeyForItem, (IComparer<TKey>)null)
 		{
 		}
 
-		protected FibonacciHeap(IComparer<TKey> comparer)
+		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
 			: base(comparer)
 		{
+			_getKeyForItem = getKeyForItem;
 		}
 
-		protected FibonacciHeap([NotNull] IEnumerable<TValue> enumerable)
-			: this(enumerable, null)
+		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
+			: this(getKeyForItem, enumerable, null)
 		{
 		}
 
-		protected FibonacciHeap([NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: base(enumerable, comparer)
+		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
+			: this(getKeyForItem, comparer)
 		{
+			Add(enumerable);
 		}
 
 		/// <inheritdoc />
-		public sealed override IEnumerableEnumerator<TValue> Enumerate(TNode root, BreadthDepthTraversal method)
-		{
-			return method switch
-			{
-				BreadthDepthTraversal.BreadthFirst => new BreadthFirstEnumerator(this, root),
-				BreadthDepthTraversal.DepthFirst => new DepthFirstEnumerator(this, root),
-				_ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
-			};
-		}
+		public sealed override FibonacciNode<TKey, TValue> MakeNode(TValue value) { return new FibonacciNode<TKey, TValue>(_getKeyForItem(value), value); }
 
 		/// <inheritdoc />
-		public sealed override void Iterate(TNode root, BreadthDepthTraversal method, Action<TNode> visitCallback)
-		{
-			if (Count == 0 || root == null) return;
-
-			switch (method)
-			{
-				case BreadthDepthTraversal.BreadthFirst:
-					BreadthFirst(root, visitCallback);
-					break;
-				case BreadthDepthTraversal.DepthFirst:
-					DepthFirst(root, visitCallback);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(method), method, null);
-			}
-		}
-
-		/// <inheritdoc />
-		public sealed override void Iterate(TNode root, BreadthDepthTraversal method, Func<TNode, bool> visitCallback)
-		{
-			if (Count == 0 || root == null) return;
-
-			switch (method)
-			{
-				case BreadthDepthTraversal.BreadthFirst:
-					BreadthFirst(root, visitCallback);
-					break;
-				case BreadthDepthTraversal.DepthFirst:
-					DepthFirst(root, visitCallback);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(method), method, null);
-			}
-		}
-
-		/// <inheritdoc />
-		public sealed override TNode Add(TNode node)
+		public sealed override FibonacciNode<TKey, TValue> Add(FibonacciNode<TKey, TValue> node)
 		{
 			node.Invalidate();
 			Head = Merge(Head, node);
@@ -361,12 +113,12 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override bool Remove(TNode node)
+		public sealed override bool Remove(FibonacciNode<TKey, TValue> node)
 		{
 			// This is a special implementation of decreaseKey that sets the
 			// argument to the min/maximum value. This is necessary to make generic keys
 			// work, since there is no Min/MaximumValue constant for generic types.
-			TNode parent = node.Parent;
+			FibonacciNode<TKey, TValue> parent = node.Parent;
 			if (parent != null) Cut(node);
 			Head = node;
 			ExtractValue();
@@ -382,14 +134,14 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override void DecreaseKey(TNode node, TKey newKey)
+		public sealed override void DecreaseKey(FibonacciNode<TKey, TValue> node, TKey newKey)
 		{
 			if (Head == null) throw new CollectionIsEmptyException();
 			if (Compare(node.Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
 			node.Key = newKey;
 			if (node == Head) return;
 
-			TNode parent = node.Parent;
+			FibonacciNode<TKey, TValue> parent = node.Parent;
 
 			/*
 			 * If the node no longer has a higher priority than its parent, cut it.
@@ -411,12 +163,12 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public sealed override TNode ExtractValue()
+		public sealed override FibonacciNode<TKey, TValue> ExtractNode()
 		{
 			if (Head == null) throw new CollectionIsEmptyException();
 
 			// Grab the min/maximum element so we know what to return.
-			TNode head = Head;
+			FibonacciNode<TKey, TValue> head = Head;
 
 			/*
 			 * Now, we need to get rid of this element from the list of roots. There
@@ -446,7 +198,7 @@ namespace essentialMix.Collections
 			if (head.Child != null)
 			{
 				// Keep track of the first visited node.
-				TNode next = head.Child;
+				FibonacciNode<TKey, TValue> next = head.Child;
 
 				do
 				{
@@ -478,7 +230,7 @@ namespace essentialMix.Collections
 			 * List where the entry at position i is either null or the 
 			 * unique tree of degree i.
 			 */
-			List<TNode> treeTable = new List<TNode>();
+			List<FibonacciNode<TKey, TValue>> treeTable = new List<FibonacciNode<TKey, TValue>>();
 
 			/*
 			 * We need to traverse the entire list, but since we're going to be
@@ -488,7 +240,7 @@ namespace essentialMix.Collections
 			 * spend a bit of overhead adding all of the nodes to a list, and
 			 * then will visit each element of this list in order.
 			 */
-			List<TNode> toVisit = new List<TNode>();
+			List<FibonacciNode<TKey, TValue>> toVisit = new List<FibonacciNode<TKey, TValue>>();
 
 			/*
 			 * To add everything, we'll iterate across the elements until we
@@ -496,13 +248,13 @@ namespace essentialMix.Collections
 			 * list is empty or while the current element isn't the first element
 			 * of that list.
 			 */
-			for (TNode next = Head; toVisit.Count == 0 || toVisit[0] != next; next = next.Next)
+			for (FibonacciNode<TKey, TValue> next = Head; toVisit.Count == 0 || toVisit[0] != next; next = next.Next)
 				toVisit.Add(next);
 
 			// Traverse this list and perform the appropriate union steps.
-			foreach (TNode node in toVisit)
+			foreach (FibonacciNode<TKey, TValue> node in toVisit)
 			{
-				TNode next = node;
+				FibonacciNode<TKey, TValue> next = node;
 
 				// Keep merging until a match arises.
 				while (true)
@@ -522,15 +274,15 @@ namespace essentialMix.Collections
 					}
 
 					// Otherwise, merge with what's there.
-					TNode other = treeTable[next.Degree];
+					FibonacciNode<TKey, TValue> other = treeTable[next.Degree];
 					treeTable[next.Degree] = null; // Clear the slot
 
 					/*
 					 * Determine which of the two trees has the smaller root, storing
 					 * the two tree accordingly.
 					 */
-					TNode min;
-					TNode max;
+					FibonacciNode<TKey, TValue> min;
+					FibonacciNode<TKey, TValue> max;
 
 					if (Compare(other.Key, next.Key) < 0)
 					{
@@ -586,7 +338,7 @@ namespace essentialMix.Collections
 		/// <param name="x"></param>
 		/// <param name="y"></param>
 		/// <returns></returns>
-		private TNode Merge(TNode x, TNode y)
+		private FibonacciNode<TKey, TValue> Merge(FibonacciNode<TKey, TValue> x, FibonacciNode<TKey, TValue> y)
 		{
 			if (ReferenceEquals(x, y)) return x;
 			if (x == null) return y;
@@ -627,7 +379,7 @@ namespace essentialMix.Collections
              *              | +-------------+ |
              *              +-----------------+
 			 */
-			TNode xNext = x.Next;
+			FibonacciNode<TKey, TValue> xNext = x.Next;
 			x.Next = y.Next;
 			x.Next.Previous = x;
 			y.Next = xNext;
@@ -643,7 +395,7 @@ namespace essentialMix.Collections
 		/// as well.
 		/// </summary>
 		/// <param name="node">The node being cut.</param>
-		private void Cut([NotNull] TNode node)
+		private void Cut([NotNull] FibonacciNode<TKey, TValue> node)
 		{
 			// Begin by clearing the node's mark, since we just cut it.
 			node.Marked = false;
@@ -695,250 +447,17 @@ namespace essentialMix.Collections
 			// Clear the relocated node's parent; it's now a root.
 			node.Parent = null;
 		}
-
-		#region Iterator Traversal for Action<TNode>
-		private void BreadthFirst([NotNull] TNode root, [NotNull] Action<TNode> visitCallback)
-		{
-			int version = _version;
-			// Head-Next-Child (Queue)
-			Queue<TNode> queue = new Queue<TNode>();
-
-			while (root != null)
-			{
-				if (version != _version) throw new VersionChangedException();
-				// Start at the root
-				queue.Enqueue(root);
-
-				while (queue.Count > 0)
-				{
-					if (version != _version) throw new VersionChangedException();
-
-					// visit the next queued node
-					TNode current = queue.Dequeue();
-					visitCallback(current);
-					if (current.Child == null) continue;
-
-					// Queue the next nodes
-					if (current.Child != null)
-					{
-						queue.Enqueue(current.Child);
-
-						/*
-						* The previous/next nodes are not exactly a doubly linked list but rather
-						* a circular reference so will have to watch out for this.
-						*/
-						if (current.Child.Next != null)
-						{
-							foreach (TNode forward in current.Child.Forwards(root))
-								queue.Enqueue(forward);
-						}
-					}
-
-					if (current.Next != null && !ReferenceEquals(current.Next, root)) queue.Enqueue(current.Next);
-				}
-
-				root = root.Next != null && !ReferenceEquals(root.Next, root)
-							? root.Next
-							: null;
-			}
-		}
-
-		private void DepthFirst([NotNull] TNode root, [NotNull] Action<TNode> visitCallback)
-		{
-			int version = _version;
-			// Head-Sibling-Child (Stack)
-			Stack<TNode> stack = new Stack<TNode>();
-
-			while (root != null)
-			{
-				if (version != _version) throw new VersionChangedException();
-				// Start at the root
-				stack.Push(root);
-
-				while (stack.Count > 0)
-				{
-					if (version != _version) throw new VersionChangedException();
-
-					// visit the next queued node
-					TNode current = stack.Pop();
-					visitCallback(current);
-
-					// Queue the next nodes
-					if (current.Child != null)
-					{
-						stack.Push(current.Child);
-
-						/*
-						* The previous/next nodes are not exactly a doubly linked list but rather
-						* a circular reference so will have to watch out for this.
-						*/
-						if (current.Child.Next != null)
-						{
-							foreach (TNode forward in current.Child.Forwards(root))
-								stack.Push(forward);
-						}
-					}
-
-					if (current.Next != null && !ReferenceEquals(current.Next, root)) stack.Push(current.Next);
-				}
-
-				root = root.Next != null && !ReferenceEquals(root.Next, root)
-							? root.Next
-							: null;
-			}
-		}
-		#endregion
-
-		#region Iterator Traversal for Func<TNode, bool>
-		private void BreadthFirst([NotNull] TNode root, [NotNull] Func<TNode, bool> visitCallback)
-		{
-			int version = _version;
-			// Head-Next-Child (Queue)
-			Queue<TNode> queue = new Queue<TNode>();
-
-			while (root != null)
-			{
-				if (version != _version) throw new VersionChangedException();
-				// Start at the root
-				queue.Enqueue(root);
-
-				while (queue.Count > 0)
-				{
-					if (version != _version) throw new VersionChangedException();
-
-					// visit the next queued node
-					TNode current = queue.Dequeue();
-					if (!visitCallback(current)) return;
-					if (current.Child == null) continue;
-
-					// Queue the next nodes
-					if (current.Child != null)
-					{
-						queue.Enqueue(current.Child);
-
-						/*
-						* The previous/next nodes are not exactly a doubly linked list but rather
-						* a circular reference so will have to watch out for this.
-						*/
-						if (current.Child.Next != null)
-						{
-							foreach (TNode forward in current.Child.Forwards(root))
-								queue.Enqueue(forward);
-						}
-					}
-
-					if (current.Next != null && !ReferenceEquals(current.Next, root)) queue.Enqueue(current.Next);
-				}
-
-				root = root.Next != null && !ReferenceEquals(root.Next, root)
-							? root.Next
-							: null;
-			}
-		}
-
-		private void DepthFirst([NotNull] TNode root, [NotNull] Func<TNode, bool> visitCallback)
-		{
-			int version = _version;
-			// Head-Sibling-Child (Stack)
-			Stack<TNode> stack = new Stack<TNode>();
-
-			while (root != null)
-			{
-				if (version != _version) throw new VersionChangedException();
-				// Start at the root
-				stack.Push(root);
-
-				while (stack.Count > 0)
-				{
-					if (version != _version) throw new VersionChangedException();
-
-					// visit the next queued node
-					TNode current = stack.Pop();
-					if (!visitCallback(current)) return;
-
-					// Queue the next nodes
-					if (current.Child != null)
-					{
-						stack.Push(current.Child);
-
-						/*
-						* The previous/next nodes are not exactly a doubly linked list but rather
-						* a circular reference so will have to watch out for this.
-						*/
-						if (current.Child.Next != null)
-						{
-							foreach (TNode forward in current.Child.Forwards(root))
-								stack.Push(forward);
-						}
-					}
-
-					if (current.Next != null && !ReferenceEquals(current.Next, root)) stack.Push(current.Next);
-				}
-
-				root = root.Next != null && !ReferenceEquals(root.Next, root)
-							? root.Next
-							: null;
-			}
-		}
-		#endregion
 	}
 
-	[DebuggerTypeProxy(typeof(FibonacciHeap<,>.DebugView))]
+	/// <summary>
+	/// <see href="https://en.wikipedia.org/wiki/Fibonacci_heap">Fibonacci heap</see> is a data structure for priority
+	/// queue operations, consisting of a collection of heap-ordered trees. It has a better amortized running time than
+	/// many other priority queue data structures including the binary heap and Fibonacci heap.
+	/// </summary>
+	/// <typeparam name="T">The element type of the heap</typeparam>
 	[Serializable]
-	public abstract class FibonacciHeap<TKey, TValue> : FibonacciHeap<FibonacciNode<TKey, TValue>, TKey, TValue>
+	public abstract class FibonacciHeap<T> : SiblingsHeap<FibonacciNode<T>, T>
 	{
-		internal sealed class DebugView : Dbg_HeapDebugView<FibonacciNode<TKey, TValue>, TKey, TValue>
-		{
-			/// <inheritdoc />
-			public DebugView([NotNull] SiblingsHeap<FibonacciNode<TKey, TValue>, TKey, TValue> heap)
-				: base(heap)
-			{
-			}
-		}
-
-		[NotNull]
-		protected Func<TValue, TKey> _getKeyForItem;
-
-		/// <inheritdoc />
-		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem)
-			: this(getKeyForItem, (IComparer<TKey>)null)
-		{
-		}
-
-		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
-			: base(comparer)
-		{
-			_getKeyForItem = getKeyForItem;
-		}
-
-		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
-			: this(getKeyForItem, enumerable, null)
-		{
-		}
-
-		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: this(getKeyForItem, comparer)
-		{
-			Add(enumerable);
-		}
-
-		/// <inheritdoc />
-		public override FibonacciNode<TKey, TValue> MakeNode(TValue value) { return new FibonacciNode<TKey, TValue>(_getKeyForItem(value), value); }
-	}
-
-	[DebuggerTypeProxy(typeof(FibonacciHeap<>.DebugView))]
-	[Serializable]
-	public abstract class FibonacciHeap<T> : FibonacciHeap<FibonacciNode<T>, T, T>
-	{
-		internal sealed class DebugView : Dbg_HeapDebugView<FibonacciNode<T>, T, T>
-		{
-			/// <inheritdoc />
-			public DebugView([NotNull] SiblingsHeap<FibonacciNode<T>, T, T> heap)
-				: base(heap)
-			{
-			}
-		}
-
 		/// <inheritdoc />
 		protected FibonacciHeap()
 			: this((IComparer<T>)null)
@@ -961,6 +480,352 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public override FibonacciNode<T> MakeNode(T value) { return new FibonacciNode<T>(value); }
+		public sealed override FibonacciNode<T> MakeNode(T value) { return new FibonacciNode<T>(value); }
+
+		/// <inheritdoc />
+		public sealed override FibonacciNode<T> Add(FibonacciNode<T> node)
+		{
+			node.Invalidate();
+			Head = Merge(Head, node);
+			Count++;
+			_version++;
+			return node;
+		}
+
+		/// <inheritdoc />
+		public sealed override bool Remove(FibonacciNode<T> node)
+		{
+			// This is a special implementation of decreaseKey that sets the
+			// argument to the min/maximum value. This is necessary to make generic keys
+			// work, since there is no Min/MaximumValue constant for generic types.
+			FibonacciNode<T> parent = node.Parent;
+			if (parent != null) Cut(node);
+			Head = node;
+			ExtractValue();
+			return true;
+		}
+
+		/// <inheritdoc />
+		public sealed override void Clear()
+		{
+			Head = null;
+			Count = 0;
+			_version++;
+		}
+
+		/// <inheritdoc />
+		public sealed override void DecreaseKey(FibonacciNode<T> node, T newValue)
+		{
+			if (Head == null) throw new CollectionIsEmptyException();
+			if (Compare(node.Value, newValue) < 0) throw new InvalidOperationException("Invalid new key.");
+			node.Value = newValue;
+			if (node == Head) return;
+
+			FibonacciNode<T> parent = node.Parent;
+
+			/*
+			 * If the node no longer has a higher priority than its parent, cut it.
+			 * Note that this also means that if we try to run a delete operation
+			 * that decreases the key to -infinity, it's guaranteed to cut the node
+			 * from its parent.
+			 */
+			if (parent != null && Compare(node.Value, parent.Value) < 0) Cut(node);
+			if (Compare(node.Value, Head.Value) > 0) return;
+			Head = node;
+			_version++;
+		}
+
+		/// <inheritdoc />
+		public sealed override T Value()
+		{
+			if (Head == null) throw new CollectionIsEmptyException();
+			return Head.Value;
+		}
+
+		/// <inheritdoc />
+		public sealed override FibonacciNode<T> ExtractNode()
+		{
+			if (Head == null) throw new CollectionIsEmptyException();
+
+			// Grab the min/maximum element so we know what to return.
+			FibonacciNode<T> head = Head;
+
+			/*
+			 * Now, we need to get rid of this element from the list of roots. There
+			 * are two cases to consider. First, if this is the only element in the
+			 * list of roots, we set the list of roots to be null by clearing Head.
+			 * Otherwise, if it's not null, then we write the elements next to the
+			 * Head element around it to remove it, then arbitrarily reassign the Head.
+			 */
+			if (head.Next == head)
+			{
+				// Case 1
+				Head = null;
+			}
+			else
+			{
+				// Case 2
+				Head.Previous.Next = Head.Next;
+				Head.Next.Previous = Head.Previous;
+				Head = Head.Next; // Arbitrary element of the root list.
+			}
+
+			/*
+			 * Next, clear the parent fields of all of the min element's children,
+			 * since they're about to become roots. Because the elements are
+			 * stored in a circular list, the traversal is a bit complex.
+			 */
+			if (head.Child != null)
+			{
+				// Keep track of the first visited node.
+				FibonacciNode<T> next = head.Child;
+
+				do
+				{
+					next.Parent = null;
+					next = next.Next;
+				}
+				while (next != head.Child);
+			}
+
+			/*
+			 * Next, splice the children of the root node into the topmost list, 
+			 * then set Head to point somewhere in that list.
+			 */
+			Head = Merge(Head, head.Child);
+			Count--;
+			_version++;
+
+			// If there are no entries left, we're done.
+			if (Head == null)
+			{
+				head.Invalidate();
+				return head;
+			}
+
+			// the next code is sick to say the least!
+			/*
+			 * Next, we need to coalesce all of the roots so that there is only one
+			 * tree of each degree. To track trees of each size, we allocate an
+			 * List where the entry at position i is either null or the 
+			 * unique tree of degree i.
+			 */
+			List<FibonacciNode<T>> treeTable = new List<FibonacciNode<T>>();
+
+			/*
+			 * We need to traverse the entire list, but since we're going to be
+			 * messing around with it we have to be careful not to break our
+			 * traversal order mid-stream. One major challenge is how to detect
+			 * whether we're visiting the same node twice. To do this, we'll
+			 * spend a bit of overhead adding all of the nodes to a list, and
+			 * then will visit each element of this list in order.
+			 */
+			List<FibonacciNode<T>> toVisit = new List<FibonacciNode<T>>();
+
+			/*
+			 * To add everything, we'll iterate across the elements until we
+			 * find the first element twice. We check this by looping while the
+			 * list is empty or while the current element isn't the first element
+			 * of that list.
+			 */
+			for (FibonacciNode<T> next = Head; toVisit.Count == 0 || toVisit[0] != next; next = next.Next)
+				toVisit.Add(next);
+
+			// Traverse this list and perform the appropriate union steps.
+			foreach (FibonacciNode<T> node in toVisit)
+			{
+				FibonacciNode<T> next = node;
+
+				// Keep merging until a match arises.
+				while (true)
+				{
+					// Ensure that the list is long enough to hold an element of this degree.
+					while (next.Degree >= treeTable.Count)
+						treeTable.Add(null);
+
+					/*
+					 * If nothing's here, we're can record that this tree has this size
+					 * and are done processing.
+					 */
+					if (treeTable[next.Degree] == null)
+					{
+						treeTable[next.Degree] = next;
+						break;
+					}
+
+					// Otherwise, merge with what's there.
+					FibonacciNode<T> other = treeTable[next.Degree];
+					treeTable[next.Degree] = null; // Clear the slot
+
+					/*
+					 * Determine which of the two trees has the smaller root, storing
+					 * the two tree accordingly.
+					 */
+					FibonacciNode<T> min;
+					FibonacciNode<T> max;
+
+					if (Compare(other.Value, next.Value) < 0)
+					{
+						min = other;
+						max = next;
+					}
+					else
+					{
+						min = next;
+						max = other;
+					}
+
+					// Break max out of the root list, then merge it into min's child list.
+					max.Next.Previous = max.Previous;
+					max.Previous.Next = max.Next;
+
+					// Make it a singleton so that we can merge it.
+					max.Next = max.Previous = max;
+					min.Child = Merge(min.Child, max);
+
+					// Re-parent max appropriately.
+					max.Parent = min;
+
+					// Clear max's mark, since it can now lose another child.
+					max.Marked = false;
+
+					// Increase min's degree; it now has another child.
+					++min.Degree;
+
+					// Continue merging this tree.
+					next = min;
+				}
+
+				/*
+				 * Update the global min based on this node. Note that we compare
+				 * for <= instead of < here. That's because if we just did a
+				 * re-parent operation that merged two different trees of equal
+				 * priority, we need to make sure that the min pointer points to
+				 * the root-level one.
+				 */
+				if (Compare(next.Value, Head.Value) <= 0) Head = next;
+			}
+
+			head.Invalidate();
+			return head;
+		}
+
+		/// <summary>
+		/// Merge two pointers into disjoint circularly linked lists, merges the two lists together
+		/// into one circularly-linked list in O(1) time. It's assumed that x and y are the minimum
+		/// elements of the lists they are in, and returns a pointer to whichever has a preceding priority.
+		/// </summary>
+		/// <param name="x"></param>
+		/// <param name="y"></param>
+		/// <returns></returns>
+		private FibonacciNode<T> Merge(FibonacciNode<T> x, FibonacciNode<T> y)
+		{
+			if (ReferenceEquals(x, y)) return x;
+			if (x == null) return y;
+			if (y == null) return x;
+
+			/*
+			 * The next comment and drawing are taken from:
+			 * https://keithschwarz.com/interesting/code/?dir=fibonacci-heap
+			 * I just changed the parameter names.
+			 *
+			 * Both non-null; actually do the splice. This is not as easy as
+			 * it seems. The idea is that we'll have two lists that look like this:
+             *
+             * +----+     +----+     +----+
+             * |    |--N->| x  |--N->|    |
+             * |    |<-P--|    |<-P--|    |
+             * +----+     +----+     +----+
+             *
+             *
+             * +----+     +----+     +----+
+             * |    |--N->| y  |--N->|    |
+             * |    |<-P--|    |<-P--|    |
+             * +----+     +----+     +----+
+             *
+             * And we want to relink everything to get
+             *
+             * +----+     +----+     +----+---+
+             * |    |--N->| x  |     |    |   |
+             * |    |<-P--|    |     |    |<+ |
+             * +----+     +----+<-\  +----+ | |
+             *                  \  P        | |
+             *                   N  \       N |
+             * +----+     +----+  \->+----+ | |
+             * |    |--N->| y  |     |    | | |
+             * |    |<-P--|    |     |    | | P
+             * +----+     +----+     +----+ | |
+             *              ^ |             | |
+             *              | +-------------+ |
+             *              +-----------------+
+			 */
+			FibonacciNode<T> xNext = x.Next;
+			x.Next = y.Next;
+			x.Next.Previous = x;
+			y.Next = xNext;
+			y.Next.Previous = y;
+			return Compare(x.Value, y.Value) < 0
+						? x
+						: y;
+		}
+
+		/// <summary>
+		/// Cuts the link between a node and its parent, moving the node to the root list.
+		/// If the parent was already marked, recursively cuts that node from its parent
+		/// as well.
+		/// </summary>
+		/// <param name="node">The node being cut.</param>
+		private void Cut([NotNull] FibonacciNode<T> node)
+		{
+			// Begin by clearing the node's mark, since we just cut it.
+			node.Marked = false;
+
+			// base case
+			if (node.Parent == null) return;
+
+			// Rewire the node's siblings around it, if it has any siblings.
+			if (node.Next != node)
+			{
+				// Has siblings
+				node.Next.Previous = node.Previous;
+				node.Previous.Next = node.Next;
+			}
+
+			/*
+			 * If the node is the one identified by its parent as its child,
+			 * we need to rewrite that pointer to point to some arbitrary other
+			 * child.
+			 */
+			if (node.Parent.Child == node)
+			{
+				/*
+				 * If there are any other children, pick one of them arbitrarily.
+				 * Otherwise, there aren't any children left and we should clear the
+				 * pointer and drop the node's degree.
+				 */
+				node.Parent.Child = node.Next != node
+										? node.Next
+										: null;
+			}
+
+			// Decrease the degree of the parent, since it just lost a child.
+			--node.Parent.Degree;
+
+			/*
+			 * Splice this tree into the root list by converting it to a singleton
+			 * and invoking the merge subroutine.
+			 */
+			node.Previous = node.Next = node;
+			Head = Merge(Head, node);
+
+			// Mark the parent and recursively cut it if it's already been marked.
+			if (node.Parent.Marked)
+				Cut(node.Parent);
+			else
+				node.Parent.Marked = true;
+
+			// Clear the relocated node's parent; it's now a root.
+			node.Parent = null;
+		}
 	}
 }

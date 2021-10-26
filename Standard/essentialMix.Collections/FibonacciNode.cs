@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -8,11 +7,11 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
-	[DebuggerDisplay("{Key} = {Value} :D{Degree}")]
 	[Serializable]
+	[DebuggerDisplay("{Value} :D{Degree}")]
 	[StructLayout(LayoutKind.Sequential)]
-	public abstract class FibonacciNode<TNode, TKey, TValue> : ISiblingNode<TNode, TKey, TValue>
-		where TNode : FibonacciNode<TNode, TKey, TValue>
+	public abstract class FibonacciNodeBase<TNode, T> : ISiblingNode<TNode, T>
+		where TNode : FibonacciNodeBase<TNode, T>
 	{
 		private const int PARENT = 0;
 		private const int CHILD = 1;
@@ -22,7 +21,7 @@ namespace essentialMix.Collections
 		// The previous/next nodes are not exactly a doubly linked list but rather a circular reference
 		private readonly TNode[] _nodes = new TNode[4];
 
-		protected FibonacciNode(TValue value)
+		protected FibonacciNodeBase(T value)
 		{
 			Value = value;
 			_nodes[PREVIOUS] = _nodes[NEXT] = (TNode)this;
@@ -69,12 +68,9 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		TNode ISiblingNode<TNode, TKey, TValue>.Sibling => Next;
+		public TNode Sibling => _nodes[NEXT];
 
-		[NotNull]
-		public abstract TKey Key { get; set; }
-
-		public TValue Value { get; set; }
+		public T Value { get; set; }
 
 		public int Degree { get; internal set; }
 
@@ -89,7 +85,7 @@ namespace essentialMix.Collections
 		[NotNull]
 		public virtual string ToString(int level)
 		{
-			return $"{Key} = {Value} :D{Degree}L{level}";
+			return $"{Value} :D{Degree}L{level}";
 		}
 
 		[ItemNotNull]
@@ -128,6 +124,32 @@ namespace essentialMix.Collections
 			}
 		}
 
+		public TNode LeftMostChild()
+		{
+			TNode node = null, next = _nodes[CHILD];
+
+			while (next != null)
+			{
+				node = next;
+				next = next._nodes[CHILD];
+			}
+
+			return node;
+		}
+
+		public TNode RightMostSibling()
+		{
+			TNode node = null, next = _nodes[NEXT];
+
+			while (next != null)
+			{
+				node = next;
+				next = next._nodes[NEXT];
+			}
+
+			return node;
+		}
+
 		[ItemNotNull]
 		public IEnumerable<TNode> Children()
 		{
@@ -143,12 +165,7 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		public IEnumerable<TNode> Siblings() { return Forwards(); }
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public void Swap([NotNull] TNode other)
-		{
-			(other.Key, Key) = (Key, other.Key);
-			(other.Value, Value) = (Value, other.Value);
-		}
+		public abstract void Swap(TNode other);
 
 		internal void Invalidate()
 		{
@@ -159,18 +176,19 @@ namespace essentialMix.Collections
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		private void AssertNotCircularRef(FibonacciNode<TNode, TKey, TValue> node)
+		private void AssertNotCircularRef(FibonacciNodeBase<TNode, T> node)
 		{
 			if (!ReferenceEquals(this, node)) return;
 			throw new InvalidOperationException("Circular reference detected.");
 		}
 
-		public static implicit operator TValue([NotNull] FibonacciNode<TNode, TKey, TValue> node) { return node.Value; }
+		public static implicit operator T([NotNull] FibonacciNodeBase<TNode, T> node) { return node.Value; }
 	}
 
 	[Serializable]
+	[DebuggerDisplay("{Key} = {Value} :D{Degree}")]
 	[StructLayout(LayoutKind.Sequential)]
-	public sealed class FibonacciNode<TKey, TValue> : FibonacciNode<FibonacciNode<TKey, TValue>, TKey, TValue>
+	public sealed class FibonacciNode<TKey, TValue> : FibonacciNodeBase<FibonacciNode<TKey, TValue>, TValue>, ISiblingNode<FibonacciNode<TKey, TValue>, TKey, TValue>
 	{
 		private TKey _key;
 
@@ -182,17 +200,29 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public override TKey Key
+		public TKey Key
 		{
 			get => _key;
 			set => _key = value;
 		}
+
+		/// <inheritdoc />
+		public override string ToString(int level)
+		{
+			return $"{Key} = {Value} :D{Degree}L{level}";
+		}
+
+		/// <inheritdoc />
+		public override void Swap(FibonacciNode<TKey, TValue> other)
+		{
+			(other.Key, Key) = (Key, other.Key);
+			(other.Value, Value) = (Value, other.Value);
+		}
 	}
 
-	[DebuggerDisplay("{Value} :D{Degree}")]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public sealed class FibonacciNode<T> : FibonacciNode<FibonacciNode<T>, T, T>
+	public sealed class FibonacciNode<T> : FibonacciNodeBase<FibonacciNode<T>, T>
 	{
 		/// <inheritdoc />
 		public FibonacciNode(T value)
@@ -200,19 +230,15 @@ namespace essentialMix.Collections
 		{
 		}
 
-		/// <inheritdoc />
-		[Browsable(false)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public override T Key
-		{
-			get => Value;
-			set => Value = value;
-		}
-
 		public override string ToString(int level)
 		{
 			return $"{Value} :D{Degree}L{level}";
+		}
+
+		/// <inheritdoc />
+		public override void Swap(FibonacciNode<T> other)
+		{
+			(other.Value, Value) = (Value, other.Value);
 		}
 	}
 }

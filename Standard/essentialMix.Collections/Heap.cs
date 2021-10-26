@@ -156,7 +156,7 @@ namespace essentialMix.Collections
 		public abstract void Clear();
 
 		/// <inheritdoc />
-		public abstract void DecreaseKey(TNode node, T newKey);
+		public abstract void DecreaseKey(TNode node, T newValue);
 
 		/// <inheritdoc />
 		public abstract T Value();
