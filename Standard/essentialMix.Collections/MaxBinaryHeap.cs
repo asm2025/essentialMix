@@ -20,14 +20,14 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public MaxBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
-			: base(getKeyForItem, comparer)
+		public MaxBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> keyComparer)
+			: base(getKeyForItem, keyComparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public MaxBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity, IComparer<TKey> comparer)
-			: base(getKeyForItem, capacity, comparer)
+		public MaxBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, capacity, keyComparer, comparer)
 		{
 		}
 
@@ -38,13 +38,16 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public MaxBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: base(getKeyForItem, enumerable, comparer)
+		public MaxBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, enumerable, keyComparer, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected sealed override int Compare(TKey x, TKey y) { return Comparer.Compare(x, y) * -1; }
+		protected sealed override int Compare(TValue x, TValue y) { return Comparer.Compare(x, y) * -1; }
+
+		/// <inheritdoc />
+		protected sealed override int KeyCompare(TKey x, TKey y) { return KeyComparer.Compare(x, y) * -1; }
 	}
 
 	[Serializable]
@@ -86,6 +89,6 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		protected sealed override int Compare(T x, T y) { return Comparer.Compare(x, y) * -1; }
+		protected override int Compare(T x, T y) { return Comparer.Compare(x, y) * -1; }
 	}
 }

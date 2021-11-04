@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
-	public interface IBinaryHeap<TNode, T> : IHeap<T>
+	public interface IBinaryHeapBase<TNode, T> : IHeap<T>
 		where TNode : ITreeNode<TNode, T>
 	{
 		[NotNull]
@@ -19,33 +19,27 @@ namespace essentialMix.Collections
 		
 		TNode Find(T value);
 		
-		void DecreaseKey([NotNull] TNode node, [NotNull] T newValue);
-		
 		[NotNull]
 		TNode ExtractNode();
 	}
 
-	public interface IBinaryHeap<TNode, in TKey, TValue> : IHeap<TValue>
+	public interface IBinaryHeap<TNode, T> : IBinaryHeapBase<TNode, T>
+		where TNode : ITreeNode<TNode, T>
+	{
+		void DecreaseKey([NotNull] TNode node, [NotNull] T newValue);
+		void DecreaseKey(int index, [NotNull] T newValue);
+	}
+
+	public interface IBinaryHeap<TNode, TKey, TValue> : IBinaryHeapBase<TNode, TValue>
 		where TNode : ITreeNode<TNode, TKey, TValue>
 	{
 		[NotNull]
-		IComparer<TKey> Comparer { get; }
-
-		[NotNull]
-		TNode MakeNode(TValue value);
-
-		[NotNull]
-		TNode Add([NotNull] TNode node);
+		IComparer<TKey> KeyComparer { get; }
 		
-		bool Remove([NotNull] TNode node);
-		
-		TNode Find(TValue value);
-		
+		int IndexOfKey([NotNull] TKey key);
 		TNode FindByKey([NotNull] TKey key);
 		
 		void DecreaseKey([NotNull] TNode node, [NotNull] TKey newKey);
-		
-		[NotNull]
-		TNode ExtractNode();
+		void DecreaseKey(int index, [NotNull] TKey newKey);
 	}
 }

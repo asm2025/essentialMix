@@ -20,14 +20,14 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public MinBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
-			: base(getKeyForItem, comparer)
+		public MinBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> keyComparer)
+			: base(getKeyForItem, keyComparer)
 		{
 		}
 
 		/// <inheritdoc />
-		public MinBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity, IComparer<TKey> comparer)
-			: base(getKeyForItem, capacity, comparer)
+		public MinBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, capacity, keyComparer, comparer)
 		{
 		}
 
@@ -38,20 +38,23 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public MinBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: base(getKeyForItem, enumerable, comparer)
+		public MinBinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, enumerable, keyComparer, comparer)
 		{
 		}
 
 		/// <inheritdoc />
-		protected sealed override int Compare(TKey x, TKey y) { return Comparer.Compare(x, y); }
+		protected sealed override int Compare(TValue x, TValue y) { return Comparer.Compare(x, y); }
+
+		/// <inheritdoc />
+		protected sealed override int KeyCompare(TKey x, TKey y) { return KeyComparer.Compare(x, y); }
 	}
 
 	[Serializable]
 	public class MinBinaryHeap<T> : BinaryHeap<T>
 	{
 		/// <inheritdoc />
-		public MinBinaryHeap() 
+		public MinBinaryHeap()
 		{
 		}
 

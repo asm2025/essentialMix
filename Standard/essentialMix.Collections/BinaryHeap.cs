@@ -18,10 +18,7 @@ namespace essentialMix.Collections
 	/// <see href="https://en.wikipedia.org/wiki/Binary_heap">Binary Heap</see> using the array representation.
 	/// </summary>
 	/// <typeparam name="TNode">The node type. This is just for abstraction purposes and shouldn't be dealt with directly.</typeparam>
-	/// <typeparam name="TKey">The key assigned to the element. It should have its value from the value at first but changing
-	/// this later will not affect the value itself, except for primitive value types. Changing the key will of course affect the
-	/// priority of the item.</typeparam>
-	/// <typeparam name="TValue">The element type of the heap</typeparam>
+	/// <typeparam name="T">The element type of the heap</typeparam>
 	/*
 	 *	     ___ F ____
 	 *	    /          \
@@ -46,22 +43,22 @@ namespace essentialMix.Collections
 	 */
 	[Serializable]
 	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(Dbg_BinaryHeapDebugView<,,>))]
-	public abstract class BinaryHeap<TNode, TKey, TValue> : IKeyedHeap<TNode, TKey, TValue>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
-		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+	[DebuggerTypeProxy(typeof(Dbg_BinaryHeapDebugView<,>))]
+	public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICollection<T>, IReadOnlyCollection<T>, ICollection
+		where TNode : class, ITreeNode<TNode, T>
 	{
 		/// <summary>
 		/// A node metadata used to navigate the tree and print it
 		/// </summary>
-		[DebuggerDisplay("{Key} = {Value}")]
-		private struct Navigator : IBinaryHeapNavigator<TNode, TKey, TValue>
+		[DebuggerDisplay("{Value}")]
+		private struct Navigator : IBinaryHeapNavigator<TNode, T>
 		{
 			[NotNull]
-			private readonly BinaryHeap<TNode, TKey, TValue> _heap;
+			private readonly BinaryHeapBase<TNode, T> _heap;
 
 			private int _index;
 
-			internal Navigator([NotNull] BinaryHeap<TNode, TKey, TValue> heap, int index = -1)
+			internal Navigator([NotNull] BinaryHeapBase<TNode, T> heap, int index = -1)
 				: this()
 			{
 				_heap = heap;
@@ -88,10 +85,7 @@ namespace essentialMix.Collections
 			}
 
 			[NotNull]
-			public TKey Key => _heap.Items[Index].Key;
-
-			[NotNull]
-			public TValue Value => _heap.Items[Index].Value;
+			public T Value => _heap.Items[Index].Value;
 
 			public int ParentIndex { get; private set; }
 
@@ -106,7 +100,6 @@ namespace essentialMix.Collections
 			public bool IsNode => LeftIndex > 0 && RightIndex > 0;
 			public bool HasOneChild => (LeftIndex > 0) ^ (RightIndex > 0);
 			public bool IsFull => LeftIndex > 0 && RightIndex > 0;
-
 			public bool ParentIsRoot => ParentIndex == 0;
 			public bool ParentIsLeft => ParentIndex > 0 && ParentIndex % 2 != 0;
 			public bool ParentIsRight => ParentIndex > 0 && ParentIndex % 2 == 0;
@@ -170,19 +163,19 @@ namespace essentialMix.Collections
 			}
 		}
 
-		private struct LevelOrderEnumerator : IEnumerableEnumerator<TValue>
+		private struct LevelOrderEnumerator : IEnumerableEnumerator<T>
 		{
-			private readonly BinaryHeap<TNode, TKey, TValue> _tree;
+			private readonly BinaryHeapBase<TNode, T> _tree;
 			private readonly int _version;
 			private readonly int _index;
 			private readonly Queue<int> _queue;
 			private readonly bool _rightToLeft;
-			private readonly IBinaryHeapNavigator<TNode, TKey, TValue> _current;
+			private readonly IBinaryHeapNavigator<TNode, T> _current;
 
 			private bool _started;
 			private bool _done;
 
-			internal LevelOrderEnumerator([NotNull] BinaryHeap<TNode, TKey, TValue> tree, int index, bool rightToLeft)
+			internal LevelOrderEnumerator([NotNull] BinaryHeapBase<TNode, T> tree, int index, bool rightToLeft)
 			{
 				_tree = tree;
 				_version = _tree._version;
@@ -196,7 +189,7 @@ namespace essentialMix.Collections
 
 			/// <inheritdoc />
 			[NotNull]
-			public TValue Current
+			public T Current
 			{
 				get
 				{
@@ -210,7 +203,7 @@ namespace essentialMix.Collections
 			object IEnumerator.Current => Current;
 
 			/// <inheritdoc />
-			public IEnumerator<TValue> GetEnumerator()
+			public IEnumerator<T> GetEnumerator()
 			{
 				IEnumerator enumerator = this;
 				enumerator.Reset();
@@ -272,19 +265,19 @@ namespace essentialMix.Collections
 			public void Dispose() { }
 		}
 
-		private struct PreOrderEnumerator : IEnumerableEnumerator<TValue>
+		private struct PreOrderEnumerator : IEnumerableEnumerator<T>
 		{
-			private readonly BinaryHeap<TNode, TKey, TValue> _tree;
+			private readonly BinaryHeapBase<TNode, T> _tree;
 			private readonly int _version;
 			private readonly int _index;
 			private readonly Stack<int> _stack;
 			private readonly bool _rightToLeft;
 
-			private readonly IBinaryHeapNavigator<TNode, TKey, TValue> _current;
+			private readonly IBinaryHeapNavigator<TNode, T> _current;
 			private bool _started;
 			private bool _done;
 
-			internal PreOrderEnumerator([NotNull] BinaryHeap<TNode, TKey, TValue> tree, int index, bool rightToLeft)
+			internal PreOrderEnumerator([NotNull] BinaryHeapBase<TNode, T> tree, int index, bool rightToLeft)
 			{
 				_tree = tree;
 				_version = _tree._version;
@@ -298,7 +291,7 @@ namespace essentialMix.Collections
 
 			/// <inheritdoc />
 			[NotNull]
-			public TValue Current
+			public T Current
 			{
 				get
 				{
@@ -312,7 +305,7 @@ namespace essentialMix.Collections
 			object IEnumerator.Current => Current;
 
 			/// <inheritdoc />
-			public IEnumerator<TValue> GetEnumerator()
+			public IEnumerator<T> GetEnumerator()
 			{
 				IEnumerator enumerator = this;
 				enumerator.Reset();
@@ -375,19 +368,19 @@ namespace essentialMix.Collections
 			public void Dispose() { }
 		}
 
-		private struct InOrderEnumerator : IEnumerableEnumerator<TValue>
+		private struct InOrderEnumerator : IEnumerableEnumerator<T>
 		{
-			private readonly BinaryHeap<TNode, TKey, TValue> _tree;
+			private readonly BinaryHeapBase<TNode, T> _tree;
 			private readonly int _version;
 			private readonly int _index;
 			private readonly Stack<int> _stack;
 			private readonly bool _rightToLeft;
 
-			private readonly IBinaryHeapNavigator<TNode, TKey, TValue> _current;
+			private readonly IBinaryHeapNavigator<TNode, T> _current;
 			private bool _started;
 			private bool _done;
 
-			internal InOrderEnumerator([NotNull] BinaryHeap<TNode, TKey, TValue> tree, int index, bool rightToLeft)
+			internal InOrderEnumerator([NotNull] BinaryHeapBase<TNode, T> tree, int index, bool rightToLeft)
 			{
 				_tree = tree;
 				_version = _tree._version;
@@ -401,7 +394,7 @@ namespace essentialMix.Collections
 
 			/// <inheritdoc />
 			[NotNull]
-			public TValue Current
+			public T Current
 			{
 				get
 				{
@@ -415,7 +408,7 @@ namespace essentialMix.Collections
 			object IEnumerator.Current => Current;
 
 			/// <inheritdoc />
-			public IEnumerator<TValue> GetEnumerator()
+			public IEnumerator<T> GetEnumerator()
 			{
 				IEnumerator enumerator = this;
 				enumerator.Reset();
@@ -485,19 +478,19 @@ namespace essentialMix.Collections
 			public void Dispose() { }
 		}
 
-		private struct PostOrderEnumerator : IEnumerableEnumerator<TValue>
+		private struct PostOrderEnumerator : IEnumerableEnumerator<T>
 		{
-			private readonly BinaryHeap<TNode, TKey, TValue> _tree;
+			private readonly BinaryHeapBase<TNode, T> _tree;
 			private readonly int _version;
 			private readonly int _index;
 			private readonly Stack<int> _stack;
 			private readonly bool _rightToLeft;
 
-			private readonly IBinaryHeapNavigator<TNode, TKey, TValue> _current;
+			private readonly IBinaryHeapNavigator<TNode, T> _current;
 			private bool _started;
 			private bool _done;
 
-			internal PostOrderEnumerator([NotNull] BinaryHeap<TNode, TKey, TValue> tree, int index, bool rightToLeft)
+			internal PostOrderEnumerator([NotNull] BinaryHeapBase<TNode, T> tree, int index, bool rightToLeft)
 			{
 				_tree = tree;
 				_version = _tree._version;
@@ -511,7 +504,7 @@ namespace essentialMix.Collections
 
 			/// <inheritdoc />
 			[NotNull]
-			public TValue Current
+			public T Current
 			{
 				get
 				{
@@ -525,7 +518,7 @@ namespace essentialMix.Collections
 			object IEnumerator.Current => Current;
 
 			/// <inheritdoc />
-			public IEnumerator<TValue> GetEnumerator()
+			public IEnumerator<T> GetEnumerator()
 			{
 				IEnumerator enumerator = this;
 				enumerator.Reset();
@@ -634,46 +627,46 @@ namespace essentialMix.Collections
 			public void Dispose() { }
 		}
 
-		private int _version;
+		protected internal int _version;
 
 		[NonSerialized]
 		private object _syncRoot;
 
 		/// <inheritdoc />
-		protected BinaryHeap() 
+		protected BinaryHeapBase() 
 			: this(0, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected BinaryHeap(int capacity)
+		protected BinaryHeapBase(int capacity)
 			: this(capacity, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected BinaryHeap(IComparer<TKey> comparer)
+		protected BinaryHeapBase(IComparer<T> comparer)
 			: this(0, comparer)
 		{
 		}
 
-		protected BinaryHeap(int capacity, IComparer<TKey> comparer)
+		protected BinaryHeapBase(int capacity, IComparer<T> comparer)
 		{
 			if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
-			Comparer = comparer ?? Comparer<TKey>.Default;
+			Comparer = comparer ?? Comparer<T>.Default;
 			Items = capacity == 0
 						? Array.Empty<TNode>()
 						: new TNode[capacity];
 		}
 
 		/// <inheritdoc />
-		protected BinaryHeap([NotNull] IEnumerable<TValue> enumerable)
+		protected BinaryHeapBase([NotNull] IEnumerable<T> enumerable)
 			: this(enumerable, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected BinaryHeap([NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
+		protected BinaryHeapBase([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
 			: this(0, comparer)
 		{
 			Add(enumerable);
@@ -703,19 +696,16 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public IComparer<TKey> Comparer { get; }
-
-		[NotNull]
-		protected EqualityComparer<TValue> ValueComparer { get; } = EqualityComparer<TValue>.Default;
+		public IComparer<T> Comparer { get; }
 
 		/// <inheritdoc cref="ICollection{TValue}" />
 		public int Count { get; protected set; }
 
 		[NotNull]
-		protected TNode[] Items { get; private set; }
+		protected internal TNode[] Items { get; private set; }
 
 		/// <inheritdoc />
-		bool ICollection<TValue>.IsReadOnly => false;
+		bool ICollection<T>.IsReadOnly => false;
 
 		/// <inheritdoc />
 		bool ICollection.IsSynchronized => false;
@@ -731,13 +721,13 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public IEnumerator<TValue> GetEnumerator() { return Enumerate(); }
+		public IEnumerator<T> GetEnumerator() { return Enumerate(); }
 
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
 		[NotNull]
-		public IBinaryHeapNavigator<TNode, TKey, TValue> CreateNavigator(int index = -1)
+		public IBinaryHeapNavigator<TNode, T> CreateNavigator(int index = -1)
 		{
 			return new Navigator(this, index);
 		}
@@ -750,7 +740,7 @@ namespace essentialMix.Collections
 		/// <param name="rightToLeft">Left-to-right or right-to-left</param>
 		/// <returns><see cref="IEnumerableEnumerator{TValue}"/></returns>
 		[NotNull]
-		public IEnumerableEnumerator<TValue> Enumerate(int index, TreeTraverseMethod method, bool rightToLeft)
+		public IEnumerableEnumerator<T> Enumerate(int index, TreeTraverseMethod method, bool rightToLeft)
 		{
 			return method switch
 			{
@@ -764,43 +754,43 @@ namespace essentialMix.Collections
 
 		#region Enumerate overloads
 		[NotNull]
-		public IEnumerableEnumerator<TValue> Enumerate()
+		public IEnumerableEnumerator<T> Enumerate()
 		{
 			return Enumerate(0, TreeTraverseMethod.InOrder, false);
 		}
 
 		[NotNull]
-		public IEnumerableEnumerator<TValue> Enumerate(TreeTraverseMethod method)
+		public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method)
 		{
 			return Enumerate(0, method, false);
 		}
 
 		[NotNull]
-		public IEnumerableEnumerator<TValue> Enumerate(bool rightToLeft)
+		public IEnumerableEnumerator<T> Enumerate(bool rightToLeft)
 		{
 			return Enumerate(0, TreeTraverseMethod.InOrder, rightToLeft);
 		}
 
 		[NotNull]
-		public IEnumerableEnumerator<TValue> Enumerate(int index)
+		public IEnumerableEnumerator<T> Enumerate(int index)
 		{
 			return Enumerate(index, TreeTraverseMethod.InOrder, false);
 		}
 
 		[NotNull]
-		public IEnumerableEnumerator<TValue> Enumerate(int index, bool rightToLeft)
+		public IEnumerableEnumerator<T> Enumerate(int index, bool rightToLeft)
 		{
 			return Enumerate(index, TreeTraverseMethod.InOrder, rightToLeft);
 		}
 
 		[NotNull]
-		public IEnumerableEnumerator<TValue> Enumerate(int index, TreeTraverseMethod method)
+		public IEnumerableEnumerator<T> Enumerate(int index, TreeTraverseMethod method)
 		{
 			return Enumerate(index, method, false);
 		}
 
 		[NotNull]
-		public IEnumerableEnumerator<TValue> Enumerate(TreeTraverseMethod method, bool rightToLeft)
+		public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method, bool rightToLeft)
 		{
 			return Enumerate(0, method, rightToLeft);
 		}
@@ -956,7 +946,7 @@ namespace essentialMix.Collections
 			int level = 0;
 			Queue<int> queue = new Queue<int>(GetCapacityForLevelQueueing(this));
 			// Start at the root
-			IBinaryHeapNavigator<TNode, TKey, TValue> current = CreateNavigator(index);
+			IBinaryHeapNavigator<TNode, T> current = CreateNavigator(index);
 			queue.Enqueue(current.Index);
 
 			while (queue.Count > 0)
@@ -1020,7 +1010,7 @@ namespace essentialMix.Collections
 			int level = 0;
 			Queue<int> queue = new Queue<int>(GetCapacityForLevelQueueing(this));
 			// Start at the root
-			IBinaryHeapNavigator<TNode, TKey, TValue> current = CreateNavigator(index);
+			IBinaryHeapNavigator<TNode, T> current = CreateNavigator(index);
 			queue.Enqueue(current.Index);
 
 			while (queue.Count > 0)
@@ -1069,54 +1059,33 @@ namespace essentialMix.Collections
 		#endregion
 
 		/// <inheritdoc />
-		public abstract TNode MakeNode(TValue value);
+		public abstract TNode MakeNode(T value);
 
-		public virtual bool Equals(BinaryHeap<TNode, TKey, TValue> other)
-		{
-			if (other is null) return false;
-			if (ReferenceEquals(this, other)) return true;
-			if (GetType() != other.GetType() || Count != other.Count || !Comparer.Equals(other.Comparer)) return false;
-			if (Count == 0) return true;
-
-			for (int i = 0; i < Count; i++)
-			{
-				if (ValueComparer.Equals(Items[i].Value, other.Items[i].Value)) continue;
-				return false;
-			}
-
-			return true;
-		}
+		public abstract bool Equals(BinaryHeapBase<TNode, T> other);
 
 		/// <inheritdoc />
-		public bool Contains(TValue value)
+		public bool Contains(T value)
 		{
 			if (value == null) throw new ArgumentNullException(nameof(value));
 			return IndexOf(value) > -1;
 		}
 
-		public bool Exists([NotNull] Predicate<TValue> match) { return Count > 0 && Array.FindIndex(Items, 0, Count, e => match(e.Value)) > -1; }
+		public bool Exists([NotNull] Predicate<T> match) { return Count > 0 && Array.FindIndex(Items, 0, Count, e => match(e.Value)) > -1; }
 
 		/// <summary>
 		/// Finds the node's index with the specified value
 		/// </summary>
 		/// <param name="value">The value to search for</param>
 		/// <returns>The found node's index or -1 if no match is found</returns>
-		public int IndexOf(TValue value)
+		public int IndexOf(T value)
 		{
 			return Count == 0
 						? -1
-						: Array.FindIndex(Items, 0, Count, e => ValueComparer.Equals(e.Value, value));
-		}
-
-		public int IndexOfByKey([NotNull] TKey key)
-		{
-			return Count == 0
-						? -1
-						: Array.FindIndex(Items, 0, Count, e => Comparer.IsEqual(e.Key, key));
+						: Array.FindIndex(Items, 0, Count, e => Comparer.Compare(e.Value, value) == 0);
 		}
 
 		/// <inheritdoc />
-		public TNode Find(TValue value)
+		public TNode Find(T value)
 		{
 			int index = IndexOf(value);
 			return index < 0
@@ -1125,16 +1094,7 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public TNode FindByKey(TKey key)
-		{
-			int index = IndexOfByKey(key);
-			return index < 0
-						? null
-						: Items[index];
-		}
-
-		/// <inheritdoc />
-		public void Add(TValue value)
+		public void Add(T value)
 		{
 			if (value == null) throw new ArgumentNullException(nameof(value));
 			Add(MakeNode(value));
@@ -1151,14 +1111,14 @@ namespace essentialMix.Collections
 			return node;
 		}
 
-		public void Add(IEnumerable<TValue> values)
+		public void Add(IEnumerable<T> values)
 		{
-			foreach (TValue value in values) 
+			foreach (T value in values) 
 				Add(value);
 		}
 
 		/// <inheritdoc />
-		public bool Remove(TValue value)
+		public bool Remove(T value)
 		{
 			if (value == null) throw new ArgumentNullException(nameof(value));
 			return RemoveNode(IndexOf(value));
@@ -1180,33 +1140,17 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public void DecreaseKey(TNode node, TKey newKey)
-		{
-			if (Count == 0) throw new CollectionIsEmptyException();
-			int index = Array.IndexOf(Items, node, 0, Count);
-			if (index < 0) throw new NotFoundException();
-			DecreaseKeyInternal(index, newKey);
-		}
-
-		public void DecreaseKey(int index, [NotNull] TKey newKey)
-		{
-			if (Count == 0) throw new CollectionIsEmptyException();
-			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			DecreaseKeyInternal(index, newKey);
-		}
-
-		/// <inheritdoc />
-		public TValue Value()
+		public T Value()
 		{
 			if (Count == 0) throw new CollectionIsEmptyException();
 			return Items[0].Value;
 		}
 
 		/// <inheritdoc />
-		TValue IHeap<TValue>.ExtractValue() { return ExtractValue().Value; }
+		T IHeap<T>.ExtractValue() { return ExtractNode().Value; }
 
 		/// <inheritdoc />
-		public TNode ExtractValue()
+		public TNode ExtractNode()
 		{
 			if (Count == 0) throw new CollectionIsEmptyException();
 			TNode node = Items[0];
@@ -1218,12 +1162,12 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public TValue ElementAt(int k)
+		public T ElementAt(int k)
 		{
 			if (k < 1 || Count < k) throw new ArgumentOutOfRangeException(nameof(k));
 
 			for (int i = 1; i < k; i++) 
-				ExtractValue();
+				ExtractNode();
 
 			return Value();
 		}
@@ -1235,20 +1179,20 @@ namespace essentialMix.Collections
 			Capacity = Count;
 		}
 
-		public IEnumerable<TOutput> ConvertAll<TOutput>([NotNull] Converter<TValue, TOutput> converter)
+		public IEnumerable<TOutput> ConvertAll<TOutput>([NotNull] Converter<T, TOutput> converter)
 		{
 			for (int i = 0; i < Count; i++)
 				yield return converter(Items[i].Value);
 		}
 
-		public virtual TValue LeftMost()
+		public virtual T LeftMost()
 		{
 			/*
 			 * This tree might not be a valid binary search tree. So a traversal is needed to search the entire tree.
 			 * In the overriden method of the BinarySearchTree (and any similar type of tree), this implementation
 			 * just grabs the root's left most node's value.
 			 */
-			if (Count == 0) return default(TValue);
+			if (Count == 0) return default(T);
 
 			int index = -1, next = 0;
 
@@ -1260,12 +1204,12 @@ namespace essentialMix.Collections
 
 			return index > -1
 						? Items[index].Value
-						: default(TValue);
+						: default(T);
 		}
 
-		public virtual TValue RightMost()
+		public virtual T RightMost()
 		{
-			if (Count == 0) return default(TValue);
+			if (Count == 0) return default(T);
 
 			int index = -1, next = 0;
 
@@ -1277,7 +1221,7 @@ namespace essentialMix.Collections
 
 			return index > -1
 						? Items[index].Value
-						: default(TValue);
+						: default(T);
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -1359,7 +1303,7 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public void CopyTo(TValue[] array, int arrayIndex)
+		public void CopyTo(T[] array, int arrayIndex)
 		{
 			if (Count == 0) return;
 			array.Length.ValidateRange(arrayIndex, Count);
@@ -1373,7 +1317,7 @@ namespace essentialMix.Collections
 			if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
 			if (Count == 0) return;
 
-			if (array is TValue[] tArray)
+			if (array is T[] tArray)
 			{
 				CopyTo(tArray, index);
 				return;
@@ -1388,7 +1332,7 @@ namespace essentialMix.Collections
 			array.Length.ValidateRange(index, Count);
 
 			Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
-			Type sourceType = typeof(TValue);
+			Type sourceType = typeof(T);
 			if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 			if (array is not object[] objects) throw new ArgumentException("Invalid array type", nameof(array));
 			Iterate(e => objects[index++] = Items[e].Value);
@@ -1403,24 +1347,24 @@ namespace essentialMix.Collections
 		}
 
 		[NotNull]
-		public TValue[] ToArray(TreeTraverseMethod method = TreeTraverseMethod.InOrder, bool rightToLeft = false)
+		public T[] ToArray(TreeTraverseMethod method = TreeTraverseMethod.InOrder, bool rightToLeft = false)
 		{
 			switch (Count)
 			{
 				case 0:
-					return Array.Empty<TValue>();
+					return Array.Empty<T>();
 				case 1:
 					return new[] { Items[0].Value };
 				default:
 					int index = 0;
-					TValue[] array = new TValue[Count];
+					T[] array = new T[Count];
 					Iterate(method, rightToLeft, e => array[index++] = Items[e].Value);
 					return array;
 			}
 		}
 
 		[ItemNotNull]
-		public IEnumerable<TValue> GetRange(int index, int count)
+		public IEnumerable<T> GetRange(int index, int count)
 		{
 			Count.ValidateRange(index, ref count);
 			int last = index + count;
@@ -1429,7 +1373,7 @@ namespace essentialMix.Collections
 				yield return Items[i].Value;
 		}
 
-		public void ForEach([NotNull] Action<TValue> action)
+		public void ForEach([NotNull] Action<T> action)
 		{
 			int version = _version;
 
@@ -1442,7 +1386,7 @@ namespace essentialMix.Collections
 			if (version != _version) throw new VersionChangedException();
 		}
 
-		public void ForEach([NotNull] Action<TValue, int> action)
+		public void ForEach([NotNull] Action<T, int> action)
 		{
 			int version = _version;
 
@@ -1464,7 +1408,7 @@ namespace essentialMix.Collections
 			_version++;
 		}
 
-		public bool TrueForAll([NotNull] Predicate<TValue> match)
+		public bool TrueForAll([NotNull] Predicate<T> match)
 		{
 			for (int i = 0; i < Count; i++)
 			{
@@ -1484,59 +1428,15 @@ namespace essentialMix.Collections
 		{
 			if (Count == 0 || index < 0) return false;
 			BubbleUp(index, true);
-			ExtractValue();
+			ExtractNode();
 			return true;
 		}
 
-		protected void BubbleUp(int index, bool toRoot = false)
-		{
-			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			if (index == 0) return;
+		protected abstract int Compare(T x, T y);
 
-			bool changed = false;
-			IBinaryHeapNavigator<TNode, TKey, TValue> node = CreateNavigator(index);
+		protected abstract void BubbleUp(int index, bool toRoot = false);
 
-			// the parent's value must be greater than its children so move the greater value up.
-			while (node.ParentIndex > -1 && (toRoot || Compare(Items[node.ParentIndex].Key, Items[node.Index].Key) > 0))
-			{
-				Swap(node.Index, node.ParentIndex);
-				node.Index = node.ParentIndex;
-				changed = true;
-			}
-
-			if (!changed) return;
-			_version++;
-		}
-
-		protected void BubbleDown(int index)
-		{
-			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-
-			bool changed = false;
-			IBinaryHeapNavigator<TNode, TKey, TValue> node = CreateNavigator(index);
-
-			/*
-			 * the parent's value must be greater than its children.
-			 * move the smaller value down to either left or right.
-			 * to select which child to swap the value with, pick the
-			 * child with the greater value.
-			 */
-			while (node.LeftIndex > -1 || node.RightIndex > -1)
-			{
-				int childIndex = node.Index;
-				if (node.LeftIndex > -1 && Compare(Items[node.LeftIndex].Key, Items[childIndex].Key) < 0) childIndex = node.LeftIndex;
-				if (node.RightIndex > -1 && Compare(Items[node.RightIndex].Key, Items[childIndex].Key) < 0) childIndex = node.RightIndex;
-				if (childIndex == node.Index) break;
-				Swap(node.Index, childIndex);
-				node.Index = childIndex;
-				changed = true;
-			}
-
-			if (!changed) return;
-			_version++;
-		}
-
-		protected abstract int Compare([NotNull] TKey x, [NotNull] TKey y);
+		protected abstract void BubbleDown(int index);
 
 		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 		protected internal void Swap(int x, int y)
@@ -1552,21 +1452,13 @@ namespace essentialMix.Collections
 						: value;
 		}
 
-		private void DecreaseKeyInternal(int index, [NotNull] TKey newKey)
-		{
-			if (Compare(Items[index].Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
-			Items[index].Key = newKey;
-			if (index == 0) return;
-			BubbleUp(index);
-		}
-
 		#region Iterator Traversal for Action<int>
 		private void LevelOrder(int index, [NotNull] Action<int> visitCallback, bool rightToLeft)
 		{
 			int version = _version;
 			// Root-Left-Right (Queue)
 			Queue<int> queue = new Queue<int>();
-			IBinaryHeapNavigator<TNode, TKey, TValue> current = CreateNavigator(index);
+			IBinaryHeapNavigator<TNode, T> current = CreateNavigator(index);
 
 			// Start at the root
 			queue.Enqueue(current.Index);
@@ -1598,7 +1490,7 @@ namespace essentialMix.Collections
 			int version = _version;
 			// Root-Left-Right (Stack)
 			Stack<int> stack = new Stack<int>();
-			IBinaryHeapNavigator<TNode, TKey, TValue> current = CreateNavigator(index);
+			IBinaryHeapNavigator<TNode, T> current = CreateNavigator(index);
 
 			// Start at the root
 			stack.Push(current.Index);
@@ -1631,7 +1523,7 @@ namespace essentialMix.Collections
 			// Left-Root-Right (Stack)
 			Stack<int> stack = new Stack<int>();
 			// Start at the root
-			IBinaryHeapNavigator<TNode, TKey, TValue> current = CreateNavigator(index);
+			IBinaryHeapNavigator<TNode, T> current = CreateNavigator(index);
 
 			while (current.Index > -1 || stack.Count > 0)
 			{
@@ -1662,7 +1554,7 @@ namespace essentialMix.Collections
 			// Left-Right-Root (Stack)
 			Stack<int> stack = new Stack<int>();
 			// Start at the root
-			IBinaryHeapNavigator<TNode, TKey, TValue> current = CreateNavigator(index);
+			IBinaryHeapNavigator<TNode, T> current = CreateNavigator(index);
 			int lastVisited = -1;
 
 			while (current.Index > -1 || stack.Count > 0)
@@ -1738,7 +1630,7 @@ namespace essentialMix.Collections
 			int version = _version;
 			// Root-Left-Right (Queue)
 			Queue<int> queue = new Queue<int>();
-			IBinaryHeapNavigator<TNode, TKey, TValue> current = CreateNavigator(index);
+			IBinaryHeapNavigator<TNode, T> current = CreateNavigator(index);
 
 			// Start at the root
 			queue.Enqueue(current.Index);
@@ -1770,7 +1662,7 @@ namespace essentialMix.Collections
 			int version = _version;
 			// Root-Left-Right (Stack)
 			Stack<int> stack = new Stack<int>();
-			IBinaryHeapNavigator<TNode, TKey, TValue> current = CreateNavigator(index);
+			IBinaryHeapNavigator<TNode, T> current = CreateNavigator(index);
 
 			// Start at the root
 			stack.Push(current.Index);
@@ -1802,7 +1694,7 @@ namespace essentialMix.Collections
 			// Left-Root-Right (Stack)
 			Stack<int> stack = new Stack<int>();
 			// Start at the root
-			IBinaryHeapNavigator<TNode, TKey, TValue> current = CreateNavigator(index);
+			IBinaryHeapNavigator<TNode, T> current = CreateNavigator(index);
 
 			while (current.Index > -1 || stack.Count > 0)
 			{
@@ -1832,7 +1724,7 @@ namespace essentialMix.Collections
 			// Left-Right-Root (Stack)
 			Stack<int> stack = new Stack<int>();
 			// Start at the root
-			IBinaryHeapNavigator<TNode, TKey, TValue> current = CreateNavigator(index);
+			IBinaryHeapNavigator<TNode, T> current = CreateNavigator(index);
 			int lastVisited = -1;
 
 			while (current.Index > -1 || stack.Count > 0)
@@ -1902,7 +1794,7 @@ namespace essentialMix.Collections
 		}
 		#endregion
 
-		protected static int GetCapacityForQueueing([NotNull] BinaryHeap<TNode, TKey, TValue> heap)
+		protected static int GetCapacityForQueueing([NotNull] BinaryHeapBase<TNode, T> heap)
 		{
 			/* The maximum height of a red-black tree is 2*lg(n+1) which is worse than
 			* avl tree. The binary search tree, if is skewed, could be worse. I'll take
@@ -1914,7 +1806,7 @@ namespace essentialMix.Collections
 						: 2 * (int)Math.Log(heap.Count + 1, 2);
 		}
 
-		protected static int GetCapacityForLevelQueueing([NotNull] BinaryHeap<TNode, TKey, TValue> tree)
+		protected static int GetCapacityForLevelQueueing([NotNull] BinaryHeapBase<TNode, T> heap)
 		{
 			/*
 			 * capacity:
@@ -1924,77 +1816,168 @@ namespace essentialMix.Collections
 			 * 4. h can be found by using: h = log2(n + 1) - 1.
 			 * 5. from 1, 3, and 4 k = 2 ^ log2(n + 1) - 1
 			 */
-			return tree.Count == 0
+			return heap.Count == 0
 						? 0
-						: (int)Math.Pow(2, Math.Log(tree.Count + 1, 2) - 1);
+						: (int)Math.Pow(2, Math.Log(heap.Count + 1, 2) - 1);
 		}
 	}
 
 	[Serializable]
-	[DebuggerTypeProxy(typeof(BinaryHeap<,>.DebugView))]
-	public abstract class BinaryHeap<TKey, TValue> : BinaryHeap<BinaryNode<TKey, TValue>, TKey, TValue>
+	public abstract class BinaryHeap<TKey, TValue> : BinaryHeapBase<BinaryNode<TKey, TValue>, TValue>, IBinaryHeap<BinaryNode<TKey, TValue>, TKey, TValue>
 	{
-		internal sealed class DebugView : Dbg_BinaryHeapDebugView<BinaryNode<TKey, TValue>, TKey, TValue>
-		{
-			public DebugView([NotNull] BinaryHeap<TKey, TValue> heap)
-				: base(heap)
-			{
-			}
-		}
-
 		[NotNull]
 		protected Func<TValue, TKey> _getKeyForItem;
 
 		/// <inheritdoc />
 		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem)
-			: this(getKeyForItem, 0, null)
+			: this(getKeyForItem, 0, null, null)
 		{
 		}
 
 		/// <inheritdoc />
 		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity)
-			: this(getKeyForItem, capacity, null)
+			: this(getKeyForItem, capacity, null, null)
 		{
 		}
 
-		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
-			: this(getKeyForItem, 0, comparer)
+		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> keyComparer)
+			: this(getKeyForItem, 0, keyComparer, null)
 		{
 		}
 
-		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity, IComparer<TKey> comparer)
+		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
 			: base(capacity, comparer)
 		{
 			_getKeyForItem = getKeyForItem;
+			KeyComparer = keyComparer ?? Comparer<TKey>.Default;
 		}
 
 		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
-			: this(getKeyForItem, enumerable, null)
+			: this(getKeyForItem, enumerable, null, null)
 		{
 		}
 
-		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: this(getKeyForItem, 0, comparer)
+		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: this(getKeyForItem, 0, keyComparer, comparer)
 		{
 			Add(enumerable);
 		}
 
-		/// <inheritdoc />
-		public override BinaryNode<TKey, TValue> MakeNode(TValue value) { return new BinaryNode<TKey, TValue>(_getKeyForItem(value), value); }
-	}
+		public IComparer<TKey> KeyComparer { get; }
 
-	[DebuggerTypeProxy(typeof(BinaryHeap<>.DebugView))]
-	[Serializable]
-	public abstract class BinaryHeap<T> : BinaryHeap<KeyedBinaryNode<T>, T, T>
-	{
-		internal sealed class DebugView : Dbg_BinaryHeapDebugView<KeyedBinaryNode<T>, T, T>
+		/// <inheritdoc />
+		public sealed override BinaryNode<TKey, TValue> MakeNode(TValue value) { return new BinaryNode<TKey, TValue>(_getKeyForItem(value), value); }
+
+		/// <inheritdoc />
+		public override bool Equals(BinaryHeapBase<BinaryNode<TKey, TValue>, TValue> other)
 		{
-			public DebugView([NotNull] BinaryHeap<T> heap)
-				: base(heap)
+			if (other is null) return false;
+			if (ReferenceEquals(this, other)) return true;
+			if (GetType() != other.GetType() || Count != other.Count || !Comparer.Equals(other.Comparer)) return false;
+			if (Count == 0) return true;
+
+			for (int i = 0; i < Count; i++)
 			{
+				if (KeyComparer.Compare(Items[i].Key, other.Items[i].Key) == 0 
+					&& Comparer.Compare(Items[i].Value, other.Items[i].Value) == 0) continue;
+				return false;
 			}
+
+			return true;
 		}
 
+		/// <inheritdoc />
+		public int IndexOfKey(TKey key)
+		{
+			return Count == 0
+						? -1
+						: Array.FindIndex(Items, 0, Count, e => KeyComparer.Compare(e.Key, key) == 0);
+		}
+
+		/// <inheritdoc />
+		public BinaryNode<TKey, TValue> FindByKey(TKey key)
+		{
+			int index = IndexOfKey(key);
+			return index < 0
+						? null
+						: Items[index];
+		}
+
+		/// <inheritdoc />
+		public void DecreaseKey(BinaryNode<TKey, TValue> node, TKey newKey)
+		{
+			if (Count == 0) throw new CollectionIsEmptyException();
+			int index = Array.IndexOf(Items, node, 0, Count);
+			if (index < 0) throw new NotFoundException();
+			DecreaseKey(index, newKey);
+		}
+
+		/// <inheritdoc />
+		public void DecreaseKey(int index, TKey newKey)
+		{
+			if (Count == 0) throw new CollectionIsEmptyException();
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			if (KeyCompare(Items[index].Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
+			Items[index].Key = newKey;
+			if (index == 0) return;
+			BubbleUp(index);
+		}
+
+		protected abstract int KeyCompare(TKey x, TKey y);
+
+		protected sealed override void BubbleUp(int index, bool toRoot = false)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			if (index == 0) return;
+
+			bool changed = false;
+			IBinaryHeapNavigator<BinaryNode<TKey, TValue>, TValue> node = CreateNavigator(index);
+
+			// the parent's value must be greater than its children so move the greater value up.
+			while (node.ParentIndex > -1 && (toRoot || KeyCompare(Items[node.ParentIndex].Key, Items[node.Index].Key) > 0))
+			{
+				Swap(node.Index, node.ParentIndex);
+				node.Index = node.ParentIndex;
+				changed = true;
+			}
+
+			if (!changed) return;
+			_version++;
+		}
+		
+		protected sealed override void BubbleDown(int index)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+
+			bool changed = false;
+			IBinaryHeapNavigator<BinaryNode<TKey, TValue>, TValue> node = CreateNavigator(index);
+
+			/*
+			 * the parent's value must be greater than its children.
+			 * move the smaller value down to either left or right.
+			 * to select which child to swap the value with, pick the
+			 * child with the greater value.
+			 */
+			while (node.LeftIndex > -1 || node.RightIndex > -1)
+			{
+				int childIndex = node.Index;
+				if (node.LeftIndex > -1 && KeyCompare(Items[node.LeftIndex].Key, Items[childIndex].Key) < 0) childIndex = node.LeftIndex;
+				if (node.RightIndex > -1 && KeyCompare(Items[node.RightIndex].Key, Items[childIndex].Key) < 0) childIndex = node.RightIndex;
+				if (childIndex == node.Index) break;
+				Swap(node.Index, childIndex);
+				node.Index = childIndex;
+				changed = true;
+			}
+
+			if (!changed) return;
+			_version++;
+		}
+	}
+
+	[Serializable]
+	[DebuggerTypeProxy(typeof(BinaryHeap<>))]
+	public abstract class BinaryHeap<T> : BinaryHeapBase<BinaryNode<T>, T>
+	{
 		/// <inheritdoc />
 		protected BinaryHeap()
 			: this(0, null)
@@ -2029,7 +2012,71 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		public override KeyedBinaryNode<T> MakeNode(T value) { return new KeyedBinaryNode<T>(value); }
+		public override BinaryNode<T> MakeNode(T value) { return new BinaryNode<T>(value); }
+		
+		public override bool Equals(BinaryHeapBase<BinaryNode<T>, T> other)
+		{
+			if (other is null) return false;
+			if (ReferenceEquals(this, other)) return true;
+			if (GetType() != other.GetType() || Count != other.Count || !Comparer.Equals(other.Comparer)) return false;
+			if (Count == 0) return true;
+
+			for (int i = 0; i < Count; i++)
+			{
+				if (Comparer.Compare(Items[i].Value, other.Items[i].Value) == 0) continue;
+				return false;
+			}
+
+			return true;
+		}
+		
+		protected sealed override void BubbleUp(int index, bool toRoot = false)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			if (index == 0) return;
+
+			bool changed = false;
+			IBinaryHeapNavigator<BinaryNode<T>, T> node = CreateNavigator(index);
+
+			// the parent's value must be greater than its children so move the greater value up.
+			while (node.ParentIndex > -1 && (toRoot || Compare(Items[node.ParentIndex].Value, Items[node.Index].Value) > 0))
+			{
+				Swap(node.Index, node.ParentIndex);
+				node.Index = node.ParentIndex;
+				changed = true;
+			}
+
+			if (!changed) return;
+			_version++;
+		}
+		
+		protected sealed override void BubbleDown(int index)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+
+			bool changed = false;
+			IBinaryHeapNavigator<BinaryNode<T>, T> node = CreateNavigator(index);
+
+			/*
+			 * the parent's value must be greater than its children.
+			 * move the smaller value down to either left or right.
+			 * to select which child to swap the value with, pick the
+			 * child with the greater value.
+			 */
+			while (node.LeftIndex > -1 || node.RightIndex > -1)
+			{
+				int childIndex = node.Index;
+				if (node.LeftIndex > -1 && Compare(Items[node.LeftIndex].Value, Items[childIndex].Value) < 0) childIndex = node.LeftIndex;
+				if (node.RightIndex > -1 && Compare(Items[node.RightIndex].Value, Items[childIndex].Value) < 0) childIndex = node.RightIndex;
+				if (childIndex == node.Index) break;
+				Swap(node.Index, childIndex);
+				node.Index = childIndex;
+				changed = true;
+			}
+
+			if (!changed) return;
+			_version++;
+		}
 	}
 
 	public static class BinaryHeap
@@ -2084,14 +2131,14 @@ namespace essentialMix.Collections
 
 	public static class BinaryHeapExtension
 	{
-		public static void WriteTo<TNode, TKey, TValue>([NotNull] this BinaryHeap<TNode, TKey, TValue> thisValue, [NotNull] TextWriter writer)
-			where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+		public static void WriteTo<TNode, T>([NotNull] this BinaryHeapBase<TNode, T> thisValue, [NotNull] TextWriter writer)
+			where TNode : class, ITreeNode<TNode, T>
 		{
 			if (thisValue.Count == 0) return;
 
 			StringBuilder indent = new StringBuilder();
 			Stack<(int NodeIndex, int Level)> stack = new Stack<(int NodeIndex, int Level)>(1);
-			IBinaryHeapNavigator<TNode, TKey, TValue> navigator = thisValue.CreateNavigator();
+			IBinaryHeapNavigator<TNode, T> navigator = thisValue.CreateNavigator();
 			stack.Push((0, 0));
 
 			while (stack.Count > 0)

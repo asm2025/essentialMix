@@ -2,11 +2,10 @@
 
 namespace essentialMix.Collections
 {
-	public interface IBinaryHeapNavigator<TNode, TKey, TValue>
-		where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+	public interface IBinaryHeapNavigator<TNode, TValue>
+		where TNode : ITreeNode<TNode, TValue>
 	{
 		int Index { get; set; }
-		TKey Key { get; }
 		TValue Value { get; }
 		int ParentIndex { get; }
 		int LeftIndex { get; }
@@ -23,12 +22,17 @@ namespace essentialMix.Collections
 		bool ParentIsRight { get; }
 
 		string ToString();
-
 		string ToString(int level);
 		IEnumerable<int> Ancestors();
 		int LeftMost();
 		int RightMost();
 		void Swap(int other);
 		void Invalidate();
+	}
+	
+	public interface IBinaryHeapNavigator<TNode, TKey, TValue> : IBinaryHeapNavigator<TNode, TValue>
+		where TNode : ITreeNode<TNode, TKey, TValue>
+	{
+		TKey Key { get; }
 	}
 }
