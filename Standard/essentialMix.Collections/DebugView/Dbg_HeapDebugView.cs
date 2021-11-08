@@ -10,9 +10,9 @@ namespace essentialMix.Collections.DebugView
 	public class Dbg_HeapDebugView<TNode, T>
 		where TNode : class, ITreeNode<TNode, T>
 	{
-		private readonly Heap<TNode, T> _heap;
+		private readonly LinkedHeap<TNode, T> _heap;
 
-		public Dbg_HeapDebugView([NotNull] Heap<TNode, T> heap)
+		public Dbg_HeapDebugView([NotNull] LinkedHeap<TNode, T> heap)
 		{
 			_heap = heap;
 		}
@@ -29,9 +29,9 @@ namespace essentialMix.Collections.DebugView
 	public class Dbg_HeapDebugView<TNode, TKey, TValue>
 		where TNode : class, ITreeNode<TNode, TKey, TValue>
 	{
-		private readonly Heap<TNode, TKey, TValue> _heap;
+		private readonly LinkedHeap<TNode, TKey, TValue> _heap;
 
-		public Dbg_HeapDebugView([NotNull] Heap<TNode, TKey, TValue> heap)
+		public Dbg_HeapDebugView([NotNull] LinkedHeap<TNode, TKey, TValue> heap)
 		{
 			_heap = heap;
 		}

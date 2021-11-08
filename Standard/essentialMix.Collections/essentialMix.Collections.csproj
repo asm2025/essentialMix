@@ -60,6 +60,17 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Compile Remove="!todo\BPlusTree.cs" />
+	  <Compile Remove="!todo\BTree.cs" />
+	  <Compile Remove="!todo\BTreeBlock.cs" />
+	  <Compile Remove="!todo\BTreeNode.cs" />
+	  <Compile Remove="!todo\GraphMatrix.cs" />
+	  <Compile Remove="!todo\SplayTree.cs" />
+	  <Compile Remove="BTree.cs" />
+	  <Compile Remove="BTreeBlock.cs" />
+	  <Compile Remove="BTreeNode.cs" />
+	</ItemGroup>
+	<ItemGroup>
 		<None Include="..\..\buckramega.png" Pack="True" PackagePath="" />
 	</ItemGroup>
 
@@ -74,6 +85,10 @@
 	<ItemGroup>
 		<ProjectReference Include="..\essentialMix.Exceptions\essentialMix.Exceptions.csproj" />
 		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="!todo\" />
 	</ItemGroup>
 
 	<PropertyGroup>

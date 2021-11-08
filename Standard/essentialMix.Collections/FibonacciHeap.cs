@@ -73,34 +73,32 @@ namespace essentialMix.Collections
 	[Serializable]
 	public abstract class FibonacciHeap<TKey, TValue> : SiblingsHeap<FibonacciNode<TKey, TValue>, TKey, TValue>
 	{
-		[NotNull]
-		private readonly Func<TValue, TKey> _getKeyForItem;
-
 		/// <inheritdoc />
 		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem)
-			: this(getKeyForItem, (IComparer<TKey>)null)
+			: base(getKeyForItem)
 		{
-		}
-
-		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
-			: base(comparer)
-		{
-			_getKeyForItem = getKeyForItem;
-		}
-
-		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
-			: this(getKeyForItem, enumerable, null)
-		{
-		}
-
-		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: this(getKeyForItem, comparer)
-		{
-			Add(enumerable);
 		}
 
 		/// <inheritdoc />
-		public sealed override FibonacciNode<TKey, TValue> MakeNode(TValue value) { return new FibonacciNode<TKey, TValue>(_getKeyForItem(value), value); }
+		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, keyComparer, comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
+			: base(getKeyForItem, enumerable)
+		{
+		}
+
+		/// <inheritdoc />
+		protected FibonacciHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, enumerable, keyComparer, comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		public sealed override FibonacciNode<TKey, TValue> MakeNode(TValue value) { return new FibonacciNode<TKey, TValue>(GetKeyForItem(value), value); }
 
 		/// <inheritdoc />
 		public sealed override FibonacciNode<TKey, TValue> Add(FibonacciNode<TKey, TValue> node)

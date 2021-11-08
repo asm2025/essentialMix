@@ -3736,12 +3736,12 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, IList<TValue> array)
-				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+			static void DoTheTest<TNode, T>(BinaryHeapBase<TNode, T> heap, IList<T> array)
+				where TNode : BinaryNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
-				foreach (TValue value in array)
+				foreach (T value in array)
 				{
 					heap.Add(value);
 					//heap.PrintWithProps();
@@ -3787,8 +3787,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array)
-				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+			static void DoTheTest<TNode, T>(BinaryHeapBase<TNode, T> heap, T[] array)
+				where TNode : BinaryNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
@@ -3850,8 +3850,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
-				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+			static void DoTheTest<TNode, T>(BinaryHeapBase<TNode, T> heap, T[] array, int k)
+				where TNode : BinaryNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
@@ -3866,6 +3866,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 		private static void TestBinaryHeapDecreaseKey()
 		{
+			const int MAX = 10;
+
 			bool more;
 
 			do
@@ -3902,60 +3904,17 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheKeyTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue)
-				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
+			static void DoTheKeyTest<TKey, TValue>(BinaryHeap<TKey, TValue> heap, TValue[] array, TKey newKeyValue)
 			{
 				Queue<TKey> queue = new Queue<TKey>();
-				DoTheTest(heap, array, queue);
-
-				while (queue.Count > 0)
-				{
-					TKey key = queue.Dequeue();
-					TNode node = heap.FindByKey(key);
-					Debug.Assert(node != null, $"Node for key {key} is not found.");
-					heap.DecreaseKey(node, newKeyValue);
-					TKey extracted = heap.ExtractValue().Key;
-					bool succeeded = heap.Comparer.IsEqual(extracted, key);
-					Console.WriteLine($"Extracted {extracted}, expected {key}");
-					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
-				}
-
-				Console.WriteLine();
-			}
-
-			static void DoTheValueTest<TNode, TValue>(BinaryHeap<TNode, TValue, TValue> heap, TValue[] array, TValue newKeyValue)
-				where TNode : KeyedBinaryNode<TNode, TValue, TValue>
-			{
-				Queue<TValue> queue = new Queue<TValue>();
-				DoTheTest(heap, array, queue);
-
-				while (queue.Count > 0)
-				{
-					TValue key = queue.Dequeue();
-					TNode node = heap.Find(key);
-					Debug.Assert(node != null, $"Node for value {key} is not found.");
-					heap.DecreaseKey(node, newKeyValue);
-					TValue extracted = heap.ExtractValue().Key;
-					bool succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
-					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
-					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
-				}
-
-				Console.WriteLine();
-			}
-
-			static void DoTheTest<TNode, TKey, TValue>(BinaryHeap<TNode, TKey, TValue> heap, TValue[] array, Queue<TKey> queue)
-				where TNode : KeyedBinaryNode<TNode, TKey, TValue>
-			{
-				const int MAX = 10;
-
 				int max = Math.Min(MAX, array.Length);
+
 				queue.Clear();
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
 				foreach (TValue v in array)
 				{
-					TNode node = heap.MakeNode(v);
+					BinaryNode<TKey, TValue> node = heap.MakeNode(v);
 					if (queue.Count < max) queue.Enqueue(node.Key);
 					heap.Add(node);
 				}
@@ -3963,6 +3922,54 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(Bright.Black("Enumeration(InOrder - Default): ") + string.Join(", ", heap));
 				Console.WriteLine(Bright.Black("Enumeration(LevelOrder): ") + string.Join(", ", heap.Enumerate(TreeTraverseMethod.LevelOrder)));
 				heap.Print();
+
+				while (queue.Count > 0)
+				{
+					TKey key = queue.Dequeue();
+					BinaryNode<TKey, TValue> node = heap.FindByKey(key);
+					Debug.Assert(node != null, $"Node for key {key} is not found.");
+					heap.DecreaseKey(node, newKeyValue);
+					TKey extracted = heap.ExtractNode().Key;
+					bool succeeded = heap.KeyComparer.Compare(extracted, key) == 0;
+					Console.WriteLine($"Extracted {extracted}, expected {key}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
+				}
+
+				Console.WriteLine();
+			}
+
+			static void DoTheValueTest<T>(BinaryHeap<T> heap, T[] array, T newKeyValue)
+			{
+				Queue<T> queue = new Queue<T>();
+				int max = Math.Min(MAX, array.Length);
+
+				queue.Clear();
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
+
+				foreach (T v in array)
+				{
+					BinaryNode<T> node = heap.MakeNode(v);
+					if (queue.Count < max) queue.Enqueue(node.Value);
+					heap.Add(node);
+				}
+
+				Console.WriteLine(Bright.Black("Enumeration(InOrder - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(LevelOrder): ") + string.Join(", ", heap.Enumerate(TreeTraverseMethod.LevelOrder)));
+				heap.Print();
+
+				while (queue.Count > 0)
+				{
+					T key = queue.Dequeue();
+					BinaryNode<T> node = heap.Find(key);
+					Debug.Assert(node != null, $"Node for value {key} is not found.");
+					heap.DecreaseKey(node, newKeyValue);
+					T extracted = heap.ExtractValue();
+					bool succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
+					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
+				}
+
+				Console.WriteLine();
 			}
 		}
 
@@ -4275,8 +4282,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 					Debug.Assert(node != null, $"Node for key {key} is not found.");
 					// todo fix this error: succeeded = false, why? extracted != key
 					heap.DecreaseKey(node, newKeyValue);
-					TKey extracted = heap.ExtractValue().Key;
-					bool succeeded = heap.Comparer.IsEqual(extracted, key);
+					TKey extracted = heap.ExtractNode().Key;
+					bool succeeded = heap.KeyComparer.Compare(extracted, key) == 0;
 					Console.WriteLine($"Extracted {extracted}, expected {key}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
 				}
@@ -4319,12 +4326,12 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array)
-				where TNode : PairingNodeBase<TNode, TKey, TValue>
+			static void DoTheTest<TNode, T>(PairingHeap<TNode, T> heap, T[] array)
+				where TNode : PairingNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
-				foreach (TValue value in array)
+				foreach (T value in array)
 				{
 					heap.Add(value);
 					//heap.PrintWithProps();
@@ -4372,8 +4379,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array)
-				where TNode : PairingNodeBase<TNode, TKey, TValue>
+			static void DoTheTest<TNode, T>(PairingHeap<TNode, T> heap, T[] array)
+				where TNode : PairingNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);

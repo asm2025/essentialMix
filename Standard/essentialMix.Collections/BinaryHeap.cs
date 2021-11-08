@@ -1061,8 +1061,6 @@ namespace essentialMix.Collections
 		/// <inheritdoc />
 		public abstract TNode MakeNode(T value);
 
-		public abstract bool Equals(BinaryHeapBase<TNode, T> other);
-
 		/// <inheritdoc />
 		public bool Contains(T value)
 		{
@@ -1147,7 +1145,7 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		T IHeap<T>.ExtractValue() { return ExtractNode().Value; }
+		public T ExtractValue() { return ExtractNode().Value; }
 
 		/// <inheritdoc />
 		public TNode ExtractNode()
@@ -1823,160 +1821,7 @@ namespace essentialMix.Collections
 	}
 
 	[Serializable]
-	public abstract class BinaryHeap<TKey, TValue> : BinaryHeapBase<BinaryNode<TKey, TValue>, TValue>, IBinaryHeap<BinaryNode<TKey, TValue>, TKey, TValue>
-	{
-		[NotNull]
-		protected Func<TValue, TKey> _getKeyForItem;
-
-		/// <inheritdoc />
-		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem)
-			: this(getKeyForItem, 0, null, null)
-		{
-		}
-
-		/// <inheritdoc />
-		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity)
-			: this(getKeyForItem, capacity, null, null)
-		{
-		}
-
-		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> keyComparer)
-			: this(getKeyForItem, 0, keyComparer, null)
-		{
-		}
-
-		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
-			: base(capacity, comparer)
-		{
-			_getKeyForItem = getKeyForItem;
-			KeyComparer = keyComparer ?? Comparer<TKey>.Default;
-		}
-
-		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
-			: this(getKeyForItem, enumerable, null, null)
-		{
-		}
-
-		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
-			: this(getKeyForItem, 0, keyComparer, comparer)
-		{
-			Add(enumerable);
-		}
-
-		public IComparer<TKey> KeyComparer { get; }
-
-		/// <inheritdoc />
-		public sealed override BinaryNode<TKey, TValue> MakeNode(TValue value) { return new BinaryNode<TKey, TValue>(_getKeyForItem(value), value); }
-
-		/// <inheritdoc />
-		public override bool Equals(BinaryHeapBase<BinaryNode<TKey, TValue>, TValue> other)
-		{
-			if (other is null) return false;
-			if (ReferenceEquals(this, other)) return true;
-			if (GetType() != other.GetType() || Count != other.Count || !Comparer.Equals(other.Comparer)) return false;
-			if (Count == 0) return true;
-
-			for (int i = 0; i < Count; i++)
-			{
-				if (KeyComparer.Compare(Items[i].Key, other.Items[i].Key) == 0 
-					&& Comparer.Compare(Items[i].Value, other.Items[i].Value) == 0) continue;
-				return false;
-			}
-
-			return true;
-		}
-
-		/// <inheritdoc />
-		public int IndexOfKey(TKey key)
-		{
-			return Count == 0
-						? -1
-						: Array.FindIndex(Items, 0, Count, e => KeyComparer.Compare(e.Key, key) == 0);
-		}
-
-		/// <inheritdoc />
-		public BinaryNode<TKey, TValue> FindByKey(TKey key)
-		{
-			int index = IndexOfKey(key);
-			return index < 0
-						? null
-						: Items[index];
-		}
-
-		/// <inheritdoc />
-		public void DecreaseKey(BinaryNode<TKey, TValue> node, TKey newKey)
-		{
-			if (Count == 0) throw new CollectionIsEmptyException();
-			int index = Array.IndexOf(Items, node, 0, Count);
-			if (index < 0) throw new NotFoundException();
-			DecreaseKey(index, newKey);
-		}
-
-		/// <inheritdoc />
-		public void DecreaseKey(int index, TKey newKey)
-		{
-			if (Count == 0) throw new CollectionIsEmptyException();
-			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			if (KeyCompare(Items[index].Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
-			Items[index].Key = newKey;
-			if (index == 0) return;
-			BubbleUp(index);
-		}
-
-		protected abstract int KeyCompare(TKey x, TKey y);
-
-		protected sealed override void BubbleUp(int index, bool toRoot = false)
-		{
-			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			if (index == 0) return;
-
-			bool changed = false;
-			IBinaryHeapNavigator<BinaryNode<TKey, TValue>, TValue> node = CreateNavigator(index);
-
-			// the parent's value must be greater than its children so move the greater value up.
-			while (node.ParentIndex > -1 && (toRoot || KeyCompare(Items[node.ParentIndex].Key, Items[node.Index].Key) > 0))
-			{
-				Swap(node.Index, node.ParentIndex);
-				node.Index = node.ParentIndex;
-				changed = true;
-			}
-
-			if (!changed) return;
-			_version++;
-		}
-		
-		protected sealed override void BubbleDown(int index)
-		{
-			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-
-			bool changed = false;
-			IBinaryHeapNavigator<BinaryNode<TKey, TValue>, TValue> node = CreateNavigator(index);
-
-			/*
-			 * the parent's value must be greater than its children.
-			 * move the smaller value down to either left or right.
-			 * to select which child to swap the value with, pick the
-			 * child with the greater value.
-			 */
-			while (node.LeftIndex > -1 || node.RightIndex > -1)
-			{
-				int childIndex = node.Index;
-				if (node.LeftIndex > -1 && KeyCompare(Items[node.LeftIndex].Key, Items[childIndex].Key) < 0) childIndex = node.LeftIndex;
-				if (node.RightIndex > -1 && KeyCompare(Items[node.RightIndex].Key, Items[childIndex].Key) < 0) childIndex = node.RightIndex;
-				if (childIndex == node.Index) break;
-				Swap(node.Index, childIndex);
-				node.Index = childIndex;
-				changed = true;
-			}
-
-			if (!changed) return;
-			_version++;
-		}
-	}
-
-	[Serializable]
-	[DebuggerTypeProxy(typeof(BinaryHeap<>))]
-	public abstract class BinaryHeap<T> : BinaryHeapBase<BinaryNode<T>, T>
+	public abstract class BinaryHeap<T> : BinaryHeapBase<BinaryNode<T>, T>, IBinaryHeap<BinaryNode<T>, T>
 	{
 		/// <inheritdoc />
 		protected BinaryHeap()
@@ -2013,8 +1858,27 @@ namespace essentialMix.Collections
 
 		/// <inheritdoc />
 		public override BinaryNode<T> MakeNode(T value) { return new BinaryNode<T>(value); }
+
+		/// <inheritdoc />
+		public void DecreaseKey(BinaryNode<T> node, T newValue)
+		{
+			if (Count == 0) throw new CollectionIsEmptyException();
+			int index = Array.IndexOf(Items, node, 0, Count);
+			if (index < 0) throw new NotFoundException();
+			DecreaseKey(index, newValue);
+		}
+
+		public void DecreaseKey(int index, T newValue)
+		{
+			if (Count == 0) throw new CollectionIsEmptyException();
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			if (Compare(Items[index].Value, newValue) < 0) throw new InvalidOperationException("Invalid new key.");
+			Items[index].Value = newValue;
+			if (index == 0) return;
+			BubbleUp(index);
+		}
 		
-		public override bool Equals(BinaryHeapBase<BinaryNode<T>, T> other)
+		public bool Equals(BinaryHeap<T> other)
 		{
 			if (other is null) return false;
 			if (ReferenceEquals(this, other)) return true;
@@ -2068,6 +1932,156 @@ namespace essentialMix.Collections
 				int childIndex = node.Index;
 				if (node.LeftIndex > -1 && Compare(Items[node.LeftIndex].Value, Items[childIndex].Value) < 0) childIndex = node.LeftIndex;
 				if (node.RightIndex > -1 && Compare(Items[node.RightIndex].Value, Items[childIndex].Value) < 0) childIndex = node.RightIndex;
+				if (childIndex == node.Index) break;
+				Swap(node.Index, childIndex);
+				node.Index = childIndex;
+				changed = true;
+			}
+
+			if (!changed) return;
+			_version++;
+		}
+	}
+
+	[Serializable]
+	public abstract class BinaryHeap<TKey, TValue> : BinaryHeapBase<BinaryNode<TKey, TValue>, TValue>, IBinaryHeap<BinaryNode<TKey, TValue>, TKey, TValue>
+	{
+		/// <inheritdoc />
+		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem)
+			: this(getKeyForItem, 0, null, null)
+		{
+		}
+
+		/// <inheritdoc />
+		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity)
+			: this(getKeyForItem, capacity, null, null)
+		{
+		}
+
+		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> keyComparer)
+			: this(getKeyForItem, 0, keyComparer, null)
+		{
+		}
+
+		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(capacity, comparer)
+		{
+			GetKeyForItem = getKeyForItem;
+			KeyComparer = keyComparer ?? Comparer<TKey>.Default;
+		}
+
+		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
+			: this(getKeyForItem, enumerable, null, null)
+		{
+		}
+
+		protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: this(getKeyForItem, 0, keyComparer, comparer)
+		{
+			Add(enumerable);
+		}
+
+		/// <inheritdoc />
+		public IComparer<TKey> KeyComparer { get; }
+
+		[NotNull]
+		protected Func<TValue, TKey> GetKeyForItem { get; }
+
+		/// <inheritdoc />
+		public sealed override BinaryNode<TKey, TValue> MakeNode(TValue value) { return new BinaryNode<TKey, TValue>(GetKeyForItem(value), value); }
+
+		public bool Equals(BinaryHeap<TKey, TValue> other)
+		{
+			if (other is null) return false;
+			if (ReferenceEquals(this, other)) return true;
+			if (GetType() != other.GetType() || Count != other.Count || !Comparer.Equals(other.Comparer)) return false;
+			if (Count == 0) return true;
+
+			for (int i = 0; i < Count; i++)
+			{
+				if (KeyComparer.Compare(Items[i].Key, other.Items[i].Key) == 0 
+					&& Comparer.Compare(Items[i].Value, other.Items[i].Value) == 0) continue;
+				return false;
+			}
+
+			return true;
+		}
+
+		public int IndexOfKey(TKey key)
+		{
+			return Count == 0
+						? -1
+						: Array.FindIndex(Items, 0, Count, e => KeyComparer.Compare(e.Key, key) == 0);
+		}
+
+		/// <inheritdoc />
+		public BinaryNode<TKey, TValue> FindByKey(TKey key)
+		{
+			int index = IndexOfKey(key);
+			return index < 0
+						? null
+						: Items[index];
+		}
+
+		/// <inheritdoc />
+		public void DecreaseKey(BinaryNode<TKey, TValue> node, TKey newKey)
+		{
+			if (Count == 0) throw new CollectionIsEmptyException();
+			int index = Array.IndexOf(Items, node, 0, Count);
+			if (index < 0) throw new NotFoundException();
+			DecreaseKey(index, newKey);
+		}
+
+		public void DecreaseKey(int index, TKey newKey)
+		{
+			if (Count == 0) throw new CollectionIsEmptyException();
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			if (KeyCompare(Items[index].Key, newKey) < 0) throw new InvalidOperationException("Invalid new key.");
+			Items[index].Key = newKey;
+			if (index == 0) return;
+			BubbleUp(index);
+		}
+
+		protected abstract int KeyCompare(TKey x, TKey y);
+
+		protected sealed override void BubbleUp(int index, bool toRoot = false)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			if (index == 0) return;
+
+			bool changed = false;
+			IBinaryHeapNavigator<BinaryNode<TKey, TValue>, TValue> node = CreateNavigator(index);
+
+			// the parent's value must be greater than its children so move the greater value up.
+			while (node.ParentIndex > -1 && (toRoot || KeyCompare(Items[node.ParentIndex].Key, Items[node.Index].Key) > 0))
+			{
+				Swap(node.Index, node.ParentIndex);
+				node.Index = node.ParentIndex;
+				changed = true;
+			}
+
+			if (!changed) return;
+			_version++;
+		}
+		
+		protected sealed override void BubbleDown(int index)
+		{
+			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+
+			bool changed = false;
+			IBinaryHeapNavigator<BinaryNode<TKey, TValue>, TValue> node = CreateNavigator(index);
+
+			/*
+			 * the parent's value must be greater than its children.
+			 * move the smaller value down to either left or right.
+			 * to select which child to swap the value with, pick the
+			 * child with the greater value.
+			 */
+			while (node.LeftIndex > -1 || node.RightIndex > -1)
+			{
+				int childIndex = node.Index;
+				if (node.LeftIndex > -1 && KeyCompare(Items[node.LeftIndex].Key, Items[childIndex].Key) < 0) childIndex = node.LeftIndex;
+				if (node.RightIndex > -1 && KeyCompare(Items[node.RightIndex].Key, Items[childIndex].Key) < 0) childIndex = node.RightIndex;
 				if (childIndex == node.Index) break;
 				Swap(node.Index, childIndex);
 				node.Index = childIndex;

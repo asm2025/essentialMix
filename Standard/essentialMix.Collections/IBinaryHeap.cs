@@ -27,7 +27,6 @@ namespace essentialMix.Collections
 		where TNode : ITreeNode<TNode, T>
 	{
 		void DecreaseKey([NotNull] TNode node, [NotNull] T newValue);
-		void DecreaseKey(int index, [NotNull] T newValue);
 	}
 
 	public interface IBinaryHeap<TNode, TKey, TValue> : IBinaryHeapBase<TNode, TValue>
@@ -36,10 +35,8 @@ namespace essentialMix.Collections
 		[NotNull]
 		IComparer<TKey> KeyComparer { get; }
 		
-		int IndexOfKey([NotNull] TKey key);
 		TNode FindByKey([NotNull] TKey key);
 		
 		void DecreaseKey([NotNull] TNode node, [NotNull] TKey newKey);
-		void DecreaseKey(int index, [NotNull] TKey newKey);
 	}
 }

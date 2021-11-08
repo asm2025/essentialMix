@@ -35,34 +35,32 @@ namespace essentialMix.Collections
 	[Serializable]
 	public abstract class BinomialHeap<TKey, TValue> : SiblingsHeap<BinomialNode<TKey, TValue>, TKey, TValue>
 	{
-		[NotNull]
-		private readonly Func<TValue, TKey> _getKeyForItem;
-
 		/// <inheritdoc />
 		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem)
-			: this(getKeyForItem, (IComparer<TKey>)null)
+			: base(getKeyForItem)
 		{
-		}
-
-		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
-			: base(comparer)
-		{
-			_getKeyForItem = getKeyForItem;
-		}
-
-		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
-			: this(getKeyForItem, enumerable, null)
-		{
-		}
-
-		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: this(getKeyForItem, comparer)
-		{
-			Add(enumerable);
 		}
 
 		/// <inheritdoc />
-		public sealed override BinomialNode<TKey, TValue> MakeNode(TValue value) { return new BinomialNode<TKey, TValue>(_getKeyForItem(value), value); }
+		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, keyComparer, comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
+			: base(getKeyForItem, enumerable)
+		{
+		}
+
+		/// <inheritdoc />
+		protected BinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, enumerable, keyComparer, comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		public sealed override BinomialNode<TKey, TValue> MakeNode(TValue value) { return new BinomialNode<TKey, TValue>(GetKeyForItem(value), value); }
 
 		/// <inheritdoc />
 		public sealed override BinomialNode<TKey, TValue> Add(BinomialNode<TKey, TValue> node)

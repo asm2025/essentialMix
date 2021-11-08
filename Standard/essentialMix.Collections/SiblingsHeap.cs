@@ -9,7 +9,7 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections
 {
 	[Serializable]
-	public abstract class SiblingsHeap<TNode, T> : Heap<TNode, T>
+	public abstract class SiblingsHeap<TNode, T> : LinkedHeap<TNode, T>
 		where TNode : class, ISiblingNode<TNode, T>
 	{
 		private struct BreadthFirstEnumerator : IEnumerableEnumerator<T>
@@ -262,36 +262,6 @@ namespace essentialMix.Collections
 			}
 		}
 
-		public virtual bool Equals(SiblingsHeap<TNode, T> other)
-		{
-			if (ReferenceEquals(null, other)) return false;
-			if (ReferenceEquals(this, other)) return true;
-			if (GetType() != other.GetType() 
-				|| Count != other.Count 
-				|| !Comparer.Equals(other.Comparer)) return false;
-			if (Count == 0) return true;
-
-			using (IEnumerator<T> thisEnumerator = GetEnumerator())
-			{
-				using (IEnumerator<T> otherEnumerator = other.GetEnumerator())
-				{
-					bool thisMoved = thisEnumerator.MoveNext();
-					bool otherMoved = otherEnumerator.MoveNext();
-
-					while (thisMoved && otherMoved)
-					{
-						if (Comparer.Compare(thisEnumerator.Current, otherEnumerator.Current) != 0) return false;
-						thisMoved = thisEnumerator.MoveNext();
-						otherMoved = otherEnumerator.MoveNext();
-					}
-
-					if (thisMoved ^ otherMoved) return false;
-				}
-			}
-
-			return true;
-		}
-
 		#region Iterator Traversal for Action<TNode>
 		private void BreadthFirst([NotNull] TNode root, [NotNull] Action<TNode> visitCallback)
 		{
@@ -428,7 +398,7 @@ namespace essentialMix.Collections
 	}
 
 	[Serializable]
-	public abstract class SiblingsHeap<TNode, TKey, TValue> : Heap<TNode, TKey, TValue>
+	public abstract class SiblingsHeap<TNode, TKey, TValue> : LinkedHeap<TNode, TKey, TValue>
 		where TNode : class, ISiblingNode<TNode, TKey, TValue>
 	{
 		private struct BreadthFirstEnumerator : IEnumerableEnumerator<TValue>
@@ -614,23 +584,26 @@ namespace essentialMix.Collections
 		}
 
 		/// <inheritdoc />
-		protected SiblingsHeap()
-			: this((IComparer<TKey>)null)
+		protected SiblingsHeap([NotNull] Func<TValue, TKey> getKeyForItem)
+			: base(getKeyForItem)
 		{
 		}
 
-		protected SiblingsHeap(IComparer<TKey> comparer)
-			: base(comparer)
+		/// <inheritdoc />
+		protected SiblingsHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, keyComparer, comparer)
 		{
 		}
 
-		protected SiblingsHeap([NotNull] IEnumerable<TValue> enumerable)
-			: this(enumerable, null)
+		/// <inheritdoc />
+		protected SiblingsHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
+			: base(getKeyForItem, enumerable)
 		{
 		}
 
-		protected SiblingsHeap([NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: base(enumerable, comparer)
+		/// <inheritdoc />
+		protected SiblingsHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, enumerable, keyComparer, comparer)
 		{
 		}
 
@@ -679,36 +652,6 @@ namespace essentialMix.Collections
 				default:
 					throw new ArgumentOutOfRangeException(nameof(method), method, null);
 			}
-		}
-
-		public virtual bool Equals(SiblingsHeap<TNode, TKey, TValue> other)
-		{
-			if (ReferenceEquals(null, other)) return false;
-			if (ReferenceEquals(this, other)) return true;
-			if (GetType() != other.GetType() 
-				|| Count != other.Count 
-				|| !ValueComparer.Equals(other.ValueComparer)) return false;
-			if (Count == 0) return true;
-
-			using (IEnumerator<TValue> thisEnumerator = GetEnumerator())
-			{
-				using (IEnumerator<TValue> otherEnumerator = other.GetEnumerator())
-				{
-					bool thisMoved = thisEnumerator.MoveNext();
-					bool otherMoved = otherEnumerator.MoveNext();
-
-					while (thisMoved && otherMoved)
-					{
-						if (!ValueComparer.Equals(thisEnumerator.Current, otherEnumerator.Current)) return false;
-						thisMoved = thisEnumerator.MoveNext();
-						otherMoved = otherEnumerator.MoveNext();
-					}
-
-					if (thisMoved ^ otherMoved) return false;
-				}
-			}
-
-			return true;
 		}
 
 		#region Iterator Traversal for Action<TNode>

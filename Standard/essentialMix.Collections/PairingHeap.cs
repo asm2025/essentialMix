@@ -20,34 +20,32 @@ namespace essentialMix.Collections
 	[Serializable]
 	public abstract class PairingHeap<TKey, TValue> : SiblingsHeap<PairingNode<TKey, TValue>, TKey, TValue>
 	{
-		[NotNull]
-		private readonly Func<TValue, TKey> _getKeyForItem;
-
 		/// <inheritdoc />
 		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem)
-			: this(getKeyForItem, (IComparer<TKey>)null)
+			: base(getKeyForItem)
 		{
-		}
-
-		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
-			: base(comparer)
-		{
-			_getKeyForItem = getKeyForItem;
-		}
-
-		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
-			: this(getKeyForItem, enumerable, null)
-		{
-		}
-
-		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: this(getKeyForItem, comparer)
-		{
-			Add(enumerable);
 		}
 
 		/// <inheritdoc />
-		public sealed override PairingNode<TKey, TValue> MakeNode(TValue value) { return new PairingNode<TKey, TValue>(_getKeyForItem(value), value); }
+		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, keyComparer, comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
+			: base(getKeyForItem, enumerable)
+		{
+		}
+
+		/// <inheritdoc />
+		protected PairingHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, enumerable, keyComparer, comparer)
+		{
+		}
+
+		/// <inheritdoc />
+		public sealed override PairingNode<TKey, TValue> MakeNode(TValue value) { return new PairingNode<TKey, TValue>(GetKeyForItem(value), value); }
 
 		/// <inheritdoc />
 		public sealed override PairingNode<TKey, TValue> Add(PairingNode<TKey, TValue> node)

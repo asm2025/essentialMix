@@ -245,7 +245,7 @@ namespace essentialMix.Collections
 
 			while (result.Count < Keys.Count && queue.Count > 0)
 			{
-				BinomialNode<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>> edgeEntry = queue.ExtractValue();
+				BinomialNode<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>> edgeEntry = queue.ExtractNode();
 
 				if (!result.ContainsKey(edgeEntry.Value.Edge.To))
 				{
@@ -322,7 +322,7 @@ namespace essentialMix.Collections
 
 			while (result.Count < Keys.Count && queue.Count > 0)
 			{
-				BinomialNode<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>> edgeEntry = queue.ExtractValue();
+				BinomialNode<TWeight, EdgeEntry<T, GraphEdge<T, TWeight>>> edgeEntry = queue.ExtractNode();
 				if (disjointSet.IsConnected(edgeEntry.Value.From, edgeEntry.Value.Edge.To)) continue;
 				disjointSet.Union(edgeEntry.Value.From, edgeEntry.Value.Edge.To);
 				if (!result.ContainsKey(edgeEntry.Value.From)) result.Add(edgeEntry.Value.From);

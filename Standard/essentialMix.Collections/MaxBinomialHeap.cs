@@ -9,30 +9,36 @@ namespace essentialMix.Collections
 	{
 		/// <inheritdoc />
 		public MaxBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem)
-			: this(getKeyForItem, (IComparer<TKey>)null)
+			: base(getKeyForItem)
 		{
 		}
 
 		/// <inheritdoc />
-		public MaxBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> comparer)
-			: base(getKeyForItem, comparer)
+		public MaxBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, keyComparer, comparer)
 		{
 		}
 
 		/// <inheritdoc />
 		public MaxBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
-			: this(getKeyForItem, enumerable, null)
+			: base(getKeyForItem, enumerable)
 		{
 		}
 
 		/// <inheritdoc />
-		public MaxBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> comparer)
-			: base(getKeyForItem, enumerable, comparer)
+		public MaxBinomialHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+			: base(getKeyForItem, enumerable, keyComparer, comparer)
 		{
 		}
 
 		/// <inheritdoc />
 		protected sealed override int Compare(TKey x, TKey y)
+		{
+			return KeyComparer.Compare(x, y) * - 1;
+		}
+
+		/// <inheritdoc />
+		protected sealed override int Compare(TValue x, TValue y)
 		{
 			return Comparer.Compare(x, y) * - 1;
 		}

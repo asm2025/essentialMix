@@ -537,7 +537,7 @@ namespace essentialMix.Collections
 			while (queue.Count > 0)
 			{
 				// edges will be extracted in ascending weight order
-				BinomialNode<TWeight, PathEntry> current = queue.ExtractValue();
+				BinomialNode<TWeight, PathEntry> current = queue.ExtractNode();
 				KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[current.Value.Value];
 				if (edges == null || edges.Count == 0) continue;
 

@@ -84,22 +84,15 @@ namespace TestApp
 			thisValue.WriteTo(Console.Out);
 		}
 
-		public static void Print<TNode, TKey, TValue>([NotNull] this BinaryHeap<TNode, TKey, TValue> thisValue)
-			where TNode : BinaryNode<TNode, TKey, TValue>
+		public static void Print<TNode, T>([NotNull] this BinaryHeapBase<TNode, T> thisValue)
+			where TNode : BinaryNodeBase<TNode, T>
 		{
 			Console.WriteLine();
 			thisValue.WriteTo(Console.Out);
 		}
 
-		public static void Print<TKey, TValue>([NotNull] this BinomialHeap<TKey, TValue> thisValue)
-		{
-			Console.WriteLine();
-			Console.WriteLine("Count: " + thisValue.Count);
-			Console.WriteLine();
-			thisValue.WriteTo(Console.Out);
-		}
-
-		public static void Print<T>([NotNull] this BinomialHeap<T> thisValue)
+		public static void Print<TNode, T>([NotNull] this SiblingsHeap<TNode, T> thisValue)
+			where TNode : class, ISiblingNode<TNode, T>
 		{
 			Console.WriteLine();
 			Console.WriteLine("Count: " + thisValue.Count);
@@ -107,17 +100,8 @@ namespace TestApp
 			thisValue.WriteTo(Console.Out);
 		}
 
-		public static void Print<TNode, TKey, TValue>([NotNull] this FibonacciHeap<TNode, TKey, TValue> thisValue)
-			where TNode : FibonacciNode<TNode, TKey, TValue>
-		{
-			Console.WriteLine();
-			Console.WriteLine("Count: " + thisValue.Count);
-			Console.WriteLine();
-			thisValue.WriteTo(Console.Out);
-		}
-
-		public static void Print<TNode, TKey, TValue>([NotNull] this PairingHeap<TNode, TKey, TValue> thisValue)
-			where TNode : PairingNodeBase<TNode, TKey, TValue>
+		public static void Print<TNode, TKey, Tvalue>([NotNull] this SiblingsHeap<TNode, TKey, Tvalue> thisValue)
+			where TNode : class, ISiblingNode<TNode, TKey, Tvalue>
 		{
 			Console.WriteLine();
 			Console.WriteLine("Count: " + thisValue.Count);
