@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -51,9 +53,9 @@ namespace essentialMix.Extensions
 		{
 			if (string.IsNullOrEmpty(description))
 			{
-				description = @"JWT Authorization header using the Bearer scheme.
-Please enter into field the word: Bearer[space][YOUR JWT TOKEN].
-Example: Bearer 12345abcdef";
+				description = @$"JWT Authorization header using the {JwtBearerDefaults.AuthenticationScheme} scheme.
+Please enter into field the word: {JwtBearerDefaults.AuthenticationScheme}[space][YOUR JWT TOKEN].
+Example: {JwtBearerDefaults.AuthenticationScheme} 12345abcdef";
 			}
 
 			thisValue.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
@@ -75,6 +77,49 @@ Example: Bearer 12345abcdef";
 						Reference = new OpenApiReference
 						{
 							Id = JwtBearerDefaults.AuthenticationScheme,
+							Type = ReferenceType.SecurityScheme
+						}
+					},
+					new List<string>()
+				}
+			});
+
+			return thisValue;
+		}
+
+		[NotNull]
+		public static SwaggerGenOptions AddOpenIdConnectSecurity([NotNull] this SwaggerGenOptions thisValue, [NotNull] Uri authorizationUrl, [NotNull] Uri tokenUrl, IDictionary<string, string> scopes, string description = null)
+		{
+			if (string.IsNullOrEmpty(description)) description = $"OAuth2 using the {OpenIdConnectDefaults.AuthenticationScheme} scheme.";
+			scopes ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+			{
+				{"api", "API - full access"}
+			};
+			thisValue.AddSecurityDefinition(OpenIdConnectDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+			{
+				Type = SecuritySchemeType.OAuth2,
+				Description = description,
+				Flows = new OpenApiOAuthFlows
+				{
+					AuthorizationCode = new OpenApiOAuthFlow
+					{
+						AuthorizationUrl = authorizationUrl,
+						TokenUrl = tokenUrl,
+						Scopes = scopes
+					}
+				}
+			});
+
+			thisValue.AddSecurityRequirement(new OpenApiSecurityRequirement
+			{
+				{
+					new OpenApiSecurityScheme
+					{
+						Scheme = SecuritySchemeType.OAuth2.ToString(),
+						Name = OpenIdConnectDefaults.AuthenticationScheme,
+						Reference = new OpenApiReference
+						{
+							Id = OpenIdConnectDefaults.AuthenticationScheme,
 							Type = ReferenceType.SecurityScheme
 						}
 					},
