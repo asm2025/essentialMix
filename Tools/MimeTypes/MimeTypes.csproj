@@ -83,8 +83,8 @@
 	<ItemGroup>
 		<PackageReference Include="EntityFramework" Version="6.4.4" />
 		<PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
-		<PackageReference Include="CsvHelper" Version="27.1.1" />
-		<PackageReference Include="Humanizer" Version="2.11.10" />
+		<PackageReference Include="CsvHelper" Version="27.2.0" />
+		<PackageReference Include="Humanizer" Version="2.13.14" />
 		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0.0" />
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1.0" />
 		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />

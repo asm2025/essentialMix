@@ -91,17 +91,8 @@ namespace TestApp
 			thisValue.WriteTo(Console.Out);
 		}
 
-		public static void Print<TNode, T>([NotNull] this SiblingsHeap<TNode, T> thisValue)
+		public static void Print<TNode, T>([NotNull] this SiblingsHeapBase<TNode, T> thisValue)
 			where TNode : class, ISiblingNode<TNode, T>
-		{
-			Console.WriteLine();
-			Console.WriteLine("Count: " + thisValue.Count);
-			Console.WriteLine();
-			thisValue.WriteTo(Console.Out);
-		}
-
-		public static void Print<TNode, TKey, Tvalue>([NotNull] this SiblingsHeap<TNode, TKey, Tvalue> thisValue)
-			where TNode : class, ISiblingNode<TNode, TKey, Tvalue>
 		{
 			Console.WriteLine();
 			Console.WriteLine("Count: " + thisValue.Count);

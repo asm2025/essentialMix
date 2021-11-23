@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using essentialMix.Collections.DebugView;
 using essentialMix.Extensions;
@@ -22,7 +23,7 @@ namespace essentialMix.Collections
 	[Serializable]
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_HeapDebugView<,>))]
-	public abstract class LinkedHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICollection<T>, IReadOnlyCollection<T>, ICollection
+	public abstract class LinkedHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICollection<T>, IReadOnlyCollection<T>, ICollection, IEquatable<LinkedHeapBase<TNode, T>>
 		where TNode : class, ITreeNode<TNode, T>
 	{
 		internal int _version;
@@ -242,41 +243,9 @@ namespace essentialMix.Collections
 		}
 
 		protected abstract int Compare([NotNull] T x, [NotNull] T y);
-	}
-
-	/// <inheritdoc cref="LinkedHeapBase{TNode,T}" />
-	/// <typeparam name="TNode">The node type.</typeparam>
-	/// <typeparam name="T">The element type of the heap</typeparam>
-	[Serializable]
-	public abstract class LinkedHeap<TNode, T> : LinkedHeapBase<TNode, T>, IBinaryHeap<TNode, T>, ICollection<T>, IReadOnlyCollection<T>, ICollection
-		where TNode : class, ITreeNode<TNode, T>
-	{
-		/// <inheritdoc />
-		protected LinkedHeap()
-			: this((IComparer<T>)null)
-		{
-		}
-
-		protected LinkedHeap(IComparer<T> comparer)
-			: base(comparer)
-		{
-		}
-
-		protected LinkedHeap([NotNull] IEnumerable<T> enumerable)
-			: this(enumerable, null)
-		{
-		}
-
-		protected LinkedHeap([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
-			: base(comparer)
-		{
-			Add(enumerable);
-		}
 
 		/// <inheritdoc />
-		public abstract void DecreaseKey(TNode node, T newValue);
-
-		public bool Equals(LinkedHeap<TNode, T> other)
+		public bool Equals(LinkedHeapBase<TNode, T> other)
 		{
 			if (ReferenceEquals(null, other)) return false;
 			if (ReferenceEquals(this, other)) return true;
@@ -305,6 +274,53 @@ namespace essentialMix.Collections
 
 			return true;
 		}
+
+		/// <inheritdoc />
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			return obj.GetType() == GetType() && Equals((LinkedHeapBase<TNode, T>)obj);
+		}
+
+		/// <inheritdoc />
+		public override int GetHashCode() { return RuntimeHelpers.GetHashCode(this); }
+
+		public static bool operator ==(LinkedHeapBase<TNode, T> left, LinkedHeapBase<TNode, T> right) { return Equals(left, right); }
+		public static bool operator !=(LinkedHeapBase<TNode, T> left, LinkedHeapBase<TNode, T> right) { return !Equals(left, right); }
+	}
+
+	/// <inheritdoc cref="LinkedHeapBase{TNode,T}" />
+	/// <typeparam name="TNode">The node type.</typeparam>
+	/// <typeparam name="T">The element type of the heap</typeparam>
+	[Serializable]
+	public abstract class LinkedHeap<TNode, T> : LinkedHeapBase<TNode, T>, IBinaryHeap<TNode, T>
+		where TNode : class, ITreeNode<TNode, T>
+	{
+		/// <inheritdoc />
+		protected LinkedHeap()
+			: this((IComparer<T>)null)
+		{
+		}
+
+		protected LinkedHeap(IComparer<T> comparer)
+			: base(comparer)
+		{
+		}
+
+		protected LinkedHeap([NotNull] IEnumerable<T> enumerable)
+			: this(enumerable, null)
+		{
+		}
+
+		protected LinkedHeap([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
+			: base(comparer)
+		{
+			Add(enumerable);
+		}
+
+		/// <inheritdoc />
+		public abstract void DecreaseKey(TNode node, T newValue);
 	}
 
 	/// <inheritdoc cref="LinkedHeapBase{TNode,T}" />
@@ -312,7 +328,7 @@ namespace essentialMix.Collections
 	/// <typeparam name="TKey">The element key type of the heap</typeparam>
 	/// <typeparam name="TValue">The element type of the heap</typeparam>
 	[Serializable]
-	public abstract class LinkedHeap<TNode, TKey, TValue> : LinkedHeapBase<TNode, TValue>, IBinaryHeap<TNode, TKey, TValue>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
+	public abstract class LinkedHeap<TNode, TKey, TValue> : LinkedHeapBase<TNode, TValue>, IBinaryHeap<TNode, TKey, TValue>
 		where TNode : class, ITreeNode<TNode, TKey, TValue>
 	{
 		/// <inheritdoc />
@@ -356,42 +372,13 @@ namespace essentialMix.Collections
 		public TNode FindByKey(TKey key)
 		{
 			TNode node = null;
+			IEqualityComparer<TKey> comparer = EqualityComparer<TKey>.Default;
 			Iterate(e =>
 			{
-				if (KeyComparer.IsEqual(e.Key, key)) node = e;
+				if (comparer.Equals(e.Key, key)) node = e;
 				return node == null;
 			});
 			return node;
-		}
-
-		public bool Equals(LinkedHeap<TNode, TKey, TValue> other)
-		{
-			if (ReferenceEquals(null, other)) return false;
-			if (ReferenceEquals(this, other)) return true;
-			if (GetType() != other.GetType() 
-				|| Count != other.Count 
-				|| !Comparer.Equals(other.Comparer)) return false;
-			if (Count == 0) return true;
-
-			using (IEnumerator<TValue> thisEnumerator = GetEnumerator())
-			{
-				using (IEnumerator<TValue> otherEnumerator = other.GetEnumerator())
-				{
-					bool thisMoved = thisEnumerator.MoveNext();
-					bool otherMoved = otherEnumerator.MoveNext();
-
-					while (thisMoved && otherMoved)
-					{
-						if (Comparer.Compare(thisEnumerator.Current, otherEnumerator.Current) != 0) return false;
-						thisMoved = thisEnumerator.MoveNext();
-						otherMoved = otherEnumerator.MoveNext();
-					}
-
-					if (thisMoved ^ otherMoved) return false;
-				}
-			}
-
-			return true;
 		}
 	}
 }

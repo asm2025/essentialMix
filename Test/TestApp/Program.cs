@@ -4016,7 +4016,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(LinkedHeapBase<TNode, T> heap, T[] array)
+			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array)
 				where TNode : BinomialNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -4056,10 +4056,10 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
-				DoTheKeyedTest(studentHeap, students);
+				DoTheTest(studentHeap, students);
 
 				studentHeap = new MinBinomialHeap<double, Student>(e => e.Grade);
-				DoTheKeyedTest(studentHeap, students);
+				DoTheTest(studentHeap, students);
 
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
@@ -4069,29 +4069,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<T>(BinomialHeap<T> heap, T[] array)
-			{
-				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
-				heap.Add(array);
-				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
-				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
-				heap.Print();
-				Console.WriteLine("Test removing...");
-				bool removeStarted = false;
-
-				while (heap.Count > 0)
-				{
-					if (!removeStarted) removeStarted = true;
-					else Console.Write(", ");
-
-					Console.Write(heap.ExtractValue());
-				}
-
-				Console.WriteLine();
-				Console.WriteLine();
-			}
-
-			static void DoTheKeyedTest<TKey, TValue>(BinomialHeap<TKey, TValue> heap, TValue[] array)
+			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array)
+				where TNode : BinomialNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
@@ -4140,10 +4119,10 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
-				DoTheKeyedTest(studentHeap, students, k);
+				DoTheTest(studentHeap, students, k);
 
 				studentHeap = new MinBinomialHeap<double, Student>(e => e.Grade);
-				DoTheKeyedTest(studentHeap, students, k);
+				DoTheTest(studentHeap, students, k);
 
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
@@ -4153,19 +4132,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<T>(BinomialHeap<T> heap, T[] array, int k)
-			{
-				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
-				heap.Add(array);
-				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
-				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
-				heap.Print();
-				Console.WriteLine($"Kth element at position {k} element = {Bright.Cyan().Underline(heap.ElementAt(k).ToString())}");
-				Console.WriteLine();
-				Console.WriteLine();
-			}
-
-			static void DoTheKeyedTest<TKey, TValue>(BinomialHeap<TKey, TValue> heap, TValue[] array, int k)
+			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array, int k)
+				where TNode : BinomialNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
@@ -4180,6 +4148,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 		private static void TestBinomialHeapDecreaseKey()
 		{
+			const int MAX = 10;
+
 			bool more;
 
 			do
@@ -4218,8 +4188,6 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			static void DoTheTest<T>(BinomialHeap<T> heap, T[] array, T newKeyValue)
 			{
-				const int MAX = 10;
-
 				int max = Math.Min(MAX, array.Length);
 				Queue<T> queue = new Queue<T>();
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -4252,8 +4220,6 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			static void DoTheKeyedTest<TKey, TValue>(BinomialHeap<TKey, TValue> heap, TValue[] array, TKey newKeyValue)
 			{
-				const int MAX = 10;
-
 				Queue<TKey> queue = new Queue<TKey>();
 				int max = Math.Min(MAX, array.Length);
 				queue.Clear();
@@ -4308,10 +4274,10 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 				Student[] students = GetRandomStudents(len);
 				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students);
+				DoTheTest(studentHeap, students);
 
 				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students);
+				DoTheTest(studentHeap, students);
 
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
@@ -4321,26 +4287,12 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<T>(PairingHeap<T> heap, T[] array)
+			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array)
+				where TNode : PairingNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
 				foreach (T value in array)
-				{
-					heap.Add(value);
-					//heap.PrintWithProps();
-				}
-
-				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
-				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
-				heap.Print();
-			}
-
-			static void DoTheKeyTest<TKey, TValue>(PairingHeap<TKey, TValue> heap, TValue[] array)
-			{
-				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
-
-				foreach (TValue value in array)
 				{
 					heap.Add(value);
 					//heap.PrintWithProps();
@@ -4375,10 +4327,10 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students);
+				DoTheTest(studentHeap, students);
 
 				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students);
+				DoTheTest(studentHeap, students);
 
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
@@ -4388,29 +4340,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<T>(PairingHeap<T> heap, T[] array)
-			{
-				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
-				heap.Add(array);
-				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
-				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
-				heap.Print();
-				Console.WriteLine("Test removing...");
-				bool removeStarted = false;
-
-				while (heap.Count > 0)
-				{
-					if (!removeStarted) removeStarted = true;
-					else Console.Write(", ");
-
-					Console.Write(heap.ExtractValue());
-				}
-
-				Console.WriteLine();
-				Console.WriteLine();
-			}
-
-			static void DoTheKeyTest<TKey, TValue>(PairingHeap<TKey, TValue> heap, TValue[] array)
+			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array)
+				where TNode : PairingNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
@@ -4459,10 +4390,10 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students, k);
+				DoTheTest(studentHeap, students, k);
 
 				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
-				DoTheKeyTest(studentHeap, students, k);
+				DoTheTest(studentHeap, students, k);
 
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
@@ -4472,19 +4403,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<T>(PairingHeap<T> heap, T[] array, int k)
-			{
-				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
-				heap.Add(array);
-				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
-				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
-				heap.Print();
-				Console.WriteLine($"Kth element at position {k} element = {Bright.Cyan().Underline(heap.ElementAt(k).ToString())}");
-				Console.WriteLine();
-				Console.WriteLine();
-			}
-
-			static void DoTheKeyTest<TKey, TValue>(PairingHeap<TKey, TValue> heap, TValue[] array, int k)
+			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array, int k)
+				where TNode : PairingNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
@@ -4499,6 +4419,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 		private static void TestPairingHeapDecreaseKey()
 		{
+			const int MAX = 10;
+
 			bool more;
 
 			do
@@ -4512,10 +4434,10 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
 				PairingHeap<int> heap = new MaxPairingHeap<int>();
-				DoTheValueTest(heap, values, int.MaxValue);
+				DoTheTest(heap, values, int.MaxValue);
 
 				heap = new MinPairingHeap<int>();
-				DoTheValueTest(heap, values, int.MinValue);
+				DoTheTest(heap, values, int.MinValue);
 
 				Student[] students = GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
@@ -4535,10 +4457,22 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheValueTest<T>(PairingHeap<T> heap, T[] array, T newKeyValue)
+			static void DoTheTest<T>(PairingHeap<T> heap, T[] array, T newKeyValue)
 			{
+				int max = Math.Min(MAX, array.Length);
 				Queue<T> queue = new Queue<T>();
-				DoTheTest(heap, array, queue);
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
+
+				foreach (T v in array)
+				{
+					PairingNode<T> node = heap.MakeNode(v);
+					if (queue.Count < max) queue.Enqueue(node.Value);
+					heap.Add(node);
+				}
+
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
+				heap.Print();
 
 				while (queue.Count > 0)
 				{
@@ -4557,8 +4491,20 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			static void DoTheKeyTest<TKey, TValue>(PairingHeap<TKey, TValue> heap, TValue[] array, TKey newKeyValue)
 			{
+				int max = Math.Min(MAX, array.Length);
 				Queue<TKey> queue = new Queue<TKey>();
-				DoTheTest(heap, array, queue);
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
+
+				foreach (TValue v in array)
+				{
+					PairingNode<TKey, TValue> node = heap.MakeNode(v);
+					if (queue.Count < max) queue.Enqueue(node.Key);
+					heap.Add(node);
+				}
+
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
+				heap.Print();
 
 				while (queue.Count > 0)
 				{
@@ -4573,27 +4519,6 @@ The external id reflects the order by which they are scheduled and the -* part i
 				}
 
 				Console.WriteLine();
-			}
-
-			static void DoTheTest<TNode, TValue>(PairingHeap<TNode, TValue> heap, TValue[] array, Queue<TKey> queue)
-				where TNode : PairingNodeBase<TNode, TValue>
-			{
-				const int MAX = 10;
-
-				int max = Math.Min(MAX, array.Length);
-				queue.Clear();
-				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
-
-				foreach (TValue v in array)
-				{
-					TNode node = heap.MakeNode(v);
-					if (queue.Count < max) queue.Enqueue(node.Key);
-					heap.Add(node);
-				}
-
-				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
-				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
-				heap.Print();
 			}
 		}
 
@@ -4631,12 +4556,12 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array)
-				where TNode : FibonacciNode<TNode, TKey, TValue>
+			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array)
+				where TNode : FibonacciNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
-				foreach (TValue value in array)
+				foreach (T value in array)
 				{
 					heap.Add(value);
 					//heap.PrintWithProps();
@@ -4684,8 +4609,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array)
-				where TNode : FibonacciNode<TNode, TKey, TValue>
+			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array)
+				where TNode : FibonacciNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
@@ -4747,8 +4672,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
-				where TNode : FibonacciNode<TNode, TKey, TValue>
+			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array, int k)
+				where TNode : FibonacciNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
@@ -4763,6 +4688,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 		private static void TestFibonacciHeapDecreaseKey()
 		{
+			const int MAX = 10;
+
 			bool more;
 
 			do
@@ -4776,10 +4703,10 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
 				FibonacciHeap<int> heap = new MaxFibonacciHeap<int>();
-				DoTheValueTest(heap, values, int.MaxValue);
+				DoTheTest(heap, values, int.MaxValue);
 
 				heap = new MinFibonacciHeap<int>();
-				DoTheValueTest(heap, values, int.MinValue);
+				DoTheTest(heap, values, int.MinValue);
 
 				Student[] students = GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
@@ -4799,40 +4726,30 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheKeyTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue)
-				where TNode : FibonacciNode<TNode, TKey, TValue>
+			static void DoTheTest<T>(FibonacciHeap<T> heap, T[] array, T newKeyValue)
 			{
-				Queue<TKey> queue = new Queue<TKey>();
-				DoTheTest(heap, array, queue);
+				int max = Math.Min(MAX, array.Length);
+				Queue<T> queue = new Queue<T>();
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
-				while (queue.Count > 0)
+				foreach (T v in array)
 				{
-					TKey key = queue.Dequeue();
-					TNode node = heap.FindByKey(key);
-					Debug.Assert(node != null, $"Node for key {key} is not found.");
-					heap.DecreaseKey(node, newKeyValue);
-					TKey extracted = heap.ExtractValue().Key;
-					bool succeeded = heap.Comparer.IsEqual(extracted, key);
-					Console.WriteLine($"Extracted {extracted}, expected {key}");
-					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
+					FibonacciNode<T> node = heap.MakeNode(v);
+					if (queue.Count < max) queue.Enqueue(node.Value);
+					heap.Add(node);
 				}
 
-				Console.WriteLine();
-			}
-
-			static void DoTheValueTest<TNode, TValue>(FibonacciHeap<TNode, TValue, TValue> heap, TValue[] array, TValue newKeyValue)
-				where TNode : FibonacciNode<TNode, TValue, TValue>
-			{
-				Queue<TValue> queue = new Queue<TValue>();
-				DoTheTest(heap, array, queue);
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
+				heap.Print();
 
 				while (queue.Count > 0)
 				{
-					TValue key = queue.Dequeue();
-					TNode node = heap.Find(key);
+					T key = queue.Dequeue();
+					FibonacciNode<T> node = heap.Find(key);
 					Debug.Assert(node != null, $"Node for value {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
-					TValue extracted = heap.ExtractValue().Key;
+					T extracted = heap.ExtractValue();
 					bool succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
 					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
@@ -4841,18 +4758,15 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 			}
 
-			static void DoTheTest<TNode, TKey, TValue>(FibonacciHeap<TNode, TKey, TValue> heap, TValue[] array, Queue<TKey> queue)
-				where TNode : FibonacciNode<TNode, TKey, TValue>
+			static void DoTheKeyTest<TKey, TValue>(FibonacciHeap<TKey, TValue> heap, TValue[] array, TKey newKeyValue)
 			{
-				const int MAX = 10;
-
 				int max = Math.Min(MAX, array.Length);
-				queue.Clear();
+				Queue<TKey> queue = new Queue<TKey>();
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
 				foreach (TValue v in array)
 				{
-					TNode node = heap.MakeNode(v);
+					FibonacciNode<TKey, TValue> node = heap.MakeNode(v);
 					if (queue.Count < max) queue.Enqueue(node.Key);
 					heap.Add(node);
 				}
@@ -4860,6 +4774,20 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
 				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
 				heap.Print();
+
+				while (queue.Count > 0)
+				{
+					TKey key = queue.Dequeue();
+					FibonacciNode<TKey, TValue> node = heap.FindByKey(key);
+					Debug.Assert(node != null, $"Node for key {key} is not found.");
+					heap.DecreaseKey(node, newKeyValue);
+					TKey extracted = heap.ExtractNode().Key;
+					bool succeeded = heap.KeyComparer.IsEqual(extracted, key);
+					Console.WriteLine($"Extracted {extracted}, expected {key}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
+				}
+
+				Console.WriteLine();
 			}
 		}
 
