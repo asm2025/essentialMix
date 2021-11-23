@@ -747,9 +747,6 @@ work with {HEAVY} items.");
 							: 0;
 			Console.WriteLine();
 
-			string timeoutString = timeout > 0
-										? $"{timeout} minute(s)"
-										: "None";
 			int threads;
 
 			if (DebugHelper.DebugMode)
@@ -771,23 +768,47 @@ work with {HEAVY} items.");
 																.Where(e => e.SupportsProducerQueue())
 																.ToArray();
 			Queue<ThreadQueueMode> queueModes = new Queue<ThreadQueueMode>(modes);
+			BinomialHeap<Student> priorityQueue = null;
 			HashSet<Student> visited = new HashSet<Student>();
 			List<Student> duplicates = new List<Student>();
-			BinomialHeap<Student> priorityQueue = null;
 			Stopwatch clock = new Stopwatch();
-			int externalId = 0;
 
 			while (queueModes.Count > 0)
 			{
 				Console.Clear();
 				Console.WriteLine();
+				DoTheTest(values, queueModes.Dequeue(), ref priorityQueue, visited, duplicates, threads, clock, timeout);
 
-				ThreadQueueMode mode = queueModes.Dequeue();
-				Title($"Testing multi-thread queue in '{Bright.Cyan(mode.ToString())}' mode...");
+				if (queueModes.Count == 0)
+				{
+					if (!RepeatTheTest(queueModes, modes)) continue;
 
+					if (iteration < MAX_ITERATION_INC)
+					{
+						iteration++;
+						values = GetRandomStudents(values.Length * iteration);
+					}
+				}
+
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				if (response.Key != ConsoleKey.Y) queueModes.Clear();
+			}
+
+			clock.Stop();
+
+			static void DoTheTest(IReadOnlyCollection<Student> values, ThreadQueueMode mode, ref BinomialHeap<Student> priorityQueue, HashSet<Student> visited, List<Student> duplicates, int threads, Stopwatch clock, int timeout)
+			{
+				int externalId = 0;
 				CancellationTokenSource cts = null;
 				CountdownEvent cdeThreshold = null;
 				IProducerConsumer<Student> queue = null;
+				string timeoutString = timeout > 0
+											? $"{timeout} minute(s)"
+											: "None";
+				Title($"Testing multi-thread queue in '{Bright.Cyan(mode.ToString())}' mode...");
 
 				try
 				{
@@ -800,21 +821,24 @@ work with {HEAVY} items.");
 						Console.WriteLine();
 					}
 
-					if (heapKey == ConsoleKey.N)
+					switch (heapKey)
 					{
-						if (priorityQueue == null || priorityQueue.GetType() != typeof(MinBinomialHeap<Student>))
-							priorityQueue = new MinBinomialHeap<Student>(ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade)));
-						else priorityQueue.Clear();
-					}
-					else if (heapKey == ConsoleKey.X)
-					{
-						if (priorityQueue == null || priorityQueue.GetType() != typeof(MaxBinomialHeap<Student>))
-							priorityQueue = new MaxBinomialHeap<Student>(ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade)));
-						else priorityQueue.Clear();
-					}
-					else
-					{
-						break;
+						case ConsoleKey.N:
+							if (priorityQueue == null || priorityQueue.GetType() != typeof(MinBinomialHeap<Student>))
+								priorityQueue = new MinBinomialHeap<Student>(ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade)));
+							else
+								priorityQueue.Clear();
+							
+							break;
+						case ConsoleKey.X:
+							if (priorityQueue == null || priorityQueue.GetType() != typeof(MaxBinomialHeap<Student>))
+								priorityQueue = new MaxBinomialHeap<Student>(ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade)));
+							else 
+								priorityQueue.Clear();
+
+							break;
+						default:
+							return;
 					}
 
 					int written = 0;
@@ -822,9 +846,8 @@ work with {HEAVY} items.");
 					cts = timeout > 0
 							? new CancellationTokenSource(TimeSpan.FromMinutes(timeout))
 							: null;
-					cdeThreshold = new CountdownEvent(values.Length / 2);
-					// copy to local variable
-					Student[] val = values;
+					cdeThreshold = new CountdownEvent(values.Count / 2);
+					// copy to local variables
 					CancellationToken token = cts?.Token ?? CancellationToken.None;
 					CountdownEvent threshold = cdeThreshold;
 					ScheduledCallbackDelegates<Student> scheduled = e =>
@@ -841,21 +864,20 @@ work with {HEAVY} items.");
 							// This can control time restriction i.e. Number of threads/tasks per second/minute etc.
 							Threshold = TimeSpan.FromSeconds(1),
 							ScheduledCallback = scheduled,
-							WorkStartedCallback = que => QueueStarted(que, val, mode, clock, timeoutString),
-							WorkCompletedCallback = que => QueueCompleted(que, val, visited, duplicates, mode, ref externalId, clock, timeoutString, written)
+							WorkStartedCallback = que => QueueStarted(que, values, mode, clock, timeoutString),
+							WorkCompletedCallback = que => QueueCompleted(que, values, visited, duplicates, mode, ref externalId, clock, timeoutString, written)
 						},
 						_ => new ProducerConsumerQueueOptions<Student>(threads, true, (_, item) => Exec(item, ref written, visited, duplicates, threshold))
 						{
 							ScheduledCallback = scheduled,
-							WorkStartedCallback = que => QueueStarted(que, val, mode, clock, timeoutString),
-							WorkCompletedCallback = que => QueueCompleted(que, val, visited, duplicates, mode, ref externalId, clock, timeoutString, written)
+							WorkStartedCallback = que => QueueStarted(que, values, mode, clock, timeoutString),
+							WorkCompletedCallback = que => QueueCompleted(que, values, visited, duplicates, mode, ref externalId, clock, timeoutString, written)
 						}
 					};
 
 					visited.Clear();
 					duplicates.Clear();
 					queue = ProducerConsumerQueue.Create(mode, priorityQueue, options, token);
-					
 					queue.Pause();
 					Console.WriteLine();
 					Console.WriteLine();
@@ -876,7 +898,6 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 					Console.WriteLine(Yellow("Queue is resumed."));
 					queue.Resume();
-
 					// wait for the threshold to pause is reached to test the pause feature
 					cdeThreshold.Wait(token);
 
@@ -884,7 +905,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 					{
 						if (!queue.CanPause)
 						{
-							Title($"Queue does {Bright.Cyan("NOT SUPPORT")} pausing.");
+							Title($"Queue {Bright.Cyan("does not support pausing")}.");
 						}
 						else
 						{
@@ -924,33 +945,21 @@ The external id reflects the order by which they are scheduled and the -* part i
 					ObjectHelper.Dispose(ref cdeThreshold);
 					ObjectHelper.Dispose(ref cts);
 				}
-
-				if (queueModes.Count == 0)
-				{
-					Console.WriteLine();
-					Console.Write($"Would you like to repeat the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to exit. ");
-
-					if (Console.ReadKey(true).Key == ConsoleKey.Y)
-					{
-						Console.WriteLine();
-
-						foreach (ThreadQueueMode m in modes) 
-							queueModes.Enqueue(m);
-
-						if (iteration < MAX_ITERATION_INC) values = GetRandomStudents(values.Length * ++iteration);
-					}
-
-					continue;
-				}
-
-				Console.WriteLine();
-				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				if (response.Key != ConsoleKey.Y) queueModes.Clear();
 			}
 
-			clock.Stop();
+			static bool RepeatTheTest(Queue<ThreadQueueMode> queue, IEnumerable<ThreadQueueMode> modes)
+			{
+				Console.WriteLine();
+				Console.Write($"Would you like to repeat the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to exit. ");
+				ConsoleKey key = Console.ReadKey(true).Key;
+				Console.WriteLine();
+				if (key != ConsoleKey.Y) return false;
+				
+				foreach (ThreadQueueMode m in modes) 
+					queue.Enqueue(m);
+
+				return true;
+			}
 
 			static void QueueStarted(IProducerConsumer<Student> queue, IReadOnlyCollection<Student> values, ThreadQueueMode mode, Stopwatch clock, string timeoutString)
 			{
@@ -3881,10 +3890,10 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
 				BinaryHeap<int> heap = new MaxBinaryHeap<int>();
-				DoTheValueTest(heap, values, int.MaxValue);
+				DoTheTest(heap, values, int.MaxValue);
 
 				heap = new MinBinaryHeap<int>();
-				DoTheValueTest(heap, values, int.MinValue);
+				DoTheTest(heap, values, int.MinValue);
 
 				Student[] students = GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
@@ -3903,6 +3912,40 @@ The external id reflects the order by which they are scheduled and the -* part i
 				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
+
+			static void DoTheTest<T>(BinaryHeap<T> heap, T[] array, T newKeyValue)
+			{
+				Queue<T> queue = new Queue<T>();
+				int max = Math.Min(MAX, array.Length);
+
+				queue.Clear();
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
+
+				foreach (T v in array)
+				{
+					BinaryNode<T> node = heap.MakeNode(v);
+					if (queue.Count < max) queue.Enqueue(node.Value);
+					heap.Add(node);
+				}
+
+				Console.WriteLine(Bright.Black("Enumeration(InOrder - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(LevelOrder): ") + string.Join(", ", heap.Enumerate(TreeTraverseMethod.LevelOrder)));
+				heap.Print();
+
+				while (queue.Count > 0)
+				{
+					T key = queue.Dequeue();
+					BinaryNode<T> node = heap.Find(key);
+					Debug.Assert(node != null, $"Node for value {key} is not found.");
+					heap.DecreaseKey(node, newKeyValue);
+					T extracted = heap.ExtractValue();
+					bool succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
+					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
+				}
+
+				Console.WriteLine();
+			}
 
 			static void DoTheKeyTest<TKey, TValue>(BinaryHeap<TKey, TValue> heap, TValue[] array, TKey newKeyValue)
 			{
@@ -3937,40 +3980,6 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 				Console.WriteLine();
 			}
-
-			static void DoTheValueTest<T>(BinaryHeap<T> heap, T[] array, T newKeyValue)
-			{
-				Queue<T> queue = new Queue<T>();
-				int max = Math.Min(MAX, array.Length);
-
-				queue.Clear();
-				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
-
-				foreach (T v in array)
-				{
-					BinaryNode<T> node = heap.MakeNode(v);
-					if (queue.Count < max) queue.Enqueue(node.Value);
-					heap.Add(node);
-				}
-
-				Console.WriteLine(Bright.Black("Enumeration(InOrder - Default): ") + string.Join(", ", heap));
-				Console.WriteLine(Bright.Black("Enumeration(LevelOrder): ") + string.Join(", ", heap.Enumerate(TreeTraverseMethod.LevelOrder)));
-				heap.Print();
-
-				while (queue.Count > 0)
-				{
-					T key = queue.Dequeue();
-					BinaryNode<T> node = heap.Find(key);
-					Debug.Assert(node != null, $"Node for value {key} is not found.");
-					heap.DecreaseKey(node, newKeyValue);
-					T extracted = heap.ExtractValue();
-					bool succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
-					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
-					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
-				}
-
-				Console.WriteLine();
-			}
 		}
 
 		private static void TestBinomialHeapAdd()
@@ -3994,10 +4003,10 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 				Student[] students = GetRandomStudents(len);
 				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
-				DoTheKeyedTest(studentHeap, students);
+				DoTheTest(studentHeap, students);
 
 				studentHeap = new MinBinomialHeap<double, Student>(e => e.Grade);
-				DoTheKeyedTest(studentHeap, students);
+				DoTheTest(studentHeap, students);
 
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
@@ -4007,26 +4016,12 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<T>(BinomialHeap<T> heap, T[] array)
+			static void DoTheTest<TNode, T>(BinomialHeap<TNode, T> heap, T[] array)
+				where TNode : BinomialNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
 				foreach (T value in array)
-				{
-					heap.Add(value);
-					//heap.Print();
-				}
-
-				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
-				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
-				heap.Print();
-			}
-
-			static void DoTheKeyedTest<TKey, TValue>(BinomialHeap<TKey, TValue> heap, TValue[] array)
-			{
-				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
-
-				foreach (TValue value in array)
 				{
 					heap.Add(value);
 					//heap.Print();
@@ -4313,10 +4308,10 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 				Student[] students = GetRandomStudents(len);
 				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students);
+				DoTheKeyTest(studentHeap, students);
 
 				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students);
+				DoTheKeyTest(studentHeap, students);
 
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
@@ -4326,12 +4321,26 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(PairingHeap<TNode, T> heap, T[] array)
-				where TNode : PairingNodeBase<TNode, T>
+			static void DoTheTest<T>(PairingHeap<T> heap, T[] array)
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 
 				foreach (T value in array)
+				{
+					heap.Add(value);
+					//heap.PrintWithProps();
+				}
+
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
+				heap.Print();
+			}
+
+			static void DoTheKeyTest<TKey, TValue>(PairingHeap<TKey, TValue> heap, TValue[] array)
+			{
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
+
+				foreach (TValue value in array)
 				{
 					heap.Add(value);
 					//heap.PrintWithProps();
@@ -4366,10 +4375,10 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students);
+				DoTheKeyTest(studentHeap, students);
 
 				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students);
+				DoTheKeyTest(studentHeap, students);
 
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
@@ -4379,8 +4388,29 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(PairingHeap<TNode, T> heap, T[] array)
-				where TNode : PairingNodeBase<TNode, T>
+			static void DoTheTest<T>(PairingHeap<T> heap, T[] array)
+			{
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
+				heap.Add(array);
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
+				heap.Print();
+				Console.WriteLine("Test removing...");
+				bool removeStarted = false;
+
+				while (heap.Count > 0)
+				{
+					if (!removeStarted) removeStarted = true;
+					else Console.Write(", ");
+
+					Console.Write(heap.ExtractValue());
+				}
+
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+
+			static void DoTheKeyTest<TKey, TValue>(PairingHeap<TKey, TValue> heap, TValue[] array)
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
@@ -4429,10 +4459,10 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students, k);
+				DoTheKeyTest(studentHeap, students, k);
 
 				studentHeap = new MinPairingHeap<double, Student>(e => e.Grade);
-				DoTheTest(studentHeap, students, k);
+				DoTheKeyTest(studentHeap, students, k);
 
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
@@ -4442,8 +4472,19 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, int k)
-				where TNode : PairingNodeBase<TNode, TKey, TValue>
+			static void DoTheTest<T>(PairingHeap<T> heap, T[] array, int k)
+			{
+				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
+				heap.Add(array);
+				Console.WriteLine(Bright.Black("Enumeration(BFS - Default): ") + string.Join(", ", heap));
+				Console.WriteLine(Bright.Black("Enumeration(DFS): ") + string.Join(", ", heap.Enumerate(BreadthDepthTraversal.DepthFirst)));
+				heap.Print();
+				Console.WriteLine($"Kth element at position {k} element = {Bright.Cyan().Underline(heap.ElementAt(k).ToString())}");
+				Console.WriteLine();
+				Console.WriteLine();
+			}
+
+			static void DoTheKeyTest<TKey, TValue>(PairingHeap<TKey, TValue> heap, TValue[] array, int k)
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
 				heap.Add(array);
@@ -4494,40 +4535,18 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheKeyTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, TKey newKeyValue)
-				where TNode : PairingNodeBase<TNode, TKey, TValue>
+			static void DoTheValueTest<T>(PairingHeap<T> heap, T[] array, T newKeyValue)
 			{
-				Queue<TKey> queue = new Queue<TKey>();
+				Queue<T> queue = new Queue<T>();
 				DoTheTest(heap, array, queue);
 
 				while (queue.Count > 0)
 				{
-					TKey key = queue.Dequeue();
-					TNode node = heap.FindByKey(key);
-					Debug.Assert(node != null, $"Node for key {key} is not found.");
-					heap.DecreaseKey(node, newKeyValue);
-					TKey extracted = heap.ExtractValue().Key;
-					bool succeeded = heap.Comparer.IsEqual(extracted, key);
-					Console.WriteLine($"Extracted {extracted}, expected {key}");
-					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
-				}
-
-				Console.WriteLine();
-			}
-
-			static void DoTheValueTest<TNode, TValue>(PairingHeap<TNode, TValue, TValue> heap, TValue[] array, TValue newKeyValue)
-				where TNode : PairingNodeBase<TNode, TValue, TValue>
-			{
-				Queue<TValue> queue = new Queue<TValue>();
-				DoTheTest(heap, array, queue);
-
-				while (queue.Count > 0)
-				{
-					TValue key = queue.Dequeue();
-					TNode node = heap.Find(key);
+					T key = queue.Dequeue();
+					PairingNode<T> node = heap.Find(key);
 					Debug.Assert(node != null, $"Node for value {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
-					TValue extracted = heap.ExtractValue().Key;
+					T extracted = heap.ExtractValue();
 					bool succeeded = heap.Comparer.IsEqual(extracted, newKeyValue);
 					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
 					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Value}.");
@@ -4536,8 +4555,28 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 			}
 
-			static void DoTheTest<TNode, TKey, TValue>(PairingHeap<TNode, TKey, TValue> heap, TValue[] array, Queue<TKey> queue)
-				where TNode : PairingNodeBase<TNode, TKey, TValue>
+			static void DoTheKeyTest<TKey, TValue>(PairingHeap<TKey, TValue> heap, TValue[] array, TKey newKeyValue)
+			{
+				Queue<TKey> queue = new Queue<TKey>();
+				DoTheTest(heap, array, queue);
+
+				while (queue.Count > 0)
+				{
+					TKey key = queue.Dequeue();
+					PairingNode<TKey, TValue> node = heap.FindByKey(key);
+					Debug.Assert(node != null, $"Node for key {key} is not found.");
+					heap.DecreaseKey(node, newKeyValue);
+					TKey extracted = heap.ExtractNode().Key;
+					bool succeeded = heap.KeyComparer.IsEqual(extracted, key);
+					Console.WriteLine($"Extracted {extracted}, expected {key}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
+				}
+
+				Console.WriteLine();
+			}
+
+			static void DoTheTest<TNode, TValue>(PairingHeap<TNode, TValue> heap, TValue[] array, Queue<TKey> queue)
+				where TNode : PairingNodeBase<TNode, TValue>
 			{
 				const int MAX = 10;
 

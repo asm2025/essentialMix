@@ -5,6 +5,23 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
+	/*
+	 * https://brilliant.org/wiki/binomial-heap/
+	 *
+	 * https://algorithmtutor.com/Data-Structures/Tree/Binomial-Heaps/ << good (after fixing a couple of bugs - extractMin and merge).
+	 * OK, in the above link, extractMin has a weird implementation and I'm not sure it's working essentially!
+	 *
+	 * https://gist.github.com/chinchila/81a4c9bfd852e775f2bdf68339d212a2 << good. actually this one is better and simpler.
+	 * the rest, no matter what site it is, has some issues after test, not stable or utter garbage!
+	 *
+	 * And then I found https://keithschwarz.com/interesting/code/?dir=binomial-heap from Keith Schwarz a.k.a templatetypedef
+	 * @stackOverflow. It contains some useful and dense explanation everywhere. He seems to be an interesting lecturer at Stanford as
+	 * well with a bunch of interesting code.
+	 * His implementation has a different style which does not use a degree or parent node pointer per each node, which is cool because it
+	 * enhances the structure in terms of space required to store the nodes. Unfortunately, It does not have a Head/Root node but rather a
+	 * trees list and does not implement a few essential functions such as remove a node or DecreaseKey!
+	 * So, Maybe will try it some other time.
+	 */
 	/// <summary>
 	/// <see href="https://en.wikipedia.org/wiki/Binomial_heap">Binomial heap</see> using the linked representation.
 	/// It is a data structure that acts as a priority queue but also allows pairs of heaps to be merged together.
@@ -15,23 +32,13 @@ namespace essentialMix.Collections
 	/// this later will not affect the value itself, except for primitive value types. Changing the key will of course affect the
 	/// priority of the item.</typeparam>
 	/// <typeparam name="TValue">The element type of the heap</typeparam>
-	// https://brilliant.org/wiki/binomial-heap/
-	/*
-	 * https://algorithmtutor.com/Data-Structures/Tree/Binomial-Heaps/ << good (after fixing a couple of bugs - extractMin and merge).
-	 * OK, extractMin has a weird implementation and I'm not sure it's working essentially!
-	 */
-	// https://gist.github.com/chinchila/81a4c9bfd852e775f2bdf68339d212a2 << good. actually this one is better and simpler.
-	// the rest, no matter what site it is, has some issues after test, not stable or utter garbage!
-	
-	/*
-	 * And then I found https://keithschwarz.com/interesting/code/?dir=binomial-heap from Keith Schwarz a.k.a templatetypedef
-	 * @stackOverflow. It contains some useful and dense explanation everywhere. He seems to be an interesting lecturer at Stanford as
-	 * well with a bunch of interesting code.
-	 * His implementation has a different style which does not use a degree or parent node pointer per each node, which is cool because it
-	 * enhances the structure in terms of space required to store the nodes. Unfortunately, It does not have a Head/Root node but rather a
-	 * trees list and does not implement a few essential functions such as remove a node or DecreaseKey!
-	 * So, Maybe will try it some other time.
-	 */
+	[Serializable]
+	public abstract class BinomialHeapBase<TNode, T> : SiblingsHeap<TNode, T>
+		where TNode : BinomialNodeBase<TNode, T>
+	{
+
+	}
+
 	[Serializable]
 	public abstract class BinomialHeap<TKey, TValue> : SiblingsHeap<BinomialNode<TKey, TValue>, TKey, TValue>
 	{

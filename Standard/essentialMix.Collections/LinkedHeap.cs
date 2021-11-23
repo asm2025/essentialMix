@@ -9,6 +9,16 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
+	/// <summary>
+	/// <inheritdoc cref="IBinaryHeapBase{TNode, T}" />
+	/// <para>
+	/// <see href="https://en.wikipedia.org/wiki/Heap_(data_structure)">Heap</see> using the linked representation.
+	/// It is a data structure that acts as a priority queue. It is implemented as similarly to a binary heap but using
+	/// a special tree structure that is different from the complete binary trees used by binary heaps.
+	/// </para>
+	/// </summary>
+	/// <typeparam name="TNode">The node type.</typeparam>
+	/// <typeparam name="T">The element type of the heap</typeparam>
 	[Serializable]
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_HeapDebugView<,>))]
@@ -234,6 +244,7 @@ namespace essentialMix.Collections
 		protected abstract int Compare([NotNull] T x, [NotNull] T y);
 	}
 
+	/// <inheritdoc cref="LinkedHeapBase{TNode,T}" />
 	[Serializable]
 	public abstract class LinkedHeap<TNode, T> : LinkedHeapBase<TNode, T>, IBinaryHeap<TNode, T>, ICollection<T>, IReadOnlyCollection<T>, ICollection
 		where TNode : class, ITreeNode<TNode, T>
@@ -294,6 +305,10 @@ namespace essentialMix.Collections
 		}
 	}
 
+	/// <inheritdoc cref="LinkedHeapBase{TNode,T}" />
+	/// <typeparam name="TNode">The node type.</typeparam>
+	/// <typeparam name="TKey">The element key type of the heap</typeparam>
+	/// <typeparam name="TValue">The element type of the heap</typeparam>
 	[Serializable]
 	public abstract class LinkedHeap<TNode, TKey, TValue> : LinkedHeapBase<TNode, TValue>, IBinaryHeap<TNode, TKey, TValue>, ICollection<TValue>, IReadOnlyCollection<TValue>, ICollection
 		where TNode : class, ITreeNode<TNode, TKey, TValue>

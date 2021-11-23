@@ -8,6 +8,12 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
+	/// <summary>
+	/// <inheritdoc />
+	/// <para>
+	/// This heap type and its subclasses use a <see cref="ISiblingNode{TNode, T}">sibling tree node</see>
+	/// </para>
+	/// </summary>
 	[Serializable]
 	public abstract class SiblingsHeap<TNode, T> : LinkedHeap<TNode, T>
 		where TNode : class, ISiblingNode<TNode, T>
@@ -397,6 +403,12 @@ namespace essentialMix.Collections
 		#endregion
 	}
 
+	/// <summary>
+	/// <inheritdoc />
+	/// <para>
+	/// This heap type and its subclasses use a <see cref="ISiblingNode{TNode, TKey, TValue}">sibling tree node</see>
+	/// </para>
+	/// </summary>
 	[Serializable]
 	public abstract class SiblingsHeap<TNode, TKey, TValue> : LinkedHeap<TNode, TKey, TValue>
 		where TNode : class, ISiblingNode<TNode, TKey, TValue>
