@@ -3973,9 +3973,9 @@ The external id reflects the order by which they are scheduled and the -* part i
 					Debug.Assert(node != null, $"Node for key {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
 					TKey extracted = heap.ExtractNode().Key;
-					bool succeeded = heap.KeyComparer.Compare(extracted, key) == 0;
-					Console.WriteLine($"Extracted {extracted}, expected {key}");
-					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
+					bool succeeded = heap.KeyComparer.IsEqual(extracted, newKeyValue);
+					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Key}.");
 				}
 
 				Console.WriteLine();
@@ -4244,9 +4244,9 @@ The external id reflects the order by which they are scheduled and the -* part i
 					// todo fix this error: succeeded = false, why? extracted != key
 					heap.DecreaseKey(node, newKeyValue);
 					TKey extracted = heap.ExtractNode().Key;
-					bool succeeded = heap.KeyComparer.Compare(extracted, key) == 0;
-					Console.WriteLine($"Extracted {extracted}, expected {key}");
-					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
+					bool succeeded = heap.KeyComparer.IsEqual(extracted, newKeyValue);
+					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Key}.");
 				}
 
 				Console.WriteLine();
@@ -4513,9 +4513,9 @@ The external id reflects the order by which they are scheduled and the -* part i
 					Debug.Assert(node != null, $"Node for key {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
 					TKey extracted = heap.ExtractNode().Key;
-					bool succeeded = heap.KeyComparer.IsEqual(extracted, key);
-					Console.WriteLine($"Extracted {extracted}, expected {key}");
-					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
+					bool succeeded = heap.KeyComparer.IsEqual(extracted, newKeyValue);
+					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Key}.");
 				}
 
 				Console.WriteLine();
@@ -4782,9 +4782,9 @@ The external id reflects the order by which they are scheduled and the -* part i
 					Debug.Assert(node != null, $"Node for key {key} is not found.");
 					heap.DecreaseKey(node, newKeyValue);
 					TKey extracted = heap.ExtractNode().Key;
-					bool succeeded = heap.KeyComparer.IsEqual(extracted, key);
-					Console.WriteLine($"Extracted {extracted}, expected {key}");
-					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {key}.");
+					bool succeeded = heap.KeyComparer.IsEqual(extracted, newKeyValue);
+					Console.WriteLine($"Extracted {extracted}, expected {newKeyValue}");
+					Debug.Assert(succeeded, $"Extracted a different value {extracted} instead of {node.Key}.");
 				}
 
 				Console.WriteLine();

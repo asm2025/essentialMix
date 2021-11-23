@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
+using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions.Collections;
 using JetBrains.Annotations;
 
@@ -447,6 +449,7 @@ namespace essentialMix.Collections
 	/// <typeparam name="TKey">The element key type of the heap</typeparam>
 	/// <typeparam name="TValue">The element type of the heap</typeparam>
 	[Serializable]
+	[DebuggerTypeProxy(typeof(Dbg_HeapDebugView<,,>))]
 	public abstract class SiblingsHeap<TNode, TKey, TValue> : SiblingsHeapBase<TNode, TValue>, IBinaryHeap<TNode, TKey, TValue>
 		where TNode : class, ISiblingNode<TNode, TKey, TValue>
 	{

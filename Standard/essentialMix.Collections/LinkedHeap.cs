@@ -328,6 +328,7 @@ namespace essentialMix.Collections
 	/// <typeparam name="TKey">The element key type of the heap</typeparam>
 	/// <typeparam name="TValue">The element type of the heap</typeparam>
 	[Serializable]
+	[DebuggerTypeProxy(typeof(Dbg_HeapDebugView<,,>))]
 	public abstract class LinkedHeap<TNode, TKey, TValue> : LinkedHeapBase<TNode, TValue>, IBinaryHeap<TNode, TKey, TValue>
 		where TNode : class, ITreeNode<TNode, TKey, TValue>
 	{
