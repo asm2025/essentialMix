@@ -245,6 +245,8 @@ namespace essentialMix.Collections
 	}
 
 	/// <inheritdoc cref="LinkedHeapBase{TNode,T}" />
+	/// <typeparam name="TNode">The node type.</typeparam>
+	/// <typeparam name="T">The element type of the heap</typeparam>
 	[Serializable]
 	public abstract class LinkedHeap<TNode, T> : LinkedHeapBase<TNode, T>, IBinaryHeap<TNode, T>, ICollection<T>, IReadOnlyCollection<T>, ICollection
 		where TNode : class, ITreeNode<TNode, T>

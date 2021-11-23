@@ -4016,7 +4016,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(BinomialHeap<TNode, T> heap, T[] array)
+			static void DoTheTest<TNode, T>(LinkedHeapBase<TNode, T> heap, T[] array)
 				where TNode : BinomialNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));

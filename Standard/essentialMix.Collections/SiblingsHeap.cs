@@ -14,6 +14,8 @@ namespace essentialMix.Collections
 	/// This heap type and its subclasses use a <see cref="ISiblingNode{TNode, T}">sibling tree node</see>
 	/// </para>
 	/// </summary>
+	/// <typeparam name="TNode">The node type.</typeparam>
+	/// <typeparam name="T">The element type of the heap</typeparam>
 	[Serializable]
 	public abstract class SiblingsHeap<TNode, T> : LinkedHeap<TNode, T>
 		where TNode : class, ISiblingNode<TNode, T>
@@ -409,6 +411,9 @@ namespace essentialMix.Collections
 	/// This heap type and its subclasses use a <see cref="ISiblingNode{TNode, TKey, TValue}">sibling tree node</see>
 	/// </para>
 	/// </summary>
+	/// <typeparam name="TNode">The node type.</typeparam>
+	/// <typeparam name="TKey">The element key type of the heap</typeparam>
+	/// <typeparam name="TValue">The element type of the heap</typeparam>
 	[Serializable]
 	public abstract class SiblingsHeap<TNode, TKey, TValue> : LinkedHeap<TNode, TKey, TValue>
 		where TNode : class, ISiblingNode<TNode, TKey, TValue>
