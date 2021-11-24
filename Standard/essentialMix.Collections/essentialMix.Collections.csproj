@@ -60,6 +60,9 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Compile Remove="!todo\BPlusTree.cs" />
+	  <Compile Remove="!todo\GraphMatrix.cs" />
+	  <Compile Remove="!todo\SplayTree.cs" />
 	  <Compile Remove="BTree.cs" />
 	  <Compile Remove="BTreeBlock.cs" />
 	  <Compile Remove="BTreeNode.cs" />

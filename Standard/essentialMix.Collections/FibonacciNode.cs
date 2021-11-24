@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
+	/// <inheritdoc />
 	[Serializable]
 	[DebuggerDisplay("{Value} :D{Degree}")]
 	[StructLayout(LayoutKind.Sequential)]
@@ -185,6 +186,30 @@ namespace essentialMix.Collections
 		public static implicit operator T([NotNull] FibonacciNodeBase<TNode, T> node) { return node.Value; }
 	}
 
+	/// <inheritdoc cref="FibonacciNodeBase{TNode,T}" />
+	[Serializable]
+	[StructLayout(LayoutKind.Sequential)]
+	public sealed class FibonacciNode<T> : FibonacciNodeBase<FibonacciNode<T>, T>, ISiblingNode<FibonacciNode<T>, T>
+	{
+		/// <inheritdoc />
+		public FibonacciNode(T value)
+			: base(value)
+		{
+		}
+
+		public override string ToString(int level)
+		{
+			return $"{Value} :D{Degree}L{level}";
+		}
+
+		/// <inheritdoc />
+		public override void Swap(FibonacciNode<T> other)
+		{
+			(other.Value, Value) = (Value, other.Value);
+		}
+	}
+
+	/// <inheritdoc cref="FibonacciNodeBase{TNode,T}" />
 	[Serializable]
 	[DebuggerDisplay("{Key} = {Value} :D{Degree}")]
 	[StructLayout(LayoutKind.Sequential)]
@@ -216,28 +241,6 @@ namespace essentialMix.Collections
 		public override void Swap(FibonacciNode<TKey, TValue> other)
 		{
 			(other.Key, Key) = (Key, other.Key);
-			(other.Value, Value) = (Value, other.Value);
-		}
-	}
-
-	[Serializable]
-	[StructLayout(LayoutKind.Sequential)]
-	public sealed class FibonacciNode<T> : FibonacciNodeBase<FibonacciNode<T>, T>
-	{
-		/// <inheritdoc />
-		public FibonacciNode(T value)
-			: base(value)
-		{
-		}
-
-		public override string ToString(int level)
-		{
-			return $"{Value} :D{Degree}L{level}";
-		}
-
-		/// <inheritdoc />
-		public override void Swap(FibonacciNode<T> other)
-		{
 			(other.Value, Value) = (Value, other.Value);
 		}
 	}

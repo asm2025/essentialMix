@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
+	/// <inheritdoc />
 	[Serializable]
 	[DebuggerDisplay("{Value} :D{Degree}")]
 	[StructLayout(LayoutKind.Sequential)]
@@ -150,6 +151,30 @@ namespace essentialMix.Collections
 		public static implicit operator T([NotNull] BinomialNodeBase<TNode, T> node) { return node.Value; }
 	}
 
+	/// <inheritdoc cref="BinomialNodeBase{TNode,T}" />
+	[Serializable]
+	[StructLayout(LayoutKind.Sequential)]
+	public sealed class BinomialNode<T> : BinomialNodeBase<BinomialNode<T>, T>, ISiblingNode<BinomialNode<T>, T>
+	{
+		/// <inheritdoc />
+		public BinomialNode(T value)
+			: base(value)
+		{
+		}
+
+		public override string ToString(int level)
+		{
+			return $"{Value} :D{Degree}L{level}";
+		}
+
+		/// <inheritdoc />
+		public override void Swap(BinomialNode<T> other)
+		{
+			(other.Value, Value) = (Value, other.Value);
+		}
+	}
+
+	/// <inheritdoc cref="BinomialNodeBase{TNode,T}" />
 	[Serializable]
 	[DebuggerDisplay("{Key} = {Value} :D{Degree}")]
 	[StructLayout(LayoutKind.Sequential)]
@@ -181,28 +206,6 @@ namespace essentialMix.Collections
 		public override void Swap(BinomialNode<TKey, TValue> other)
 		{
 			(other.Key, Key) = (Key, other.Key);
-			(other.Value, Value) = (Value, other.Value);
-		}
-	}
-
-	[Serializable]
-	[StructLayout(LayoutKind.Sequential)]
-	public sealed class BinomialNode<T> : BinomialNodeBase<BinomialNode<T>, T>
-	{
-		/// <inheritdoc />
-		public BinomialNode(T value)
-			: base(value)
-		{
-		}
-
-		public override string ToString(int level)
-		{
-			return $"{Value} :D{Degree}L{level}";
-		}
-
-		/// <inheritdoc />
-		public override void Swap(BinomialNode<T> other)
-		{
 			(other.Value, Value) = (Value, other.Value);
 		}
 	}

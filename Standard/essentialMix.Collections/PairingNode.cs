@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections
 {
+	/// <inheritdoc />
 	[Serializable]
 	[DebuggerDisplay("{Value}")]
 	[StructLayout(LayoutKind.Sequential)]
@@ -135,6 +136,30 @@ namespace essentialMix.Collections
 		public static implicit operator TValue([NotNull] PairingNodeBase<TNode, TValue> node) { return node.Value; }
 	}
 
+	/// <inheritdoc cref="PairingNodeBase{TNode,TValue}" />
+	[Serializable]
+	[StructLayout(LayoutKind.Sequential)]
+	public sealed class PairingNode<T> : PairingNodeBase<PairingNode<T>, T>, ISiblingNode<PairingNode<T>, T>
+	{
+		/// <inheritdoc />
+		public PairingNode(T value)
+			: base(value)
+		{
+		}
+
+		public override string ToString(int level)
+		{
+			return $"{Value} :L{level}";
+		}
+
+		/// <inheritdoc />
+		public override void Swap(PairingNode<T> other)
+		{
+			(other.Value, Value) = (Value, other.Value);
+		}
+	}
+
+	/// <inheritdoc cref="PairingNodeBase{TNode,TValue}" />
 	[Serializable]
 	[DebuggerDisplay("{Key} = {Value}")]
 	[StructLayout(LayoutKind.Sequential)]
@@ -166,28 +191,6 @@ namespace essentialMix.Collections
 		public override void Swap(PairingNode<TKey, TValue> other)
 		{
 			(other.Key, Key) = (Key, other.Key);
-			(other.Value, Value) = (Value, other.Value);
-		}
-	}
-
-	[Serializable]
-	[StructLayout(LayoutKind.Sequential)]
-	public sealed class PairingNode<T> : PairingNodeBase<PairingNode<T>, T>
-	{
-		/// <inheritdoc />
-		public PairingNode(T value)
-			: base(value)
-		{
-		}
-
-		public override string ToString(int level)
-		{
-			return $"{Value} :L{level}";
-		}
-
-		/// <inheritdoc />
-		public override void Swap(PairingNode<T> other)
-		{
 			(other.Value, Value) = (Value, other.Value);
 		}
 	}
