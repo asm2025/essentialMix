@@ -20,10 +20,11 @@ namespace essentialMix.Web.Handlers
 
 		/// <inheritdoc />
 		[NotNull]
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+		[ItemNotNull]
+		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 		{
-			Task<HttpResponseMessage> response = base.SendAsync(request, cancellationToken);
-			response.Result.Headers.TransferEncodingChunked = true;
+			HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
+			response.Headers.TransferEncodingChunked = true;
 			return response;
 		}
 	}
