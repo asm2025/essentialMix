@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Web.Api.Http
 {
-	public class MessageResult : ResponseResult
+	public class MessageResult : ResponseResultBase
 	{
 		/// <inheritdoc />
 		public MessageResult([NotNull] HttpRequestMessage request, HttpStatusCode statusCode, string message)

@@ -12,7 +12,7 @@ using essentialMix.Helpers;
 
 namespace essentialMix.Web.Api.Http
 {
-	public class FileResult : PushStreamResult
+	public class FileResult : PushResultBase
 	{
 		/// <inheritdoc />
 		public FileResult([NotNull] HttpRequestMessage request, [NotNull] Uri destination)

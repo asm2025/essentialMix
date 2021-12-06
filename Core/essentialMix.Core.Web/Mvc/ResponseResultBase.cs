@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace essentialMix.Core.Web.Mvc
 {
-	public abstract class ResponseResult : IActionResult
+	public abstract class ResponseResultBase : IActionResult
 	{
-		protected ResponseResult()
+		protected ResponseResultBase()
 		{
 		}
 

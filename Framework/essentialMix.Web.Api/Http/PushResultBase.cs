@@ -10,22 +10,22 @@ using essentialMix.Extensions;
 
 namespace essentialMix.Web.Api.Http
 {
-	public abstract class PushStreamResult : ResponseResult
+	public abstract class PushResultBase : ResponseResultBase
 	{
 		/// <inheritdoc />
-		protected PushStreamResult([NotNull] HttpRequestMessage request)
+		protected PushResultBase([NotNull] HttpRequestMessage request)
 			: this(request, null, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected PushStreamResult([NotNull] HttpRequestMessage request, Action<Exception, Stream, HttpContent, TransportContext> onError)
+		protected PushResultBase([NotNull] HttpRequestMessage request, Action<Exception, Stream, HttpContent, TransportContext> onError)
 			: this(request, null, onError)
 		{
 		}
 
 		/// <inheritdoc />
-		protected PushStreamResult([NotNull] HttpRequestMessage request, Action onCompleted, Action<Exception, Stream, HttpContent, TransportContext> onError) 
+		protected PushResultBase([NotNull] HttpRequestMessage request, Action onCompleted, Action<Exception, Stream, HttpContent, TransportContext> onError) 
 			: base(request)
 		{
 			OnCompleted = onCompleted;

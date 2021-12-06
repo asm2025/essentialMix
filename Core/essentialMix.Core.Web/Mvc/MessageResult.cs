@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace essentialMix.Core.Web.Mvc
 {
-	public class MessageResult : ResponseResult
+	public class MessageResult : ResponseResultBase
 	{
 		/// <inheritdoc />
 		public MessageResult(HttpStatusCode statusCode, string message)

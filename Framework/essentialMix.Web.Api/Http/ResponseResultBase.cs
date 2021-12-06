@@ -6,9 +6,9 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Web.Api.Http
 {
-	public abstract class ResponseResult : IHttpActionResult
+	public abstract class ResponseResultBase : IHttpActionResult
 	{
-		protected ResponseResult([NotNull] HttpRequestMessage request)
+		protected ResponseResultBase([NotNull] HttpRequestMessage request)
 		{
 			Request = request;
 		}

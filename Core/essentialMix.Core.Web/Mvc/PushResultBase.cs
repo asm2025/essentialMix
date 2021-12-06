@@ -11,22 +11,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace essentialMix.Core.Web.Mvc
 {
-	public abstract class PushStreamResult : ResponseResult
+	public abstract class PushResultBase : ResponseResultBase
 	{
 		/// <inheritdoc />
-		protected PushStreamResult()
+		protected PushResultBase()
 			: this(null, null)
 		{
 		}
 
 		/// <inheritdoc />
-		protected PushStreamResult(Action<Exception, ActionContext> onError)
+		protected PushResultBase(Action<Exception, ActionContext> onError)
 			: this(null, onError)
 		{
 		}
 
 		/// <inheritdoc />
-		protected PushStreamResult(Action onCompleted, Action<Exception, ActionContext> onError) 
+		protected PushResultBase(Action onCompleted, Action<Exception, ActionContext> onError) 
 		{
 			OnCompleted = onCompleted;
 			OnError = onError;

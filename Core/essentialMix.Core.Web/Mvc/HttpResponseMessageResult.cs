@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace essentialMix.Core.Web.Mvc
 {
-	public class HttpResponseMessageResult : ResponseResult
+	public class HttpResponseMessageResult : ResponseResultBase
 	{
 		private HttpResponseMessage _response;
 
