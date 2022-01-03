@@ -34,13 +34,13 @@ namespace essentialMix.Extensions
 				input = new NewtonsoftJsonInputFormatter(logger, settings, ArrayPool<char>.Shared, new DefaultObjectPoolProvider(), thisValue, mvcJsonOptions);
 				thisValue.InputFormatters.Add(input);
 			}
-			
+
 			NewtonsoftJsonOutputFormatter output = thisValue.OutputFormatters.OfType<NewtonsoftJsonOutputFormatter>()
 															.FirstOrDefault();
-			
+
 			if (output == null)
 			{
-				output = new NewtonsoftJsonOutputFormatter(settings, ArrayPool<char>.Shared, thisValue);
+				output = new NewtonsoftJsonOutputFormatter(settings, ArrayPool<char>.Shared, thisValue, mvcJsonOptions);
 				thisValue.OutputFormatters.Add(output);
 			}
 

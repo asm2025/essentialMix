@@ -9,12 +9,14 @@ namespace essentialMix.Extensions
 {
 	public static class JwtBearerAuthenticationBuilderExtension
 	{
-		public static AuthenticationBuilder AddJwtBearerOptions([NotNull] this AuthenticationBuilder thisValue, Action<JwtBearerOptions> configureOptions = null)
+		[NotNull]
+		public static AuthenticationBuilder AddJwtBearerOptions([NotNull] this AuthenticationBuilder thisValue, [NotNull] Action<JwtBearerOptions> configureOptions)
 		{
 			return AddJwtBearerOptions(thisValue, true, configureOptions);
 		}
 
-		public static AuthenticationBuilder AddJwtBearerOptions([NotNull] this AuthenticationBuilder thisValue, bool useAsDefault, Action<JwtBearerOptions> configureOptions = null)
+		[NotNull]
+		public static AuthenticationBuilder AddJwtBearerOptions([NotNull] this AuthenticationBuilder thisValue, bool useAsDefault, [NotNull] Action<JwtBearerOptions> configureOptions)
 		{
 			return useAsDefault
 				? thisValue.AddJwtBearer(configureOptions)

@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Globalization;
+using essentialMix.Extensions;
+using essentialMix.Helpers;
+using essentialMix.Logging.Helpers;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using essentialMix.Extensions;
-using essentialMix.Helpers;
-using essentialMix.Logging.Helpers;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace essentialMix.Core.Web.Controllers
 {
@@ -93,12 +93,13 @@ namespace essentialMix.Core.Web.Controllers
 		[NotNull]
 		protected IMemoryCache Cache { get; } = new MemoryCache(new MemoryCacheOptions());
 
+		[NotNull]
 		[AllowAnonymous]
 		[HttpGet("[action]")]
 		public virtual IActionResult ChangeCulture(string name, string returnUrl)
 		{
 			name = name?.Trim();
-			if (!CultureInfoHelper.IsCultureName(name)) return LocalRedirect(returnUrl);
+			if (string.IsNullOrEmpty(name) || !CultureInfoHelper.IsCultureName(name)) return LocalRedirect(returnUrl);
 			Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName, CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(name)), new CookieOptions
 			{
 				Secure = Request.IsHttps,

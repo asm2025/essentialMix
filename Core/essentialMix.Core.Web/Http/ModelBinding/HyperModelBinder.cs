@@ -8,15 +8,16 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using essentialMix.Data.Helpers;
+using essentialMix.Extensions;
+using essentialMix.Json.Abstraction;
+using essentialMix.Web;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
-using essentialMix.Data.Helpers;
-using essentialMix.Extensions;
-using essentialMix.Json.Abstraction;
 
 namespace essentialMix.Core.Web.Http.ModelBinding
 {
@@ -45,13 +46,14 @@ namespace essentialMix.Core.Web.Http.ModelBinding
 			CancellationToken token = bindingContext.HttpContext.RequestAborted;
 			if (token.IsCancellationRequested) return Task.FromCanceled(token);
 
+			StringComparer comparer = StringComparer.OrdinalIgnoreCase;
 			Dictionary<string, string> values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-			
+
 			try
 			{
 				HttpRequest request = bindingContext.HttpContext.Request;
-				string contentType = request.ContentType.ToLowerInvariant();
-				
+				string contentType = request.ContentType;
+
 				/*
 				bindingContext.ValueProvider
 				Route data
@@ -65,24 +67,15 @@ namespace essentialMix.Core.Web.Http.ModelBinding
 				{
 					bindingContext.ModelState.SetModelValue(bindingContext.ModelName, valueProviderResult);
 
-					switch (contentType)
-					{
-						case "application/x-www-form-urlencoded":
-							HandleFromData(valueProviderResult.FirstValue.ToNullIfEmpty());
-							break;
-						case "application/json":
-						case "text/json":
-							HandleJson(valueProviderResult.FirstValue.ToNullIfEmpty());
-							break;
-						case "application/xml":
-						case "text/xml":
-							HandleXml(valueProviderResult.FirstValue.ToNullIfEmpty());
-							break;
-					}
+					string value = valueProviderResult.FirstValue.ToNullIfEmpty();
+
+					if (comparer.Equals(contentType, MediaTypeNames.Application.FormUrlencoded)) HandleFromData(value);
+					else if (comparer.Equals(contentType, MediaTypeNames.Application.Json) || comparer.Equals(contentType, MediaTypeNames.Text.Json)) HandleJson(value);
+					else if (comparer.Equals(contentType, MediaTypeNames.Application.Xml) || comparer.Equals(contentType, MediaTypeNames.Text.Xml)) HandleXml(value);
 				}
 
 				if (token.IsCancellationRequested) return Task.FromCanceled(token);
-				
+
 				RouteData routeData = bindingContext.HttpContext.GetRouteData();
 
 				foreach ((string key, object value) in routeData.Values)
@@ -92,20 +85,11 @@ namespace essentialMix.Core.Web.Http.ModelBinding
 					values[key] = Convert.ToString(value);
 				}
 
-				switch (contentType)
-				{
-					case "application/x-www-form-urlencoded":
-						HandleFromData(ReadRequestBodyLocal(request)?.TrimStart('?'));
-						break;
-					case "application/json":
-					case "text/json":
-						HandleJson(ReadRequestBodyLocal(request)?.TrimStart('?'));
-						break;
-					case "application/xml":
-					case "text/xml":
-						HandleXml(ReadRequestBodyLocal(request));
-						break;
-				}
+				string body = ReadRequestBodyLocal(request)?.TrimStart('?');
+
+				if (comparer.Equals(contentType, MediaTypeNames.Application.FormUrlencoded)) HandleFromData(body);
+				else if (comparer.Equals(contentType, MediaTypeNames.Application.Json) || comparer.Equals(contentType, MediaTypeNames.Text.Json)) HandleJson(body);
+				else if (comparer.Equals(contentType, MediaTypeNames.Application.Xml) || comparer.Equals(contentType, MediaTypeNames.Text.Xml)) HandleXml(body);
 
 				// Query string
 				HandleQueryString(request.Query);
@@ -237,7 +221,7 @@ namespace essentialMix.Core.Web.Http.ModelBinding
 			if (root == null) return;
 
 			string path = root.GetXPath() ?? string.Empty;
-			
+
 			foreach (XAttribute attribute in root.Attributes())
 			{
 				values[string.Join(".", path, attribute)] = attribute.Value;
@@ -430,7 +414,7 @@ namespace essentialMix.Core.Web.Http.ModelBinding
 	public class HyperModelBinder<T> : HyperModelBinder
 	{
 		/// <inheritdoc />
-		public HyperModelBinder([NotNull]IJsonSerializer serializer, int maxRecursionLimit = 100)
+		public HyperModelBinder([NotNull] IJsonSerializer serializer, int maxRecursionLimit = 100)
 			: base(typeof(T), serializer, maxRecursionLimit)
 		{
 		}

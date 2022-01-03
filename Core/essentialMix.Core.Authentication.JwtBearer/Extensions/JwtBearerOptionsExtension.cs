@@ -42,7 +42,7 @@ namespace essentialMix.Extensions
 													.ToNullIfEmpty()
 													.Split(StringSplitOptions.RemoveEmptyEntries, ',');
 			if (validIssuers.Count == 0) validIssuers = null;
-			
+
 			IList<string> validAudiences = configuration.GetValue<string>("jwt:audience")
 														.ToNullIfEmpty()
 														.Split(StringSplitOptions.RemoveEmptyEntries, ',');
@@ -52,13 +52,6 @@ namespace essentialMix.Extensions
 			thisValue.SaveToken = true;
 
 			TokenValidationParameters validationParameters = thisValue.TokenValidationParameters;
-
-			if (validationParameters == null)
-			{
-				validationParameters = new TokenValidationParameters();
-				thisValue.TokenValidationParameters = validationParameters;
-			}
-
 			validationParameters.ValidateIssuerSigningKey = true;
 			validationParameters.ValidateLifetime = true;
 			validationParameters.RequireSignedTokens = true;

@@ -37,13 +37,13 @@ namespace essentialMix.Core.Swagger.Filters
 					Properties = new Dictionary<string, OpenApiSchema>(StringComparer.OrdinalIgnoreCase),
 					Required = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 				}
-			}); 
+			});
 
 			IDictionary<string, OpenApiSchema> schemaProperties = uploadFileMediaType.Schema.Properties;
 			ISet<string> schemaRequired = uploadFileMediaType.Schema.Required;
 			ISchemaGenerator generator = context.SchemaGenerator;
 			SchemaRepository repository = context.SchemaRepository;
-			
+
 			foreach (ParameterDescriptor parameter in Enumerate(context.ApiDescription.ActionDescriptor))
 			{
 				OpenApiSchema schema = generator.GenerateSchema(parameter.ParameterType, repository);
@@ -54,7 +54,7 @@ namespace essentialMix.Core.Swagger.Filters
 					schema.Type = "file";
 				}
 				schemaProperties.Add(parameter.Name, schema);
-				
+
 				if (parameter.ParameterType.IsPrimitive && !parameter.ParameterType.IsNullable()
 					|| !parameter.ParameterType.IsInterface && !parameter.ParameterType.IsClass || parameter.ParameterType.HasAttribute<RequiredAttribute>())
 				{
@@ -64,7 +64,7 @@ namespace essentialMix.Core.Swagger.Filters
 
 			static IEnumerable<ParameterDescriptor> Enumerate(ActionDescriptor descriptor)
 			{
-				foreach (ParameterDescriptor parameter in descriptor.Parameters.Where(p => p.BindingInfo.BindingSource != null && p.BindingInfo.BindingSource.IsFromRequest && !p.BindingInfo.BindingSource.Id.IsSame("Path")))
+				foreach (ParameterDescriptor parameter in descriptor.Parameters.Where(p => p.BindingInfo?.BindingSource != null && p.BindingInfo.BindingSource.IsFromRequest && !p.BindingInfo.BindingSource.Id.IsSame("Path")))
 				{
 					yield return parameter;
 				}

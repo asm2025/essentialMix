@@ -91,12 +91,13 @@ namespace essentialMix.Core.Web.Controllers
 		[NotNull]
 		protected IMemoryCache Cache { get; } = new MemoryCache(new MemoryCacheOptions());
 
+		[NotNull]
 		[AllowAnonymous]
 		[HttpGet("[action]")]
 		public virtual IActionResult ChangeCulture(string name, string returnUrl)
 		{
 			name = name?.Trim();
-			if (!CultureInfoHelper.IsCultureName(name)) return LocalRedirect(returnUrl);
+			if (string.IsNullOrEmpty(name) || !CultureInfoHelper.IsCultureName(name)) return LocalRedirect(returnUrl);
 			Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName, CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(name)), new CookieOptions
 			{
 				Secure = Request.IsHttps,

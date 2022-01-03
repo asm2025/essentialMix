@@ -17,7 +17,7 @@ namespace essentialMix.Extensions
 			if (string.IsNullOrEmpty(areaName)) throw new ArgumentNullException(nameof(areaName));
 			prefix = prefix?.Trim('/', ' ') ?? string.Empty;
 			string prefixWithArea = string.Join("/", prefix, areaName);
-			thisValue.MapAreaControllerRoute(null,
+			thisValue.MapAreaControllerRoute(string.Empty,
 											areaName,
 											prefixWithArea + "/{controller}/{action}/{id?}",
 											new
@@ -67,7 +67,7 @@ namespace essentialMix.Extensions
 								{
 									UseNamespaceFallback = false
 								});
-			
+
 			if (!string.IsNullOrWhiteSpace(swaggerUrl))
 			{
 				thisValue.MapControllerRoute("Swagger",

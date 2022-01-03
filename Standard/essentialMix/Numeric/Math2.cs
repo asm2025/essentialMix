@@ -121,7 +121,7 @@ namespace essentialMix.Numeric
 			2147483629,
 			int.MaxValue
 		}, LazyThreadSafetyMode.ExecutionAndPublication);
-		
+
 		public static bool IsPrime(sbyte value) { return IsPrime((ulong)value); }
 		public static bool IsPrime(byte value) { return IsPrime((ulong)value); }
 		public static bool IsPrime(short value) { return IsPrime((ulong)value); }
@@ -161,7 +161,7 @@ namespace essentialMix.Numeric
 		{
 			long count = 0;
 
-			foreach (ulong _ in GetPrimes(minimum, maximum)) 
+			foreach (ulong _ in GetPrimes(minimum, maximum))
 				count++;
 
 			return count;
@@ -223,7 +223,12 @@ namespace essentialMix.Numeric
 		}
 
 		[NotNull]
-		public static IEnumerable<ulong> GetPrimeFactors(ulong value) { return GetPrimes(value).Where(prime => value % prime == 0); }
+		public static IEnumerable<ulong> GetPrimeFactors(ulong value)
+		{
+			return value == 0ul
+						? Enumerable.Empty<ulong>()
+						: GetPrimes(value).Where(prime => value % (double)prime == 0.0d);
+		}
 
 		public static double Ratio(byte value, byte basis) { return value / (double)basis * 100.0d; }
 
@@ -1106,7 +1111,7 @@ namespace essentialMix.Numeric
 		{
 			ulong result = 1;
 
-			for (ulong i = 1; i <= value; i++) 
+			for (ulong i = 1; i <= value; i++)
 				result *= i;
 
 			return result;

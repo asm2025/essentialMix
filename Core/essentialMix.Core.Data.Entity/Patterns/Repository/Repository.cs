@@ -33,13 +33,15 @@ namespace essentialMix.Core.Data.Entity.Patterns.Repository
 		}
 
 		/// <inheritdoc />
+		[NotNull]
 		public TEntity Add(TEntity entity)
 		{
 			ThrowIfDisposed();
 			return AddInternal(entity);
 		}
 
-		protected virtual TEntity AddInternal([NotNull] TEntity entity) { return DbSet.Add(entity)?.Entity; }
+		[NotNull]
+		protected virtual TEntity AddInternal([NotNull] TEntity entity) { return DbSet.Add(entity).Entity; }
 
 		/// <inheritdoc />
 		public ValueTask<TEntity> AddAsync(TEntity entity, CancellationToken token = default(CancellationToken))
@@ -56,13 +58,15 @@ namespace essentialMix.Core.Data.Entity.Patterns.Repository
 		}
 
 		/// <inheritdoc />
+		[NotNull]
 		public TEntity Attach(TEntity entity)
 		{
 			ThrowIfDisposed();
 			return AttachInternal(entity);
 		}
 
-		protected virtual TEntity AttachInternal([NotNull] TEntity entity) { return DbSet.Attach(entity)?.Entity; }
+		[NotNull]
+		protected virtual TEntity AttachInternal([NotNull] TEntity entity) { return DbSet.Attach(entity).Entity; }
 
 		/// <inheritdoc />
 		public ValueTask<TEntity> AttachAsync(TEntity entity, CancellationToken token = default(CancellationToken))
@@ -139,16 +143,18 @@ namespace essentialMix.Core.Data.Entity.Patterns.Repository
 		}
 
 		/// <inheritdoc />
+		[NotNull]
 		public TEntity Delete(TEntity entity)
 		{
 			ThrowIfDisposed();
 			return DeleteInternal(entity);
 		}
 
+		[NotNull]
 		protected virtual TEntity DeleteInternal([NotNull] TEntity entity)
 		{
 			if (Context.Entry(entity).State == EntityState.Detached) DbSet.Attach(entity);
-			return DbSet.Remove(entity)?.Entity;
+			return DbSet.Remove(entity).Entity;
 		}
 
 		public ValueTask<TEntity> DeleteAsync(TEntity entity, CancellationToken token = default(CancellationToken))

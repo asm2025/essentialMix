@@ -53,7 +53,7 @@ namespace essentialMix.Core.Data.Entity.Patterns.Repository
 
 		/// <inheritdoc />
 		public DbSet<TEntity> DbSet { get; }
-		
+
 		protected bool OwnsContext { get; }
 
 		/// <inheritdoc />
@@ -114,18 +114,18 @@ namespace essentialMix.Core.Data.Entity.Patterns.Repository
 
 		protected override IQueryable<TEntity> PrepareListQuery(IQueryable<TEntity> query, IPagination settings)
 		{
-			if (settings is IIncludeSettings { Include: { Count: > 0 } } includeSettings)
+			if (settings is IIncludeSettings { Include.Count: > 0 } includeSettings)
 			{
 				query = includeSettings.Include.SkipNullOrEmpty()
 										.Aggregate(query, (current, path) => current.Include(path));
 			}
-			
+
 			if (settings is IFilterSettings filterSettings && !string.IsNullOrWhiteSpace(filterSettings.FilterExpression))
 			{
 				query = query.Where(filterSettings.FilterExpression);
 			}
-			
-			if (settings is ISortable { OrderBy: { Count: > 0 } } sortable)
+
+			if (settings is ISortable { OrderBy.Count: > 0 } sortable)
 			{
 				bool addedFirst = false;
 
@@ -173,8 +173,8 @@ namespace essentialMix.Core.Data.Entity.Patterns.Repository
 		protected override IQueryable<TEntity> PrepareGetQuery(IGetSettings settings)
 		{
 			IQueryable<TEntity> query = PrepareGetQuery(settings.KeyValue);
-			
-			if (settings is IIncludeSettings { Include: { Count: > 0 } } includeSettings)
+
+			if (settings is IIncludeSettings { Include.Count: > 0 } includeSettings)
 			{
 				query = includeSettings.Include.SkipNullOrEmpty()
 										.Aggregate(query, (current, path) => current.Include(path));

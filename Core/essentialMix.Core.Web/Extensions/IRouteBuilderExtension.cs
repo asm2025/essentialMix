@@ -18,8 +18,8 @@ namespace essentialMix.Extensions
 			prefix = prefix?.Trim('/', ' ') ?? string.Empty;
 			string prefixWithArea = string.Join("/", prefix, areaName);
 			thisValue.MapAreaRoute(
-									null, 
-									areaName, 
+									string.Empty,
+									areaName,
 									prefixWithArea + "/{controller}/{action}/{id?}",
 									new { area = areaName, action = "Index" },
 									null,
@@ -55,7 +55,7 @@ namespace essentialMix.Extensions
 								{
 									UseNamespaceFallback = false
 								});
-			
+
 			if (!string.IsNullOrWhiteSpace(swaggerUrl))
 			{
 				thisValue.MapRoute("Swagger",

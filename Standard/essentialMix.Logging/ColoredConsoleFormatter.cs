@@ -82,10 +82,10 @@ namespace essentialMix.Logging
 		{
 			ThrowIfDisposed();
 			if (logEntry.LogLevel == LogLevel.None) return;
-			
-			string text = logEntry.Formatter(logEntry.State, logEntry.Exception);
-			if (text == null && logEntry.Exception == null) return;
-			
+
+			string text = logEntry.Formatter?.Invoke(logEntry.State, logEntry.Exception);
+			if (string.IsNullOrEmpty(text) && logEntry.Exception == null) return;
+
 			LogLevel logLevel = logEntry.Exception != null && logEntry.LogLevel < LogLevel.Error
 									? LogLevel.Error
 									: logEntry.LogLevel;
@@ -226,7 +226,7 @@ namespace essentialMix.Logging
 					{
 						Exception ex = inn;
 
-						while (ex.InnerException != null) 
+						while (ex.InnerException != null)
 							ex = ex.InnerException;
 
 						sb.AppendLine(ex.Message);
@@ -236,7 +236,7 @@ namespace essentialMix.Logging
 				}
 				default:
 				{
-					while (exception.InnerException != null) 
+					while (exception.InnerException != null)
 						exception = exception.InnerException;
 
 					return exception.Message;
