@@ -1,10 +1,9 @@
 using System.ComponentModel;
 
-namespace essentialMix.Collections
+namespace essentialMix.Collections;
+
+public interface IFixable
 {
-	public interface IFixable
-	{
-		[Browsable(false)]
-		bool IsFixed { get; }
-	}
+	[Browsable(false)]
+	bool IsFixed { get; }
 }

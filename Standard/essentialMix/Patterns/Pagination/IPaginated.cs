@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace essentialMix.Patterns.Pagination
+namespace essentialMix.Patterns.Pagination;
+
+public interface IPaginated<out T>
 {
-	public interface IPaginated<out T>
-	{
-		[NotNull]
-		IEnumerable<T> Result { get; }
+	[NotNull]
+	IEnumerable<T> Result { get; }
 		
-		[NotNull]
-		IPagination Pagination { get; }
-	}
+	[NotNull]
+	IPagination Pagination { get; }
 }

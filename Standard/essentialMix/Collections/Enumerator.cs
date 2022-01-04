@@ -6,158 +6,164 @@ using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
 
-namespace essentialMix.Collections
+namespace essentialMix.Collections;
+
+public class Enumerator : Disposable, IEnumerator, IEnumerable
 {
-	public class Enumerator : Disposable, IEnumerator, IEnumerable
+	private IEnumerator _impl;
+
+	public Enumerator() { IsIterable = false; }
+
+	public Enumerator([NotNull] IEnumerable enumerable)
 	{
-		private IEnumerator _impl;
+		Enumerable = enumerable;
 
-		public Enumerator() { IsIterable = false; }
-
-		public Enumerator([NotNull] IEnumerable enumerable)
+		switch (enumerable)
 		{
-			Enumerable = enumerable;
-
-			switch (enumerable)
-			{
-				case IReadOnlyCollection<object> readOnlyCollection:
-					IsIterable = readOnlyCollection.Count > 0;
-					return;
-				case ICollection collection:
-					IsIterable = collection.Count > 0;
-					return;
-			}
-
-			IEnumerator im = Enumerable.GetEnumerator();
-			IsIterable = im.MoveNext();
+			case IReadOnlyCollection<object> readOnlyCollection:
+				IsIterable = readOnlyCollection.Count > 0;
+				return;
+			case ICollection collection:
+				IsIterable = collection.Count > 0;
+				return;
 		}
 
-		public virtual object Current => Impl.Current;
+		IEnumerator im = Enumerable.GetEnumerator();
+		IsIterable = im.MoveNext();
+		ObjectHelper.Dispose(ref im);
+	}
 
-		public virtual int Position => Index;
+	public virtual object Current => Impl.Current;
 
-		public bool IsIterable { get; protected set; }
+	public virtual int Position => Index;
 
-		protected IEnumerable Enumerable { get; }
+	public bool IsIterable { get; protected set; }
 
-		protected int Index { get; set; } = -1;
+	protected IEnumerable Enumerable { get; }
 
-		protected bool Done { get; set; }
+	protected int Index { get; set; } = -1;
 
-		protected virtual IEnumerator Impl => _impl ??= Enumerable?.GetEnumerator();
+	protected bool Done { get; set; }
 
-		/// <inheritdoc />
-		public IEnumerator GetEnumerator()
+	protected virtual IEnumerator Impl => _impl ??= Enumerable?.GetEnumerator();
+
+	/// <inheritdoc />
+	public IEnumerator GetEnumerator()
+	{
+		Reset();
+		return this;
+	}
+
+	public virtual bool MoveNext()
+	{
+		if (Impl == null || !IsIterable || Done) return false;
+
+		if (!Impl.MoveNext())
 		{
-			Reset();
-			return this;
+			Done = true;
+			return false;
 		}
 
-		public virtual bool MoveNext()
+		Index++;
+		return true;
+	}
+
+	public virtual void Reset()
+	{
+		_impl = null;
+		Index = -1;
+		Done = false;
+	}
+
+	protected override void Dispose(bool disposing)
+	{
+		if (disposing) ObjectHelper.Dispose(ref _impl);
+		base.Dispose(disposing);
+	}
+}
+
+public class Enumerator<T> : Disposable, IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable
+{
+	private IEnumerator<T> _impl;
+
+	public Enumerator() { IsIterable = false; }
+
+	public Enumerator([NotNull] IEnumerable<T> enumerable)
+	{
+		switch (enumerable)
 		{
-			if (Impl == null || !IsIterable || Done) return false;
-
-			if (!Impl.MoveNext())
-			{
-				Done = true;
-				return false;
-			}
-
-			Index++;
-			return true;
-		}
-
-		public virtual void Reset()
-		{
-			_impl = null;
-			Index = -1;
-			Done = false;
+			case IReadOnlyCollection<T> readOnlyCollection:
+				Enumerable = readOnlyCollection;
+				IsIterable = readOnlyCollection.Count > 0;
+				break;
+			case ICollection<T> collection:
+				Enumerable = collection;
+				IsIterable = collection.Count > 0;
+				break;
+			default:
+				IList<T> list = enumerable.ToList();
+				Enumerable = list;
+				IsIterable = list.Count > 0;
+				break;
 		}
 	}
 
-	public class Enumerator<T> : Disposable, IEnumerator<T>, IEnumerator, IEnumerable<T>, IEnumerable
+	public virtual T Current => Impl.Current;
+
+	object IEnumerator.Current => Current;
+
+	public virtual int Position { get => Index; set => Index = value; }
+
+	public bool IsIterable { get; protected set; }
+
+	public IEnumerable<T> Enumerable { get; }
+
+	protected int Index { get; set; } = -1;
+
+	protected bool Done { get; set; }
+
+	protected virtual IEnumerator<T> Impl { get { return _impl ??= Enumerable?.GetEnumerator(); } set => _impl = value; }
+
+	/// <inheritdoc />
+	public IEnumerator<T> GetEnumerator()
 	{
-		private IEnumerator<T> _impl;
+		Reset();
+		return this;
+	}
 
-		public Enumerator() { IsIterable = false; }
+	/// <inheritdoc />
+	IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-		public Enumerator([NotNull] IEnumerable<T> enumerable)
+	public virtual bool MoveNext()
+	{
+		if (!IsIterable || Done) return false;
+
+		if (!Impl.MoveNext())
 		{
-			switch (enumerable)
-			{
-				case IReadOnlyCollection<T> readOnlyCollection:
-					Enumerable = readOnlyCollection;
-					IsIterable = readOnlyCollection.Count > 0;
-					break;
-				case ICollection<T> collection:
-					Enumerable = collection;
-					IsIterable = collection.Count > 0;
-					break;
-				default:
-					IList<T> list = enumerable.ToList();
-					Enumerable = list;
-					IsIterable = list.Count > 0;
-					break;
-			}
+			Done = true;
+			return false;
 		}
 
-		public virtual T Current => Impl.Current;
+		Index++;
+		return true;
+	}
 
-		object IEnumerator.Current => Current;
+	public virtual void Reset()
+	{
+		_impl = null;
+		Index = -1;
+		Done = false;
+	}
 
-		public virtual int Position { get => Index; set => Index = value; }
+	protected override void Dispose(bool disposing)
+	{
+		if (disposing) ObjectHelper.Dispose(ref _impl);
+		base.Dispose(disposing);
+	}
 
-		public bool IsIterable { get; protected set; }
-
-		public IEnumerable<T> Enumerable { get; }
-
-		protected int Index { get; set; } = -1;
-
-		protected bool Done { get; set; }
-
-		protected virtual IEnumerator<T> Impl { get { return _impl ??= Enumerable?.GetEnumerator(); } set => _impl = value; }
-
-		/// <inheritdoc />
-		public IEnumerator<T> GetEnumerator()
-		{
-			Reset();
-			return this;
-		}
-
-		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-		public virtual bool MoveNext()
-		{
-			if (!IsIterable || Done) return false;
-
-			if (!Impl.MoveNext())
-			{
-				Done = true;
-				return false;
-			}
-
-			Index++;
-			return true;
-		}
-
-		public virtual void Reset()
-		{
-			_impl = null;
-			Index = -1;
-			Done = false;
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing) ObjectHelper.Dispose(ref _impl);
-			base.Dispose(disposing);
-		}
-
-		protected void AssertImpl()
-		{
-			if (Impl != null) return;
-			throw new InvalidOperationException("No implementation available for this operation");
-		}
+	protected void AssertImpl()
+	{
+		if (Impl != null) return;
+		throw new InvalidOperationException("No implementation available for this operation");
 	}
 }

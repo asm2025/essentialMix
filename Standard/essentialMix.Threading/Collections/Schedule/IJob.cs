@@ -1,7 +1,6 @@
-﻿namespace essentialMix.Threading.Collections.Schedule
+﻿namespace essentialMix.Threading.Collections.Schedule;
+
+public interface IJob
 {
-	public interface IJob
-	{
-		void Execute();
-	}
+	void Execute();
 }

@@ -1,17 +1,16 @@
 using System;
 
-namespace essentialMix.Logging
+namespace essentialMix.Logging;
+
+public readonly struct ConsoleColors
 {
-	public readonly struct ConsoleColors
+	public ConsoleColors(ConsoleColor? foreground, ConsoleColor? background)
 	{
-		public ConsoleColors(ConsoleColor? foreground, ConsoleColor? background)
-		{
-			Foreground = foreground;
-			Background = background;
-		}
-
-		public ConsoleColor? Foreground { get; }
-
-		public ConsoleColor? Background { get; }
+		Foreground = foreground;
+		Background = background;
 	}
+
+	public ConsoleColor? Foreground { get; }
+
+	public ConsoleColor? Background { get; }
 }

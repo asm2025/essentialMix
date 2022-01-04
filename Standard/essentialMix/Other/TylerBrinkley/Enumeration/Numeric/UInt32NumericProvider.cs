@@ -25,44 +25,43 @@ using System;
 using System.Globalization;
 
 // ReSharper disable once CheckNamespace
-namespace Other.TylerBrinkley.Enumeration.Numeric
+namespace Other.TylerBrinkley.Enumeration.Numeric;
+
+internal class UInt32NumericProvider : INumericProvider<uint>
 {
-    internal class UInt32NumericProvider : INumericProvider<uint>
-    {
-        public string ToHexadecimalString(uint value) { return value.ToString("X8"); }
+	public string ToHexadecimalString(uint value) { return value.ToString("X8"); }
 
-		public string ToDecimalString(uint value) { return value.ToString(); }
+	public string ToDecimalString(uint value) { return value.ToString(); }
 
-		public uint One => 1U;
+	public uint One => 1U;
 
-		public uint Zero => 0U;
+	public uint Zero => 0U;
 
-		public uint And(uint left, uint right) { return left & right; }
+	public uint And(uint left, uint right) { return left & right; }
 
-		public int BitCount(uint value) { return Number.BitCount((int)value); }
+	public int BitCount(uint value) { return Number.BitCount((int)value); }
 
-		public uint Create(ulong value) { return (uint)value; }
+	public uint Create(ulong value) { return (uint)value; }
 
-		public uint Create(long value) { return (uint)value; }
+	public uint Create(long value) { return (uint)value; }
 
-		public bool IsInValueRange(ulong value) { return value <= uint.MaxValue; }
+	public bool IsInValueRange(ulong value) { return value <= uint.MaxValue; }
 
-		public bool IsInValueRange(long value) { return value is >= uint.MinValue and <= uint.MaxValue; }
+	public bool IsInValueRange(long value) { return value is >= uint.MinValue and <= uint.MaxValue; }
 
-		public uint LeftShift(uint value, int amount) { return value << amount; }
+	public uint LeftShift(uint value, int amount) { return value << amount; }
 
-		public bool LessThan(uint left, uint right) { return left < right; }
+	public bool LessThan(uint left, uint right) { return left < right; }
 
-		public uint Not(uint value) { return ~value; }
+	public uint Not(uint value) { return ~value; }
 
-		public uint Or(uint left, uint right) { return left | right; }
+	public uint Or(uint left, uint right) { return left | right; }
 
-		public uint Subtract(uint left, uint right) { return left - right; }
+	public uint Subtract(uint left, uint right) { return left - right; }
 
-		public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out uint result) { return uint.TryParse(s, style, provider, out result); }
+	public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out uint result) { return uint.TryParse(s, style, provider, out result); }
 
-		public bool TryParseNative(string s, out uint result) { return uint.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
+	public bool TryParseNative(string s, out uint result) { return uint.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
 
-		public uint Xor(uint left, uint right) { return left ^ right; }
-	}
+	public uint Xor(uint left, uint right) { return left ^ right; }
 }

@@ -1,15 +1,14 @@
-﻿namespace essentialMix.Patterns.Text
+﻿namespace essentialMix.Patterns.Text;
+
+public enum TextCasing
 {
-	public enum TextCasing
-	{
-		Any,
-		Upper,
-		Lower,
-		Pascal,
-		Camel,
-		StartCase,
-		Snake,
-		Dash,
-		Dot
-	}
+	Any,
+	Upper,
+	Lower,
+	Pascal,
+	Camel,
+	StartCase,
+	Snake,
+	Dash,
+	Dot
 }

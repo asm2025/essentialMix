@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace essentialMix.Patterns.Sorting
+namespace essentialMix.Patterns.Sorting;
+
+public interface ISortable
 {
-	public interface ISortable
-	{
-		IList<SortField> OrderBy { get; set; }
-	}
+	IList<SortField> OrderBy { get; set; }
 }

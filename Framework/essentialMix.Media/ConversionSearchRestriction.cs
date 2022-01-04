@@ -1,9 +1,8 @@
-namespace essentialMix.Media
+namespace essentialMix.Media;
+
+public enum ConversionSearchRestriction
 {
-	public enum ConversionSearchRestriction
-	{
-		None,
-		MP4,
-		WebMedia
-	}
+	None,
+	MP4,
+	WebMedia
 }

@@ -1,11 +1,10 @@
-﻿namespace essentialMix.Newtonsoft.Serialization
+﻿namespace essentialMix.Newtonsoft.Serialization;
+
+public class CamelCasePropertyExtensionNoDictionaryNamingStrategy : PropertyExtensionNoDictionaryNamingStrategy
 {
-	public class CamelCasePropertyExtensionNoDictionaryNamingStrategy : PropertyExtensionNoDictionaryNamingStrategy
+	/// <inheritdoc />
+	public CamelCasePropertyExtensionNoDictionaryNamingStrategy()
+		: base(NamingStrategyType.CamelCase)
 	{
-		/// <inheritdoc />
-		public CamelCasePropertyExtensionNoDictionaryNamingStrategy()
-			: base(NamingStrategyType.CamelCase)
-		{
-		}
 	}
 }

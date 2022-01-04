@@ -1,7 +1,6 @@
-namespace essentialMix.Patterns.Editable
+namespace essentialMix.Patterns.Editable;
+
+public interface IEditable : System.ComponentModel.IEditableObject
 {
-	public interface IEditable : System.ComponentModel.IEditableObject
-	{
-		bool IsDirty { get; }
-	}
+	bool IsDirty { get; }
 }

@@ -1,16 +1,15 @@
 using System;
 using JetBrains.Annotations;
 
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class RandomExtension
 {
-	public static class RandomExtension
+	public static bool NextBool([NotNull] this Random thisValue)
 	{
-		public static bool NextBool([NotNull] this Random thisValue)
+		lock(thisValue)
 		{
-			lock(thisValue)
-			{
-				return thisValue.Next(0, 1) == 1;
-			}
+			return thisValue.Next(0, 1) == 1;
 		}
 	}
 }

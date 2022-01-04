@@ -11,18 +11,14 @@ using System.Linq.Expressions;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Principal;
+using System.ServiceProcess;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Bogus;
 using Bogus.DataSets;
-using JetBrains.Annotations;
-using System.ServiceProcess;
-using System.Threading.Tasks;
 using essentialMix;
-using essentialMix.Newtonsoft.Helpers;
-using essentialMix.Patterns.Threading;
-using essentialMix.Threading;
 using essentialMix.Collections;
 using essentialMix.Comparers;
 using essentialMix.ComponentModel;
@@ -31,20 +27,22 @@ using essentialMix.Cryptography.Settings;
 using essentialMix.Exceptions;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
+using essentialMix.Newtonsoft.Helpers;
 using essentialMix.Patterns.Events;
-using Other.Microsoft.Collections;
+using essentialMix.Patterns.Threading;
+using essentialMix.Threading;
 using essentialMix.Threading.Helpers;
 using essentialMix.Threading.IO;
 using essentialMix.Threading.Patterns.ProducerConsumer;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Other.JonSkeet.MiscUtil.Collections;
-
-using TimeoutException = System.TimeoutException;
-using Menu = EasyConsole.Menu;
+using Other.Microsoft.Collections;
+using static Crayon.Output;
 using AutoResetEvent = essentialMix.Threading.AutoResetEvent;
 using ManualResetEvent = essentialMix.Threading.ManualResetEvent;
-
-using static Crayon.Output;
+using Menu = EasyConsole.Menu;
+using TimeoutException = System.TimeoutException;
 
 // ReSharper disable UnusedMember.Local
 namespace TestApp
@@ -55,10 +53,10 @@ namespace TestApp
 		private const int SMALL = 10_000;
 		private const int MEDIUM = 100_000;
 		private const int HEAVY = 1_000_000;
-		
+
 		private const int MAX_ITERATION_INC = 3;
 		private const int TOP_COUNT = 10;
-		
+
 		private const int PAUSE_TIMEOUT = 3000;
 
 		private static readonly string __compilationText = Yellow($@"
@@ -69,7 +67,7 @@ with just {START} items and the next time when you press '{Bright.Green("Y")}', 
 work with {HEAVY} items.");
 
 		private static readonly Lazy<Faker> __fakeGenerator = new Lazy<Faker>(() => new Faker(), LazyThreadSafetyMode.PublicationOnly);
-		private static readonly string[] __sortAlgorithms = 
+		private static readonly string[] __sortAlgorithms =
 		{
 			nameof(IListExtension.SortBubble),
 			nameof(IListExtension.SortSelection),
@@ -138,7 +136,7 @@ work with {HEAVY} items.");
 			//TestAllBinaryTreesPerformance();
 
 			//TestSortedSetPerformance();
-			
+
 			//TestTreeEquality();
 
 			//TestTrie();
@@ -147,22 +145,22 @@ work with {HEAVY} items.");
 			//TestSkipList();
 
 			//TestDisjointSet();
-			
+
 			//TestBinaryHeapAdd();
 			//TestBinaryHeapRemove();
 			//TestBinaryHeapElementAt();
 			//TestBinaryHeapDecreaseKey();
-		
+
 			//TestBinomialHeapAdd();
 			//TestBinomialHeapRemove();
 			//TestBinomialHeapElementAt();
 			TestBinomialHeapDecreaseKey();
-			
+
 			//TestPairingHeapAdd();
 			//TestPairingHeapRemove();
 			//TestPairingHeapElementAt();
 			//TestPairingHeapDecreaseKey();
-			
+
 			//TestFibonacciHeapAdd();
 			//TestFibonacciHeapRemove();
 			//TestFibonacciHeapElementAt();
@@ -177,12 +175,12 @@ work with {HEAVY} items.");
 			//TestSingletonAppGuard();
 
 			//TestImpersonationHelper();
-			
+
 			//TestServiceHelper();
-			
+
 			//TestUriHelper();
 			//TestUriHelperRelativeUrl();
-			
+
 			//TestJsonUriConverter();
 
 			//TestDevicesMonitor();
@@ -190,11 +188,11 @@ work with {HEAVY} items.");
 			//TestAppInfo();
 
 			//TestObservableCollections();
-			
+
 			//TestEnumerateDirectoriesAndFiles();
-			
+
 			//TestEventWaitHandle();
-			
+
 			//TestWaitForEvent();
 
 			//TestBlockingStream();
@@ -225,7 +223,7 @@ work with {HEAVY} items.");
 			Title("Testing bool conversion...");
 			BooleanTypeDescriptionProvider.Register();
 
-			foreach (string value in values) 
+			foreach (string value in values)
 				Console.WriteLine($"'{value}' evaluates to {value.To(false).ToYesNo()}");
 		}
 
@@ -377,18 +375,18 @@ work with {HEAVY} items.");
 				i = (i + 1) % allWords.Length;
 				string[] words = allWords[i];
 				Console.Write(Bright.Black("Words: "));
-				
+
 				if (words == null) Console.WriteLine("<null>");
 				else if (words.Length == 0) Console.WriteLine("[]");
 				else Console.WriteLine("[" + string.Join(", ", words) + "]");
-				
+
 				IReadOnlyCollection<IReadOnlyList<string>> anagrams = StringHelper.GroupAnagrams(words);
 				Console.Write(Bright.Yellow("Anagrams: "));
 
 				if (anagrams == null) Console.WriteLine("<null>");
 				else if (anagrams.Count == 0) Console.WriteLine("[]");
 				else Console.WriteLine(string.Join(", ", anagrams.Select(e => "[" + string.Join(", ", e) + "]")));
-				
+
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
@@ -421,10 +419,10 @@ work with {HEAVY} items.");
 				i = (i + 1) % allNumbers.Length;
 				int[] numbers = allNumbers[i];
 				Console.Write(Bright.Black("Numbers: "));
-				
+
 				if (numbers.Length == 0) Console.WriteLine("[]");
 				else Console.WriteLine("[" + string.Join(", ", numbers) + "]");
-				
+
 				Console.WriteLine(Bright.Yellow("Sum: ") + numbers.KadaneMaximumSum());
 				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
@@ -508,10 +506,10 @@ work with {HEAVY} items.");
 				i = (i + 1) % allNumbers.Length;
 				(string label, int[] numbers) = allNumbers[i];
 				Console.Write(Bright.Black(label));
-				
+
 				if (numbers.Length == 0) Console.WriteLine("[]");
 				else Console.WriteLine("[" + string.Join(", ", numbers) + "]");
-				
+
 				Console.WriteLine(Bright.Yellow("Deepest Pit: ") + numbers.DeepestPit());
 				Console.Write($"Press {Bright.Green("[Y]")} to move to next test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
@@ -598,7 +596,7 @@ work with {HEAVY} items.");
 							WorkCompletedCallback = que => QueueCompleted(que, val, visited, duplicates, mode, clock, timeoutString, written)
 						}
 					};
-				
+
 					visited.Clear();
 					duplicates.Clear();
 					queue = ProducerConsumerQueue.Create(mode, options, token);
@@ -665,7 +663,7 @@ work with {HEAVY} items.");
 					{
 						Console.WriteLine();
 
-						foreach (ThreadQueueMode m in modes) 
+						foreach (ThreadQueueMode m in modes)
 							queueModes.Enqueue(m);
 
 						if (iteration < MAX_ITERATION_INC) values = Enumerable.Range(1, values.Length * ++iteration).ToArray();
@@ -722,11 +720,11 @@ work with {HEAVY} items.");
 				Console.Write($"{e:D4} ");
 				Interlocked.Increment(ref written);
 
-				lock(visited)
+				lock (visited)
 				{
 					if (!visited.Add(e))
 					{
-						lock(duplicates) 
+						lock (duplicates)
 							duplicates.Add(e);
 					}
 				}
@@ -828,12 +826,12 @@ work with {HEAVY} items.");
 								priorityQueue = new MinBinomialHeap<Student>(ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade)));
 							else
 								priorityQueue.Clear();
-							
+
 							break;
 						case ConsoleKey.X:
 							if (priorityQueue == null || priorityQueue.GetType() != typeof(MaxBinomialHeap<Student>))
 								priorityQueue = new MaxBinomialHeap<Student>(ComparisonComparer.FromComparison<Student>((x, y) => x.Grade.CompareTo(y.Grade)));
-							else 
+							else
 								priorityQueue.Clear();
 
 							break;
@@ -954,8 +952,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 				ConsoleKey key = Console.ReadKey(true).Key;
 				Console.WriteLine();
 				if (key != ConsoleKey.Y) return false;
-				
-				foreach (ThreadQueueMode m in modes) 
+
+				foreach (ThreadQueueMode m in modes)
 					queue.Enqueue(m);
 
 				return true;
@@ -1001,15 +999,15 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine($"{e.External:D2}-{e.Id:D2}. {e.Name}, Grade = {e.Grade:###.##}");
 				Interlocked.Increment(ref written);
 
-				lock(visited)
+				lock (visited)
 				{
 					if (!visited.Add(e))
 					{
-						lock(duplicates) 
+						lock (duplicates)
 							duplicates.Add(e);
 					}
 				}
-	
+
 				if (threshold.IsSet) return;
 				threshold.SignalOne();
 			}
@@ -1047,7 +1045,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				return "test";
 			}
 		}
-	
+
 		private static void TestSortAlgorithm()
 		{
 			const string ALGORITHM = nameof(IListExtension.SortInsertion);
@@ -1156,7 +1154,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(Bright.Yellow("Finished"));
 				Console.WriteLine();
 				Console.WriteLine(Bright.Green($"Fastest {TOP_COUNT} numeric sort:"));
-			
+
 				foreach (KeyValuePair<string, long> pair in numericResults
 															.OrderBy(e => e.Value)
 															.Take(TOP_COUNT))
@@ -1213,19 +1211,19 @@ The external id reflects the order by which they are scheduled and the -* part i
 		private static void TestLinkedQueue()
 		{
 			Title("Testing LinkedQueue...");
-			
+
 			int len = RNGRandomHelper.Next(5, 20);
 			int[] values = GetRandomIntegers(len);
 			Console.WriteLine("Array: " + string.Join(", ", values));
 
 			Console.WriteLine("As Queue:");
 			LinkedQueue<int> queue = new LinkedQueue<int>(DequeuePriority.FIFO);
-	
+
 			foreach (int value in values)
 			{
 				queue.Enqueue(value);
 			}
-	
+
 			while (queue.Count > 0)
 			{
 				Console.WriteLine(queue.Dequeue());
@@ -1261,7 +1259,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				queue.Enqueue(value);
 				Console.WriteLine($"Adding Value: {value}, Min: {queue.Minimum}, Max: {queue.Maximum}");
 			}
-	
+
 			Console.WriteLine();
 
 			while (queue.Count > 0)
@@ -1272,7 +1270,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			Console.WriteLine();
 			Console.WriteLine();
 			Console.WriteLine("As Stack:");
-			
+
 			MinMaxStack<int> stack = new MinMaxStack<int>();
 
 			foreach (int value in values)
@@ -1344,7 +1342,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine($"Test adding {Bright.Cyan().Underline(value.ToString())} before {Bright.Cyan().Underline(x.ToString())}...");
 				SinglyLinkedListNode<int> previous = list.AddBefore(node, value);
 				list.Remove(previous);
-	
+
 				Console.WriteLine($"Test adding {Bright.Cyan().Underline(value.ToString())} to the beginning of the list...");
 				list.AddFirst(value);
 				list.RemoveFirst();
@@ -1462,7 +1460,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine($"Test adding {Bright.Cyan().Underline(value.ToString())} before {Bright.Cyan().Underline(x.ToString())}...");
 				list.AddBefore(node, value);
 				Console.WriteLine("Node's previous: " + node.Previous?.Value);
-				
+
 				Console.WriteLine($"Test adding {Bright.Cyan().Underline(value.ToString())} to the beginning of the list...");
 				list.AddFirst(value);
 
@@ -1621,7 +1619,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine(Bright.Red("Test removing..."));
-		
+
 				int removed = 0;
 				count = deque.Count;
 				clock.Restart();
@@ -1810,7 +1808,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing CircularBuffer as a Stack...");
 				DoTheTest(buffer, values, buffer.Enqueue, buffer.Pop, print, clock);
 				Title("End testing CircularBuffer as a Queue...");
-				
+
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
@@ -1883,7 +1881,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				if (print) Console.WriteLine(string.Join(", ", array));
 
 				Console.WriteLine(Bright.Red("Test removing..."));
-		
+
 				int removed = 0;
 				count = buffer.Count;
 				clock.Restart();
@@ -1945,7 +1943,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing LinkedCircularBuffer as a Stack...");
 				DoTheTest(buffer, values, buffer.Enqueue, buffer.Pop, print, clock);
 				Title("End testing LinkedCircularBuffer as a Queue...");
-				
+
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
@@ -2018,7 +2016,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				if (print) Console.WriteLine(string.Join(", ", array));
 
 				Console.WriteLine(Bright.Red("Test removing..."));
-		
+
 				int removed = 0;
 				count = buffer.Count;
 				clock.Restart();
@@ -2071,7 +2069,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 
 				DoTheTest(collection, values, print, clock);
-				
+
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
@@ -2140,7 +2138,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 				Console.WriteLine(Bright.Yellow("Test toggle..."));
 				count = collection.Count / 4;
-				
+
 				HashSet<uint> set = new HashSet<uint>(count);
 
 				while (set.Count < count)
@@ -2166,7 +2164,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				if (print) Console.WriteLine(string.Join(", ", array));
 
 				Console.WriteLine(Bright.Red("Test removing..."));
-		
+
 				int removed = 0;
 				int collectionCount = collection.Count;
 				count = collection.Count;
@@ -2269,7 +2267,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
 
 				Console.WriteLine(Bright.Red("Test removing..."));
-		
+
 				int removed = 0;
 				count = adapter.Count;
 				clock.Restart();
@@ -2444,7 +2442,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				}
 
 				Console.WriteLine("Found.");
-				
+
 				int found = 0;
 				Console.WriteLine("Test finding all values...");
 
@@ -2975,7 +2973,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
 				Console.WriteLine();
 				Console.WriteLine($"Array: {string.Join(", ", values)}");
-				
+
 				tree.Add(values);
 				Console.WriteLine($"Added {tree.Count} of {values.Length} items.");
 				tree.PrintProps();
@@ -3160,7 +3158,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				tests++;
 			}
 			while (more);
-			
+
 			clock.Stop();
 
 			static void DoTheTest<T>(SortedSet<T> sortedSet, T[] values, Stopwatch clock)
@@ -3216,7 +3214,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 						Debug.Assert(count - removed == sortedSet.Count, $"Values are not removed correctly! {count} != {sortedSet.Count}.");
 						continue;
 					}
-					
+
 					Console.WriteLine(Bright.Red($"Remove missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
@@ -3308,7 +3306,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 				string word = values.PickRandom();
 				DoTheTest(trie, word, values);
-				
+
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
@@ -3347,7 +3345,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 					Console.WriteLine(Bright.Red("Didn't find a shit...!"));
 					return;
 				}
-				
+
 				Console.WriteLine(Bright.Green("Found...!") + " Let's try all caps...");
 
 				if (!trie.Contains(token.ToUpperInvariant()))
@@ -3453,7 +3451,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			Console.WriteLine("Adding similar words...");
 			Console.WriteLine(Bright.Black("Words list: ") + string.Join(", ", values));
 
-			foreach (string value in values) 
+			foreach (string value in values)
 				trie.Add(value);
 
 			int results = 0;
@@ -3575,7 +3573,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 						Debug.Assert(count - removed == skipList.Count, $"Values are not removed correctly! {count} != {skipList.Count}.");
 						continue;
 					}
-					
+
 					Console.WriteLine(Bright.Red($"Remove missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
@@ -3602,10 +3600,10 @@ The external id reflects the order by which they are scheduled and the -* part i
 				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
-			
+
 			clock.Stop();
 		}
-		
+
 		private static void TestDisjointSet()
 		{
 			bool more;
@@ -3646,7 +3644,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				}
 				Console.WriteLine($"Found {found} of {disjointSet.Count} items in {clock.ElapsedMilliseconds} ms.");
 
-				
+
 				Console.WriteLine(Bright.Yellow("Test find and union..."));
 
 				int threshold = (int)Math.Floor(disjointSet.Count / 0.5d);
@@ -3680,7 +3678,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 						removed++;
 						continue;
 					}
-					
+
 					Console.WriteLine(Bright.Red($"Remove missed a value: {v} :(("));
 					ConsoleHelper.Pause();
 					Console.WriteLine();
@@ -3707,7 +3705,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				more = response.Key == ConsoleKey.Y;
 			}
 			while (more);
-			
+
 			clock.Stop();
 		}
 
@@ -4842,7 +4840,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 				Title("Testing IKeyedHeap<TNode, TKey, TValue> types performance...");
 				result.Clear();
-				
+
 				// BinaryHeap
 				DoHeapTest(new MinBinaryHeap<double, Student>(getKey), students, clock);
 				result[typeof(MinBinaryHeap<double, Student>).Name] = clock.ElapsedTicks;
@@ -5020,7 +5018,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 					Console.WriteLine(Bright.Red("Huh, must add more nodes...!"));
 					return;
 				}
-				
+
 				Console.WriteLine(Bright.Green("All nodes are added...!") + " Let's try adding some relationships...");
 				Console.Write($@"{Yellow("Would you like to add a bit of randomization?")} {Bright.Green("[Y]")} / {Dim("any key")}.
 This may cause cycles but will make it much more fun for finding shortest paths. ");
@@ -5133,7 +5131,7 @@ or press {Bright.Red("ESCAPE")} key to exit this test. ");
 							spanningTree.Print();
 							Console.WriteLine(LINE_SEPARATOR);
 						}
-						
+
 						spanningTree = weightedUndirectedGraph.GetMinimumSpanningTree(SpanningTreeAlgorithm.Kruskal);
 
 						if (spanningTree != null)
@@ -5172,11 +5170,11 @@ or press {Bright.Red("ESCAPE")} key to exit this test. ");
 
 					Console.WriteLine();
 					Console.WriteLine($"{Yellow("Shortest Path")} from '{Bright.Cyan(value.ToString())}' to '{Bright.Cyan(to.ToString())}'");
-					
+
 					Console.Write("Dijkstra: ");
 					try { Console.WriteLine(string.Join(" -> ", wGraph.SingleSourcePath(value, to, SingleSourcePathAlgorithm.Dijkstra))); }
 					catch (Exception e) { Console.WriteLine(Bright.Red(e.Message)); }
-					
+
 					Console.Write("Bellman-Ford: ");
 					try { Console.WriteLine(string.Join(" -> ", wGraph.SingleSourcePath(value, to, SingleSourcePathAlgorithm.BellmanFord))); }
 					catch (Exception e) { Console.WriteLine(Bright.Red(e.Message)); }
@@ -5188,7 +5186,8 @@ or press {Bright.Red("ESCAPE")} key to exit this test. ");
 
 		private static void TestAsymmetric()
 		{
-			RSASettings settings = new RSASettings {
+			RSASettings settings = new RSASettings
+			{
 				Encoding = Encoding.UTF8,
 				KeySize = 512,
 				SaltSize = 8,
@@ -5245,7 +5244,7 @@ decrypted:
 
 			Title("Testing ImpersonationHelper...");
 
-			bool elevated = WindowsIdentityHelper.HasElevatedPrivileges();
+			bool elevated = WindowsIdentityHelper.HasElevatedPrivileges;
 			Console.WriteLine($"Current process is running with elevated privileges? {elevated.ToYesNo()}");
 
 			Console.WriteLine($"Checking {SERVICE_NAME} service status...");
@@ -5338,7 +5337,7 @@ decrypted:
 		private static void TestUriHelper()
 		{
 			const string URI_TEST = "http://example.com/folder path";
-			
+
 			string[] uriParts =
 			{
 				"/another folder",
@@ -5476,8 +5475,8 @@ decrypted:
 		{
 			bool more;
 			Title("Testing observable collections");
-			
-			ObservableList<int> list = new ObservableList<int>(); 
+
+			ObservableList<int> list = new ObservableList<int>();
 			list.PropertyChanged += onPropertyChanged;
 			list.CollectionChanged += onCollectionChanged;
 
@@ -5543,7 +5542,7 @@ decrypted:
 
 				Console.WriteLine($"Added {collection.Count} of {values.Length} items.");
 				Console.WriteLine(Bright.Red("Test removing..."));
-				
+
 				int removed = 0;
 				int missed = 0;
 
@@ -5588,7 +5587,7 @@ decrypted:
 
 				Console.WriteLine($"Added {dictionary.Count} of {values.Length} items.");
 				Console.WriteLine(Bright.Red("Test removing..."));
-				
+
 				int removed = 0;
 				int missed = 0;
 
@@ -5645,7 +5644,7 @@ decrypted:
 				Console.WriteLine("3. Directories");
 				Console.WriteLine("4. Files");
 				Console.WriteLine("Any character to exit");
-				
+
 				char c = Console.ReadKey().KeyChar;
 				Console.WriteLine();
 
@@ -5809,7 +5808,7 @@ decrypted:
 				Console.Clear();
 
 				Title("Testing EventWaitHandle asynchronously.");
-				
+
 				ConsoleKey eventTypeKey = ConsoleKey.Clear;
 
 				while (eventTypeKey != ConsoleKey.A && eventTypeKey != ConsoleKey.M && eventTypeKey != ConsoleKey.Escape)
@@ -5843,7 +5842,7 @@ decrypted:
 					waitHandle = eventTypeKey == ConsoleKey.A
 									? new AutoResetEvent()
 									: new ManualResetEvent();
-					
+
 					// copy to local variable
 					CancellationToken token = cts?.Token ?? CancellationToken.None;
 					EventWaitHandleBase handle = waitHandle;
@@ -6275,7 +6274,7 @@ decrypted:
 
 		[NotNull]
 		private static int[] GetRandomIntegers(int len = 0) { return GetRandomIntegers(false, len); }
-		
+
 		[NotNull]
 		private static int[] GetRandomIntegers(bool unique, int len = 0)
 		{
@@ -6308,12 +6307,12 @@ decrypted:
 
 		[NotNull]
 		private static char[] GetRandomChar(int len = 0) { return GetRandomChar(false, len); }
-		
+
 		[NotNull]
 		private static char[] GetRandomChar(bool unique, int len = 0)
 		{
 			if (len < 1) len = RNGRandomHelper.Next(1, 12);
-			
+
 			char[] values = new char[len];
 
 			if (unique)
@@ -6341,7 +6340,7 @@ decrypted:
 
 		[NotNull]
 		private static ICollection<string> GetRandomStrings(int len = 0) { return GetRandomStrings(false, len); }
-		
+
 		[NotNull]
 		private static ICollection<string> GetRandomStrings(bool unique, int len = 0)
 		{
@@ -6350,7 +6349,7 @@ decrypted:
 
 			HashSet<string> set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-			while (set.Count < len) 
+			while (set.Count < len)
 				set.Add(__fakeGenerator.Value.Random.Word());
 
 			return set;
@@ -6360,7 +6359,7 @@ decrypted:
 		private static Student[] GetRandomStudents(int len = 0)
 		{
 			if (len < 1) len = RNGRandomHelper.Next(1, 12);
-			
+
 			Student[] students = new Student[len];
 
 			for (int i = 0; i < len; i++)

@@ -27,42 +27,41 @@ using System.Runtime.Serialization;
 using essentialMix.Helpers;
 
 // ReSharper disable once CheckNamespace
-namespace Other.TylerBrinkley.Enumeration
+namespace Other.TylerBrinkley.Enumeration;
+
+/// <summary>
+/// Specifies the enum string representation formats.
+/// </summary>
+[EnumFormatValidator]
+public enum EnumFormat
 {
 	/// <summary>
-	/// Specifies the enum string representation formats.
+	/// Enum is represented by its decimal value.
 	/// </summary>
-	[EnumFormatValidator]
-	public enum EnumFormat
-	{
-		/// <summary>
-		/// Enum is represented by its decimal value.
-		/// </summary>
-		DecimalValue = 0,
-		/// <summary>
-		/// Enum is represented by its hexadecimal value.
-		/// </summary>
-		HexadecimalValue = 1,
-		/// <summary>
-		/// Enum is represented by its underlying value.
-		/// </summary>
-		UnderlyingValue = 2,
-		/// <summary>
-		/// Enum is represented by its name.
-		/// </summary>
-		Name = 3,
-		/// <summary>
-		/// Enum is represented by its <see cref="DescriptionAttribute.Description"/>.
-		/// </summary>
-		Description = 4,
-		/// <summary>
-		/// Enum is represented by its <see cref="EnumMemberAttribute.Value"/>.
-		/// </summary>
-		EnumMemberValue = 5
-	}
+	DecimalValue = 0,
+	/// <summary>
+	/// Enum is represented by its hexadecimal value.
+	/// </summary>
+	HexadecimalValue = 1,
+	/// <summary>
+	/// Enum is represented by its underlying value.
+	/// </summary>
+	UnderlyingValue = 2,
+	/// <summary>
+	/// Enum is represented by its name.
+	/// </summary>
+	Name = 3,
+	/// <summary>
+	/// Enum is represented by its <see cref="DescriptionAttribute.Description"/>.
+	/// </summary>
+	Description = 4,
+	/// <summary>
+	/// Enum is represented by its <see cref="EnumMemberAttribute.Value"/>.
+	/// </summary>
+	EnumMemberValue = 5
+}
 
-	internal sealed class EnumFormatValidatorAttribute : Attribute, IEnumValidatorAttribute<EnumFormat>
-	{
-		public bool IsValid(EnumFormat value) { return EnumHelper.EnumFormatIsValid(value); }
-	}
+internal sealed class EnumFormatValidatorAttribute : Attribute, IEnumValidatorAttribute<EnumFormat>
+{
+	public bool IsValid(EnumFormat value) { return EnumHelper.EnumFormatIsValid(value); }
 }

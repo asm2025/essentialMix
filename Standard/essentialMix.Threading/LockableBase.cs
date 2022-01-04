@@ -1,19 +1,18 @@
 using System;
 
-namespace essentialMix.Threading
+namespace essentialMix.Threading;
+
+public abstract class LockableBase
 {
-	public abstract class LockableBase
+	protected LockableBase()
 	{
-		protected LockableBase()
-		{
-		}
+	}
 
-		public bool IsLocked { get; protected set; }
+	public bool IsLocked { get; protected set; }
 
-		protected void ThrowIfLocked()
-		{
-			if (!IsLocked) return;
-			throw new InvalidOperationException(GetType().Name + " is locked.");
-		}
+	protected void ThrowIfLocked()
+	{
+		if (!IsLocked) return;
+		throw new InvalidOperationException(GetType().Name + " is locked.");
 	}
 }

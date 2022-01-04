@@ -26,45 +26,44 @@ using System.Globalization;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
-namespace Other.TylerBrinkley.Enumeration.Numeric
+namespace Other.TylerBrinkley.Enumeration.Numeric;
+
+internal class Int16NumericProvider : INumericProvider<short>
 {
-    internal class Int16NumericProvider : INumericProvider<short>
-    {
-        [NotNull]
-        public string ToHexadecimalString(short value) { return value.ToString("X4"); }
+	[NotNull]
+	public string ToHexadecimalString(short value) { return value.ToString("X4"); }
 
-		public string ToDecimalString(short value) { return value.ToString(); }
+	public string ToDecimalString(short value) { return value.ToString(); }
 
-		public short One => 1;
+	public short One => 1;
 
-		public short Zero => 0;
+	public short Zero => 0;
 
-		public short And(short left, short right) { return (short)(left & right); }
+	public short And(short left, short right) { return (short)(left & right); }
 
-		public int BitCount(short value) { return Number.BitCount(value); }
+	public int BitCount(short value) { return Number.BitCount(value); }
 
-		public short Create(ulong value) { return (short)value; }
+	public short Create(ulong value) { return (short)value; }
 
-		public short Create(long value) { return (short)value; }
+	public short Create(long value) { return (short)value; }
 
-		public bool IsInValueRange(ulong value) { return value <= (ulong)short.MaxValue; }
+	public bool IsInValueRange(ulong value) { return value <= (ulong)short.MaxValue; }
 
-		public bool IsInValueRange(long value) { return value is >= short.MinValue and <= short.MaxValue; }
+	public bool IsInValueRange(long value) { return value is >= short.MinValue and <= short.MaxValue; }
 
-		public short LeftShift(short value, int amount) { return (short)(value << amount); }
+	public short LeftShift(short value, int amount) { return (short)(value << amount); }
 
-		public bool LessThan(short left, short right) { return left < right; }
+	public bool LessThan(short left, short right) { return left < right; }
 
-		public short Not(short value) { return (short)~value; }
+	public short Not(short value) { return (short)~value; }
 
-		public short Or(short left, short right) { return (short)(left | right); }
+	public short Or(short left, short right) { return (short)(left | right); }
 
-		public short Subtract(short left, short right) { return (short)(left - right); }
+	public short Subtract(short left, short right) { return (short)(left - right); }
 
-		public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out short result) { return short.TryParse(s, style, provider, out result); }
+	public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out short result) { return short.TryParse(s, style, provider, out result); }
 
-		public bool TryParseNative(string s, out short result) { return short.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
+	public bool TryParseNative(string s, out short result) { return short.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
 
-		public short Xor(short left, short right) { return (short)(left ^ right); }
-	}
+	public short Xor(short left, short right) { return (short)(left ^ right); }
 }

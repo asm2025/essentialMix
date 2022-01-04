@@ -4,99 +4,98 @@ using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
 using JetBrains.Annotations;
 
-namespace essentialMix.Patterns.Threading
+namespace essentialMix.Patterns.Threading;
+
+public class TimedCallback : Disposable
 {
-	public class TimedCallback : Disposable
+	private readonly Action<TimedCallback> _action;
+
+	// MUST keep a reference to the timer callback function to prevent GC from collecting it.
+	private TimerCallback _timerCallback;
+	private uint _timerId;
+	private int _interval;
+	private AutoResetEvent _event;
+
+	/// <inheritdoc />
+	public TimedCallback([NotNull] Action<TimedCallback> action, int interval)
 	{
-		private readonly Action<TimedCallback> _action;
+		if (interval < 1) throw new ArgumentOutOfRangeException(nameof(interval));
+		_action = action;
+		_interval = interval;
+		_timerCallback = TimerProc;
+	}
 
-		// MUST keep a reference to the timer callback function to prevent GC from collecting it.
-		private TimerCallback _timerCallback;
-		private uint _timerId;
-		private int _interval;
-		private AutoResetEvent _event;
-
-		/// <inheritdoc />
-		public TimedCallback([NotNull] Action<TimedCallback> action, int interval)
+	/// <inheritdoc />
+	protected override void Dispose(bool disposing)
+	{
+		if (disposing)
 		{
-			if (interval < 1) throw new ArgumentOutOfRangeException(nameof(interval));
-			_action = action;
-			_interval = interval;
-			_timerCallback = TimerProc;
+			Enabled = false;
+			ObjectHelper.Dispose(ref _event);
 		}
 
-		/// <inheritdoc />
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing)
-			{
-				Enabled = false;
-				ObjectHelper.Dispose(ref _event);
-			}
+		_timerCallback = null;
+		base.Dispose(disposing);
+	}
 
-			_timerCallback = null;
-			base.Dispose(disposing);
-		}
-
-		public bool Enabled
+	public bool Enabled
+	{
+		get => _timerId != 0;
+		set
 		{
-			get => _timerId != 0;
-			set
+			if (value)
 			{
-				if (value)
+				if (_timerId != 0)
 				{
-					if (_timerId != 0)
-					{
-						Win32.timeKillEvent(_timerId);
-						Win32.timeEndPeriod(1);
-					}
-
-					if (IsDisposed) return;
-					Win32.timeBeginPeriod(1);
-					_timerId = Win32.timeSetEvent((uint)Interval, 0, _timerCallback, UIntPtr.Zero, fuEvent.TIME_PERIODIC);
-					return;
+					Win32.timeKillEvent(_timerId);
+					Win32.timeEndPeriod(1);
 				}
 
-				if (_timerId == 0) return;
-				Win32.timeEndPeriod(1);
-				Win32.timeKillEvent(_timerId);
-				_timerId = 0;
+				if (IsDisposed) return;
+				Win32.timeBeginPeriod(1);
+				_timerId = Win32.timeSetEvent((uint)Interval, 0, _timerCallback, UIntPtr.Zero, fuEvent.TIME_PERIODIC);
+				return;
 			}
-		}
 
-		public int Interval
-		{
-			get => _interval;
-			set
-			{
-				if (value < 1) throw new ArgumentOutOfRangeException(nameof(value));
-				_interval = value;
-			}
+			if (_timerId == 0) return;
+			Win32.timeEndPeriod(1);
+			Win32.timeKillEvent(_timerId);
+			_timerId = 0;
 		}
+	}
 
-		public bool Wait() { return Wait(TimeSpanHelper.INFINITE, false); }
-		public bool Wait(int millisecondsTimeout) { return Wait(millisecondsTimeout, false); }
-		public bool Wait(int millisecondsTimeout, bool exitContext)
+	public int Interval
+	{
+		get => _interval;
+		set
 		{
-			if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			if (_event == null) Interlocked.CompareExchange(ref _event, new AutoResetEvent(false), null);
-			return _event.WaitOne(millisecondsTimeout, exitContext);
+			if (value < 1) throw new ArgumentOutOfRangeException(nameof(value));
+			_interval = value;
 		}
+	}
 
-		private void TimerProc(uint uTimerId, uint uMsg, UIntPtr dwUser, UIntPtr dw1, UIntPtr dw2)
-		{
-			if (uTimerId == 0 || IsDisposed) return;
-			_action(this);
-			_event?.Set();
-		}
+	public bool Wait() { return Wait(TimeSpanHelper.INFINITE, false); }
+	public bool Wait(int millisecondsTimeout) { return Wait(millisecondsTimeout, false); }
+	public bool Wait(int millisecondsTimeout, bool exitContext)
+	{
+		if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
+		if (_event == null) Interlocked.CompareExchange(ref _event, new AutoResetEvent(false), null);
+		return _event.WaitOne(millisecondsTimeout, exitContext);
+	}
 
-		[NotNull]
-		public static TimedCallback Create([NotNull] Action<TimedCallback> action, int interval, bool enabled = true)
+	private void TimerProc(uint uTimerId, uint uMsg, UIntPtr dwUser, UIntPtr dw1, UIntPtr dw2)
+	{
+		if (uTimerId == 0 || IsDisposed) return;
+		_action(this);
+		_event?.Set();
+	}
+
+	[NotNull]
+	public static TimedCallback Create([NotNull] Action<TimedCallback> action, int interval, bool enabled = true)
+	{
+		return new TimedCallback(action, interval)
 		{
-			return new TimedCallback(action, interval)
-			{
-				Enabled = enabled
-			};
-		}
+			Enabled = enabled
+		};
 	}
 }

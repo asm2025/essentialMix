@@ -1,21 +1,20 @@
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
-namespace essentialMix.Web
+namespace essentialMix.Web;
+
+public static class CookieNames
 {
-	public static class CookieNames
-	{
-		private const string CULTURE = "__culture";
+	private const string CULTURE = "__culture";
 
-		public static readonly string AntiForgeryToken = "X-XSRF-TOKEN";
+	public static readonly string AntiForgeryToken = "X-XSRF-TOKEN";
 	
-		private static string __culture = CULTURE;
+	private static string __culture = CULTURE;
 
-		[NotNull]
-		public static string Culture
-		{
-			get => __culture;
-			set => __culture = value.ToNullIfEmpty() ?? CULTURE;
-		}
+	[NotNull]
+	public static string Culture
+	{
+		get => __culture;
+		set => __culture = value.ToNullIfEmpty() ?? CULTURE;
 	}
 }

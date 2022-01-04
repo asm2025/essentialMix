@@ -1,10 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace essentialMix.Threading.Collections.Schedule
+namespace essentialMix.Threading.Collections.Schedule;
+
+public interface IAsyncJob : IJob
 {
-	public interface IAsyncJob : IJob
-	{
-		Task ExecuteAsync(CancellationToken token);
-	}
+	Task ExecuteAsync(CancellationToken token);
 }

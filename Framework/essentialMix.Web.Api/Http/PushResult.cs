@@ -9,107 +9,106 @@ using System.Web.Http;
 using JetBrains.Annotations;
 using essentialMix.Web.Exceptions;
 
-namespace essentialMix.Web.Api.Http
+namespace essentialMix.Web.Api.Http;
+
+public class PushResult<T> : PushResultBase
 {
-	public class PushResult<T> : PushResultBase
+	private readonly Task<T> _getResultTask;
+
+	private bool _valueSet;
+	private T _value;
+
+	/// <inheritdoc />
+	internal PushResult([NotNull] HttpRequestMessage request, [NotNull] T value, Action onCompleted, Action<Exception, Stream, HttpContent, TransportContext> onError)
+		: base(request, onCompleted, onError)
 	{
-		private readonly Task<T> _getResultTask;
-
-		private bool _valueSet;
-		private T _value;
-
-		/// <inheritdoc />
-		internal PushResult([NotNull] HttpRequestMessage request, [NotNull] T value, Action onCompleted, Action<Exception, Stream, HttpContent, TransportContext> onError)
-			: base(request, onCompleted, onError)
-		{
-			_value = value;
-			_valueSet = true;
-		}
-
-		/// <inheritdoc />
-		internal PushResult([NotNull] HttpRequestMessage request, [NotNull] Task<T> getResultTask, Action onCompleted, Action<Exception, Stream, HttpContent, TransportContext> onError)
-			: base(request, onCompleted, onError)
-		{
-			_getResultTask = getResultTask;
-			_getResultTask.ConfigureAwait(false);
-		}
-
-		/// <inheritdoc />
-		protected override async Task WriteContent(HttpResponseMessage response, Stream stream, HttpContent content, TransportContext context, CancellationToken token = default(CancellationToken))
-		{
-			try
-			{
-				if (token.IsCancellationRequested) return;
-			
-				if (!_valueSet && _getResultTask != null)
-				{
-					_value = await _getResultTask;
-					if (token.IsCancellationRequested) return;
-					_valueSet = true;
-				}
-
-				if (!_valueSet) return;
-
-				T value = _value;
-				if (value is null || token.IsCancellationRequested) return;
-
-				HttpConfiguration configuration = Request.GetConfiguration();
-				if (configuration == null) throw new HttpConfigurationMissingException();
-
-				Type type = value.GetType();
-				ContentNegotiationResult result = configuration.Services
-																.GetContentNegotiator()?
-																.Negotiate(type, Request, configuration.Formatters);
-				if (result == null || token.IsCancellationRequested) return;
-				await result.Formatter.WriteToStreamAsync(type, value, stream, content, context, token);
-			}
-			catch (Exception e)
-			{
-				OnError?.Invoke(e, stream, content, context);
-			}
-			finally
-			{
-				OnCompleted?.Invoke();
-			}
-		}
+		_value = value;
+		_valueSet = true;
 	}
 
-	public static class PushResult
+	/// <inheritdoc />
+	internal PushResult([NotNull] HttpRequestMessage request, [NotNull] Task<T> getResultTask, Action onCompleted, Action<Exception, Stream, HttpContent, TransportContext> onError)
+		: base(request, onCompleted, onError)
 	{
-		[NotNull]
-		public static PushResult<T> From<T>([NotNull] HttpRequestMessage request, [NotNull] T value)
-		{
-			return From(request, value, null, null);
-		}
+		_getResultTask = getResultTask;
+		_getResultTask.ConfigureAwait(false);
+	}
 
-		[NotNull]
-		public static PushResult<T> From<T>([NotNull] HttpRequestMessage request, [NotNull] T value, Action<Exception, Stream, HttpContent, TransportContext> onError)
+	/// <inheritdoc />
+	protected override async Task WriteContent(HttpResponseMessage response, Stream stream, HttpContent content, TransportContext context, CancellationToken token = default(CancellationToken))
+	{
+		try
 		{
-			return From(request, value, null, onError);
-		}
+			if (token.IsCancellationRequested) return;
+			
+			if (!_valueSet && _getResultTask != null)
+			{
+				_value = await _getResultTask;
+				if (token.IsCancellationRequested) return;
+				_valueSet = true;
+			}
 
-		[NotNull]
-		public static PushResult<T> From<T>([NotNull] HttpRequestMessage request, [NotNull] T value, Action onCompleted, Action<Exception, Stream, HttpContent, TransportContext> onError)
-		{
-			return new PushResult<T>(request, value, onCompleted, onError);
-		}
+			if (!_valueSet) return;
 
-		[NotNull]
-		public static PushResult<T> From<T>([NotNull] HttpRequestMessage request, [NotNull] Task<T> getResultTask)
-		{
-			return From(request, getResultTask, null, null);
-		}
+			T value = _value;
+			if (value is null || token.IsCancellationRequested) return;
 
-		[NotNull]
-		public static PushResult<T> From<T>([NotNull] HttpRequestMessage request, [NotNull] Task<T> getResultTask, Action<Exception, Stream, HttpContent, TransportContext> onError)
-		{
-			return From(request, getResultTask, null, onError);
-		}
+			HttpConfiguration configuration = Request.GetConfiguration();
+			if (configuration == null) throw new HttpConfigurationMissingException();
 
-		[NotNull]
-		public static PushResult<T> From<T>([NotNull] HttpRequestMessage request, [NotNull] Task<T> getResultTask, Action onCompleted, Action<Exception, Stream, HttpContent, TransportContext> onError)
-		{
-			return new PushResult<T>(request, getResultTask, onCompleted, onError);
+			Type type = value.GetType();
+			ContentNegotiationResult result = configuration.Services
+															.GetContentNegotiator()?
+															.Negotiate(type, Request, configuration.Formatters);
+			if (result == null || token.IsCancellationRequested) return;
+			await result.Formatter.WriteToStreamAsync(type, value, stream, content, context, token);
 		}
+		catch (Exception e)
+		{
+			OnError?.Invoke(e, stream, content, context);
+		}
+		finally
+		{
+			OnCompleted?.Invoke();
+		}
+	}
+}
+
+public static class PushResult
+{
+	[NotNull]
+	public static PushResult<T> From<T>([NotNull] HttpRequestMessage request, [NotNull] T value)
+	{
+		return From(request, value, null, null);
+	}
+
+	[NotNull]
+	public static PushResult<T> From<T>([NotNull] HttpRequestMessage request, [NotNull] T value, Action<Exception, Stream, HttpContent, TransportContext> onError)
+	{
+		return From(request, value, null, onError);
+	}
+
+	[NotNull]
+	public static PushResult<T> From<T>([NotNull] HttpRequestMessage request, [NotNull] T value, Action onCompleted, Action<Exception, Stream, HttpContent, TransportContext> onError)
+	{
+		return new PushResult<T>(request, value, onCompleted, onError);
+	}
+
+	[NotNull]
+	public static PushResult<T> From<T>([NotNull] HttpRequestMessage request, [NotNull] Task<T> getResultTask)
+	{
+		return From(request, getResultTask, null, null);
+	}
+
+	[NotNull]
+	public static PushResult<T> From<T>([NotNull] HttpRequestMessage request, [NotNull] Task<T> getResultTask, Action<Exception, Stream, HttpContent, TransportContext> onError)
+	{
+		return From(request, getResultTask, null, onError);
+	}
+
+	[NotNull]
+	public static PushResult<T> From<T>([NotNull] HttpRequestMessage request, [NotNull] Task<T> getResultTask, Action onCompleted, Action<Exception, Stream, HttpContent, TransportContext> onError)
+	{
+		return new PushResult<T>(request, getResultTask, onCompleted, onError);
 	}
 }

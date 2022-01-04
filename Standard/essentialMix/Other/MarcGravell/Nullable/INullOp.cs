@@ -1,10 +1,9 @@
 ﻿// ReSharper disable once CheckNamespace
-namespace Other.MarcGravell.Nullable
-{
-	public interface INullOp<T>
-	{
-		bool HasValue(T value);
+namespace Other.MarcGravell.Nullable;
 
-		bool AddIfNotNull(ref T accumulator, T value);
-	}
+public interface INullOp<T>
+{
+	bool HasValue(T value);
+
+	bool AddIfNotNull(ref T accumulator, T value);
 }

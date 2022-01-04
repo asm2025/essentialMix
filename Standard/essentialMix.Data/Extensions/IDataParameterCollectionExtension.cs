@@ -1,10 +1,9 @@
 using System.Data;
 
 // ReSharper disable once CheckNamespace
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class IDataParameterCollectionExtension
 {
-	public static class IDataParameterCollectionExtension
-	{
-		public static bool IsNullOrEmpty(this IDataParameterCollection thisValue) { return thisValue == null || thisValue.Count == 0; }
-	}
+	public static bool IsNullOrEmpty(this IDataParameterCollection thisValue) { return thisValue == null || thisValue.Count == 0; }
 }

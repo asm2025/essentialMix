@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 
-namespace essentialMix.Comparers
+namespace essentialMix.Comparers;
+
+public interface IDictionaryComparer<TKey, TValue> : IGenericComparer<IDictionary<TKey, TValue>>
 {
-	public interface IDictionaryComparer<TKey, TValue> : IGenericComparer<IDictionary<TKey, TValue>>
-	{
-		IKeyValueComparer<TKey, TValue> Comparer { get; }
-	}
+	IKeyValueComparer<TKey, TValue> Comparer { get; }
 }

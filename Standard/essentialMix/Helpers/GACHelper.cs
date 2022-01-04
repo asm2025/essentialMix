@@ -39,755 +39,754 @@ using System.Security;
 using System.Text;
 using JetBrains.Annotations;
 
-namespace essentialMix.Helpers
+namespace essentialMix.Helpers;
+
+/// <summary>
+/// <see cref="IAssemblyName.GetDisplayName"/>
+/// </summary>
+[Flags]
+public enum AsmDisplayFlags
+{
+	Version = 0x1,
+	Culture = 0x2,
+	PublicKeyToken = 0x4,
+	PublicKey = 0x8,
+	Custom = 0x10,
+	Processorarchitecture = 0x20,
+	Languageid = 0x40
+}
+
+[Flags]
+public enum AsmCmpFlags
+{
+	Name = 0x1,
+	MajorVersion = 0x2,
+	MinorVersion = 0x4,
+	BuildNumber = 0x8,
+	RevisionNumber = 0x10,
+	PublicKeyToken = 0x20,
+	Culture = 0x40,
+	Custom = 0x80,
+	All = Name | MajorVersion | MinorVersion |
+		RevisionNumber | BuildNumber |
+		PublicKeyToken | Culture | Custom,
+	Default = 0x100
+}
+
+/// <summary>
+/// The ASM_NAME enumeration property ID describes the valid names of the name-value pairs in an assembly name. 
+/// See the .NET Framework SDK for a description of these properties. 
+/// </summary>
+public enum AsmName
+{
+	AsmNamePublicKey = 0,
+	AsmNamePublicKeyToken,
+	AsmNameHashValue,
+	AsmNameName,
+	AsmNameMajorVersion,
+	AsmNameMinorVersion,
+	AsmNameBuildNumber,
+	AsmNameRevisionNumber,
+	AsmNameCulture,
+	AsmNameProcessorIDArray,
+	AsmNameOsinfoArray,
+	AsmNameHashAlgid,
+	AsmNameAlias,
+	AsmNameCodebaseUrl,
+	AsmNameCodebaseLastmod,
+	AsmNameNullPublicKey,
+	AsmNameNullPublicKeyToken,
+	AsmNameCustom,
+	AsmNameNullCustom,                
+	AsmNameMvid,
+	AsmNameMaxParams
+} 
+
+/// <summary>
+/// <see cref="IAssemblyCache.UninstallAssembly"/>
+/// </summary>
+public enum IassemblycacheUninstallDisposition
+{
+	IassemblycacheUninstallDispositionUninstalled = 1,
+	IassemblycacheUninstallDispositionStillInUse = 2,
+	IassemblycacheUninstallDispositionAlreadyUninstalled = 3,
+	IassemblycacheUninstallDispositionDeletePending = 4,
+	IassemblycacheUninstallDispositionHasInstallReferences = 5,
+	IassemblycacheUninstallDispositionReferenceNotFound = 6
+}
+
+/// <summary>
+/// <see cref="IAssemblyCache.QueryAssemblyInfo"/>
+/// </summary>
+public enum QueryAsmInfoFlag
+{
+	QueryasminfoFlagValidate = 1,
+	QueryasminfoFlagGetsize = 2
+}
+
+public enum IassemblycacheInstallFlag
+{
+	IassemblycacheInstallFlagRefresh = 1,
+	IassemblycacheInstallFlagForceRefresh = 2
+}
+
+/// <summary>
+/// The CREATE_ASM_NAME_OBJ_FLAGS enumeration contains the following values: 
+///	CANOF_PARSE_DISPLAY_NAME - If this flag is specified, the szAssemblyName parameter is a full assembly name and is parsed to 
+///		the individual properties. If the flag is not specified, szAssemblyName is the "Name" portion of the assembly name.
+///	CANOF_SET_DEFAULT_VALUES - If this flag is specified, certain properties, such as processor architecture, are set to 
+///		their default values.
+///	<see cref="AssemblyCache.CreateAssemblyNameObject"/>
+/// </summary>
+public enum CreateAsmNameObjFlags
+{
+	CanofParseDisplayName = 0x1,
+	CanofSetDefaultValues = 0x2
+} 
+
+/// <summary>
+/// The ASM_CACHE_FLAGS enumeration contains the following values: 
+/// ASM_CACHE_ZAP - Enumerates the cache of precompiled assemblies by using Ngen.exe.
+/// ASM_CACHE_GAC - Enumerates the GAC.
+/// ASM_CACHE_DOWNLOAD - Enumerates the assemblies that have been downloaded on-demand or that have been shadow-copied.
+/// </summary>
+[Flags]
+public enum AsmCacheFlags
+{
+	AsmCacheZap = 0x1,
+	AsmCacheGac = 0x2,
+	AsmCacheDownload = 0x4
+}
+
+/// <summary>
+/// The FUSION_INSTALL_REFERENCE structure represents a reference that is made when an application has installed an 
+/// assembly in the GAC. 
+/// The fields of the structure are defined as follows: 
+///		cbSize - The size of the structure in bytes.
+///		dwFlags - Reserved, must be zero.
+///		guidScheme - The entity that adds the reference.
+///		szIdentifier - A unique string that identifies the application that installed the assembly.
+///		szNonCannonicalData - A string that is only understood by the entity that adds the reference. 
+///				The GAC only stores this string.
+/// Possible values for the guidScheme field can be one of the following: 
+///		FUSION_REFCOUNT_MSI_GUID - The assembly is referenced by an application that has been installed by using 
+///				Windows Installer. The szIdentifier field is set to MSI, and szNonCannonicalData is set to Windows Installer. 
+///				This scheme must only be used by Windows Installer itself.
+///		FUSION_REFCOUNT_UNINSTALL_SUBKEY_GUID - The assembly is referenced by an application that appears in Add/Remove 
+///				Programs. The szIdentifier field is the token that is used to register the application with Add/Remove programs.
+///		FUSION_REFCOUNT_FILEPATH_GUID - The assembly is referenced by an application that is represented by a file in 
+///				the file global::System. The szIdentifier field is the path to this file.
+///		FUSION_REFCOUNT_OPAQUE_STRING_GUID - The assembly is referenced by an application that is only represented 
+///				by an opaque string. The szIdentifier is this opaque string. The GAC does not perform existence checking 
+///				for opaque references when you remove this.
+/// </summary>
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Unicode)]
+public struct FusionInstallReference
+{
+	public uint cbSize;
+	public uint dwFlags;
+	public Guid guidScheme;
+	public string szIdentifier;
+	public string szNonCannonicalData;
+}
+
+/// <summary>
+/// The ASSEMBLY_INFO structure represents information about an assembly in the assembly cache. 
+/// The fields of the structure are defined as follows: 
+///		cbAssemblyInfo - Size of the structure in bytes. Permits additions to the structure in future version of the .NET Framework.
+///		dwAssemblyFlags - Indicates one or more of the ASSEMBLYINFO_FLAG_* bits.
+///		uliAssemblySizeInKB - The size of the files that make up the assembly in kilobytes (KB).
+///		pszCurrentAssemblyPathBuf - A pointer to a string buffer that holds the current path of the directory that contains the 
+///				files that make up the assembly. The path must end with a zero.
+///		cchBuf - Size of the buffer that the pszCurrentAssemblyPathBug field points to.
+///	dwAssemblyFlags can have one of the following values: 
+///		ASSEMBLYINFO_FLAG__INSTALLED - Indicates that the assembly is actually installed. Always set in current version of the 
+///				.NET Framework.
+///		ASSEMBLYINFO_FLAG__PAYLOADRESIDENT - Never set in the current version of the .NET Framework.
+/// </summary>
+[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Unicode)]
+public struct AssemblyInfo
+{
+	public uint cbAssemblyInfo;
+	public uint dwAssemblyFlags;
+	public ulong uliAssemblySizeInKB;
+	public string pszCurrentAssemblyPathBuf;
+	public uint cchBuf;
+}
+
+public class AssemblyCache
 {
 	/// <summary>
-	/// <see cref="IAssemblyName.GetDisplayName"/>
+	/// The key entry point for reading the assembly cache.
 	/// </summary>
-	[Flags]
-	public enum AsmDisplayFlags
+	/// <param name="ppAsmCache">Pointer to return IAssemblyCache</param>
+	/// <param name="dwReserved">must be 0</param>
+	[SecurityCritical]
+	[DllImport("fusion.dll", SetLastError=true, PreserveSig=false)]
+	public static extern void CreateAssemblyCache(out IAssemblyCache ppAsmCache, uint dwReserved);
+
+	/// <summary>
+	/// An instance of IAssemblyName is obtained by calling the CreateAssemblyNameObject API.
+	/// </summary>
+	/// <param name="ppAssemblyNameObj">Pointer to a memory location that receives the IAssemblyName pointer that is created.</param>
+	/// <param name="szAssemblyName">A string representation of the assembly name or of a full assembly reference that is 
+	/// determined by dwFlags. The string representation can be null.</param>
+	/// <param name="dwFlags">Zero or more of the bits that are defined in the CREATE_ASM_NAME_OBJ_FLAGS enumeration.</param>
+	/// <param name="pvReserved"> Must be null.</param>
+	[SecurityCritical]
+	[DllImport("fusion.dll", SetLastError=true, CharSet=CharSet.Unicode, PreserveSig=false)]
+	public static extern void CreateAssemblyNameObject(out IAssemblyName ppAssemblyNameObj, string szAssemblyName,
+		uint dwFlags, IntPtr pvReserved);
+
+	/// <summary>
+	/// To obtain an instance of the CreateAssemblyEnum API, call the CreateAssemblyNameObject API.
+	/// </summary>
+	/// <param name="pEnum">Pointer to a memory location that contains the IAssemblyEnum pointer.</param>
+	/// <param name="pUnkReserved">Must be null.</param>
+	/// <param name="pName">An assembly name that is used to filter the enumeration. Can be null to enumerate all assemblies in the GAC.</param>
+	/// <param name="dwFlags">Exactly one bit from the ASM_CACHE_FLAGS enumeration.</param>
+	/// <param name="pvReserved">Must be NULL.</param>
+	[SecurityCritical]
+	[DllImport("fusion.dll", SetLastError=true, PreserveSig=false)]
+	public static extern void CreateAssemblyEnum(out IAssemblyEnum pEnum, IntPtr pUnkReserved, IAssemblyName pName,
+		AsmCacheFlags dwFlags, IntPtr pvReserved);
+
+	/// <summary>
+	/// To obtain an instance of the CreateInstallReferenceEnum API, call the CreateInstallReferenceEnum API.
+	/// </summary>
+	/// <param name="ppRefEnum">A pointer to a memory location that receives the IInstallReferenceEnum pointer.</param>
+	/// <param name="pName">The assembly name for which the references are enumerated.</param>
+	/// <param name="dwFlags"> Must be zero.</param>
+	/// <param name="pvReserved">Must be null.</param>
+	[SecurityCritical]
+	[DllImport("fusion.dll", SetLastError=true, PreserveSig=false)]
+	public static extern void CreateInstallReferenceEnum(out IInstallReferenceEnum ppRefEnum, IAssemblyName pName,
+		uint dwFlags, IntPtr pvReserved);
+
+	/// <summary>
+	/// The GetCachePath API returns the storage location of the GAC. 
+	/// </summary>
+	/// <param name="dwCacheFlags">Exactly one of the bits defined in the ASM_CACHE_FLAGS enumeration.</param>
+	/// <param name="pwzCachePath">Pointer to a buffer that is to receive the path of the GAC as a Unicode string.</param>
+	/// <param name="pcchPath">Length of the pwszCachePath buffer, in Unicode characters.</param>
+	[SecurityCritical]
+	[DllImport("fusion.dll", SetLastError=true, CharSet=CharSet.Unicode, PreserveSig=false)]
+	public static extern void GetCachePath(AsmCacheFlags dwCacheFlags, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwzCachePath,
+		ref uint pcchPath);
+
+	/// <summary>
+	/// GUID value for element guidScheme in the struct FUSION_INSTALL_REFERENCE
+	/// The assembly is referenced by an application that has been installed by using Windows Installer. 
+	/// The szIdentifier field is set to MSI, and szNonCannonicalData is set to Windows Installer. 
+	/// This scheme must only be used by Windows Installer itself.
+	/// </summary>
+	public static Guid FusionRefcountUninstallSubkeyGuid => new Guid("8cedc215-ac4b-488b-93c0-a50a49cb2fb8");
+
+	/// <summary>
+	/// GUID value for element guidScheme in the struct FUSION_INSTALL_REFERENCE
+	/// 
+	/// </summary>
+	public static Guid FusionRefcountFilepathGuid => new Guid("b02f9d65-fb77-4f7a-afa5-b391309f11c9");
+
+	/// <summary>
+	/// GUID value for element guidScheme in the struct FUSION_INSTALL_REFERENCE
+	/// 
+	/// </summary>
+	public static Guid FusionRefcountOpaqueStringGuid => new Guid("2ec93463-b0c3-45e1-8364-327e96aea856");
+
+	/// <summary>
+	/// GUID value for element guidScheme in the struct FUSION_INSTALL_REFERENCE
+	/// 
+	/// </summary>
+	public static Guid FusionRefcountMsiGuid => new Guid("25df0fc1-7f97-4070-add7-4b13bbfd7cb8");
+
+	/// <summary>
+	/// Use this method as a start for the GAC API
+	/// </summary>
+	/// <returns>IAssemblyCache COM interface</returns>
+	public static IAssemblyCache CreateAssemblyCache()
 	{
-		Version = 0x1,
-		Culture = 0x2,
-		PublicKeyToken = 0x4,
-		PublicKey = 0x8,
-		Custom = 0x10,
-		Processorarchitecture = 0x20,
-		Languageid = 0x40
+
+		CreateAssemblyCache(out IAssemblyCache ac, 0);
+
+		return ac;
 	}
 
-	[Flags]
-	public enum AsmCmpFlags
+	public static IAssemblyName CreateAssemblyName(string name)
 	{
-		Name = 0x1,
-		MajorVersion = 0x2,
-		MinorVersion = 0x4,
-		BuildNumber = 0x8,
-		RevisionNumber = 0x10,
-		PublicKeyToken = 0x20,
-		Culture = 0x40,
-		Custom = 0x80,
-		All = Name | MajorVersion | MinorVersion |
-			RevisionNumber | BuildNumber |
-			PublicKeyToken | Culture | Custom,
-		Default = 0x100
+
+		CreateAssemblyNameObject(out IAssemblyName an, name, 2, (IntPtr)0);
+
+		return an;
+	}
+
+	[NotNull]
+	public static  string GetDisplayName([NotNull] IAssemblyName name, AsmDisplayFlags which)
+	{
+		uint bufferSize = 255;
+		StringBuilder buffer = new StringBuilder((int) bufferSize);
+		name.GetDisplayName(buffer, ref bufferSize, which);
+		return buffer.ToString();
+	}
+
+	[NotNull]
+	public static  string GetName([NotNull] IAssemblyName name)
+	{
+		uint bufferSize = 255;
+		StringBuilder buffer = new StringBuilder((int) bufferSize);
+		name.GetName(ref bufferSize, buffer);
+		return buffer.ToString();
+	}
+
+	[NotNull]
+	public static AssemblyName GetAssemblyName([NotNull] IAssemblyName nameRef)
+	{
+		AssemblyName name = new AssemblyName
+		{
+			Name = GetName(nameRef),
+			Version = GetVersion(nameRef),
+			CultureInfo = GetCulture(nameRef)
+		};
+		name.SetPublicKeyToken(GetPublicKeyToken(nameRef));
+		return name;
+	}
+
+	[NotNull]
+	public static System.Version GetVersion([NotNull] IAssemblyName name)
+	{
+		name.GetVersion(out uint major, out uint minor);
+		return new System.Version((int)major >> 16, (int)major & 0xFFFF, (int)minor >> 16, (int)minor & 0xFFFF);
+	}
+
+	[NotNull]
+	public static byte[] GetPublicKeyToken([NotNull] IAssemblyName name)
+	{
+		byte[] result = new byte[8];
+		uint bufferSize = 8;
+		IntPtr buffer = Marshal.AllocHGlobal((int) bufferSize);
+		name.GetProperty(AsmName.AsmNamePublicKeyToken, buffer, ref bufferSize);
+		for (int i = 0; i < 8; i++)
+			result[i] = Marshal.ReadByte(buffer, i);
+		Marshal.FreeHGlobal(buffer);
+		return result;
+	}
+
+	[NotNull]
+	public static byte[] GetPublicKey([NotNull] IAssemblyName name)
+	{
+		uint bufferSize = 512;
+		IntPtr buffer = Marshal.AllocHGlobal((int) bufferSize);
+		name.GetProperty(AsmName.AsmNamePublicKey, buffer, ref bufferSize);
+		byte[] result = new byte[bufferSize];
+		for (int i = 0; i < bufferSize; i++)
+			result[i] = Marshal.ReadByte(buffer, i);
+		Marshal.FreeHGlobal(buffer);
+		return result;
+	}
+
+	[NotNull]
+	public static CultureInfo GetCulture([NotNull] IAssemblyName name)
+	{
+		uint bufferSize = 255;
+		IntPtr buffer = Marshal.AllocHGlobal((int) bufferSize);
+		name.GetProperty(AsmName.AsmNameCulture, buffer, ref bufferSize);
+		string result = Marshal.PtrToStringAuto(buffer);
+		Marshal.FreeHGlobal(buffer);
+		return result == null ? CultureInfoHelper.Default : new CultureInfo(result);
+	}
+
+	public static IAssemblyEnum CreateGacEnum()
+	{
+
+		CreateAssemblyEnum(out IAssemblyEnum ae, (IntPtr)0, null, AsmCacheFlags.AsmCacheGac, (IntPtr)0);
+
+		return ae;
 	}
 
 	/// <summary>
-	/// The ASM_NAME enumeration property ID describes the valid names of the name-value pairs in an assembly name. 
-	/// See the .NET Framework SDK for a description of these properties. 
+	/// Get the next assembly name in the current enumerator or fail
 	/// </summary>
-	public enum AsmName
+	/// <param name="enumerator"></param>
+	/// <param name="name"></param>
+	/// <returns>0 if the enumeration is not at its end</returns>
+	public static int GetNextAssembly([NotNull] IAssemblyEnum enumerator, out IAssemblyName name) { return enumerator.GetNextAssembly((IntPtr)0, out name, 0); }
+
+	[NotNull]
+	public static string GetGACPath()
 	{
-		AsmNamePublicKey = 0,
-		AsmNamePublicKeyToken,
-		AsmNameHashValue,
-		AsmNameName,
-		AsmNameMajorVersion,
-		AsmNameMinorVersion,
-		AsmNameBuildNumber,
-		AsmNameRevisionNumber,
-		AsmNameCulture,
-		AsmNameProcessorIDArray,
-		AsmNameOsinfoArray,
-		AsmNameHashAlgid,
-		AsmNameAlias,
-		AsmNameCodebaseUrl,
-		AsmNameCodebaseLastmod,
-		AsmNameNullPublicKey,
-		AsmNameNullPublicKeyToken,
-		AsmNameCustom,
-		AsmNameNullCustom,                
-		AsmNameMvid,
-		AsmNameMaxParams
-	} 
+		uint bufferSize = 255;
+		StringBuilder buffer = new StringBuilder((int) bufferSize);
+		GetCachePath(AsmCacheFlags.AsmCacheGac, buffer, ref bufferSize);
+		return buffer.ToString();
+	}
+
+	[NotNull]
+	public static string GetZapPath()
+	{
+		uint bufferSize = 255;
+		StringBuilder buffer = new StringBuilder((int) bufferSize);
+		GetCachePath(AsmCacheFlags.AsmCacheZap, buffer, ref bufferSize);
+		return buffer.ToString();
+	}
+
+	[NotNull]
+	public static string GetDownloadPath()
+	{
+		uint bufferSize = 255;
+		StringBuilder buffer = new StringBuilder((int) bufferSize);
+		GetCachePath(AsmCacheFlags.AsmCacheDownload, buffer, ref bufferSize);
+		return buffer.ToString();
+	}
+}
+
+/// <summary>
+/// The IAssemblyCache interface is the top-level interface that provides access to the GAC.
+/// </summary>
+[ComImport, Guid("e707dcde-d1cd-11d2-bab9-00c04f8eceae"),
+InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IAssemblyCache
+{
+	/// <summary>
+	/// The IAssemblyCache::UninstallAssembly method removes a reference to an assembly from the GAC. 
+	/// If other applications hold no other references to the assembly, the files that make up the assembly are removed from the GAC. 
+	/// </summary>
+	/// <param name="dwFlags">No flags defined. Must be zero.</param>
+	/// <param name="pszAssemblyName">The name of the assembly. A zero-ended Unicode string.</param>
+	/// <param name="pRefData">A pointer to a FUSION_INSTALL_REFERENCE structure. Although this is not recommended, 
+	///		this parameter can be null. The assembly is installed without an application reference, or all existing application 
+	///		references are gone.</param>
+	/// <param name="pulDisposition">Pointer to an integer that indicates the action that is performed by the function.</param>
+	/// <returns>The return values are defined as follows: 
+	///		S_OK - The assembly has been uninstalled.
+	///		S_FALSE - The operation succeeded, but the assembly was not removed from the GAC. 
+	///		The reason is described in pulDisposition.</returns>
+	///	<remarks>
+	///	NOTE: If pulDisposition is not null, pulDisposition contains one of the following values:
+	///		IASSEMBLYCACHE_UNINSTALL_DISPOSITION_UNINSTALLED - The assembly files have been removed from the GAC.
+	///		IASSEMBLYCACHE_UNINSTALL_DISPOSITION_STILL_IN_USE - An application is using the assembly. 
+	///			This value is returned on Microsoft Windows 95 and Microsoft Windows 98.
+	///		IASSEMBLYCACHE_UNINSTALL_DISPOSITION_ALREADY_UNINSTALLED - The assembly does not exist in the GAC.
+	///		IASSEMBLYCACHE_UNINSTALL_DISPOSITION_DELETE_PENDING - Not used.
+	///		IASSEMBLYCACHE_UNINSTALL_DISPOSITION_HAS_INSTALL_REFERENCES - The assembly has not been removed from the GAC because 
+	///			another application reference exists.
+	///		IASSEMBLYCACHE_UNINSTALL_DISPOSITION_REFERENCE_NOT_FOUND - The reference that is specified in pRefData is not found 
+	///			in the GAC.
+	///	</remarks>
+	[PreserveSig]
+	int UninstallAssembly(
+		uint dwFlags, 
+		[MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName,
+		[MarshalAs(UnmanagedType.LPArray)] FusionInstallReference[] pRefData,
+		out uint pulDisposition);
 
 	/// <summary>
-	/// <see cref="IAssemblyCache.UninstallAssembly"/>
+	/// The IAssemblyCache::QueryAssemblyInfo method retrieves information about an assembly from the GAC. 
 	/// </summary>
-	public enum IassemblycacheUninstallDisposition
-	{
-		IassemblycacheUninstallDispositionUninstalled = 1,
-		IassemblycacheUninstallDispositionStillInUse = 2,
-		IassemblycacheUninstallDispositionAlreadyUninstalled = 3,
-		IassemblycacheUninstallDispositionDeletePending = 4,
-		IassemblycacheUninstallDispositionHasInstallReferences = 5,
-		IassemblycacheUninstallDispositionReferenceNotFound = 6
-	}
+	/// <param name="dwFlags">One of QUERYASMINFO_FLAG_VALIDATE or QUERYASMINFO_FLAG_GETSIZE: 
+	///		*_VALIDATE - Performs validation of the files in the GAC against the assembly manifest, including hash verification 
+	///			and strong name signature verification.
+	///		*_GETSIZE - Returns the size of all files in the assembly (disk footprint). If this is not specified, the 
+	///			ASSEMBLY_INFO::uliAssemblySizeInKB field is not modified.</param>
+	/// <param name="pszAssemblyName"></param>
+	/// <param name="pAsmInfo"></param>
+	/// <returns></returns>
+	[PreserveSig]
+	int QueryAssemblyInfo(
+		uint dwFlags,
+		[MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName,
+		ref AssemblyInfo pAsmInfo);
 
 	/// <summary>
-	/// <see cref="IAssemblyCache.QueryAssemblyInfo"/>
+	/// Undocumented
 	/// </summary>
-	public enum QueryAsmInfoFlag
-	{
-		QueryasminfoFlagValidate = 1,
-		QueryasminfoFlagGetsize = 2
-	}
-
-	public enum IassemblycacheInstallFlag
-	{
-		IassemblycacheInstallFlagRefresh = 1,
-		IassemblycacheInstallFlagForceRefresh = 2
-	}
+	/// <param name="dwFlags"></param>
+	/// <param name="pvReserved"></param>
+	/// <param name="ppAsmItem"></param>
+	/// <param name="pszAssemblyName"></param>
+	/// <returns></returns>
+	[PreserveSig]
+	int CreateAssemblyCacheItem(
+		uint dwFlags,
+		IntPtr pvReserved,
+		out IAssemblyCacheItem ppAsmItem,
+		[MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName);
 
 	/// <summary>
-	/// The CREATE_ASM_NAME_OBJ_FLAGS enumeration contains the following values: 
-	///	CANOF_PARSE_DISPLAY_NAME - If this flag is specified, the szAssemblyName parameter is a full assembly name and is parsed to 
-	///		the individual properties. If the flag is not specified, szAssemblyName is the "Name" portion of the assembly name.
-	///	CANOF_SET_DEFAULT_VALUES - If this flag is specified, certain properties, such as processor architecture, are set to 
-	///		their default values.
-	///	<see cref="AssemblyCache.CreateAssemblyNameObject"/>
+	/// Undocumented
 	/// </summary>
-	public enum CreateAsmNameObjFlags
-	{
-		CanofParseDisplayName = 0x1,
-		CanofSetDefaultValues = 0x2
-	} 
+	/// <param name="ppAsmScavenger"></param>
+	/// <returns></returns>
+	[PreserveSig]
+	int CreateAssemblyScavenger(
+		[MarshalAs(UnmanagedType.IUnknown)] out object ppAsmScavenger);
 
 	/// <summary>
-	/// The ASM_CACHE_FLAGS enumeration contains the following values: 
-	/// ASM_CACHE_ZAP - Enumerates the cache of precompiled assemblies by using Ngen.exe.
-	/// ASM_CACHE_GAC - Enumerates the GAC.
-	/// ASM_CACHE_DOWNLOAD - Enumerates the assemblies that have been downloaded on-demand or that have been shadow-copied.
+	/// The IAssemblyCache::InstallAssembly method adds a new assembly to the GAC. The assembly must be persisted in the file 
+	/// system and is copied to the GAC.
 	/// </summary>
-	[Flags]
-	public enum AsmCacheFlags
-	{
-		AsmCacheZap = 0x1,
-		AsmCacheGac = 0x2,
-		AsmCacheDownload = 0x4
-	}
+	/// <param name="dwFlags">At most, one of the bits of the IASSEMBLYCACHE_INSTALL_FLAG_* values can be specified: 
+	///		*_REFRESH - If the assembly is already installed in the GAC and the file version numbers of the assembly being 
+	///		installed are the same or later, the files are replaced.
+	///		*_FORCE_REFRESH - The files of an existing assembly are overwritten regardless of their version number.</param>
+	/// <param name="pszManifestFilePath"> A string pointing to the dynamic-linked library (DLL) that contains the assembly manifest. 
+	///	Other assembly files must reside in the same directory as the DLL that contains the assembly manifest.</param>
+	/// <param name="pRefData">A pointer to a FUSION_INSTALL_REFERENCE that indicates the application on whose behalf the 
+	/// assembly is being installed. Although this is not recommended, this parameter can be null, but this leaves the assembly 
+	/// without any application reference.</param>
+	/// <returns></returns>
+	[PreserveSig]
+	int InstallAssembly(
+		uint dwFlags,
+		[MarshalAs(UnmanagedType.LPWStr)] string pszManifestFilePath,
+		[MarshalAs(UnmanagedType.LPArray)] FusionInstallReference[] pRefData);
+}
+
+
+/// <summary>
+/// The IAssemblyName interface represents an assembly name. An assembly name includes a predetermined set of name-value pairs. 
+/// The assembly name is described in detail in the .NET Framework SDK.
+/// </summary>
+[ComImport, Guid("CD193BC0-B4BC-11d2-9833-00C04FC31D2E"),
+InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IAssemblyName
+{
+	/// <summary>
+	/// The IAssemblyName::SetProperty method adds a name-value pair to the assembly name, or, if a name-value pair 
+	/// with the same name already exists, modifies or deletes the value of a name-value pair.
+	/// </summary>
+	/// <param name="propertyId">The ID that represents the name part of the name-value pair that is to be 
+	/// added or to be modified. Valid property IDs are defined in the ASM_NAME enumeration.</param>
+	/// <param name="pvProperty">A pointer to a buffer that contains the value of the property.</param>
+	/// <param name="cbProperty">The length of the pvProperty buffer in bytes. If cbProperty is zero, the name-value pair 
+	/// is removed from the assembly name.</param>
+	/// <returns></returns>
+	[PreserveSig]
+	int SetProperty(
+		AsmName propertyId,
+		IntPtr pvProperty,
+		uint cbProperty);
 
 	/// <summary>
-	/// The FUSION_INSTALL_REFERENCE structure represents a reference that is made when an application has installed an 
-	/// assembly in the GAC. 
-	/// The fields of the structure are defined as follows: 
-	///		cbSize - The size of the structure in bytes.
-	///		dwFlags - Reserved, must be zero.
-	///		guidScheme - The entity that adds the reference.
-	///		szIdentifier - A unique string that identifies the application that installed the assembly.
-	///		szNonCannonicalData - A string that is only understood by the entity that adds the reference. 
-	///				The GAC only stores this string.
-	/// Possible values for the guidScheme field can be one of the following: 
-	///		FUSION_REFCOUNT_MSI_GUID - The assembly is referenced by an application that has been installed by using 
-	///				Windows Installer. The szIdentifier field is set to MSI, and szNonCannonicalData is set to Windows Installer. 
-	///				This scheme must only be used by Windows Installer itself.
-	///		FUSION_REFCOUNT_UNINSTALL_SUBKEY_GUID - The assembly is referenced by an application that appears in Add/Remove 
-	///				Programs. The szIdentifier field is the token that is used to register the application with Add/Remove programs.
-	///		FUSION_REFCOUNT_FILEPATH_GUID - The assembly is referenced by an application that is represented by a file in 
-	///				the file global::System. The szIdentifier field is the path to this file.
-	///		FUSION_REFCOUNT_OPAQUE_STRING_GUID - The assembly is referenced by an application that is only represented 
-	///				by an opaque string. The szIdentifier is this opaque string. The GAC does not perform existence checking 
-	///				for opaque references when you remove this.
+	/// The IAssemblyName::GetProperty method retrieves the value of a name-value pair in the assembly name that specifies the name.
 	/// </summary>
-	[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Unicode)]
-	public struct FusionInstallReference
-	{
-		public uint cbSize;
-		public uint dwFlags;
-		public Guid guidScheme;
-		public string szIdentifier;
-		public string szNonCannonicalData;
-	}
+	/// <param name="propertyId">The ID that represents the name of the name-value pair whose value is to be retrieved.
+	/// Specified property IDs are defined in the ASM_NAME enumeration.</param>
+	/// <param name="pvProperty">A pointer to a buffer that is to contain the value of the property.</param>
+	/// <param name="pcbProperty">The length of the pvProperty buffer, in bytes.</param>
+	/// <returns></returns>
+	[PreserveSig]
+	int GetProperty(
+		AsmName propertyId,
+		IntPtr pvProperty,
+		ref uint pcbProperty);
+
+	///		*_VERSION - Includes the version number as part of the display name.
+	///		*_CULTURE - Includes the culture.
+	///		*_PUBLIC_KEY_TOKEN - Includes the public key token.
+	///		*_PUBLIC_KEY - Includes the public key.
+	///		*_CUSTOM - Includes the custom part of the assembly name.
+	///		*_PROCESSORARCHITECTURE - Includes the processor architecture.
+	///		*_LANGUAGEID - Includes the language ID.
+	/// <remarks>http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpguide/html/cpcondefaultmarshalingforstrings.asp</remarks>
+	[PreserveSig]
+	int GetDisplayName(
+		[Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder szDisplayName,
+		ref uint pccDisplayName,
+		AsmDisplayFlags dwDisplayFlags);
 
 	/// <summary>
-	/// The ASSEMBLY_INFO structure represents information about an assembly in the assembly cache. 
-	/// The fields of the structure are defined as follows: 
-	///		cbAssemblyInfo - Size of the structure in bytes. Permits additions to the structure in future version of the .NET Framework.
-	///		dwAssemblyFlags - Indicates one or more of the ASSEMBLYINFO_FLAG_* bits.
-	///		uliAssemblySizeInKB - The size of the files that make up the assembly in kilobytes (KB).
-	///		pszCurrentAssemblyPathBuf - A pointer to a string buffer that holds the current path of the directory that contains the 
-	///				files that make up the assembly. The path must end with a zero.
-	///		cchBuf - Size of the buffer that the pszCurrentAssemblyPathBug field points to.
-	///	dwAssemblyFlags can have one of the following values: 
-	///		ASSEMBLYINFO_FLAG__INSTALLED - Indicates that the assembly is actually installed. Always set in current version of the 
-	///				.NET Framework.
-	///		ASSEMBLYINFO_FLAG__PAYLOADRESIDENT - Never set in the current version of the .NET Framework.
+	/// Undocumented
 	/// </summary>
-	[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Unicode)]
-	public struct AssemblyInfo
-	{
-		public uint cbAssemblyInfo;
-		public uint dwAssemblyFlags;
-		public ulong uliAssemblySizeInKB;
-		public string pszCurrentAssemblyPathBuf;
-		public uint cchBuf;
-	}
-
-	public class AssemblyCache
-	{
-		/// <summary>
-		/// The key entry point for reading the assembly cache.
-		/// </summary>
-		/// <param name="ppAsmCache">Pointer to return IAssemblyCache</param>
-		/// <param name="dwReserved">must be 0</param>
-		[SecurityCritical]
-		[DllImport("fusion.dll", SetLastError=true, PreserveSig=false)]
-		public static extern void CreateAssemblyCache(out IAssemblyCache ppAsmCache, uint dwReserved);
-
-		/// <summary>
-		/// An instance of IAssemblyName is obtained by calling the CreateAssemblyNameObject API.
-		/// </summary>
-		/// <param name="ppAssemblyNameObj">Pointer to a memory location that receives the IAssemblyName pointer that is created.</param>
-		/// <param name="szAssemblyName">A string representation of the assembly name or of a full assembly reference that is 
-		/// determined by dwFlags. The string representation can be null.</param>
-		/// <param name="dwFlags">Zero or more of the bits that are defined in the CREATE_ASM_NAME_OBJ_FLAGS enumeration.</param>
-		/// <param name="pvReserved"> Must be null.</param>
-		[SecurityCritical]
-		[DllImport("fusion.dll", SetLastError=true, CharSet=CharSet.Unicode, PreserveSig=false)]
-		public static extern void CreateAssemblyNameObject(out IAssemblyName ppAssemblyNameObj, string szAssemblyName,
-			uint dwFlags, IntPtr pvReserved);
-
-		/// <summary>
-		/// To obtain an instance of the CreateAssemblyEnum API, call the CreateAssemblyNameObject API.
-		/// </summary>
-		/// <param name="pEnum">Pointer to a memory location that contains the IAssemblyEnum pointer.</param>
-		/// <param name="pUnkReserved">Must be null.</param>
-		/// <param name="pName">An assembly name that is used to filter the enumeration. Can be null to enumerate all assemblies in the GAC.</param>
-		/// <param name="dwFlags">Exactly one bit from the ASM_CACHE_FLAGS enumeration.</param>
-		/// <param name="pvReserved">Must be NULL.</param>
-		[SecurityCritical]
-		[DllImport("fusion.dll", SetLastError=true, PreserveSig=false)]
-		public static extern void CreateAssemblyEnum(out IAssemblyEnum pEnum, IntPtr pUnkReserved, IAssemblyName pName,
-			AsmCacheFlags dwFlags, IntPtr pvReserved);
-
-		/// <summary>
-		/// To obtain an instance of the CreateInstallReferenceEnum API, call the CreateInstallReferenceEnum API.
-		/// </summary>
-		/// <param name="ppRefEnum">A pointer to a memory location that receives the IInstallReferenceEnum pointer.</param>
-		/// <param name="pName">The assembly name for which the references are enumerated.</param>
-		/// <param name="dwFlags"> Must be zero.</param>
-		/// <param name="pvReserved">Must be null.</param>
-		[SecurityCritical]
-		[DllImport("fusion.dll", SetLastError=true, PreserveSig=false)]
-		public static extern void CreateInstallReferenceEnum(out IInstallReferenceEnum ppRefEnum, IAssemblyName pName,
-			uint dwFlags, IntPtr pvReserved);
-
-		/// <summary>
-		/// The GetCachePath API returns the storage location of the GAC. 
-		/// </summary>
-		/// <param name="dwCacheFlags">Exactly one of the bits defined in the ASM_CACHE_FLAGS enumeration.</param>
-		/// <param name="pwzCachePath">Pointer to a buffer that is to receive the path of the GAC as a Unicode string.</param>
-		/// <param name="pcchPath">Length of the pwszCachePath buffer, in Unicode characters.</param>
-		[SecurityCritical]
-		[DllImport("fusion.dll", SetLastError=true, CharSet=CharSet.Unicode, PreserveSig=false)]
-		public static extern void GetCachePath(AsmCacheFlags dwCacheFlags, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwzCachePath,
-			ref uint pcchPath);
-
-		/// <summary>
-		/// GUID value for element guidScheme in the struct FUSION_INSTALL_REFERENCE
-		/// The assembly is referenced by an application that has been installed by using Windows Installer. 
-		/// The szIdentifier field is set to MSI, and szNonCannonicalData is set to Windows Installer. 
-		/// This scheme must only be used by Windows Installer itself.
-		/// </summary>
-		public static Guid FusionRefcountUninstallSubkeyGuid => new Guid("8cedc215-ac4b-488b-93c0-a50a49cb2fb8");
-
-		/// <summary>
-		/// GUID value for element guidScheme in the struct FUSION_INSTALL_REFERENCE
-		/// 
-		/// </summary>
-		public static Guid FusionRefcountFilepathGuid => new Guid("b02f9d65-fb77-4f7a-afa5-b391309f11c9");
-
-		/// <summary>
-		/// GUID value for element guidScheme in the struct FUSION_INSTALL_REFERENCE
-		/// 
-		/// </summary>
-		public static Guid FusionRefcountOpaqueStringGuid => new Guid("2ec93463-b0c3-45e1-8364-327e96aea856");
-
-		/// <summary>
-		/// GUID value for element guidScheme in the struct FUSION_INSTALL_REFERENCE
-		/// 
-		/// </summary>
-		public static Guid FusionRefcountMsiGuid => new Guid("25df0fc1-7f97-4070-add7-4b13bbfd7cb8");
-
-		/// <summary>
-		/// Use this method as a start for the GAC API
-		/// </summary>
-		/// <returns>IAssemblyCache COM interface</returns>
-		public static IAssemblyCache CreateAssemblyCache()
-		{
-
-			CreateAssemblyCache(out IAssemblyCache ac, 0);
-
-			return ac;
-		}
-
-		public static IAssemblyName CreateAssemblyName(string name)
-		{
-
-			CreateAssemblyNameObject(out IAssemblyName an, name, 2, (IntPtr)0);
-
-			return an;
-		}
-
-		[NotNull]
-		public static  string GetDisplayName([NotNull] IAssemblyName name, AsmDisplayFlags which)
-		{
-			uint bufferSize = 255;
-			StringBuilder buffer = new StringBuilder((int) bufferSize);
-			name.GetDisplayName(buffer, ref bufferSize, which);
-			return buffer.ToString();
-		}
-
-		[NotNull]
-		public static  string GetName([NotNull] IAssemblyName name)
-		{
-			uint bufferSize = 255;
-			StringBuilder buffer = new StringBuilder((int) bufferSize);
-			name.GetName(ref bufferSize, buffer);
-			return buffer.ToString();
-		}
-
-		[NotNull]
-		public static AssemblyName GetAssemblyName([NotNull] IAssemblyName nameRef)
-		{
-			AssemblyName name = new AssemblyName
-			{
-				Name = GetName(nameRef),
-				Version = GetVersion(nameRef),
-				CultureInfo = GetCulture(nameRef)
-			};
-			name.SetPublicKeyToken(GetPublicKeyToken(nameRef));
-			return name;
-		}
-
-		[NotNull]
-		public static System.Version GetVersion([NotNull] IAssemblyName name)
-		{
-			name.GetVersion(out uint major, out uint minor);
-			return new System.Version((int)major >> 16, (int)major & 0xFFFF, (int)minor >> 16, (int)minor & 0xFFFF);
-		}
-
-		[NotNull]
-		public static byte[] GetPublicKeyToken([NotNull] IAssemblyName name)
-		{
-			byte[] result = new byte[8];
-			uint bufferSize = 8;
-			IntPtr buffer = Marshal.AllocHGlobal((int) bufferSize);
-			name.GetProperty(AsmName.AsmNamePublicKeyToken, buffer, ref bufferSize);
-			for (int i = 0; i < 8; i++)
-				result[i] = Marshal.ReadByte(buffer, i);
-			Marshal.FreeHGlobal(buffer);
-			return result;
-		}
-
-		[NotNull]
-		public static byte[] GetPublicKey([NotNull] IAssemblyName name)
-		{
-			uint bufferSize = 512;
-			IntPtr buffer = Marshal.AllocHGlobal((int) bufferSize);
-			name.GetProperty(AsmName.AsmNamePublicKey, buffer, ref bufferSize);
-			byte[] result = new byte[bufferSize];
-			for (int i = 0; i < bufferSize; i++)
-				result[i] = Marshal.ReadByte(buffer, i);
-			Marshal.FreeHGlobal(buffer);
-			return result;
-		}
-
-		[NotNull]
-		public static CultureInfo GetCulture([NotNull] IAssemblyName name)
-		{
-			uint bufferSize = 255;
-			IntPtr buffer = Marshal.AllocHGlobal((int) bufferSize);
-			name.GetProperty(AsmName.AsmNameCulture, buffer, ref bufferSize);
-			string result = Marshal.PtrToStringAuto(buffer);
-			Marshal.FreeHGlobal(buffer);
-			return result == null ? CultureInfoHelper.Default : new CultureInfo(result);
-		}
-
-		public static IAssemblyEnum CreateGacEnum()
-		{
-
-			CreateAssemblyEnum(out IAssemblyEnum ae, (IntPtr)0, null, AsmCacheFlags.AsmCacheGac, (IntPtr)0);
-
-			return ae;
-		}
-
-		/// <summary>
-		/// Get the next assembly name in the current enumerator or fail
-		/// </summary>
-		/// <param name="enumerator"></param>
-		/// <param name="name"></param>
-		/// <returns>0 if the enumeration is not at its end</returns>
-		public static int GetNextAssembly([NotNull] IAssemblyEnum enumerator, out IAssemblyName name) { return enumerator.GetNextAssembly((IntPtr)0, out name, 0); }
-
-		[NotNull]
-		public static string GetGACPath()
-		{
-			uint bufferSize = 255;
-			StringBuilder buffer = new StringBuilder((int) bufferSize);
-			GetCachePath(AsmCacheFlags.AsmCacheGac, buffer, ref bufferSize);
-			return buffer.ToString();
-		}
-
-		[NotNull]
-		public static string GetZapPath()
-		{
-			uint bufferSize = 255;
-			StringBuilder buffer = new StringBuilder((int) bufferSize);
-			GetCachePath(AsmCacheFlags.AsmCacheZap, buffer, ref bufferSize);
-			return buffer.ToString();
-		}
-
-		[NotNull]
-		public static string GetDownloadPath()
-		{
-			uint bufferSize = 255;
-			StringBuilder buffer = new StringBuilder((int) bufferSize);
-			GetCachePath(AsmCacheFlags.AsmCacheDownload, buffer, ref bufferSize);
-			return buffer.ToString();
-		}
-	}
+	/// <param name="refIid"></param>
+	/// <param name="pUnkSink"></param>
+	/// <param name="pUnkContext"></param>
+	/// <param name="szCodeBase"></param>
+	/// <param name="llFlags"></param>
+	/// <param name="pvReserved"></param>
+	/// <param name="cbReserved"></param>
+	/// <param name="ppv"></param>
+	/// <returns></returns>
+	[PreserveSig]
+	int BindToObject(
+		ref Guid refIid,
+		[MarshalAs(UnmanagedType.IUnknown)] object pUnkSink,
+		[MarshalAs(UnmanagedType.IUnknown)] object pUnkContext,
+		[MarshalAs(UnmanagedType.LPWStr)] string szCodeBase,
+		long llFlags,
+		IntPtr pvReserved,
+		uint cbReserved,
+		out IntPtr ppv);
 
 	/// <summary>
-	/// The IAssemblyCache interface is the top-level interface that provides access to the GAC.
+	/// The IAssemblyName::GetName method returns the name part of the assembly name.
 	/// </summary>
-	[ComImport, Guid("e707dcde-d1cd-11d2-bab9-00c04f8eceae"),
-	InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	public interface IAssemblyCache
-	{
-		/// <summary>
-		/// The IAssemblyCache::UninstallAssembly method removes a reference to an assembly from the GAC. 
-		/// If other applications hold no other references to the assembly, the files that make up the assembly are removed from the GAC. 
-		/// </summary>
-		/// <param name="dwFlags">No flags defined. Must be zero.</param>
-		/// <param name="pszAssemblyName">The name of the assembly. A zero-ended Unicode string.</param>
-		/// <param name="pRefData">A pointer to a FUSION_INSTALL_REFERENCE structure. Although this is not recommended, 
-		///		this parameter can be null. The assembly is installed without an application reference, or all existing application 
-		///		references are gone.</param>
-		/// <param name="pulDisposition">Pointer to an integer that indicates the action that is performed by the function.</param>
-		/// <returns>The return values are defined as follows: 
-		///		S_OK - The assembly has been uninstalled.
-		///		S_FALSE - The operation succeeded, but the assembly was not removed from the GAC. 
-		///		The reason is described in pulDisposition.</returns>
-		///	<remarks>
-		///	NOTE: If pulDisposition is not null, pulDisposition contains one of the following values:
-		///		IASSEMBLYCACHE_UNINSTALL_DISPOSITION_UNINSTALLED - The assembly files have been removed from the GAC.
-		///		IASSEMBLYCACHE_UNINSTALL_DISPOSITION_STILL_IN_USE - An application is using the assembly. 
-		///			This value is returned on Microsoft Windows 95 and Microsoft Windows 98.
-		///		IASSEMBLYCACHE_UNINSTALL_DISPOSITION_ALREADY_UNINSTALLED - The assembly does not exist in the GAC.
-		///		IASSEMBLYCACHE_UNINSTALL_DISPOSITION_DELETE_PENDING - Not used.
-		///		IASSEMBLYCACHE_UNINSTALL_DISPOSITION_HAS_INSTALL_REFERENCES - The assembly has not been removed from the GAC because 
-		///			another application reference exists.
-		///		IASSEMBLYCACHE_UNINSTALL_DISPOSITION_REFERENCE_NOT_FOUND - The reference that is specified in pRefData is not found 
-		///			in the GAC.
-		///	</remarks>
-		[PreserveSig]
-		int UninstallAssembly(
-			uint dwFlags, 
-			[MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName,
-			[MarshalAs(UnmanagedType.LPArray)] FusionInstallReference[] pRefData,
-			out uint pulDisposition);
-
-		/// <summary>
-		/// The IAssemblyCache::QueryAssemblyInfo method retrieves information about an assembly from the GAC. 
-		/// </summary>
-		/// <param name="dwFlags">One of QUERYASMINFO_FLAG_VALIDATE or QUERYASMINFO_FLAG_GETSIZE: 
-		///		*_VALIDATE - Performs validation of the files in the GAC against the assembly manifest, including hash verification 
-		///			and strong name signature verification.
-		///		*_GETSIZE - Returns the size of all files in the assembly (disk footprint). If this is not specified, the 
-		///			ASSEMBLY_INFO::uliAssemblySizeInKB field is not modified.</param>
-		/// <param name="pszAssemblyName"></param>
-		/// <param name="pAsmInfo"></param>
-		/// <returns></returns>
-		[PreserveSig]
-		int QueryAssemblyInfo(
-			uint dwFlags,
-			[MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName,
-			ref AssemblyInfo pAsmInfo);
-
-		/// <summary>
-		/// Undocumented
-		/// </summary>
-		/// <param name="dwFlags"></param>
-		/// <param name="pvReserved"></param>
-		/// <param name="ppAsmItem"></param>
-		/// <param name="pszAssemblyName"></param>
-		/// <returns></returns>
-		[PreserveSig]
-		int CreateAssemblyCacheItem(
-			uint dwFlags,
-			IntPtr pvReserved,
-			out IAssemblyCacheItem ppAsmItem,
-			[MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName);
-
-		/// <summary>
-		/// Undocumented
-		/// </summary>
-		/// <param name="ppAsmScavenger"></param>
-		/// <returns></returns>
-		[PreserveSig]
-		int CreateAssemblyScavenger(
-			[MarshalAs(UnmanagedType.IUnknown)] out object ppAsmScavenger);
-
-		/// <summary>
-		/// The IAssemblyCache::InstallAssembly method adds a new assembly to the GAC. The assembly must be persisted in the file 
-		/// system and is copied to the GAC.
-		/// </summary>
-		/// <param name="dwFlags">At most, one of the bits of the IASSEMBLYCACHE_INSTALL_FLAG_* values can be specified: 
-		///		*_REFRESH - If the assembly is already installed in the GAC and the file version numbers of the assembly being 
-		///		installed are the same or later, the files are replaced.
-		///		*_FORCE_REFRESH - The files of an existing assembly are overwritten regardless of their version number.</param>
-		/// <param name="pszManifestFilePath"> A string pointing to the dynamic-linked library (DLL) that contains the assembly manifest. 
-		///	Other assembly files must reside in the same directory as the DLL that contains the assembly manifest.</param>
-		/// <param name="pRefData">A pointer to a FUSION_INSTALL_REFERENCE that indicates the application on whose behalf the 
-		/// assembly is being installed. Although this is not recommended, this parameter can be null, but this leaves the assembly 
-		/// without any application reference.</param>
-		/// <returns></returns>
-		[PreserveSig]
-		int InstallAssembly(
-			uint dwFlags,
-			[MarshalAs(UnmanagedType.LPWStr)] string pszManifestFilePath,
-			[MarshalAs(UnmanagedType.LPArray)] FusionInstallReference[] pRefData);
-	}
-
+	/// <param name="lpcwBuffer">Size of the pwszName buffer (on input). Length of the name (on return).</param>
+	/// <param name="pwzName">Pointer to the buffer that is to contain the name part of the assembly name.</param>
+	/// <returns></returns>
+	/// <remarks>http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpguide/html/cpcondefaultmarshalingforstrings.asp</remarks>
+	[PreserveSig]
+	int GetName(
+		ref uint lpcwBuffer,
+		[Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwzName);
 
 	/// <summary>
-	/// The IAssemblyName interface represents an assembly name. An assembly name includes a predetermined set of name-value pairs. 
-	/// The assembly name is described in detail in the .NET Framework SDK.
+	/// The IAssemblyName::GetVersion method returns the version part of the assembly name.
 	/// </summary>
-	[ComImport, Guid("CD193BC0-B4BC-11d2-9833-00C04FC31D2E"),
-	InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	public interface IAssemblyName
-	{
-		/// <summary>
-		/// The IAssemblyName::SetProperty method adds a name-value pair to the assembly name, or, if a name-value pair 
-		/// with the same name already exists, modifies or deletes the value of a name-value pair.
-		/// </summary>
-		/// <param name="propertyId">The ID that represents the name part of the name-value pair that is to be 
-		/// added or to be modified. Valid property IDs are defined in the ASM_NAME enumeration.</param>
-		/// <param name="pvProperty">A pointer to a buffer that contains the value of the property.</param>
-		/// <param name="cbProperty">The length of the pvProperty buffer in bytes. If cbProperty is zero, the name-value pair 
-		/// is removed from the assembly name.</param>
-		/// <returns></returns>
-		[PreserveSig]
-		int SetProperty(
-			AsmName propertyId,
-			IntPtr pvProperty,
-			uint cbProperty);
-
-		/// <summary>
-		/// The IAssemblyName::GetProperty method retrieves the value of a name-value pair in the assembly name that specifies the name.
-		/// </summary>
-		/// <param name="propertyId">The ID that represents the name of the name-value pair whose value is to be retrieved.
-		/// Specified property IDs are defined in the ASM_NAME enumeration.</param>
-		/// <param name="pvProperty">A pointer to a buffer that is to contain the value of the property.</param>
-		/// <param name="pcbProperty">The length of the pvProperty buffer, in bytes.</param>
-		/// <returns></returns>
-		[PreserveSig]
-		int GetProperty(
-			AsmName propertyId,
-			IntPtr pvProperty,
-			ref uint pcbProperty);
-
-		///		*_VERSION - Includes the version number as part of the display name.
-		///		*_CULTURE - Includes the culture.
-		///		*_PUBLIC_KEY_TOKEN - Includes the public key token.
-		///		*_PUBLIC_KEY - Includes the public key.
-		///		*_CUSTOM - Includes the custom part of the assembly name.
-		///		*_PROCESSORARCHITECTURE - Includes the processor architecture.
-		///		*_LANGUAGEID - Includes the language ID.
-		/// <remarks>http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpguide/html/cpcondefaultmarshalingforstrings.asp</remarks>
-		[PreserveSig]
-		int GetDisplayName(
-			[Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder szDisplayName,
-			ref uint pccDisplayName,
-			AsmDisplayFlags dwDisplayFlags);
-
-		/// <summary>
-		/// Undocumented
-		/// </summary>
-		/// <param name="refIid"></param>
-		/// <param name="pUnkSink"></param>
-		/// <param name="pUnkContext"></param>
-		/// <param name="szCodeBase"></param>
-		/// <param name="llFlags"></param>
-		/// <param name="pvReserved"></param>
-		/// <param name="cbReserved"></param>
-		/// <param name="ppv"></param>
-		/// <returns></returns>
-		[PreserveSig]
-		int BindToObject(
-			ref Guid refIid,
-			[MarshalAs(UnmanagedType.IUnknown)] object pUnkSink,
-			[MarshalAs(UnmanagedType.IUnknown)] object pUnkContext,
-			[MarshalAs(UnmanagedType.LPWStr)] string szCodeBase,
-			long llFlags,
-			IntPtr pvReserved,
-			uint cbReserved,
-			out IntPtr ppv);
-
-		/// <summary>
-		/// The IAssemblyName::GetName method returns the name part of the assembly name.
-		/// </summary>
-		/// <param name="lpcwBuffer">Size of the pwszName buffer (on input). Length of the name (on return).</param>
-		/// <param name="pwzName">Pointer to the buffer that is to contain the name part of the assembly name.</param>
-		/// <returns></returns>
-		/// <remarks>http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpguide/html/cpcondefaultmarshalingforstrings.asp</remarks>
-		[PreserveSig]
-		int GetName(
-			ref uint lpcwBuffer,
-			[Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwzName);
-
-		/// <summary>
-		/// The IAssemblyName::GetVersion method returns the version part of the assembly name.
-		/// </summary>
-		/// <param name="pdwVersionHi">Pointer to a DWORD that contains the upper 32 bits of the version number.</param>
-		/// <param name="pdwVersionLow">Pointer to a DWORD that contain the lower 32 bits of the version number.</param>
-		/// <returns></returns>
-		[PreserveSig]
-		int GetVersion(
-			out uint pdwVersionHi,
-			out uint pdwVersionLow);
-
-		/// <summary>
-		/// The IAssemblyName::IsEqual method compares the assembly name to another assembly names.
-		/// </summary>
-		/// <param name="pName">The assembly name to compare to.</param>
-		/// <param name="dwCmpFlags">Indicates which part of the assembly name to use in the comparison. 
-		/// Values are one or more of the bits defined in the ASM_CMP_FLAGS enumeration.</param>
-		/// <returns></returns>
-		[PreserveSig]
-		int IsEqual(
-			IAssemblyName pName,
-			AsmCmpFlags dwCmpFlags);
-
-		/// <summary>
-		/// The IAssemblyName::Clone method creates a copy of an assembly name. 
-		/// </summary>
-		/// <param name="pName"></param>
-		/// <returns></returns>
-		[PreserveSig]
-		int Clone(
-			out IAssemblyName pName);
-	}
-
+	/// <param name="pdwVersionHi">Pointer to a DWORD that contains the upper 32 bits of the version number.</param>
+	/// <param name="pdwVersionLow">Pointer to a DWORD that contain the lower 32 bits of the version number.</param>
+	/// <returns></returns>
+	[PreserveSig]
+	int GetVersion(
+		out uint pdwVersionHi,
+		out uint pdwVersionLow);
 
 	/// <summary>
-	/// The IAssemblyEnum interface enumerates the assemblies in the GAC.
+	/// The IAssemblyName::IsEqual method compares the assembly name to another assembly names.
 	/// </summary>
-	[ComImport, Guid("21b8916c-f28e-11d2-a473-00c04f8ef448"),
-	InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	public interface IAssemblyEnum
-	{
-		/// <summary>
-		/// The IAssemblyEnum::GetNextAssembly method enumerates the assemblies in the GAC. 
-		/// </summary>
-		/// <param name="pvReserved">Must be null.</param>
-		/// <param name="ppName">Pointer to a memory location that is to receive the interface pointer to the assembly 
-		/// name of the next assembly that is enumerated.</param>
-		/// <param name="dwFlags">Must be zero.</param>
-		/// <returns></returns>
-		[PreserveSig]
-		int GetNextAssembly(
-			IntPtr pvReserved,
-			out IAssemblyName ppName,
-			uint dwFlags);
-
-		/// <summary>
-		/// Undocumented. Best guess: reset the enumeration to the first assembly.
-		/// </summary>
-		/// <returns></returns>
-		[PreserveSig]
-		int Reset();
-
-		/// <summary>
-		/// Undocumented. Create a copy of the assembly enum that is independently enumerable.
-		/// </summary>
-		/// <param name="ppEnum"></param>
-		/// <returns></returns>
-		[PreserveSig]
-		int Clone(
-			out IAssemblyEnum ppEnum);
-	}
-
+	/// <param name="pName">The assembly name to compare to.</param>
+	/// <param name="dwCmpFlags">Indicates which part of the assembly name to use in the comparison. 
+	/// Values are one or more of the bits defined in the ASM_CMP_FLAGS enumeration.</param>
+	/// <returns></returns>
+	[PreserveSig]
+	int IsEqual(
+		IAssemblyName pName,
+		AsmCmpFlags dwCmpFlags);
 
 	/// <summary>
-	/// The IInstallReferenceItem interface represents a reference that has been set on an assembly in the GAC. 
-	/// Instances of IInstallReferenceIteam are returned by the IInstallReferenceEnum interface.
+	/// The IAssemblyName::Clone method creates a copy of an assembly name. 
 	/// </summary>
-	[ComImport, Guid("582dac66-e678-449f-aba6-6faaec8a9394"),
-	InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	public interface IInstallReferenceItem
-	{
-		/// <summary>
-		/// The IInstallReferenceItem::GetReference method returns a FUSION_INSTALL_REFERENCE structure. 
-		/// </summary>
-		/// <param name="ppRefData">A pointer to a FUSION_INSTALL_REFERENCE structure. The memory is allocated by the GetReference 
-		/// method and is freed when IInstallReferenceItem is released. Callers must not hold a reference to this buffer after the 
-		/// IInstallReferenceItem object is released.</param>
-		/// <param name="dwFlags">Must be zero.</param>
-		/// <param name="pvReserved">Must be null.</param>
-		/// <returns></returns>
-		[PreserveSig]
-		int GetReference(
-			[MarshalAs(UnmanagedType.LPArray)] out FusionInstallReference[] ppRefData,
-			uint dwFlags,
-			IntPtr pvReserved);
-	}
+	/// <param name="pName"></param>
+	/// <returns></returns>
+	[PreserveSig]
+	int Clone(
+		out IAssemblyName pName);
+}
+
+
+/// <summary>
+/// The IAssemblyEnum interface enumerates the assemblies in the GAC.
+/// </summary>
+[ComImport, Guid("21b8916c-f28e-11d2-a473-00c04f8ef448"),
+InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IAssemblyEnum
+{
+	/// <summary>
+	/// The IAssemblyEnum::GetNextAssembly method enumerates the assemblies in the GAC. 
+	/// </summary>
+	/// <param name="pvReserved">Must be null.</param>
+	/// <param name="ppName">Pointer to a memory location that is to receive the interface pointer to the assembly 
+	/// name of the next assembly that is enumerated.</param>
+	/// <param name="dwFlags">Must be zero.</param>
+	/// <returns></returns>
+	[PreserveSig]
+	int GetNextAssembly(
+		IntPtr pvReserved,
+		out IAssemblyName ppName,
+		uint dwFlags);
+
+	/// <summary>
+	/// Undocumented. Best guess: reset the enumeration to the first assembly.
+	/// </summary>
+	/// <returns></returns>
+	[PreserveSig]
+	int Reset();
+
+	/// <summary>
+	/// Undocumented. Create a copy of the assembly enum that is independently enumerable.
+	/// </summary>
+	/// <param name="ppEnum"></param>
+	/// <returns></returns>
+	[PreserveSig]
+	int Clone(
+		out IAssemblyEnum ppEnum);
+}
+
+
+/// <summary>
+/// The IInstallReferenceItem interface represents a reference that has been set on an assembly in the GAC. 
+/// Instances of IInstallReferenceIteam are returned by the IInstallReferenceEnum interface.
+/// </summary>
+[ComImport, Guid("582dac66-e678-449f-aba6-6faaec8a9394"),
+InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IInstallReferenceItem
+{
+	/// <summary>
+	/// The IInstallReferenceItem::GetReference method returns a FUSION_INSTALL_REFERENCE structure. 
+	/// </summary>
+	/// <param name="ppRefData">A pointer to a FUSION_INSTALL_REFERENCE structure. The memory is allocated by the GetReference 
+	/// method and is freed when IInstallReferenceItem is released. Callers must not hold a reference to this buffer after the 
+	/// IInstallReferenceItem object is released.</param>
+	/// <param name="dwFlags">Must be zero.</param>
+	/// <param name="pvReserved">Must be null.</param>
+	/// <returns></returns>
+	[PreserveSig]
+	int GetReference(
+		[MarshalAs(UnmanagedType.LPArray)] out FusionInstallReference[] ppRefData,
+		uint dwFlags,
+		IntPtr pvReserved);
+}
 	
 
+/// <summary>
+/// The IInstallReferenceEnum interface enumerates all references that are set on an assembly in the GAC.
+/// NOTE: References that belong to the assembly are locked for changes while those references are being enumerated. 
+/// </summary>
+[ComImport,	Guid("56b1a988-7c0c-4aa2-8639-c3eb5a90226f"),
+InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IInstallReferenceEnum
+{
 	/// <summary>
-	/// The IInstallReferenceEnum interface enumerates all references that are set on an assembly in the GAC.
-	/// NOTE: References that belong to the assembly are locked for changes while those references are being enumerated. 
+	/// IInstallReferenceEnum::GetNextInstallReferenceItem returns the next reference information for an assembly. 
 	/// </summary>
-	[ComImport,	Guid("56b1a988-7c0c-4aa2-8639-c3eb5a90226f"),
-	InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	public interface IInstallReferenceEnum
-	{
-		/// <summary>
-		/// IInstallReferenceEnum::GetNextInstallReferenceItem returns the next reference information for an assembly. 
-		/// </summary>
-		/// <param name="ppRefItem">Pointer to a memory location that receives the IInstallReferenceItem pointer.</param>
-		/// <param name="dwFlags">Must be zero.</param>
-		/// <param name="pvReserved">Must be null.</param>
-		/// <returns></returns>
-		[PreserveSig]
-		int GetNextInstallReferenceItem(
-			out IInstallReferenceItem ppRefItem,
-			uint dwFlags,
-			IntPtr pvReserved);
-	}
+	/// <param name="ppRefItem">Pointer to a memory location that receives the IInstallReferenceItem pointer.</param>
+	/// <param name="dwFlags">Must be zero.</param>
+	/// <param name="pvReserved">Must be null.</param>
+	/// <returns></returns>
+	[PreserveSig]
+	int GetNextInstallReferenceItem(
+		out IInstallReferenceItem ppRefItem,
+		uint dwFlags,
+		IntPtr pvReserved);
+}
 
 
+
+/// <summary>
+/// Undocumented. Probably only for internal use.
+/// <see cref="IAssemblyCache.CreateAssemblyCacheItem"/>
+/// </summary>
+[ComImport, Guid("9E3AAEB4-D1CD-11D2-BAB9-00C04F8ECEAE"),
+InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IAssemblyCacheItem
+{
+	/// <summary>
+	/// Undocumented.
+	/// </summary>
+	/// <param name="dwFlags"></param>
+	/// <param name="pszStreamName"></param>
+	/// <param name="dwFormat"></param>
+	/// <param name="dwFormatFlags"></param>
+	/// <param name="ppIStream"></param>
+	/// <param name="puliMaxSize"></param>
+	void CreateStream(
+		uint dwFlags,
+		[MarshalAs(UnmanagedType.LPWStr)] string pszStreamName,
+		uint dwFormat,
+		uint dwFormatFlags,
+		out IStream ppIStream,
+		ref long puliMaxSize);
 
 	/// <summary>
-	/// Undocumented. Probably only for internal use.
-	/// <see cref="IAssemblyCache.CreateAssemblyCacheItem"/>
+	/// Undocumented.
 	/// </summary>
-	[ComImport, Guid("9E3AAEB4-D1CD-11D2-BAB9-00C04F8ECEAE"),
-	InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	public interface IAssemblyCacheItem
-	{
-		/// <summary>
-		/// Undocumented.
-		/// </summary>
-		/// <param name="dwFlags"></param>
-		/// <param name="pszStreamName"></param>
-		/// <param name="dwFormat"></param>
-		/// <param name="dwFormatFlags"></param>
-		/// <param name="ppIStream"></param>
-		/// <param name="puliMaxSize"></param>
-		void CreateStream(
-			uint dwFlags,
-			[MarshalAs(UnmanagedType.LPWStr)] string pszStreamName,
-			uint dwFormat,
-			uint dwFormatFlags,
-			out IStream ppIStream,
-			ref long puliMaxSize);
+	/// <param name="dwFlags"></param>
+	/// <param name="pulDisposition"></param>
+	void Commit(
+		uint dwFlags,
+		out long pulDisposition);
 
-		/// <summary>
-		/// Undocumented.
-		/// </summary>
-		/// <param name="dwFlags"></param>
-		/// <param name="pulDisposition"></param>
-		void Commit(
-			uint dwFlags,
-			out long pulDisposition);
-
-		/// <summary>
-		/// Undocumented.
-		/// </summary>
-		void AbortItem();
-	}
+	/// <summary>
+	/// Undocumented.
+	/// </summary>
+	void AbortItem();
 }

@@ -1,13 +1,12 @@
 ﻿using essentialMix.Newtonsoft.Serialization;
 
-namespace essentialMix.Web.Api.Annotations.Json
+namespace essentialMix.Web.Api.Annotations.Json;
+
+public class SnakeCasePropertyNoExtensionNoDictionaryJsonResolverAttribute : PropertyNoExtensionNoDictionaryJsonResolverAttribute
 {
-	public class SnakeCasePropertyNoExtensionNoDictionaryJsonResolverAttribute : PropertyNoExtensionNoDictionaryJsonResolverAttribute
+	/// <inheritdoc />
+	public SnakeCasePropertyNoExtensionNoDictionaryJsonResolverAttribute()
+		: base(new SnakeCasePropertyNoExtensionNoDictionaryNamingStrategy())
 	{
-		/// <inheritdoc />
-		public SnakeCasePropertyNoExtensionNoDictionaryJsonResolverAttribute()
-			: base(new SnakeCasePropertyNoExtensionNoDictionaryNamingStrategy())
-		{
-		}
 	}
 }

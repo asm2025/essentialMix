@@ -1,8 +1,7 @@
-namespace essentialMix.Patterns.Layout
+namespace essentialMix.Patterns.Layout;
+
+public enum Orientation
 {
-	public enum Orientation
-	{
-		Horizontal,
-		Vertical
-	}
+	Horizontal,
+	Vertical
 }

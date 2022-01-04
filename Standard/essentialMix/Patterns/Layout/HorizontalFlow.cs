@@ -1,8 +1,7 @@
-namespace essentialMix.Patterns.Layout
+namespace essentialMix.Patterns.Layout;
+
+public enum HorizontalFlow
 {
-	public enum HorizontalFlow
-	{
-		LeftToRight = Flow.LeftToRight,
-		RightToLeft = Flow.RightToLeft
-	}
+	LeftToRight = Flow.LeftToRight,
+	RightToLeft = Flow.RightToLeft
 }

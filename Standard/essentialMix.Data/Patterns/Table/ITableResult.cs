@@ -2,15 +2,14 @@
 using essentialMix.Patterns.Pagination;
 using JetBrains.Annotations;
 
-namespace essentialMix.Data.Patterns.Table
-{
-	public interface ITableResult<T> : ITableResultBase<T>
-	{
-		[NotNull]
-		IPagination Paging { get; }
-	}
+namespace essentialMix.Data.Patterns.Table;
 
-	public interface ITableResult : ITableResult<IDictionary<string, object>>
-	{
-	}
+public interface ITableResult<T> : ITableResultBase<T>
+{
+	[NotNull]
+	IPagination Paging { get; }
+}
+
+public interface ITableResult : ITableResult<IDictionary<string, object>>
+{
 }

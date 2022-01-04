@@ -5,118 +5,107 @@ using JetBrains.Annotations;
 using essentialMix.Comparers;
 using essentialMix.Patterns.NotifyChange;
 
-namespace essentialMix.Collections
+namespace essentialMix.Collections;
+
+[Serializable]
+public abstract class Header : NotifyPropertyChangedBase, IHeader
 {
-	[Serializable]
-	public abstract class Header : NotifyPropertyChangedBase, IHeader
+	private string _name;
+	private string _text;
+	private object _tag;
+	private bool _enabled;
+
+	protected Header([NotNull] string name, [NotNull] Type type)
+		: this(name, type, null, false) { }
+
+	protected Header([NotNull] string name, [NotNull] Type type, string text)
+		: this(name, type, text, false) { }
+
+	protected Header([NotNull] string name, [NotNull] Type type, bool isFixed)
+		: this(name, type, null, isFixed) { }
+
+	protected Header([NotNull] string name, [NotNull] Type type, string text, bool isFixed)
 	{
-		private string _name;
-		private string _text;
-		private object _tag;
-		private bool _enabled;
+		if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
+		ValueType = type ?? throw new ArgumentNullException(nameof(type));
+		_name = name;
+		_text = text.IfNullOrEmpty(() => _name);
+		_enabled = true;
+		IsFixed = isFixed;
+	}
 
-		protected Header([NotNull] string name, [NotNull] Type type)
-			: this(name, type, null, false) { }
+	public override string ToString() { return _text.IfNullOrEmpty(() => _name); }
 
-		protected Header([NotNull] string name, [NotNull] Type type, string text)
-			: this(name, type, text, false) { }
-
-		protected Header([NotNull] string name, [NotNull] Type type, bool isFixed)
-			: this(name, type, null, isFixed) { }
-
-		protected Header([NotNull] string name, [NotNull] Type type, string text, bool isFixed)
+	public virtual string Name
+	{
+		get => _name;
+		set
 		{
-			if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
-			ValueType = type ?? throw new ArgumentNullException(nameof(type));
-			_name = name;
-			_text = text.IfNullOrEmpty(() => _name);
-			_enabled = true;
-			IsFixed = isFixed;
+			if (string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException(nameof(value));
+			if (_name == value) return;
+			_name = value;
+			OnNameChanged();
+			OnPropertyChanged();
 		}
+	}
 
-		public override string ToString() { return _text.IfNullOrEmpty(() => _name); }
-
-		public virtual string Name
+	[Localizable(true)]
+	public virtual string Text
+	{
+		get => _text;
+		set
 		{
-			get => _name;
-			set
-			{
-				if (string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException(nameof(value));
-				if (_name == value) return;
-				_name = value;
-				OnNameChanged();
-				OnPropertyChanged();
-			}
+			if (_text == value) return;
+			_text = value;
+			OnPropertyChanged();
 		}
+	}
 
-		[Localizable(true)]
-		public virtual string Text
+	public virtual object Tag
+	{
+		get => _tag;
+		set
 		{
-			get => _text;
-			set
-			{
-				if (_text == value) return;
-				_text = value;
-				OnPropertyChanged();
-			}
+			if (_tag == value) return;
+			_tag = value;
+			OnPropertyChanged();
 		}
+	}
 
-		public virtual object Tag
+	public bool Enabled
+	{
+		get => _enabled;
+		set
 		{
-			get => _tag;
-			set
-			{
-				if (_tag == value) return;
-				_tag = value;
-				OnPropertyChanged();
-			}
+			if (_enabled == value) return;
+			_enabled = value;
+			OnPropertyChanged();
 		}
+	}
 
-		public bool Enabled
+	public virtual bool IsFixed { get; }
+
+	public Type ValueType { get; }
+
+	public abstract object Clone();
+
+	public virtual int CompareTo(object obj) { return ReferenceComparer<IHeader>.Default.Compare(this, obj); }
+
+	public virtual int CompareTo(IHeader other) { return HeaderComparer.Default.Compare(this, other); }
+
+	public virtual bool Equals(IHeader other) { return HeaderComparer.Default.Equals(this, other); }
+
+	public virtual bool IsCompatibleObject(object value)
+	{
+		if (value == null) return ValueType.IsClass;
+
+		if (ValueType.IsEnum)
 		{
-			get => _enabled;
-			set
+			if (value is string s)
 			{
-				if (_enabled == value) return;
-				_enabled = value;
-				OnPropertyChanged();
-			}
-		}
-
-		public virtual bool IsFixed { get; }
-
-		public Type ValueType { get; }
-
-		public abstract object Clone();
-
-		public virtual int CompareTo(object obj) { return ReferenceComparer<IHeader>.Default.Compare(this, obj); }
-
-		public virtual int CompareTo(IHeader other) { return HeaderComparer.Default.Compare(this, other); }
-
-		public virtual bool Equals(IHeader other) { return HeaderComparer.Default.Equals(this, other); }
-
-		public virtual bool IsCompatibleObject(object value)
-		{
-			if (value == null) return ValueType.IsClass;
-
-			if (ValueType.IsEnum)
-			{
-				if (value is string s)
-				{
-					try
-					{
-						object unused = Enum.Parse(ValueType, s, true);
-						return true;
-					}
-					catch
-					{
-						// ignored
-					}
-				}
-
 				try
 				{
-					object unused = value.ToEnum(ValueType);
+					object unused = Enum.Parse(ValueType, s, true);
 					return true;
 				}
 				catch
@@ -125,9 +114,19 @@ namespace essentialMix.Collections
 				}
 			}
 
-			return value.Is(ValueType);
+			try
+			{
+				object unused = value.ToEnum(ValueType);
+				return true;
+			}
+			catch
+			{
+				// ignored
+			}
 		}
 
-		protected virtual void OnNameChanged() { }
+		return value.Is(ValueType);
 	}
+
+	protected virtual void OnNameChanged() { }
 }

@@ -5,34 +5,33 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace essentialMix.Core.Web.Middleware
+namespace essentialMix.Core.Web.Middleware;
+
+public abstract class MiddlewareBase
 {
-	public abstract class MiddlewareBase
+	protected MiddlewareBase(RequestDelegate next, ILogger logger)
 	{
-		protected MiddlewareBase(RequestDelegate next, ILogger logger)
-		{
-			Next = next;
-			Logger = logger ?? LogHelper.Empty;
-		}
-
-		protected RequestDelegate Next { get; }
-
-		[NotNull]
-		protected ILogger Logger { get; }
-
-		public abstract Task Invoke(HttpContext context);
+		Next = next;
+		Logger = logger ?? LogHelper.Empty;
 	}
 
-	public abstract class MiddlewareBase<TOptions> : MiddlewareBase
-		where TOptions : class, new()
-	{
-		/// <inheritdoc />
-		protected MiddlewareBase(RequestDelegate next, IOptions<TOptions> options, ILogger logger)
-			: base(next, logger)
-		{
-			Options = options;
-		}
+	protected RequestDelegate Next { get; }
 
-		protected IOptions<TOptions> Options { get; }
+	[NotNull]
+	protected ILogger Logger { get; }
+
+	public abstract Task Invoke(HttpContext context);
+}
+
+public abstract class MiddlewareBase<TOptions> : MiddlewareBase
+	where TOptions : class, new()
+{
+	/// <inheritdoc />
+	protected MiddlewareBase(RequestDelegate next, IOptions<TOptions> options, ILogger logger)
+		: base(next, logger)
+	{
+		Options = options;
 	}
+
+	protected IOptions<TOptions> Options { get; }
 }

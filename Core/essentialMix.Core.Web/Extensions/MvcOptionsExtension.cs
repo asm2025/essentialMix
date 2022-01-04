@@ -11,123 +11,122 @@ using TextInputFormatter = essentialMix.Core.Web.Mvc.Formatters.Text.TextInputFo
 using TextOutputFormatter = essentialMix.Core.Web.Mvc.Formatters.Text.TextOutputFormatter;
 
 // ReSharper disable once CheckNamespace
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class MvcOptionsExtension
 {
-	public static class MvcOptionsExtension
+	[NotNull]
+	public static MvcOptions SkipSsl([NotNull] this MvcOptions thisValue)
 	{
-		[NotNull]
-		public static MvcOptions SkipSsl([NotNull] this MvcOptions thisValue)
+		RequireHttpsAttribute requireHttps = thisValue.Filters.OfType<RequireHttpsAttribute>().FirstOrDefault();
+		if (requireHttps != null) thisValue.Filters.Remove(requireHttps);
+		return thisValue;
+	}
+
+	[NotNull]
+	public static MvcOptions RequireSsl([NotNull] this MvcOptions thisValue)
+	{
+		RequireHttpsAttribute requireHttps = thisValue.Filters.OfType<RequireHttpsAttribute>().FirstOrDefault();
+		if (requireHttps == null) thisValue.Filters.Add<RequireHttpsAttribute>();
+		return thisValue;
+	}
+
+	[NotNull]
+	public static MvcOptions ConfigureRawFormatter([NotNull] this MvcOptions thisValue)
+	{
+		thisValue.RespectBrowserAcceptHeader = true;
+		RawInputFormatter input = thisValue.InputFormatters.OfType<RawInputFormatter>()
+											.FirstOrDefault();
+			
+		if (input == null)
 		{
-			RequireHttpsAttribute requireHttps = thisValue.Filters.OfType<RequireHttpsAttribute>().FirstOrDefault();
-			if (requireHttps != null) thisValue.Filters.Remove(requireHttps);
-			return thisValue;
+			input = new RawInputFormatter();
+			thisValue.InputFormatters.Add(input);
 		}
 
-		[NotNull]
-		public static MvcOptions RequireSsl([NotNull] this MvcOptions thisValue)
+		thisValue.FormatterMappings.SetMediaTypeMappingForFormat("plain", MediaTypeHeaderValues.TextPlain);
+		thisValue.FormatterMappings.SetMediaTypeMappingForFormat("octet-stream", MediaTypeHeaderValues.OctetStream);
+		return thisValue;
+	}
+
+	[NotNull]
+	public static MvcOptions ConfigureTextFormatter([NotNull] this MvcOptions thisValue)
+	{
+		thisValue.RespectBrowserAcceptHeader = true;
+		TextInputFormatter input = thisValue.InputFormatters.OfType<TextInputFormatter>()
+											.FirstOrDefault();
+			
+		if (input == null)
 		{
-			RequireHttpsAttribute requireHttps = thisValue.Filters.OfType<RequireHttpsAttribute>().FirstOrDefault();
-			if (requireHttps == null) thisValue.Filters.Add<RequireHttpsAttribute>();
-			return thisValue;
+			input = new TextInputFormatter();
+			thisValue.InputFormatters.Add(input);
+		}
+			
+		TextOutputFormatter output = thisValue.OutputFormatters.OfType<TextOutputFormatter>()
+											.FirstOrDefault();
+			
+		if (output == null)
+		{
+			output = new TextOutputFormatter();
+			thisValue.OutputFormatters.Add(output);
 		}
 
-		[NotNull]
-		public static MvcOptions ConfigureRawFormatter([NotNull] this MvcOptions thisValue)
-		{
-			thisValue.RespectBrowserAcceptHeader = true;
-			RawInputFormatter input = thisValue.InputFormatters.OfType<RawInputFormatter>()
-															.FirstOrDefault();
-			
-			if (input == null)
-			{
-				input = new RawInputFormatter();
-				thisValue.InputFormatters.Add(input);
-			}
+		thisValue.FormatterMappings.SetMediaTypeMappingForFormat("plain", Core.Web.Mvc.Formatters.Text.Internal.MediaTypeHeaderValues.TextPlain);
+		return thisValue;
+	}
 
-			thisValue.FormatterMappings.SetMediaTypeMappingForFormat("plain", MediaTypeHeaderValues.TextPlain);
-			thisValue.FormatterMappings.SetMediaTypeMappingForFormat("octet-stream", MediaTypeHeaderValues.OctetStream);
-			return thisValue;
+	[NotNull]
+	public static MvcOptions ConfigureXmlFormatter([NotNull] this MvcOptions thisValue, [NotNull] Action<XmlWriterSettings> configureXml)
+	{
+		thisValue.RespectBrowserAcceptHeader = true;
+		XmlSerializerInputFormatter input = thisValue.InputFormatters.OfType<XmlSerializerInputFormatter>()
+													.FirstOrDefault();
+			
+		if (input == null)
+		{
+			input = new XmlSerializerInputFormatter(thisValue);
+			thisValue.InputFormatters.Add(input);
+		}
+			
+		XmlSerializerOutputFormatter output = thisValue.OutputFormatters.OfType<XmlSerializerOutputFormatter>()
+														.FirstOrDefault();
+			
+		if (output == null)
+		{
+			output = new XmlSerializerOutputFormatter();
+			thisValue.OutputFormatters.Add(output);
 		}
 
-		[NotNull]
-		public static MvcOptions ConfigureTextFormatter([NotNull] this MvcOptions thisValue)
-		{
-			thisValue.RespectBrowserAcceptHeader = true;
-			TextInputFormatter input = thisValue.InputFormatters.OfType<TextInputFormatter>()
-												.FirstOrDefault();
-			
-			if (input == null)
-			{
-				input = new TextInputFormatter();
-				thisValue.InputFormatters.Add(input);
-			}
-			
-			TextOutputFormatter output = thisValue.OutputFormatters.OfType<TextOutputFormatter>()
-												.FirstOrDefault();
-			
-			if (output == null)
-			{
-				output = new TextOutputFormatter();
-				thisValue.OutputFormatters.Add(output);
-			}
+		configureXml(output.WriterSettings);
+		thisValue.FormatterMappings.SetMediaTypeMappingForFormat("xml", MediaTypeHeaderValue.Parse("application/xml"));
+		return thisValue;
+	}
 
-			thisValue.FormatterMappings.SetMediaTypeMappingForFormat("plain", Core.Web.Mvc.Formatters.Text.Internal.MediaTypeHeaderValues.TextPlain);
-			return thisValue;
+	[NotNull]
+	public static MvcOptions ConfigureXmlDataContractFormatter([NotNull] this MvcOptions thisValue, [NotNull] Action<XmlWriterSettings> configureXml)
+	{
+		thisValue.RespectBrowserAcceptHeader = true;
+
+		XmlDataContractSerializerInputFormatter dataContractInput = thisValue.InputFormatters.OfType<XmlDataContractSerializerInputFormatter>()
+																			.FirstOrDefault();
+			
+		if (dataContractInput == null)
+		{
+			dataContractInput = new XmlDataContractSerializerInputFormatter(thisValue);
+			thisValue.InputFormatters.Add(dataContractInput);
 		}
 
-		[NotNull]
-		public static MvcOptions ConfigureXmlFormatter([NotNull] this MvcOptions thisValue, [NotNull] Action<XmlWriterSettings> configureXml)
-		{
-			thisValue.RespectBrowserAcceptHeader = true;
-			XmlSerializerInputFormatter input = thisValue.InputFormatters.OfType<XmlSerializerInputFormatter>()
-															.FirstOrDefault();
-			
-			if (input == null)
-			{
-				input = new XmlSerializerInputFormatter(thisValue);
-				thisValue.InputFormatters.Add(input);
-			}
-			
-			XmlSerializerOutputFormatter output = thisValue.OutputFormatters.OfType<XmlSerializerOutputFormatter>()
-															.FirstOrDefault();
-			
-			if (output == null)
-			{
-				output = new XmlSerializerOutputFormatter();
-				thisValue.OutputFormatters.Add(output);
-			}
-
-			configureXml(output.WriterSettings);
-			thisValue.FormatterMappings.SetMediaTypeMappingForFormat("xml", MediaTypeHeaderValue.Parse("application/xml"));
-			return thisValue;
-		}
-
-		[NotNull]
-		public static MvcOptions ConfigureXmlDataContractFormatter([NotNull] this MvcOptions thisValue, [NotNull] Action<XmlWriterSettings> configureXml)
-		{
-			thisValue.RespectBrowserAcceptHeader = true;
-
-			XmlDataContractSerializerInputFormatter dataContractInput = thisValue.InputFormatters.OfType<XmlDataContractSerializerInputFormatter>()
+		XmlDataContractSerializerOutputFormatter dataContractOutput = thisValue.OutputFormatters.OfType<XmlDataContractSerializerOutputFormatter>()
 																				.FirstOrDefault();
 			
-			if (dataContractInput == null)
-			{
-				dataContractInput = new XmlDataContractSerializerInputFormatter(thisValue);
-				thisValue.InputFormatters.Add(dataContractInput);
-			}
-
-			XmlDataContractSerializerOutputFormatter dataContractOutput = thisValue.OutputFormatters.OfType<XmlDataContractSerializerOutputFormatter>()
-																					.FirstOrDefault();
-			
-			if (dataContractOutput == null)
-			{
-				dataContractOutput = new XmlDataContractSerializerOutputFormatter();
-				thisValue.OutputFormatters.Add(dataContractOutput);
-			}
-
-			configureXml(dataContractOutput.WriterSettings);
-			thisValue.FormatterMappings.SetMediaTypeMappingForFormat("dcxml", MediaTypeHeaderValue.Parse("application/dcxml"));
-			return thisValue;
+		if (dataContractOutput == null)
+		{
+			dataContractOutput = new XmlDataContractSerializerOutputFormatter();
+			thisValue.OutputFormatters.Add(dataContractOutput);
 		}
+
+		configureXml(dataContractOutput.WriterSettings);
+		thisValue.FormatterMappings.SetMediaTypeMappingForFormat("dcxml", MediaTypeHeaderValue.Parse("application/dcxml"));
+		return thisValue;
 	}
 }

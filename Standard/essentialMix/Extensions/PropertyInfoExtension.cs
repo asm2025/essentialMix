@@ -4,10 +4,9 @@ using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
 
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class PropertyInfoExtension
 {
-	public static class PropertyInfoExtension
-	{
-		public static bool HasArguments([NotNull] this PropertyInfo thisValue) { return thisValue.GetIndexParameters().Length > 0; }
-	}
+	public static bool HasArguments([NotNull] this PropertyInfo thisValue) { return thisValue.GetIndexParameters().Length > 0; }
 }

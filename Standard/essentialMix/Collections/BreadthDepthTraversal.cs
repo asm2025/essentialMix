@@ -1,8 +1,7 @@
-﻿namespace essentialMix.Collections
+﻿namespace essentialMix.Collections;
+
+public enum BreadthDepthTraversal
 {
-	public enum BreadthDepthTraversal
-	{
-		BreadthFirst,
-		DepthFirst
-	}
+	BreadthFirst,
+	DepthFirst
 }

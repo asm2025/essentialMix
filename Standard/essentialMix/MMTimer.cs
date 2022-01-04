@@ -1,87 +1,86 @@
 ﻿using System;
 using essentialMix.Patterns.Object;
 
-namespace essentialMix
+namespace essentialMix;
+
+// bug: something wrong with this timer. The second time it's called causes a NullReferenceException
+public class MMTimer : Disposable
 {
-	// bug: something wrong with this timer. The second time it's called causes a NullReferenceException
-	public class MMTimer : Disposable
+	private uint _id;
+
+	private bool _enabled;
+
+	/// <inheritdoc />
+	public MMTimer()
+		: this(0)
 	{
-		private uint _id;
+	}
 
-		private bool _enabled;
+	/// <inheritdoc />
+	public MMTimer(uint interval)
+	{
+		Interval = interval;
+	}
 
-		/// <inheritdoc />
-		public MMTimer()
-			: this(0)
+	public event EventHandler Tick;
+
+	public bool Enabled
+	{
+		get => _enabled;
+		set
 		{
+			if (_enabled == value) return;
+			_enabled = value;
+
+			if (_enabled)
+				Start(Interval, true);
+			else
+				Stop();
+		}
+	}
+
+	public uint Interval { get; set; }
+
+	/// <inheritdoc />
+	protected override void Dispose(bool disposing)
+	{
+		if (disposing) Stop();
+		base.Dispose(disposing);
+	}
+
+	protected virtual void OnTick(EventArgs e)
+	{
+		Tick?.Invoke(this, e);
+	}
+
+	private void Start(uint ms, bool repeat)
+	{
+		Stop();
+		fuEvent f = fuEvent.TIME_CALLBACK_FUNCTION | (repeat ? fuEvent.TIME_PERIODIC : fuEvent.TIME_ONESHOT);
+
+		lock(this)
+		{
+			_id = Win32.timeSetEvent(ms, 0, TimerCB, UIntPtr.Zero, f);
 		}
 
-		/// <inheritdoc />
-		public MMTimer(uint interval)
-		{
-			Interval = interval;
-		}
+		if (_id == 0) throw new Exception("Could not set timer.");
+	}
 
-		public event EventHandler Tick;
-
-		public bool Enabled
+	private void Stop()
+	{
+		lock(this)
 		{
-			get => _enabled;
-			set
+			if (_id != 0)
 			{
-				if (_enabled == value) return;
-				_enabled = value;
-
-				if (_enabled)
-					Start(Interval, true);
-				else
-					Stop();
+				Win32.timeKillEvent(_id);
+				_id = 0;
 			}
 		}
-
-		public uint Interval { get; set; }
-
-		/// <inheritdoc />
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing) Stop();
-			base.Dispose(disposing);
-		}
-
-		protected virtual void OnTick(EventArgs e)
-		{
-			Tick?.Invoke(this, e);
-		}
-
-		private void Start(uint ms, bool repeat)
-		{
-			Stop();
-			fuEvent f = fuEvent.TIME_CALLBACK_FUNCTION | (repeat ? fuEvent.TIME_PERIODIC : fuEvent.TIME_ONESHOT);
-
-			lock(this)
-			{
-				_id = Win32.timeSetEvent(ms, 0, TimerCB, UIntPtr.Zero, f);
-			}
-
-			if (_id == 0) throw new Exception("Could not set timer.");
-		}
-
-		private void Stop()
-		{
-			lock(this)
-			{
-				if (_id != 0)
-				{
-					Win32.timeKillEvent(_id);
-					_id = 0;
-				}
-			}
-		}
+	}
 		
-		private void TimerCB(uint uTimerID, uint uMsg, UIntPtr dwUser, UIntPtr dw1, UIntPtr dw2)
-		{
-			//Callback from the MMTimer API that fires the Timer event. Note we are in a different thread here
-			OnTick(EventArgs.Empty);
-		}
+	private void TimerCB(uint uTimerID, uint uMsg, UIntPtr dwUser, UIntPtr dw1, UIntPtr dw2)
+	{
+		//Callback from the MMTimer API that fires the Timer event. Note we are in a different thread here
+		OnTick(EventArgs.Empty);
 	}
 }

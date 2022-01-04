@@ -2,18 +2,17 @@
 using JetBrains.Annotations;
 using Microsoft.AspNet.Identity.EntityFramework;
 
-namespace essentialMix.Web.Entity.Model.Membership
+namespace essentialMix.Web.Entity.Model.Membership;
+
+public interface IIdentity<out TUser>
+	where TUser : IdentityUser
 {
-	public interface IIdentity<out TUser>
-		where TUser : IdentityUser
-	{
-		[NotNull]
-		TUser User { get; }
+	[NotNull]
+	TUser User { get; }
 
-		SecureString Password { get; }
-	}
+	SecureString Password { get; }
+}
 
-	public interface IIdentity : IIdentity<IdentityUser>
-	{
-	}
+public interface IIdentity : IIdentity<IdentityUser>
+{
 }

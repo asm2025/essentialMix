@@ -4,18 +4,17 @@ using System.IO;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class ImageExtension
 {
-	public static class ImageExtension
+	[NotNull]
+	public static byte[] ToByteArray([NotNull] this Image thisValue)
 	{
-		[NotNull]
-		public static byte[] ToByteArray([NotNull] this Image thisValue)
+		using (MemoryStream stream = new MemoryStream())
 		{
-			using (MemoryStream stream = new MemoryStream())
-			{
-				thisValue.Save(stream, thisValue.RawFormat.HasEncoder() ? thisValue.RawFormat : ImageFormat.Bmp);
-				return stream.ToArray();
-			}
+			thisValue.Save(stream, thisValue.RawFormat.HasEncoder() ? thisValue.RawFormat : ImageFormat.Bmp);
+			return stream.ToArray();
 		}
 	}
 }

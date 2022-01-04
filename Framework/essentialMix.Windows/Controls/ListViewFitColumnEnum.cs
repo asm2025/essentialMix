@@ -1,9 +1,8 @@
-namespace essentialMix.Windows.Controls
+namespace essentialMix.Windows.Controls;
+
+public enum ListViewFitColumnEnum
 {
-	public enum ListViewFitColumnEnum
-	{
-		ListWidth,
-		Header,
-		Content
-	}
+	ListWidth,
+	Header,
+	Content
 }

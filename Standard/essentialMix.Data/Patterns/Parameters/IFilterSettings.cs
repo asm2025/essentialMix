@@ -1,7 +1,6 @@
-﻿namespace essentialMix.Data.Patterns.Parameters
+﻿namespace essentialMix.Data.Patterns.Parameters;
+
+public interface IFilterSettings
 {
-	public interface IFilterSettings
-	{
-		string FilterExpression { get; set; }
-	}
+	string FilterExpression { get; set; }
 }

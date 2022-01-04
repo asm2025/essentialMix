@@ -1,11 +1,10 @@
-namespace essentialMix.Threading.Patterns.ProducerConsumer
+namespace essentialMix.Threading.Patterns.ProducerConsumer;
+
+public enum TaskResult
 {
-	public enum TaskResult
-	{
-		None,
-		Canceled,
-		Timeout,
-		Error,
-		Success
-	}
+	None,
+	Canceled,
+	Timeout,
+	Error,
+	Success
 }

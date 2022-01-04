@@ -1,10 +1,9 @@
 ﻿using System.Security.Cryptography;
 
-namespace essentialMix.Cryptography.Asymmetric.Signature
+namespace essentialMix.Cryptography.Asymmetric.Signature;
+
+public interface IDSASignatureAlgorithm : ISignatureAlgorithm
 {
-	public interface IDSASignatureAlgorithm : ISignatureAlgorithm
-	{
-		DSAParameters ExportParameters(bool includePrivateParameters);
-		void ImportParameters(DSAParameters parameters);
-	}
+	DSAParameters ExportParameters(bool includePrivateParameters);
+	void ImportParameters(DSAParameters parameters);
 }

@@ -1,8 +1,7 @@
-namespace essentialMix.Patterns.Layout
+namespace essentialMix.Patterns.Layout;
+
+public enum VerticalFlow
 {
-	public enum VerticalFlow
-	{
-		TopToBottom = Flow.TopToBottom,
-		BottomToTop = Flow.BottomToTop
-	}
+	TopToBottom = Flow.TopToBottom,
+	BottomToTop = Flow.BottomToTop
 }

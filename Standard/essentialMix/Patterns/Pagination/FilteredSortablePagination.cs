@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace essentialMix.Patterns.Pagination
+namespace essentialMix.Patterns.Pagination;
+
+[Serializable]
+public class FilteredSortablePagination : SortablePagination
 {
-	[Serializable]
-	public class FilteredSortablePagination : SortablePagination
-	{
-		public string Filter { get; set; }
-	}
+	public string Filter { get; set; }
 }

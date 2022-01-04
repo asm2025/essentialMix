@@ -1,8 +1,7 @@
-﻿namespace essentialMix.Collections
+﻿namespace essentialMix.Collections;
+
+public enum PropertyScope
 {
-	public enum PropertyScope
-	{
-		CurrentUser,
-		Global
-	}
+	CurrentUser,
+	Global
 }

@@ -1,9 +1,8 @@
 using System.Runtime.InteropServices;
 
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class SafeHandleExtension
 {
-	public static class SafeHandleExtension
-	{
-		public static bool IsAwaitable(this SafeHandle thisValue) { return thisValue is { IsInvalid: false, IsClosed: false }; }
-	}
+	public static bool IsAwaitable(this SafeHandle thisValue) { return thisValue is { IsInvalid: false, IsClosed: false }; }
 }

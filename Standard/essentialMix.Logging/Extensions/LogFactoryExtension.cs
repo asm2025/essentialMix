@@ -4,20 +4,19 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
-namespace essentialMix.Extensions
-{
-	public static class LogFactoryExtension
-	{
-		[NotNull]
-		public static ILoggingBuilder AddColoredConsoleFormatter([NotNull] this ILoggingBuilder thisValue)
-		{
-			return thisValue.AddConsoleFormatter<ColoredConsoleFormatter, ColoredConsoleFormatterOptions>();
-		}
+namespace essentialMix.Extensions;
 
-		[NotNull]
-		public static ILoggingBuilder AddColoredConsoleFormatter([NotNull] this ILoggingBuilder thisValue, [NotNull] Action<ColoredConsoleFormatterOptions> configure)
-		{
-			return thisValue.AddConsoleFormatter<ColoredConsoleFormatter, ColoredConsoleFormatterOptions>(configure);
-		}
+public static class LogFactoryExtension
+{
+	[NotNull]
+	public static ILoggingBuilder AddColoredConsoleFormatter([NotNull] this ILoggingBuilder thisValue)
+	{
+		return thisValue.AddConsoleFormatter<ColoredConsoleFormatter, ColoredConsoleFormatterOptions>();
+	}
+
+	[NotNull]
+	public static ILoggingBuilder AddColoredConsoleFormatter([NotNull] this ILoggingBuilder thisValue, [NotNull] Action<ColoredConsoleFormatterOptions> configure)
+	{
+		return thisValue.AddConsoleFormatter<ColoredConsoleFormatter, ColoredConsoleFormatterOptions>(configure);
 	}
 }

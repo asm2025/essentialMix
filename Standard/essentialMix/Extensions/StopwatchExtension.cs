@@ -2,40 +2,39 @@ using System;
 using System.Diagnostics;
 using JetBrains.Annotations;
 
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class StopwatchExtension
 {
-	public static class StopwatchExtension
+	public static long Measure([NotNull] this Stopwatch thisValue, [NotNull] Action action)
 	{
-		public static long Measure([NotNull] this Stopwatch thisValue, [NotNull] Action action)
+		thisValue.Restart();
+
+		try
 		{
-			thisValue.Restart();
-
-			try
-			{
-				action();
-			}
-			finally
-			{
-				thisValue.Stop();
-			}
-
-			return thisValue.ElapsedTicks;
+			action();
+		}
+		finally
+		{
+			thisValue.Stop();
 		}
 
-		public static long Measure<TResult>([NotNull] this Stopwatch thisValue, [NotNull] Func<TResult> func, out TResult result)
+		return thisValue.ElapsedTicks;
+	}
+
+	public static long Measure<TResult>([NotNull] this Stopwatch thisValue, [NotNull] Func<TResult> func, out TResult result)
+	{
+		thisValue.Restart();
+
+		try
 		{
-			thisValue.Restart();
-
-			try
-			{
-				result = func();
-			}
-			finally
-			{
-				thisValue.Stop();
-			}
-
-			return thisValue.ElapsedTicks;
+			result = func();
 		}
+		finally
+		{
+			thisValue.Stop();
+		}
+
+		return thisValue.ElapsedTicks;
 	}
 }

@@ -1,15 +1,14 @@
 using System.Drawing;
 
-namespace essentialMix.Drawing.Helpers
+namespace essentialMix.Drawing.Helpers;
+
+public static class ColorHelper
 {
-	public static class ColorHelper
+	public static Color ToColor(uint value)
 	{
-		public static Color ToColor(uint value)
-		{
-			return Color.FromArgb((byte)(value >> 24)
-								, (byte)(value >> 16)
-								, (byte)(value >> 8)
-								, (byte)value);
-		}
+		return Color.FromArgb((byte)(value >> 24)
+							, (byte)(value >> 16)
+							, (byte)(value >> 8)
+							, (byte)value);
 	}
 }

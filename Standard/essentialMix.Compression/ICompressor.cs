@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace essentialMix.Compression
+namespace essentialMix.Compression;
+
+public interface ICompressor : ICompressorCore, IDisposable
 {
-	public interface ICompressor : ICompressorCore, IDisposable
-	{
-		bool PreserveDirectoryRoot { get; set; }
-	}
+	bool PreserveDirectoryRoot { get; set; }
 }

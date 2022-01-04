@@ -1,13 +1,12 @@
 using System.Drawing;
 
 // ReSharper disable once CheckNamespace
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class RectangleExtension
 {
-	public static class RectangleExtension
+	public static RECT ToWin32Rect(this Rectangle thisValue)
 	{
-		public static RECT ToWin32Rect(this Rectangle thisValue)
-		{
-			return new RECT(thisValue.X, thisValue.Y, thisValue.Width, thisValue.Height);
-		}
+		return new RECT(thisValue.X, thisValue.Y, thisValue.Width, thisValue.Height);
 	}
 }

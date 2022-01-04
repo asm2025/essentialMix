@@ -25,35 +25,34 @@ using System;
 using Other.TylerBrinkley.Collections;
 
 // ReSharper disable once CheckNamespace
-namespace Other.TylerBrinkley.Enumeration
+namespace Other.TylerBrinkley.Enumeration;
+
+internal interface IEnumMember : IFormattable, IConvertible
 {
-    internal interface IEnumMember : IFormattable, IConvertible
-    {
-        string Name { get; }
-        string DisplayName { get; }
-        AttributeCollection Attributes { get; }
+	string Name { get; }
+	string DisplayName { get; }
+	AttributeCollection Attributes { get; }
 
-        object GetUnderlyingValue();
-        string AsString(string format);
-        string AsString(params EnumFormat[] formats);
-        string Format(string format);
-        string AsString(EnumFormat format);
-        string AsString(EnumFormat format0, EnumFormat format1);
-        string AsString(EnumFormat format0, EnumFormat format1, EnumFormat format2);
-        string Format(params EnumFormat[] formats);
-        byte ToByte();
-        short ToInt16();
-        int ToInt32();
-        long ToInt64();
-        sbyte ToSByte();
-        ushort ToUInt16();
-        uint ToUInt32();
-        ulong ToUInt64();
-        int GetHashCode();
+	object GetUnderlyingValue();
+	string AsString(string format);
+	string AsString(params EnumFormat[] formats);
+	string Format(string format);
+	string AsString(EnumFormat format);
+	string AsString(EnumFormat format0, EnumFormat format1);
+	string AsString(EnumFormat format0, EnumFormat format1, EnumFormat format2);
+	string Format(params EnumFormat[] formats);
+	byte ToByte();
+	short ToInt16();
+	int ToInt32();
+	long ToInt64();
+	sbyte ToSByte();
+	ushort ToUInt16();
+	uint ToUInt32();
+	ulong ToUInt64();
+	int GetHashCode();
 
-        bool IsValidFlagCombination();
-        bool HasAnyFlags();
-        bool HasAllFlags();
-        int GetFlagCount();
-    }
+	bool IsValidFlagCombination();
+	bool HasAnyFlags();
+	bool HasAllFlags();
+	int GetFlagCount();
 }

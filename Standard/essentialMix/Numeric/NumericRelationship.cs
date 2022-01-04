@@ -1,9 +1,8 @@
-namespace essentialMix.Numeric
+namespace essentialMix.Numeric;
+
+public enum NumericRelationship
 {
-	public enum NumericRelationship
-	{
-		LessThan = -1,
-		EqualTo = 0,
-		GreaterThan = 1
-	}
+	LessThan = -1,
+	EqualTo = 0,
+	GreaterThan = 1
 }

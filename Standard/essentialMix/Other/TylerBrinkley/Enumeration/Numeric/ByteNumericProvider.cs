@@ -26,45 +26,44 @@ using System.Globalization;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
-namespace Other.TylerBrinkley.Enumeration.Numeric
+namespace Other.TylerBrinkley.Enumeration.Numeric;
+
+internal class ByteNumericProvider : INumericProvider<byte>
 {
-    internal class ByteNumericProvider : INumericProvider<byte>
-    {
-        [NotNull]
-        public string ToHexadecimalString(byte value) { return value.ToString("X2"); }
+	[NotNull]
+	public string ToHexadecimalString(byte value) { return value.ToString("X2"); }
 
-		public string ToDecimalString(byte value) { return value.ToString(); }
+	public string ToDecimalString(byte value) { return value.ToString(); }
 
-		public byte One => 1;
+	public byte One => 1;
 
-		public byte Zero => 0;
+	public byte Zero => 0;
 
-		public byte And(byte left, byte right) { return (byte)(left & right); }
+	public byte And(byte left, byte right) { return (byte)(left & right); }
 
-		public int BitCount(byte value) { return Number.BitCount(value); }
+	public int BitCount(byte value) { return Number.BitCount(value); }
 
-		public byte Create(ulong value) { return (byte)value; }
+	public byte Create(ulong value) { return (byte)value; }
 
-		public byte Create(long value) { return (byte)value; }
+	public byte Create(long value) { return (byte)value; }
 
-		public bool IsInValueRange(ulong value) { return value <= byte.MaxValue; }
+	public bool IsInValueRange(ulong value) { return value <= byte.MaxValue; }
 
-		public bool IsInValueRange(long value) { return value is >= byte.MinValue and <= byte.MaxValue; }
+	public bool IsInValueRange(long value) { return value is >= byte.MinValue and <= byte.MaxValue; }
 
-		public byte LeftShift(byte value, int amount) { return (byte)(value << amount); }
+	public byte LeftShift(byte value, int amount) { return (byte)(value << amount); }
 
-		public bool LessThan(byte left, byte right) { return left < right; }
+	public bool LessThan(byte left, byte right) { return left < right; }
 
-		public byte Not(byte value) { return (byte)~value; }
+	public byte Not(byte value) { return (byte)~value; }
 
-		public byte Or(byte left, byte right) { return (byte)(left | right); }
+	public byte Or(byte left, byte right) { return (byte)(left | right); }
 
-		public byte Subtract(byte left, byte right) { return (byte)(left - right); }
+	public byte Subtract(byte left, byte right) { return (byte)(left - right); }
 
-		public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out byte result) { return byte.TryParse(s, style, provider, out result); }
+	public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out byte result) { return byte.TryParse(s, style, provider, out result); }
 
-		public bool TryParseNative(string s, out byte result) { return byte.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
+	public bool TryParseNative(string s, out byte result) { return byte.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
 
-		public byte Xor(byte left, byte right) { return (byte)(left ^ right); }
-	}
+	public byte Xor(byte left, byte right) { return (byte)(left ^ right); }
 }

@@ -5,111 +5,110 @@ using essentialMix.Extensions;
 using JetBrains.Annotations;
 using essentialMix.Data.Patterns.Provider;
 
-namespace essentialMix.Data.Patterns.Settings
+namespace essentialMix.Data.Patterns.Settings;
+
+public abstract class AppSettings<TProvider, TDbType>
+	where TDbType : struct, IComparable
+	where TProvider : IDataProvider<TDbType>
 {
-	public abstract class AppSettings<TProvider, TDbType>
-		where TDbType : struct, IComparable
-		where TProvider : IDataProvider<TDbType>
+	protected AppSettings([NotNull] TProvider provider)
+		: this(provider, string.Empty) { }
+
+	protected AppSettings([NotNull] TProvider provider, [NotNull] string tableName)
 	{
-		protected AppSettings([NotNull] TProvider provider)
-			: this(provider, string.Empty) { }
+		Provider = provider;
+		TableName = tableName;
+	}
 
-		protected AppSettings([NotNull] TProvider provider, [NotNull] string tableName)
+	public string TableName
+	{
+		get => Table.TableName;
+		set => Table.TableName = value?.Trim();
+	}
+
+	[NotNull]
+	public TProvider Provider { get; set; }
+
+	[NotNull]
+	protected DataTable Table { get; } = new DataTable();
+
+	public virtual T Get<T>([NotNull] string name, T defaultValue)
+	{
+		AssertProperty(name);
+		return Table.GetFieldOfTable(name, defaultValue);
+	}
+
+	public virtual void Set<T>([NotNull] string name, T value)
+	{
+		AssertProperty(name);
+		EnsureRows();
+
+		DataRow row = Table.Rows[0];
+		row[name] = value != null ? value : DBNull.Value;
+		row.AcceptChanges();
+	}
+
+	public virtual bool Load(bool resetSchema = false)
+	{
+		bool result;
+
+		try
 		{
-			Provider = provider;
-			TableName = tableName;
-		}
+			Table.Clear();
 
-		public string TableName
-		{
-			get => Table.TableName;
-			set => Table.TableName = value?.Trim();
-		}
-
-		[NotNull]
-		public TProvider Provider { get; set; }
-
-		[NotNull]
-		protected DataTable Table { get; } = new DataTable();
-
-		public virtual T Get<T>([NotNull] string name, T defaultValue)
-		{
-			AssertProperty(name);
-			return Table.GetFieldOfTable(name, defaultValue);
-		}
-
-		public virtual void Set<T>([NotNull] string name, T value)
-		{
-			AssertProperty(name);
-			EnsureRows();
-
-			DataRow row = Table.Rows[0];
-			row[name] = value != null ? value : DBNull.Value;
-			row.AcceptChanges();
-		}
-
-		public virtual bool Load(bool resetSchema = false)
-		{
-			bool result;
-
-			try
+			if (resetSchema)
 			{
 				Table.Clear();
-
-				if (resetSchema)
-				{
-					Table.Clear();
-					Table.PrimaryKey = Array.Empty<DataColumn>();
-					Table.Columns.Clear();
-				}
-
-				result = !string.IsNullOrWhiteSpace(Table.TableName) && LoadSettingsTable();
-			}
-			catch
-			{
-				result = false;
+				Table.PrimaryKey = Array.Empty<DataColumn>();
+				Table.Columns.Clear();
 			}
 
-			return result;
+			result = !string.IsNullOrWhiteSpace(Table.TableName) && LoadSettingsTable();
 		}
-
-		public virtual bool Save()
+		catch
 		{
-			if (string.IsNullOrWhiteSpace(Table.TableName) || Table.Rows.Count == 0) return false;
-
-			bool result;
-
-			try
-			{
-				result = SaveSettingsTable();
-			}
-			catch
-			{
-				result = false;
-			}
-
-			return result;
+			result = false;
 		}
 
-		protected abstract bool LoadSettingsTable();
-		protected abstract bool SaveSettingsTable();
+		return result;
+	}
 
-		protected virtual void EnsureRows()
+	public virtual bool Save()
+	{
+		if (string.IsNullOrWhiteSpace(Table.TableName) || Table.Rows.Count == 0) return false;
+
+		bool result;
+
+		try
 		{
-			if (Table.Rows.Count > 0) return;
-			DataRow row = Table.NewRow();
-			Table.Rows.Add(row);
-			if (Table.PrimaryKey.Length == 0) return;
-
-			foreach (DataColumn column in Table.PrimaryKey.Where(c => c.DataType.IsIntegral())) row[column.ColumnName] = -1;
-
-			row.AcceptChanges();
+			result = SaveSettingsTable();
 		}
-
-		protected void AssertProperty([NotNull] string name)
+		catch
 		{
-			if (Table.Columns.Contains(name)) return;
-			throw new NotSupportedException(string.Concat("The property '", name, "' is not found in the table columns."));
+			result = false;
 		}
+
+		return result;
+	}
+
+	protected abstract bool LoadSettingsTable();
+	protected abstract bool SaveSettingsTable();
+
+	protected virtual void EnsureRows()
+	{
+		if (Table.Rows.Count > 0) return;
+		DataRow row = Table.NewRow();
+		Table.Rows.Add(row);
+		if (Table.PrimaryKey.Length == 0) return;
+
+		foreach (DataColumn column in Table.PrimaryKey.Where(c => c.DataType.IsIntegral())) row[column.ColumnName] = -1;
+
+		row.AcceptChanges();
+	}
+
+	protected void AssertProperty([NotNull] string name)
+	{
+		if (Table.Columns.Contains(name)) return;
+		throw new NotSupportedException(string.Concat("The property '", name, "' is not found in the table columns."));
 	}
 }

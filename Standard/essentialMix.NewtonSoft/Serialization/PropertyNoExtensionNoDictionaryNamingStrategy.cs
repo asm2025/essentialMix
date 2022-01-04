@@ -1,19 +1,18 @@
-﻿namespace essentialMix.Newtonsoft.Serialization
-{
-	public class PropertyNoExtensionNoDictionaryNamingStrategy : PropertyExtensionDictionaryNamingStrategy
-	{
-		/// <inheritdoc />
-		public PropertyNoExtensionNoDictionaryNamingStrategy()
-			: this(NamingStrategyType.Default)
-		{
-		}
+﻿namespace essentialMix.Newtonsoft.Serialization;
 
-		/// <inheritdoc />
-		protected PropertyNoExtensionNoDictionaryNamingStrategy(NamingStrategyType nameStrategy)
-			: base(nameStrategy)
-		{
-			ProcessExtensionDataNames = false;
-			ProcessDictionaryKeys = false;
-		}
+public class PropertyNoExtensionNoDictionaryNamingStrategy : PropertyExtensionDictionaryNamingStrategy
+{
+	/// <inheritdoc />
+	public PropertyNoExtensionNoDictionaryNamingStrategy()
+		: this(NamingStrategyType.Default)
+	{
+	}
+
+	/// <inheritdoc />
+	protected PropertyNoExtensionNoDictionaryNamingStrategy(NamingStrategyType nameStrategy)
+		: base(nameStrategy)
+	{
+		ProcessExtensionDataNames = false;
+		ProcessDictionaryKeys = false;
 	}
 }

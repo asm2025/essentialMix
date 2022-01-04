@@ -1,13 +1,12 @@
-namespace essentialMix.Web
+namespace essentialMix.Web;
+
+public enum UrlSearchStatus
 {
-	public enum UrlSearchStatus
-	{
-		Unknown,
-		Canceled,
-		Failed,
-		Unauthorized,
-		Error,
-		Success,
-		Found
-	}
+	Unknown,
+	Canceled,
+	Failed,
+	Unauthorized,
+	Error,
+	Success,
+	Found
 }

@@ -1,14 +1,13 @@
 using JetBrains.Annotations;
 
-namespace essentialMix
-{
-	public interface IWrapper<out TSource>
-	{
-		[NotNull]
-		TSource Source { get; }
-	}
+namespace essentialMix;
 
-	public interface IWrapper : IWrapper<object>
-	{
-	}
+public interface IWrapper<out TSource>
+{
+	[NotNull]
+	TSource Source { get; }
+}
+
+public interface IWrapper : IWrapper<object>
+{
 }

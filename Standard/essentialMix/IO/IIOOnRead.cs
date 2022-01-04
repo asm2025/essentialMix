@@ -1,11 +1,10 @@
 using System;
 using JetBrains.Annotations;
 
-namespace essentialMix.IO
+namespace essentialMix.IO;
+
+public interface IIOOnRead
 {
-	public interface IIOOnRead
-	{
-		[NotNull]
-		Func<char[], int, bool> OnRead { get; set; }
-	}
+	[NotNull]
+	Func<char[], int, bool> OnRead { get; set; }
 }

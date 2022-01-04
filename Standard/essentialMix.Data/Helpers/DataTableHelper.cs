@@ -3,23 +3,22 @@ using System.Data;
 using System.IO;
 using JetBrains.Annotations;
 
-namespace essentialMix.Data.Helpers
+namespace essentialMix.Data.Helpers;
+
+public static class DataTableHelper
 {
-	public static class DataTableHelper
+	[NotNull]
+	public static DataTable FromXml([NotNull] string xml)
 	{
-		[NotNull]
-		public static DataTable FromXml([NotNull] string xml)
+		if (string.IsNullOrWhiteSpace(xml)) throw new ArgumentNullException(nameof(xml));
+
+		DataTable table = new DataTable();
+
+		using (StringReader reader = new StringReader(xml))
 		{
-			if (string.IsNullOrWhiteSpace(xml)) throw new ArgumentNullException(nameof(xml));
-
-			DataTable table = new DataTable();
-
-			using (StringReader reader = new StringReader(xml))
-			{
-				table.ReadXml(reader);
-			}
-
-			return table;
+			table.ReadXml(reader);
 		}
+
+		return table;
 	}
 }

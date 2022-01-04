@@ -1,29 +1,28 @@
 using System;
 using essentialMix.Patterns.Object;
 
-namespace essentialMix.Threading
+namespace essentialMix.Threading;
+
+[Serializable]
+public class SimpleMonitor : Disposable
 {
-	[Serializable]
-	public class SimpleMonitor : Disposable
+	private int _busyCount;
+
+	public bool Busy => _busyCount > 0;
+
+	public void Enter()
 	{
-		private int _busyCount;
+		if (_busyCount == int.MaxValue) return;
+		_busyCount++;
+	}
 
-		public bool Busy => _busyCount > 0;
-
-		public void Enter()
+	protected override void Dispose(bool disposing)
+	{
+		if (disposing)
 		{
-			if (_busyCount == int.MaxValue) return;
-			_busyCount++;
+			if (_busyCount == 0) return;
+			_busyCount--;
 		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing)
-			{
-				if (_busyCount == 0) return;
-				_busyCount--;
-			}
-			base.Dispose(disposing);
-		}
+		base.Dispose(disposing);
 	}
 }

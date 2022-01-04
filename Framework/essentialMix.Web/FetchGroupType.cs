@@ -1,9 +1,8 @@
-namespace essentialMix.Web
+namespace essentialMix.Web;
+
+public enum FetchGroupType
 {
-	public enum FetchGroupType
-	{
-		Any = 0,
-		Each,
-		All
-	}
+	Any = 0,
+	Each,
+	All
 }

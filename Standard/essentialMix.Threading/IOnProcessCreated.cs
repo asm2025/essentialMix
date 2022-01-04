@@ -1,10 +1,9 @@
 using System;
 using System.Diagnostics;
 
-namespace essentialMix.Threading
+namespace essentialMix.Threading;
+
+public interface IOnProcessCreated
 {
-	public interface IOnProcessCreated
-	{
-		Action<Process> OnCreate { get; set; }
-	}
+	Action<Process> OnCreate { get; set; }
 }

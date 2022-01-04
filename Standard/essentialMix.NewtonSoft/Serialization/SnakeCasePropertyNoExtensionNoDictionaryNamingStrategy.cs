@@ -1,11 +1,10 @@
-﻿namespace essentialMix.Newtonsoft.Serialization
+﻿namespace essentialMix.Newtonsoft.Serialization;
+
+public class SnakeCasePropertyNoExtensionNoDictionaryNamingStrategy : PropertyNoExtensionNoDictionaryNamingStrategy
 {
-	public class SnakeCasePropertyNoExtensionNoDictionaryNamingStrategy : PropertyNoExtensionNoDictionaryNamingStrategy
+	/// <inheritdoc />
+	public SnakeCasePropertyNoExtensionNoDictionaryNamingStrategy()
+		: base(NamingStrategyType.SnakeCase)
 	{
-		/// <inheritdoc />
-		public SnakeCasePropertyNoExtensionNoDictionaryNamingStrategy()
-			: base(NamingStrategyType.SnakeCase)
-		{
-		}
 	}
 }

@@ -1,10 +1,9 @@
-namespace essentialMix.Numeric
+namespace essentialMix.Numeric;
+
+public enum BitVectorMode
 {
-	public enum BitVectorMode
-	{
-		Binary = 2,
-		Octal = 8,
-		Decimal = 10,
-		Hexadecimal = 16
-	}
+	Binary = 2,
+	Octal = 8,
+	Decimal = 10,
+	Hexadecimal = 16
 }

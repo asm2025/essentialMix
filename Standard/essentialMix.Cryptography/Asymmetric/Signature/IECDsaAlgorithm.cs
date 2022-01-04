@@ -1,6 +1,5 @@
-﻿namespace essentialMix.Cryptography.Asymmetric.Signature
+﻿namespace essentialMix.Cryptography.Asymmetric.Signature;
+
+public interface IECDsaAlgorithm : IECDsaAlgorithmBase, ISignatureAlgorithm
 {
-	public interface IECDsaAlgorithm : IECDsaAlgorithmBase, ISignatureAlgorithm
-	{
-	}
 }

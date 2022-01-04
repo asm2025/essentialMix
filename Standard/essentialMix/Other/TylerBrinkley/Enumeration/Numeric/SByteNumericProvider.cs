@@ -26,45 +26,44 @@ using System.Globalization;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
-namespace Other.TylerBrinkley.Enumeration.Numeric
+namespace Other.TylerBrinkley.Enumeration.Numeric;
+
+internal class SByteNumericProvider : INumericProvider<sbyte>
 {
-    internal class SByteNumericProvider : INumericProvider<sbyte>
-    {
-        [NotNull]
-        public string ToHexadecimalString(sbyte value) { return value.ToString("X2"); }
+	[NotNull]
+	public string ToHexadecimalString(sbyte value) { return value.ToString("X2"); }
 
-		public string ToDecimalString(sbyte value) { return value.ToString(); }
+	public string ToDecimalString(sbyte value) { return value.ToString(); }
 
-		public sbyte One => 1;
+	public sbyte One => 1;
 
-		public sbyte Zero => 0;
+	public sbyte Zero => 0;
 
-		public sbyte And(sbyte left, sbyte right) { return (sbyte)(left & right); }
+	public sbyte And(sbyte left, sbyte right) { return (sbyte)(left & right); }
 
-		public int BitCount(sbyte value) { return Number.BitCount(value); }
+	public int BitCount(sbyte value) { return Number.BitCount(value); }
 
-		public sbyte Create(ulong value) { return (sbyte)value; }
+	public sbyte Create(ulong value) { return (sbyte)value; }
 
-		public sbyte Create(long value) { return (sbyte)value; }
+	public sbyte Create(long value) { return (sbyte)value; }
 
-		public bool IsInValueRange(ulong value) { return value <= (ulong)sbyte.MaxValue; }
+	public bool IsInValueRange(ulong value) { return value <= (ulong)sbyte.MaxValue; }
 
-		public bool IsInValueRange(long value) { return value is >= sbyte.MinValue and <= sbyte.MaxValue; }
+	public bool IsInValueRange(long value) { return value is >= sbyte.MinValue and <= sbyte.MaxValue; }
 
-		public sbyte LeftShift(sbyte value, int amount) { return (sbyte)(value << amount); }
+	public sbyte LeftShift(sbyte value, int amount) { return (sbyte)(value << amount); }
 
-		public bool LessThan(sbyte left, sbyte right) { return left < right; }
+	public bool LessThan(sbyte left, sbyte right) { return left < right; }
 
-		public sbyte Not(sbyte value) { return (sbyte)~value; }
+	public sbyte Not(sbyte value) { return (sbyte)~value; }
 
-		public sbyte Or(sbyte left, sbyte right) { return (sbyte)(left | right); }
+	public sbyte Or(sbyte left, sbyte right) { return (sbyte)(left | right); }
 
-		public sbyte Subtract(sbyte left, sbyte right) { return (sbyte)(left - right); }
+	public sbyte Subtract(sbyte left, sbyte right) { return (sbyte)(left - right); }
 
-		public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out sbyte result) { return sbyte.TryParse(s, style, provider, out result); }
+	public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out sbyte result) { return sbyte.TryParse(s, style, provider, out result); }
 
-		public bool TryParseNative(string s, out sbyte result) { return sbyte.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
+	public bool TryParseNative(string s, out sbyte result) { return sbyte.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
 
-		public sbyte Xor(sbyte left, sbyte right) { return (sbyte)(left ^ right); }
-	}
+	public sbyte Xor(sbyte left, sbyte right) { return (sbyte)(left ^ right); }
 }

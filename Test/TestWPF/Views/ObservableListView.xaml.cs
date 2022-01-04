@@ -1,15 +1,14 @@
 ﻿using System.Windows.Controls;
 
-namespace TestWPF.Views
+namespace TestWPF.Views;
+
+/// <summary>
+/// Interaction logic for ObservableListView.xaml
+/// </summary>
+public partial class ObservableListView : Page
 {
-	/// <summary>
-	/// Interaction logic for ObservableListView.xaml
-	/// </summary>
-	public partial class ObservableListView : Page
+	public ObservableListView()
 	{
-		public ObservableListView()
-		{
-			InitializeComponent();
-		}
+		InitializeComponent();
 	}
 }

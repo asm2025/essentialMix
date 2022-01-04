@@ -1,9 +1,8 @@
-namespace essentialMix.Comparers
+namespace essentialMix.Comparers;
+
+public enum FunctionalComparerMethod
 {
-	public enum FunctionalComparerMethod
-	{
-		StartsWith,
-		Contains,
-		EndsWith
-	}
+	StartsWith,
+	Contains,
+	EndsWith
 }

@@ -5,38 +5,37 @@ using JetBrains.Annotations;
 using essentialMix.Data.Patterns.Table;
 using essentialMix.Extensions;
 
-namespace essentialMix.Data.Helpers
+namespace essentialMix.Data.Helpers;
+
+public static class TableColumnHelper
 {
-	public static class TableColumnHelper
+	[NotNull]
+	public static ITableColumnSettings PrepareAndFilter([NotNull] string name, [NotNull] IReadOnlyDictionary<string, (string Name, TableColumnSettings Settings)> dictionary, [NotNull] ResourceManager resourceManager, CultureInfo culture)
 	{
-		[NotNull]
-		public static ITableColumnSettings PrepareAndFilter([NotNull] string name, [NotNull] IReadOnlyDictionary<string, (string Name, TableColumnSettings Settings)> dictionary, [NotNull] ResourceManager resourceManager, CultureInfo culture)
+		string resourceName;
+		TableColumnSettings settings;
+
+		if (!dictionary.TryGetValue(name, out (string Name, TableColumnSettings Settings) tuple))
 		{
-			string resourceName;
-			TableColumnSettings settings;
-
-			if (!dictionary.TryGetValue(name, out (string Name, TableColumnSettings Settings) tuple))
-			{
-				resourceName = name;
-				settings = new TableColumnSettings();
-			}
-			else
-			{
-				resourceName = tuple.Name ?? name;
-				settings = tuple.Settings;
-			}
-
-			if (resourceManager.TryGetString(resourceName, culture, out string text))
-			{
-				settings.Text = text;
-			}
-			else
-			{
-				settings.Text = resourceName;
-				settings.Hidden = true;
-			}
-
-			return settings;
+			resourceName = name;
+			settings = new TableColumnSettings();
 		}
+		else
+		{
+			resourceName = tuple.Name ?? name;
+			settings = tuple.Settings;
+		}
+
+		if (resourceManager.TryGetString(resourceName, culture, out string text))
+		{
+			settings.Text = text;
+		}
+		else
+		{
+			settings.Text = resourceName;
+			settings.Hidden = true;
+		}
+
+		return settings;
 	}
 }

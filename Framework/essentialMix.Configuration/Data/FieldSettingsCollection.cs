@@ -1,18 +1,17 @@
 using System.Configuration;
 
-namespace essentialMix.Configuration.Data
+namespace essentialMix.Configuration.Data;
+
+[ConfigurationCollection(typeof(FieldElement), CollectionType = ConfigurationElementCollectionType.BasicMap, AddItemName = "field")]
+public class FieldSettingsCollection : ConfigurationElementCollection<FieldElement>
 {
-	[ConfigurationCollection(typeof(FieldElement), CollectionType = ConfigurationElementCollectionType.BasicMap, AddItemName = "field")]
-	public class FieldSettingsCollection : ConfigurationElementCollection<FieldElement>
+	public FieldSettingsCollection()
 	{
-		public FieldSettingsCollection()
-		{
-		}
-
-		public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMap;
-
-		protected override object GetElementKey(ConfigurationElement element) { return ((FieldElement)element).Name; }
-
-		protected override string ElementName => "field";
 	}
+
+	public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMap;
+
+	protected override object GetElementKey(ConfigurationElement element) { return ((FieldElement)element).Name; }
+
+	protected override string ElementName => "field";
 }

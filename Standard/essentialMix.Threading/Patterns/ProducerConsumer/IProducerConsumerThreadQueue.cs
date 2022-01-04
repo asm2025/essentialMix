@@ -1,10 +1,9 @@
 ﻿using System.Threading;
 
-namespace essentialMix.Threading.Patterns.ProducerConsumer
+namespace essentialMix.Threading.Patterns.ProducerConsumer;
+
+public interface IProducerConsumerThreadQueue<in T> : IProducerConsumer<T>
 {
-	public interface IProducerConsumerThreadQueue<in T> : IProducerConsumer<T>
-	{
-		bool IsBackground { get; }
-		ThreadPriority Priority { get; }
-	}
+	bool IsBackground { get; }
+	ThreadPriority Priority { get; }
 }

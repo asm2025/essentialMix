@@ -1,10 +1,9 @@
 ﻿using essentialMix.Numeric;
 
-namespace essentialMix.Cryptography.Encoders
+namespace essentialMix.Cryptography.Encoders;
+
+public interface INumericEncoder : IAlgorithmBase, IEncode
 {
-	public interface INumericEncoder : IAlgorithmBase, IEncode
-	{
-		bool CanChange { get; }
-		BitVectorMode Mode { get; set; }
-	}
+	bool CanChange { get; }
+	BitVectorMode Mode { get; set; }
 }

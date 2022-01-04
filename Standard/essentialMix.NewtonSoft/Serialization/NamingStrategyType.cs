@@ -1,9 +1,8 @@
-﻿namespace essentialMix.Newtonsoft.Serialization
+﻿namespace essentialMix.Newtonsoft.Serialization;
+
+public enum NamingStrategyType
 {
-	public enum NamingStrategyType
-	{
-		Default,
-		CamelCase,
-		SnakeCase
-	}
+	Default,
+	CamelCase,
+	SnakeCase
 }

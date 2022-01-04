@@ -1,8 +1,7 @@
-namespace essentialMix.Collections
+namespace essentialMix.Collections;
+
+public enum PartitionSize
 {
-	public enum PartitionSize
-	{
-		PerPartition,
-		TotalCount
-	}
+	PerPartition,
+	TotalCount
 }

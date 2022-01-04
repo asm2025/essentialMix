@@ -3,19 +3,18 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
-namespace Other.TylerBrinkley.Enumeration
-{
-	public interface IEnumInfoCommon
-	{
-		[NotNull]
-		Type EnumType { get; }
-		TypeCode TypeCode { get; }
-		Type UnderlyingType { get; }
-		bool IsFlagEnum { get; }
+namespace Other.TylerBrinkley.Enumeration;
 
-		int GetCount(EnumMemberSelection selection = EnumMemberSelection.All);
-		int GetFlagCount();
-		IEnumerable<string> GetNames(EnumMemberSelection selection = EnumMemberSelection.All);
-		IEnumerable<string> GetDisplayNames(EnumMemberSelection selection = EnumMemberSelection.All);
-	}
+public interface IEnumInfoCommon
+{
+	[NotNull]
+	Type EnumType { get; }
+	TypeCode TypeCode { get; }
+	Type UnderlyingType { get; }
+	bool IsFlagEnum { get; }
+
+	int GetCount(EnumMemberSelection selection = EnumMemberSelection.All);
+	int GetFlagCount();
+	IEnumerable<string> GetNames(EnumMemberSelection selection = EnumMemberSelection.All);
+	IEnumerable<string> GetDisplayNames(EnumMemberSelection selection = EnumMemberSelection.All);
 }

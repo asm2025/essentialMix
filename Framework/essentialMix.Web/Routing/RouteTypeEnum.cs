@@ -1,12 +1,11 @@
-﻿namespace essentialMix.Web.Routing
+﻿namespace essentialMix.Web.Routing;
+
+public enum RouteTypeEnum
 {
-	public enum RouteTypeEnum
-	{
-		Route,
-		Ignore,
-		File,
-		Static,
-		StaticWithDynamic,
-		Dynamic
-	}
+	Route,
+	Ignore,
+	File,
+	Static,
+	StaticWithDynamic,
+	Dynamic
 }

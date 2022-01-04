@@ -2,26 +2,25 @@
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 
-namespace essentialMix.Patterns.NotifyChange
+namespace essentialMix.Patterns.NotifyChange;
+
+public abstract class NotifyPropertyChangedBase : INotifyPropertyChanged
 {
-	public abstract class NotifyPropertyChangedBase : INotifyPropertyChanged
+	protected NotifyPropertyChangedBase() 
 	{
-		protected NotifyPropertyChangedBase() 
-		{
-		}
+	}
 
-		public event PropertyChangedEventHandler PropertyChanged;
+	public event PropertyChangedEventHandler PropertyChanged;
 
-		protected virtual void OnPropertyChanged([NotNull] PropertyChangedEventArgs args)
-		{
-			PropertyChanged?.Invoke(this, args);
-		}
+	protected virtual void OnPropertyChanged([NotNull] PropertyChangedEventArgs args)
+	{
+		PropertyChanged?.Invoke(this, args);
+	}
 
-		[NotifyPropertyChangedInvocator]
-		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			if (PropertyChanged == null) return;
-			OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
-		}
+	[NotifyPropertyChangedInvocator]
+	protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+	{
+		if (PropertyChanged == null) return;
+		OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
 	}
 }

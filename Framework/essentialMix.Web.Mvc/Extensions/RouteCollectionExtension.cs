@@ -3,27 +3,26 @@ using System.Web.Routing;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class RouteCollectionExtension
 {
-	public static class RouteCollectionExtension
+	[NotNull]
+	public static RouteCollection MapDefaultRoutes([NotNull] this RouteCollection thisValue, object defaults = null, string prefix = null)
 	{
-		[NotNull]
-		public static RouteCollection MapDefaultRoutes([NotNull] this RouteCollection thisValue, object defaults = null, string prefix = null)
-		{
-			prefix = prefix?.Trim('/', ' ');
-			if (!string.IsNullOrEmpty(prefix)) prefix += "/";
-			prefix ??= string.Empty;
+		prefix = prefix?.Trim('/', ' ');
+		if (!string.IsNullOrEmpty(prefix)) prefix += "/";
+		prefix ??= string.Empty;
 
-			thisValue.MapMvcAttributeRoutes();
+		thisValue.MapMvcAttributeRoutes();
 
-			thisValue.MapRoute(null,
+		thisValue.MapRoute(null,
 							prefix + "{controller}",
 							new { action = "Index", id = UrlParameter.Optional });
 
-			thisValue.MapRoute("Default",
+		thisValue.MapRoute("Default",
 							prefix + "{controller}/{action}/{id}",
 							defaults ?? new { controller = "Home", action = "Index", id = UrlParameter.Optional });
-			return thisValue;
-		}
+		return thisValue;
 	}
 }

@@ -1,26 +1,25 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace essentialMix.Core.WPF.Controls
+namespace essentialMix.Core.WPF.Controls;
+
+public class FormControlItem : ContentControl
 {
-	public class FormControlItem : ContentControl
+	public static DependencyProperty LabelProperty = DependencyProperty.Register(nameof(Label), typeof(string), typeof(ContentControl), new FrameworkPropertyMetadata());
+
+	static FormControlItem()
 	{
-		public static DependencyProperty LabelProperty = DependencyProperty.Register(nameof(Label), typeof(string), typeof(ContentControl), new FrameworkPropertyMetadata());
+		DefaultStyleKeyProperty.OverrideMetadata(typeof(FormControlItem), new FrameworkPropertyMetadata(typeof(FormControlItem)));
+	}
 
-		static FormControlItem()
-		{
-			DefaultStyleKeyProperty.OverrideMetadata(typeof(FormControlItem), new FrameworkPropertyMetadata(typeof(FormControlItem)));
-		}
+	/// <inheritdoc />
+	public FormControlItem() 
+	{
+	}
 
-		/// <inheritdoc />
-		public FormControlItem() 
-		{
-		}
-
-		public string Label
-		{
-			get => (string)GetValue(LabelProperty);
-			set => SetValue(LabelProperty, value);
-		}
+	public string Label
+	{
+		get => (string)GetValue(LabelProperty);
+		set => SetValue(LabelProperty, value);
 	}
 }

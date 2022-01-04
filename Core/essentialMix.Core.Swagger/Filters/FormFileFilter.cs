@@ -12,69 +12,68 @@ using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace essentialMix.Core.Swagger.Filters
+namespace essentialMix.Core.Swagger.Filters;
+
+public class FormFileFilter : IOperationFilter
 {
-	public class FormFileFilter : IOperationFilter
+	/// <inheritdoc />
+	public void Apply([NotNull] OpenApiOperation operation, [NotNull] OperationFilterContext context)
 	{
-		/// <inheritdoc />
-		public void Apply([NotNull] OpenApiOperation operation, [NotNull] OperationFilterContext context)
+		if (operation.Deprecated
+			|| !Enum.TryParse(context.ApiDescription.HttpMethod, true, out HttpMethod method)
+			|| !method.In(HttpMethod.Post, HttpMethod.Put))
 		{
-			if (operation.Deprecated
-				|| !Enum.TryParse(context.ApiDescription.HttpMethod, true, out HttpMethod method)
-				|| !method.In(HttpMethod.Post, HttpMethod.Put))
+			return;
+		}
+
+		// Check if any of the parameters' types or their nested properties / fields are supported
+		if (!Enumerate(context.ApiDescription.ActionDescriptor).Any(e => IsSupported(e.ParameterType))) return;
+
+		OpenApiMediaType uploadFileMediaType = operation.RequestBody.Content.GetOrAdd(MediaTypeNames.Multipart.FormData, _ => new OpenApiMediaType
+		{
+			Schema = new OpenApiSchema
 			{
-				return;
+				Type = "object",
+				Properties = new Dictionary<string, OpenApiSchema>(StringComparer.OrdinalIgnoreCase),
+				Required = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 			}
+		});
 
-			// Check if any of the parameters' types or their nested properties / fields are supported
-			if (!Enumerate(context.ApiDescription.ActionDescriptor).Any(e => IsSupported(e.ParameterType))) return;
+		IDictionary<string, OpenApiSchema> schemaProperties = uploadFileMediaType.Schema.Properties;
+		ISet<string> schemaRequired = uploadFileMediaType.Schema.Required;
+		ISchemaGenerator generator = context.SchemaGenerator;
+		SchemaRepository repository = context.SchemaRepository;
 
-			OpenApiMediaType uploadFileMediaType = operation.RequestBody.Content.GetOrAdd(MediaTypeNames.Multipart.FormData, _ => new OpenApiMediaType
+		foreach (ParameterDescriptor parameter in Enumerate(context.ApiDescription.ActionDescriptor))
+		{
+			OpenApiSchema schema = generator.GenerateSchema(parameter.ParameterType, repository);
+			if (schema == null) continue;
+
+			if (IsSupported(parameter.ParameterType))
 			{
-				Schema = new OpenApiSchema
-				{
-					Type = "object",
-					Properties = new Dictionary<string, OpenApiSchema>(StringComparer.OrdinalIgnoreCase),
-					Required = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-				}
-			});
-
-			IDictionary<string, OpenApiSchema> schemaProperties = uploadFileMediaType.Schema.Properties;
-			ISet<string> schemaRequired = uploadFileMediaType.Schema.Required;
-			ISchemaGenerator generator = context.SchemaGenerator;
-			SchemaRepository repository = context.SchemaRepository;
-
-			foreach (ParameterDescriptor parameter in Enumerate(context.ApiDescription.ActionDescriptor))
-			{
-				OpenApiSchema schema = generator.GenerateSchema(parameter.ParameterType, repository);
-				if (schema == null) continue;
-
-				if (IsSupported(parameter.ParameterType))
-				{
-					schema.Type = "file";
-				}
-				schemaProperties.Add(parameter.Name, schema);
-
-				if (parameter.ParameterType.IsPrimitive && !parameter.ParameterType.IsNullable()
-					|| !parameter.ParameterType.IsInterface && !parameter.ParameterType.IsClass || parameter.ParameterType.HasAttribute<RequiredAttribute>())
-				{
-					schemaRequired.Add(parameter.Name);
-				}
+				schema.Type = "file";
 			}
+			schemaProperties.Add(parameter.Name, schema);
 
-			static IEnumerable<ParameterDescriptor> Enumerate(ActionDescriptor descriptor)
+			if (parameter.ParameterType.IsPrimitive && !parameter.ParameterType.IsNullable()
+				|| !parameter.ParameterType.IsInterface && !parameter.ParameterType.IsClass || parameter.ParameterType.HasAttribute<RequiredAttribute>())
 			{
-				foreach (ParameterDescriptor parameter in descriptor.Parameters.Where(p => p.BindingInfo?.BindingSource != null && p.BindingInfo.BindingSource.IsFromRequest && !p.BindingInfo.BindingSource.Id.IsSame("Path")))
-				{
-					yield return parameter;
-				}
+				schemaRequired.Add(parameter.Name);
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		private static bool IsSupported(Type type)
+		static IEnumerable<ParameterDescriptor> Enumerate(ActionDescriptor descriptor)
 		{
-			return type != null && (type.IsAssignableFrom(typeof(IFormFile)) || type.IsAssignableFrom(typeof(IFormFileCollection)));
+			foreach (ParameterDescriptor parameter in descriptor.Parameters.Where(p => p.BindingInfo?.BindingSource != null && p.BindingInfo.BindingSource.IsFromRequest && !p.BindingInfo.BindingSource.Id.IsSame("Path")))
+			{
+				yield return parameter;
+			}
 		}
+	}
+
+	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+	private static bool IsSupported(Type type)
+	{
+		return type != null && (type.IsAssignableFrom(typeof(IFormFile)) || type.IsAssignableFrom(typeof(IFormFileCollection)));
 	}
 }

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace essentialMix.Data.Patterns.Parameters
+namespace essentialMix.Data.Patterns.Parameters;
+
+public interface IIncludeSettings
 {
-	public interface IIncludeSettings
-	{
-		IList<string> Include { get; set; }
-	}
+	IList<string> Include { get; set; }
 }

@@ -7,45 +7,44 @@ using JetBrains.Annotations;
 using essentialMix.Newtonsoft.Helpers;
 using Newtonsoft.Json;
 
-namespace essentialMix.Web.Mvc
+namespace essentialMix.Web.Mvc;
+
+/// <summary>
+/// Must register and use essentialMix.MVC.Annotations.JsonHandlerAttribute
+/// </summary>
+public class JsonNetResult : JsonResult
 {
-	/// <summary>
-	/// Must register and use essentialMix.MVC.Annotations.JsonHandlerAttribute
-	/// </summary>
-	public class JsonNetResult : JsonResult
+	public JsonNetResult()
 	{
-		public JsonNetResult()
+	}
+
+	[NotNull]
+	public JsonSerializerSettings Settings { get; } = JsonHelper.CreateSettings();
+
+	public override void ExecuteResult([NotNull] ControllerContext context)
+	{
+		if (context == null) throw new ArgumentNullException(nameof(context));
+		if (JsonRequestBehavior == JsonRequestBehavior.DenyGet && context.HttpContext.Request.HttpMethod.IsSame(HttpMethod.Get.Method)) throw new InvalidOperationException("JSON GET is not allowed");
+		base.ExecuteResult(context);
+
+		HttpResponseBase response = context.HttpContext.Response;
+		response.ContentType = string.IsNullOrWhiteSpace(ContentType) ? "application/json" : ContentType;
+		if (ContentEncoding != null) response.ContentEncoding = ContentEncoding;
+		JsonSerializer scriptSerializer = JsonSerializer.Create(Settings);
+		scriptSerializer.Serialize(response.Output, Data);
+	}
+
+	[NotNull]
+	public static JsonNetResult FromJsonResult([NotNull] JsonResult jsonResult)
+	{
+		return new JsonNetResult
 		{
-		}
-
-		[NotNull]
-		public JsonSerializerSettings Settings { get; } = JsonHelper.CreateSettings();
-
-		public override void ExecuteResult([NotNull] ControllerContext context)
-		{
-			if (context == null) throw new ArgumentNullException(nameof(context));
-			if (JsonRequestBehavior == JsonRequestBehavior.DenyGet && context.HttpContext.Request.HttpMethod.IsSame(HttpMethod.Get.Method)) throw new InvalidOperationException("JSON GET is not allowed");
-			base.ExecuteResult(context);
-
-			HttpResponseBase response = context.HttpContext.Response;
-			response.ContentType = string.IsNullOrWhiteSpace(ContentType) ? "application/json" : ContentType;
-			if (ContentEncoding != null) response.ContentEncoding = ContentEncoding;
-			JsonSerializer scriptSerializer = JsonSerializer.Create(Settings);
-			scriptSerializer.Serialize(response.Output, Data);
-		}
-
-		[NotNull]
-		public static JsonNetResult FromJsonResult([NotNull] JsonResult jsonResult)
-		{
-			return new JsonNetResult
-			{
-				ContentEncoding = jsonResult.ContentEncoding,
-				ContentType = !string.IsNullOrWhiteSpace(jsonResult.ContentType)
-								? jsonResult.ContentType
-								: "application/json",
-				Data = jsonResult.Data,
-				JsonRequestBehavior = jsonResult.JsonRequestBehavior
-			};
-		}
+			ContentEncoding = jsonResult.ContentEncoding,
+			ContentType = !string.IsNullOrWhiteSpace(jsonResult.ContentType)
+							? jsonResult.ContentType
+							: "application/json",
+			Data = jsonResult.Data,
+			JsonRequestBehavior = jsonResult.JsonRequestBehavior
+		};
 	}
 }

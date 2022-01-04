@@ -6,80 +6,79 @@ using System.Linq;
 using System.Linq.Expressions;
 using JetBrains.Annotations;
 
-namespace essentialMix.Linq
-{
-	public abstract class QueryTranslatorProvider : ExpressionVisitor
-	{
-		protected QueryTranslatorProvider([NotNull] IQueryable source)
-		{
-			Source = source;
-		}
+namespace essentialMix.Linq;
 
-		internal IQueryable Source { get; }
+public abstract class QueryTranslatorProvider : ExpressionVisitor
+{
+	protected QueryTranslatorProvider([NotNull] IQueryable source)
+	{
+		Source = source;
 	}
 
-	[SuppressMessage("ReSharper", "UnusedTypeParameter")]
-	public class QueryTranslatorProvider<T> : QueryTranslatorProvider, IQueryProvider
+	internal IQueryable Source { get; }
+}
+
+[SuppressMessage("ReSharper", "UnusedTypeParameter")]
+public class QueryTranslatorProvider<T> : QueryTranslatorProvider, IQueryProvider
+{
+	private readonly IEnumerable<ExpressionVisitor> _visitors;
+
+	public QueryTranslatorProvider([NotNull] IQueryable source, [NotNull] IEnumerable<ExpressionVisitor> visitors)
+		: base(source)
 	{
-		private readonly IEnumerable<ExpressionVisitor> _visitors;
+		_visitors = visitors;
+	}
 
-		public QueryTranslatorProvider([NotNull] IQueryable source, [NotNull] IEnumerable<ExpressionVisitor> visitors)
-			: base(source)
-		{
-		   _visitors = visitors;
-		}
+	public IQueryable<TElement> CreateQuery<TElement>(Expression expression) { return new QueryTranslator<TElement>(Source, expression, _visitors); }
 
-		public IQueryable<TElement> CreateQuery<TElement>(Expression expression) { return new QueryTranslator<TElement>(Source, expression, _visitors); }
+	public IQueryable CreateQuery(Expression expression)
+	{
+		Type elementType = expression.Type.GetGenericArguments().First();
+		IQueryable result = (IQueryable)Activator.CreateInstance(typeof(QueryTranslator<>).MakeGenericType(elementType), Source, expression, _visitors);
+		return result;
+	}
 
-		public IQueryable CreateQuery(Expression expression)
-		{
-			Type elementType = expression.Type.GetGenericArguments().First();
-			IQueryable result = (IQueryable)Activator.CreateInstance(typeof(QueryTranslator<>).MakeGenericType(elementType), Source, expression, _visitors);
-			return result;
-		}
+	public TResult Execute<TResult>(Expression expression)
+	{
+		object result = (this as IQueryProvider).Execute(expression);
+		return (TResult)result;
+	}
 
-		public TResult Execute<TResult>(Expression expression)
-		{
-			object result = (this as IQueryProvider).Execute(expression);
-			return (TResult)result;
-		}
+	public object Execute(Expression expression)
+	{
+		Expression translated = VisitAll(expression);
+		return Source.Provider.Execute(translated);
+	}
 
-		public object Execute(Expression expression)
-		{
-			Expression translated = VisitAll(expression);
-			return Source.Provider.Execute(translated);
-		}
+	internal IEnumerable ExecuteEnumerable([NotNull] Expression expression)
+	{
+		Expression translated = VisitAll(expression);
+		return Source.Provider.CreateQuery(translated);
+	}
 
-		internal IEnumerable ExecuteEnumerable([NotNull] Expression expression)
-		{
-			Expression translated = VisitAll(expression);
-			return Source.Provider.CreateQuery(translated);
-		}
-
-		private Expression VisitAll(Expression expression)
-		{
-			// Run all visitors in order
-			IEnumerable<ExpressionVisitor> visitors = new ExpressionVisitor[] { this }.Concat(_visitors);
-			Expression result = expression;
+	private Expression VisitAll(Expression expression)
+	{
+		// Run all visitors in order
+		IEnumerable<ExpressionVisitor> visitors = new ExpressionVisitor[] { this }.Concat(_visitors);
+		Expression result = expression;
 			
-			foreach (ExpressionVisitor visitor in visitors) 
-				result = visitor.Visit(result);
+		foreach (ExpressionVisitor visitor in visitors) 
+			result = visitor.Visit(result);
 
-			return result;
-		}
+		return result;
+	}
 
-		protected override Expression VisitConstant(ConstantExpression node)
+	protected override Expression VisitConstant(ConstantExpression node)
+	{
+		// Fix up the Expression tree to work with the underlying LINQ provider
+		if (node.Type.IsGenericType && node.Type.GetGenericTypeDefinition() == typeof(QueryTranslator<>))
 		{
-			// Fix up the Expression tree to work with the underlying LINQ provider
-			if (node.Type.IsGenericType && node.Type.GetGenericTypeDefinition() == typeof(QueryTranslator<>))
-			{
-				if (((IQueryable)node.Value).Provider is QueryTranslatorProvider provider)
-					return provider.Source.Expression;
+			if (((IQueryable)node.Value).Provider is QueryTranslatorProvider provider)
+				return provider.Source.Expression;
 
-				return Source.Expression;
-			}
-
-			return base.VisitConstant(node);
+			return Source.Expression;
 		}
+
+		return base.VisitConstant(node);
 	}
 }

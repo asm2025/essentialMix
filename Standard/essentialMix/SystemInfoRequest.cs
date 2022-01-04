@@ -3,104 +3,103 @@ using System.Management;
 using System.Text;
 using JetBrains.Annotations;
 
-namespace essentialMix
+namespace essentialMix;
+
+public class SystemInfoRequest
 {
-	public class SystemInfoRequest
+	private string _machineName;
+	private string _scope;
+	private string _selectExpression = "*";
+	private string _whereExpression;
+
+	private string _scopeRoot;
+
+	public SystemInfoRequest(SystemInfoType type)
 	{
-		private string _machineName;
-		private string _scope;
-		private string _selectExpression = "*";
-		private string _whereExpression;
+		Type = type;
+	}
 
-		private string _scopeRoot;
+	public SystemInfoType Type { get; set; }
 
-		public SystemInfoRequest(SystemInfoType type)
+	public string MachineName
+	{
+		get => _machineName;
+		set
 		{
-			Type = type;
+			_machineName = value?.Trim('\\', '/', ' ');
+			_scopeRoot = null;
 		}
+	}
 
-		public SystemInfoType Type { get; set; }
-
-		public string MachineName
+	public string Scope
+	{
+		get => _scope;
+		set
 		{
-			get => _machineName;
-			set
+			_scope = value?.Trim();
+			_scopeRoot = null;
+		}
+	}
+
+	public string SelectExpression
+	{
+		get => _selectExpression;
+		set
+		{
+			value = value?.Trim();
+			if (string.IsNullOrEmpty(value)) value = "*";
+			_selectExpression = value;
+		}
+	}
+
+	public string WhereExpression
+	{
+		get => _whereExpression;
+		set => _whereExpression = value?.Trim();
+	}
+
+	public Predicate<ManagementObject> Filter { get; set; }
+
+	public EnumerationOptions Options { get; set; }
+
+	[NotNull]
+	public string ScopeRoot
+	{
+		get
+		{
+			if (_scopeRoot == null)
 			{
-				_machineName = value?.Trim('\\', '/', ' ');
-				_scopeRoot = null;
-			}
-		}
+				StringBuilder sb = new StringBuilder(256);
 
-		public string Scope
-		{
-			get => _scope;
-			set
-			{
-				_scope = value?.Trim();
-				_scopeRoot = null;
-			}
-		}
-
-		public string SelectExpression
-		{
-			get => _selectExpression;
-			set
-			{
-				value = value?.Trim();
-				if (string.IsNullOrEmpty(value)) value = "*";
-				_selectExpression = value;
-			}
-		}
-
-		public string WhereExpression
-		{
-			get => _whereExpression;
-			set => _whereExpression = value?.Trim();
-		}
-
-		public Predicate<ManagementObject> Filter { get; set; }
-
-		public EnumerationOptions Options { get; set; }
-
-		[NotNull]
-		public string ScopeRoot
-		{
-			get
-			{
-				if (_scopeRoot == null)
+				if (!string.IsNullOrEmpty(MachineName))
 				{
-					StringBuilder sb = new StringBuilder(256);
-
-					if (!string.IsNullOrEmpty(MachineName))
-					{
-						sb.Append(@"\\");
-						sb.Append(MachineName);
-					}
-
-					if (!string.IsNullOrEmpty(Scope))
-					{
-						if (Scope[0] != '\\' && sb.Length > 0) sb.Append('\\');
-						sb.Append(Scope);
-					}
-
-					_scopeRoot = sb.ToString();
+					sb.Append(@"\\");
+					sb.Append(MachineName);
 				}
 
-				return _scopeRoot;
+				if (!string.IsNullOrEmpty(Scope))
+				{
+					if (Scope[0] != '\\' && sb.Length > 0) sb.Append('\\');
+					sb.Append(Scope);
+				}
+
+				_scopeRoot = sb.ToString();
 			}
+
+			return _scopeRoot;
 		}
 	}
+}
 
-	public class SystemInfoRequest<T> : SystemInfoRequest
+public class SystemInfoRequest<T> : SystemInfoRequest
+{
+	/// <inheritdoc />
+	public SystemInfoRequest(SystemInfoType type, [NotNull] Func<ManagementObject, T> converter)
+		: base(type)
 	{
-		/// <inheritdoc />
-		public SystemInfoRequest(SystemInfoType type, [NotNull] Func<ManagementObject, T> converter)
-			: base(type)
-		{
-			Converter = converter;
-		}
-
-		[NotNull]
-		public Func<ManagementObject, T> Converter { get; set; }
+		Converter = converter;
 	}
+
+	[NotNull]
+	public Func<ManagementObject, T> Converter { get; set; }
 }

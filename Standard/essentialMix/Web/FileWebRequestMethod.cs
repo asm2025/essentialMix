@@ -1,10 +1,9 @@
-namespace essentialMix.Web
+namespace essentialMix.Web;
+
+public enum FileWebRequestMethod
 {
-	public enum FileWebRequestMethod
-	{
-		Unknown,
-		DownloadFile,
-		UploadFile,
-		Post
-	}
+	Unknown,
+	DownloadFile,
+	UploadFile,
+	Post
 }

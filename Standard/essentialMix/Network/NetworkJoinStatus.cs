@@ -1,10 +1,9 @@
-namespace essentialMix.Network
+namespace essentialMix.Network;
+
+public enum NetworkJoinStatus
 {
-	public enum NetworkJoinStatus
-	{
-		Unknown = 0,
-		Unjoined,
-		Workgroup,
-		Domain
-	}
+	Unknown = 0,
+	Unjoined,
+	Workgroup,
+	Domain
 }

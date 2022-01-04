@@ -1,8 +1,7 @@
-namespace essentialMix.Patterns.Direction
+namespace essentialMix.Patterns.Direction;
+
+public enum HorizontalDirection
 {
-	public enum HorizontalDirection
-	{
-		Left = -1,
-		Right = 1
-	}
+	Left = -1,
+	Right = 1
 }

@@ -26,45 +26,44 @@ using System.Globalization;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
-namespace Other.TylerBrinkley.Enumeration.Numeric
+namespace Other.TylerBrinkley.Enumeration.Numeric;
+
+internal class Int64NumericProvider : INumericProvider<long>
 {
-    internal class Int64NumericProvider : INumericProvider<long>
-    {
-        [NotNull]
-        public string ToHexadecimalString(long value) { return value.ToString("X16"); }
+	[NotNull]
+	public string ToHexadecimalString(long value) { return value.ToString("X16"); }
 
-		public string ToDecimalString(long value) { return value.ToString(); }
+	public string ToDecimalString(long value) { return value.ToString(); }
 
-		public long One => 1L;
+	public long One => 1L;
 
-		public long Zero => 0L;
+	public long Zero => 0L;
 
-		public long And(long left, long right) { return left & right; }
+	public long And(long left, long right) { return left & right; }
 
-		public int BitCount(long value) { return Number.BitCount(value); }
+	public int BitCount(long value) { return Number.BitCount(value); }
 
-		public long Create(ulong value) { return (long)value; }
+	public long Create(ulong value) { return (long)value; }
 
-		public long Create(long value) { return value; }
+	public long Create(long value) { return value; }
 
-		public bool IsInValueRange(ulong value) { return value <= long.MaxValue; }
+	public bool IsInValueRange(ulong value) { return value <= long.MaxValue; }
 
-		public bool IsInValueRange(long value) { return true; }
+	public bool IsInValueRange(long value) { return true; }
 
-		public long LeftShift(long value, int amount) { return value << amount; }
+	public long LeftShift(long value, int amount) { return value << amount; }
 
-		public bool LessThan(long left, long right) { return left < right; }
+	public bool LessThan(long left, long right) { return left < right; }
 
-		public long Not(long value) { return ~value; }
+	public long Not(long value) { return ~value; }
 
-		public long Or(long left, long right) { return left | right; }
+	public long Or(long left, long right) { return left | right; }
 
-		public long Subtract(long left, long right) { return left - right; }
+	public long Subtract(long left, long right) { return left - right; }
 
-		public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out long result) { return long.TryParse(s, style, provider, out result); }
+	public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out long result) { return long.TryParse(s, style, provider, out result); }
 
-		public bool TryParseNative(string s, out long result) { return long.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
+	public bool TryParseNative(string s, out long result) { return long.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
 
-		public long Xor(long left, long right) { return left ^ right; }
-	}
+	public long Xor(long left, long right) { return left ^ right; }
 }

@@ -7,166 +7,165 @@ using System.Runtime.CompilerServices;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class EnumExtension
 {
-	public static class EnumExtension
+	public static bool HasMoreThan<T>(this T thisValue, int count = 0)
+		where T : struct, Enum, IComparable
 	{
-		public static bool HasMoreThan<T>(this T thisValue, int count = 0)
-			where T : struct, Enum, IComparable
+		IEnumerable<T> flags = EnumHelper<T>.GetValues();
+		int lo = 0, hi = count + 1;
+		return flags.Count(e => FastHasFlag(thisValue, e) && ++lo < hi) >= count;
+	}
+
+	public static int Count<T>(this T thisValue, [NotNull] params T[] flags)
+		where T : struct, Enum, IComparable
+	{
+		return flags.Count(e => FastHasFlag(thisValue, e));
+	}
+
+	public static T HighestFlag<T>(this T thisValue)
+		where T : struct, Enum, IComparable
+	{
+		Type type = typeof(T);
+		T value = default(T);
+		if (!type.HasAttribute<FlagsAttribute>()) return value;
+
+		T[] flags = EnumHelper<T>.GetValues();
+
+		foreach (T flag in flags)
 		{
-			IEnumerable<T> flags = EnumHelper<T>.GetValues();
-			int lo = 0, hi = count + 1;
-			return flags.Count(e => FastHasFlag(thisValue, e) && ++lo < hi) >= count;
+			if (FastHasFlag(thisValue, flag))
+				value = flag;
 		}
 
-		public static int Count<T>(this T thisValue, [NotNull] params T[] flags)
-			where T : struct, Enum, IComparable
-		{
-			return flags.Count(e => FastHasFlag(thisValue, e));
-		}
+		return value;
+	}
 
-		public static T HighestFlag<T>(this T thisValue)
-			where T : struct, Enum, IComparable
-		{
-			Type type = typeof(T);
-			T value = default(T);
-			if (!type.HasAttribute<FlagsAttribute>()) return value;
+	[NotNull]
+	public static T[] Flags<T>(this T thisValue, params T[] exclude)
+		where T : struct, Enum, IComparable
+	{
+		Type type = typeof(T);
+		if (!type.HasAttribute<FlagsAttribute>()) return Array.Empty<T>();
 
-			T[] flags = EnumHelper<T>.GetValues();
+		T[] values = EnumHelper<T>.GetValues();
+		return exclude is { Length: > 0 }
+					? values.Where(e => !exclude.Contains(e) && FastHasFlag(thisValue, e)).ToArray()
+					: values;
+	}
 
-			foreach (T flag in flags)
-			{
-				if (FastHasFlag(thisValue, flag))
-					value = flag;
-			}
+	public static string GetName<T>(this T thisValue)
+		where T : struct, Enum, IComparable
+	{
+		return EnumHelper<T>.GetName(thisValue);
+	}
 
-			return value;
-		}
+	public static string GetDisplayName<T>(this T thisValue)
+		where T : struct, Enum, IComparable
+	{
+		string name = GetName(thisValue);
+		return thisValue.GetType()
+						.GetField(name)
+						.GetDisplayName(name);
+	}
 
-		[NotNull]
-		public static T[] Flags<T>(this T thisValue, params T[] exclude)
-			where T : struct, Enum, IComparable
-		{
-			Type type = typeof(T);
-			if (!type.HasAttribute<FlagsAttribute>()) return Array.Empty<T>();
+	public static string GetDescription<T>(this T thisValue)
+		where T : struct, Enum, IComparable
+	{
+		return thisValue.GetType()
+						.GetField(GetName(thisValue))
+						.GetDescription();
+	}
 
-			T[] values = EnumHelper<T>.GetValues();
-			return exclude is { Length: > 0 }
-						? values.Where(e => !exclude.Contains(e) && FastHasFlag(thisValue, e)).ToArray()
-						: values;
-		}
+	[NotNull]
+	public static Type GetUnderlyingType<T>(this T thisValue)
+		where T : struct, Enum, IComparable
+	{
+		return thisValue.AsType().GetUnderlyingType();
+	}
 
-		public static string GetName<T>(this T thisValue)
-			where T : struct, Enum, IComparable
-		{
-			return EnumHelper<T>.GetName(thisValue);
-		}
+	public static TypeCode GetUnderlyingTypeCode<T>(this T thisValue)
+		where T : struct, Enum, IComparable
+	{
+		return thisValue.AsType().GetUnderlyingTypeCode();
+	}
 
-		public static string GetDisplayName<T>(this T thisValue)
-			where T : struct, Enum, IComparable
-		{
-			string name = GetName(thisValue);
-			return thisValue.GetType()
-				.GetField(name)
-				.GetDisplayName(name);
-		}
+	public static FieldInfo GetField<T>(this T thisValue)
+		where T : struct, Enum, IComparable
+	{
+		return thisValue.GetType()
+						.GetField(GetName(thisValue));
+	}
 
-		public static string GetDescription<T>(this T thisValue)
-			where T : struct, Enum, IComparable
-		{
-			return thisValue.GetType()
-							.GetField(GetName(thisValue))
-							.GetDescription();
-		}
+	[NotNull]
+	public static IEnumerable<Attribute> GetAttributes<T>(this T thisValue, Type type = null)
+		where T : struct, Enum, IComparable
+	{
+		FieldInfo field = GetField(thisValue);
+		return field?.GetAttributes(type) ?? Enumerable.Empty<Attribute>();
+	}
 
-		[NotNull]
-		public static Type GetUnderlyingType<T>(this T thisValue)
-			where T : struct, Enum, IComparable
-		{
-			return thisValue.AsType().GetUnderlyingType();
-		}
+	public static Attribute GetAttribute<T>(this T thisValue, Type type = null)
+		where T : struct, Enum, IComparable
+	{
+		return GetAttributes(thisValue, type).FirstOrDefault();
+	}
 
-		public static TypeCode GetUnderlyingTypeCode<T>(this T thisValue)
-			where T : struct, Enum, IComparable
-		{
-			return thisValue.AsType().GetUnderlyingTypeCode();
-		}
+	public static bool HasAttribute<T>(this T thisValue, Type type = null)
+		where T : struct, Enum, IComparable
+	{
+		return GetAttribute(thisValue, type) != null;
+	}
 
-		public static FieldInfo GetField<T>(this T thisValue)
-			where T : struct, Enum, IComparable
-		{
-			return thisValue.GetType()
-							.GetField(GetName(thisValue));
-		}
+	public static TEnum ChangeTo<T, TEnum>(this T thisValue)
+		where T : struct, Enum, IComparable
+		where TEnum : struct, Enum, IComparable
+	{
+		return (TEnum)ChangeTo(thisValue, typeof(TEnum));
+	}
 
-		[NotNull]
-		public static IEnumerable<Attribute> GetAttributes<T>(this T thisValue, Type type = null)
-			where T : struct, Enum, IComparable
-		{
-			FieldInfo field = GetField(thisValue);
-			return field?.GetAttributes(type) ?? Enumerable.Empty<Attribute>();
-		}
+	[NotNull]
+	public static object ChangeTo<T>(this T thisValue, [NotNull] Type type)
+		where T : struct, Enum, IComparable
+	{
+		if (!type.IsEnum) throw new InvalidEnumArgumentException();
+		return Enum.ToObject(type, thisValue);
+	}
 
-		public static Attribute GetAttribute<T>(this T thisValue, Type type = null)
-			where T : struct, Enum, IComparable
-		{
-			return GetAttributes(thisValue, type).FirstOrDefault();
-		}
+	[NotNull]
+	public static IEnumerable<TAttribute> GetAttributes<T, TAttribute>(this T thisValue)
+		where T : struct, Enum, IComparable
+		where TAttribute : Attribute
+	{
+		return GetAttributes(thisValue, typeof(TAttribute)).CastTo<Attribute, TAttribute>();
+	}
 
-		public static bool HasAttribute<T>(this T thisValue, Type type = null)
-			where T : struct, Enum, IComparable
-		{
-			return GetAttribute(thisValue, type) != null;
-		}
+	public static TAttribute GetAttribute<T, TAttribute>(this T thisValue)
+		where T : struct, Enum, IComparable
+		where TAttribute : Attribute
+	{
+		return GetAttributes<T, TAttribute>(thisValue).FirstOrDefault();
+	}
 
-		public static TEnum ChangeTo<T, TEnum>(this T thisValue)
-			where T : struct, Enum, IComparable
-			where TEnum : struct, Enum, IComparable
-		{
-			return (TEnum)ChangeTo(thisValue, typeof(TEnum));
-		}
+	public static bool HasAttribute<T, TAttribute>(this T thisValue, bool inherit = false)
+		where T : struct, Enum, IComparable
+		where TAttribute : Attribute
+	{
+		return typeof(T).IsDefined(typeof(TAttribute), inherit);
+	}
 
-		[NotNull]
-		public static object ChangeTo<T>(this T thisValue, [NotNull] Type type)
-			where T : struct, Enum, IComparable
-		{
-			if (!type.IsEnum) throw new InvalidEnumArgumentException();
-			return Enum.ToObject(type, thisValue);
-		}
+	public static bool IsMemberOf<T>(this T thisValue, [NotNull] Type type)
+		where T : struct, Enum, IComparable
+	{
+		return type.IsDefined(thisValue);
+	}
 
-		[NotNull]
-		public static IEnumerable<TAttribute> GetAttributes<T, TAttribute>(this T thisValue)
-			where T : struct, Enum, IComparable
-			where TAttribute : Attribute
-		{
-			return GetAttributes(thisValue, typeof(TAttribute)).CastTo<Attribute, TAttribute>();
-		}
-
-		public static TAttribute GetAttribute<T, TAttribute>(this T thisValue)
-			where T : struct, Enum, IComparable
-			where TAttribute : Attribute
-		{
-			return GetAttributes<T, TAttribute>(thisValue).FirstOrDefault();
-		}
-
-		public static bool HasAttribute<T, TAttribute>(this T thisValue, bool inherit = false)
-			where T : struct, Enum, IComparable
-			where TAttribute : Attribute
-		{
-			return typeof(T).IsDefined(typeof(TAttribute), inherit);
-		}
-
-		public static bool IsMemberOf<T>(this T thisValue, [NotNull] Type type)
-			where T : struct, Enum, IComparable
-		{
-			return type.IsDefined(thisValue);
-		}
-
-		[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-		public static bool FastHasFlag<T>(this T thisValue, T flag)
-			where T : struct, Enum, IComparable
-		{
-			return EnumHelper<T>.HasFlag(thisValue, flag);
-		}
+	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+	public static bool FastHasFlag<T>(this T thisValue, T flag)
+		where T : struct, Enum, IComparable
+	{
+		return EnumHelper<T>.HasFlag(thisValue, flag);
 	}
 }

@@ -1,6 +1,5 @@
-﻿namespace essentialMix.Collections
+﻿namespace essentialMix.Collections;
+
+public class BipBuffer
 {
-	public class BipBuffer
-	{
-	}
 }

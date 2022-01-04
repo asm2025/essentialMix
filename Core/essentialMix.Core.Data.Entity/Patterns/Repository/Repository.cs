@@ -8,166 +8,165 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SystemDbContext = Microsoft.EntityFrameworkCore.DbContext;
 
-namespace essentialMix.Core.Data.Entity.Patterns.Repository
+namespace essentialMix.Core.Data.Entity.Patterns.Repository;
+
+public abstract class Repository<TContext, TEntity> : RepositoryBase<TContext, TEntity>, IRepository<TContext, TEntity>
+	where TContext : SystemDbContext
+	where TEntity : class, IEntity
 {
-	public abstract class Repository<TContext, TEntity> : RepositoryBase<TContext, TEntity>, IRepository<TContext, TEntity>
-		where TContext : SystemDbContext
-		where TEntity : class, IEntity
+	/// <inheritdoc />
+	protected Repository([NotNull] TContext context, [NotNull] IConfiguration configuration)
+		: this(context, configuration, null, false)
 	{
-		/// <inheritdoc />
-		protected Repository([NotNull] TContext context, [NotNull] IConfiguration configuration)
-			: this(context, configuration, null, false)
-		{
-		}
+	}
 
-		/// <inheritdoc />
-		protected Repository([NotNull] TContext context, [NotNull] IConfiguration configuration, ILogger logger)
-			: this(context, configuration, logger, false)
-		{
-		}
+	/// <inheritdoc />
+	protected Repository([NotNull] TContext context, [NotNull] IConfiguration configuration, ILogger logger)
+		: this(context, configuration, logger, false)
+	{
+	}
 
-		/// <inheritdoc />
-		protected Repository([NotNull] TContext context, [NotNull] IConfiguration configuration, ILogger logger, bool ownsContext)
-			: base(context, configuration, logger, ownsContext)
-		{
-		}
+	/// <inheritdoc />
+	protected Repository([NotNull] TContext context, [NotNull] IConfiguration configuration, ILogger logger, bool ownsContext)
+		: base(context, configuration, logger, ownsContext)
+	{
+	}
 
-		/// <inheritdoc />
-		[NotNull]
-		public TEntity Add(TEntity entity)
-		{
-			ThrowIfDisposed();
-			return AddInternal(entity);
-		}
+	/// <inheritdoc />
+	[NotNull]
+	public TEntity Add(TEntity entity)
+	{
+		ThrowIfDisposed();
+		return AddInternal(entity);
+	}
 
-		[NotNull]
-		protected virtual TEntity AddInternal([NotNull] TEntity entity) { return DbSet.Add(entity).Entity; }
+	[NotNull]
+	protected virtual TEntity AddInternal([NotNull] TEntity entity) { return DbSet.Add(entity).Entity; }
 
-		/// <inheritdoc />
-		public ValueTask<TEntity> AddAsync(TEntity entity, CancellationToken token = default(CancellationToken))
-		{
-			ThrowIfDisposed();
-			token.ThrowIfCancellationRequested();
-			return AddAsyncInternal(entity, token);
-		}
+	/// <inheritdoc />
+	public ValueTask<TEntity> AddAsync(TEntity entity, CancellationToken token = default(CancellationToken))
+	{
+		ThrowIfDisposed();
+		token.ThrowIfCancellationRequested();
+		return AddAsyncInternal(entity, token);
+	}
 
-		protected virtual ValueTask<TEntity> AddAsyncInternal([NotNull] TEntity entity, CancellationToken token = default(CancellationToken))
-		{
-			token.ThrowIfCancellationRequested();
-			return new ValueTask<TEntity>(AddInternal(entity));
-		}
+	protected virtual ValueTask<TEntity> AddAsyncInternal([NotNull] TEntity entity, CancellationToken token = default(CancellationToken))
+	{
+		token.ThrowIfCancellationRequested();
+		return new ValueTask<TEntity>(AddInternal(entity));
+	}
 
-		/// <inheritdoc />
-		[NotNull]
-		public TEntity Attach(TEntity entity)
-		{
-			ThrowIfDisposed();
-			return AttachInternal(entity);
-		}
+	/// <inheritdoc />
+	[NotNull]
+	public TEntity Attach(TEntity entity)
+	{
+		ThrowIfDisposed();
+		return AttachInternal(entity);
+	}
 
-		[NotNull]
-		protected virtual TEntity AttachInternal([NotNull] TEntity entity) { return DbSet.Attach(entity).Entity; }
+	[NotNull]
+	protected virtual TEntity AttachInternal([NotNull] TEntity entity) { return DbSet.Attach(entity).Entity; }
 
-		/// <inheritdoc />
-		public ValueTask<TEntity> AttachAsync(TEntity entity, CancellationToken token = default(CancellationToken))
-		{
-			ThrowIfDisposed();
-			token.ThrowIfCancellationRequested();
-			return AttachAsyncInternal(entity, token);
-		}
+	/// <inheritdoc />
+	public ValueTask<TEntity> AttachAsync(TEntity entity, CancellationToken token = default(CancellationToken))
+	{
+		ThrowIfDisposed();
+		token.ThrowIfCancellationRequested();
+		return AttachAsyncInternal(entity, token);
+	}
 
-		protected virtual ValueTask<TEntity> AttachAsyncInternal([NotNull] TEntity entity, CancellationToken token = default(CancellationToken))
-		{
-			token.ThrowIfCancellationRequested();
-			return new ValueTask<TEntity>(AttachInternal(entity));
-		}
+	protected virtual ValueTask<TEntity> AttachAsyncInternal([NotNull] TEntity entity, CancellationToken token = default(CancellationToken))
+	{
+		token.ThrowIfCancellationRequested();
+		return new ValueTask<TEntity>(AttachInternal(entity));
+	}
 
-		/// <inheritdoc />
-		[NotNull]
-		public TEntity Update(TEntity entity)
-		{
-			ThrowIfDisposed();
-			return UpdateInternal(entity);
-		}
+	/// <inheritdoc />
+	[NotNull]
+	public TEntity Update(TEntity entity)
+	{
+		ThrowIfDisposed();
+		return UpdateInternal(entity);
+	}
 
-		[NotNull]
-		protected virtual TEntity UpdateInternal([NotNull] TEntity entity)
-		{
-			DbSet.Attach(entity);
-			Context.Entry(entity).State = EntityState.Modified;
-			return entity;
-		}
+	[NotNull]
+	protected virtual TEntity UpdateInternal([NotNull] TEntity entity)
+	{
+		DbSet.Attach(entity);
+		Context.Entry(entity).State = EntityState.Modified;
+		return entity;
+	}
 
-		/// <inheritdoc />
-		public ValueTask<TEntity> UpdateAsync(TEntity entity, CancellationToken token = default(CancellationToken))
-		{
-			ThrowIfDisposed();
-			token.ThrowIfCancellationRequested();
-			return UpdateAsyncInternal(entity, token);
-		}
+	/// <inheritdoc />
+	public ValueTask<TEntity> UpdateAsync(TEntity entity, CancellationToken token = default(CancellationToken))
+	{
+		ThrowIfDisposed();
+		token.ThrowIfCancellationRequested();
+		return UpdateAsyncInternal(entity, token);
+	}
 
-		protected virtual ValueTask<TEntity> UpdateAsyncInternal([NotNull] TEntity entity, CancellationToken token = default(CancellationToken))
-		{
-			token.ThrowIfCancellationRequested();
-			return new ValueTask<TEntity>(UpdateInternal(entity));
-		}
+	protected virtual ValueTask<TEntity> UpdateAsyncInternal([NotNull] TEntity entity, CancellationToken token = default(CancellationToken))
+	{
+		token.ThrowIfCancellationRequested();
+		return new ValueTask<TEntity>(UpdateInternal(entity));
+	}
 
-		/// <inheritdoc />
-		public void Delete(object[] key)
-		{
-			ThrowIfDisposed();
-			DeleteInternal(key);
-		}
+	/// <inheritdoc />
+	public void Delete(object[] key)
+	{
+		ThrowIfDisposed();
+		DeleteInternal(key);
+	}
 
-		protected virtual void DeleteInternal([NotNull] object[] key)
-		{
-			TEntity entity = DbSet.Find(key) ?? throw new KeyNotFoundException();
-			DeleteInternal(entity);
-		}
+	protected virtual void DeleteInternal([NotNull] object[] key)
+	{
+		TEntity entity = DbSet.Find(key) ?? throw new KeyNotFoundException();
+		DeleteInternal(entity);
+	}
 
-		/// <inheritdoc />
-		public ValueTask DeleteAsync(object[] key, CancellationToken token = default(CancellationToken))
-		{
-			ThrowIfDisposed();
-			token.ThrowIfCancellationRequested();
-			return DeleteAsyncInternal(key, token);
-		}
+	/// <inheritdoc />
+	public ValueTask DeleteAsync(object[] key, CancellationToken token = default(CancellationToken))
+	{
+		ThrowIfDisposed();
+		token.ThrowIfCancellationRequested();
+		return DeleteAsyncInternal(key, token);
+	}
 
-		protected virtual async ValueTask DeleteAsyncInternal([NotNull] object[] key, CancellationToken token = default(CancellationToken))
-		{
-			token.ThrowIfCancellationRequested();
-			TEntity entity = await DbSet.FindAsync(token, key);
-			if (entity == null) throw new KeyNotFoundException();
-			token.ThrowIfCancellationRequested();
-			await DeleteAsyncInternal(entity, token);
-		}
+	protected virtual async ValueTask DeleteAsyncInternal([NotNull] object[] key, CancellationToken token = default(CancellationToken))
+	{
+		token.ThrowIfCancellationRequested();
+		TEntity entity = await DbSet.FindAsync(token, key);
+		if (entity == null) throw new KeyNotFoundException();
+		token.ThrowIfCancellationRequested();
+		await DeleteAsyncInternal(entity, token);
+	}
 
-		/// <inheritdoc />
-		[NotNull]
-		public TEntity Delete(TEntity entity)
-		{
-			ThrowIfDisposed();
-			return DeleteInternal(entity);
-		}
+	/// <inheritdoc />
+	[NotNull]
+	public TEntity Delete(TEntity entity)
+	{
+		ThrowIfDisposed();
+		return DeleteInternal(entity);
+	}
 
-		[NotNull]
-		protected virtual TEntity DeleteInternal([NotNull] TEntity entity)
-		{
-			if (Context.Entry(entity).State == EntityState.Detached) DbSet.Attach(entity);
-			return DbSet.Remove(entity).Entity;
-		}
+	[NotNull]
+	protected virtual TEntity DeleteInternal([NotNull] TEntity entity)
+	{
+		if (Context.Entry(entity).State == EntityState.Detached) DbSet.Attach(entity);
+		return DbSet.Remove(entity).Entity;
+	}
 
-		public ValueTask<TEntity> DeleteAsync(TEntity entity, CancellationToken token = default(CancellationToken))
-		{
-			ThrowIfDisposed();
-			token.ThrowIfCancellationRequested();
-			return DeleteAsyncInternal(entity, token);
-		}
+	public ValueTask<TEntity> DeleteAsync(TEntity entity, CancellationToken token = default(CancellationToken))
+	{
+		ThrowIfDisposed();
+		token.ThrowIfCancellationRequested();
+		return DeleteAsyncInternal(entity, token);
+	}
 
-		protected virtual ValueTask<TEntity> DeleteAsyncInternal([NotNull] TEntity entity, CancellationToken token = default(CancellationToken))
-		{
-			token.ThrowIfCancellationRequested();
-			return new ValueTask<TEntity>(DeleteInternal(entity));
-		}
+	protected virtual ValueTask<TEntity> DeleteAsyncInternal([NotNull] TEntity entity, CancellationToken token = default(CancellationToken))
+	{
+		token.ThrowIfCancellationRequested();
+		return new ValueTask<TEntity>(DeleteInternal(entity));
 	}
 }

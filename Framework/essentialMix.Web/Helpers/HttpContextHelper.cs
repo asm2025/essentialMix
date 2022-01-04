@@ -8,73 +8,72 @@ using System.Web.SessionState;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-namespace essentialMix.Web.Helpers
+namespace essentialMix.Web.Helpers;
+
+public static class HttpContextHelper
 {
-	public static class HttpContextHelper
+	private const string URL_DEF = "http://tempuri.org";
+
+	[NotNull]
+	public static HttpContext Create(string url = null)
 	{
-		private const string URL_DEF = "http://tempuri.org";
+		url = url?.Trim();
+		if (string.IsNullOrEmpty(url)) url = URL_DEF;
+		if (!UriHelper.TryBuildUri(url, out Uri uri)) throw new ArgumentException("Uri is not well formatted.", nameof(url));
+		return Create(uri);
+	}
 
-		[NotNull]
-		public static HttpContext Create(string url = null)
+	[NotNull]
+	public static HttpContext Create(Uri url = null, Encoding encoding = null)
+	{
+		string uri;
+		string query;
+
+		if (url != null)
 		{
-			url = url?.Trim();
-			if (string.IsNullOrEmpty(url)) url = URL_DEF;
-			if (!UriHelper.TryBuildUri(url, out Uri uri)) throw new ArgumentException("Uri is not well formatted.", nameof(url));
-			return Create(uri);
+			uri = url.ToString();
+			query = url.Query.TrimStart('?');
+		}
+		else
+		{
+			uri = null;
+			query = string.Empty;
 		}
 
-		[NotNull]
-		public static HttpContext Create(Uri url = null, Encoding encoding = null)
+		if (string.IsNullOrEmpty(uri)) uri = URL_DEF;
+		HttpRequest request = new HttpRequest(string.Empty, uri, query)
 		{
-			string uri;
-			string query;
+			ContentEncoding = encoding ?? EncodingHelper.Default  //UrlDecode needs this to be set
+		};
 
-			if (url != null)
-			{
-				uri = url.ToString();
-				query = url.Query.TrimStart('?');
-			}
-			else
-			{
-				uri = null;
-				query = string.Empty;
-			}
+		HttpContext ctx = new HttpContext(request, new HttpResponse(new StringWriter()));
 
-			if (string.IsNullOrEmpty(uri)) uri = URL_DEF;
-			HttpRequest request = new HttpRequest(string.Empty, uri, query)
-			{
-				ContentEncoding = encoding ?? EncodingHelper.Default  //UrlDecode needs this to be set
-			};
+		//Session need to be set
+		HttpSessionStateContainer sessionContainer = new HttpSessionStateContainer("id", 
+																					new SessionStateItemCollection(),
+																					new HttpStaticObjectsCollection(), 
+																					10, true, HttpCookieMode.AutoDetect,
+																					SessionStateMode.InProc, false);
+		SessionStateUtility.AddHttpSessionStateToContext(ctx, sessionContainer);
+		ctx.User = new GenericPrincipal(new GenericIdentity(string.Empty), Array.Empty<string>());
+		return ctx;
+	}
 
-			HttpContext ctx = new HttpContext(request, new HttpResponse(new StringWriter()));
+	public static HttpContext Create(string url, Func<IDictionary<string, object>, bool> onFillOwinData) { return FillContextData(Create(url), onFillOwinData); }
 
-			//Session need to be set
-			HttpSessionStateContainer sessionContainer = new HttpSessionStateContainer("id", 
-				new SessionStateItemCollection(),
-				new HttpStaticObjectsCollection(), 
-				10, true, HttpCookieMode.AutoDetect,
-				SessionStateMode.InProc, false);
-			SessionStateUtility.AddHttpSessionStateToContext(ctx, sessionContainer);
-			ctx.User = new GenericPrincipal(new GenericIdentity(string.Empty), Array.Empty<string>());
-			return ctx;
-		}
+	public static HttpContext Create(Uri url, Func<IDictionary<string, object>, bool> onFillOwinData) { return FillContextData(Create(url), onFillOwinData); }
 
-		public static HttpContext Create(string url, Func<IDictionary<string, object>, bool> onFillOwinData) { return FillContextData(Create(url), onFillOwinData); }
+	private static HttpContext FillContextData(HttpContext ctx, Func<IDictionary<string, object>, bool> onFillOwinData = null)
+	{
+		if (ctx == null) return null;
 
-		public static HttpContext Create(Uri url, Func<IDictionary<string, object>, bool> onFillOwinData) { return FillContextData(Create(url), onFillOwinData); }
-
-		private static HttpContext FillContextData(HttpContext ctx, Func<IDictionary<string, object>, bool> onFillOwinData = null)
+		Dictionary<string, object> data = new Dictionary<string, object>
 		{
-			if (ctx == null) return null;
+			{"owin.RequestBody", null} // fake whatever  you need here.
+		};
 
-			Dictionary<string, object> data = new Dictionary<string, object>
-			{
-				{"owin.RequestBody", null} // fake whatever  you need here.
-			};
-
-			if (onFillOwinData != null && !onFillOwinData(data)) return null;
-			ctx.Items["owin.Environment"] = data;
-			return ctx;
-		}
+		if (onFillOwinData != null && !onFillOwinData(data)) return null;
+		ctx.Items["owin.Environment"] = data;
+		return ctx;
 	}
 }

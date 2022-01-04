@@ -1,12 +1,11 @@
-﻿namespace essentialMix.Compression
+﻿namespace essentialMix.Compression;
+
+public enum CompressionLevel
 {
-	public enum CompressionLevel
-	{
-		None,
-		Fast,
-		Low,
-		Normal,
-		High,
-		Ultra,
-	}
+	None,
+	Fast,
+	Low,
+	Normal,
+	High,
+	Ultra,
 }

@@ -4,15 +4,14 @@ using JetBrains.Annotations;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 // ReSharper disable once CheckNamespace
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class OperationFilterContextExtension
 {
-	public static class OperationFilterContextExtension
+	[NotNull]
+	public static IEnumerable<T> GetControllerAndActionAttributes<T>([NotNull] this OperationFilterContext thisValue)
+		where T : Attribute
 	{
-		[NotNull]
-		public static IEnumerable<T> GetControllerAndActionAttributes<T>([NotNull] this OperationFilterContext thisValue)
-			where T : Attribute
-		{
-			return thisValue.MethodInfo.GetMemberAndTypeAttributes<T>();
-		}
+		return thisValue.MethodInfo.GetMemberAndTypeAttributes<T>();
 	}
 }

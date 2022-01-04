@@ -1,10 +1,9 @@
 using System.Web.UI.WebControls;
 
-namespace essentialMix.Web.Drawing
+namespace essentialMix.Web.Drawing;
+
+public enum PxUnitType
 {
-	public enum PxUnitType
-	{
-		Percentage = UnitType.Percentage,
-		Pixel = UnitType.Pixel
-	}
+	Percentage = UnitType.Percentage,
+	Pixel = UnitType.Pixel
 }

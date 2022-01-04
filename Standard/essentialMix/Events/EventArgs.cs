@@ -1,21 +1,20 @@
 using System;
 
-namespace essentialMix.Events
+namespace essentialMix.Events;
+
+[Serializable]
+public class EventArgs<T> : ReadOnlyEventArgs<T>
 {
-	[Serializable]
-	public class EventArgs<T> : ReadOnlyEventArgs<T>
+	/// <inheritdoc />
+	public EventArgs()
 	{
-		/// <inheritdoc />
-		public EventArgs()
-		{
-		}
-
-		/// <inheritdoc />
-		public EventArgs(T value)
-			: base(value)
-		{
-		}
-
-		public new virtual T Value { get; set; }
 	}
+
+	/// <inheritdoc />
+	public EventArgs(T value)
+		: base(value)
+	{
+	}
+
+	public new virtual T Value { get; set; }
 }

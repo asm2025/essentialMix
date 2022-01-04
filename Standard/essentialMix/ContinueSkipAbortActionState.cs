@@ -1,9 +1,8 @@
-namespace essentialMix
+namespace essentialMix;
+
+public enum ContinueSkipAbortActionState
 {
-	public enum ContinueSkipAbortActionState
-	{
-		Continue,
-		Skip,
-		Abort
-	}
+	Continue,
+	Skip,
+	Abort
 }

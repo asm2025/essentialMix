@@ -8,81 +8,80 @@ using essentialMix.Extensions;
 using JetBrains.Annotations;
 using essentialMix.Comparers;
 
-namespace essentialMix.Drawing.Helpers
+namespace essentialMix.Drawing.Helpers;
+
+public static class FontHelper
 {
-	public static class FontHelper
+	private static readonly ISet<string> __pannedMonospaceFontNames = new HashSet<string>(StringFunctionalComparer.StartsWithOrdinalIgnoreCase)
 	{
-		private static readonly ISet<string> __pannedMonospaceFontNames = new HashSet<string>(StringFunctionalComparer.StartsWithOrdinalIgnoreCase)
+		"ESRI",
+		"Oc_"
+	};
+
+	private static IReadOnlySet<string> __cachedMonospacedFontNames;
+
+	public static bool IsMonospaced([NotNull] Font value, [NotNull] Graphics g) { return g.MeasureString("i", value).Width.IsEqual(g.MeasureString("W", value).Width); }
+
+	public static bool IsSymbolFont([NotNull] Font font)
+	{
+		const byte SYMBOL_FONT = 2;
+
+		LOGFONT logicalFont = new LOGFONT();
+		font.ToLogFont(logicalFont);
+		return logicalFont.lfCharSet == SYMBOL_FONT;
+	}
+
+	[NotNull]
+	public static IReadOnlySet<string> GetMonospacedFontNames()
+	{
+		if (__cachedMonospacedFontNames == null)
 		{
-			"ESRI",
-			"Oc_"
-		};
-
-		private static IReadOnlySet<string> __cachedMonospacedFontNames;
-
-		public static bool IsMonospaced([NotNull] Font value, [NotNull] Graphics g) { return g.MeasureString("i", value).Width.IsEqual(g.MeasureString("W", value).Width); }
-
-		public static bool IsSymbolFont([NotNull] Font font)
-		{
-			const byte SYMBOL_FONT = 2;
-
-			LOGFONT logicalFont = new LOGFONT();
-			font.ToLogFont(logicalFont);
-			return logicalFont.lfCharSet == SYMBOL_FONT;
-		}
-
-		[NotNull]
-		public static IReadOnlySet<string> GetMonospacedFontNames()
-		{
-			if (__cachedMonospacedFontNames == null)
+			FontStyle[] requiredStyles = 
 			{
-				FontStyle[] requiredStyles = 
-				{
-					FontStyle.Regular,
-					FontStyle.Bold,
-					FontStyle.Italic
-				};
-				ISet<string> cachedMonospacedFontNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-				__cachedMonospacedFontNames = new ReadOnlySet<string>(cachedMonospacedFontNames);
+				FontStyle.Regular,
+				FontStyle.Bold,
+				FontStyle.Italic
+			};
+			ISet<string> cachedMonospacedFontNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			__cachedMonospacedFontNames = new ReadOnlySet<string>(cachedMonospacedFontNames);
 
-				using (InstalledFontCollection ifc = new InstalledFontCollection())
+			using (InstalledFontCollection ifc = new InstalledFontCollection())
+			{
+				using (Bitmap bmp = new Bitmap(1, 1))
 				{
-					using (Bitmap bmp = new Bitmap(1, 1))
+					using (Graphics g = Graphics.FromImage(bmp))
 					{
-						using (Graphics g = Graphics.FromImage(bmp))
+						foreach (System.Drawing.FontFamily fontFamily in ifc.Families)
 						{
-							foreach (System.Drawing.FontFamily fontFamily in ifc.Families)
-							{
-								if (__pannedMonospaceFontNames.Contains(fontFamily.Name)) continue;
-								if (!fontFamily.HasStyles(requiredStyles)) continue;
+							if (__pannedMonospaceFontNames.Contains(fontFamily.Name)) continue;
+							if (!fontFamily.HasStyles(requiredStyles)) continue;
 
-								using (Font font = new Font(fontFamily, 10))
-								{
-									if (!IsMonospaced(font, g) || IsSymbolFont(font)) continue;
-									cachedMonospacedFontNames.Add(fontFamily.Name);
-								}
+							using (Font font = new Font(fontFamily, 10))
+							{
+								if (!IsMonospaced(font, g) || IsSymbolFont(font)) continue;
+								cachedMonospacedFontNames.Add(fontFamily.Name);
 							}
 						}
 					}
 				}
 			}
-			
-			return __cachedMonospacedFontNames;
 		}
-
-		public static SizeF MeasureString(string value, CONSOLE_FONT_INFO_EX fontInfoEx)
-		{
-			if (string.IsNullOrEmpty(value)) return SizeF.Empty;
-			if (fontInfoEx == null) return SizeF.Empty;
 			
-			using (Font font = new Font(fontInfoEx.lpszFaceName, fontInfoEx.nWidth, fontInfoEx.nWeight.IsBold() ? FontStyle.Bold : FontStyle.Regular))
+		return __cachedMonospacedFontNames;
+	}
+
+	public static SizeF MeasureString(string value, CONSOLE_FONT_INFO_EX fontInfoEx)
+	{
+		if (string.IsNullOrEmpty(value)) return SizeF.Empty;
+		if (fontInfoEx == null) return SizeF.Empty;
+			
+		using (Font font = new Font(fontInfoEx.lpszFaceName, fontInfoEx.nWidth, fontInfoEx.nWeight.IsBold() ? FontStyle.Bold : FontStyle.Regular))
+		{
+			using (Bitmap bmp = new Bitmap(1, 1, PixelFormat.Format32bppArgb))
 			{
-				using (Bitmap bmp = new Bitmap(1, 1, PixelFormat.Format32bppArgb))
+				using (Graphics g = Graphics.FromImage(bmp))
 				{
-					using (Graphics g = Graphics.FromImage(bmp))
-					{
-						return g.MeasureString(value, font);
-					}
+					return g.MeasureString(value, font);
 				}
 			}
 		}

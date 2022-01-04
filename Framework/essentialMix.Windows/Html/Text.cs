@@ -1,13 +1,12 @@
-namespace essentialMix.Windows.Html
-{
-	/// <summary>
-	/// HTML Plain text
-	/// </summary>
-	public class Text : SimplePart
-	{
-		public Text(string value)
-			: base(PartType.Text, value) { }
+namespace essentialMix.Windows.Html;
 
-		public override string ToString() { return $"TEXT: {Value}"; }
-	}
+/// <summary>
+/// HTML Plain text
+/// </summary>
+public class Text : SimplePart
+{
+	public Text(string value)
+		: base(PartType.Text, value) { }
+
+	public override string ToString() { return $"TEXT: {Value}"; }
 }

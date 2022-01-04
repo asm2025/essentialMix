@@ -1,10 +1,9 @@
 using System;
 using System.Net;
 
-namespace essentialMix.IO
+namespace essentialMix.IO;
+
+public interface IIOOnResponseReceived
 {
-	public interface IIOOnResponseReceived
-	{
-		Func<WebResponse, bool> OnResponseReceived { get; set; }
-	}
+	Func<WebResponse, bool> OnResponseReceived { get; set; }
 }

@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class IEnumeratorExtension
 {
-	public static class IEnumeratorExtension
+	public static IEnumerator<T> CastTo<T>([NotNull] this IEnumerator thisValue)
 	{
-		public static IEnumerator<T> CastTo<T>([NotNull] this IEnumerator thisValue)
+		while (thisValue.MoveNext())
 		{
-			while (thisValue.MoveNext())
-			{
-				yield return (T)thisValue.Current;
-			}
+			yield return (T)thisValue.Current;
 		}
 	}
 }

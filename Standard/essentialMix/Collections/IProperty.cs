@@ -1,33 +1,32 @@
 using System;
 using System.ComponentModel;
 
-namespace essentialMix.Collections
+namespace essentialMix.Collections;
+
+public interface IProperty : IHeader, IComparable<IProperty>, IEquatable<IProperty>
 {
-	public interface IProperty : IHeader, IComparable<IProperty>, IEquatable<IProperty>
-	{
-		[Browsable(false)]
-		object Value { get; set; }
+	[Browsable(false)]
+	object Value { get; set; }
 
-		[Browsable(false)]
-		object DefaultValue { get; set; }
+	[Browsable(false)]
+	object DefaultValue { get; set; }
 
-		PropertyScope Scope { get; set; }
+	PropertyScope Scope { get; set; }
 
-		[Browsable(false)]
-		bool IsPrimitive { get; }
+	[Browsable(false)]
+	bool IsPrimitive { get; }
 
-		[Browsable(false)]
-		bool IsReadOnly { get; }
+	[Browsable(false)]
+	bool IsReadOnly { get; }
 
-		void Reset();
-	}
+	void Reset();
+}
 
-	public interface IProperty<T> : IProperty
-	{
-		[Browsable(false)]
-		new T Value { get; set; }
+public interface IProperty<T> : IProperty
+{
+	[Browsable(false)]
+	new T Value { get; set; }
 
-		[Browsable(false)]
-		new T DefaultValue { get; set; }
-	}
+	[Browsable(false)]
+	new T DefaultValue { get; set; }
 }

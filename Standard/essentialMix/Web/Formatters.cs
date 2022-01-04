@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace essentialMix.Web
+namespace essentialMix.Web;
+
+[Flags]
+public enum Formatters
 {
-	[Flags]
-	public enum Formatters
-	{
-		None = 0,
-		Xml = 1,
-		Json = 1 << 1
-	}
+	None = 0,
+	Xml = 1,
+	Json = 1 << 1
 }

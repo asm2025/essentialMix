@@ -1,9 +1,8 @@
-﻿namespace essentialMix.Data
+﻿namespace essentialMix.Data;
+
+public enum RelatedTableTypeEnum
 {
-	public enum RelatedTableTypeEnum
-	{
-		Detail,
-		Lookup,
-		Dynamic
-	}
+	Detail,
+	Lookup,
+	Dynamic
 }

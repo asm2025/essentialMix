@@ -6,110 +6,109 @@ using essentialMix.Patterns.Object;
 using JetBrains.Annotations;
 using Renci.SshNet;
 
-namespace essentialMix.Network
+namespace essentialMix.Network;
+
+public class SecureShellConnection : Disposable
 {
-	public class SecureShellConnection : Disposable
+	private const int PORT_DEF = 22;
+	private const int TIMEOUT_DEF = 30000;
+
+	private SshClient _client;
+
+	public SecureShellConnection([NotNull] string host)
+		: this(host, PORT_DEF, null, null, TIMEOUT_DEF)
 	{
-		private const int PORT_DEF = 22;
-		private const int TIMEOUT_DEF = 30000;
+	}
 
-		private SshClient _client;
+	public SecureShellConnection([NotNull] string host, int port)
+		: this(host, port, null, null, TIMEOUT_DEF)
+	{
+	}
 
-		public SecureShellConnection([NotNull] string host)
-			: this(host, PORT_DEF, null, null, TIMEOUT_DEF)
+	public SecureShellConnection([NotNull] string host, int port, string username, string password)
+		: this(host, port, username, password, TIMEOUT_DEF)
+	{
+	}
+
+	public SecureShellConnection([NotNull] string host, int port, string username, string password, int timeout)
+	{
+		_client = new SshClient(host, port, username, password)
 		{
-		}
-
-		public SecureShellConnection([NotNull] string host, int port)
-			: this(host, port, null, null, TIMEOUT_DEF)
-		{
-		}
-
-		public SecureShellConnection([NotNull] string host, int port, string username, string password)
-			: this(host, port, username, password, TIMEOUT_DEF)
-		{
-		}
-
-		public SecureShellConnection([NotNull] string host, int port, string username, string password, int timeout)
-		{
-			_client = new SshClient(host, port, username, password)
+			ConnectionInfo =
 			{
-				ConnectionInfo =
-				{
-					Timeout = TimeSpan.FromMilliseconds(timeout.NotBelow(0))
-				}
-			};
-		}
-
-		public TimeSpan Ttl
-		{
-			get => _client.KeepAliveInterval;
-			set => _client.KeepAliveInterval = value;
-		}
-
-		public ConnectionInfo ConnectionInfo
-		{
-			get
-			{
-				ThrowIfDisposed();
-				return _client.ConnectionInfo;
+				Timeout = TimeSpan.FromMilliseconds(timeout.NotBelow(0))
 			}
-		}
+		};
+	}
 
-		public bool IsConnected
-		{
-			get
-			{
-				ThrowIfDisposed();
-				return _client.IsConnected;
-			}
-		}
+	public TimeSpan Ttl
+	{
+		get => _client.KeepAliveInterval;
+		set => _client.KeepAliveInterval = value;
+	}
 
-		public virtual void Connect()
+	public ConnectionInfo ConnectionInfo
+	{
+		get
 		{
 			ThrowIfDisposed();
-			if (IsConnected) return;
-			_client.Connect();
+			return _client.ConnectionInfo;
 		}
+	}
 
-		public virtual bool TryConnect()
+	public bool IsConnected
+	{
+		get
 		{
 			ThrowIfDisposed();
-
-			try
-			{
-				Connect();
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
+			return _client.IsConnected;
 		}
+	}
 
-		public virtual void Disconnect()
+	public virtual void Connect()
+	{
+		ThrowIfDisposed();
+		if (IsConnected) return;
+		_client.Connect();
+	}
+
+	public virtual bool TryConnect()
+	{
+		ThrowIfDisposed();
+
+		try
 		{
-			ThrowIfDisposed();
-			if (!IsConnected) return;
-			_client.Disconnect();
+			Connect();
+			return true;
 		}
-
-		public virtual SshCommand Execute([NotNull] string commandLine)
+		catch
 		{
-			ThrowIfDisposed();
-			if (string.IsNullOrWhiteSpace(commandLine)) throw new ArgumentNullException(nameof(commandLine));
-			if (!IsConnected) throw new NotConnectedException();
-			return _client.RunCommand(commandLine);
+			return false;
 		}
+	}
 
-		protected override void Dispose(bool disposing)
+	public virtual void Disconnect()
+	{
+		ThrowIfDisposed();
+		if (!IsConnected) return;
+		_client.Disconnect();
+	}
+
+	public virtual SshCommand Execute([NotNull] string commandLine)
+	{
+		ThrowIfDisposed();
+		if (string.IsNullOrWhiteSpace(commandLine)) throw new ArgumentNullException(nameof(commandLine));
+		if (!IsConnected) throw new NotConnectedException();
+		return _client.RunCommand(commandLine);
+	}
+
+	protected override void Dispose(bool disposing)
+	{
+		if (disposing)
 		{
-			if (disposing)
-			{
-				_client?.Disconnect();
-				ObjectHelper.Dispose(ref _client);
-			}
-			base.Dispose(disposing);
+			_client?.Disconnect();
+			ObjectHelper.Dispose(ref _client);
 		}
+		base.Dispose(disposing);
 	}
 }

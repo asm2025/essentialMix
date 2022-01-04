@@ -6,34 +6,33 @@ using System.Threading.Tasks;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-namespace essentialMix.Web.Handlers
+namespace essentialMix.Web.Handlers;
+
+public sealed class RedirectHandler : HttpMessageHandler
 {
-	public sealed class RedirectHandler : HttpMessageHandler
+	private readonly Uri _redirectPath;
+
+	/// <inheritdoc />
+	public RedirectHandler([NotNull] string redirectPath)
+		: this(UriHelper.ToUri(redirectPath) ?? new Uri("/"))
 	{
-		private readonly Uri _redirectPath;
+	}
 
-		/// <inheritdoc />
-		public RedirectHandler([NotNull] string redirectPath)
-			: this(UriHelper.ToUri(redirectPath) ?? new Uri("/"))
-		{
-		}
+	/// <inheritdoc />
+	public RedirectHandler([NotNull] Uri redirectPath) 
+	{
+		_redirectPath = redirectPath;
+	}
 
-		/// <inheritdoc />
-		public RedirectHandler([NotNull] Uri redirectPath) 
-		{
-			_redirectPath = redirectPath;
-		}
-
-		/// <inheritdoc />
-		[NotNull]
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-		{
-			Uri redirectUri = _redirectPath.IsAbsoluteUri
-								? _redirectPath
-								: UriHelper.Combine(UriHelper.GetHostUrl(request.RequestUri), _redirectPath);
-			HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.Moved);
-			response.Headers.Location = redirectUri;
-			return Task.FromResult(response);
-		}
+	/// <inheritdoc />
+	[NotNull]
+	protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+	{
+		Uri redirectUri = _redirectPath.IsAbsoluteUri
+							? _redirectPath
+							: UriHelper.Combine(UriHelper.GetHostUrl(request.RequestUri), _redirectPath);
+		HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.Moved);
+		response.Headers.Location = redirectUri;
+		return Task.FromResult(response);
 	}
 }

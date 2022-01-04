@@ -25,45 +25,44 @@ using System;
 using System.Globalization;
 
 // ReSharper disable once CheckNamespace
-namespace Other.TylerBrinkley.Enumeration.Numeric
+namespace Other.TylerBrinkley.Enumeration.Numeric;
+
+internal interface INumericProvider<TInt>
+	where TInt : struct, IComparable, IComparable<TInt>, IEquatable<TInt>, IConvertible
 {
-	internal interface INumericProvider<TInt>
-		where TInt : struct, IComparable, IComparable<TInt>, IEquatable<TInt>, IConvertible
-	{
-		bool LessThan(TInt left, TInt right);
+	bool LessThan(TInt left, TInt right);
 
-		TInt And(TInt left, TInt right);
+	TInt And(TInt left, TInt right);
 
-		TInt Or(TInt left, TInt right);
+	TInt Or(TInt left, TInt right);
 
-		TInt Xor(TInt left, TInt right);
+	TInt Xor(TInt left, TInt right);
 
-		TInt Not(TInt value);
+	TInt Not(TInt value);
 
-		TInt LeftShift(TInt value, int amount);
+	TInt LeftShift(TInt value, int amount);
 
-		TInt Subtract(TInt left, TInt right);
+	TInt Subtract(TInt left, TInt right);
 
-		TInt Create(long value);
+	TInt Create(long value);
 
-		TInt Create(ulong value);
+	TInt Create(ulong value);
 
-		bool IsInValueRange(long value);
+	bool IsInValueRange(long value);
 
-		bool IsInValueRange(ulong value);
+	bool IsInValueRange(ulong value);
 
-		bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out TInt result);
+	bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out TInt result);
 
-		bool TryParseNative(string s, out TInt result);
+	bool TryParseNative(string s, out TInt result);
 
-		string ToHexadecimalString(TInt value);
+	string ToHexadecimalString(TInt value);
 
-		string ToDecimalString(TInt value);
+	string ToDecimalString(TInt value);
 
-		int BitCount(TInt value);
+	int BitCount(TInt value);
 
-		TInt Zero { get; }
+	TInt Zero { get; }
 
-		TInt One { get; }
-	}
+	TInt One { get; }
 }

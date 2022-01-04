@@ -1,8 +1,7 @@
-﻿namespace essentialMix.Collections
+﻿namespace essentialMix.Collections;
+
+public enum DequeuePriority
 {
-	public enum DequeuePriority
-	{
-		FIFO,
-		LIFO
-	}
+	FIFO,
+	LIFO
 }

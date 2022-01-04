@@ -4,84 +4,83 @@ using System.Reflection;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
-namespace essentialMix.Collections
+namespace essentialMix.Collections;
+
+public abstract class TypePropertyDescriptorBase : PropertyDescriptor
 {
-	public abstract class TypePropertyDescriptorBase : PropertyDescriptor
+	protected const string TARGET_PROPERTY_NAME = "DisplayName";
+
+	private Type _componentType;
+	private string _name;
+	private string _displayName;
+	private string _description;
+
+	protected TypePropertyDescriptorBase([NotNull] string name, Attribute[] attrs) 
+		: base(name, attrs)
 	{
-		protected const string TARGET_PROPERTY_NAME = "DisplayName";
+	}
 
-		private Type _componentType;
-		private string _name;
-		private string _displayName;
-		private string _description;
+	protected TypePropertyDescriptorBase([NotNull] MemberDescriptor descriptor) 
+		: base(descriptor)
+	{
+	}
 
-		protected TypePropertyDescriptorBase([NotNull] string name, Attribute[] attrs) 
-			: base(name, attrs)
-		{
-		}
+	protected TypePropertyDescriptorBase([NotNull] MemberDescriptor descriptor, Attribute[] attrs) 
+		: base(descriptor, attrs)
+	{
+	}
 
-		protected TypePropertyDescriptorBase([NotNull] MemberDescriptor descriptor) 
-			: base(descriptor)
-		{
-		}
+	public override AttributeCollection Attributes { get; } = new AttributeCollection();
+	public override string Name => _name ??= GetName();
 
-		protected TypePropertyDescriptorBase([NotNull] MemberDescriptor descriptor, Attribute[] attrs) 
-			: base(descriptor, attrs)
-		{
-		}
+	public override string DisplayName => _displayName ??= GetDisplayName();
 
-		public override AttributeCollection Attributes { get; } = new AttributeCollection();
-		public override string Name => _name ??= GetName();
+	[NotNull]
+	public override string Description => _description ??= GetDescription();
 
-		public override string DisplayName => _displayName ??= GetDisplayName();
+	public override Type ComponentType => _componentType ??= GetComponentType();
 
-		[NotNull]
-		public override string Description => _description ??= GetDescription();
+	public override Type PropertyType => GetTargetValue()?.GetType();
 
-		public override Type ComponentType => _componentType ??= GetComponentType();
+	public override object GetValue(object component) { return GetTargetValue(); }
 
-		public override Type PropertyType => GetTargetValue()?.GetType();
+	public override bool CanResetValue(object component) { return !IsReadOnly; }
 
-		public override object GetValue(object component) { return GetTargetValue(); }
+	public override void ResetValue(object component)
+	{
+		if (!CanResetValue(component)) return;
+		SetTargetValue(PropertyType.Default());
+	}
 
-		public override bool CanResetValue(object component) { return !IsReadOnly; }
+	public override void SetValue(object component, object value)
+	{
+		SetTargetValue(PropertyType.Default());
+	}
 
-		public override void ResetValue(object component)
-		{
-			if (!CanResetValue(component)) return;
-			SetTargetValue(PropertyType.Default());
-		}
+	public override bool ShouldSerializeValue(object component) { return PropertyType.IsSerializable; }
 
-		public override void SetValue(object component, object value)
-		{
-			SetTargetValue(PropertyType.Default());
-		}
+	protected abstract string GetName();
+	protected abstract Type GetComponentType();
+	protected abstract object GetTargetValue();
+	protected abstract void SetTargetValue(object value);
 
-		public override bool ShouldSerializeValue(object component) { return PropertyType.IsSerializable; }
+	protected virtual string GetDisplayName()
+	{
+		object target = GetTargetValue();
+		if (target == null) return Name;
 
-		protected abstract string GetName();
-		protected abstract Type GetComponentType();
-		protected abstract object GetTargetValue();
-		protected abstract void SetTargetValue(object value);
+		if (target is ICustomAttributeProvider provider) return provider.GetDisplayName(Name);
 
-		protected virtual string GetDisplayName()
-		{
-			object target = GetTargetValue();
-			if (target == null) return Name;
+		return target.GetPropertyValue(TARGET_PROPERTY_NAME, out string displayName, Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE, typeof(string), Name) ? displayName : Name;
+	}
 
-			if (target is ICustomAttributeProvider provider) return provider.GetDisplayName(Name);
+	[NotNull]
+	protected virtual string GetDescription()
+	{
+		object target = GetTargetValue();
+		if (target == null) return string.Empty;
 
-			return target.GetPropertyValue(TARGET_PROPERTY_NAME, out string displayName, Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE, typeof(string), Name) ? displayName : Name;
-		}
-
-		[NotNull]
-		protected virtual string GetDescription()
-		{
-			object target = GetTargetValue();
-			if (target == null) return string.Empty;
-
-			ICustomAttributeProvider provider = target as ICustomAttributeProvider;
-			return provider?.GetDescription(string.Empty) ?? string.Empty;
-		}
+		ICustomAttributeProvider provider = target as ICustomAttributeProvider;
+		return provider?.GetDescription(string.Empty) ?? string.Empty;
 	}
 }

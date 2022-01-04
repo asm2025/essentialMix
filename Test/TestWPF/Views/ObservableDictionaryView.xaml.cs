@@ -1,15 +1,14 @@
 ﻿using System.Windows.Controls;
 
-namespace TestWPF.Views
+namespace TestWPF.Views;
+
+/// <summary>
+/// Interaction logic for ObservableDictionaryView.xaml
+/// </summary>
+public partial class ObservableDictionaryView : Page
 {
-	/// <summary>
-	/// Interaction logic for ObservableDictionaryView.xaml
-	/// </summary>
-	public partial class ObservableDictionaryView : Page
+	public ObservableDictionaryView()
 	{
-		public ObservableDictionaryView()
-		{
-			InitializeComponent();
-		}
+		InitializeComponent();
 	}
 }

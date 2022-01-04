@@ -1,7 +1,6 @@
-﻿namespace essentialMix.Collections
+﻿namespace essentialMix.Collections;
+
+public interface INode<T>
 {
-	public interface INode<T>
-	{
-		T Value { get; set; }
-	}
+	T Value { get; set; }
 }

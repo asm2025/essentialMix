@@ -5,16 +5,15 @@ using System.Runtime.CompilerServices;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
-namespace essentialMix.Web.Mvc.Helpers
+namespace essentialMix.Web.Mvc.Helpers;
+
+public static class ActionHelper
 {
-	public static class ActionHelper
+	[NotNull]
+	public static IEnumerable<MethodInfo> GetAllActions()
 	{
-		[NotNull]
-		public static IEnumerable<MethodInfo> GetAllActions()
-		{
-			return IControllerHelper.GetAllControllers()
-			                       .SelectMany(e => e.GetMethods(Constants.BF_PUBLIC_INSTANCE | BindingFlags.DeclaredOnly))
-									.Where(e => !e.HasAttribute<CompilerGeneratedAttribute>());
-		}
+		return IControllerHelper.GetAllControllers()
+								.SelectMany(e => e.GetMethods(Constants.BF_PUBLIC_INSTANCE | BindingFlags.DeclaredOnly))
+								.Where(e => !e.HasAttribute<CompilerGeneratedAttribute>());
 	}
 }

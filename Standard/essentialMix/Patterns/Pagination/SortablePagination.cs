@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using essentialMix.Patterns.Sorting;
 
-namespace essentialMix.Patterns.Pagination
+namespace essentialMix.Patterns.Pagination;
+
+[Serializable]
+public class SortablePagination : Pagination, ISortable
 {
-	[Serializable]
-	public class SortablePagination : Pagination, ISortable
-	{
-		/// <inheritdoc />
-		public IList<SortField> OrderBy { get; set; }
-	}
+	/// <inheritdoc />
+	public IList<SortField> OrderBy { get; set; }
 }

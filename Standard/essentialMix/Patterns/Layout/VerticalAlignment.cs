@@ -1,9 +1,8 @@
-namespace essentialMix.Patterns.Layout
+namespace essentialMix.Patterns.Layout;
+
+public enum VerticalAlignment
 {
-	public enum VerticalAlignment
-	{
-		Top,
-		Center,
-		Bottom
-	}
+	Top,
+	Center,
+	Bottom
 }

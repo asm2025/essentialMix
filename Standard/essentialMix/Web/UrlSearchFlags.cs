@@ -1,14 +1,13 @@
 using System;
 
-namespace essentialMix.Web
+namespace essentialMix.Web;
+
+[Flags]
+public enum UrlSearchFlags
 {
-	[Flags]
-	public enum UrlSearchFlags
-	{
-		None = 0,
-		Title = 1,
-		Buffer = 1 << 1,
-		IgnoreCase = 1 << 2,
-		TitleAndBuffer = Title | Buffer
-	}
+	None = 0,
+	Title = 1,
+	Buffer = 1 << 1,
+	IgnoreCase = 1 << 2,
+	TitleAndBuffer = Title | Buffer
 }

@@ -1,18 +1,17 @@
-﻿namespace essentialMix.Data.Patterns.Table
+﻿namespace essentialMix.Data.Patterns.Table;
+
+public enum TableColumnFormatting
 {
-	public enum TableColumnFormatting
-	{
-		General,
-		Text,
-		Number,
-		Integer,
-		Float,
-		Currency,
-		Percent,
-		DateTime,
-		Date,
-		Time,
-		Raw,
-		Custom
-	}
+	General,
+	Text,
+	Number,
+	Integer,
+	Float,
+	Currency,
+	Percent,
+	DateTime,
+	Date,
+	Time,
+	Raw,
+	Custom
 }

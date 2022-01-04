@@ -10,48 +10,47 @@ using Microsoft.Extensions.Logging;
 using essentialMix.Web;
 
 // ReSharper disable once CheckNamespace
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class IApplicationBuilderExtension
 {
-	public static class IApplicationBuilderExtension
+	public static IApplicationBuilder UseRedirectWithStatusCode([NotNull] this IApplicationBuilder thisValue, string errorHandlerPathTemplate = null)
 	{
-		public static IApplicationBuilder UseRedirectWithStatusCode([NotNull] this IApplicationBuilder thisValue, string errorHandlerPathTemplate = null)
-		{
-			errorHandlerPathTemplate = errorHandlerPathTemplate?.Trim(Path.AltDirectorySeparatorChar, ' ').ToNullIfEmpty() ?? "/error/{0}";
-			return thisValue.UseStatusCodePagesWithReExecute(errorHandlerPathTemplate);
-		}
+		errorHandlerPathTemplate = errorHandlerPathTemplate?.Trim(Path.AltDirectorySeparatorChar, ' ').ToNullIfEmpty() ?? "/error/{0}";
+		return thisValue.UseStatusCodePagesWithReExecute(errorHandlerPathTemplate);
+	}
 
-		[NotNull]
-		public static IApplicationBuilder UseDefaultExceptionDelegate([NotNull] this IApplicationBuilder thisValue, ILogger logger = null)
-		{
-			return UseDefaultExceptionDelegate(thisValue, null, logger);
-		}
+	[NotNull]
+	public static IApplicationBuilder UseDefaultExceptionDelegate([NotNull] this IApplicationBuilder thisValue, ILogger logger = null)
+	{
+		return UseDefaultExceptionDelegate(thisValue, null, logger);
+	}
 
-		[NotNull]
-		public static IApplicationBuilder UseDefaultExceptionDelegate([NotNull] this IApplicationBuilder thisValue, Func<HttpContext, Exception, ILogger, Task> onError, ILogger logger = null)
+	[NotNull]
+	public static IApplicationBuilder UseDefaultExceptionDelegate([NotNull] this IApplicationBuilder thisValue, Func<HttpContext, Exception, ILogger, Task> onError, ILogger logger = null)
+	{
+		onError ??= async (context, exception, log) =>
 		{
-			onError ??= async (context, exception, log) =>
+			log?.LogError(exception, exception.Message);
+			context.Response.ContentType = "text/html";
+			await context.Response.WriteAsync(new ResponseStatus
+												{
+													StatusCode = (HttpStatusCode)context.Response.StatusCode,
+													Exception = exception
+												}.ToString()
+												.Replace(Environment.NewLine, $"{Environment.NewLine}<br />"));
+		};
+
+		thisValue.UseExceptionHandler(app =>
+		{
+			app.Run(async context =>
 			{
-				log?.LogError(exception, exception.Message);
-				context.Response.ContentType = "text/html";
-				await context.Response.WriteAsync(new ResponseStatus
-													{
-														StatusCode = (HttpStatusCode)context.Response.StatusCode,
-														Exception = exception
-													}.ToString()
-													.Replace(Environment.NewLine, $"{Environment.NewLine}<br />"));
-			};
-
-			thisValue.UseExceptionHandler(app =>
-			{
-				app.Run(async context =>
-				{
-					IExceptionHandlerFeature contextFeature = context.Features.Get<IExceptionHandlerFeature>();
-					if (contextFeature == null) return;
-					await onError(context, contextFeature.Error, logger);
-				});
+				IExceptionHandlerFeature contextFeature = context.Features.Get<IExceptionHandlerFeature>();
+				if (contextFeature == null) return;
+				await onError(context, contextFeature.Error, logger);
 			});
+		});
 
-			return thisValue;
-		}
+		return thisValue;
 	}
 }

@@ -24,25 +24,24 @@
 using System;
 
 // ReSharper disable once CheckNamespace
-namespace Other.TylerBrinkley.Enumeration
+namespace Other.TylerBrinkley.Enumeration;
+
+/// <summary>
+/// Specifies what enum members to include.
+/// </summary>
+[Flags]
+public enum EnumMemberSelection
 {
 	/// <summary>
-	/// Specifies what enum members to include.
+	/// Include all enum members.
 	/// </summary>
-	[Flags]
-    public enum EnumMemberSelection
-    {
-        /// <summary>
-        /// Include all enum members.
-        /// </summary>
-        All = 0,
-        /// <summary>
-        /// Include only distinct valued enum members.
-        /// </summary>
-        Distinct = 1,
-        /// <summary>
-        /// Include each flag enum member.
-        /// </summary>
-        Flags = 1 << 1
-    }
+	All = 0,
+	/// <summary>
+	/// Include only distinct valued enum members.
+	/// </summary>
+	Distinct = 1,
+	/// <summary>
+	/// Include each flag enum member.
+	/// </summary>
+	Flags = 1 << 1
 }

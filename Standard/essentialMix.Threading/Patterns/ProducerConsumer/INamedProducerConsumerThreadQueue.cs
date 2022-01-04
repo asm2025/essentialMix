@@ -1,8 +1,7 @@
-﻿namespace essentialMix.Threading.Patterns.ProducerConsumer
+﻿namespace essentialMix.Threading.Patterns.ProducerConsumer;
+
+public interface INamedProducerConsumerThreadQueue<in T> : IProducerConsumerThreadQueue<T>
 {
-	public interface INamedProducerConsumerThreadQueue<in T> : IProducerConsumerThreadQueue<T>
-	{
-		string Name { get; }
-		bool IsOwner { get; }
-	}
+	string Name { get; }
+	bool IsOwner { get; }
 }

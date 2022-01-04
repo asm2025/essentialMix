@@ -4,29 +4,28 @@ using System.Runtime;
 using Other.JonSkeet.MiscUtil.Collections;
 using JetBrains.Annotations;
 
-namespace essentialMix.Comparers
+namespace essentialMix.Comparers;
+
+// https://github.com/StevenThuriot/FunctorComparer
+public sealed class FunctorComparer<T> : GenericComparer<T>
 {
-	// https://github.com/StevenThuriot/FunctorComparer
-	public sealed class FunctorComparer<T> : GenericComparer<T>
+	public new static FunctorComparer<T> Default { get; } = new FunctorComparer<T>((x, y) => Comparer<T>.Default.Compare(x, y));
+
+	[TargetedPatchingOptOut("Performance critical to in-line this type of method across NGen image boundaries")]
+	public FunctorComparer([NotNull] Comparison<T> comparison)
+		: this(ComparisonComparer.FromComparison(comparison))
 	{
-		public new static FunctorComparer<T> Default { get; } = new FunctorComparer<T>((x, y) => Comparer<T>.Default.Compare(x, y));
+	}
 
-		[TargetedPatchingOptOut("Performance critical to in-line this type of method across NGen image boundaries")]
-		public FunctorComparer([NotNull] Comparison<T> comparison)
-			: this(ComparisonComparer.FromComparison(comparison))
-		{
-		}
+	/// <inheritdoc />
+	public FunctorComparer(IComparer<T> comparer)
+		: base(comparer)
+	{
+	}
 
-		/// <inheritdoc />
-		public FunctorComparer(IComparer<T> comparer)
-			: base(comparer)
-		{
-		}
-
-		/// <inheritdoc />
-		public FunctorComparer(IComparer<T> comparer, IEqualityComparer<T> equalityComparer)
-			: base(comparer, equalityComparer)
-		{
-		}
+	/// <inheritdoc />
+	public FunctorComparer(IComparer<T> comparer, IEqualityComparer<T> equalityComparer)
+		: base(comparer, equalityComparer)
+	{
 	}
 }

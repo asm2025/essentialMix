@@ -1,7 +1,6 @@
-namespace essentialMix.Network
+namespace essentialMix.Network;
+
+public enum TelnetOptions
 {
-	public enum TelnetOptions
-	{
-		Sga = 3
-	}
+	Sga = 3
 }

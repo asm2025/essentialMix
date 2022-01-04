@@ -1,15 +1,14 @@
 ﻿using System.Windows.Controls;
 
-namespace TestWPF.Views
+namespace TestWPF.Views;
+
+/// <summary>
+/// Interaction logic for ObservableHashSetView.xaml
+/// </summary>
+public partial class ObservableHashSetView : Page
 {
-	/// <summary>
-	/// Interaction logic for ObservableHashSetView.xaml
-	/// </summary>
-	public partial class ObservableHashSetView : Page
+	public ObservableHashSetView()
 	{
-		public ObservableHashSetView()
-		{
-			InitializeComponent();
-		}
+		InitializeComponent();
 	}
 }

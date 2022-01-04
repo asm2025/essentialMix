@@ -2,15 +2,14 @@
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 // ReSharper disable once CheckNamespace
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class SwaggerUIOptionsExtension
 {
-	public static class SwaggerUIOptionsExtension
+	[NotNull]
+	public static SwaggerUIOptions AsStartPage([NotNull] this SwaggerUIOptions thisValue)
 	{
-		[NotNull]
-		public static SwaggerUIOptions AsStartPage([NotNull] this SwaggerUIOptions thisValue)
-		{
-			thisValue.RoutePrefix = string.Empty;
-			return thisValue;
-		}
+		thisValue.RoutePrefix = string.Empty;
+		return thisValue;
 	}
 }

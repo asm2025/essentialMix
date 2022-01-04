@@ -1,36 +1,35 @@
 using System.Runtime.InteropServices;
 
-namespace essentialMix.Numeric
+namespace essentialMix.Numeric;
+
+[StructLayout(LayoutKind.Explicit)]
+public struct UnionUnsignedLong
 {
-	[StructLayout(LayoutKind.Explicit)]
-	public struct UnionUnsignedLong
+	[FieldOffset(0)]
+	public ulong Value;
+
+	[FieldOffset(0)]
+	public uint Low;
+
+	[FieldOffset(8)]
+	public uint High;
+
+	public static explicit operator UnionUnsignedLong(ulong value)
 	{
-		[FieldOffset(0)]
-		public ulong Value;
-
-		[FieldOffset(0)]
-		public uint Low;
-
-		[FieldOffset(8)]
-		public uint High;
-
-		public static explicit operator UnionUnsignedLong(ulong value)
+		return new UnionUnsignedLong
 		{
-			return new UnionUnsignedLong
-					{
-						Value = value
-					};
-		}
+			Value = value
+		};
+	}
 
-		public static implicit operator ulong(UnionUnsignedLong value) { return value.Value; }
+	public static implicit operator ulong(UnionUnsignedLong value) { return value.Value; }
 
-		public static UnionUnsignedLong FromHiLo(uint low, uint high)
+	public static UnionUnsignedLong FromHiLo(uint low, uint high)
+	{
+		return new UnionUnsignedLong
 		{
-			return new UnionUnsignedLong
-			{
-				Low = low,
-				High = high
-			};
-		}
+			Low = low,
+			High = high
+		};
 	}
 }

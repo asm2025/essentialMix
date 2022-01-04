@@ -4,35 +4,34 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 
-namespace essentialMix.Collections
-{
-	//[Serializable]
-	//[DebuggerDisplay("{Degree}, Count = {Count}")]
-	//[StructLayout(LayoutKind.Sequential)]
-	//public abstract class BTreeBlock<TBlock, TEntry, TKey, TValue>
-	//	where TBlock : BTreeBlock<TBlock, TEntry, TKey, TValue>
-	//{
-	//	protected BTreeBlock(int degree)
-	//		: this(degree, default(T))
-	//	{
-	//	}
+namespace essentialMix.Collections;
 
-	//	protected BTreeBlock(int degree, T value)
-	//	{
-	//		Degree = degree;
-	//		Value = value;
-	//	}
+//[Serializable]
+//[DebuggerDisplay("{Degree}, Count = {Count}")]
+//[StructLayout(LayoutKind.Sequential)]
+//public abstract class BTreeBlock<TBlock, TEntry, TKey, TValue>
+//	where TBlock : BTreeBlock<TBlock, TEntry, TKey, TValue>
+//{
+//	protected BTreeBlock(int degree)
+//		: this(degree, default(T))
+//	{
+//	}
 
-	//	public T Value { get; set; }
+//	protected BTreeBlock(int degree, T value)
+//	{
+//		Degree = degree;
+//		Value = value;
+//	}
 
-	//	public int Degree { get; }
+//	public T Value { get; set; }
+
+//	public int Degree { get; }
 	
-	//	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	//	public void Swap([NotNull] TNode other)
-	//	{
-	//		(other.Value, Value) = (Value, other.Value);
-	//	}
+//	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+//	public void Swap([NotNull] TNode other)
+//	{
+//		(other.Value, Value) = (Value, other.Value);
+//	}
 
-	//	public static implicit operator TValue([NotNull] BinaryNode<TNode, TKey, TValue> node) { return node.Value; }
-	//}
-}
+//	public static implicit operator TValue([NotNull] BinaryNode<TNode, TKey, TValue> node) { return node.Value; }
+//}

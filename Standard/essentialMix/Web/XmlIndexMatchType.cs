@@ -1,12 +1,11 @@
 using System;
 
-namespace essentialMix.Web
+namespace essentialMix.Web;
+
+[Flags]
+public enum XmlIndexMatchType : short
 {
-	[Flags]
-	public enum XmlIndexMatchType : short
-	{
-		None = 0,
-		Type = 1,
-		Name = 1 << 1
-	}
+	None = 0,
+	Type = 1,
+	Name = 1 << 1
 }

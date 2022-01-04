@@ -3,22 +3,21 @@ using System.Collections.Generic;
 using System.Data;
 using JetBrains.Annotations;
 
-namespace essentialMix.Data.Patterns.Table
+namespace essentialMix.Data.Patterns.Table;
+
+public interface ITableResultBase
 {
-	public interface ITableResultBase
-	{
-		string Name { get; set; }
+	string Name { get; set; }
 
-		[NotNull]
-		TableColumns Columns { get; }
+	[NotNull]
+	TableColumns Columns { get; }
 
-		bool MapSchemaTable(DataTable schema, Func<string, bool> filter = null, Func<string, ITableColumnSettings> onGetSettings = null);
-	}
+	bool MapSchemaTable(DataTable schema, Func<string, bool> filter = null, Func<string, ITableColumnSettings> onGetSettings = null);
+}
 
-	public interface ITableResultBase<T> : ITableResultBase
-	{
-		[NotNull]
-		ICollection<T> Items { get; }
-		bool MapSchemaTable<TInstance>(TInstance instance, Func<string, bool> filter = null, Func<string, ITableColumnSettings> onGetSettings = null);
-	}
+public interface ITableResultBase<T> : ITableResultBase
+{
+	[NotNull]
+	ICollection<T> Items { get; }
+	bool MapSchemaTable<TInstance>(TInstance instance, Func<string, bool> filter = null, Func<string, ITableColumnSettings> onGetSettings = null);
 }

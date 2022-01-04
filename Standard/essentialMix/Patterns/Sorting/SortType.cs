@@ -1,9 +1,8 @@
-﻿namespace essentialMix.Patterns.Sorting
+﻿namespace essentialMix.Patterns.Sorting;
+
+public enum SortType
 {
-	public enum SortType
-	{
-		None,
-		Ascending,
-		Descending
-	}
+	None,
+	Ascending,
+	Descending
 }

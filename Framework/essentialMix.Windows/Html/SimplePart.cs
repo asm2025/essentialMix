@@ -1,13 +1,12 @@
-namespace essentialMix.Windows.Html
-{
-	/// <summary>
-	/// Simple type which has only a type and a value
-	/// </summary>
-	public class SimplePart : Part
-	{
-		public SimplePart(PartType type, string text)
-			: base(type) { Value = text; }
+namespace essentialMix.Windows.Html;
 
-		public string Value { get; set; }
-	}
+/// <summary>
+/// Simple type which has only a type and a value
+/// </summary>
+public class SimplePart : Part
+{
+	public SimplePart(PartType type, string text)
+		: base(type) { Value = text; }
+
+	public string Value { get; set; }
 }

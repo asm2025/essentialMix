@@ -2,10 +2,9 @@ using System;
 using System.Drawing;
 
 // ReSharper disable once CheckNamespace
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class ConsoleColorExtension
 {
-	public static class ConsoleColorExtension
-	{
-		public static Color ToColor(this ConsoleColor thisValue) { return Color.FromName(thisValue.GetName()); }
-	}
+	public static Color ToColor(this ConsoleColor thisValue) { return Color.FromName(thisValue.GetName()); }
 }

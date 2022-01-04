@@ -1,12 +1,11 @@
-﻿namespace essentialMix.Patterns.Imaging
+﻿namespace essentialMix.Patterns.Imaging;
+
+public enum ImageSize
 {
-	public enum ImageSize
-	{
-		Default,
-		Thumbnail,
-		Small,
-		Medium,
-		Large,
-		ExtraLarge
-	}
+	Default,
+	Thumbnail,
+	Small,
+	Medium,
+	Large,
+	ExtraLarge
 }

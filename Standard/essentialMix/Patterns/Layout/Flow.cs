@@ -1,10 +1,9 @@
-namespace essentialMix.Patterns.Layout
+namespace essentialMix.Patterns.Layout;
+
+public enum Flow
 {
-	public enum Flow
-	{
-		LeftToRight,
-		RightToLeft,
-		TopToBottom,
-		BottomToTop
-	}
+	LeftToRight,
+	RightToLeft,
+	TopToBottom,
+	BottomToTop
 }

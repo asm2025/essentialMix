@@ -1,9 +1,8 @@
-﻿namespace essentialMix.Cryptography.Asymmetric.Signature
-{
-	public interface ISignatureAlgorithm : ISignatureAlgorithmBase
-	{
-		byte[] SignHash(byte[] hash);
+﻿namespace essentialMix.Cryptography.Asymmetric.Signature;
 
-		bool VerifyHash(byte[] hash, byte[] signature);
-	}
+public interface ISignatureAlgorithm : ISignatureAlgorithmBase
+{
+	byte[] SignHash(byte[] hash);
+
+	bool VerifyHash(byte[] hash, byte[] signature);
 }

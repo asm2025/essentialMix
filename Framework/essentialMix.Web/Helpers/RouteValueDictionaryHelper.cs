@@ -1,20 +1,19 @@
 ﻿using System.Web.Routing;
 
-namespace essentialMix.Web.Helpers
+namespace essentialMix.Web.Helpers;
+
+public class RouteValueDictionaryHelper
 {
-	public class RouteValueDictionaryHelper
+	public static RouteValueDictionary FromObject(object value)
 	{
-		public static RouteValueDictionary FromObject(object value)
+		switch (value)
 		{
-			switch (value)
-			{
-				case null:
-					return null;
-				case RouteValueDictionary dictionary:
-					return dictionary;
-				default:
-					return new RouteValueDictionary(value);
-			}
+			case null:
+				return null;
+			case RouteValueDictionary dictionary:
+				return dictionary;
+			default:
+				return new RouteValueDictionary(value);
 		}
 	}
 }

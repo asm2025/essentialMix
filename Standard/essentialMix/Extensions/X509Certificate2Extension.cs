@@ -2,26 +2,25 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using JetBrains.Annotations;
 
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class X509Certificate2Extension
 {
-	public static class X509Certificate2Extension
+	[NotNull]
+	public static AsymmetricAlgorithm GetPublicEncryptor([NotNull] this X509Certificate2 thisValue) { return GetPublicEncryptor<AsymmetricAlgorithm>(thisValue); }
+
+	public static AsymmetricAlgorithm GetPrivateDecryptor([NotNull] this X509Certificate2 thisValue) { return GetPrivateDecryptor<AsymmetricAlgorithm>(thisValue); }
+
+	[NotNull]
+	public static T GetPublicEncryptor<T>([NotNull] this X509Certificate2 thisValue)
+		where T : AsymmetricAlgorithm
 	{
-		[NotNull]
-		public static AsymmetricAlgorithm GetPublicEncryptor([NotNull] this X509Certificate2 thisValue) { return GetPublicEncryptor<AsymmetricAlgorithm>(thisValue); }
+		return (T)thisValue.PublicKey.Key;
+	}
 
-		public static AsymmetricAlgorithm GetPrivateDecryptor([NotNull] this X509Certificate2 thisValue) { return GetPrivateDecryptor<AsymmetricAlgorithm>(thisValue); }
-
-		[NotNull]
-		public static T GetPublicEncryptor<T>([NotNull] this X509Certificate2 thisValue)
-			where T : AsymmetricAlgorithm
-		{
-			return (T)thisValue.PublicKey.Key;
-		}
-
-		public static T GetPrivateDecryptor<T>([NotNull] this X509Certificate2 thisValue)
-			where T : AsymmetricAlgorithm
-		{
-			return (T)thisValue.PrivateKey;
-		}
+	public static T GetPrivateDecryptor<T>([NotNull] this X509Certificate2 thisValue)
+		where T : AsymmetricAlgorithm
+	{
+		return (T)thisValue.PrivateKey;
 	}
 }

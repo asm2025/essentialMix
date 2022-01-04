@@ -1,14 +1,13 @@
-namespace essentialMix.Logging
+namespace essentialMix.Logging;
+
+public enum Severity
 {
-	public enum Severity
-	{
-		Trace,
-		Debug,
-		Information,
-		Success,
-		Warning,
-		Error,
-		Critical,
-		None
-	}
+	Trace,
+	Debug,
+	Information,
+	Success,
+	Warning,
+	Error,
+	Critical,
+	None
 }

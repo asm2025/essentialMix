@@ -26,45 +26,44 @@ using System.Globalization;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
-namespace Other.TylerBrinkley.Enumeration.Numeric
+namespace Other.TylerBrinkley.Enumeration.Numeric;
+
+internal class UInt16NumericProvider : INumericProvider<ushort>
 {
-    internal class UInt16NumericProvider : INumericProvider<ushort>
-    {
-        [NotNull]
-        public string ToHexadecimalString(ushort value) { return value.ToString("X4"); }
+	[NotNull]
+	public string ToHexadecimalString(ushort value) { return value.ToString("X4"); }
 
-		public string ToDecimalString(ushort value) { return value.ToString(); }
+	public string ToDecimalString(ushort value) { return value.ToString(); }
 
-		public ushort One => 1;
+	public ushort One => 1;
 
-		public ushort Zero => 0;
+	public ushort Zero => 0;
 
-		public ushort And(ushort left, ushort right) { return (ushort)(left & right); }
+	public ushort And(ushort left, ushort right) { return (ushort)(left & right); }
 
-		public int BitCount(ushort value) { return Number.BitCount(value); }
+	public int BitCount(ushort value) { return Number.BitCount(value); }
 
-		public ushort Create(ulong value) { return (ushort)value; }
+	public ushort Create(ulong value) { return (ushort)value; }
 
-		public ushort Create(long value) { return (ushort)value; }
+	public ushort Create(long value) { return (ushort)value; }
 
-		public bool IsInValueRange(ulong value) { return value <= ushort.MaxValue; }
+	public bool IsInValueRange(ulong value) { return value <= ushort.MaxValue; }
 
-		public bool IsInValueRange(long value) { return value is >= ushort.MinValue and <= ushort.MaxValue; }
+	public bool IsInValueRange(long value) { return value is >= ushort.MinValue and <= ushort.MaxValue; }
 
-		public ushort LeftShift(ushort value, int amount) { return (ushort)(value << amount); }
+	public ushort LeftShift(ushort value, int amount) { return (ushort)(value << amount); }
 
-		public bool LessThan(ushort left, ushort right) { return left < right; }
+	public bool LessThan(ushort left, ushort right) { return left < right; }
 
-		public ushort Not(ushort value) { return (ushort)~value; }
+	public ushort Not(ushort value) { return (ushort)~value; }
 
-		public ushort Or(ushort left, ushort right) { return (ushort)(left | right); }
+	public ushort Or(ushort left, ushort right) { return (ushort)(left | right); }
 
-		public ushort Subtract(ushort left, ushort right) { return (ushort)(left - right); }
+	public ushort Subtract(ushort left, ushort right) { return (ushort)(left - right); }
 
-		public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out ushort result) { return ushort.TryParse(s, style, provider, out result); }
+	public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out ushort result) { return ushort.TryParse(s, style, provider, out result); }
 
-		public bool TryParseNative(string s, out ushort result) { return ushort.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
+	public bool TryParseNative(string s, out ushort result) { return ushort.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
 
-		public ushort Xor(ushort left, ushort right) { return (ushort)(left ^ right); }
-	}
+	public ushort Xor(ushort left, ushort right) { return (ushort)(left ^ right); }
 }

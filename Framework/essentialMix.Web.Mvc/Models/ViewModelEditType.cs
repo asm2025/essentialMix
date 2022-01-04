@@ -1,10 +1,9 @@
-﻿namespace essentialMix.Web.Mvc.Models
+﻿namespace essentialMix.Web.Mvc.Models;
+
+public enum ViewModelEditTypeEnum
 {
-	public enum ViewModelEditTypeEnum
-	{
-		Unknown,
-		Create,
-		Edit,
-		Delete
-	}
+	Unknown,
+	Create,
+	Edit,
+	Delete
 }

@@ -1,11 +1,10 @@
 ﻿using System.Text;
 using JetBrains.Annotations;
 
-namespace essentialMix.Text
+namespace essentialMix.Text;
+
+public interface IEncoding
 {
-	public interface IEncoding
-	{
-		[NotNull]
-		Encoding Encoding { get; set; }
-	}
+	[NotNull]
+	Encoding Encoding { get; set; }
 }

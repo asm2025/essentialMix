@@ -1,8 +1,7 @@
-﻿namespace essentialMix.Patterns.Design
+﻿namespace essentialMix.Patterns.Design;
+
+public interface ICommand
 {
-	public interface ICommand
-	{
-		void Execute();
-		void Undo();
-	}
+	void Execute();
+	void Undo();
 }

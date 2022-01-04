@@ -26,45 +26,44 @@ using System.Globalization;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
-namespace Other.TylerBrinkley.Enumeration.Numeric
+namespace Other.TylerBrinkley.Enumeration.Numeric;
+
+internal class UInt64NumericProvider : INumericProvider<ulong>
 {
-    internal class UInt64NumericProvider : INumericProvider<ulong>
-    {
-        [NotNull]
-        public string ToHexadecimalString(ulong value) { return value.ToString("X16"); }
+	[NotNull]
+	public string ToHexadecimalString(ulong value) { return value.ToString("X16"); }
 
-		public string ToDecimalString(ulong value) { return value.ToString(); }
+	public string ToDecimalString(ulong value) { return value.ToString(); }
 
-		public ulong One => 1UL;
+	public ulong One => 1UL;
 
-		public ulong Zero => 0UL;
+	public ulong Zero => 0UL;
 
-		public ulong And(ulong left, ulong right) { return left & right; }
+	public ulong And(ulong left, ulong right) { return left & right; }
 
-		public int BitCount(ulong value) { return Number.BitCount((long)value); }
+	public int BitCount(ulong value) { return Number.BitCount((long)value); }
 
-		public ulong Create(ulong value) { return value; }
+	public ulong Create(ulong value) { return value; }
 
-		public ulong Create(long value) { return (ulong)value; }
+	public ulong Create(long value) { return (ulong)value; }
 
-		public bool IsInValueRange(ulong value) { return true; }
+	public bool IsInValueRange(ulong value) { return true; }
 
-		public bool IsInValueRange(long value) { return value >= 0L; }
+	public bool IsInValueRange(long value) { return value >= 0L; }
 
-		public ulong LeftShift(ulong value, int amount) { return value << amount; }
+	public ulong LeftShift(ulong value, int amount) { return value << amount; }
 
-		public bool LessThan(ulong left, ulong right) { return left < right; }
+	public bool LessThan(ulong left, ulong right) { return left < right; }
 
-		public ulong Not(ulong value) { return ~value; }
+	public ulong Not(ulong value) { return ~value; }
 
-		public ulong Or(ulong left, ulong right) { return left | right; }
+	public ulong Or(ulong left, ulong right) { return left | right; }
 
-		public ulong Subtract(ulong left, ulong right) { return left - right; }
+	public ulong Subtract(ulong left, ulong right) { return left - right; }
 
-		public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out ulong result) { return ulong.TryParse(s, style, provider, out result); }
+	public bool TryParseNumber(string s, NumberStyles style, IFormatProvider provider, out ulong result) { return ulong.TryParse(s, style, provider, out result); }
 
-		public bool TryParseNative(string s, out ulong result) { return ulong.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
+	public bool TryParseNative(string s, out ulong result) { return ulong.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result); }
 
-		public ulong Xor(ulong left, ulong right) { return left ^ right; }
-	}
+	public ulong Xor(ulong left, ulong right) { return left ^ right; }
 }

@@ -10,67 +10,66 @@ using CsvHelper.Configuration;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc.Formatters;
 
-namespace essentialMix.Core.Web.Formatters.Csv.Mvc.Formatters.Csv
+namespace essentialMix.Core.Web.Formatters.Csv.Mvc.Formatters.Csv;
+
+public class CsvOutputFormatter : TextOutputFormatter
 {
-	public class CsvOutputFormatter : TextOutputFormatter
+	/// <inheritdoc />
+	public CsvOutputFormatter([NotNull] CsvConfiguration configuration) 
 	{
-		/// <inheritdoc />
-		public CsvOutputFormatter([NotNull] CsvConfiguration configuration) 
-		{
-			Configuration = configuration;
+		Configuration = configuration;
 
-			SupportedEncodings.Add(Encoding.UTF8);
-			SupportedEncodings.Add(Encoding.Unicode);
-			if (configuration.Encoding != null && !SupportedEncodings.Contains(configuration.Encoding)) SupportedEncodings.Add(configuration.Encoding);
+		SupportedEncodings.Add(Encoding.UTF8);
+		SupportedEncodings.Add(Encoding.Unicode);
+		if (configuration.Encoding != null && !SupportedEncodings.Contains(configuration.Encoding)) SupportedEncodings.Add(configuration.Encoding);
 
-			SupportedMediaTypes.Add(MediaTypeHeaderValues.ApplicationCsv);
-			SupportedMediaTypes.Add(MediaTypeHeaderValues.TextCsv);
-			SupportedMediaTypes.Add(MediaTypeHeaderValues.ApplicationAnyCsvSyntax);
-		}
+		SupportedMediaTypes.Add(MediaTypeHeaderValues.ApplicationCsv);
+		SupportedMediaTypes.Add(MediaTypeHeaderValues.TextCsv);
+		SupportedMediaTypes.Add(MediaTypeHeaderValues.ApplicationAnyCsvSyntax);
+	}
 
-		[NotNull]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public CsvConfiguration Configuration { get; }
+	[NotNull]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public CsvConfiguration Configuration { get; }
 
-		/// <inheritdoc />
-		[NotNull]
-		public override Task WriteResponseBodyAsync([NotNull] OutputFormatterWriteContext context, [NotNull] Encoding selectedEncoding)
-		{
-			if (context == null) throw new ArgumentNullException(nameof (context));
-			if (selectedEncoding == null) throw new ArgumentNullException(nameof (selectedEncoding));
-			if (context.Object == null) return Task.CompletedTask;
+	/// <inheritdoc />
+	[NotNull]
+	public override Task WriteResponseBodyAsync([NotNull] OutputFormatterWriteContext context, [NotNull] Encoding selectedEncoding)
+	{
+		if (context == null) throw new ArgumentNullException(nameof (context));
+		if (selectedEncoding == null) throw new ArgumentNullException(nameof (selectedEncoding));
+		if (context.Object == null) return Task.CompletedTask;
 			
-			using (TextWriter writer = context.WriterFactory(context.HttpContext.Response.Body, selectedEncoding))
-			{
-				Write(writer, context.Object);
-				return writer.FlushAsync();
-			}
-		}
-
-		public void Write([NotNull] TextWriter writer, object value)
+		using (TextWriter writer = context.WriterFactory(context.HttpContext.Response.Body, selectedEncoding))
 		{
-			if (value == null) return;
-
-			using (CsvWriter csvWriter = new CsvWriter(writer, Configuration))
-			{
-				if (value is IEnumerable enumerable) 
-					csvWriter.WriteRecords(enumerable);
-				else
-					csvWriter.WriteRecord(value);
-			}
+			Write(writer, context.Object);
+			return writer.FlushAsync();
 		}
+	}
 
-		public void Write<T>([NotNull] TextWriter writer, T value)
+	public void Write([NotNull] TextWriter writer, object value)
+	{
+		if (value == null) return;
+
+		using (CsvWriter csvWriter = new CsvWriter(writer, Configuration))
 		{
-			if (value == null) return;
+			if (value is IEnumerable enumerable) 
+				csvWriter.WriteRecords(enumerable);
+			else
+				csvWriter.WriteRecord(value);
+		}
+	}
 
-			using (CsvWriter csvWriter = new CsvWriter(writer, Configuration))
-			{
-				if (value is IEnumerable enumerable) 
-					csvWriter.WriteRecords(enumerable);
-				else
-					csvWriter.WriteRecord(value);
-			}
+	public void Write<T>([NotNull] TextWriter writer, T value)
+	{
+		if (value == null) return;
+
+		using (CsvWriter csvWriter = new CsvWriter(writer, Configuration))
+		{
+			if (value is IEnumerable enumerable) 
+				csvWriter.WriteRecords(enumerable);
+			else
+				csvWriter.WriteRecord(value);
 		}
 	}
 }

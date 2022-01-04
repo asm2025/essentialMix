@@ -3,13 +3,12 @@ using essentialMix.Helpers;
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
-namespace essentialMix.Extensions
+namespace essentialMix.Extensions;
+
+public static class JwtSecurityTokenExtension
 {
-	public static class JwtSecurityTokenExtension
+	public static string Value([NotNull] this JwtSecurityToken thisValue)
 	{
-		public static string Value([NotNull] this JwtSecurityToken thisValue)
-		{
-			return SecurityTokenHelper.Value(thisValue);
-		}
+		return SecurityTokenHelper.Value(thisValue);
 	}
 }

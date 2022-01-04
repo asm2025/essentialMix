@@ -1,10 +1,9 @@
 using System.ComponentModel;
 
-namespace essentialMix.Collections
+namespace essentialMix.Collections;
+
+public interface IProtectable
 {
-	public interface IProtectable
-	{
-		[Browsable(false)]
-		bool IsProtected { get; set; }
-	}
+	[Browsable(false)]
+	bool IsProtected { get; set; }
 }

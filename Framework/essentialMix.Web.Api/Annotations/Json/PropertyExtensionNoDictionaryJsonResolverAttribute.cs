@@ -2,26 +2,25 @@
 using essentialMix.Newtonsoft.Serialization;
 using Newtonsoft.Json.Serialization;
 
-namespace essentialMix.Web.Api.Annotations.Json
+namespace essentialMix.Web.Api.Annotations.Json;
+
+public class PropertyExtensionNoDictionaryJsonResolverAttribute : PropertyExtensionDictionaryJsonResolverAttribute
 {
-	public class PropertyExtensionNoDictionaryJsonResolverAttribute : PropertyExtensionDictionaryJsonResolverAttribute
+	/// <inheritdoc />
+	public PropertyExtensionNoDictionaryJsonResolverAttribute()
+		: this(new PropertyExtensionNoDictionaryNamingStrategy())
 	{
-		/// <inheritdoc />
-		public PropertyExtensionNoDictionaryJsonResolverAttribute()
-			: this(new PropertyExtensionNoDictionaryNamingStrategy())
-		{
-		}
+	}
 
-		/// <inheritdoc />
-		protected PropertyExtensionNoDictionaryJsonResolverAttribute(NamingStrategy nameStrategy)
-			: base(nameStrategy)
-		{
-		}
+	/// <inheritdoc />
+	protected PropertyExtensionNoDictionaryJsonResolverAttribute(NamingStrategy nameStrategy)
+		: base(nameStrategy)
+	{
+	}
 
-		/// <inheritdoc />
-		protected PropertyExtensionNoDictionaryJsonResolverAttribute([NotNull] IContractResolver resolver)
-			: base(resolver)
-		{
-		}
+	/// <inheritdoc />
+	protected PropertyExtensionNoDictionaryJsonResolverAttribute([NotNull] IContractResolver resolver)
+		: base(resolver)
+	{
 	}
 }

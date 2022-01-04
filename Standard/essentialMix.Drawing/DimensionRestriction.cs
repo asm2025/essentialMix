@@ -1,12 +1,11 @@
 using System;
 
-namespace essentialMix.Drawing
+namespace essentialMix.Drawing;
+
+[Flags]
+public enum DimensionRestriction
 {
-	[Flags]
-	public enum DimensionRestriction
-	{
-		None = 0,
-		KeepWidth = 1,
-		KeepHeight = 1 << 1
-	}
+	None = 0,
+	KeepWidth = 1,
+	KeepHeight = 1 << 1
 }

@@ -2,53 +2,52 @@ using System.IO.MemoryMappedFiles;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
 
-namespace essentialMix.Threading
+namespace essentialMix.Threading;
+
+public class SafeMemoryMappedFile : Disposable
 {
-	public class SafeMemoryMappedFile : Disposable
+	private MemoryMappedFile _mmFile;
+	private MemoryMappedViewAccessor _accessor;
+	private unsafe byte* _pointer;
+
+	public unsafe SafeMemoryMappedFile(MemoryMappedFile mmFile)
 	{
-		private MemoryMappedFile _mmFile;
-		private MemoryMappedViewAccessor _accessor;
-		private unsafe byte* _pointer;
+		_mmFile = mmFile;
+		_accessor = _mmFile.CreateViewAccessor();
+		_pointer = (byte*)_accessor.SafeMemoryMappedViewHandle.DangerousGetHandle().ToPointer();
+		Length = (int)_accessor.Capacity;
+	}
 
-		public unsafe SafeMemoryMappedFile(MemoryMappedFile mmFile)
+	/// <inheritdoc />
+	protected override unsafe void Dispose(bool disposing)
+	{
+		if (disposing)
 		{
-			_mmFile = mmFile;
-			_accessor = _mmFile.CreateViewAccessor();
-			_pointer = (byte*)_accessor.SafeMemoryMappedViewHandle.DangerousGetHandle().ToPointer();
-			Length = (int)_accessor.Capacity;
+			ObjectHelper.Dispose(ref _accessor);
+			ObjectHelper.Dispose(ref _mmFile);
+			_pointer = null;
 		}
 
-		/// <inheritdoc />
-		protected override unsafe void Dispose(bool disposing)
-		{
-			if (disposing)
-			{
-				ObjectHelper.Dispose(ref _accessor);
-				ObjectHelper.Dispose(ref _mmFile);
-				_pointer = null;
-			}
+		base.Dispose(disposing);
+	}
 
-			base.Dispose(disposing);
+	public int Length { get; }
+
+	public MemoryMappedViewAccessor Accessor
+	{
+		get
+		{
+			ThrowIfDisposedOrDisposing();
+			return _accessor;
 		}
+	}
 
-		public int Length { get; }
-
-		public MemoryMappedViewAccessor Accessor
+	public unsafe byte* Pointer
+	{
+		get
 		{
-			get
-			{
-				ThrowIfDisposedOrDisposing();
-				return _accessor;
-			}
-		}
-
-		public unsafe byte* Pointer
-		{
-			get
-			{
-				ThrowIfDisposedOrDisposing();
-				return _pointer;
-			}
+			ThrowIfDisposedOrDisposing();
+			return _pointer;
 		}
 	}
 }

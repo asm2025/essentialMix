@@ -1,9 +1,8 @@
-namespace essentialMix.Patterns.Layout
+namespace essentialMix.Patterns.Layout;
+
+public enum HorizontalAlignment
 {
-	public enum HorizontalAlignment
-	{
-		Left,
-		Center,
-		Right
-	}
+	Left,
+	Center,
+	Right
 }

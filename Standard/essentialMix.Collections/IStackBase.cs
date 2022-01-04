@@ -1,11 +1,10 @@
 ﻿using System.Collections;
 
-namespace essentialMix.Collections
+namespace essentialMix.Collections;
+
+public interface IStackBase<T> : ICollection
 {
-	public interface IStackBase<T> : ICollection
-	{
-		void Push(T item);
-		T Pop();
-		bool TryPop(out T item);
-	}
+	void Push(T item);
+	T Pop();
+	bool TryPop(out T item);
 }

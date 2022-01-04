@@ -1,21 +1,20 @@
 using System;
 using System.Collections.Generic;
 
-namespace essentialMix.Collections
+namespace essentialMix.Collections;
+
+public interface IReadOnlyRangeDictionary<TKey, TValue> : IReadOnlyDictionary<(TKey Minimum, TKey Maximum), TValue>
+	where TKey : IComparable
 {
-	public interface IReadOnlyRangeDictionary<TKey, TValue> : IReadOnlyDictionary<(TKey Minimum, TKey Maximum), TValue>
-		where TKey : IComparable
-	{
-		RangeDictionaryComparer<TKey> Comparer { get; }
+	RangeDictionaryComparer<TKey> Comparer { get; }
 
-		TValue this[TKey key] { get; }
+	TValue this[TKey key] { get; }
 
-		bool ContainsKey(TKey key);
+	bool ContainsKey(TKey key);
 
-		(TKey Minimum, TKey Maximum) GetKey(TKey key);
+	(TKey Minimum, TKey Maximum) GetKey(TKey key);
 
-		bool TryGetKey(TKey lookup, out (TKey Minimum, TKey Maximum) key);
+	bool TryGetKey(TKey lookup, out (TKey Minimum, TKey Maximum) key);
 
-		bool TryGetValue(TKey key, out TValue value);
-	}
+	bool TryGetValue(TKey key, out TValue value);
 }

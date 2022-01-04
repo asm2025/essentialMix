@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace essentialMix.Media.ffmpeg
+namespace essentialMix.Media.ffmpeg;
+
+[SuppressMessage("ReSharper", "InconsistentNaming")]
+public enum TargetStandard
 {
-	[SuppressMessage("ReSharper", "InconsistentNaming")]
-	public enum TargetStandard
-	{
-		Default,
-		pal,
-		ntsc,
-		film
-	}
+	Default,
+	pal,
+	ntsc,
+	film
 }

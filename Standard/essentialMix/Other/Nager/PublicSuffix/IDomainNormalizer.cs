@@ -2,10 +2,9 @@
 
 // ReSharper disable once CheckNamespace
 // ReSharper disable once CheckNamespace
-namespace Other.Nager.PublicSuffix
+namespace Other.Nager.PublicSuffix;
+
+public interface IDomainNormalizer
 {
-    public interface IDomainNormalizer
-    {
-        List<string> PartlyNormalizeDomainAndExtractFullyNormalizedParts(string domain, out string partlyNormalizedDomain);
-    }
+	List<string> PartlyNormalizeDomainAndExtractFullyNormalizedParts(string domain, out string partlyNormalizedDomain);
 }

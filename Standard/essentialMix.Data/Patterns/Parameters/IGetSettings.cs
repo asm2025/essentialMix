@@ -1,7 +1,6 @@
-﻿namespace essentialMix.Data.Patterns.Parameters
+﻿namespace essentialMix.Data.Patterns.Parameters;
+
+public interface IGetSettings
 {
-	public interface IGetSettings
-	{
-		object[] KeyValue { get; set; }
-	}
+	object[] KeyValue { get; set; }
 }

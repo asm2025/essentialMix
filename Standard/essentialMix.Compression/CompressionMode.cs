@@ -1,8 +1,7 @@
-﻿namespace essentialMix.Compression
+﻿namespace essentialMix.Compression;
+
+public enum CompressionMode
 {
-	public enum CompressionMode
-	{
-		Create,
-		Append,
-	}
+	Create,
+	Append,
 }

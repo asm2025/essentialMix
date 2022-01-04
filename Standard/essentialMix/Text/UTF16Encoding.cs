@@ -1,20 +1,19 @@
 using System;
 using System.Text;
 
-namespace essentialMix.Text
+namespace essentialMix.Text;
+
+[Serializable]
+public class UTF16Encoding : UnicodeEncoding
 {
-	[Serializable]
-	public class UTF16Encoding : UnicodeEncoding
-	{
-		private const string ENCODING_NAME = "UTF-16";
+	private const string ENCODING_NAME = "UTF-16";
 
-		public UTF16Encoding(bool bBigEndian, bool bBOM)
-			: base(bBigEndian, bBOM) { }
+	public UTF16Encoding(bool bBigEndian, bool bBOM)
+		: base(bBigEndian, bBOM) { }
 
-		public override string BodyName => ENCODING_NAME;
+	public override string BodyName => ENCODING_NAME;
 
-		public override string EncodingName => ENCODING_NAME;
+	public override string EncodingName => ENCODING_NAME;
 
-		public override string WebName => ENCODING_NAME;
-	}
+	public override string WebName => ENCODING_NAME;
 }

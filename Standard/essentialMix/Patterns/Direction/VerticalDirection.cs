@@ -1,8 +1,7 @@
-﻿namespace essentialMix.Patterns.Direction
+﻿namespace essentialMix.Patterns.Direction;
+
+public enum VerticalDirection
 {
-	public enum VerticalDirection
-	{
-		Up = -1,
-		Down = 1
-	}
+	Up = -1,
+	Down = 1
 }

@@ -1,9 +1,8 @@
 using System;
 
-namespace essentialMix.Collections
+namespace essentialMix.Collections;
+
+public interface IProperties : IReadOnlyKeyedCollection<string, IProperty>, IComparable<IProperties>, IComparable, IEquatable<IProperties>, ICloneable
 {
-	public interface IProperties : IReadOnlyKeyedCollection<string, IProperty>, IComparable<IProperties>, IComparable, IEquatable<IProperties>, ICloneable
-	{
-		void Reset();
-	}
+	void Reset();
 }

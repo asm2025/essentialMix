@@ -1,17 +1,16 @@
 ﻿using essentialMix.Newtonsoft.Serialization;
 using Newtonsoft.Json.Serialization;
 
-namespace essentialMix.Web.Api.Annotations.Json
+namespace essentialMix.Web.Api.Annotations.Json;
+
+public class CamelCasePropertyExtensionDictionaryJsonResolverAttribute : PropertyExtensionDictionaryJsonResolverAttribute
 {
-	public class CamelCasePropertyExtensionDictionaryJsonResolverAttribute : PropertyExtensionDictionaryJsonResolverAttribute
-	{
-		/// <inheritdoc />
-		public CamelCasePropertyExtensionDictionaryJsonResolverAttribute()
-			: base(new CamelCasePropertyNamesContractResolver
-					{
-						NamingStrategy = new CamelCasePropertyExtensionDictionaryNamingStrategy()
-					})
+	/// <inheritdoc />
+	public CamelCasePropertyExtensionDictionaryJsonResolverAttribute()
+		: base(new CamelCasePropertyNamesContractResolver
 		{
-		}
+			NamingStrategy = new CamelCasePropertyExtensionDictionaryNamingStrategy()
+		})
+	{
 	}
 }
