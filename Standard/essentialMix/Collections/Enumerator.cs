@@ -2,9 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
+using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
@@ -30,7 +30,7 @@ public class Enumerator : Disposable, IEnumerator, IEnumerable
 
 		IEnumerator im = Enumerable.GetEnumerator();
 		IsIterable = im.MoveNext();
-		ObjectHelper.Dispose(ref im);
+		ObjectHelper.Dispose(im as IDisposable);
 	}
 
 	public virtual object Current => Impl.Current;
@@ -77,7 +77,7 @@ public class Enumerator : Disposable, IEnumerator, IEnumerable
 
 	protected override void Dispose(bool disposing)
 	{
-		if (disposing) ObjectHelper.Dispose(ref _impl);
+		if (disposing) ObjectHelper.Dispose(_impl as IDisposable);
 		base.Dispose(disposing);
 	}
 }

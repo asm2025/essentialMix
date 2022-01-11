@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using essentialMix.Collections.DebugView;
@@ -12,7 +11,8 @@ namespace essentialMix.Collections;
 /// <para>Based on BTree chapter in "Introduction to Algorithms", by Thomas Cormen, Charles Leiserson, Ronald Rivest.</para>
 /// <para>This uses the same abstract pattern as <see cref="LinkedBinaryTree{TNode,T}"/></para>
 /// </summary>
-/// <typeparam name="TNode">The node type. Must inherit from <see cref="LinkedBinaryNode{TNode, T}"/></typeparam>
+/// <typeparam name="TBlock">The block type. Must implement <see cref="ITreeBlock{TBlock, TNode, T}"/></typeparam>
+/// <typeparam name="TNode">The node type. Must implement <see cref="ITreeNode{TNode, T}"/></typeparam>
 /// <typeparam name="T">The element type of the tree</typeparam>
 /*
 * A B-tree of order m is a tree which satisfies the following properties:
@@ -42,10 +42,38 @@ namespace essentialMix.Collections;
 * DFS [InOrder]:    ABCDEFGHIJ => Left-Root-Right (Stack)
 * DFS [PostOrder]:   => Left-Right-Root (Stack)
 */
-//[Serializable]
-//[DebuggerDisplay("Count = {Count}")]
-//[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
-//public abstract class BTree<TBlock, TNode, TKey, TValue> : ICollection<T>, ICollection, IReadOnlyCollection<T>
-//	where TBlock : BTreeBlock<TBlock, TNode, TKey, TValue>
-//{
-//}
+[Serializable]
+[DebuggerDisplay("Count = {Count}")]
+[DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,>))]
+public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
+	where TBlock : ITreeBlockBase<TBlock, TNode, T>
+	where TNode : ITreeNode<TNode, T>
+{
+	public TBlock Root { get; private set; }
+}
+
+/// <inheritdoc cref="BTreeBase{TBlock, TNode, T}" />
+/// <typeparam name="TBlock">The block type. Must implement <see cref="ITreeBlock{TBlock, TNode, T}"/></typeparam>
+/// <typeparam name="TNode">The node type. Must implement <see cref="ITreeNode{TNode, T}"/></typeparam>
+/// <typeparam name="T">The element type of the tree</typeparam>
+[Serializable]
+public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBTree<TBlock, TNode, T>
+	where TBlock : ITreeBlock<TBlock, TNode, T>
+	where TNode : ITreeNode<TNode, T>
+{
+}
+
+/// <inheritdoc cref="BTreeBase{TBlock, TNode, T}" />
+/// <typeparam name="TBlock">The block type. Must implement <see cref="ITreeBlock{TBlock, TNode, TKey, T}"/></typeparam>
+/// <typeparam name="TNode">The node type. Must implement <see cref="ITreeNode{TNode, TKey, TValue}"/></typeparam>
+/// <typeparam name="TKey">The key type of the tree</typeparam>
+/// <typeparam name="TValue">The element type of the tree</typeparam>
+[Serializable]
+[DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,,>))]
+public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNode, TValue>, IBTree<TBlock, TNode, TKey, TValue>
+	where TBlock : ITreeBlock<TBlock, TNode, TKey, TValue>
+	where TNode : ITreeNode<TNode, TKey, TValue>
+{
+	/// <inheritdoc />
+	public IComparer<TKey> KeyComparer { get; }
+}

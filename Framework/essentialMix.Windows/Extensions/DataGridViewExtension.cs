@@ -3,6 +3,7 @@ using System.Text;
 using System.Windows.Forms;
 using essentialMix.Threading.Helpers;
 using JetBrains.Annotations;
+using SystemMessageBoxButtons = System.Windows.Forms.MessageBoxButtons;
 
 // ReSharper disable once CheckNamespace
 namespace essentialMix.Extensions;
@@ -84,7 +85,7 @@ public static class DataGridViewExtension
 		}
 		catch (Exception ex)
 		{
-			MessageBox.Show(ex.CollectMessages(), "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			MessageBox.Show(ex.CollectMessages(), "Error...", SystemMessageBoxButtons.OK, MessageBoxIcon.Error);
 		}
 	}
 }

@@ -39,7 +39,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 		{
 			get
 			{
-				lock(_root)
+				lock (_root)
 				{
 					return _list.Count;
 				}
@@ -50,7 +50,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 		{
 			get
 			{
-				lock(_root)
+				lock (_root)
 				{
 					return ((ICollection<T>)_list).IsReadOnly;
 				}
@@ -59,7 +59,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 
 		public void Add(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_list.Add(item);
 			}
@@ -67,7 +67,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 
 		public void Clear()
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_list.Clear();
 			}
@@ -75,7 +75,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 
 		public bool Contains(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _list.Contains(item);
 			}
@@ -83,7 +83,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 
 		public void CopyTo(T[] array, int arrayIndex)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_list.CopyTo(array, arrayIndex);
 			}
@@ -91,7 +91,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 
 		public bool Remove(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _list.Remove(item);
 			}
@@ -99,7 +99,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _list.GetEnumerator();
 			}
@@ -107,7 +107,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 
 		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return ((IEnumerable<T>)_list).GetEnumerator();
 			}
@@ -117,14 +117,14 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 		{
 			get
 			{
-				lock(_root)
+				lock (_root)
 				{
 					return _list[index];
 				}
 			}
 			set
 			{
-				lock(_root)
+				lock (_root)
 				{
 					_list[index] = value;
 				}
@@ -133,7 +133,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 
 		public int IndexOf(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _list.IndexOf(item);
 			}
@@ -141,7 +141,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 
 		public void Insert(int index, T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_list.Insert(index, item);
 			}
@@ -149,7 +149,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 
 		public void RemoveAt(int index)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_list.RemoveAt(index);
 			}
@@ -157,7 +157,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	}
 
 	[Serializable]
-	public struct Enumerator : IEnumerator<T>, IEnumerator
+	private struct Enumerator : IEnumerator<T>, IEnumerator
 	{
 		[NonSerialized]
 		private readonly ListBase<T> _list;
@@ -426,7 +426,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 				}
 				else
 				{
-					foreach (T item in readOnlyCollection) 
+					foreach (T item in readOnlyCollection)
 						Items[index++] = item;
 				}
 

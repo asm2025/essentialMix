@@ -23,9 +23,9 @@ public class MainViewModel : NotifyPropertyChangedBase
 			new ObservableListViewModel(),
 			new ObservableSortedSetViewModel()
 		};
-		ChangeViewCommand = new RelayCommand<ViewModelBase>(vm => SelectedViewModel = vm, vm => vm != SelectedViewModel);
-		GenerateCommand = new RelayCommand(() => SelectedViewModel.Generate(), () => SelectedViewModel != null);
-		ClearCommand = new RelayCommand(() => SelectedViewModel.Clear(), () => SelectedViewModel != null);
+		ChangeViewCommand = new RelayCommand<ViewModelBase>((_, vm) => SelectedViewModel = vm, (_, vm) => vm != SelectedViewModel);
+		GenerateCommand = new RelayCommand(_ => SelectedViewModel.Generate(), _ => SelectedViewModel != null);
+		ClearCommand = new RelayCommand(_ => SelectedViewModel.Clear(), _ => SelectedViewModel != null);
 	}
 
 	[NotNull]
@@ -34,7 +34,7 @@ public class MainViewModel : NotifyPropertyChangedBase
 	public ViewModelBase SelectedViewModel
 	{
 		get => _selectedViewModel;
-		set 
+		set
 		{
 			if (_selectedViewModel == value) return;
 			_selectedViewModel = value;

@@ -1,37 +1,70 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
-//[Serializable]
-//[DebuggerDisplay("{Degree}, Count = {Count}")]
-//[StructLayout(LayoutKind.Sequential)]
-//public abstract class BTreeBlock<TBlock, TEntry, TKey, TValue>
-//	where TBlock : BTreeBlock<TBlock, TEntry, TKey, TValue>
-//{
-//	protected BTreeBlock(int degree)
-//		: this(degree, default(T))
-//	{
-//	}
+/// <inheritdoc cref="ITreeBlock{TBlock,TNode,T}" />
+[Serializable]
+[DebuggerDisplay("{Degree}, Count = {Count}")]
+[StructLayout(LayoutKind.Sequential)]
+public abstract class BTreeBlockBase<TBlock, TNode, T> : List<TNode>, ITreeBlockBase<TBlock, TNode, T>
+	where TBlock : BTreeBlockBase<TBlock, TNode, T>
+	where TNode : BTreeNodeBase<TNode, T>
+{
+	protected BTreeBlockBase(int degree)
+		: base(degree)
+	{
+		if (degree < 2) throw new ArgumentOutOfRangeException(nameof(degree), $"{GetType()}'s degree must be at least 2.");
+		Degree = degree;
+	}
 
-//	protected BTreeBlock(int degree, T value)
-//	{
-//		Degree = degree;
-//		Value = value;
-//	}
+	/// <inheritdoc />
+	public IList<TBlock> Children { get; set; }
 
-//	public T Value { get; set; }
+	/// <inheritdoc />
+	public int Degree { get; }
 
-//	public int Degree { get; }
-	
-//	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-//	public void Swap([NotNull] TNode other)
-//	{
-//		(other.Value, Value) = (Value, other.Value);
-//	}
+	/// <inheritdoc />
+	public bool IsLeaf => Children == null || Children.Count == 0;
 
-//	public static implicit operator TValue([NotNull] BinaryNode<TNode, TKey, TValue> node) { return node.Value; }
-//}
+	/// <inheritdoc />
+	public bool IsFull => Count >= 2 * Degree - 1;
+
+	/// <inheritdoc />
+	public bool IsEmpty => Count == 0;
+
+	/// <inheritdoc />
+	public bool HasMinimumEntries => Count >= Degree - 1;
+}
+
+/// <inheritdoc cref="BTreeBlockBase{TBlock, TNode, T}" />
+[Serializable]
+[StructLayout(LayoutKind.Sequential)]
+public sealed class BTreeBlock<T> : BTreeBlockBase<BTreeBlock<T>, BTreeNode<T>, T>, ITreeBlock<BTreeBlock<T>, BTreeNode<T>, T>
+{
+	/// <inheritdoc />
+	public BTreeBlock(int degree)
+		: base(degree)
+	{
+	}
+
+	/// <inheritdoc />
+	public BTreeNode<T> MakeNode(T value) { return new BTreeNode<T>(value); }
+}
+
+/// <inheritdoc cref="BTreeBlockBase{TBlock, TNode,T}" />
+[Serializable]
+[StructLayout(LayoutKind.Sequential)]
+public sealed class BTreeBlock<TKey, TValue> : BTreeBlockBase<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TValue>, ITreeBlock<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TKey, TValue>
+{
+	/// <inheritdoc />
+	public BTreeBlock(int degree)
+		: base(degree)
+	{
+	}
+
+	/// <inheritdoc />
+	public BTreeNode<TKey, TValue> MakeNode(TKey key, TValue value) { return new BTreeNode<TKey, TValue>(key, value); }
+}

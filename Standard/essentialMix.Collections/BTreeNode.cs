@@ -1,29 +1,24 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
+/// <inheritdoc />
 [Serializable]
 [DebuggerDisplay("{Value}")]
 [StructLayout(LayoutKind.Sequential)]
-public abstract class BTreeNodeBase<TNode, T> : ILinkedBinaryNode<TKey, TValue>
+public abstract class BTreeNodeBase<TNode, T> : ITreeNode<TNode, T>
 	where TNode : BTreeNodeBase<TNode, T>
 {
-	protected BTreeNode(TValue value)
+	protected BTreeNodeBase(T value)
 	{
 		Value = value;
 	}
 
 	/// <inheritdoc />
-	[NotNull]
-	public abstract TKey Key { get; set; }
-
-	/// <inheritdoc />
-	public TValue Value { get; set; }
+	public T Value { get; set; }
 
 	/// <inheritdoc />
 	[NotNull]
@@ -32,26 +27,47 @@ public abstract class BTreeNodeBase<TNode, T> : ILinkedBinaryNode<TKey, TValue>
 	[NotNull]
 	public virtual string ToString(int level)
 	{
-		return $"{Key} = {Value} :L{level}";
+		return $"{Value} :L{level}";
 	}
 
-	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	public void Swap([NotNull] TNode other)
-	{
-		(other.Key, Key) = (Key, other.Key);
-		(other.Value, Value) = (Value, other.Value);
-	}
+	public abstract void Swap(TNode other);
 
-	public static implicit operator TValue([NotNull] BTreeNode<TNode, TKey, TValue> node) { return node.Value; }
+	public static implicit operator T([NotNull] BTreeNodeBase<TNode, T> node) { return node.Value; }
 }
 
+/// <inheritdoc cref="BTreeNodeBase{TNode,T}" />
+[Serializable]
+[StructLayout(LayoutKind.Sequential)]
+public sealed class BTreeNode<T> : BTreeNodeBase<BTreeNode<T>, T>, ITreeNode<BTreeNode<T>, T>
+{
+	/// <inheritdoc />
+	public BTreeNode(T value)
+		: base(value)
+	{
+	}
+
+	/// <inheritdoc />
+	public override string ToString(int level)
+	{
+		return $"{Value} :L{level}";
+	}
+
+	/// <inheritdoc />
+	public override void Swap(BTreeNode<T> other)
+	{
+		(other.Value, Value) = (Value, other.Value);
+	}
+}
+
+/// <inheritdoc cref="BTreeNodeBase{TNode,T}" />
 [Serializable]
 [DebuggerDisplay("{Key} = {Value}")]
 [StructLayout(LayoutKind.Sequential)]
-public sealed class BTreeNode<TKey, TValue> : BTreeNode<BTreeNode<TKey, TValue>, TKey, TValue>
+public sealed class BTreeNode<TKey, TValue> : BTreeNodeBase<BTreeNode<TKey, TValue>, TValue>, ITreeNode<BTreeNode<TKey, TValue>, TKey, TValue>
 {
 	private TKey _key;
 
+	/// <inheritdoc />
 	public BTreeNode([NotNull] TKey key, TValue value)
 		: base(value)
 	{
@@ -59,34 +75,22 @@ public sealed class BTreeNode<TKey, TValue> : BTreeNode<BTreeNode<TKey, TValue>,
 	}
 
 	/// <inheritdoc />
-	public override TKey Key
+	public TKey Key
 	{
 		get => _key;
 		set => _key = value;
 	}
-}
 
-[Serializable]
-[StructLayout(LayoutKind.Sequential)]
-public sealed class BTreeNode<T> : BTreeNode<BTreeNode<T>, T, T>
-{
-	public BTreeNode(T value)
-		: base(value)
+	/// <inheritdoc />
+	public override string ToString(int level)
 	{
+		return $"{Key} = {Value} :L{level}";
 	}
 
 	/// <inheritdoc />
-	[Browsable(false)]
-	[EditorBrowsable(EditorBrowsableState.Never)]
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	public override T Key
+	public override void Swap(BTreeNode<TKey, TValue> other)
 	{
-		get => Value;
-		set => Value = value;
-	}
-
-	public override string ToString(int level)
-	{
-		return $"{Value} :L{level}";
+		(other.Key, Key) = (Key, other.Key);
+		(other.Value, Value) = (Value, other.Value);
 	}
 }
