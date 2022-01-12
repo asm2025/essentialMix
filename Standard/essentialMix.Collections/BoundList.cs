@@ -5,7 +5,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Threading;
-using essentialMix;
 using essentialMix.Collections.DebugView;
 using essentialMix.Comparers;
 using essentialMix.Exceptions.Collections;
@@ -13,23 +12,21 @@ using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-// ReSharper disable once CheckNamespace
-namespace Other.Microsoft.Collections;
+namespace essentialMix.Collections;
 
-// based on https://github.com/microsoft/referencesource/blob/master/mscorlib/system/collections/generic/list.cs
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 [Serializable]
-public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
+public class BoundList<T> : IBoundList<T>, IReadOnlyList<T>, IList
 {
 	[Serializable]
-	internal class SynchronizedList : IList<T>
+	internal class SynchronizedList : IBoundList<T>
 	{
-		private readonly ListBase<T> _list;
+		private readonly BoundList<T> _list;
 
 		private object _root;
 
-		internal SynchronizedList(ListBase<T> list)
+		internal SynchronizedList(BoundList<T> list)
 		{
 			_list = list;
 			_root = ((ICollection)list).SyncRoot;
@@ -53,6 +50,44 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 				lock (_root)
 				{
 					return ((ICollection<T>)_list).IsReadOnly;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public int Capacity
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _list.Capacity;
+				}
+			}
+			set
+			{
+				lock (_root)
+				{
+					_list.Capacity = value;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public int Limit
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _list.Limit;
+				}
+			}
+			set
+			{
+				lock (_root)
+				{
+					_list.Limit = value;
 				}
 			}
 		}
@@ -160,13 +195,13 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	private struct Enumerator : IEnumerator<T>, IEnumerator
 	{
 		[NonSerialized]
-		private readonly ListBase<T> _list;
+		private readonly BoundList<T> _list;
 		private readonly int _version;
 
 		private int _index;
 		private T _current;
 
-		internal Enumerator([NotNull] ListBase<T> list)
+		internal Enumerator([NotNull] BoundList<T> list)
 		{
 			_list = list;
 			_version = list._version;
@@ -193,7 +228,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 		{
 			if (_version == _list._version && _index < _list.Count)
 			{
-				_current = _list.Items[_index];
+				_current = _list._items[_index];
 				_index++;
 				return true;
 			}
@@ -216,61 +251,72 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 		}
 	}
 
+	private int _limit;
 	private int _version;
 
 	[NonSerialized]
 	private object _syncRoot;
 
-	// Constructs a List. The list is initially empty and has a capacity
-	// of zero. Upon adding the first element to the list the capacity is
-	// increased to 16, and then increased in multiples of two as required.
-	public ListBase()
-		: this(0)
+	[NotNull]
+	private T[] _items;
+
+	public BoundList()
+		: this(1, 0)
 	{
 	}
 
-	// Constructs a List with a given initial capacity. The list is
-	// initially empty, but will have room for the given number of elements
-	// before any reallocation is required.
-	public ListBase(int capacity)
+	public BoundList(int limit)
+		: this(limit, 0)
 	{
-		if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
-		Items = capacity == 0
+	}
+
+	public BoundList(int limit, int capacity)
+	{
+		if (limit < 1) throw new ArgumentOutOfRangeException(nameof(limit));
+		if (capacity < 0 || capacity > limit) throw new ArgumentOutOfRangeException(nameof(capacity));
+		_limit = limit;
+		_items = capacity == 0
 					? Array.Empty<T>()
 					: new T[capacity];
 	}
 
-	// Constructs a List, copying the contents of the given collection. The
-	// size and capacity of the new list will both be equal to the size of the
-	// given collection.
-	public ListBase([NotNull] IEnumerable<T> enumerable)
+	public BoundList(int limit, [NotNull] IEnumerable<T> enumerable)
+		: this(limit, 0)
 	{
-		Items = Array.Empty<T>();
 		InsertRange(0, enumerable);
 	}
 
-	// Gets and sets the capacity of this list.  The capacity is the size of
-	// the internal array used to hold items.  When set, the internal 
-	// array of the list is reallocated to the given capacity.
 	public int Capacity
 	{
-		get => Items.Length;
+		get => _items.Length;
 		set
 		{
-			if (value < Count) throw new ArgumentOutOfRangeException(nameof(value));
-			if (value == Items.Length) return;
+			if (value < Count || value > Limit) throw new ArgumentOutOfRangeException(nameof(value));
+			if (value == _items.Length) return;
 
 			if (value > 0)
 			{
 				T[] newItems = new T[value];
-				if (Count > 0) Array.Copy(Items, 0, newItems, 0, Count);
-				Items = newItems;
+				if (Count > 0) Array.Copy(_items, 0, newItems, 0, Count);
+				_items = newItems;
 			}
 			else
 			{
-				Items = Array.Empty<T>();
+				_items = Array.Empty<T>();
 			}
 
+			_version++;
+		}
+	}
+
+	public int Limit
+	{
+		get => _limit;
+		set
+		{
+			if (value < 1 || value < Count) throw new ArgumentOutOfRangeException(nameof(value));
+			_limit = value;
+			if (_items.Length > _limit) Array.Resize(ref _items, _limit);
 			_version++;
 		}
 	}
@@ -282,7 +328,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	// Sets or Gets the element at the given index.
 	public T this[int index]
 	{
-		get => Items[index];
+		get => _items[index];
 		set => Insert(index, value, false);
 	}
 
@@ -317,7 +363,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	}
 
 	[NotNull]
-	protected T[] Items { get; private set; }
+	protected T[] Items => _items;
 
 	[NotNull]
 	public ReadOnlyCollection<T> AsReadOnly()
@@ -354,11 +400,11 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 
 	// Removes the element at the given index. The size of the list is
 	// decreased by one.
-	public virtual void RemoveAt(int index)
+	public void RemoveAt(int index)
 	{
 		if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-		if (index < Count - 1) Array.Copy(Items, index + 1, Items, index, Count - (index + 1));
-		Items[Count] = default(T);
+		if (index < Count - 1) Array.Copy(_items, index + 1, _items, index, Count - (index + 1));
+		_items[Count] = default(T);
 		Count--;
 		_version++;
 	}
@@ -380,10 +426,10 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	}
 
 	// Clears the contents of List.
-	public virtual void Clear()
+	public void Clear()
 	{
 		if (Count == 0) return;
-		Array.Clear(Items, 0, Count); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
+		Array.Clear(_items, 0, Count); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
 		Count = 0;
 		_version++;
 	}
@@ -413,26 +459,26 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 			{
 				count = readOnlyCollection.Count;
 				if (count == 0) return;
+				if (Count + count > _limit) count = _limit - Count;
 				EnsureCapacity(Count + count);
-				if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
+				if (index < Count) Array.Copy(_items, index, _items, index + count, Count - index);
 
 				// If we're inserting a List into itself, we want to be able to deal with that.
 				if (ReferenceEquals(this, readOnlyCollection))
 				{
 					// Copy first part of _items to insert location
-					Array.Copy(Items, 0, Items, index, index);
+					Array.Copy(_items, 0, _items, index, index);
 					// Copy last part of _items back to inserted location
-					Array.Copy(Items, index + count, Items, index * 2, Count - index);
+					Array.Copy(_items, index + count, _items, index * 2, Count - index);
 				}
 				else
 				{
 					foreach (T item in readOnlyCollection)
-						Items[index++] = item;
+						_items[index++] = item;
 				}
 
 				Count += count;
 				_version++;
-				RangeInserted(index, count);
 				break;
 			}
 			case ICollection<T> collection:
@@ -440,24 +486,23 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 				count = collection.Count;
 				if (count == 0) return;
 				EnsureCapacity(Count + count);
-				if (index < Count) Array.Copy(Items, index, Items, index + count, Count - index);
+				if (index < Count) Array.Copy(_items, index, _items, index + count, Count - index);
 
 				// If we're inserting a List into itself, we want to be able to deal with that.
 				if (ReferenceEquals(this, collection))
 				{
 					// Copy first part of _items to insert location
-					Array.Copy(Items, 0, Items, index, index);
+					Array.Copy(_items, 0, _items, index, index);
 					// Copy last part of _items back to inserted location
-					Array.Copy(Items, index + count, Items, index * 2, Count - index);
+					Array.Copy(_items, index + count, _items, index * 2, Count - index);
 				}
 				else
 				{
-					collection.CopyTo(Items, index);
+					collection.CopyTo(_items, index);
 				}
 
 				Count += count;
 				_version++;
-				RangeInserted(index, count);
 				break;
 			}
 			default:
@@ -482,9 +527,8 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	{
 		Count.ValidateRange(index, ref count);
 		if (count == 0) return;
-		RangeRemoving(index, count);
-		if (index < Count) Array.Copy(Items, index + count, Items, index, Count - index);
-		Array.Clear(Items, Count - count, count);
+		if (index < Count) Array.Copy(_items, index + count, _items, index, Count - index);
+		Array.Clear(_items, Count - count, count);
 		Count -= count;
 		_version++;
 	}
@@ -496,7 +540,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 		int freeIndex = 0;   // the first free slot in items array
 
 		// Find the first item which needs to be removed.
-		while (freeIndex < Count && !match(Items[freeIndex]))
+		while (freeIndex < Count && !match(_items[freeIndex]))
 			freeIndex++;
 
 		if (freeIndex >= Count) return 0;
@@ -545,7 +589,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	public int BinarySearch(int index, int count, [NotNull] T item, IComparer<T> comparer)
 	{
 		Count.ValidateRange(index, ref count);
-		return Array.BinarySearch(Items, index, count, item, comparer);
+		return Array.BinarySearch(_items, index, count, item, comparer);
 	}
 
 	// Returns the index of the first occurrence of a given value in a range of
@@ -578,7 +622,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	public int IndexOf(T item, int index, int count)
 	{
 		Count.ValidateRange(index, ref count);
-		return Array.IndexOf(Items, item, index, count);
+		return Array.IndexOf(_items, item, index, count);
 	}
 
 	int IList.IndexOf(object item)
@@ -627,7 +671,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 		if (index == 0) index = Count - 1;
 		return Count == 0
 					? -1
-					: Array.LastIndexOf(Items, item, index, count);
+					: Array.LastIndexOf(_items, item, index, count);
 	}
 
 	// Contains returns true if the specified element is in the List.
@@ -647,8 +691,8 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	{
 		for (int i = 0; i < Count; i++)
 		{
-			if (!match(Items[i])) continue;
-			return Items[i];
+			if (!match(_items[i])) continue;
+			return _items[i];
 		}
 		return default(T);
 	}
@@ -657,7 +701,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	{
 		for (int i = Count - 1; i >= 0; i--)
 		{
-			T item = Items[i];
+			T item = _items[i];
 			if (!match(item)) continue;
 			return item;
 		}
@@ -668,7 +712,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	{
 		for (int i = 0; i < Count; i++)
 		{
-			T item = Items[i];
+			T item = _items[i];
 			if (!match(item)) continue;
 			yield return item;
 		}
@@ -687,7 +731,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	public int FindIndex(int startIndex, int count, [NotNull] Predicate<T> match)
 	{
 		Count.ValidateRange(startIndex, ref count);
-		return Array.FindIndex(Items, startIndex, count, match);
+		return Array.FindIndex(_items, startIndex, count, match);
 	}
 
 	public int FindLastIndex([NotNull] Predicate<T> match)
@@ -703,7 +747,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	public int FindLastIndex(int startIndex, int count, [NotNull] Predicate<T> match)
 	{
 		Count.ValidateRange(startIndex, ref count);
-		return Array.FindLastIndex(Items, startIndex, count, match);
+		return Array.FindLastIndex(_items, startIndex, count, match);
 	}
 
 	public bool Exists([NotNull] Predicate<T> match) { return FindIndex(match) != -1; }
@@ -712,7 +756,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	{
 		for (int i = 0; i < Count; i++)
 		{
-			yield return converter(Items[i]);
+			yield return converter(_items[i]);
 		}
 	}
 
@@ -727,7 +771,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 		if (count == 0) return;
 		Count.ValidateRange(arrayIndex, ref count);
 		// Delegate rest of error checking to Array.Copy.
-		Array.Copy(Items, 0, array, arrayIndex, count);
+		Array.Copy(_items, 0, array, arrayIndex, count);
 	}
 
 	// Copies this List into array, which must be of a 
@@ -776,7 +820,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	public T[] ToArray()
 	{
 		T[] array = new T[Count];
-		Array.Copy(Items, 0, array, 0, Count);
+		Array.Copy(_items, 0, array, 0, Count);
 		return array;
 	}
 
@@ -787,7 +831,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 
 		for (int i = index; i < last; i++)
 		{
-			yield return Items[i];
+			yield return _items[i];
 		}
 	}
 
@@ -798,7 +842,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 		for (int i = 0; i < Count; i++)
 		{
 			if (version != _version) break;
-			action(Items[i]);
+			action(_items[i]);
 		}
 
 		if (version != _version) throw new VersionChangedException();
@@ -811,7 +855,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 		for (int i = 0; i < Count; i++)
 		{
 			if (version != _version) break;
-			action(Items[i], i);
+			action(_items[i], i);
 		}
 
 		if (version != _version) throw new VersionChangedException();
@@ -831,7 +875,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	{
 		Count.ValidateRange(index, ref count);
 		if (Count < 2 || count < 2) return;
-		Array.Reverse(Items, index, count);
+		Array.Reverse(_items, index, count);
 		_version++;
 	}
 
@@ -866,7 +910,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	public void Sort(int index, int count, IComparer<T> comparer)
 	{
 		Count.ValidateRange(index, ref count);
-		Array.Sort(Items, index, count, comparer);
+		Array.Sort(_items, index, count, comparer);
 		_version++;
 	}
 
@@ -880,7 +924,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	// list.TrimExcess();
 	public void TrimExcess()
 	{
-		int threshold = (int)(Items.Length * 0.9);
+		int threshold = (int)(_items.Length * 0.9);
 		if (Count >= threshold) return;
 		Capacity = Count;
 	}
@@ -889,14 +933,14 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	{
 		for (int i = 0; i < Count; i++)
 		{
-			if (match(Items[i])) continue;
+			if (match(_items[i])) continue;
 			return false;
 		}
 		return true;
 	}
 
 	[NotNull]
-	public static IList<T> Synchronized(ListBase<T> list)
+	public static IBoundList<T> Synchronized(BoundList<T> list)
 	{
 		return new SynchronizedList(list);
 	}
@@ -907,17 +951,20 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	// whichever is larger.
 	protected void EnsureCapacity(int min)
 	{
-		if (Items.Length >= min) return;
-		Capacity = (Items.Length == 0 ? Constants.DEFAULT_CAPACITY : Items.Length * 2).NotBelow(min);
+		if (min > _limit) min = _limit;
+		if (_items.Length >= min) return;
+		Capacity = (_items.Length == 0
+						? Constants.DEFAULT_CAPACITY
+						: _items.Length * 2).Within(min, _limit);
 	}
 
-	protected virtual void Insert(int index, T item, bool add)
+	protected void Insert(int index, T item, bool add)
 	{
 		if (add)
 		{
 			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			if (Count == Items.Length) EnsureCapacity(Count + 1);
-			if (index < Count) Array.Copy(Items, index, Items, index + 1, Count - index);
+			if (Count == _items.Length) EnsureCapacity(Count + 1);
+			if (index < Count) Array.Copy(_items, index, _items, index + 1, Count - index);
 			Count++;
 		}
 		else
@@ -925,11 +972,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 			if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 		}
 
-		Items[index] = item;
+		_items[index] = item;
 		_version++;
 	}
-
-	protected virtual void RangeInserted(int index, int count) { }
-
-	protected virtual void RangeRemoving(int index, int count) { }
 }

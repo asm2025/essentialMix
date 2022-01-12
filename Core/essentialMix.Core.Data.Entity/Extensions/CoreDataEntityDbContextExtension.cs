@@ -18,12 +18,14 @@ public static class CoreDataEntityDbContextExtension
 		thisValue.Entry(entity).Reload();
 	}
 
+	[NotNull]
 	public static Task ReloadAsync<TEntity>([NotNull] this SystemDbContext thisValue, [NotNull] TEntity entity)
 		where TEntity : class
 	{
 		return thisValue.Entry(entity).ReloadAsync();
 	}
 
+	[NotNull]
 	public static Task ReloadAsync<TEntity>([NotNull] this SystemDbContext thisValue, [NotNull] TEntity entity, CancellationToken cancellationToken)
 		where TEntity : class
 	{
