@@ -2,8 +2,8 @@
 
 namespace essentialMix.Collections;
 
-public interface IBoundList<T> : IList<T>
+public interface IReadOnlyBoundList<T> : IReadOnlyList<T>
 {
-	int Capacity { get; set; }
+	int Capacity { get; }
 	int Limit { get; }
 }

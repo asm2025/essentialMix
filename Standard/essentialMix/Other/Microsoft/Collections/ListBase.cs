@@ -907,8 +907,11 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	// whichever is larger.
 	protected void EnsureCapacity(int min)
 	{
+		if (min < 0) throw new ArgumentOutOfRangeException(nameof(min));
 		if (Items.Length >= min) return;
-		Capacity = (Items.Length == 0 ? Constants.DEFAULT_CAPACITY : Items.Length * 2).NotBelow(min);
+		Capacity = (Items.Length == 0
+						? Constants.DEFAULT_CAPACITY
+						: Items.Length * 2).NotBelow(min);
 	}
 
 	protected virtual void Insert(int index, T item, bool add)

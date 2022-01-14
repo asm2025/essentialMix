@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
@@ -9,7 +8,7 @@ namespace essentialMix.Collections;
 [Serializable]
 [DebuggerDisplay("{Degree}, Count = {Count}")]
 [StructLayout(LayoutKind.Sequential)]
-public abstract class BTreeBlockBase<TBlock, TNode, T> : List<TNode>, ITreeBlockBase<TBlock, TNode, T>
+public abstract class BTreeBlockBase<TBlock, TNode, T> : BoundList<TNode>, ITreeBlockBase<TBlock, TNode, T>
 	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : BTreeNodeBase<TNode, T>
 {
@@ -17,14 +16,13 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : List<TNode>, ITreeBlock
 		: base(degree)
 	{
 		if (degree < 2) throw new ArgumentOutOfRangeException(nameof(degree), $"{GetType()}'s degree must be at least 2.");
-		Degree = degree;
 	}
 
 	/// <inheritdoc />
-	public IList<TBlock> Children { get; set; }
+	public IBoundList<TBlock> Children { get; set; }
 
 	/// <inheritdoc />
-	public int Degree { get; }
+	public int Degree => Limit;
 
 	/// <inheritdoc />
 	public bool IsLeaf => Children == null || Children.Count == 0;

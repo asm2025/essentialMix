@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
 /// <inheritdoc />
-public interface ITreeBlockBase<TBlock, TNode, T> : IList<TNode>
+public interface ITreeBlockBase<TBlock, TNode, T> : IBoundList<TNode>
 	where TBlock : ITreeBlockBase<TBlock, TNode, T>
 	where TNode : ITreeNode<TNode, T>
 {
-	IList<TBlock> Children { get; set; }
+	IBoundList<TBlock> Children { get; set; }
 	int Degree { get; }
 	bool IsLeaf { get; }
 	bool IsFull { get; }

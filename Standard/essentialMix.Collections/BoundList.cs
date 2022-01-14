@@ -17,7 +17,7 @@ namespace essentialMix.Collections;
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 [Serializable]
-public class BoundList<T> : IBoundList<T>, IReadOnlyList<T>, IList
+public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 {
 	[Serializable]
 	internal class SynchronizedList : IBoundList<T>
@@ -81,13 +81,6 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyList<T>, IList
 				lock (_root)
 				{
 					return _list.Limit;
-				}
-			}
-			set
-			{
-				lock (_root)
-				{
-					_list.Limit = value;
 				}
 			}
 		}
@@ -251,7 +244,6 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyList<T>, IList
 		}
 	}
 
-	private int _limit;
 	private int _version;
 
 	[NonSerialized]
@@ -274,7 +266,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyList<T>, IList
 	{
 		if (limit < 1) throw new ArgumentOutOfRangeException(nameof(limit));
 		if (capacity < 0 || capacity > limit) throw new ArgumentOutOfRangeException(nameof(capacity));
-		_limit = limit;
+		Limit = limit;
 		_items = capacity == 0
 					? Array.Empty<T>()
 					: new T[capacity];
@@ -291,7 +283,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyList<T>, IList
 		get => _items.Length;
 		set
 		{
-			if (value < Count || value > Limit) throw new ArgumentOutOfRangeException(nameof(value));
+			if (value > Limit || value < Count) throw new ArgumentOutOfRangeException(nameof(value));
 			if (value == _items.Length) return;
 
 			if (value > 0)
@@ -309,17 +301,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyList<T>, IList
 		}
 	}
 
-	public int Limit
-	{
-		get => _limit;
-		set
-		{
-			if (value < 1 || value < Count) throw new ArgumentOutOfRangeException(nameof(value));
-			_limit = value;
-			if (_items.Length > _limit) Array.Resize(ref _items, _limit);
-			_version++;
-		}
-	}
+	public int Limit { get; }
 
 	// Read-only property describing how many elements are in the List.
 	[field: ContractPublicPropertyName("Count")]
@@ -459,7 +441,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyList<T>, IList
 			{
 				count = readOnlyCollection.Count;
 				if (count == 0) return;
-				if (Count + count > _limit) count = _limit - Count;
+				if (Count + count > Limit) count = Limit - Count;
 				EnsureCapacity(Count + count);
 				if (index < Count) Array.Copy(_items, index, _items, index + count, Count - index);
 
@@ -485,6 +467,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyList<T>, IList
 			{
 				count = collection.Count;
 				if (count == 0) return;
+				if (Count + count > Limit) count = Limit - Count;
 				EnsureCapacity(Count + count);
 				if (index < Count) Array.Copy(_items, index, _items, index + count, Count - index);
 
@@ -512,7 +495,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyList<T>, IList
 
 				using (IEnumerator<T> en = enumerable.GetEnumerator())
 				{
-					while (en.MoveNext())
+					while (Count < Limit && en.MoveNext())
 					{
 						Insert(index++, en.Current, true);
 					}
@@ -951,11 +934,12 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyList<T>, IList
 	// whichever is larger.
 	protected void EnsureCapacity(int min)
 	{
-		if (min > _limit) min = _limit;
+		if (min < 0) throw new ArgumentOutOfRangeException(nameof(min));
+		if (min > Limit) min = Limit;
 		if (_items.Length >= min) return;
 		Capacity = (_items.Length == 0
 						? Constants.DEFAULT_CAPACITY
-						: _items.Length * 2).Within(min, _limit);
+						: _items.Length * 2).Within(min, Limit);
 	}
 
 	protected void Insert(int index, T item, bool add)
@@ -963,6 +947,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyList<T>, IList
 		if (add)
 		{
 			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
+			if (Count == Limit) throw new LimitReachedException();
 			if (Count == _items.Length) EnsureCapacity(Count + 1);
 			if (index < Count) Array.Copy(_items, index, _items, index + 1, Count - index);
 			Count++;

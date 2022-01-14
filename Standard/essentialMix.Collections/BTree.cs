@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using essentialMix.Collections.DebugView;
@@ -46,10 +47,84 @@ namespace essentialMix.Collections;
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,>))]
 public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
-	where TBlock : ITreeBlockBase<TBlock, TNode, T>
-	where TNode : ITreeNode<TNode, T>
+	where TBlock : class, ITreeBlockBase<TBlock, TNode, T>
+	where TNode : class, ITreeNode<TNode, T>
 {
-	public TBlock Root { get; private set; }
+	private TBlock _root;
+
+	protected BTreeBase(int degree)
+	{
+		if (degree < 2) throw new ArgumentOutOfRangeException(nameof(degree), $"{GetType()}'s degree must be at least 2.");
+		Degree = degree;
+	}
+
+	/// <inheritdoc />
+	public TNode this[int index]
+	{
+		get => Root[index];
+		set => Root[index] = value;
+	}
+
+	/// <inheritdoc />
+	public int Capacity
+	{
+		get => Root.Capacity;
+		set => Root.Capacity = value;
+	}
+
+	/// <inheritdoc />
+	public int Limit => Root.Limit;
+
+	/// <inheritdoc />
+	public TBlock Root => _root ??= MakeBlock();
+
+	/// <inheritdoc />
+	public int Degree { get; }
+
+	/// <inheritdoc />
+	public int Height { get; private set; }
+
+	/// <inheritdoc />
+	public int Count => Root.Count;
+
+	/// <inheritdoc />
+	public bool IsReadOnly => Root.IsReadOnly;
+
+	/// <inheritdoc />
+	public abstract TBlock MakeBlock();
+
+	/// <inheritdoc />
+	public abstract int Compare(TNode node1, TNode node2);
+
+	/// <inheritdoc />
+	public IEnumerator<TNode> GetEnumerator() { return Root.GetEnumerator(); }
+
+	/// <inheritdoc />
+	IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+	/// <inheritdoc />
+	public void Insert(int index, TNode item) { Root.Insert(index, item); }
+
+	/// <inheritdoc />
+	public void Add(TNode item) { Root.Add(item); }
+
+	/// <inheritdoc />
+	public void RemoveAt(int index) { Root.RemoveAt(index); }
+
+	/// <inheritdoc />
+	public bool Remove(TNode item) { return Root.Remove(item); }
+
+	/// <inheritdoc />
+	public void Clear() { Root.Clear(); }
+
+	/// <inheritdoc />
+	public int IndexOf(TNode item) { return Root.IndexOf(item); }
+
+	/// <inheritdoc />
+	public bool Contains(TNode item) { return Root.Contains(item); }
+
+	/// <inheritdoc />
+	public void CopyTo(TNode[] array, int arrayIndex) { Root.CopyTo(array, arrayIndex); }
 }
 
 /// <inheritdoc cref="BTreeBase{TBlock, TNode, T}" />
@@ -58,9 +133,33 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 /// <typeparam name="T">The element type of the tree</typeparam>
 [Serializable]
 public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBTree<TBlock, TNode, T>
-	where TBlock : ITreeBlock<TBlock, TNode, T>
-	where TNode : ITreeNode<TNode, T>
+	where TBlock : class, ITreeBlock<TBlock, TNode, T>
+	where TNode : class, ITreeNode<TNode, T>
 {
+	/// <inheritdoc />
+	protected BTree(int degree, IComparer<T> comparer)
+		: base(degree)
+	{
+		Comparer = comparer ?? Comparer<T>.Default;
+	}
+
+	/// <inheritdoc />
+	public IComparer<T> Comparer { get; }
+
+	/// <inheritdoc />
+	public void Insert(int index, T item) { TODO_IMPLEMENT_ME(); }
+
+	/// <inheritdoc />
+	public void Add(T item) { TODO_IMPLEMENT_ME(); }
+
+	/// <inheritdoc />
+	public bool Remove(T item) { return TODO_IMPLEMENT_ME; }
+
+	/// <inheritdoc />
+	public TNode Find(T item) { return TODO_IMPLEMENT_ME; }
+
+	/// <inheritdoc />
+	public bool Contains(T item) { return TODO_IMPLEMENT_ME; }
 }
 
 /// <inheritdoc cref="BTreeBase{TBlock, TNode, T}" />
@@ -71,9 +170,35 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 [Serializable]
 [DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,,>))]
 public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNode, TValue>, IBTree<TBlock, TNode, TKey, TValue>
-	where TBlock : ITreeBlock<TBlock, TNode, TKey, TValue>
-	where TNode : ITreeNode<TNode, TKey, TValue>
+	where TBlock : class, ITreeBlock<TBlock, TNode, TKey, TValue>
+	where TNode : class, ITreeNode<TNode, TKey, TValue>
 {
 	/// <inheritdoc />
+	protected BTree(int degree, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
+		: base(degree)
+	{
+		KeyComparer = keyComparer ?? Comparer<TKey>.Default;
+		Comparer = comparer ?? Comparer<TValue>.Default;
+	}
+
+	/// <inheritdoc />
 	public IComparer<TKey> KeyComparer { get; }
+
+	/// <inheritdoc />
+	public IComparer<TValue> Comparer { get; }
+
+	/// <inheritdoc />
+	public void Insert(int index, TKey key, TValue value) { TODO_IMPLEMENT_ME(); }
+
+	/// <inheritdoc />
+	public void Add(TKey key, TValue value) { TODO_IMPLEMENT_ME(); }
+
+	/// <inheritdoc />
+	public bool Remove(TKey key) { return TODO_IMPLEMENT_ME; }
+
+	/// <inheritdoc />
+	public TNode Find(TKey key) { return TODO_IMPLEMENT_ME; }
+
+	/// <inheritdoc />
+	public bool Contains(TKey key) { return TODO_IMPLEMENT_ME; }
 }
