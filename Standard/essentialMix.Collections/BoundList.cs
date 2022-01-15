@@ -143,6 +143,18 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 			}
 		}
 
+		/// <inheritdoc />
+		public void AddRange(IEnumerable<T> enumerable) { _list.AddRange(enumerable); }
+
+		/// <inheritdoc />
+		public void InsertRange(int index, IEnumerable<T> enumerable) { _list.InsertRange(index, enumerable); }
+
+		/// <inheritdoc />
+		public void RemoveRange(int index, int count) { _list.RemoveRange(index, count); }
+
+		/// <inheritdoc />
+		public int RemoveAll(Predicate<T> match) { return _list.RemoveAll(match); }
+
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			lock (_root)
@@ -167,6 +179,21 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 			}
 		}
 
+		/// <inheritdoc />
+		public int IndexOf(T item, int index) { return _list.IndexOf(item, index); }
+
+		/// <inheritdoc />
+		public int IndexOf(T item, int index, int count) { return _list.IndexOf(item, index, count); }
+
+		/// <inheritdoc />
+		public int LastIndexOf(T item) { return _list.LastIndexOf(item); }
+
+		/// <inheritdoc />
+		public int LastIndexOf(T item, int index) { return _list.LastIndexOf(item, index); }
+
+		/// <inheritdoc />
+		public int LastIndexOf(T item, int index, int count) { return _list.LastIndexOf(item, index, count); }
+
 		public bool Contains(T item)
 		{
 			lock (_root)
@@ -174,6 +201,33 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 				return _list.Contains(item);
 			}
 		}
+
+		/// <inheritdoc />
+		public T Find(Predicate<T> match) { return _list.Find(match); }
+
+		/// <inheritdoc />
+		public T FindLast(Predicate<T> match) { return _list.FindLast(match); }
+
+		/// <inheritdoc />
+		public IEnumerable<T> FindAll(Predicate<T> match) { return _list.FindAll(match); }
+
+		/// <inheritdoc />
+		public int FindIndex(Predicate<T> match) { return _list.FindIndex(match); }
+
+		/// <inheritdoc />
+		public int FindIndex(int startIndex, Predicate<T> match) { return _list.FindIndex(startIndex, match); }
+
+		/// <inheritdoc />
+		public int FindLastIndex(Predicate<T> match) { return _list.FindLastIndex(match); }
+
+		/// <inheritdoc />
+		public int FindLastIndex(int startIndex, Predicate<T> match) { return _list.FindLastIndex(startIndex, match); }
+
+		/// <inheritdoc />
+		public int FindLastIndex(int startIndex, int count, Predicate<T> match) { return _list.FindLastIndex(startIndex, count, match); }
+
+		/// <inheritdoc />
+		public IEnumerable<T> GetRange(int index, int count) { return _list.GetRange(index, count); }
 
 		public void CopyTo(T[] array, int arrayIndex)
 		{
@@ -273,7 +327,12 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 	}
 
 	public BoundList(int limit, [NotNull] IEnumerable<T> enumerable)
-		: this(limit, 0)
+		: this(limit, 0, enumerable)
+	{
+	}
+
+	public BoundList(int limit, int capacity, [NotNull] IEnumerable<T> enumerable)
+		: this(limit, capacity)
 	{
 		InsertRange(0, enumerable);
 	}
@@ -420,7 +479,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 	// required, the capacity of the list is increased to twice the previous
 	// capacity or the new size, whichever is larger.
 	//
-	public void AddRange([NotNull] IEnumerable<T> enumerable)
+	public void AddRange(IEnumerable<T> enumerable)
 	{
 		InsertRange(Count, enumerable);
 	}
@@ -429,7 +488,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 	// required, the capacity of the list is increased to twice the previous
 	// capacity or the new size, whichever is larger.  Ranges may be added
 	// to the end of the list by setting index to the List's size.
-	public void InsertRange(int index, [NotNull] IEnumerable<T> enumerable)
+	public void InsertRange(int index, IEnumerable<T> enumerable)
 	{
 		if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 
@@ -518,7 +577,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 
 	// This method removes all items which matches the predicate.
 	// The complexity is O(n).   
-	public int RemoveAll([NotNull] Predicate<T> match)
+	public int RemoveAll(Predicate<T> match)
 	{
 		int freeIndex = 0;   // the first free slot in items array
 
@@ -670,7 +729,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 		return ObjectHelper.IsCompatible<T>(item) && Contains((T)item);
 	}
 
-	public T Find([NotNull] Predicate<T> match)
+	public T Find(Predicate<T> match)
 	{
 		for (int i = 0; i < Count; i++)
 		{
@@ -680,7 +739,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 		return default(T);
 	}
 
-	public T FindLast([NotNull] Predicate<T> match)
+	public T FindLast(Predicate<T> match)
 	{
 		for (int i = Count - 1; i >= 0; i--)
 		{
@@ -691,7 +750,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 		return default(T);
 	}
 
-	public IEnumerable<T> FindAll([NotNull] Predicate<T> match)
+	public IEnumerable<T> FindAll(Predicate<T> match)
 	{
 		for (int i = 0; i < Count; i++)
 		{
@@ -701,12 +760,12 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 		}
 	}
 
-	public int FindIndex([NotNull] Predicate<T> match)
+	public int FindIndex(Predicate<T> match)
 	{
 		return FindIndex(0, Count, match);
 	}
 
-	public int FindIndex(int startIndex, [NotNull] Predicate<T> match)
+	public int FindIndex(int startIndex, Predicate<T> match)
 	{
 		return FindIndex(startIndex, -1, match);
 	}
@@ -717,17 +776,17 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 		return Array.FindIndex(_items, startIndex, count, match);
 	}
 
-	public int FindLastIndex([NotNull] Predicate<T> match)
+	public int FindLastIndex(Predicate<T> match)
 	{
 		return FindLastIndex(0, -1, match);
 	}
 
-	public int FindLastIndex(int startIndex, [NotNull] Predicate<T> match)
+	public int FindLastIndex(int startIndex, Predicate<T> match)
 	{
 		return FindLastIndex(startIndex, -1, match);
 	}
 
-	public int FindLastIndex(int startIndex, int count, [NotNull] Predicate<T> match)
+	public int FindLastIndex(int startIndex, int count, Predicate<T> match)
 	{
 		Count.ValidateRange(startIndex, ref count);
 		return Array.FindLastIndex(_items, startIndex, count, match);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
@@ -8,24 +9,31 @@ namespace essentialMix.Collections;
 [Serializable]
 [DebuggerDisplay("{Degree}, Count = {Count}")]
 [StructLayout(LayoutKind.Sequential)]
-public abstract class BTreeBlockBase<TBlock, TNode, T> : BoundList<TNode>, ITreeBlockBase<TBlock, TNode, T>
-	where TBlock : BTreeBlockBase<TBlock, TNode, T>
-	where TNode : BTreeNodeBase<TNode, T>
+public abstract class BTreeBlockBase<TBlock, TNode, T> : List<TNode>, ITreeBlockBase<TBlock, TNode, T>
+	where TBlock : class, ITreeBlockBase<TBlock, TNode, T>
+	where TNode : class, ITreeNode<TNode, T>
 {
+	private List<TBlock> _children;
+
 	protected BTreeBlockBase(int degree)
 		: base(degree)
 	{
 		if (degree < 2) throw new ArgumentOutOfRangeException(nameof(degree), $"{GetType()}'s degree must be at least 2.");
+		Degree = degree;
 	}
 
 	/// <inheritdoc />
-	public IBoundList<TBlock> Children { get; set; }
+	public List<TBlock> Children
+	{
+		get => _children ??= new List<TBlock>();
+		set => _children = value;
+	}
 
 	/// <inheritdoc />
-	public int Degree => Limit;
+	public int Degree { get; }
 
 	/// <inheritdoc />
-	public bool IsLeaf => Children == null || Children.Count == 0;
+	public bool IsLeaf => _children == null || _children.Count == 0;
 
 	/// <inheritdoc />
 	public bool IsFull => Count >= 2 * Degree - 1;

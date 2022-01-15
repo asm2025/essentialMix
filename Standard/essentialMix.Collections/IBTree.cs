@@ -1,21 +1,24 @@
 ﻿using System.Collections.Generic;
+using essentialMix.Comparers;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
 /// <inheritdoc />
-public interface IBTreeBase<TBlock, TNode, T> : IBoundList<TNode>
+public interface IBTreeBase<TBlock, TNode, T> : ICollection<TNode>
 	where TBlock : class, ITreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	[NotNull]
 	TBlock Root { get; }
 	int Degree { get; }
+	int Capacity { get; }
 	int Height { get; }
 
 	[NotNull]
 	TBlock MakeBlock();
-	int Compare(TNode node1, TNode node2);
+	int Compare(TNode x, TNode y);
+	bool Equal(TNode x, TNode y);
 }
 
 /// <inheritdoc />
@@ -24,8 +27,7 @@ public interface IBTree<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	[NotNull]
-	IComparer<T> Comparer { get; }
-	void Insert(int index, T item);
+	IGenericComparer<T> Comparer { get; }
 	void Add(T item);
 	bool Remove(T item);
 	TNode Find(T item);
@@ -38,12 +40,9 @@ public interface IBTree<TBlock, TNode, TKey, TValue> : IBTreeBase<TBlock, TNode,
 	where TNode : class, ITreeNode<TNode, TKey, TValue>
 {
 	[NotNull]
-	IComparer<TKey> KeyComparer { get; }
-	[NotNull]
-	IComparer<TValue> Comparer { get; }
-	void Insert(int index, TKey key, TValue value);
-	void Add(TKey key, TValue value);
-	bool Remove(TKey key);
-	TNode Find(TKey key);
-	bool Contains(TKey key);
+	IGenericComparer<TKey> Comparer { get; }
+	void Add([NotNull] TKey key, TValue value);
+	bool Remove([NotNull] TKey key);
+	TNode Find([NotNull] TKey key);
+	bool Contains([NotNull] TKey key);
 }
