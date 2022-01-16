@@ -17,12 +17,8 @@
 		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 	
-	<PropertyGroup Condition="'$(Platform)'=='x86'">
-	  <PlatformTarget>AnyCPU</PlatformTarget>
-	</PropertyGroup>
-	
-	<PropertyGroup Condition="'$(Platform)'=='x64'">
-	  <PlatformTarget>AnyCPU</PlatformTarget>
+	<PropertyGroup Condition=" '$(Platform)'=='x64' ">
+		<PlatformTarget>x64</PlatformTarget>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'x86' ">

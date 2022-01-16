@@ -10,7 +10,7 @@
 		<LangVersion>10.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<Prefer32Bit>false</Prefer32Bit>
-		<Platforms>AnyCPU;x86;x64</Platforms>
+		<Platforms>AnyCPU;x64;x86</Platforms>
 	</PropertyGroup>
 	
 	<PropertyGroup>
@@ -24,8 +24,8 @@
 		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 	
-	<PropertyGroup Condition="'$(Platform)'=='x64'">
-	  <PlatformTarget>AnyCPU</PlatformTarget>
+	<PropertyGroup Condition=" '$(Platform)'=='x64' ">
+		<PlatformTarget>x64</PlatformTarget>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'x86' ">

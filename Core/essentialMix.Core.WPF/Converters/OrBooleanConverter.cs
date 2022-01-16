@@ -3,32 +3,31 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace essentialMix.Core.WPF.Converters
+namespace essentialMix.Core.WPF.Converters;
+
+[Localizability(LocalizationCategory.NeverLocalize)]
+public class OrBooleanConverter : IMultiValueConverter
 {
-	[Localizability(LocalizationCategory.NeverLocalize)]
-	public class OrBooleanConverter : IMultiValueConverter
+	public OrBooleanConverter()
 	{
-		public OrBooleanConverter()
+	}
+
+	/// <inheritdoc />
+	public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+	{
+		if (values == null || values.Length == 0) return true;
+
+		foreach (object value in values)
 		{
+			if (value is true) return true;
 		}
 
-		/// <inheritdoc />
-		public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-		{
-			if (values == null || values.Length == 0) return true;
+		return false;
+	}
 
-			foreach (object value in values)
-			{
-				if (value is true) return true;
-			}
-
-			return false;
-		}
-
-		/// <inheritdoc />
-		public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-		{
-			throw new NotSupportedException();
-		}
+	/// <inheritdoc />
+	public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+	{
+		throw new NotSupportedException();
 	}
 }

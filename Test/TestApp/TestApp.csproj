@@ -9,7 +9,7 @@
 		<LangVersion>10.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<Prefer32Bit>false</Prefer32Bit>
-		<Platforms>AnyCPU;x86;x64</Platforms>
+		<Platforms>AnyCPU;x64;x86</Platforms>
 	</PropertyGroup>
 	
 	<PropertyGroup>
@@ -23,8 +23,8 @@
 		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 	
-	<PropertyGroup Condition="'$(Platform)'=='x64'">
-	  <PlatformTarget>AnyCPU</PlatformTarget>
+	<PropertyGroup Condition=" '$(Platform)'=='x64' ">
+		<PlatformTarget>x64</PlatformTarget>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'x86' ">
@@ -54,16 +54,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Include="App.config" />
-		<None Include="packages.config" />
+		<ProjectReference Include="..\Test.Common\Test.Common.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

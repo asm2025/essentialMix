@@ -16,7 +16,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Bogus;
 using Bogus.DataSets;
 using essentialMix;
 using essentialMix.Collections;
@@ -24,7 +23,6 @@ using essentialMix.Comparers;
 using essentialMix.ComponentModel;
 using essentialMix.Cryptography;
 using essentialMix.Cryptography.Settings;
-using essentialMix.Exceptions;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using essentialMix.Newtonsoft.Helpers;
@@ -34,12 +32,14 @@ using essentialMix.Threading;
 using essentialMix.Threading.Helpers;
 using essentialMix.Threading.IO;
 using essentialMix.Threading.Patterns.ProducerConsumer;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Other.JonSkeet.MiscUtil.Collections;
 using Other.Microsoft.Collections;
+using Test.Common;
+using Test.Common.Model;
 using static Crayon.Output;
 using AutoResetEvent = essentialMix.Threading.AutoResetEvent;
+using Constants = Test.Common.Constants;
 using ManualResetEvent = essentialMix.Threading.ManualResetEvent;
 using Menu = EasyConsole.Menu;
 using TimeoutException = System.TimeoutException;
@@ -49,52 +49,28 @@ namespace TestApp
 {
 	internal class Program
 	{
-		private const int START = 10;
-		private const int SMALL = 10_000;
-		private const int MEDIUM = 100_000;
-		private const int HEAVY = 1_000_000;
-
-		private const int MAX_ITERATION_INC = 3;
-		private const int TOP_COUNT = 10;
-
 		private const int PAUSE_TIMEOUT = 3000;
 
 		private static readonly string __compilationText = Yellow($@"
 This is C# (a compiled language), so the test needs to run at least
 once before considering results in order for the code to be compiled
 and run at full speed. The first time this test run, it will start 
-with just {START} items and the next time when you press '{Bright.Green("Y")}', it will 
-work with {HEAVY} items.");
-
-		private static readonly Lazy<Faker> __fakeGenerator = new Lazy<Faker>(() => new Faker(), LazyThreadSafetyMode.PublicationOnly);
-		private static readonly string[] __sortAlgorithms =
-		{
-			nameof(IListExtension.SortBubble),
-			nameof(IListExtension.SortSelection),
-			nameof(IListExtension.SortInsertion),
-			nameof(IListExtension.SortHeap),
-			nameof(IListExtension.SortMerge),
-			nameof(IListExtension.SortQuick),
-			nameof(IListExtension.SortShell),
-			nameof(IListExtension.SortComb),
-			nameof(IListExtension.SortTim),
-			nameof(IListExtension.SortCocktail),
-			nameof(IListExtension.SortBitonic),
-			nameof(IListExtension.SortPancake),
-			nameof(IListExtension.SortBinary),
-			nameof(IListExtension.SortGnome),
-			nameof(IListExtension.SortBrick),
-		};
+with just {Constants.START} items and the next time when you press '{Bright.Green("Y")}', it will 
+work with {Constants.HEAVY} items.");
 
 		private static void Main()
 		{
 			Console.OutputEncoding = Encoding.UTF8;
 
+			#region Extensions
 			//TestBool();
+			//TestExpressionExtension();
+			#endregion
+
+			//TestSortAlgorithm();
+			//TestSortAlgorithms();
 
 			//TestDomainName();
-
-			//TestExpressionExtension();
 
 			//TestFibonacci();
 			//TestGroupAnagrams();
@@ -102,13 +78,21 @@ work with {HEAVY} items.");
 			//TestLevenshteinDistance();
 			//TestDeepestPit();
 
+			#region Threads
 			//TestThreadQueue();
 			//TestThreadQueueWithPriorityQueue();
 			//TestAsyncLock();
 
-			//TestSortAlgorithm();
-			//TestSortAlgorithms();
+			//TestEventWaitHandle();
 
+			//TestWaitForEvent();
+
+			//TestBlockingStream();
+			//TestConsumerStream();
+			//TestConsumerPipe();
+			#endregion
+
+			#region Collection
 			//TestLinkedQueue();
 			//TestMinMaxQueue();
 			//TestSinglyLinkedList();
@@ -154,7 +138,7 @@ work with {HEAVY} items.");
 			//TestBinomialHeapAdd();
 			//TestBinomialHeapRemove();
 			//TestBinomialHeapElementAt();
-			TestBinomialHeapDecreaseKey();
+			//TestBinomialHeapDecreaseKey();
 
 			//TestPairingHeapAdd();
 			//TestPairingHeapRemove();
@@ -169,6 +153,9 @@ work with {HEAVY} items.");
 			//TestAllHeapsPerformance();
 
 			//TestGraph();
+
+			//TestObservableCollections();
+			#endregion
 
 			//TestAsymmetric();
 
@@ -187,17 +174,7 @@ work with {HEAVY} items.");
 
 			//TestAppInfo();
 
-			//TestObservableCollections();
-
 			//TestEnumerateDirectoriesAndFiles();
-
-			//TestEventWaitHandle();
-
-			//TestWaitForEvent();
-
-			//TestBlockingStream();
-			//TestConsumerStream();
-			//TestConsumerPipe();
 
 			ConsoleHelper.Pause();
 		}
@@ -522,7 +499,7 @@ work with {HEAVY} items.");
 		private static void TestThreadQueue()
 		{
 			int iteration = 1;
-			int[] values = Enumerable.Range(1, START).ToArray();
+			int[] values = Enumerable.Range(1, Constants.START).ToArray();
 			Console.WriteLine();
 			Console.Write($"Would you like to use timeout for the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to skip timeout. ");
 			int timeout = Console.ReadKey(true).Key == ConsoleKey.Y
@@ -538,7 +515,7 @@ work with {HEAVY} items.");
 			if (DebugHelper.DebugMode)
 			{
 				// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
-				threads = LimitThreads()
+				threads = Constants.LimitThreads()
 							? 1
 							: RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
 			}
@@ -666,7 +643,7 @@ work with {HEAVY} items.");
 						foreach (ThreadQueueMode m in modes)
 							queueModes.Enqueue(m);
 
-						if (iteration < MAX_ITERATION_INC) values = Enumerable.Range(1, values.Length * ++iteration).ToArray();
+						if (iteration < Constants.MAX_ITERATION_INC) values = Enumerable.Range(1, values.Length * ++iteration).ToArray();
 					}
 
 					continue;
@@ -737,7 +714,7 @@ work with {HEAVY} items.");
 		private static void TestThreadQueueWithPriorityQueue()
 		{
 			int iteration = 1;
-			Student[] values = GetRandomStudents(START);
+			Student[] values = Generator.GetRandomStudents(Constants.START);
 			Console.WriteLine();
 			Console.Write($"Would you like to use timeout for the tests? {Bright.Green("[Y]")} or {Dim("any other key")} to skip timeout. ");
 			int timeout = Console.ReadKey(true).Key == ConsoleKey.Y
@@ -750,7 +727,7 @@ work with {HEAVY} items.");
 			if (DebugHelper.DebugMode)
 			{
 				// if in debug mode and LimitThreads is true, use just 1 thread for easier debugging.
-				threads = LimitThreads()
+				threads = Constants.LimitThreads()
 							? 1
 							: RNGRandomHelper.Next(TaskHelper.QueueMinimum, TaskHelper.QueueMaximum);
 			}
@@ -781,10 +758,10 @@ work with {HEAVY} items.");
 				{
 					if (!RepeatTheTest(queueModes, modes)) continue;
 
-					if (iteration < MAX_ITERATION_INC)
+					if (iteration < Constants.MAX_ITERATION_INC)
 					{
 						iteration++;
-						values = GetRandomStudents(values.Length * iteration);
+						values = Generator.GetRandomStudents(values.Length * iteration);
 					}
 				}
 
@@ -1050,8 +1027,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 		{
 			const string ALGORITHM = nameof(IListExtension.SortInsertion);
 
-			Action<IList<int>, int, int, IComparer<int>, bool> sortNumbers = GetAlgorithm<int>(ALGORITHM);
-			Action<IList<string>, int, int, IComparer<string>, bool> sortStrings = GetAlgorithm<string>(ALGORITHM);
+			Action<IList<int>, int, int, IComparer<int>, bool> sortNumbers = Generator.GetSortAlgorithm<int>(ALGORITHM);
+			Action<IList<string>, int, int, IComparer<string>, bool> sortStrings = Generator.GetSortAlgorithm<string>(ALGORITHM);
 			Console.WriteLine($"Testing {Bright.Cyan(ALGORITHM)} algorithm: ");
 
 			Stopwatch watch = new Stopwatch();
@@ -1062,8 +1039,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 			do
 			{
 				Console.Clear();
-				int[] numbers = GetRandomIntegers(RNGRandomHelper.Next(5, 20));
-				string[] strings = GetRandomStrings(RNGRandomHelper.Next(3, 10)).ToArray();
+				int[] numbers = Generator.GetRandomIntegers(RNGRandomHelper.Next(5, 20));
+				string[] strings = Generator.GetRandomStrings(RNGRandomHelper.Next(3, 10)).ToArray();
 				Console.WriteLine(Bright.Cyan("Numbers: ") + string.Join(", ", numbers));
 				Console.WriteLine(Bright.Cyan("String: ") + string.Join(", ", strings.Select(e => e.SingleQuote())));
 
@@ -1109,8 +1086,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 			string sectionSeparator = Bright.Magenta(new string('*', 80));
 			bool more;
 			int tests = 0;
-			int[] numbers = GetRandomIntegers(START);
-			string[] strings = GetRandomStrings(START).ToArray();
+			int[] numbers = Generator.GetRandomIntegers(Constants.START);
+			string[] strings = Generator.GetRandomStrings(Constants.START).ToArray();
 
 			do
 			{
@@ -1123,11 +1100,11 @@ The external id reflects the order by which they are scheduled and the -* part i
 					CompilationHint();
 				}
 
-				foreach (string algorithm in __sortAlgorithms)
+				foreach (string algorithm in Constants.SortAlgorithms)
 				{
 					GC.Collect();
-					Action<IList<int>, int, int, IComparer<int>, bool> sortNumbers = GetAlgorithm<int>(algorithm);
-					Action<IList<string>, int, int, IComparer<string>, bool> sortStrings = GetAlgorithm<string>(algorithm);
+					Action<IList<int>, int, int, IComparer<int>, bool> sortNumbers = Generator.GetSortAlgorithm<int>(algorithm);
+					Action<IList<string>, int, int, IComparer<string>, bool> sortStrings = Generator.GetSortAlgorithm<string>(algorithm);
 					Console.WriteLine(sectionSeparator);
 					Console.WriteLine($"Testing {Bright.Cyan(algorithm)} algorithm: ");
 
@@ -1153,21 +1130,21 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(sectionSeparator);
 				Console.WriteLine(Bright.Yellow("Finished"));
 				Console.WriteLine();
-				Console.WriteLine(Bright.Green($"Fastest {TOP_COUNT} numeric sort:"));
+				Console.WriteLine(Bright.Green($"Fastest {Constants.TOP_COUNT} numeric sort:"));
 
 				foreach (KeyValuePair<string, long> pair in numericResults
 															.OrderBy(e => e.Value)
-															.Take(TOP_COUNT))
+															.Take(Constants.TOP_COUNT))
 				{
 					Console.WriteLine($"{pair.Key} {pair.Value}");
 				}
 
 				Console.WriteLine();
-				Console.WriteLine(Bright.Green($"Fastest {TOP_COUNT} string sort:"));
+				Console.WriteLine(Bright.Green($"Fastest {Constants.TOP_COUNT} string sort:"));
 
 				foreach (KeyValuePair<string, long> pair in stringResults
 															.OrderBy(e => e.Value)
-															.Take(TOP_COUNT))
+															.Take(Constants.TOP_COUNT))
 				{
 					Console.WriteLine($"{pair.Key} {pair.Value}");
 				}
@@ -1190,16 +1167,16 @@ The external id reflects the order by which they are scheduled and the -* part i
 				switch (tests)
 				{
 					case 0:
-						numbers = GetRandomIntegers(SMALL);
-						strings = GetRandomStrings(SMALL).ToArray();
+						numbers = Generator.GetRandomIntegers(Constants.SMALL);
+						strings = Generator.GetRandomStrings(Constants.SMALL).ToArray();
 						break;
 					case 1:
-						numbers = GetRandomIntegers(MEDIUM);
-						strings = GetRandomStrings(MEDIUM).ToArray();
+						numbers = Generator.GetRandomIntegers(Constants.MEDIUM);
+						strings = Generator.GetRandomStrings(Constants.MEDIUM).ToArray();
 						break;
 					case 2:
-						numbers = GetRandomIntegers(HEAVY);
-						strings = GetRandomStrings(HEAVY).ToArray();
+						numbers = Generator.GetRandomIntegers(Constants.HEAVY);
+						strings = Generator.GetRandomStrings(Constants.HEAVY).ToArray();
 						break;
 				}
 
@@ -1213,7 +1190,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			Title("Testing LinkedQueue...");
 
 			int len = RNGRandomHelper.Next(5, 20);
-			int[] values = GetRandomIntegers(len);
+			int[] values = Generator.GetRandomIntegers(len);
 			Console.WriteLine("Array: " + string.Join(", ", values));
 
 			Console.WriteLine("As Queue:");
@@ -1248,7 +1225,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			Title("Testing MinMaxQueue...");
 
 			int len = RNGRandomHelper.Next(5, 20);
-			int[] values = GetRandomIntegers(len);
+			int[] values = Generator.GetRandomIntegers(len);
 			Console.WriteLine("Array: " + string.Join(", ", values));
 
 			Console.WriteLine("As Queue:");
@@ -1292,7 +1269,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			bool more;
 			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			IList<int> values = GetRandomIntegers(true, START);
+			IList<int> values = Generator.GetRandomIntegers(true, Constants.START);
 			SinglyLinkedList<int> list = new SinglyLinkedList<int>();
 
 			do
@@ -1398,7 +1375,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, HEAVY);
+				values = Generator.GetRandomIntegers(true, Constants.HEAVY);
 				tests++;
 			}
 			while (more);
@@ -1411,7 +1388,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			bool more;
 			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			IList<int> values = GetRandomIntegers(true, START);
+			IList<int> values = Generator.GetRandomIntegers(true, Constants.START);
 			LinkedList<int> list = new LinkedList<int>();
 
 			do
@@ -1515,7 +1492,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, HEAVY);
+				values = Generator.GetRandomIntegers(true, Constants.HEAVY);
 				tests++;
 			}
 			while (more);
@@ -1528,12 +1505,12 @@ The external id reflects the order by which they are scheduled and the -* part i
 			bool more;
 			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, START);
+			int[] values = Generator.GetRandomIntegers(true, Constants.START);
 			Deque<int> deque = new Deque<int>();
 
 			do
 			{
-				bool canPrint = values.Length <= START * 2;
+				bool canPrint = values.Length <= Constants.START * 2;
 				Console.Clear();
 				Title("Testing Deque...");
 				CompilationHint();
@@ -1561,7 +1538,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 1) continue;
-				values = GetRandomIntegers(true, tests == 0 ? START * 2 : HEAVY);
+				values = Generator.GetRandomIntegers(true, tests == 0 ? Constants.START * 2 : Constants.HEAVY);
 				tests++;
 			}
 			while (more);
@@ -1656,12 +1633,12 @@ The external id reflects the order by which they are scheduled and the -* part i
 			bool more;
 			int iteration = 0;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, START);
+			int[] values = Generator.GetRandomIntegers(true, Constants.START);
 			LinkedDeque<int> deque = new LinkedDeque<int>();
 
 			do
 			{
-				bool canPrint = values.Length <= START * 2;
+				bool canPrint = values.Length <= Constants.START * 2;
 				Console.Clear();
 				Title("Testing Deque...");
 				CompilationHint();
@@ -1689,7 +1666,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || iteration > 1) continue;
-				values = GetRandomIntegers(true, iteration == 0 ? START * 2 : HEAVY);
+				values = Generator.GetRandomIntegers(true, iteration == 0 ? Constants.START * 2 : Constants.HEAVY);
 				iteration++;
 			}
 			while (more);
@@ -1783,12 +1760,12 @@ The external id reflects the order by which they are scheduled and the -* part i
 			bool more;
 			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			int[] values = Enumerable.Range(1, START).ToArray();
+			int[] values = Enumerable.Range(1, Constants.START).ToArray();
 			CircularBuffer<int> buffer = new CircularBuffer<int>(values.Length / 2);
 
 			do
 			{
-				bool canPrint = values.Length <= START * 2;
+				bool canPrint = values.Length <= Constants.START * 2;
 				Console.Clear();
 				Title("Testing CircularBuffer...");
 				CompilationHint();
@@ -1815,7 +1792,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 1) continue;
-				values = Enumerable.Range(1, tests == 0 ? START * 2 : HEAVY).ToArray();
+				values = Enumerable.Range(1, tests == 0 ? Constants.START * 2 : Constants.HEAVY).ToArray();
 				tests++;
 			}
 			while (more);
@@ -1918,12 +1895,12 @@ The external id reflects the order by which they are scheduled and the -* part i
 			bool more;
 			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			int[] values = Enumerable.Range(1, START).ToArray();
+			int[] values = Enumerable.Range(1, Constants.START).ToArray();
 			LinkedCircularBuffer<int> buffer = new LinkedCircularBuffer<int>(values.Length / 2);
 
 			do
 			{
-				bool canPrint = values.Length <= START * 2;
+				bool canPrint = values.Length <= Constants.START * 2;
 				Console.Clear();
 				Title("Testing LinkedCircularBuffer...");
 				CompilationHint();
@@ -1950,7 +1927,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 1) continue;
-				values = Enumerable.Range(1, tests == 0 ? START * 2 : HEAVY).ToArray();
+				values = Enumerable.Range(1, tests == 0 ? Constants.START * 2 : Constants.HEAVY).ToArray();
 				tests++;
 			}
 			while (more);
@@ -2053,12 +2030,12 @@ The external id reflects the order by which they are scheduled and the -* part i
 			bool more;
 			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			IList<uint> values = Enumerable.Range(1, START).Select(e => (uint)e).ToArray();
+			IList<uint> values = Enumerable.Range(1, Constants.START).Select(e => (uint)e).ToArray();
 			BitCollection collection = new BitCollection(values.Max());
 
 			do
 			{
-				bool canPrint = values.Count <= START * 2;
+				bool canPrint = values.Count <= Constants.START * 2;
 				Console.Clear();
 				Title("Testing BitCollection...");
 				CompilationHint();
@@ -2076,7 +2053,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 1) continue;
-				values = Enumerable.Range(1, tests == 0 ? START * 2 : HEAVY).Select(e => (uint)e).ToArray();
+				values = Enumerable.Range(1, tests == 0 ? Constants.START * 2 : Constants.HEAVY).Select(e => (uint)e).ToArray();
 				collection.Maximum = values.Max();
 				tests++;
 			}
@@ -2188,12 +2165,12 @@ The external id reflects the order by which they are scheduled and the -* part i
 			bool more;
 			int tests = 0;
 			Stopwatch clock = new Stopwatch();
-			int[] values = GetRandomIntegers(true, START);
+			int[] values = Generator.GetRandomIntegers(true, Constants.START);
 			QueueAdapter<Queue<int>, int> adapter = new QueueAdapter<Queue<int>, int>(new Queue<int>());
 
 			do
 			{
-				bool canPrint = values.Length <= START * 2;
+				bool canPrint = values.Length <= Constants.START * 2;
 				Console.Clear();
 				Title("Testing QueueAdapter...");
 				CompilationHint();
@@ -2209,7 +2186,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 1) continue;
-				values = GetRandomIntegers(true, tests == 0 ? START * 2 : HEAVY);
+				values = Generator.GetRandomIntegers(true, tests == 0 ? Constants.START * 2 : Constants.HEAVY);
 				tests++;
 			}
 			while (more);
@@ -2387,7 +2364,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.Clear();
 				Title("Testing BinarySearchTree.Add()...");
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(true, len);
+				int[] values = Generator.GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				Console.WriteLine(Bright.Green("Test adding..."));
@@ -2421,7 +2398,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.Clear();
 				Title("Testing BinarySearchTree.Remove()...");
 				int len = RNGRandomHelper.Next(1, 12);
-				IList<int> values = GetRandomIntegers(true, len);
+				IList<int> values = Generator.GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				Console.WriteLine(Bright.Green("Test adding..."));
@@ -2512,7 +2489,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.Clear();
 				Title("Testing BinarySearchTree.Balance()...");
 				int len = RNGRandomHelper.Next(1, 12);
-				IList<int> values = GetRandomIntegers(true, len);
+				IList<int> values = Generator.GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				Console.WriteLine(Bright.Green("Test adding..."));
@@ -2550,7 +2527,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			BinarySearchTree<int> tree = new BinarySearchTree<int>();
 			int len = RNGRandomHelper.Next(1, 50);
-			int[] values = GetRandomIntegers(true, len);
+			int[] values = Generator.GetRandomIntegers(true, len);
 			int min = values.Min();
 			int max = values.Max();
 			tree.Clear();
@@ -2581,7 +2558,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.Clear();
 				Title("Testing BinaryTree BranchSums...");
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(true, len);
+				int[] values = Generator.GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				tree.Clear();
@@ -2608,7 +2585,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.Clear();
 				Title("Testing BinaryTree Invert...");
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(true, len);
+				int[] values = Generator.GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				tree.Clear();
@@ -2638,7 +2615,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.Clear();
 				Title("Testing AVLTree.Add()...");
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(true, len);
+				int[] values = Generator.GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				Console.WriteLine(Bright.Green("Test adding..."));
@@ -2673,7 +2650,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing AVLTree.Remove()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				IList<int> values = GetRandomIntegers(true, len);
+				IList<int> values = Generator.GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				Console.WriteLine(Bright.Green("Test adding..."));
@@ -2763,7 +2740,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing RedBlackTree.Add()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(true, len);
+				int[] values = Generator.GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				Console.WriteLine(Bright.Green("Test adding..."));
@@ -2797,7 +2774,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.Clear();
 				Title("Testing RedBlackTree.Remove()...");
 				int len = RNGRandomHelper.Next(1, 12);
-				IList<int> values = GetRandomIntegers(true, len);
+				IList<int> values = Generator.GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				Console.WriteLine(Bright.Green("Test adding..."));
@@ -2891,7 +2868,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing all BinaryTrees...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				IList<int> values = GetRandomIntegers(true, len);
+				IList<int> values = Generator.GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				DoTheTest(binarySearchTree, values);
@@ -2939,7 +2916,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			BinarySearchTree<int> binarySearchTree = new BinarySearchTree<int>();
 			AVLTree<int> avlTree = new AVLTree<int>();
 			RedBlackTree<int> redBlackTree = new RedBlackTree<int>();
-			int[] values = GetRandomIntegers(true, 30);
+			int[] values = Generator.GetRandomIntegers(true, 30);
 
 			do
 			{
@@ -3038,7 +3015,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			BinarySearchTree<int> binarySearchTree = new BinarySearchTree<int>();
 			AVLTree<int> avlTree = new AVLTree<int>();
 			RedBlackTree<int> redBlackTree = new RedBlackTree<int>();
-			int[] values = GetRandomIntegers(true, START);
+			int[] values = Generator.GetRandomIntegers(true, Constants.START);
 
 			do
 			{
@@ -3062,7 +3039,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, HEAVY);
+				values = Generator.GetRandomIntegers(true, Constants.HEAVY);
 				tests++;
 			}
 			while (more);
@@ -3136,7 +3113,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			Stopwatch clock = new Stopwatch();
 			// this is a RedBlackTree implementation by Microsoft, just testing it.
 			SortedSet<int> sortedSet = new SortedSet<int>();
-			int[] values = GetRandomIntegers(true, START);
+			int[] values = Generator.GetRandomIntegers(true, Constants.START);
 
 			do
 			{
@@ -3154,7 +3131,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, HEAVY);
+				values = Generator.GetRandomIntegers(true, Constants.HEAVY);
 				tests++;
 			}
 			while (more);
@@ -3234,7 +3211,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing tree equality...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(true, len);
+				int[] values = Generator.GetRandomIntegers(true, len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				Console.WriteLine();
@@ -3327,7 +3304,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			{
 				int len = RNGRandomHelper.Next(10, 20);
 				Console.WriteLine(Bright.Green($"Generating {len} words: "));
-				ICollection<string> newValues = GetRandomStrings(true, len);
+				ICollection<string> newValues = Generator.GetRandomStrings(true, len);
 
 				foreach (string value in newValues)
 				{
@@ -3517,7 +3494,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			bool more;
 			Stopwatch clock = new Stopwatch();
 			SkipList<int> skipList = new SkipList<int>();
-			int[] values = GetRandomIntegers(true, 200_000);
+			int[] values = Generator.GetRandomIntegers(true, 200_000);
 
 			do
 			{
@@ -3609,7 +3586,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			bool more;
 			Stopwatch clock = new Stopwatch();
 			DisjointSet<int> disjointSet = new DisjointSet<int>();
-			IList<int> values = GetRandomIntegers(true, 12/*200_000*/);
+			IList<int> values = Generator.GetRandomIntegers(true, 12/*200_000*/);
 
 			do
 			{
@@ -3719,7 +3696,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing BinaryHeap.Add()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				IList<int> values = GetRandomIntegers(len);
+				IList<int> values = Generator.GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				BinaryHeap<int> heap = new MaxBinaryHeap<int>();
@@ -3728,7 +3705,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinBinaryHeap<int>();
 				DoTheTest(heap, values);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				BinaryHeap<double, Student> studentsHeap = new MaxBinaryHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentsHeap, students);
 
@@ -3770,7 +3747,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing BinaryHeap.Remove()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				BinaryHeap<int> heap = new MaxBinaryHeap<int>();
@@ -3779,7 +3756,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinBinaryHeap<int>();
 				DoTheTest(heap, values);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				BinaryHeap<double, Student> studentsHeap = new MaxBinaryHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentsHeap, students);
 
@@ -3828,7 +3805,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing BinaryHeap ElementAt...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				int k = RNGRandomHelper.Next(1, values.Length);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
@@ -3839,7 +3816,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinBinaryHeap<int>();
 				DoTheTest(heap, values, k);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
@@ -3883,7 +3860,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing BinaryHeap DecreaseKey...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
@@ -3893,7 +3870,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinBinaryHeap<int>();
 				DoTheTest(heap, values, int.MinValue);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
@@ -3990,7 +3967,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing BinomialHeap.Add()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				BinomialHeap<int> heap = new MaxBinomialHeap<int>();
@@ -3999,7 +3976,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinBinomialHeap<int>();
 				DoTheTest(heap, values);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students);
 
@@ -4041,7 +4018,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing BinomialHeap.Remove()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				BinomialHeap<int> heap = new MaxBinomialHeap<int>();
@@ -4050,7 +4027,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinBinomialHeap<int>();
 				DoTheTest(heap, values);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				BinomialHeap<double, Student> studentHeap = new MaxBinomialHeap<double, Student>(e => e.Grade);
@@ -4101,7 +4078,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing BinomialHeap ElementAt...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				int k = RNGRandomHelper.Next(1, values.Length);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
@@ -4112,7 +4089,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinBinomialHeap<int>();
 				DoTheTest(heap, values, k);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
@@ -4156,7 +4133,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing BinomialHeap DecreaseKey...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
@@ -4166,7 +4143,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinBinomialHeap<int>();
 				DoTheTest(heap, values, int.MinValue);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
@@ -4261,7 +4238,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing PairingHeap.Add()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				PairingHeap<int> heap = new MaxPairingHeap<int>();
@@ -4270,7 +4247,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinPairingHeap<int>();
 				DoTheTest(heap, values);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students);
 
@@ -4312,7 +4289,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing PairingHeap.Remove()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				PairingHeap<int> heap = new MaxPairingHeap<int>();
@@ -4321,7 +4298,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinPairingHeap<int>();
 				DoTheTest(heap, values);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				PairingHeap<double, Student> studentHeap = new MaxPairingHeap<double, Student>(e => e.Grade);
@@ -4372,7 +4349,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing PairingHeap ElementAt...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				int k = RNGRandomHelper.Next(1, values.Length);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
@@ -4383,7 +4360,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinPairingHeap<int>();
 				DoTheTest(heap, values, k);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
@@ -4427,7 +4404,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing PairingHeap DecreaseKey...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
@@ -4437,7 +4414,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinPairingHeap<int>();
 				DoTheTest(heap, values, int.MinValue);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
@@ -4530,7 +4507,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing FibonacciHeap.Add()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				FibonacciHeap<int> heap = new MaxFibonacciHeap<int>();
@@ -4539,7 +4516,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinFibonacciHeap<int>();
 				DoTheTest(heap, values);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				FibonacciHeap<double, Student> studentHeap = new MaxFibonacciHeap<double, Student>(e => e.Grade);
 				DoTheTest(studentHeap, students);
 
@@ -4581,7 +4558,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing FibonacciHeap.Remove()...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 
 				FibonacciHeap<int> heap = new MaxFibonacciHeap<int>();
@@ -4590,7 +4567,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinFibonacciHeap<int>();
 				DoTheTest(heap, values);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 
 				FibonacciHeap<double, Student> studentHeap = new MaxFibonacciHeap<double, Student>(e => e.Grade);
@@ -4641,7 +4618,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing FibonacciHeap ElementAt...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				int k = RNGRandomHelper.Next(1, values.Length);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
@@ -4652,7 +4629,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinFibonacciHeap<int>();
 				DoTheTest(heap, values, k);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
@@ -4696,7 +4673,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Title("Testing FibonacciHeap DecreaseKey...");
 
 				int len = RNGRandomHelper.Next(1, 12);
-				int[] values = GetRandomIntegers(len);
+				int[] values = Generator.GetRandomIntegers(len);
 				Console.WriteLine(Bright.Black("Array: ") + string.Join(", ", values));
 				Console.WriteLine(Yellow("Array [sorted]: ") + string.Join(", ", values.OrderBy(e => e)));
 
@@ -4706,7 +4683,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				heap = new MinFibonacciHeap<int>();
 				DoTheTest(heap, values, int.MinValue);
 
-				Student[] students = GetRandomStudents(len);
+				Student[] students = Generator.GetRandomStudents(len);
 				Console.WriteLine(Bright.Black("Students: ") + string.Join(", ", students.Select(e => $"{e.Name} {e.Grade:F2}")));
 				Console.WriteLine(Yellow("Students [sorted]: ") + string.Join(", ", students.OrderBy(e => e.Grade).Select(e => $"{e.Name} {e.Grade:F2}")));
 
@@ -4794,9 +4771,9 @@ The external id reflects the order by which they are scheduled and the -* part i
 			bool more;
 			Stopwatch clock = new Stopwatch();
 			int tests = 0;
-			int[] values = GetRandomIntegers(true, START);
+			int[] values = Generator.GetRandomIntegers(true, Constants.START);
 			IDictionary<string, long> result = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
-			Student[] students = GetRandomStudents(START);
+			Student[] students = Generator.GetRandomStudents(Constants.START);
 			Func<Student, double> getKey = e => e.Grade;
 
 			do
@@ -4875,8 +4852,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 				more = response.Key == ConsoleKey.Y;
 				if (!more || tests > 0) continue;
-				values = GetRandomIntegers(true, HEAVY);
-				students = GetRandomStudents(HEAVY);
+				values = Generator.GetRandomIntegers(true, Constants.HEAVY);
+				students = Generator.GetRandomStudents(Constants.HEAVY);
 				tests++;
 			}
 			while (more);
@@ -4986,7 +4963,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			{
 				int len = RNGRandomHelper.Next(1, 12);
 				Console.WriteLine(Bright.Green("Generating new characters: "));
-				char[] newValues = GetRandomChar(true, len);
+				char[] newValues = Generator.GetRandomChar(true, len);
 				int count = 0;
 
 				foreach (char value in newValues)
@@ -5037,8 +5014,8 @@ This may cause cycles but will make it much more fun for finding shortest paths.
 				char from = queue.Dequeue();
 				Action<char, char> addEdge = graph switch
 				{
-					MixedGraphList<char> mGraph => (f, t) => mGraph.AddEdge(f, t, __fakeGenerator.Value.Random.Bool()),
-					WeightedMixedGraphList<char, int> wmGraph => (f, t) => wmGraph.AddEdge(f, t, RNGRandomHelper.Next(min, max), __fakeGenerator.Value.Random.Bool()),
+					MixedGraphList<char> mGraph => (f, t) => mGraph.AddEdge(f, t, Generator.Faker.Random.Bool()),
+					WeightedMixedGraphList<char, int> wmGraph => (f, t) => wmGraph.AddEdge(f, t, RNGRandomHelper.Next(min, max), Generator.Faker.Random.Bool()),
 					WeightedGraphList<char, int> wGraph => (f, t) => wGraph.AddEdge(f, t, RNGRandomHelper.Next(min, max)),
 					_ => graph.AddEdge
 				};
@@ -5050,7 +5027,7 @@ This may cause cycles but will make it much more fun for finding shortest paths.
 					Console.WriteLine($"Adding {Bright.Cyan().Underline(from.ToString())} to {Bright.Cyan().Underline(to.ToString())}...");
 					addEdge(from, to);
 
-					if (threshold > 0 && __fakeGenerator.Value.Random.Bool())
+					if (threshold > 0 && Generator.Faker.Random.Bool())
 					{
 						queue.Enqueue(from);
 						queue.Enqueue(values.PickRandom());
@@ -5496,9 +5473,9 @@ decrypted:
 			keyedDictionary.PropertyChanged += onPropertyChanged;
 			keyedDictionary.CollectionChanged += onCollectionChanged;
 
-			int[] values = GetRandomIntegers(30);
-			char[] chars = GetRandomChar(values.Length);
-			Student[] students = GetRandomStudents(values.Length);
+			int[] values = Generator.GetRandomIntegers(30);
+			char[] chars = Generator.GetRandomChar(values.Length);
+			Student[] students = Generator.GetRandomStudents(values.Length);
 
 			do
 			{
@@ -5899,8 +5876,8 @@ decrypted:
 			Student student = new Student
 			{
 				Id = 1,
-				Name = __fakeGenerator.Value.Name.FirstName(__fakeGenerator.Value.PickRandom<Name.Gender>()),
-				Grade = __fakeGenerator.Value.Random.Double(0.0d, 100.0d)
+				Name = Generator.Faker.Name.FirstName(Generator.Faker.PickRandom<Name.Gender>()),
+				Grade = Generator.Faker.Random.Double(0.0d, 100.0d)
 			};
 			WaitForEventSettings<Student> settings = WaitForEventSettings.Create(student, nameof(Student.Happened));
 
@@ -5945,8 +5922,8 @@ decrypted:
 			Student student = new Student
 			{
 				Id = 1,
-				Name = __fakeGenerator.Value.Name.FirstName(__fakeGenerator.Value.PickRandom<Name.Gender>()),
-				Grade = __fakeGenerator.Value.Random.Double(0.0d, 100.0d)
+				Name = Generator.Faker.Name.FirstName(Generator.Faker.PickRandom<Name.Gender>()),
+				Grade = Generator.Faker.Random.Double(0.0d, 100.0d)
 			};
 			CancellationTokenSource cts = null;
 			TimedCallback timedCallback = null;
@@ -6040,8 +6017,8 @@ decrypted:
 			Student student = new Student
 			{
 				Id = 1,
-				Name = __fakeGenerator.Value.Name.FirstName(__fakeGenerator.Value.PickRandom<Name.Gender>()),
-				Grade = __fakeGenerator.Value.Random.Double(0.0d, 100.0d)
+				Name = Generator.Faker.Name.FirstName(Generator.Faker.PickRandom<Name.Gender>()),
+				Grade = Generator.Faker.Random.Double(0.0d, 100.0d)
 			};
 			CancellationTokenSource cts = null;
 			TimedCallback timedCallback = null;
@@ -6134,8 +6111,8 @@ decrypted:
 			Student student = new Student
 			{
 				Id = 1,
-				Name = __fakeGenerator.Value.Name.FirstName(__fakeGenerator.Value.PickRandom<Name.Gender>()),
-				Grade = __fakeGenerator.Value.Random.Double(0.0d, 100.0d)
+				Name = Generator.Faker.Name.FirstName(Generator.Faker.PickRandom<Name.Gender>()),
+				Grade = Generator.Faker.Random.Double(0.0d, 100.0d)
 			};
 			CancellationTokenSource cts = null;
 			TimedCallback timedCallback = null;
@@ -6244,141 +6221,6 @@ decrypted:
 			return token.IsCancellationRequested
 						? default(ConsoleKeyInfo)
 						: Console.ReadKey(intercept);
-		}
-
-		[NotNull]
-		private static Action<IList<T>, int, int, IComparer<T>, bool> GetAlgorithm<T>([NotNull] string name)
-		{
-			return name switch
-			{
-				nameof(IListExtension.SortBubble) => IListExtension.SortBubble,
-				nameof(IListExtension.SortSelection) => IListExtension.SortSelection,
-				nameof(IListExtension.SortInsertion) => IListExtension.SortInsertion,
-				nameof(IListExtension.SortHeap) => IListExtension.SortHeap,
-				nameof(IListExtension.SortMerge) => IListExtension.SortMerge,
-				nameof(IListExtension.SortQuick) => IListExtension.SortQuick,
-				nameof(IListExtension.SortShell) => IListExtension.SortShell,
-				nameof(IListExtension.SortComb) => IListExtension.SortComb,
-				nameof(IListExtension.SortTim) => IListExtension.SortTim,
-				nameof(IListExtension.SortCocktail) => IListExtension.SortCocktail,
-				nameof(IListExtension.SortBitonic) => IListExtension.SortBitonic,
-				nameof(IListExtension.SortPancake) => IListExtension.SortPancake,
-				nameof(IListExtension.SortBinary) => IListExtension.SortBinary,
-				nameof(IListExtension.SortGnome) => IListExtension.SortGnome,
-				nameof(IListExtension.SortBrick) => IListExtension.SortBrick,
-				_ => throw new NotFoundException()
-			};
-		}
-
-		private static bool RandomBool() { return RandomHelper.Default.Next(1) == 1; }
-
-		[NotNull]
-		private static int[] GetRandomIntegers(int len = 0) { return GetRandomIntegers(false, len); }
-
-		[NotNull]
-		private static int[] GetRandomIntegers(bool unique, int len = 0)
-		{
-			const double GAPS_THRESHOLD = 0.25d;
-
-			if (len < 1) len = RNGRandomHelper.Next(1, 12);
-
-			int[] values = new int[len];
-
-			if (unique)
-			{
-				int gaps = (int)(len * GAPS_THRESHOLD);
-				values = Enumerable.Range(1, len).ToArray();
-
-				int min = len + 1, max = min + gaps + 1;
-
-				for (int i = 0; i < gaps; i++)
-					values[RNGRandomHelper.Next(0, values.Length - 1)] = RNGRandomHelper.Next(min, max);
-
-				values.Shuffle();
-			}
-			else
-			{
-				for (int i = 0; i < len; i++)
-					values[i] = RNGRandomHelper.Next(1, short.MaxValue);
-			}
-
-			return values;
-		}
-
-		[NotNull]
-		private static char[] GetRandomChar(int len = 0) { return GetRandomChar(false, len); }
-
-		[NotNull]
-		private static char[] GetRandomChar(bool unique, int len = 0)
-		{
-			if (len < 1) len = RNGRandomHelper.Next(1, 12);
-
-			char[] values = new char[len];
-
-			if (unique)
-			{
-				int i = 0;
-				HashSet<char> set = new HashSet<char>();
-
-				while (i < len)
-				{
-					char value = (char)RNGRandomHelper.Next('a', 'z');
-					if (!set.Add(value)) continue;
-					values[i++] = value;
-				}
-			}
-			else
-			{
-				for (int i = 0; i < len; i++)
-				{
-					values[i] = (char)RNGRandomHelper.Next('a', 'z');
-				}
-			}
-
-			return values;
-		}
-
-		[NotNull]
-		private static ICollection<string> GetRandomStrings(int len = 0) { return GetRandomStrings(false, len); }
-
-		[NotNull]
-		private static ICollection<string> GetRandomStrings(bool unique, int len = 0)
-		{
-			if (len < 1) len = RNGRandomHelper.Next(1, 12);
-			if (!unique) return __fakeGenerator.Value.Random.WordsArray(len);
-
-			HashSet<string> set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-			while (set.Count < len)
-				set.Add(__fakeGenerator.Value.Random.Word());
-
-			return set;
-		}
-
-		[NotNull]
-		private static Student[] GetRandomStudents(int len = 0)
-		{
-			if (len < 1) len = RNGRandomHelper.Next(1, 12);
-
-			Student[] students = new Student[len];
-
-			for (int i = 0; i < len; i++)
-			{
-				students[i] = new Student
-				{
-					Id = i + 1,
-					Name = __fakeGenerator.Value.Name.FirstName(__fakeGenerator.Value.PickRandom<Name.Gender>()),
-					Grade = __fakeGenerator.Value.Random.Double(0.0d, 100.0d)
-				};
-			}
-
-			return students;
-		}
-
-		private static bool LimitThreads()
-		{
-			// change this to true to use 1 thread only for debugging
-			return false;
 		}
 	}
 }

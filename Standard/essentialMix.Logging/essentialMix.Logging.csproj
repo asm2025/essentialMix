@@ -9,15 +9,15 @@
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\sign.pfx</AssemblyOriginatorKeyFile>
-		<Platforms>AnyCPU;x86;x64</Platforms>
+		<Platforms>AnyCPU;x64;x86</Platforms>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
 		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 	
-	<PropertyGroup Condition="'$(Platform)'=='x64'">
-	  <PlatformTarget>AnyCPU</PlatformTarget>
+	<PropertyGroup Condition=" '$(Platform)'=='x64' ">
+		<PlatformTarget>x64</PlatformTarget>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'x86' ">

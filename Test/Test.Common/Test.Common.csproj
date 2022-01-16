@@ -2,21 +2,14 @@
 
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-		<Platform Condition=" '$(Platform)' == '' ">x64</Platform>
-		<OutputType>Exe</OutputType>
-		<TargetFramework>net6.0</TargetFramework>
+		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+		<TargetFramework>netstandard2.0</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>10.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<Prefer32Bit>false</Prefer32Bit>
 		<Platforms>AnyCPU;x64;x86</Platforms>
-	</PropertyGroup>
-	
-	<PropertyGroup>
-		<AssemblyVersion>12.33.0.0</AssemblyVersion>
-		<FileVersion>21.9.4.0</FileVersion>
-		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
-		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
+		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -54,19 +47,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Bogus" Version="34.0.1" />
 		<PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\C++\essentailMix.MediaFoundation\essentailMix.MediaFoundation.vcxproj" />
-		<ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
+	  <ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup>
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
 if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
 		</PreBuildEvent>
-		<IsPublishable>False</IsPublishable>
 	</PropertyGroup>
 
 </Project>

@@ -3,53 +3,52 @@ using System.Collections.Generic;
 using System.Windows.Input;
 using essentialMix.Core.WPF.Helpers;
 
-namespace essentialMix.Core.WPF.Commands
+namespace essentialMix.Core.WPF.Commands;
+
+public abstract class RelayCommandBase : IRelayCommandBase
 {
-	public abstract class RelayCommandBase : IRelayCommandBase
+	private bool _isAutomaticRequeryDisabled;
+	private IList<WeakReference> _canExecuteChangedHandlers;
+
+	protected RelayCommandBase()
 	{
-		private bool _isAutomaticRequeryDisabled;
-		private IList<WeakReference> _canExecuteChangedHandlers;
+		_canExecuteChangedHandlers = new List<WeakReference>();
+	}
 
-		protected RelayCommandBase()
+	public event EventHandler CanExecuteChanged
+	{
+		add
 		{
-			_canExecuteChangedHandlers = new List<WeakReference>();
+			if (!IsAutomaticRequeryDisabled) CommandManager.RequerySuggested += value;
+			CommandManagerHelper.AddWeakReferenceHandler(ref _canExecuteChangedHandlers, value, 2);
 		}
-
-		public event EventHandler CanExecuteChanged
+		remove
 		{
-			add
-			{
-				if (!IsAutomaticRequeryDisabled) CommandManager.RequerySuggested += value;
-				CommandManagerHelper.AddWeakReferenceHandler(ref _canExecuteChangedHandlers, value, 2);
-			}
-			remove
-			{
-				if (!IsAutomaticRequeryDisabled) CommandManager.RequerySuggested -= value;
-				CommandManagerHelper.RemoveWeakReferenceHandler(_canExecuteChangedHandlers, value);
-			}
+			if (!IsAutomaticRequeryDisabled) CommandManager.RequerySuggested -= value;
+			CommandManagerHelper.RemoveWeakReferenceHandler(_canExecuteChangedHandlers, value);
 		}
+	}
 
-		public bool IsAutomaticRequeryDisabled
+	public bool IsAutomaticRequeryDisabled
+	{
+		get => _isAutomaticRequeryDisabled;
+		set
 		{
-			get => _isAutomaticRequeryDisabled;
-			set
-			{
-				if (_isAutomaticRequeryDisabled == value) return;
+			if (_isAutomaticRequeryDisabled == value) return;
 
-				if (value)
-					CommandManagerHelper.RemoveHandlersFromRequerySuggested(_canExecuteChangedHandlers);
-				else
-					CommandManagerHelper.AddHandlersToRequerySuggested(_canExecuteChangedHandlers);
+			if (value)
+				CommandManagerHelper.RemoveHandlersFromRequerySuggested(_canExecuteChangedHandlers);
+			else
+				CommandManagerHelper.AddHandlersToRequerySuggested(_canExecuteChangedHandlers);
 
-				_isAutomaticRequeryDisabled = value;
-			}
+			_isAutomaticRequeryDisabled = value;
 		}
+	}
 
-		public void RaiseCanExecuteChanged() { OnCanExecuteChanged(); }
+	public void RaiseCanExecuteChanged() { OnCanExecuteChanged(); }
 
-		protected virtual void OnCanExecuteChanged()
-		{
-			CommandManagerHelper.CallWeakReferenceHandlers(_canExecuteChangedHandlers);
-		}
+	protected virtual void OnCanExecuteChanged()
+	{
+		CommandManagerHelper.CallWeakReferenceHandlers(_canExecuteChangedHandlers);
 	}
 }

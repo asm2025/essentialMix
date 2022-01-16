@@ -4,26 +4,25 @@ using System.Windows;
 using System.Windows.Data;
 using JetBrains.Annotations;
 
-namespace essentialMix.Core.WPF.Converters
+namespace essentialMix.Core.WPF.Converters;
+
+[Localizability(LocalizationCategory.NeverLocalize)]
+public class InverseBooleanConverter : IValueConverter
 {
-	[Localizability(LocalizationCategory.NeverLocalize)]
-	public class InverseBooleanConverter : IValueConverter
+	public InverseBooleanConverter()
 	{
-		public InverseBooleanConverter()
-		{
-		}
+	}
 
-		/// <inheritdoc />
-		[NotNull]
-		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-		{
-			return value is false;
-		}
+	/// <inheritdoc />
+	[NotNull]
+	public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+	{
+		return value is false;
+	}
 
-		/// <inheritdoc />
-		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-		{
-			return value is not true;
-		}
+	/// <inheritdoc />
+	public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+	{
+		return value is not true;
 	}
 }
