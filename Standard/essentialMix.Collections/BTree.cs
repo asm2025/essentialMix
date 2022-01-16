@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using essentialMix.Collections.DebugView;
 using essentialMix.Comparers;
 using JetBrains.Annotations;
@@ -57,7 +58,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 
 	protected BTreeBase(int degree)
 	{
-		if (degree < 2) throw new ArgumentOutOfRangeException(nameof(degree), $"{GetType()}'s degree must be at least 2.");
+		if (degree < BTree.MINIMUM_DEGREE) throw new ArgumentOutOfRangeException(nameof(degree), $"{GetType()}'s degree must be at least 2.");
 		Degree = degree;
 		Height = 1;
 	}
@@ -678,5 +679,72 @@ public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNo
 			block.RemoveAt(0);
 			return node;
 		}
+	}
+}
+
+[Serializable]
+public class BTree<T> : BTree<BTreeBlock<T>, BTreeNode<T>, T>
+{
+	/// <inheritdoc />
+	public BTree(int degree)
+		: base(degree)
+	{
+	}
+
+	/// <inheritdoc />
+	public BTree(int degree, IGenericComparer<T> comparer)
+		: base(degree, comparer)
+	{
+	}
+
+	/// <inheritdoc />
+	public override BTreeBlock<T> MakeBlock() { return new BTreeBlock<T>(Degree); }
+}
+
+[Serializable]
+public class BTree<TKey, TValue> : BTree<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TKey, TValue>
+{
+	/// <inheritdoc />
+	public BTree(int degree)
+		: base(degree)
+	{
+	}
+
+	/// <inheritdoc />
+	public BTree(int degree, IGenericComparer<TKey> comparer)
+		: base(degree, comparer)
+	{
+	}
+
+	/// <inheritdoc />
+	public override BTreeBlock<TKey, TValue> MakeBlock() { return new BTreeBlock<TKey, TValue>(Degree); }
+}
+
+public static class BTree
+{
+	public const int MINIMUM_DEGREE = 2;
+
+	public static int MinimumEntries(int degree)
+	{
+		if (degree < MINIMUM_DEGREE) throw new ArgumentOutOfRangeException(nameof(degree));
+		return degree - 1;
+	}
+
+	public static int MaximumEntries(int degree)
+	{
+		if (degree < MINIMUM_DEGREE) throw new ArgumentOutOfRangeException(nameof(degree));
+		return 2 * degree - 1;
+	}
+
+	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+	public static int FastMinimumEntries(int degree)
+	{
+		return degree - 1;
+	}
+
+	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+	public static int FastMaximumEntries(int degree)
+	{
+		return 2 * degree - 1;
 	}
 }

@@ -13,13 +13,18 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : List<TNode>, ITreeBlock
 	where TBlock : class, ITreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
+	private readonly int _minEntries;
+	private readonly int _maxEntries;
+
 	private List<TBlock> _children;
 
 	protected BTreeBlockBase(int degree)
 		: base(degree)
 	{
-		if (degree < 2) throw new ArgumentOutOfRangeException(nameof(degree), $"{GetType()}'s degree must be at least 2.");
+		if (degree < BTree.MINIMUM_DEGREE) throw new ArgumentOutOfRangeException(nameof(degree), $"{GetType()}'s degree must be at least 2.");
 		Degree = degree;
+		_minEntries = BTree.FastMinimumEntries(degree);
+		_maxEntries = BTree.FastMaximumEntries(degree);
 	}
 
 	/// <inheritdoc />
@@ -36,13 +41,13 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : List<TNode>, ITreeBlock
 	public bool IsLeaf => _children == null || _children.Count == 0;
 
 	/// <inheritdoc />
-	public bool IsFull => Count >= 2 * Degree - 1;
-
-	/// <inheritdoc />
 	public bool IsEmpty => Count == 0;
 
 	/// <inheritdoc />
-	public bool HasMinimumEntries => Count >= Degree - 1;
+	public bool IsFull => Count >= _maxEntries;
+
+	/// <inheritdoc />
+	public bool HasMinimumEntries => Count >= _minEntries;
 }
 
 /// <inheritdoc cref="BTreeBlockBase{TBlock, TNode, T}" />
