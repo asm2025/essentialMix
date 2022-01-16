@@ -10,16 +10,29 @@
 		<LangVersion>10.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<Prefer32Bit>false</Prefer32Bit>
+		<Platforms>AnyCPU;x86;x64</Platforms>
 	</PropertyGroup>
 	
 	<PropertyGroup>
-	<AssemblyVersion>12.33.0.0</AssemblyVersion>
-	<FileVersion>21.9.4.0</FileVersion>
+		<AssemblyVersion>12.33.0.0</AssemblyVersion>
+		<FileVersion>21.9.4.0</FileVersion>
 		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 	</PropertyGroup>
 	
-	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+		<PlatformTarget>AnyCPU</PlatformTarget>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(Platform)'=='x64'">
+	  <PlatformTarget>AnyCPU</PlatformTarget>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition=" '$(Platform)' == 'x86' ">
+		<PlatformTarget>x86</PlatformTarget>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
 		<DebugSymbols>true</DebugSymbols>
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
 		<DebugType>full</DebugType>
@@ -27,7 +40,7 @@
 		<ErrorReport>prompt</ErrorReport>
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 		<DefineConstants>TRACE</DefineConstants>
 		<Optimize>true</Optimize>
 		<DebugType>portable</DebugType>
@@ -53,13 +66,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Page Include="App.xaml" />
+		<Page Include="App.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Core\essentialMix.Core.WPF\essentialMix.Core.WPF.csproj" />
-	  <ProjectReference Include="..\..\Standard\essentialMix.Collections\essentialMix.Collections.csproj" />
-	  <ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
+		<ProjectReference Include="..\..\Core\essentialMix.Core.WPF\essentialMix.Core.WPF.csproj" />
+		<ProjectReference Include="..\..\Standard\essentialMix.Collections\essentialMix.Collections.csproj" />
+		<ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup>

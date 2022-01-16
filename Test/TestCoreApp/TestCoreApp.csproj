@@ -2,13 +2,14 @@
 
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+		<Platform Condition=" '$(Platform)' == '' ">x64</Platform>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net6.0</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>10.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<Prefer32Bit>false</Prefer32Bit>
+		<Platforms>AnyCPU;x86;x64</Platforms>
 	</PropertyGroup>
 	
 	<PropertyGroup>
@@ -18,7 +19,19 @@
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 	</PropertyGroup>
 	
-	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+		<PlatformTarget>x64</PlatformTarget>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(Platform)'=='x64'">
+	  <PlatformTarget>x64</PlatformTarget>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition=" '$(Platform)' == 'x86' ">
+		<PlatformTarget>x86</PlatformTarget>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
 		<DebugSymbols>true</DebugSymbols>
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
 		<DebugType>full</DebugType>
@@ -26,7 +39,7 @@
 		<ErrorReport>prompt</ErrorReport>
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 		<DefineConstants>TRACE</DefineConstants>
 		<Optimize>true</Optimize>
 		<DebugType>portable</DebugType>
@@ -53,6 +66,7 @@
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
 if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
 		</PreBuildEvent>
+		<IsPublishable>False</IsPublishable>
 	</PropertyGroup>
 
 </Project>

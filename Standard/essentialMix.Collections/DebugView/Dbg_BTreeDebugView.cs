@@ -28,8 +28,8 @@ public class Dbg_BTreeDebugView<TBlock, TNode, T>
 * collections in this solution assemblies.
 */
 public class Dbg_BTreeDebugView<TBlock, TNode, TKey, TValue>
-	where TBlock : ITreeBlock<TBlock, TNode, TKey, TValue>
-	where TNode : ITreeNode<TNode, TKey, TValue>
+	where TBlock : class, ITreeBlock<TBlock, TNode, TKey, TValue>
+	where TNode : class, ITreeNode<TNode, TKey, TValue>
 {
 	private readonly IBTree<TBlock, TNode, TKey, TValue> _tree;
 

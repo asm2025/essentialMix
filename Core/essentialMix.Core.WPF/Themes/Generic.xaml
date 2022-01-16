@@ -80,7 +80,7 @@
 														Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedPath}" />
 						</Border>
 						<Button Grid.Column="1" x:Name="PART_Button" Content="..." Margin="2 0 0 0"
-								Command="{TemplateBinding ButtonCommand}" CommandParameter="{Binding}"
+								Command="{TemplateBinding BrowseCommand}" CommandParameter="{Binding}"
 								Visibility="{TemplateBinding IsReadOnly, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
 					</Grid>
 				</ControlTemplate>

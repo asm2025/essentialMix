@@ -9,6 +9,7 @@
 		<LangVersion>10.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<Prefer32Bit>false</Prefer32Bit>
+		<Platforms>AnyCPU;x86;x64</Platforms>
 	</PropertyGroup>
 	
 	<PropertyGroup>
@@ -18,7 +19,19 @@
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 	</PropertyGroup>
 	
-	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+		<PlatformTarget>AnyCPU</PlatformTarget>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(Platform)'=='x64'">
+	  <PlatformTarget>AnyCPU</PlatformTarget>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition=" '$(Platform)' == 'x86' ">
+		<PlatformTarget>x86</PlatformTarget>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
 		<DebugSymbols>true</DebugSymbols>
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
 		<DebugType>full</DebugType>
@@ -26,7 +39,7 @@
 		<ErrorReport>prompt</ErrorReport>
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 		<DefineConstants>TRACE</DefineConstants>
 		<Optimize>true</Optimize>
 		<DebugType>portable</DebugType>
@@ -54,9 +67,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Update="TestUSBForm.resx">
-	    <DependentUpon>TestUSBForm.cs</DependentUpon>
-	  </EmbeddedResource>
+		<EmbeddedResource Update="TestUSBForm.resx">
+			<DependentUpon>TestUSBForm.cs</DependentUpon>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -77,7 +90,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Reference Include="System.Windows.Forms" />
+		<Reference Include="System.Windows.Forms" />
 	</ItemGroup>
 
 	<PropertyGroup>
