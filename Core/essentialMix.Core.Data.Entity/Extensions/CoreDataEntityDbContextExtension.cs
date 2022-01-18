@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using SystemDbContext = Microsoft.EntityFrameworkCore.DbContext;
 
 // ReSharper disable once CheckNamespace
@@ -12,6 +13,20 @@ namespace essentialMix.Extensions;
 
 public static class CoreDataEntityDbContextExtension
 {
+	public static string GetTableName<TEntity>([NotNull] this SystemDbContext thisValue)
+		where TEntity : class
+	{
+		IEntityType entityType = thisValue.Model.FindEntityType(typeof(TEntity));
+		return entityType?.GetTableName();
+	}
+
+	public static string GetSchemaQualifiedTableName<TEntity>([NotNull] this SystemDbContext thisValue)
+		where TEntity : class
+	{
+		IEntityType entityType = thisValue.Model.FindEntityType(typeof(TEntity));
+		return entityType?.GetSchemaQualifiedTableName();
+	}
+
 	public static void Reload<TEntity>([NotNull] this SystemDbContext thisValue, [NotNull] TEntity entity)
 		where TEntity : class
 	{
