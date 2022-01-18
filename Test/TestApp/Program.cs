@@ -156,7 +156,7 @@ work with {Constants.HEAVY} items.");
 
 			//TestObservableCollections();
 
-
+			TestBoundList();
 			#endregion
 
 			//TestAsymmetric();
@@ -5605,6 +5605,137 @@ decrypted:
 									? Convert.ToString(e.NewItems[0])
 									: "...";
 				Console.WriteLine($"{item} => Collection{Bright.Cyan(e.Action.ToString())}");
+			}
+		}
+
+		private static void TestBoundList()
+		{
+			bool more;
+			int tests = 0;
+			Stopwatch clock = new Stopwatch();
+			int[] values = Generator.GetRandomIntegers(true, Constants.START);
+			BoundList<int> list = new BoundList<int>(values.Length);
+
+			do
+			{
+				bool canPrint = values.Length <= Constants.START * 2;
+				Console.Clear();
+				Title("Testing BoundList...");
+				CompilationHint();
+				Console.WriteLine($"Array has {values.Length} items.");
+				Console.WriteLine("Test BoundList functionality...");
+
+				if (canPrint) Console.Write($"Would you like to print the results? {Bright.Green("[Y]")} or {Dim("any other key")}: ");
+				bool print = canPrint && Console.ReadKey(true).Key == ConsoleKey.Y;
+				Console.WriteLine();
+
+				DoTheTest(list, values, print, clock);
+
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+				if (!more || tests > 1) continue;
+				values = Generator.GetRandomIntegers(true, tests == 0 ? Constants.START * 2 : Constants.HEAVY);
+				list = new BoundList<int>(values.Length);
+				tests++;
+			}
+			while (more);
+
+			clock.Stop();
+
+			static void DoTheTest(BoundList<int> list, int[] values, bool print, Stopwatch clock)
+			{
+				list.Clear();
+				int count = list.Count;
+				Debug.Assert(count == 0, "Values are not cleared correctly!");
+				Console.WriteLine($"Original values: {Bright.Yellow(values.Length.ToString())}...");
+				if (print) Console.WriteLine(string.Join(", ", values));
+				clock.Restart();
+
+				foreach (int v in values)
+				{
+					list.Add(v);
+					count++;
+				}
+
+				Console.WriteLine($"Added {count} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
+
+				if (list.Count != values.Length)
+				{
+					Console.WriteLine(Bright.Red("Something went wrong, Count isn't right...!"));
+					return;
+				}
+
+				Console.WriteLine(Bright.Yellow("Test search..."));
+				int found = 0;
+				int missed = 0;
+				count = list.Count / 4;
+				clock.Restart();
+
+				// will just test for items not more than MAX_SEARCH
+				for (int i = 0; i < count; i++)
+				{
+					int v = values[i];
+
+					if (list.Contains(v))
+					{
+						found++;
+						continue;
+					}
+
+					missed++;
+					Console.WriteLine(missed <= 3
+										? Bright.Red($"Find missed a value: {v} :((")
+										: Bright.Red("FIND MISSED A LOT :(("));
+					if (missed > 3) return;
+					//return;
+				}
+
+				Console.WriteLine($"Found {found} of {count} items in {clock.ElapsedMilliseconds} ms.");
+
+				Console.WriteLine(Bright.Red("Test adding beyond limit..."));
+
+				try
+				{
+					list.Add(values[0]);
+					Console.WriteLine(Bright.Red("Added beyond limits."));
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine(Bright.Green(ex.Message));
+				}
+
+				Console.WriteLine(Bright.Red("Test removing..."));
+
+				int removed = 0;
+				count = list.Count;
+				clock.Restart();
+
+				if (print)
+				{
+					while (list.Count > 0 && count > 0)
+					{
+						list.RemoveAt(list.Count - 1);
+						count--;
+						removed++;
+					}
+				}
+				else
+				{
+					while (list.Count > 0 && count > 0)
+					{
+						list.RemoveAt(list.Count - 1);
+						count--;
+						removed++;
+					}
+				}
+
+				Debug.Assert(count == 0 && list.Count == 0, $"Values are not cleared correctly! {count} != {list.Count}.");
+				Console.WriteLine();
+				Console.WriteLine();
+				Console.WriteLine($"Removed {removed} of {values.Length} items in {clock.ElapsedMilliseconds} ms.");
 			}
 		}
 

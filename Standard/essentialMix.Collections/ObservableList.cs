@@ -44,7 +44,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 		{
 			get
 			{
-				lock(_root)
+				lock (_root)
 				{
 					return _list.Count;
 				}
@@ -55,7 +55,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 		{
 			get
 			{
-				lock(_root)
+				lock (_root)
 				{
 					return ((ICollection<T>)_list).IsReadOnly;
 				}
@@ -64,7 +64,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 
 		public void Add(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_list.Add(item);
 			}
@@ -72,7 +72,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 
 		public void Clear()
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_list.Clear();
 			}
@@ -80,7 +80,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 
 		public bool Contains(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _list.Contains(item);
 			}
@@ -88,7 +88,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 
 		public void CopyTo(T[] array, int arrayIndex)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_list.CopyTo(array, arrayIndex);
 			}
@@ -96,7 +96,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 
 		public bool Remove(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _list.Remove(item);
 			}
@@ -104,7 +104,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _list.GetEnumerator();
 			}
@@ -112,7 +112,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 
 		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return ((IEnumerable<T>)_list).GetEnumerator();
 			}
@@ -122,14 +122,14 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 		{
 			get
 			{
-				lock(_root)
+				lock (_root)
 				{
 					return _list[index];
 				}
 			}
 			set
 			{
-				lock(_root)
+				lock (_root)
 				{
 					_list[index] = value;
 				}
@@ -138,7 +138,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 
 		public int IndexOf(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _list.IndexOf(item);
 			}
@@ -146,7 +146,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 
 		public void Insert(int index, T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_list.Insert(index, item);
 			}
@@ -154,7 +154,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 
 		public void RemoveAt(int index)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_list.RemoveAt(index);
 			}
@@ -352,7 +352,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 		if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 		T item = Items[index];
 		if (index < Count - 1) Array.Copy(Items, index + 1, Items, index, Count - (index + 1));
-		Items[Count] = default(T);
+		Items[Count - 1] = default(T);
 		Count--;
 		_version++;
 		if (SuppressCollectionEvents) return;
@@ -673,7 +673,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 
 		if (version != _version) throw new VersionChangedException();
 	}
-	
+
 	public void Reverse() { Reverse(0, Count); }
 	public void Reverse(int index, int count)
 	{

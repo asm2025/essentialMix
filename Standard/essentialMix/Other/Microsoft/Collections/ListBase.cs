@@ -358,7 +358,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	{
 		if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 		if (index < Count - 1) Array.Copy(Items, index + 1, Items, index, Count - (index + 1));
-		Items[Count] = default(T);
+		Items[Count - 1] = default(T);
 		Count--;
 		_version++;
 	}

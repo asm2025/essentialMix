@@ -445,7 +445,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 	{
 		if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 		if (index < Count - 1) Array.Copy(_items, index + 1, _items, index, Count - (index + 1));
-		_items[Count] = default(T);
+		_items[Count - 1] = default(T);
 		Count--;
 		_version++;
 	}
