@@ -44,8 +44,8 @@ namespace essentialMix.Extensions
 
 			// Find the storage entity set (table) that the entity is mapped
 			EntitySet table = mapping
-							.EntityTypeMappings.Single()
-							.Fragments.Single()
+							.EntityTypeMappings.First()
+							.Fragments.First()
 							.StoreEntitySet;
 
 			// Return the table name from the storage entity set
