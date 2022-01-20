@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,18 +14,27 @@ namespace essentialMix.Extensions;
 
 public static class CoreDataEntityDbContextExtension
 {
-	public static string GetTableName<TEntity>([NotNull] this SystemDbContext thisValue)
-		where TEntity : class
+	public static IEntityType GetEntityType([NotNull] this SystemDbContext thisValue, [NotNull] Type type)
 	{
-		IEntityType entityType = thisValue.Model.FindEntityType(typeof(TEntity));
-		return entityType?.GetTableName();
+		return thisValue.Model.FindEntityType(type);
 	}
 
-	public static string GetSchemaQualifiedTableName<TEntity>([NotNull] this SystemDbContext thisValue)
-		where TEntity : class
+	public static string GetTableName([NotNull] this SystemDbContext thisValue, [NotNull] Type type)
 	{
-		IEntityType entityType = thisValue.Model.FindEntityType(typeof(TEntity));
-		return entityType?.GetSchemaQualifiedTableName();
+		return GetEntityType(thisValue, type)?.GetTableName();
+	}
+
+	public static string GetSchemaQualifiedTableName([NotNull] this SystemDbContext thisValue, [NotNull] Type type)
+	{
+		return GetEntityType(thisValue, type)?.GetSchemaQualifiedTableName();
+	}
+
+	public static IEnumerable<string> GetKeyNames([NotNull] this SystemDbContext thisValue, [NotNull] Type type)
+	{
+		return GetEntityType(thisValue, type)
+				?.FindPrimaryKey()
+				?.Properties
+				.Select(e => e.Name);
 	}
 
 	public static void Reload<TEntity>([NotNull] this SystemDbContext thisValue, [NotNull] TEntity entity)

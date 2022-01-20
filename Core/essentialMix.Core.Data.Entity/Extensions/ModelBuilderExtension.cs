@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 // ReSharper disable once CheckNamespace
 namespace essentialMix.Extensions;
 
-public static class CoreDataEntityModelBuilderExtension
+public static class ModelBuilderExtension
 {
 	[NotNull]
 	public static ModelBuilder RegisterStringComparisonFunctions([NotNull] this ModelBuilder thisValue)
@@ -39,7 +39,7 @@ public static class CoreDataEntityModelBuilderExtension
 
 						//// EF Core 2.x
 						// return Expression.MakeBinary(type, first, second, false, method);
-							
+
 						// EF Core 3.0
 						if (second is SqlParameterExpression secondExpression) second = secondExpression.ApplyTypeMapping(first.TypeMapping);
 						else if (first is SqlParameterExpression firstExpression) first = firstExpression.ApplyTypeMapping(second.TypeMapping);

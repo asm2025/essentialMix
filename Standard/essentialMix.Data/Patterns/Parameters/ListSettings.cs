@@ -5,7 +5,7 @@ using essentialMix.Patterns.Sorting;
 
 namespace essentialMix.Data.Patterns.Parameters;
 
-public struct ListSettings : IIncludeSettings, IFilterSettings, ISortable, IPagination
+public struct ListSettings : IListSettings
 {
 	private int? _page;
 	private int? _pageSize;
@@ -14,7 +14,7 @@ public struct ListSettings : IIncludeSettings, IFilterSettings, ISortable, IPagi
 	/// <inheritdoc />
 	public int Page
 	{
-		get => _page ??= 1; 
+		get => _page ??= 1;
 		set => _page = value.NotBelow(1);
 	}
 

@@ -19,8 +19,6 @@ public interface IRepositoryBase<TEntity> : IRepositoryBase
 {
 	[NotNull]
 	Type EntityType { get; }
-		
-	object[] GetKeyValue([NotNull] TEntity entity);
 
 	[NotNull]
 	TEntity Create();
@@ -32,12 +30,64 @@ public interface IRepositoryBase<TEntity> : IRepositoryBase
 
 	IQueryable<TEntity> List(IPagination settings = null);
 	ValueTask<IList<TEntity>> ListAsync(IPagination settings = null, CancellationToken token = default(CancellationToken));
+}
 
-	TEntity Get([NotNull] params object[] keys);
-	ValueTask<TEntity> GetAsync([NotNull] params object[] keys);
-	ValueTask<TEntity> GetAsync(CancellationToken token, [NotNull] params object[] keys);
-	ValueTask<TEntity> GetAsync([NotNull] object[] keys, CancellationToken token);
+public interface IRepositoryBase<TEntity, TKey> : IRepositoryBase<TEntity>
+	where TEntity : class, IEntity
+{
+	TKey GetKeyValue([NotNull] TEntity entity);
 
-	TEntity Get([NotNull] IGetSettings settings);
-	ValueTask<TEntity> GetAsync([NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
+	TEntity Get([NotNull] TKey key);
+	ValueTask<TEntity> GetAsync([NotNull] TKey key, CancellationToken token = default(CancellationToken));
+
+	TEntity Get([NotNull] TKey key, [NotNull] IGetSettings settings);
+	ValueTask<TEntity> GetAsync([NotNull] TKey key, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
+}
+
+public interface IRepositoryBase<TEntity, TKey1, TKey2> : IRepositoryBase<TEntity>
+	where TEntity : class, IEntity
+{
+	(TKey1, TKey2) GetKeyValue([NotNull] TEntity entity);
+
+	TEntity Get([NotNull] TKey1 key1, [NotNull] TKey2 key2);
+	ValueTask<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, CancellationToken token = default(CancellationToken));
+
+	TEntity Get([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] IGetSettings settings);
+	ValueTask<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
+}
+
+public interface IRepositoryBase<TEntity, TKey1, TKey2, TKey3> : IRepositoryBase<TEntity>
+	where TEntity : class, IEntity
+{
+	(TKey1, TKey2, TKey3) GetKeyValue([NotNull] TEntity entity);
+
+	TEntity Get([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3);
+	ValueTask<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, CancellationToken token = default(CancellationToken));
+
+	TEntity Get([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] IGetSettings settings);
+	ValueTask<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
+}
+
+public interface IRepositoryBase<TEntity, TKey1, TKey2, TKey3, TKey4> : IRepositoryBase<TEntity>
+	where TEntity : class, IEntity
+{
+	(TKey1, TKey2, TKey3, TKey4) GetKeyValue([NotNull] TEntity entity);
+
+	TEntity Get([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4);
+	ValueTask<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, CancellationToken token = default(CancellationToken));
+
+	TEntity Get([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] IGetSettings settings);
+	ValueTask<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
+}
+
+public interface IRepositoryBase<TEntity, TKey1, TKey2, TKey3, TKey4, TKey5> : IRepositoryBase<TEntity>
+	where TEntity : class, IEntity
+{
+	(TKey1, TKey2, TKey3, TKey4, TKey5) GetKeyValue([NotNull] TEntity entity);
+
+	TEntity Get([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5);
+	ValueTask<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5, CancellationToken token = default(CancellationToken));
+
+	TEntity Get([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5, [NotNull] IGetSettings settings);
+	ValueTask<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
 }

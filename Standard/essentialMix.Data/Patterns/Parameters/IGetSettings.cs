@@ -1,6 +1,5 @@
 ﻿namespace essentialMix.Data.Patterns.Parameters;
 
-public interface IGetSettings
+public interface IGetSettings : IIncludeSettings, IFilterSettings
 {
-	object[] KeyValue { get; set; }
 }
