@@ -13,13 +13,6 @@
 		<Platforms>AnyCPU;x64;x86</Platforms>
 	</PropertyGroup>
 	
-	<PropertyGroup>
-		<AssemblyVersion>12.33.0.0</AssemblyVersion>
-		<FileVersion>21.9.4.0</FileVersion>
-		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
-		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
-	</PropertyGroup>
-	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
 		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
