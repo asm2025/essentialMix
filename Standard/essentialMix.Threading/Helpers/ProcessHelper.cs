@@ -137,8 +137,6 @@ public static class ProcessHelper
 				return Task.FromResult(true);
 			}
 
-			bool processReallyExited = false;
-			process.Exited += (_, _) => processReallyExited = true;
 			waitHandle = new SafeWaitHandle(process.Handle, false);
 			if (!waitHandle.IsAwaitable()) return Task.FromResult(false);
 			processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
@@ -151,12 +149,6 @@ public static class ProcessHelper
 								int ndx = t.IsCompleted && t.Result
 											? 0
 											: -1;
-
-								if (!processReallyExited && proc.IsAwaitable())
-								{
-									if (!proc.WaitForExit(TimeSpanHelper.FIVE_SECONDS)) ndx = -1;
-								}
-
 								proc.Die();
 								ObjectHelper.Dispose(ref proc);
 								processFinishedEvent?.Close();
@@ -207,8 +199,6 @@ public static class ProcessHelper
 				return true;
 			}
 
-			bool processReallyExited = false;
-			process.Exited += (_, _) => processReallyExited = true;
 			waitHandle = new SafeWaitHandle(process.Handle, false);
 			if (!waitHandle.IsAwaitable()) return false;
 			processFinishedEvent = new ManualResetEvent(false) { SafeWaitHandle = waitHandle };
@@ -222,14 +212,8 @@ public static class ProcessHelper
 
 			int ndx = waitHandles.WaitAny();
 			if (ndx != 0) return false;
-
-			if (!processReallyExited && process.IsAwaitable())
-			{
-				if (!process.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
-			}
-
 			process.Die();
-			return ndx == 0;
+			return true;
 		}
 		finally
 		{
@@ -312,8 +296,6 @@ public static class ProcessHelper
 				};
 			}
 
-			bool processReallyExited = false;
-
 			process.Exited += (sender, _) =>
 			{
 				Process p = (Process)sender;
@@ -333,7 +315,6 @@ public static class ProcessHelper
 					}
 				}
 
-				processReallyExited = true;
 				settings.OnExit?.Invoke(execName, exitTime, exitCode);
 			};
 
@@ -373,12 +354,6 @@ public static class ProcessHelper
 								int ndx = t.IsCompleted && t.Result
 											? 0
 											: -1;
-
-								if (!processReallyExited && proc.IsAwaitable())
-								{
-									if (!proc.WaitForExit(TimeSpanHelper.FIVE_SECONDS)) ndx = -1;
-								}
-
 								proc.Die();
 								ObjectHelper.Dispose(ref proc);
 								processFinishedEvent?.Close();
@@ -440,30 +415,7 @@ public static class ProcessHelper
 				};
 			}
 
-			bool processReallyExited = false;
-
-			process.Exited += (sender, _) =>
-			{
-				Process p = (Process)sender;
-				DateTime? exitTime = null;
-				int? exitCode = null;
-
-				if (p.IsAssociated())
-				{
-					try
-					{
-						exitTime = p.ExitTime;
-						exitCode = p.ExitCode;
-					}
-					catch
-					{
-						// ignored
-					}
-				}
-
-				processReallyExited = true;
-				settings.OnExit?.Invoke(execName, exitTime, exitCode);
-			};
+			process.Exited += OnProcExit;
 
 			bool result = process.Start();
 			if (!result) return false;
@@ -507,14 +459,8 @@ public static class ProcessHelper
 
 				int ndx = waitHandles.WaitAny();
 				if (ndx != 0) return false;
-
-				if (!processReallyExited && process.IsAwaitable())
-				{
-					if (!process.WaitForExit(TimeSpanHelper.HALF)) ndx = -1;
-				}
-
 				process.Die();
-				return ndx == 0;
+				return true;
 			}
 			finally
 			{
@@ -531,6 +477,28 @@ public static class ProcessHelper
 		finally
 		{
 			ObjectHelper.Dispose(ref process);
+		}
+
+		void OnProcExit(object s, EventArgs e)
+		{
+			Process p = (Process)s;
+			DateTime? exitTime = null;
+			int? exitCode = null;
+
+			if (p.IsAssociated())
+			{
+				try
+				{
+					exitTime = p.ExitTime;
+					exitCode = p.ExitCode;
+				}
+				catch
+				{
+					// ignored
+				}
+			}
+
+			settings.OnExit?.Invoke(execName, exitTime, exitCode);
 		}
 	}
 
