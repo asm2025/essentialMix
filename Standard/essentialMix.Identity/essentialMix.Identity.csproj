@@ -85,6 +85,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\essentialMix.Data\essentialMix.Data.csproj" />
 		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
 	</ItemGroup>
 
