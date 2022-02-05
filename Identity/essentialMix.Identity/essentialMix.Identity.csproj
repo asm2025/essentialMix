@@ -3,9 +3,8 @@
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>netstandard2.0</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<ImplicitUsings>enable</ImplicitUsings>
 		<LangVersion>10.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<SignAssembly>true</SignAssembly>
@@ -32,7 +31,7 @@
 	<PropertyGroup Condition=" '$(Configuration)' == 'Independent' ">
 		<OutputPath>bin\$(Platform)\</OutputPath>
 	</PropertyGroup>
-
+	
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' OR '$(Configuration)' == 'Independent' ">
 		<DebugSymbols>true</DebugSymbols>
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -48,7 +47,7 @@
 		<ErrorReport>prompt</ErrorReport>
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
-
+	
 	<PropertyGroup>
 		<IsPackable>True</IsPackable>
 		<PackageId>$(ProjectName)</PackageId>
@@ -60,8 +59,8 @@
 		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
 		<PackageVersion>$(Version)</PackageVersion>
 		<Authors>asm</Authors>
-		<Description>Common extensions methods, helper classes, components, authorization</Description>
-		<PackageTags>utilities, tools, extensions, helpers, components, patterns, core, mvc, web api, authorization, jwt, token, bearer</PackageTags>
+		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
+		<PackageTags>utilities, tools, extensions, helpers, components, patterns, identity</PackageTags>
 		<PackageProjectUrl>https://github.com/asm2025/essentialMix</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/asm2025/essentialMix</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
@@ -77,19 +76,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Compile Include="..\..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="6.0.1" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\..\Standard\essentialMix.Data\essentialMix.Data.csproj" />
-		<ProjectReference Include="..\..\Standard\essentialMix.Identity\essentialMix.Identity.csproj" />
-		<ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
+	  <ProjectReference Include="..\..\Standard\essentialMix.Data\essentialMix.Data.csproj" />
+	  <ProjectReference Include="..\..\Standard\essentialMix\essentialMix.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup>

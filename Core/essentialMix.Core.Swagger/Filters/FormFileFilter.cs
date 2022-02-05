@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using essentialMix.Extensions;
 using essentialMix.Web;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
-using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -20,8 +16,8 @@ public class FormFileFilter : IOperationFilter
 	public void Apply([NotNull] OpenApiOperation operation, [NotNull] OperationFilterContext context)
 	{
 		if (operation.Deprecated
-			|| !Enum.TryParse(context.ApiDescription.HttpMethod, true, out HttpMethod method)
-			|| !method.In(HttpMethod.Post, HttpMethod.Put))
+			|| !string.Equals(context.ApiDescription.HttpMethod, HttpMethod.Post.Method, StringComparison.OrdinalIgnoreCase)
+			&& !string.Equals(context.ApiDescription.HttpMethod, HttpMethod.Put.Method, StringComparison.OrdinalIgnoreCase))
 		{
 			return;
 		}
