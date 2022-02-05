@@ -1,0 +1,91 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net48</TargetFramework>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<LangVersion>10.0</LangVersion>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<Prefer32Bit>false</Prefer32Bit>
+		<Platforms>AnyCPU;x64;x86</Platforms>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+		<PlatformTarget>AnyCPU</PlatformTarget>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition=" '$(Platform)'=='x64' ">
+		<PlatformTarget>x64</PlatformTarget>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition=" '$(Platform)' == 'x86' ">
+		<PlatformTarget>x86</PlatformTarget>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+		<DebugSymbols>true</DebugSymbols>
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<DebugType>full</DebugType>
+		<UseVSHostingProcess>false</UseVSHostingProcess>
+		<ErrorReport>prompt</ErrorReport>
+		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<DefineConstants>TRACE</DefineConstants>
+		<Optimize>true</Optimize>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<UseVSHostingProcess>false</UseVSHostingProcess>
+		<ErrorReport>prompt</ErrorReport>
+		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
+		<ProjectReference Include="..\Test.Common\Test.Common.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="TestUSBForm.resx">
+			<DependentUpon>TestUSBForm.cs</DependentUpon>
+		</EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Bogus" Version="34.0.1" />
+		<PackageReference Include="Crayon" Version="2.0.64" />
+		<PackageReference Include="EasyConsole" Version="1.1.0.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\essentialMix.Collections\essentialMix.Collections.csproj" />
+		<ProjectReference Include="..\essentialMix.Cryptography\essentialMix.Cryptography.csproj" />
+		<ProjectReference Include="..\essentialMix.Exceptions\essentialMix.Exceptions.csproj" />
+		<ProjectReference Include="..\essentialMix.NewtonSoft\essentialMix.Newtonsoft.csproj" />
+		<ProjectReference Include="..\essentialMix.Threading\essentialMix.Threading.csproj" />
+		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="System.Windows.Forms" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
+if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
+		</PreBuildEvent>
+	</PropertyGroup>
+
+</Project>
