@@ -1,5 +1,5 @@
 ﻿
-namespace TestApp
+namespace Test.App
 {
 	partial class TestUSBForm
 	{

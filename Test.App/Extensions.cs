@@ -5,7 +5,7 @@ using essentialMix.Collections;
 using JetBrains.Annotations;
 using static Crayon.Output;
 
-namespace TestApp
+namespace Test.App
 {
 	public static class Extensions
 	{

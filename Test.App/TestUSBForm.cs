@@ -5,7 +5,7 @@ using essentialMix;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Hardware;
 
-namespace TestApp
+namespace Test.App
 {
 	public partial class TestUSBForm : Form
 	{

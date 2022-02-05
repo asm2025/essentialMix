@@ -44,8 +44,7 @@ using ManualResetEvent = essentialMix.Threading.ManualResetEvent;
 using Menu = EasyConsole.Menu;
 using TimeoutException = System.TimeoutException;
 
-// ReSharper disable UnusedMember.Local
-namespace TestApp
+namespace Test.App
 {
 	internal class Program
 	{
