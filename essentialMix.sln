@@ -51,7 +51,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Newtonsoft", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "essentialMix.Threading", "essentialMix.Threading\essentialMix.Threading.csproj", "{147FFAE4-4340-4222-B232-15FDE6B85F7F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.App", "TestApp\Test.App.csproj", "{A53E2FAB-033C-4569-BEA5-62974217D6F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.App", "Test.App\Test.App.csproj", "{A53E2FAB-033C-4569-BEA5-62974217D6F6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Common", "Test.Common\Test.Common.csproj", "{BA69395B-858A-4237-B38A-9B6239549E78}"
 EndProject
