@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using essentialMix.Patterns.Object;
 using JetBrains.Annotations;
@@ -8,8 +8,8 @@ namespace essentialMix.Data.Patterns.Repository;
 
 public class UnitOfWork : Disposable, IUnitOfWork
 {
-	private readonly ConcurrentDictionary<Type, Func<IRepositoryBase>> _templates = new ConcurrentDictionary<Type, Func<IRepositoryBase>>();
-	private readonly ConcurrentDictionary<Type, IRepositoryBase> _instances = new ConcurrentDictionary<Type, IRepositoryBase>();
+	private readonly IDictionary<Type, Func<IRepositoryBase>> _templates = new Dictionary<Type, Func<IRepositoryBase>>();
+	private readonly IDictionary<Type, IRepositoryBase> _instances = new Dictionary<Type, IRepositoryBase>();
 
 	/// <inheritdoc />
 	public UnitOfWork()
@@ -21,8 +21,11 @@ public class UnitOfWork : Disposable, IUnitOfWork
 	{
 		if (disposing)
 		{
-			ClearRegistration();
-			Clear();
+			lock (_templates)
+			{
+				_templates.Clear();
+				Clear();
+			}
 		}
 
 		base.Dispose(disposing);
@@ -40,7 +43,12 @@ public class UnitOfWork : Disposable, IUnitOfWork
 	public void Register(Type type, Expression<Func<IRepositoryBase>> template)
 	{
 		if (!typeof(IRepositoryBase).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement {nameof(IRepositoryBase)} interface.", nameof(type));
-		_templates.TryAdd(type, template.Compile());
+
+		lock (_templates)
+		{
+			if (_templates.ContainsKey(type)) return;
+			_templates.Add(type, template.Compile());
+		}
 	}
 
 	/// <inheritdoc />
@@ -53,14 +61,18 @@ public class UnitOfWork : Disposable, IUnitOfWork
 	/// <inheritdoc />
 	public void Deregister(Type type)
 	{
-		_templates.TryRemove(type, out _);
-		if (_instances.TryRemove(type, out IRepositoryBase repository)) repository?.Dispose();
+		lock (_templates)
+		{
+			if (!_templates.ContainsKey(type)) return;
+			_templates.Remove(type);
+		}
 	}
 
 	/// <inheritdoc />
 	public void ClearRegistration()
 	{
-		_templates.Clear();
+		lock (_templates)
+			_templates.Clear();
 	}
 
 	/// <inheritdoc />
@@ -75,20 +87,29 @@ public class UnitOfWork : Disposable, IUnitOfWork
 	[NotNull]
 	public IRepositoryBase GetOrCreate(Type type)
 	{
-		return (_instances.TryGetValue(type, out IRepositoryBase instance)
-					? instance
-					: !_templates.TryGetValue(type, out Func<IRepositoryBase> template)
-						? null
-						: _instances.GetOrAdd(type, _ => template())) ?? throw new InvalidOperationException("Type is not registered or created.");
+		lock (_instances)
+		{
+			if (_instances.TryGetValue(type, out IRepositoryBase repository)) return repository;
+
+			lock (_templates)
+			{
+				if (!_templates.TryGetValue(type, out Func<IRepositoryBase> template)) throw new InvalidOperationException("Type is not registered or created.");
+				repository = template();
+				_instances.Add(type, repository);
+				return repository;
+			}
+		}
 	}
 
 	/// <inheritdoc />
 	public void Clear()
 	{
-		foreach (Type type in _instances.Keys)
+		lock (_instances)
 		{
-			if (!_instances.TryRemove(type, out IRepositoryBase repository)) continue;
-			repository?.Dispose();
+			foreach (IRepositoryBase repository in _instances.Values)
+				repository?.Dispose();
+
+			_instances.Clear();
 		}
 	}
 }

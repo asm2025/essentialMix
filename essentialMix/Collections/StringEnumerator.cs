@@ -1,10 +1,9 @@
 using System;
-using essentialMix.Extensions;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
-public abstract class StringEnumerator<T> : Enumerator<string> 
+public abstract class StringEnumerator<T> : Enumerator<string>
 	where T : IComparable<T>, IComparable, IEquatable<T>, IConvertible
 {
 	protected StringEnumerator(string targetString, [NotNull] T delimiter)
@@ -85,7 +84,7 @@ public class StringEnumerator : StringEnumerator<string>
 								: TargetString.Length) - Index;
 			return true;
 		}
-			
+
 		if (NextIndex < 0 || NextIndex >= TargetString.Length - 1)
 		{
 			Reset();
