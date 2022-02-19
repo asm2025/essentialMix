@@ -17,6 +17,18 @@ public class UnitOfWork : Disposable, IUnitOfWork
 	}
 
 	/// <inheritdoc />
+	protected override void Dispose(bool disposing)
+	{
+		if (disposing)
+		{
+			ClearRegistration();
+			Clear();
+		}
+
+		base.Dispose(disposing);
+	}
+
+	/// <inheritdoc />
 	public void Register<T>(Expression<Func<T>> template)
 		where T : IRepositoryBase
 	{
@@ -42,7 +54,7 @@ public class UnitOfWork : Disposable, IUnitOfWork
 	public void Deregister(Type type)
 	{
 		_templates.TryRemove(type, out _);
-		_instances.TryRemove(type, out _);
+		if (_instances.TryRemove(type, out IRepositoryBase repository)) repository?.Dispose();
 	}
 
 	/// <inheritdoc />
@@ -50,7 +62,7 @@ public class UnitOfWork : Disposable, IUnitOfWork
 	{
 		_templates.Clear();
 	}
-	
+
 	/// <inheritdoc />
 	[NotNull]
 	public TRepository GetOrCreate<TRepository>()
@@ -73,6 +85,10 @@ public class UnitOfWork : Disposable, IUnitOfWork
 	/// <inheritdoc />
 	public void Clear()
 	{
-		_instances.Clear();
+		foreach (Type type in _instances.Keys)
+		{
+			if (!_instances.TryRemove(type, out IRepositoryBase repository)) continue;
+			repository?.Dispose();
+		}
 	}
 }
