@@ -10,6 +10,9 @@
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\sign.pfx</AssemblyOriginatorKeyFile>
 		<Platforms>AnyCPU;x64;x86</Platforms>
+		<AssemblyVersion>13.0.3.0</AssemblyVersion>
+		<FileVersion>22.2.19.0</FileVersion>
+		<Version>$(AssemblyVersion)</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -49,11 +52,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<AssemblyVersion>13.0.3.0</AssemblyVersion>
-		<FileVersion>22.2.19.0</FileVersion>
-		<Version Condition=" '$(AssemblyVersion)' == '' ">0.0.1</Version>
-		<Version Condition=" '$(AssemblyVersion)' != '' ">$(AssemblyVersion)</Version>
-		<PackageVersion>$(Version)</PackageVersion>
+		<PackageVersion>$(AssemblyVersion)</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns, NewtonSoft, json, serialization</PackageTags>
@@ -89,7 +88,6 @@
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
 if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
 		</PreBuildEvent>
-		<Version>13.0.3.0</Version>
 	</PropertyGroup>
 
 </Project>
