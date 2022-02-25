@@ -15,13 +15,13 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using essentialMix.Collections;
-using JetBrains.Annotations;
 using essentialMix.Comparers;
 using essentialMix.Delegation;
 using essentialMix.Helpers;
-using Other.MarcGravell;
 using essentialMix.Patterns.Object;
 using essentialMix.Reflection;
+using JetBrains.Annotations;
+using Other.MarcGravell;
 
 namespace essentialMix.Extensions;
 
@@ -462,16 +462,16 @@ public static class GenericsExtension
 				return true;
 			}
 
-			if (string.Equals(str, bool.TrueString, StringComparison.OrdinalIgnoreCase) 
-				|| string.Equals(str, "yes", StringComparison.OrdinalIgnoreCase) 
+			if (string.Equals(str, bool.TrueString, StringComparison.OrdinalIgnoreCase)
+				|| string.Equals(str, "yes", StringComparison.OrdinalIgnoreCase)
 				|| string.Equals(str, "on", StringComparison.OrdinalIgnoreCase))
 			{
 				result = true;
 				return true;
 			}
 
-			return string.Equals(str, bool.FalseString, StringComparison.OrdinalIgnoreCase) 
-					|| string.Equals(str, "no", StringComparison.OrdinalIgnoreCase) 
+			return string.Equals(str, bool.FalseString, StringComparison.OrdinalIgnoreCase)
+					|| string.Equals(str, "no", StringComparison.OrdinalIgnoreCase)
 					|| string.Equals(str, "off", StringComparison.OrdinalIgnoreCase);
 		}
 	}
@@ -1294,13 +1294,13 @@ public static class GenericsExtension
 		*/
 		int lo = startIndex, hi = Math.Min(BLOCK_SIZE, count);
 
-		while (lo < hi) 
+		while (lo < hi)
 			thisValue[lo++] = value;
 
 		if (lo == startIndex + count) return;
 
 		int itemSize;
-	
+
 		switch (typeof(T).AsTypeCode())
 		{
 			case TypeCode.Boolean:
@@ -1343,7 +1343,7 @@ public static class GenericsExtension
 		startIndex *= itemSize;
 		lo *= itemSize;
 		hi = count * itemSize;
-	
+
 		for (; lo < hi; lo += block, block = Math.Min(block * 2, hi - lo))
 			Buffer.BlockCopy(thisValue, startIndex, thisValue, lo, block);
 	}
@@ -1874,17 +1874,15 @@ public static class GenericsExtension
 					: thisValue.GetType().GetFields(Constants.BF_PUBLIC_INSTANCE).Where(e => !e.IsInitOnly);
 	}
 
-	public static void EnumeratePropertyDescriptors(object source, PropertyInfoType propertyInfoType, Func<object, string, PropertyDescriptor, bool> onProperty, Func<object, string, FieldInfo, bool> onField)
+	public static void EnumeratePropertyDescriptors<T>(this T thisValue, PropertyInfoType propertyInfoType, Func<object, string, PropertyDescriptor, bool> onProperty, Func<object, string, FieldInfo, bool> onField)
 	{
-		if (source.IsNull())
-			return;
-		EnumeratePropertyDescriptorsInternal(new HashSet<string>(StringComparer.OrdinalIgnoreCase), source, null, propertyInfoType, onProperty, onField);
+		if (thisValue.IsNull()) return;
+		EnumeratePropertyDescriptorsInternal(new HashSet<string>(StringComparer.OrdinalIgnoreCase), thisValue, null, propertyInfoType, onProperty, onField);
 
 		static void EnumeratePropertyDescriptorsInternal(ISet<string> keys, object sourceInternal, string rootInternal, PropertyInfoType propertyInfoTypeInternal, Func<object, string, PropertyDescriptor, bool> onPropertyInternal, Func<object, string, FieldInfo, bool> onFieldInternal)
 		{
 			rootInternal ??= string.Empty;
-			if (!string.IsNullOrEmpty(rootInternal))
-				rootInternal += ".";
+			if (!string.IsNullOrEmpty(rootInternal)) rootInternal += ".";
 
 			if (onPropertyInternal != null)
 			{
@@ -1928,11 +1926,10 @@ public static class GenericsExtension
 		}
 	}
 
-	public static void EnumerateProperties(object source, PropertyInfoType propertyInfoType, Func<object, string, PropertyInfo, bool> onProperty, Func<object, string, FieldInfo, bool> onField)
+	public static void EnumerateProperties<T>(this T thisValue, PropertyInfoType propertyInfoType, Func<object, string, PropertyInfo, bool> onProperty, Func<object, string, FieldInfo, bool> onField)
 	{
-		if (source.IsNull())
-			return;
-		EnumeratePropertiesInternal(new HashSet<string>(StringComparer.OrdinalIgnoreCase), source, null, propertyInfoType, onProperty, onField);
+		if (thisValue.IsNull()) return;
+		EnumeratePropertiesInternal(new HashSet<string>(StringComparer.OrdinalIgnoreCase), thisValue, null, propertyInfoType, onProperty, onField);
 
 		static void EnumeratePropertiesInternal(ISet<string> keys, object sourceInternal, string rootInternal, PropertyInfoType propertyInfoTypeInternal, Func<object, string, PropertyInfo, bool> onPropertyInternal, Func<object, string, FieldInfo, bool> onFieldInternal)
 		{

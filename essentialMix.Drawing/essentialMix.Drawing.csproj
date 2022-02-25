@@ -12,9 +12,9 @@
 		<PackageTags>utilities, tools, extensions, helpers, drawing, imaging</PackageTags>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Platforms>AnyCPU;x64;x86</Platforms>
-		<AssemblyVersion>13.0.3.0</AssemblyVersion>
-		<FileVersion>22.2.19.0</FileVersion>
-		<Version>$(AssemblyVersion)</Version>
+		<AssemblyVersion>13.0.4.0</AssemblyVersion>
+		<FileVersion>22.2.25.0</FileVersion>
+		<Version>13.0.4.0</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
