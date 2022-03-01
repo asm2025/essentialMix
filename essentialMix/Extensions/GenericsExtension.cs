@@ -1679,7 +1679,7 @@ public static class GenericsExtension
 		NameValueCollection rootCollection = new NameValueCollection(StringComparer.OrdinalIgnoreCase);
 		if (thisValue.IsNull())
 			return rootCollection;
-		EnumerateProperties(thisValue, type, (source, key, property) =>
+		EnumerateMembers(thisValue, type, (source, key, property) =>
 		{
 			if (property.PropertyType.IsPrimitive())
 			{
@@ -1721,7 +1721,7 @@ public static class GenericsExtension
 		IDictionary<string, object> rootDictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 		if (thisValue.IsNull())
 			return rootDictionary;
-		EnumerateProperties(thisValue
+		EnumerateMembers(thisValue
 							, type
 							, (source, key, property) =>
 							{
@@ -1753,7 +1753,7 @@ public static class GenericsExtension
 		Dictionary<string, Type> rootDictionary = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
 		if (thisValue.IsNull())
 			return rootDictionary;
-		EnumerateProperties(thisValue
+		EnumerateMembers(thisValue
 							, type
 							, (_, key, property) =>
 							{
@@ -1774,7 +1774,7 @@ public static class GenericsExtension
 		Dictionary<string, PropertyInfo> rootDictionary = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
 		if (thisValue.IsNull())
 			return rootDictionary;
-		EnumerateProperties(thisValue, type, (_, key, property) =>
+		EnumerateMembers(thisValue, type, (_, key, property) =>
 		{
 			rootDictionary.Add(key, property);
 			return true;
@@ -1788,7 +1788,7 @@ public static class GenericsExtension
 		Dictionary<string, MemberInfo> rootDictionary = new Dictionary<string, MemberInfo>(StringComparer.OrdinalIgnoreCase);
 		if (thisValue.IsNull())
 			return rootDictionary;
-		EnumerateProperties(thisValue
+		EnumerateMembers(thisValue
 							, type
 							, (_, key, property) =>
 							{
@@ -1807,7 +1807,7 @@ public static class GenericsExtension
 	public static IReadOnlyCollection<(string Key, object Source, MemberInfo Member, bool ShouldSerialize)> GetNameValueMembers<T>(this T thisValue, PropertyInfoType type = PropertyInfoType.All)
 	{
 		List<(string Key, object Source, MemberInfo Member, bool ShouldSerialize)> list = new List<(string Key, object Source, MemberInfo Member, bool ShouldSerialize)>();
-		EnumeratePropertyDescriptors(thisValue, type, (source, key, property) =>
+		EnumerateMembersDescriptors(thisValue, type, (source, key, property) =>
 		{
 			if (property.PropertyType.IsPrimitive())
 				list.Add((key, source, property.ComponentType.GetProperty(property.Name), false));
@@ -1874,107 +1874,100 @@ public static class GenericsExtension
 					: thisValue.GetType().GetFields(Constants.BF_PUBLIC_INSTANCE).Where(e => !e.IsInitOnly);
 	}
 
-	public static void EnumeratePropertyDescriptors<T>(this T thisValue, PropertyInfoType propertyInfoType, Func<object, string, PropertyDescriptor, bool> onProperty, Func<object, string, FieldInfo, bool> onField)
+	public static void EnumerateMembersDescriptors<T>(this T thisValue, Func<object, string, PropertyDescriptor, bool> onProperty, Func<object, string, FieldInfo, bool> onField) { EnumerateMembersDescriptors(thisValue, PropertyInfoType.Default, onProperty, onField); }
+	public static void EnumerateMembersDescriptors<T>(this T thisValue, PropertyInfoType propertyInfoType, Func<object, string, PropertyDescriptor, bool> onProperty, Func<object, string, FieldInfo, bool> onField)
 	{
+		if (onProperty == null && onField == null) throw new ArgumentException("No property or field handler is specified.");
 		if (thisValue.IsNull()) return;
-		EnumeratePropertyDescriptorsInternal(new HashSet<string>(StringComparer.OrdinalIgnoreCase), thisValue, null, propertyInfoType, onProperty, onField);
+		EnumerateMembersDescriptorsLocal(new HashSet<string>(StringComparer.OrdinalIgnoreCase), thisValue, null, propertyInfoType, onProperty, onField);
 
-		static void EnumeratePropertyDescriptorsInternal(ISet<string> keys, object sourceInternal, string rootInternal, PropertyInfoType propertyInfoTypeInternal, Func<object, string, PropertyDescriptor, bool> onPropertyInternal, Func<object, string, FieldInfo, bool> onFieldInternal)
+		static void EnumerateMembersDescriptorsLocal(ISet<string> keys, object source, string root, PropertyInfoType propertyInfoType, Func<object, string, PropertyDescriptor, bool> onProperty, Func<object, string, FieldInfo, bool> onField)
 		{
-			rootInternal ??= string.Empty;
-			if (!string.IsNullOrEmpty(rootInternal)) rootInternal += ".";
+			root ??= string.Empty;
+			if (!string.IsNullOrEmpty(root)) root += ".";
 
-			if (onPropertyInternal != null)
+			if (onProperty != null)
 			{
-				foreach (PropertyDescriptor property in GetNameValuePropertyDescriptors(sourceInternal, propertyInfoTypeInternal))
+				foreach (PropertyDescriptor property in GetNameValuePropertyDescriptors(source, propertyInfoType))
 				{
-					string key = $"{rootInternal}{property.Name}";
-					if (!keys.Add(key))
-						continue;
+					string key = $"{root}{property.Name}";
+					if (!keys.Add(key)) continue;
 
 					if (property.PropertyType.IsPrimitive() || property.PropertyType.IsArray)
 					{
-						if (!onPropertyInternal(sourceInternal, key, property))
-							return;
+						if (!onProperty(source, key, property)) return;
 						continue;
 					}
 
-					object value = property.GetValue(sourceInternal) ?? TypeHelper.CreateInstance(property.PropertyType);
-					EnumeratePropertyDescriptorsInternal(keys, value, key, propertyInfoTypeInternal, onPropertyInternal, onFieldInternal);
+					object value = property.GetValue(source) ?? TypeHelper.CreateInstance(property.PropertyType);
+					EnumerateMembersDescriptorsLocal(keys, value, key, propertyInfoType, onProperty, onField);
 				}
 			}
 
-			if (onFieldInternal != null)
+			if (onField == null) return;
+
+			foreach (FieldInfo field in GetNameValueFields(source))
 			{
-				foreach (FieldInfo field in GetNameValueFields(sourceInternal))
+				string key = $"{root}{field.Name}";
+				if (!keys.Add(key)) continue;
+
+				if (field.FieldType.IsPrimitive() || field.FieldType.IsArray)
 				{
-					string key = $"{rootInternal}{field.Name}";
-					if (!keys.Add(key))
-						continue;
-
-					if (field.FieldType.IsPrimitive() || field.FieldType.IsArray)
-					{
-						if (!onFieldInternal(sourceInternal, key, field))
-							return;
-						continue;
-					}
-
-					object value = field.GetValue(sourceInternal) ?? TypeHelper.CreateInstance(field.FieldType);
-					EnumeratePropertyDescriptorsInternal(keys, value, key, propertyInfoTypeInternal, onPropertyInternal, onFieldInternal);
+					if (!onField(source, key, field)) return;
+					continue;
 				}
+
+				object value = field.GetValue(source) ?? TypeHelper.CreateInstance(field.FieldType);
+				EnumerateMembersDescriptorsLocal(keys, value, key, propertyInfoType, onProperty, onField);
 			}
 		}
 	}
 
-	public static void EnumerateProperties<T>(this T thisValue, PropertyInfoType propertyInfoType, Func<object, string, PropertyInfo, bool> onProperty, Func<object, string, FieldInfo, bool> onField)
+	public static void EnumerateMembers<T>(this T thisValue, Func<object, string, PropertyInfo, bool> onProperty, Func<object, string, FieldInfo, bool> onField) { EnumerateMembers(thisValue, PropertyInfoType.Default, onProperty, onField); }
+	public static void EnumerateMembers<T>(this T thisValue, PropertyInfoType propertyInfoType, Func<object, string, PropertyInfo, bool> onProperty, Func<object, string, FieldInfo, bool> onField)
 	{
+		if (onProperty == null && onField == null) throw new ArgumentException("No property or field handler is specified.");
 		if (thisValue.IsNull()) return;
-		EnumeratePropertiesInternal(new HashSet<string>(StringComparer.OrdinalIgnoreCase), thisValue, null, propertyInfoType, onProperty, onField);
+		EnumerateMembersLocal(new HashSet<string>(StringComparer.OrdinalIgnoreCase), thisValue, null, propertyInfoType, onProperty, onField);
 
-		static void EnumeratePropertiesInternal(ISet<string> keys, object sourceInternal, string rootInternal, PropertyInfoType propertyInfoTypeInternal, Func<object, string, PropertyInfo, bool> onPropertyInternal, Func<object, string, FieldInfo, bool> onFieldInternal)
+		static void EnumerateMembersLocal(ISet<string> keys, object source, string root, PropertyInfoType propertyInfoType, Func<object, string, PropertyInfo, bool> onProperty, Func<object, string, FieldInfo, bool> onField)
 		{
-			rootInternal ??= string.Empty;
-			if (!string.IsNullOrEmpty(rootInternal))
-				rootInternal += ".";
+			root ??= string.Empty;
+			if (!string.IsNullOrEmpty(root)) root += ".";
 
-			if (onPropertyInternal != null)
+			if (onProperty != null)
 			{
-				foreach (PropertyInfo property in GetNameValuePropertyInfo(sourceInternal, propertyInfoTypeInternal))
+				foreach (PropertyInfo property in GetNameValuePropertyInfo(source, propertyInfoType))
 				{
-					string key = $"{rootInternal}{property.Name}";
-					if (!keys.Add(key))
-						continue;
+					string key = $"{root}{property.Name}";
+					if (!keys.Add(key)) continue;
 
 					if (property.PropertyType.IsPrimitive() || property.PropertyType.IsArray)
 					{
-						if (!onPropertyInternal(sourceInternal, key, property))
-							return;
+						if (!onProperty(source, key, property)) return;
 						continue;
 					}
 
-					object value = property.GetValue(sourceInternal) ?? TypeHelper.CreateInstance(property.PropertyType);
-					EnumeratePropertiesInternal(keys, value, key, propertyInfoTypeInternal, onPropertyInternal, onFieldInternal);
+					object value = property.GetValue(source) ?? TypeHelper.CreateInstance(property.PropertyType);
+					EnumerateMembersLocal(keys, value, key, propertyInfoType, onProperty, onField);
 				}
 			}
 
-			if (onFieldInternal != null)
+			if (onField == null) return;
+
+			foreach (FieldInfo field in GetNameValueFields(source))
 			{
-				foreach (FieldInfo field in GetNameValueFields(sourceInternal))
+				string key = $"{root}{field.Name}";
+				if (!keys.Add(key)) continue;
+
+				if (field.FieldType.IsPrimitive() || field.FieldType.IsArray)
 				{
-					string key = $"{rootInternal}{field.Name}";
-					if (!keys.Add(key))
-						continue;
-
-					if (field.FieldType.IsPrimitive() || field.FieldType.IsArray)
-					{
-						if (!onFieldInternal(sourceInternal, key, field))
-							return;
-						continue;
-					}
-
-					object value = field.GetValue(sourceInternal) ?? TypeHelper.CreateInstance(field.FieldType);
-					EnumeratePropertiesInternal(keys, value, key, propertyInfoTypeInternal, onPropertyInternal, onFieldInternal);
+					if (!onField(source, key, field)) return;
+					continue;
 				}
+
+				object value = field.GetValue(source) ?? TypeHelper.CreateInstance(field.FieldType);
+				EnumerateMembersLocal(keys, value, key, propertyInfoType, onProperty, onField);
 			}
 		}
 	}

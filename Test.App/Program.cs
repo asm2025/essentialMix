@@ -528,7 +528,7 @@ work with {Constants.HEAVY} items.");
 
 			if (threads < 1 || threads > TaskHelper.ProcessDefault) threads = TaskHelper.ProcessDefault;
 
-			ThreadQueueMode[] modes = EnumHelper<ThreadQueueMode>.GetValues();
+			IReadOnlyList<ThreadQueueMode> modes = EnumHelper<ThreadQueueMode>.GetValues();
 			Queue<ThreadQueueMode> queueModes = new Queue<ThreadQueueMode>(modes);
 			HashSet<int> visited = new HashSet<int>();
 			List<int> duplicates = new List<int>();

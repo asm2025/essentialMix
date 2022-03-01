@@ -611,7 +611,7 @@ public static class FileHelper
 		return ConvertToEncoding(fileName, encoding, enc);
 	}
 
-	public static bool ConvertToEncoding([NotNull] string fileName, [NotNull] Encoding encoding,  Encoding detectedEncoding = null)
+	public static bool ConvertToEncoding([NotNull] string fileName, [NotNull] Encoding encoding, Encoding detectedEncoding = null)
 	{
 		if (fileName.Length == 0) throw new ArgumentNullException(nameof(fileName));
 
@@ -635,7 +635,7 @@ public static class FileHelper
 		{
 			using (StreamReader reader = detectedEncoding == null ? new StreamReader(fileName) : new StreamReader(fileName, detectedEncoding, true))
 			{
-				using (StreamWriter writer = new StreamWriter(tmpName, true, encoding) {AutoFlush = true})
+				using (StreamWriter writer = new StreamWriter(tmpName, true, encoding) { AutoFlush = true })
 				{
 					string line;
 
@@ -675,7 +675,7 @@ public static class FileHelper
 		name = name?.Trim();
 		if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
 		if (!PathHelper.IsValidPath(name)) throw new ArgumentException($"{nameof(name)} is invalid.");
-			
+
 		if (PathHelper.IsPathQualified(name))
 		{
 			return File.Exists(name)
@@ -717,22 +717,11 @@ public static class FileHelper
 		return null;
 	}
 
-	[NotNull]
 	public static string GetRandomName() { return GetRandomName(true); }
-
-	[NotNull]
 	public static string GetRandomName(bool useTempDirectory) { return GetRandomName(null, useTempDirectory); }
-
-	[NotNull]
 	public static string GetRandomName(string extension) { return GetRandomName(extension, true); }
-
-	[NotNull]
 	public static string GetRandomName(string extension, bool useTempDirectory) { return GetRandomName(null, extension, useTempDirectory); }
-
-	[NotNull]
 	public static string GetRandomName(string basePath, string extension) { return GetRandomName(basePath, extension, true); }
-
-	[NotNull]
 	private static string GetRandomName(string basePath, string extension, bool useTempDirectory)
 	{
 		StringBuilder sPath = new StringBuilder();
@@ -757,38 +746,32 @@ public static class FileHelper
 
 		if (sPath.Length > 0) sPath.Suffix('\\');
 
-		TryPath:
+		string newName = null;
 
-		sb.Length = 0;
-
-		for (int i = 0; i <= 8; i++)
+		while (sb.Length == 0)
 		{
-			bool bNum = RNGRandomHelper.Default.Next(1, 2) == 2;
+			for (int i = 0; i <= 8; i++)
+			{
+				bool bNum = RNGRandomHelper.Default.Next(1, 2) == 2;
 
-			if (bNum)
-				sb.Append(RNGRandomHelper.Default.Next(0, 9).ToString(CultureInfo.InvariantCulture));
-			else
-				sb.Append((char)RNGRandomHelper.Default.Next('a', 'z'));
+				if (bNum)
+					sb.Append(RNGRandomHelper.Default.Next(0, 9).ToString(CultureInfo.InvariantCulture));
+				else
+					sb.Append((char)RNGRandomHelper.Default.Next('a', 'z'));
+			}
+
+			if (sPath.Length > 0) sb.Insert(0, sPath.ToString());
+			if (sbExt.Length > 0) sb.Append(sbExt);
+
+			newName = sb.ToString();
+			if (sPath.Length > 0 && File.Exists(newName)) sb.Length = 0;
 		}
-
-		if (sPath.Length > 0) sb.Insert(0, sPath.ToString());
-		if (sbExt.Length > 0) sb.Append(sbExt);
-
-		string newName = sb.ToString();
-
-		if (sPath.Length > 0 && File.Exists(newName))
-			goto TryPath;
 
 		return newName;
 	}
 
-	[NotNull]
 	public static string GetRandomName(string basePath, string extension, string suffix) { return GetRandomName(basePath, extension, null, suffix); }
-
-	[NotNull]
 	public static string GetRandomName(string basePath, string extension, string prefix, string suffix) { return GetRandomName(basePath, null, extension, prefix, suffix); }
-
-	[NotNull]
 	public static string GetRandomName(string basePath, string name, string extension, string prefix, string suffix)
 	{
 		StringBuilder sPath = new StringBuilder();
@@ -812,67 +795,57 @@ public static class FileHelper
 
 		bool hasName = !string.IsNullOrEmpty(name);
 		int fileCount = 0;
-
-		TryPath:
-
-		sb.Length = 0;
-
 		StringBuilder sbName = new StringBuilder();
+		string newName = null;
 
-		if (hasName)
+		while (sb.Length == 0)
 		{
-			sbName.Append(name);
-		}
-		else
-		{
-			for (int i = 0; i <= 8; i++)
+			sbName.Length = 0;
+
+			if (hasName)
 			{
-				bool bNum = RNGRandomHelper.Default.Next(1, 2) == 2;
-
-				if (bNum)
-					sbName.Append(RNGRandomHelper.Default.Next(0, 9).ToString(CultureInfo.InvariantCulture));
-				else
-					sbName.Append((char)RNGRandomHelper.Default.Next('a', 'z'));
+				sbName.Append(name);
 			}
+			else
+			{
+				for (int i = 0; i <= 8; i++)
+				{
+					bool bNum = RNGRandomHelper.Default.Next(1, 2) == 2;
+
+					if (bNum)
+						sbName.Append(RNGRandomHelper.Default.Next(0, 9).ToString(CultureInfo.InvariantCulture));
+					else
+						sbName.Append((char)RNGRandomHelper.Default.Next('a', 'z'));
+				}
+			}
+
+			if (!string.IsNullOrEmpty(prefix)) sbName.Insert(0, prefix + "_");
+			if (!string.IsNullOrEmpty(suffix)) sbName.AppendFormat("_{0}", suffix);
+
+			if (hasName)
+			{
+				if (fileCount > 0) sbName.AppendFormat(" ({0})", fileCount);
+				fileCount++;
+			}
+
+			if (sPath.Length > 0) sb.Insert(0, sPath);
+			sb.Append(sbName);
+			if (sbExt.Length > 0) sb.Append(sbExt);
+
+			newName = sb.ToString();
+
+			if (sPath.Length > 0 && File.Exists(newName))
+				sb.Length = 0;
 		}
-
-		if (!string.IsNullOrEmpty(prefix)) sbName.Insert(0, prefix + "_");
-		if (!string.IsNullOrEmpty(suffix)) sbName.AppendFormat("_{0}", suffix);
-
-		if (hasName)
-		{
-			if (fileCount > 0) sbName.AppendFormat(" ({0})", fileCount);
-			fileCount++;
-		}
-
-		if (sPath.Length > 0) sb.Insert(0, sPath);
-		sb.Append(sbName);
-		if (sbExt.Length > 0) sb.Append(sbExt);
-
-		string newName = sb.ToString();
-
-		if (sPath.Length > 0 && File.Exists(newName))
-			goto TryPath;
 
 		return newName;
 	}
 
-	[NotNull]
 	public static string GetRandomGuidName() { return GetRandomGuidName(true); }
-
-	[NotNull]
 	public static string GetRandomGuidName(bool useTempDirectory) { return GetRandomGuidName(null, useTempDirectory); }
-
-	[NotNull]
 	public static string GetRandomGuidName(string sExtension) { return GetRandomGuidName(sExtension, true); }
-
-	[NotNull]
 	public static string GetRandomGuidName(string sExtension, bool useTempDirectory) { return GetRandomGuidName(null, sExtension, useTempDirectory); }
-
-	[NotNull]
 	public static string GetRandomGuidName(string basePath, string extension) { return GetRandomGuidName(basePath, extension, true); }
-
-	[NotNull]
 	private static string GetRandomGuidName(string basePath, string extension, bool useTempDirectory)
 	{
 		StringBuilder sPath = new StringBuilder();
@@ -897,17 +870,19 @@ public static class FileHelper
 
 		if (sPath.Length > 0) sPath.Suffix('\\');
 
-		TryPath:
+		string newName = null;
 
-		sb.Length = 0;
-		sb.Append(Guid.NewGuid().ToString("D").Replace('-', '_'));
-		if (sPath.Length > 0) sb.Insert(0, sPath.ToString());
-		if (sbExt.Length > 0) sb.Append(sbExt);
+		while (sb.Length == 0)
+		{
+			sb.Append(Guid.NewGuid().ToString("D").Replace('-', '_'));
+			if (sPath.Length > 0) sb.Insert(0, sPath.ToString());
+			if (sbExt.Length > 0) sb.Append(sbExt);
 
-		string newName = sb.ToString();
+			newName = sb.ToString();
 
-		if (sPath.Length > 0 && File.Exists(newName))
-			goto TryPath;
+			if (sPath.Length > 0 && File.Exists(newName))
+				sb.Length = 0;
+		}
 
 		return newName;
 	}

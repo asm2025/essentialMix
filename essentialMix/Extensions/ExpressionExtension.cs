@@ -6,9 +6,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using JetBrains.Annotations;
 using essentialMix.Linq.Expressions;
 using essentialMix.Reflection;
+using JetBrains.Annotations;
 
 namespace essentialMix.Extensions;
 
@@ -51,9 +51,9 @@ public static class ExpressionExtension
 			}
 
 			if (declaringType == null) throw new NotSupportedException();
-				
+
 			MemberInfo mi = declaringType.GetMember(node.Member.Name, MemberTypes.Field | MemberTypes.Property, Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE_STATIC).SingleOrDefault();
-				
+
 			if (mi != null)
 			{
 				if (mi.MemberType == MemberTypes.Field)
@@ -104,7 +104,7 @@ public static class ExpressionExtension
 
 			if (typeof(IConvertible).IsAssignableFrom(type))
 			{
-				foreach (ConstantExpression expression in node.Expressions.Cast<ConstantExpression>()) 
+				foreach (ConstantExpression expression in node.Expressions.Cast<ConstantExpression>())
 					list.Add(Convert.ChangeType(expression.Value, expression.Type));
 			}
 			else
@@ -312,7 +312,7 @@ public static class ExpressionExtension
 					: Simplify(thisValue, expression3);
 	}
 
-	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
+	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3,
 		ExpressionType expression4)
 	{
 		if (thisValue == null) return null;
@@ -326,7 +326,7 @@ public static class ExpressionExtension
 					: Simplify(thisValue, expression4);
 	}
 
-	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
+	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3,
 		ExpressionType expression4, ExpressionType expression5)
 	{
 		if (thisValue == null) return null;
@@ -342,7 +342,7 @@ public static class ExpressionExtension
 					: Simplify(thisValue, expression5);
 	}
 
-	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
+	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3,
 		ExpressionType expression4, ExpressionType expression5, ExpressionType expression6)
 	{
 		if (thisValue == null) return null;
@@ -360,7 +360,7 @@ public static class ExpressionExtension
 					: Simplify(thisValue, expression6);
 	}
 
-	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
+	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3,
 		ExpressionType expression4, ExpressionType expression5, ExpressionType expression6, ExpressionType expression7)
 	{
 		if (thisValue == null) return null;
@@ -380,7 +380,7 @@ public static class ExpressionExtension
 					: Simplify(thisValue, expression7);
 	}
 
-	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
+	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3,
 		ExpressionType expression4, ExpressionType expression5, ExpressionType expression6, ExpressionType expression7, ExpressionType expression8)
 	{
 		if (thisValue == null) return null;
@@ -402,8 +402,8 @@ public static class ExpressionExtension
 					: Simplify(thisValue, expression8);
 	}
 
-	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
-		ExpressionType expression4, ExpressionType expression5, ExpressionType expression6, ExpressionType expression7, ExpressionType expression8, 
+	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3,
+		ExpressionType expression4, ExpressionType expression5, ExpressionType expression6, ExpressionType expression7, ExpressionType expression8,
 		ExpressionType expression9)
 	{
 		if (thisValue == null) return null;
@@ -427,8 +427,8 @@ public static class ExpressionExtension
 					: Simplify(thisValue, expression9);
 	}
 
-	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3, 
-		ExpressionType expression4, ExpressionType expression5, ExpressionType expression6, ExpressionType expression7, ExpressionType expression8, 
+	public static Expression Simplify(this Expression thisValue, ExpressionType expression1, ExpressionType expression2, ExpressionType expression3,
+		ExpressionType expression4, ExpressionType expression5, ExpressionType expression6, ExpressionType expression7, ExpressionType expression8,
 		ExpressionType expression9, ExpressionType expression10)
 	{
 		if (thisValue == null) return null;
@@ -671,7 +671,7 @@ public static class ExpressionExtension
 			{
 				BinaryExpression expression = (BinaryExpression)thisValue;
 				method = expression.Method;
-				arguments = new []{ expression.Right };
+				arguments = new[] { expression.Right };
 				break;
 			}
 			case ExpressionType.Call:
@@ -850,31 +850,43 @@ public static class ExpressionExtension
 		}).Any();
 	}
 
-	public static string GetPath(this Expression thisValue, bool placeholders = false) { return GetPath(thisValue, placeholders, out _); }
-	public static string GetPath(this Expression thisValue, bool placeholders, out int parametersCount)
+	public static string GetPath(this Expression thisValue) { return GetPath(thisValue, true, false, out _); }
+	public static string GetPath(this Expression thisValue, bool includeRoot) { return GetPath(thisValue, includeRoot, false, out _); }
+	public static string GetPath(this Expression thisValue, bool placeholders, out int parametersCount) { return GetPath(thisValue, true, placeholders, out parametersCount); }
+	public static string GetPath(this Expression thisValue, bool includeRoot, bool placeholders, out int parametersCount)
 	{
 		parametersCount = 0;
 		if (thisValue == null) return null;
 
 		StringBuilder sb = new StringBuilder();
-		bool passedFirst = false;
+		bool firstParam = false;
+		bool firstMember = false;
 
-		foreach (Expression	expression in Enumerate(thisValue))
+		foreach (Expression expression in Enumerate(thisValue))
 		{
 			switch (expression)
 			{
 				case ParameterExpression parameter:
-					if (!passedFirst) goto NextLoop;
+					if (!firstParam)
+					{
+						firstParam = true;
+						continue;
+					}
+
 					sb.Append(placeholders
 								? $"[{{{parametersCount++}}}]"
 								: $"[{parameter.Name}]");
 					break;
 				case MemberExpression memberExpression:
+					if (!includeRoot && !firstMember)
+					{
+						firstMember = true;
+						continue;
+					}
+
 					sb.Separator('.').Append(memberExpression.Member.Name);
 					break;
 			}
-			NextLoop:
-			passedFirst = true;
 		}
 
 		return sb.Length > 0

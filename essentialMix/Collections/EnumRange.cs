@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
@@ -30,12 +29,12 @@ public class EnumRange<T> : Range<T>
 	{
 	}
 
-	public EnumRange([NotNull] IReadOnlyRange<T> range) 
+	public EnumRange([NotNull] IReadOnlyRange<T> range)
 		: this(range.Minimum, range.Maximum)
 	{
 	}
 
-	public EnumRange([NotNull] LambdaRange<T> range) 
+	public EnumRange([NotNull] LambdaRange<T> range)
 		: this(range.Minimum, range.Maximum)
 	{
 	}
@@ -176,17 +175,15 @@ public class EnumRange<T> : Range<T>
 
 	public static Type EnumType { get; } = typeof(T);
 
-	public static T[] Values { get; } = EnumHelper<T>.GetValues();
+	public static IReadOnlyList<T> Values { get; } = EnumHelper<T>.GetValues();
 
-	[SuppressMessage("ReSharper", "StaticMemberInGenericType")]
 	public static string[] Names { get; } = Values.Select(v => v.ToString()).ToArray();
 
-	[SuppressMessage("ReSharper", "StaticMemberInGenericType")]
 	public static string[] DisplayNames { get; } = Values.Select(v => EnumType.GetDisplayName(v)).ToArray();
 
 	public static T MinValue { get; } = Values[0];
 
-	public static T MaxValue { get; } = Values[Values.Length - 1];
+	public static T MaxValue { get; } = Values[Values.Count - 1];
 
 	public static bool operator ==(EnumRange<T> x, EnumRange<T> y) { return EnumRangeComparer<T>.Default.Equals(x, y); }
 
@@ -249,7 +246,7 @@ public static class EnumRange
 		if (!value.Contains(Range.GROUP))
 		{
 			if (!IsWellFormattedRangeString(value, out EnumRange<T> range)) return Array.Empty<EnumRange<T>>();
-			return new Collection<EnumRange<T>> {range};
+			return new Collection<EnumRange<T>> { range };
 		}
 
 		ICollection<EnumRange<T>> collection = new Collection<EnumRange<T>>();

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Helpers;
 using essentialMix.Numeric;
@@ -15,6 +16,23 @@ public static class IReadOnlyListExtension
 	public static Type[] Types([NotNull] this IReadOnlyList<object> thisValue)
 	{
 		return thisValue.Count == 0 ? Type.EmptyTypes : thisValue.Select(item => item.AsType()).ToArray();
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.ForwardRef)]
+	public static int IndexOf<T>([NotNull] this IReadOnlyList<T> thisValue, T value) { return IndexOf(thisValue, value, null); }
+	public static int IndexOf<T>([NotNull] this IReadOnlyList<T> thisValue, T value, IEqualityComparer<T> comparer)
+	{
+		if (thisValue.Count == 0) return -1;
+
+		comparer ??= EqualityComparer<T>.Default;
+
+		for (int i = 0; i < thisValue.Count; i++)
+		{
+			if (!comparer.Equals(thisValue[i], value)) continue;
+			return i;
+		}
+
+		return -1;
 	}
 
 	public static int BinarySearch<T>([NotNull] this IReadOnlyList<T> thisValue, T value) { return BinarySearch(thisValue, value, 0, -1, null); }

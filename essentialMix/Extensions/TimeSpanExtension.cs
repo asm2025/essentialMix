@@ -1,10 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Patterns.DateTime;
+using JetBrains.Annotations;
 
 namespace essentialMix.Extensions;
 
@@ -20,7 +21,7 @@ public static class TimeSpanExtension
 	private const string MEDIUM_STRING = @"d\.hh\:mm\:ss\.fffff";
 	private const string LONG_STRING = @"d\.hh\:mm\:ss\.fffffff";
 
-	private static readonly Lazy<TimeUnit[]> __timeUnitValues = new Lazy<TimeUnit[]>(EnumHelper<TimeUnit>.GetValues, LazyThreadSafetyMode.PublicationOnly);
+	private static readonly Lazy<IReadOnlyList<TimeUnit>> __timeUnitValues = new Lazy<IReadOnlyList<TimeUnit>>(EnumHelper<TimeUnit>.GetValues, LazyThreadSafetyMode.PublicationOnly);
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static bool IsValid(this TimeSpan thisValue, bool zeroIsValid = false, bool infiniteIsValid = false)
@@ -256,7 +257,7 @@ public static class TimeSpanExtension
 	public static string HoursMinutesSecondsMilliseconds(this TimeSpan thisValue, byte millisecondsLength = 3, bool millisecondsAreOptional = false)
 	{
 		millisecondsLength = millisecondsLength.Within((byte)0, (byte)7);
-		return millisecondsLength == 0 
+		return millisecondsLength == 0
 					? thisValue.ToString(HOURS_MINUTES_SECONDS)
 					: thisValue.ToString(HOURS_MINUTES_SECONDS + DOT_SEP + new string(millisecondsAreOptional ? 'F' : 'f', millisecondsLength));
 	}
@@ -266,7 +267,7 @@ public static class TimeSpanExtension
 	public static string DaysHoursMinutesSecondsMilliseconds(this TimeSpan thisValue, byte millisecondsLength = 3, bool millisecondsAreOptional = false)
 	{
 		millisecondsLength = millisecondsLength.Within((byte)0, (byte)7);
-		return millisecondsLength == 0 
+		return millisecondsLength == 0
 					? thisValue.ToString(DAYS_HOURS_MINUTES_SECONDS)
 					: thisValue.ToString(DAYS_HOURS_MINUTES_SECONDS + DOT_SEP + new string(millisecondsAreOptional ? 'F' : 'f', millisecondsLength));
 	}

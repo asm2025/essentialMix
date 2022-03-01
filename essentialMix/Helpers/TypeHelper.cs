@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Reflection;
 using essentialMix.Collections;
-using JetBrains.Annotations;
 using essentialMix.Extensions;
+using JetBrains.Annotations;
 
 namespace essentialMix.Helpers;
 
@@ -86,7 +86,7 @@ public static class TypeHelper
 		{
 			if (type.IsEnum)
 			{
-				EnumHelper.GetBoundaries(type, out Enum minimum, out Enum maximum);
+				(Enum minimum, Enum maximum) = EnumHelper.GetBoundaries(type);
 				(T Miniumum, T Maximum) bounds = ((T)(object)minimum, (T)(object)maximum);
 				__typeBoundsCache.TryAdd(type, bounds);
 				return bounds;

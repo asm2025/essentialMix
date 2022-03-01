@@ -19,9 +19,9 @@ public static class JsonSerializerSettingsExtension
 		if (converters.IsReadOnly) throw new ReadOnlyException();
 		if (convertersToAdd == JsonSerializerSettingsConverters.Default) convertersToAdd = EnumHelper<JsonSerializerSettingsConverters>.GetAllFlags();
 
-		if (EnumHelper<JsonSerializerSettingsConverters>.HasFlag(convertersToAdd, JsonSerializerSettingsConverters.StringEnum | JsonSerializerSettingsConverters.StringEnumTranslation))
+		if (EnumHelper<JsonSerializerSettingsConverters>.HasAnyFlags(convertersToAdd, JsonSerializerSettingsConverters.StringEnum | JsonSerializerSettingsConverters.StringEnumTranslation))
 			convertersToAdd &= ~JsonSerializerSettingsConverters.StringEnumTranslation;
-			
+
 		if (convertersToAdd.FastHasFlag(JsonSerializerSettingsConverters.Binary)) converters.Add(new BinaryConverter());
 		if (convertersToAdd.FastHasFlag(JsonSerializerSettingsConverters.DataSet)) converters.Add(new DataSetConverter());
 		if (convertersToAdd.FastHasFlag(JsonSerializerSettingsConverters.DataTable)) converters.Add(new DataTableConverter());
@@ -35,7 +35,7 @@ public static class JsonSerializerSettingsExtension
 
 		if (convertersToAdd.FastHasFlag(JsonSerializerSettingsConverters.StringEnumTranslation)) converters.Add(new StringEnumTranslationConverter { Culture = thisValue.Culture });
 		else if (convertersToAdd.FastHasFlag(JsonSerializerSettingsConverters.StringEnum)) converters.Add(new StringEnumConverter());
-			
+
 		if (convertersToAdd.FastHasFlag(JsonSerializerSettingsConverters.Version)) converters.Add(new VersionConverter());
 		if (convertersToAdd.FastHasFlag(JsonSerializerSettingsConverters.XmlNode)) converters.Add(new XmlNodeConverter());
 		if (convertersToAdd.FastHasFlag(JsonSerializerSettingsConverters.Uri)) converters.Add(new UriConverter());

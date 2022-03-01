@@ -32,7 +32,7 @@ public static class EnumExtension
 		T value = default(T);
 		if (!type.HasAttribute<FlagsAttribute>()) return value;
 
-		T[] flags = EnumHelper<T>.GetValues();
+		IReadOnlyList<T> flags = EnumHelper<T>.GetValues();
 
 		foreach (T flag in flags)
 		{
@@ -44,13 +44,13 @@ public static class EnumExtension
 	}
 
 	[NotNull]
-	public static T[] Flags<T>(this T thisValue, params T[] exclude)
+	public static IReadOnlyList<T> Flags<T>(this T thisValue, params T[] exclude)
 		where T : struct, Enum, IComparable
 	{
 		Type type = typeof(T);
 		if (!type.HasAttribute<FlagsAttribute>()) return Array.Empty<T>();
 
-		T[] values = EnumHelper<T>.GetValues();
+		IReadOnlyList<T> values = EnumHelper<T>.GetValues();
 		return exclude is { Length: > 0 }
 					? values.Where(e => !exclude.Contains(e) && FastHasFlag(thisValue, e)).ToArray()
 					: values;
@@ -166,6 +166,6 @@ public static class EnumExtension
 	public static bool FastHasFlag<T>(this T thisValue, T flag)
 		where T : struct, Enum, IComparable
 	{
-		return EnumHelper<T>.HasFlag(thisValue, flag);
+		return EnumHelper<T>.HasAnyFlags(thisValue, flag);
 	}
 }

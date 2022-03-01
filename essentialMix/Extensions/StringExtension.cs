@@ -9,9 +9,9 @@ using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using essentialMix.Collections;
-using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Text;
+using JetBrains.Annotations;
 using CharEnumerator = essentialMix.Collections.CharEnumerator;
 
 namespace essentialMix.Extensions;
@@ -846,9 +846,9 @@ public static class StringExtension
 		return sb.ToString();
 	}
 
-	[NotNull] 
+	[NotNull]
 	public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, StringComparison comparison) { return Replace(thisValue, oldValue, newValue, comparison, 0, -1); }
-	[NotNull] 
+	[NotNull]
 	public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, StringComparison comparison, int startIndex) { return Replace(thisValue, oldValue, newValue, comparison, startIndex, -1); }
 	[NotNull]
 	public static string Replace([NotNull] this string thisValue, string oldValue, string newValue, StringComparison comparison, int startIndex, int count)
@@ -1193,7 +1193,7 @@ public static class StringExtension
 		if (string.IsNullOrEmpty(thisValue)) return thisValue;
 		byte[] bytes = thisValue.ToBytes(encoding ?? EncodingHelper.Default);
 		return bytes.Length == 0
-					? string.Empty 
+					? string.Empty
 					: Convert.ToBase64String(bytes);
 	}
 
@@ -1601,14 +1601,13 @@ public static class StringExtension
 					w = "%";
 					break;
 				case 'd': // integer
+				case 'i': // integer
 					w = FormatNumber(flagGroupThousands ? "n" : "d",
 									fieldLength, int.MinValue, flagLeft2Right,
 									flagPositiveSign, flagPositiveSpace,
 									paddingCharacter, o);
 					defaultParamIx++;
 					break;
-				case 'i': // integer
-					goto case 'd';
 				case 'o': // octal integer - no leading zero
 					w = FormatOct(flagAlternate,
 								fieldLength, flagLeft2Right,
@@ -1627,7 +1626,6 @@ public static class StringExtension
 								paddingCharacter, o);
 					defaultParamIx++;
 					break;
-
 				case 'u': // unsigned integer
 					IComparable comparable = o as IComparable;
 					w = FormatNumber(flagGroupThousands ? "n" : "d",
@@ -1798,7 +1796,7 @@ public static class StringExtension
 		using (CharEnumerator enumerator = Enumerate(thisValue, delimiter))
 		{
 			int i = 0;
-				
+
 			foreach (string s in enumerator)
 			{
 				if (!predicate(s, i++)) return false;
@@ -1824,7 +1822,7 @@ public static class StringExtension
 		using (StringEnumerator enumerator = Enumerate(thisValue, delimiter, comparison))
 		{
 			int i = 0;
-				
+
 			foreach (string s in enumerator)
 			{
 				if (!predicate(s, i++)) return false;
@@ -1996,21 +1994,21 @@ public static class StringExtension
 	{
 		thisValue = thisValue?.Trim();
 		if (string.IsNullOrEmpty(thisValue)) return thisValue;
-			
+
 		switch (casing)
 		{
 			case TextCasing.Upper:
-				return CultureInfoHelper.English.TextInfo.ToUpper(thisValue); 
+				return CultureInfoHelper.English.TextInfo.ToUpper(thisValue);
 			case TextCasing.Lower:
-				return CultureInfoHelper.English.TextInfo.ToLower(thisValue); 
+				return CultureInfoHelper.English.TextInfo.ToLower(thisValue);
 			case TextCasing.Pascal:
-				return ToPascalCase(thisValue); 
+				return ToPascalCase(thisValue);
 			case TextCasing.Camel:
 				return ToCamelCase(thisValue);
 			case TextCasing.StartCase:
 				return ToStartCase(thisValue);
 			case TextCasing.Snake:
-				return ToSnakeCase(thisValue); 
+				return ToSnakeCase(thisValue);
 			case TextCasing.Dash:
 				return ToDashCase(thisValue);
 			case TextCasing.Dot:
@@ -2097,7 +2095,7 @@ public static class StringExtension
 		w = string.Format(numberFormat, value);
 
 		IComparable comparable = value as IComparable;
-			
+
 		if (left2Right || padding == ' ')
 		{
 			if (comparable.IsPositiveObj()) w = (positiveSign ? "+" : positiveSpace ? " " : string.Empty) + w;
@@ -2121,7 +2119,7 @@ public static class StringExtension
 		newValue ??= string.Empty;
 
 		CompareOptions options = CompareOptions.None;
-			
+
 		if (ignoreCase)
 		{
 			options |= ordinal
