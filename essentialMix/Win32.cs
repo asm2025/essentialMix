@@ -71,10 +71,15 @@ public enum ConsoleModesEnum : uint
 {
 	NONE = 0x0000,
 	ENABLE_PROCESSED_INPUT = 0x0001,
+	ENABLE_PROCESSED_OUTPUT = 0x0001,
 	ENABLE_LINE_INPUT = 0x0002,
+	ENABLE_WRAP_AT_EOL_OUTPUT = 0x0002,
 	ENABLE_ECHO_INPUT = 0x0004,
+	ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004,
 	ENABLE_WINDOW_INPUT = 0x0008,
+	DISABLE_NEWLINE_AUTO_RETURN = 0x0008,
 	ENABLE_MOUSE_INPUT = 0x0010,
+	ENABLE_LVB_GRID_WORLDWIDE = 0x0010,
 	ENABLE_INSERT_MODE = 0x0020,
 	ENABLE_QUICK_EDIT_MODE = 0x0040,
 	ENABLE_EXTENDED_FLAGS = 0x0080,
@@ -579,7 +584,7 @@ public enum WindowStylesEnum : uint
 
 	WS_EX_NOINHERITLAYOUT = 0x00100000, // Disable inheritence of mirroring by children
 	WS_EX_LAYOUTRTL = 0x00400000, // Right to left mirroring
-	//#endif /* WINVER >= 0x0500 */
+								  //#endif /* WINVER >= 0x0500 */
 
 	//#if(WIN32WINNT >= 0x0500)
 
@@ -1842,7 +1847,7 @@ public struct DEV_BROADCAST_HDR
 	public int Reserved;
 }
 
-[StructLayout( LayoutKind.Sequential )]
+[StructLayout(LayoutKind.Sequential)]
 public struct DEV_BROADCAST_OEM
 {
 	public int Size;
@@ -1852,7 +1857,7 @@ public struct DEV_BROADCAST_OEM
 	public int SuppFunc;
 }
 
-[StructLayout( LayoutKind.Sequential )]
+[StructLayout(LayoutKind.Sequential)]
 public struct DEV_BROADCAST_VOLUME
 {
 	public int Size;
@@ -1868,7 +1873,7 @@ public struct DEV_BROADCAST_PORT
 	public int Size;
 	public DBT_DeviceType DeviceType;
 	public int Reserved;
-	[MarshalAs(UnmanagedType.ByValTStr, SizeConst=128)]
+	[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
 	public string Name;
 }
 
@@ -1879,7 +1884,7 @@ public struct DEV_BROADCAST_DEVICEINTERFACE
 	public DBT_DeviceType DeviceType;
 	public int Reserved;
 	public Guid ClassGuid;
-	[MarshalAs(UnmanagedType.ByValTStr, SizeConst=128)]
+	[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
 	public string Name;
 }
 
@@ -1901,7 +1906,7 @@ public struct DEV_BROADCAST_HANDLE
 public struct DEV_BROADCAST_USERDEFINED
 {
 	public DEV_BROADCAST_HDR dbh;
-	[MarshalAs(UnmanagedType.ByValTStr, SizeConst=256)]
+	[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
 	public string szName;
 }
 
@@ -23219,10 +23224,10 @@ public static class Win32
 
 	[DllImport("Dwmapi.dll", EntryPoint = "#127")] // Undocumented API
 	public static extern int DwmGetColorizationParameters(out DWMCOLORIZATIONPARAMS parameters);
-	
+
 	[DllImport("Shell32.dll", SetLastError = false)]
 	public static extern int SHGetStockIconInfo(SHSTOCKICONID siid, SHGSI uFlags, ref SHSTOCKICONINFO psii);
-		
-	[DllImport("user32.dll", SetLastError=true)]
+
+	[DllImport("user32.dll", SetLastError = true)]
 	public static extern bool DestroyIcon(IntPtr hIcon);
 }

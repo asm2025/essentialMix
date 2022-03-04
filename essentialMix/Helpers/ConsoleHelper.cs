@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.ServiceProcess;
+using essentialMix.Exceptions.IO;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
-using essentialMix.Exceptions.IO;
 
 namespace essentialMix.Helpers;
 
@@ -17,16 +17,30 @@ public static class ConsoleHelper
 	private static FieldInfo __fiError;
 	private static MethodInfo __fiInitializeStdOutError;
 
-	public static bool IsInputRedirected => FileType.Char != Win32.GetFileType(GetInputHandle());
+	public static bool IsInputRedirected()
+	{
+		IntPtr hConsole = GetInputHandle();
+		return !hConsole.IsInvalidHandle() && FileType.Char != Win32.GetFileType(hConsole);
+	}
 
-	public static bool IsOutputRedirected => FileType.Char != Win32.GetFileType(GetOutputHandle());
+	public static bool IsOutputRedirected()
+	{
+		IntPtr hConsole = GetOutputHandle();
+		return !hConsole.IsInvalidHandle() && FileType.Char != Win32.GetFileType(hConsole);
+	}
 
-	public static bool IsErrorRedirected => FileType.Char != Win32.GetFileType(GetErrorHandle());
+	public static bool IsErrorRedirected()
+	{
+		IntPtr hConsole = GetErrorHandle();
+		return !hConsole.IsInvalidHandle() && FileType.Char != Win32.GetFileType(hConsole);
+	}
 
 	public static bool HasConsole => !GetConsoleWindow().IsInvalidHandle();
 
-	public static IntPtr AttachConsole() { return AttachConsole(out _); }
-
+	public static IntPtr AttachConsole(ConsoleModesEnum remove = ConsoleModesEnum.NONE, ConsoleModesEnum add = ConsoleModesEnum.NONE)
+	{
+		return AttachConsole(out _, remove, add);
+	}
 	public static IntPtr AttachConsole(out bool consoleCreated, ConsoleModesEnum remove = ConsoleModesEnum.NONE, ConsoleModesEnum add = ConsoleModesEnum.NONE)
 	{
 		consoleCreated = false;
@@ -62,12 +76,10 @@ public static class ConsoleHelper
 			return IntPtr.Zero;
 		}
 
-		if (remove != ConsoleModesEnum.NONE || add != ConsoleModesEnum.NONE) SetMode(remove, add);
+		if (remove != ConsoleModesEnum.NONE || add != ConsoleModesEnum.NONE) SetMode(hConsole, remove, add);
 		return hConsole;
 	}
-
-	public static bool AttachConsole(IntPtr hWndParent, out bool consoleCreated, bool visible = true, ConsoleModesEnum remove = ConsoleModesEnum.NONE, 
-		ConsoleModesEnum add = ConsoleModesEnum.NONE)
+	public static bool AttachConsole(IntPtr hWndParent, out bool consoleCreated, bool visible = true, ConsoleModesEnum remove = ConsoleModesEnum.NONE, ConsoleModesEnum add = ConsoleModesEnum.NONE)
 	{
 		consoleCreated = false;
 		if (hWndParent.IsInvalidHandle() || !Win32.IsWindow(hWndParent)) return false;
@@ -96,7 +108,7 @@ public static class ConsoleHelper
 		uint style = Win32.GetWindowLong(hConsole, WindowLongSettingIndexEnum.GWL_STYLE);
 		style &= (uint)~(WindowStylesEnum.WS_POPUP | WindowStylesEnum.WS_BORDER);
 		style |= (uint)WindowStylesEnum.WS_EMBEDED;
-			
+
 		if (visible)
 			style |= (uint)WindowStylesEnum.WS_VISIBLE;
 		else
@@ -186,7 +198,7 @@ public static class ConsoleHelper
 		if (handle.IsInvalidHandle()) return;
 		Win32.SetStdHandle((IntPtr)Win32.STD_OUTPUT_HANDLE, handle);
 
-		TextWriter outWriter = new StreamWriter(Console.OpenStandardOutput()) {AutoFlush = true};
+		TextWriter outWriter = new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true };
 		Console.SetOut(outWriter);
 	}
 
@@ -198,20 +210,25 @@ public static class ConsoleHelper
 		if (handle.IsInvalidHandle()) return;
 		Win32.SetStdHandle((IntPtr)Win32.STD_ERROR_HANDLE, handle);
 
-		TextWriter errWriter = new StreamWriter(Console.OpenStandardError()) {AutoFlush = true};
+		TextWriter errWriter = new StreamWriter(Console.OpenStandardError()) { AutoFlush = true };
 		Console.SetError(errWriter);
 	}
 
-	public static ConsoleModesEnum GetMode() { return GetMode(GetInputHandle()); }
+	public static ConsoleModesEnum GetMode(IntPtr hConsole)
+	{
+		return hConsole.IsInvalidHandle()
+					? ConsoleModesEnum.NONE
+					: Win32.GetConsoleMode(hConsole, out ConsoleModesEnum mode)
+						? mode
+						: ConsoleModesEnum.NONE;
+	}
 
-	public static bool SetMode(ConsoleModesEnum mode) { return SetMode(GetInputHandle(), mode); }
-
-	public static bool SetMode(ConsoleModesEnum remove, ConsoleModesEnum add)
+	public static bool SetMode(IntPtr hConsole, ConsoleModesEnum mode) { return !hConsole.IsInvalidHandle() && Win32.SetConsoleMode(hConsole, mode); }
+	public static bool SetMode(IntPtr hConsole, ConsoleModesEnum remove, ConsoleModesEnum add)
 	{
 		if (remove == ConsoleModesEnum.NONE && add == ConsoleModesEnum.NONE) return true;
 
-		IntPtr hInput = GetInputHandle();
-		ConsoleModesEnum consoleMode = GetMode(hInput);
+		ConsoleModesEnum consoleMode = GetMode(hConsole);
 
 		if (remove != ConsoleModesEnum.NONE)
 		{
@@ -230,7 +247,25 @@ public static class ConsoleHelper
 			consoleMode |= add;
 		}
 
-		return SetMode(consoleMode);
+		return SetMode(hConsole, consoleMode);
+	}
+
+	public static bool AddMode(IntPtr hConsole, ConsoleModesEnum mode)
+	{
+		return SetMode(hConsole, ConsoleModesEnum.NONE, mode);
+	}
+
+	public static bool RemoveMode(IntPtr hConsole, ConsoleModesEnum mode)
+	{
+		return SetMode(hConsole, mode, ConsoleModesEnum.NONE);
+	}
+
+	public static bool ANSISequenceMode(IntPtr hConsole, bool enable)
+	{
+		const ConsoleModesEnum FLAGS = ConsoleModesEnum.ENABLE_VIRTUAL_TERMINAL_PROCESSING | ConsoleModesEnum.DISABLE_NEWLINE_AUTO_RETURN;
+		return enable
+					? AddMode(hConsole, FLAGS)
+					: RemoveMode(hConsole, FLAGS);
 	}
 
 	public static bool SetIcon(IntPtr hIcon) { return Win32.SetConsoleIcon(hIcon); }
@@ -244,15 +279,29 @@ public static class ConsoleHelper
 		Console.SetWindowSize(cx, cy);
 	}
 
-
-	public static CONSOLE_FONT_INFO? GetCurrentFont() { return GetCurrentFont(GetOutputHandle()); }
-
-	public static COORD? GetFontSize()
+	public static CONSOLE_FONT_INFO? GetCurrentFont(IntPtr hConsole)
 	{
-		IntPtr hConsole = GetOutputHandle();
+		if (hConsole.IsInvalidHandle()) return null;
+		//Obtain the current console font index
+		return !Win32.GetCurrentConsoleFont(hConsole, false, out CONSOLE_FONT_INFO fontInfo)
+					? null
+					: fontInfo;
+	}
+
+	public static CONSOLE_FONT_INFO_EX GetCurrentFontEx(IntPtr hConsole)
+	{
+		if (hConsole.IsInvalidHandle()) return null;
+		//Obtain the current console font index
+		CONSOLE_FONT_INFO_EX fontInfo = new CONSOLE_FONT_INFO_EX();
+		return !Win32.GetCurrentConsoleFontEx(hConsole, false, fontInfo)
+					? null
+					: fontInfo;
+	}
+
+	public static COORD? GetFontSize(IntPtr hConsole)
+	{
 		CONSOLE_FONT_INFO? fontInfo = GetCurrentFont(hConsole);
 		if (fontInfo == null) return null;
-
 		//Use that index to obtain font size
 		return Win32.GetConsoleFontSize(hConsole, fontInfo.Value.nFont);
 	}
@@ -260,9 +309,8 @@ public static class ConsoleHelper
 	public static int GetFontCount() { return (int)Win32.GetNumberOfConsoleFonts(); }
 
 	[NotNull]
-	public static ConsoleFont[] GetConsoleFonts()
+	public static ConsoleFont[] GetConsoleFonts(IntPtr hConsole)
 	{
-		IntPtr hConsole = GetOutputHandle();
 		if (hConsole.IsInvalidHandle()) return Array.Empty<ConsoleFont>();
 
 		int c = GetFontCount();
@@ -273,15 +321,12 @@ public static class ConsoleHelper
 		return fonts;
 	}
 
-	public static bool SetFont(uint index)
+	public static bool SetFont(IntPtr hConsole, uint index)
 	{
-		IntPtr hConsole = GetOutputHandle();
 		return !hConsole.IsInvalidHandle() && Win32.SetConsoleFont(hConsole, index) != 0;
 	}
 
-	public static CONSOLE_FONT_INFO_EX GetCurrentFontEx() { return GetCurrentFontEx(GetOutputHandle()); }
-
-	public static bool SetCurrentFontEx([NotNull] string fontName = FONT_DEF, FontMask fontFamily = FontMask.TRUETYPE_FONTTYPE, short size = 11, FontWeight weight = FontWeight.FW_DONTCARE)
+	public static bool SetCurrentFontEx(IntPtr hConsole, [NotNull] string fontName = FONT_DEF, FontMask fontFamily = FontMask.TRUETYPE_FONTTYPE, short size = 11, FontWeight weight = FontWeight.FW_DONTCARE)
 	{
 		CONSOLE_FONT_INFO_EX fontInfoEx = new CONSOLE_FONT_INFO_EX
 		{
@@ -291,19 +336,18 @@ public static class ConsoleHelper
 			nHeight = size,
 			nWeight = weight
 		};
-			
-		return SetCurrentFontEx(fontInfoEx);
+
+		return SetCurrentFontEx(hConsole, fontInfoEx);
 	}
 
-	public static bool SetCurrentFontEx([NotNull] CONSOLE_FONT_INFO_EX fontInfoEx)
+	public static bool SetCurrentFontEx(IntPtr hConsole, [NotNull] CONSOLE_FONT_INFO_EX fontInfoEx)
 	{
-		IntPtr hConsole = GetOutputHandle();
 		return !hConsole.IsInvalidHandle() && Win32.SetCurrentConsoleFontEx(hConsole, false, ref fontInfoEx);
 	}
-		
-	public static bool IsConsoleFontTrueType()
+
+	public static bool IsConsoleFontTrueType(IntPtr hConsole)
 	{
-		CONSOLE_FONT_INFO_EX fontInfoEx = GetCurrentFontEx();
+		CONSOLE_FONT_INFO_EX fontInfoEx = GetCurrentFontEx(hConsole);
 		return fontInfoEx != null && fontInfoEx.nFamily.FastHasFlag(FontMask.TRUETYPE_FONTTYPE);
 	}
 
@@ -351,33 +395,6 @@ public static class ConsoleHelper
 
 		Console.WriteLine();
 		if (Debugger.IsAttached) Pause();
-	}
-
-	private static ConsoleModesEnum GetMode(IntPtr hInput)
-	{
-		if (hInput.IsInvalidHandle()) return ConsoleModesEnum.NONE;
-		return Win32.GetConsoleMode(hInput, out ConsoleModesEnum mode)
-					? mode
-					: ConsoleModesEnum.NONE;
-	}
-
-	private static bool SetMode(IntPtr hInput, ConsoleModesEnum mode) { return !hInput.IsInvalidHandle() && Win32.SetConsoleMode(hInput, mode); }
-
-	private static CONSOLE_FONT_INFO? GetCurrentFont(IntPtr hConsole)
-	{
-		if (hConsole.IsInvalidHandle()) return null;
-
-		//Obtain the current console font index
-		return !Win32.GetCurrentConsoleFont(hConsole, false, out CONSOLE_FONT_INFO fontInfo) ? null : fontInfo;
-	}
-
-	private static CONSOLE_FONT_INFO_EX GetCurrentFontEx(IntPtr hConsole)
-	{
-		if (hConsole.IsInvalidHandle()) return null;
-
-		//Obtain the current console font index
-		CONSOLE_FONT_INFO_EX fontInfo = new CONSOLE_FONT_INFO_EX();
-		return !Win32.GetCurrentConsoleFontEx(hConsole, false, fontInfo) ? null : fontInfo;
 	}
 
 	private static void InvalidateOutAndError()

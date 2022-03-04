@@ -66,6 +66,7 @@ work with {Constants.HEAVY} items.");
 			//TestExpressionExtension();
 			#endregion
 
+			#region Algorithms
 			//TestSortAlgorithm();
 			//TestSortAlgorithms();
 
@@ -76,19 +77,6 @@ work with {Constants.HEAVY} items.");
 			//TestKadaneMaximum();
 			//TestLevenshteinDistance();
 			//TestDeepestPit();
-
-			#region Threads
-			//TestThreadQueue();
-			//TestThreadQueueWithPriorityQueue();
-			//TestAsyncLock();
-
-			//TestEventWaitHandle();
-
-			//TestWaitForEvent();
-
-			//TestBlockingStream();
-			//TestConsumerStream();
-			//TestConsumerPipe();
 			#endregion
 
 			#region Collection
@@ -155,10 +143,26 @@ work with {Constants.HEAVY} items.");
 
 			//TestObservableCollections();
 
-			TestBoundList();
+			//TestBoundList();
 			#endregion
 
+			#region Threads
+			//TestThreadQueue();
+			//TestThreadQueueWithPriorityQueue();
+			//TestAsyncLock();
+
+			//TestEventWaitHandle();
+
+			//TestWaitForEvent();
+
+			//TestBlockingStream();
+			//TestConsumerStream();
+			//TestConsumerPipe();
+			#endregion
+
+			#region Encryption
 			//TestAsymmetric();
+			#endregion
 
 			//TestSingletonAppGuard();
 
@@ -176,6 +180,8 @@ work with {Constants.HEAVY} items.");
 			//TestAppInfo();
 
 			//TestEnumerateDirectoriesAndFiles();
+
+			TestConsoleHelper();
 
 			ConsoleHelper.Pause();
 		}
@@ -6332,6 +6338,13 @@ decrypted:
 				Console.WriteLine();
 			}
 			while (more);
+		}
+
+		private static void TestConsoleHelper()
+		{
+			IntPtr hConsole = ConsoleHelper.GetConsoleWindow();
+			ConsoleHelper.ANSISequenceMode(hConsole, true);
+			Console.WriteLine("\u001b[31;1;4mHello\u001b[0m");
 		}
 
 		private static void Title(string title)
