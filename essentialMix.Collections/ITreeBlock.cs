@@ -10,7 +10,6 @@ public interface ITreeBlockBase<TBlock, TNode, T> : IList<TNode>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	int Capacity { get; set; }
-	[NotNull]
 	List<TBlock> Children { get; set; }
 	int Degree { get; }
 	bool IsLeaf { get; }
@@ -18,6 +17,7 @@ public interface ITreeBlockBase<TBlock, TNode, T> : IList<TNode>
 	bool IsEmpty { get; }
 	bool HasMinimumEntries { get; }
 
+	void EnsureChildren();
 	void AddRange([NotNull] IEnumerable<TNode> enumerable);
 	void InsertRange(int index, [NotNull] IEnumerable<TNode> enumerable);
 	void RemoveRange(int index, int count);

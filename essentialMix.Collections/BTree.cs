@@ -28,30 +28,30 @@ namespace essentialMix.Collections;
 * 5. All leaves appear in the same level and carry no information.
 *
 * For a B-Tree of order 3
-*	     ___ D ____
-*	    /          \
-*	   B            F H
-*	 /   \        /  |  \
+*	     ___ D ______
+*	    /          \ \
+*	   B            F H __
+*	 /   \        /  |  \ \
 *	A     C      E   G   I J
 *
 *	    BFS                  DFS                  DFS                   DFS
 *	  LevelOrder           PreOrder              InOrder              PostOrder
-*	    1 ___                 1 ___                 4 ___                   ___
-*	   /     \               /     \               /     \               /     \
-*	  2       3 4           2       5             2       6 8                      
-*	 /  \    / |  \        /  \    / |  \        /  \    / |  \        /  \    / |  \
-*	5    6  7  8   9 10   3    4  6             1    3  5  7   9 10                      
+*	    1 _____               1 _____                4 _____               10 ____
+*	   /     \ \             /     \ \              /     \ \             /     \ \
+*	  2       3 4 __        2       5 8 __         2       6 8 __        3       6 9 __
+*	 /  \    / |  \ \      /  \    / |  \ \       /  \    / |  \ \      /  \    / |  \ \
+*	5    6  7  8   9 10   3    4  6  7  9  10    1    3  5  7   9 10   1    2  4  5   7 8
 *
 * BFS (LevelOrder): DBFHACEGIJ => Root-Left-Right (Queue)
-* DFS [PreOrder]:    => Root-Left-Right (Stack)
+* DFS [PreOrder]:   DBACFEGHIJ => Root-Left-Right (Stack)
 * DFS [InOrder]:    ABCDEFGHIJ => Left-Root-Right (Stack)
-* DFS [PostOrder]:   => Left-Right-Root (Stack)
+* DFS [PostOrder]:  ACBEGFIJHD => Left-Right-Root (Stack)
 */
 [Serializable]
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,>))]
 public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
-	where TBlock : class, ITreeBlockBase<TBlock, TNode, T>
+	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	private TBlock _root;
@@ -66,14 +66,18 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	/// <inheritdoc />
 	public int Capacity
 	{
-		get => Root.Capacity;
-		set => Root.Capacity = value;
+		get => _root?.Capacity ?? 0;
+		set
+		{
+			EnsureRoot();
+			_root.Capacity = value;
+		}
 	}
 
 	/// <inheritdoc />
 	public TBlock Root
 	{
-		get => _root ??= MakeBlock();
+		get => _root;
 		protected set => _root = value;
 	}
 
@@ -84,17 +88,14 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	public int Height { get; protected set; }
 
 	/// <inheritdoc />
-	public int Count
-	{
-		get
-		{
-			// todo
-			return Root.Count;
-		}
-	}
+	public int Count { get; internal set; }
 
 	/// <inheritdoc />
-	public bool IsReadOnly => Root.IsReadOnly;
+	public bool IsReadOnly => false;
+
+	/// <inheritdoc />
+	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+	public void EnsureRoot() { _root ??= MakeBlock(); }
 
 	/// <inheritdoc />
 	public abstract TBlock MakeBlock();
@@ -106,7 +107,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	public abstract bool Equal(TNode x, TNode y);
 
 	/// <inheritdoc />
-	public IEnumerator<TNode> GetEnumerator() { return Root.GetEnumerator(); }
+	public IEnumerator<TNode> GetEnumerator() { return _root?.GetEnumerator() ?? Enumerable.Empty<TNode>().GetEnumerator(); }
 
 	/// <inheritdoc />
 	IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
@@ -120,7 +121,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	/// <inheritdoc />
 	public void Clear()
 	{
-		Root.Clear();
+		_root?.Clear();
 	}
 
 	/// <inheritdoc />
@@ -130,7 +131,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	public void CopyTo(TNode[] array, int arrayIndex)
 	{
 		// todo
-		Root.CopyTo(array, arrayIndex);
+		_root?.CopyTo(array, arrayIndex);
 	}
 
 	protected void Split([NotNull] TBlock parent, int index, [NotNull] TBlock block)
@@ -154,7 +155,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 /// <typeparam name="T">The element type of the tree</typeparam>
 [Serializable]
 public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBTree<TBlock, TNode, T>
-	where TBlock : class, ITreeBlock<TBlock, TNode, T>
+	where TBlock : BTreeBlockBase<TBlock, TNode, T>, ITreeBlock<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	/// <inheritdoc />
@@ -183,6 +184,8 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 	/// <inheritdoc />
 	public void Add(T item)
 	{
+		EnsureRoot();
+
 		if (!Root.IsFull)
 		{
 			Add(Root, item);
@@ -191,6 +194,7 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 
 		TBlock oldRoot = Root;
 		Root = MakeBlock();
+		Root.EnsureChildren();
 		Root.Children.Add(oldRoot);
 		Split(Root, 0, oldRoot);
 		Add(Root, item);
@@ -202,7 +206,7 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 	/// <inheritdoc />
 	public bool Remove(T item)
 	{
-		if (!Remove(Root, item)) return false;
+		if (Root == null || !Remove(Root, item)) return false;
 		if (Root.Count > 0 || Root.IsLeaf) return true;
 		Root = Root.Children[0];
 		Height--;
@@ -212,7 +216,9 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 	/// <inheritdoc />
 	public TNode Find(T item)
 	{
-		return FindLocal(Root, item, Comparer);
+		return Root == null
+					? null
+					: FindLocal(Root, item, Comparer);
 
 		static TNode FindLocal(TBlock block, T item, IGenericComparer<T> comparer)
 		{
@@ -422,7 +428,7 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 [Serializable]
 [DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,,>))]
 public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNode, TValue>, IBTree<TBlock, TNode, TKey, TValue>
-	where TBlock : class, ITreeBlock<TBlock, TNode, TKey, TValue>
+	where TBlock : BTreeBlockBase<TBlock, TNode, TValue>, ITreeBlock<TBlock, TNode, TKey, TValue>
 	where TNode : class, ITreeNode<TNode, TKey, TValue>
 {
 	/// <inheritdoc />
@@ -451,6 +457,8 @@ public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNo
 	/// <inheritdoc />
 	public void Add(TKey key, TValue value)
 	{
+		EnsureRoot();
+
 		if (!Root.IsFull)
 		{
 			Add(Root, key, value);
@@ -459,6 +467,7 @@ public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNo
 
 		TBlock oldRoot = Root;
 		Root = MakeBlock();
+		Root.EnsureChildren();
 		Root.Children.Add(oldRoot);
 		Split(Root, 0, oldRoot);
 		Add(Root, key, value);
@@ -470,7 +479,7 @@ public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNo
 	/// <inheritdoc />
 	public bool Remove(TKey key)
 	{
-		if (!Remove(Root, key)) return false;
+		if (Root == null || !Remove(Root, key)) return false;
 		if (Root.Count > 0 || Root.IsLeaf) return true;
 		Root = Root.Children[0];
 		Height--;
@@ -480,7 +489,9 @@ public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNo
 	/// <inheritdoc />
 	public TNode Find(TKey key)
 	{
-		return FindLocal(Root, key, Comparer);
+		return Root == null
+					? null
+					: FindLocal(Root, key, Comparer);
 
 		static TNode FindLocal(TBlock block, TKey key, IGenericComparer<TKey> comparer)
 		{

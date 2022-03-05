@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Net.Http.Headers;
-using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Web;
 
@@ -9,7 +8,6 @@ namespace essentialMix.IO;
 public class IOHttpRequestSettings : IORequestSettings
 {
 	private string _userAgent = UriHelper.RandomUserAgent();
-	private IList<MediaTypeWithQualityHeaderValue> _accept;
 
 	/// <inheritdoc />
 	public IOHttpRequestSettings()
@@ -17,7 +15,7 @@ public class IOHttpRequestSettings : IORequestSettings
 	}
 
 	/// <inheritdoc />
-	public IOHttpRequestSettings(IOSettings settings) 
+	public IOHttpRequestSettings(IOSettings settings)
 		: base(settings)
 	{
 		if (settings is not IOHttpRequestSettings ioHttpRequestSettings) return;
@@ -31,12 +29,7 @@ public class IOHttpRequestSettings : IORequestSettings
 	public bool AllowAutoRedirect { get; set; } = true;
 	public bool AllowWriteStreamBuffering { get; set; }
 
-	[NotNull]
-	public IList<MediaTypeWithQualityHeaderValue> Accept
-	{
-		get => _accept ??= new List<MediaTypeWithQualityHeaderValue>(); 
-		set => _accept = value;
-	}
+	public IList<MediaTypeWithQualityHeaderValue> Accept { get; set; }
 
 	public string UserAgent
 	{

@@ -9,12 +9,12 @@ public interface IBTreeBase<TBlock, TNode, T> : ICollection<TNode>
 	where TBlock : class, ITreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
-	[NotNull]
 	TBlock Root { get; }
 	int Degree { get; }
 	int Capacity { get; }
 	int Height { get; }
 
+	void EnsureRoot();
 	[NotNull]
 	TBlock MakeBlock();
 	int Compare(TNode x, TNode y);

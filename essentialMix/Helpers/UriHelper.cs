@@ -11,10 +11,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using essentialMix.Extensions;
 using essentialMix.IO;
 using essentialMix.Web;
+using JetBrains.Annotations;
 
 namespace essentialMix.Helpers;
 
@@ -103,12 +103,12 @@ public static class UriHelper
 				partsAdded = true;
 			}
 		}
-			
+
 		foreach (string path in paths)
 		{
 			string escaped = Escape(path);
 			if (escaped == null) continue;
-				
+
 			if (Uri.IsWellFormedUriString(escaped, UriKind.Absolute))
 			{
 				if (partsAdded) throw new NotSupportedException("Operation is not supported for absolute URI.");
@@ -244,7 +244,7 @@ public static class UriHelper
 		request.AllowAutoRedirect = settings.AllowAutoRedirect;
 		request.AllowWriteStreamBuffering = settings.AllowWriteStreamBuffering;
 		request.Timeout = settings.Timeout;
-		if (settings.Accept.Count > 0) request.Accept = settings.Accept.FirstOrDefault()?.MediaType;
+		if (settings.Accept?.Count > 0) request.Accept = settings.Accept.FirstOrDefault()?.MediaType;
 		request.CachePolicy = settings.CachePolicy;
 		request.UserAgent = settings.UserAgent;
 		request.UseDefaultCredentials = settings.Credentials == null;
@@ -511,7 +511,7 @@ public static class UriHelper
 
 		IProgress<int> progress = settings.Progress;
 		progress?.Report(0);
-			
+
 		WebRequest request = MakeHttpWebRequest(url, settings);
 		WebHeaderCollection headers = request.Headers;
 		headers.Add(HttpRequestHeader.CacheControl, "no-cache");
@@ -559,7 +559,7 @@ public static class UriHelper
 			int read;
 			byte[] buffer = new byte[settings.BufferSize];
 			responseStream = response.GetResponseStream() ?? throw new IOException("Could not get response stream.");
-				
+
 			while ((read = responseStream.Read(buffer)) > 0)
 			{
 				received += read;
@@ -736,7 +736,7 @@ public static class UriHelper
 				if (header is { Length: > 0 })
 					stream.Write(header);
 
-				while ((read = reader.Read(buffer)) > 0) 
+				while ((read = reader.Read(buffer)) > 0)
 					writer.Write(buffer, 0, read);
 
 				if (footer is { Length: > 0 })
@@ -775,7 +775,7 @@ public static class UriHelper
 			int read;
 			byte[] buffer = new byte[length];
 
-			while ((read = reader.Read(buffer)) > 0) 
+			while ((read = reader.Read(buffer)) > 0)
 				stream.Write(buffer, 0, read);
 
 			if (footer is { Length: > 0 })
@@ -823,7 +823,7 @@ public static class UriHelper
 			ObjectHelper.Dispose(ref stream);
 		}
 	}
-		
+
 	[NotNull]
 	public static async Task<Uri> UploadFileAsync([NotNull] Stream stream, [NotNull] Uri url, [NotNull] IOUploadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
 	{
@@ -867,7 +867,7 @@ public static class UriHelper
 
 			int read;
 
-			while (!token.IsCancellationRequested && (read = await reader.ReadAsync(buffer)) > 0) 
+			while (!token.IsCancellationRequested && (read = await reader.ReadAsync(buffer)) > 0)
 				await writer.WriteAsync(buffer, 0, read);
 
 			token.ThrowIfCancellationRequested();
@@ -1088,7 +1088,7 @@ public static class UriHelper
 
 		int n = -1;
 
-		while (n < url.Length - 1 && url[n + 1] == '/') 
+		while (n < url.Length - 1 && url[n + 1] == '/')
 			n++;
 
 		if (n > 0)
@@ -1156,7 +1156,7 @@ public static class UriHelper
 							string[] parts = part.Split(2, StringSplitOptions.RemoveEmptyEntries, ':');
 							if (Uri.EscapeDataString(parts[0]) != parts[0]) throw new InvalidOperationException($"Bad host name '{parts[0]}'.");
 							sb.Append(parts[0]);
-								
+
 							if (parts.Length > 1)
 							{
 								if (!int.TryParse(parts[1], out int port)) throw new InvalidOperationException($"Invalid port number '{parts[1]}'.");

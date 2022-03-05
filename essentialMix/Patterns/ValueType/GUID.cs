@@ -10,23 +10,21 @@ namespace essentialMix.Patterns.ValueType;
 public struct GUID
 {
 	private const int LAST_BYTES_LEN = 8;
-	
-	private byte[] _data4;
-	
+
+	public GUID()
+	{
+		Data1 = 0u;
+		Data2 = 0;
+		Data3 = 0;
+		Data4 = new byte[LAST_BYTES_LEN];
+	}
+
 	public uint Data1 { get; set; }
 	public ushort Data2 { get; set; }
 	public ushort Data3 { get; set; }
+
 	[NotNull]
-	public byte[] Data4 
-	{
-		get => _data4 ??= new byte[LAST_BYTES_LEN];
-		set
-		{
-			if (value == null) throw new ArgumentNullException(nameof(value));
-			if (value.Length != LAST_BYTES_LEN) throw new ArgumentNullException(nameof(value));
-			_data4 = value;
-		} 
-	}
+	public byte[] Data4 { get; }
 
 	[NotNull]
 	public override string ToString()
@@ -50,7 +48,7 @@ public struct GUID
 		sb.Append(string.Concat(Data4.Skip(2).Select(e => e.ToString("x2"))));
 		return sb.ToString();
 	}
-	
+
 	public static GUID FromGuid(Guid value)
 	{
 		byte[] bytes = value.ToByteArray();

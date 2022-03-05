@@ -3,8 +3,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using JetBrains.Annotations;
 using essentialMix.IO;
+using JetBrains.Annotations;
 
 namespace essentialMix.Extensions;
 
@@ -25,7 +25,7 @@ public static class HttpClientExtension
 		if (settings == null) return thisValue;
 		if (settings.Timeout > 0) thisValue.Timeout = TimeSpan.FromMilliseconds(settings.Timeout);
 
-		if (settings.Accept.Count > 0)
+		if (settings.Accept?.Count > 0)
 		{
 			headers.Accept.Clear();
 

@@ -10,7 +10,7 @@ namespace essentialMix.Collections;
 [DebuggerDisplay("{Degree}, Count = {Count}")]
 [StructLayout(LayoutKind.Sequential)]
 public abstract class BTreeBlockBase<TBlock, TNode, T> : List<TNode>, ITreeBlockBase<TBlock, TNode, T>
-	where TBlock : class, ITreeBlockBase<TBlock, TNode, T>
+	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	private readonly int _minEntries;
@@ -18,19 +18,22 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : List<TNode>, ITreeBlock
 
 	private List<TBlock> _children;
 
-	protected BTreeBlockBase(int degree)
+	protected BTreeBlockBase(BTreeBase<TBlock, TNode, T> tree, int degree)
 		: base(degree)
 	{
 		if (degree < BTree.MINIMUM_DEGREE) throw new ArgumentOutOfRangeException(nameof(degree), $"{GetType()}'s degree must be at least 2.");
 		Degree = degree;
+		Tree = tree;
 		_minEntries = BTree.FastMinimumEntries(degree);
 		_maxEntries = BTree.FastMaximumEntries(degree);
 	}
 
+	protected BTreeBase<TBlock, TNode, T> Tree { get; }
+
 	/// <inheritdoc />
 	public List<TBlock> Children
 	{
-		get => _children ??= new List<TBlock>();
+		get => _children;
 		set => _children = value;
 	}
 
@@ -48,6 +51,9 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : List<TNode>, ITreeBlock
 
 	/// <inheritdoc />
 	public bool HasMinimumEntries => Count >= _minEntries;
+
+	/// <inheritdoc />
+	public void EnsureChildren() { _children ??= new List<TBlock>(); }
 }
 
 /// <inheritdoc cref="BTreeBlockBase{TBlock, TNode, T}" />
@@ -56,8 +62,8 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : List<TNode>, ITreeBlock
 public sealed class BTreeBlock<T> : BTreeBlockBase<BTreeBlock<T>, BTreeNode<T>, T>, ITreeBlock<BTreeBlock<T>, BTreeNode<T>, T>
 {
 	/// <inheritdoc />
-	public BTreeBlock(int degree)
-		: base(degree)
+	internal BTreeBlock(BTreeBase<BTreeBlock<T>, BTreeNode<T>, T> tree, int degree)
+		: base(tree, degree)
 	{
 	}
 
@@ -71,8 +77,8 @@ public sealed class BTreeBlock<T> : BTreeBlockBase<BTreeBlock<T>, BTreeNode<T>, 
 public sealed class BTreeBlock<TKey, TValue> : BTreeBlockBase<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TValue>, ITreeBlock<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TKey, TValue>
 {
 	/// <inheritdoc />
-	public BTreeBlock(int degree)
-		: base(degree)
+	internal BTreeBlock(BTreeBase<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TValue> tree, int degree)
+		: base(tree, degree)
 	{
 	}
 
