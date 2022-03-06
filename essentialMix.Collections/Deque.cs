@@ -29,7 +29,7 @@ namespace essentialMix.Collections;
 public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyCollection<T>, ICollection, IEnumerable
 {
 	[Serializable]
-	internal class SynchronizedList : IList<T>
+	private class SynchronizedList : IList<T>
 	{
 		private readonly Deque<T> _deque;
 		private readonly IList _list;
@@ -47,14 +47,14 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		{
 			get
 			{
-				lock(_root)
+				lock (_root)
 				{
 					return _deque[index];
 				}
 			}
 			set
 			{
-				lock(_root)
+				lock (_root)
 				{
 					_deque[index] = value;
 				}
@@ -66,7 +66,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		{
 			get
 			{
-				lock(_root)
+				lock (_root)
 				{
 					return _deque.Count;
 				}
@@ -78,7 +78,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		{
 			get
 			{
-				lock(_root)
+				lock (_root)
 				{
 					return _list.IsReadOnly;
 				}
@@ -88,7 +88,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		/// <inheritdoc />
 		public void Insert(int index, T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_deque.Insert(index, item);
 			}
@@ -97,7 +97,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		/// <inheritdoc />
 		public void Add(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_deque.Insert(_deque.Count, item);
 			}
@@ -106,7 +106,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		/// <inheritdoc />
 		public void RemoveAt(int index)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_deque.RemoveAt(index);
 			}
@@ -115,7 +115,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		/// <inheritdoc />
 		public bool Remove(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _deque.Remove(item);
 			}
@@ -124,7 +124,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		/// <inheritdoc />
 		public void Clear()
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_deque.Clear();
 			}
@@ -133,7 +133,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		/// <inheritdoc />
 		public int IndexOf(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _deque.IndexOf(item);
 			}
@@ -142,7 +142,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		/// <inheritdoc />
 		public bool Contains(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _deque.Contains(item);
 			}
@@ -151,7 +151,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		/// <inheritdoc />
 		public void CopyTo(T[] array, int arrayIndex)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_deque.CopyTo(array, arrayIndex);
 			}
@@ -160,7 +160,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _deque.GetEnumerator();
 			}
@@ -169,7 +169,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		/// <inheritdoc />
 		public IEnumerator<T> GetEnumerator()
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _deque.GetEnumerator();
 			}
@@ -994,7 +994,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 				}
 				else
 				{
-					foreach (T item in readOnlyCollection) 
+					foreach (T item in readOnlyCollection)
 						Items[index++] = item;
 				}
 

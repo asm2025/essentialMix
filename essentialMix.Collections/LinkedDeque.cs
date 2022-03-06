@@ -22,7 +22,7 @@ namespace essentialMix.Collections;
 public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
 {
 	[Serializable]
-	internal class SynchronizedCollection : ICollection<T>
+	private class SynchronizedCollection : ICollection<T>
 	{
 		private readonly LinkedDeque<T> _deque;
 		private readonly ICollection _collection;
@@ -40,7 +40,7 @@ public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyC
 		{
 			get
 			{
-				lock(_root)
+				lock (_root)
 				{
 					return _deque.Count;
 				}
@@ -52,7 +52,7 @@ public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyC
 		{
 			get
 			{
-				lock(_root)
+				lock (_root)
 				{
 					return ((ICollection<T>)_collection).IsReadOnly;
 				}
@@ -62,7 +62,7 @@ public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyC
 		/// <inheritdoc />
 		public void Add(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_deque.Add(item);
 			}
@@ -71,7 +71,7 @@ public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyC
 		/// <inheritdoc />
 		public bool Remove(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _deque.Remove(item);
 			}
@@ -80,7 +80,7 @@ public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyC
 		/// <inheritdoc />
 		public void Clear()
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_deque.Clear();
 			}
@@ -89,7 +89,7 @@ public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyC
 		/// <inheritdoc />
 		public bool Contains(T item)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _deque.Contains(item);
 			}
@@ -98,7 +98,7 @@ public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyC
 		/// <inheritdoc />
 		public void CopyTo(T[] array, int arrayIndex)
 		{
-			lock(_root)
+			lock (_root)
 			{
 				_deque.CopyTo(array, arrayIndex);
 			}
@@ -107,7 +107,7 @@ public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyC
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _deque.GetEnumerator();
 			}
@@ -116,7 +116,7 @@ public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyC
 		/// <inheritdoc />
 		public IEnumerator<T> GetEnumerator()
 		{
-			lock(_root)
+			lock (_root)
 			{
 				return _deque.GetEnumerator();
 			}
@@ -164,7 +164,7 @@ public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyC
 
 	public void Enqueue([NotNull] IEnumerable<T> enumerable)
 	{
-		foreach (T item in enumerable) 
+		foreach (T item in enumerable)
 			Items.AddLast(item);
 	}
 
@@ -217,7 +217,7 @@ public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyC
 
 	public void Push([NotNull] IEnumerable<T> enumerable)
 	{
-		foreach (T item in enumerable.Reverse()) 
+		foreach (T item in enumerable.Reverse())
 			Items.AddLast(item);
 	}
 

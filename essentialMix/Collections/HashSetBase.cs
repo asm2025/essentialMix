@@ -12,9 +12,9 @@ using essentialMix.Extensions;
 using essentialMix.Helpers;
 using essentialMix.Numeric;
 using JetBrains.Annotations;
+using Other.Microsoft.Collections;
 
-// ReSharper disable once CheckNamespace
-namespace Other.Microsoft.Collections;
+namespace essentialMix.Collections;
 
 // based on https://github.com/microsoft/referencesource/blob/master/System.Core/System/Collections/Generic/HashSet.cs
 [DebuggerDisplay("Count = {Count}")]
@@ -35,7 +35,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 	// a lot of adds followed by removes. Users must explicitly shrink by calling TrimExcess.
 	// This is set to 3 because capacity is acceptable as 2x rounded up to nearest prime.
 	private const int SHRINK_THRESHOLD = 3;
-		
+
 	private const string VERSION_NAME = "Version";
 	private const string COMPARER_NAME = "Comparer";
 	private const string CAPACITY_NAME = "Capacity";
@@ -251,7 +251,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 			T[] array = (T[])_siInfo.GetValue(ELEMENTS_NAME, typeof(T[])) ?? throw new SerializationException("Missing keys");
 
 			// there are no resizes here because we already set capacity above
-			foreach (T item in array) 
+			foreach (T item in array)
 				AddIfNotPresent(item);
 		}
 		else
@@ -290,7 +290,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 	public virtual bool Remove(T item)
 	{
 		if (_buckets == null) return false;
-			
+
 		int hashCode = InternalGetHashCode(item);
 		int bucket = hashCode % _buckets.Length;
 		int last = -1;
@@ -298,7 +298,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 		for (int i = _buckets[bucket] - 1; i >= 0; last = i, i = _slots[i].Next)
 		{
 			if (_slots[i].HashCode != hashCode || !Comparer.Equals(_slots[i].Value, item)) continue;
-				
+
 			if (last < 0)
 			{
 				// first iteration; update buckets
@@ -363,7 +363,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 		for (int i = 0; i < _lastIndex; i++)
 		{
 			if (_slots[i].HashCode < 0) continue;
-				
+
 			// cache value in case delegate removes it
 			T value = _slots[i].Value;
 
@@ -383,9 +383,9 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 	public bool Contains(T item)
 	{
 		if (_buckets == null) return false;
-			
+
 		int hashCode = InternalGetHashCode(item);
-			
+
 		// see note at "HashSet" level describing why "- 1" appears in for loop
 		for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].Next)
 		{
@@ -410,7 +410,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 		Count.ValidateRange(arrayIndex, ref count);
 
 		int numCopied = 0;
-			
+
 		for (int i = 0; i < _lastIndex && numCopied < count; i++)
 		{
 			if (_slots[i].HashCode < 0) continue;
@@ -428,7 +428,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 	/// <param name="other">enumerable with items to add</param>
 	public void UnionWith(IEnumerable<T> other)
 	{
-		foreach (T item in other) 
+		foreach (T item in other)
 			AddIfNotPresent(item);
 	}
 
@@ -487,7 +487,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 		}
 
 		// remove every element in other from this
-		foreach (T element in other) 
+		foreach (T element in other)
 			Remove(element);
 	}
 
@@ -758,7 +758,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 			// move down slots and rehash at the same time. newIndex keeps track of current 
 			// position in newSlots array
 			int newIndex = 0;
-				
+
 			for (int i = 0; i < _lastIndex; i++)
 			{
 				if (_slots[i].HashCode < 0) continue;
@@ -882,7 +882,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 				int lastIndex = hashSetBase._lastIndex;
 				Slot[] slots = hashSetBase._slots;
 				Initialize(count);
-					
+
 				int index = 0;
 
 				for (int i = 0; i < lastIndex; ++i)
@@ -942,7 +942,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 		}
 
 		int[] newBuckets = new int[newSize];
-			
+
 		for (int i = 0; i < _lastIndex; i++)
 		{
 			int bucket = newSlots[i].HashCode % newSize;
@@ -997,7 +997,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 		{
 			if (!other.Contains(item)) return false;
 		}
-			
+
 		return true;
 	}
 
@@ -1136,7 +1136,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 		foreach (T item in other)
 		{
 			bool added = AddOrGetLocation(item, out int location);
-				
+
 			if (added)
 			{
 				// wasn't already present in collection; flag it as something not to remove

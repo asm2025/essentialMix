@@ -113,7 +113,7 @@ public class DomainParser
 	[NotNull]
 	private DomainName GetDomainFromParts(string domain, [NotNull] List<string> parts)
 	{
-		if (parts == null || parts.Count == 0 || parts.Any(x => x.Equals(string.Empty)))
+		if (parts is not { Count: not 0 } || parts.Any(x => x.Equals(string.Empty)))
 		{
 			throw new ParseException("Invalid domain part detected");
 		}

@@ -64,7 +64,7 @@ public static class CharExtension
 		if (char.IsControl(thisValue)) return false;
 
 		UnicodeCategory category = char.GetUnicodeCategory(thisValue);
-		return category == UnicodeCategory.OtherNotAssigned || category != UnicodeCategory.Control && category != UnicodeCategory.Format && category != UnicodeCategory.LineSeparator && category != UnicodeCategory.ParagraphSeparator;
+		return category is UnicodeCategory.OtherNotAssigned or not UnicodeCategory.Control and not UnicodeCategory.Format and not UnicodeCategory.LineSeparator and not UnicodeCategory.ParagraphSeparator;
 	}
 
 	public static bool IsSeparator(this char thisValue) { return char.IsSeparator(thisValue); }

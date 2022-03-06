@@ -21,7 +21,7 @@ public static class DataTableExtension
 		return b;
 	}
 
-	public static bool IsNullOrEmpty(this DataTable thisValue) { return thisValue == null || thisValue.Rows.Count == 0; }
+	public static bool IsNullOrEmpty(this DataTable thisValue) { return thisValue is not { Rows: { Count: not 0 } }; }
 
 	public static object[] CollectValues([NotNull] this DataTable thisValue, [NotNull] params string[] fieldNames) { return CollectValues(thisValue, true, fieldNames); }
 

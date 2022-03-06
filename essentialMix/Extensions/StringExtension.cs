@@ -1537,10 +1537,7 @@ public static class StringExtension
 
 			// default precision is 6 digits if none is specified except
 			if (fieldPrecision == int.MinValue &&
-				formatSpecifier != 's' &&
-				formatSpecifier != 'c' &&
-				char.ToUpper(formatSpecifier) != 'X' &&
-				formatSpecifier != 'o')
+				formatSpecifier is not 's' and not 'c' && char.ToUpper(formatSpecifier) != 'X' && formatSpecifier != 'o')
 			{
 				fieldPrecision = 6;
 			}

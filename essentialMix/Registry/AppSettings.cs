@@ -228,7 +228,7 @@ public class AppSettings : Properties
 			if (frame == null) continue;
 
 			MethodBase method = frame.GetMethod();
-			if (method == null || method.DeclaringType == null || method.DeclaringType.Assembly == ThisAssembly) continue;
+			if (method is not { DeclaringType: { } } || method.DeclaringType.Assembly == ThisAssembly) continue;
 
 			assembly = method.DeclaringType.Assembly;
 			break;

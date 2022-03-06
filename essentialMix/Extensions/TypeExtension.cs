@@ -63,7 +63,7 @@ public static class TypeExtension
 	public static MethodBase GetMethod([NotNull] this Type thisValue, [NotNull] LambdaExpression expression)
 	{
 		MethodBase result = expression.GetMethod();
-		if (result == null || result.ReflectedType == null || !result.ReflectedType.IsAssignableFrom(thisValue))
+		if (result is not { ReflectedType: { } } || !result.ReflectedType.IsAssignableFrom(thisValue))
 			throw new ArgumentException($"Expression '{expression}' refers to a method that is not from type {thisValue}.");
 
 		return result;
@@ -794,7 +794,7 @@ public static class TypeExtension
 	[NotNull]
 	public static Delegate Ctor([NotNull] this Type thisValue, params ParameterExpression[] parameters)
 	{
-		if (parameters == null || parameters.Length == 0)
+		if (parameters is not { Length: not 0 })
 		{
 			ConstructorInfo ci = GetConstructor(thisValue);
 			return Expression.Lambda(Expression.New(ci)).Compile();
@@ -1154,7 +1154,7 @@ public static class TypeExtension
 
 		bool OpFilter(MethodInfo m)
 		{
-			if (m.Name != "op_Explicit" && m.Name != "op_Implicit" || !m.Attributes.FastHasFlag(MethodAttributes.SpecialName)) return false;
+			if (m.Name is not "op_Explicit" and not "op_Implicit" || !m.Attributes.FastHasFlag(MethodAttributes.SpecialName)) return false;
 
 			ParameterInfo[] parameters = m.GetParameters();
 			if (parameters.Length != 1) return false;

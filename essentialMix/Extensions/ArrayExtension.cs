@@ -12,7 +12,7 @@ namespace essentialMix.Extensions;
 public static class ArrayExtension
 {
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	public static bool IsNullOrEmpty(this Array thisValue) { return thisValue == null || thisValue.Length == 0; }
+	public static bool IsNullOrEmpty(this Array thisValue) { return thisValue is not { Length: not 0 }; }
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	[NotNull]

@@ -33,7 +33,7 @@ public static class StreamExtension
 	{
 		if (bufferSize == -1) bufferSize = Constants.GetBufferKB(100);
 		if (bufferSize < StreamHelper.BUFFER_DEFAULT) bufferSize = StreamHelper.BUFFER_DEFAULT;
-		if (output == null || !output.CanWrite) return 0;
+		if (output is not { CanWrite: true }) return 0;
 		output.SetLength(0);
 
 		if (!thisValue.CanRead)

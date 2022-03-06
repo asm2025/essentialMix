@@ -20,7 +20,7 @@ namespace essentialMix.Collections;
 public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 {
 	[Serializable]
-	internal class SynchronizedList : IBoundList<T>
+	private class SynchronizedList : IBoundList<T>
 	{
 		private readonly BoundList<T> _list;
 

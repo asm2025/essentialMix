@@ -309,7 +309,7 @@ public static class UriHelper
 		value = value?.Trim();
 		if (string.IsNullOrEmpty(value)) return false;
 		if (!TryBuildUri(value, out Uri outUri, kind) || outUri == null) return false;
-		if (!outUri.IsAbsoluteUri || scheme == null || scheme.Length == 0) return true;
+		if (!outUri.IsAbsoluteUri || scheme is not { Length: not 0 }) return true;
 		return scheme.Length == 0 || scheme.All(s => s != null && Schemes.Contains(s));
 	}
 
@@ -337,7 +337,7 @@ public static class UriHelper
 
 		Uri uri = ToUri(url, UriKind.Absolute);
 		if (uri == null) return null;
-		if (uri.Port > 0 && uri.Port != 80) port = uri.Port;
+		if (uri.Port is > 0 and not 80) port = uri.Port;
 		return uri.Host;
 	}
 
@@ -1161,7 +1161,7 @@ public static class UriHelper
 							{
 								if (!int.TryParse(parts[1], out int port)) throw new InvalidOperationException($"Invalid port number '{parts[1]}'.");
 
-								if (port > 0 && port != 80)
+								if (port is > 0 and not 80)
 								{
 									sb.Append(':');
 									sb.Append(parts[1]);

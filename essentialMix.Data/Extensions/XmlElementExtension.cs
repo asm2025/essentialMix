@@ -82,7 +82,7 @@ public static class XmlElementExtension
 	public static XmlNodeList Elements(this XmlElement thisValue, string name) { return Elements(thisValue, name, null); }
 	public static XmlNodeList Elements(this XmlElement thisValue, string name, XmlNamespaceManager manager)
 	{
-		if (thisValue == null || !thisValue.HasChildNodes) return null;
+		if (thisValue is not { HasChildNodes: true }) return null;
 		string expr = name ?? "*";
 		return manager == null
 					? thisValue.SelectNodes(expr)
@@ -92,7 +92,7 @@ public static class XmlElementExtension
 	public static XmlNodeList Elements(this XmlElement thisValue, string name, string attribute, string value) { return Elements(thisValue, name, attribute, value, null); }
 	public static XmlNodeList Elements(this XmlElement thisValue, string name, string attribute, string value, XmlNamespaceManager manager)
 	{
-		if (thisValue == null || !thisValue.HasChildNodes) return null;
+		if (thisValue is not { HasChildNodes: true }) return null;
 		string nm = name ?? "*";
 		string expr = attribute == null
 						? nm
@@ -109,7 +109,7 @@ public static class XmlElementExtension
 	public static XmlElement First(this XmlElement thisValue, string name, string attribute, string value) { return First(thisValue, name, attribute, value, null); }
 	public static XmlElement First(this XmlElement thisValue, string name, string attribute, string value, XmlNamespaceManager manager)
 	{
-		if (thisValue == null || !thisValue.HasChildNodes) return null;
+		if (thisValue is not { HasChildNodes: true }) return null;
 		string nm = name ?? "*";
 		string expr = attribute == null
 						? nm
@@ -124,7 +124,7 @@ public static class XmlElementExtension
 	public static XmlElement Last(this XmlElement thisValue, string name, string attribute, string value) { return Last(thisValue, name, attribute, value, null); }
 	public static XmlElement Last(this XmlElement thisValue, string name, string attribute, string value, XmlNamespaceManager manager)
 	{
-		if (thisValue == null || !thisValue.HasChildNodes) return null;
+		if (thisValue is not { HasChildNodes: true }) return null;
 		string nm = name ?? "*";
 		string expr = attribute == null
 						? $"{nm}[last()]"

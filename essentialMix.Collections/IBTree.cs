@@ -11,7 +11,6 @@ public interface IBTreeBase<TBlock, TNode, T> : ICollection<TNode>
 {
 	TBlock Root { get; }
 	int Degree { get; }
-	int Capacity { get; }
 	int Height { get; }
 
 	void EnsureRoot();

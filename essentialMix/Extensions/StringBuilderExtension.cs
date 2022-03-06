@@ -702,7 +702,7 @@ public static class StringBuilderExtension
 		return true;
 	}
 
-	public static bool IsNullOrEmpty(this StringBuilder thisValue) { return thisValue == null || thisValue.Length == 0; }
+	public static bool IsNullOrEmpty(this StringBuilder thisValue) { return thisValue is not { Length: not 0 }; }
 
 	public static string IfNullOrEmpty(this StringBuilder thisValue, string returnValue)
 	{

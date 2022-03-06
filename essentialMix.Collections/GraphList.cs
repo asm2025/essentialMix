@@ -270,7 +270,7 @@ public abstract class GraphList<T> : GraphList<T, HashSet<T>, T>
 			{
 				T from = _queue.Dequeue();
 				HashSet<T> edges = _graph[from];
-				if (edges == null || edges.Count == 0) continue;
+				if (edges is not { Count: not 0 }) continue;
 
 				foreach (T edge in edges)
 					_edges.Enqueue(new EdgeEntry<T, T>(from, edge));
@@ -377,7 +377,7 @@ public abstract class GraphList<T> : GraphList<T, HashSet<T>, T>
 
 			// Queue the next vertices
 			HashSet<T> edges = _graph[_current];
-			if (edges == null || edges.Count == 0) return true;
+			if (edges is not { Count: not 0 }) return true;
 
 			foreach (T edge in edges)
 				_queue.Enqueue(edge);
@@ -482,7 +482,7 @@ public abstract class GraphList<T> : GraphList<T, HashSet<T>, T>
 				
 			// Queue the next vertices
 			HashSet<T> edges = _graph[_current];
-			if (edges == null || edges.Count == 0) return true;
+			if (edges is not { Count: not 0 }) return true;
 
 			foreach (T edge in edges)
 				_stack.Push(edge);
@@ -562,7 +562,7 @@ public abstract class GraphList<T> : GraphList<T, HashSet<T>, T>
 		{
 			if (version != _version) throw new VersionChangedException();
 			HashSet<T> edges = this[vertex];
-			if (edges == null || edges.Count == 0) continue;
+			if (edges is not { Count: not 0 }) continue;
 
 			foreach (T edge in edges)
 			{
@@ -583,7 +583,7 @@ public abstract class GraphList<T> : GraphList<T, HashSet<T>, T>
 		{
 			if (version != _version) throw new VersionChangedException();
 			HashSet<T> edges = this[vertex];
-			if (edges == null || edges.Count == 0) continue;
+			if (edges is not { Count: not 0 }) continue;
 
 			foreach (T edge in edges)
 			{
@@ -608,7 +608,7 @@ public abstract class GraphList<T> : GraphList<T, HashSet<T>, T>
 
 		foreach (HashSet<T> hashset in Values)
 		{
-			if (hashset == null || hashset.Count == 0) continue;
+			if (hashset is not { Count: not 0 }) continue;
 			hashset.RemoveWhere(e => Comparer.Equals(value, e));
 		}
 	}
@@ -635,7 +635,7 @@ public static class GraphExtension
 
 		foreach (KeyValuePair<T, TAdjacencyList> pair in thisValue)
 		{
-			if (pair.Value == null || pair.Value.Count == 0) continue;
+			if (pair.Value is not { Count: not 0 }) continue;
 			writer.WriteLine($"{pair.Key}->[{string.Join(", ", pair.Value)}]");
 		}
 	}

@@ -2,8 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using essentialMix.Collections.DebugView;
 using essentialMix.Comparers;
 using JetBrains.Annotations;
@@ -50,28 +50,21 @@ namespace essentialMix.Collections;
 [Serializable]
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,>))]
-public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
+public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>, ICollection
 	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
+	internal int _version;
+
 	private TBlock _root;
+	[NonSerialized]
+	private object _syncRoot;
 
 	protected BTreeBase(int degree)
 	{
 		if (degree < BTree.MINIMUM_DEGREE) throw new ArgumentOutOfRangeException(nameof(degree), $"{GetType()}'s degree must be at least 2.");
 		Degree = degree;
 		Height = 1;
-	}
-
-	/// <inheritdoc />
-	public int Capacity
-	{
-		get => _root?.Capacity ?? 0;
-		set
-		{
-			EnsureRoot();
-			_root.Capacity = value;
-		}
 	}
 
 	/// <inheritdoc />
@@ -87,11 +80,21 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	/// <inheritdoc />
 	public int Height { get; protected set; }
 
-	/// <inheritdoc />
 	public int Count { get; internal set; }
 
 	/// <inheritdoc />
 	public bool IsReadOnly => false;
+
+	bool ICollection.IsSynchronized => false;
+
+	object ICollection.SyncRoot
+	{
+		get
+		{
+			if (_syncRoot == null) Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
+			return _syncRoot;
+		}
+	}
 
 	/// <inheritdoc />
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
@@ -709,7 +712,7 @@ public class BTree<T> : BTree<BTreeBlock<T>, BTreeNode<T>, T>
 	}
 
 	/// <inheritdoc />
-	public override BTreeBlock<T> MakeBlock() { return new BTreeBlock<T>(Degree); }
+	public override BTreeBlock<T> MakeBlock() { return new BTreeBlock<T>(this, Degree); }
 }
 
 [Serializable]
@@ -728,7 +731,7 @@ public class BTree<TKey, TValue> : BTree<BTreeBlock<TKey, TValue>, BTreeNode<TKe
 	}
 
 	/// <inheritdoc />
-	public override BTreeBlock<TKey, TValue> MakeBlock() { return new BTreeBlock<TKey, TValue>(Degree); }
+	public override BTreeBlock<TKey, TValue> MakeBlock() { return new BTreeBlock<TKey, TValue>(this, Degree); }
 }
 
 public static class BTree

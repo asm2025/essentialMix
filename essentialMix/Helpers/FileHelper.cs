@@ -190,7 +190,7 @@ public static class FileHelper
 
 		StringBuilder builder = new StringBuilder(value.Length);
 
-		if (includeChars == null || includeChars.Length == 0)
+		if (includeChars is not { Length: not 0 })
 		{
 			foreach (char c in value)
 			{

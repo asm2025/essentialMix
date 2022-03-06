@@ -68,7 +68,7 @@ public sealed class RedBlackTree<T> : LinkedBinaryTree<RedBlackNode<T>, T>
 	/// <inheritdoc />
 	public override int GetHeight()
 	{
-		if (Root == null || Root.IsLeaf) return 0;
+		if (Root is not { IsLeaf: not true }) return 0;
 		int height = 0;
 		IterateLevels((_, _) => height++);
 		return height;
@@ -351,7 +351,7 @@ public sealed class RedBlackTree<T> : LinkedBinaryTree<RedBlackNode<T>, T>
 
 	public override bool IsBalanced()
 	{
-		if (Root == null || Root.IsLeaf) return true;
+		if (Root is not { IsLeaf: not true }) return true;
 			
 		// using levelOrder traversal
 		// Root-Left-Right (Queue)
@@ -547,7 +547,7 @@ public sealed class RedBlackTree<T> : LinkedBinaryTree<RedBlackNode<T>, T>
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	private static bool IsNullOrBlack(RedBlackNode<T> node)
 	{
-		return node == null || !node.Color;
+		return node is not { Color: true };
 	}
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

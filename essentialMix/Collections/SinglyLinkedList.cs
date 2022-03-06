@@ -12,8 +12,7 @@ using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
-// ReSharper disable once CheckNamespace
-namespace Other.Microsoft.Collections;
+namespace essentialMix.Collections;
 
 // based on https://github.com/microsoft/referencesource/blob/master/System/compmod/system/collections/generic/linkedlist.cs
 [DebuggerDisplay("Count = {Count}")]
@@ -124,7 +123,7 @@ public class SinglyLinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollect
 				// MoveNext will throw upon next call and Current has the correct value. 
 				if (_node != null && _index != 0)
 				{
-					for (int i = 0; i < _index; i++) 
+					for (int i = 0; i < _index; i++)
 						_node = _node._next;
 
 					if (_node == _list.First) _node = null;
@@ -146,14 +145,14 @@ public class SinglyLinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollect
 	private object _syncRoot;
 
 	private SerializationInfo siInfo; //A temporary variable which we need during deserialization.
-		
+
 	public SinglyLinkedList()
 	{
 	}
 
 	public SinglyLinkedList([NotNull] IEnumerable<T> enumerable)
 	{
-		foreach (T item in enumerable) 
+		foreach (T item in enumerable)
 			AddLast(item);
 	}
 
@@ -190,7 +189,7 @@ public class SinglyLinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollect
 		info.AddValue(nameof(_version), _version);
 		info.AddValue(nameof(Count), _count); //This is the length of the bucket array.
 		if (_count == 0) return;
-			
+
 		T[] array = new T[Count];
 		CopyTo(array, 0);
 		info.AddValue(VALUES, array, typeof(T[]));
@@ -209,7 +208,7 @@ public class SinglyLinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollect
 			T[] array = (T[])siInfo.GetValue(VALUES, typeof(T[]));
 			if (array == null) throw new SerializationException("Missing keys");
 
-			foreach (T value in array) 
+			foreach (T value in array)
 				AddLast(value);
 		}
 		else
@@ -360,7 +359,7 @@ public class SinglyLinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollect
 
 		SinglyLinkedListNode<T> node = _head;
 		EqualityComparer<T> comparer = EqualityComparer<T>.Default;
-			
+
 		if (value != null)
 		{
 			do
@@ -453,11 +452,11 @@ public class SinglyLinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollect
 		if (array is not object[] objects) throw new ArgumentException("Invalid array type", nameof(array));
 
 		SinglyLinkedListNode<T> node = _head;
-			
+
 		try
 		{
 			if (node == null) return;
-				
+
 			do
 			{
 				objects[index++] = node._item;

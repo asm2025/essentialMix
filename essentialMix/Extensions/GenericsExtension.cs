@@ -1238,7 +1238,7 @@ public static class GenericsExtension
 	}
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	public static bool IsNullOrEmpty<T>(this T[] thisValue) { return thisValue == null || thisValue.Length == 0; }
+	public static bool IsNullOrEmpty<T>(this T[] thisValue) { return thisValue is not { Length: not 0 }; }
 
 	public static bool IsNullOrUninitialized<T>(this T[] thisValue)
 		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
@@ -1255,7 +1255,7 @@ public static class GenericsExtension
 	public static bool IsNullOrUninitialized<T>(this T[] thisValue, int arrayIndex, int count)
 		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 	{
-		if (thisValue == null || thisValue.Length == 0)
+		if (thisValue is not { Length: not 0 })
 			return true;
 		thisValue.Length.ValidateRange(arrayIndex, ref count);
 

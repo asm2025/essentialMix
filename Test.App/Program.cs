@@ -796,7 +796,7 @@ work with {Constants.HEAVY} items.");
 				{
 					ConsoleKey heapKey = ConsoleKey.Clear;
 
-					while (heapKey != ConsoleKey.N && heapKey != ConsoleKey.X && heapKey != ConsoleKey.Escape)
+					while (heapKey is not ConsoleKey.N and not ConsoleKey.X and not ConsoleKey.Escape)
 					{
 						Console.Write($"Would you like to use Mi{Bright.Green("[n]")}Heap or Ma{Bright.Green("[x]")}Heap? Press {Bright.Red("ESCAPE")} key to exit this test. ");
 						heapKey = Console.ReadKey().Key;

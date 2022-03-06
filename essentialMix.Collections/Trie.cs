@@ -164,7 +164,7 @@ public class Trie<T>
 			parent = node;
 		}
 
-		if (node == null || !node.EndOfToken) return false;
+		if (node is not { EndOfToken: true }) return false;
 
 		do
 		{

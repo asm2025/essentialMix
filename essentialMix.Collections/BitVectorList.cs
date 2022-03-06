@@ -460,7 +460,7 @@ public class BitVectorList : ListBase<BitVector>, IList<byte>, IReadOnlyList<byt
 	[NotNull]
 	public static explicit operator bool[](BitVectorList value)
 	{
-		if (value == null || value.Count == 0) return Array.Empty<bool>();
+		if (value is not { Count: not 0 }) return Array.Empty<bool>();
 
 		bool[] bits = new bool[value.Count * 8];
 

@@ -264,7 +264,7 @@ public class BinarySearchTree<T> : LinkedBinaryTree<T>
 	/// <inheritdoc />
 	public override bool IsBalanced()
 	{
-		if (Root == null || Root.IsLeaf) return true;
+		if (Root is not { IsLeaf: not true }) return true;
 			
 		bool balanced = true;
 		Iterate(TreeTraverseMethod.LevelOrder, e =>
@@ -276,15 +276,9 @@ public class BinarySearchTree<T> : LinkedBinaryTree<T>
 
 		static bool IsBalancedLocal(LinkedBinaryNode<T> node)
 		{
-			return node == null
-					|| node.IsLeaf
-					|| Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR
-					&& (node.Left == null 
-						|| node.Left.IsLeaf 
-						|| Math.Abs(node.Left.BalanceFactor) <= BALANCE_FACTOR)
-					&& (node.Right == null 
-						|| node.Right.IsLeaf 
-						|| Math.Abs(node.Right.BalanceFactor) <= BALANCE_FACTOR);
+			return node is not { IsLeaf: not true } || Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR
+					&& (node.Left is not { IsLeaf: not true } || Math.Abs(node.Left.BalanceFactor) <= BALANCE_FACTOR)
+					&& (node.Right is not { IsLeaf: not true } || Math.Abs(node.Right.BalanceFactor) <= BALANCE_FACTOR);
 		}
 	}
 

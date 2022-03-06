@@ -28,7 +28,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 	protected const string ITEMS_NAME = "Item[]";
 
 	[Serializable]
-	internal class SynchronizedList : IList<T>
+	private class SynchronizedList : IList<T>
 	{
 		private readonly ObservableList<T> _list;
 
@@ -768,6 +768,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 		CollectionChanged?.Invoke(this, e);
 	}
 
+	[NotNull]
 	protected IDisposable BlockReentrancy()
 	{
 		_monitor.Enter();

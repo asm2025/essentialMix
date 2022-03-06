@@ -310,11 +310,8 @@ public static class PathHelper
 		{
 			char c = path[i];
 
-			if (c <= '?') // fast path for common case - '?' is highest wildcard character
-			{
-				if (c is '\"' or '<' or '>' or '*' or '?')
-					return true;
-			}
+			if (c is <= '?' and ('\"' or '<' or '>' or '*' or '?')) // fast path for common case - '?' is highest wildcard character
+				return true;
 		}
 
 		return false;

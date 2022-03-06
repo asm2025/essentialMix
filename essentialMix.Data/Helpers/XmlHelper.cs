@@ -234,7 +234,7 @@ public static class XmlHelper
 		}
 		finally
 		{
-			if (reader != null && reader.ReadState != ReadState.Closed)
+			if (reader is { ReadState: not ReadState.Closed })
 			{
 				reader.Close();
 				ObjectHelper.Dispose(ref reader);

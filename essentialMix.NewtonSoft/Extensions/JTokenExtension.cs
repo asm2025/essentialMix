@@ -24,7 +24,7 @@ public static class JTokenExtension
 			case null:
 			case JValue:
 				return;
-			case JProperty property when property.Name != "$id":
+			case JProperty { Name: not "$id" } property:
 				fieldNames.Add(property.Path);
 				break;
 		}

@@ -5,7 +5,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Threading;
-using essentialMix;
 using essentialMix.Collections.DebugView;
 using essentialMix.Comparers;
 using essentialMix.Exceptions.Collections;
@@ -13,8 +12,7 @@ using essentialMix.Extensions;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
 
-// ReSharper disable once CheckNamespace
-namespace Other.Microsoft.Collections;
+namespace essentialMix.Collections;
 
 // based on https://github.com/microsoft/referencesource/blob/master/mscorlib/system/collections/generic/list.cs
 [DebuggerDisplay("Count = {Count}")]
@@ -23,7 +21,7 @@ namespace Other.Microsoft.Collections;
 public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 {
 	[Serializable]
-	internal class SynchronizedList : IList<T>
+	private class SynchronizedList : IList<T>
 	{
 		private readonly ListBase<T> _list;
 
@@ -300,8 +298,6 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 
 	// Is this List read-only?
 	public bool IsReadOnly => false;
-
-	bool IList.IsReadOnly => false;
 
 	// Is this List synchronized (thread-safe)?
 	bool ICollection.IsSynchronized => false;

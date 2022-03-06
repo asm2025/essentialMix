@@ -556,7 +556,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 
 	public abstract bool AutoBalance { get; }
 
-	public bool IsFull => Root == null || Root.IsFull;
+	public bool IsFull => Root is not { IsFull: not true };
 
 	/// <inheritdoc />
 	bool ICollection<T>.IsReadOnly => false;
@@ -1141,7 +1141,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 	/// Validates the tree nodes
 	/// </summary>
 	/// <returns></returns>
-	public bool Validate() { return Root == null || Root.IsLeaf || Validate(Root); }
+	public bool Validate() { return Root is not { IsLeaf: not true } || Validate(Root); }
 
 	/// <summary>
 	/// Validates the node and its children.

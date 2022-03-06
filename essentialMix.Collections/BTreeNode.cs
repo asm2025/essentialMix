@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
@@ -8,7 +7,6 @@ namespace essentialMix.Collections;
 /// <inheritdoc />
 [Serializable]
 [DebuggerDisplay("{Value}")]
-[StructLayout(LayoutKind.Sequential)]
 public abstract class BTreeNodeBase<TNode, T> : ITreeNode<TNode, T>
 	where TNode : BTreeNodeBase<TNode, T>
 {
@@ -37,7 +35,6 @@ public abstract class BTreeNodeBase<TNode, T> : ITreeNode<TNode, T>
 
 /// <inheritdoc cref="BTreeNodeBase{TNode,T}" />
 [Serializable]
-[StructLayout(LayoutKind.Sequential)]
 public sealed class BTreeNode<T> : BTreeNodeBase<BTreeNode<T>, T>, ITreeNode<BTreeNode<T>, T>
 {
 	/// <inheritdoc />
@@ -62,7 +59,6 @@ public sealed class BTreeNode<T> : BTreeNodeBase<BTreeNode<T>, T>, ITreeNode<BTr
 /// <inheritdoc cref="BTreeNodeBase{TNode,T}" />
 [Serializable]
 [DebuggerDisplay("{Key} = {Value}")]
-[StructLayout(LayoutKind.Sequential)]
 public sealed class BTreeNode<TKey, TValue> : BTreeNodeBase<BTreeNode<TKey, TValue>, TValue>, ITreeNode<BTreeNode<TKey, TValue>, TKey, TValue>
 {
 	private TKey _key;

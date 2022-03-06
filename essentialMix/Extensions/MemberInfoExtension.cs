@@ -49,7 +49,7 @@ public static class MemberInfoExtension
 	public static bool IsBrowsable([NotNull] this MemberInfo thisValue)
 	{
 		BrowsableAttribute browsable = thisValue.GetAttribute<BrowsableAttribute>(true);
-		return browsable == null || browsable.Browsable;
+		return browsable is not { Browsable: not true };
 	}
 
 	[NotNull]

@@ -7,7 +7,7 @@ namespace essentialMix.Extensions;
 
 public static class SecureStringExtension
 {
-	public static bool IsNullOrEmpty(this SecureString thisValue) { return thisValue == null || thisValue.Length == 0; }
+	public static bool IsNullOrEmpty(this SecureString thisValue) { return thisValue is not { Length: not 0 }; }
 
 	[NotNull]
 	public static SecureString ToReadOnly([NotNull] this SecureString thisValue)

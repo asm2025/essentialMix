@@ -168,7 +168,7 @@ public sealed class SynchronizedThreads<T> : Disposable
 	{
 		ThrowIfDisposed();
 		if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-		if (_workersCountdown == null || _workersCountdown.IsSet) return true;
+		if (_workersCountdown is not { IsSet: not true }) return true;
 
 		try
 		{

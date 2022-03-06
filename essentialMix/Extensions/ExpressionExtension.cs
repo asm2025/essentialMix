@@ -768,7 +768,7 @@ public static class ExpressionExtension
 	public static IReadOnlyCollection<Expression> GetArguments(this Expression thisValue)
 	{
 		thisValue = Simplify(thisValue);
-		if (thisValue == null || thisValue is not IArgumentProvider provider) return null;
+		if (thisValue is not IArgumentProvider provider) return null;
 
 		// try property first
 		Type type = thisValue.GetType();
@@ -1081,7 +1081,7 @@ public static class ExpressionExtension
 	internal static PropertyPath MatchSimplePropertyAccess([NotNull] this Expression thisValue, [NotNull] Expression propertyAccessExpression)
 	{
 		PropertyPath propertyPath = MatchPropertyAccess(thisValue, propertyAccessExpression);
-		return !(propertyPath != null) || propertyPath.Count != 1
+		return propertyPath is not { Count: 1 }
 					? null
 					: propertyPath;
 	}

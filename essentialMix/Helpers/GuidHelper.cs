@@ -8,7 +8,7 @@ public static class GuidHelper
 	public static Guid NewSequential()
 	{
 		int result = Win32.UuidCreateSequential(out Guid guid);
-		if (result != ResultCom.S_OK && result != ResultWin32.RPC_S_UUID_LOCAL_ONLY) throw new COMException("UuidCreateSequential call failed", result);
+		if (result is not ResultCom.S_OK and not ResultWin32.RPC_S_UUID_LOCAL_ONLY) throw new COMException("UuidCreateSequential call failed", result);
 		return guid;
 	}
 

@@ -540,7 +540,7 @@ public static class ValueTypeExtension
 
 	public static unsafe void Swap(this byte[] thisValue)
 	{
-		if (thisValue == null || thisValue.Length == 0) return;
+		if (thisValue is not { Length: not 0 }) return;
 
 		fixed (byte* pThisValue = thisValue)
 		{

@@ -1,10 +1,9 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using essentialMix.Collections;
 using JetBrains.Annotations;
+using Other.Microsoft.Collections;
 
-// ReSharper disable once CheckNamespace
-namespace Other.Microsoft.Collections;
+namespace essentialMix.Collections;
 
 // based on https://referencesource.microsoft.com/#system/compmod/system/collections/generic/linkedlist.cs
 // Note following class is not serializable since we customized the serialization of SinglyLinkedList. 

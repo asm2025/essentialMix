@@ -261,7 +261,7 @@ public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T
 	{
 		ThrowIfDisposed();
 		if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-		if (_workersCountdown == null || _workersCountdown.IsSet) return true;
+		if (_workersCountdown is not { IsSet: not true }) return true;
 			
 		try
 		{
@@ -283,7 +283,7 @@ public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T
 	{
 		ThrowIfDisposed();
 		if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-		if (_workersCountdown == null || _workersCountdown.IsSet) return Task.FromResult(true);
+		if (_workersCountdown is not { IsSet: not true }) return Task.FromResult(true);
 		return TaskHelper.FromWaitHandle(_workersCountdown.WaitHandle, millisecondsTimeout, Token);
 	}
 
@@ -321,7 +321,7 @@ public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T
 	{
 		ThrowIfDisposed();
 		if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-		if (_tasksCountdown == null || _tasksCountdown.IsSet) return true;
+		if (_tasksCountdown is not { IsSet: not true }) return true;
 			
 		try
 		{

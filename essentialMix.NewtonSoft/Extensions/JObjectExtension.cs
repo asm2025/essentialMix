@@ -115,7 +115,7 @@ public static class JObjectExtension
 		while (jObject != null && queue.Count > 1)
 		{
 			name = queue.Dequeue();
-			if (jObject.GetValue(name, StringComparison.OrdinalIgnoreCase) is not JObject jObj || !jObj.HasValues) return false;
+			if (jObject.GetValue(name, StringComparison.OrdinalIgnoreCase) is not JObject { HasValues: true } jObj) return false;
 			jObject = jObj;
 		}
 
@@ -136,8 +136,7 @@ public static class JObjectExtension
 			name = queue.Dequeue();
 
 			if (!jObject.TryGetValue(name, StringComparison.OrdinalIgnoreCase, out JToken token) 
-				|| token is not JObject jObj
-				|| !jObj.HasValues) return false;
+				|| token is not JObject { HasValues: true } jObj) return false;
 
 			jObject = jObj;
 		}

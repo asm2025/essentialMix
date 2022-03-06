@@ -341,7 +341,7 @@ public static class IDictionaryExtension
 
 		foreach (IDictionary<TKey, TValue> dictionary in dictionaries)
 		{
-			if (dictionary == null || dictionary.Count == 0) continue;
+			if (dictionary is not { Count: not 0 }) continue;
 
 			foreach (KeyValuePair<TKey, TValue> pair in dictionary)
 			{

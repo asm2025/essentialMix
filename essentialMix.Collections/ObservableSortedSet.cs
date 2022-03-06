@@ -2204,7 +2204,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 
 	private static bool IsBlackNode(Node node) { return node is { IsRed: false }; }
 
-	private static bool IsNullOrBlack(Node node) { return node == null || !node.IsRed; }
+	private static bool IsNullOrBlack(Node node) { return node is not { IsRed: true }; }
 
 	private static void Merge2Nodes([NotNull] Node parent, [NotNull] Node child1, [NotNull] Node child2)
 	{

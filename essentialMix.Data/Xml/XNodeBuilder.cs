@@ -33,7 +33,7 @@ public class XNodeBuilder : XmlWriter
 
 	public override void Close()
 	{
-		if (_content == null || _content.Count == 0) return;
+		if (_content is not { Count: not 0 }) return;
 		if (_root == null) throw new InvalidOperationException("No container node was found to hold the contents");
 		_root.Add(_content);
 	}

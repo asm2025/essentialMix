@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,20 +14,20 @@ using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
 using essentialMix.Numeric;
 using JetBrains.Annotations;
+using Other.Microsoft;
 
-// ReSharper disable once CheckNamespace
-namespace Other.Microsoft.Collections;
+namespace essentialMix.Collections;
 
 // based on https://github.com/microsoft/referencesource/blob/master/mscorlib/system/collections/generic/dictionary.cs
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_DictionaryDebugView<,>))]
 [Serializable]
 [ComVisible(false)]
-public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, ICollection, IReadOnlyDictionary<TKey, TValue>, ISerializable, IDeserializationCallback
+public abstract class DictionaryBase<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>, ISerializable, IDeserializationCallback
 {
 	// constants for serialization
 	private const string HASH_SIZE_NAME = "HashSize"; // Must save buckets.Length
-	private const string ITEMS_NAME = "Item[]";
+	private const string ITEMS_NAME = "KeyValuePairs";
 
 	protected struct Entry
 	{
@@ -45,13 +45,13 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 		/// <inheritdoc cref="IEnumerator{T}" />
 		[Serializable]
 		// ReSharper disable once MemberHidesStaticFromOuterClass
-		public struct Enumerator : IEnumerator<TKey>, IEnumerator
+		private struct Enumerator : IEnumerator<TKey>, IEnumerator
 		{
-			private KeyedDictionaryBase<TKey, TValue> _dictionary;
+			private readonly DictionaryBase<TKey, TValue> _dictionary;
 			private int _index;
 			private int _version;
 
-			internal Enumerator([NotNull] KeyedDictionaryBase<TKey, TValue> dictionary)
+			internal Enumerator([NotNull] DictionaryBase<TKey, TValue> dictionary)
 			{
 				_dictionary = dictionary;
 				_version = dictionary._version;
@@ -101,9 +101,9 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 			}
 		}
 
-		private readonly KeyedDictionaryBase<TKey, TValue> _dictionary;
+		private DictionaryBase<TKey, TValue> _dictionary;
 
-		public KeyCollection([NotNull] KeyedDictionaryBase<TKey, TValue> dictionary)
+		public KeyCollection([NotNull] DictionaryBase<TKey, TValue> dictionary)
 		{
 			_dictionary = dictionary;
 		}
@@ -120,7 +120,8 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 
 		IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator() { return new Enumerator(_dictionary); }
 
-		public Enumerator GetEnumerator() { return new Enumerator(_dictionary); }
+		[NotNull]
+		public IEnumerator<TKey> GetEnumerator() { return new Enumerator(_dictionary); }
 
 		void ICollection<TKey>.Add(TKey item) { throw new NotSupportedException(); }
 
@@ -179,13 +180,13 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 		/// <inheritdoc cref="IEnumerator{T}" />
 		[Serializable]
 		// ReSharper disable once MemberHidesStaticFromOuterClass
-		public struct Enumerator : IEnumerator<TValue>, IEnumerator
+		private struct Enumerator : IEnumerator<TValue>, IEnumerator
 		{
-			private KeyedDictionaryBase<TKey, TValue> _dictionary;
+			private DictionaryBase<TKey, TValue> _dictionary;
 			private int _index;
 			private int _version;
 
-			internal Enumerator([NotNull] KeyedDictionaryBase<TKey, TValue> dictionary)
+			internal Enumerator([NotNull] DictionaryBase<TKey, TValue> dictionary)
 			{
 				_dictionary = dictionary;
 				_version = dictionary._version;
@@ -235,9 +236,9 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 			}
 		}
 
-		private KeyedDictionaryBase<TKey, TValue> _dictionary;
+		private DictionaryBase<TKey, TValue> _dictionary;
 
-		public ValueCollection([NotNull] KeyedDictionaryBase<TKey, TValue> dictionary)
+		public ValueCollection([NotNull] DictionaryBase<TKey, TValue> dictionary)
 		{
 			_dictionary = dictionary;
 		}
@@ -254,7 +255,8 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 
 		IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() { return new Enumerator(_dictionary); }
 
-		public Enumerator GetEnumerator() { return new Enumerator(_dictionary); }
+		[NotNull]
+		public IEnumerator<TValue> GetEnumerator() { return new Enumerator(_dictionary); }
 
 		void ICollection<TValue>.Add(TValue item) { throw new NotSupportedException(); }
 
@@ -262,7 +264,7 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 
 		void ICollection<TValue>.Clear() { throw new NotSupportedException(); }
 
-		bool ICollection<TValue>.Contains(TValue item) { return _dictionary.Contains(item); }
+		bool ICollection<TValue>.Contains(TValue item) { return _dictionary.ContainsValue(item); }
 
 		public void CopyTo(TValue[] array, int index)
 		{
@@ -303,19 +305,19 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 	}
 
 	[Serializable]
-	public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IDictionaryEnumerator
+	private struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IDictionaryEnumerator
 	{
 		internal const int DICT_ENTRY = 1;
 		internal const int KEY_VALUE_PAIR = 2;
 
-		private readonly KeyedDictionaryBase<TKey, TValue> _dictionary;
+		private readonly DictionaryBase<TKey, TValue> _dictionary;
 		private readonly int _version;
 
 		private int _index;
 		private KeyValuePair<TKey, TValue> _current;
 		private int _getEnumeratorRetType; // What should Enumerator.Current return?
 
-		internal Enumerator([NotNull] KeyedDictionaryBase<TKey, TValue> dictionary, int getEnumeratorRetType)
+		internal Enumerator([NotNull] DictionaryBase<TKey, TValue> dictionary, int getEnumeratorRetType)
 		{
 			_dictionary = dictionary;
 			_version = dictionary._version;
@@ -398,10 +400,11 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 		}
 	}
 
+	protected internal int _version;
+
 	private int[] _buckets;
 	private Entry[] _entries;
 	private int _count;
-	private int _version;
 	private int _freeList;
 	private int _freeCount;
 	private KeyCollection _keys;
@@ -410,41 +413,41 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 	[NonSerialized]
 	private object _syncRoot;
 
-	protected KeyedDictionaryBase()
+	protected DictionaryBase()
 		: this(0, null)
 	{
 	}
 
-	protected KeyedDictionaryBase(int capacity)
+	protected DictionaryBase(int capacity)
 		: this(capacity, null)
 	{
 	}
 
-	protected KeyedDictionaryBase(IEqualityComparer<TKey> comparer)
+	protected DictionaryBase(IEqualityComparer<TKey> comparer)
 		: this(0, comparer)
 	{
 	}
 
-	protected KeyedDictionaryBase(int capacity, IEqualityComparer<TKey> comparer)
+	protected DictionaryBase(int capacity, IEqualityComparer<TKey> comparer)
 	{
 		if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
 		if (capacity > 0) Initialize(capacity);
 		Comparer = comparer ?? EqualityComparer<TKey>.Default;
 	}
 
-	protected KeyedDictionaryBase([NotNull] IEnumerable<TValue> collection)
-		: this(collection, null)
+	protected DictionaryBase([NotNull] IDictionary<TKey, TValue> dictionary)
+		: this(dictionary, null)
 	{
 	}
 
-	protected KeyedDictionaryBase([NotNull] IEnumerable<TValue> collection, IEqualityComparer<TKey> comparer)
-		: this(comparer)
+	protected DictionaryBase([NotNull] IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
+		: this(dictionary.Count, comparer)
 	{
-		foreach (TValue item in collection) 
-			Add(item);
+		foreach (KeyValuePair<TKey, TValue> pair in dictionary)
+			Add(pair.Key, pair.Value);
 	}
 
-	protected KeyedDictionaryBase(SerializationInfo info, StreamingContext context)
+	protected DictionaryBase(SerializationInfo info, StreamingContext context)
 	{
 		//We can't do anything with the keys and values until the entire graph has been deserialized
 		//and we have a reasonable estimate that GetHashCode is not going to fail. For the time being,
@@ -463,7 +466,7 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 		}
 	}
 
-	public TValue this[[NotNull] TKey key]
+	public TValue this[TKey key]
 	{
 		get
 		{
@@ -471,17 +474,23 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 			if (i < 0) throw new KeyNotFoundException();
 			return _entries[i].Value;
 		}
-		set
-		{
-			int i = FindEntry(key);
-			if (i < 0) throw new KeyNotFoundException();
-			TKey k = GetKeyForItem(_entries[i].Value);
-			if (!Comparer.Equals(k, key)) throw new InvalidOperationException();
-			Insert(k, value, false);
-		}
+		set => Insert(key, value, false);
 	}
 
 	public int Count => _count - _freeCount;
+
+	object IDictionary.this[object key]
+	{
+		get
+		{
+			if (!IsCompatibleKey(key)) return null;
+			int i = FindEntry((TKey)key);
+			return i >= 0
+						? _entries[i].Value
+						: null;
+		}
+		set => this[(TKey)key] = (TValue)value;
+	}
 
 	public IEqualityComparer<TKey> Comparer { get; private set; }
 
@@ -492,12 +501,20 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 	[NotNull]
 	public KeyCollection Keys => _keys ??= new KeyCollection(this);
 
+	ICollection<TKey> IDictionary<TKey, TValue>.Keys => Keys;
+
 	IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Keys;
+
+	ICollection IDictionary.Keys => Keys;
 
 	[NotNull]
 	public ValueCollection Values => _values ??= new ValueCollection(this);
 
+	ICollection<TValue> IDictionary<TKey, TValue>.Values => Values;
+
 	IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Values;
+
+	ICollection IDictionary.Values => Values;
 
 	void IDeserializationCallback.OnDeserialization(object sender) { OnDeserialization(); }
 	protected virtual void OnDeserialization()
@@ -526,7 +543,7 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 
 		_buckets = new int[hashSize];
 
-		for (int i = 0; i < _buckets.Length; i++) 
+		for (int i = 0; i < _buckets.Length; i++)
 			_buckets[i] = -1;
 
 		_entries = new Entry[hashSize];
@@ -546,8 +563,8 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 	}
 
 	void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
-	[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 	[SecurityCritical]
+	[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 	protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 	{
 		info.AddValue(nameof(_version), _version);
@@ -559,25 +576,19 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 		info.AddValue(ITEMS_NAME, array, typeof(KeyValuePair<TKey, TValue>[]));
 	}
 
-	public IEnumerator<TValue> GetEnumerator() { return Values.GetEnumerator(); }
-
-	IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() { return new Enumerator(this, Enumerator.KEY_VALUE_PAIR); }
+	public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() { return new Enumerator(this, Enumerator.KEY_VALUE_PAIR); }
 
 	IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-	public void Add(TValue value)
-	{
-		if (ReferenceEquals(value, null)) throw new ArgumentNullException(nameof(value));
-		Insert(GetKeyForItem(value), value, true);
-	}
+	IDictionaryEnumerator IDictionary.GetEnumerator() { return new Enumerator(this, Enumerator.DICT_ENTRY); }
 
-	public bool Remove(TValue value)
-	{
-		if (ReferenceEquals(value, null)) throw new ArgumentNullException(nameof(value));
-		return RemoveByKey(GetKeyForItem(value));
-	}
+	public void Add(TKey key, TValue value) { Insert(key, value, true); }
 
-	public virtual bool RemoveByKey([NotNull] TKey key)
+	void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> keyValuePair) { Add(keyValuePair.Key, keyValuePair.Value); }
+
+	void IDictionary.Add(object key, object value) { Add((TKey)key, (TValue)value); }
+
+	public virtual bool Remove(TKey key)
 	{
 		if (_buckets == null) return false;
 
@@ -607,11 +618,24 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 		return false;
 	}
 
+	public bool Remove(KeyValuePair<TKey, TValue> keyValuePair)
+	{
+		int i = FindEntry(keyValuePair.Key);
+		if (i < 0 || !EqualityComparer<TValue>.Default.Equals(_entries[i].Value, keyValuePair.Value)) return false;
+		Remove(keyValuePair.Key);
+		return true;
+	}
+
+	void IDictionary.Remove(object key)
+	{
+		if (IsCompatibleKey(key)) Remove((TKey)key);
+	}
+
 	public virtual void Clear()
 	{
 		if (_count == 0) return;
 
-		for (int i = 0; i < _buckets.Length; i++) 
+		for (int i = 0; i < _buckets.Length; i++)
 			_buckets[i] = -1;
 
 		Array.Clear(_entries, 0, _count);
@@ -621,14 +645,39 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 		_version++;
 	}
 
-	public bool ContainsKey([NotNull] TKey key) { return FindEntry(key) >= 0; }
+	public bool ContainsKey(TKey key) { return FindEntry(key) >= 0; }
 
-	public bool Contains(TValue value)
+	public bool ContainsValue(TValue value)
 	{
-		if (ReferenceEquals(value, null)) throw new ArgumentNullException(nameof(value));
-		int i = FindEntry(GetKeyForItem(value));
-		return i >= 0 && EqualityComparer<TValue>.Default.Equals(_entries[i].Value, value);
+		if (ReferenceEquals(value, null))
+		{
+			for (int i = 0; i < _count; i++)
+			{
+				if (_entries[i].HashCode >= 0 && ReferenceEquals(_entries[i].Value, null))
+					return true;
+			}
+		}
+		else
+		{
+			EqualityComparer<TValue> c = EqualityComparer<TValue>.Default;
+
+			for (int i = 0; i < _count; i++)
+			{
+				if (_entries[i].HashCode >= 0 && c.Equals(_entries[i].Value, value))
+					return true;
+			}
+		}
+
+		return false;
 	}
+
+	public bool Contains(KeyValuePair<TKey, TValue> keyValuePair)
+	{
+		int i = FindEntry(keyValuePair.Key);
+		return i >= 0 && EqualityComparer<TValue>.Default.Equals(_entries[i].Value, keyValuePair.Value);
+	}
+
+	bool IDictionary.Contains(object key) { return IsCompatibleKey(key) && ContainsKey((TKey)key); }
 
 	public bool TryGetValue(TKey key, out TValue value)
 	{
@@ -644,7 +693,7 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 		return false;
 	}
 
-	public void CopyTo(TValue[] array, int index) { Values.CopyTo(array, index); }
+	void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int index) { CopyTo(array, index); }
 
 	void ICollection.CopyTo(Array array, int index)
 	{
@@ -660,13 +709,12 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 				break;
 			case DictionaryEntry[] dictionaryEntries:
 			{
-				DictionaryEntry[] dictEntryArray = dictionaryEntries;
 				Entry[] entries = _entries;
 
 				for (int i = 0; i < _count; i++)
 				{
 					if (entries[i].HashCode < 0) continue;
-					dictEntryArray[index++] = new DictionaryEntry(entries[i].Key, entries[i].Value);
+					dictionaryEntries[index++] = new DictionaryEntry(entries[i].Key, entries[i].Value);
 				}
 
 				break;
@@ -692,7 +740,7 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 	protected virtual void Insert([NotNull] TKey key, TValue value, bool add)
 	{
 		if (_buckets == null) Initialize(0);
-			
+
 		int hashCode = Comparer.GetHashCode(key) & 0x7FFFFFFF;
 		int targetBucket = hashCode % _buckets.Length;
 
@@ -732,9 +780,6 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 		_buckets[targetBucket] = index;
 		_version++;
 	}
-
-	[NotNull]
-	protected abstract TKey GetKeyForItem([NotNull] TValue item);
 
 	// This is a convenience method for the internal callers that were converted from using Hashtable.
 	// Many were combining key doesn't exist and key exists but null value (for non-value types) checks.
@@ -801,7 +846,8 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 		Contract.Assert(newSize >= _entries.Length);
 		int[] newBuckets = new int[newSize];
 
-		for (int i = 0; i < newBuckets.Length; i++) newBuckets[i] = -1;
+		for (int i = 0; i < newBuckets.Length; i++)
+			newBuckets[i] = -1;
 
 		Entry[] newEntries = new Entry[newSize];
 		Array.Copy(_entries, 0, newEntries, 0, _count);
@@ -809,10 +855,8 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 		if (forceNewHashCodes)
 		{
 			for (int i = 0; i < _count; i++)
-			{
 				if (newEntries[i].HashCode != -1)
 					newEntries[i].HashCode = Comparer.GetHashCode(newEntries[i].Key) & 0x7FFFFFFF;
-			}
 		}
 
 		for (int i = 0; i < _count; i++)
@@ -826,4 +870,6 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 		_buckets = newBuckets;
 		_entries = newEntries;
 	}
+
+	private static bool IsCompatibleKey(object key) { return key is TKey; }
 }

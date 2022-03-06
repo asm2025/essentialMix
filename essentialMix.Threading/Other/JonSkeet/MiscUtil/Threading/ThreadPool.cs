@@ -268,7 +268,7 @@ public sealed class ThreadPool
 		}
 		set
 		{
-			if (value < 0 && value != Timeout.Infinite) throw new ArgumentException("IdlePeriod must be non-negative.", nameof(value));
+			if (value is < 0 and not Timeout.Infinite) throw new ArgumentException("IdlePeriod must be non-negative.", nameof(value));
 
 			lock(_stateLock)
 			{
@@ -756,8 +756,7 @@ public sealed class ThreadPool
 			}
 			// Do we need to raise the waiting period?
 			if (TotalThreads <= MinThreads &&
-				waitPeriod < MIN_WAIT_PERIOD &&
-				waitPeriod != Timeout.Infinite)
+				waitPeriod is < MIN_WAIT_PERIOD and not Timeout.Infinite)
 			{
 				waitPeriod = MIN_WAIT_PERIOD;
 			}

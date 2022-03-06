@@ -78,7 +78,7 @@ public static class BitmapHelper
 
 	public static Color? GetMatchedBackColor(Bitmap value)
 	{
-		if (value == null || value.Width < 2 || value.Height < 2) return null;
+		if (value is not { Width: >= 2, Height: >= 2 }) return null;
 
 		// Getting The Background Color by checking Corners of Original Image
 		Point[] corners = {
