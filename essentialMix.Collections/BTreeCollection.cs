@@ -12,11 +12,11 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
+[Serializable]
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
-[Serializable]
-public class BTreeCollection<TBlock, TNode, T, TItem> : IList<TItem>, IReadOnlyList<TItem>, IList
-	where TBlock : BTreeBlockBase<TBlock, TNode, T>
+public abstract class BTreeCollection<TBlock, TNode, T, TItem> : IList<TItem>, IReadOnlyList<TItem>, IList
+	where TBlock : BTreeBase<TBlock, TNode, T>.BTreeBlockBase
 	where TNode : class, ITreeNode<TNode, T>
 {
 	[Serializable]
@@ -217,12 +217,7 @@ public class BTreeCollection<TBlock, TNode, T, TItem> : IList<TItem>, IReadOnlyL
 	private TItem[] _items;
 	private object _root;
 
-	public BTreeCollection([NotNull] BTreeBase<TBlock, TNode, T> tree)
-		: this(tree, 0)
-	{
-	}
-
-	public BTreeCollection([NotNull] BTreeBase<TBlock, TNode, T> tree, int capacity)
+	protected BTreeCollection([NotNull] BTreeBase<TBlock, TNode, T> tree, int capacity)
 	{
 		if (capacity < 1) throw new ArgumentOutOfRangeException(nameof(capacity));
 		_tree = tree;
@@ -230,7 +225,7 @@ public class BTreeCollection<TBlock, TNode, T, TItem> : IList<TItem>, IReadOnlyL
 		_items = new TItem[capacity];
 	}
 
-	public int Capacity
+	protected int InnerCapacity
 	{
 		get => _items.Length;
 		set
@@ -479,23 +474,21 @@ public class BTreeCollection<TBlock, TNode, T, TItem> : IList<TItem>, IReadOnlyL
 		int last = index + count;
 
 		for (int i = index; i < last; i++)
-		{
 			yield return _items[i];
-		}
 	}
 
 	public void TrimExcess()
 	{
 		int threshold = (int)(_items.Length * 0.9);
 		if (Count >= threshold) return;
-		Capacity = Count;
+		InnerCapacity = Count;
 	}
 
 	private void EnsureCapacity(int min)
 	{
 		if (min < 0) throw new ArgumentOutOfRangeException(nameof(min));
 		if (_items.Length >= min) return;
-		Capacity = (_items.Length == 0
+		InnerCapacity = (_items.Length == 0
 						? Constants.DEFAULT_CAPACITY
 						: _items.Length * 2).NotBelow(min);
 	}

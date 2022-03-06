@@ -6,10 +6,10 @@ namespace essentialMix.Collections;
 
 /// <inheritdoc />
 public interface ITreeBlockBase<TBlock, TNode, T> : IList<TNode>
-	where TBlock : BTreeBlockBase<TBlock, TNode, T>, ITreeBlockBase<TBlock, TNode, T>
+	where TBlock : BTreeBase<TBlock, TNode, T>.BTreeBlockBase, ITreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
-	BTreeCollection<TBlock, TNode, T, TBlock> Children { get; set; }
+	BTreeBase<TBlock, TNode, T>.BlockCollection Children { get; set; }
 	int Degree { get; }
 	bool IsLeaf { get; }
 	bool IsFull { get; }
@@ -33,7 +33,7 @@ public interface ITreeBlockBase<TBlock, TNode, T> : IList<TNode>
 
 /// <inheritdoc />
 public interface ITreeBlock<TBlock, TNode, T> : ITreeBlockBase<TBlock, TNode, T>
-	where TBlock : BTreeBlockBase<TBlock, TNode, T>, ITreeBlock<TBlock, TNode, T>
+	where TBlock : BTreeBase<TBlock, TNode, T>.BTreeBlockBase, ITreeBlock<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	[NotNull]
@@ -41,7 +41,7 @@ public interface ITreeBlock<TBlock, TNode, T> : ITreeBlockBase<TBlock, TNode, T>
 }
 
 public interface ITreeBlock<TBlock, TNode, TKey, TValue> : ITreeBlockBase<TBlock, TNode, TValue>
-	where TBlock : BTreeBlockBase<TBlock, TNode, TValue>, ITreeBlock<TBlock, TNode, TKey, TValue>
+	where TBlock : BTreeBase<TBlock, TNode, TValue>.BTreeBlockBase, ITreeBlock<TBlock, TNode, TKey, TValue>
 	where TNode : class, ITreeNode<TNode, TKey, TValue>
 {
 	[NotNull]

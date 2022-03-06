@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using essentialMix.Collections.DebugView;
@@ -51,12 +52,92 @@ namespace essentialMix.Collections;
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,>))]
 public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>, ICollection
-	where TBlock : BTreeBlockBase<TBlock, TNode, T>
+	where TBlock : BTreeBase<TBlock, TNode, T>.BTreeBlockBase
 	where TNode : class, ITreeNode<TNode, T>
 {
+	/// <inheritdoc cref="ITreeBlock{TBlock,TNode,T}" />
+	[Serializable]
+	[DebuggerDisplay("{Degree}, Count = {Count}")]
+	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
+	public abstract class BTreeBlockBase : NodeCollection, ITreeBlockBase<TBlock, TNode, T>
+	{
+		private readonly int _minEntries;
+		private readonly int _maxEntries;
+
+		private BTreeBase<TBlock, TNode, T> _tree;
+		private BlockCollection _children;
+
+		protected BTreeBlockBase([NotNull] BTreeBase<TBlock, TNode, T> tree, int degree)
+			: base(tree, degree)
+		{
+			_tree = tree;
+			_minEntries = BTree.FastMinimumEntries(degree);
+			_maxEntries = BTree.FastMaximumEntries(degree);
+		}
+
+		/// <inheritdoc />
+		public BlockCollection Children
+		{
+			get => _children;
+			set => _children = value;
+		}
+
+		/// <inheritdoc />
+		public int Degree => InnerCapacity;
+
+		/// <inheritdoc />
+		public bool IsLeaf => _children == null || _children.Count == 0;
+
+		/// <inheritdoc />
+		public bool IsEmpty => Count == 0;
+
+		/// <inheritdoc />
+		public bool IsFull => Count >= _maxEntries;
+
+		/// <inheritdoc />
+		public bool HasMinimumEntries => Count >= _minEntries;
+
+		/// <inheritdoc />
+		public void EnsureChildren() { _children ??= new BlockCollection(_tree); }
+	}
+
+	[Serializable]
+	public class BlockCollection : BTreeCollection<TBlock, TNode, T, TBlock>
+	{
+		/// <inheritdoc />
+		public BlockCollection([NotNull] BTreeBase<TBlock, TNode, T> tree)
+			: this(tree, 0)
+		{
+		}
+
+		/// <inheritdoc />
+		public BlockCollection([NotNull] BTreeBase<TBlock, TNode, T> tree, int capacity)
+			: base(tree, capacity)
+		{
+		}
+
+		public int Capacity
+		{
+			get => InnerCapacity;
+			set => InnerCapacity = value;
+		}
+	}
+
+	[Serializable]
+	public class NodeCollection : BTreeCollection<TBlock, TNode, T, TNode>
+	{
+		/// <inheritdoc />
+		public NodeCollection([NotNull] BTreeBase<TBlock, TNode, T> tree, int degree)
+			: base(tree, degree)
+		{
+			if (degree < BTree.MINIMUM_DEGREE) throw new ArgumentOutOfRangeException(nameof(degree), $"{GetType()}'s degree must be at least 2.");
+		}
+	}
+
 	internal int _version;
 
 	private TBlock _root;
+
 	[NonSerialized]
 	private object _syncRoot;
 
@@ -158,7 +239,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 /// <typeparam name="T">The element type of the tree</typeparam>
 [Serializable]
 public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBTree<TBlock, TNode, T>
-	where TBlock : BTreeBlockBase<TBlock, TNode, T>, ITreeBlock<TBlock, TNode, T>
+	where TBlock : BTreeBase<TBlock, TNode, T>.BTreeBlockBase, ITreeBlock<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	/// <inheritdoc />
@@ -431,7 +512,7 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 [Serializable]
 [DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,,>))]
 public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNode, TValue>, IBTree<TBlock, TNode, TKey, TValue>
-	where TBlock : BTreeBlockBase<TBlock, TNode, TValue>, ITreeBlock<TBlock, TNode, TKey, TValue>
+	where TBlock : BTreeBase<TBlock, TNode, TValue>.BTreeBlockBase, ITreeBlock<TBlock, TNode, TKey, TValue>
 	where TNode : class, ITreeNode<TNode, TKey, TValue>
 {
 	/// <inheritdoc />
