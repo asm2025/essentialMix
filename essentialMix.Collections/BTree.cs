@@ -56,6 +56,36 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
+	[Serializable]
+	private class SynchronizedCollection : ICollection<TNode>
+	{
+
+	}
+
+	[Serializable]
+	private struct LevelOrderEnumerator : IEnumerableEnumerator<TNode>
+	{
+
+	}
+
+	[Serializable]
+	private struct PreOrderEnumerator : IEnumerableEnumerator<TNode>
+	{
+
+	}
+
+	[Serializable]
+	private struct InOrderEnumerator : IEnumerableEnumerator<TNode>
+	{
+
+	}
+
+	[Serializable]
+	private struct PostOrderEnumerator : IEnumerableEnumerator<TNode>
+	{
+
+	}
+
 	internal int _version;
 
 	private TBlock _root;

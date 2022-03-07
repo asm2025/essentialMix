@@ -60,6 +60,13 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		public TNode Root => _tree.Root;
 	}
 
+	[Serializable]
+	private class SynchronizedCollection : ICollection<T>
+	{
+
+	}
+
+	[Serializable]
 	private struct LevelOrderEnumerator : IEnumerableEnumerator<T>
 	{
 		private readonly LinkedBinaryTree<TNode, T> _tree;
@@ -160,6 +167,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		public void Dispose() { }
 	}
 
+	[Serializable]
 	private struct PreOrderEnumerator : IEnumerableEnumerator<T>
 	{
 		private readonly LinkedBinaryTree<TNode, T> _tree;
@@ -261,6 +269,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		public void Dispose() { }
 	}
 
+	[Serializable]
 	private struct InOrderEnumerator : IEnumerableEnumerator<T>
 	{
 		private readonly LinkedBinaryTree<TNode, T> _tree;
@@ -368,7 +377,8 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		/// <inheritdoc />
 		public void Dispose() { }
 	}
-		
+
+	[Serializable]
 	private struct PostOrderEnumerator : IEnumerableEnumerator<T>
 	{
 		private readonly LinkedBinaryTree<TNode, T> _tree;
@@ -434,7 +444,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 			{
 				_current = null;
 			}
-	
+
 			do
 			{
 				while (_current != null)
@@ -498,7 +508,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 						continue;
 					}
 				}
-		
+
 				if (_current != null)
 					break; // break from the loop to visit this node
 			} while (_stack.Count > 0);
@@ -919,10 +929,10 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 
 		bool EqualsLocal(TNode x, TNode y)
 		{
-			return ReferenceEquals(x, y) 
-					|| x != null && y != null 
-								&& Comparer.IsEqual(x.Value, y.Value) 
-								&& EqualsLocal(x.Left, y.Left) 
+			return ReferenceEquals(x, y)
+					|| x != null && y != null
+								&& Comparer.IsEqual(x.Value, y.Value)
+								&& EqualsLocal(x.Left, y.Left)
 								&& EqualsLocal(x.Right, y.Right);
 		}
 	}
@@ -985,7 +995,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 	{
 		if (level < 0) throw new ArgumentOutOfRangeException(nameof(level));
 		if (Count == 0) return null;
-			
+
 		foreach (TNode e in GeNodesAtLevel(level))
 		{
 			if (Comparer.IsEqual(e.Value, value)) return e;
@@ -1006,7 +1016,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 
 	public void Add([NotNull] IEnumerable<T> values)
 	{
-		foreach (T value in values) 
+		foreach (T value in values)
 			Add(value);
 	}
 
@@ -1038,7 +1048,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		* just grabs the root's left most node's value.
 		*/
 		T minimum = Root.Value;
-			
+
 		if (Root.Left != null)
 		{
 			Iterate(Root.Left, TreeTraverseMethod.PreOrder, e =>
@@ -1047,7 +1057,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 				minimum = e.Value;
 			});
 		}
-			
+
 		if (Root.Right != null)
 		{
 			Iterate(Root.Right, TreeTraverseMethod.PreOrder, e =>
@@ -1071,7 +1081,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		* just grabs the root's right most node's value.
 		*/
 		T maximum = Root.Value;
-			
+
 		if (Root.Left != null)
 		{
 			Iterate(Root.Left, TreeTraverseMethod.PreOrder, e =>
@@ -1080,7 +1090,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 				maximum = e.Value;
 			});
 		}
-			
+
 		if (Root.Right != null)
 		{
 			Iterate(Root.Right, TreeTraverseMethod.PreOrder, e =>
@@ -1108,7 +1118,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		}
 
 		// the maximum value in left subtree is the predecessor node
-		if (root != null && Comparer.IsEqual(value, root.Value) && root.Left != null) 
+		if (root != null && Comparer.IsEqual(value, root.Value) && root.Left != null)
 			node = root.Left.RightMost();
 
 		return node;
@@ -1129,7 +1139,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		}
 
 		// the minimum value in right subtree is the successor node
-		if (root != null && Comparer.IsEqual(value, root.Value) && root.Right != null) 
+		if (root != null && Comparer.IsEqual(value, root.Value) && root.Right != null)
 			node = root.Right.LeftMost();
 
 		return node;
@@ -1224,7 +1234,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 				return array;
 		}
 	}
-		
+
 	/// <summary>
 	/// Fill a <see cref="LinkedBinaryTree{TNode,T}"/> from the LevelOrder <see cref="collection"/>.
 	/// <para>
@@ -1834,7 +1844,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 			}
 
 			TNode peek = stack.Peek();
-				
+
 			if (rtl)
 			{
 				/*
@@ -1882,7 +1892,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		}
 	}
 	#endregion
-		
+
 	#region Iterative Traversal for Func<TNode, bool>
 	private void LevelOrder([NotNull] TNode root, [NotNull] Func<TNode, bool> visitCallback, bool rtl)
 	{
@@ -2126,7 +2136,7 @@ public abstract class LinkedBinaryTree<T> : LinkedBinaryTree<LinkedBinaryNode<T>
 	}
 
 	/// <inheritdoc />
-	protected LinkedBinaryTree() 
+	protected LinkedBinaryTree()
 	{
 	}
 

@@ -6,7 +6,7 @@ namespace essentialMix.Collections;
 
 /// <inheritdoc />
 public interface IBTreeBase<TBlock, TNode, T> : ICollection<TNode>
-	where TBlock : class, ITreeBlockBase<TBlock, TNode, T>
+	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	TBlock Root { get; }
@@ -22,7 +22,7 @@ public interface IBTreeBase<TBlock, TNode, T> : ICollection<TNode>
 
 /// <inheritdoc />
 public interface IBTree<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
-	where TBlock : class, ITreeBlock<TBlock, TNode, T>
+	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	[NotNull]
@@ -35,7 +35,7 @@ public interface IBTree<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 
 /// <inheritdoc />
 public interface IBTree<TBlock, TNode, TKey, TValue> : IBTreeBase<TBlock, TNode, TValue>
-	where TBlock : class, ITreeBlock<TBlock, TNode, TKey, TValue>
+	where TBlock : BTreeBlockBase<TBlock, TNode, TValue>, ITreeBlock<TBlock, TNode, TKey, TValue>
 	where TNode : class, ITreeNode<TNode, TKey, TValue>
 {
 	[NotNull]
