@@ -718,7 +718,6 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	public void CopyTo(T[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
 	public void CopyTo([NotNull] T[] array, int arrayIndex, int count)
 	{
-		if (Count == 0) return;
 		array.Length.ValidateRange(arrayIndex, ref count);
 		if (count == 0) return;
 		Count.ValidateRange(arrayIndex, ref count);

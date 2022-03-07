@@ -406,7 +406,8 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 	public void CopyTo([NotNull] T[] array) { CopyTo(array, 0, Count); }
 	public void CopyTo([NotNull] T[] array, int arrayIndex, int count)
 	{
-		if (array == null) throw new ArgumentNullException(nameof(array));
+		array.Length.ValidateRange(arrayIndex, ref count);
+		if (count == 0) return;
 		Count.ValidateRange(arrayIndex, ref count);
 
 		int numCopied = 0;

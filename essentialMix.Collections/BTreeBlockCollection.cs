@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
-using System.Runtime.CompilerServices;
 using essentialMix.Collections.DebugView;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Extensions;
@@ -13,25 +12,24 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
-/// <inheritdoc cref="ITreeBlock{TBlock,TNode,T}" />
 [Serializable]
-[DebuggerDisplay("{Degree}, Count = {Count}")]
+[DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
-public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, TNode, T>, IReadOnlyList<TNode>, IList
+public class BTreeBlockCollection<TBlock, TNode, T> : IList<TBlock>, IReadOnlyList<TBlock>, IList
 	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	[Serializable]
-	private class SynchronizedList : IList<TNode>
+	private class SynchronizedList : IList<TBlock>
 	{
-		private readonly BTreeBlockBase<TBlock, TNode, T> _block;
+		private readonly BTreeBlockCollection<TBlock, TNode, T> _collection;
 
 		private object _root;
 
-		internal SynchronizedList(BTreeBlockBase<TBlock, TNode, T> block)
+		internal SynchronizedList(BTreeBlockCollection<TBlock, TNode, T> collection)
 		{
-			_block = block;
-			_root = ((ICollection)block).SyncRoot;
+			_collection = collection;
+			_root = ((ICollection)collection).SyncRoot;
 		}
 
 		public int Count
@@ -40,7 +38,7 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 			{
 				lock (_root)
 				{
-					return _block.Count;
+					return _collection.Count;
 				}
 			}
 		}
@@ -51,42 +49,42 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 			{
 				lock (_root)
 				{
-					return _block.IsReadOnly;
+					return _collection.IsReadOnly;
 				}
 			}
 		}
 
-		public TNode this[int index]
+		public TBlock this[int index]
 		{
 			get
 			{
 				lock (_root)
 				{
-					return _block[index];
+					return _collection[index];
 				}
 			}
 			set
 			{
 				lock (_root)
 				{
-					_block[index] = value;
+					_collection[index] = value;
 				}
 			}
 		}
 
-		public void Add(TNode item)
+		public void Add(TBlock item)
 		{
 			lock (_root)
 			{
-				_block.Add(item);
+				_collection.Add(item);
 			}
 		}
 
-		public void Insert(int index, TNode item)
+		public void Insert(int index, TBlock item)
 		{
 			lock (_root)
 			{
-				_block.Insert(index, item);
+				_collection.Insert(index, item);
 			}
 		}
 
@@ -94,15 +92,15 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 		{
 			lock (_root)
 			{
-				_block.RemoveAt(index);
+				_collection.RemoveAt(index);
 			}
 		}
 
-		public bool Remove(TNode item)
+		public bool Remove(TBlock item)
 		{
 			lock (_root)
 			{
-				return _block.Remove(item);
+				return _collection.Remove(item);
 			}
 		}
 
@@ -110,7 +108,7 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 		{
 			lock (_root)
 			{
-				_block.Clear();
+				_collection.Clear();
 			}
 		}
 
@@ -118,62 +116,62 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 		{
 			lock (_root)
 			{
-				return _block.GetEnumerator();
+				return _collection.GetEnumerator();
 			}
 		}
 
-		IEnumerator<TNode> IEnumerable<TNode>.GetEnumerator()
+		IEnumerator<TBlock> IEnumerable<TBlock>.GetEnumerator()
 		{
 			lock (_root)
 			{
-				return _block.GetEnumerator();
+				return _collection.GetEnumerator();
 			}
 		}
 
-		public int IndexOf(TNode item)
+		public int IndexOf(TBlock item)
 		{
 			lock (_root)
 			{
-				return _block.IndexOf(item);
+				return _collection.IndexOf(item);
 			}
 		}
 
-		public bool Contains(TNode item)
+		public bool Contains(TBlock item)
 		{
 			lock (_root)
 			{
-				return _block.Contains(item);
+				return _collection.Contains(item);
 			}
 		}
 
-		public void CopyTo(TNode[] array, int arrayIndex)
+		public void CopyTo(TBlock[] array, int arrayIndex)
 		{
 			lock (_root)
 			{
-				_block.CopyTo(array, arrayIndex);
+				_collection.CopyTo(array, arrayIndex);
 			}
 		}
 	}
 
 	[Serializable]
-	private struct Enumerator : IEnumerator<TNode>, IEnumerator
+	private struct Enumerator : IEnumerator<TBlock>, IEnumerator
 	{
 		[NonSerialized]
-		private readonly BTreeBlockBase<TBlock, TNode, T> _collection;
+		private readonly BTreeBlockCollection<TBlock, TNode, T> _collection;
 		private readonly int _version;
 
 		private int _index;
-		private TNode _current;
+		private TBlock _current;
 
-		internal Enumerator([NotNull] BTreeBlockBase<TBlock, TNode, T> collection)
+		internal Enumerator([NotNull] BTreeBlockCollection<TBlock, TNode, T> collection)
 		{
 			_collection = collection;
 			_version = collection._tree._version;
 			_index = 0;
-			_current = default(TNode);
+			_current = default(TBlock);
 		}
 
-		public TNode Current
+		public TBlock Current
 		{
 			get
 			{
@@ -203,7 +201,7 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 		{
 			if (_version != _collection._tree._version) throw new VersionChangedException();
 			_index = _collection.Count + 1;
-			_current = default(TNode);
+			_current = default(TBlock);
 			return false;
 		}
 
@@ -211,33 +209,55 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 		{
 			if (_version != _collection._tree._version) throw new VersionChangedException();
 			_index = 0;
-			_current = default(TNode);
+			_current = default(TBlock);
 		}
 	}
 
-	private readonly int _minEntries;
-	private readonly int _maxEntries;
-
-	private TNode[] _items;
-	private object _root;
 	private BTreeBase<TBlock, TNode, T> _tree;
-	private BTreeBlockCollection<TBlock, TNode, T> _children;
+	private TBlock[] _items;
+	private object _root;
 
-	protected BTreeBlockBase([NotNull] BTreeBase<TBlock, TNode, T> tree, int degree)
+	/// <inheritdoc />
+	public BTreeBlockCollection([NotNull] BTreeBase<TBlock, TNode, T> tree)
+		: this(tree, 0)
 	{
-		if (degree < BTree.MINIMUM_DEGREE) throw new ArgumentOutOfRangeException(nameof(degree), $"{GetType()}'s degree must be at least 2.");
-		Degree = degree;
+	}
+
+	public BTreeBlockCollection([NotNull] BTreeBase<TBlock, TNode, T> tree, int capacity)
+	{
+		if (capacity < 1) throw new ArgumentOutOfRangeException(nameof(capacity));
 		_tree = tree;
 		_root = ((ICollection)_tree).SyncRoot;
-		_items = new TNode[degree];
-		_minEntries = BTree.FastMinimumEntries(degree);
-		_maxEntries = BTree.FastMaximumEntries(degree);
+		_items = new TBlock[capacity];
+	}
+
+	public int Capacity
+	{
+		get => _items.Length;
+		set
+		{
+			if (value < Count) throw new ArgumentOutOfRangeException(nameof(value));
+			if (value == _items.Length) return;
+
+			if (value > 0)
+			{
+				TBlock[] newItems = new TBlock[value];
+				if (Count > 0) Array.Copy(_items, 0, newItems, 0, Count);
+				_items = newItems;
+			}
+			else
+			{
+				_items = Array.Empty<TBlock>();
+			}
+
+			_tree._version++;
+		}
 	}
 
 	[field: ContractPublicPropertyName("Count")]
 	public int Count { get; private set; }
 
-	public TNode this[int index]
+	public TBlock this[int index]
 	{
 		get => _items[index];
 		set => Insert(index, value, false);
@@ -248,8 +268,8 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 		get => this[index];
 		set
 		{
-			if (!ObjectHelper.IsCompatible<TNode>(value)) throw new ArgumentException("Incompatible value.", nameof(value));
-			Insert(index, (TNode)value, false);
+			if (!ObjectHelper.IsCompatible<TBlock>(value)) throw new ArgumentException("Incompatible value.", nameof(value));
+			Insert(index, (TBlock)value, false);
 		}
 	}
 
@@ -261,49 +281,23 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 
 	object ICollection.SyncRoot => _root;
 
-	/// <inheritdoc />
-	public BTreeBlockCollection<TBlock, TNode, T> Children
-	{
-		get => _children;
-		set => _children = value;
-	}
-
-	/// <inheritdoc />
-	public int Degree { get; }
-
-	/// <inheritdoc />
-	public bool IsLeaf => _children == null || _children.Count == 0;
-
-	/// <inheritdoc />
-	public bool IsEmpty => Count == 0;
-
-	/// <inheritdoc />
-	public bool IsFull => Count >= _maxEntries;
-
-	/// <inheritdoc />
-	public bool HasMinimumEntries => Count >= _minEntries;
-
-	/// <inheritdoc />
-	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	public void EnsureChildren() { _children ??= new BTreeBlockCollection<TBlock, TNode, T>(_tree); }
-
 	[NotNull]
-	public ReadOnlyCollection<TNode> AsReadOnly() { return new ReadOnlyCollection<TNode>(this); }
+	public ReadOnlyCollection<TBlock> AsReadOnly() { return new ReadOnlyCollection<TBlock>(this); }
 
-	public void Insert(int index, TNode item) { Insert(index, item, true); }
+	public void Insert(int index, TBlock item) { Insert(index, item, true); }
 
 	void IList.Insert(int index, object item)
 	{
-		if (!ObjectHelper.IsCompatible<TNode>(item)) throw new ArgumentException("Incompatible value.", nameof(item));
-		Insert(index, (TNode)item, true);
+		if (!ObjectHelper.IsCompatible<TBlock>(item)) throw new ArgumentException("Incompatible value.", nameof(item));
+		Insert(index, (TBlock)item, true);
 	}
 
-	public void Add(TNode item) { Insert(Count, item, true); }
+	public void Add(TBlock item) { Insert(Count, item, true); }
 
 	int IList.Add(object item)
 	{
-		if (!ObjectHelper.IsCompatible<TNode>(item)) throw new ArgumentException("Incompatible value.", nameof(item));
-		Insert(Count, (TNode)item, true);
+		if (!ObjectHelper.IsCompatible<TBlock>(item)) throw new ArgumentException("Incompatible value.", nameof(item));
+		Insert(Count, (TBlock)item, true);
 		return Count - 1;
 	}
 
@@ -311,13 +305,13 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 	{
 		if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 		if (index < Count - 1) Array.Copy(_items, index + 1, _items, index, Count - (index + 1));
-		_items[Count - 1] = default(TNode);
+		_items[Count - 1] = default(TBlock);
 		Count--;
 		_tree.Count--;
 		_tree._version++;
 	}
 
-	public bool Remove(TNode item)
+	public bool Remove(TBlock item)
 	{
 		int index = IndexOf(item);
 		if (index < 0) return false;
@@ -327,22 +321,21 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 
 	void IList.Remove(object item)
 	{
-		if (!ObjectHelper.IsCompatible<TNode>(item)) return;
-		Remove((TNode)item);
+		if (!ObjectHelper.IsCompatible<TBlock>(item)) return;
+		Remove((TBlock)item);
 	}
 
 	public void Clear()
 	{
 		if (Count == 0) return;
 		Array.Clear(_items, 0, Count);
-		_tree.Count -= Count;
 		Count = 0;
 		_tree._version++;
 	}
 
-	public void AddRange([NotNull] IEnumerable<TNode> enumerable) { InsertRange(Count, enumerable); }
+	public void AddRange([NotNull] IEnumerable<TBlock> enumerable) { InsertRange(Count, enumerable); }
 
-	public void InsertRange(int index, [NotNull] IEnumerable<TNode> enumerable)
+	public void InsertRange(int index, [NotNull] IEnumerable<TBlock> enumerable)
 	{
 		if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
 
@@ -350,11 +343,11 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 
 		switch (enumerable)
 		{
-			case IReadOnlyCollection<TNode> readOnlyCollection:
+			case IReadOnlyCollection<TBlock> readOnlyCollection:
 			{
 				count = readOnlyCollection.Count;
-				if (Count + count > Degree) count = Degree - Count;
-				if (count <= 0) return;
+				if (count == 0) return;
+				EnsureCapacity(Count + count);
 				if (index < Count) Array.Copy(_items, index, _items, index + count, Count - index);
 
 				// If we're inserting a List into itself, we want to be able to deal with that.
@@ -367,20 +360,19 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 				}
 				else
 				{
-					foreach (TNode item in readOnlyCollection)
+					foreach (TBlock item in readOnlyCollection)
 						_items[index++] = item;
 				}
 
 				Count += count;
-				_tree.Count += count;
 				_tree._version++;
 				break;
 			}
-			case ICollection<TNode> collection:
+			case ICollection<TBlock> collection:
 			{
 				count = collection.Count;
-				if (Count + count > Degree) count = Degree - Count;
-				if (count <= 0) return;
+				if (count == 0) return;
+				EnsureCapacity(Count + count);
 				if (index < Count) Array.Copy(_items, index, _items, index + count, Count - index);
 
 				// If we're inserting a List into itself, we want to be able to deal with that.
@@ -397,26 +389,19 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 				}
 
 				Count += count;
-				_tree.Count += count;
 				_tree._version++;
 				break;
 			}
 			default:
 			{
 				count = enumerable.FastCount();
+				if (count > 0) EnsureCapacity(Count + count);
 
-				if (count > 0)
+				using (IEnumerator<TBlock> en = enumerable.GetEnumerator())
 				{
-					if (Count + count > Degree) count = Degree - Count;
-					if (count <= 0) return;
-				}
-
-				using (IEnumerator<TNode> en = enumerable.GetEnumerator())
-				{
-					while (count > 0 && en.MoveNext())
+					while (en.MoveNext())
 					{
 						Insert(index++, en.Current, true);
-						count--;
 					}
 				}
 				break;
@@ -430,12 +415,11 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 		if (count == 0) return;
 		if (index < Count) Array.Copy(_items, index + count, _items, index, Count - index);
 		Array.Clear(_items, Count - count, count);
-		_tree._version++;
-		_tree.Count -= count;
 		Count -= count;
+		_tree._version++;
 	}
 
-	public int RemoveAll([NotNull] Predicate<TNode> match)
+	public int RemoveAll([NotNull] Predicate<TBlock> match)
 	{
 		int freeIndex = 0;   // the first free slot in items array
 
@@ -449,21 +433,21 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 		return count;
 	}
 
-	public IEnumerator<TNode> GetEnumerator() { return new Enumerator(this); }
+	public IEnumerator<TBlock> GetEnumerator() { return new Enumerator(this); }
 
 	IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-	public int BinarySearch([NotNull] TNode item) { return BinarySearch(0, Count, item, null); }
-	public int BinarySearch([NotNull] TNode item, IComparer<TNode> comparer) { return BinarySearch(0, Count, item, comparer); }
-	public int BinarySearch(int index, int count, [NotNull] TNode item, IComparer<TNode> comparer)
+	public int BinarySearch([NotNull] TBlock item) { return BinarySearch(0, Count, item, null); }
+	public int BinarySearch([NotNull] TBlock item, IComparer<TBlock> comparer) { return BinarySearch(0, Count, item, comparer); }
+	public int BinarySearch(int index, int count, [NotNull] TBlock item, IComparer<TBlock> comparer)
 	{
 		Count.ValidateRange(index, ref count);
 		return Array.BinarySearch(_items, index, count, item, comparer);
 	}
 
-	public int IndexOf(TNode item) { return IndexOf(item, 0, -1); }
-	public int IndexOf(TNode item, int index) { return IndexOf(item, index, -1); }
-	public int IndexOf(TNode item, int index, int count)
+	public int IndexOf(TBlock item) { return IndexOf(item, 0, -1); }
+	public int IndexOf(TBlock item, int index) { return IndexOf(item, index, -1); }
+	public int IndexOf(TBlock item, int index, int count)
 	{
 		Count.ValidateRange(index, ref count);
 		return Array.IndexOf(_items, item, index, count);
@@ -471,13 +455,13 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 
 	int IList.IndexOf(object item)
 	{
-		return ObjectHelper.IsCompatible<TNode>(item)
-					? IndexOf((TNode)item)
+		return ObjectHelper.IsCompatible<TBlock>(item)
+					? IndexOf((TBlock)item)
 					: -1;
 	}
-	public int LastIndexOf(TNode item) { return LastIndexOf(item, 0, -1); }
-	public int LastIndexOf(TNode item, int index) { return LastIndexOf(item, index, -1); }
-	public int LastIndexOf(TNode item, int index, int count)
+	public int LastIndexOf(TBlock item) { return LastIndexOf(item, 0, -1); }
+	public int LastIndexOf(TBlock item, int index) { return LastIndexOf(item, index, -1); }
+	public int LastIndexOf(TBlock item, int index, int count)
 	{
 		Count.ValidateRange(index, ref count);
 		if (index == 0) index = Count - 1;
@@ -486,62 +470,62 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 					: Array.LastIndexOf(_items, item, index, count);
 	}
 
-	public bool Contains(TNode item) { return IndexOf(item, 0, -1) > -1; }
+	public bool Contains(TBlock item) { return IndexOf(item, 0, -1) > -1; }
 	bool IList.Contains(object item)
 	{
-		return ObjectHelper.IsCompatible<TNode>(item) && Contains((TNode)item);
+		return ObjectHelper.IsCompatible<TBlock>(item) && Contains((TBlock)item);
 	}
 
-	public TNode Find(Predicate<TNode> match)
+	public TBlock Find([NotNull] Predicate<TBlock> match)
 	{
 		for (int i = 0; i < Count; i++)
 		{
 			if (!match(_items[i])) continue;
 			return _items[i];
 		}
-		return default(TNode);
+		return default(TBlock);
 	}
 
-	public TNode FindLast(Predicate<TNode> match)
+	public TBlock FindLast([NotNull] Predicate<TBlock> match)
 	{
 		for (int i = Count - 1; i >= 0; i--)
 		{
-			TNode item = _items[i];
+			TBlock item = _items[i];
 			if (!match(item)) continue;
 			return item;
 		}
-		return default(TNode);
+		return default(TBlock);
 	}
 
-	public IEnumerable<TNode> FindAll([NotNull] Predicate<TNode> match)
+	public IEnumerable<TBlock> FindAll([NotNull] Predicate<TBlock> match)
 	{
 		for (int i = 0; i < Count; i++)
 		{
-			TNode item = _items[i];
+			TBlock item = _items[i];
 			if (!match(item)) continue;
 			yield return item;
 		}
 	}
 
-	public int FindIndex(Predicate<TNode> match) { return FindIndex(0, Count, match); }
-	public int FindIndex(int startIndex, Predicate<TNode> match) { return FindIndex(startIndex, -1, match); }
-	public int FindIndex(int startIndex, int count, [NotNull] Predicate<TNode> match)
+	public int FindIndex([NotNull] Predicate<TBlock> match) { return FindIndex(0, Count, match); }
+	public int FindIndex(int startIndex, [NotNull] Predicate<TBlock> match) { return FindIndex(startIndex, -1, match); }
+	public int FindIndex(int startIndex, int count, [NotNull] Predicate<TBlock> match)
 	{
 		Count.ValidateRange(startIndex, ref count);
 		return Array.FindIndex(_items, startIndex, count, match);
 	}
 
-	public int FindLastIndex(Predicate<TNode> match) { return FindLastIndex(0, -1, match); }
-	public int FindLastIndex(int startIndex, Predicate<TNode> match) { return FindLastIndex(startIndex, -1, match); }
-	public int FindLastIndex(int startIndex, int count, Predicate<TNode> match)
+	public int FindLastIndex([NotNull] Predicate<TBlock> match) { return FindLastIndex(0, -1, match); }
+	public int FindLastIndex(int startIndex, [NotNull] Predicate<TBlock> match) { return FindLastIndex(startIndex, -1, match); }
+	public int FindLastIndex(int startIndex, int count, [NotNull] Predicate<TBlock> match)
 	{
 		Count.ValidateRange(startIndex, ref count);
 		return Array.FindLastIndex(_items, startIndex, count, match);
 	}
 
-	public void CopyTo([NotNull] TNode[] array) { CopyTo(array, 0); }
-	public void CopyTo(TNode[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
-	public void CopyTo([NotNull] TNode[] array, int arrayIndex, int count)
+	public void CopyTo([NotNull] TBlock[] array) { CopyTo(array, 0); }
+	public void CopyTo(TBlock[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
+	public void CopyTo([NotNull] TBlock[] array, int arrayIndex, int count)
 	{
 		if (Count == 0) return;
 		array.Length.ValidateRange(arrayIndex, ref count);
@@ -556,7 +540,7 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 		if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
 		if (Count == 0) return;
 
-		if (array is TNode[] tArray)
+		if (array is TBlock[] tArray)
 		{
 			CopyTo(tArray, arrayIndex);
 			return;
@@ -565,13 +549,13 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 		array.Length.ValidateRange(arrayIndex, Count);
 
 		Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
-		Type sourceType = typeof(TNode);
+		Type sourceType = typeof(TBlock);
 		if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 		if (array is not object[] objects) throw new ArgumentException("Invalid array type", nameof(array));
 
 		try
 		{
-			foreach (TNode item in this)
+			foreach (TBlock item in this)
 			{
 				objects[arrayIndex++] = item;
 			}
@@ -583,14 +567,14 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 	}
 
 	[NotNull]
-	public TNode[] ToArray()
+	public TBlock[] ToArray()
 	{
-		TNode[] array = new TNode[Count];
+		TBlock[] array = new TBlock[Count];
 		Array.Copy(_items, 0, array, 0, Count);
 		return array;
 	}
 
-	public IEnumerable<TNode> GetRange(int index, int count)
+	public IEnumerable<TBlock> GetRange(int index, int count)
 	{
 		Count.ValidateRange(index, ref count);
 
@@ -600,15 +584,30 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 			yield return _items[i];
 	}
 
-	private void Insert(int index, TNode item, bool add)
+	public void TrimExcess()
+	{
+		int threshold = (int)(_items.Length * 0.9);
+		if (Count >= threshold) return;
+		Capacity = Count;
+	}
+
+	private void EnsureCapacity(int min)
+	{
+		if (min < 0 || min < Count) throw new ArgumentOutOfRangeException(nameof(min));
+		if (_items.Length >= min) return;
+		Capacity = (_items.Length == 0
+						? Constants.DEFAULT_CAPACITY
+						: _items.Length * 2).NotBelow(min);
+	}
+
+	private void Insert(int index, TBlock item, bool add)
 	{
 		if (add)
 		{
 			if (!index.InRange(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
-			if (Count == _items.Length) throw new LimitReachedException();
+			if (Count == _items.Length) EnsureCapacity(Count + 1);
 			if (index < Count) Array.Copy(_items, index, _items, index + 1, Count - index);
 			Count++;
-			_tree.Count++;
 		}
 		else
 		{
@@ -620,34 +619,5 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 	}
 
 	[NotNull]
-	public static IList<TNode> Synchronized(BTreeBlockBase<TBlock, TNode, T> block)
-	{
-		return new SynchronizedList(block);
-	}
-}
-
-[Serializable]
-public sealed class BTreeBlock<T> : BTreeBlockBase<BTreeBlock<T>, BTreeNode<T>, T>, ITreeBlock<BTreeBlock<T>, BTreeNode<T>, T>
-{
-	/// <inheritdoc />
-	internal BTreeBlock(BTreeBase<BTreeBlock<T>, BTreeNode<T>, T> tree, int degree)
-		: base(tree, degree)
-	{
-	}
-
-	/// <inheritdoc />
-	public BTreeNode<T> MakeNode(T value) { return new BTreeNode<T>(value); }
-}
-
-[Serializable]
-public sealed class BTreeBlock<TKey, TValue> : BTreeBlockBase<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TValue>, ITreeBlock<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TKey, TValue>
-{
-	/// <inheritdoc />
-	internal BTreeBlock(BTreeBase<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TValue> tree, int degree)
-		: base(tree, degree)
-	{
-	}
-
-	/// <inheritdoc />
-	public BTreeNode<TKey, TValue> MakeNode(TKey key, TValue value) { return new BTreeNode<TKey, TValue>(key, value); }
+	public static IList<TBlock> Synchronized(BTreeBlockCollection<TBlock, TNode, T> block) { return new SynchronizedList(block); }
 }

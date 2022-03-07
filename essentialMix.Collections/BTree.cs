@@ -7,19 +7,11 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using essentialMix.Collections.DebugView;
 using essentialMix.Comparers;
+using essentialMix.Extensions;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
-/// <summary>
-/// <see href="https://en.wikipedia.org/wiki/B-tree">B-tree</see> using the linked representation.
-/// See a brief overview at <see href="https://www.youtube.com/watch?v=aZjYr87r1b8">10.2  B Trees and B+ Trees. How they are useful in Databases</see>.
-/// <para>Based on BTree chapter in "Introduction to Algorithms", by Thomas Cormen, Charles Leiserson, Ronald Rivest.</para>
-/// <para>This uses the same abstract pattern as <see cref="LinkedBinaryTree{TNode,T}"/></para>
-/// </summary>
-/// <typeparam name="TBlock">The block type. Must implement <see cref="ITreeBlock{TBlock, TNode, T}"/></typeparam>
-/// <typeparam name="TNode">The node type. Must implement <see cref="ITreeNode{TNode, T}"/></typeparam>
-/// <typeparam name="T">The element type of the tree</typeparam>
 /*
 * A B-tree of order m is a tree which satisfies the following properties:
 * 1. The nodes in a B-tree of order m can have a maximum of m children.
@@ -48,92 +40,22 @@ namespace essentialMix.Collections;
 * DFS [InOrder]:    ABCDEFGHIJ => Left-Root-Right (Stack)
 * DFS [PostOrder]:  ACBEGFIJHD => Left-Right-Root (Stack)
 */
+/// <summary>
+/// <see href="https://en.wikipedia.org/wiki/B-tree">B-tree</see> using the linked representation.
+/// See a brief overview at <see href="https://www.youtube.com/watch?v=aZjYr87r1b8">10.2  B Trees and B+ Trees. How they are useful in Databases</see>.
+/// <para>Based on BTree chapter in "Introduction to Algorithms", by Thomas Cormen, Charles Leiserson, Ronald Rivest.</para>
+/// <para>This uses the same abstract pattern as <see cref="LinkedBinaryTree{TNode,T}"/></para>
+/// </summary>
+/// <typeparam name="TBlock">The block type. Must implement <see cref="ITreeBlock{TBlock, TNode, T}"/></typeparam>
+/// <typeparam name="TNode">The node type. Must implement <see cref="ITreeNode{TNode, T}"/></typeparam>
+/// <typeparam name="T">The element type of the tree</typeparam>
 [Serializable]
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,>))]
 public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>, ICollection
-	where TBlock : BTreeBase<TBlock, TNode, T>.BTreeBlockBase
+	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
-	/// <inheritdoc cref="ITreeBlock{TBlock,TNode,T}" />
-	[Serializable]
-	[DebuggerDisplay("{Degree}, Count = {Count}")]
-	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
-	public abstract class BTreeBlockBase : NodeCollection, ITreeBlockBase<TBlock, TNode, T>
-	{
-		private readonly int _minEntries;
-		private readonly int _maxEntries;
-
-		private BTreeBase<TBlock, TNode, T> _tree;
-		private BlockCollection _children;
-
-		protected BTreeBlockBase([NotNull] BTreeBase<TBlock, TNode, T> tree, int degree)
-			: base(tree, degree)
-		{
-			_tree = tree;
-			_minEntries = BTree.FastMinimumEntries(degree);
-			_maxEntries = BTree.FastMaximumEntries(degree);
-		}
-
-		/// <inheritdoc />
-		public BlockCollection Children
-		{
-			get => _children;
-			set => _children = value;
-		}
-
-		/// <inheritdoc />
-		public int Degree => InnerCapacity;
-
-		/// <inheritdoc />
-		public bool IsLeaf => _children == null || _children.Count == 0;
-
-		/// <inheritdoc />
-		public bool IsEmpty => Count == 0;
-
-		/// <inheritdoc />
-		public bool IsFull => Count >= _maxEntries;
-
-		/// <inheritdoc />
-		public bool HasMinimumEntries => Count >= _minEntries;
-
-		/// <inheritdoc />
-		public void EnsureChildren() { _children ??= new BlockCollection(_tree); }
-	}
-
-	[Serializable]
-	public class BlockCollection : BTreeCollection<TBlock, TNode, T, TBlock>
-	{
-		/// <inheritdoc />
-		public BlockCollection([NotNull] BTreeBase<TBlock, TNode, T> tree)
-			: this(tree, 0)
-		{
-		}
-
-		/// <inheritdoc />
-		public BlockCollection([NotNull] BTreeBase<TBlock, TNode, T> tree, int capacity)
-			: base(tree, capacity)
-		{
-		}
-
-		public int Capacity
-		{
-			get => InnerCapacity;
-			set => InnerCapacity = value;
-		}
-	}
-
-	[Serializable]
-	public class NodeCollection : BTreeCollection<TBlock, TNode, T, TNode>
-	{
-		/// <inheritdoc />
-		public NodeCollection([NotNull] BTreeBase<TBlock, TNode, T> tree, int degree)
-			: base(tree, degree)
-		{
-			if (degree < BTree.MINIMUM_DEGREE) throw new ArgumentOutOfRangeException(nameof(degree), $"{GetType()}'s degree must be at least 2.");
-		}
-	}
-
 	internal int _version;
 
 	private TBlock _root;
@@ -211,11 +133,58 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	/// <inheritdoc />
 	public abstract bool Contains(TNode node);
 
-	/// <inheritdoc />
-	public void CopyTo(TNode[] array, int arrayIndex)
+	public void CopyTo([NotNull] TNode[] array) { CopyTo(array, 0); }
+	public void CopyTo(TNode[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
+	public void CopyTo([NotNull] TNode[] array, int arrayIndex, int count)
 	{
-		// todo
-		_root?.CopyTo(array, arrayIndex);
+		array.Length.ValidateRange(arrayIndex, ref count);
+		if (count == 0) return;
+		Count.ValidateRange(arrayIndex, ref count);
+		if (_root == null) return;
+
+		while (count > 0)
+		{
+			// todo
+			count--;
+		}
+	}
+
+	void ICollection.CopyTo(Array array, int arrayIndex)
+	{
+		if (array.Rank != 1) throw new RankException();
+		if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
+		if (Count == 0) return;
+
+		if (array is TNode[] tArray)
+		{
+			CopyTo(tArray, arrayIndex);
+			return;
+		}
+
+		/*
+		* Catch the obvious case assignment will fail.
+		* We can find all possible problems by doing the check though.
+		* For example, if the element type of the Array is derived from T,
+		* we can't figure out if we can successfully copy the element beforehand.
+		*/
+		array.Length.ValidateRange(arrayIndex, Count);
+
+		Type targetType = array.GetType().GetElementType() ?? throw new TypeAccessException();
+		Type sourceType = typeof(T);
+		if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
+		if (array is not object[] objects) throw new ArgumentException("Invalid array type", nameof(array));
+
+		try
+		{
+			foreach (TNode item in this)
+			{
+				objects[arrayIndex++] = item;
+			}
+		}
+		catch (ArrayTypeMismatchException)
+		{
+			throw new ArgumentException("Invalid array type", nameof(array));
+		}
 	}
 
 	protected void Split([NotNull] TBlock parent, int index, [NotNull] TBlock block)
@@ -239,7 +208,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 /// <typeparam name="T">The element type of the tree</typeparam>
 [Serializable]
 public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBTree<TBlock, TNode, T>
-	where TBlock : BTreeBase<TBlock, TNode, T>.BTreeBlockBase, ITreeBlock<TBlock, TNode, T>
+	where TBlock : BTreeBlockBase<TBlock, TNode, T>, ITreeBlock<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	/// <inheritdoc />
@@ -512,7 +481,7 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 [Serializable]
 [DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,,>))]
 public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNode, TValue>, IBTree<TBlock, TNode, TKey, TValue>
-	where TBlock : BTreeBase<TBlock, TNode, TValue>.BTreeBlockBase, ITreeBlock<TBlock, TNode, TKey, TValue>
+	where TBlock : BTreeBlockBase<TBlock, TNode, T>, ITreeBlock<TBlock, TNode, TKey, TValue>
 	where TNode : class, ITreeNode<TNode, TKey, TValue>
 {
 	/// <inheritdoc />
