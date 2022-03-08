@@ -4,8 +4,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
-/// <inheritdoc />
-public interface IBTreeBase<TBlock, TNode, T> : ICollection<T>
+public interface IBTreeBase<TBlock, TNode, T> : ICollection<TNode>
 	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
@@ -13,6 +12,8 @@ public interface IBTreeBase<TBlock, TNode, T> : ICollection<T>
 	int Degree { get; }
 	int Height { get; }
 
+	void CopyTo([NotNull] TNode[] array);
+	void CopyTo([NotNull] TNode[] array, int arrayIndex, int count);
 	void EnsureRoot();
 	[NotNull]
 	TBlock MakeBlock();
@@ -20,7 +21,6 @@ public interface IBTreeBase<TBlock, TNode, T> : ICollection<T>
 	bool Equal(TNode x, TNode y);
 }
 
-/// <inheritdoc />
 public interface IBTree<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
@@ -28,17 +28,17 @@ public interface IBTree<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	[NotNull]
 	IGenericComparer<T> Comparer { get; }
 	TNode Find(T item);
+	[NotNull]
+	TNode MakeNode([NotNull] T value);
 }
 
-/// <inheritdoc />
 public interface IBTree<TBlock, TNode, TKey, TValue> : IBTreeBase<TBlock, TNode, TValue>
-	where TBlock : BTreeBlockBase<TBlock, TNode, TValue>, ITreeBlock<TBlock, TNode, TKey, TValue>
+	where TBlock : BTreeBlockBase<TBlock, TNode, TValue>, IBTreeBlock<TBlock, TNode, TKey, TValue>
 	where TNode : class, ITreeNode<TNode, TKey, TValue>
 {
 	[NotNull]
 	IGenericComparer<TKey> Comparer { get; }
-	void Add([NotNull] TKey key, TValue value);
-	bool Remove([NotNull] TKey key);
 	TNode Find([NotNull] TKey key);
-	bool Contains([NotNull] TKey key);
+	[NotNull]
+	TNode MakeNode([NotNull] TKey key, [CanBeNull] TValue value);
 }

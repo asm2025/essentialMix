@@ -13,11 +13,11 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
-/// <inheritdoc cref="ITreeBlock{TBlock,TNode,T}" />
+/// <inheritdoc cref="IBTreeBlock{TBlock,TNode,T}" />
 [Serializable]
 [DebuggerDisplay("{Degree}, Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
-public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, TNode, T>, IReadOnlyList<TNode>, IList
+public abstract class BTreeBlockBase<TBlock, TNode, T> : IBTreeBlockBase<TBlock, TNode, T>, IReadOnlyList<TNode>, IList
 	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
@@ -651,20 +651,17 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 }
 
 [Serializable]
-public sealed class BTreeBlock<T> : BTreeBlockBase<BTreeBlock<T>, BTreeNode<T>, T>, ITreeBlock<BTreeBlock<T>, BTreeNode<T>, T>
+public sealed class BTreeBlock<T> : BTreeBlockBase<BTreeBlock<T>, BTreeNode<T>, T>, IBTreeBlock<BTreeBlock<T>, BTreeNode<T>, T>
 {
 	/// <inheritdoc />
 	internal BTreeBlock(BTreeBase<BTreeBlock<T>, BTreeNode<T>, T> tree, int degree)
 		: base(tree, degree)
 	{
 	}
-
-	/// <inheritdoc />
-	public BTreeNode<T> MakeNode(T value) { return new BTreeNode<T>(value); }
 }
 
 [Serializable]
-public sealed class BTreeBlock<TKey, TValue> : BTreeBlockBase<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TValue>, ITreeBlock<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TKey, TValue>
+public sealed class BTreeBlock<TKey, TValue> : BTreeBlockBase<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TValue>, IBTreeBlock<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TKey, TValue>
 {
 	/// <inheritdoc />
 	internal BTreeBlock(BTreeBase<BTreeBlock<TKey, TValue>, BTreeNode<TKey, TValue>, TValue> tree, int degree)

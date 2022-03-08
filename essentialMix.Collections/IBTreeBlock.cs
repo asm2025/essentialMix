@@ -5,8 +5,8 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections;
 
 /// <inheritdoc />
-public interface ITreeBlockBase<TBlock, TNode, T> : IList<TNode>
-	where TBlock : BTreeBlockBase<TBlock, TNode, T>, ITreeBlockBase<TBlock, TNode, T>
+public interface IBTreeBlockBase<TBlock, TNode, T> : IList<TNode>
+	where TBlock : BTreeBlockBase<TBlock, TNode, T>, IBTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	BTreeBlockCollection<TBlock, TNode, T> Children { get; set; }
@@ -32,18 +32,14 @@ public interface ITreeBlockBase<TBlock, TNode, T> : IList<TNode>
 }
 
 /// <inheritdoc />
-public interface ITreeBlock<TBlock, TNode, T> : ITreeBlockBase<TBlock, TNode, T>
-	where TBlock : BTreeBlockBase<TBlock, TNode, T>, ITreeBlock<TBlock, TNode, T>
+public interface IBTreeBlock<TBlock, TNode, T> : IBTreeBlockBase<TBlock, TNode, T>
+	where TBlock : BTreeBlockBase<TBlock, TNode, T>, IBTreeBlock<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
-	[NotNull]
-	TNode MakeNode([NotNull] T value);
 }
 
-public interface ITreeBlock<TBlock, TNode, TKey, TValue> : ITreeBlockBase<TBlock, TNode, TValue>
-	where TBlock : BTreeBlockBase<TBlock, TNode, TValue>, ITreeBlock<TBlock, TNode, TKey, TValue>
+public interface IBTreeBlock<TBlock, TNode, TKey, TValue> : IBTreeBlockBase<TBlock, TNode, TValue>
+	where TBlock : BTreeBlockBase<TBlock, TNode, TValue>, IBTreeBlock<TBlock, TNode, TKey, TValue>
 	where TNode : class, ITreeNode<TNode, TKey, TValue>
 {
-	[NotNull]
-	TNode MakeNode([NotNull] TKey key, [CanBeNull] TValue value);
 }

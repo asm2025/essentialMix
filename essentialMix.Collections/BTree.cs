@@ -46,7 +46,7 @@ namespace essentialMix.Collections;
 /// <para>Based on BTree chapter in "Introduction to Algorithms", by Thomas Cormen, Charles Leiserson, Ronald Rivest.</para>
 /// <para>This uses the same abstract pattern as <see cref="LinkedBinaryTree{TNode,T}"/></para>
 /// </summary>
-/// <typeparam name="TBlock">The block type. Must implement <see cref="ITreeBlock{TBlock, TNode, T}"/></typeparam>
+/// <typeparam name="TBlock">The block type. Must implement <see cref="IBTreeBlock{TBlock,TNode,T}"/></typeparam>
 /// <typeparam name="TNode">The node type. Must implement <see cref="ITreeNode{TNode, T}"/></typeparam>
 /// <typeparam name="T">The element type of the tree</typeparam>
 [Serializable]
@@ -98,7 +98,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 		{
 			lock (_root)
 			{
-				return _tree.GetEnumerator();
+				return _tree.EnumerateNodes();
 			}
 		}
 
@@ -176,7 +176,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	public int Degree { get; }
 
 	/// <inheritdoc />
-	public int Height { get; protected set; }
+	public int Height { get; internal set; }
 
 	public int Count { get; internal set; }
 
@@ -208,29 +208,60 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	public abstract bool Equal(TNode x, TNode y);
 
 	/// <inheritdoc />
-	public IEnumerator<T> GetEnumerator() { return _root?.GetEnumerator() ?? Enumerable.Empty<T>().GetEnumerator(); }
+	IEnumerator<TNode> IEnumerable<TNode>.GetEnumerator() { return EnumerateNodes(); }
 
 	/// <inheritdoc />
-	IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+	IEnumerator IEnumerable.GetEnumerator() { return EnumerateNodes(); }
+
+	[NotNull]
+	public IEnumerableEnumerator<TNode> EnumerateNodes(TreeTraverseMethod method, bool rightToLeft) { return _root?.EnumerateNodes(method, rightToLeft) ?? EnumerableEnumerator.Empty<TNode>(); }
+
+	#region EnumerateNodes overloads
+	[NotNull]
+	public IEnumerableEnumerator<TNode> EnumerateNodes() { return EnumerateNodes(TreeTraverseMethod.InOrder, false); }
+
+	[NotNull]
+	public IEnumerableEnumerator<TNode> EnumerateNodes(TreeTraverseMethod method) { return EnumerateNodes(method, false); }
+
+	[NotNull]
+	public IEnumerableEnumerator<TNode> EnumerateNodes(bool rightToLeft) { return EnumerateNodes(TreeTraverseMethod.InOrder, rightToLeft); }
+	#endregion
+
+	public void IterateNodes(TreeTraverseMethod method, bool rightToLeft, [NotNull] Action<TNode> visitCallback) { _root?.IterateNodes(method, rightToLeft, visitCallback); }
+
+	#region IterateNodes overloads - visitCallback action
+	public void IterateNodes([NotNull] Action<TNode> visitCallback) { IterateNodes(TreeTraverseMethod.InOrder, false, visitCallback); }
+
+	public void IterateNodes(TreeTraverseMethod method, [NotNull] Action<TNode> visitCallback) { IterateNodes(Root, method, false, visitCallback); }
+
+	public void IterateNodes(bool rightToLeft, [NotNull] Action<TNode> visitCallback) { IterateNodes(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	#endregion
+
+	public void IterateNodes(TreeTraverseMethod method, bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback) { _root?.IterateNodes(method, rightToLeft, visitCallback); }
+
+	#region IterateNodes overloads - visitCallback function
+	public void IterateNodes([NotNull] Func<TNode, bool> visitCallback) { IterateNodes(TreeTraverseMethod.InOrder, false, visitCallback); }
+
+	public void IterateNodes(TreeTraverseMethod method, [NotNull] Func<TNode, bool> visitCallback) { IterateNodes(method, false, visitCallback); }
+
+	public void IterateNodes(bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback) { IterateNodes(TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	#endregion
 
 	/// <inheritdoc />
-	public abstract void Add(T node);
+	public abstract void Add(TNode node);
 
 	/// <inheritdoc />
-	public abstract bool Remove(T node);
+	public abstract bool Remove(TNode node);
 
 	/// <inheritdoc />
-	public void Clear()
-	{
-		_root?.Clear();
-	}
+	public void Clear() { _root?.Clear(); }
 
 	/// <inheritdoc />
-	public abstract bool Contains(T node);
+	public abstract bool Contains(TNode node);
 
-	public void CopyTo([NotNull] T[] array) { CopyTo(array, 0); }
-	public void CopyTo(T[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
-	public void CopyTo([NotNull] T[] array, int arrayIndex, int count)
+	public void CopyTo(TNode[] array) { CopyTo(array, 0); }
+	public void CopyTo(TNode[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
+	public void CopyTo(TNode[] array, int arrayIndex, int count)
 	{
 		array.Length.ValidateRange(arrayIndex, ref count);
 		if (count == 0) return;
@@ -250,7 +281,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 		if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
 		if (Count == 0) return;
 
-		if (array is T[] tArray)
+		if (array is TNode[] tArray)
 		{
 			CopyTo(tArray, arrayIndex);
 			return;
@@ -271,7 +302,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 
 		try
 		{
-			foreach (T item in this)
+			foreach (TNode item in this)
 			{
 				objects[arrayIndex++] = item;
 			}
@@ -297,19 +328,16 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	}
 
 	[NotNull]
-	public static ICollection<TNode> Synchronized(BTreeBase<TBlock, TNode, T> tree)
-	{
-		return new SynchronizedCollection(tree);
-	}
+	public static ICollection<TNode> Synchronized([NotNull] BTreeBase<TBlock, TNode, T> tree) { return new SynchronizedCollection(tree); }
 }
 
 /// <inheritdoc cref="BTreeBase{TBlock, TNode, T}" />
-/// <typeparam name="TBlock">The block type. Must implement <see cref="ITreeBlock{TBlock, TNode, T}"/></typeparam>
+/// <typeparam name="TBlock">The block type. Must implement <see cref="IBTreeBlock{TBlock,TNode,T}"/></typeparam>
 /// <typeparam name="TNode">The node type. Must implement <see cref="ITreeNode{TNode, T}"/></typeparam>
 /// <typeparam name="T">The element type of the tree</typeparam>
 [Serializable]
-public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBTree<TBlock, TNode, T>
-	where TBlock : BTreeBlockBase<TBlock, TNode, T>, ITreeBlock<TBlock, TNode, T>
+public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBTree<TBlock, TNode, T>, ICollection<T>
+	where TBlock : BTreeBlockBase<TBlock, TNode, T>, IBTreeBlock<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	/// <inheritdoc />
@@ -329,14 +357,14 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 	public IGenericComparer<T> Comparer { get; }
 
 	/// <inheritdoc />
-	public sealed override void Add(T item)
+	public sealed override void Add(TNode node)
 	{
-		if (item == null) throw new ArgumentNullException(nameof(item));
+		if (node == null) throw new ArgumentNullException(nameof(node));
 		Add(node.Value);
 	}
 
 	/// <inheritdoc />
-	public void Add(TNode node)
+	public void Add(T item)
 	{
 		EnsureRoot();
 
@@ -390,6 +418,9 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 	public bool Contains(T item) { return Find(item) != null; }
 
 	/// <inheritdoc />
+	public abstract TNode MakeNode(T value);
+
+	/// <inheritdoc />
 	public override int Compare(TNode x, TNode y)
 	{
 		if (ReferenceEquals(x, y)) return 0;
@@ -428,7 +459,7 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 							: block.FindLastIndex(e => Comparer.Compare(item, e.Value) >= 0) + 1;
 		}
 
-		block.Insert(position, block.MakeNode(item));
+		block.Insert(position, MakeNode(item));
 	}
 
 	protected bool Remove([NotNull] TBlock block, T item)
@@ -575,14 +606,14 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 }
 
 /// <inheritdoc cref="BTreeBase{TBlock, TNode, T}" />
-/// <typeparam name="TBlock">The block type. Must implement <see cref="ITreeBlock{TBlock, TNode, TKey, T}"/></typeparam>
+/// <typeparam name="TBlock">The block type. Must implement <see cref="IBTreeBlock{TBlock,TNode,TKey,TValue}"/></typeparam>
 /// <typeparam name="TNode">The node type. Must implement <see cref="ITreeNode{TNode, TKey, TValue}"/></typeparam>
 /// <typeparam name="TKey">The key type of the tree</typeparam>
 /// <typeparam name="TValue">The element type of the tree</typeparam>
 [Serializable]
 [DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,,>))]
-public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNode, TValue>, IBTree<TBlock, TNode, TKey, TValue>
-	where TBlock : BTreeBlockBase<TBlock, TNode, TValue>, ITreeBlock<TBlock, TNode, TKey, TValue>
+public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNode, TValue>, IBTree<TBlock, TNode, TKey, TValue>, IDictionary<TKey, TValue>
+	where TBlock : BTreeBlockBase<TBlock, TNode, TValue>, IBTreeBlock<TBlock, TNode, TKey, TValue>
 	where TNode : class, ITreeNode<TNode, TKey, TValue>
 {
 	/// <inheritdoc />
@@ -661,6 +692,8 @@ public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNo
 	public sealed override bool Contains(TNode node) { return node != null && Contains(node.Key); }
 	/// <inheritdoc />
 	public bool Contains(TKey key) { return Find(key) != null; }
+	/// <inheritdoc />
+	public abstract TNode MakeNode(TKey key, TValue value);
 
 	/// <inheritdoc />
 	public override int Compare(TNode x, TNode y)
@@ -701,7 +734,7 @@ public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNo
 							: block.FindLastIndex(e => Comparer.Compare(key, e.Key) >= 0) + 1;
 		}
 
-		block.Insert(position, block.MakeNode(key, value));
+		block.Insert(position, MakeNode(key, value));
 	}
 
 	protected bool Remove([NotNull] TBlock block, TKey key)
@@ -864,6 +897,9 @@ public class BTree<T> : BTree<BTreeBlock<T>, BTreeNode<T>, T>
 
 	/// <inheritdoc />
 	public override BTreeBlock<T> MakeBlock() { return new BTreeBlock<T>(this, Degree); }
+
+	/// <inheritdoc />
+	public override BTreeNode<T> MakeNode(T value) { return new BTreeNode<T>(value); }
 }
 
 [Serializable]
@@ -883,6 +919,9 @@ public class BTree<TKey, TValue> : BTree<BTreeBlock<TKey, TValue>, BTreeNode<TKe
 
 	/// <inheritdoc />
 	public override BTreeBlock<TKey, TValue> MakeBlock() { return new BTreeBlock<TKey, TValue>(this, Degree); }
+
+	/// <inheritdoc />
+	public override BTreeNode<TKey, TValue> MakeNode(TKey key, TValue value) { return new BTreeNode<TKey, TValue>(key, value); }
 }
 
 public static class BTree

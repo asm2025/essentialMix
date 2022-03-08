@@ -8,7 +8,7 @@ namespace essentialMix.Collections.DebugView;
 * collections in this solution assemblies.
 */
 public class Dbg_BTreeDebugView<TBlock, TNode, T>
-	where TBlock : class, ITreeBlock<TBlock, TNode, T>
+	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	private readonly IBTreeBase<TBlock, TNode, T> _tree;
@@ -28,7 +28,7 @@ public class Dbg_BTreeDebugView<TBlock, TNode, T>
 * collections in this solution assemblies.
 */
 public class Dbg_BTreeDebugView<TBlock, TNode, TKey, TValue>
-	where TBlock : class, ITreeBlock<TBlock, TNode, TKey, TValue>
+	where TBlock : BTreeBlockBase<TBlock, TNode, TValue>, IBTreeBlock<TBlock, TNode, TKey, TValue>
 	where TNode : class, ITreeNode<TNode, TKey, TValue>
 {
 	private readonly IBTree<TBlock, TNode, TKey, TValue> _tree;
