@@ -890,12 +890,6 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 		return true;
 	}
 
-	[NotNull]
-	public static IList<T> Synchronized(ListBase<T> list)
-	{
-		return new SynchronizedList(list);
-	}
-
 	// Ensures that the capacity of this list is at least the given minimum
 	// value. If the current capacity of the list is less than min, the
 	// capacity is increased to twice the current capacity or to min,
@@ -930,4 +924,10 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	protected virtual void RangeInserted(int index, int count) { }
 
 	protected virtual void RangeRemoving(int index, int count) { }
+
+	[NotNull]
+	public static IList<T> Synchronized(ListBase<T> list)
+	{
+		return new SynchronizedList(list);
+	}
 }

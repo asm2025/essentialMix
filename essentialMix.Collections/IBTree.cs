@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections;
 
 /// <inheritdoc />
-public interface IBTreeBase<TBlock, TNode, T> : ICollection<TNode>
+public interface IBTreeBase<TBlock, TNode, T> : ICollection<T>
 	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
@@ -27,10 +27,7 @@ public interface IBTree<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 {
 	[NotNull]
 	IGenericComparer<T> Comparer { get; }
-	void Add(T item);
-	bool Remove(T item);
 	TNode Find(T item);
-	bool Contains(T item);
 }
 
 /// <inheritdoc />

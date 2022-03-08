@@ -63,7 +63,96 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 	[Serializable]
 	private class SynchronizedCollection : ICollection<T>
 	{
+		private readonly LinkedBinaryTree<TNode, T> _tree;
 
+		private object _root;
+
+		internal SynchronizedCollection(LinkedBinaryTree<TNode, T> tree)
+		{
+			_tree = tree;
+			_root = ((ICollection)tree).SyncRoot;
+		}
+
+		/// <inheritdoc />
+		public int Count
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _tree.Count;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public bool IsReadOnly
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _tree.IsReadOnly;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public IEnumerator<T> GetEnumerator()
+		{
+			lock (_root)
+			{
+				return _tree.GetEnumerator();
+			}
+		}
+
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+		/// <inheritdoc />
+		public void Add(T item)
+		{
+			lock (_tree)
+			{
+				_tree.Add(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public bool Remove(T item)
+		{
+			lock (_tree)
+			{
+				return _tree.Remove(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public void Clear()
+		{
+			lock (_root)
+			{
+				_tree.Clear();
+			}
+		}
+
+		/// <inheritdoc />
+		public bool Contains(T item)
+		{
+			lock (_root)
+			{
+				return _tree.Contains(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public void CopyTo(T[] array, int arrayIndex)
+		{
+			lock (_root)
+			{
+				_tree.CopyTo(array, arrayIndex);
+			}
+		}
 	}
 
 	[Serializable]
@@ -569,7 +658,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 	public bool IsFull => Root is not { IsFull: not true };
 
 	/// <inheritdoc />
-	bool ICollection<T>.IsReadOnly => false;
+	public bool IsReadOnly => false;
 
 	/// <inheritdoc />
 	bool ICollection.IsSynchronized => false;
@@ -1029,12 +1118,6 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		Root = null;
 		Count = 0;
 		_version++;
-	}
-
-	public IEnumerable<TOutput> ConvertAll<TOutput>([NotNull] Converter<T, TOutput> converter)
-	{
-		foreach (T item in this)
-			yield return converter(item);
 	}
 
 	public virtual T Minimum()
@@ -2111,6 +2194,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		return result;
 	}
 
+	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	private static void ThrowNotFormingATree(string collection1Name, string collection2Name)
 	{
 		throw new ArgumentException($"{collection1Name} and {collection2Name} do not form a binary tree.");

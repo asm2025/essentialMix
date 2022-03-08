@@ -213,30 +213,6 @@ public class BTreeBlockCollection<TBlock, TNode, T> : IList<TBlock>, IReadOnlyLi
 		}
 	}
 
-	[Serializable]
-	private struct LevelOrderEnumerator : IEnumerableEnumerator<TNode>
-	{
-
-	}
-
-	[Serializable]
-	private struct PreOrderEnumerator : IEnumerableEnumerator<TNode>
-	{
-
-	}
-
-	[Serializable]
-	private struct InOrderEnumerator : IEnumerableEnumerator<TNode>
-	{
-
-	}
-
-	[Serializable]
-	private struct PostOrderEnumerator : IEnumerableEnumerator<TNode>
-	{
-
-	}
-
 	private BTreeBase<TBlock, TNode, T> _tree;
 	private TBlock[] _items;
 	private object _root;

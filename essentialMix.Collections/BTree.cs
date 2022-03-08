@@ -59,31 +59,96 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	[Serializable]
 	private class SynchronizedCollection : ICollection<TNode>
 	{
+		private readonly BTreeBase<TBlock, TNode, T> _tree;
 
-	}
+		private object _root;
 
-	[Serializable]
-	private struct LevelOrderEnumerator : IEnumerableEnumerator<TNode>
-	{
+		internal SynchronizedCollection(BTreeBase<TBlock, TNode, T> tree)
+		{
+			_tree = tree;
+			_root = ((ICollection)tree).SyncRoot;
+		}
 
-	}
+		/// <inheritdoc />
+		public int Count
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _tree.Count;
+				}
+			}
+		}
 
-	[Serializable]
-	private struct PreOrderEnumerator : IEnumerableEnumerator<TNode>
-	{
+		/// <inheritdoc />
+		public bool IsReadOnly
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _tree.IsReadOnly;
+				}
+			}
+		}
 
-	}
+		/// <inheritdoc />
+		public IEnumerator<TNode> GetEnumerator()
+		{
+			lock (_root)
+			{
+				return _tree.GetEnumerator();
+			}
+		}
 
-	[Serializable]
-	private struct InOrderEnumerator : IEnumerableEnumerator<TNode>
-	{
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-	}
+		/// <inheritdoc />
+		public void Add(TNode item)
+		{
+			lock (_tree)
+			{
+				_tree.Add(item);
+			}
+		}
 
-	[Serializable]
-	private struct PostOrderEnumerator : IEnumerableEnumerator<TNode>
-	{
+		/// <inheritdoc />
+		public bool Remove(TNode item)
+		{
+			lock (_tree)
+			{
+				return _tree.Remove(item);
+			}
+		}
 
+		/// <inheritdoc />
+		public void Clear()
+		{
+			lock (_root)
+			{
+				_tree.Clear();
+			}
+		}
+
+		/// <inheritdoc />
+		public bool Contains(TNode item)
+		{
+			lock (_root)
+			{
+				return _tree.Contains(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public void CopyTo(TNode[] array, int arrayIndex)
+		{
+			lock (_root)
+			{
+				_tree.CopyTo(array, arrayIndex);
+			}
+		}
 	}
 
 	internal int _version;
@@ -143,16 +208,16 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	public abstract bool Equal(TNode x, TNode y);
 
 	/// <inheritdoc />
-	public IEnumerator<TNode> GetEnumerator() { return _root?.GetEnumerator() ?? Enumerable.Empty<TNode>().GetEnumerator(); }
+	public IEnumerator<T> GetEnumerator() { return _root?.GetEnumerator() ?? Enumerable.Empty<T>().GetEnumerator(); }
 
 	/// <inheritdoc />
 	IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
 	/// <inheritdoc />
-	public abstract void Add(TNode node);
+	public abstract void Add(T node);
 
 	/// <inheritdoc />
-	public abstract bool Remove(TNode node);
+	public abstract bool Remove(T node);
 
 	/// <inheritdoc />
 	public void Clear()
@@ -161,11 +226,11 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	}
 
 	/// <inheritdoc />
-	public abstract bool Contains(TNode node);
+	public abstract bool Contains(T node);
 
-	public void CopyTo([NotNull] TNode[] array) { CopyTo(array, 0); }
-	public void CopyTo(TNode[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
-	public void CopyTo([NotNull] TNode[] array, int arrayIndex, int count)
+	public void CopyTo([NotNull] T[] array) { CopyTo(array, 0); }
+	public void CopyTo(T[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
+	public void CopyTo([NotNull] T[] array, int arrayIndex, int count)
 	{
 		array.Length.ValidateRange(arrayIndex, ref count);
 		if (count == 0) return;
@@ -175,7 +240,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 		while (count > 0)
 		{
 			// todo
-			count--;
+			?? count--;
 		}
 	}
 
@@ -185,7 +250,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 		if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
 		if (Count == 0) return;
 
-		if (array is TNode[] tArray)
+		if (array is T[] tArray)
 		{
 			CopyTo(tArray, arrayIndex);
 			return;
@@ -206,7 +271,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 
 		try
 		{
-			foreach (TNode item in this)
+			foreach (T item in this)
 			{
 				objects[arrayIndex++] = item;
 			}
@@ -229,6 +294,12 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 		if (block.IsLeaf) return;
 		newBlock.Children.AddRange(block.Children.GetRange(Degree, Degree));
 		block.Children.RemoveRange(Degree, Degree);
+	}
+
+	[NotNull]
+	public static ICollection<TNode> Synchronized(BTreeBase<TBlock, TNode, T> tree)
+	{
+		return new SynchronizedCollection(tree);
 	}
 }
 
@@ -258,14 +329,14 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 	public IGenericComparer<T> Comparer { get; }
 
 	/// <inheritdoc />
-	public sealed override void Add(TNode node)
+	public sealed override void Add(T item)
 	{
-		if (node == null) throw new ArgumentNullException(nameof(node));
+		if (item == null) throw new ArgumentNullException(nameof(item));
 		Add(node.Value);
 	}
 
 	/// <inheritdoc />
-	public void Add(T item)
+	public void Add(TNode node)
 	{
 		EnsureRoot();
 
@@ -511,7 +582,7 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 [Serializable]
 [DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,,>))]
 public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNode, TValue>, IBTree<TBlock, TNode, TKey, TValue>
-	where TBlock : BTreeBlockBase<TBlock, TNode, T>, ITreeBlock<TBlock, TNode, TKey, TValue>
+	where TBlock : BTreeBlockBase<TBlock, TNode, TValue>, ITreeBlock<TBlock, TNode, TKey, TValue>
 	where TNode : class, ITreeNode<TNode, TKey, TValue>
 {
 	/// <inheritdoc />

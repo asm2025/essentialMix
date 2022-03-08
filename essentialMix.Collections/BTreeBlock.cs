@@ -215,6 +215,30 @@ public abstract class BTreeBlockBase<TBlock, TNode, T> : ITreeBlockBase<TBlock, 
 		}
 	}
 
+	[Serializable]
+	private struct LevelOrderEnumerator : IEnumerableEnumerator<TNode>
+	{
+
+	}
+
+	[Serializable]
+	private struct PreOrderEnumerator : IEnumerableEnumerator<TNode>
+	{
+
+	}
+
+	[Serializable]
+	private struct InOrderEnumerator : IEnumerableEnumerator<TNode>
+	{
+
+	}
+
+	[Serializable]
+	private struct PostOrderEnumerator : IEnumerableEnumerator<TNode>
+	{
+
+	}
+
 	private readonly int _minEntries;
 	private readonly int _maxEntries;
 
