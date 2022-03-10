@@ -52,105 +52,10 @@ namespace essentialMix.Collections;
 [Serializable]
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_BTreeDebugView<,,>))]
-public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>, ICollection
+public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>, IReadOnlyCollection<T>, ICollection
 	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
-	[Serializable]
-	private class SynchronizedCollection : ICollection<TNode>
-	{
-		private readonly BTreeBase<TBlock, TNode, T> _tree;
-
-		private object _root;
-
-		internal SynchronizedCollection(BTreeBase<TBlock, TNode, T> tree)
-		{
-			_tree = tree;
-			_root = ((ICollection)tree).SyncRoot;
-		}
-
-		/// <inheritdoc />
-		public int Count
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _tree.Count;
-				}
-			}
-		}
-
-		/// <inheritdoc />
-		public bool IsReadOnly
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _tree.IsReadOnly;
-				}
-			}
-		}
-
-		/// <inheritdoc />
-		public IEnumerator<TNode> GetEnumerator()
-		{
-			lock (_root)
-			{
-				return _tree.EnumerateNodes();
-			}
-		}
-
-		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-
-		/// <inheritdoc />
-		public void Add(TNode item)
-		{
-			lock (_tree)
-			{
-				_tree.Add(item);
-			}
-		}
-
-		/// <inheritdoc />
-		public bool Remove(TNode item)
-		{
-			lock (_tree)
-			{
-				return _tree.Remove(item);
-			}
-		}
-
-		/// <inheritdoc />
-		public void Clear()
-		{
-			lock (_root)
-			{
-				_tree.Clear();
-			}
-		}
-
-		/// <inheritdoc />
-		public bool Contains(TNode item)
-		{
-			lock (_root)
-			{
-				return _tree.Contains(item);
-			}
-		}
-
-		/// <inheritdoc />
-		public void CopyTo(TNode[] array, int arrayIndex)
-		{
-			lock (_root)
-			{
-				_tree.CopyTo(array, arrayIndex);
-			}
-		}
-	}
-
 	internal int _version;
 
 	private TBlock _root;
@@ -178,7 +83,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	/// <inheritdoc />
 	public int Height { get; internal set; }
 
-	public int Count { get; internal set; }
+	public int Count { get; protected set; }
 
 	/// <inheritdoc />
 	public bool IsReadOnly => false;
@@ -195,10 +100,6 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	}
 
 	/// <inheritdoc />
-	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	public void EnsureRoot() { _root ??= MakeBlock(); }
-
-	/// <inheritdoc />
 	public abstract TBlock MakeBlock();
 
 	/// <inheritdoc />
@@ -208,10 +109,24 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	public abstract bool Equal(TNode x, TNode y);
 
 	/// <inheritdoc />
-	IEnumerator<TNode> IEnumerable<TNode>.GetEnumerator() { return EnumerateNodes(); }
+	public IEnumerator<T> GetEnumerator() { return Enumerate(); }
 
 	/// <inheritdoc />
-	IEnumerator IEnumerable.GetEnumerator() { return EnumerateNodes(); }
+	IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+	[NotNull]
+	public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method, bool rightToLeft) { return _root?.Enumerate(method, rightToLeft) ?? EnumerableEnumerator.Empty<T>(); }
+
+	#region Enumerate overloads
+	[NotNull]
+	public IEnumerableEnumerator<T> Enumerate() { return Enumerate(TreeTraverseMethod.InOrder, false); }
+
+	[NotNull]
+	public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method) { return Enumerate(method, false); }
+
+	[NotNull]
+	public IEnumerableEnumerator<T> Enumerate(bool rightToLeft) { return Enumerate(TreeTraverseMethod.InOrder, rightToLeft); }
+	#endregion
 
 	[NotNull]
 	public IEnumerableEnumerator<TNode> EnumerateNodes(TreeTraverseMethod method, bool rightToLeft) { return _root?.EnumerateNodes(method, rightToLeft) ?? EnumerableEnumerator.Empty<TNode>(); }
@@ -227,24 +142,78 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	public IEnumerableEnumerator<TNode> EnumerateNodes(bool rightToLeft) { return EnumerateNodes(TreeTraverseMethod.InOrder, rightToLeft); }
 	#endregion
 
-	public void IterateNodes(TreeTraverseMethod method, bool rightToLeft, [NotNull] Action<TNode> visitCallback) { _root?.IterateNodes(method, rightToLeft, visitCallback); }
+	[NotNull]
+	public IEnumerableEnumerator<TBlock> EnumerateBlocks(TreeTraverseMethod method, bool rightToLeft) { return _root?.EnumerateBlocks(method, rightToLeft) ?? EnumerableEnumerator.Empty<TBlock>(); }
 
-	#region IterateNodes overloads - visitCallback action
-	public void IterateNodes([NotNull] Action<TNode> visitCallback) { IterateNodes(TreeTraverseMethod.InOrder, false, visitCallback); }
+	#region EnumerateBlocks overloads
+	[NotNull]
+	public IEnumerableEnumerator<TBlock> EnumerateBlocks() { return EnumerateBlocks(TreeTraverseMethod.InOrder, false); }
 
-	public void IterateNodes(TreeTraverseMethod method, [NotNull] Action<TNode> visitCallback) { IterateNodes(Root, method, false, visitCallback); }
+	[NotNull]
+	public IEnumerableEnumerator<TBlock> EnumerateBlocks(TreeTraverseMethod method) { return EnumerateBlocks(method, false); }
 
-	public void IterateNodes(bool rightToLeft, [NotNull] Action<TNode> visitCallback) { IterateNodes(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	[NotNull]
+	public IEnumerableEnumerator<TBlock> EnumerateBlocks(bool rightToLeft) { return EnumerateBlocks(TreeTraverseMethod.InOrder, rightToLeft); }
 	#endregion
 
-	public void IterateNodes(TreeTraverseMethod method, bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback) { _root?.IterateNodes(method, rightToLeft, visitCallback); }
+	public void Iterate(TreeTraverseMethod method, bool rightToLeft, Action<T> visitCallback) { _root?.Iterate(method, rightToLeft, visitCallback); }
+
+	#region Iterate overloads - visitCallback action
+	public void Iterate(Action<T> visitCallback) { Iterate(TreeTraverseMethod.InOrder, false, visitCallback); }
+
+	public void Iterate(TreeTraverseMethod method, Action<T> visitCallback) { Iterate(method, false, visitCallback); }
+
+	public void Iterate(bool rightToLeft, Action<T> visitCallback) { Iterate(TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	#endregion
+
+	public void IterateNodes(TreeTraverseMethod method, bool rightToLeft, Action<TNode> visitCallback) { _root?.IterateNodes(method, rightToLeft, visitCallback); }
+
+	#region IterateNodes overloads - visitCallback action
+	public void IterateNodes(Action<TNode> visitCallback) { IterateNodes(TreeTraverseMethod.InOrder, false, visitCallback); }
+
+	public void IterateNodes(TreeTraverseMethod method, Action<TNode> visitCallback) { IterateNodes(method, false, visitCallback); }
+
+	public void IterateNodes(bool rightToLeft, Action<TNode> visitCallback) { IterateNodes(TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	#endregion
+
+	public void IterateBlocks(TreeTraverseMethod method, bool rightToLeft, Action<TBlock> visitCallback) { _root?.IterateBlocks(method, rightToLeft, visitCallback); }
+
+	#region IterateBlocks overloads - visitCallback action
+	public void IterateBlocks(Action<TBlock> visitCallback) { IterateBlocks(TreeTraverseMethod.InOrder, false, visitCallback); }
+
+	public void IterateBlocks(TreeTraverseMethod method, Action<TBlock> visitCallback) { IterateBlocks(method, false, visitCallback); }
+
+	public void IterateBlocks(bool rightToLeft, Action<TBlock> visitCallback) { IterateBlocks(TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	#endregion
+
+	public void Iterate(TreeTraverseMethod method, bool rightToLeft, Func<T, bool> visitCallback) { _root?.Iterate(method, rightToLeft, visitCallback); }
+
+	#region Iterate overloads - visitCallback function
+	public void Iterate(Func<T, bool> visitCallback) { Iterate(TreeTraverseMethod.InOrder, false, visitCallback); }
+
+	public void Iterate(TreeTraverseMethod method, Func<T, bool> visitCallback) { Iterate(method, false, visitCallback); }
+
+	public void Iterate(bool rightToLeft, Func<T, bool> visitCallback) { Iterate(TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	#endregion
+
+	public void IterateNodes(TreeTraverseMethod method, bool rightToLeft, Func<TNode, bool> visitCallback) { _root?.IterateNodes(method, rightToLeft, visitCallback); }
 
 	#region IterateNodes overloads - visitCallback function
-	public void IterateNodes([NotNull] Func<TNode, bool> visitCallback) { IterateNodes(TreeTraverseMethod.InOrder, false, visitCallback); }
+	public void IterateNodes(Func<TNode, bool> visitCallback) { IterateNodes(TreeTraverseMethod.InOrder, false, visitCallback); }
 
-	public void IterateNodes(TreeTraverseMethod method, [NotNull] Func<TNode, bool> visitCallback) { IterateNodes(method, false, visitCallback); }
+	public void IterateNodes(TreeTraverseMethod method, Func<TNode, bool> visitCallback) { IterateNodes(method, false, visitCallback); }
 
-	public void IterateNodes(bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback) { IterateNodes(TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void IterateNodes(bool rightToLeft, Func<TNode, bool> visitCallback) { IterateNodes(TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	#endregion
+
+	public void IterateBlocks(TreeTraverseMethod method, bool rightToLeft, Func<TBlock, bool> visitCallback) { _root?.IterateBlocks(method, rightToLeft, visitCallback); }
+
+	#region IterateBlocks overloads - visitCallback function
+	public void IterateBlocks(Func<TBlock, bool> visitCallback) { IterateBlocks(TreeTraverseMethod.InOrder, false, visitCallback); }
+
+	public void IterateBlocks(TreeTraverseMethod method, Func<TBlock, bool> visitCallback) { IterateBlocks(method, false, visitCallback); }
+
+	public void IterateBlocks(bool rightToLeft, Func<TBlock, bool> visitCallback) { IterateBlocks(TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
 	#endregion
 
 	/// <inheritdoc />
@@ -254,14 +223,19 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	public abstract bool Remove(TNode node);
 
 	/// <inheritdoc />
-	public void Clear() { _root?.Clear(); }
+	public void Clear()
+	{
+		_root = null;
+		Count = 0;
+		_version++;
+	}
 
 	/// <inheritdoc />
 	public abstract bool Contains(TNode node);
 
-	public void CopyTo(TNode[] array) { CopyTo(array, 0); }
-	public void CopyTo(TNode[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
-	public void CopyTo(TNode[] array, int arrayIndex, int count)
+	public void CopyTo(T[] array) { CopyTo(array, 0); }
+	public void CopyTo(T[] array, int arrayIndex) { CopyTo(array, arrayIndex, -1); }
+	public void CopyTo(T[] array, int arrayIndex, int count)
 	{
 		array.Length.ValidateRange(arrayIndex, ref count);
 		if (count == 0) return;
@@ -281,7 +255,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 		if (array.GetLowerBound(0) != 0) throw new ArgumentException("Invalid array lower bound.", nameof(array));
 		if (Count == 0) return;
 
-		if (array is TNode[] tArray)
+		if (array is T[] tArray)
 		{
 			CopyTo(tArray, arrayIndex);
 			return;
@@ -302,7 +276,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 
 		try
 		{
-			foreach (TNode item in this)
+			foreach (T item in this)
 			{
 				objects[arrayIndex++] = item;
 			}
@@ -326,9 +300,6 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 		newBlock.Children.AddRange(block.Children.GetRange(Degree, Degree));
 		block.Children.RemoveRange(Degree, Degree);
 	}
-
-	[NotNull]
-	public static ICollection<TNode> Synchronized([NotNull] BTreeBase<TBlock, TNode, T> tree) { return new SynchronizedCollection(tree); }
 }
 
 /// <inheritdoc cref="BTreeBase{TBlock, TNode, T}" />
@@ -366,7 +337,7 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 	/// <inheritdoc />
 	public void Add(T item)
 	{
-		EnsureRoot();
+		Root ??= MakeBlock();
 
 		if (!Root.IsFull)
 		{
@@ -376,7 +347,7 @@ public abstract class BTree<TBlock, TNode, T> : BTreeBase<TBlock, TNode, T>, IBT
 
 		TBlock oldRoot = Root;
 		Root = MakeBlock();
-		Root.EnsureChildren();
+		Root.Children ??= new BTreeBlockCollection<TBlock, TNode, T>(this);
 		Root.Children.Add(oldRoot);
 		Split(Root, 0, oldRoot);
 		Add(Root, item);
@@ -642,7 +613,7 @@ public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNo
 	/// <inheritdoc />
 	public void Add(TKey key, TValue value)
 	{
-		EnsureRoot();
+		Root ??= MakeBlock();
 
 		if (!Root.IsFull)
 		{
@@ -652,7 +623,7 @@ public abstract class BTree<TBlock, TNode, TKey, TValue> : BTreeBase<TBlock, TNo
 
 		TBlock oldRoot = Root;
 		Root = MakeBlock();
-		Root.EnsureChildren();
+		Root.Children ??= new BTreeBlockCollection<TBlock, TNode, TValue>(this);
 		Root.Children.Add(oldRoot);
 		Split(Root, 0, oldRoot);
 		Add(Root, key, value);
@@ -928,6 +899,103 @@ public static class BTree
 {
 	public const int MINIMUM_DEGREE = 2;
 
+	[Serializable]
+	private class SynchronizedCollection<TBlock, TNode, T> : ICollection<T>
+		where TBlock : BTreeBlockBase<TBlock, TNode, T>
+		where TNode : class, ITreeNode<TNode, T>
+	{
+		private readonly BTreeBase<TBlock, TNode, T> _tree;
+
+		private object _root;
+
+		internal SynchronizedCollection(BTreeBase<TBlock, TNode, T> tree)
+		{
+			_tree = tree;
+			_root = ((ICollection)tree).SyncRoot;
+		}
+
+		/// <inheritdoc />
+		public int Count
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _tree.Count;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public bool IsReadOnly
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _tree.IsReadOnly;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public IEnumerator<T> GetEnumerator()
+		{
+			lock (_root)
+			{
+				return _tree.GetEnumerator();
+			}
+		}
+
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+		/// <inheritdoc />
+		public void Add(T item)
+		{
+			lock (_tree)
+			{
+				_tree.Add(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public bool Remove(T item)
+		{
+			lock (_tree)
+			{
+				return _tree.Remove(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public void Clear()
+		{
+			lock (_root)
+			{
+				_tree.Clear();
+			}
+		}
+
+		/// <inheritdoc />
+		public bool Contains(T item)
+		{
+			lock (_root)
+			{
+				return _tree.Contains(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public void CopyTo(T[] array, int arrayIndex)
+		{
+			lock (_root)
+			{
+				_tree.CopyTo(array, arrayIndex);
+			}
+		}
+	}
+
 	public static int MinimumEntries(int degree)
 	{
 		if (degree < MINIMUM_DEGREE) throw new ArgumentOutOfRangeException(nameof(degree));
@@ -941,14 +1009,16 @@ public static class BTree
 	}
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	public static int FastMinimumEntries(int degree)
-	{
-		return degree - 1;
-	}
+	public static int FastMinimumEntries(int degree) { return degree - 1; }
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	public static int FastMaximumEntries(int degree)
+	public static int FastMaximumEntries(int degree) { return 2 * degree - 1; }
+
+	[NotNull]
+	public static ICollection<T> Synchronized<TBlock, TNode, T>([NotNull] BTreeBase<TBlock, TNode, T> tree)
+		where TBlock : BTreeBlockBase<TBlock, TNode, T>
+		where TNode : class, ITreeNode<TNode, T>
 	{
-		return 2 * degree - 1;
+		return new SynchronizedCollection<TBlock, TNode, T>(tree);
 	}
 }

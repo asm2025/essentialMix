@@ -21,108 +21,6 @@ namespace essentialMix.Collections;
 [Serializable]
 public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
 {
-	[Serializable]
-	private class SynchronizedCollection : ICollection<T>
-	{
-		private readonly LinkedDeque<T> _deque;
-		private readonly ICollection _collection;
-		private readonly object _root;
-
-		internal SynchronizedCollection(LinkedDeque<T> deque)
-		{
-			_deque = deque;
-			_collection = deque;
-			_root = _collection.SyncRoot;
-		}
-
-		/// <inheritdoc />
-		public int Count
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _deque.Count;
-				}
-			}
-		}
-
-		/// <inheritdoc />
-		public bool IsReadOnly
-		{
-			get
-			{
-				lock (_root)
-				{
-					return ((ICollection<T>)_collection).IsReadOnly;
-				}
-			}
-		}
-
-		/// <inheritdoc />
-		public void Add(T item)
-		{
-			lock (_root)
-			{
-				_deque.Add(item);
-			}
-		}
-
-		/// <inheritdoc />
-		public bool Remove(T item)
-		{
-			lock (_root)
-			{
-				return _deque.Remove(item);
-			}
-		}
-
-		/// <inheritdoc />
-		public void Clear()
-		{
-			lock (_root)
-			{
-				_deque.Clear();
-			}
-		}
-
-		/// <inheritdoc />
-		public bool Contains(T item)
-		{
-			lock (_root)
-			{
-				return _deque.Contains(item);
-			}
-		}
-
-		/// <inheritdoc />
-		public void CopyTo(T[] array, int arrayIndex)
-		{
-			lock (_root)
-			{
-				_deque.CopyTo(array, arrayIndex);
-			}
-		}
-
-		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			lock (_root)
-			{
-				return _deque.GetEnumerator();
-			}
-		}
-
-		/// <inheritdoc />
-		public IEnumerator<T> GetEnumerator()
-		{
-			lock (_root)
-			{
-				return _deque.GetEnumerator();
-			}
-		}
-	}
-
 	[NotNull]
 	[NonSerialized]
 	private ICollection _collection;
@@ -359,10 +257,112 @@ public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyC
 
 	/// <inheritdoc />
 	public void CopyTo(Array array, int index) { _collection.CopyTo(array, index); }
+}
+
+public static class LinkedDeque
+{
+	[Serializable]
+	private class SynchronizedCollection<T> : ICollection<T>
+	{
+		private readonly LinkedDeque<T> _deque;
+		private readonly ICollection _collection;
+		private readonly object _root;
+
+		internal SynchronizedCollection(LinkedDeque<T> deque)
+		{
+			_deque = deque;
+			_collection = deque;
+			_root = _collection.SyncRoot;
+		}
+
+		/// <inheritdoc />
+		public int Count
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _deque.Count;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public bool IsReadOnly
+		{
+			get
+			{
+				lock (_root)
+				{
+					return ((ICollection<T>)_collection).IsReadOnly;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public void Add(T item)
+		{
+			lock (_root)
+			{
+				_deque.Add(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public bool Remove(T item)
+		{
+			lock (_root)
+			{
+				return _deque.Remove(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public void Clear()
+		{
+			lock (_root)
+			{
+				_deque.Clear();
+			}
+		}
+
+		/// <inheritdoc />
+		public bool Contains(T item)
+		{
+			lock (_root)
+			{
+				return _deque.Contains(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public void CopyTo(T[] array, int arrayIndex)
+		{
+			lock (_root)
+			{
+				_deque.CopyTo(array, arrayIndex);
+			}
+		}
+
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			lock (_root)
+			{
+				return _deque.GetEnumerator();
+			}
+		}
+
+		/// <inheritdoc />
+		public IEnumerator<T> GetEnumerator()
+		{
+			lock (_root)
+			{
+				return _deque.GetEnumerator();
+			}
+		}
+	}
 
 	[NotNull]
-	public static ICollection<T> Synchronized(LinkedDeque<T> list)
-	{
-		return new SynchronizedCollection(list);
-	}
+	public static ICollection<T> Synchronized<T>([NotNull] LinkedDeque<T> list) { return new SynchronizedCollection<T>(list); }
 }

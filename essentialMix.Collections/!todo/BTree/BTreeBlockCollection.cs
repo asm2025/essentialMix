@@ -20,140 +20,6 @@ public class BTreeBlockCollection<TBlock, TNode, T> : IList<TBlock>, IReadOnlyLi
 	where TNode : class, ITreeNode<TNode, T>
 {
 	[Serializable]
-	private class SynchronizedList : IList<TBlock>
-	{
-		private readonly BTreeBlockCollection<TBlock, TNode, T> _collection;
-
-		private object _root;
-
-		internal SynchronizedList(BTreeBlockCollection<TBlock, TNode, T> collection)
-		{
-			_collection = collection;
-			_root = ((ICollection)collection).SyncRoot;
-		}
-
-		public int Count
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _collection.Count;
-				}
-			}
-		}
-
-		public bool IsReadOnly
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _collection.IsReadOnly;
-				}
-			}
-		}
-
-		public TBlock this[int index]
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _collection[index];
-				}
-			}
-			set
-			{
-				lock (_root)
-				{
-					_collection[index] = value;
-				}
-			}
-		}
-
-		public void Add(TBlock item)
-		{
-			lock (_root)
-			{
-				_collection.Add(item);
-			}
-		}
-
-		public void Insert(int index, TBlock item)
-		{
-			lock (_root)
-			{
-				_collection.Insert(index, item);
-			}
-		}
-
-		public void RemoveAt(int index)
-		{
-			lock (_root)
-			{
-				_collection.RemoveAt(index);
-			}
-		}
-
-		public bool Remove(TBlock item)
-		{
-			lock (_root)
-			{
-				return _collection.Remove(item);
-			}
-		}
-
-		public void Clear()
-		{
-			lock (_root)
-			{
-				_collection.Clear();
-			}
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			lock (_root)
-			{
-				return _collection.GetEnumerator();
-			}
-		}
-
-		IEnumerator<TBlock> IEnumerable<TBlock>.GetEnumerator()
-		{
-			lock (_root)
-			{
-				return _collection.GetEnumerator();
-			}
-		}
-
-		public int IndexOf(TBlock item)
-		{
-			lock (_root)
-			{
-				return _collection.IndexOf(item);
-			}
-		}
-
-		public bool Contains(TBlock item)
-		{
-			lock (_root)
-			{
-				return _collection.Contains(item);
-			}
-		}
-
-		public void CopyTo(TBlock[] array, int arrayIndex)
-		{
-			lock (_root)
-			{
-				_collection.CopyTo(array, arrayIndex);
-			}
-		}
-	}
-
-	[Serializable]
 	private struct Enumerator : IEnumerator<TBlock>, IEnumerator
 	{
 		[NonSerialized]
@@ -617,7 +483,151 @@ public class BTreeBlockCollection<TBlock, TNode, T> : IList<TBlock>, IReadOnlyLi
 		_items[index] = item;
 		_tree._version++;
 	}
+}
+
+public static class BTreeBlockCollection
+{
+	[Serializable]
+	private class SynchronizedList<TBlock, TNode, T> : IList<TBlock>
+		where TBlock : BTreeBlockBase<TBlock, TNode, T>
+		where TNode : class, ITreeNode<TNode, T>
+	{
+		private readonly BTreeBlockCollection<TBlock, TNode, T> _collection;
+
+		private object _root;
+
+		internal SynchronizedList(BTreeBlockCollection<TBlock, TNode, T> collection)
+		{
+			_collection = collection;
+			_root = ((ICollection)collection).SyncRoot;
+		}
+
+		public int Count
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _collection.Count;
+				}
+			}
+		}
+
+		public bool IsReadOnly
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _collection.IsReadOnly;
+				}
+			}
+		}
+
+		public TBlock this[int index]
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _collection[index];
+				}
+			}
+			set
+			{
+				lock (_root)
+				{
+					_collection[index] = value;
+				}
+			}
+		}
+
+		public void Add(TBlock item)
+		{
+			lock (_root)
+			{
+				_collection.Add(item);
+			}
+		}
+
+		public void Insert(int index, TBlock item)
+		{
+			lock (_root)
+			{
+				_collection.Insert(index, item);
+			}
+		}
+
+		public void RemoveAt(int index)
+		{
+			lock (_root)
+			{
+				_collection.RemoveAt(index);
+			}
+		}
+
+		public bool Remove(TBlock item)
+		{
+			lock (_root)
+			{
+				return _collection.Remove(item);
+			}
+		}
+
+		public void Clear()
+		{
+			lock (_root)
+			{
+				_collection.Clear();
+			}
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			lock (_root)
+			{
+				return _collection.GetEnumerator();
+			}
+		}
+
+		IEnumerator<TBlock> IEnumerable<TBlock>.GetEnumerator()
+		{
+			lock (_root)
+			{
+				return _collection.GetEnumerator();
+			}
+		}
+
+		public int IndexOf(TBlock item)
+		{
+			lock (_root)
+			{
+				return _collection.IndexOf(item);
+			}
+		}
+
+		public bool Contains(TBlock item)
+		{
+			lock (_root)
+			{
+				return _collection.Contains(item);
+			}
+		}
+
+		public void CopyTo(TBlock[] array, int arrayIndex)
+		{
+			lock (_root)
+			{
+				_collection.CopyTo(array, arrayIndex);
+			}
+		}
+	}
 
 	[NotNull]
-	public static IList<TBlock> Synchronized(BTreeBlockCollection<TBlock, TNode, T> block) { return new SynchronizedList(block); }
+	public static IList<TBlock> Synchronized<TBlock, TNode, T>([NotNull] BTreeBlockCollection<TBlock, TNode, T> block)
+		where TBlock : BTreeBlockBase<TBlock, TNode, T>
+		where TNode : class, ITreeNode<TNode, T>
+	{
+		return new SynchronizedList<TBlock, TNode, T>(block);
+	}
 }

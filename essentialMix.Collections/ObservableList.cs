@@ -28,140 +28,6 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 	protected const string ITEMS_NAME = "Item[]";
 
 	[Serializable]
-	private class SynchronizedList : IList<T>
-	{
-		private readonly ObservableList<T> _list;
-
-		private object _root;
-
-		internal SynchronizedList(ObservableList<T> list)
-		{
-			_list = list;
-			_root = ((ICollection)list).SyncRoot;
-		}
-
-		public int Count
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _list.Count;
-				}
-			}
-		}
-
-		public bool IsReadOnly
-		{
-			get
-			{
-				lock (_root)
-				{
-					return ((ICollection<T>)_list).IsReadOnly;
-				}
-			}
-		}
-
-		public void Add(T item)
-		{
-			lock (_root)
-			{
-				_list.Add(item);
-			}
-		}
-
-		public void Clear()
-		{
-			lock (_root)
-			{
-				_list.Clear();
-			}
-		}
-
-		public bool Contains(T item)
-		{
-			lock (_root)
-			{
-				return _list.Contains(item);
-			}
-		}
-
-		public void CopyTo(T[] array, int arrayIndex)
-		{
-			lock (_root)
-			{
-				_list.CopyTo(array, arrayIndex);
-			}
-		}
-
-		public bool Remove(T item)
-		{
-			lock (_root)
-			{
-				return _list.Remove(item);
-			}
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			lock (_root)
-			{
-				return _list.GetEnumerator();
-			}
-		}
-
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
-		{
-			lock (_root)
-			{
-				return ((IEnumerable<T>)_list).GetEnumerator();
-			}
-		}
-
-		public T this[int index]
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _list[index];
-				}
-			}
-			set
-			{
-				lock (_root)
-				{
-					_list[index] = value;
-				}
-			}
-		}
-
-		public int IndexOf(T item)
-		{
-			lock (_root)
-			{
-				return _list.IndexOf(item);
-			}
-		}
-
-		public void Insert(int index, T item)
-		{
-			lock (_root)
-			{
-				_list.Insert(index, item);
-			}
-		}
-
-		public void RemoveAt(int index)
-		{
-			lock (_root)
-			{
-				_list.RemoveAt(index);
-			}
-		}
-	}
-
-	[Serializable]
 	public struct Enumerator : IEnumerator<T>, IEnumerator
 	{
 		[NonSerialized]
@@ -719,12 +585,6 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 		return true;
 	}
 
-	[NotNull]
-	public static IList<T> Synchronized(ObservableList<T> list)
-	{
-		return new SynchronizedList(list);
-	}
-
 	[NotifyPropertyChangedInvocator]
 	protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
 	{
@@ -816,4 +676,144 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 		OnPropertyChanged(ITEMS_NAME);
 		OnCollectionChanged(NotifyCollectionChangedAction.Replace, oldItem, item, index);
 	}
+}
+
+public static class ObservableList
+{
+	[Serializable]
+	private class SynchronizedList<T> : IList<T>
+	{
+		private readonly ObservableList<T> _list;
+
+		private object _root;
+
+		internal SynchronizedList(ObservableList<T> list)
+		{
+			_list = list;
+			_root = ((ICollection)list).SyncRoot;
+		}
+
+		public int Count
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _list.Count;
+				}
+			}
+		}
+
+		public bool IsReadOnly
+		{
+			get
+			{
+				lock (_root)
+				{
+					return ((ICollection<T>)_list).IsReadOnly;
+				}
+			}
+		}
+
+		public void Add(T item)
+		{
+			lock (_root)
+			{
+				_list.Add(item);
+			}
+		}
+
+		public void Clear()
+		{
+			lock (_root)
+			{
+				_list.Clear();
+			}
+		}
+
+		public bool Contains(T item)
+		{
+			lock (_root)
+			{
+				return _list.Contains(item);
+			}
+		}
+
+		public void CopyTo(T[] array, int arrayIndex)
+		{
+			lock (_root)
+			{
+				_list.CopyTo(array, arrayIndex);
+			}
+		}
+
+		public bool Remove(T item)
+		{
+			lock (_root)
+			{
+				return _list.Remove(item);
+			}
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			lock (_root)
+			{
+				return _list.GetEnumerator();
+			}
+		}
+
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		{
+			lock (_root)
+			{
+				return ((IEnumerable<T>)_list).GetEnumerator();
+			}
+		}
+
+		public T this[int index]
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _list[index];
+				}
+			}
+			set
+			{
+				lock (_root)
+				{
+					_list[index] = value;
+				}
+			}
+		}
+
+		public int IndexOf(T item)
+		{
+			lock (_root)
+			{
+				return _list.IndexOf(item);
+			}
+		}
+
+		public void Insert(int index, T item)
+		{
+			lock (_root)
+			{
+				_list.Insert(index, item);
+			}
+		}
+
+		public void RemoveAt(int index)
+		{
+			lock (_root)
+			{
+				_list.RemoveAt(index);
+			}
+		}
+	}
+
+	[NotNull]
+	public static IList<T> Synchronized<T>([NotNull] ObservableList<T> list) { return new SynchronizedList<T>(list); }
 }

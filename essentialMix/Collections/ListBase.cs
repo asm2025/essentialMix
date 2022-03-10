@@ -21,140 +21,6 @@ namespace essentialMix.Collections;
 public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 {
 	[Serializable]
-	private class SynchronizedList : IList<T>
-	{
-		private readonly ListBase<T> _list;
-
-		private object _root;
-
-		internal SynchronizedList(ListBase<T> list)
-		{
-			_list = list;
-			_root = ((ICollection)list).SyncRoot;
-		}
-
-		public int Count
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _list.Count;
-				}
-			}
-		}
-
-		public bool IsReadOnly
-		{
-			get
-			{
-				lock (_root)
-				{
-					return ((ICollection<T>)_list).IsReadOnly;
-				}
-			}
-		}
-
-		public T this[int index]
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _list[index];
-				}
-			}
-			set
-			{
-				lock (_root)
-				{
-					_list[index] = value;
-				}
-			}
-		}
-
-		public void Add(T item)
-		{
-			lock (_root)
-			{
-				_list.Add(item);
-			}
-		}
-
-		public void Insert(int index, T item)
-		{
-			lock (_root)
-			{
-				_list.Insert(index, item);
-			}
-		}
-
-		public void RemoveAt(int index)
-		{
-			lock (_root)
-			{
-				_list.RemoveAt(index);
-			}
-		}
-
-		public bool Remove(T item)
-		{
-			lock (_root)
-			{
-				return _list.Remove(item);
-			}
-		}
-
-		public void Clear()
-		{
-			lock (_root)
-			{
-				_list.Clear();
-			}
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			lock (_root)
-			{
-				return _list.GetEnumerator();
-			}
-		}
-
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
-		{
-			lock (_root)
-			{
-				return ((IEnumerable<T>)_list).GetEnumerator();
-			}
-		}
-
-		public int IndexOf(T item)
-		{
-			lock (_root)
-			{
-				return _list.IndexOf(item);
-			}
-		}
-
-		public bool Contains(T item)
-		{
-			lock (_root)
-			{
-				return _list.Contains(item);
-			}
-		}
-
-		public void CopyTo(T[] array, int arrayIndex)
-		{
-			lock (_root)
-			{
-				_list.CopyTo(array, arrayIndex);
-			}
-		}
-	}
-
-	[Serializable]
 	private struct Enumerator : IEnumerator<T>, IEnumerator
 	{
 		[NonSerialized]
@@ -924,10 +790,144 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	protected virtual void RangeInserted(int index, int count) { }
 
 	protected virtual void RangeRemoving(int index, int count) { }
+}
+
+public static class ListBase
+{
+	[Serializable]
+	private class SynchronizedList<T> : IList<T>
+	{
+		private readonly ListBase<T> _list;
+
+		private object _root;
+
+		internal SynchronizedList(ListBase<T> list)
+		{
+			_list = list;
+			_root = ((ICollection)list).SyncRoot;
+		}
+
+		public int Count
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _list.Count;
+				}
+			}
+		}
+
+		public bool IsReadOnly
+		{
+			get
+			{
+				lock (_root)
+				{
+					return ((ICollection<T>)_list).IsReadOnly;
+				}
+			}
+		}
+
+		public T this[int index]
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _list[index];
+				}
+			}
+			set
+			{
+				lock (_root)
+				{
+					_list[index] = value;
+				}
+			}
+		}
+
+		public void Add(T item)
+		{
+			lock (_root)
+			{
+				_list.Add(item);
+			}
+		}
+
+		public void Insert(int index, T item)
+		{
+			lock (_root)
+			{
+				_list.Insert(index, item);
+			}
+		}
+
+		public void RemoveAt(int index)
+		{
+			lock (_root)
+			{
+				_list.RemoveAt(index);
+			}
+		}
+
+		public bool Remove(T item)
+		{
+			lock (_root)
+			{
+				return _list.Remove(item);
+			}
+		}
+
+		public void Clear()
+		{
+			lock (_root)
+			{
+				_list.Clear();
+			}
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			lock (_root)
+			{
+				return _list.GetEnumerator();
+			}
+		}
+
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		{
+			lock (_root)
+			{
+				return ((IEnumerable<T>)_list).GetEnumerator();
+			}
+		}
+
+		public int IndexOf(T item)
+		{
+			lock (_root)
+			{
+				return _list.IndexOf(item);
+			}
+		}
+
+		public bool Contains(T item)
+		{
+			lock (_root)
+			{
+				return _list.Contains(item);
+			}
+		}
+
+		public void CopyTo(T[] array, int arrayIndex)
+		{
+			lock (_root)
+			{
+				_list.CopyTo(array, arrayIndex);
+			}
+		}
+	}
 
 	[NotNull]
-	public static IList<T> Synchronized(ListBase<T> list)
-	{
-		return new SynchronizedList(list);
-	}
+	public static IList<T> Synchronized<T>([NotNull] ListBase<T> list) { return new SynchronizedList<T>(list); }
 }

@@ -20,225 +20,6 @@ namespace essentialMix.Collections;
 public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 {
 	[Serializable]
-	private class SynchronizedList : IBoundList<T>
-	{
-		private readonly BoundList<T> _list;
-
-		private object _root;
-
-		internal SynchronizedList(BoundList<T> list)
-		{
-			_list = list;
-			_root = ((ICollection)list).SyncRoot;
-		}
-
-		public int Count
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _list.Count;
-				}
-			}
-		}
-
-		public bool IsReadOnly
-		{
-			get
-			{
-				lock (_root)
-				{
-					return ((ICollection<T>)_list).IsReadOnly;
-				}
-			}
-		}
-
-		/// <inheritdoc />
-		public int Capacity
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _list.Capacity;
-				}
-			}
-			set
-			{
-				lock (_root)
-				{
-					_list.Capacity = value;
-				}
-			}
-		}
-
-		/// <inheritdoc />
-		public int Limit
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _list.Limit;
-				}
-			}
-		}
-
-		public T this[int index]
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _list[index];
-				}
-			}
-			set
-			{
-				lock (_root)
-				{
-					_list[index] = value;
-				}
-			}
-		}
-
-		public void Add(T item)
-		{
-			lock (_root)
-			{
-				_list.Add(item);
-			}
-		}
-
-		public void Insert(int index, T item)
-		{
-			lock (_root)
-			{
-				_list.Insert(index, item);
-			}
-		}
-
-		public void RemoveAt(int index)
-		{
-			lock (_root)
-			{
-				_list.RemoveAt(index);
-			}
-		}
-
-		public bool Remove(T item)
-		{
-			lock (_root)
-			{
-				return _list.Remove(item);
-			}
-		}
-
-		public void Clear()
-		{
-			lock (_root)
-			{
-				_list.Clear();
-			}
-		}
-
-		/// <inheritdoc />
-		public void AddRange(IEnumerable<T> enumerable) { _list.AddRange(enumerable); }
-
-		/// <inheritdoc />
-		public void InsertRange(int index, IEnumerable<T> enumerable) { _list.InsertRange(index, enumerable); }
-
-		/// <inheritdoc />
-		public void RemoveRange(int index, int count) { _list.RemoveRange(index, count); }
-
-		/// <inheritdoc />
-		public int RemoveAll(Predicate<T> match) { return _list.RemoveAll(match); }
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			lock (_root)
-			{
-				return _list.GetEnumerator();
-			}
-		}
-
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
-		{
-			lock (_root)
-			{
-				return ((IEnumerable<T>)_list).GetEnumerator();
-			}
-		}
-
-		public int IndexOf(T item)
-		{
-			lock (_root)
-			{
-				return _list.IndexOf(item);
-			}
-		}
-
-		/// <inheritdoc />
-		public int IndexOf(T item, int index) { return _list.IndexOf(item, index); }
-
-		/// <inheritdoc />
-		public int IndexOf(T item, int index, int count) { return _list.IndexOf(item, index, count); }
-
-		/// <inheritdoc />
-		public int LastIndexOf(T item) { return _list.LastIndexOf(item); }
-
-		/// <inheritdoc />
-		public int LastIndexOf(T item, int index) { return _list.LastIndexOf(item, index); }
-
-		/// <inheritdoc />
-		public int LastIndexOf(T item, int index, int count) { return _list.LastIndexOf(item, index, count); }
-
-		public bool Contains(T item)
-		{
-			lock (_root)
-			{
-				return _list.Contains(item);
-			}
-		}
-
-		/// <inheritdoc />
-		public T Find(Predicate<T> match) { return _list.Find(match); }
-
-		/// <inheritdoc />
-		public T FindLast(Predicate<T> match) { return _list.FindLast(match); }
-
-		/// <inheritdoc />
-		public IEnumerable<T> FindAll(Predicate<T> match) { return _list.FindAll(match); }
-
-		/// <inheritdoc />
-		public int FindIndex(Predicate<T> match) { return _list.FindIndex(match); }
-
-		/// <inheritdoc />
-		public int FindIndex(int startIndex, Predicate<T> match) { return _list.FindIndex(startIndex, match); }
-
-		/// <inheritdoc />
-		public int FindLastIndex(Predicate<T> match) { return _list.FindLastIndex(match); }
-
-		/// <inheritdoc />
-		public int FindLastIndex(int startIndex, Predicate<T> match) { return _list.FindLastIndex(startIndex, match); }
-
-		/// <inheritdoc />
-		public int FindLastIndex(int startIndex, int count, Predicate<T> match) { return _list.FindLastIndex(startIndex, count, match); }
-
-		/// <inheritdoc />
-		public IEnumerable<T> GetRange(int index, int count) { return _list.GetRange(index, count); }
-
-		public void CopyTo(T[] array, int arrayIndex)
-		{
-			lock (_root)
-			{
-				_list.CopyTo(array, arrayIndex);
-			}
-		}
-	}
-
-	[Serializable]
 	private struct Enumerator : IEnumerator<T>, IEnumerator
 	{
 		[NonSerialized]
@@ -981,12 +762,6 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 		return true;
 	}
 
-	[NotNull]
-	public static IBoundList<T> Synchronized(BoundList<T> list)
-	{
-		return new SynchronizedList(list);
-	}
-
 	// Ensures that the capacity of this list is at least the given minimum
 	// value. If the current capacity of the list is less than min, the
 	// capacity is increased to twice the current capacity or to min,
@@ -1019,4 +794,229 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 		_items[index] = item;
 		_version++;
 	}
+}
+
+public static class BoundList
+{
+	[Serializable]
+	private class SynchronizedList<T> : IBoundList<T>
+	{
+		private readonly BoundList<T> _list;
+
+		private object _root;
+
+		internal SynchronizedList(BoundList<T> list)
+		{
+			_list = list;
+			_root = ((ICollection)list).SyncRoot;
+		}
+
+		public int Count
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _list.Count;
+				}
+			}
+		}
+
+		public bool IsReadOnly
+		{
+			get
+			{
+				lock (_root)
+				{
+					return ((ICollection<T>)_list).IsReadOnly;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public int Capacity
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _list.Capacity;
+				}
+			}
+			set
+			{
+				lock (_root)
+				{
+					_list.Capacity = value;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public int Limit
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _list.Limit;
+				}
+			}
+		}
+
+		public T this[int index]
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _list[index];
+				}
+			}
+			set
+			{
+				lock (_root)
+				{
+					_list[index] = value;
+				}
+			}
+		}
+
+		public void Add(T item)
+		{
+			lock (_root)
+			{
+				_list.Add(item);
+			}
+		}
+
+		public void Insert(int index, T item)
+		{
+			lock (_root)
+			{
+				_list.Insert(index, item);
+			}
+		}
+
+		public void RemoveAt(int index)
+		{
+			lock (_root)
+			{
+				_list.RemoveAt(index);
+			}
+		}
+
+		public bool Remove(T item)
+		{
+			lock (_root)
+			{
+				return _list.Remove(item);
+			}
+		}
+
+		public void Clear()
+		{
+			lock (_root)
+			{
+				_list.Clear();
+			}
+		}
+
+		/// <inheritdoc />
+		public void AddRange(IEnumerable<T> enumerable) { _list.AddRange(enumerable); }
+
+		/// <inheritdoc />
+		public void InsertRange(int index, IEnumerable<T> enumerable) { _list.InsertRange(index, enumerable); }
+
+		/// <inheritdoc />
+		public void RemoveRange(int index, int count) { _list.RemoveRange(index, count); }
+
+		/// <inheritdoc />
+		public int RemoveAll(Predicate<T> match) { return _list.RemoveAll(match); }
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			lock (_root)
+			{
+				return _list.GetEnumerator();
+			}
+		}
+
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		{
+			lock (_root)
+			{
+				return ((IEnumerable<T>)_list).GetEnumerator();
+			}
+		}
+
+		public int IndexOf(T item)
+		{
+			lock (_root)
+			{
+				return _list.IndexOf(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public int IndexOf(T item, int index) { return _list.IndexOf(item, index); }
+
+		/// <inheritdoc />
+		public int IndexOf(T item, int index, int count) { return _list.IndexOf(item, index, count); }
+
+		/// <inheritdoc />
+		public int LastIndexOf(T item) { return _list.LastIndexOf(item); }
+
+		/// <inheritdoc />
+		public int LastIndexOf(T item, int index) { return _list.LastIndexOf(item, index); }
+
+		/// <inheritdoc />
+		public int LastIndexOf(T item, int index, int count) { return _list.LastIndexOf(item, index, count); }
+
+		public bool Contains(T item)
+		{
+			lock (_root)
+			{
+				return _list.Contains(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public T Find(Predicate<T> match) { return _list.Find(match); }
+
+		/// <inheritdoc />
+		public T FindLast(Predicate<T> match) { return _list.FindLast(match); }
+
+		/// <inheritdoc />
+		public IEnumerable<T> FindAll(Predicate<T> match) { return _list.FindAll(match); }
+
+		/// <inheritdoc />
+		public int FindIndex(Predicate<T> match) { return _list.FindIndex(match); }
+
+		/// <inheritdoc />
+		public int FindIndex(int startIndex, Predicate<T> match) { return _list.FindIndex(startIndex, match); }
+
+		/// <inheritdoc />
+		public int FindLastIndex(Predicate<T> match) { return _list.FindLastIndex(match); }
+
+		/// <inheritdoc />
+		public int FindLastIndex(int startIndex, Predicate<T> match) { return _list.FindLastIndex(startIndex, match); }
+
+		/// <inheritdoc />
+		public int FindLastIndex(int startIndex, int count, Predicate<T> match) { return _list.FindLastIndex(startIndex, count, match); }
+
+		/// <inheritdoc />
+		public IEnumerable<T> GetRange(int index, int count) { return _list.GetRange(index, count); }
+
+		public void CopyTo(T[] array, int arrayIndex)
+		{
+			lock (_root)
+			{
+				_list.CopyTo(array, arrayIndex);
+			}
+		}
+	}
+
+	[NotNull]
+	public static IBoundList<T> Synchronized<T>([NotNull] BoundList<T> list) { return new SynchronizedList<T>(list); }
 }

@@ -29,154 +29,6 @@ namespace essentialMix.Collections;
 public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyCollection<T>, ICollection, IEnumerable
 {
 	[Serializable]
-	private class SynchronizedList : IList<T>
-	{
-		private readonly Deque<T> _deque;
-		private readonly IList _list;
-		private readonly object _root;
-
-		internal SynchronizedList(Deque<T> deque)
-		{
-			_deque = deque;
-			_list = deque;
-			_root = _list.SyncRoot;
-		}
-
-		/// <inheritdoc />
-		public T this[int index]
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _deque[index];
-				}
-			}
-			set
-			{
-				lock (_root)
-				{
-					_deque[index] = value;
-				}
-			}
-		}
-
-		/// <inheritdoc />
-		public int Count
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _deque.Count;
-				}
-			}
-		}
-
-		/// <inheritdoc />
-		public bool IsReadOnly
-		{
-			get
-			{
-				lock (_root)
-				{
-					return _list.IsReadOnly;
-				}
-			}
-		}
-
-		/// <inheritdoc />
-		public void Insert(int index, T item)
-		{
-			lock (_root)
-			{
-				_deque.Insert(index, item);
-			}
-		}
-
-		/// <inheritdoc />
-		public void Add(T item)
-		{
-			lock (_root)
-			{
-				_deque.Insert(_deque.Count, item);
-			}
-		}
-
-		/// <inheritdoc />
-		public void RemoveAt(int index)
-		{
-			lock (_root)
-			{
-				_deque.RemoveAt(index);
-			}
-		}
-
-		/// <inheritdoc />
-		public bool Remove(T item)
-		{
-			lock (_root)
-			{
-				return _deque.Remove(item);
-			}
-		}
-
-		/// <inheritdoc />
-		public void Clear()
-		{
-			lock (_root)
-			{
-				_deque.Clear();
-			}
-		}
-
-		/// <inheritdoc />
-		public int IndexOf(T item)
-		{
-			lock (_root)
-			{
-				return _deque.IndexOf(item);
-			}
-		}
-
-		/// <inheritdoc />
-		public bool Contains(T item)
-		{
-			lock (_root)
-			{
-				return _deque.Contains(item);
-			}
-		}
-
-		/// <inheritdoc />
-		public void CopyTo(T[] array, int arrayIndex)
-		{
-			lock (_root)
-			{
-				_deque.CopyTo(array, arrayIndex);
-			}
-		}
-
-		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			lock (_root)
-			{
-				return _deque.GetEnumerator();
-			}
-		}
-
-		/// <inheritdoc />
-		public IEnumerator<T> GetEnumerator()
-		{
-			lock (_root)
-			{
-				return _deque.GetEnumerator();
-			}
-		}
-	}
-
-	[Serializable]
 	private struct Enumerator : IEnumerator<T>, IEnumerator, IDisposable
 	{
 		private readonly Deque<T> _deque;
@@ -1068,10 +920,158 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 		_version++;
 		return true;
 	}
+}
+
+public static class Deque
+{
+	[Serializable]
+	private class SynchronizedList<T> : IList<T>
+	{
+		private readonly Deque<T> _deque;
+		private readonly IList _list;
+		private readonly object _root;
+
+		internal SynchronizedList(Deque<T> deque)
+		{
+			_deque = deque;
+			_list = deque;
+			_root = _list.SyncRoot;
+		}
+
+		/// <inheritdoc />
+		public T this[int index]
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _deque[index];
+				}
+			}
+			set
+			{
+				lock (_root)
+				{
+					_deque[index] = value;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public int Count
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _deque.Count;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public bool IsReadOnly
+		{
+			get
+			{
+				lock (_root)
+				{
+					return _list.IsReadOnly;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public void Insert(int index, T item)
+		{
+			lock (_root)
+			{
+				_deque.Insert(index, item);
+			}
+		}
+
+		/// <inheritdoc />
+		public void Add(T item)
+		{
+			lock (_root)
+			{
+				_deque.Insert(_deque.Count, item);
+			}
+		}
+
+		/// <inheritdoc />
+		public void RemoveAt(int index)
+		{
+			lock (_root)
+			{
+				_deque.RemoveAt(index);
+			}
+		}
+
+		/// <inheritdoc />
+		public bool Remove(T item)
+		{
+			lock (_root)
+			{
+				return _deque.Remove(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public void Clear()
+		{
+			lock (_root)
+			{
+				_deque.Clear();
+			}
+		}
+
+		/// <inheritdoc />
+		public int IndexOf(T item)
+		{
+			lock (_root)
+			{
+				return _deque.IndexOf(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public bool Contains(T item)
+		{
+			lock (_root)
+			{
+				return _deque.Contains(item);
+			}
+		}
+
+		/// <inheritdoc />
+		public void CopyTo(T[] array, int arrayIndex)
+		{
+			lock (_root)
+			{
+				_deque.CopyTo(array, arrayIndex);
+			}
+		}
+
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			lock (_root)
+			{
+				return _deque.GetEnumerator();
+			}
+		}
+
+		/// <inheritdoc />
+		public IEnumerator<T> GetEnumerator()
+		{
+			lock (_root)
+			{
+				return _deque.GetEnumerator();
+			}
+		}
+	}
 
 	[NotNull]
-	public static IList<T> Synchronized(Deque<T> list)
-	{
-		return new SynchronizedList(list);
-	}
+	public static IList<T> Synchronized<T>([NotNull] Deque<T> list) { return new SynchronizedList<T>(list); }
 }

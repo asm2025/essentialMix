@@ -1,6 +1,5 @@
-﻿namespace essentialMix.Collections
+﻿namespace essentialMix.Collections;
+
+public abstract class GraphMatrix<TEdge, T>
 {
-	public abstract class GraphMatrix<TEdge, T>
-	{
-	}
 }
