@@ -68,6 +68,11 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Compile Remove="!todo\**" />
+	  <EmbeddedResource Remove="!todo\**" />
+	  <None Remove="!todo\**" />
+	</ItemGroup>
+	<ItemGroup>
 		<None Include="..\buckramega.png" Pack="True" PackagePath="" />
 	</ItemGroup>
 
@@ -76,6 +81,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Include="!todo\BTree\BTree.cs" />
+		<Compile Include="!todo\BTree\BTreeBlock.cs" />
+		<Compile Include="!todo\BTree\BTreeBlockCollection.cs" />
+		<Compile Include="!todo\BTree\BTreeNode.cs" />
+		<Compile Include="!todo\BTree\Dbg_BTreeDebugView.cs" />
+		<Compile Include="!todo\BTree\IBTree.cs" />
+		<Compile Include="!todo\BTree\IBTreeBlock.cs" />
 		<Compile Include="..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
 	</ItemGroup>
 
