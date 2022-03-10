@@ -68,11 +68,6 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 	<ItemGroup>
-	  <Compile Remove="!todo\**" />
-	  <EmbeddedResource Remove="!todo\**" />
-	  <None Remove="!todo\**" />
-	</ItemGroup>
-	<ItemGroup>
 		<None Include="..\buckramega.png" Pack="True" PackagePath="" />
 	</ItemGroup>
 
