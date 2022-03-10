@@ -5,8 +5,8 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
-using JetBrains.Annotations;
 using essentialMix.Data.Helpers;
+using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
 namespace essentialMix.Extensions;
@@ -21,7 +21,7 @@ public static class DataSetExtension
 		return b;
 	}
 
-	public static bool IsNullOrEmpty(this DataSet thisValue) { return thisValue is not { Tables: { Count: not 0 } }; }
+	public static bool IsNullOrEmpty(this DataSet thisValue) { return thisValue == null || thisValue.Tables.Count == 0; }
 
 	public static object[] CollectValues([NotNull] this DataSet thisValue, int index, [NotNull] params string[] fieldNames)
 	{

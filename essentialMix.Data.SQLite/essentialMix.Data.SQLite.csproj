@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -11,7 +11,7 @@
 		<AssemblyOriginatorKeyFile>..\sign.pfx</AssemblyOriginatorKeyFile>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<AssemblyVersion>13.0.4.0</AssemblyVersion>
-		<FileVersion>22.2.25.0</FileVersion>
+		<FileVersion>22.3.10.0</FileVersion>
 		<Version>13.0.4.0</Version>
 	</PropertyGroup>
 	
@@ -52,7 +52,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>$(AssemblyVersion)</PackageVersion>
+		<PackageVersion>13.0.4.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns, database, orm, dbms, sqlite</PackageTags>

@@ -13,7 +13,7 @@ public static class CancellationTokenSourceExtension
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static bool IsCancelledOrDisposed(this CancellationTokenSource thisValue)
 	{
-		try { return thisValue is not { IsCancellationRequested: not true }; }
+		try { return thisValue == null || thisValue.IsCancellationRequested; }
 		catch (ObjectDisposedException) { return true; }
 	}
 

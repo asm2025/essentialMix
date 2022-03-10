@@ -13,5 +13,5 @@ public static class DataColumnCollectionExtension
 		return (DataTable)info?.GetValue(thisValue);
 	}
 
-	public static bool IsNullOrEmpty(this DataColumnCollection thisValue) { return thisValue is not { Count: not 0 }; }
+	public static bool IsNullOrEmpty(this DataColumnCollection thisValue) { return thisValue == null || thisValue.Count == 0; }
 }

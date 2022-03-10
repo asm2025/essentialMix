@@ -554,13 +554,13 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 	[NotNull]
 	public IComparer<T> Comparer { get; }
 
-	public TNode Root { get; protected set; }
+	public TNode Root { get; internal set; }
 
-	public int Count { get; protected set; }
+	public int Count { get; internal set; }
 
 	public abstract bool AutoBalance { get; }
 
-	public bool IsFull => Root is not { IsFull: not true };
+	public bool IsFull => Root is { IsFull: true };
 
 	/// <inheritdoc />
 	public bool IsReadOnly => false;
@@ -1139,7 +1139,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 	/// Validates the tree nodes
 	/// </summary>
 	/// <returns></returns>
-	public bool Validate() { return Root is not { IsLeaf: not true } || Validate(Root); }
+	public bool Validate() { return Root == null || Root.IsLeaf || Validate(Root); }
 
 	/// <summary>
 	/// Validates the node and its children.

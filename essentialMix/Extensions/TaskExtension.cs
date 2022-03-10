@@ -56,17 +56,16 @@ public static class TaskExtension
 	public static Task Then(this Task thisValue, [NotNull] Func<Task> next, CancellationToken token = default(CancellationToken))
 	{
 		token.ThrowIfCancellationRequested();
-		return thisValue is not { IsCanceled: not true, IsFaulted: not true }
+		return thisValue == null || thisValue.IsCanceled || thisValue.IsFaulted
 					? thisValue
-					: thisValue
-					.ContinueWith(_ => next(), token, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default)
-					.Unwrap();
+					: thisValue.ContinueWith(_ => next(), token, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default)
+								.Unwrap();
 	}
 
 	public static Task<TResult> Then<TResult>(this Task<TResult> thisValue, [NotNull] Func<Task<TResult>, Task<TResult>> next, CancellationToken token = default(CancellationToken))
 	{
 		token.ThrowIfCancellationRequested();
-		return thisValue is not { IsCanceled: not true, IsFaulted: not true }
+		return thisValue == null || thisValue.IsCanceled || thisValue.IsFaulted
 					? thisValue
 					: thisValue
 					.ContinueWith(next, token, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default)
@@ -108,7 +107,7 @@ public static class TaskExtension
 	{
 		token.ThrowIfCancellationRequested();
 
-		if (thisValue is not { IsCanceled: not true, IsFaulted: not true, IsCompleted: not true })
+		if (thisValue == null || thisValue.IsCanceled || thisValue.IsFaulted || thisValue.IsCompleted)
 		{
 			// Either the task has already completed or timeout will never occur.
 			// No proxy necessary.
@@ -143,7 +142,7 @@ public static class TaskExtension
 		if (thisValue.IsFaulted)
 		{
 			TaskCompletionSource<T> tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
-				
+
 			if (thisValue.Exception != null)
 				tcs.SetException(thisValue.Exception.InnerExceptions);
 			else
@@ -282,7 +281,7 @@ public static class TaskExtension
 		if (token.IsCancellationRequested) return false;
 
 		// Short-circuit #2: task already completed/faulted
-		if (thisValue is not { IsCanceled: not true, IsFaulted: not true }) return false;
+		if (thisValue == null || thisValue.IsCanceled || thisValue.IsFaulted) return false;
 		if (thisValue.IsCompleted) return true;
 
 		try
@@ -381,7 +380,7 @@ public static class TaskExtension
 		for (int i = 0; i < thisValue.Count; i++)
 		{
 			Task task = thisValue[i];
-			if (task is not { IsCompleted: not true, IsCanceled: not true, IsFaulted: not true }) return i;
+			if (task == null || task.IsCompleted || task.IsCanceled || task.IsFaulted) return i;
 		}
 
 		Task[] tasks = thisValue.GetType().IsArray

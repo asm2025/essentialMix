@@ -33,7 +33,7 @@ public class XNodeBuilder : XmlWriter
 
 	public override void Close()
 	{
-		if (_content is not { Count: not 0 }) return;
+		if (_content == null || _content.Count == 0) return;
 		if (_root == null) throw new InvalidOperationException("No container node was found to hold the contents");
 		_root.Add(_content);
 	}
@@ -127,7 +127,7 @@ public class XNodeBuilder : XmlWriter
 
 	public override void WriteString(string text) { AddString(text); }
 
-	public override void WriteSurrogateCharEntity(char lowCh, char highCh) { AddString(new string(new[] {highCh, lowCh})); }
+	public override void WriteSurrogateCharEntity(char lowCh, char highCh) { AddString(new string(new[] { highCh, lowCh })); }
 
 	public override void WriteWhitespace(string ws) { AddString(ws); }
 
@@ -150,9 +150,9 @@ public class XNodeBuilder : XmlWriter
 			return;
 		}
 
-		if (_parent != null) 
+		if (_parent != null)
 			_parent.Add(n);
-		else 
+		else
 			Add(n);
 
 		if (!isContainer) return;
@@ -169,9 +169,9 @@ public class XNodeBuilder : XmlWriter
 			string str = xnodeBuilder._attrValue + s;
 			xnodeBuilder._attrValue = str;
 		}
-		else if (_parent != null) 
+		else if (_parent != null)
 			_parent.Add(s);
-		else 
+		else
 			Add(s);
 	}
 }

@@ -1081,7 +1081,7 @@ public static class ExpressionExtension
 	internal static PropertyPath MatchSimplePropertyAccess([NotNull] this Expression thisValue, [NotNull] Expression propertyAccessExpression)
 	{
 		PropertyPath propertyPath = MatchPropertyAccess(thisValue, propertyAccessExpression);
-		return propertyPath is not { Count: 1 }
+		return propertyPath == null || propertyPath.Count < 1
 					? null
 					: propertyPath;
 	}

@@ -1,9 +1,9 @@
 using System;
 using System.Threading;
 using essentialMix.Extensions;
-using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
+using JetBrains.Annotations;
 
 namespace essentialMix.Threading;
 
@@ -43,7 +43,7 @@ public sealed class SynchronizedThreads<T> : Disposable
 		WaitOnDispose = options.WaitOnDispose;
 
 		InitializeToken(token);
-			
+
 		_workStartedCallback = options.WorkStartedCallback;
 		_workCompletedCallback = options.WorkCompletedCallback;
 
@@ -130,12 +130,12 @@ public sealed class SynchronizedThreads<T> : Disposable
 		ThrowIfDisposed();
 		if (IsBusy) return;
 
-		lock(SyncRoot)
+		lock (SyncRoot)
 		{
 			_workStartedCallback?.Invoke(this);
 			_workersCountdown.AddCount(_workers.Length);
 
-			foreach (Thread thread in _workers) 
+			foreach (Thread thread in _workers)
 				thread.Start();
 		}
 	}
@@ -168,7 +168,7 @@ public sealed class SynchronizedThreads<T> : Disposable
 	{
 		ThrowIfDisposed();
 		if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-		if (_workersCountdown is not { IsSet: not true }) return true;
+		if (_workersCountdown == null || _workersCountdown.IsSet) return true;
 
 		try
 		{
@@ -214,7 +214,7 @@ public sealed class SynchronizedThreads<T> : Disposable
 			_workerWaitEvent.Wait(Token);
 			if (Token.IsCancellationRequested || IsDisposed) break;
 
-			lock(SyncRoot)
+			lock (SyncRoot)
 			{
 				if (IsDisposed || Token.IsCancellationRequested || IsPaused) continue;
 				more = _mainRoutine(State);
@@ -251,7 +251,7 @@ public sealed class SynchronizedThreads<T> : Disposable
 			_mainWaitEvent.Wait(Token);
 			if (Token.IsCancellationRequested || IsDisposed) break;
 
-			lock(SyncRoot)
+			lock (SyncRoot)
 			{
 				if (IsDisposed || Token.IsCancellationRequested || IsPaused) continue;
 				more = _workerRoutine(State);

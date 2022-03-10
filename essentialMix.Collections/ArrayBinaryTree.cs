@@ -677,7 +677,7 @@ public abstract class ArrayBinaryTree<T> : ICollection<T>, IReadOnlyCollection<T
 	public IComparer<T> Comparer { get; }
 
 	/// <inheritdoc cref="ICollection{T}" />
-	public int Count { get; protected set; }
+	public int Count { get; internal set; }
 
 	[NotNull]
 	protected T[] Items { get; private set; }
@@ -1098,10 +1098,10 @@ public abstract class ArrayBinaryTree<T> : ICollection<T>, IReadOnlyCollection<T
 	{
 		if (level < 0) throw new ArgumentOutOfRangeException(nameof(level));
 		if (Count == 0) return -1;
-			
+
 		int index = Find(value);
 		if (index < 0) return -1;
-			
+
 		int lvl = 0, parentIndex = index;
 
 		while (parentIndex > -1)
@@ -1793,7 +1793,7 @@ public static class ArrayBinaryTreeExtension
 			(int nodeIndex, int level) = stack.Pop();
 			int n = Constants.INDENT * level;
 			navigator.Index = nodeIndex;
-	
+
 			if (indent.Length > n) indent.Length = n;
 			else if (indent.Length < n) indent.Append(' ', n - indent.Length);
 

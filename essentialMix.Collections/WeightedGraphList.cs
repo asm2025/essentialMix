@@ -128,7 +128,7 @@ public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollecti
 			{
 				T from = _queue.Dequeue();
 				KeyedCollection<T, GraphEdge<T, TWeight>> edges = _graph[from];
-				if (edges is not { Count: not 0 }) continue;
+				if (edges == null || edges.Count == 0) continue;
 
 				foreach (GraphEdge<T, TWeight> edge in edges)
 					_edges.Enqueue(new EdgeEntry<T, GraphEdge<T, TWeight>>(from, edge));
@@ -234,7 +234,7 @@ public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollecti
 
 			// Queue the next vertices
 			KeyedCollection<T, GraphEdge<T, TWeight>> edges = _graph[_current];
-			if (edges is not { Count: not 0 }) return true;
+			if (edges == null || edges.Count == 0) return true;
 
 			foreach (GraphEdge<T, TWeight> edge in edges)
 				_queue.Enqueue(edge.To);
@@ -336,10 +336,10 @@ public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollecti
 			}
 
 			_visited.Add(_current);
-				
+
 			// Queue the next vertices
 			KeyedCollection<T, GraphEdge<T, TWeight>> edges = _graph[_current];
-			if (edges is not { Count: not 0 }) return true;
+			if (edges == null || edges.Count == 0) return true;
 
 			foreach (GraphEdge<T, TWeight> edge in edges)
 				_stack.Push(edge.To);
@@ -362,7 +362,7 @@ public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollecti
 	}
 
 	/// <inheritdoc />
-	protected WeightedGraphList() 
+	protected WeightedGraphList()
 		: this(0, null)
 	{
 	}
@@ -390,7 +390,7 @@ public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollecti
 		: base(info, context)
 	{
 	}
-		
+
 	/// <inheritdoc />
 	protected sealed override KeyedCollection<T, GraphEdge<T, TWeight>> MakeContainer() { return new KeyedCollection<T, GraphEdge<T, TWeight>>(e => e.To, Comparer); }
 
@@ -419,7 +419,7 @@ public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollecti
 		{
 			if (version != _version) throw new VersionChangedException();
 			KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
-			if (edges is not { Count: not 0 }) continue;
+			if (edges == null || edges.Count == 0) continue;
 
 			foreach (GraphEdge<T, TWeight> edge in edges)
 			{
@@ -440,7 +440,7 @@ public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollecti
 		{
 			if (version != _version) throw new VersionChangedException();
 			KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
-			if (edges is not { Count: not 0 }) continue;
+			if (edges == null || edges.Count == 0) continue;
 
 			foreach (GraphEdge<T, TWeight> edge in edges)
 			{
@@ -478,7 +478,7 @@ public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollecti
 
 		foreach (KeyedCollection<T, GraphEdge<T, TWeight>> collection in Values)
 		{
-			if (collection is not { Count: not 0 }) continue;
+			if (collection == null || collection.Count == 0) continue;
 			collection.Remove(value);
 		}
 	}
@@ -539,7 +539,7 @@ public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollecti
 			// edges will be extracted in ascending weight order
 			BinomialNode<TWeight, PathEntry> current = queue.ExtractNode();
 			KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[current.Value.Value];
-			if (edges is not { Count: not 0 }) continue;
+			if (edges == null || edges.Count == 0) continue;
 
 			// Update the priorities of all of its edges.
 			foreach (GraphEdge<T, TWeight> edge in edges)
@@ -606,9 +606,9 @@ public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollecti
 		TWeight maxWeight = TypeHelper.MaximumOf<TWeight>();
 		Dictionary<T, TWeight> destTo = new Dictionary<T, TWeight>(Keys.Count, Comparer);
 		Dictionary<T, T> history = new Dictionary<T, T>(Comparer);
-			
+
 		// Step 1: Initialize distances from src to all other vertices as INFINITE
-		foreach (T vertex in Keys) 
+		foreach (T vertex in Keys)
 			destTo.Add(vertex, maxWeight);
 
 		destTo[from] = defWeight;
@@ -625,7 +625,7 @@ public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollecti
 		foreach (T vertex in Keys)
 		{
 			KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
-			if (edges is not { Count: not 0 }) continue;
+			if (edges == null || edges.Count == 0) continue;
 
 			foreach (GraphEdge<T, TWeight> edge in edges)
 			{
@@ -645,7 +645,7 @@ public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollecti
 		foreach (T u in Keys)
 		{
 			KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[u];
-			if (edges is not { Count: not 0 }) continue;
+			if (edges == null || edges.Count == 0) continue;
 
 			foreach (GraphEdge<T, TWeight> edge in edges)
 			{

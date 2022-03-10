@@ -8,10 +8,10 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using essentialMix.Collections;
-using JetBrains.Annotations;
-using Microsoft.CSharp.RuntimeBinder;
 using essentialMix.Helpers;
 using essentialMix.Reflection;
+using JetBrains.Annotations;
+using Microsoft.CSharp.RuntimeBinder;
 using Binder = System.Reflection.Binder;
 using CSharpBinder = Microsoft.CSharp.RuntimeBinder.Binder;
 
@@ -63,7 +63,7 @@ public static class TypeExtension
 	public static MethodBase GetMethod([NotNull] this Type thisValue, [NotNull] LambdaExpression expression)
 	{
 		MethodBase result = expression.GetMethod();
-		if (result is not { ReflectedType: { } } || !result.ReflectedType.IsAssignableFrom(thisValue))
+		if (result?.ReflectedType == null || !result.ReflectedType.IsAssignableFrom(thisValue))
 			throw new ArgumentException($"Expression '{expression}' refers to a method that is not from type {thisValue}.");
 
 		return result;
@@ -114,7 +114,7 @@ public static class TypeExtension
 		return thisValue.GetProperty(name, bindingAttributes, binder, returnType, types ?? Type.EmptyTypes, modifiers);
 	}
 
-	[NotNull] 
+	[NotNull]
 	public static MethodInfo[] GetGetters([NotNull] this Type thisValue) { return GetGetters(thisValue, Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE_STATIC); }
 
 	[NotNull]
@@ -123,7 +123,7 @@ public static class TypeExtension
 		return thisValue.GetMethods(m => m.Name.StartsWith("get_") && m.GetParameters().Length == 0, bindingFlags).ToArray();
 	}
 
-	[NotNull] 
+	[NotNull]
 	public static MethodInfo[] GetSetters([NotNull] this Type thisValue) { return GetGetters(thisValue, Constants.BF_PUBLIC_NON_PUBLIC_INSTANCE_STATIC); }
 
 	[NotNull]
@@ -794,7 +794,7 @@ public static class TypeExtension
 	[NotNull]
 	public static Delegate Ctor([NotNull] this Type thisValue, params ParameterExpression[] parameters)
 	{
-		if (parameters is not { Length: not 0 })
+		if (parameters == null || parameters.Length == 0)
 		{
 			ConstructorInfo ci = GetConstructor(thisValue);
 			return Expression.Lambda(Expression.New(ci)).Compile();
@@ -1069,7 +1069,7 @@ public static class TypeExtension
 			* succeed OR we get a runtime failure related to the inability to cast null to
 			* the desired type, which may or may not indicate an actual issue. thus, we do
 			* the work manually
-			*/ 
+			*/
 			return CanReferenceTypeExplicitlyCastTo(thisValue, type);
 		});
 	}

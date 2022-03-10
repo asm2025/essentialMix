@@ -6,8 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using JetBrains.Annotations;
 using essentialMix.Helpers;
+using JetBrains.Annotations;
 
 namespace essentialMix.Extensions;
 
@@ -117,8 +117,8 @@ public static class StringBuilderExtension
 	public static StringBuilder AppendIfDoesNotEndWith([NotNull] this StringBuilder thisValue, string value)
 	{
 		if (string.IsNullOrEmpty(value)) return thisValue;
-		return EndsWith(thisValue, value) 
-					? thisValue 
+		return EndsWith(thisValue, value)
+					? thisValue
 					: thisValue.Append(value);
 	}
 
@@ -605,8 +605,8 @@ public static class StringBuilderExtension
 		if (thisValue == null || value == null) return false;
 		if (thisValue.Length == 0 && value.Length == 0) return true;
 		if (thisValue.Length == 0 || value.Length == 0 || thisValue.Length < value.Length) return false;
-		return value.Length == 1 
-					? thisValue[0] == value[0] 
+		return value.Length == 1
+					? thisValue[0] == value[0]
 					: Equals(thisValue, 0, value, 0, value.Length);
 	}
 	public static bool StartsWith(this StringBuilder thisValue, string value, StringComparison comparison)
@@ -702,7 +702,7 @@ public static class StringBuilderExtension
 		return true;
 	}
 
-	public static bool IsNullOrEmpty(this StringBuilder thisValue) { return thisValue is not { Length: not 0 }; }
+	public static bool IsNullOrEmpty(this StringBuilder thisValue) { return thisValue == null || thisValue.Length == 0; }
 
 	public static string IfNullOrEmpty(this StringBuilder thisValue, string returnValue)
 	{
@@ -939,7 +939,7 @@ public static class StringBuilderExtension
 					break;
 			}
 		}
-			
+
 		return thisValue;
 	}
 
@@ -966,7 +966,7 @@ public static class StringBuilderExtension
 					break;
 			}
 		}
-			
+
 		return thisValue;
 	}
 
@@ -993,7 +993,7 @@ public static class StringBuilderExtension
 					break;
 			}
 		}
-			
+
 		return thisValue;
 	}
 
@@ -1006,7 +1006,7 @@ public static class StringBuilderExtension
 		{
 			thisValue.AppendFormat(pair, format, group);
 		}
-			
+
 		return thisValue;
 	}
 
@@ -1019,7 +1019,7 @@ public static class StringBuilderExtension
 		{
 			thisValue.AppendFormat(pair, format, group);
 		}
-			
+
 		return thisValue;
 	}
 
@@ -1046,7 +1046,7 @@ public static class StringBuilderExtension
 					break;
 			}
 		}
-			
+
 		return thisValue;
 	}
 
@@ -1078,7 +1078,7 @@ public static class StringBuilderExtension
 					break;
 			}
 		}
-			
+
 		return thisValue;
 	}
 
@@ -1103,7 +1103,7 @@ public static class StringBuilderExtension
 					break;
 			}
 		}
-			
+
 		return thisValue;
 	}
 
@@ -1141,7 +1141,7 @@ public static class StringBuilderExtension
 		{
 			thisValue.Append(pair, separator, group);
 		}
-			
+
 		return thisValue;
 	}
 
@@ -1154,7 +1154,7 @@ public static class StringBuilderExtension
 		{
 			thisValue.Append(pair, separator, group);
 		}
-			
+
 		return thisValue;
 	}
 
@@ -1193,8 +1193,8 @@ public static class StringBuilderExtension
 	{
 		if (length == -1) length = thisValue.Length;
 		if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-		return length == 0 
-					? new StringBuilder() 
+		return length == 0
+					? new StringBuilder()
 					: thisValue.Substring(thisValue.Length - length, length);
 	}
 
@@ -1448,42 +1448,42 @@ public static class StringBuilderExtension
 	public static string[] Split(this StringBuilder thisValue, [NotNull] params char[] separator)
 	{
 		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
-		return separator.IsNullOrEmpty() ? new[] {thisValue.ToString()} : thisValue.ToString().Split(separator);
+		return separator.IsNullOrEmpty() ? new[] { thisValue.ToString() } : thisValue.ToString().Split(separator);
 	}
 
 	[NotNull]
 	public static string[] Split(this StringBuilder thisValue, char[] separator, int count)
 	{
 		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
-		return separator.IsNullOrEmpty() ? new[] {thisValue.ToString()} : thisValue.ToString().Split(separator, count);
+		return separator.IsNullOrEmpty() ? new[] { thisValue.ToString() } : thisValue.ToString().Split(separator, count);
 	}
 
 	[NotNull]
 	public static string[] Split(this StringBuilder thisValue, [NotNull] char[] separator, StringSplitOptions options)
 	{
 		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
-		return separator.IsNullOrEmpty() ? new[] {thisValue.ToString()} : thisValue.ToString().Split(separator, options);
+		return separator.IsNullOrEmpty() ? new[] { thisValue.ToString() } : thisValue.ToString().Split(separator, options);
 	}
 
 	[NotNull]
 	public static string[] Split([NotNull] this StringBuilder thisValue, [NotNull] char[] separator, int count, StringSplitOptions options)
 	{
 		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
-		return separator.IsNullOrEmpty() ? new[] {thisValue.ToString()} : thisValue.ToString().Split(separator, count, options);
+		return separator.IsNullOrEmpty() ? new[] { thisValue.ToString() } : thisValue.ToString().Split(separator, count, options);
 	}
 
 	[NotNull]
 	public static string[] Split([NotNull] this StringBuilder thisValue, [NotNull] string[] separator, StringSplitOptions options)
 	{
 		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
-		return separator.IsNullOrEmpty() ? new[] {thisValue.ToString()} : thisValue.ToString().Split(separator, options);
+		return separator.IsNullOrEmpty() ? new[] { thisValue.ToString() } : thisValue.ToString().Split(separator, options);
 	}
 
 	[NotNull]
 	public static string[] Split([NotNull] this StringBuilder thisValue, [NotNull] string[] separator, int count, StringSplitOptions options)
 	{
 		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
-		return separator.IsNullOrEmpty() ? new[] {thisValue.ToString()} : thisValue.ToString().Split(separator, count, options);
+		return separator.IsNullOrEmpty() ? new[] { thisValue.ToString() } : thisValue.ToString().Split(separator, count, options);
 	}
 
 	[NotNull]
@@ -1495,7 +1495,7 @@ public static class StringBuilderExtension
 		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
 
 		string value = thisValue.ToString();
-		return string.IsNullOrEmpty(pattern) ? new[] {value} : Regex.Split(value, pattern, options);
+		return string.IsNullOrEmpty(pattern) ? new[] { value } : Regex.Split(value, pattern, options);
 	}
 
 	[NotNull]

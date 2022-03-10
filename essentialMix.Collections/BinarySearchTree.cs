@@ -16,7 +16,7 @@ public class BinarySearchTree<T> : LinkedBinaryTree<T>
 	protected const int BALANCE_FACTOR = 1;
 
 	/// <inheritdoc />
-	public BinarySearchTree() 
+	public BinarySearchTree()
 		: this((IComparer<T>)null)
 	{
 	}
@@ -189,7 +189,7 @@ public class BinarySearchTree<T> : LinkedBinaryTree<T>
 			/*
 			* if there is a left-most for the node's right node, then
 			* move its right to its parent's left.
-			*/ 
+			*/
 			if (leftMostParent != null)
 			{
 				leftMostParent.Left = successor.Right;
@@ -264,8 +264,8 @@ public class BinarySearchTree<T> : LinkedBinaryTree<T>
 	/// <inheritdoc />
 	public override bool IsBalanced()
 	{
-		if (Root is not { IsLeaf: not true }) return true;
-			
+		if (Root == null || Root.IsLeaf) return true;
+
 		bool balanced = true;
 		Iterate(TreeTraverseMethod.LevelOrder, e =>
 		{
@@ -276,9 +276,9 @@ public class BinarySearchTree<T> : LinkedBinaryTree<T>
 
 		static bool IsBalancedLocal(LinkedBinaryNode<T> node)
 		{
-			return node is not { IsLeaf: not true } || Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR
-					&& (node.Left is not { IsLeaf: not true } || Math.Abs(node.Left.BalanceFactor) <= BALANCE_FACTOR)
-					&& (node.Right is not { IsLeaf: not true } || Math.Abs(node.Right.BalanceFactor) <= BALANCE_FACTOR);
+			return node == null || node.IsLeaf || Math.Abs(node.BalanceFactor) <= BALANCE_FACTOR
+					&& (node.Left == null || node.Left.IsLeaf || Math.Abs(node.Left.BalanceFactor) <= BALANCE_FACTOR)
+					&& (node.Right == null || node.Right.IsLeaf || Math.Abs(node.Right.BalanceFactor) <= BALANCE_FACTOR);
 		}
 	}
 

@@ -33,12 +33,12 @@ public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T
 	private volatile int _isCompleted;
 	private volatile int _tasksCompleted;
 	private volatile int _workCompleted;
-		
+
 	protected ProducerConsumerQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 	{
 		Threads = options.Threads;
 		WaitOnDispose = options.WaitOnDispose;
-			
+
 		_context = options.SynchronizeContext
 						? SynchronizationContext.Current
 						: null;
@@ -51,7 +51,7 @@ public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T
 		ResultCallback = options.ResultCallback;
 		ScheduledCallback = options.ScheduledCallback;
 		FinalizeCallback = options.FinalizeCallback;
-			
+
 		if (_context != null)
 		{
 			_context.OperationStarted();
@@ -181,7 +181,7 @@ public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T
 		ThrowIfDisposed();
 		if (_workerStart == null) return false;
 		if (_workerStart is not { IsSet: false }) return true;
-			
+
 		try
 		{
 			return _workerStart.Wait(TimeSpanHelper.INFINITE, Token);
@@ -227,7 +227,7 @@ public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T
 			WorkCompletedCallback?.Invoke(this);
 			return;
 		}
-			
+
 		if (IsPaused || Running > 0)
 		{
 			SpinWait.SpinUntil(() => IsDisposed || !IsPaused && Running == 0);
@@ -261,8 +261,8 @@ public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T
 	{
 		ThrowIfDisposed();
 		if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-		if (_workersCountdown is not { IsSet: not true }) return true;
-			
+		if (_workersCountdown == null || _workersCountdown.IsSet) return true;
+
 		try
 		{
 			return _workersCountdown.Wait(millisecondsTimeout, Token) && !Token.IsCancellationRequested;
@@ -275,7 +275,7 @@ public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T
 		{
 			// ignored
 		}
-	
+
 		return false;
 	}
 
@@ -283,7 +283,7 @@ public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T
 	{
 		ThrowIfDisposed();
 		if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-		if (_workersCountdown is not { IsSet: not true }) return Task.FromResult(true);
+		if (_workersCountdown == null || _workersCountdown.IsSet) return Task.FromResult(true);
 		return TaskHelper.FromWaitHandle(_workersCountdown.WaitHandle, millisecondsTimeout, Token);
 	}
 
@@ -321,8 +321,8 @@ public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T
 	{
 		ThrowIfDisposed();
 		if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-		if (_tasksCountdown is not { IsSet: not true }) return true;
-			
+		if (_workersCountdown == null || _workersCountdown.IsSet) return true;
+
 		try
 		{
 			return _tasksCountdown.Wait(millisecondsTimeout, Token) && !Token.IsCancellationRequested;
@@ -335,7 +335,7 @@ public abstract class ProducerConsumerQueue<T> : Disposable, IProducerConsumer<T
 		{
 			// ignored
 		}
-	
+
 		return false;
 	}
 
@@ -471,7 +471,7 @@ public static class ProducerConsumerQueue
 			_ => Create(mode, new Queue<T>(), options, token)
 		};
 	}
-		
+
 	[NotNull]
 	public static IProducerConsumer<T> Create<TQueue, T>(ThreadQueueMode mode, [NotNull] TQueue queue, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
 		where TQueue : ICollection, IReadOnlyCollection<T>

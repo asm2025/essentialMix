@@ -150,7 +150,7 @@ public class WeightedUndirectedGraphList<T, TWeight> : WeightedGraphList<T, TWei
 	{
 		// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
 		if (vertices.Count == 0) return null;
-			
+
 		bool conflictIsSet = false;
 		T conflictVertex = default(T);
 		HashSet<T> visitedSet = new HashSet<T>(Comparer);
@@ -227,8 +227,8 @@ public class WeightedUndirectedGraphList<T, TWeight> : WeightedGraphList<T, TWei
 		foreach (T vertex in Keys)
 		{
 			KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
-			if (edges is not { Count: not 0 }) continue;
-			
+			if (edges == null || edges.Count == 0) continue;
+
 			foreach (GraphEdge<T, TWeight> edge in edges)
 			{
 				if (minEdge != null && minEdge.Weight.CompareTo(edge.Weight) < 1) continue;
@@ -256,7 +256,7 @@ public class WeightedUndirectedGraphList<T, TWeight> : WeightedGraphList<T, TWei
 
 			// doing it this way guarantees the vertices are always connected
 			KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[edgeEntry.Value.Edge.To];
-			if (edges is not { Count: not 0 }) continue;
+			if (edges == null || edges.Count == 0) continue;
 			AddOutgoingEdges(edgeEntry.Value.Edge.To, edges, queue, result, entries);
 		}
 
@@ -309,7 +309,7 @@ public class WeightedUndirectedGraphList<T, TWeight> : WeightedGraphList<T, TWei
 		foreach (T vertex in Keys)
 		{
 			KeyedCollection<T, GraphEdge<T, TWeight>> edges = this[vertex];
-			if (edges is not { Count: not 0 }) continue;
+			if (edges == null || edges.Count == 0) continue;
 
 			foreach (GraphEdge<T, TWeight> edge in edges)
 				queue.Add(new EdgeEntry<T, GraphEdge<T, TWeight>>(vertex, edge));

@@ -6,9 +6,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Numeric;
+using JetBrains.Annotations;
 using Other.JonSkeet.MiscUtil.Text;
 
 namespace essentialMix.Extensions;
@@ -119,7 +119,7 @@ public static class ValueTypeExtension
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static void ValidateRange(this int thisValue, int startIndex) { ValidateRange(thisValue, startIndex, thisValue); }
-		
+
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static void ValidateRange(this int thisValue, int startIndex, int count)
 	{
@@ -130,7 +130,7 @@ public static class ValueTypeExtension
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static void ValidateRange(this long thisValue, long startIndex) { ValidateRange(thisValue, startIndex, thisValue); }
-		
+
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static void ValidateRange(this long thisValue, long startIndex, long count)
 	{
@@ -516,7 +516,7 @@ public static class ValueTypeExtension
 	{
 		thisValue.Length.ValidateRange(startIndex, ref count);
 		return count == 0 || thisValue.Length == 0
-					? string.Empty 
+					? string.Empty
 					: Convert.ToBase64String(thisValue, startIndex, count);
 	}
 
@@ -540,7 +540,7 @@ public static class ValueTypeExtension
 
 	public static unsafe void Swap(this byte[] thisValue)
 	{
-		if (thisValue is not { Length: not 0 }) return;
+		if (thisValue == null || thisValue.Length == 0) return;
 
 		fixed (byte* pThisValue = thisValue)
 		{
@@ -551,7 +551,7 @@ public static class ValueTypeExtension
 #else
 			long length = thisValue.Length & 0xFFFFFFFE;
 #endif
-				
+
 			while (length > 7)
 			{
 				length -= 8;
@@ -565,9 +565,9 @@ public static class ValueTypeExtension
 			if (length > 0)
 			{
 				uint* pui = (uint*)pThisValue;
-				*pui = (*pui >> 24) | 
-						((*pui >> 8) & 0x0000FF00U) | 
-						((*pui << 8) & 0x00FF0000U) | 
+				*pui = (*pui >> 24) |
+						((*pui >> 8) & 0x0000FF00U) |
+						((*pui << 8) & 0x00FF0000U) |
 						(*pui << 24);
 			}
 		}
@@ -580,7 +580,7 @@ public static class ValueTypeExtension
 		if (startIndex > thisValue.Length - count) throw new ArgumentOutOfRangeException(nameof(count));
 
 		byte[] buffer;
-			
+
 		if (startIndex == 0 && count == thisValue.Length)
 			buffer = thisValue;
 		else
@@ -588,7 +588,7 @@ public static class ValueTypeExtension
 			buffer = new byte[count];
 			Buffer.BlockCopy(thisValue, startIndex, buffer, 0, count);
 		}
-			
+
 		using (MemoryStream stream = new MemoryStream(buffer))
 		{
 			IFormatter formatter = new BinaryFormatter();
@@ -655,7 +655,7 @@ public static class ValueTypeExtension
 		ulong d = (ulong)Math.Floor(thisValue);
 		decimal f = Fraction(thisValue);
 		int n;
-	
+
 		for (n = 0; d > 0UL; n++, d /= 10UL)
 		{
 		}
@@ -680,7 +680,7 @@ public static class ValueTypeExtension
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static int DecimalPlaces(this short thisValue) { return DecimalPlaces((decimal)thisValue); }
-		
+
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static int DecimalPlaces(this ushort thisValue) { return DecimalPlaces((decimal)thisValue); }
 

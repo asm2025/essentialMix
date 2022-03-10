@@ -4,15 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using essentialMix.Collections;
-using JetBrains.Annotations;
 using essentialMix.Comparers;
+using JetBrains.Annotations;
 
 namespace essentialMix.Extensions;
 
 public static class ArrayExtension
 {
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	public static bool IsNullOrEmpty(this Array thisValue) { return thisValue is not { Length: not 0 }; }
+	public static bool IsNullOrEmpty(this Array thisValue) { return thisValue == null || thisValue.Length == 0; }
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	[NotNull]
@@ -105,7 +105,7 @@ public static class ArrayExtension
 		if (thisValue.Length == 0) return;
 
 		int lastPos = startIndex + count;
-			
+
 		for (int i = startIndex; i < lastPos; i++)
 			thisValue.SetValue(func(i), i);
 	}
@@ -198,7 +198,7 @@ public static class ArrayExtension
 	public static void ForEach([NotNull] this Array thisValue, [NotNull] Action<object> action)
 	{
 		if (thisValue.Length == 0) return;
-			
+
 		using (Enumerator enumerator = new Enumerator(thisValue))
 		{
 			while (enumerator.MoveNext())

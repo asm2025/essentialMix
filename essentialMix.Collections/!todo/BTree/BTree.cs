@@ -56,6 +56,82 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	where TBlock : BTreeBlockBase<TBlock, TNode, T>
 	where TNode : class, ITreeNode<TNode, T>
 {
+
+	[Serializable]
+	private struct LevelOrderEnumerator : IEnumerableEnumerator<T>
+	{
+		internal LevelOrderEnumerator([NotNull] BTreeBlockBase<TBlock, TNode, T> block)
+		{
+
+		}
+	}
+
+	[Serializable]
+	private struct PreOrderEnumerator : IEnumerableEnumerator<T>
+	{
+
+	}
+
+	[Serializable]
+	private struct InOrderEnumerator : IEnumerableEnumerator<T>
+	{
+
+	}
+
+	[Serializable]
+	private struct PostOrderEnumerator : IEnumerableEnumerator<T>
+	{
+
+	}
+
+	[Serializable]
+	private struct LevelOrderNodeEnumerator : IEnumerableEnumerator<TNode>
+	{
+
+	}
+
+	[Serializable]
+	private struct PreOrderNodeEnumerator : IEnumerableEnumerator<TNode>
+	{
+
+	}
+
+	[Serializable]
+	private struct InOrderNodeEnumerator : IEnumerableEnumerator<TNode>
+	{
+
+	}
+
+	[Serializable]
+	private struct PostOrderNodeEnumerator : IEnumerableEnumerator<TNode>
+	{
+
+	}
+
+	[Serializable]
+	private struct LevelOrderBlockEnumerator : IEnumerableEnumerator<TBlock>
+	{
+
+	}
+
+	[Serializable]
+	private struct PreOrderBlockEnumerator : IEnumerableEnumerator<TBlock>
+	{
+
+	}
+
+	[Serializable]
+	private struct InOrderBlockEnumerator : IEnumerableEnumerator<TBlock>
+	{
+
+	}
+
+	[Serializable]
+	private struct PostOrderBlockEnumerator : IEnumerableEnumerator<TBlock>
+	{
+
+	}
+
 	internal int _version;
 
 	private TBlock _root;
@@ -83,7 +159,7 @@ public abstract class BTreeBase<TBlock, TNode, T> : IBTreeBase<TBlock, TNode, T>
 	/// <inheritdoc />
 	public int Height { get; internal set; }
 
-	public int Count { get; protected set; }
+	public int Count { get; internal set; }
 
 	/// <inheritdoc />
 	public bool IsReadOnly => false;

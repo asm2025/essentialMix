@@ -68,7 +68,7 @@ public sealed class RedBlackTree<T> : LinkedBinaryTree<RedBlackNode<T>, T>
 	/// <inheritdoc />
 	public override int GetHeight()
 	{
-		if (Root is not { IsLeaf: not true }) return 0;
+		if (Root == null || Root.IsLeaf) return 0;
 		int height = 0;
 		IterateLevels((_, _) => height++);
 		return height;
@@ -351,8 +351,8 @@ public sealed class RedBlackTree<T> : LinkedBinaryTree<RedBlackNode<T>, T>
 
 	public override bool IsBalanced()
 	{
-		if (Root is not { IsLeaf: not true }) return true;
-			
+		if (Root == null || Root.IsLeaf) return true;
+
 		// using levelOrder traversal
 		// Root-Left-Right (Queue)
 		Queue<RedBlackNode<T>> queue = new Queue<RedBlackNode<T>>(GetCapacityForQueueing(this));
@@ -454,7 +454,7 @@ public sealed class RedBlackTree<T> : LinkedBinaryTree<RedBlackNode<T>, T>
 	{
 		// Replace the matching node with its successor.
 		if (successor == match)
-		{  
+		{
 			// this node has no successor, should only happen if right child of matching node is null.
 			Debug.Assert(match.Right == null, "Right child must be null!");
 			successor = match.Left;

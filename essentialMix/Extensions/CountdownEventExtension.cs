@@ -15,6 +15,7 @@ public static class CountdownEventExtension
 
 	public static bool SignalAll(this CountdownEvent thisValue)
 	{
-		return thisValue is not { CurrentCount: >= 1 } || thisValue.Signal(thisValue.CurrentCount);
+		try { return thisValue == null || thisValue.CurrentCount < 1 || thisValue.Signal(thisValue.CurrentCount); }
+		catch (ObjectDisposedException) { return true; }
 	}
 }

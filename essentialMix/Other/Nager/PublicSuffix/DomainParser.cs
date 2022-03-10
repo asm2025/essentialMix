@@ -113,10 +113,8 @@ public class DomainParser
 	[NotNull]
 	private DomainName GetDomainFromParts(string domain, [NotNull] List<string> parts)
 	{
-		if (parts is not { Count: not 0 } || parts.Any(x => x.Equals(string.Empty)))
-		{
+		if (parts == null || parts.Count == 0 || parts.Any(string.IsNullOrEmpty))
 			throw new ParseException("Invalid domain part detected");
-		}
 
 		DomainDataStructure structure = _domainDataStructure;
 		List<TldRule> matches = new List<TldRule>();

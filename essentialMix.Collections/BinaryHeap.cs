@@ -633,7 +633,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 	private object _syncRoot;
 
 	/// <inheritdoc />
-	protected BinaryHeapBase() 
+	protected BinaryHeapBase()
 		: this(0, null)
 	{
 	}
@@ -699,7 +699,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 	public IComparer<T> Comparer { get; }
 
 	/// <inheritdoc cref="ICollection{TValue}" />
-	public int Count { get; protected set; }
+	public int Count { get; internal set; }
 
 	[NotNull]
 	protected internal TNode[] Items { get; private set; }
@@ -1111,7 +1111,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 	public void Add(IEnumerable<T> values)
 	{
-		foreach (T value in values) 
+		foreach (T value in values)
 			Add(value);
 	}
 
@@ -1164,7 +1164,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 	{
 		if (k < 1 || Count < k) throw new ArgumentOutOfRangeException(nameof(k));
 
-		for (int i = 1; i < k; i++) 
+		for (int i = 1; i < k; i++)
 			ExtractNode();
 
 		return Value();
@@ -1877,7 +1877,7 @@ public abstract class BinaryHeap<T> : BinaryHeapBase<BinaryNode<T>, T>, IBinaryH
 		if (index == 0) return;
 		BubbleUp(index);
 	}
-		
+
 	public bool Equals(BinaryHeap<T> other)
 	{
 		if (other is null) return false;
@@ -1893,7 +1893,7 @@ public abstract class BinaryHeap<T> : BinaryHeapBase<BinaryNode<T>, T>, IBinaryH
 
 		return true;
 	}
-		
+
 	protected sealed override void BubbleUp(int index, bool toRoot = false)
 	{
 		if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
@@ -1913,7 +1913,7 @@ public abstract class BinaryHeap<T> : BinaryHeapBase<BinaryNode<T>, T>, IBinaryH
 		if (!changed) return;
 		_version++;
 	}
-		
+
 	protected sealed override void BubbleDown(int index)
 	{
 		if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
@@ -1999,7 +1999,7 @@ public abstract class BinaryHeap<TKey, TValue> : BinaryHeapBase<BinaryNode<TKey,
 
 		for (int i = 0; i < Count; i++)
 		{
-			if (KeyComparer.Compare(Items[i].Key, other.Items[i].Key) == 0 
+			if (KeyComparer.Compare(Items[i].Key, other.Items[i].Key) == 0
 				&& Comparer.Compare(Items[i].Value, other.Items[i].Value) == 0) continue;
 			return false;
 		}
@@ -2063,7 +2063,7 @@ public abstract class BinaryHeap<TKey, TValue> : BinaryHeapBase<BinaryNode<TKey,
 		if (!changed) return;
 		_version++;
 	}
-		
+
 	protected sealed override void BubbleDown(int index)
 	{
 		if (!index.InRangeRx(0, Count)) throw new ArgumentOutOfRangeException(nameof(index));
@@ -2131,10 +2131,10 @@ public static class BinaryHeap
 			}
 
 			if (comparer.IsLessThanOrEqual(values[i], values[(i - 1) / 2])) continue;
-				
+
 			// if child is (bigger/smaller) than parent
-			for (int child = i, parent = (child - 1) / 2; 
-				parent >= index && comparer.IsGreaterThan(values[child], values[parent]); 
+			for (int child = i, parent = (child - 1) / 2;
+				parent >= index && comparer.IsGreaterThan(values[child], values[parent]);
 				child = parent, parent = (child - 1) / 2)
 			{
 				values.FastSwap(child, parent);
@@ -2160,7 +2160,7 @@ public static class BinaryHeapExtension
 			(int nodeIndex, int level) = stack.Pop();
 			int n = Constants.INDENT * level;
 			navigator.Index = nodeIndex;
-	
+
 			if (indent.Length > n) indent.Length = n;
 			else if (indent.Length < n) indent.Append(' ', n - indent.Length);
 

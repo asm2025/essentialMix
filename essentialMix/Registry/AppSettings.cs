@@ -9,8 +9,8 @@ using System.Security.Permissions;
 using System.Text;
 using essentialMix.Collections;
 using essentialMix.Extensions;
-using Microsoft.Win32;
 using JetBrains.Annotations;
+using Microsoft.Win32;
 
 namespace essentialMix.Registry;
 
@@ -228,7 +228,7 @@ public class AppSettings : Properties
 			if (frame == null) continue;
 
 			MethodBase method = frame.GetMethod();
-			if (method is not { DeclaringType: { } } || method.DeclaringType.Assembly == ThisAssembly) continue;
+			if (method?.DeclaringType == null || method.DeclaringType.Assembly == ThisAssembly) continue;
 
 			assembly = method.DeclaringType.Assembly;
 			break;

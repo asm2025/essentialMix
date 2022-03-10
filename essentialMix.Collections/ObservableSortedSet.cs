@@ -134,7 +134,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 			if (Count == 0) return;
 
 			List<T> toRemove = new List<T>();
-			BreadthFirstTreeWalk(delegate(Node n)
+			BreadthFirstTreeWalk(delegate (Node n)
 			{
 				toRemove.Add(n.Value);
 				return true;
@@ -374,7 +374,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		private ObservableSortedSet<T> _set;
 		private int _version;
 		private Stack<Node> _stack;
-			
+
 		private Node _current;
 		private bool _reverse;
 		private SerializationInfo _sinfo;
@@ -395,7 +395,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 			Initialize();
 		}
 
-		private Enumerator(SerializationInfo info, StreamingContext context) 
+		private Enumerator(SerializationInfo info, StreamingContext context)
 		{
 			_set = null;
 			_version = -1;
@@ -449,7 +449,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 			if (!enumStarted) return;
 			T item = (T)_sinfo.GetValue(NODE_VALUE_NAME, typeof(T));
 			Initialize();
-				
+
 			//go until it reaches the value we want
 			while (MoveNext())
 			{
@@ -590,21 +590,21 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 	{
 	}
 
-	public ObservableSortedSet(IComparer<T> comparer) 
+	public ObservableSortedSet(IComparer<T> comparer)
 	{
 		Comparer = comparer ?? Comparer<T>.Default;
 	}
 
-	public ObservableSortedSet([NotNull] IEnumerable<T> enumerable) 
+	public ObservableSortedSet([NotNull] IEnumerable<T> enumerable)
 		: this(enumerable, null)
 	{
 	}
 
-	public ObservableSortedSet([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer) 
+	public ObservableSortedSet([NotNull] IEnumerable<T> enumerable, IComparer<T> comparer)
 		: this(comparer)
 	{
 		ObservableSortedSet<T> treeSubSet = enumerable as TreeSubSet;
-			
+
 		if (enumerable is ObservableSortedSet<T> set && treeSubSet == null && AreComparersEqual(this, set))
 		{
 			//breadth first traversal to recreate nodes
@@ -701,11 +701,11 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		}
 	}
 
-	protected ObservableSortedSet(SerializationInfo info, StreamingContext context) 
+	protected ObservableSortedSet(SerializationInfo info, StreamingContext context)
 	{
 		_sinfo = info;
 	}
-		
+
 	// LinkDemand here is unnecessary as this is a methodImpl and linkDemand from the interface should suffice
 	void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
 	protected virtual void GetObjectData([NotNull] SerializationInfo info, StreamingContext context)
@@ -725,7 +725,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		if (Comparer != null) return; //Somebody had a dependency on this class and fixed us up before the ObjectManager got to it.
 		if (_sinfo == null) throw new SerializationException();
 		Comparer = (IComparer<T>)_sinfo.GetValue(nameof(Comparer), typeof(IComparer<T>));
-			
+
 		int savedCount = _sinfo.GetInt32(nameof(Count));
 
 		if (savedCount != 0)
@@ -736,7 +736,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 
 			try
 			{
-				foreach (T item in items) 
+				foreach (T item in items)
 					Add(item);
 			}
 			finally
@@ -766,7 +766,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		get
 		{
 			T ret = default(T);
-			InOrderTreeWalk(delegate(Node n)
+			InOrderTreeWalk(delegate (Node n)
 			{
 				ret = n.Value;
 				return false;
@@ -780,7 +780,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		get
 		{
 			T ret = default(T);
-			InOrderTreeWalk(delegate(Node n)
+			InOrderTreeWalk(delegate (Node n)
 			{
 				ret = n.Value;
 				return false;
@@ -861,7 +861,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		//upper bound
 		count += index;
 
-		InOrderTreeWalk(delegate(Node node)
+		InOrderTreeWalk(delegate (Node node)
 		{
 			if (index >= count) return false;
 			array[index++] = node.Value;
@@ -876,14 +876,14 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 			CopyTo(arr, index);
 			return;
 		}
-			
+
 		array.Length.ValidateRange(index, Count);
 		if (array.Rank != 1) throw new RankException();
 		if (array.GetLowerBound(0) != 0) throw new LBoundLargerThanZeroException();
-			
+
 		object[] objects = array as object[];
 		if (objects == null) throw new ArrayTypeMismatchException();
-		InOrderTreeWalk(delegate(Node node)
+		InOrderTreeWalk(delegate (Node node)
 		{
 			objects[index++] = node.Value;
 			return true;
@@ -957,7 +957,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 				Enumerator remaining = mineEnded
 											? theirs
 											: mine;
-				do 
+				do
 					merged[c++] = remaining.Current;
 				while (remaining.MoveNext());
 			}
@@ -1069,7 +1069,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 	public bool TryGetValue(T equalValue, out T actualValue)
 	{
 		Node node = FindNode(equalValue);
-			
+
 		if (node != null)
 		{
 			actualValue = node.Value;
@@ -1102,7 +1102,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 			//outside range, no point doing anything               
 			if (Comparer.Compare(asSorted.Max, Min) < 0 || Comparer.Compare(asSorted.Min, Max) > 0) return;
 			CheckReentrancy();
-			
+
 			T min = Min;
 			T max = Max;
 			SuppressCollectionEvents = true;
@@ -1212,9 +1212,9 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		//another for sorted sets with the same comparer
 		if (other is not ObservableSortedSet<T> asSorted || !AreComparersEqual(this, asSorted)) return ContainsAllElements(other);
 		if (Count < asSorted.Count) return false;
-			
+
 		ObservableSortedSet<T> pruned = GetViewBetween(asSorted.Min, asSorted.Max);
-				
+
 		foreach (T item in asSorted)
 		{
 			if (!pruned.Contains(item))
@@ -1240,7 +1240,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		{
 			if (asSorted.Count >= Count) return false;
 			ObservableSortedSet<T> pruned = GetViewBetween(asSorted.Min, asSorted.Max);
-				
+
 			foreach (T item in asSorted)
 			{
 				if (!pruned.Contains(item))
@@ -1274,7 +1274,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 			{
 				bool mineEnded = !mine.MoveNext();
 				bool theirsEnded = !theirs.MoveNext();
-				
+
 				while (!mineEnded && !theirsEnded)
 				{
 					if (Comparer.Compare(mine.Current, theirs.Current) != 0) return false;
@@ -1306,8 +1306,8 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 	{
 		if (Count == 0) return false;
 		if (other is ICollection<T> { Count: 0 }) return false;
-		if (other is ObservableSortedSet<T> asSorted 
-			&& AreComparersEqual(this, asSorted) 
+		if (other is ObservableSortedSet<T> asSorted
+			&& AreComparersEqual(this, asSorted)
 			&& (Comparer.Compare(Min, asSorted.Max) > 0 || Comparer.Compare(Max, asSorted.Min) < 0)) return false;
 
 		foreach (T item in other)
@@ -1325,7 +1325,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 
 		List<T> matches = new List<T>(Count);
 
-		BreadthFirstTreeWalk(delegate(Node n)
+		BreadthFirstTreeWalk(delegate (Node n)
 		{
 			if (match(n.Value)) matches.Add(n.Value);
 			return true;
@@ -1416,7 +1416,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		if (CollectionChanged != null && CollectionChanged.GetInvocationList().Length > 1)
 			throw new InvalidOperationException("Reentrancy not allowed.");
 	}
-		
+
 	internal virtual void VersionCheck() { }
 
 	//virtual function for subclass that needs to do range checks
@@ -1554,7 +1554,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 
 						parent.IsRed = true;
 						sibling.IsRed = false; // parent's color
-						// sibling becomes child of grandParent or root after rotation. Update link from grandParent or root
+											   // sibling becomes child of grandParent or root after rotation. Update link from grandParent or root
 						ReplaceChildOfNodeOrRoot(grandParent, parent, sibling);
 						// sibling will become grandParent of current node 
 						grandParent = sibling;
@@ -1620,7 +1620,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 			int order = foundMatch
 							? -1
 							: Comparer.Compare(item, current.Value);
-				
+
 			if (order == 0)
 			{
 				// save the matching node
@@ -1774,7 +1774,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 	internal Node FindRange(T from, T to, bool lowerBoundActive, bool upperBoundActive)
 	{
 		Node current = _root;
-			
+
 		while (current != null)
 		{
 			if (lowerBoundActive && Comparer.Compare(from, current.Value) > 0)
@@ -1827,7 +1827,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 
 		try
 		{
-			foreach (T item in other) 
+			foreach (T item in other)
 			{
 				//yes, it is classier to say
 				//if (!this.Remove(item)) this.Add(item);
@@ -1859,7 +1859,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		{
 			for (int i = 0; i < other.Count; i++)
 			{
-				while (i < other.Count && i != 0 && Comparer.Compare(other[i], last) == 0) 
+				while (i < other.Count && i != 0 && Comparer.Compare(other[i], last) == 0)
 					i++;
 
 				if (i >= other.Count) break;
@@ -2005,7 +2005,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		if (Count == 0)
 		{
 			int numElementsInOther = 0;
-				
+
 			foreach (T _ in other)
 			{
 				numElementsInOther++;
@@ -2022,7 +2022,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		int intArrayLength = BitHelper.ToIntArrayLength(originalLastIndex);
 
 		BitHelper bitHelper;
-			
+
 		if (intArrayLength <= STACK_ALLOC_THRESHOLD)
 		{
 			int* bitArrayPtr = stackalloc int[intArrayLength];
@@ -2228,7 +2228,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 	private static TreeRotation RotationNeeded([NotNull] Node parent, Node current, [NotNull] Node sibling)
 	{
 		Debug.Assert(IsRedNode(sibling.Left) || IsRedNode(sibling.Right), "sibling must have at least one red child");
-			
+
 		if (IsRedNode(sibling.Left))
 		{
 			return parent.Left == current
@@ -2309,7 +2309,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		//base cases are described below
 		int size = endIndex - startIndex + 1;
 		if (size == 0) return null;
-			
+
 		Node root;
 
 		switch (size)

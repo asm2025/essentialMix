@@ -309,7 +309,7 @@ public static class UriHelper
 		value = value?.Trim();
 		if (string.IsNullOrEmpty(value)) return false;
 		if (!TryBuildUri(value, out Uri outUri, kind) || outUri == null) return false;
-		if (!outUri.IsAbsoluteUri || scheme is not { Length: not 0 }) return true;
+		if (!outUri.IsAbsoluteUri || scheme == null || scheme.Length == 0) return true;
 		return scheme.Length == 0 || scheme.All(s => s != null && Schemes.Contains(s));
 	}
 

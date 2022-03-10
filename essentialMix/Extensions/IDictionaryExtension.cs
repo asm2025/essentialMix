@@ -29,7 +29,7 @@ public static class IDictionaryExtension
 	public static TValue GetOrAdd<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] TKey key)
 		where TValue : new()
 	{
-		lock(thisValue)
+		lock (thisValue)
 		{
 			if (thisValue.TryGetValue(key, out TValue value)) return value;
 			value = new TValue();
@@ -41,7 +41,7 @@ public static class IDictionaryExtension
 	public static TValue GetOrAdd<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] TKey key, TValue missingValue)
 		where TValue : struct, IComparable
 	{
-		lock(thisValue)
+		lock (thisValue)
 		{
 			if (thisValue.TryGetValue(key, out TValue value)) return value;
 			thisValue[key] = missingValue;
@@ -51,7 +51,7 @@ public static class IDictionaryExtension
 
 	public static TValue GetOrAdd<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] TKey key, [NotNull] Func<TKey, TValue> onNotFound)
 	{
-		lock(thisValue)
+		lock (thisValue)
 		{
 			if (thisValue.TryGetValue(key, out TValue value)) return value;
 			value = onNotFound(key);
@@ -64,7 +64,7 @@ public static class IDictionaryExtension
 
 	public static bool TryAdd([NotNull] this IDictionary thisValue, [NotNull] object key, object value)
 	{
-		lock(thisValue.SyncRoot)
+		lock (thisValue.SyncRoot)
 		{
 			if (thisValue.Contains(key)) return false;
 			thisValue.Add(key, value);
@@ -81,7 +81,7 @@ public static class IDictionaryExtension
 	{
 		if (key == null) return false;
 
-		lock(thisValue)
+		lock (thisValue)
 		{
 			if (thisValue.ContainsKey(key)) return false;
 			thisValue.Add(key, value);
@@ -93,7 +93,7 @@ public static class IDictionaryExtension
 	{
 		if (entry.Length == 0) return 0;
 
-		lock(thisValue.SyncRoot)
+		lock (thisValue.SyncRoot)
 		{
 			int n = 0;
 
@@ -111,7 +111,7 @@ public static class IDictionaryExtension
 	{
 		if (pair.Length == 0) return 0;
 
-		lock(thisValue)
+		lock (thisValue)
 		{
 			foreach (KeyValuePair<TKey, TValue> p in pair)
 				thisValue.Add(p);
@@ -122,7 +122,7 @@ public static class IDictionaryExtension
 
 	public static int AddRange([NotNull] this IDictionary thisValue, [NotNull] IEnumerable<DictionaryEntry> source, bool skipExisting = false)
 	{
-		lock(thisValue.SyncRoot)
+		lock (thisValue.SyncRoot)
 		{
 			int added = 0;
 
@@ -195,7 +195,7 @@ public static class IDictionaryExtension
 
 	public static void Initialize([NotNull] this IDictionary thisValue, object value = null)
 	{
-		lock(thisValue.SyncRoot)
+		lock (thisValue.SyncRoot)
 		{
 			foreach (object key in thisValue.Keys)
 				thisValue[key] = value;
@@ -306,7 +306,7 @@ public static class IDictionaryExtension
 	{
 		if (other.Count == 0) return;
 
-		foreach (KeyValuePair<TKey, TValue> pair in other) 
+		foreach (KeyValuePair<TKey, TValue> pair in other)
 			thisValue[pair.Key] = pair.Value;
 	}
 
@@ -314,10 +314,10 @@ public static class IDictionaryExtension
 	{
 		if (other1.Count == 0) return;
 
-		foreach (KeyValuePair<TKey, TValue> pair in other1) 
+		foreach (KeyValuePair<TKey, TValue> pair in other1)
 			thisValue[pair.Key] = pair.Value;
 
-		foreach (KeyValuePair<TKey, TValue> pair in other2) 
+		foreach (KeyValuePair<TKey, TValue> pair in other2)
 			thisValue[pair.Key] = pair.Value;
 	}
 
@@ -325,13 +325,13 @@ public static class IDictionaryExtension
 	{
 		if (other1.Count == 0) return;
 
-		foreach (KeyValuePair<TKey, TValue> pair in other1) 
+		foreach (KeyValuePair<TKey, TValue> pair in other1)
 			thisValue[pair.Key] = pair.Value;
 
-		foreach (KeyValuePair<TKey, TValue> pair in other2) 
+		foreach (KeyValuePair<TKey, TValue> pair in other2)
 			thisValue[pair.Key] = pair.Value;
 
-		foreach (KeyValuePair<TKey, TValue> pair in other3) 
+		foreach (KeyValuePair<TKey, TValue> pair in other3)
 			thisValue[pair.Key] = pair.Value;
 	}
 
@@ -341,7 +341,7 @@ public static class IDictionaryExtension
 
 		foreach (IDictionary<TKey, TValue> dictionary in dictionaries)
 		{
-			if (dictionary is not { Count: not 0 }) continue;
+			if (dictionary == null || dictionary.Count == 0) continue;
 
 			foreach (KeyValuePair<TKey, TValue> pair in dictionary)
 			{

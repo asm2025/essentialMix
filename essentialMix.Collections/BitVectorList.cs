@@ -5,10 +5,9 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using Other.Microsoft.Collections;
 using essentialMix.Extensions;
-using JetBrains.Annotations;
 using essentialMix.Numeric;
+using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
@@ -312,7 +311,7 @@ public class BitVectorList : ListBase<BitVector>, IList<byte>, IReadOnlyList<byt
 		if (!count.InRange(0, Constants.INT_BIT_SIZE)) throw new ArgumentOutOfRangeException(nameof(count));
 		if (startIndex + count > Constants.INT_BIT_SIZE) count = Constants.INT_BIT_SIZE - startIndex;
 		if (count == 0) return;
-			
+
 		int c = 0;
 		int index = 0;
 		byte v = 0;
@@ -428,7 +427,7 @@ public class BitVectorList : ListBase<BitVector>, IList<byte>, IReadOnlyList<byt
 
 		int unitLength = BitVector.GetUnitLength(mode);
 		int capacity = value.Length + (unitLength - value.Length % unitLength) / unitLength;
-		return new BitVectorList(capacity, mode) {value};
+		return new BitVectorList(capacity, mode) { value };
 	}
 
 	[NotNull]
@@ -460,7 +459,7 @@ public class BitVectorList : ListBase<BitVector>, IList<byte>, IReadOnlyList<byt
 	[NotNull]
 	public static explicit operator bool[](BitVectorList value)
 	{
-		if (value is not { Count: not 0 }) return Array.Empty<bool>();
+		if (value == null || value.Count == 0) return Array.Empty<bool>();
 
 		bool[] bits = new bool[value.Count * 8];
 
@@ -471,9 +470,9 @@ public class BitVectorList : ListBase<BitVector>, IList<byte>, IReadOnlyList<byt
 	}
 
 	[NotNull]
-	public static explicit operator string (BitVectorList value) { return value?.ToString() ?? string.Empty; }
+	public static explicit operator string(BitVectorList value) { return value?.ToString() ?? string.Empty; }
 }
-	
+
 public static class BitVectorListExtension
 {
 	[NotNull]
