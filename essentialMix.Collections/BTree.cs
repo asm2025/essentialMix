@@ -66,7 +66,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 	[Serializable]
 	[DebuggerDisplay("{Degree}, Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
-	public sealed class Node : IReadOnlyList<Entry>
+	public class Node : IReadOnlyList<Entry>
 	{
 		[Serializable]
 		private struct Enumerator : IEnumerator<Entry>, IEnumerator
@@ -799,7 +799,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 	[Serializable]
 	private struct LevelOrderEnumerator : IEnumerableEnumerator<T>
 	{
-		internal LevelOrderEnumerator([NotNull] Node node)
+		internal LevelOrderEnumerator([NotNull] BTree<T> tree, [NotNull] Node node, bool rightToLeft)
 		{
 
 		}
@@ -808,43 +808,28 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 	[Serializable]
 	private struct PreOrderEnumerator : IEnumerableEnumerator<T>
 	{
+		public PreOrderEnumerator([NotNull] BTree<T> tree, [NotNull] Node node, bool rightToLeft)
+		{
 
+		}
 	}
 
 	[Serializable]
 	private struct InOrderEnumerator : IEnumerableEnumerator<T>
 	{
+		public InOrderEnumerator([NotNull] BTree<T> tree, [NotNull] Node node, bool rightToLeft)
+		{
 
+		}
 	}
 
 	[Serializable]
 	private struct PostOrderEnumerator : IEnumerableEnumerator<T>
 	{
+		public PostOrderEnumerator([NotNull] BTree<T> tree, [NotNull] Node node, bool rightToLeft)
+		{
 
-	}
-
-	[Serializable]
-	private struct LevelOrderNodeEnumerator : IEnumerableEnumerator<Entry>
-	{
-
-	}
-
-	[Serializable]
-	private struct PreOrderNodeEnumerator : IEnumerableEnumerator<Entry>
-	{
-
-	}
-
-	[Serializable]
-	private struct InOrderNodeEnumerator : IEnumerableEnumerator<Entry>
-	{
-
-	}
-
-	[Serializable]
-	private struct PostOrderNodeEnumerator : IEnumerableEnumerator<Entry>
-	{
-
+		}
 	}
 
 	private int _version;
@@ -904,72 +889,150 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 	[NotNull]
 	public IEnumerableEnumerator<T> Enumerate(Node root, TreeTraverseMethod method, bool rightToLeft)
 	{
-		return _root?.Enumerate(method, rightToLeft) ?? EnumerableEnumerator.Empty<T>();
+		return method switch
+		{
+			TreeTraverseMethod.LevelOrder => new LevelOrderEnumerator(this, root, rightToLeft),
+			TreeTraverseMethod.PreOrder => new PreOrderEnumerator(this, root, rightToLeft),
+			TreeTraverseMethod.InOrder => new InOrderEnumerator(this, root, rightToLeft),
+			TreeTraverseMethod.PostOrder => new PostOrderEnumerator(this, root, rightToLeft),
+			_ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
+		};
 	}
 
 	#region Enumerate overloads
 	[NotNull]
-	public IEnumerableEnumerator<T> Enumerate() { return Enumerate(TreeTraverseMethod.InOrder, false); }
+	public IEnumerableEnumerator<T> Enumerate() { return Enumerate(Root, TreeTraverseMethod.InOrder, false); }
 
 	[NotNull]
-	public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method) { return Enumerate(method, false); }
+	public IEnumerableEnumerator<T> Enumerate(Node root) { return Enumerate(root, TreeTraverseMethod.InOrder, false); }
 
 	[NotNull]
-	public IEnumerableEnumerator<T> Enumerate(bool rightToLeft) { return Enumerate(TreeTraverseMethod.InOrder, rightToLeft); }
+	public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method) { return Enumerate(Root, method, false); }
+
+	[NotNull]
+	public IEnumerableEnumerator<T> Enumerate(bool rightToLeft) { return Enumerate(Root, TreeTraverseMethod.InOrder, rightToLeft); }
+
+	[NotNull]
+	public IEnumerableEnumerator<T> Enumerate(Node root, bool rightToLeft) { return Enumerate(root, TreeTraverseMethod.InOrder, rightToLeft); }
+
+	[NotNull]
+	public IEnumerableEnumerator<T> Enumerate(Node root, TreeTraverseMethod method) { return Enumerate(root, method, false); }
+
+	[NotNull]
+	public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method, bool rightToLeft) { return Enumerate(Root, method, rightToLeft); }
 	#endregion
 
-	[NotNull]
-	public IEnumerableEnumerator<Entry> EnumerateEntries(Node root, TreeTraverseMethod method, bool rightToLeft) { return _root?.EnumerateNodes(method, rightToLeft) ?? EnumerableEnumerator.Empty<Entry>(); }
+	public void Iterate(Node root, TreeTraverseMethod method, bool rightToLeft, [NotNull] Action<T> visitCallback)
+	{
+		if (root == null) return;
 
-	#region EnumerateEntries overloads
-	[NotNull]
-	public IEnumerableEnumerator<Entry> EnumerateEntries() { return EnumerateEntries(TreeTraverseMethod.InOrder, false); }
-
-	[NotNull]
-	public IEnumerableEnumerator<Entry> EnumerateEntries(TreeTraverseMethod method) { return EnumerateEntries(method, false); }
-
-	[NotNull]
-	public IEnumerableEnumerator<Entry> EnumerateEntries(bool rightToLeft) { return EnumerateEntries(TreeTraverseMethod.InOrder, rightToLeft); }
-	#endregion
-
-	public void Iterate(Node root, TreeTraverseMethod method, bool rightToLeft, Action<T> visitCallback) { _root?.Iterate(method, rightToLeft, visitCallback); }
+		switch (method)
+		{
+			case TreeTraverseMethod.LevelOrder:
+				LevelOrder(root, visitCallback, rightToLeft);
+				break;
+			case TreeTraverseMethod.PreOrder:
+				PreOrder(root, visitCallback, rightToLeft);
+				break;
+			case TreeTraverseMethod.InOrder:
+				InOrder(root, visitCallback, rightToLeft);
+				break;
+			case TreeTraverseMethod.PostOrder:
+				PostOrder(root, visitCallback, rightToLeft);
+				break;
+			default:
+				throw new ArgumentOutOfRangeException();
+		}
+	}
 
 	#region Iterate overloads - visitCallback action
-	public void Iterate(Action<T> visitCallback) { Iterate(TreeTraverseMethod.InOrder, false, visitCallback); }
-
-	public void Iterate(TreeTraverseMethod method, Action<T> visitCallback) { Iterate(method, false, visitCallback); }
-
-	public void Iterate(bool rightToLeft, Action<T> visitCallback) { Iterate(TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate([NotNull] Action<T> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, false, visitCallback); }
+	public void Iterate(Node root, [NotNull] Action<T> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback); }
+	public void Iterate(TreeTraverseMethod method, [NotNull] Action<T> visitCallback) { Iterate(Root, method, false, visitCallback); }
+	public void Iterate(bool rightToLeft, [NotNull] Action<T> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate(Node root, bool rightToLeft, [NotNull] Action<T> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate(Node root, TreeTraverseMethod method, [NotNull] Action<T> visitCallback) { Iterate(root, method, false, visitCallback); }
+	public void Iterate(TreeTraverseMethod method, bool rightToLeft, [NotNull] Action<T> visitCallback) { Iterate(Root, method, rightToLeft, visitCallback); }
 	#endregion
 
-	public void IterateEntries(Node root, TreeTraverseMethod method, bool rightToLeft, Action<Entry> visitCallback) { _root?.IterateEntries(method, rightToLeft, visitCallback); }
+	public void Iterate(Node root, TreeTraverseMethod method, bool rightToLeft, [NotNull] Func<T, bool> visitCallback)
+	{
+		if (root == null) return;
 
-	#region IterateEntries overloads - visitCallback action
-	public void IterateEntries(Action<Entry> visitCallback) { IterateEntries(TreeTraverseMethod.InOrder, false, visitCallback); }
-
-	public void IterateEntries(TreeTraverseMethod method, Action<Entry> visitCallback) { IterateEntries(method, false, visitCallback); }
-
-	public void IterateEntries(bool rightToLeft, Action<Entry> visitCallback) { IterateEntries(TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
-	#endregion
-
-	public void Iterate(Node root, TreeTraverseMethod method, bool rightToLeft, Func<T, bool> visitCallback) { _root?.Iterate(method, rightToLeft, visitCallback); }
+		switch (method)
+		{
+			case TreeTraverseMethod.LevelOrder:
+				LevelOrder(root, visitCallback, rightToLeft);
+				break;
+			case TreeTraverseMethod.PreOrder:
+				PreOrder(root, visitCallback, rightToLeft);
+				break;
+			case TreeTraverseMethod.InOrder:
+				InOrder(root, visitCallback, rightToLeft);
+				break;
+			case TreeTraverseMethod.PostOrder:
+				PostOrder(root, visitCallback, rightToLeft);
+				break;
+			default:
+				throw new ArgumentOutOfRangeException();
+		}
+	}
 
 	#region Iterate overloads - visitCallback function
-	public void Iterate(Func<T, bool> visitCallback) { Iterate(TreeTraverseMethod.InOrder, false, visitCallback); }
-
-	public void Iterate(TreeTraverseMethod method, Func<T, bool> visitCallback) { Iterate(method, false, visitCallback); }
-
-	public void Iterate(bool rightToLeft, Func<T, bool> visitCallback) { Iterate(TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate([NotNull] Func<T, bool> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, false, visitCallback); }
+	public void Iterate(TreeTraverseMethod method, [NotNull] Func<T, bool> visitCallback) { Iterate(Root, method, false, visitCallback); }
+	public void Iterate(bool rightToLeft, [NotNull] Func<T, bool> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate(Node root, [NotNull] Func<T, bool> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback); }
+	public void Iterate(Node root, bool rightToLeft, [NotNull] Func<T, bool> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate(Node root, TreeTraverseMethod method, [NotNull] Func<T, bool> visitCallback) { Iterate(root, method, false, visitCallback); }
+	public void Iterate(TreeTraverseMethod method, bool rightToLeft, [NotNull] Func<T, bool> visitCallback) { Iterate(Root, method, rightToLeft, visitCallback); }
 	#endregion
 
-	public void IterateEntries(Node root, TreeTraverseMethod method, bool rightToLeft, Func<Entry, bool> visitCallback) { _root?.IterateEntries(method, rightToLeft, visitCallback); }
+	public void IterateLevels(Node root, bool rightToLeft, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback)
+	{
+		// Root-Left-Right (Queue)
+		if (root == null) return;
 
-	#region IterateEntries overloads - visitCallback function
-	public void IterateEntries(Func<Entry, bool> visitCallback) { IterateEntries(TreeTraverseMethod.InOrder, false, visitCallback); }
+		int version = _version;
+		int level = 0;
+		Queue<Node> queue = new Queue<Node>();
+		// Start at the root
+		queue.Enqueue(root);
 
-	public void IterateEntries(TreeTraverseMethod method, Func<Entry, bool> visitCallback) { IterateEntries(method, false, visitCallback); }
+		while (queue.Count > 0)
+		{
+			if (version != _version) throw new VersionChangedException();
+			levelCallback(level, queue);
 
-	public void IterateEntries(bool rightToLeft, Func<Entry, bool> visitCallback) { IterateEntries(TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+			int count = queue.Count;
+			level++;
+
+			for (int i = 0; i < count; i++)
+			{
+				// visit the next queued node
+				Node current = queue.Dequeue();
+
+				if (current.Children == null || current.Children.Count == 0) continue;
+
+				// Queue the next nodes
+				if (rightToLeft)
+				{
+					for (int n = current.Children.Count - 1; n >= 0; n--)
+						queue.Enqueue(current.Children[n]);
+				}
+				else
+				{
+					foreach (Node n in current.Children)
+						queue.Enqueue(n);
+				}
+			}
+		}
+	}
+
+	#region LevelIterate overloads - visitCallback function
+	public void IterateLevels([NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback) { IterateLevels(Root, false, levelCallback); }
+	public void IterateLevels(bool rightToLeft, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback) { IterateLevels(Root, rightToLeft, levelCallback); }
+	public void IterateLevels(Node root, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback) { IterateLevels(root, false, levelCallback); }
 	#endregion
 
 	/// <inheritdoc />
@@ -1265,6 +1328,340 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 		newBlock.Children.AddRange(node.Children.GetRange(Degree, Degree));
 		node.Children.RemoveRange(Degree, Degree);
 	}
+
+	#region Iterative Traversal for Action<Node>
+	private void LevelOrder([NotNull] Node root, [NotNull] Action<Node> visitCallback, bool rtl)
+	{
+		int version = _version;
+		// Root-Left-Right (Queue)
+		Queue<Node> queue = new Queue<Node>();
+
+		// Start at the root
+		queue.Enqueue(root);
+
+		while (queue.Count > 0)
+		{
+			if (version != _version) throw new VersionChangedException();
+
+			// visit the next queued node
+			Node current = queue.Dequeue();
+			visitCallback(current);
+
+			// Queue the next nodes
+			if (rtl)
+			{
+				if (current.Right != null) queue.Enqueue(current.Right);
+				if (current.Left != null) queue.Enqueue(current.Left);
+			}
+			else
+			{
+				if (current.Left != null) queue.Enqueue(current.Left);
+				if (current.Right != null) queue.Enqueue(current.Right);
+			}
+		}
+	}
+
+	private void PreOrder([NotNull] Node root, [NotNull] Action<Node> visitCallback, bool rtl)
+	{
+		int version = _version;
+		// Root-Left-Right (Stack)
+		Stack<Node> stack = new Stack<Node>();
+
+		// Start at the root
+		stack.Push(root);
+
+		while (stack.Count > 0)
+		{
+			if (version != _version) throw new VersionChangedException();
+
+			// visit the next queued node
+			Node current = stack.Pop();
+			visitCallback(current);
+
+			// Queue the next nodes
+			if (rtl)
+			{
+				if (current.Left != null) stack.Push(current.Left);
+				if (current.Right != null) stack.Push(current.Right);
+			}
+			else
+			{
+				if (current.Right != null) stack.Push(current.Right);
+				if (current.Left != null) stack.Push(current.Left);
+			}
+		}
+	}
+
+	private void InOrder([NotNull] Node root, [NotNull] Action<Node> visitCallback, bool rtl)
+	{
+		int version = _version;
+		// Left-Root-Right (Stack)
+		Stack<Node> stack = new Stack<Node>();
+
+		// Start at the root
+		Node current = root;
+
+		while (current != null || stack.Count > 0)
+		{
+			if (version != _version) throw new VersionChangedException();
+
+			if (current != null)
+			{
+				stack.Push(current);
+				current = rtl
+							? current.Right // Navigate right
+							: current.Left; // Navigate left
+			}
+			else
+			{
+				// visit the next queued node
+				current = stack.Pop();
+				visitCallback(current);
+				current = rtl
+							? current.Left // Navigate left
+							: current.Right; // Navigate right
+			}
+		}
+	}
+
+	private void PostOrder([NotNull] Node root, [NotNull] Action<Node> visitCallback, bool rtl)
+	{
+		int version = _version;
+		// Left-Right-Root (Stack)
+		Stack<Node> stack = new Stack<Node>();
+		Node lastVisited = null;
+		// Start at the root
+		Node current = root;
+
+		while (current != null || stack.Count > 0)
+		{
+			if (version != _version) throw new VersionChangedException();
+
+			if (current != null)
+			{
+				stack.Push(current);
+				current = rtl
+							? current.Right // Navigate right
+							: current.Left; // Navigate left
+				continue;
+			}
+
+			Node peek = stack.Peek();
+
+			if (rtl)
+			{
+				/*
+				* At this point we are either coming from
+				* either the root node or the right branch.
+				* Is there a left node?
+				* if yes, then navigate left.
+				*/
+				if (peek.Left != null && lastVisited != peek.Left)
+				{
+					// Navigate left
+					current = peek.Left;
+				}
+				else
+				{
+					// visit the next queued node
+					lastVisited = peek;
+					current = stack.Pop();
+					visitCallback(current);
+					current = null;
+				}
+			}
+			else
+			{
+				/*
+				* At this point we are either coming from
+				* either the root node or the left branch.
+				* Is there a right node?
+				* if yes, then navigate right.
+				*/
+				if (peek.Right != null && lastVisited != peek.Right)
+				{
+					// Navigate right
+					current = peek.Right;
+				}
+				else
+				{
+					// visit the next queued node
+					lastVisited = peek;
+					current = stack.Pop();
+					visitCallback(current);
+					current = null;
+				}
+			}
+		}
+	}
+	#endregion
+
+	#region Iterative Traversal for Func<Node, bool>
+	private void LevelOrder([NotNull] Node root, [NotNull] Func<Node, bool> visitCallback, bool rtl)
+	{
+		int version = _version;
+		// Root-Left-Right (Queue)
+		Queue<Node> queue = new Queue<Node>();
+
+		// Start at the root
+		queue.Enqueue(root);
+
+		while (queue.Count > 0)
+		{
+			if (version != _version) throw new VersionChangedException();
+
+			// visit the next queued node
+			Node current = queue.Dequeue();
+			if (!visitCallback(current)) break;
+
+			// Queue the next nodes
+			if (rtl)
+			{
+				if (current.Right != null) queue.Enqueue(current.Right);
+				if (current.Left != null) queue.Enqueue(current.Left);
+			}
+			else
+			{
+				if (current.Left != null) queue.Enqueue(current.Left);
+				if (current.Right != null) queue.Enqueue(current.Right);
+			}
+		}
+	}
+
+	private void PreOrder([NotNull] Node root, [NotNull] Func<Node, bool> visitCallback, bool rtl)
+	{
+		int version = _version;
+		// Root-Left-Right (Stack)
+		Stack<Node> stack = new Stack<Node>();
+
+		// Start at the root
+		stack.Push(root);
+
+		while (stack.Count > 0)
+		{
+			if (version != _version) throw new VersionChangedException();
+
+			// visit the next queued node
+			Node current = stack.Pop();
+			if (!visitCallback(current)) break;
+
+			// Queue the next nodes
+			if (rtl)
+			{
+				if (current.Left != null) stack.Push(current.Left);
+				if (current.Right != null) stack.Push(current.Right);
+			}
+			else
+			{
+				if (current.Right != null) stack.Push(current.Right);
+				if (current.Left != null) stack.Push(current.Left);
+			}
+		}
+	}
+
+	private void InOrder([NotNull] Node root, [NotNull] Func<Node, bool> visitCallback, bool rtl)
+	{
+		int version = _version;
+		// Left-Root-Right (Stack)
+		Stack<Node> stack = new Stack<Node>();
+
+		// Start at the root
+		Node current = root;
+
+		while (current != null || stack.Count > 0)
+		{
+			if (version != _version) throw new VersionChangedException();
+
+			if (current != null)
+			{
+				stack.Push(current);
+				current = rtl
+							? current.Right // Navigate right
+							: current.Left; // Navigate left
+			}
+			else
+			{
+				// visit the next queued node
+				current = stack.Pop();
+				if (!visitCallback(current)) break;
+				current = rtl
+							? current.Left // Navigate left
+							: current.Right; // Navigate right
+			}
+		}
+	}
+
+	private void PostOrder([NotNull] Node root, [NotNull] Func<Node, bool> visitCallback, bool rtl)
+	{
+		int version = _version;
+		// Left-Right-Root (Stack)
+		Stack<Node> stack = new Stack<Node>();
+		Node lastVisited = null;
+		// Start at the root
+		Node current = root;
+
+		while (current != null || stack.Count > 0)
+		{
+			if (version != _version) throw new VersionChangedException();
+
+			if (current != null)
+			{
+				stack.Push(current);
+				current = rtl
+							? current.Right // Navigate right
+							: current.Left; // Navigate left
+				continue;
+			}
+
+			Node peek = stack.Peek();
+
+			if (rtl)
+			{
+				/*
+				* At this point we are either coming from
+				* either the root node or the right branch.
+				* Is there a left node?
+				* if yes, then navigate left.
+				*/
+				if (peek.Left != null && lastVisited != peek.Left)
+				{
+					// Navigate left
+					current = peek.Left;
+				}
+				else
+				{
+					// visit the next queued node
+					lastVisited = peek;
+					current = stack.Pop();
+					if (!visitCallback(current)) break;
+					current = null;
+				}
+			}
+			else
+			{
+				/*
+				* At this point we are either coming from
+				* either the root node or the left branch.
+				* Is there a right node?
+				* if yes, then navigate right.
+				*/
+				if (peek.Right != null && lastVisited != peek.Right)
+				{
+					// Navigate right
+					current = peek.Right;
+				}
+				else
+				{
+					// visit the next queued node
+					lastVisited = peek;
+					current = stack.Pop();
+					if (!visitCallback(current)) break;
+					current = null;
+				}
+			}
+		}
+	}
+	#endregion
 
 	[NotNull]
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]

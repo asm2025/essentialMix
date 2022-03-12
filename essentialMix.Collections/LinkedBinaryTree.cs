@@ -606,46 +606,25 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 
 	#region Enumerate overloads
 	[NotNull]
-	public IEnumerableEnumerator<T> Enumerate()
-	{
-		return Enumerate(Root, TreeTraverseMethod.InOrder, false);
-	}
+	public IEnumerableEnumerator<T> Enumerate() { return Enumerate(Root, TreeTraverseMethod.InOrder, false); }
 
 	[NotNull]
-	public IEnumerableEnumerator<T> Enumerate(TNode root)
-	{
-		return Enumerate(root, TreeTraverseMethod.InOrder, false);
-	}
+	public IEnumerableEnumerator<T> Enumerate(TNode root) { return Enumerate(root, TreeTraverseMethod.InOrder, false); }
 
 	[NotNull]
-	public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method)
-	{
-		return Enumerate(Root, method, false);
-	}
+	public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method) { return Enumerate(Root, method, false); }
 
 	[NotNull]
-	public IEnumerableEnumerator<T> Enumerate(bool rightToLeft)
-	{
-		return Enumerate(Root, TreeTraverseMethod.InOrder, rightToLeft);
-	}
+	public IEnumerableEnumerator<T> Enumerate(bool rightToLeft) { return Enumerate(Root, TreeTraverseMethod.InOrder, rightToLeft); }
 
 	[NotNull]
-	public IEnumerableEnumerator<T> Enumerate(TNode root, bool rightToLeft)
-	{
-		return Enumerate(root, TreeTraverseMethod.InOrder, rightToLeft);
-	}
+	public IEnumerableEnumerator<T> Enumerate(TNode root, bool rightToLeft) { return Enumerate(root, TreeTraverseMethod.InOrder, rightToLeft); }
 
 	[NotNull]
-	public IEnumerableEnumerator<T> Enumerate(TNode root, TreeTraverseMethod method)
-	{
-		return Enumerate(root, method, false);
-	}
+	public IEnumerableEnumerator<T> Enumerate(TNode root, TreeTraverseMethod method) { return Enumerate(root, method, false); }
 
 	[NotNull]
-	public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method, bool rightToLeft)
-	{
-		return Enumerate(Root, method, rightToLeft);
-	}
+	public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method, bool rightToLeft) { return Enumerate(Root, method, rightToLeft); }
 	#endregion
 
 	/// <summary>
@@ -679,40 +658,13 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 	}
 
 	#region Iterate overloads - visitCallback action
-	public void Iterate([NotNull] Action<TNode> visitCallback)
-	{
-		Iterate(Root, TreeTraverseMethod.InOrder, false, visitCallback);
-	}
-
-	public void Iterate(TNode root, [NotNull] Action<TNode> visitCallback)
-	{
-		Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback);
-	}
-
-	public void Iterate(TreeTraverseMethod method, [NotNull] Action<TNode> visitCallback)
-	{
-		Iterate(Root, method, false, visitCallback);
-	}
-
-	public void Iterate(bool rightToLeft, [NotNull] Action<TNode> visitCallback)
-	{
-		Iterate(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback);
-	}
-
-	public void Iterate(TNode root, bool rightToLeft, [NotNull] Action<TNode> visitCallback)
-	{
-		Iterate(root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback);
-	}
-
-	public void Iterate(TNode root, TreeTraverseMethod method, [NotNull] Action<TNode> visitCallback)
-	{
-		Iterate(root, method, false, visitCallback);
-	}
-
-	public void Iterate(TreeTraverseMethod method, bool rightToLeft, [NotNull] Action<TNode> visitCallback)
-	{
-		Iterate(Root, method, rightToLeft, visitCallback);
-	}
+	public void Iterate([NotNull] Action<TNode> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, false, visitCallback); }
+	public void Iterate(TNode root, [NotNull] Action<TNode> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback); }
+	public void Iterate(TreeTraverseMethod method, [NotNull] Action<TNode> visitCallback) { Iterate(Root, method, false, visitCallback); }
+	public void Iterate(bool rightToLeft, [NotNull] Action<TNode> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate(TNode root, bool rightToLeft, [NotNull] Action<TNode> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate(TNode root, TreeTraverseMethod method, [NotNull] Action<TNode> visitCallback) { Iterate(root, method, false, visitCallback); }
+	public void Iterate(TreeTraverseMethod method, bool rightToLeft, [NotNull] Action<TNode> visitCallback) { Iterate(Root, method, rightToLeft, visitCallback); }
 	#endregion
 
 	/// <summary>
@@ -746,40 +698,13 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 	}
 
 	#region Iterate overloads - visitCallback function
-	public void Iterate([NotNull] Func<TNode, bool> visitCallback)
-	{
-		Iterate(Root, TreeTraverseMethod.InOrder, false, visitCallback);
-	}
-
-	public void Iterate(TreeTraverseMethod method, [NotNull] Func<TNode, bool> visitCallback)
-	{
-		Iterate(Root, method, false, visitCallback);
-	}
-
-	public void Iterate(bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback)
-	{
-		Iterate(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback);
-	}
-
-	public void Iterate(TNode root, [NotNull] Func<TNode, bool> visitCallback)
-	{
-		Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback);
-	}
-
-	public void Iterate(TNode root, bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback)
-	{
-		Iterate(root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback);
-	}
-
-	public void Iterate(TNode root, TreeTraverseMethod method, [NotNull] Func<TNode, bool> visitCallback)
-	{
-		Iterate(root, method, false, visitCallback);
-	}
-
-	public void Iterate(TreeTraverseMethod method, bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback)
-	{
-		Iterate(Root, method, rightToLeft, visitCallback);
-	}
+	public void Iterate([NotNull] Func<TNode, bool> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, false, visitCallback); }
+	public void Iterate(TreeTraverseMethod method, [NotNull] Func<TNode, bool> visitCallback) { Iterate(Root, method, false, visitCallback); }
+	public void Iterate(bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate(TNode root, [NotNull] Func<TNode, bool> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback); }
+	public void Iterate(TNode root, bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate(TNode root, TreeTraverseMethod method, [NotNull] Func<TNode, bool> visitCallback) { Iterate(root, method, false, visitCallback); }
+	public void Iterate(TreeTraverseMethod method, bool rightToLeft, [NotNull] Func<TNode, bool> visitCallback) { Iterate(Root, method, rightToLeft, visitCallback); }
 	#endregion
 
 	/// <summary>
@@ -829,20 +754,9 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 	}
 
 	#region LevelIterate overloads - visitCallback function
-	public void IterateLevels([NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
-	{
-		IterateLevels(Root, false, levelCallback);
-	}
-
-	public void IterateLevels(bool rightToLeft, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
-	{
-		IterateLevels(Root, rightToLeft, levelCallback);
-	}
-
-	public void IterateLevels(TNode root, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback)
-	{
-		IterateLevels(root, false, levelCallback);
-	}
+	public void IterateLevels([NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback) { IterateLevels(Root, false, levelCallback); }
+	public void IterateLevels(bool rightToLeft, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback) { IterateLevels(Root, rightToLeft, levelCallback); }
+	public void IterateLevels(TNode root, [NotNull] Action<int, IReadOnlyCollection<TNode>> levelCallback) { IterateLevels(root, false, levelCallback); }
 	#endregion
 
 	/// <summary>
