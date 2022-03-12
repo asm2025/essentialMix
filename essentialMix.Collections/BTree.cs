@@ -46,7 +46,6 @@ namespace essentialMix.Collections;
 /// <see href="https://en.wikipedia.org/wiki/B-tree">B-tree</see> using the linked representation.
 /// See a brief overview at <see href="https://www.youtube.com/watch?v=aZjYr87r1b8">10.2  B Trees and B+ Trees. How they are useful in Databases</see>.
 /// <para>Based on BTree chapter in "Introduction to Algorithms", by Thomas Cormen, Charles Leiserson, Ronald Rivest.</para>
-/// <para>This uses the same abstract pattern similar to <see cref="LinkedBinaryTree{Entry,T}"/></para>
 /// <para>
 /// A B-tree of order m is a tree which satisfies the following properties:
 /// <list type="number">
