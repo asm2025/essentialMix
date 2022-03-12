@@ -60,6 +60,8 @@
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
 if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
 		</PreBuildEvent>
+		<Version>13.0.5.0</Version>
+		<FileVersion>22.3.12.0</FileVersion>
 	</PropertyGroup>
 
 </Project>

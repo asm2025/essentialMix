@@ -132,10 +132,9 @@ public sealed class SkipList<T> : ICollection<T>, ICollection, IReadOnlyCollecti
 		public void Dispose() { }
 	}
 
-	internal int _version;
-
 	private readonly Random _random = new Random(Guid.NewGuid().GetHashCode());
 
+	private int _version;
 	[NonSerialized]
 	private object _syncRoot;
 
@@ -183,7 +182,7 @@ public sealed class SkipList<T> : ICollection<T>, ICollection, IReadOnlyCollecti
 
 	/// <inheritdoc />
 	IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-		
+
 	[NotNull]
 	public IEnumerableEnumerator<T> Enumerate(int level)
 	{
@@ -205,7 +204,7 @@ public sealed class SkipList<T> : ICollection<T>, ICollection, IReadOnlyCollecti
 		* new value between update[0] and current node.
 		*/
 		if (node != null && Comparer.IsEqual(node.Value, value)) return;
-			
+
 		// Generate a random level for node
 		int rLevel = RandomLevel();
 
@@ -254,11 +253,11 @@ public sealed class SkipList<T> : ICollection<T>, ICollection, IReadOnlyCollecti
 		* linked list to remove the target node.
 		*/
 		// if at level i, next node is not the target node; So, break the loop
-		for (int i = 0; i <= Level && update[i].Forward[i] == node; i++) 
+		for (int i = 0; i <= Level && update[i].Forward[i] == node; i++)
 			update[i].Forward[i] = node.Forward[i];
 
 		// Remove levels having no elements
-		while (Level > 0 && Header.Forward[Level] == null) 
+		while (Level > 0 && Header.Forward[Level] == null)
 			Level--;
 
 		Count--;
@@ -288,7 +287,7 @@ public sealed class SkipList<T> : ICollection<T>, ICollection, IReadOnlyCollecti
 		if (Count == 0) return;
 		array.Length.ValidateRange(arrayIndex, Count);
 
-		foreach (T value in this) 
+		foreach (T value in this)
 			array[arrayIndex++] = value;
 	}
 
@@ -318,7 +317,7 @@ public sealed class SkipList<T> : ICollection<T>, ICollection, IReadOnlyCollecti
 		if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType))) throw new ArgumentException("Invalid array type", nameof(array));
 		if (array is not object[] objects) throw new ArgumentException("Invalid array type", nameof(array));
 
-		foreach (T value in this) 
+		foreach (T value in this)
 			objects[index++] = value;
 	}
 
@@ -348,7 +347,7 @@ public sealed class SkipList<T> : ICollection<T>, ICollection, IReadOnlyCollecti
 		*/
 		for (int i = Level; i >= 0; i--)
 		{
-			while (node.Forward[i] != null && Comparer.IsLessThan(node.Forward[i].Value, value)) 
+			while (node.Forward[i] != null && Comparer.IsLessThan(node.Forward[i].Value, value))
 				node = node.Forward[i];
 
 			if (update == null) continue;

@@ -165,7 +165,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 	private struct LevelOrderEnumerator : IEnumerableEnumerator<T>
 	{
-		private readonly BinaryHeapBase<TNode, T> _tree;
+		private readonly BinaryHeapBase<TNode, T> _heap;
 		private readonly int _version;
 		private readonly int _index;
 		private readonly Queue<int> _queue;
@@ -175,16 +175,16 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 		private bool _started;
 		private bool _done;
 
-		internal LevelOrderEnumerator([NotNull] BinaryHeapBase<TNode, T> tree, int index, bool rightToLeft)
+		internal LevelOrderEnumerator([NotNull] BinaryHeapBase<TNode, T> heap, int index, bool rightToLeft)
 		{
-			_tree = tree;
-			_version = _tree._version;
+			_heap = heap;
+			_version = _heap._version;
 			_index = index;
-			_queue = new Queue<int>(GetCapacityForQueueing(_tree));
+			_queue = new Queue<int>(GetCapacityForQueueing(_heap));
 			_rightToLeft = rightToLeft;
-			_current = tree.CreateNavigator(index);
+			_current = heap.CreateNavigator(index);
 			_started = false;
-			_done = !_index.InRangeRx(0, _tree.Count);
+			_done = !_index.InRangeRx(0, _heap.Count);
 		}
 
 		/// <inheritdoc />
@@ -215,7 +215,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 		public bool MoveNext()
 		{
-			if (_version != _tree._version) throw new VersionChangedException();
+			if (_version != _heap._version) throw new VersionChangedException();
 			// Root-Left-Right (Queue)
 			if (_done) return false;
 
@@ -254,11 +254,11 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 		void IEnumerator.Reset()
 		{
-			if (_version != _tree._version) throw new VersionChangedException();
+			if (_version != _heap._version) throw new VersionChangedException();
 			_current.Index = -1;
 			_started = false;
 			_queue.Clear();
-			_done = !_index.InRangeRx(0, _tree.Count);
+			_done = !_index.InRangeRx(0, _heap.Count);
 		}
 
 		/// <inheritdoc />
@@ -267,7 +267,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 	private struct PreOrderEnumerator : IEnumerableEnumerator<T>
 	{
-		private readonly BinaryHeapBase<TNode, T> _tree;
+		private readonly BinaryHeapBase<TNode, T> _heap;
 		private readonly int _version;
 		private readonly int _index;
 		private readonly Stack<int> _stack;
@@ -277,16 +277,16 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 		private bool _started;
 		private bool _done;
 
-		internal PreOrderEnumerator([NotNull] BinaryHeapBase<TNode, T> tree, int index, bool rightToLeft)
+		internal PreOrderEnumerator([NotNull] BinaryHeapBase<TNode, T> heap, int index, bool rightToLeft)
 		{
-			_tree = tree;
-			_version = _tree._version;
+			_heap = heap;
+			_version = _heap._version;
 			_index = index;
-			_stack = new Stack<int>(GetCapacityForQueueing(_tree));
+			_stack = new Stack<int>(GetCapacityForQueueing(_heap));
 			_rightToLeft = rightToLeft;
-			_current = tree.CreateNavigator(index);
+			_current = heap.CreateNavigator(index);
 			_started = false;
-			_done = !_index.InRangeRx(0, _tree.Count);
+			_done = !_index.InRangeRx(0, _heap.Count);
 		}
 
 		/// <inheritdoc />
@@ -317,7 +317,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 		public bool MoveNext()
 		{
-			if (_version != _tree._version) throw new VersionChangedException();
+			if (_version != _heap._version) throw new VersionChangedException();
 
 			// Root-Left-Right (Stack)
 			if (_done) return false;
@@ -357,11 +357,11 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 		void IEnumerator.Reset()
 		{
-			if (_version != _tree._version) throw new VersionChangedException();
+			if (_version != _heap._version) throw new VersionChangedException();
 			_current.Index = -1;
 			_started = false;
 			_stack.Clear();
-			_done = !_index.InRangeRx(0, _tree.Count);
+			_done = !_index.InRangeRx(0, _heap.Count);
 		}
 
 		/// <inheritdoc />
@@ -370,7 +370,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 	private struct InOrderEnumerator : IEnumerableEnumerator<T>
 	{
-		private readonly BinaryHeapBase<TNode, T> _tree;
+		private readonly BinaryHeapBase<TNode, T> _heap;
 		private readonly int _version;
 		private readonly int _index;
 		private readonly Stack<int> _stack;
@@ -380,16 +380,16 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 		private bool _started;
 		private bool _done;
 
-		internal InOrderEnumerator([NotNull] BinaryHeapBase<TNode, T> tree, int index, bool rightToLeft)
+		internal InOrderEnumerator([NotNull] BinaryHeapBase<TNode, T> heap, int index, bool rightToLeft)
 		{
-			_tree = tree;
-			_version = _tree._version;
+			_heap = heap;
+			_version = _heap._version;
 			_index = index;
-			_stack = new Stack<int>(GetCapacityForQueueing(_tree));
+			_stack = new Stack<int>(GetCapacityForQueueing(_heap));
 			_rightToLeft = rightToLeft;
-			_current = tree.CreateNavigator(index);
+			_current = heap.CreateNavigator(index);
 			_started = false;
-			_done = !_index.InRangeRx(0, _tree.Count);
+			_done = !_index.InRangeRx(0, _heap.Count);
 		}
 
 		/// <inheritdoc />
@@ -420,7 +420,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 		public bool MoveNext()
 		{
-			if (_version != _tree._version) throw new VersionChangedException();
+			if (_version != _heap._version) throw new VersionChangedException();
 
 			// Left-Root-Right (Stack)
 			if (_done) return false;
@@ -442,7 +442,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 			while (_current.Index > -1 || _stack.Count > 0)
 			{
-				if (_version != _tree._version) throw new VersionChangedException();
+				if (_version != _heap._version) throw new VersionChangedException();
 
 				if (_current.Index > -1)
 				{
@@ -467,11 +467,11 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 		void IEnumerator.Reset()
 		{
-			if (_version != _tree._version) throw new VersionChangedException();
+			if (_version != _heap._version) throw new VersionChangedException();
 			_current.Index = -1;
 			_started = false;
 			_stack.Clear();
-			_done = !_index.InRangeRx(0, _tree.Count);
+			_done = !_index.InRangeRx(0, _heap.Count);
 		}
 
 		/// <inheritdoc />
@@ -480,7 +480,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 	private struct PostOrderEnumerator : IEnumerableEnumerator<T>
 	{
-		private readonly BinaryHeapBase<TNode, T> _tree;
+		private readonly BinaryHeapBase<TNode, T> _heap;
 		private readonly int _version;
 		private readonly int _index;
 		private readonly Stack<int> _stack;
@@ -490,16 +490,16 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 		private bool _started;
 		private bool _done;
 
-		internal PostOrderEnumerator([NotNull] BinaryHeapBase<TNode, T> tree, int index, bool rightToLeft)
+		internal PostOrderEnumerator([NotNull] BinaryHeapBase<TNode, T> heap, int index, bool rightToLeft)
 		{
-			_tree = tree;
-			_version = _tree._version;
+			_heap = heap;
+			_version = _heap._version;
 			_index = index;
-			_stack = new Stack<int>(GetCapacityForQueueing(_tree));
+			_stack = new Stack<int>(GetCapacityForQueueing(_heap));
 			_rightToLeft = rightToLeft;
-			_current = tree.CreateNavigator(index);
+			_current = heap.CreateNavigator(index);
 			_started = false;
-			_done = !_index.InRangeRx(0, _tree.Count);
+			_done = !_index.InRangeRx(0, _heap.Count);
 		}
 
 		/// <inheritdoc />
@@ -530,7 +530,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 		public bool MoveNext()
 		{
-			if (_version != _tree._version) throw new VersionChangedException();
+			if (_version != _heap._version) throw new VersionChangedException();
 
 			// Left-Right-Root (Stack)
 			if (_done) return false;
@@ -550,7 +550,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 			{
 				while (_current.Index > -1)
 				{
-					if (_version != _tree._version) throw new VersionChangedException();
+					if (_version != _heap._version) throw new VersionChangedException();
 
 					if (_rightToLeft)
 					{
@@ -569,7 +569,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 										: _current.LeftIndex; // Navigate left
 				}
 
-				if (_version != _tree._version) throw new VersionChangedException();
+				if (_version != _heap._version) throw new VersionChangedException();
 				_current.Index = _stack.Count > 0
 									? _stack.Pop()
 									: -1;
@@ -616,18 +616,18 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 
 		void IEnumerator.Reset()
 		{
-			if (_version != _tree._version) throw new VersionChangedException();
+			if (_version != _heap._version) throw new VersionChangedException();
 			_current.Index = -1;
 			_started = false;
 			_stack.Clear();
-			_done = !_index.InRangeRx(0, _tree.Count);
+			_done = !_index.InRangeRx(0, _heap.Count);
 		}
 
 		/// <inheritdoc />
 		public void Dispose() { }
 	}
 
-	protected internal int _version;
+	internal int _version;
 
 	[NonSerialized]
 	private object _syncRoot;
