@@ -213,7 +213,6 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		public bool MoveNext()
 		{
 			if (_version != _tree._version) throw new VersionChangedException();
-
 			// Root-Left-Right (Stack)
 			if (_done) return false;
 
@@ -315,7 +314,6 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		public bool MoveNext()
 		{
 			if (_version != _tree._version) throw new VersionChangedException();
-
 			// Left-Root-Right (Stack)
 			if (_done) return false;
 
@@ -424,7 +422,6 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 		public bool MoveNext()
 		{
 			if (_version != _tree._version) throw new VersionChangedException();
-
 			// Left-Right-Root (Stack)
 			if (_done) return false;
 

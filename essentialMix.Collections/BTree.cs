@@ -799,34 +799,338 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 	[Serializable]
 	private struct LevelOrderEnumerator : IEnumerableEnumerator<T>
 	{
-		internal LevelOrderEnumerator([NotNull] BTree<T> tree, [NotNull] Node node, bool rightToLeft)
-		{
+		private readonly BTree<T> _tree;
+		private readonly int _version;
+		private readonly Node _root;
+		private readonly Queue<Node> _nodes;
+		private readonly Queue<Entry> _queue;
+		private readonly bool _rightToLeft;
 
+		private Entry _current;
+		private bool _started;
+		private bool _done;
+
+		internal LevelOrderEnumerator([NotNull] BTree<T> tree, Node root, bool rightToLeft)
+		{
+			_tree = tree;
+			_version = _tree._version;
+			_root = root;
+			_nodes = new Queue<Node>();
+			_queue = new Queue<Entry>();
+			_rightToLeft = rightToLeft;
+			_current = null;
+			_started = false;
+			_done = _root == null;
 		}
+
+		/// <inheritdoc />
+		public T Current
+		{
+			get
+			{
+				if (!_started || _current == null) throw new InvalidOperationException();
+				return _current.Value;
+			}
+		}
+
+		/// <inheritdoc />
+		object IEnumerator.Current => Current;
+
+		/// <inheritdoc />
+		public IEnumerator<T> GetEnumerator()
+		{
+			IEnumerator enumerator = this;
+			enumerator.Reset();
+			return this;
+		}
+
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+		public bool MoveNext()
+		{
+			if (_version != _tree._version) throw new VersionChangedException();
+			// Root-Left-Right (Queue)
+			if (_done) return false;
+
+			if (!_started)
+			{
+				_started = true;
+				// Start at the root
+				_nodes.Enqueue(_root);
+			}
+
+			if (_queue.Count == 0)
+			{
+				/*
+				 * If we are here, all queued entries are consumed.
+				 * Process the next node...
+				 */
+				Node node = _nodes.Count > 0
+								? _nodes.Dequeue()
+								: null;
+
+				if (node == null)
+				{
+					_done = true;
+					return false;
+				}
+
+				// Queue the next entries
+				if (_rightToLeft)
+				{
+					for (int i = node.Count - 1; i >= 0; i--)
+						_queue.Enqueue(node[i]);
+				}
+				else
+				{
+					foreach (Entry entry in node)
+						_queue.Enqueue(entry);
+				}
+
+				if (node.Children != null)
+				{
+					// Queue the next nodes
+					if (_rightToLeft)
+					{
+						for (int i = node.Children.Count - 1; i >= 0; i--)
+							_nodes.Enqueue(node.Children[i]);
+					}
+					else
+					{
+						foreach (Node child in node.Children)
+							_nodes.Enqueue(child);
+					}
+				}
+			}
+
+			// visit the next queued entry
+			_current = _queue.Count > 0
+							? _queue.Dequeue()
+							: null;
+			if (_current != null) return true;
+			_done = true;
+			return false;
+		}
+
+		void IEnumerator.Reset()
+		{
+			if (_version != _tree._version) throw new VersionChangedException();
+			_current = null;
+			_started = false;
+			_queue.Clear();
+			_nodes.Clear();
+			_done = _root == null;
+		}
+
+		/// <inheritdoc />
+		public void Dispose() { }
 	}
 
 	[Serializable]
 	private struct PreOrderEnumerator : IEnumerableEnumerator<T>
 	{
-		public PreOrderEnumerator([NotNull] BTree<T> tree, [NotNull] Node node, bool rightToLeft)
-		{
+		private readonly BTree<T> _tree;
+		private readonly int _version;
+		private readonly Node _root;
+		private readonly Stack<Node> _nodes;
+		private readonly Stack<Entry> _stack;
+		private readonly bool _rightToLeft;
 
+		private Entry _current;
+		private bool _started;
+		private bool _done;
+
+		internal PreOrderEnumerator([NotNull] BTree<T> tree, Node root, bool rightToLeft)
+		{
+			_tree = tree;
+			_version = _tree._version;
+			_root = root;
+			_nodes = new Stack<Node>();
+			_stack = new Stack<Entry>();
+			_rightToLeft = rightToLeft;
+			_current = null;
+			_started = false;
+			_done = _root == null;
 		}
+
+		/// <inheritdoc />
+		public T Current
+		{
+			get
+			{
+				if (!_started || _current == null) throw new InvalidOperationException();
+				return _current.Value;
+			}
+		}
+
+		/// <inheritdoc />
+		object IEnumerator.Current => Current;
+
+		/// <inheritdoc />
+		public IEnumerator<T> GetEnumerator()
+		{
+			IEnumerator enumerator = this;
+			enumerator.Reset();
+			return this;
+		}
+
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+		public bool MoveNext()
+		{
+			if (_version != _tree._version) throw new VersionChangedException();
+			// Root-Left-Right (Stack)
+			if (_done) return false;
+
+			if (!_started)
+			{
+				_started = true;
+				// Start at the root
+				_nodes.Push(_root);
+			}
+
+			if (_stack.Count == 0)
+			{
+				/*
+				 * If we are here, all queued entries are consumed.
+				 * Process the next node...
+				 */
+				Node node = _nodes.Count > 0
+								? _nodes.Pop()
+								: null;
+
+				if (node == null)
+				{
+					_done = true;
+					return false;
+				}
+
+				// Queue the next entries
+				if (_rightToLeft)
+				{
+					foreach (Entry entry in node)
+						_stack.Push(entry);
+				}
+				else
+				{
+					for (int i = node.Count - 1; i >= 0; i--)
+						_stack.Push(node[i]);
+				}
+
+				if (node.Children != null)
+				{
+					// Queue the next nodes
+					if (_rightToLeft)
+					{
+						foreach (Node child in node.Children)
+							_nodes.Push(child);
+					}
+					else
+					{
+						for (int i = node.Children.Count - 1; i >= 0; i--)
+							_nodes.Push(node.Children[i]);
+					}
+				}
+			}
+
+			// visit the next queued entry
+			_current = _stack.Count > 0
+							? _stack.Pop()
+							: null;
+			if (_current != null) return true;
+			_done = true;
+			return false;
+		}
+
+		void IEnumerator.Reset()
+		{
+			if (_version != _tree._version) throw new VersionChangedException();
+			_current = null;
+			_started = false;
+			_stack.Clear();
+			_nodes.Clear();
+			_done = _root == null;
+		}
+
+		/// <inheritdoc />
+		public void Dispose() { }
 	}
 
 	[Serializable]
 	private struct InOrderEnumerator : IEnumerableEnumerator<T>
 	{
-		public InOrderEnumerator([NotNull] BTree<T> tree, [NotNull] Node node, bool rightToLeft)
-		{
+		private readonly BTree<T> _tree;
+		private readonly int _version;
+		private readonly Node _root;
+		private readonly Stack<Node> _nodes;
+		private readonly Stack<Entry> _stack;
+		private readonly bool _rightToLeft;
 
+		private Entry _current;
+		private bool _started;
+		private bool _done;
+
+		public InOrderEnumerator([NotNull] BTree<T> tree, Node root, bool rightToLeft)
+		{
+			_tree = tree;
+			_version = _tree._version;
+			_root = root;
+			_nodes = new Stack<Node>();
+			_stack = new Stack<Entry>();
+			_rightToLeft = rightToLeft;
+			_current = null;
+			_started = false;
+			_done = _root == null;
 		}
+
+		/// <inheritdoc />
+		public T Current
+		{
+			get
+			{
+				if (!_started || _current == null) throw new InvalidOperationException();
+				return _current.Value;
+			}
+		}
+
+		/// <inheritdoc />
+		object IEnumerator.Current => Current;
+
+		/// <inheritdoc />
+		public IEnumerator<T> GetEnumerator()
+		{
+			IEnumerator enumerator = this;
+			enumerator.Reset();
+			return this;
+		}
+
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+		public bool MoveNext()
+		{
+		}
+
+		void IEnumerator.Reset()
+		{
+			if (_version != _tree._version) throw new VersionChangedException();
+			_current = null;
+			_started = false;
+			_stack.Clear();
+			_nodes.Clear();
+			_done = _root == null;
+		}
+
+		/// <inheritdoc />
+		public void Dispose() { }
 	}
 
 	[Serializable]
 	private struct PostOrderEnumerator : IEnumerableEnumerator<T>
 	{
-		public PostOrderEnumerator([NotNull] BTree<T> tree, [NotNull] Node node, bool rightToLeft)
+		public PostOrderEnumerator([NotNull] BTree<T> tree, Node root, bool rightToLeft)
 		{
 
 		}
