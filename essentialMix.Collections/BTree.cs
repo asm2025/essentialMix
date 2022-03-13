@@ -888,7 +888,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 						_queue.Enqueue(entry);
 				}
 
-				if (node.Children != null)
+				if (node.Children?.Count > 0)
 				{
 					// Queue the next nodes
 					if (_rightToLeft)
@@ -1019,7 +1019,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 						_stack.Push(node[i]);
 				}
 
-				if (node.Children != null)
+				if (node.Children?.Count > 0)
 				{
 					// Queue the next nodes
 					if (_rightToLeft)
