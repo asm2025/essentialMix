@@ -344,13 +344,12 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 									? _current.Right
 									// Navigate left
 									: _current.Left;
+					continue;
 				}
-				else
-				{
-					// visit the next queued node
-					_current = _stack.Pop();
-					break; // break from the loop to visit this node
-				}
+
+				// visit the next queued node
+				_current = _stack.Pop();
+				break; // break from the loop to visit this node
 			}
 
 			_done = _current == null;
