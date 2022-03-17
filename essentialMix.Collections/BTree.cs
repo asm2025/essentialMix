@@ -847,12 +847,21 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
+		/// <inheritdoc />
 		public bool MoveNext()
 		{
 			if (_version != _tree._version) throw new VersionChangedException();
 			// Root-Left-Right (Queue)
 			if (_done) return false;
 
+			if (_entries.Count > 0)
+			{
+				// visit the next queued entry
+				_current = _entries.Dequeue();
+				return true;
+			}
+
+			// We don't have entries in the queue, so process the next node
 			if (!_started)
 			{
 				_started = true;
@@ -860,59 +869,59 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 				_nodes.Enqueue(_root);
 			}
 
-			if (_entries.Count == 0)
+			Node node;
+
+			do
 			{
-				/*
-				 * If we are here, all queued entries are consumed.
-				 * Process the next node...
-				 */
-				Node node = _nodes.Count > 0
+				// visit the next queued node
+				node = _nodes.Count > 0
 								? _nodes.Dequeue()
 								: null;
+				if (node == null) break;
+				if (node.Children == null || node.Children.Count == 0) continue;
 
-				if (node == null)
-				{
-					_done = true;
-					return false;
-				}
-
-				// Queue the next entries
+				// Queue the next nodes
 				if (_rightToLeft)
 				{
-					for (int i = node.Count - 1; i >= 0; i--)
-						_entries.Enqueue(node[i]);
+					for (int i = node.Children.Count - 1; i >= 0; i--)
+						_nodes.Enqueue(node.Children[i]);
 				}
 				else
 				{
-					foreach (Entry entry in node)
-						_entries.Enqueue(entry);
+					foreach (Node child in node.Children)
+						_nodes.Enqueue(child);
 				}
+			}
+			while (node is { Count: 0 });
 
-				if (node.Children != null)
-				{
-					// Queue the next nodes
-					if (_rightToLeft)
-					{
-						for (int i = node.Children.Count - 1; i >= 0; i--)
-							_nodes.Enqueue(node.Children[i]);
-					}
-					else
-					{
-						foreach (Node child in node.Children)
-							_nodes.Enqueue(child);
-					}
-				}
+			if (node == null)
+			{
+				_current = null;
+				_done = true;
+				return false;
+			}
+
+			// Queue the next entries
+			if (_rightToLeft)
+			{
+				for (int i = node.Count - 1; i >= 0; i--)
+					_entries.Enqueue(node[i]);
+			}
+			else
+			{
+				foreach (Entry entry in node)
+					_entries.Enqueue(entry);
 			}
 
 			// visit the next queued entry
 			_current = _entries.Count > 0
 							? _entries.Dequeue()
 							: null;
-			if (_current != null) return true;
-			_done = true;
-			return false;
+			_done = _current == null;
+			return !_done;
 		}
 
+		/// <inheritdoc />
 		void IEnumerator.Reset()
 		{
 			if (_version != _tree._version) throw new VersionChangedException();
@@ -978,12 +987,21 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
+		/// <inheritdoc />
 		public bool MoveNext()
 		{
 			if (_version != _tree._version) throw new VersionChangedException();
 			// Root-Left-Right (Stack)
 			if (_done) return false;
 
+			if (_entries.Count > 0)
+			{
+				// visit the next queued entry
+				_current = _entries.Pop();
+				return true;
+			}
+
+			// We don't have entries in the queue, so process the next node
 			if (!_started)
 			{
 				_started = true;
@@ -991,59 +1009,61 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 				_nodes.Push(_root);
 			}
 
-			if (_entries.Count == 0)
+			Node node;
+
+			do
 			{
-				/*
-				 * If we are here, all queued entries are consumed.
-				 * Process the next node...
-				 */
-				Node node = _nodes.Count > 0
-								? _nodes.Pop()
-								: null;
+				// visit the next queued node
+				node = _nodes.Count > 0
+							? _nodes.Pop()
+							: null;
+				if (node == null) break;
+				if (node.Children == null || node.Children.Count == 0) continue;
 
-				if (node == null)
-				{
-					_done = true;
-					return false;
-				}
-
-				// Queue the next entries
+				// Queue the next nodes
 				if (_rightToLeft)
 				{
-					foreach (Entry entry in node)
-						_entries.Push(entry);
+					foreach (Node child in node.Children)
+						_nodes.Push(child);
 				}
 				else
 				{
-					for (int i = node.Count - 1; i >= 0; i--)
-						_entries.Push(node[i]);
+					for (int i = node.Children.Count - 1; i >= 0; i--)
+						_nodes.Push(node.Children[i]);
 				}
+			}
+			while (node is { Count: 0 });
 
-				if (node.Children != null)
-				{
-					// Queue the next nodes
-					if (_rightToLeft)
-					{
-						foreach (Node child in node.Children)
-							_nodes.Push(child);
-					}
-					else
-					{
-						for (int i = node.Children.Count - 1; i >= 0; i--)
-							_nodes.Push(node.Children[i]);
-					}
-				}
+			if (node == null)
+			{
+				_current = null;
+				_done = true;
+				return false;
+			}
+
+			// Queue the next entries
+			if (_rightToLeft)
+			{
+				// Navigate right
+				foreach (Entry entry in node)
+					_entries.Push(entry);
+			}
+			else
+			{
+				// Navigate left
+				for (int i = node.Count - 1; i >= 0; i--)
+					_entries.Push(node[i]);
 			}
 
 			// visit the next queued entry
 			_current = _entries.Count > 0
 							? _entries.Pop()
 							: null;
-			if (_current != null) return true;
-			_done = true;
-			return false;
+			_done = _current == null;
+			return !_done;
 		}
 
+		/// <inheritdoc />
 		void IEnumerator.Reset()
 		{
 			if (_version != _tree._version) throw new VersionChangedException();
@@ -1109,6 +1129,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 		/// <inheritdoc />
 		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
+		/// <inheritdoc />
 		public bool MoveNext()
 		{
 			if (_version != _tree._version) throw new VersionChangedException();
@@ -1123,7 +1144,6 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 			}
 
 			// We don't have entries in the queue, so process the next node
-			_current = null;
 			Node node;
 
 			if (!_started)
@@ -1141,6 +1161,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 
 			if (node == null)
 			{
+				_current = null;
 				_done = true;
 				return false;
 			}
@@ -1181,6 +1202,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 				// visit the next queued node
 				node = _nodes.Pop();
 
+				// the node has its children queued already, just check for entries
 				while (node is { Count: 0 })
 					node = _nodes.Count > 0
 								? _nodes.Pop()
@@ -1188,6 +1210,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 
 				if (node == null || node.Count == 0) break;
 
+				// Queue the next entries
 				if (_rightToLeft)
 				{
 					// Navigate right
@@ -1211,6 +1234,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 			return !_done;
 		}
 
+		/// <inheritdoc />
 		void IEnumerator.Reset()
 		{
 			if (_version != _tree._version) throw new VersionChangedException();
@@ -1228,10 +1252,126 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 	[Serializable]
 	private struct PostOrderEnumerator : IEnumerableEnumerator<T>
 	{
+		private readonly BTree<T> _tree;
+		private readonly int _version;
+		private readonly Node _root;
+		private readonly Stack<Node> _nodes;
+		private readonly Stack<Entry> _entries;
+		private readonly bool _rightToLeft;
+
+		private Entry _current;
+		private bool _started;
+		private bool _done;
+
 		public PostOrderEnumerator([NotNull] BTree<T> tree, Node root, bool rightToLeft)
 		{
-
+			_tree = tree;
+			_version = _tree._version;
+			_root = root;
+			_nodes = new Stack<Node>();
+			_entries = new Stack<Entry>();
+			_rightToLeft = rightToLeft;
+			_current = null;
+			_started = false;
+			_done = _root == null;
 		}
+
+		/// <inheritdoc />
+		public T Current
+		{
+			get
+			{
+				if (!_started || _current == null) throw new InvalidOperationException();
+				return _current.Value;
+			}
+		}
+
+		/// <inheritdoc />
+		object IEnumerator.Current => Current;
+
+		/// <inheritdoc />
+		public IEnumerator<T> GetEnumerator()
+		{
+			IEnumerator enumerator = this;
+			enumerator.Reset();
+			return this;
+		}
+
+		/// <inheritdoc />
+		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+		/// <inheritdoc />
+		public bool MoveNext()
+		{
+			if (_version != _tree._version) throw new VersionChangedException();
+			// Left-Right-Root (Stack)
+			if (_done) return false;
+
+			if (_entries.Count > 0)
+			{
+				// visit the next queued entry
+				_current = _entries.Pop();
+				return true;
+			}
+
+			// We don't have entries in the queue, so process the next node
+			Node node;
+
+			if (!_started)
+			{
+				_started = true;
+				// Start at the root
+				node = _root;
+			}
+			else
+			{
+				node = null;
+			}
+
+			do
+			{
+				while (node != null)
+				{
+					if (_version != _tree._version) throw new VersionChangedException();
+
+					if (_rightToLeft)
+					{
+						// Navigate left
+						if (node.Left != null) _nodes.Push(node.Left);
+					}
+					else
+					{
+						// Navigate right
+						if (node.Right != null) _nodes.Push(node.Right);
+					}
+
+					_nodes.Push(node);
+					node = _rightToLeft
+								? node.Right // Navigate right
+								: node.Left; // Navigate left
+				}
+
+				if (_version != _tree._version) throw new VersionChangedException();
+			}
+			while (_nodes.Count > 0);
+
+			_done = _current == null;
+			return !_done;
+		}
+
+		/// <inheritdoc />
+		void IEnumerator.Reset()
+		{
+			if (_version != _tree._version) throw new VersionChangedException();
+			_current = null;
+			_started = false;
+			_entries.Clear();
+			_nodes.Clear();
+			_done = _root == null;
+		}
+
+		/// <inheritdoc />
+		public void Dispose() { }
 	}
 
 	private int _version;
