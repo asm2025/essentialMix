@@ -122,14 +122,16 @@ public abstract class RepositoryBase<TEntity> : RepositoryBase, IRepositoryBase<
 	protected abstract IQueryable<TEntity> CountInternal(IPagination settings = null);
 
 	/// <inheritdoc />
-	public ValueTask<int> CountAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
+	public ValueTask<T> CountAsync<T>(IPagination settings = null, CancellationToken token = default(CancellationToken))
+		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
-		return CountAsyncInternal(settings, token);
+		return CountAsyncInternal<T>(settings, token);
 	}
 
-	protected abstract ValueTask<int> CountAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
+	protected abstract ValueTask<T> CountAsyncInternal<T>(IPagination settings = null, CancellationToken token = default(CancellationToken))
+		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable;
 
 	/// <inheritdoc />
 	public IQueryable<TEntity> List(IPagination settings = null)
@@ -149,6 +151,9 @@ public abstract class RepositoryBase<TEntity> : RepositoryBase, IRepositoryBase<
 	}
 
 	protected abstract ValueTask<IList<TEntity>> ListAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
+
+	[NotNull]
+	protected abstract IQueryable<TEntity> PrepareCountQuery([NotNull] IQueryable<TEntity> query, IPagination settings);
 
 	[NotNull]
 	protected abstract IQueryable<TEntity> PrepareListQuery([NotNull] IQueryable<TEntity> query, IPagination settings);

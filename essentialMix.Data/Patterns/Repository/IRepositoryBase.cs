@@ -29,7 +29,8 @@ public interface IRepositoryBase<TEntity> : IRepositoryBase
 	ValueTask<T> CreateAsync<T>(CancellationToken token = default(CancellationToken)) where T : TEntity;
 
 	IQueryable<TEntity> Count(IPagination settings = null);
-	ValueTask<int> CountAsync(IPagination settings = null, CancellationToken token = default(CancellationToken));
+	ValueTask<T> CountAsync<T>(IPagination settings = null, CancellationToken token = default(CancellationToken))
+		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable;
 
 	IQueryable<TEntity> List(IPagination settings = null);
 	ValueTask<IList<TEntity>> ListAsync(IPagination settings = null, CancellationToken token = default(CancellationToken));
