@@ -113,25 +113,42 @@ public abstract class RepositoryBase<TEntity> : RepositoryBase, IRepositoryBase<
 	}
 
 	/// <inheritdoc />
-	public IQueryable<TEntity> Count(IPagination settings = null)
+	public int Count(IPagination settings = null)
 	{
 		ThrowIfDisposed();
 		return CountInternal(settings);
 	}
 
-	protected abstract IQueryable<TEntity> CountInternal(IPagination settings = null);
+	protected abstract int CountInternal(IPagination settings = null);
 
 	/// <inheritdoc />
-	public ValueTask<T> CountAsync<T>(IPagination settings = null, CancellationToken token = default(CancellationToken))
-		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
+	public ValueTask<int> CountAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
-		return CountAsyncInternal<T>(settings, token);
+		return CountAsyncInternal(settings, token);
 	}
 
-	protected abstract ValueTask<T> CountAsyncInternal<T>(IPagination settings = null, CancellationToken token = default(CancellationToken))
-		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable;
+	protected abstract ValueTask<int> CountAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
+
+	/// <inheritdoc />
+	public long LongCount(IPagination settings = null)
+	{
+		ThrowIfDisposed();
+		return LongCountInternal(settings);
+	}
+
+	protected abstract long LongCountInternal(IPagination settings = null);
+
+	/// <inheritdoc />
+	public ValueTask<long> LongCountAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
+	{
+		ThrowIfDisposed();
+		token.ThrowIfCancellationRequested();
+		return LongCountAsyncInternal(settings, token);
+	}
+
+	protected abstract ValueTask<long> LongCountAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
 	public IQueryable<TEntity> List(IPagination settings = null)
