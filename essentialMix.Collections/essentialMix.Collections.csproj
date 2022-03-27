@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -12,7 +12,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<AssemblyVersion>13.0.5.0</AssemblyVersion>
-		<FileVersion>22.3.12.0</FileVersion>
+		<FileVersion>22.3.27.0</FileVersion>
 		<Version>13.0.5.0</Version>
 	</PropertyGroup>
 	
@@ -53,7 +53,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>$(AssemblyVersion)</PackageVersion>
+		<PackageVersion>13.0.5.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns, collections, data structure</PackageTags>
@@ -67,6 +67,11 @@
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="!todo\**" />
+	  <EmbeddedResource Remove="!todo\**" />
+	  <None Remove="!todo\**" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="..\buckramega.png" Pack="True" PackagePath="" />

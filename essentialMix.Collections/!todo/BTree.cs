@@ -990,75 +990,75 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 		/// <inheritdoc />
 		public bool MoveNext()
 		{
-			if (_version != _tree._version) throw new VersionChangedException();
-			// Root-Left-Right (Stack)
-			if (_done) return false;
+			//if (_version != _tree._version) throw new VersionChangedException();
+			//// Root-Left-Right (Stack)
+			//if (_done) return false;
 
-			if (_entries.Count > 0)
-			{
-				// visit the next queued entry
-				_current = _entries.Pop();
-				return true;
-			}
+			//if (_entries.Count > 0)
+			//{
+			//	// visit the next queued entry
+			//	_current = _entries.Pop();
+			//	return true;
+			//}
 
-			// We don't have entries in the queue, so process the next node
-			if (!_started)
-			{
-				_started = true;
-				// Start at the root
-				_nodes.Push(_root);
-			}
+			//// We don't have entries in the queue, so process the next node
+			//if (!_started)
+			//{
+			//	_started = true;
+			//	// Start at the root
+			//	_nodes.Push(_root);
+			//}
 
-			Node node;
+			//Node node;
 
-			do
-			{
-				// visit the next queued node
-				node = _nodes.Count > 0
-							? _nodes.Pop()
-							: null;
-				if (node == null) break;
-				if (node.Children == null || node.Children.Count == 0) continue;
+			//do
+			//{
+			//	// process the next node
+			//	node = _nodes.Count > 0
+			//				? _nodes.Pop()
+			//				: null;
+			//	if (node == null) break;
+			//	if (node.Children == null || node.Children.Count == 0) continue;
 
-				// Queue the next nodes
-				if (_rightToLeft)
-				{
-					foreach (Node child in node.Children)
-						_nodes.Push(child);
-				}
-				else
-				{
-					for (int i = node.Children.Count - 1; i >= 0; i--)
-						_nodes.Push(node.Children[i]);
-				}
-			}
-			while (node is { Count: 0 });
+			//	// Queue the next nodes
+			//	if (_rightToLeft)
+			//	{
+			//		foreach (Node child in node.Children)
+			//			_nodes.Push(child);
+			//	}
+			//	else
+			//	{
+			//		for (int i = node.Children.Count - 1; i >= 0; i--)
+			//			_nodes.Push(node.Children[i]);
+			//	}
+			//}
+			//while (node is { Count: 0 });
 
-			if (node == null)
-			{
-				_current = null;
-				_done = true;
-				return false;
-			}
+			//if (node == null)
+			//{
+			//	_current = null;
+			//	_done = true;
+			//	return false;
+			//}
 
-			// Queue the next entries
-			if (_rightToLeft)
-			{
-				// Navigate right
-				foreach (Entry entry in node)
-					_entries.Push(entry);
-			}
-			else
-			{
-				// Navigate left
-				for (int i = node.Count - 1; i >= 0; i--)
-					_entries.Push(node[i]);
-			}
+			//// Queue the next entries
+			//if (_rightToLeft)
+			//{
+			//	// Navigate right
+			//	foreach (Entry entry in node)
+			//		_entries.Push(entry);
+			//}
+			//else
+			//{
+			//	// Navigate left
+			//	for (int i = node.Count - 1; i >= 0; i--)
+			//		_entries.Push(node[i]);
+			//}
 
-			// visit the next queued entry
-			_current = _entries.Count > 0
-							? _entries.Pop()
-							: null;
+			//// visit the next queued entry
+			//_current = _entries.Count > 0
+			//				? _entries.Pop()
+			//				: null;
 			_done = _current == null;
 			return !_done;
 		}
@@ -1132,103 +1132,103 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 		/// <inheritdoc />
 		public bool MoveNext()
 		{
-			if (_version != _tree._version) throw new VersionChangedException();
-			// Left-Root-Right (Stack)
-			if (_done) return false;
+			//if (_version != _tree._version) throw new VersionChangedException();
+			//// Left-Root-Right (Stack)
+			//if (_done) return false;
 
-			if (_entries.Count > 0)
-			{
-				// visit the next queued entry
-				_current = _entries.Dequeue();
-				return true;
-			}
+			//if (_entries.Count > 0)
+			//{
+			//	// visit the next queued entry
+			//	_current = _entries.Dequeue();
+			//	return true;
+			//}
 
-			// We don't have entries in the queue, so process the next node
-			Node node;
+			//// We don't have entries in the queue, so process the next node
+			//Node node;
 
-			if (!_started)
-			{
-				_started = true;
-				// Start at the root
-				node = _root;
-			}
-			else
-			{
-				node = _nodes.Count > 0
-							? _nodes.Pop()
-							: null;
-			}
+			//if (!_started)
+			//{
+			//	_started = true;
+			//	// Start at the root
+			//	node = _root;
+			//}
+			//else
+			//{
+			//	node = _nodes.Count > 0
+			//				? _nodes.Pop()
+			//				: null;
+			//}
 
-			if (node == null)
-			{
-				_current = null;
-				_done = true;
-				return false;
-			}
+			//if (node == null)
+			//{
+			//	_current = null;
+			//	_done = true;
+			//	return false;
+			//}
 
-			while (node != null || _nodes.Count > 0)
-			{
-				if (_version != _tree._version) throw new VersionChangedException();
+			//while (node != null || _nodes.Count > 0)
+			//{
+			//	if (_version != _tree._version) throw new VersionChangedException();
 
-				if (node != null)
-				{
-					_nodes.Push(node);
+			//	if (node != null)
+			//	{
+			//		_nodes.Push(node);
 
-					if (node.Children?.Count > 0)
-					{
-						if (_rightToLeft)
-						{
-							// Navigate right
-							for (int i = node.Children.Count - 1; i >= 0; i--)
-								_nodes.Push(node.Children[i]);
-						}
-						else
-						{
-							// Navigate left
-							foreach (Node child in node.Children)
-								_nodes.Push(child);
-						}
+			//		if (node.Children?.Count > 0)
+			//		{
+			//			if (_rightToLeft)
+			//			{
+			//				// Navigate right
+			//				for (int i = node.Children.Count - 1; i >= 0; i--)
+			//					_nodes.Push(node.Children[i]);
+			//			}
+			//			else
+			//			{
+			//				// Navigate left
+			//				foreach (Node child in node.Children)
+			//					_nodes.Push(child);
+			//			}
 
-						node = _nodes.Pop();
-					}
-					else
-					{
-						node = null;
-					}
+			//			node = _nodes.Pop();
+			//		}
+			//		else
+			//		{
+			//			node = null;
+			//		}
 
-					continue;
-				}
+			//		continue;
+			//	}
 
-				// visit the next queued node
-				node = _nodes.Pop();
+			//	// visit the next queued node
+			//	node = _nodes.Pop();
 
-				// the node has its children queued already, just check for entries
-				while (node is { Count: 0 })
-					node = _nodes.Count > 0
-								? _nodes.Pop()
-								: null;
+			//	// the node has its children queued already, just check for entries
+			//	while (node is { Count: 0 })
+			//		node = _nodes.Count > 0
+			//					? _nodes.Pop()
+			//					: null;
 
-				if (node == null || node.Count == 0) break;
+			//	if (node == null || node.Count == 0) break;
 
-				// Queue the next entries
-				if (_rightToLeft)
-				{
-					// Navigate right
-					for (int i = node.Count - 1; i >= 0; i--)
-						_entries.Enqueue(node[i]);
-				}
-				else
-				{
-					// Navigate left
-					foreach (Entry entry in node)
-						_entries.Enqueue(entry);
-				}
+			//	// Queue the next entries
+			//	if (_rightToLeft)
+			//	{
+			//		// Navigate right
+			//		for (int i = node.Count - 1; i >= 0; i--)
+			//			_entries.Enqueue(node[i]);
+			//	}
+			//	else
+			//	{
+			//		// Navigate left
+			//		foreach (Entry entry in node)
+			//			_entries.Enqueue(entry);
+			//	}
 
-				_current = _entries.Count > 0
-								? _entries.Dequeue()
-								: null;
-				break; // break from the loop to visit this entry
-			}
+			//	_current = _entries.Count > 0
+			//					? _entries.Dequeue()
+			//					: null;
+			//	break; // break from the loop to visit this entry
+			//}
 
 			_done = _current == null;
 			return !_done;
@@ -1303,57 +1303,98 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 		/// <inheritdoc />
 		public bool MoveNext()
 		{
-			if (_version != _tree._version) throw new VersionChangedException();
-			// Left-Right-Root (Stack)
-			if (_done) return false;
+			//if (_version != _tree._version) throw new VersionChangedException();
+			//// Left-Right-Root (Stack)
+			//if (_done) return false;
 
-			if (_entries.Count > 0)
-			{
-				// visit the next queued entry
-				_current = _entries.Pop();
-				return true;
-			}
+			//if (_entries.Count > 0)
+			//{
+			//	// visit the next queued entry
+			//	_current = _entries.Pop();
+			//	return true;
+			//}
 
-			// We don't have entries in the queue, so process the next node
-			Node node;
+			//// We don't have entries in the queue, so process the next node
+			//Node node;
 
-			if (!_started)
-			{
-				_started = true;
-				// Start at the root
-				node = _root;
-			}
-			else
-			{
-				node = null;
-			}
+			//if (!_started)
+			//{
+			//	_started = true;
+			//	// Start at the root
+			//	node = _root;
+			//}
+			//else
+			//{
+			//	node = null;
+			//}
 
-			do
-			{
-				while (node != null)
-				{
-					if (_version != _tree._version) throw new VersionChangedException();
+			//do
+			//{
+			//	while (node != null)
+			//	{
+			//		if (_version != _tree._version) throw new VersionChangedException();
 
-					if (_rightToLeft)
-					{
-						// Navigate left
-						if (node.Left != null) _nodes.Push(node.Left);
-					}
-					else
-					{
-						// Navigate right
-						if (node.Right != null) _nodes.Push(node.Right);
-					}
+			//		if (_rightToLeft)
+			//		{
+			//			// Navigate left
+			//			if (node.Left != null) _nodes.Push(node.Left);
+			//		}
+			//		else
+			//		{
+			//			// Navigate right
+			//			if (node.Right != null) _nodes.Push(node.Right);
+			//		}
 
-					_nodes.Push(node);
-					node = _rightToLeft
-								? node.Right // Navigate right
-								: node.Left; // Navigate left
-				}
+			//		_nodes.Push(node);
+			//		node = _rightToLeft
+			//					? node.Right // Navigate right
+			//					: node.Left; // Navigate left
+			//	}
 
-				if (_version != _tree._version) throw new VersionChangedException();
-			}
-			while (_nodes.Count > 0);
+			//	if (_version != _tree._version) throw new VersionChangedException();
+			//	node = _nodes.Count > 0
+			//				? _nodes.Pop()
+			//				: null;
+			//	if (node == null) continue;
+
+			//	if (_rightToLeft)
+			//	{
+			//		/*
+			//		* if node has a left child and is not processed yet,
+			//		* then make sure left child is processed before root
+			//		*/
+			//		if (node.Left != null && _nodes.Count > 0 && node.Left == _nodes.Peek())
+			//		{
+			//			// remove left child from stack
+			//			_nodes.Pop();
+			//			// push node back to stack
+			//			_nodes.Push(node);
+			//			// process left first
+			//			node = node.Left;
+			//			continue;
+			//		}
+			//	}
+			//	else
+			//	{
+			//		/*
+			//		* if node has a right child and is not processed yet,
+			//		* then make sure right child is processed before root
+			//		*/
+			//		if (node.Right != null && _nodes.Count > 0 && node.Right == _nodes.Peek())
+			//		{
+			//			// remove right child from stack
+			//			_nodes.Pop();
+			//			// push node back to stack
+			//			_nodes.Push(node);
+			//			// process right first
+			//			node = node.Right;
+			//			continue;
+			//		}
+			//	}
+
+			//	if (node != null) break; // break from the loop to visit this node
+			//}
+			//while (_nodes.Count > 0);
 
 			_done = _current == null;
 			return !_done;
@@ -1464,7 +1505,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 	public IEnumerableEnumerator<T> Enumerate(TreeTraverseMethod method, bool rightToLeft) { return Enumerate(Root, method, rightToLeft); }
 	#endregion
 
-	public void Iterate(Node root, TreeTraverseMethod method, bool rightToLeft, [NotNull] Action<T> visitCallback)
+	public void Iterate(Node root, TreeTraverseMethod method, bool rightToLeft, [NotNull] Action<Entry> visitCallback)
 	{
 		if (root == null) return;
 
@@ -1488,16 +1529,16 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 	}
 
 	#region Iterate overloads - visitCallback action
-	public void Iterate([NotNull] Action<T> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, false, visitCallback); }
-	public void Iterate(Node root, [NotNull] Action<T> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback); }
-	public void Iterate(TreeTraverseMethod method, [NotNull] Action<T> visitCallback) { Iterate(Root, method, false, visitCallback); }
-	public void Iterate(bool rightToLeft, [NotNull] Action<T> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
-	public void Iterate(Node root, bool rightToLeft, [NotNull] Action<T> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
-	public void Iterate(Node root, TreeTraverseMethod method, [NotNull] Action<T> visitCallback) { Iterate(root, method, false, visitCallback); }
-	public void Iterate(TreeTraverseMethod method, bool rightToLeft, [NotNull] Action<T> visitCallback) { Iterate(Root, method, rightToLeft, visitCallback); }
+	public void Iterate([NotNull] Action<Entry> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, false, visitCallback); }
+	public void Iterate(Node root, [NotNull] Action<Entry> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback); }
+	public void Iterate(TreeTraverseMethod method, [NotNull] Action<Entry> visitCallback) { Iterate(Root, method, false, visitCallback); }
+	public void Iterate(bool rightToLeft, [NotNull] Action<Entry> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate(Node root, bool rightToLeft, [NotNull] Action<Entry> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate(Node root, TreeTraverseMethod method, [NotNull] Action<Entry> visitCallback) { Iterate(root, method, false, visitCallback); }
+	public void Iterate(TreeTraverseMethod method, bool rightToLeft, [NotNull] Action<Entry> visitCallback) { Iterate(Root, method, rightToLeft, visitCallback); }
 	#endregion
 
-	public void Iterate(Node root, TreeTraverseMethod method, bool rightToLeft, [NotNull] Func<T, bool> visitCallback)
+	public void Iterate(Node root, TreeTraverseMethod method, bool rightToLeft, [NotNull] Func<Entry, bool> visitCallback)
 	{
 		if (root == null) return;
 
@@ -1521,38 +1562,41 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 	}
 
 	#region Iterate overloads - visitCallback function
-	public void Iterate([NotNull] Func<T, bool> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, false, visitCallback); }
-	public void Iterate(TreeTraverseMethod method, [NotNull] Func<T, bool> visitCallback) { Iterate(Root, method, false, visitCallback); }
-	public void Iterate(bool rightToLeft, [NotNull] Func<T, bool> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
-	public void Iterate(Node root, [NotNull] Func<T, bool> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback); }
-	public void Iterate(Node root, bool rightToLeft, [NotNull] Func<T, bool> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
-	public void Iterate(Node root, TreeTraverseMethod method, [NotNull] Func<T, bool> visitCallback) { Iterate(root, method, false, visitCallback); }
-	public void Iterate(TreeTraverseMethod method, bool rightToLeft, [NotNull] Func<T, bool> visitCallback) { Iterate(Root, method, rightToLeft, visitCallback); }
+	public void Iterate([NotNull] Func<Entry, bool> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, false, visitCallback); }
+	public void Iterate(TreeTraverseMethod method, [NotNull] Func<Entry, bool> visitCallback) { Iterate(Root, method, false, visitCallback); }
+	public void Iterate(bool rightToLeft, [NotNull] Func<Entry, bool> visitCallback) { Iterate(Root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate(Node root, [NotNull] Func<Entry, bool> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, false, visitCallback); }
+	public void Iterate(Node root, bool rightToLeft, [NotNull] Func<Entry, bool> visitCallback) { Iterate(root, TreeTraverseMethod.InOrder, rightToLeft, visitCallback); }
+	public void Iterate(Node root, TreeTraverseMethod method, [NotNull] Func<Entry, bool> visitCallback) { Iterate(root, method, false, visitCallback); }
+	public void Iterate(TreeTraverseMethod method, bool rightToLeft, [NotNull] Func<Entry, bool> visitCallback) { Iterate(Root, method, rightToLeft, visitCallback); }
 	#endregion
 
-	public void IterateLevels(Node root, bool rightToLeft, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback)
+	public void IterateLevels(Node root, bool rightToLeft, [NotNull] Action<int, IReadOnlyCollection<Entry>> levelCallback)
 	{
 		// Root-Left-Right (Queue)
 		if (root == null) return;
 
 		int version = _version;
 		int level = 0;
-		Queue<Node> queue = new Queue<Node>();
+		Queue<Node> nodes = new Queue<Node>();
+		List<Entry> entries = new List<Entry>();
 		// Start at the root
-		queue.Enqueue(root);
+		nodes.Enqueue(root);
 
-		while (queue.Count > 0)
+		while (nodes.Count > 0)
 		{
 			if (version != _version) throw new VersionChangedException();
-			levelCallback(level, queue);
+			entries.Clear();
+			entries.AddRange(nodes.Peek());
+			levelCallback(level, entries.AsReadOnly());
 
-			int count = queue.Count;
+			int count = nodes.Count;
 			level++;
 
 			for (int i = 0; i < count; i++)
 			{
 				// visit the next queued node
-				Node current = queue.Dequeue();
+				Node current = nodes.Dequeue();
 
 				if (current.Children == null || current.Children.Count == 0) continue;
 
@@ -1560,21 +1604,21 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 				if (rightToLeft)
 				{
 					for (int n = current.Children.Count - 1; n >= 0; n--)
-						queue.Enqueue(current.Children[n]);
+						nodes.Enqueue(current.Children[n]);
 				}
 				else
 				{
 					foreach (Node n in current.Children)
-						queue.Enqueue(n);
+						nodes.Enqueue(n);
 				}
 			}
 		}
 	}
 
 	#region LevelIterate overloads - visitCallback function
-	public void IterateLevels([NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback) { IterateLevels(Root, false, levelCallback); }
-	public void IterateLevels(bool rightToLeft, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback) { IterateLevels(Root, rightToLeft, levelCallback); }
-	public void IterateLevels(Node root, [NotNull] Action<int, IReadOnlyCollection<Node>> levelCallback) { IterateLevels(root, false, levelCallback); }
+	public void IterateLevels([NotNull] Action<int, IReadOnlyCollection<Entry>> levelCallback) { IterateLevels(Root, false, levelCallback); }
+	public void IterateLevels(bool rightToLeft, [NotNull] Action<int, IReadOnlyCollection<Entry>> levelCallback) { IterateLevels(Root, rightToLeft, levelCallback); }
+	public void IterateLevels(Node root, [NotNull] Action<int, IReadOnlyCollection<Entry>> levelCallback) { IterateLevels(root, false, levelCallback); }
 	#endregion
 
 	/// <inheritdoc />
@@ -1872,7 +1916,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 	}
 
 	#region Iterative Traversal for Action<Node>
-	private void LevelOrder([NotNull] Node root, [NotNull] Action<Node> visitCallback, bool rtl)
+	private void LevelOrder([NotNull] Node root, [NotNull] Action<Entry> visitCallback, bool rtl)
 	{
 		int version = _version;
 		// Root-Left-Right (Queue)
@@ -1887,6 +1931,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 
 			// visit the next queued node
 			Node current = queue.Dequeue();
+
 			visitCallback(current);
 
 			// Queue the next nodes
@@ -1903,7 +1948,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 		}
 	}
 
-	private void PreOrder([NotNull] Node root, [NotNull] Action<Node> visitCallback, bool rtl)
+	private void PreOrder([NotNull] Node root, [NotNull] Action<Entry> visitCallback, bool rtl)
 	{
 		int version = _version;
 		// Root-Left-Right (Stack)
@@ -1934,7 +1979,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 		}
 	}
 
-	private void InOrder([NotNull] Node root, [NotNull] Action<Node> visitCallback, bool rtl)
+	private void InOrder([NotNull] Node root, [NotNull] Action<Entry> visitCallback, bool rtl)
 	{
 		int version = _version;
 		// Left-Root-Right (Stack)
@@ -1966,7 +2011,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 		}
 	}
 
-	private void PostOrder([NotNull] Node root, [NotNull] Action<Node> visitCallback, bool rtl)
+	private void PostOrder([NotNull] Node root, [NotNull] Action<Entry> visitCallback, bool rtl)
 	{
 		int version = _version;
 		// Left-Right-Root (Stack)
@@ -2039,7 +2084,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 	#endregion
 
 	#region Iterative Traversal for Func<Node, bool>
-	private void LevelOrder([NotNull] Node root, [NotNull] Func<Node, bool> visitCallback, bool rtl)
+	private void LevelOrder([NotNull] Node root, [NotNull] Func<Entry, bool> visitCallback, bool rtl)
 	{
 		int version = _version;
 		// Root-Left-Right (Queue)
@@ -2070,7 +2115,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 		}
 	}
 
-	private void PreOrder([NotNull] Node root, [NotNull] Func<Node, bool> visitCallback, bool rtl)
+	private void PreOrder([NotNull] Node root, [NotNull] Func<Entry, bool> visitCallback, bool rtl)
 	{
 		int version = _version;
 		// Root-Left-Right (Stack)
@@ -2101,7 +2146,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 		}
 	}
 
-	private void InOrder([NotNull] Node root, [NotNull] Func<Node, bool> visitCallback, bool rtl)
+	private void InOrder([NotNull] Node root, [NotNull] Func<Entry, bool> visitCallback, bool rtl)
 	{
 		int version = _version;
 		// Left-Root-Right (Stack)
@@ -2133,7 +2178,7 @@ public class BTree<T> : ICollection<T>, IReadOnlyCollection<T>, ICollection
 		}
 	}
 
-	private void PostOrder([NotNull] Node root, [NotNull] Func<Node, bool> visitCallback, bool rtl)
+	private void PostOrder([NotNull] Node root, [NotNull] Func<Entry, bool> visitCallback, bool rtl)
 	{
 		int version = _version;
 		// Left-Right-Root (Stack)

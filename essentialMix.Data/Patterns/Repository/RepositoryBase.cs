@@ -113,6 +113,25 @@ public abstract class RepositoryBase<TEntity> : RepositoryBase, IRepositoryBase<
 	}
 
 	/// <inheritdoc />
+	public IQueryable<TEntity> Count(IPagination settings = null)
+	{
+		ThrowIfDisposed();
+		return CountInternal(settings);
+	}
+
+	protected abstract IQueryable<TEntity> CountInternal(IPagination settings = null);
+
+	/// <inheritdoc />
+	public ValueTask<int> CountAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
+	{
+		ThrowIfDisposed();
+		token.ThrowIfCancellationRequested();
+		return CountAsyncInternal(settings, token);
+	}
+
+	protected abstract ValueTask<int> CountAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
+
+	/// <inheritdoc />
 	public IQueryable<TEntity> List(IPagination settings = null)
 	{
 		ThrowIfDisposed();

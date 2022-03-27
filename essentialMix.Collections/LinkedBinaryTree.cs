@@ -499,8 +499,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 					}
 				}
 
-				if (_current != null)
-					break; // break from the loop to visit this node
+				if (_current != null) break; // break from the loop to visit this node
 			} while (_stack.Count > 0);
 
 			_done = _current == null;
