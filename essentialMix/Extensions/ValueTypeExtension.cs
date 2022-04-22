@@ -839,9 +839,6 @@ public static class ValueTypeExtension
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static UnionUnsignedLong AsUnionULong(this ulong thisValue) { return (UnionUnsignedLong)thisValue; }
 
-	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	public static UnionBigInteger AsUnionBigInteger(this BigInteger thisValue) { return (UnionBigInteger)thisValue; }
-
 	/// <summary>
 	/// Converts the given double to a string representation of its
 	/// exact decimal value.

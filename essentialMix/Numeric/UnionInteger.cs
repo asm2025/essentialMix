@@ -11,7 +11,7 @@ public struct UnionInteger
 	[FieldOffset(0)]
 	public short Low;
 
-	[FieldOffset(2)]
+	[FieldOffset(sizeof(short))]
 	public short High;
 
 	public static explicit operator UnionInteger(int value)

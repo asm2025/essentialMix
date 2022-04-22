@@ -11,7 +11,7 @@ public struct UnionShort
 	[FieldOffset(0)]
 	public sbyte Low;
 
-	[FieldOffset(1)]
+	[FieldOffset(sizeof(sbyte))]
 	public sbyte High;
 
 	public static explicit operator UnionShort(short value)

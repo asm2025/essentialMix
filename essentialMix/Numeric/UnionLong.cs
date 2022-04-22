@@ -11,7 +11,7 @@ public struct UnionLong
 	[FieldOffset(0)]
 	public int Low;
 
-	[FieldOffset(8)]
+	[FieldOffset(sizeof(int))]
 	public int High;
 
 	public static explicit operator UnionLong(long value)

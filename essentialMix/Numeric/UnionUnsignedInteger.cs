@@ -11,7 +11,7 @@ public struct UnionUnsignedInteger
 	[FieldOffset(0)]
 	public ushort Low;
 
-	[FieldOffset(2)]
+	[FieldOffset(sizeof(ushort))]
 	public ushort High;
 
 	public static explicit operator UnionUnsignedInteger(uint value)

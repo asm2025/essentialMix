@@ -11,7 +11,7 @@ public struct UnionUnsignedShort
 	[FieldOffset(0)]
 	public byte Low;
 
-	[FieldOffset(1)]
+	[FieldOffset(sizeof(byte))]
 	public byte High;
 
 	public static explicit operator UnionUnsignedShort(ushort value)
