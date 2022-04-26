@@ -6,8 +6,8 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using essentialMix.Extensions;
-using JetBrains.Annotations;
 using essentialMix.IO;
+using JetBrains.Annotations;
 
 namespace essentialMix.Helpers;
 
@@ -15,8 +15,8 @@ public static class IPAddressHelper
 {
 	private const string STR_PUBLIC_IP = "http://icanhazip.com/"; // also "http://ipinfo.io/ip"
 
-	private static readonly Regex __extractIP = new Regex(@"(?s)(?<ip>(?:[0-9]{1,3}\.){3}[0-9]{1,3})", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
-	private static readonly Regex __extractIPWithPort = new Regex(@"(?s)(?<ip>\d+\.\d+\.\d+\.\d+)(?<port>:\d{1,5})", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+	private static readonly Regex __extractIP = new Regex(@"(?s)(?<ip>(?:[0-9]{1,3}\.){3}[0-9]{1,3})", RegexHelper.OPTIONS_I | RegexOptions.Singleline);
+	private static readonly Regex __extractIPWithPort = new Regex(@"(?s)(?<ip>\d+\.\d+\.\d+\.\d+)(?<port>:\d{1,5})", RegexHelper.OPTIONS_I | RegexOptions.Singleline);
 	private static readonly Regex __isIPv4 = new Regex(@"^\b(?<url>(?<ip>(?:[0-9]{1,3}\.){3}[0-9]{1,3})(?<port>:\d{1,5})?)\b$", RegexHelper.OPTIONS_I);
 	private static readonly Regex __isIPv4Url = new Regex(@"^\b(?<url>(?<protocol>https?://)?(?<ip>(?:[0-9]{1,3}\.){3}[0-9]{1,3})(?<port>:\d{1,5})?)\b/?$", RegexHelper.OPTIONS_I);
 	private static readonly Regex __isIPv4Simple = new Regex(@"^\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}-(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b$", RegexHelper.OPTIONS_I);

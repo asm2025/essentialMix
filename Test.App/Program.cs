@@ -6375,7 +6375,7 @@ decrypted:
 
 						if (format == null)
 						{
-							Console.WriteLine("Not recognized.");
+							Console.WriteLine(Bright.Red("Not recognized."));
 							continue;
 						}
 

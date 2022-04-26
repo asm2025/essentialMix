@@ -12,7 +12,8 @@ public record Svg : FileFormat
 	private const int BUFFER_SIZE = 512;
 	private const int BUFFER_MIN = 100;
 
-	private static readonly Regex __regex = new Regex(@"<!DOCTYPE\s+svg\s+PUBLIC\s+[""']-//W3C//DTD\s+SVG.+?/DTD/svg\d*\.dtd.+?<svg.+?(?:version=[""']\d+(?:\.\d+)?[""'])?", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+	private static readonly Regex __regex = new Regex(@"<!DOCTYPE\s+svg\s+PUBLIC\s+[""']-//W3C//DTD\s+SVG.+?/DTD/svg\d*\.dtd.+?<svg.+?(?:version=[""']\d+(?:\.\d+)?[""'])?", RegexHelper.OPTIONS_I | RegexOptions.Singleline);
+
 	public Svg()
 		: base("svg", MediaTypeNames.Image.SvgXml, null)
 	{
@@ -23,6 +24,7 @@ public record Svg : FileFormat
 	{
 		if (!stream.CanSeek) throw new NotSupportedException("Stream type is not supported.");
 		if (stream.Length < BUFFER_MIN) return false;
+		stream.Position = 0;
 
 		using (StreamReader reader = new StreamReader(stream, Encoding.Default, true, BUFFER_SIZE, true))
 		{

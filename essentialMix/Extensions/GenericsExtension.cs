@@ -2142,6 +2142,13 @@ public static class GenericsExtension
 		return Enumerable.SequenceEqual(thisValue, value);
 	}
 
+	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
+	[NotNull]
+	public static IEnumerable<T> DefaultIfNull<T>(this IEnumerable<T> thisValue)
+	{
+		return thisValue ?? Enumerable.Empty<T>();
+	}
+
 	[NotNull]
 	private static string GetFormat(bool bFractions, string suffix)
 	{

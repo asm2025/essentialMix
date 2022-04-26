@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 namespace essentialMix.IO.FileType;
 
 // based on https://github.com/neilharvey/FileSignatures/
-[DebuggerDisplay("{Extension}[{MimeType}]")]
+[DebuggerDisplay("{Name} - {Extension}[{MimeType}]")]
 public abstract record FileFormat : IEquatable<FileFormat>
 {
 	protected FileFormat(string extension, string mimeType, byte[] signature)
@@ -18,6 +18,7 @@ public abstract record FileFormat : IEquatable<FileFormat>
 	protected FileFormat(string extension, string mimeType, byte[] signature, int offset)
 	{
 		if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
+		Name = GetType().Name;
 		Extension = extension?.Trim('.');
 		HasWildCard = !string.IsNullOrEmpty(Extension) && (Extension.IndexOf('*') >= 0 || Extension.IndexOf('?') >= 0);
 		MimeType = mimeType;
@@ -25,6 +26,7 @@ public abstract record FileFormat : IEquatable<FileFormat>
 		Offset = offset;
 	}
 
+	public string Name { get; }
 	public string Extension { get; }
 	public bool HasWildCard { get; }
 	public string MimeType { get; }

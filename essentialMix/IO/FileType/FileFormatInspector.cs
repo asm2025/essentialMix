@@ -30,7 +30,7 @@ public class FileFormatInspector : IFileFormatInspector
 
 	public FileFormatInspector([NotNull] IEnumerable<FileFormat> formats)
 	{
-		_formats = formats.OrderBy(e => e.Signature?.Length ?? 0)
+		_formats = formats.OrderByDescending(e => e.Signature?.Length ?? 0)
 			.ToList();
 	}
 
@@ -92,9 +92,6 @@ public class FileFormatInspector : IFileFormatInspector
 			}
 		}
 
-		if (candidates.Count < 2) return candidates;
-		// Reverse the comparators to sort in descending order.
-		candidates.Sort((x, y) => y.Signature.Length.CompareTo(x.Signature.Length));
 		return candidates;
 	}
 

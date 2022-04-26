@@ -21,7 +21,7 @@ public static class StringExtension
 	private const string RGX_PARTITIONS = "[^{0}]+";
 	private const string RGX_WORDS = @"\w+";
 
-	private static readonly Regex __rgxPrintf = new Regex(@"\%(\d*\$)?([\'\#\-\+ ]*)(\d*)(?:\.(\d+))?([hl])?([dioxXucsfeEgGpn%])", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+	private static readonly Regex __rgxPrintf = new Regex(@"\%(\d*\$)?([\'\#\-\+ ]*)(\d*)(?:\.(\d+))?([hl])?([dioxXucsfeEgGpn%])", RegexHelper.OPTIONS_I | RegexOptions.Singleline);
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static string ToNullIfEmpty(this string thisValue)
@@ -717,7 +717,7 @@ public static class StringExtension
 
 		string ch = remove.ToString(0);
 		if (string.IsNullOrEmpty(ch)) return thisValue;
-		Regex expression = new Regex($"[{Regex.Escape(ch)}]", RegexHelper.OPTIONS | RegexOptions.Multiline);
+		Regex expression = new Regex($"[{Regex.Escape(ch)}]", RegexHelper.OPTIONS | RegexOptions.Singleline);
 		return expression.Replace(thisValue, string.Empty, count, startIndex);
 	}
 
@@ -732,7 +732,7 @@ public static class StringExtension
 	{
 		thisValue.Length.ValidateRange(startIndex, ref count);
 		if (string.IsNullOrEmpty(thisValue) || string.IsNullOrEmpty(remove) || count == 0) return string.Empty;
-		Regex expression = new Regex(remove, ignoreCase ? RegexHelper.OPTIONS_I : RegexHelper.OPTIONS | RegexOptions.Multiline);
+		Regex expression = new Regex(remove, ignoreCase ? RegexHelper.OPTIONS_I : RegexHelper.OPTIONS | RegexOptions.Singleline);
 		return expression.Replace(thisValue, string.Empty, count, startIndex);
 	}
 

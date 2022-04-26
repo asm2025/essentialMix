@@ -18,7 +18,7 @@ public class TelnetConnection : Disposable
 	private const int TTL_DEF = 60;
 	private const string FMT_LOGIN = "Username: {0}\r\nSecret: {1}\r\nActionID: 1\r\nEvents: off";
 
-	private static readonly Regex __loginSuccess = new Regex(@"Message:\s+Authentication accepted", RegexHelper.OPTIONS_I | RegexOptions.Multiline);
+	private static readonly Regex __loginSuccess = new Regex(@"Message:\s+Authentication accepted", RegexHelper.OPTIONS_I | RegexOptions.Singleline);
 	private static readonly TimeSpan __timeBetweenRead = TimeSpan.FromSeconds(1);
 	private static readonly TimeSpan __timeBetweenActions = TimeSpan.FromSeconds(2);
 
