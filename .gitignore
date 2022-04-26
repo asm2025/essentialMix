@@ -362,3 +362,4 @@ FodyWeavers.xsd
 /packages
 /nuget
 /dist
+/Test.App/Test

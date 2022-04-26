@@ -2123,6 +2123,25 @@ public static class GenericsExtension
 		}
 	}
 
+	public static int CompareSequence<T>(this T[] thisValue, T[] value)
+		where T : IComparable<T>
+	{
+		if (ReferenceEquals(thisValue, value)) return 0;
+		if (ReferenceEquals(thisValue, null)) return 1;
+		if (ReferenceEquals(value, null)) return -1;
+		int cmp = thisValue.Length.CompareTo(value.Length);
+		return cmp != 0
+					? cmp
+					: thisValue.AsSpan().SequenceCompareTo(value.AsSpan());
+	}
+
+	public static bool IsSequenceEqual<T>(this T[] thisValue, T[] value)
+	{
+		if (ReferenceEquals(thisValue, value)) return true;
+		if (ReferenceEquals(thisValue, null) || ReferenceEquals(value, null)) return false;
+		return Enumerable.SequenceEqual(thisValue, value);
+	}
+
 	[NotNull]
 	private static string GetFormat(bool bFractions, string suffix)
 	{

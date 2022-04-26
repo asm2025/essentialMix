@@ -12,9 +12,9 @@
 		<PackageTags>utilities, tools, extensions, helpers, drawing, imaging</PackageTags>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Platforms>AnyCPU;x64;x86</Platforms>
-		<AssemblyVersion>13.0.8.0</AssemblyVersion>
-		<FileVersion>22.4.22.0</FileVersion>
-		<Version>13.0.8.0</Version>
+		<AssemblyVersion>13.0.9.0</AssemblyVersion>
+		<FileVersion>22.4.26.0</FileVersion>
+		<Version>13.0.9.0</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -54,7 +54,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>13.0.8.0</PackageVersion>
+		<PackageVersion>13.0.9.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns, drawing, imaging</PackageTags>

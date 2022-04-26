@@ -25,6 +25,7 @@ using essentialMix.Cryptography;
 using essentialMix.Cryptography.Settings;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
+using essentialMix.IO.FileType;
 using essentialMix.Newtonsoft.Helpers;
 using essentialMix.Patterns.Events;
 using essentialMix.Patterns.Threading;
@@ -34,7 +35,6 @@ using essentialMix.Threading.IO;
 using essentialMix.Threading.Patterns.ProducerConsumer;
 using Newtonsoft.Json;
 using Other.JonSkeet.MiscUtil.Collections;
-using Other.Microsoft.Collections;
 using Test.Common;
 using Test.Common.Model;
 using static Crayon.Output;
@@ -181,7 +181,9 @@ work with {Constants.HEAVY} items.");
 
 			//TestEnumerateDirectoriesAndFiles();
 
-			TestConsoleHelper();
+			//TestConsoleHelper();
+
+			TestFileTypes();
 
 			ConsoleHelper.Pause();
 		}
@@ -6345,6 +6347,57 @@ decrypted:
 			IntPtr hConsole = ConsoleHelper.GetConsoleWindow();
 			ConsoleHelper.ANSISequenceMode(hConsole, true);
 			Console.WriteLine("\u001b[31;1;4mHello\u001b[0m");
+		}
+
+		private static void TestFileTypes()
+		{
+			string basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Test\FileType");
+			FileFormatInspector inspector = new FileFormatInspector();
+
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing file types...");
+
+				foreach (string path in DirectoryHelper.Enumerate(basePath, SearchOption.TopDirectoryOnly))
+				{
+					string fileName = Path.GetFileName(path);
+					Console.WriteLine(fileName);
+
+					Stream stream = null;
+
+					try
+					{
+						stream = File.OpenRead(path);
+						FileFormat format = inspector.Detect(stream);
+
+						if (format == null)
+						{
+							Console.WriteLine("Not recognized.");
+							continue;
+						}
+
+						Console.WriteLine($"Type: {format.Extension}, Mime type: {format.MimeType}");
+					}
+					catch (Exception ex)
+					{
+						Console.Error.WriteLine(Bright.Red(ex.CollectMessages()));
+					}
+					finally
+					{
+						ObjectHelper.Dispose(ref stream);
+					}
+				}
+
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
 		}
 
 		private static void Title(string title)

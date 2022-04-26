@@ -1,84 +1,99 @@
-// ReSharper disable InconsistentNaming
-namespace essentialMix.Web;
+﻿namespace essentialMix.Web;
 
 public static class MediaTypeNames
 {
 	public static class Application
 	{
 		public const string A2L = "application/A2L";
-		public const string ActiveMessage = "application/activemessage";
+		public const string AceCbor = "application/ace+cbor";
+		public const string AceJson = "application/ace+json";
+		public const string Activemessage = "application/activemessage";
 		public const string ActivityJson = "application/activity+json";
-		public const string AltoCostMapFilterJson = "application/alto-costmapfilter+json";
-		public const string AltoCostMapJson = "application/alto-costmap+json";
+		public const string AifCbor = "application/aif+cbor";
+		public const string AifJson = "application/aif+json";
+		public const string AltoCdnifilterJson = "application/alto-cdnifilter+json";
+		public const string AltoCdniJson = "application/alto-cdni+json";
+		public const string AltoCostmapfilterJson = "application/alto-costmapfilter+json";
+		public const string AltoCostmapJson = "application/alto-costmap+json";
 		public const string AltoDirectoryJson = "application/alto-directory+json";
-		public const string AltoEndpointCostJson = "application/alto-endpointcost+json";
-		public const string AltoEndpointCostParamsJson = "application/alto-endpointcostparams+json";
-		public const string AltoEndPointPropJson = "application/alto-endpointprop+json";
-		public const string AltoEndpointPropParamsJson = "application/alto-endpointpropparams+json";
+		public const string AltoEndpointcostJson = "application/alto-endpointcost+json";
+		public const string AltoEndpointcostparamsJson = "application/alto-endpointcostparams+json";
+		public const string AltoEndpointpropJson = "application/alto-endpointprop+json";
+		public const string AltoEndpointpropparamsJson = "application/alto-endpointpropparams+json";
 		public const string AltoErrorJson = "application/alto-error+json";
-		public const string AltoNetworkMapFilterJson = "application/alto-networkmapfilter+json";
-		public const string AltoNetworkMapJson = "application/alto-networkmap+json";
+		public const string AltoNetworkmapfilterJson = "application/alto-networkmapfilter+json";
+		public const string AltoNetworkmapJson = "application/alto-networkmap+json";
+		public const string AltoPropmapJson = "application/alto-propmap+json";
+		public const string AltoPropmapparamsJson = "application/alto-propmapparams+json";
+		public const string AltoUpdatestreamcontrolJson = "application/alto-updatestreamcontrol+json";
+		public const string AltoUpdatestreamparamsJson = "application/alto-updatestreamparams+json";
 		public const string AML = "application/AML";
 		public const string AndrewInset = "application/andrew-inset";
-		public const string AppleFile = "application/applefile";
+		public const string Applefile = "application/applefile";
 		public const string ATF = "application/ATF";
 		public const string ATFX = "application/ATFX";
-		public const string AtomCatXml = "application/atomcat+xml";
-		public const string AtomDeletedXml = "application/atomdeleted+xml";
-		public const string AtomICMail = "application/atomicmail";
-		public const string AtomSVCXml = "application/atomsvc+xml";
+		public const string AtJwt = "application/at+jwt";
+		public const string AtomcatXml = "application/atomcat+xml";
+		public const string AtomdeletedXml = "application/atomdeleted+xml";
+		public const string Atomicmail = "application/atomicmail";
+		public const string AtomsvcXml = "application/atomsvc+xml";
 		public const string AtomXml = "application/atom+xml";
-		public const string ATSC_DwdXml = "application/atsc-dwd+xml";
-		public const string ATSC_HeldXml = "application/atsc-held+xml";
-		public const string ATSC_RDTJson = "application/atsc-rdt+json";
-		public const string ATSC_RSATXml = "application/atsc-rsat+xml";
-		public const string ATXml = "application/ATXML";
+		public const string AtscDwdXml = "application/atsc-dwd+xml";
+		public const string AtscDynamicEventMessage = "application/atsc-dynamic-event-message";
+		public const string AtscHeldXml = "application/atsc-held+xml";
+		public const string AtscRdtJson = "application/atsc-rdt+json";
+		public const string AtscRsatXml = "application/atsc-rsat+xml";
+		public const string ATXML = "application/ATXML";
 		public const string AuthPolicyXml = "application/auth-policy+xml";
-		public const string BacNetXddZip = "application/bacnet-xdd+zip";
+		public const string BacnetXddZip = "application/bacnet-xdd+zip";
 		public const string BatchSMTP = "application/batch-SMTP";
 		public const string BeepXml = "application/beep+xml";
 		public const string CalendarJson = "application/calendar+json";
 		public const string CalendarXml = "application/calendar+xml";
 		public const string CallCompletion = "application/call-completion";
 		public const string CALS1840 = "application/CALS-1840";
-		public const string CBOR = "application/cbor";
-		public const string CBOR_SEQ = "application/cbor-seq";
-		public const string CCCEX = "application/cccex";
-		public const string CCMP_Xml = "application/ccmp+xml";
-		public const string CCXml_Xml = "application/ccxml+xml";
-		public const string CDFX_Xml = "application/CDFX+XML";
-		public const string CDMICapability = "application/cdmi-capability";
-		public const string CDMIContainer = "application/cdmi-container";
-		public const string CDMIDomain = "application/cdmi-domain";
-		public const string CDMIObject = "application/cdmi-object";
-		public const string CDMIQueue = "application/cdmi-queue";
-		public const string CDNI = "application/cdni";
+		public const string CaptiveJson = "application/captive+json";
+		public const string Cbor = "application/cbor";
+		public const string CborSeq = "application/cbor-seq";
+		public const string Cccex = "application/cccex";
+		public const string CcmpXml = "application/ccmp+xml";
+		public const string CcxmlXml = "application/ccxml+xml";
+		public const string CdaXml = "application/cda+xml";
+		public const string CDFXXML = "application/CDFX+XML";
+		public const string CdmiCapability = "application/cdmi-capability";
+		public const string CdmiContainer = "application/cdmi-container";
+		public const string CdmiDomain = "application/cdmi-domain";
+		public const string CdmiObject = "application/cdmi-object";
+		public const string CdmiQueue = "application/cdmi-queue";
+		public const string Cdni = "application/cdni";
 		public const string CEA = "application/CEA";
 		public const string Cea2018Xml = "application/cea-2018+xml";
-		public const string Cell_ML_Xml = "application/cellml+xml";
+		public const string CellmlXml = "application/cellml+xml";
 		public const string Cfw = "application/cfw";
+		public const string CityJson = "application/city+json";
+		public const string Clr = "application/clr";
 		public const string ClueInfoXml = "application/clue_info+xml";
 		public const string ClueXml = "application/clue+xml";
 		public const string Cms = "application/cms";
-		public const string CNRP_Xml = "application/cnrp+xml";
-		public const string COAPGroupJson = "application/coap-group+json";
-		public const string COAPPayload = "application/coap-payload";
-		public const string CommonGround = "application/commonground";
+		public const string CnrpXml = "application/cnrp+xml";
+		public const string CoapGroupJson = "application/coap-group+json";
+		public const string CoapPayload = "application/coap-payload";
+		public const string Commonground = "application/commonground";
 		public const string ConferenceInfoXml = "application/conference-info+xml";
 		public const string Cose = "application/cose";
 		public const string CoseKey = "application/cose-key";
 		public const string CoseKeySet = "application/cose-key-set";
 		public const string CplXml = "application/cpl+xml";
-		public const string CSRAttributes = "application/csrattrs";
+		public const string Csrattrs = "application/csrattrs";
 		public const string CSTAdataXml = "application/CSTAdata+xml";
-		public const string CSTA_Xml = "application/csta+xml";
-		public const string Csv = "application/csv";
+		public const string CstaXml = "application/csta+xml";
 		public const string CsvmJson = "application/csvm+json";
 		public const string Cwt = "application/cwt";
-		public const string CyberCash = "application/cybercash";
-		public const string DashDelta = "application/dashdelta";
+		public const string Cybercash = "application/cybercash";
+		public const string Dashdelta = "application/dashdelta";
+		public const string DashPatchXml = "application/dash-patch+xml";
 		public const string DashXml = "application/dash+xml";
-		public const string DavMountXml = "application/davmount+xml";
+		public const string DavmountXml = "application/davmount+xml";
 		public const string DcaRft = "application/dca-rft";
 		public const string DCD = "application/DCD";
 		public const string DecDx = "application/dec-dx";
@@ -96,11 +111,12 @@ public static class MediaTypeNames
 		public const string DsscDer = "application/dssc+der";
 		public const string DsscXml = "application/dssc+xml";
 		public const string Dvcs = "application/dvcs";
-		public const string Ecmascript = "application/ecmascript";
 		public const string EDIConsent = "application/EDI-consent";
 		public const string EDIFACT = "application/EDIFACT";
 		public const string EDIX12 = "application/EDI-X12";
 		public const string Efi = "application/efi";
+		public const string ElmJson = "application/elm+json";
+		public const string ElmXml = "application/elm+xml";
 		public const string EmmaXml = "application/emma+xml";
 		public const string EmotionmlXml = "application/emotionml+xml";
 		public const string Encaprtp = "application/encaprtp";
@@ -110,42 +126,45 @@ public static class MediaTypeNames
 		public const string Example = "application/example";
 		public const string Exi = "application/exi";
 		public const string ExpectCtReportJson = "application/expect-ct-report+json";
-		public const string FastInfoset = "application/fastinfoset";
-		public const string FastSoap = "application/fastsoap";
+		public const string Express = "application/express";
+		public const string Fastinfoset = "application/fastinfoset";
+		public const string Fastsoap = "application/fastsoap";
+		public const string Fdf = "application/fdf";
 		public const string FdtXml = "application/fdt+xml";
 		public const string FhirJson = "application/fhir+json";
 		public const string FhirXml = "application/fhir+xml";
 		public const string Fits = "application/fits";
-		public const string FlexFec = "application/flexfec";
+		public const string Flexfec = "application/flexfec";
 		public const string FontTdpfr = "application/font-tdpfr";
 		public const string FrameworkAttributesXml = "application/framework-attributes+xml";
 		public const string GeoJson = "application/geo+json";
 		public const string GeoJsonSeq = "application/geo+json-seq";
-		public const string GeoPackageSqlite3 = "application/geopackage+sqlite3";
-		public const string GeoXacmlXml = "application/geoxacml+xml";
+		public const string GeopackageSqlite3 = "application/geopackage+sqlite3";
+		public const string GeoxacmlXml = "application/geoxacml+xml";
 		public const string GltfBuffer = "application/gltf-buffer";
 		public const string GmlXml = "application/gml+xml";
-		public const string GZip = "application/gzip";
+		public const string Gzip = "application/gzip";
 		public const string H224 = "application/H224";
 		public const string HeldXml = "application/held+xml";
+		public const string Hl7v2Xml = "application/hl7v2+xml";
 		public const string Http = "application/http";
-		public const string HyperStudio = "application/hyperstudio";
+		public const string Hyperstudio = "application/hyperstudio";
 		public const string IbeKeyRequestXml = "application/ibe-key-request+xml";
 		public const string IbePkgReplyXml = "application/ibe-pkg-reply+xml";
 		public const string IbePpData = "application/ibe-pp-data";
 		public const string Iges = "application/iges";
-		public const string ImIsComposingXml = "application/im-iscomposing+xml";
+		public const string ImIscomposingXml = "application/im-iscomposing+xml";
 		public const string InkmlXml = "application/inkml+xml";
 		public const string IOTP = "application/IOTP";
 		public const string Ipfix = "application/ipfix";
 		public const string Ipp = "application/ipp";
 		public const string ISUP = "application/ISUP";
 		public const string ItsXml = "application/its+xml";
-		public const string Javascript = "application/javascript";
 		public const string Jf2feedJson = "application/jf2feed+json";
 		public const string Jose = "application/jose";
 		public const string JoseJson = "application/jose+json";
 		public const string JrdJson = "application/jrd+json";
+		public const string JscalendarJson = "application/jscalendar+json";
 		public const string Json = "application/json";
 		public const string JsonPatchJson = "application/json-patch+json";
 		public const string JsonSeq = "application/json-seq";
@@ -158,12 +177,14 @@ public static class MediaTypeNames
 		public const string LgrXml = "application/lgr+xml";
 		public const string LinkFormat = "application/link-format";
 		public const string LoadControlXml = "application/load-control+xml";
-		public const string LostSyncXml = "application/lostsync+xml";
+		public const string LostsyncXml = "application/lostsync+xml";
 		public const string LostXml = "application/lost+xml";
+		public const string LpfZip = "application/lpf+zip";
 		public const string LXF = "application/LXF";
-		public const string MacBinHex40 = "application/mac-binhex40";
-		public const string MacWriteII = "application/macwriteii";
+		public const string MacBinhex40 = "application/mac-binhex40";
+		public const string Macwriteii = "application/macwriteii";
 		public const string MadsXml = "application/mads+xml";
+		public const string ManifestJson = "application/manifest+json";
 		public const string Marc = "application/marc";
 		public const string MarcxmlXml = "application/marcxml+xml";
 		public const string Mathematica = "application/mathematica";
@@ -191,6 +212,7 @@ public static class MediaTypeNames
 		public const string MF4 = "application/MF4";
 		public const string Mikey = "application/mikey";
 		public const string Mipc = "application/mipc";
+		public const string MissingBlocksCborSeq = "application/missing-blocks+cbor-seq";
 		public const string MmtAeiXml = "application/mmt-aei+xml";
 		public const string MmtUsdXml = "application/mmt-usd+xml";
 		public const string ModsXml = "application/mods+xml";
@@ -211,6 +233,7 @@ public static class MediaTypeNames
 		public const string MudJson = "application/mud+json";
 		public const string MultipartCore = "application/multipart-core";
 		public const string Mxf = "application/mxf";
+		public const string Name = "Template";
 		public const string Nasdata = "application/nasdata";
 		public const string NewsCheckgroups = "application/news-checkgroups";
 		public const string NewsGroupinfo = "application/news-groupinfo";
@@ -218,8 +241,10 @@ public static class MediaTypeNames
 		public const string NlsmlXml = "application/nlsml+xml";
 		public const string Node = "application/node";
 		public const string NQuads = "application/n-quads";
-		public const string NSS = "application/nss";
+		public const string Nss = "application/nss";
 		public const string NTriples = "application/n-triples";
+		public const string OauthAuthzReqJwt = "application/oauth-authz-req+jwt";
+		public const string ObliviousDnsMessage = "application/oblivious-dns-message";
 		public const string OcspRequest = "application/ocsp-request";
 		public const string OcspResponse = "application/ocsp-response";
 		public const string OctetStream = "application/octet-stream";
@@ -229,8 +254,11 @@ public static class MediaTypeNames
 		public const string OebpsPackageXml = "application/oebps-package+xml";
 		public const string Ogg = "application/ogg";
 		public const string OneDInterleavedParityfec = "application/1d-interleaved-parityfec";
+		public const string OpcNodesetXml = "application/opc-nodeset+xml";
 		public const string Oscore = "application/oscore";
 		public const string Oxps = "application/oxps";
+		public const string P21 = "application/p21";
+		public const string P21Zip = "application/p21+zip";
 		public const string P2pOverlayXml = "application/p2p-overlay+xml";
 		public const string Parityfec = "application/parityfec";
 		public const string Passport = "application/passport";
@@ -262,6 +290,7 @@ public static class MediaTypeNames
 		public const string ProblemXml = "application/problem+xml";
 		public const string ProvenanceXml = "application/provenance+xml";
 		public const string PskcXml = "application/pskc+xml";
+		public const string PvdJson = "application/pvd+json";
 		public const string QSIG = "application/QSIG";
 		public const string Raptorfec = "application/raptorfec";
 		public const string RdapJson = "application/rdap+json";
@@ -289,6 +318,9 @@ public static class MediaTypeNames
 		public const string Rtx = "application/rtx";
 		public const string SamlassertionXml = "application/samlassertion+xml";
 		public const string SamlmetadataXml = "application/samlmetadata+xml";
+		public const string SarifExternalPropertiesJson = "application/sarif-external-properties+json";
+		public const string SarifJson = "application/sarif+json";
+		public const string Sbe = "application/sbe";
 		public const string SbmlXml = "application/sbml+xml";
 		public const string ScaipXml = "application/scaip+xml";
 		public const string ScimJson = "application/scim+json";
@@ -299,6 +331,8 @@ public static class MediaTypeNames
 		public const string Sdp = "application/sdp";
 		public const string SeceventJwt = "application/secevent+jwt";
 		public const string SenmlCbor = "application/senml+cbor";
+		public const string SenmlEtchCbor = "application/senml-etch+cbor";
+		public const string SenmlEtchJson = "application/senml-etch+json";
 		public const string SenmlExi = "application/senml-exi";
 		public const string SenmlJson = "application/senml+json";
 		public const string SenmlXml = "application/senml+xml";
@@ -313,7 +347,7 @@ public static class MediaTypeNames
 		public const string SetPaymentInitiation = "application/set-payment-initiation";
 		public const string SetRegistration = "application/set-registration";
 		public const string SetRegistrationInitiation = "application/set-registration-initiation";
-		public const string Sgml = "application/sgml";
+		public const string SGML = "application/SGML";
 		public const string SgmlOpenCatalog = "application/sgml-open-catalog";
 		public const string ShfXml = "application/shf+xml";
 		public const string Sieve = "application/sieve";
@@ -328,6 +362,7 @@ public static class MediaTypeNames
 		public const string SoapXml = "application/soap+xml";
 		public const string SparqlQuery = "application/sparql-query";
 		public const string SparqlResultsXml = "application/sparql-results+xml";
+		public const string SpdxJson = "application/spdx+json";
 		public const string SpiritsEventXml = "application/spirits-event+xml";
 		public const string Sql = "application/sql";
 		public const string Srgs = "application/srgs";
@@ -348,10 +383,13 @@ public static class MediaTypeNames
 		public const string TampUpdate = "application/tamp-update";
 		public const string TampUpdateConfirm = "application/tamp-update-confirm";
 		public const string TaxiiJson = "application/taxii+json";
+		public const string TdJson = "application/td+json";
 		public const string TeiXml = "application/tei+xml";
 		public const string TETRAISI = "application/TETRA_ISI";
 		public const string ThraudXml = "application/thraud+xml";
 		public const string ThreeGpdashQoeReportXml = "application/3gpdash-qoe-report+xml";
+		public const string ThreeGppHalFormsJson = "application/3gppHalForms+json";
+		public const string ThreeGppHalJson = "application/3gppHal+json";
 		public const string ThreeGppImsXml = "application/3gpp-ims+xml";
 		public const string TimestampedData = "application/timestamped-data";
 		public const string TimestampQuery = "application/timestamp-query";
@@ -359,6 +397,7 @@ public static class MediaTypeNames
 		public const string TlsrptGzip = "application/tlsrpt+gzip";
 		public const string TlsrptJson = "application/tlsrpt+json";
 		public const string Tnauthlist = "application/tnauthlist";
+		public const string TokenIntrospectionJwt = "application/token-introspection+jwt";
 		public const string TrickleIceSdpfrag = "application/trickle-ice-sdpfrag";
 		public const string Trig = "application/trig";
 		public const string TtmlXml = "application/ttml+xml";
@@ -376,6 +415,7 @@ public static class MediaTypeNames
 		public const string VoicexmlXml = "application/voicexml+xml";
 		public const string VoucherCmsJson = "application/voucher-cms+json";
 		public const string VqRtcpxr = "application/vq-rtcpxr";
+		public const string Wasm = "application/wasm";
 		public const string WatcherinfoXml = "application/watcherinfo+xml";
 		public const string WebpushOptionsJson = "application/webpush-options+json";
 		public const string WhoisppQuery = "application/whoispp-query";
@@ -403,10 +443,15 @@ public static class MediaTypeNames
 		public const string XmlPatchXml = "application/xml-patch+xml";
 		public const string XmppXml = "application/xmpp+xml";
 		public const string XopXml = "application/xop+xml";
+		public const string XPkiMessage = "application/x-pki-message";
 		public const string XsltXml = "application/xslt+xml";
 		public const string XvXml = "application/xv+xml";
-		public const string FormUrlencoded = "application/x-www-form-urlencoded";
+		public const string XWwwFormUrlencoded = "application/x-www-form-urlencoded";
+		public const string XX509CaCert = "application/x-x509-ca-cert";
+		public const string XX509CaRaCert = "application/x-x509-ca-ra-cert";
+		public const string XX509NextCaCert = "application/x-x509-next-ca-cert";
 		public const string Yang = "application/yang";
+		public const string YangDataCbor = "application/yang-data+cbor";
 		public const string YangDataJson = "application/yang-data+json";
 		public const string YangDataXml = "application/yang-data+xml";
 		public const string YangPatchJson = "application/yang-patch+json";
@@ -418,6 +463,7 @@ public static class MediaTypeNames
 
 		public static class EmergencyCallData
 		{
+			public const string CapXml = "application/EmergencyCallData.cap+xml";
 			public const string CommentXml = "application/EmergencyCallData.Comment+xml";
 			public const string ControlXml = "application/EmergencyCallData.Control+xml";
 			public const string DeviceInfoXml = "application/EmergencyCallData.DeviceInfo+xml";
@@ -443,6 +489,7 @@ public static class MediaTypeNames
 		public static class Prs
 		{
 			public const string Cww = "application/prs.cww";
+			public const string Cyn = "application/prs.cyn";
 			public const string HpubZip = "application/prs.hpub+zip";
 			public const string Nprend = "application/prs.nprend";
 			public const string Plucker = "application/prs.plucker";
@@ -459,6 +506,7 @@ public static class MediaTypeNames
 		{
 			public const string Acucobol = "application/vnd.acucobol";
 			public const string Acucorp = "application/vnd.acucorp";
+			public const string Age = "application/vnd.age";
 			public const string AhBarcode = "application/vnd.ah-barcode";
 			public const string AmadeusJson = "application/vnd.amadeus+json";
 			public const string Anki = "application/vnd.anki";
@@ -502,9 +550,14 @@ public static class MediaTypeNames
 			public const string CupsRaw = "application/vnd.cups-raw";
 			public const string Curl = "application/vnd.curl";
 			public const string Cybank = "application/vnd.cybank";
+			public const string CyclonedxJson = "application/vnd.cyclonedx+json";
+			public const string CyclonedxXml = "application/vnd.cyclonedx+xml";
+			public const string D3mDataset = "application/vnd.d3m-dataset";
+			public const string D3mProblem = "application/vnd.d3m-problem";
 			public const string Dart = "application/vnd.dart";
 			public const string DatapackageJson = "application/vnd.datapackage+json";
 			public const string DataresourceJson = "application/vnd.dataresource+json";
+			public const string Dbf = "application/vnd.dbf";
 			public const string Dna = "application/vnd.dna";
 			public const string DocumentJson = "application/vnd.document+json";
 			public const string Dpgraph = "application/vnd.dpgraph";
@@ -522,7 +575,6 @@ public static class MediaTypeNames
 			public const string EzpixAlbum = "application/vnd.ezpix-album";
 			public const string EzpixPackage = "application/vnd.ezpix-package";
 			public const string FastcopyDiskImage = "application/vnd.fastcopy-disk-image";
-			public const string Fdf = "application/vnd.fdf";
 			public const string Ffsns = "application/vnd.ffsns";
 			public const string Fints = "application/vnd.fints";
 			public const string FloGraphIt = "application/vnd.FloGraphIt";
@@ -532,6 +584,7 @@ public static class MediaTypeNames
 			public const string FutoinCbor = "application/vnd.futoin+cbor";
 			public const string FutoinJson = "application/vnd.futoin+json";
 			public const string Fuzzysheet = "application/vnd.fuzzysheet";
+			public const string Genozip = "application/vnd.genozip";
 			public const string GeometryExplorer = "application/vnd.geometry-explorer";
 			public const string Geonext = "application/vnd.geonext";
 			public const string Geoplan = "application/vnd.geoplan";
@@ -686,15 +739,19 @@ public static class MediaTypeNames
 			public const string Sar = "application/vnd.sar";
 			public const string Scribus = "application/vnd.scribus";
 			public const string Seemail = "application/vnd.seemail";
+			public const string SeisJson = "application/vnd.seis+json";
 			public const string Sema = "application/vnd.sema";
 			public const string Semd = "application/vnd.semd";
 			public const string Semf = "application/vnd.semf";
 			public const string ShadeSaveFile = "application/vnd.shade-save-file";
 			public const string ShootproofJson = "application/vnd.shootproof+json";
 			public const string ShopkickJson = "application/vnd.shopkick+json";
+			public const string Shp = "application/vnd.shp";
+			public const string Shx = "application/vnd.shx";
 			public const string SimTechMindMapper = "application/vnd.SimTech-MindMapper";
 			public const string SirenJson = "application/vnd.siren+json";
 			public const string Smaf = "application/vnd.smaf";
+			public const string SnesdevPageTable = "application/vnd.snesdev-page-table";
 			public const string Sqlite3 = "application/vnd.sqlite3";
 			public const string SssCod = "application/vnd.sss-cod";
 			public const string SssDtf = "application/vnd.sss-dtf";
@@ -703,17 +760,25 @@ public static class MediaTypeNames
 			public const string SusCalendar = "application/vnd.sus-calendar";
 			public const string Svd = "application/vnd.svd";
 			public const string SwiftviewIcs = "application/vnd.swiftview-ics";
+			public const string SycleXml = "application/vnd.sycle+xml";
+			public const string SyftJson = "application/vnd.syft+json";
 			public const string SyncmlXml = "application/vnd.syncml+xml";
 			public const string TableschemaJson = "application/vnd.tableschema+json";
 			public const string ThreeGpp2BcmcsinfoXml = "application/vnd.3gpp2.bcmcsinfo+xml";
 			public const string ThreeGpp2Sms = "application/vnd.3gpp2.sms";
 			public const string ThreeGpp2Tcap = "application/vnd.3gpp2.tcap";
+			public const string ThreeGpp5gnas = "application/vnd.3gpp.5gnas";
 			public const string ThreeGppAccessTransferEventsXml = "application/vnd.3gpp.access-transfer-events+xml";
 			public const string ThreeGppBsfXml = "application/vnd.3gpp.bsf+xml";
 			public const string ThreeGppGMOPXml = "application/vnd.3gpp.GMOP+xml";
+			public const string ThreeGppGtpc = "application/vnd.3gpp.gtpc";
+			public const string ThreeGppInterworkingData = "application/vnd.3gpp.interworking-data";
+			public const string ThreeGppLpp = "application/vnd.3gpp.lpp";
 			public const string ThreeGppMcdataAffiliationCommandXml = "application/vnd.3gpp.mcdata-affiliation-command+xml";
 			public const string ThreeGppMcdataInfoXml = "application/vnd.3gpp.mcdata-info+xml";
+			public const string ThreeGppMcdataMsgstoreCtrlRequestXml = "application/vnd.3gpp.mcdata-msgstore-ctrl-request+xml";
 			public const string ThreeGppMcdataPayload = "application/vnd.3gpp.mcdata-payload";
+			public const string ThreeGppMcdataRegroupXml = "application/vnd.3gpp.mcdata-regroup+xml";
 			public const string ThreeGppMcdataServiceConfigXml = "application/vnd.3gpp.mcdata-service-config+xml";
 			public const string ThreeGppMcdataSignalling = "application/vnd.3gpp.mcdata-signalling";
 			public const string ThreeGppMcdataUeConfigXml = "application/vnd.3gpp.mcdata-ue-config+xml";
@@ -738,11 +803,14 @@ public static class MediaTypeNames
 			public const string ThreeGppMcvideoUeConfigXml = "application/vnd.3gpp.mcvideo-ue-config+xml";
 			public const string ThreeGppMcvideoUserProfileXml = "application/vnd.3gpp.mcvideo-user-profile+xml";
 			public const string ThreeGppMidCallXml = "application/vnd.3gpp.mid-call+xml";
+			public const string ThreeGppNgap = "application/vnd.3gpp.ngap";
+			public const string ThreeGppPfcp = "application/vnd.3gpp.pfcp";
 			public const string ThreeGppPicBwLarge = "application/vnd.3gpp.pic-bw-large";
 			public const string ThreeGppPicBwSmall = "application/vnd.3gpp.pic-bw-small";
 			public const string ThreeGppPicBwVar = "application/vnd.3gpp.pic-bw-var";
 			public const string ThreeGppProsePc3chXml = "application/vnd.3gpp-prose-pc3ch+xml";
 			public const string ThreeGppProseXml = "application/vnd.3gpp-prose+xml";
+			public const string ThreeGppS1ap = "application/vnd.3gpp.s1ap";
 			public const string ThreeGppSms = "application/vnd.3gpp.sms";
 			public const string ThreeGppSmsXml = "application/vnd.3gpp.sms+xml";
 			public const string ThreeGppSrvccExtXml = "application/vnd.3gpp.srvcc-ext+xml";
@@ -817,10 +885,12 @@ public static class MediaTypeNames
 			{
 				public const string Afplinedata = "application/vnd.afpc.afplinedata";
 				public const string AfplinedataPagedef = "application/vnd.afpc.afplinedata-pagedef";
+				public const string CmocaCmresource = "application/vnd.afpc.cmoca-cmresource";
 				public const string FocaCharset = "application/vnd.afpc.foca-charset";
 				public const string FocaCodedfont = "application/vnd.afpc.foca-codedfont";
 				public const string FocaCodepage = "application/vnd.afpc.foca-codepage";
 				public const string Modca = "application/vnd.afpc.modca";
+				public const string ModcaCmtable = "application/vnd.afpc.modca-cmtable";
 				public const string ModcaFormdef = "application/vnd.afpc.modca-formdef";
 				public const string ModcaMediummap = "application/vnd.afpc.modca-mediummap";
 				public const string ModcaObjectcontainer = "application/vnd.afpc.modca-objectcontainer";
@@ -875,6 +945,12 @@ public static class MediaTypeNames
 
 			public static class Apache
 			{
+
+				public static class Arrow
+				{
+					public const string File = "application/vnd.apache.arrow.file";
+					public const string Stream = "application/vnd.apache.arrow.stream";
+				}
 
 				public static class Thrift
 				{
@@ -947,7 +1023,6 @@ public static class MediaTypeNames
 
 			public static class Bluetooth
 			{
-
 				public static class Ep
 				{
 					public const string Oob = "application/vnd.bluetooth.ep.oob";
@@ -966,7 +1041,6 @@ public static class MediaTypeNames
 
 			public static class Cendio
 			{
-
 				public static class Thinlinc
 				{
 					public const string Clientconf = "application/vnd.cendio.thinlinc.clientconf";
@@ -1011,7 +1085,6 @@ public static class MediaTypeNames
 
 			public static class Collabio
 			{
-
 				public static class Xodocuments
 				{
 					public const string Document = "application/vnd.collabio.xodocuments.document";
@@ -1041,7 +1114,6 @@ public static class MediaTypeNames
 
 			public static class Crick
 			{
-
 				public static class Clicker
 				{
 					public const string Keyboard = "application/vnd.crick.clicker.keyboard";
@@ -1061,6 +1133,12 @@ public static class MediaTypeNames
 				public const string PipeJson = "application/vnd.cryptii.pipe+json";
 			}
 
+			public static class Cryptomator
+			{
+				public const string Encrypted = "application/vnd.cryptomator.encrypted";
+				public const string Vault = "application/vnd.cryptomator.vault";
+			}
+
 			public static class Ctct
 			{
 				public const string WsXml = "application/vnd.ctct.ws+xml";
@@ -1068,7 +1146,6 @@ public static class MediaTypeNames
 
 			public static class Cyan
 			{
-
 				public static class Dean
 				{
 					public const string RootXml = "application/vnd.cyan.dean.root+xml";
@@ -1120,7 +1197,6 @@ public static class MediaTypeNames
 
 			public static class Dolby
 			{
-
 				public static class Mobile
 				{
 					public const string One = "application/vnd.dolby.mobile.1";
@@ -1135,7 +1211,6 @@ public static class MediaTypeNames
 
 			public static class Dtg
 			{
-
 				public static class Local
 				{
 					public const string Flash = "application/vnd.dtg.local.flash";
@@ -1146,6 +1221,7 @@ public static class MediaTypeNames
 			public static class Dvb
 			{
 				public const string Ait = "application/vnd.dvb.ait";
+				public const string DvbislXml = "application/vnd.dvb.dvbisl+xml";
 				public const string Dvbj = "application/vnd.dvb.dvbj";
 				public const string Esgcontainer = "application/vnd.dvb.esgcontainer";
 				public const string Ipdcdftnotifaccess = "application/vnd.dvb.ipdcdftnotifaccess";
@@ -1178,6 +1254,11 @@ public static class MediaTypeNames
 			public static class Ecip
 			{
 				public const string Rlp = "application/vnd.ecip.rlp";
+			}
+
+			public static class Eclipse
+			{
+				public const string DittoJson = "application/vnd.eclipse.ditto+json";
 			}
 
 			public static class Ecowin
@@ -1255,6 +1336,14 @@ public static class MediaTypeNames
 				}
 			}
 
+			public static class Eu
+			{
+				public static class Kasparian
+				{
+					public const string CarJson = "application/vnd.eu.kasparian.car+json";
+				}
+			}
+
 			public static class Eudora
 			{
 				public const string Data = "application/vnd.eudora.data";
@@ -1262,13 +1351,17 @@ public static class MediaTypeNames
 
 			public static class Evolv
 			{
-
 				public static class Ecig
 				{
 					public const string Profile = "application/vnd.evolv.ecig.profile";
 					public const string Settings = "application/vnd.evolv.ecig.settings";
 					public const string Theme = "application/vnd.evolv.ecig.theme";
 				}
+			}
+
+			public static class Familysearch
+			{
+				public const string GedcomZip = "application/vnd.familysearch.gedcom+zip";
 			}
 
 			public static class Fdsn
@@ -1299,8 +1392,8 @@ public static class MediaTypeNames
 
 			public static class Frogans
 			{
-				public const string Fnc = "application/vnd.frogans.fnc";
-				public const string Ltf = "application/vnd.frogans.ltf";
+				public const string FncOBSOLETE = "application/vnd.frogans.fnc";
+				public const string LtfOBSOLETE = "application/vnd.frogans.ltf";
 			}
 
 			public static class Fsc
@@ -1311,6 +1404,20 @@ public static class MediaTypeNames
 			public static class FSecure
 			{
 				public const string Mobile = "application/vnd.f-secure.mobile";
+			}
+
+			public static class Fujifilm
+			{
+				public static class Fb
+				{
+					public const string JfiXml = "application/vnd.fujifilm.fb.jfi+xml";
+
+					public static class Docuworks
+					{
+						public const string Binder = "application/vnd.fujifilm.fb.docuworks.binder";
+						public const string Container = "application/vnd.fujifilm.fb.docuworks.container";
+					}
+				}
 			}
 
 			public static class Fujitsu
@@ -1349,6 +1456,7 @@ public static class MediaTypeNames
 			public static class Geogebra
 			{
 				public const string File = "application/vnd.geogebra.file";
+				public const string Slides = "application/vnd.geogebra.slides";
 				public const string Tool = "application/vnd.geogebra.tool";
 			}
 
@@ -1356,6 +1464,15 @@ public static class MediaTypeNames
 			{
 				public const string CardContentMgt = "application/vnd.globalplatform.card-content-mgt";
 				public const string CardContentMgtResponse = "application/vnd.globalplatform.card-content-mgt-response";
+			}
+
+			public static class Gnu
+			{
+				public static class Taler
+				{
+					public const string ExchangeJson = "application/vnd.gnu.taler.exchange+json";
+					public const string MerchantJson = "application/vnd.gnu.taler.merchant+json";
+				}
 			}
 
 			public static class GoogleEarth
@@ -1366,7 +1483,6 @@ public static class MediaTypeNames
 
 			public static class Gov
 			{
-
 				public static class Sk
 				{
 					public const string EFormXml = "application/vnd.gov.sk.e-form+xml";
@@ -1412,7 +1528,6 @@ public static class MediaTypeNames
 
 				public static class Lis
 				{
-
 					public static class V2
 					{
 						public const string ResultJson = "application/vnd.ims.lis.v2.result+json";
@@ -1421,7 +1536,6 @@ public static class MediaTypeNames
 
 				public static class Lti
 				{
-
 					public static class V2
 					{
 						public const string ToolconsumerprofileJson = "application/vnd.ims.lti.v2.toolconsumerprofile+json";
@@ -1454,7 +1568,6 @@ public static class MediaTypeNames
 
 			public static class Innopath
 			{
-
 				public static class Wamp
 				{
 					public const string Notification = "application/vnd.innopath.wamp.notification";
@@ -1483,9 +1596,14 @@ public static class MediaTypeNames
 				public const string Qfx = "application/vnd.intu.qfx";
 			}
 
+			public static class Ipld
+			{
+				public const string Car = "application/vnd.ipld.car";
+				public const string Raw = "application/vnd.ipld.raw";
+			}
+
 			public static class Iptc
 			{
-
 				public static class G2
 				{
 					public const string CatalogitemXml = "application/vnd.iptc.g2.catalogitem+xml";
@@ -1515,7 +1633,6 @@ public static class MediaTypeNames
 
 			public static class Jcp
 			{
-
 				public static class Javame
 				{
 					public const string MidletRms = "application/vnd.jcp.javame.midlet-rms";
@@ -1552,7 +1669,6 @@ public static class MediaTypeNames
 
 			public static class Llamagraphics
 			{
-
 				public static class LifeBalance
 				{
 					public const string Desktop = "application/vnd.llamagraphics.life-balance.desktop";
@@ -1572,13 +1688,20 @@ public static class MediaTypeNames
 
 			public static class Marlin
 			{
-
 				public static class Drm
 				{
 					public const string ActiontokenXml = "application/vnd.marlin.drm.actiontoken+xml";
 					public const string ConftokenXml = "application/vnd.marlin.drm.conftoken+xml";
 					public const string LicenseXml = "application/vnd.marlin.drm.license+xml";
 					public const string Mdcf = "application/vnd.marlin.drm.mdcf";
+				}
+			}
+
+			public static class Maxar
+			{
+				public static class Archive
+				{
+					public const string ThreeTzZip = "application/vnd.maxar.archive.3tz+zip";
 				}
 			}
 
@@ -1610,7 +1733,6 @@ public static class MediaTypeNames
 
 			public static class Mitsubishi
 			{
-
 				public static class MistyGuard
 				{
 					public const string Trustweb = "application/vnd.mitsubishi.misty-guard.trustweb";
@@ -1656,10 +1778,10 @@ public static class MediaTypeNames
 
 			public static class MsExcel
 			{
+				public const string Default = "application/vnd.ms-excel";
 
 				public static class Addin
 				{
-
 					public static class MacroEnabled
 					{
 						public const string Twelve = "application/vnd.ms-excel.addin.macroEnabled.12";
@@ -1668,10 +1790,8 @@ public static class MediaTypeNames
 
 				public static class Sheet
 				{
-
 					public static class Binary
 					{
-
 						public static class MacroEnabled
 						{
 							public const string Twelve = "application/vnd.ms-excel.sheet.binary.macroEnabled.12";
@@ -1686,7 +1806,6 @@ public static class MediaTypeNames
 
 				public static class Template
 				{
-
 					public static class MacroEnabled
 					{
 						public const string Twelve = "application/vnd.ms-excel.template.macroEnabled.12";
@@ -1699,6 +1818,11 @@ public static class MediaTypeNames
 				public const string ActiveXXml = "application/vnd.ms-office.activeX+xml";
 			}
 
+			public static class MsOutlook
+			{
+				public const string Default = "application/vnd.ms-outlook";
+			}
+
 			public static class MsPlayready
 			{
 				public const string InitiatorXml = "application/vnd.ms-playready.initiator+xml";
@@ -1706,10 +1830,10 @@ public static class MediaTypeNames
 
 			public static class MsPowerpoint
 			{
+				public const string Default = "application/vnd.ms-powerpoint";
 
 				public static class Addin
 				{
-
 					public static class MacroEnabled
 					{
 						public const string Twelve = "application/vnd.ms-powerpoint.addin.macroEnabled.12";
@@ -1718,7 +1842,6 @@ public static class MediaTypeNames
 
 				public static class Presentation
 				{
-
 					public static class MacroEnabled
 					{
 						public const string Twelve = "application/vnd.ms-powerpoint.presentation.macroEnabled.12";
@@ -1727,7 +1850,6 @@ public static class MediaTypeNames
 
 				public static class Slide
 				{
-
 					public static class MacroEnabled
 					{
 						public const string Twelve = "application/vnd.ms-powerpoint.slide.macroEnabled.12";
@@ -1736,7 +1858,6 @@ public static class MediaTypeNames
 
 				public static class Slideshow
 				{
-
 					public static class MacroEnabled
 					{
 						public const string Twelve = "application/vnd.ms-powerpoint.slideshow.macroEnabled.12";
@@ -1745,7 +1866,6 @@ public static class MediaTypeNames
 
 				public static class Template
 				{
-
 					public static class MacroEnabled
 					{
 						public const string Twelve = "application/vnd.ms-powerpoint.template.macroEnabled.12";
@@ -1779,10 +1899,10 @@ public static class MediaTypeNames
 
 			public static class MsWord
 			{
+				public const string Default = "application/vnd.ms-word";
 
 				public static class Document
 				{
-
 					public static class MacroEnabled
 					{
 						public const string Twelve = "application/vnd.ms-word.document.macroEnabled.12";
@@ -1791,7 +1911,6 @@ public static class MediaTypeNames
 
 				public static class Template
 				{
-
 					public static class MacroEnabled
 					{
 						public const string Twelve = "application/vnd.ms-word.template.macroEnabled.12";
@@ -1801,7 +1920,6 @@ public static class MediaTypeNames
 
 			public static class Multiad
 			{
-
 				public static class Creator
 				{
 					public const string Cif = "application/vnd.multiad.creator.cif";
@@ -1811,6 +1929,11 @@ public static class MediaTypeNames
 			public static class Muvee
 			{
 				public const string Style = "application/vnd.muvee.style";
+			}
+
+			public static class Nacamar
+			{
+				public const string YbridJson = "application/vnd.nacamar.ybrid+json";
 			}
 
 			public static class Ncd
@@ -1824,6 +1947,11 @@ public static class MediaTypeNames
 				public const string InvJson = "application/vnd.nearst.inv+json";
 			}
 
+			public static class Nebumind
+			{
+				public const string Line = "application/vnd.nebumind.line";
+			}
+
 			public static class Neurolanguage
 			{
 				public const string Nlu = "application/vnd.neurolanguage.nlu";
@@ -1831,7 +1959,6 @@ public static class MediaTypeNames
 
 			public static class Nintendo
 			{
-
 				public static class Nitro
 				{
 					public const string Rom = "application/vnd.nintendo.nitro.rom";
@@ -1893,7 +2020,6 @@ public static class MediaTypeNames
 
 			public static class Oasis
 			{
-
 				public static class Opendocument
 				{
 					public const string Chart = "application/vnd.oasis.opendocument.chart";
@@ -1913,6 +2039,17 @@ public static class MediaTypeNames
 					public const string TextMaster = "application/vnd.oasis.opendocument.text-master";
 					public const string TextTemplate = "application/vnd.oasis.opendocument.text-template";
 					public const string TextWeb = "application/vnd.oasis.opendocument.text-web";
+				}
+			}
+
+			public static class Oci
+			{
+				public static class Image
+				{
+					public static class Manifest
+					{
+						public const string V1Json = "application/vnd.oci.image.manifest.v1+json";
+					}
 				}
 			}
 
@@ -1955,6 +2092,7 @@ public static class MediaTypeNames
 				public const string Dcdc = "application/vnd.oma.dcdc";
 				public const string Dd2Xml = "application/vnd.oma.dd2+xml";
 				public const string GroupUsageListXml = "application/vnd.oma.group-usage-list+xml";
+				public const string Lwm2mCbor = "application/vnd.oma.lwm2m+cbor";
 				public const string Lwm2mJson = "application/vnd.oma.lwm2m+json";
 				public const string Lwm2mTlv = "application/vnd.oma.lwm2m+tlv";
 				public const string PalXml = "application/vnd.oma.pal+xml";
@@ -1998,6 +2136,11 @@ public static class MediaTypeNames
 				}
 			}
 
+			public static class Onvif
+			{
+				public const string Metadata = "application/vnd.onvif.metadata";
+			}
+
 			public static class Openblox
 			{
 				public const string GameBinary = "application/vnd.openblox.game-binary";
@@ -2012,6 +2155,11 @@ public static class MediaTypeNames
 			public static class Openstreetmap
 			{
 				public const string DataXml = "application/vnd.openstreetmap.data+xml";
+			}
+
+			public static class Opentimestamps
+			{
+				public const string Ots = "application/vnd.opentimestamps.ots";
 			}
 
 			public static class OpenxmlformatsOfficedocument
@@ -2053,6 +2201,7 @@ public static class MediaTypeNames
 
 					public static class Presentation
 					{
+						public const string Default = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
 						public const string MainXml = "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml";
 					}
 
@@ -2092,6 +2241,7 @@ public static class MediaTypeNames
 
 					public static class Sheet
 					{
+						public const string Default = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 						public const string MainXml = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml";
 					}
 
@@ -2115,6 +2265,7 @@ public static class MediaTypeNames
 
 					public static class Document
 					{
+						public const string Default = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 						public const string GlossaryXml = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.glossary+xml";
 						public const string MainXml = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml";
 					}
@@ -2150,7 +2301,6 @@ public static class MediaTypeNames
 
 			public static class Osgeo
 			{
-
 				public static class Mapguide
 				{
 					public const string Package = "application/vnd.osgeo.mapguide.package";
@@ -2265,6 +2415,11 @@ public static class MediaTypeNames
 				public const string Rlprint = "application/vnd.RenLearn.rlprint";
 			}
 
+			public static class Resilient
+			{
+				public const string Logic = "application/vnd.resilient.logic";
+			}
+
 			public static class Rig
 			{
 				public const string Cryptonote = "application/vnd.rig.cryptonote";
@@ -2306,7 +2461,6 @@ public static class MediaTypeNames
 
 			public static class Sealedmedia
 			{
-
 				public static class Softseal
 				{
 					public const string Html = "application/vnd.sealedmedia.softseal.html";
@@ -2316,7 +2470,6 @@ public static class MediaTypeNames
 
 			public static class Shana
 			{
-
 				public static class Informed
 				{
 					public const string Formdata = "application/vnd.shana.informed.formdata";
@@ -2339,7 +2492,6 @@ public static class MediaTypeNames
 
 			public static class Software602
 			{
-
 				public static class Filler
 				{
 					public const string FormXml = "application/vnd.software602.filler.form+xml";
@@ -2406,7 +2558,6 @@ public static class MediaTypeNames
 
 			public static class Tmd
 			{
-
 				public static class Mediaflex
 				{
 					public const string ApiXml = "application/vnd.tmd.mediaflex.api+xml";
@@ -2457,7 +2608,6 @@ public static class MediaTypeNames
 
 			public static class Valve
 			{
-
 				public static class Source
 				{
 					public const string Material = "application/vnd.valve.source.material";
@@ -2467,6 +2617,11 @@ public static class MediaTypeNames
 			public static class Verimatrix
 			{
 				public const string Vcas = "application/vnd.verimatrix.vcas";
+			}
+
+			public static class Veritone
+			{
+				public const string AionJson = "application/vnd.veritone.aion+json";
 			}
 
 			public static class Veryant
@@ -2500,6 +2655,7 @@ public static class MediaTypeNames
 
 			public static class Wfa
 			{
+				public const string Dpp = "application/vnd.wfa.dpp";
 				public const string P2p = "application/vnd.wfa.p2p";
 				public const string Wsc = "application/vnd.wfa.wsc";
 			}
@@ -2649,6 +2805,7 @@ public static class MediaTypeNames
 		public const string MELP1200 = "audio/MELP1200";
 		public const string MELP2400 = "audio/MELP2400";
 		public const string MELP600 = "audio/MELP600";
+		public const string Mhas = "audio/mhas";
 		public const string MobileXmf = "audio/mobile-xmf";
 		public const string Mp4 = "audio/mp4";
 		public const string MP4ALATM = "audio/MP4A-LATM";
@@ -2656,6 +2813,7 @@ public static class MediaTypeNames
 		public const string MpaRobust = "audio/mpa-robust";
 		public const string Mpeg = "audio/mpeg";
 		public const string Mpeg4Generic = "audio/mpeg4-generic";
+		public const string Name = "Template";
 		public const string Ogg = "audio/ogg";
 		public const string OneDInterleavedParityfec = "audio/1d-interleaved-parityfec";
 		public const string Opus = "audio/opus";
@@ -2671,9 +2829,11 @@ public static class MediaTypeNames
 		public const string Rtploopback = "audio/rtploopback";
 		public const string RtpMidi = "audio/rtp-midi";
 		public const string Rtx = "audio/rtx";
+		public const string Scip = "audio/scip";
 		public const string SMV = "audio/SMV";
 		public const string SMV0 = "audio/SMV0";
 		public const string SMVQCP = "audio/SMV-QCP";
+		public const string Sofa = "audio/sofa";
 		public const string Speex = "audio/speex";
 		public const string SpMidi = "audio/sp-midi";
 		public const string T140c = "audio/t140c";
@@ -2685,6 +2845,7 @@ public static class MediaTypeNames
 		public const string ThreeGpp = "audio/3gpp";
 		public const string ThreeGpp2 = "audio/3gpp2";
 		public const string Tone = "audio/tone";
+		public const string TSVCIS = "audio/TSVCIS";
 		public const string UEMCLIP = "audio/UEMCLIP";
 		public const string Ulpfec = "audio/ulpfec";
 		public const string Usac = "audio/usac";
@@ -2787,7 +2948,6 @@ public static class MediaTypeNames
 
 			public static class MsPlayready
 			{
-
 				public static class Media
 				{
 					public const string Pya = "audio/vnd.ms-playready.media.pya";
@@ -2828,7 +2988,6 @@ public static class MediaTypeNames
 
 			public static class Sealedmedia
 			{
-
 				public static class Softseal
 				{
 					public const string Mpeg = "audio/vnd.sealedmedia.softseal.mpeg";
@@ -2845,6 +3004,7 @@ public static class MediaTypeNames
 	public static class Font
 	{
 		public const string Collection = "font/collection";
+		public const string Name = "Template";
 		public const string Otf = "font/otf";
 		public const string Sfnt = "font/sfnt";
 		public const string Ttf = "font/ttf";
@@ -2857,6 +3017,7 @@ public static class MediaTypeNames
 		public const string Aces = "image/aces";
 		public const string Avci = "image/avci";
 		public const string Avcs = "image/avcs";
+		public const string Avif = "image/avif";
 		public const string Bmp = "image/bmp";
 		public const string Cgm = "image/cgm";
 		public const string DicomRle = "image/dicom-rle";
@@ -2887,6 +3048,8 @@ public static class MediaTypeNames
 		public const string Jxsi = "image/jxsi";
 		public const string Jxss = "image/jxss";
 		public const string Ktx = "image/ktx";
+		public const string Ktx2 = "image/ktx2";
+		public const string Name = "Template";
 		public const string Naplps = "image/naplps";
 		public const string Png = "image/png";
 		public const string PwgRaster = "image/pwg-raster";
@@ -2895,6 +3058,7 @@ public static class MediaTypeNames
 		public const string Tiff = "image/tiff";
 		public const string TiffFx = "image/tiff-fx";
 		public const string Wmf = "image/wmf";
+		public const string WebP = "image/webp";
 
 		public static class Prs
 		{
@@ -2924,7 +3088,6 @@ public static class MediaTypeNames
 
 			public static class Airzip
 			{
-
 				public static class Accelerator
 				{
 					public const string Azv = "image/vnd.airzip.accelerator.azv";
@@ -2967,6 +3130,11 @@ public static class MediaTypeNames
 				public const string Apng = "image/vnd.mozilla.apng";
 			}
 
+			public static class Pco
+			{
+				public const string B16 = "image/vnd.pco.b16";
+			}
+
 			public static class Sealed
 			{
 				public const string Png = "image/vnd.sealed.png";
@@ -2974,7 +3142,6 @@ public static class MediaTypeNames
 
 			public static class Sealedmedia
 			{
-
 				public static class Softseal
 				{
 					public const string Gif = "image/vnd.sealedmedia.softseal.gif";
@@ -2989,7 +3156,6 @@ public static class MediaTypeNames
 
 			public static class Valve
 			{
-
 				public static class Source
 				{
 					public const string Texture = "image/vnd.valve.source.texture";
@@ -3022,16 +3188,16 @@ public static class MediaTypeNames
 		public const string GlobalHeaders = "message/global-headers";
 		public const string Http = "message/http";
 		public const string ImdnXml = "message/imdn+xml";
+		public const string Name = "Template";
 		public const string Partial = "message/partial";
 		public const string Rfc822 = "message/rfc822";
-		public const string SHttp = "message/s-http";
+		public const string SHttpOBSOLETE = "message/s-http";
 		public const string Sip = "message/sip";
 		public const string Sipfrag = "message/sipfrag";
 		public const string TrackingStatus = "message/tracking-status";
 
 		public static class Vnd
 		{
-
 			public static class Wfa
 			{
 				public const string Wsc = "message/vnd.wfa.wsc";
@@ -3041,13 +3207,23 @@ public static class MediaTypeNames
 
 	public static class Model
 	{
+		public const string E57 = "model/e57";
 		public const string Example = "model/example";
 		public const string GltfBinary = "model/gltf-binary";
 		public const string GltfJson = "model/gltf+json";
 		public const string Iges = "model/iges";
 		public const string Mesh = "model/mesh";
+		public const string Mtl = "model/mtl";
+		public const string Name = "Template";
+		public const string Obj = "model/obj";
+		public const string Prc = "model/prc";
+		public const string Step = "model/step";
+		public const string StepXml = "model/step+xml";
+		public const string StepXmlZip = "model/step-xml+zip";
+		public const string StepZip = "model/step+zip";
 		public const string Stl = "model/stl";
 		public const string ThreeMf = "model/3mf";
+		public const string U3d = "model/u3d";
 		public const string Vrml = "model/vrml";
 		public const string X3dFastinfoset = "model/x3d+fastinfoset";
 		public const string X3dVrml = "model/x3d-vrml";
@@ -3073,7 +3249,6 @@ public static class MediaTypeNames
 
 			public static class Parasolid
 			{
-
 				public static class Transmit
 				{
 					public const string Binary = "model/vnd.parasolid.transmit.binary";
@@ -3081,14 +3256,23 @@ public static class MediaTypeNames
 				}
 			}
 
+			public static class Pytha
+			{
+				public const string Pyox = "model/vnd.pytha.pyox";
+			}
+
 			public static class Rosette
 			{
 				public const string AnnotatedDataModel = "model/vnd.rosette.annotated-data-model";
 			}
 
+			public static class Sap
+			{
+				public const string Vds = "model/vnd.sap.vds";
+			}
+
 			public static class Valve
 			{
-
 				public static class Source
 				{
 					public const string CompiledMap = "model/vnd.valve.source.compiled-map";
@@ -3109,16 +3293,16 @@ public static class MediaTypeNames
 		public const string HeaderSet = "multipart/header-set";
 		public const string Mixed = "multipart/mixed";
 		public const string Multilingual = "multipart/multilingual";
+		public const string Name = "Template";
 		public const string Parallel = "multipart/parallel";
 		public const string Related = "multipart/related";
 		public const string Report = "multipart/report";
 		public const string Signed = "multipart/signed";
 		public const string VoiceMessage = "multipart/voice-message";
-		public const string MixedReplace = "multipart/x-mixed-replace";
+		public const string XMixedReplace = "multipart/x-mixed-replace";
 
 		public static class Vnd
 		{
-
 			public static class Bint
 			{
 				public const string MedPlus = "multipart/vnd.bint.med-plus";
@@ -3130,6 +3314,9 @@ public static class MediaTypeNames
 	{
 		public const string CacheManifest = "text/cache-manifest";
 		public const string Calendar = "text/calendar";
+		public const string Cql = "text/cql";
+		public const string CqlExpression = "text/cql-expression";
+		public const string CqlIdentifier = "text/cql-identifier";
 		public const string Css = "text/css";
 		public const string Csv = "text/csv";
 		public const string CsvSchema = "text/csv-schema";
@@ -3137,15 +3324,18 @@ public static class MediaTypeNames
 		public const string Encaprtp = "text/encaprtp";
 		public const string Enriched = "text/enriched";
 		public const string Example = "text/example";
+		public const string Fhirpath = "text/fhirpath";
 		public const string Flexfec = "text/flexfec";
 		public const string Fwdred = "text/fwdred";
+		public const string Gff3 = "text/gff3";
 		public const string GrammarRefList = "text/grammar-ref-list";
 		public const string Html = "text/html";
+		public const string Javascript = "text/javascript";
 		public const string JcrCnd = "text/jcr-cnd";
-		public const string Json = "text/json";
 		public const string Markdown = "text/markdown";
 		public const string Mizar = "text/mizar";
 		public const string N3 = "text/n3";
+		public const string Name = "Template";
 		public const string OneDInterleavedParityfec = "text/1d-interleaved-parityfec";
 		public const string Parameters = "text/parameters";
 		public const string Parityfec = "text/parityfec";
@@ -3159,11 +3349,13 @@ public static class MediaTypeNames
 		public const string RtpEncAescm128 = "text/rtp-enc-aescm128";
 		public const string Rtploopback = "text/rtploopback";
 		public const string Rtx = "text/rtx";
-		public const string Sgml = "text/sgml";
+		public const string SGML = "text/SGML";
+		public const string Shaclc = "text/shaclc";
+		public const string Shex = "text/shex";
+		public const string Spdx = "text/spdx";
 		public const string Strings = "text/strings";
 		public const string T140 = "text/t140";
 		public const string TabSeparatedValues = "text/tab-separated-values";
-		public const string TextJson = "text/json";
 		public const string Troff = "text/troff";
 		public const string Turtle = "text/turtle";
 		public const string Ulpfec = "text/ulpfec";
@@ -3175,7 +3367,6 @@ public static class MediaTypeNames
 
 		public static class Prs
 		{
-
 			public static class Fallenstein
 			{
 				public const string Rst = "text/prs.fallenstein.rst";
@@ -3202,6 +3393,7 @@ public static class MediaTypeNames
 			public const string Fly = "text/vnd.fly";
 			public const string Gml = "text/vnd.gml";
 			public const string Graphviz = "text/vnd.graphviz";
+			public const string Hans = "text/vnd.hans";
 			public const string Hgl = "text/vnd.hgl";
 			public const string LatexZ = "text/vnd.latex-z";
 			public const string MsMediapackage = "text/vnd.ms-mediapackage";
@@ -3220,6 +3412,11 @@ public static class MediaTypeNames
 			public static class Esmertec
 			{
 				public const string ThemeDescriptor = "text/vnd.esmertec.theme-descriptor";
+			}
+
+			public static class Familysearch
+			{
+				public const string Gedcom = "text/vnd.familysearch.gedcom";
 			}
 
 			public static class Ficlab
@@ -3251,7 +3448,6 @@ public static class MediaTypeNames
 
 			public static class Net2phone
 			{
-
 				public static class Commcenter
 				{
 					public const string Command = "text/vnd.net2phone.commcenter.command";
@@ -3270,7 +3466,6 @@ public static class MediaTypeNames
 
 			public static class Sun
 			{
-
 				public static class J2me
 				{
 					public const string AppDescriptor = "text/vnd.sun.j2me.app-descriptor";
@@ -3294,12 +3489,14 @@ public static class MediaTypeNames
 
 	public static class Video
 	{
+		public const string AV1 = "video/AV1";
 		public const string BMPEG = "video/BMPEG";
 		public const string BT656 = "video/BT656";
 		public const string CelB = "video/CelB";
 		public const string DV = "video/DV";
 		public const string Encaprtp = "video/encaprtp";
 		public const string Example = "video/example";
+		public const string FFV1 = "video/FFV1";
 		public const string Flexfec = "video/flexfec";
 		public const string H261 = "video/H261";
 		public const string H263 = "video/H263";
@@ -3311,6 +3508,7 @@ public static class MediaTypeNames
 		public const string H265 = "video/H265";
 		public const string JPEG = "video/JPEG";
 		public const string Jpeg2000 = "video/jpeg2000";
+		public const string Jxsv = "video/jxsv";
 		public const string Mj2 = "video/mj2";
 		public const string MP1S = "video/MP1S";
 		public const string MP2P = "video/MP2P";
@@ -3320,6 +3518,7 @@ public static class MediaTypeNames
 		public const string Mpeg = "video/mpeg";
 		public const string Mpeg4Generic = "video/mpeg4-generic";
 		public const string MPV = "video/MPV";
+		public const string Name = "Template";
 		public const string Nv = "video/nv";
 		public const string Ogg = "video/ogg";
 		public const string OneDInterleavedParityfec = "video/1d-interleaved-parityfec";
@@ -3331,6 +3530,7 @@ public static class MediaTypeNames
 		public const string RtpEncAescm128 = "video/rtp-enc-aescm128";
 		public const string Rtploopback = "video/rtploopback";
 		public const string Rtx = "video/rtx";
+		public const string Scip = "video/scip";
 		public const string Smpte291 = "video/smpte291";
 		public const string SMPTE292M = "video/SMPTE292M";
 		public const string ThreeGpp = "video/3gpp";
@@ -3340,6 +3540,7 @@ public static class MediaTypeNames
 		public const string Vc1 = "video/vc1";
 		public const string Vc2 = "video/vc2";
 		public const string VP8 = "video/VP8";
+		public const string VP9 = "video/VP9";
 
 		public static class Iso
 		{
@@ -3403,7 +3604,6 @@ public static class MediaTypeNames
 
 			public static class MsPlayready
 			{
-
 				public static class Media
 				{
 					public const string Pyv = "video/vnd.ms-playready.media.pyv";
@@ -3432,7 +3632,6 @@ public static class MediaTypeNames
 
 			public static class Sealedmedia
 			{
-
 				public static class Softseal
 				{
 					public const string Mov = "video/vnd.sealedmedia.softseal.mov";

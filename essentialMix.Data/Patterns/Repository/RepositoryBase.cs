@@ -122,14 +122,14 @@ public abstract class RepositoryBase<TEntity> : RepositoryBase, IRepositoryBase<
 	protected abstract int CountInternal(IPagination settings = null);
 
 	/// <inheritdoc />
-	public ValueTask<int> CountAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
+	public Task<int> CountAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return CountAsyncInternal(settings, token);
 	}
 
-	protected abstract ValueTask<int> CountAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
+	protected abstract Task<int> CountAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
 	public long LongCount(IPagination settings = null)
@@ -141,14 +141,14 @@ public abstract class RepositoryBase<TEntity> : RepositoryBase, IRepositoryBase<
 	protected abstract long LongCountInternal(IPagination settings = null);
 
 	/// <inheritdoc />
-	public ValueTask<long> LongCountAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
+	public Task<long> LongCountAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return LongCountAsyncInternal(settings, token);
 	}
 
-	protected abstract ValueTask<long> LongCountAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
+	protected abstract Task<long> LongCountAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
 	public IQueryable<TEntity> List(IPagination settings = null)
@@ -160,14 +160,14 @@ public abstract class RepositoryBase<TEntity> : RepositoryBase, IRepositoryBase<
 	protected abstract IQueryable<TEntity> ListInternal(IPagination settings = null);
 
 	/// <inheritdoc />
-	public ValueTask<IList<TEntity>> ListAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
+	public Task<IList<TEntity>> ListAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return ListAsyncInternal(settings, token);
 	}
 
-	protected abstract ValueTask<IList<TEntity>> ListAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
+	protected abstract Task<IList<TEntity>> ListAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
 
 	[NotNull]
 	protected abstract IQueryable<TEntity> PrepareCountQuery([NotNull] IQueryable<TEntity> query, IPagination settings);
@@ -215,14 +215,14 @@ public abstract class RepositoryBase<TEntity, TKey> : RepositoryBase<TEntity>, I
 	protected abstract TEntity GetInternal([NotNull] TKey key);
 
 	/// <inheritdoc />
-	public ValueTask<TEntity> GetAsync(TKey key, CancellationToken token = default(CancellationToken))
+	public Task<TEntity> GetAsync(TKey key, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return GetAsyncInternal(key, token);
 	}
 
-	protected abstract ValueTask<TEntity> GetAsyncInternal([NotNull] TKey key, CancellationToken token = default(CancellationToken));
+	protected abstract Task<TEntity> GetAsyncInternal([NotNull] TKey key, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
 	public TEntity Get(TKey key, IGetSettings settings)
@@ -234,14 +234,14 @@ public abstract class RepositoryBase<TEntity, TKey> : RepositoryBase<TEntity>, I
 	protected abstract TEntity GetInternal([NotNull] TKey key, [NotNull] IGetSettings settings);
 
 	/// <inheritdoc />
-	public ValueTask<TEntity> GetAsync(TKey key, IGetSettings settings, CancellationToken token = default(CancellationToken))
+	public Task<TEntity> GetAsync(TKey key, IGetSettings settings, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return GetAsyncInternal(key, settings, token);
 	}
 
-	protected abstract ValueTask<TEntity> GetAsyncInternal([NotNull] TKey key, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
+	protected abstract Task<TEntity> GetAsyncInternal([NotNull] TKey key, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
 
 	[NotNull]
 	protected abstract IQueryable<TEntity> PrepareGetQuery([NotNull] TKey key);
@@ -294,14 +294,14 @@ public abstract class RepositoryBase<TEntity, TKey1, TKey2> : RepositoryBase<TEn
 	protected abstract TEntity GetInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2);
 
 	/// <inheritdoc />
-	public ValueTask<TEntity> GetAsync(TKey1 key1, TKey2 key2, CancellationToken token = default(CancellationToken))
+	public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return GetAsyncInternal(key1, key2, token);
 	}
 
-	protected abstract ValueTask<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, CancellationToken token = default(CancellationToken));
+	protected abstract Task<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
 	public TEntity Get(TKey1 key1, TKey2 key2, IGetSettings settings)
@@ -313,14 +313,14 @@ public abstract class RepositoryBase<TEntity, TKey1, TKey2> : RepositoryBase<TEn
 	protected abstract TEntity GetInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] IGetSettings settings);
 
 	/// <inheritdoc />
-	public ValueTask<TEntity> GetAsync(TKey1 key1, TKey2 key2, IGetSettings settings, CancellationToken token = default(CancellationToken))
+	public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, IGetSettings settings, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return GetAsyncInternal(key1, key2, settings, token);
 	}
 
-	protected abstract ValueTask<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
+	protected abstract Task<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
 
 	[NotNull]
 	protected abstract IQueryable<TEntity> PrepareGetQuery([NotNull] TKey1 key1, [NotNull] TKey2 key2);
@@ -377,14 +377,14 @@ public abstract class RepositoryBase<TEntity, TKey1, TKey2, TKey3> : RepositoryB
 	protected abstract TEntity GetInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3);
 
 	/// <inheritdoc />
-	public ValueTask<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken token = default(CancellationToken))
+	public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return GetAsyncInternal(key1, key2, key3, token);
 	}
 
-	protected abstract ValueTask<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, CancellationToken token = default(CancellationToken));
+	protected abstract Task<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
 	public TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3, IGetSettings settings)
@@ -396,14 +396,14 @@ public abstract class RepositoryBase<TEntity, TKey1, TKey2, TKey3> : RepositoryB
 	protected abstract TEntity GetInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] IGetSettings settings);
 
 	/// <inheritdoc />
-	public ValueTask<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, IGetSettings settings, CancellationToken token = default(CancellationToken))
+	public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, IGetSettings settings, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return GetAsyncInternal(key1, key2, key3, settings, token);
 	}
 
-	protected abstract ValueTask<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
+	protected abstract Task<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
 
 	[NotNull]
 	protected abstract IQueryable<TEntity> PrepareGetQuery([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3);
@@ -464,14 +464,14 @@ public abstract class RepositoryBase<TEntity, TKey1, TKey2, TKey3, TKey4> : Repo
 	protected abstract TEntity GetInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4);
 
 	/// <inheritdoc />
-	public ValueTask<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, CancellationToken token = default(CancellationToken))
+	public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return GetAsyncInternal(key1, key2, key3, key4, token);
 	}
 
-	protected abstract ValueTask<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, CancellationToken token = default(CancellationToken));
+	protected abstract Task<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
 	public TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, IGetSettings settings)
@@ -483,14 +483,14 @@ public abstract class RepositoryBase<TEntity, TKey1, TKey2, TKey3, TKey4> : Repo
 	protected abstract TEntity GetInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] IGetSettings settings);
 
 	/// <inheritdoc />
-	public ValueTask<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, IGetSettings settings, CancellationToken token = default(CancellationToken))
+	public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, IGetSettings settings, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return GetAsyncInternal(key1, key2, key3, key4, settings, token);
 	}
 
-	protected abstract ValueTask<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
+	protected abstract Task<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
 
 	[NotNull]
 	protected abstract IQueryable<TEntity> PrepareGetQuery([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4);
@@ -555,14 +555,14 @@ public abstract class RepositoryBase<TEntity, TKey1, TKey2, TKey3, TKey4, TKey5>
 	protected abstract TEntity GetInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5);
 
 	/// <inheritdoc />
-	public ValueTask<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, TKey5 key5, CancellationToken token = default(CancellationToken))
+	public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, TKey5 key5, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return GetAsyncInternal(key1, key2, key3, key4, key5, token);
 	}
 
-	protected abstract ValueTask<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5, CancellationToken token = default(CancellationToken));
+	protected abstract Task<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
 	public TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, TKey5 key5, IGetSettings settings)
@@ -574,14 +574,14 @@ public abstract class RepositoryBase<TEntity, TKey1, TKey2, TKey3, TKey4, TKey5>
 	protected abstract TEntity GetInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5, [NotNull] IGetSettings settings);
 
 	/// <inheritdoc />
-	public ValueTask<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, TKey5 key5, IGetSettings settings, CancellationToken token = default(CancellationToken))
+	public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, TKey5 key5, IGetSettings settings, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return GetAsyncInternal(key1, key2, key3, key4, key5, settings, token);
 	}
 
-	protected abstract ValueTask<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
+	protected abstract Task<TEntity> GetAsyncInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5, [NotNull] IGetSettings settings, CancellationToken token = default(CancellationToken));
 
 	[NotNull]
 	protected abstract IQueryable<TEntity> PrepareGetQuery([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5);
