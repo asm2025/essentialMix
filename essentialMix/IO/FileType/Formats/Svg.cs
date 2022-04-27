@@ -7,7 +7,7 @@ using essentialMix.Web;
 
 namespace essentialMix.IO.FileType.Formats;
 
-public record Svg : FileFormat
+public record Svg : FileFormatBase
 {
 	private const int BUFFER_SIZE = 512;
 	private const int BUFFER_MIN = 100;

@@ -6,9 +6,9 @@ using JetBrains.Annotations;
 
 namespace essentialMix.IO.FileType.Formats;
 
-public abstract record OfficeOpenXml : Zip, ICompoundStream
+public abstract record OfficeOpenXmlBase : ZipBase, ICompoundStream
 {
-	protected OfficeOpenXml(string extension, string mimeType, [NotNull] string identifiableEntry)
+	protected OfficeOpenXmlBase(string extension, string mimeType, [NotNull] string identifiableEntry)
 		: base(extension, mimeType)
 	{
 		IdentifiableEntry = identifiableEntry;
@@ -16,6 +16,12 @@ public abstract record OfficeOpenXml : Zip, ICompoundStream
 
 	[NotNull]
 	public string IdentifiableEntry { get; }
+
+	/// <inheritdoc />
+	public bool HasGuid => false;
+
+	/// <inheritdoc />
+	public bool HasStorage => true;
 
 	/// <inheritdoc />
 	public IDisposable GetStream(Stream stream)

@@ -8,19 +8,18 @@ namespace essentialMix.IO.FileType;
 
 // based on https://github.com/neilharvey/FileSignatures/
 [DebuggerDisplay("{Name} - {Extension}[{MimeType}]")]
-public abstract record FileFormat : IEquatable<FileFormat>
+public abstract record FileFormatBase : IEquatable<FileFormatBase>
 {
-	protected FileFormat(string extension, string mimeType, byte[] signature)
+	protected FileFormatBase(string extension, string mimeType, byte[] signature)
 		: this(extension, mimeType, signature, 0)
 	{
 	}
 
-	protected FileFormat(string extension, string mimeType, byte[] signature, int offset)
+	protected FileFormatBase(string extension, string mimeType, byte[] signature, int offset)
 	{
 		if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
 		Name = GetType().Name;
 		Extension = extension?.Trim('.');
-		HasWildCard = !string.IsNullOrEmpty(Extension) && (Extension.IndexOf('*') >= 0 || Extension.IndexOf('?') >= 0);
 		MimeType = mimeType;
 		Signature = signature;
 		Offset = offset;
@@ -28,7 +27,6 @@ public abstract record FileFormat : IEquatable<FileFormat>
 
 	public string Name { get; }
 	public string Extension { get; }
-	public bool HasWildCard { get; }
 	public string MimeType { get; }
 	public byte[] Signature { get; }
 	public int Offset { get; }
@@ -38,7 +36,7 @@ public abstract record FileFormat : IEquatable<FileFormat>
 	public override string ToString() { return $"{Extension}[{MimeType}]"; }
 
 	/// <inheritdoc />
-	public virtual bool Equals(FileFormat other)
+	public virtual bool Equals(FileFormatBase other)
 	{
 		return other != null
 				&& Offset == other.Offset
@@ -54,7 +52,6 @@ public abstract record FileFormat : IEquatable<FileFormat>
 			int hashCode = Extension != null
 								? Extension.GetHashCode()
 								: 0;
-			hashCode = (hashCode * 397) ^ HasWildCard.GetHashCode();
 			hashCode = (hashCode * 397) ^
 						(MimeType != null
 							? MimeType.GetHashCode()

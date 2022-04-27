@@ -6371,7 +6371,7 @@ decrypted:
 					try
 					{
 						stream = File.OpenRead(path);
-						FileFormat format = inspector.Detect(stream);
+						FileFormatBase format = inspector.Detect(stream);
 
 						if (format == null)
 						{

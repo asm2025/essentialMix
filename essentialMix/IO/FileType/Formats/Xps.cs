@@ -2,4 +2,4 @@
 
 namespace essentialMix.IO.FileType.Formats;
 
-public record Xps() : OfficeOpenXml("xps", MediaTypeNames.Application.Vnd.MsXpsdocument, "FixedDocSeq.fdseq");
+public record Xps() : OfficeOpenXmlBase("xps", MediaTypeNames.Application.Vnd.MsXpsdocument, "FixedDocSeq.fdseq");

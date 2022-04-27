@@ -2,4 +2,4 @@
 
 namespace essentialMix.IO.FileType.Formats;
 
-public record Gif() : Image("gif", MediaTypeNames.Image.Gif, new byte[] { 0x47, 0x49, 0x46, 0x38 });
+public record Gif() : ImageBase("gif", MediaTypeNames.Image.Gif, new byte[] { 0x47, 0x49, 0x46, 0x38 });

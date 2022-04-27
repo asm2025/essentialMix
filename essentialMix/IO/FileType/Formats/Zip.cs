@@ -1,18 +1,9 @@
-﻿using essentialMix.Web;
+﻿namespace essentialMix.IO.FileType.Formats;
 
-namespace essentialMix.IO.FileType.Formats;
-
-public abstract record Zip : FileFormat
-{
-	/// <inheritdoc />
-	protected Zip()
-		: this("zip", MediaTypeNames.Application.Zip)
-	{
-	}
-
-	/// <inheritdoc />
-	protected Zip(string extension, string mimeType)
-		: base(extension, mimeType, new byte[] { 0x50, 0x4B, 0x03, 0x04 })
-	{
-	}
-}
+public record Zip() : ZipBase(new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+public record Zip_1() : ZipBase(new byte[] { 0x50, 0x4B, 0x4C, 0x49, 0x54, 0x45 }, 30);
+public record Zip_2() : ZipBase(new byte[] { 0x50, 0x4B, 0x53, 0x70, 0x58 }, 526);
+public record Zip_3() : ZipBase(new byte[] { 0x50, 0x4B, 0x05, 0x06 });
+public record Zip_4() : ZipBase(new byte[] { 0x50, 0x4B, 0x07, 0x08 });
+public record Zip_5() : ZipBase(new byte[] { 0x57, 0x69, 0x6E, 0x5A, 0x69, 0x70 }, 29152);
+public record Zip_6() : ZipBase(new byte[] { 0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x01, 0x00 });

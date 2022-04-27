@@ -347,6 +347,7 @@ public static class MediaTypeNames
 		public const string SetPaymentInitiation = "application/set-payment-initiation";
 		public const string SetRegistration = "application/set-registration";
 		public const string SetRegistrationInitiation = "application/set-registration-initiation";
+		public const string SevenZip = "application/x-7z-compressed";
 		public const string SGML = "application/SGML";
 		public const string SgmlOpenCatalog = "application/sgml-open-catalog";
 		public const string ShfXml = "application/shf+xml";
@@ -2777,6 +2778,7 @@ public static class MediaTypeNames
 		public const string EVS = "audio/EVS";
 		public const string Example = "audio/example";
 		public const string Flexfec = "audio/flexfec";
+		public const string Flac = "audio/flac";
 		public const string Fwdred = "audio/fwdred";
 		public const string G711_0 = "audio/G711-0";
 		public const string G719 = "audio/G719";
@@ -2801,6 +2803,7 @@ public static class MediaTypeNames
 		public const string L24 = "audio/L24";
 		public const string L8 = "audio/L8";
 		public const string LPC = "audio/LPC";
+		public const string Mka = "audio/x-matroska";
 		public const string MELP = "audio/MELP";
 		public const string MELP1200 = "audio/MELP1200";
 		public const string MELP2400 = "audio/MELP2400";
@@ -3509,6 +3512,7 @@ public static class MediaTypeNames
 		public const string JPEG = "video/JPEG";
 		public const string Jpeg2000 = "video/jpeg2000";
 		public const string Jxsv = "video/jxsv";
+		public const string Mkv = "video/x-matroska";
 		public const string Mj2 = "video/mj2";
 		public const string MP1S = "video/MP1S";
 		public const string MP2P = "video/MP2P";

@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.IO.FileType.Formats;
 
-public record Jpeg : Image
+public record Jpeg : ImageBase
 {
 	private static readonly byte[] __soi = { 0xFF, 0xD8 };
 
@@ -13,8 +13,8 @@ public record Jpeg : Image
 	{
 	}
 
-	protected Jpeg([NotNull] byte[] marker)
-		: base("jpg", MediaTypeNames.Image.Jpeg, __soi.Concat(marker).ToArray())
+	protected Jpeg([NotNull] byte[] signature)
+		: base("jpg", MediaTypeNames.Image.Jpeg, __soi.Concat(signature).ToArray())
 	{
 	}
 }
