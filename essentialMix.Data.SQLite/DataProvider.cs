@@ -15,7 +15,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Data.SQLite;
 
-public class DataProvider : 
+public class DataProvider :
 	DataProvider<DbType>,
 	IDataProvider<DbType>
 {
@@ -23,7 +23,7 @@ public class DataProvider :
 	private static readonly Regex __cleanupValueTypeMess = new Regex(@"\(\d+\)|\d+$", RegexHelper.OPTIONS_I);
 
 	/// <inheritdoc />
-	public DataProvider() 
+	public DataProvider()
 	{
 	}
 
@@ -91,7 +91,7 @@ public class DataProvider :
 
 	protected override IReadOnlyDictionary<DbType, Type> TdbTypeToType => DbTypeHelper.TdbTypeToType;
 
-	protected override IReadOnlySet<DbType> TextualTDbType => DbTypeHelper.TextualTDbType;
+	protected override ISet<DbType> TextualTDbType => DbTypeHelper.TextualTDbType;
 
 	protected IReadOnlyDictionary<string, Type> StringToTypeMapping = new Dictionary<string, Type>(StringFunctionalComparer.StartsWithOrdinalIgnoreCase)
 	{

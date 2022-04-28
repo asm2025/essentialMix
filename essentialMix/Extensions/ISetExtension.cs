@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using essentialMix.Collections;
 using essentialMix.Exceptions.Collections;
 using essentialMix.Helpers;
 using JetBrains.Annotations;
@@ -30,7 +29,7 @@ public static class ISetExtension
 		bool useDefaultName = fieldName == null;
 		if (useDefaultName) fieldName = "_comparer";
 		FieldInfo comparerField = type.GetField(fieldName, Constants.BF_NON_PUBLIC_INSTANCE);
-			
+
 		if (comparerField == null)
 		{
 			fieldName = "comparer";
@@ -42,9 +41,6 @@ public static class ISetExtension
 					: (IEqualityComparer<T>)comparerField.GetValue(thisValue);
 	}
 
-	[NotNull]
-	public static IReadOnlySet<T> AsReadOnly<T>([NotNull] this ISet<T> thisValue) { return new ReadOnlySet<T>(thisValue); }
-
 	public static T PickRandom<T>([NotNull] this ISet<T> thisValue)
 	{
 		if (thisValue.Count == 0) throw new CollectionIsEmptyException();
@@ -54,7 +50,7 @@ public static class ISetExtension
 
 		if (thisValue is ICollection collection)
 		{
-			lock(collection.SyncRoot)
+			lock (collection.SyncRoot)
 			{
 				max = thisValue.Count - 1;
 				n = RNGRandomHelper.Next(0, max);
@@ -62,7 +58,7 @@ public static class ISetExtension
 			}
 		}
 
-		lock(thisValue)
+		lock (thisValue)
 		{
 			max = thisValue.Count - 1;
 			n = RNGRandomHelper.Next(0, max);
@@ -80,7 +76,7 @@ public static class ISetExtension
 
 		if (thisValue is ICollection collection)
 		{
-			lock(collection.SyncRoot)
+			lock (collection.SyncRoot)
 			{
 				max = thisValue.Count - 1;
 				n = RNGRandomHelper.Next(0, max);
@@ -90,7 +86,7 @@ public static class ISetExtension
 			}
 		}
 
-		lock(thisValue)
+		lock (thisValue)
 		{
 			max = thisValue.Count - 1;
 			n = RNGRandomHelper.Next(0, max);
@@ -108,7 +104,7 @@ public static class ISetExtension
 
 		if (thisValue is ICollection { IsSynchronized: true } collection)
 		{
-			lock(collection.SyncRoot)
+			lock (collection.SyncRoot)
 			{
 				result = thisValue.First();
 				thisValue.Remove(result);
@@ -116,7 +112,7 @@ public static class ISetExtension
 			}
 		}
 
-		lock(thisValue)
+		lock (thisValue)
 		{
 			result = thisValue.First();
 			thisValue.Remove(result);
@@ -132,7 +128,7 @@ public static class ISetExtension
 
 		if (thisValue is ICollection { IsSynchronized: true } collection)
 		{
-			lock(collection.SyncRoot)
+			lock (collection.SyncRoot)
 			{
 				result = thisValue.Last();
 				thisValue.Remove(result);
@@ -140,7 +136,7 @@ public static class ISetExtension
 			}
 		}
 
-		lock(thisValue)
+		lock (thisValue)
 		{
 			result = thisValue.Last();
 			thisValue.Remove(result);

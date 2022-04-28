@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Reflection;
-using essentialMix.Collections;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
@@ -12,7 +11,7 @@ namespace essentialMix.Helpers;
 public static class TypeHelper
 {
 	[NotNull]
-	internal static IReadOnlySet<Type> NumericTypes =>
+	internal static ISet<Type> NumericTypes =>
 		new HashSet<Type>
 		{
 			typeof(bool),
@@ -29,10 +28,10 @@ public static class TypeHelper
 			typeof(float),
 			typeof(double),
 			typeof(decimal)
-		}.AsReadOnly();
+		};
 
 	[NotNull]
-	internal static IReadOnlySet<Type> IntegralTypes =>
+	internal static ISet<Type> IntegralTypes =>
 		new HashSet<Type>
 		{
 			typeof(bool),
@@ -46,16 +45,16 @@ public static class TypeHelper
 			typeof(long),
 			typeof(ulong),
 			typeof(BigInteger)
-		}.AsReadOnly();
+		};
 
 	[NotNull]
-	internal static IReadOnlySet<Type> FloatingTypes =>
+	internal static ISet<Type> FloatingTypes =>
 		new HashSet<Type>
 		{
 			typeof(float),
 			typeof(double),
 			typeof(decimal)
-		}.AsReadOnly();
+		};
 
 	private static readonly ConcurrentDictionary<Type, (object Minimum, object Maximum)> __typeBoundsCache =
 		new ConcurrentDictionary<Type, (object Minimum, object Maximum)>

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using essentialMix.Collections;
-using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Pagination;
+using JetBrains.Annotations;
 
 namespace essentialMix.Extensions;
 
@@ -349,7 +349,7 @@ public static class IEnumerableExtension
 		if (count == 0) yield break;
 
 		IEnumerator enumerator = thisValue.GetEnumerator();
-			
+
 		while (startIndex > 0)
 		{
 			if (!enumerator.MoveNext()) yield break;
@@ -482,7 +482,7 @@ public static class IEnumerableExtension
 		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 	{
 		if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-			
+
 		switch (count)
 		{
 			case 0:
@@ -642,7 +642,7 @@ public static class IEnumerableExtension
 		Lister<T> values = new Lister<T>(thisValue);
 		HashSet<T> set = new HashSet<T>();
 		T expected = values[0], prev = expected;
-			
+
 		foreach (T value in values)
 		{
 			if (!set.Add(value)) continue;
@@ -678,7 +678,7 @@ public static class IEnumerableExtension
 				tmp.Add(list[i]);
 				Backtrack(list, results, tmp, i + 1);
 				tmp.Remove(list[i]);
-			
+
 				while (i < list.Count - 1 && list[i].Equals(list[i + 1]))
 					i++;
 			}
@@ -828,7 +828,7 @@ public static class IEnumerableExtension
 				IEnumerable<T> children = getChildren.Invoke(item);
 				if (children == null) continue;
 
-				foreach (T child in children) 
+				foreach (T child in children)
 					queue.Enqueue(child);
 			}
 
@@ -850,7 +850,7 @@ public static class IEnumerableExtension
 				if (children == null) continue;
 				d++;
 
-				foreach (T child in children) 
+				foreach (T child in children)
 					queue.Enqueue((child, d));
 			}
 
@@ -870,7 +870,7 @@ public static class IEnumerableExtension
 				IEnumerable<T> children = getChildren.Invoke(item);
 				if (children == null) continue;
 
-				foreach (T child in children) 
+				foreach (T child in children)
 					stack.Push(child);
 			}
 
@@ -892,7 +892,7 @@ public static class IEnumerableExtension
 				if (children == null) continue;
 				d++;
 
-				foreach (T child in children) 
+				foreach (T child in children)
 					stack.Push((child, d));
 			}
 
@@ -990,12 +990,6 @@ public static class IEnumerableExtension
 		return thisValue as HashSet<T> ?? new HashSet<T>(thisValue, comparer ?? EqualityComparer<T>.Default);
 	}
 
-	[NotNull]
-	public static IReadOnlySet<T> AsReadOnlySet<T>([NotNull] this IEnumerable<T> thisValue, IEqualityComparer<T> comparer = null)
-	{
-		return thisValue as IReadOnlySet<T> ?? AsHashSet(thisValue, comparer).AsReadOnly();
-	}
-
 	[ItemNotNull]
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static IEnumerable<T> SkipNull<T>([NotNull] this IEnumerable<T> thisValue)
@@ -1031,7 +1025,7 @@ public static class IEnumerableExtension
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static T FirstNotNull<T>([NotNull] this IEnumerable<T> thisValue) { return thisValue.First(e => !e.IsNull()); }
-		
+
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static T LastNotNull<T>([NotNull] this IEnumerable<T> thisValue) { return thisValue.Last(e => !e.IsNull()); }
 
@@ -1110,7 +1104,7 @@ public static class IEnumerableExtension
 	{
 		if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
 		if (count == 0) yield break;
-	
+
 		switch (thisValue)
 		{
 			case IList<T> list:
@@ -1142,7 +1136,7 @@ public static class IEnumerableExtension
 					int numOfItems = 0;
 					T[] buffer = new T[count];
 
-					while (numOfItems < count && enumerator.MoveNext()) 
+					while (numOfItems < count && enumerator.MoveNext())
 						buffer[numOfItems++] = enumerator.Current;
 
 					// if numOfItems < count, it means we got all what we possibly could
@@ -1158,8 +1152,8 @@ public static class IEnumerableExtension
 
 					// if we got here, then we'll keep going and replace the element circularly using the modulus operator
 					int index;
-				
-					for (index = 0; enumerator.MoveNext(); index = (index + 1) % count) 
+
+					for (index = 0; enumerator.MoveNext(); index = (index + 1) % count)
 						buffer[index] = enumerator.Current;
 
 					/*
@@ -1231,7 +1225,7 @@ public static class IEnumerableExtension
 	public static IEnumerable<T> SkipLast<T>([NotNull] this IEnumerable<T> thisValue, int count)
 	{
 		if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-	
+
 		switch (thisValue)
 		{
 			case IList<T> list:

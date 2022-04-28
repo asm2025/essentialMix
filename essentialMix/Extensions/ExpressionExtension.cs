@@ -460,7 +460,7 @@ public static class ExpressionExtension
 						, ExpressionType.Invoke);
 	}
 
-	public static Expression Simplify(this Expression thisValue, [NotNull] params ExpressionType[] valuesToRemove) { return valuesToRemove.Length == 0 ? thisValue : Simplify(thisValue, valuesToRemove.AsReadOnlySet()); }
+	public static Expression Simplify(this Expression thisValue, [NotNull] params ExpressionType[] valuesToRemove) { return valuesToRemove.Length == 0 ? thisValue : Simplify(thisValue, (IEnumerable<ExpressionType>)valuesToRemove); }
 	public static Expression Simplify(this Expression thisValue, [NotNull] IEnumerable<ExpressionType> valuesToRemove)
 	{
 		if (thisValue == null) return null;

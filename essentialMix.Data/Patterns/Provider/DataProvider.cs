@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using essentialMix.Collections;
 using essentialMix.Extensions;
-using JetBrains.Annotations;
 using essentialMix.Helpers;
+using JetBrains.Annotations;
 
 namespace essentialMix.Data.Patterns.Provider;
 
@@ -275,5 +274,5 @@ public abstract class DataProvider<TType> : IDataProvider<TType>
 	protected abstract IReadOnlyDictionary<TType, Type> TdbTypeToType { get; }
 
 	[NotNull]
-	protected abstract IReadOnlySet<TType> TextualTDbType { get; }
+	protected abstract ISet<TType> TextualTDbType { get; }
 }

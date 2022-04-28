@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using essentialMix.Collections;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
@@ -10,7 +9,7 @@ namespace essentialMix.Helpers;
 public static class ValueTypeHelper
 {
 	[NotNull]
-	public static IReadOnlySet<TypeCode> NumericTypes =>
+	public static ISet<TypeCode> NumericTypes =>
 		new HashSet<TypeCode>
 		{
 			TypeCode.Boolean,
@@ -26,10 +25,10 @@ public static class ValueTypeHelper
 			TypeCode.Single,
 			TypeCode.Double,
 			TypeCode.Decimal
-		}.AsReadOnly();
+		};
 
 	[NotNull]
-	public static IReadOnlySet<TypeCode> IntegralTypes =>
+	public static ISet<TypeCode> IntegralTypes =>
 		new HashSet<TypeCode>
 		{
 			TypeCode.Boolean,
@@ -42,16 +41,16 @@ public static class ValueTypeHelper
 			TypeCode.UInt32,
 			TypeCode.Int64,
 			TypeCode.UInt64
-		}.AsReadOnly();
+		};
 
 	[NotNull]
-	public static IReadOnlySet<TypeCode> FloatingTypes =>
+	public static ISet<TypeCode> FloatingTypes =>
 		new HashSet<TypeCode>
 		{
 			TypeCode.Single,
 			TypeCode.Double,
 			TypeCode.Decimal
-		}.AsReadOnly();
+		};
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static int Percent(sbyte value, sbyte total) { return Percent((double)value, total); }

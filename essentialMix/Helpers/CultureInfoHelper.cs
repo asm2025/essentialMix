@@ -42,10 +42,10 @@ public static class CultureInfoHelper
 			"Y"
 		};
 
-		foreach (string pattern in CultureInfo.InvariantCulture.DateTimeFormat.GetAllDateTimePatterns()) 
+		foreach (string pattern in CultureInfo.InvariantCulture.DateTimeFormat.GetAllDateTimePatterns())
 			set.Add(pattern);
 
-		foreach (string pattern in Thread.CurrentThread.CurrentCulture.DateTimeFormat.GetAllDateTimePatterns()) 
+		foreach (string pattern in Thread.CurrentThread.CurrentCulture.DateTimeFormat.GetAllDateTimePatterns())
 			set.Add(pattern);
 
 		return set;
@@ -77,16 +77,16 @@ public static class CultureInfoHelper
 	public static IReadOnlyDictionary<string, CultureInfo> NeutralCultures => __neutralCultures.Value;
 
 	[NotNull]
-	public static IReadOnlyCollection<string> GetDateTimeFormats(string addFormat)
+	public static ISet<string> GetDateTimeFormats(string addFormat)
 	{
 		if (!string.IsNullOrEmpty(addFormat)) __dateTimeFormats.Value.Add(addFormat);
-		return __dateTimeFormats.Value.AsReadOnly();
+		return __dateTimeFormats.Value;
 	}
 
 	public static char[] GetDefaultListSeparators()
 	{
 		string ls = Default.TextInfo.ListSeparator;
-			
+
 		if (string.IsNullOrEmpty(ls))
 		{
 			return new[]

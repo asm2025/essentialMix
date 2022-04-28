@@ -17,7 +17,7 @@ public static class UnicodeHelper
 {
 	private static readonly ISet<LambdaRange<char>> __allRanges = new HashSet<LambdaRange<char>>();
 
-	public static ReadOnlySet<LambdaRange<char>> AllRanges { get; } = new ReadOnlySet<LambdaRange<char>>(__allRanges);
+	public static ISet<LambdaRange<char>> AllRanges => __allRanges;
 
 	[NotNull]
 	public static LambdaRange<char> BasicLatin => CreateRange('\u0000', '\u007f');

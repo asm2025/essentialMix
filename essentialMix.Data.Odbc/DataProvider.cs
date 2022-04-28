@@ -17,7 +17,7 @@ public abstract class DataProvider
 		IDataProvider<OdbcType>
 {
 	/// <inheritdoc />
-	protected DataProvider() 
+	protected DataProvider()
 	{
 	}
 
@@ -87,7 +87,7 @@ public abstract class DataProvider
 			{OdbcType.Timestamp, typeof(byte[])}
 		}.AsReadOnly();
 
-	protected override IReadOnlySet<OdbcType> TextualTDbType { get; } = new HashSet<OdbcType>
+	protected override ISet<OdbcType> TextualTDbType { get; } = new HashSet<OdbcType>
 	{
 		OdbcType.Char,
 		OdbcType.NChar,
@@ -100,5 +100,5 @@ public abstract class DataProvider
 		OdbcType.SmallDateTime,
 		OdbcType.Date,
 		OdbcType.Time
-	}.AsReadOnly();
+	};
 }

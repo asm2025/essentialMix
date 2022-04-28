@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
-using essentialMix.Collections;
+using essentialMix.Comparers;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
-using essentialMix.Comparers;
 
 namespace essentialMix.Drawing.Helpers;
 
@@ -18,7 +17,7 @@ public static class FontHelper
 		"Oc_"
 	};
 
-	private static IReadOnlySet<string> __cachedMonospacedFontNames;
+	private static ISet<string> __cachedMonospacedFontNames;
 
 	public static bool IsMonospaced([NotNull] Font value, [NotNull] Graphics g) { return g.MeasureString("i", value).Width.IsEqual(g.MeasureString("W", value).Width); }
 
@@ -32,18 +31,18 @@ public static class FontHelper
 	}
 
 	[NotNull]
-	public static IReadOnlySet<string> GetMonospacedFontNames()
+	public static ISet<string> GetMonospacedFontNames()
 	{
 		if (__cachedMonospacedFontNames == null)
 		{
-			FontStyle[] requiredStyles = 
+			FontStyle[] requiredStyles =
 			{
 				FontStyle.Regular,
 				FontStyle.Bold,
 				FontStyle.Italic
 			};
 			ISet<string> cachedMonospacedFontNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-			__cachedMonospacedFontNames = new ReadOnlySet<string>(cachedMonospacedFontNames);
+			__cachedMonospacedFontNames = new HashSet<string>(cachedMonospacedFontNames);
 
 			using (InstalledFontCollection ifc = new InstalledFontCollection())
 			{
@@ -66,7 +65,7 @@ public static class FontHelper
 				}
 			}
 		}
-			
+
 		return __cachedMonospacedFontNames;
 	}
 
@@ -74,7 +73,7 @@ public static class FontHelper
 	{
 		if (string.IsNullOrEmpty(value)) return SizeF.Empty;
 		if (fontInfoEx == null) return SizeF.Empty;
-			
+
 		using (Font font = new Font(fontInfoEx.lpszFaceName, fontInfoEx.nWidth, fontInfoEx.nWeight.IsBold() ? FontStyle.Bold : FontStyle.Regular))
 		{
 			using (Bitmap bmp = new Bitmap(1, 1, PixelFormat.Format32bppArgb))

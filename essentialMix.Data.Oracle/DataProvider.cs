@@ -18,7 +18,7 @@ public class DataProvider
 		IDataProvider<OracleDbType>
 {
 	/// <inheritdoc />
-	public DataProvider() 
+	public DataProvider()
 	{
 	}
 
@@ -107,7 +107,7 @@ public class DataProvider
 			{OracleDbType.Blob, typeof(byte[])}
 		}.AsReadOnly();
 
-	protected override IReadOnlySet<OracleDbType> TextualTDbType { get; } = new HashSet<OracleDbType>
+	protected override ISet<OracleDbType> TextualTDbType { get; } = new HashSet<OracleDbType>
 	{
 		OracleDbType.Char,
 		OracleDbType.NChar,
@@ -121,5 +121,5 @@ public class DataProvider
 		OracleDbType.TimeStamp,
 		OracleDbType.TimeStampLTZ,
 		OracleDbType.TimeStampTZ
-	}.AsReadOnly();
+	};
 }

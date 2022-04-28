@@ -13,11 +13,11 @@ using MySql.Data.MySqlClient;
 namespace essentialMix.Data.MySql;
 
 public class DataProvider
-	: DataProvider<MySqlDbType>, 
+	: DataProvider<MySqlDbType>,
 		IDataProvider<MySqlDbType>
 {
 	/// <inheritdoc />
-	public DataProvider() 
+	public DataProvider()
 	{
 	}
 
@@ -112,7 +112,7 @@ public class DataProvider
 			{MySqlDbType.Geometry, typeof(byte[])} // WTF is this? it has no description in the documentation!
 		}.AsReadOnly();
 
-	protected override IReadOnlySet<MySqlDbType> TextualTDbType { get; } = new HashSet<MySqlDbType>
+	protected override ISet<MySqlDbType> TextualTDbType { get; } = new HashSet<MySqlDbType>
 	{
 		MySqlDbType.VarChar,
 		MySqlDbType.VarString,
@@ -130,5 +130,5 @@ public class DataProvider
 		MySqlDbType.Time,
 		MySqlDbType.Timestamp,
 		MySqlDbType.Newdate // obsolete in docs
-	}.AsReadOnly();
+	};
 }

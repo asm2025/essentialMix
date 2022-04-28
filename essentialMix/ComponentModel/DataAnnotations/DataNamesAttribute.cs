@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using essentialMix.Collections;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
 
@@ -13,11 +12,9 @@ public class DataNamesAttribute : Attribute
 
 	public DataNamesAttribute([NotNull] params string[] valueNames)
 	{
-		foreach (string valueName in valueNames.SkipNullOrEmptyTrim()) 
+		foreach (string valueName in valueNames.SkipNullOrEmptyTrim())
 			ValueNamesInternal.Add(valueName);
-
-		ValueNames = new ReadOnlySet<string>(ValueNamesInternal);
 	}
 
-	public IReadOnlySet<string> ValueNames { get; }
+	public ISet<string> ValueNames => ValueNamesInternal;
 }

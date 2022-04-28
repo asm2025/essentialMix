@@ -12,12 +12,12 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Data.MSSQL;
 
-public class DataProvider 
-	: DataProvider<SqlDbType>, 
+public class DataProvider
+	: DataProvider<SqlDbType>,
 		IDataProvider<SqlDbType>
 {
 	/// <inheritdoc />
-	public DataProvider() 
+	public DataProvider()
 	{
 	}
 
@@ -95,7 +95,7 @@ public class DataProvider
 			{SqlDbType.Structured, typeof(object)}
 		}.AsReadOnly();
 
-	protected override IReadOnlySet<SqlDbType> TextualTDbType { get; } = new HashSet<SqlDbType>
+	protected override ISet<SqlDbType> TextualTDbType { get; } = new HashSet<SqlDbType>
 	{
 		SqlDbType.Char,
 		SqlDbType.NChar,
@@ -111,5 +111,5 @@ public class DataProvider
 		SqlDbType.Date,
 		SqlDbType.Time,
 		SqlDbType.DateTimeOffset
-	}.AsReadOnly();
+	};
 }

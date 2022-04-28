@@ -65,7 +65,7 @@ public static class DbTypeHelper
 		{DbType.Object, typeof(object)}
 	}.AsReadOnly();
 
-	public static IReadOnlySet<DbType> TextualTDbType { get; } = new HashSet<DbType>
+	public static ISet<DbType> TextualTDbType { get; } = new HashSet<DbType>
 	{
 		DbType.AnsiStringFixedLength,
 		DbType.StringFixedLength,
@@ -78,7 +78,7 @@ public static class DbTypeHelper
 		DbType.Date,
 		DbType.Time,
 		DbType.DateTimeOffset
-	}.AsReadOnly();
+	};
 
 	[NotNull]
 	public static string FormatValue([NotNull] DataRow row, [NotNull] DataColumn column) { return FormatValue(row[column.ColumnName], MapType(column.DataType)); }
