@@ -61,13 +61,13 @@ public abstract class Repository<TEntity, TKey> : RepositoryBase<TEntity, TKey>,
 	protected abstract ValueTask<TEntity> UpdateAsyncInternal([NotNull] TEntity entity, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
-	public void Delete(TKey key)
+	public TEntity Delete(TKey key)
 	{
 		ThrowIfDisposed();
-		DeleteInternal(key);
+		return DeleteInternal(key);
 	}
 
-	protected abstract void DeleteInternal([NotNull] TKey key);
+	protected abstract TEntity DeleteInternal([NotNull] TKey key);
 
 	/// <inheritdoc />
 	public ValueTask<TEntity> DeleteAsync(TKey key, CancellationToken token = default(CancellationToken))
@@ -152,13 +152,13 @@ public abstract class Repository<TEntity, TKey1, TKey2> : RepositoryBase<TEntity
 	protected abstract ValueTask<TEntity> UpdateAsyncInternal([NotNull] TEntity entity, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
-	public void Delete(TKey1 key1, TKey2 key2)
+	public TEntity Delete(TKey1 key1, TKey2 key2)
 	{
 		ThrowIfDisposed();
-		DeleteInternal(key1, key2);
+		return DeleteInternal(key1, key2);
 	}
 
-	protected abstract void DeleteInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2);
+	protected abstract TEntity DeleteInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2);
 
 	/// <inheritdoc />
 	public ValueTask<TEntity> DeleteAsync(TKey1 key1, TKey2 key2, CancellationToken token = default(CancellationToken))
@@ -243,13 +243,13 @@ public abstract class Repository<TEntity, TKey1, TKey2, TKey3> : RepositoryBase<
 	protected abstract ValueTask<TEntity> UpdateAsyncInternal([NotNull] TEntity entity, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
-	public void Delete(TKey1 key1, TKey2 key2, TKey3 key3)
+	public TEntity Delete(TKey1 key1, TKey2 key2, TKey3 key3)
 	{
 		ThrowIfDisposed();
-		DeleteInternal(key1, key2, key3);
+		return DeleteInternal(key1, key2, key3);
 	}
 
-	protected abstract void DeleteInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3);
+	protected abstract TEntity DeleteInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3);
 
 	/// <inheritdoc />
 	public ValueTask<TEntity> DeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken token = default(CancellationToken))
@@ -334,13 +334,13 @@ public abstract class Repository<TEntity, TKey1, TKey2, TKey3, TKey4> : Reposito
 	protected abstract ValueTask<TEntity> UpdateAsyncInternal([NotNull] TEntity entity, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
-	public void Delete(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4)
+	public TEntity Delete(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4)
 	{
 		ThrowIfDisposed();
-		DeleteInternal(key1, key2, key3, key4);
+		return DeleteInternal(key1, key2, key3, key4);
 	}
 
-	protected abstract void DeleteInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4);
+	protected abstract TEntity DeleteInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4);
 
 	/// <inheritdoc />
 	public ValueTask<TEntity> DeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, CancellationToken token = default(CancellationToken))
@@ -425,13 +425,13 @@ public abstract class Repository<TEntity, TKey1, TKey2, TKey3, TKey4, TKey5> : R
 	protected abstract ValueTask<TEntity> UpdateAsyncInternal([NotNull] TEntity entity, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
-	public void Delete(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, TKey5 key5)
+	public TEntity Delete(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, TKey5 key5)
 	{
 		ThrowIfDisposed();
-		DeleteInternal(key1, key2, key3, key4, key5);
+		return DeleteInternal(key1, key2, key3, key4, key5);
 	}
 
-	protected abstract void DeleteInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5);
+	protected abstract TEntity DeleteInternal([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5);
 
 	/// <inheritdoc />
 	public ValueTask<TEntity> DeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, TKey4 key4, TKey5 key5, CancellationToken token = default(CancellationToken))

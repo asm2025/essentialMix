@@ -19,34 +19,34 @@ public interface IRepository<TEntity> : IRepositoryBase<TEntity>
 public interface IRepository<TEntity, TKey> : IRepository<TEntity>
 	where TEntity : class, IEntity
 {
-	void Delete([NotNull] TKey key);
+	TEntity Delete([NotNull] TKey key);
 	ValueTask<TEntity> DeleteAsync([NotNull] TKey key, CancellationToken token = default(CancellationToken));
 }
 
 public interface IRepository<TEntity, TKey1, TKey2> : IRepository<TEntity>
 	where TEntity : class, IEntity
 {
-	void Delete([NotNull] TKey1 key1, [NotNull] TKey2 key2);
+	TEntity Delete([NotNull] TKey1 key1, [NotNull] TKey2 key2);
 	ValueTask<TEntity> DeleteAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, CancellationToken token = default(CancellationToken));
 }
 
 public interface IRepository<TEntity, TKey1, TKey2, TKey3> : IRepository<TEntity>
 	where TEntity : class, IEntity
 {
-	void Delete([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3);
+	TEntity Delete([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3);
 	ValueTask<TEntity> DeleteAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, CancellationToken token = default(CancellationToken));
 }
 
 public interface IRepository<TEntity, TKey1, TKey2, TKey3, TKey4> : IRepository<TEntity>
 	where TEntity : class, IEntity
 {
-	void Delete([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4);
+	TEntity Delete([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4);
 	ValueTask<TEntity> DeleteAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, CancellationToken token = default(CancellationToken));
 }
 
 public interface IRepository<TEntity, TKey1, TKey2, TKey3, TKey4, TKey5> : IRepository<TEntity>
 	where TEntity : class, IEntity
 {
-	void Delete([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5);
+	TEntity Delete([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5);
 	ValueTask<TEntity> DeleteAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5, CancellationToken token = default(CancellationToken));
 }
