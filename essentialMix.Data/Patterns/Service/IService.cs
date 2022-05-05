@@ -16,35 +16,35 @@ public interface IService<TEntity> : IServiceBase<TEntity>
 	Task<T> DeleteAsync<T>([NotNull] TEntity entity, CancellationToken token = default(CancellationToken));
 }
 
-public interface IService<TEntity, TKey> : IService<TEntity>
+public interface IService<TEntity, TKey> : IService<TEntity>, IServiceBase<TEntity, TKey>
 	where TEntity : class, IEntity
 {
 	T Delete<T>([NotNull] TKey key);
 	Task<T> DeleteAsync<T>([NotNull] TKey key, CancellationToken token = default(CancellationToken));
 }
 
-public interface IService<TEntity, TKey1, TKey2> : IService<TEntity>
+public interface IService<TEntity, TKey1, TKey2> : IService<TEntity>, IServiceBase<TEntity, TKey1, TKey2>
 	where TEntity : class, IEntity
 {
 	T Delete<T>([NotNull] TKey1 key1, [NotNull] TKey2 key2);
 	Task<T> DeleteAsync<T>([NotNull] TKey1 key1, [NotNull] TKey2 key2, CancellationToken token = default(CancellationToken));
 }
 
-public interface IService<TEntity, TKey1, TKey2, TKey3> : IService<TEntity>
+public interface IService<TEntity, TKey1, TKey2, TKey3> : IService<TEntity>, IServiceBase<TEntity, TKey1, TKey2, TKey3>
 	where TEntity : class, IEntity
 {
 	T Delete<T>([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3);
 	Task<T> DeleteAsync<T>([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, CancellationToken token = default(CancellationToken));
 }
 
-public interface IService<TEntity, TKey1, TKey2, TKey3, TKey4> : IService<TEntity>
+public interface IService<TEntity, TKey1, TKey2, TKey3, TKey4> : IService<TEntity>, IServiceBase<TEntity, TKey1, TKey2, TKey3, TKey4>
 	where TEntity : class, IEntity
 {
 	T Delete<T>([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4);
 	Task<T> DeleteAsync<T>([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, CancellationToken token = default(CancellationToken));
 }
 
-public interface IService<TEntity, TKey1, TKey2, TKey3, TKey4, TKey5> : IService<TEntity>
+public interface IService<TEntity, TKey1, TKey2, TKey3, TKey4, TKey5> : IService<TEntity>, IServiceBase<TEntity, TKey1, TKey2, TKey3, TKey4, TKey5>
 	where TEntity : class, IEntity
 {
 	T Delete<T>([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] TKey4 key4, [NotNull] TKey5 key5);
