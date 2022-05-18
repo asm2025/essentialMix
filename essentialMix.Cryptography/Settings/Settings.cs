@@ -24,8 +24,22 @@ public class Settings
 	[NotNull]
 	public virtual Encoding Encoding
 	{
-		get => _encoding; 
+		get => _encoding;
 		set => _encoding = value;
+	}
+
+	[NotNull]
+	public string EncodingWebName
+	{
+		get => _encoding.WebName;
+		set => _encoding = Encoding.GetEncoding(value);
+	}
+
+	[NotNull]
+	public string EncodingName
+	{
+		get => _encoding.EncodingName;
+		set => _encoding = Encoding.GetEncoding(value);
 	}
 
 	public ushort SaltSize { get; set; }

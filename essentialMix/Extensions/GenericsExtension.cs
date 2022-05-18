@@ -2149,6 +2149,23 @@ public static class GenericsExtension
 		return thisValue ?? Enumerable.Empty<T>();
 	}
 
+	public static int ReverseIndexOf<T>([NotNull] this IList<T> thisValue, T search, int startIndex = -1)
+	{
+		if (thisValue.Count == 0) return -1;
+
+		int index = -1;
+		if (startIndex < 0) startIndex = 0;
+		IEqualityComparer<T> comparer = EqualityComparer<T>.Default;
+
+		for (int i = thisValue.Count - 1; i >= startIndex; i--)
+		{
+			if (!comparer.Equals(thisValue[i], search)) break;
+			index = i;
+		}
+
+		return index;
+	}
+
 	[NotNull]
 	private static string GetFormat(bool bFractions, string suffix)
 	{

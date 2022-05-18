@@ -1,8 +1,8 @@
 using System;
 using System.Text;
 using essentialMix.Extensions;
-using JetBrains.Annotations;
 using essentialMix.Helpers;
+using JetBrains.Annotations;
 
 namespace essentialMix.Cryptography;
 
@@ -38,7 +38,10 @@ public abstract class EncryptBase<T> : AlgorithmEncodeBase<T>, IEncrypt
 	{
 		if (string.IsNullOrEmpty(value)) return value;
 		byte[] encryptedBytes = Convert.FromBase64String(value);
-		return Encoding.GetString(Decrypt(encryptedBytes)).TrimEnd('\0');
+		byte[] data = Decrypt(encryptedBytes);
+		int len = data.ReverseIndexOf(byte.MinValue);
+		if (len < 0) len = data.Length;
+		return Encoding.GetString(data, 0, len);
 	}
 
 	/// <inheritdoc />

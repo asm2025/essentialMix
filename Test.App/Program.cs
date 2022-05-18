@@ -161,6 +161,8 @@ work with {Constants.HEAVY} items.");
 			#endregion
 
 			#region Encryption
+
+			TestSymmetric();
 			//TestAsymmetric();
 			#endregion
 
@@ -183,7 +185,7 @@ work with {Constants.HEAVY} items.");
 
 			//TestConsoleHelper();
 
-			TestFileTypes();
+			//TestFileTypes();
 
 			ConsoleHelper.Pause();
 		}
@@ -5168,6 +5170,33 @@ or press {Bright.Red("ESCAPE")} key to exit this test. ");
 
 				return true;
 			}
+		}
+
+		private static void TestSymmetric()
+		{
+			SymmetricSettings settings = new SymmetricSettings
+			{
+				Encoding = Encoding.UTF8,
+				KeySize = 256,
+				SaltSize = 0,
+				UseExpiration = false
+			};
+			string key = Convert.ToBase64String(QuickCipher.GenerateSymmetricKey(settings));
+			Title("Generated key:");
+			Console.WriteLine(key);
+
+			string data = "string(atan(ceil(cbrt(abs(x)) * 100) * sqrt(log(x)))).replace('.', '')";
+			string encrypted = QuickCipher.SymmetricEncrypt(key, data, settings);
+			SecureString decrypted = QuickCipher.SymmetricDecrypt(key, encrypted, settings);
+			Title("Encrypted");
+			Console.WriteLine($@"data:
+'{data}'
+
+encrypted:
+'{encrypted}'
+
+decrypted:
+'{decrypted.UnSecure()}'");
 		}
 
 		private static void TestAsymmetric()

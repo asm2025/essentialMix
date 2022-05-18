@@ -64,7 +64,7 @@ public static class QuickCipher
 		{
 			byte[] saltBytes = new byte[saltSize];
 
-			using (IRandomNumberGenerator random = CreateRandomNumberGenerator()) 
+			using (IRandomNumberGenerator random = CreateRandomNumberGenerator())
 				random.GetNonZeroBytes(saltBytes);
 
 			saltBytes.CopyTo(finalBytes, n);
@@ -84,7 +84,7 @@ public static class QuickCipher
 		// Skip Salt
 		int n = Constants.SHORT_SIZE + size;
 		encoding ??= Encoding.Unicode;
-		int len = finalBytes.IndexOf(0, n);
+		int len = finalBytes.ReverseIndexOf(byte.MinValue, n);
 		if (len == n) return null;
 		len = len < 0
 				? finalBytes.Length - n
@@ -222,7 +222,7 @@ public static class QuickCipher
 		byte[] encrypted = Convert.FromBase64String(value);
 		byte[] data = AsymmetricDecrypt(privateKeyXml, encrypted, settings);
 		if (data == null) return null;
-		int len = data.IndexOf(0);
+		int len = data.ReverseIndexOf(byte.MinValue);
 		if (len == 0) return null;
 		return (len > -1
 					? settings.Encoding.GetString(data, 0, len)
@@ -266,7 +266,7 @@ public static class QuickCipher
 		byte[] encrypted = Convert.FromBase64String(value);
 		byte[] data = AsymmetricDecrypt(certificate, encrypted, settings);
 		if (data == null) return null;
-		int len = data.IndexOf(0);
+		int len = data.ReverseIndexOf(byte.MinValue);
 		if (len == 0) return null;
 		Encoding encoding = settings?.Encoding ?? Encoding.UTF8;
 		return (len > -1
@@ -371,7 +371,7 @@ public static class QuickCipher
 		byte[] encrypted = Convert.FromBase64String(value);
 		byte[] data = SymmetricDecrypt(key, encrypted, settings);
 		if (data == null) return null;
-		int len = data.IndexOf(0);
+		int len = data.ReverseIndexOf(byte.MinValue);
 		if (len == 0) return null;
 		return (len > -1
 					? settings.Encoding.GetString(data, 0, len)
@@ -477,7 +477,7 @@ public static class QuickCipher
 		byte[] encrypted = Convert.FromBase64String(value);
 		byte[] data = HyperDecrypt(privateKeyXml, encrypted, settings);
 		if (data == null) return null;
-		int len = data.IndexOf(0);
+		int len = data.ReverseIndexOf(byte.MinValue);
 		if (len == 0) return null;
 		return (len > -1
 					? settings.Encoding.GetString(data, 0, len)
@@ -500,7 +500,7 @@ public static class QuickCipher
 		byte[] key = AsymmetricDecrypt(privateKeyXml, encryptedKey, settings?.RSASettings);
 		if (key == null) return null;
 		n += size;
-			
+
 		byte[] encryptedData = data.GetRange(n, size);
 		return SymmetricDecrypt(key, encryptedData, settings);
 	}
