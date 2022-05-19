@@ -29,16 +29,9 @@ public class Settings
 	}
 
 	[NotNull]
-	public string EncodingWebName
-	{
-		get => _encoding.WebName;
-		set => _encoding = Encoding.GetEncoding(value);
-	}
-
-	[NotNull]
 	public string EncodingName
 	{
-		get => _encoding.EncodingName;
+		get => _encoding.WebName;
 		set => _encoding = Encoding.GetEncoding(value);
 	}
 
