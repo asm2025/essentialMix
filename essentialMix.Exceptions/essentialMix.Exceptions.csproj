@@ -92,18 +92,22 @@
 			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
 	</ItemGroup>
-	
-	<Target Name="RemoveNuget" BeforeTargets="BeforeBuild">
-		<ItemGroup>
-			<NugetFiles Include="$(SolutionDir)nuget\**\*" />
-		</ItemGroup>
-		<Delete Files="@(NugetFiles)" />
-	</Target>
 
 	<PropertyGroup>
 		<PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
 if exist "$(TargetPath)" if not exist "$(TargetPath).locked" move "$(TargetPath)" "$(TargetPath).locked"
 		</PreBuildEvent>
 	</PropertyGroup>
+
+	<Target Name="DeleteFiles" BeforeTargets="PreBuildEvent">
+		<ItemGroup>
+			<FilesToDelete Include="$(PackageOutputPath)\*" />
+		</ItemGroup>
+		<Message Text="Deleting files in $(PackageOutputPath)" />
+		<Delete Files="@(FilesToDelete)">
+			<Output TaskParameter="DeletedFiles" ItemName="FilesDeleted" />
+		</Delete>
+		<Message Text="Files deletes: @(FilesDeleted)" />
+	</Target>
 
 </Project>
