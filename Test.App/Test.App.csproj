@@ -47,10 +47,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
 		<ProjectReference Include="..\Test.Common\Test.Common.csproj" />
 	</ItemGroup>
