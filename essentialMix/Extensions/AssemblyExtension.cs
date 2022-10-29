@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -8,8 +7,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text.RegularExpressions;
-using JetBrains.Annotations;
 using essentialMix.Helpers;
+using JetBrains.Annotations;
 
 namespace essentialMix.Extensions;
 
@@ -94,7 +93,7 @@ public static class AssemblyExtension
 	public static string GetPath([NotNull] this Assembly thisValue)
 	{
 		string codeBase = thisValue.CodeBase; // "pseudo" because it is not properly escaped
-			
+
 		if (string.IsNullOrEmpty(codeBase))
 		{
 			return string.IsNullOrEmpty(thisValue.Location)
@@ -110,25 +109,9 @@ public static class AssemblyExtension
 	public static string GetDirectoryPath([NotNull] this Assembly thisValue)
 	{
 		string path = GetPath(thisValue);
-		return string.IsNullOrEmpty(path) 
-					? null 
+		return string.IsNullOrEmpty(path)
+					? null
 					: PathHelper.AddDirectorySeparator(Path.GetDirectoryName(path));
-	}
-
-	public static Configuration GetConfiguration([NotNull] this Assembly thisValue)
-	{
-		string path;
-
-		try
-		{
-			path = GetPath(thisValue);
-		}
-		catch
-		{
-			path = AppDomain.CurrentDomain.BaseDirectory;
-		}
-
-		return string.IsNullOrEmpty(path) ? null : ConfigurationManager.OpenExeConfiguration(path);
 	}
 
 	public static string ExtractEmbeddedResource([NotNull] this Assembly thisValue, string resourceName, bool skipExisting)
@@ -190,7 +173,7 @@ public static class AssemblyExtension
 		directoryPath = PathHelper.AddDirectorySeparator(directoryPath);
 		if (!DirectoryHelper.Ensure(directoryPath)) throw new IOException($"Cannot access or create directory '{directoryPath}'");
 
-		if (resourceNames.IsNullOrEmpty()) resourceNames = new[]{ string.Empty };
+		if (resourceNames.IsNullOrEmpty()) resourceNames = new[] { string.Empty };
 
 		foreach (string resourceName in resourceNames)
 		{

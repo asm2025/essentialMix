@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
-using Other.JonSkeet.MiscUtil.Collections;
-using Other.MarcGravell;
 using essentialMix.Patterns.Future;
 using JetBrains.Annotations;
+using Other.JonSkeet.MiscUtil.Collections;
+using Other.MarcGravell;
 
 namespace essentialMix.Patterns.Producer;
 
@@ -34,7 +34,7 @@ public interface IDataProducer<T>
 	/// </summary>
 	event EventHandler Completed;
 }
-	
+
 public static class IDataProducerExtension
 {
 	/// <summary>
@@ -882,7 +882,7 @@ public static class IDataProducerExtension
 		// Reverse immediately available (more efficient, and 2.0 compatible)
 		List<TSource> results = new List<TSource>();
 		thisValue.Data += (_, item) => results.Add(item);
-		thisValue.Completed += (_, _) => 
+		thisValue.Completed += (_, _) =>
 		{
 			List<TSource> items = new List<TSource>(results);
 			items.Reverse();
@@ -1019,10 +1019,9 @@ public static class IDataProducerExtension
 		if (descending) itemComparer = itemComparer.Reverse();
 
 		// first, discard any existing "order by"s by going back to the producer
-		IOrderedDataProducer<TSource> orderedProducer;
 		bool first = true;
 
-		while ((orderedProducer = thisValue as IOrderedDataProducer<TSource>) != null)
+		while ((thisValue as IOrderedDataProducer<TSource>) is { } orderedProducer)
 		{
 			if (first)
 			{

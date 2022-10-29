@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Other.Microsoft.Collections;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
@@ -11,7 +10,7 @@ namespace essentialMix.Collections;
 public class Tree<T> : KeyedDictionaryBase<T, Tree<T>>
 {
 	/// <inheritdoc />
-	public Tree(T value) 
+	public Tree(T value)
 		: this(value, (IEqualityComparer<T>)null)
 	{
 	}
@@ -37,7 +36,7 @@ public class Tree<T> : KeyedDictionaryBase<T, Tree<T>>
 	}
 
 	public T Value { get; set; }
-		
+
 	public bool IsLeaf => Count == 0;
 
 	/// <inheritdoc />
@@ -49,7 +48,7 @@ public class Tree<T> : KeyedDictionaryBase<T, Tree<T>>
 public class Tree<TKey, TValue> : KeyedDictionaryBase<TKey, Tree<TKey, TValue>>
 {
 	/// <inheritdoc />
-	public Tree([NotNull] TKey key) 
+	public Tree([NotNull] TKey key)
 		: this(key, (IEqualityComparer<TKey>)null)
 	{
 	}
@@ -75,9 +74,9 @@ public class Tree<TKey, TValue> : KeyedDictionaryBase<TKey, Tree<TKey, TValue>>
 	}
 
 	public TKey Key { get; set; }
-		
+
 	public TValue Value { get; set; }
-		
+
 	public bool IsLeaf => Count == 0;
 
 	/// <inheritdoc />

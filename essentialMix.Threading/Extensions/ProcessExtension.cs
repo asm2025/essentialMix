@@ -1,15 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Management;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 using essentialMix.Helpers;
-using essentialMix.Threading.Helpers;
 using JetBrains.Annotations;
 using Microsoft.Win32.SafeHandles;
 
@@ -30,19 +25,6 @@ public static class ProcessExtension
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static bool IsAwaitable(this Process thisValue) { return IsAssociated(thisValue) && !thisValue.HasExited; }
-
-	public static bool IsRunning(this Process thisValue)
-	{
-		if (!IsAwaitable(thisValue)) return false;
-
-		SystemInfoRequest request = new SystemInfoRequest(SystemInfoType.Win32_Process)
-		{
-			SelectExpression = "ProcessId",
-			Filter = mo => Convert.ToInt32(mo["ProcessId"]) == thisValue.Id
-		};
-
-		return SystemInfo.Get(request).Any();
-	}
 
 	[NotNull]
 	public static Task<bool> WaitForExitAsync([NotNull] this Process thisValue, CancellationToken token = default(CancellationToken))
@@ -176,121 +158,11 @@ public static class ProcessExtension
 		}
 	}
 
-	[NotNull]
-	public static IEnumerable<Process> GetChildren(this Process thisValue)
-	{
-		if (!IsAwaitable(thisValue)) return Enumerable.Empty<Process>();
-
-		Func<ManagementObject, Process> converter = mo => ProcessHelper.TryGetProcessById(Convert.ToInt32(mo["ProcessID"]), out Process p) ? p : null;
-		SystemInfoRequest<Process> request = new SystemInfoRequest<Process>(SystemInfoType.Win32_Process, converter)
-		{
-			WhereExpression = $"ParentProcessID={thisValue.Id}"
-		};
-
-		return SystemInfo.Get(request).Where(p => p != null);
-	}
-
-	[NotNull]
-	public static IEnumerable<Process> GetChildren([NotNull] this Process thisValue, [NotNull] Predicate<Process> predicate)
-	{
-		if (!IsAwaitable(thisValue)) return Enumerable.Empty<Process>();
-
-		Func<ManagementObject, Process> converter = mo => ProcessHelper.TryGetProcessById(Convert.ToInt32(mo["ProcessID"]), out Process p) ? p : null;
-		SystemInfoRequest<Process> request = new SystemInfoRequest<Process>(SystemInfoType.Win32_Process, converter)
-		{
-			WhereExpression = $"ParentProcessID={thisValue.Id}"
-		};
-
-		return SystemInfo.Get(request).Where(p => p != null && predicate(p));
-	}
-
-	public static Process GetChild([NotNull] this Process thisValue, [NotNull] Predicate<Process> predicate)
-	{
-		if (!IsAwaitable(thisValue)) return null;
-
-		Func<ManagementObject, Process> converter = mo => ProcessHelper.TryGetProcessById(Convert.ToInt32(mo["ProcessID"]), out Process p) ? p : null;
-		SystemInfoRequest<Process> request = new SystemInfoRequest<Process>(SystemInfoType.Win32_Process, converter)
-		{
-			WhereExpression = $"ParentProcessID={thisValue.Id}"
-		};
-
-		return SystemInfo.Get(request).FirstOrDefault(p => p != null && predicate(p));
-	}
-
-	public static bool KillChildren([NotNull] this Process thisValue)
-	{
-		foreach (Process p in GetChildren(thisValue))
-		{
-			if (!p.Die()) return false;
-		}
-
-		return true;
-	}
-
-	public static bool KillChildren([NotNull] this Process thisValue, [NotNull] Predicate<Process> predicate)
-	{
-		foreach (Process p in GetChildren(thisValue, predicate))
-		{
-			if (!p.Die()) return false;
-		}
-
-		return true;
-	}
-
-	[SecurityPermission(SecurityAction.LinkDemand)]
-	public static bool Die(this Process thisValue, int delay = 0)
-	{
-		if (!IsAwaitable(thisValue)) return true;
-
-		if (delay > 0)
-		{
-			TimeSpanHelper.WasteTime(delay);
-			if (!IsAwaitable(thisValue)) return true;
-		}
-
-		try
-		{
-			if (!KillChildren(thisValue)) return false;
-			if (!IsAwaitable(thisValue)) return true;
-			thisValue.Kill();
-			return true;
-		}
-		catch
-		{
-			return false;
-		}
-	}
-
-	[SecurityPermission(SecurityAction.LinkDemand)]
-	public static void Die([NotNull] this Process[] thisValue)
-	{
-		foreach (Process process in thisValue)
-			Die(process);
-	}
-
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static FileVersionInfo Version([NotNull] this Process thisValue)
 	{
 		return IsAwaitable(thisValue)
 					? thisValue.MainModule?.FileVersionInfo
 					: null;
-	}
-
-	public static string GetFileName(this Process thisValue) { return GetCommandLine(thisValue).ExecutablePath; }
-
-	public static (string ExecutablePath, string CommandLine) GetCommandLine(this Process thisValue)
-	{
-		if (!IsAwaitable(thisValue)) return (null, null);
-
-		SystemInfoRequest request = new SystemInfoRequest(SystemInfoType.Win32_Process)
-		{
-			SelectExpression = "ProcessId, ExecutablePath, CommandLine",
-			Filter = e => Convert.ToInt32(e["ProcessId"]) == thisValue.Id
-		};
-
-		ManagementObject mo = SystemInfo.FirstOrDefault(request);
-		return mo == null 
-					? (null, null) 
-					: ((string)mo["ExecutablePath"], (string)mo["CommandLine"]);
 	}
 }

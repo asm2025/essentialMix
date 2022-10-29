@@ -17,9 +17,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
-using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
+using JetBrains.Annotations;
 
 namespace essentialMix.Threading;
 
@@ -110,7 +110,7 @@ public sealed class AsyncStreamReader : Disposable
 
 		try
 		{
-			byteLen = (int)BaseStream?.EndRead(ar);
+			byteLen = BaseStream?.EndRead(ar) ?? 0;
 		}
 		catch (IOException)
 		{

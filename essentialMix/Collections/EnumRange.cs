@@ -86,10 +86,11 @@ public class EnumRange<T> : Range<T>
 	public void ForEach([NotNull] Action<T, string> action)
 	{
 		int i = 0;
+		string[] names = Names();
 
 		foreach (T value in Values)
 		{
-			action(value, Names[i]);
+			action(value, names[i]);
 			i++;
 		}
 	}
@@ -97,10 +98,11 @@ public class EnumRange<T> : Range<T>
 	public void ForEach([NotNull] Action<T, string, int> action)
 	{
 		int i = 0;
+		string[] names = Names();
 
 		foreach (T value in Values)
 		{
-			action(value, Names[i], i);
+			action(value, names[i], i);
 			i++;
 		}
 	}
@@ -108,10 +110,12 @@ public class EnumRange<T> : Range<T>
 	public void ForEach([NotNull] Action<T, string, string> action)
 	{
 		int i = 0;
+		string[] names = Names();
+		string[] displayNames = DisplayNames();
 
 		foreach (T value in Values)
 		{
-			action(value, Names[i], DisplayNames[i]);
+			action(value, names[i], displayNames[i]);
 			i++;
 		}
 	}
@@ -119,10 +123,12 @@ public class EnumRange<T> : Range<T>
 	public void ForEach([NotNull] Action<T, string, string, int> action)
 	{
 		int i = 0;
+		string[] names = Names();
+		string[] displayNames = DisplayNames();
 
 		foreach (T value in Values)
 		{
-			action(value, Names[i], DisplayNames[i], i);
+			action(value, names[i], displayNames[i], i);
 			i++;
 		}
 	}
@@ -130,10 +136,11 @@ public class EnumRange<T> : Range<T>
 	public void ForEach([NotNull] Func<T, string, bool> action)
 	{
 		int i = 0;
+		string[] names = Names();
 
 		foreach (T value in Values)
 		{
-			if (!action(value, Names[i])) break;
+			if (!action(value, names[i])) break;
 			i++;
 		}
 	}
@@ -141,10 +148,11 @@ public class EnumRange<T> : Range<T>
 	public void ForEach([NotNull] Func<T, string, int, bool> action)
 	{
 		int i = 0;
+		string[] names = Names();
 
 		foreach (T value in Values)
 		{
-			if (!action(value, Names[i], i)) break;
+			if (!action(value, names[i], i)) break;
 			i++;
 		}
 	}
@@ -152,10 +160,12 @@ public class EnumRange<T> : Range<T>
 	public void ForEach([NotNull] Func<T, string, string, bool> action)
 	{
 		int i = 0;
+		string[] names = Names();
+		string[] displayNames = DisplayNames();
 
 		foreach (T value in Values)
 		{
-			if (!action(value, Names[i], DisplayNames[i])) break;
+			if (!action(value, names[i], displayNames[i])) break;
 			i++;
 		}
 	}
@@ -163,10 +173,12 @@ public class EnumRange<T> : Range<T>
 	public void ForEach([NotNull] Func<T, string, string, int, bool> action)
 	{
 		int i = 0;
+		string[] names = Names();
+		string[] displayNames = DisplayNames();
 
 		foreach (T value in Values)
 		{
-			if (!action(value, Names[i], DisplayNames[i], i)) break;
+			if (!action(value, names[i], displayNames[i], i)) break;
 			i++;
 		}
 	}
@@ -177,9 +189,11 @@ public class EnumRange<T> : Range<T>
 
 	public static IReadOnlyList<T> Values { get; } = EnumHelper<T>.GetValues();
 
-	public static string[] Names { get; } = Values.Select(v => v.ToString()).ToArray();
+	[NotNull]
+	public static string[] Names() { return Values.Select(v => v.ToString()).ToArray(); }
 
-	public static string[] DisplayNames { get; } = Values.Select(v => EnumType.GetDisplayName(v)).ToArray();
+	[NotNull]
+	public static string[] DisplayNames() { return Values.Select(v => EnumType.GetDisplayName(v)).ToArray(); }
 
 	public static T MinValue { get; } = Values[0];
 

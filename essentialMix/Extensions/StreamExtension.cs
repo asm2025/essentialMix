@@ -148,41 +148,6 @@ public static class StreamExtension
 		return value;
 	}
 
-	[NotNull]
-	public static FileStream SaveToTempStream([NotNull] this Stream thisValue) { return SaveToTempStream(thisValue, null, null, 0); }
-
-	[NotNull]
-	public static FileStream SaveToTempStream([NotNull] this Stream thisValue, string basePath) { return SaveToTempStream(thisValue, basePath, null, 0); }
-
-	[NotNull]
-	public static FileStream SaveToTempStream([NotNull] this Stream thisValue, string basePath, string prefix) { return SaveToTempStream(thisValue, basePath, prefix, 0); }
-
-	[NotNull]
-	public static FileStream SaveToTempStream([NotNull] this Stream thisValue, string basePath, string prefix, uint unique)
-	{
-		FileStream stream = FileHelper.GetTempStream(basePath, prefix, unique);
-		CopyTo(thisValue, stream);
-		return stream;
-	}
-
-	public static string SaveToTempFile([NotNull] this Stream thisValue) { return SaveToTempFile(thisValue, null, null, 0); }
-
-	public static string SaveToTempFile([NotNull] this Stream thisValue, string basePath) { return SaveToTempFile(thisValue, basePath, null, 0); }
-
-	public static string SaveToTempFile([NotNull] this Stream thisValue, string basePath, string prefix) { return SaveToTempFile(thisValue, basePath, prefix, 0); }
-
-	public static string SaveToTempFile([NotNull] this Stream thisValue, string basePath, string prefix, uint unique)
-	{
-		string path;
-
-		using (FileStream output = SaveToTempStream(thisValue, basePath, prefix, unique))
-		{
-			path = output.Name;
-		}
-
-		return path;
-	}
-
 	public static FileStream SaveToStream([NotNull] this Stream thisValue, [NotNull] string fileName, bool overwrite = false)
 	{
 		if (PathHelper.IsPathQualified(fileName))

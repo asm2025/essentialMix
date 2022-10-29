@@ -16,7 +16,7 @@ public static class IntPtrExtension
 	public static bool IsMinusOne(this IntPtr thisValue) { return thisValue == IntPtrHelper.MinusOne; }
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	public static bool IsInvalidHandle(this IntPtr thisValue) { return thisValue == IntPtr.Zero || thisValue == Win32.INVALID_HANDLE_VALUE; }
+	public static bool IsInvalidHandle(this IntPtr thisValue) { return thisValue == IntPtr.Zero || thisValue == IntPtrHelper.MinusOne; }
 
 	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
 	public static int AsInt(this IntPtr thisValue) { return thisValue.ToInt32(); }

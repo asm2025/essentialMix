@@ -11,17 +11,17 @@ public class RSACng : RSAAlgorithmBase<System.Security.Cryptography.RSACng>
 	{
 	}
 
-	public RSACng([NotNull] System.Security.Cryptography.RSACng algorithm) 
+	public RSACng([NotNull] System.Security.Cryptography.RSACng algorithm)
 		: base(algorithm)
 	{
 	}
 
-	public RSACng([NotNull] Encoding encoding) 
+	public RSACng([NotNull] Encoding encoding)
 		: base(new System.Security.Cryptography.RSACng(), encoding)
 	{
 	}
 
-	public RSACng([NotNull] System.Security.Cryptography.RSACng algorithm, [NotNull] Encoding encoding) 
+	public RSACng([NotNull] System.Security.Cryptography.RSACng algorithm, [NotNull] Encoding encoding)
 		: base(algorithm, encoding)
 	{
 	}

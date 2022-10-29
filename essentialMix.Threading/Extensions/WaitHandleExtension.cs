@@ -70,7 +70,7 @@ public static class WaitHandleExtension
 		else
 		{
 			int n = WaitHandle.WaitAny(new[] { thisValue, token.WaitHandle }, millisecondsTimeout, exitContext);
-			result = n == ResultWin32.WAIT_OBJECT_0;
+			result = n == 0;
 		}
 
 		if (result && setEvent && thisValue is EventWaitHandle evt) evt.Set();
@@ -237,11 +237,11 @@ public static class WaitHandleExtension
 										index = WaitHandle.WaitAny(thisValue, TimeSpanHelper.ZERO, exitContext);
 										return index == 0;
 									}
-									: () =>
-									{
-										index = WaitHandle.WaitAny(thisValue, TimeSpanHelper.ZERO, exitContext);
-										return index == 0 || evalFunc();
-									};
+		: () =>
+		{
+			index = WaitHandle.WaitAny(thisValue, TimeSpanHelper.ZERO, exitContext);
+			return index == 0 || evalFunc();
+		};
 
 		SpinWait.SpinUntil(predicate, millisecondsTimeout);
 		return index;

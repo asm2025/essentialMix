@@ -15,8 +15,8 @@ public static class TaskHelper
 
 		public WaitHandleRegistration([NotNull] WaitHandle handle, int millisecondsTimeout, TaskCompletionSource<bool> completionSource)
 		{
-			_registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(handle, 
-																			(state, timedOut) => ((TaskCompletionSource<bool>)state).TrySetResult(!timedOut), 
+			_registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(handle,
+																			(state, timedOut) => ((TaskCompletionSource<bool>)state).TrySetResult(!timedOut),
 																			completionSource, millisecondsTimeout, true);
 		}
 
@@ -26,9 +26,7 @@ public static class TaskHelper
 
 	public static int QueueMinimum => 1;
 
-	public static int QueueMaximum { get; } = SystemInfo.IsHyperThreadingEnabled 
-												? Environment.ProcessorCount * 2
-												: Environment.ProcessorCount;
+	public static int QueueMaximum { get; } = Environment.ProcessorCount;
 	public static int QueueDefault => QueueMaximum;
 
 	public static int ProcessMinimum => 1;
@@ -500,7 +498,7 @@ public static class TaskHelper
 	public static async Task<TResult> SequenceAsync<TResult>(CancellationToken token, Predicate<TResult> predicate, [NotNull] Task<TResult> function, [NotNull] params Func<TResult, Task<TResult>>[] functions)
 	{
 		token.ThrowIfCancellationRequested();
-			
+
 		foreach (Func<TResult, Task<TResult>> func in functions)
 		{
 			if (func != null) continue;
@@ -549,7 +547,7 @@ public static class TaskHelper
 	public static Task<bool> FromWaitHandle([NotNull] WaitHandle handle, int millisecondsTimeout, CancellationToken token)
 	{
 		if (millisecondsTimeout < TimeSpanHelper.INFINITE) throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout));
-			
+
 		bool isSet = handle.WaitOne(0);
 		if (isSet) return Task.FromResult(true);
 		if (millisecondsTimeout == 0 || token.IsCancellationRequested) return Task.FromResult(false);

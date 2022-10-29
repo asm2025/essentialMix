@@ -24,8 +24,8 @@ public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IP
 		: base(options, token)
 	{
 		bool createdNew;
-		string name = Name.ToNullIfEmpty()?.LeftMax(Win32.MAX_PATH);
-			
+		string name = Name.ToNullIfEmpty()?.LeftMax(Constants.MAX_PATH);
+
 		if (name == null)
 		{
 			_semaphore = new Semaphore(Threads, Threads, null, out createdNew);
@@ -65,7 +65,7 @@ public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IP
 	/// <inheritdoc />
 	// ReSharper disable once InconsistentlySynchronizedField
 	public TQueue Queue => _queue.Queue;
-		
+
 	/// <inheritdoc />
 	// ReSharper disable once InconsistentlySynchronizedField
 	public bool IsSynchronized => _queue.IsSynchronized;
@@ -93,7 +93,7 @@ public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IP
 		{
 			bool invokeWorkStarted = false;
 
-			lock(SyncRoot)
+			lock (SyncRoot)
 			{
 				if (!WaitForWorkerStart())
 				{
@@ -106,7 +106,7 @@ public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IP
 						IsBackground = IsBackground,
 						Priority = Priority
 					}.Start();
-					
+
 					invokeWorkStarted = true;
 					if (!WaitForWorkerStart()) throw new TimeoutException();
 					if (IsDisposed || Token.IsCancellationRequested || IsCompleted) return;
@@ -116,7 +116,7 @@ public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IP
 			if (invokeWorkStarted) WorkStartedCallback?.Invoke(this);
 		}
 
-		lock(SyncRoot) 
+		lock (SyncRoot)
 		{
 			_queue.Enqueue(item);
 			Monitor.Pulse(SyncRoot);
@@ -128,7 +128,7 @@ public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IP
 	{
 		ThrowIfDisposed();
 
-		lock(SyncRoot)
+		lock (SyncRoot)
 		{
 			if (!_queue.TryDequeue(out item)) return false;
 			Monitor.Pulse(SyncRoot);
@@ -142,7 +142,7 @@ public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IP
 	{
 		ThrowIfDisposed();
 
-		lock(SyncRoot)
+		lock (SyncRoot)
 			return _queue.TryPeek(out item);
 	}
 
@@ -151,13 +151,13 @@ public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IP
 	{
 		ThrowIfDisposed();
 
-		lock(SyncRoot)
+		lock (SyncRoot)
 		{
 			if (_queue.IsEmpty) return;
 
 			int n = _queue.Count;
 
-			while (!_queue.IsEmpty && _queue.TryPeek(out T item) && predicate(item)) 
+			while (!_queue.IsEmpty && _queue.TryPeek(out T item) && predicate(item))
 				_queue.Dequeue();
 
 			if (n == _queue.Count) return;
@@ -167,7 +167,7 @@ public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IP
 
 	protected override void CompleteInternal()
 	{
-		lock(SyncRoot)
+		lock (SyncRoot)
 		{
 			IsCompleted = true;
 			Monitor.PulseAll(SyncRoot);
@@ -176,7 +176,7 @@ public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IP
 
 	protected override void ClearInternal()
 	{
-		lock(SyncRoot)
+		lock (SyncRoot)
 		{
 			_queue.Clear();
 			Monitor.PulseAll(SyncRoot);
@@ -202,7 +202,7 @@ public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IP
 				if (IsDisposed || Token.IsCancellationRequested) return;
 				T item;
 
-				lock(SyncRoot)
+				lock (SyncRoot)
 				{
 					if (IsPaused || _queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
 				}
@@ -228,7 +228,7 @@ public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IP
 
 				T item;
 
-				lock(SyncRoot)
+				lock (SyncRoot)
 				{
 					if (IsPaused || _queue.IsEmpty || !_queue.TryDequeue(out item)) continue;
 				}
@@ -279,7 +279,7 @@ public class SemaphoreQueue<TQueue, T> : NamedProducerConsumerThreadQueue<T>, IP
 		{
 			if (IsPaused) return false;
 
-			lock(SyncRoot)
+			lock (SyncRoot)
 			{
 				if (IsPaused || IsDisposed || Token.IsCancellationRequested || IsCompleted || !_queue.IsEmpty) continue;
 				Monitor.Wait(SyncRoot, TimeSpanHelper.FAST);

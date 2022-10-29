@@ -1,4 +1,5 @@
 using System;
+using essentialMix.Helpers;
 
 namespace essentialMix.IO;
 
@@ -15,9 +16,9 @@ public struct PipeInOutHandles
 
 	public void Init()
 	{
-		In.HRead = Win32.INVALID_HANDLE_VALUE;
-		In.HWrite = Win32.INVALID_HANDLE_VALUE;
-		Out.HRead = Win32.INVALID_HANDLE_VALUE;
-		Out.HWrite = Win32.INVALID_HANDLE_VALUE;
+		In.HRead = IntPtrHelper.INVALID_HANDLE_VALUE;
+		In.HWrite = IntPtrHelper.INVALID_HANDLE_VALUE;
+		Out.HRead = IntPtrHelper.INVALID_HANDLE_VALUE;
+		Out.HWrite = IntPtrHelper.INVALID_HANDLE_VALUE;
 	}
 }

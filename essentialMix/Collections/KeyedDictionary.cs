@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Other.Microsoft.Collections;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
@@ -28,8 +27,8 @@ public class KeyedDictionary<TKey, TValue> : KeyedDictionaryBase<TKey, TValue>
 		: base(comparer ?? EqualityComparer<TKey>.Default)
 	{
 		GetKey = getKey;
-		
-		foreach (TValue value in collection) 
+
+		foreach (TValue value in collection)
 			Add(value);
 	}
 

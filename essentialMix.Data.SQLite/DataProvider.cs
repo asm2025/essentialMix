@@ -5,7 +5,6 @@ using System.Data.Common;
 using System.Data.SQLite;
 using System.Linq;
 using System.Text.RegularExpressions;
-using essentialMix.Collections;
 using essentialMix.Comparers;
 using essentialMix.Data.Helpers;
 using essentialMix.Data.Patterns.Provider;

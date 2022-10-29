@@ -7,17 +7,12 @@ using essentialMix.Web;
 
 namespace essentialMix.IO.FileType.Formats;
 
-public record Svg : FileFormatBase
+public record Svg() : FileFormatBase("svg", MediaTypeNames.Image.SvgXml, null)
 {
 	private const int BUFFER_SIZE = 512;
 	private const int BUFFER_MIN = 100;
 
 	private static readonly Regex __regex = new Regex(@"<!DOCTYPE\s+svg\s+PUBLIC\s+[""']-//W3C//DTD\s+SVG.+?/DTD/svg\d*\.dtd.+?<svg.+?(?:version=[""']\d+(?:\.\d+)?[""'])?", RegexHelper.OPTIONS_I | RegexOptions.Singleline);
-
-	public Svg()
-		: base("svg", MediaTypeNames.Image.SvgXml, null)
-	{
-	}
 
 	/// <inheritdoc />
 	public override bool IsMatch(Stream stream)

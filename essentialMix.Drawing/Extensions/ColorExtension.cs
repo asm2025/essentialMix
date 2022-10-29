@@ -10,8 +10,6 @@ public static class ColorExtension
 {
 	public static uint ToDWORD(this Color thisValue) { return thisValue.R + ((uint)thisValue.G << 8) + ((uint)thisValue.B << 16); }
 
-	public static COLORREF ToColorRef(this Color thisValue) { return new COLORREF(ToDWORD(thisValue)); }
-
 	[NotNull]
 	public static string ToHex(this Color thisValue)
 	{
@@ -36,8 +34,8 @@ public static class ColorExtension
 
 		foreach (ConsoleColor consoleColor in consoleColors)
 		{
-			Color color = Color.FromName(consoleColor == ConsoleColor.DarkYellow 
-											? nameof(Color.Orange) 
+			Color color = Color.FromName(consoleColor == ConsoleColor.DarkYellow
+											? nameof(Color.Orange)
 											: consoleColor.GetName());
 			double t = Math.Pow(color.R - red, 2.0) + Math.Pow(color.G - green, 2.0) + Math.Pow(color.B - blue, 2.0);
 			if (t.IsEqual(0.0d)) return consoleColor;

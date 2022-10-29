@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Drawing;
 using System.Numerics;
-using essentialMix.Collections;
 using essentialMix.Data.Patterns.Provider;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
@@ -67,7 +65,6 @@ public class DataProvider
 			{typeof(OracleIntervalYM), OracleDbType.IntervalYM},
 			{typeof(OracleRefCursor), OracleDbType.RefCursor},
 			{typeof(byte[]), OracleDbType.Blob},
-			{typeof(Image), OracleDbType.BFile},
 			{typeof(OracleBFile), OracleDbType.BFile},
 			{typeof(OracleBinary), OracleDbType.Raw},
 			{typeof(object), OracleDbType.Blob},

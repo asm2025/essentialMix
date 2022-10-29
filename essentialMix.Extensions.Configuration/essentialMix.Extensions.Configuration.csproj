@@ -11,9 +11,10 @@
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\sign.pfx</AssemblyOriginatorKeyFile>
 		<Platforms>AnyCPU;x64;x86</Platforms>
-		<AssemblyVersion>13.0.17.0</AssemblyVersion>
-		<FileVersion>22.8.16.0</FileVersion>
-		<Version>13.0.17.0</Version>
+		<OutputPath>..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
+		<AssemblyVersion>14.0.0.0</AssemblyVersion>
+		<FileVersion>22.09.11</FileVersion>
+		<Version>14.0.0.0</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -26,10 +27,6 @@
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'x86' ">
 		<PlatformTarget>x86</PlatformTarget>
-	</PropertyGroup>
-
-	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' OR '$(Configuration)' == 'Release' ">
-		<OutputPath>..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug'">
@@ -53,7 +50,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>13.0.17.0</PackageVersion>
+		<PackageVersion>14.0.0.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns, configuration</PackageTags>

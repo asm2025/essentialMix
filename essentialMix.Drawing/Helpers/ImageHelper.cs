@@ -4,10 +4,10 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using essentialMix.Extensions;
-using JetBrains.Annotations;
 using essentialMix.Exceptions.Drawing;
+using essentialMix.Extensions;
 using essentialMix.Helpers;
+using JetBrains.Annotations;
 using Image = System.Drawing.Image;
 
 namespace essentialMix.Drawing.Helpers;
@@ -46,7 +46,7 @@ public static class ImageHelper
 	{
 		fileName = PathHelper.Trim(fileName);
 		if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
-			
+
 		string path = Path.GetDirectoryName(fileName);
 
 		if (path == null)
@@ -98,7 +98,7 @@ public static class ImageHelper
 	{
 		if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width));
 		if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height));
-			
+
 		Rectangle rect = new Rectangle(0, 0, width, height);
 		Bitmap bitmap = null;
 		Graphics graphics = null;
@@ -114,7 +114,7 @@ public static class ImageHelper
 			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 			graphics.SmoothingMode = SmoothingMode.HighQuality;
 			graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-				
+
 			imageAttributes = new ImageAttributes();
 			imageAttributes.SetWrapMode(WrapMode.TileFlipXY, Color.Transparent);
 			graphics.DrawImage(image, rect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, imageAttributes);
@@ -129,54 +129,6 @@ public static class ImageHelper
 		{
 			ObjectHelper.Dispose(ref graphics);
 			ObjectHelper.Dispose(ref imageAttributes);
-		}
-	}
-
-	public static Image Crop([NotNull] Image value, Rectangle rectangle, DimensionRestriction restriction = DimensionRestriction.None)
-	{
-		Bitmap bmp = value as Bitmap;
-		bool created = bmp == null;
-
-		try
-		{
-			if (created) bmp = new Bitmap(value);
-			return BitmapHelper.Crop(bmp, rectangle, restriction);
-		}
-		finally
-		{
-			if (created) ObjectHelper.Dispose(ref bmp);
-		}
-	}
-
-	public static Image CropBackground([NotNull] Image value, DimensionRestriction restriction = DimensionRestriction.None, int unitWidthLimit = 0, int unitHeightLimit = 0)
-	{
-		Bitmap bmp = value as Bitmap;
-		bool created = bmp == null;
-
-		try
-		{
-			if (created) bmp = new Bitmap(value);
-			return BitmapHelper.CropBackground(bmp, restriction, unitWidthLimit, unitHeightLimit);
-		}
-		finally
-		{
-			if (created) ObjectHelper.Dispose(ref bmp);
-		}
-	}
-
-	public static Image CropBackground([NotNull] Image value, Color backColor, DimensionRestriction restriction = DimensionRestriction.None, int unitWidthLimit = 0, int unitHeightLimit = 0)
-	{
-		Bitmap bmp = value as Bitmap;
-		bool created = bmp == null;
-
-		try
-		{
-			if (created) bmp = new Bitmap(value);
-			return BitmapHelper.CropBackground(bmp, backColor, restriction, unitWidthLimit, unitHeightLimit);
-		}
-		finally
-		{
-			if (created) ObjectHelper.Dispose(ref bmp);
 		}
 	}
 

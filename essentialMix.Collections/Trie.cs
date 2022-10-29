@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Other.Microsoft.Collections;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
@@ -113,12 +112,12 @@ public class Trie<T>
 
 	private Node _root;
 
-	public Trie() 
+	public Trie()
 		: this(null)
 	{
 	}
 
-	public Trie(IEqualityComparer<T> comparer) 
+	public Trie(IEqualityComparer<T> comparer)
 	{
 		Comparer = comparer ?? EqualityComparer<T>.Default;
 	}
@@ -140,8 +139,8 @@ public class Trie<T>
 	public void Add([NotNull] IEnumerable<T> token)
 	{
 		Node node = Root;
-			
-		foreach (T key in token) 
+
+		foreach (T key in token)
 			node = node.GetOrAdd(key);
 
 		if (!ReferenceEquals(node, Root)) node.EndOfToken = true;

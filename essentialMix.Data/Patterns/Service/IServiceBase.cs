@@ -11,6 +11,7 @@ public interface IServiceBase : IDisposable
 {
 }
 
+// ReSharper disable once UnusedTypeParameter
 public interface IServiceBase<TEntity> : IServiceBase
 	where TEntity : class
 {

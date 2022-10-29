@@ -9,11 +9,6 @@ public static class PointExtension
 	{
 		int dx = thisValue.X - other.X;
 		int dy = thisValue.Y - other.Y;
-		return (float) System.Math.Sqrt( dx * dx + dy * dy );
-	}
-
-	public static POINT ToWin32Point(this Point thisValue)
-	{
-		return new POINT(thisValue.X, thisValue.Y);
+		return (float)System.Math.Sqrt(dx * dx + dy * dy);
 	}
 }

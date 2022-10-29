@@ -132,7 +132,7 @@ public class ObservableKeyedDictionary<TKey, TValue> : ICollection<TValue>, ICol
 
 		void ICollection<TKey>.Clear() { throw new NotSupportedException(); }
 
-		bool ICollection<TKey>.Contains(TKey item) { return !ReferenceEquals(item, null) && _dictionary.ContainsKey(item); }
+		bool ICollection<TKey>.Contains(TKey item) { return item is not null && _dictionary.ContainsKey(item); }
 
 		void ICollection.CopyTo(Array array, int index)
 		{
@@ -451,7 +451,7 @@ public class ObservableKeyedDictionary<TKey, TValue> : ICollection<TValue>, ICol
 
 		try
 		{
-			foreach (TValue item in collection) 
+			foreach (TValue item in collection)
 				Insert(GetKey(item), item, true);
 		}
 		finally
@@ -706,7 +706,7 @@ public class ObservableKeyedDictionary<TKey, TValue> : ICollection<TValue>, ICol
 		CheckReentrancy();
 		if (_count == 0) return;
 
-		for (int i = 0; i < _buckets.Length; i++) 
+		for (int i = 0; i < _buckets.Length; i++)
 			_buckets[i] = -1;
 
 		Array.Clear(_entries, 0, _count);
@@ -792,7 +792,7 @@ public class ObservableKeyedDictionary<TKey, TValue> : ICollection<TValue>, ICol
 	{
 		CheckReentrancy();
 		if (_buckets == null) Initialize(0);
-			
+
 		int hashCode = Comparer.GetHashCode(key) & LOWER31_BIT_MASK;
 		int targetBucket = hashCode % _buckets.Length;
 
@@ -888,7 +888,7 @@ public class ObservableKeyedDictionary<TKey, TValue> : ICollection<TValue>, ICol
 		int size = Math2.GetPrime(capacity);
 		_buckets = new int[size];
 
-		for (int i = 0; i < _buckets.Length; i++) 
+		for (int i = 0; i < _buckets.Length; i++)
 			_buckets[i] = -1;
 
 		_entries = new Entry[size];
@@ -907,7 +907,7 @@ public class ObservableKeyedDictionary<TKey, TValue> : ICollection<TValue>, ICol
 		Contract.Assert(newSize >= _entries.Length);
 		int[] newBuckets = new int[newSize];
 
-		for (int i = 0; i < newBuckets.Length; i++) 
+		for (int i = 0; i < newBuckets.Length; i++)
 			newBuckets[i] = -1;
 
 		Entry[] newEntries = new Entry[newSize];

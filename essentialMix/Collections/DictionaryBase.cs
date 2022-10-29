@@ -129,7 +129,7 @@ public abstract class DictionaryBase<TKey, TValue> : IDictionary<TKey, TValue>, 
 
 		void ICollection<TKey>.Clear() { throw new NotSupportedException(); }
 
-		bool ICollection<TKey>.Contains(TKey item) { return !ReferenceEquals(item, null) && _dictionary.ContainsKey(item); }
+		bool ICollection<TKey>.Contains(TKey item) { return item is not null && _dictionary.ContainsKey(item); }
 
 		void ICollection.CopyTo(Array array, int index)
 		{

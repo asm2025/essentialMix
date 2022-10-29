@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.Odbc;
-using System.Drawing;
 using System.Numerics;
-using essentialMix.Collections;
 using essentialMix.Data.Patterns.Provider;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
@@ -54,7 +52,6 @@ public abstract class DataProvider
 			{typeof(DateTimeOffset), OdbcType.DateTime},
 			{typeof(TimeSpan), OdbcType.Time},
 			{typeof(byte[]), OdbcType.Binary},
-			{typeof(Image), OdbcType.Image},
 			{typeof(Guid), OdbcType.UniqueIdentifier},
 			{typeof(object), OdbcType.VarBinary}
 		}.AsReadOnly();

@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
-using System.Drawing;
 using System.Numerics;
-using essentialMix.Collections;
 using essentialMix.Data.Patterns.Provider;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
@@ -54,7 +52,6 @@ public class DataProvider
 			{typeof(DateTimeOffset), SqlDbType.DateTimeOffset},
 			{typeof(TimeSpan), SqlDbType.Time},
 			{typeof(byte[]), SqlDbType.Binary},
-			{typeof(Image), SqlDbType.Image},
 			{typeof(Guid), SqlDbType.UniqueIdentifier},
 			{typeof(object), SqlDbType.Variant}
 		}.AsReadOnly();

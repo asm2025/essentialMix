@@ -131,7 +131,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDi
 
 		void ICollection<TKey>.Clear() { throw new NotSupportedException(); }
 
-		bool ICollection<TKey>.Contains(TKey item) { return !ReferenceEquals(item, null) && _dictionary.ContainsKey(item); }
+		bool ICollection<TKey>.Contains(TKey item) { return item is not null && _dictionary.ContainsKey(item); }
 
 		void ICollection.CopyTo(Array array, int index)
 		{
@@ -450,7 +450,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDi
 
 		try
 		{
-			foreach (KeyValuePair<TKey, TValue> pair in dictionary) 
+			foreach (KeyValuePair<TKey, TValue> pair in dictionary)
 				Insert(pair.Key, pair.Value, true);
 		}
 		finally
@@ -566,7 +566,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDi
 
 		_buckets = new int[hashSize];
 
-		for (int i = 0; i < _buckets.Length; i++) 
+		for (int i = 0; i < _buckets.Length; i++)
 			_buckets[i] = -1;
 
 		_entries = new Entry[hashSize];
@@ -676,7 +676,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDi
 		CheckReentrancy();
 		if (_count == 0) return;
 
-		for (int i = 0; i < _buckets.Length; i++) 
+		for (int i = 0; i < _buckets.Length; i++)
 			_buckets[i] = -1;
 
 		Array.Clear(_entries, 0, _count);
@@ -832,7 +832,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDi
 	{
 		CheckReentrancy();
 		if (_buckets == null) Initialize(0);
-			
+
 		int hashCode = Comparer.GetHashCode(key) & LOWER31_BIT_MASK;
 		int targetBucket = hashCode % _buckets.Length;
 
@@ -928,7 +928,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDi
 		int size = Math2.GetPrime(capacity);
 		_buckets = new int[size];
 
-		for (int i = 0; i < _buckets.Length; i++) 
+		for (int i = 0; i < _buckets.Length; i++)
 			_buckets[i] = -1;
 
 		_entries = new Entry[size];
@@ -947,7 +947,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDi
 		Contract.Assert(newSize >= _entries.Length);
 		int[] newBuckets = new int[newSize];
 
-		for (int i = 0; i < newBuckets.Length; i++) 
+		for (int i = 0; i < newBuckets.Length; i++)
 			newBuckets[i] = -1;
 
 		Entry[] newEntries = new Entry[newSize];

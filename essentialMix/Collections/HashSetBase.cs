@@ -791,7 +791,7 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 		if (_buckets == null) Initialize(0);
 
 		int hashCode = InternalGetHashCode(value);
-		int bucket = hashCode % _buckets.Length;
+		int bucket = hashCode % _buckets!.Length;
 
 		for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].Next)
 		{

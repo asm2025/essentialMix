@@ -6,6 +6,8 @@ namespace essentialMix;
 
 public static class Constants
 {
+	public const int MAX_PATH = 260;
+
 	public const int N_DATA_BATCH_MAX = 100;
 
 	public const int BUFFER_KB = 1024;

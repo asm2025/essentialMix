@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Management;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using essentialMix.Extensions;
@@ -100,17 +99,5 @@ public static class MacAddressHelper
 		return NetworkInterface.GetAllNetworkInterfaces()
 								.Where(e => e.OperationalStatus == OperationalStatus.Up)
 								.Select(e => e.GetPhysicalAddress());
-	}
-
-	[NotNull]
-	public static IEnumerable<PhysicalAddress> GetMacAddressWMI()
-	{
-		Func<ManagementObject, PhysicalAddress> converter = mo => PhysicalAddress.Parse(Convert.ToString(mo["MacAddress"]));
-		SystemInfoRequest<PhysicalAddress> request = new SystemInfoRequest<PhysicalAddress>(SystemInfoType.Win32_NetworkAdapterConfiguration, converter)
-		{
-			Filter = mo => Convert.ToBoolean(mo["IPEnabled"])
-		};
-
-		return SystemInfo.Get(request);
 	}
 }

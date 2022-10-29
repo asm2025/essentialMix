@@ -110,7 +110,7 @@ public static class DirectoryHelper
 		basePath = PathHelper.Trim(basePath);
 		if (string.IsNullOrEmpty(basePath)) basePath = Path.GetTempPath();
 
-		StringBuilder sb = new StringBuilder(Win32.MAX_PATH)
+		StringBuilder sb = new StringBuilder(Constants.MAX_PATH)
 							.Append(basePath)
 							.AppendIfDoesNotEndWith(PathHelper.DirectorySeparator);
 		prefix = prefix?.Trim();
@@ -230,7 +230,7 @@ public static class DirectoryHelper
 
 		// local function use a Queue to navigate the tree so check if only the top level will be searched.
 		if (option != SearchOption.TopDirectoryOnly) return EnumerateRgxLocal(path, rgxPattern, applyPatternToDirectories, onEnqueue);
-			
+
 		IEnumerable<string> enumerable = Directory.EnumerateDirectories(path);
 
 		if (applyPatternToDirectories)
@@ -284,7 +284,7 @@ public static class DirectoryHelper
 			{
 				path = queue.Dequeue();
 				IEnumerable<string> enumerable = Directory.EnumerateDirectories(path);
-					
+
 				if (applyPatternToDirectories)
 				{
 					enumerable = enumerable.Where(e =>
@@ -440,7 +440,7 @@ public static class DirectoryHelper
 				IEnumerable<string> enumerable = Directory.EnumerateDirectories(path);
 				if (onEnqueue != null) enumerable = enumerable.Where(e => onEnqueue(e));
 
-				foreach (string directory in enumerable) 
+				foreach (string directory in enumerable)
 					queue.Enqueue(directory);
 
 				enumerable = Directory.EnumerateFiles(path).Where(e =>

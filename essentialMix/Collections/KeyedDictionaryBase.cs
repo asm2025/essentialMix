@@ -128,7 +128,7 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 
 		void ICollection<TKey>.Clear() { throw new NotSupportedException(); }
 
-		bool ICollection<TKey>.Contains(TKey item) { return !ReferenceEquals(item, null) && _dictionary.ContainsKey(item); }
+		bool ICollection<TKey>.Contains(TKey item) { return item is not null && _dictionary.ContainsKey(item); }
 
 		void ICollection.CopyTo(Array array, int index)
 		{
@@ -567,13 +567,13 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 
 	public void Add(TValue value)
 	{
-		if (ReferenceEquals(value, null)) throw new ArgumentNullException(nameof(value));
+		if (value is null) throw new ArgumentNullException(nameof(value));
 		Insert(GetKeyForItem(value), value, true);
 	}
 
 	public bool Remove(TValue value)
 	{
-		if (ReferenceEquals(value, null)) throw new ArgumentNullException(nameof(value));
+		if (value is null) throw new ArgumentNullException(nameof(value));
 		return RemoveByKey(GetKeyForItem(value));
 	}
 
@@ -625,7 +625,7 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 
 	public bool Contains(TValue value)
 	{
-		if (ReferenceEquals(value, null)) throw new ArgumentNullException(nameof(value));
+		if (value is null) throw new ArgumentNullException(nameof(value));
 		int i = FindEntry(GetKeyForItem(value));
 		return i >= 0 && EqualityComparer<TValue>.Default.Equals(_entries[i].Value, value);
 	}

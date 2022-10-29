@@ -10,17 +10,17 @@ public class RSA : RSAAlgorithmBase<System.Security.Cryptography.RSA>
 	{
 	}
 
-	public RSA([NotNull] System.Security.Cryptography.RSA algorithm) 
+	public RSA([NotNull] System.Security.Cryptography.RSA algorithm)
 		: base(algorithm)
 	{
 	}
 
-	public RSA([NotNull] Encoding encoding) 
+	public RSA([NotNull] Encoding encoding)
 		: base(new System.Security.Cryptography.RSACng(), encoding)
 	{
 	}
 
-	public RSA([NotNull] System.Security.Cryptography.RSA algorithm, [NotNull] Encoding encoding) 
+	public RSA([NotNull] System.Security.Cryptography.RSA algorithm, [NotNull] Encoding encoding)
 		: base(algorithm, encoding)
 	{
 	}
