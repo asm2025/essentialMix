@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-    - main
+    - master
   pull_request:
     branches:
-    - main
+    - master
     
 jobs:
   build:
@@ -43,6 +43,6 @@ jobs:
       run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore
 
     - name: Publish
-      if: startsWith(github.ref, 'refs/heads/main')
+      if: startsWith(github.ref, 'refs/heads/master')
       run: nuget push nuget\*.nupkg -s 'https://api.nuget.org/v3/index.json' --skip-duplicate -k ${{secrets.NUGET_API_KEY}}
       
