@@ -22,7 +22,7 @@ public class Paginated<T, TPagination> : IPaginated<T, TPagination>
 }
 
 [Serializable]
-public class Paginated<T> : Paginated<T, IPagination>
+public class Paginated<T> : Paginated<T, IPagination>, IPaginated<T>
 {
 	public Paginated([NotNull] IEnumerable<T> result, [NotNull] IPagination pagination)
 		: base(result, pagination)
