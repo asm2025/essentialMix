@@ -3,11 +3,16 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Patterns.Pagination;
 
-public interface IPaginated<out T>
+public interface IPaginated<out T, TPagination>
+	where TPagination : IPagination
 {
 	[NotNull]
 	IEnumerable<T> Result { get; }
-		
+
 	[NotNull]
-	IPagination Pagination { get; }
+	TPagination Pagination { get; }
+}
+
+public interface IPaginated<out T> : IPaginated<T, IPagination>
+{
 }

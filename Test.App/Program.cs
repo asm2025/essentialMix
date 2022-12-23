@@ -163,8 +163,7 @@ work with {Constants.HEAVY} items.");
 			#endregion
 
 			#region Encryption
-
-			TestSymmetric();
+			//TestSymmetric();
 			//TestAsymmetric();
 			#endregion
 
@@ -188,6 +187,8 @@ work with {Constants.HEAVY} items.");
 			//TestConsoleHelper();
 
 			//TestFileTypes();
+
+			TestRegions();
 
 			ConsoleHelper.Pause();
 		}
@@ -6420,6 +6421,33 @@ decrypted:
 					{
 						ObjectHelper.Dispose(ref stream);
 					}
+				}
+
+				Console.WriteLine();
+				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
+				ConsoleKeyInfo response = Console.ReadKey(true);
+				Console.WriteLine();
+				more = response.Key == ConsoleKey.Y;
+			}
+			while (more);
+		}
+
+		private static void TestRegions()
+		{
+			bool more;
+
+			do
+			{
+				Console.Clear();
+				Title("Testing regions...");
+				IEnumerable<string> countries = RegionInfoHelper.Regions.Values
+																	.OrderBy(e => e.EnglishName)
+																	.Where(e => !string.IsNullOrEmpty(e.ThreeLetterISORegionName))
+																	.Select(e => e.NativeName);
+
+				foreach (string country in countries)
+				{
+					Console.WriteLine(country);
 				}
 
 				Console.WriteLine();
