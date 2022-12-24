@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
@@ -11,14 +12,24 @@ public static class ICustomAttributeProviderExtension
 {
 	public static string GetDisplayName([NotNull] this ICustomAttributeProvider thisValue, string defaultValue = null)
 	{
+		DisplayAttribute displayAttribute = (DisplayAttribute)GetAttribute(thisValue, typeof(DisplayAttribute));
+		if (displayAttribute != null && !string.IsNullOrEmpty(displayAttribute.Name)) return displayAttribute.Name;
 		DisplayNameAttribute displayNameAttribute = (DisplayNameAttribute)GetAttribute(thisValue, typeof(DisplayNameAttribute));
 		return displayNameAttribute?.DisplayName ?? defaultValue;
 	}
 
 	public static string GetDescription([NotNull] this ICustomAttributeProvider thisValue, string defaultValue = null)
 	{
+		DisplayAttribute displayAttribute = (DisplayAttribute)GetAttribute(thisValue, typeof(DisplayAttribute));
+		if (displayAttribute != null && !string.IsNullOrEmpty(displayAttribute.Description)) return displayAttribute.Description;
 		DescriptionAttribute attribute = (DescriptionAttribute)GetAttribute(thisValue, typeof(DescriptionAttribute));
 		return attribute?.Description ?? defaultValue;
+	}
+
+	public static DisplayAttribute GetDisplay([NotNull] this ICustomAttributeProvider thisValue)
+	{
+		DisplayAttribute displayAttribute = (DisplayAttribute)GetAttribute(thisValue, typeof(DisplayAttribute));
+		return displayAttribute;
 	}
 
 	[NotNull]
@@ -55,7 +66,7 @@ public static class ICustomAttributeProviderExtension
 	{
 		if (type != null && !type.Is(typeof(Attribute))) throw new InvalidCastException($"The type must be derived from type of {typeof(Attribute).FullName}");
 
-		object[] attributes = type != null 
+		object[] attributes = type != null
 								? thisValue.GetCustomAttributes(type, inherit)
 								: thisValue.GetCustomAttributes(inherit);
 		return attributes.Cast<Attribute>();
