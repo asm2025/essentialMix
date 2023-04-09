@@ -69,7 +69,7 @@
 		<PackageReference Include="Crayon" Version="2.0.69" />
 		<PackageReference Include="EasyConsole" Version="1.1.0.0" />
 		<PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>

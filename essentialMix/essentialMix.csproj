@@ -82,7 +82,7 @@
 		<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
 		<PackageReference Include="System.Security.Cryptography.Xml" Version="7.0.0" />
 		<PackageReference Include="System.Security.Permissions" Version="6.0.0" />
-		<PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
+		<PackageReference Include="System.ServiceModel.Primitives" Version="4.10.2" />
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
 		<PackageReference Include="System.Threading.AccessControl" Version="6.0.0" />
 	</ItemGroup>
