@@ -3,8 +3,9 @@
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-		<OutputType>Exe</OutputType>
-		<TargetFramework>net48</TargetFramework>
+		<OutputType>WinExe</OutputType>
+		<UseWindowsForms>true</UseWindowsForms>
+		<TargetFramework>net6.0-windows</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>10.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -67,7 +68,7 @@
 	<ItemGroup>
 		<PackageReference Include="Bogus" Version="34.0.2" />
 		<PackageReference Include="Crayon" Version="2.0.69" />
-		<PackageReference Include="EasyConsole" Version="1.1.0.0" />
+		<PackageReference Include="EasyConsoleStd" Version="2.0.0" />
 		<PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
@@ -79,10 +80,6 @@
 		<ProjectReference Include="..\essentialMix.NewtonSoft\essentialMix.Newtonsoft.csproj" />
 		<ProjectReference Include="..\essentialMix.Threading\essentialMix.Threading.csproj" />
 		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Reference Include="System.Windows.Forms" />
 	</ItemGroup>
 
 </Project>

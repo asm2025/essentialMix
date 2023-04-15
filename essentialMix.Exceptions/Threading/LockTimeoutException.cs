@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 using JetBrains.Annotations;
 
 namespace essentialMix.Exceptions.Threading;
@@ -10,12 +11,18 @@ namespace essentialMix.Exceptions.Threading;
 [Serializable]
 public class LockTimeoutException : Exception
 {
+	public LockTimeoutException()
+		: this("Lock acquire timed out.")
+	{
+	}
+
 	/// <inheritdoc />
 	/// <summary>
 	/// Constructs an instance with the specified message.
 	/// </summary>
 	/// <param name="message">The message for the exception</param>
-	internal LockTimeoutException (string message) : base (message)
+	public LockTimeoutException(string message)
+		: base(message)
 	{
 	}
 
@@ -26,8 +33,13 @@ public class LockTimeoutException : Exception
 	/// </summary>
 	/// <param name="format">The message, which will be formatted with the parameters.</param>
 	/// <param name="args">The parameters to use for formatting.</param>
-	public LockTimeoutException ([NotNull] string format, [NotNull] params object[] args)
-		: this (string.Format(format, args))
+	public LockTimeoutException([NotNull] string format, [NotNull] params object[] args)
+		: this(string.Format(format, args))
+	{
+	}
+
+	protected LockTimeoutException([NotNull] SerializationInfo info, StreamingContext context)
+		: base(info, context)
 	{
 	}
 }

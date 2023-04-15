@@ -306,13 +306,6 @@ public static class SystemInfo
 			if (ValueNotZero(currentUser, key, "UpdateExeVolatile")) return true;
 			if (ValueNotZero(localMachine, key, "UpdateExeVolatile")) return true;
 
-			// Just ignore the next annoying key if it doesn't matter
-			//key = @"SYSTEM\CurrentControlSet\Control\Session Manager";
-			//if (AnyValueExists(currentUser, key, "PendingFileRenameOperations", 
-			//					"PendingFileRenameOperations2")) return true;
-			//if (AnyValueExists(localMachine, key, "PendingFileRenameOperations", 
-			//					"PendingFileRenameOperations2")) return true;
-
 			key = @"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update";
 			if (AnyKeyExists(currentUser, key, "RebootRequired",
 							"PostRebootReporting")) return true;

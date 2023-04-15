@@ -7,7 +7,7 @@ using essentialMix.Windows.IO;
 
 namespace Test.App
 {
-    public partial class TestUSBForm : Form
+	public partial class TestUSBForm : Form
 	{
 		private const string MSG_ATTACH = "Please attach a USB device to see a change.";
 		private const string MSG_DETACH = "Please detach a USB device to close the window.";

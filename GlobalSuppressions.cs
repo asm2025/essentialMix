@@ -17,3 +17,6 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Performance", "HAA0601:Value type to reference type conversion causing boxing allocation", Justification = "String interpolation can't accept value types such as int or long? What's the alternative?")]
 [assembly: SuppressMessage("Microsoft.Performance", "HAA0102:Non-overridden virtual method call on value type", Justification = "String interpolation error/warning. Wasting my time!")]
 [assembly: SuppressMessage("Microsoft.Performance", "HAA0401:Possible allocation of reference type enumerator", Justification = "Wasting my time!")]
+[assembly: SuppressMessage("Minor Code Smell", "S4136:Method overloads should be grouped together", Justification = "Wasting my time!")]
+[assembly: SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out", Justification = "What a bunch of retards!")]
+[assembly: SuppressMessage("Major Code Smell", "S1144:Unused private types or members should be removed", Justification = "What a bunch of retards!")]

@@ -4909,54 +4909,60 @@ The external id reflects the order by which they are scheduled and the -* part i
 			WeightedGraphList<char, int> weightedGraph;
 			List<char> values = new List<char>();
 			Menu menu = new Menu()
-				.Add("Undirected graph", () =>
+				.Add("Undirected graph", token =>
 				{
 					Console.WriteLine();
 					graph = new UndirectedGraphList<char>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(graph, values);
+					return Task.CompletedTask;
 				})
-				.Add("Directed graph", () =>
+				.Add("Directed graph", token =>
 				{
 					Console.WriteLine();
 					graph = new DirectedGraphList<char>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(graph, values);
+					return Task.CompletedTask;
 				})
-				.Add("Mixed graph", () =>
+				.Add("Mixed graph", token =>
 				{
 					Console.WriteLine();
 					graph = new MixedGraphList<char>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(graph, values);
+					return Task.CompletedTask;
 				})
-				.Add("Weighted undirected graph", () =>
+				.Add("Weighted undirected graph", token =>
 				{
 					Console.WriteLine();
 					weightedGraph = new WeightedUndirectedGraphList<char, int>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(weightedGraph, values);
+					return Task.CompletedTask;
 				})
-				.Add("Weighted directed graph", () =>
+				.Add("Weighted directed graph", token =>
 				{
 					Console.WriteLine();
 					weightedGraph = new WeightedDirectedGraphList<char, int>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(weightedGraph, values);
+					return Task.CompletedTask;
 				})
-				.Add("Weighted mixed graph", () =>
+				.Add("Weighted mixed graph", token =>
 				{
 					Console.WriteLine();
 					weightedGraph = new WeightedMixedGraphList<char, int>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(weightedGraph, values);
+					return Task.CompletedTask;
 				});
 
 			do
 			{
 				Console.Clear();
 				Title("Testing graph add()");
-				menu.Display();
+				menu.Display(CancellationToken.None);
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);

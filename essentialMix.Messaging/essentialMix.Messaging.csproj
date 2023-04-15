@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -28,7 +28,8 @@
 		<PlatformTarget>x86</PlatformTarget>
 	</PropertyGroup>
 	
-	<PropertyGroup Condition=" '$(Configuration)' == 'Debug'">
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+		<EnvironmentName>Development</EnvironmentName>
 		<DebugSymbols>true</DebugSymbols>
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
 		<DebugType>full</DebugType>
@@ -36,6 +37,7 @@
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<EnvironmentName>Production</EnvironmentName>
 		<DefineConstants>TRACE</DefineConstants>
 		<Optimize>true</Optimize>
 		<DebugType>portable</DebugType>
@@ -43,7 +45,7 @@
 		<ErrorReport>prompt</ErrorReport>
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
-	
+
 	<PropertyGroup>
 		<IsPackable>True</IsPackable>
 		<PackageId>$(ProjectName)</PackageId>
@@ -51,8 +53,8 @@
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
 		<PackageVersion>14.0.5.0</PackageVersion>
 		<Authors>asm</Authors>
-		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
-		<PackageTags>utilities, tools, extensions, helpers, components, patterns, database, orm, dbms, mysql, oracle</PackageTags>
+		<Description>Common extensions methods, helper classes, components, nano systems, common patterns, and caching</Description>
+		<PackageTags>utilities, tools, extensions, helpers, components, patterns, collections, data structure, caching</PackageTags>
 		<PackageProjectUrl>https://github.com/asm2025/essentialMix</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/asm2025/essentialMix</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
@@ -63,6 +65,7 @@
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
+
 	<ItemGroup>
 		<None Include="..\buckramega.png" Pack="True" PackagePath="" />
 	</ItemGroup>
@@ -73,13 +76,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
-		<PackageReference Include="MySql.Data" Version="8.0.32.1" />
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.1" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\essentialMix.Data\essentialMix.Data.csproj" />
-		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
 	</ItemGroup>
 
 </Project>
