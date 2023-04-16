@@ -90,15 +90,4 @@
 		</EmbeddedResource>
 	</ItemGroup>
 
-	<Target Name="DeleteFiles" BeforeTargets="PreBuildEvent">
-		<ItemGroup>
-			<FilesToDelete Include="$(PackageOutputPath)\*" />
-		</ItemGroup>
-		<Message Text="Deleting files in $(PackageOutputPath)" />
-		<Delete Files="@(FilesToDelete)">
-			<Output TaskParameter="DeletedFiles" ItemName="FilesDeleted" />
-		</Delete>
-		<Message Text="Files deletes: @(FilesDeleted)" />
-	</Target>
-
 </Project>
