@@ -1,9 +1,10 @@
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-using JetBrains.Annotations;
 using essentialMix.Linq;
 using essentialMix.Patterns.Pagination;
+using JetBrains.Annotations;
 
 namespace essentialMix.Extensions;
 
@@ -30,5 +31,13 @@ public static class IQueryableExtension
 		if (settings.Page < 1) settings.Page = 1;
 		int start = (settings.Page - 1) * settings.PageSize;
 		return thisValue.Skip(start).Take(settings.PageSize);
+	}
+
+	[NotNull]
+	public static IQueryable<T> WhereIf<T>([NotNull] this IQueryable<T> query, bool condition, [NotNull] Expression<Func<T, bool>> predicate)
+	{
+		return condition
+					? query.Where(predicate)
+					: query;
 	}
 }
