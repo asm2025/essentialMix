@@ -119,17 +119,25 @@ public abstract class RepositoryBase<TEntity> : RepositoryBase, IRepositoryBase<
 		return CountInternal(settings);
 	}
 
-	protected abstract int CountInternal(IPagination settings = null);
+	protected abstract int CountInternal(IPagination settings);
 
 	/// <inheritdoc />
-	public Task<int> CountAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
+	public Task<int> CountAsync(CancellationToken token = default(CancellationToken))
+	{
+		ThrowIfDisposed();
+		token.ThrowIfCancellationRequested();
+		return CountAsyncInternal(null, token);
+	}
+
+	/// <inheritdoc />
+	public Task<int> CountAsync(IPagination settings, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return CountAsyncInternal(settings, token);
 	}
 
-	protected abstract Task<int> CountAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
+	protected abstract Task<int> CountAsyncInternal(IPagination settings, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
 	public long LongCount(IPagination settings = null)
@@ -138,17 +146,25 @@ public abstract class RepositoryBase<TEntity> : RepositoryBase, IRepositoryBase<
 		return LongCountInternal(settings);
 	}
 
-	protected abstract long LongCountInternal(IPagination settings = null);
+	protected abstract long LongCountInternal(IPagination settings);
 
 	/// <inheritdoc />
-	public Task<long> LongCountAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
+	public Task<long> LongCountAsync(CancellationToken token = default(CancellationToken))
+	{
+		ThrowIfDisposed();
+		token.ThrowIfCancellationRequested();
+		return LongCountAsyncInternal(null, token);
+	}
+
+	/// <inheritdoc />
+	public Task<long> LongCountAsync(IPagination settings, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return LongCountAsyncInternal(settings, token);
 	}
 
-	protected abstract Task<long> LongCountAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
+	protected abstract Task<long> LongCountAsyncInternal(IPagination settings, CancellationToken token = default(CancellationToken));
 
 	/// <inheritdoc />
 	public IQueryable<TEntity> List(IPagination settings = null)
@@ -157,17 +173,25 @@ public abstract class RepositoryBase<TEntity> : RepositoryBase, IRepositoryBase<
 		return ListInternal(settings);
 	}
 
-	protected abstract IQueryable<TEntity> ListInternal(IPagination settings = null);
+	protected abstract IQueryable<TEntity> ListInternal(IPagination settings);
 
 	/// <inheritdoc />
-	public Task<IList<TEntity>> ListAsync(IPagination settings = null, CancellationToken token = default(CancellationToken))
+	public Task<IList<TEntity>> ListAsync(CancellationToken token = default(CancellationToken))
+	{
+		ThrowIfDisposed();
+		token.ThrowIfCancellationRequested();
+		return ListAsyncInternal(null, token);
+	}
+
+	/// <inheritdoc />
+	public Task<IList<TEntity>> ListAsync(IPagination settings, CancellationToken token = default(CancellationToken))
 	{
 		ThrowIfDisposed();
 		token.ThrowIfCancellationRequested();
 		return ListAsyncInternal(settings, token);
 	}
 
-	protected abstract Task<IList<TEntity>> ListAsyncInternal(IPagination settings = null, CancellationToken token = default(CancellationToken));
+	protected abstract Task<IList<TEntity>> ListAsyncInternal(IPagination settings, CancellationToken token = default(CancellationToken));
 
 	[NotNull]
 	protected abstract IQueryable<TEntity> PrepareCountQuery([NotNull] IQueryable<TEntity> query, IPagination settings);
