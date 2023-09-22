@@ -26,6 +26,13 @@ public static class IDictionaryExtension
 		return new ReadOnlyDictionary<TKey, TValue>(thisValue);
 	}
 
+	public static TValue Get<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] TKey key, [NotNull] Func<TKey, TValue> getValue)
+	{
+		return thisValue.TryGetValue(key, out TValue value)
+					? value
+					: getValue(key);
+	}
+
 	public static TValue GetOrAdd<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] TKey key)
 		where TValue : new()
 	{

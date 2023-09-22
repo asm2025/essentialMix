@@ -12,9 +12,9 @@
 		<AssemblyOriginatorKeyFile>..\sign.pfx</AssemblyOriginatorKeyFile>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<OutputPath>..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
-		<AssemblyVersion>14.0.9.0</AssemblyVersion>
+		<AssemblyVersion>14.0.10.0</AssemblyVersion>
 		<FileVersion>23.09.22</FileVersion>
-		<Version>14.0.9.0</Version>
+		<Version>14.0.10.0</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -50,7 +50,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>14.0.9.0</PackageVersion>
+		<PackageVersion>14.0.10.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns, configuration</PackageTags>
