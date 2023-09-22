@@ -19,9 +19,13 @@ public interface IServiceBase<TEntity> : IServiceBase
 	IPaginated<TEntity> List(IPagination settings = null);
 	IPaginated<T> List<T>(IPagination settings = null);
 	[NotNull]
-	Task<IPaginated<TEntity>> ListAsync(IPagination settings = null, CancellationToken token = default(CancellationToken));
+	Task<IPaginated<TEntity>> ListAsync(CancellationToken token = default(CancellationToken));
 	[NotNull]
-	Task<IPaginated<T>> ListAsync<T>(IPagination settings = null, CancellationToken token = default(CancellationToken));
+	Task<IPaginated<TEntity>> ListAsync(IPagination settings, CancellationToken token = default(CancellationToken));
+	[NotNull]
+	Task<IPaginated<T>> ListAsync<T>(CancellationToken token = default(CancellationToken));
+	[NotNull]
+	Task<IPaginated<T>> ListAsync<T>(IPagination settings, CancellationToken token = default(CancellationToken));
 }
 
 public interface IServiceBase<TEntity, TKey> : IServiceBase<TEntity>

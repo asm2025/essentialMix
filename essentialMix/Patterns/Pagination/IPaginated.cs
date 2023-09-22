@@ -9,7 +9,6 @@ public interface IPaginated<out T, TPagination>
 	[NotNull]
 	IEnumerable<T> Result { get; }
 
-	[NotNull]
 	TPagination Pagination { get; }
 }
 

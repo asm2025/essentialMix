@@ -8,7 +8,7 @@ namespace essentialMix.Patterns.Pagination;
 public class Paginated<T, TPagination> : IPaginated<T, TPagination>
 	where TPagination : IPagination
 {
-	public Paginated([NotNull] IEnumerable<T> result, [NotNull] TPagination pagination)
+	public Paginated([NotNull] IEnumerable<T> result, TPagination pagination)
 	{
 		Result = result;
 		Pagination = pagination;
@@ -24,7 +24,7 @@ public class Paginated<T, TPagination> : IPaginated<T, TPagination>
 [Serializable]
 public class Paginated<T> : Paginated<T, IPagination>, IPaginated<T>
 {
-	public Paginated([NotNull] IEnumerable<T> result, [NotNull] IPagination pagination)
+	public Paginated([NotNull] IEnumerable<T> result, IPagination pagination)
 		: base(result, pagination)
 	{
 	}

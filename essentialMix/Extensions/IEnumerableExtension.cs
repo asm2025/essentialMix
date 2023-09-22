@@ -1969,9 +1969,9 @@ public static class IEnumerableExtension
 	}
 
 	[NotNull]
-	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	public static IEnumerable<T> Paginate<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] IPagination settings)
+	public static IEnumerable<T> Paginate<T>([NotNull] this IEnumerable<T> thisValue, IPagination settings)
 	{
+		if (settings == null) return thisValue;
 		if (settings.PageSize < 1) settings.PageSize = Pagination.PAGE_SIZE;
 		if (settings.Page < 1) settings.Page = 1;
 		int start = (settings.Page - 1) * settings.PageSize;

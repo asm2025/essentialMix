@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using essentialMix.Linq;
 using essentialMix.Patterns.Pagination;
 using JetBrains.Annotations;
@@ -24,9 +23,9 @@ public static class IQueryableExtension
 	}
 
 	[NotNull]
-	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	public static IQueryable<T> Paginate<T>([NotNull] this IQueryable<T> thisValue, [NotNull] IPagination settings)
+	public static IQueryable<T> Paginate<T>([NotNull] this IQueryable<T> thisValue, IPagination settings)
 	{
+		if (settings == null) return thisValue;
 		if (settings.PageSize < 1) settings.PageSize = Pagination.PAGE_SIZE;
 		if (settings.Page < 1) settings.Page = 1;
 		int start = (settings.Page - 1) * settings.PageSize;
