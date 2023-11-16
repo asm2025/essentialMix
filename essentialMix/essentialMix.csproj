@@ -74,7 +74,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Enums.NET" Version="4.0.1" />
-		<PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
 		<PackageReference Include="Microsoft.Net.Http.Headers" Version="2.1.14" />

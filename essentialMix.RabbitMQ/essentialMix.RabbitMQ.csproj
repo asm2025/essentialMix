@@ -73,10 +73,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
-		<PackageReference Include="MessagePack" Version="2.5.124" />
+		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
+		<PackageReference Include="MessagePack" Version="2.5.129" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
-		<PackageReference Include="RabbitMQ.Client" Version="6.5.0" />
+		<PackageReference Include="RabbitMQ.Client" Version="6.6.0" />
 	</ItemGroup>
 
 	<ItemGroup>
