@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
+using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace essentialMix.Patterns.Object;
 
@@ -17,7 +18,7 @@ public abstract class Disposable : IDisposable
 	private class DisposableAction : IDisposable
 	{
 		private Action _onDispose;
-	
+
 		public DisposableAction(Action onDispose)
 		{
 			_onDispose = onDispose;
@@ -27,7 +28,7 @@ public abstract class Disposable : IDisposable
 		{
 			Action todo;
 
-			lock(this)
+			lock (this)
 			{
 				todo = _onDispose;
 				_onDispose = null;

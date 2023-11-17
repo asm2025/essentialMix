@@ -28,8 +28,8 @@ public abstract class KeyedCollectionBase<TKey, TValue> : System.Collections.Obj
 		: base(comparer ?? EqualityComparer<TKey>.Default, 0)
 	{
 		if (collection == null) throw new ArgumentNullException(nameof(collection));
-			
-		foreach (TValue value in collection) 
+
+		foreach (TValue value in collection)
 			Add(value);
 	}
 
@@ -74,12 +74,5 @@ public abstract class KeyedCollectionBase<TKey, TValue> : System.Collections.Obj
 		}
 
 		return index;
-	}
-
-	public bool TryGetValue(TKey key, out TValue value)
-	{
-		if (Dictionary != null) return Dictionary.TryGetValue(key, out value);
-		value = default(TValue);
-		return false;
 	}
 }

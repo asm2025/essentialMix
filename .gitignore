@@ -363,3 +363,4 @@ FodyWeavers.xsd
 /nuget
 /dist
 /Test.App/Test
+*.DotSettings

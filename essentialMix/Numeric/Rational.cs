@@ -2,20 +2,21 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using JetBrains.Annotations;
+using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace essentialMix.Numeric;
 
 public struct Rational : IComparable, IComparable<Rational>, IEquatable<Rational>
 {
 	// These fields bypass Simplify().
-	public static readonly Rational MinValue = new Rational {Numerator = int.MinValue, Denominator = 1};
+	public static readonly Rational MinValue = new Rational { Numerator = int.MinValue, Denominator = 1 };
 
-	public static readonly Rational MaxValue = new Rational {Numerator = int.MaxValue, Denominator = 1};
-	public static readonly Rational Epsilon = new Rational {Numerator = 1, Denominator = int.MaxValue};
-	public static readonly Rational Undefined = new Rational {Numerator = 0, Denominator = 0};
-	public static readonly Rational Zero = new Rational {Numerator = 0, Denominator = 1};
-	public static readonly Rational One = new Rational {Numerator = 1, Denominator = 1};
-	public static readonly Rational MinusOne = new Rational {Numerator = -1, Denominator = 1};
+	public static readonly Rational MaxValue = new Rational { Numerator = int.MaxValue, Denominator = 1 };
+	public static readonly Rational Epsilon = new Rational { Numerator = 1, Denominator = int.MaxValue };
+	public static readonly Rational Undefined = new Rational { Numerator = 0, Denominator = 0 };
+	public static readonly Rational Zero = new Rational { Numerator = 0, Denominator = 1 };
+	public static readonly Rational One = new Rational { Numerator = 1, Denominator = 1 };
+	public static readonly Rational MinusOne = new Rational { Numerator = -1, Denominator = 1 };
 
 	public Rational(int numerator, int denominator = 1) : this()
 	{

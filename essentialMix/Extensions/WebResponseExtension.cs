@@ -6,10 +6,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using essentialMix.Helpers;
 using essentialMix.IO;
 using essentialMix.Web;
+using JetBrains.Annotations;
 
 namespace essentialMix.Extensions;
 
@@ -62,7 +62,7 @@ public static class WebResponseExtension
 		}
 	}
 
-	public static Task<bool> ReadAsync([NotNull] this WebResponse thisValue, [NotNull] IOSettings settings, CancellationToken token = default(CancellationToken))
+	public static async Task<bool> ReadAsync([NotNull] this WebResponse thisValue, [NotNull] IOSettings settings, CancellationToken token = default(CancellationToken))
 	{
 		token.ThrowIfCancellationRequested();
 
@@ -74,7 +74,7 @@ public static class WebResponseExtension
 		{
 			stream = GetStream(thisValue);
 			token.ThrowIfCancellationRequested();
-			if (stream == null) return Task.FromResult(false);
+			if (stream == null) return false;
 			reader = new StreamReader(stream, settings.Encoding, true);
 
 			int length;
@@ -82,17 +82,17 @@ public static class WebResponseExtension
 
 			do
 			{
-				length = reader.ReadAsync(chars).Execute();
+				length = await reader.ReadAsync(chars, token);
 			}
 			while (!token.IsCancellationRequested && length > 0 && ioOnRead.OnRead(chars, length));
 
 			token.ThrowIfCancellationRequested();
-			return Task.FromResult(true);
+			return true;
 		}
 		catch (Exception ex) when (settings.OnError != null)
 		{
 			settings.OnError(ex);
-			return Task.FromResult(false);
+			return false;
 		}
 		finally
 		{
@@ -186,6 +186,7 @@ public static class WebResponseExtension
 		return Read(thisValue, readSettings) ? result : null;
 	}
 
+	[NotNull]
 	public static Task<string> GetTitleAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 	{
 		token.ThrowIfCancellationRequested();
@@ -254,11 +255,12 @@ public static class WebResponseExtension
 			return !titleFound || !bufferFilled;
 		});
 
-		return Read(thisValue, readSettings) 
-					? (title, bufferFetch.ToString()) 
+		return Read(thisValue, readSettings)
+					? (title, bufferFetch.ToString())
 					: (null, null);
 	}
 
+	[NotNull]
 	public static Task<(string Title, string Buffer)> PeekAsync([NotNull] this WebResponse thisValue, IOSettings settings = null, CancellationToken token = default(CancellationToken))
 	{
 		token.ThrowIfCancellationRequested();

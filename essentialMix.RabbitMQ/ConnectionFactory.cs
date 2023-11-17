@@ -78,6 +78,20 @@ public class ConnectionFactory : Disposable, IConnectionFactory
 	}
 
 	/// <inheritdoc />
+	public ICredentialsProvider CredentialsProvider
+	{
+		get => _factory.CredentialsProvider;
+		set => _factory.CredentialsProvider = value;
+	}
+
+	/// <inheritdoc />
+	public ICredentialsRefresher CredentialsRefresher
+	{
+		get => _factory.CredentialsRefresher;
+		set => _factory.CredentialsRefresher = value;
+	}
+
+	/// <inheritdoc />
 	public string ClientProvidedName
 	{
 		get => _factory.ClientProvidedName;
@@ -113,6 +127,7 @@ public class ConnectionFactory : Disposable, IConnectionFactory
 	}
 
 	/// <inheritdoc />
+	[Obsolete]
 	public bool UseBackgroundThreadsForIO
 	{
 		get => _factory.UseBackgroundThreadsForIO;

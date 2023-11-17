@@ -599,7 +599,7 @@ public static class UriHelper
 		return DownloadFileAsync(uri, fileName, settings, token);
 	}
 
-	public static Task<FileStream> DownloadFileAsync([NotNull] Uri url, string fileName, [NotNull] IOHttpDownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
+	public static async Task<FileStream> DownloadFileAsync([NotNull] Uri url, string fileName, [NotNull] IOHttpDownloadFileWebRequestSettings settings, CancellationToken token = default(CancellationToken))
 	{
 		token.ThrowIfCancellationRequested();
 		if (string.IsNullOrEmpty(fileName)) throw new ArgumentNullException(nameof(fileName));
@@ -623,65 +623,63 @@ public static class UriHelper
 		FileStream fileStream = null;
 		Stream responseStream = null;
 		bool success = false;
-		return request.GetResponseAsync(settings, token)
-					.ContinueWith(task =>
-					{
-						WebResponse response = task.Result;
+		WebResponse response = await request.GetResponseAsync(settings, token);
+		token.ThrowIfCancellationRequested();
 
-						if (response == null)
-						{
-							progress?.Report(100);
-							return null;
-						}
+		if (response == null)
+		{
+			progress?.Report(100);
+			return null;
+		}
 
-						try
-						{
-							double received = 0.0d;
-							double len = response.ContentLength;
+		try
+		{
+			double received = 0.0d;
+			double len = response.ContentLength;
 
-							if (len.Equals(0.0d))
-							{
-								progress?.Report(100);
-								return null;
-							}
+			if (len.Equals(0.0d))
+			{
+				progress?.Report(100);
+				return null;
+			}
 
-							if (len < 0.0d) progress = null;
+			if (len < 0.0d) progress = null;
 
-							FileMode mode = settings.Overwrite
-												? FileMode.Create
-												: FileMode.CreateNew;
-							fileStream = new FileStream(fileName, mode, FileAccess.Write);
+			FileMode mode = settings.Overwrite
+								? FileMode.Create
+								: FileMode.CreateNew;
+			fileStream = new FileStream(fileName, mode, FileAccess.Write);
 
-							int read;
-							byte[] buffer = new byte[settings.BufferSize];
-							responseStream = response.GetResponseStream() ?? throw new IOException("Could not get response stream.");
+			int read;
+			byte[] buffer = new byte[settings.BufferSize];
+			responseStream = response.GetResponseStream() ?? throw new IOException("Could not get response stream.");
 
-							while (!token.IsCancellationRequested && (read = responseStream.ReadAsync(buffer, token).Execute()) > 0)
-							{
-								received += read;
-								fileStream.WriteAsync(buffer, 0, read, token).Execute();
-								progress?.Report((int)(received / len * 100.0d));
-							}
+			while (!token.IsCancellationRequested && (read = await responseStream.ReadAsync(buffer, token)) > 0)
+			{
+				token.ThrowIfCancellationRequested();
+				received += read;
+				fileStream.WriteAsync(buffer, 0, read, token).Execute();
+				progress?.Report((int)(received / len * 100.0d));
+			}
 
-							token.ThrowIfCancellationRequested();
-							fileStream.Position = 0;
-							success = true;
-							progress?.Report(100);
-							return fileStream;
-						}
-						finally
-						{
-							request.Abort();
-							ObjectHelper.Dispose(ref responseStream);
-							ObjectHelper.Dispose(ref response);
+			token.ThrowIfCancellationRequested();
+			fileStream.Position = 0;
+			success = true;
+			progress?.Report(100);
+			return fileStream;
+		}
+		finally
+		{
+			request.Abort();
+			ObjectHelper.Dispose(ref responseStream);
+			ObjectHelper.Dispose(ref response);
 
-							if (!success && fileStream != null)
-							{
-								ObjectHelper.Dispose(ref fileStream);
-								FileHelper.Delete(fileName);
-							}
-						}
-					}, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
+			if (!success && fileStream != null)
+			{
+				ObjectHelper.Dispose(ref fileStream);
+				FileHelper.Delete(fileName);
+			}
+		}
 	}
 
 	public static Uri UploadFile([NotNull] string fileName, [NotNull] string url, [NotNull] IOUploadFileWebRequestSettings settings)

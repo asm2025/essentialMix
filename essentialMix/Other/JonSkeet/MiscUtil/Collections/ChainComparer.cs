@@ -23,15 +23,14 @@ public class ChainComparer<T> : IGenericComparer<T>
 	{
 		if (comparers != null)
 		{
-			foreach (IComparer<T> comparer in comparers.Where(e => e != null)) 
+			foreach (IComparer<T> comparer in comparers.Where(e => e != null))
 				Comparers.Add(comparer);
 		}
 
-		if (equalityComparers != null)
-		{
-			foreach (IEqualityComparer<T> equalityComparer in equalityComparers.Where(e => e != null))
-				EqualityComparers.Add(equalityComparer);
-		}
+		if (equalityComparers == null) return;
+
+		foreach (IEqualityComparer<T> equalityComparer in equalityComparers.Where(e => e != null))
+			EqualityComparers.Add(equalityComparer);
 	}
 
 	[NotNull]

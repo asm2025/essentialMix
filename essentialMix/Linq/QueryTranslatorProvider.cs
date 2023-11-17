@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using JetBrains.Annotations;
+using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace essentialMix.Linq;
 
@@ -61,8 +62,8 @@ public class QueryTranslatorProvider<T> : QueryTranslatorProvider, IQueryProvide
 		// Run all visitors in order
 		IEnumerable<ExpressionVisitor> visitors = new ExpressionVisitor[] { this }.Concat(_visitors);
 		Expression result = expression;
-			
-		foreach (ExpressionVisitor visitor in visitors) 
+
+		foreach (ExpressionVisitor visitor in visitors)
 			result = visitor.Visit(result);
 
 		return result;
