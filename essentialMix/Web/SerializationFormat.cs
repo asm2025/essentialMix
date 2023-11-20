@@ -3,7 +3,7 @@
 namespace essentialMix.Web;
 
 [Flags]
-public enum Formatters
+public enum SerializationFormat
 {
 	None = 0,
 	Xml = 1,

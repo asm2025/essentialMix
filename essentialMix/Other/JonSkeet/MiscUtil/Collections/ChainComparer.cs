@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using essentialMix.Collections;
 using essentialMix.Comparers;
 using JetBrains.Annotations;
 
@@ -34,10 +35,10 @@ public class ChainComparer<T> : IGenericComparer<T>
 	}
 
 	[NotNull]
-	protected SynchronizedCollection<IComparer<T>> Comparers { get; } = new SynchronizedCollection<IComparer<T>>();
+	protected IList<IComparer<T>> Comparers { get; } = ListBase.Synchronized(new ListBase<IComparer<T>>());
 
 	[NotNull]
-	protected SynchronizedCollection<IEqualityComparer<T>> EqualityComparers { get; } = new SynchronizedCollection<IEqualityComparer<T>>();
+	protected IList<IEqualityComparer<T>> EqualityComparers { get; } = ListBase.Synchronized(new ListBase<IEqualityComparer<T>>());
 
 	public virtual int Compare(T x, T y)
 	{

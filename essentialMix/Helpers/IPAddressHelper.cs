@@ -5,6 +5,8 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using essentialMix.Extensions;
 using essentialMix.IO;
 using JetBrains.Annotations;
@@ -195,11 +197,16 @@ public static class IPAddressHelper
 			foreach (UnicastIPAddressInformation address in properties.UnicastAddresses)
 			{
 				if (address.Address.AddressFamily != AddressFamily.InterNetwork || !address.IsDnsEligible) continue;
+
 				if (address.Address.Equals(IPAddress.Any) ||
 					address.Address.Equals(IPAddress.Loopback) ||
 					address.Address.Equals(IPAddress.IPv6Any) ||
 					address.Address.Equals(IPAddress.IPv6Loopback) ||
-					address.Address.Equals(IPAddress.IPv6None)) continue;
+					address.Address.Equals(IPAddress.IPv6None))
+				{
+					continue;
+				}
+
 				if (address.DuplicateAddressDetectionState is DuplicateAddressDetectionState.Invalid or DuplicateAddressDetectionState.Duplicate) continue;
 				yield return address.Address;
 			}
@@ -218,6 +225,31 @@ public static class IPAddressHelper
 			};
 			WebRequest request = UriHelper.MakeHttpWebRequest(STR_PUBLIC_IP, settings);
 			string content = request.ReadToEnd(settings);
+			if (string.IsNullOrEmpty(content)) return null;
+
+			Match match = __extractIP.Match(content);
+			result = match.Success ? IPAddress.Parse(match.Groups["ip"].Value) : null;
+		}
+		catch
+		{
+			result = null;
+		}
+
+		return result;
+	}
+
+	public static async Task<IPAddress> GetPublicIPAsync(CancellationToken token = default(CancellationToken))
+	{
+		IPAddress result;
+
+		try
+		{
+			IOHttpRequestSettings settings = new IOHttpRequestSettings
+			{
+				OnResponseReceived = r => ((HttpWebResponse)r).StatusCode == HttpStatusCode.OK
+			};
+			WebRequest request = UriHelper.MakeHttpWebRequest(STR_PUBLIC_IP, settings);
+			string content = await request.ReadToEndAsync(settings, token);
 			if (string.IsNullOrEmpty(content)) return null;
 
 			Match match = __extractIP.Match(content);
