@@ -9,9 +9,9 @@
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<OutputPath>..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
-		<AssemblyVersion>15.0.1.0</AssemblyVersion>
-		<FileVersion>23.11.20</FileVersion>
-		<Version>15.0.1.0</Version>
+		<AssemblyVersion>15.0.2.0</AssemblyVersion>
+		<FileVersion>24.01.29</FileVersion>
+		<Version>15.0.2.0</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -47,7 +47,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>15.0.1.0</PackageVersion>
+		<PackageVersion>15.0.2.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns, database, orm, dbms, mssql</PackageTags>
@@ -71,7 +71,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
-		<PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+		<PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
 	</ItemGroup>
 
 	<ItemGroup>
