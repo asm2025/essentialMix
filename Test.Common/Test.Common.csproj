@@ -3,9 +3,9 @@
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-		<TargetFramework>netstandard2.1</TargetFramework>
+		<TargetFramework>netstandard2.0</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<LangVersion>11.0</LangVersion>
+		<LangVersion>12.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<Prefer32Bit>false</Prefer32Bit>
 		<Platforms>AnyCPU;x64;x86</Platforms>
@@ -47,7 +47,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Bogus" Version="34.0.2" />
+		<PackageReference Include="Bogus" Version="35.4.0" />
 		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>

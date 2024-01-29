@@ -82,7 +82,7 @@ public static class WebResponseExtension
 
 			do
 			{
-				length = await reader.ReadAsync(chars, token);
+				length = await reader.ReadAsync(chars);
 			}
 			while (!token.IsCancellationRequested && length > 0 && ioOnRead.OnRead(chars, length));
 
@@ -143,7 +143,7 @@ public static class WebResponseExtension
 		{
 			stream = GetStream(thisValue);
 			token.ThrowIfCancellationRequested();
-			if (stream == null) return null;
+			if (stream == null) return Task.FromResult((string)null);
 			reader = new StreamReader(stream, settings.Encoding, true, settings.BufferSize);
 			result = reader.ReadToEndAsync().Execute();
 			token.ThrowIfCancellationRequested();
@@ -358,14 +358,11 @@ public static class WebResponseExtension
 						if (hasTitleFlag && contents.Contains("</head>", StringComparison.OrdinalIgnoreCase)) hasTitleFlag = false;
 					}
 
-					if (hasSearchFlag)
+					if (hasSearchFlag && contents.Contains(searchFor!, comparison))
 					{
 						// ReSharper disable once AssignNullToNotNullAttribute
-						if (contents.Contains(searchFor, comparison))
-						{
-							result.Status = UrlSearchStatus.Found;
-							hasSearchFlag = false;
-						}
+						result.Status = UrlSearchStatus.Found;
+						hasSearchFlag = false;
 					}
 
 					return hasTitleFlag || hasSearchFlag || hasBufferFlag;
@@ -453,14 +450,11 @@ public static class WebResponseExtension
 						if (hasTitleFlag && contents.Contains("</head>", StringComparison.OrdinalIgnoreCase)) hasTitleFlag = false;
 					}
 
-					if (hasSearchFlag)
+					if (hasSearchFlag && contents.Contains(searchFor!, comparison))
 					{
 						// ReSharper disable once AssignNullToNotNullAttribute
-						if (contents.Contains(searchFor, comparison))
-						{
-							result.Status = UrlSearchStatus.Found;
-							hasSearchFlag = false;
-						}
+						result.Status = UrlSearchStatus.Found;
+						hasSearchFlag = false;
 					}
 
 					token.ThrowIfCancellationRequested();

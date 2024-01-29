@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections;
 
 [Serializable]
-public abstract class KeyedCollectionBase<TKey, TValue> : System.Collections.ObjectModel.KeyedCollection<TKey, TValue>, IReadOnlyKeyedCollection<TKey, TValue>, IList<TValue>, IList, IReadOnlyList<TValue>, IReadOnlyCollection<TValue>
+public abstract class KeyedCollectionBase<TKey, TValue> : System.Collections.ObjectModel.KeyedCollection<TKey, TValue>, IReadOnlyKeyedCollection<TKey, TValue>, IList<TValue>, IList
 {
 	protected KeyedCollectionBase()
 		: this((IEqualityComparer<TKey>)null)
@@ -46,11 +46,23 @@ public abstract class KeyedCollectionBase<TKey, TValue> : System.Collections.Obj
 		return Dictionary?.GetEnumerator() ?? Enumerable.Empty<KeyValuePair<TKey, TValue>>().GetEnumerator();
 	}
 
-	void IList.Remove([NotNull] object key) { Remove((TKey)key); }
+	void IList.Remove([NotNull] object value) { Remove((TKey)value); }
 
 	public bool ContainsKey([NotNull] TKey key) { return Contains(key); }
 
-	bool IList.Contains(object key) { return key is TKey k && Contains(k); }
+	/// <inheritdoc />
+	public bool TryGetValue(TKey key, out TValue value)
+	{
+		if (Dictionary == null)
+		{
+			value = default(TValue);
+			return false;
+		}
+
+		return Dictionary.TryGetValue(key, out value);
+	}
+
+	bool IList.Contains(object value) { return value is TKey k && Contains(k); }
 
 	public virtual void MoveItem(int index, int newIndex)
 	{

@@ -7,7 +7,7 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<TargetFramework>net6.0-windows</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<LangVersion>11.0</LangVersion>
+		<LangVersion>12.0</LangVersion>
 		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
 		<Prefer32Bit>false</Prefer32Bit>
 		<Platforms>AnyCPU;x64;x86</Platforms>
@@ -66,7 +66,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Bogus" Version="34.0.2" />
+		<PackageReference Include="Bogus" Version="35.4.0" />
 		<PackageReference Include="Crayon" Version="2.0.69" />
 		<PackageReference Include="EasyConsoleStd" Version="2.0.0" />
 		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
