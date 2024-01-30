@@ -3,18 +3,16 @@
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>netstandard2.1</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>12.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<SignAssembly>false</SignAssembly>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<AssemblyOriginatorKeyFile>..\sign.pfx</AssemblyOriginatorKeyFile>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<OutputPath>..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
-		<AssemblyVersion>14.0.11.0</AssemblyVersion>
-		<FileVersion>23.11.16</FileVersion>
-		<Version>14.0.11.0</Version>
+		<AssemblyVersion>15.0.2.0</AssemblyVersion>
+		<FileVersion>24.01.29</FileVersion>
+		<Version>15.0.2.0</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -50,7 +48,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>14.0.11.0</PackageVersion>
+		<PackageVersion>15.0.2.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns</PackageTags>
@@ -76,15 +74,13 @@
 		<PackageReference Include="Enums.NET" Version="4.0.2" />
 		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
-		<PackageReference Include="Microsoft.Net.Http.Headers" Version="2.1.14" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
 		<PackageReference Include="OpenMcdf" Version="2.3.0" />
 		<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
-		<PackageReference Include="System.Security.Cryptography.Xml" Version="6.0.1" />
-		<PackageReference Include="System.Security.Permissions" Version="6.0.0" />
-		<PackageReference Include="System.ServiceModel.Primitives" Version="4.10.3" />
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
-		<PackageReference Include="System.Threading.AccessControl" Version="6.0.0" />
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.0" />
+		<PackageReference Include="System.Security.Permissions" Version="8.0.0" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+		<PackageReference Include="System.Threading.AccessControl" Version="8.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
