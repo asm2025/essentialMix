@@ -50,18 +50,6 @@ public abstract class KeyedCollectionBase<TKey, TValue> : System.Collections.Obj
 
 	public bool ContainsKey([NotNull] TKey key) { return Contains(key); }
 
-	/// <inheritdoc />
-	public bool TryGetValue(TKey key, out TValue value)
-	{
-		if (Dictionary == null)
-		{
-			value = default(TValue);
-			return false;
-		}
-
-		return Dictionary.TryGetValue(key, out value);
-	}
-
 	bool IList.Contains(object value) { return value is TKey k && Contains(k); }
 
 	public virtual void MoveItem(int index, int newIndex)
