@@ -71,11 +71,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Enums.NET" Version="4.0.2" />
+		<PackageReference Include="Enums.NET" Version="5.0.0" />
 		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
-		<PackageReference Include="OpenMcdf" Version="2.3.0" />
+		<PackageReference Include="OpenMcdf" Version="2.3.1" />
 		<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
 		<PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.0" />
 		<PackageReference Include="System.Security.Permissions" Version="8.0.0" />
