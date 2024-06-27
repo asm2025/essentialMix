@@ -9,9 +9,9 @@
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<OutputPath>..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
-		<AssemblyVersion>15.0.3.0</AssemblyVersion>
-		<FileVersion>24.01.30</FileVersion>
-		<Version>15.0.3.0</Version>
+		<AssemblyVersion>15.0.4.0</AssemblyVersion>
+		<FileVersion>24.06.27</FileVersion>
+		<Version>15.0.4.0</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -47,7 +47,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>15.0.3.0</PackageVersion>
+		<PackageVersion>15.0.4.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns, database, orm, dbms, mssql</PackageTags>
