@@ -10,9 +10,9 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<OutputPath>..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
-		<AssemblyVersion>15.0.4.0</AssemblyVersion>
-		<FileVersion>24.06.27</FileVersion>
-		<Version>15.0.4.0</Version>
+		<AssemblyVersion>15.0.5.0</AssemblyVersion>
+		<FileVersion>24.09.12</FileVersion>
+		<Version>15.0.5.0</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -48,7 +48,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>15.0.4.0</PackageVersion>
+		<PackageVersion>15.0.5.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns</PackageTags>
@@ -72,7 +72,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Enums.NET" Version="5.0.0" />
-		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2024.2.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
 		<PackageReference Include="OpenMcdf" Version="2.3.1" />
