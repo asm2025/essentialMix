@@ -1,22 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Pipes;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Security;
-using System.Security.Cryptography;
-using System.Security.Principal;
-using System.ServiceProcess;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using Bogus.DataSets;
+﻿using Bogus.DataSets;
 using essentialMix;
 using essentialMix.Collections;
 using essentialMix.Comparers;
@@ -35,8 +17,27 @@ using essentialMix.Threading.Patterns.ProducerConsumer;
 using essentialMix.Windows.Helpers;
 using essentialMix.Windows.IO;
 using essentialMix.Windows.Threading;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Other.JonSkeet.MiscUtil.Collections;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Pipes;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Security;
+using System.Security.Cryptography;
+using System.Security.Principal;
+using System.ServiceProcess;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Test.Common;
 using Test.Common.Model;
 using static Crayon.Output;
@@ -292,7 +293,7 @@ work with {Constants.HEAVY} items.");
 				Console.WriteLine($"{expression} => {sb}");
 			}
 
-			static void Add(StringBuilder sb, object value)
+			static void Add([NotNull] StringBuilder sb, object value)
 			{
 				if (sb.Length > 1 && sb[sb.Length - 1] != '{') sb.Append(", ");
 
@@ -672,7 +673,7 @@ work with {Constants.HEAVY} items.");
 
 			clock.Stop();
 
-			static void QueueStarted(IProducerConsumer<int> queue, IReadOnlyCollection<int> values, ThreadQueueMode mode, Stopwatch clock, string timeoutString)
+			static void QueueStarted([NotNull] IProducerConsumer<int> queue, [NotNull] IReadOnlyCollection<int> values, ThreadQueueMode mode, [NotNull] Stopwatch clock, [NotNull] string timeoutString)
 			{
 				Console.WriteLine();
 				Console.WriteLine($"Starting multi-thread test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Count.ToString())}, threads: {Bright.Cyan(queue.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}...");
@@ -682,7 +683,7 @@ work with {Constants.HEAVY} items.");
 				clock.Restart();
 			}
 
-			static void QueueCompleted(IProducerConsumer<int> queue, IReadOnlyCollection<int> values, ICollection<int> visited, IList<int> duplicates, ThreadQueueMode mode, Stopwatch clock, string timeoutString, int written)
+			static void QueueCompleted([NotNull] IProducerConsumer<int> queue, [NotNull] IReadOnlyCollection<int> values, [NotNull] ICollection<int> visited, [NotNull] IList<int> duplicates, ThreadQueueMode mode, [NotNull] Stopwatch clock, [NotNull] string timeoutString, int written)
 			{
 				long elapsed = clock.ElapsedMilliseconds;
 				Console.WriteLine();
@@ -705,7 +706,7 @@ work with {Constants.HEAVY} items.");
 				}
 			}
 
-			static void Exec(int e, ref int written, ISet<int> visited, IList<int> duplicates, CountdownEvent threshold)
+			static void Exec(int e, ref int written, [NotNull] ISet<int> visited, IList<int> duplicates, [NotNull] CountdownEvent threshold)
 			{
 				Task.Delay(RNGRandomHelper.Next(10, 100)).Execute();
 				Console.Write($"{e:D4} ");
@@ -788,7 +789,7 @@ work with {Constants.HEAVY} items.");
 
 			clock.Stop();
 
-			static void DoTheTest(IReadOnlyCollection<Student> values, ThreadQueueMode mode, ref BinomialHeap<Student> priorityQueue, HashSet<Student> visited, List<Student> duplicates, int threads, Stopwatch clock, int timeout)
+			static void DoTheTest([NotNull] IReadOnlyCollection<Student> values, ThreadQueueMode mode, [NotNull] ref BinomialHeap<Student> priorityQueue, [NotNull] HashSet<Student> visited, [NotNull] List<Student> duplicates, int threads, Stopwatch clock, int timeout)
 			{
 				int externalId = 0;
 				CancellationTokenSource cts = null;
@@ -950,7 +951,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				return true;
 			}
 
-			static void QueueStarted(IProducerConsumer<Student> queue, IReadOnlyCollection<Student> values, ThreadQueueMode mode, Stopwatch clock, string timeoutString)
+			static void QueueStarted([NotNull] IProducerConsumer<Student> queue, [NotNull] IReadOnlyCollection<Student> values, ThreadQueueMode mode, [NotNull] Stopwatch clock, [NotNull] string timeoutString)
 			{
 				Console.WriteLine();
 				Console.WriteLine($"Starting multi-thread test. mode: '{Bright.Cyan(mode.ToString())}', values: {Bright.Cyan(values.Count.ToString())}, threads: {Bright.Cyan(queue.Threads.ToString())}, timeout: {Bright.Cyan(timeoutString)}...");
@@ -960,7 +961,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				clock.Restart();
 			}
 
-			static void QueueCompleted(IProducerConsumer<Student> queue, IReadOnlyCollection<Student> values, ICollection<Student> visited, IList<Student> duplicates, ThreadQueueMode mode, ref int externalId, Stopwatch clock, string timeoutString, int written)
+			static void QueueCompleted([NotNull] IProducerConsumer<Student> queue, [NotNull] IReadOnlyCollection<Student> values, [NotNull] ICollection<Student> visited, [NotNull] IList<Student> duplicates, ThreadQueueMode mode, ref int externalId, [NotNull] Stopwatch clock, [NotNull] string timeoutString, int written)
 			{
 				Interlocked.Exchange(ref externalId, 0);
 				long elapsed = clock.ElapsedMilliseconds;
@@ -984,7 +985,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				}
 			}
 
-			static void Exec(Student e, ref int written, ISet<Student> visited, List<Student> duplicates, CountdownEvent threshold)
+			static void Exec([NotNull] Student e, ref int written, [NotNull] ISet<Student> visited, List<Student> duplicates, [NotNull] CountdownEvent threshold)
 			{
 				Task.Delay(RNGRandomHelper.Next(10, 100)).Execute();
 				Console.WriteLine($"{e.External:D2}-{e.Id:D2}. {e.Name}, Grade = {e.Grade:###.##}");
@@ -1022,14 +1023,15 @@ The external id reflects the order by which they are scheduled and the -* part i
 				ObjectHelper.Dispose(ref locker);
 			}
 
-			static async Task<int> Method1(AsyncLock locker)
+			static async Task<int> Method1([NotNull] AsyncLock locker)
 			{
 				await locker.EnterAsync();
 				await Task.Delay(2000);
 				return 123;
 			}
 
-			static async Task<string> Method2(AsyncLock locker)
+			[ItemNotNull]
+			static async Task<string> Method2([NotNull] AsyncLock locker)
 			{
 				await locker.EnterAsync();
 				await Task.Delay(2000);
@@ -1559,7 +1561,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			clock.Stop();
 
-			static void DoTheTest(Deque<int> deque, int[] values, Action<int> add, Func<int> remove, bool print, Stopwatch clock)
+			static void DoTheTest([NotNull] Deque<int> deque, [NotNull] int[] values, Action<int> add, Func<int> remove, bool print, [NotNull] Stopwatch clock)
 			{
 				deque.Clear();
 				int count = deque.Count;
@@ -1687,7 +1689,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			clock.Stop();
 
-			static void DoTheTest(LinkedDeque<int> deque, int[] values, Action<int> add, Func<int> remove, bool print, Stopwatch clock)
+			static void DoTheTest([NotNull] LinkedDeque<int> deque, [NotNull] int[] values, Action<int> add, Func<int> remove, bool print, [NotNull] Stopwatch clock)
 			{
 				deque.Clear();
 				int count = deque.Count;
@@ -1813,7 +1815,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			clock.Stop();
 
-			static void DoTheTest(CircularBuffer<int> buffer, int[] values, Action<int> add, Func<int> remove, bool print, Stopwatch clock)
+			static void DoTheTest([NotNull] CircularBuffer<int> buffer, [NotNull] int[] values, Action<int> add, Func<int> remove, bool print, [NotNull] Stopwatch clock)
 			{
 				buffer.Clear();
 				int count = buffer.Count;
@@ -1948,7 +1950,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			clock.Stop();
 
-			static void DoTheTest(LinkedCircularBuffer<int> buffer, int[] values, Action<int> add, Func<int> remove, bool print, Stopwatch clock)
+			static void DoTheTest([NotNull] LinkedCircularBuffer<int> buffer, [NotNull] int[] values, Action<int> add, Func<int> remove, bool print, [NotNull] Stopwatch clock)
 			{
 				buffer.Clear();
 				int count = buffer.Count;
@@ -2075,7 +2077,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			clock.Stop();
 
-			static void DoTheTest(BitCollection collection, IList<uint> values, bool print, Stopwatch clock)
+			static void DoTheTest([NotNull] BitCollection collection, [NotNull] IList<uint> values, bool print, [NotNull] Stopwatch clock)
 			{
 				collection.Clear();
 				int count = collection.Count;
@@ -2207,7 +2209,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			clock.Stop();
 
-			static void DoTheTest(QueueAdapter<Queue<int>, int> adapter, int[] values, Action<int> add, Func<int> remove, bool print, Stopwatch clock)
+			static void DoTheTest(QueueAdapter<Queue<int>, int> adapter, [NotNull] int[] values, Action<int> add, Func<int> remove, bool print, [NotNull] Stopwatch clock)
 			{
 				adapter.Clear();
 				int count = adapter.Count;
@@ -2899,7 +2901,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, IList<int> array)
+			static void DoTheTest<TNode>([NotNull] LinkedBinaryTree<TNode, int> tree, [NotNull] IList<int> array)
 				where TNode : LinkedBinaryNode<TNode, int>
 			{
 				Console.WriteLine();
@@ -2953,7 +2955,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, int[] values)
+			static void DoTheTest<TNode>([NotNull] LinkedBinaryTree<TNode, int> tree, [NotNull] int[] values)
 				where TNode : LinkedBinaryNode<TNode, int>
 			{
 				Console.WriteLine();
@@ -3060,7 +3062,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			clock.Stop();
 
-			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree, int[] values, Stopwatch clock)
+			static void DoTheTest<TNode>([NotNull] LinkedBinaryTree<TNode, int> tree, [NotNull] int[] values, [NotNull] Stopwatch clock)
 				where TNode : LinkedBinaryNode<TNode, int>
 			{
 				Console.WriteLine();
@@ -3152,7 +3154,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			clock.Stop();
 
-			static void DoTheTest<T>(SortedSet<T> sortedSet, T[] values, Stopwatch clock)
+			static void DoTheTest<T>([NotNull] SortedSet<T> sortedSet, [NotNull] T[] values, [NotNull] Stopwatch clock)
 			{
 				Console.WriteLine();
 				Console.WriteLine(Bright.Green($"Testing {sortedSet.GetType().Name}..."));
@@ -3264,7 +3266,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode>(LinkedBinaryTree<TNode, int> tree1, LinkedBinaryTree<TNode, int> tree2, int[] array)
+			static void DoTheTest<TNode>([NotNull] LinkedBinaryTree<TNode, int> tree1, [NotNull] LinkedBinaryTree<TNode, int> tree2, [NotNull] int[] array)
 				where TNode : LinkedBinaryNode<TNode, int>
 			{
 				Console.WriteLine();
@@ -3327,7 +3329,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				}
 			}
 
-			static void DoTheTest(Trie<char> trie, string token, ISet<string> values)
+			static void DoTheTest([NotNull] Trie<char> trie, [NotNull] string token, ISet<string> values)
 			{
 				Console.WriteLine($"Test find '{Bright.Cyan().Underline(token)}'...");
 
@@ -3734,7 +3736,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(BinaryHeapBase<TNode, T> heap, IList<T> array)
+			static void DoTheTest<TNode, T>([NotNull] BinaryHeapBase<TNode, T> heap, [NotNull] IList<T> array)
 				where TNode : BinaryNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -3785,7 +3787,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(BinaryHeapBase<TNode, T> heap, T[] array)
+			static void DoTheTest<TNode, T>([NotNull] BinaryHeapBase<TNode, T> heap, [NotNull] T[] array)
 				where TNode : BinaryNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -3848,7 +3850,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(BinaryHeapBase<TNode, T> heap, T[] array, int k)
+			static void DoTheTest<TNode, T>([NotNull] BinaryHeapBase<TNode, T> heap, [NotNull] T[] array, int k)
 				where TNode : BinaryNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -3902,7 +3904,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<T>(BinaryHeap<T> heap, T[] array, T newKeyValue)
+			static void DoTheTest<T>([NotNull] BinaryHeap<T> heap, [NotNull] T[] array, T newKeyValue)
 			{
 				Queue<T> queue = new Queue<T>();
 				int max = Math.Min(MAX, array.Length);
@@ -3936,7 +3938,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 			}
 
-			static void DoTheKeyTest<TKey, TValue>(BinaryHeap<TKey, TValue> heap, TValue[] array, TKey newKeyValue)
+			static void DoTheKeyTest<TKey, TValue>([NotNull] BinaryHeap<TKey, TValue> heap, [NotNull] TValue[] array, TKey newKeyValue)
 			{
 				Queue<TKey> queue = new Queue<TKey>();
 				int max = Math.Min(MAX, array.Length);
@@ -4005,7 +4007,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array)
+			static void DoTheTest<TNode, T>([NotNull] SiblingsHeapBase<TNode, T> heap, [NotNull] T[] array)
 				where TNode : BinomialNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -4058,7 +4060,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array)
+			static void DoTheTest<TNode, T>([NotNull] SiblingsHeapBase<TNode, T> heap, [NotNull] T[] array)
 				where TNode : BinomialNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -4121,7 +4123,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array, int k)
+			static void DoTheTest<TNode, T>([NotNull] SiblingsHeapBase<TNode, T> heap, [NotNull] T[] array, int k)
 				where TNode : BinomialNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -4175,7 +4177,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<T>(BinomialHeap<T> heap, T[] array, T newKeyValue)
+			static void DoTheTest<T>([NotNull] BinomialHeap<T> heap, [NotNull] T[] array, T newKeyValue)
 			{
 				int max = Math.Min(MAX, array.Length);
 				Queue<T> queue = new Queue<T>();
@@ -4207,7 +4209,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 			}
 
-			static void DoTheKeyedTest<TKey, TValue>(BinomialHeap<TKey, TValue> heap, TValue[] array, TKey newKeyValue)
+			static void DoTheKeyedTest<TKey, TValue>([NotNull] BinomialHeap<TKey, TValue> heap, [NotNull] TValue[] array, TKey newKeyValue)
 			{
 				Queue<TKey> queue = new Queue<TKey>();
 				int max = Math.Min(MAX, array.Length);
@@ -4276,7 +4278,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array)
+			static void DoTheTest<TNode, T>([NotNull] SiblingsHeapBase<TNode, T> heap, [NotNull] T[] array)
 				where TNode : PairingNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -4329,7 +4331,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array)
+			static void DoTheTest<TNode, T>([NotNull] SiblingsHeapBase<TNode, T> heap, [NotNull] T[] array)
 				where TNode : PairingNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -4392,7 +4394,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array, int k)
+			static void DoTheTest<TNode, T>([NotNull] SiblingsHeapBase<TNode, T> heap, [NotNull] T[] array, int k)
 				where TNode : PairingNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -4446,7 +4448,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<T>(PairingHeap<T> heap, T[] array, T newKeyValue)
+			static void DoTheTest<T>([NotNull] PairingHeap<T> heap, [NotNull] T[] array, T newKeyValue)
 			{
 				int max = Math.Min(MAX, array.Length);
 				Queue<T> queue = new Queue<T>();
@@ -4478,7 +4480,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 			}
 
-			static void DoTheKeyTest<TKey, TValue>(PairingHeap<TKey, TValue> heap, TValue[] array, TKey newKeyValue)
+			static void DoTheKeyTest<TKey, TValue>([NotNull] PairingHeap<TKey, TValue> heap, [NotNull] TValue[] array, TKey newKeyValue)
 			{
 				int max = Math.Min(MAX, array.Length);
 				Queue<TKey> queue = new Queue<TKey>();
@@ -4545,7 +4547,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array)
+			static void DoTheTest<TNode, T>([NotNull] SiblingsHeapBase<TNode, T> heap, [NotNull] T[] array)
 				where TNode : FibonacciNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -4598,7 +4600,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array)
+			static void DoTheTest<TNode, T>([NotNull] SiblingsHeapBase<TNode, T> heap, [NotNull] T[] array)
 				where TNode : FibonacciNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -4661,7 +4663,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<TNode, T>(SiblingsHeapBase<TNode, T> heap, T[] array, int k)
+			static void DoTheTest<TNode, T>([NotNull] SiblingsHeapBase<TNode, T> heap, [NotNull] T[] array, int k)
 				where TNode : FibonacciNodeBase<TNode, T>
 			{
 				Console.WriteLine(Bright.Green($"Test adding ({heap.GetType().Name})..."));
@@ -4715,7 +4717,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			}
 			while (more);
 
-			static void DoTheTest<T>(FibonacciHeap<T> heap, T[] array, T newKeyValue)
+			static void DoTheTest<T>([NotNull] FibonacciHeap<T> heap, [NotNull] T[] array, T newKeyValue)
 			{
 				int max = Math.Min(MAX, array.Length);
 				Queue<T> queue = new Queue<T>();
@@ -4747,7 +4749,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine();
 			}
 
-			static void DoTheKeyTest<TKey, TValue>(FibonacciHeap<TKey, TValue> heap, TValue[] array, TKey newKeyValue)
+			static void DoTheKeyTest<TKey, TValue>([NotNull] FibonacciHeap<TKey, TValue> heap, [NotNull] TValue[] array, TKey newKeyValue)
 			{
 				int max = Math.Min(MAX, array.Length);
 				Queue<TKey> queue = new Queue<TKey>();
@@ -4874,7 +4876,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 			clock.Stop();
 
-			static void DoHeapTest<T>(IHeap<T> heap, T[] values, Stopwatch clock)
+			static void DoHeapTest<T>([NotNull] IHeap<T> heap, [NotNull] T[] values, [NotNull] Stopwatch clock)
 			{
 				Console.WriteLine();
 				Console.WriteLine(Bright.Green($"Testing {heap.GetType().Name}..."));
@@ -4909,60 +4911,54 @@ The external id reflects the order by which they are scheduled and the -* part i
 			WeightedGraphList<char, int> weightedGraph;
 			List<char> values = new List<char>();
 			Menu menu = new Menu()
-				.Add("Undirected graph", token =>
+				.Add("Undirected graph", () =>
 				{
 					Console.WriteLine();
 					graph = new UndirectedGraphList<char>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(graph, values);
-					return Task.CompletedTask;
 				})
-				.Add("Directed graph", token =>
+				.Add("Directed graph", () =>
 				{
 					Console.WriteLine();
 					graph = new DirectedGraphList<char>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(graph, values);
-					return Task.CompletedTask;
 				})
-				.Add("Mixed graph", token =>
+				.Add("Mixed graph", () =>
 				{
 					Console.WriteLine();
 					graph = new MixedGraphList<char>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(graph, values);
-					return Task.CompletedTask;
 				})
-				.Add("Weighted undirected graph", token =>
+				.Add("Weighted undirected graph", () =>
 				{
 					Console.WriteLine();
 					weightedGraph = new WeightedUndirectedGraphList<char, int>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(weightedGraph, values);
-					return Task.CompletedTask;
 				})
-				.Add("Weighted directed graph", token =>
+				.Add("Weighted directed graph", () =>
 				{
 					Console.WriteLine();
 					weightedGraph = new WeightedDirectedGraphList<char, int>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(weightedGraph, values);
-					return Task.CompletedTask;
 				})
-				.Add("Weighted mixed graph", token =>
+				.Add("Weighted mixed graph", () =>
 				{
 					Console.WriteLine();
 					weightedGraph = new WeightedMixedGraphList<char, int>();
 					if (values.Count == 0) AddValues(values);
 					DoTheTest(weightedGraph, values);
-					return Task.CompletedTask;
 				});
 
 			do
 			{
 				Console.Clear();
 				Title("Testing graph add()");
-				menu.Display(CancellationToken.None);
+				menu.Display();
 				Console.WriteLine();
 				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
 				ConsoleKeyInfo response = Console.ReadKey(true);
@@ -4996,7 +4992,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				Console.WriteLine(Bright.Green($"Added {count} characters to the set"));
 			}
 
-			static void DoTheTest<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, IList<char> values)
+			static void DoTheTest<TAdjacencyList, TEdge>([NotNull] GraphList<char, TAdjacencyList, TEdge> graph, [NotNull] IList<char> values)
 				where TAdjacencyList : class, ICollection<TEdge>
 			{
 				Console.WriteLine("Test adding nodes...");
@@ -5087,7 +5083,7 @@ or press {Bright.Red("ESCAPE")} key to exit this test. ");
 				Console.WriteLine();
 			}
 
-			static bool DoTheTestWithValue<TAdjacencyList, TEdge>(GraphList<char, TAdjacencyList, TEdge> graph, IList<char> values, char value)
+			static bool DoTheTestWithValue<TAdjacencyList, TEdge>([NotNull] GraphList<char, TAdjacencyList, TEdge> graph, IList<char> values, char value)
 				where TAdjacencyList : class, ICollection<TEdge>
 			{
 				const string LINE_SEPARATOR = "*******************************************************************************";
@@ -5548,7 +5544,7 @@ decrypted:
 			}
 			while (more);
 
-			static void DoTheTest<T>(ICollection<T> collection, T[] values)
+			static void DoTheTest<T>([NotNull] ICollection<T> collection, [NotNull] T[] values)
 			{
 				Console.WriteLine();
 				Console.WriteLine(Bright.Green($"Testing {collection.GetType().Name}..."));
@@ -5592,7 +5588,7 @@ decrypted:
 				Console.WriteLine($"Removed {removed} of {values.Length} items.");
 			}
 
-			static void DoTheTestWithValue<TKey, TValue>(IDictionary<TKey, TValue> dictionary, TKey[] keys, TValue[] values)
+			static void DoTheTestWithValue<TKey, TValue>([NotNull] IDictionary<TKey, TValue> dictionary, [NotNull] TKey[] keys, [NotNull] TValue[] values)
 			{
 				Console.WriteLine();
 				Console.WriteLine(Bright.Green($"Testing {dictionary.GetType().Name}..."));
@@ -5637,12 +5633,12 @@ decrypted:
 				Console.WriteLine($"Removed {removed} of {values.Length} items.");
 			}
 
-			static void onPropertyChanged(object sender, PropertyChangedEventArgs args)
+			static void onPropertyChanged(object sender, [NotNull] PropertyChangedEventArgs args)
 			{
 				Console.WriteLine($"{Bright.Cyan("Property")}[{Bright.Yellow(args.PropertyName)}]");
 			}
 
-			static void onCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+			static void onCollectionChanged(object sender, [NotNull] NotifyCollectionChangedEventArgs e)
 			{
 				string item = e.OldItems is { Count: > 0 }
 								? Convert.ToString(e.OldItems[0])
@@ -5690,7 +5686,7 @@ decrypted:
 
 			clock.Stop();
 
-			static void DoTheTest(BoundList<int> list, int[] values, bool print, Stopwatch clock)
+			static void DoTheTest([NotNull] BoundList<int> list, [NotNull] int[] values, bool print, [NotNull] Stopwatch clock)
 			{
 				list.Clear();
 				int count = list.Count;
@@ -6465,7 +6461,7 @@ decrypted:
 			while (more);
 		}
 
-		private static void Title(string title)
+		private static void Title([NotNull] string title)
 		{
 			Console.WriteLine();
 			Console.WriteLine(Bold().Bright.Black(title));

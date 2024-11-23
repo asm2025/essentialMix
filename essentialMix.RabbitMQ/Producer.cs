@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using essentialMix.Exceptions.Network;
+﻿using essentialMix.Exceptions.Network;
 using essentialMix.Extensions;
 using essentialMix.Messaging;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace essentialMix.RabbitMQ;
 
@@ -38,8 +38,13 @@ public abstract class Producer<TSettings> : Connector<TSettings>, IProducer
 
 		try
 		{
-			IBasicProperties properties = Channel.CreateBasicProperties();
-			Channel.BasicPublish(Settings.ExchangeQualifiedName, Settings.Route, true, properties, buffer);
+			BasicProperties properties = new BasicProperties
+			{
+				Persistent = true,
+				ContentType = "application/json",
+				DeliveryMode = DeliveryModes.Persistent
+			};
+			await Channel.BasicPublishAsync(Settings.ExchangeQualifiedName, Settings.Route, true, properties, buffer, token);
 		}
 		catch (AlreadyClosedException acx)
 		{
@@ -70,8 +75,13 @@ public abstract class Producer<TSettings> : Connector<TSettings>, IProducer
 
 			try
 			{
-				IBasicProperties properties = Channel.CreateBasicProperties();
-				Channel.BasicPublish(Settings.ExchangeQualifiedName, Settings.Route, true, properties, buffer);
+				BasicProperties properties = new BasicProperties
+				{
+					Persistent = true,
+					ContentType = "application/json",
+					DeliveryMode = DeliveryModes.Persistent
+				};
+				await Channel.BasicPublishAsync(Settings.ExchangeQualifiedName, Settings.Route, true, properties, buffer, token);
 				count++;
 			}
 			catch (AlreadyClosedException acx)

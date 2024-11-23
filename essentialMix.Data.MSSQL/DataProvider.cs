@@ -1,12 +1,12 @@
+using essentialMix.Data.Patterns.Provider;
+using essentialMix.Extensions;
+using JetBrains.Annotations;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Numerics;
-using essentialMix.Data.Patterns.Provider;
-using essentialMix.Extensions;
-using JetBrains.Annotations;
 
 namespace essentialMix.Data.MSSQL;
 

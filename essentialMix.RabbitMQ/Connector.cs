@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using essentialMix.Exceptions.Threading;
+﻿using essentialMix.Exceptions.Threading;
 using essentialMix.Extensions;
 using essentialMix.Helpers;
 using essentialMix.Messaging;
@@ -9,6 +6,9 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace essentialMix.RabbitMQ;
 
@@ -16,19 +16,13 @@ namespace essentialMix.RabbitMQ;
 /// Base class to handle common <see cref="Producer"/> / <see cref="Consumer"/>
 /// such as connecting and creating a channel.
 /// </summary>
-public abstract class Connector<TSettings> : BackgroundService, IConnector
+public abstract class Connector<TSettings>([CanBeNull] IConnectionFactory factory, [NotNull] TSettings settings, ILogger logger)
+	: BackgroundService, IConnector
 	where TSettings : ConnectorSettings, new()
 {
 	private object _syncRoot;
 	private IConnection _connection;
-	private IModel _channel;
-
-	protected Connector([CanBeNull] IConnectionFactory factory, [NotNull] TSettings settings, ILogger logger)
-	{
-		Factory = factory;
-		Settings = settings;
-		Logger = logger;
-	}
+	private IChannel _channel;
 
 	/// <inheritdoc />
 	public override void Dispose()
@@ -39,12 +33,12 @@ public abstract class Connector<TSettings> : BackgroundService, IConnector
 
 	public virtual bool IsConnected => _connection?.IsOpen == true;
 
-	protected IConnectionFactory Factory { get; set; }
+	protected IConnectionFactory Factory { get; set; } = factory;
 
 	[NotNull]
-	protected TSettings Settings { get; set; }
+	protected TSettings Settings { get; set; } = settings;
 
-	protected IModel Channel => _channel;
+	protected IChannel Channel => _channel;
 
 	protected object SyncRoot
 	{
@@ -55,10 +49,10 @@ public abstract class Connector<TSettings> : BackgroundService, IConnector
 		}
 	}
 
-	protected ILogger Logger { get; }
+	protected ILogger Logger { get; } = logger;
 
 	/// <inheritdoc />
-	public bool IsAvailable()
+	public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default(CancellationToken))
 	{
 		Logger.LogInformation("Checking if server is available.");
 
@@ -72,7 +66,8 @@ public abstract class Connector<TSettings> : BackgroundService, IConnector
 
 		try
 		{
-			connection = Factory?.CreateConnection();
+			connection = await Factory.CreateConnectionAsync(cancellationToken);
+			cancellationToken.ThrowIfCancellationRequested();
 			bool isConnected = connection is { IsOpen: true };
 			Logger.LogInformation($"Is connected: {isConnected}");
 			return isConnected;
@@ -88,28 +83,33 @@ public abstract class Connector<TSettings> : BackgroundService, IConnector
 		}
 	}
 
+	public Task<bool> ConnectAsync(CancellationToken cancellationToken = default(CancellationToken))
+	{
+		return ConnectAsync(null, cancellationToken);
+	}
+
 	/// <summary>
 	/// Connect to RabbitMQ using the <see cref="IConnectionFactory"/>.
 	/// </summary>
-	public virtual Task<bool> ConnectAsync(CancellationToken token = default(CancellationToken))
+	public virtual async Task<bool> ConnectAsync(CreateChannelOptions options, CancellationToken cancellationToken = default(CancellationToken))
 	{
-		token.ThrowIfCancellationRequested();
+		cancellationToken.ThrowIfCancellationRequested();
 		Logger.LogInformation("Connecting.");
 
 		if (IsConnected)
 		{
 			Logger.LogInformation("Already connected.");
-			return Task.FromResult(true);
+			return true;
 		}
 
-		if (token.CanBeCanceled)
+		if (cancellationToken.CanBeCanceled)
 		{
 			bool lockTaken;
 
 			if (!SpinWait.SpinUntil(() =>
 				{
 					lockTaken = Monitor.TryEnter(SyncRoot, TimeSpanHelper.MINIMUM);
-					return lockTaken || token.IsCancellationRequested;
+					return lockTaken || cancellationToken.IsCancellationRequested;
 				}, Settings.Timeout))
 			{
 				throw new LockTimeoutException();
@@ -124,12 +124,12 @@ public abstract class Connector<TSettings> : BackgroundService, IConnector
 
 		try
 		{
-			token.ThrowIfCancellationRequested();
-			OnConnecting();
+			cancellationToken.ThrowIfCancellationRequested();
+			await OnConnectingAsync();
 			Cleanup();
-			_connection = Factory?.CreateConnection();
-			if (_connection is not { IsOpen: true }) return Task.FromResult(false);
-			_channel = _connection.CreateModel();
+			_connection = await Factory.CreateConnectionAsync(cancellationToken);
+			if (_connection is not { IsOpen: true }) return false;
+			_channel = await _connection.CreateChannelAsync(options, cancellationToken);
 
 			/*
 			* We need to control the in-flight messages (unacked messages being delivered)
@@ -193,9 +193,10 @@ public abstract class Connector<TSettings> : BackgroundService, IConnector
 			* Which could have enabled this to be maintained globally per connection to control the number of threads.
 			* Unfortunately it is not, so we have to use magical numbers (grrr) which is difficult to control.
 			*/
-			Channel.BasicQos(0, 150, true);
-			Channel.ExchangeDeclare(Settings.ExchangeQualifiedName, Settings.ExchangeType.ToString().ToLowerInvariant(), Settings.Durable, Settings.AutoDelete);
-			OnConnected();
+			await Channel.BasicQosAsync(0, 150, true, cancellationToken);
+			cancellationToken.ThrowIfCancellationRequested();
+			await Channel.ExchangeDeclareAsync(Settings.ExchangeQualifiedName, Settings.ExchangeType.ToString().ToLowerInvariant(), Settings.Durable, Settings.AutoDelete, cancellationToken: cancellationToken);
+			await OnConnectedAsync();
 			result = true;
 			Logger.LogInformation("Connected.");
 		}
@@ -210,7 +211,7 @@ public abstract class Connector<TSettings> : BackgroundService, IConnector
 			Monitor.Exit(SyncRoot);
 		}
 
-		return Task.FromResult(result);
+		return result;
 	}
 
 	public virtual async Task DisconnectAsync(CancellationToken token = default(CancellationToken))
@@ -244,9 +245,9 @@ public abstract class Connector<TSettings> : BackgroundService, IConnector
 
 		try
 		{
-			OnDisconnecting();
+			await OnDisconnectingAsync();
 			await base.StopAsync(token);
-			OnDisconnected();
+			await OnDisconnectedAsync();
 			Logger.LogInformation("Disconnected.");
 		}
 		catch (Exception ex)
@@ -287,7 +288,7 @@ public abstract class Connector<TSettings> : BackgroundService, IConnector
 		try
 		{
 			await base.StartAsync(cancellationToken);
-			if (!await ConnectAsync(cancellationToken)) return;
+			if (!await ConnectAsync(null, cancellationToken)) return;
 			await OnStartedAsync(cancellationToken);
 			Logger.LogInformation("Finished.");
 		}
@@ -302,7 +303,6 @@ public abstract class Connector<TSettings> : BackgroundService, IConnector
 	}
 
 	/// <inheritdoc />
-	[NotNull]
 	public override Task StopAsync(CancellationToken cancellationToken)
 	{
 		Logger.LogInformation("Stopping.");
@@ -353,10 +353,10 @@ public abstract class Connector<TSettings> : BackgroundService, IConnector
 		}
 	}
 
-	protected virtual void OnConnecting() { }
-	protected virtual void OnConnected() { }
-	protected virtual void OnDisconnecting() { }
-	protected virtual void OnDisconnected() { }
+	protected virtual Task OnConnectingAsync() { return Task.CompletedTask; }
+	protected virtual Task OnConnectedAsync() { return Task.CompletedTask; }
+	protected virtual Task OnDisconnectingAsync() { return Task.CompletedTask; }
+	protected virtual Task OnDisconnectedAsync() { return Task.CompletedTask; }
 
 	protected void Cleanup()
 	{

@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using essentialMix.Extensions;
+﻿using essentialMix.Extensions;
 using essentialMix.Helpers;
 using essentialMix.Patterns.Object;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using RabbitMQFactory = RabbitMQ.Client.ConnectionFactory;
 
 namespace essentialMix.RabbitMQ;
@@ -85,13 +86,6 @@ public class ConnectionFactory : Disposable, IConnectionFactory
 	}
 
 	/// <inheritdoc />
-	public ICredentialsRefresher CredentialsRefresher
-	{
-		get => _factory.CredentialsRefresher;
-		set => _factory.CredentialsRefresher = value;
-	}
-
-	/// <inheritdoc />
 	public string ClientProvidedName
 	{
 		get => _factory.ClientProvidedName;
@@ -127,14 +121,6 @@ public class ConnectionFactory : Disposable, IConnectionFactory
 	}
 
 	/// <inheritdoc />
-	[Obsolete]
-	public bool UseBackgroundThreadsForIO
-	{
-		get => _factory.UseBackgroundThreadsForIO;
-		set => _factory.UseBackgroundThreadsForIO = value;
-	}
-
-	/// <inheritdoc />
 	public TimeSpan HandshakeContinuationTimeout
 	{
 		get => _factory.HandshakeContinuationTimeout;
@@ -149,37 +135,50 @@ public class ConnectionFactory : Disposable, IConnectionFactory
 	}
 
 	/// <inheritdoc />
+	public ushort ConsumerDispatchConcurrency { get; set; }
+
+	/// <inheritdoc />
+	[NotNull]
 	public AmqpTcpEndpoint Endpoint => _factory.Endpoint;
 
 	/// <inheritdoc />
-	public IAuthMechanismFactory AuthMechanismFactory(IList<string> mechanismNames) { return _factory.AuthMechanismFactory(mechanismNames); }
+	public IAuthMechanismFactory AuthMechanismFactory(IEnumerable<string> mechanismNames) { return _factory.AuthMechanismFactory(mechanismNames); }
 
 	/// <inheritdoc />
-	[NotNull]
-	public IConnection CreateConnection()
+	public Task<IConnection> CreateConnectionAsync(CancellationToken cancellationToken)
 	{
-		return Setup(_factory.CreateConnection());
+		return _factory.CreateConnectionAsync(cancellationToken).ContinueWith(e => Setup(e.Result), cancellationToken, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
 	}
 
 	/// <inheritdoc />
-	[NotNull]
-	public IConnection CreateConnection(string clientProvidedName) { return Setup(_factory.CreateConnection(clientProvidedName)); }
+	public Task<IConnection> CreateConnectionAsync(string clientProvidedName, CancellationToken cancellationToken = default(CancellationToken))
+	{
+		return _factory.CreateConnectionAsync(clientProvidedName, cancellationToken).ContinueWith(e => Setup(e.Result), cancellationToken, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+	}
 
 	/// <inheritdoc />
-	[NotNull]
-	public IConnection CreateConnection(IList<AmqpTcpEndpoint> endpoints) { return Setup(_factory.CreateConnection(endpoints)); }
+	public Task<IConnection> CreateConnectionAsync(IEnumerable<string> hostnames, CancellationToken cancellationToken = default(CancellationToken))
+	{
+		return _factory.CreateConnectionAsync(hostnames, cancellationToken).ContinueWith(e => Setup(e.Result), cancellationToken, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+	}
 
 	/// <inheritdoc />
-	[NotNull]
-	public IConnection CreateConnection(IList<AmqpTcpEndpoint> endpoints, string clientProvidedName) { return Setup(_factory.CreateConnection(endpoints, clientProvidedName)); }
+	public Task<IConnection> CreateConnectionAsync(IEnumerable<string> hostnames, string clientProvidedName, CancellationToken cancellationToken = default(CancellationToken))
+	{
+		return _factory.CreateConnectionAsync(hostnames, clientProvidedName, cancellationToken).ContinueWith(e => Setup(e.Result), cancellationToken, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+	}
 
 	/// <inheritdoc />
-	[NotNull]
-	public IConnection CreateConnection(IList<string> hostnames) { return Setup(_factory.CreateConnection(hostnames)); }
+	public Task<IConnection> CreateConnectionAsync(IEnumerable<AmqpTcpEndpoint> endpoints, CancellationToken cancellationToken = default(CancellationToken))
+	{
+		return _factory.CreateConnectionAsync(endpoints, cancellationToken).ContinueWith(e => Setup(e.Result), cancellationToken, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+	}
 
 	/// <inheritdoc />
-	[NotNull]
-	public IConnection CreateConnection(IList<string> hostnames, string clientProvidedName) { return Setup(_factory.CreateConnection(hostnames, clientProvidedName)); }
+	public Task<IConnection> CreateConnectionAsync(IEnumerable<AmqpTcpEndpoint> endpoints, string clientProvidedName, CancellationToken cancellationToken = new CancellationToken())
+	{
+		return _factory.CreateConnectionAsync(endpoints, clientProvidedName, cancellationToken).ContinueWith(e => Setup(e.Result), cancellationToken, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+	}
 
 	/// <inheritdoc />
 	public bool IsAvailable()
@@ -190,7 +189,7 @@ public class ConnectionFactory : Disposable, IConnectionFactory
 
 		try
 		{
-			connection = CreateConnection();
+			connection = CreateConnectionAsync(CancellationToken.None).Execute();
 			bool isConnected = connection is { IsOpen: true };
 			_logger.LogInformation($"Is connected: {isConnected}");
 			return isConnected;
@@ -212,44 +211,49 @@ public class ConnectionFactory : Disposable, IConnectionFactory
 	private IConnection Setup([NotNull] IConnection connection)
 	{
 		if (_logger == null) return connection;
-		connection.ConnectionBlocked += OnConnectionBlocked;
-		connection.ConnectionUnblocked += OnConnectionUnblocked;
-		connection.CallbackException += OnCallbackException;
-		connection.ConnectionShutdown += OnConnectionShutdown;
+		connection.ConnectionBlockedAsync += OnConnectionBlockedAsync;
+		connection.ConnectionUnblockedAsync += OnConnectionUnblockedAsync;
+		connection.CallbackExceptionAsync += OnCallbackExceptionAsync;
+		connection.ConnectionShutdownAsync += OnConnectionShutdownAsync;
 		_logger.LogInformation($"[START] {connection.Endpoint}");
 		return connection;
 	}
 
 	private void Release([NotNull] IConnection connection)
 	{
-		connection.ConnectionBlocked -= OnConnectionBlocked;
-		connection.ConnectionUnblocked -= OnConnectionUnblocked;
-		connection.CallbackException -= OnCallbackException;
-		connection.ConnectionShutdown -= OnConnectionShutdown;
+		connection.ConnectionBlockedAsync -= OnConnectionBlockedAsync;
+		connection.ConnectionUnblockedAsync -= OnConnectionUnblockedAsync;
+		connection.CallbackExceptionAsync -= OnCallbackExceptionAsync;
+		connection.ConnectionShutdownAsync -= OnConnectionShutdownAsync;
 	}
 
-	private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs args)
+	[NotNull]
+	private Task OnConnectionBlockedAsync(object sender, ConnectionBlockedEventArgs args)
 	{
-		if (sender is not IConnection cn) return;
-		_logger.LogWarning($"[BLOCKED] {cn.Endpoint} {args.Reason}");
+		if (sender is IConnection cn) _logger.LogWarning($"[BLOCKED] {cn.Endpoint} {args.Reason}");
+		return Task.CompletedTask;
 	}
 
-	private void OnConnectionUnblocked(object sender, EventArgs _)
+	[NotNull]
+	private Task OnConnectionUnblockedAsync(object sender, AsyncEventArgs asyncEventArgs)
 	{
-		if (sender is not IConnection cn) return;
-		_logger.LogInformation($"[UNBLOCKED] {cn.Endpoint}");
+		if (sender is IConnection cn) _logger.LogInformation($"[UNBLOCKED] {cn.Endpoint}");
+		return Task.CompletedTask;
 	}
 
-	private void OnCallbackException(object sender, CallbackExceptionEventArgs args)
+	[NotNull]
+	private Task OnCallbackExceptionAsync(object sender, CallbackExceptionEventArgs args)
 	{
-		if (sender is not IConnection cn) return;
-		_logger.LogError($"{cn.Endpoint} {args.Exception.CollectMessages()}");
+		if (sender is IConnection cn) _logger.LogError($"{cn.Endpoint} {args.Exception.CollectMessages()}");
+		return Task.CompletedTask;
 	}
 
-	private void OnConnectionShutdown(object sender, ShutdownEventArgs args)
+	[NotNull]
+	private Task OnConnectionShutdownAsync(object sender, ShutdownEventArgs args)
 	{
-		if (sender is not IConnection cn) return;
+		if (sender is not IConnection cn) return Task.CompletedTask;
 		Release(cn);
 		_logger.LogInformation($"[SHUTDOWN] {cn.Endpoint}, {args.Initiator} [{args.Cause}] {args.ReplyCode} {args.ReplyText}");
+		return Task.CompletedTask;
 	}
 }

@@ -5,15 +5,15 @@
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<LangVersion>11.0</LangVersion>
+		<LangVersion>12.0</LangVersion>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<PackageTags>utilities, tools, extensions, helpers, drawing, imaging</PackageTags>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<OutputPath>..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
-		<AssemblyVersion>15.0.5.0</AssemblyVersion>
+		<AssemblyVersion>15.0.6.0</AssemblyVersion>
 		<FileVersion>24.09.12</FileVersion>
-		<Version>15.0.5.0</Version>
+		<Version>15.0.6.0</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -49,7 +49,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>15.0.5.0</PackageVersion>
+		<PackageVersion>15.0.6.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns, drawing, imaging</PackageTags>
@@ -72,8 +72,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="JetBrains.Annotations" Version="2024.2.0" />
-		<PackageReference Include="System.Drawing.Common" Version="8.0.8" />
+		<PackageReference Include="JetBrains.Annotations" Version="2024.3.0" />
+		<PackageReference Include="System.Drawing.Common" Version="8.0.11" />
 	</ItemGroup>
 
 	<ItemGroup>

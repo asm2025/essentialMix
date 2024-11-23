@@ -1,13 +1,12 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using essentialMix.Exceptions.Network;
+﻿using essentialMix.Exceptions.Network;
 using essentialMix.Extensions;
 using essentialMix.Messaging;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace essentialMix.RabbitMQ;
 
@@ -20,7 +19,7 @@ public abstract class Consumer<TSettings> : Connector<TSettings>, IConsumer
 {
 	// each consumer will use its own queue to read the exchange. It will be deleted on Object's disposal.
 	private string _queueName;
-	private EventingBasicConsumer _consumer;
+	private AsyncEventingBasicConsumer _consumer;
 
 	/// <inheritdoc />
 	protected Consumer([CanBeNull] IConnectionFactory factory, [NotNull] TSettings settings, ILogger logger)
@@ -29,24 +28,24 @@ public abstract class Consumer<TSettings> : Connector<TSettings>, IConsumer
 	}
 
 	/// <inheritdoc />
-	protected override void OnConnected()
+	protected override async Task OnConnectedAsync()
 	{
-		_queueName = Channel.QueueDeclare(string.Empty, Settings.Durable, Settings.Exclusive, Settings.AutoDelete).QueueName;
-		Channel.QueueBind(_queueName, Settings.ExchangeQualifiedName, Settings.Route);
-		_consumer = new EventingBasicConsumer(Channel);
-		_consumer.Received += OnReceived;
-		Channel.BasicConsume(_queueName, false, _consumer);
-		base.OnConnected();
+		_queueName = (await Channel.QueueDeclareAsync(string.Empty, Settings.Durable, Settings.Exclusive, Settings.AutoDelete)).QueueName;
+		await Channel.QueueBindAsync(_queueName, Settings.ExchangeQualifiedName, Settings.Route);
+		_consumer = new AsyncEventingBasicConsumer(Channel);
+		_consumer.ReceivedAsync += OnReceivedAsync;
+		await Channel.BasicConsumeAsync(_queueName, false, GetType().Name, false, false, null, _consumer);
+		await base.OnConnectedAsync();
 	}
 
 	/// <inheritdoc />
-	protected override void OnDisconnected()
+	protected override async Task OnDisconnectedAsync()
 	{
-		_consumer.Received -= OnReceived;
-		Channel.QueueDelete(_queueName);
+		_consumer.ReceivedAsync -= OnReceivedAsync;
+		await Channel.QueueDeleteAsync(_queueName, false, true);
 		_queueName = null;
 		_consumer = null;
-		base.OnDisconnected();
+		await base.OnDisconnectedAsync();
 	}
 
 	/// <summary>
@@ -68,19 +67,19 @@ public abstract class Consumer<TSettings> : Connector<TSettings>, IConsumer
 	/// </summary>
 	protected abstract Task<bool> ProcessReceivedAsync([NotNull] BasicDeliverEventArgs args);
 
-	private async void OnReceived(object _, [NotNull] BasicDeliverEventArgs args)
+	private async Task OnReceivedAsync(object _, [NotNull] BasicDeliverEventArgs args)
 	{
 		Logger.LogInformation($"Received from {args.Exchange}, key: {args.RoutingKey}, tag: {args.ConsumerTag}, length: {args.Body.Length}{(args.Redelivered ? " [Redelivered]" : string.Empty)}.");
 
 		try
 		{
-			if (await ProcessReceivedAsync(args)) Channel.BasicAck(args.DeliveryTag, false);
-			else Channel.BasicReject(args.DeliveryTag, !args.Redelivered);
+			if (await ProcessReceivedAsync(args)) await Channel.BasicAckAsync(args.DeliveryTag, false);
+			else await Channel.BasicRejectAsync(args.DeliveryTag, !args.Redelivered);
 		}
 		catch (Exception ex)
 		{
 			Logger.LogError(ex.CollectMessages());
-			Channel.BasicNack(args.DeliveryTag, false, !args.Redelivered);
+			await Channel.BasicNackAsync(args.DeliveryTag, false, !args.Redelivered);
 		}
 	}
 }
