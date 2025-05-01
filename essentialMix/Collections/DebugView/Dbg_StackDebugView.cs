@@ -10,14 +10,9 @@ namespace essentialMix.Collections.DebugView;
 * collections in this solution assemblies.
 */
 [DebuggerNonUserCode]
-public sealed class Dbg_StackDebugView<T>
+public sealed class Dbg_StackDebugView<T>([NotNull] Stack<T> stack)
 {
-	private readonly Stack<T> _stack;
-
-	public Dbg_StackDebugView([NotNull] Stack<T> stack)
-	{
-		_stack = stack;
-	}
+	private readonly Stack<T> _stack = stack;
 
 	[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 	[NotNull]

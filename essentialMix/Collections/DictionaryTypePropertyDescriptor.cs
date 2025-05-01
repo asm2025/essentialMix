@@ -5,16 +5,12 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
-public class DictionaryTypePropertyDescriptor<TSource> : TypePropertyDescriptorBase
+public class DictionaryTypePropertyDescriptor<TSource>(
+	[NotNull] DictionaryTypeDescriptor<TSource> sourceTypeDescriptor,
+	[NotNull] object key)
+	: TypePropertyDescriptorBase(Convert.ToString(key), null)
 	where TSource : IDictionary
 {
-	public DictionaryTypePropertyDescriptor([NotNull] DictionaryTypeDescriptor<TSource> sourceTypeDescriptor, [NotNull] object key)
-		: base(Convert.ToString(key), null)
-	{
-		TypeDescriptorSource = sourceTypeDescriptor;
-		Key = key ?? throw new ArgumentNullException(nameof(key));
-	}
-
 	public override bool IsReadOnly => TypeDescriptorSource.IsReadOnly;
 
 	protected override object GetTargetValue() { return TypeDescriptorSource[Key]; }
@@ -30,8 +26,8 @@ public class DictionaryTypePropertyDescriptor<TSource> : TypePropertyDescriptorB
 	[NotNull]
 	protected override Type GetComponentType() { return TypeDescriptorSource.Source.GetType(); }
 
-	protected DictionaryTypeDescriptor<TSource> TypeDescriptorSource { get; }
-	protected object Key { get; }
+	protected DictionaryTypeDescriptor<TSource> TypeDescriptorSource { get; } = sourceTypeDescriptor;
+	protected object Key { get; } = key ?? throw new ArgumentNullException(nameof(key));
 }
 
 public class DictionaryTypePropertyDescriptor<TSource, TKey, TValue> : TypePropertyDescriptorBase

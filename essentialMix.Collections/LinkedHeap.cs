@@ -23,7 +23,8 @@ namespace essentialMix.Collections;
 [Serializable]
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_HeapDebugView<,>))]
-public abstract class LinkedHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICollection<T>, IReadOnlyCollection<T>, ICollection, IEquatable<LinkedHeapBase<TNode, T>>
+public abstract class LinkedHeapBase<TNode, T>(IComparer<T> comparer) : IBinaryHeapBase<TNode, T>, ICollection<T>,
+	IReadOnlyCollection<T>, ICollection, IEquatable<LinkedHeapBase<TNode, T>>
 	where TNode : class, ITreeNode<TNode, T>
 {
 	internal int _version;
@@ -37,11 +38,6 @@ public abstract class LinkedHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 	{
 	}
 
-	protected LinkedHeapBase(IComparer<T> comparer)
-	{
-		Comparer = comparer ?? Comparer<T>.Default;
-	}
-
 	protected LinkedHeapBase([NotNull] IEnumerable<T> enumerable)
 		: this(enumerable, null)
 	{
@@ -53,7 +49,7 @@ public abstract class LinkedHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 		Add(enumerable);
 	}
 
-	public IComparer<T> Comparer { get; }
+	public IComparer<T> Comparer { get; } = comparer ?? Comparer<T>.Default;
 
 	protected internal TNode Head { get; set; }
 

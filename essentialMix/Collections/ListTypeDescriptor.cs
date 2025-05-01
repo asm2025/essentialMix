@@ -7,18 +7,13 @@ using System.Linq;
 using System.Reflection;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
-using NotNull = JetBrains.Annotations.NotNullAttribute;
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace essentialMix.Collections;
 
-public class ListTypeDescriptor<TSource> : TypeDescriptorBase<TSource>, IList
+public class ListTypeDescriptor<TSource>([NotNull] TSource source) : TypeDescriptorBase<TSource>(source), IList
 	where TSource : IList
 {
-	public ListTypeDescriptor([NotNull] TSource source)
-		: base(source)
-	{
-	}
-
 	[NotNull]
 	public override PropertyDescriptorCollection GetProperties()
 	{
@@ -99,14 +94,10 @@ public class ListTypeDescriptor<TSource> : TypeDescriptorBase<TSource>, IList
 	public void ForEach([NotNull] Func<object, int, bool> action) { Source.Cast<object>().ForEach(action); }
 }
 
-public class ListTypeDescriptor<TSource, T> : TypeDescriptorBase<TSource>, IList<T>, IList
+public class ListTypeDescriptor<TSource, T>([NotNull] TSource source)
+	: TypeDescriptorBase<TSource>(source), IList<T>, IList
 	where TSource : IList<T>, IList
 {
-	public ListTypeDescriptor([NotNull] TSource source)
-		: base(source)
-	{
-	}
-
 	[NotNull]
 	public override PropertyDescriptorCollection GetProperties()
 	{

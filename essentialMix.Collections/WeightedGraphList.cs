@@ -23,17 +23,11 @@ public abstract class WeightedGraphList<T, TWeight> : GraphList<T, KeyedCollecti
 	where TWeight : struct, IComparable<TWeight>, IComparable, IEquatable<TWeight>, IConvertible, IFormattable
 {
 	[DebuggerDisplay("{Value}")]
-	protected class PathEntry
+	protected class PathEntry([NotNull] T value, TWeight weight)
 	{
-		public PathEntry([NotNull] T value, TWeight weight)
-		{
-			Value = value;
-			Weight = weight;
-		}
-
 		[NotNull]
-		public readonly T Value;
-		public TWeight Weight;
+		public readonly T Value = value;
+		public TWeight Weight = weight;
 	}
 
 	private struct EdgeEnumerator : IEnumerableEnumerator<EdgeEntry<T, GraphEdge<T, TWeight>>>

@@ -2,16 +2,10 @@
 
 namespace essentialMix.Events;
 
-public class PropertyChangedEventArgs<T> : PropertyChangedEventArgs
+public class PropertyChangedEventArgs<T>(string propertyName, T oldValue, T value)
+	: PropertyChangedEventArgs(propertyName)
 {
-	public PropertyChangedEventArgs(string propertyName, T oldValue, T value)
-		: base(propertyName)
-	{
-		OldValue = oldValue;
-		Value = value;
-	}
+	public T OldValue { get; } = oldValue;
 
-	public T OldValue { get; }
-
-	public T Value { get; }
+	public T Value { get; } = value;
 }

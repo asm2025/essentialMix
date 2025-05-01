@@ -10,14 +10,10 @@ namespace essentialMix.Collections;
 [Serializable]
 [DebuggerDisplay("Count = {Count}")]
 [HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
-public class ReadOnlyList<T> : IReadOnlyList<T>, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
+public class ReadOnlyList<T>([NotNull] IList<T> list)
+	: IReadOnlyList<T>, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
 {
-	private readonly IList<T> _list;
-
-	public ReadOnlyList([NotNull] IList<T> list)
-	{
-		_list = list;
-	}
+	private readonly IList<T> _list = list;
 
 	public IEnumerator<T> GetEnumerator() { return _list.GetEnumerator(); }
 

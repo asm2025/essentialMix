@@ -5,18 +5,13 @@ using essentialMix.Text;
 
 namespace essentialMix.Cryptography;
 
-public abstract class AlgorithmEncodeBase<T> : AlgorithmBase<T>, IEncoding
+public abstract class AlgorithmEncodeBase<T>([NotNull] T algorithm, [NotNull] Encoding encoding)
+	: AlgorithmBase<T>(algorithm), IEncoding
 {
 	protected AlgorithmEncodeBase([NotNull] T algorithm)
 		: this(algorithm, EncodingHelper.Default)
 	{
 	}
 
-	protected AlgorithmEncodeBase([NotNull] T algorithm, [NotNull] Encoding encoding)
-		: base(algorithm)
-	{
-		Encoding = encoding;
-	}
-
-	public Encoding Encoding { get; set; }
+	public Encoding Encoding { get; set; } = encoding;
 }

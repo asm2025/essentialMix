@@ -1,23 +1,15 @@
 ﻿namespace essentialMix.Events;
 
-public class PropertyChangingEventArgs : System.ComponentModel.PropertyChangingEventArgs
+public class PropertyChangingEventArgs(string propertyName)
+	: System.ComponentModel.PropertyChangingEventArgs(propertyName)
 {
-	public PropertyChangingEventArgs(string propertyName)
-		: base(propertyName) { }
-
 	public bool Cancel { get; set; }
 }
 
-public class PropertyChangingEventArgs<T> : PropertyChangingEventArgs
+public class PropertyChangingEventArgs<T>(string propertyName, T value, T newValue)
+	: PropertyChangingEventArgs(propertyName)
 {
-	public PropertyChangingEventArgs(string propertyName, T value, T newValue)
-		: base(propertyName)
-	{
-		Value = value;
-		NewValue = newValue;
-	}
+	public T Value { get; } = value;
 
-	public T Value { get; }
-
-	public T NewValue { get; }
+	public T NewValue { get; } = newValue;
 }

@@ -14,16 +14,11 @@ using Scriban.Runtime;
 
 namespace essentialMix.Template;
 
-public class TemplateService : Disposable, ITemplateService
+public class TemplateService([NotNull] IOptions<TemplateOptions> options) : Disposable, ITemplateService
 {
 	private static readonly ConcurrentDictionary<string, Scriban.Template> _cacheStore = new ConcurrentDictionary<string, Scriban.Template>(StringComparer.OrdinalIgnoreCase);
 
-	private readonly TemplateOptions _options;
-
-	public TemplateService([NotNull] IOptions<TemplateOptions> options)
-	{
-		_options = options.Value;
-	}
+	private readonly TemplateOptions _options = options.Value;
 
 	[NotNull]
 	public Scriban.Template RegisterOrGet(string fileName) { return RegisterOrGet(fileName, null, TimeSpan.Zero); }

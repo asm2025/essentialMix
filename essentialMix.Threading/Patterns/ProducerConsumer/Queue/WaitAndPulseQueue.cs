@@ -238,10 +238,7 @@ public class WaitAndPulseQueue<TQueue, T> : ProducerConsumerThreadQueue<T>, IPro
 }
 
 /// <inheritdoc cref="WaitAndPulseQueue{TQueue,T}" />
-public sealed class WaitAndPulseQueue<T> : WaitAndPulseQueue<Queue<T>, T>, IProducerQueue<T>
-{
-	public WaitAndPulseQueue([NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
-		: base(new Queue<T>(), options, token)
-	{
-	}
-}
+public sealed class WaitAndPulseQueue<T>(
+	[NotNull] ProducerConsumerQueueOptions<T> options,
+	CancellationToken token = default(CancellationToken))
+	: WaitAndPulseQueue<Queue<T>, T>(new Queue<T>(), options, token), IProducerQueue<T>;

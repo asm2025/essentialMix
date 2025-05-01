@@ -4,24 +4,19 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Comparers;
 
-public class KeyValueComparer<TKey, TValue> : IKeyValueComparer<TKey, TValue>
+public class KeyValueComparer<TKey, TValue>(IGenericComparer<TKey> keyComparer, IGenericComparer<TValue> valueComparer)
+	: IKeyValueComparer<TKey, TValue>
 {
 	public static IKeyValueComparer<TKey, TValue> Default { get; } = new KeyValueComparer<TKey, TValue>();
 
 	public KeyValueComparer()
 		: this(null, null) { }
 
-	public KeyValueComparer(IGenericComparer<TKey> keyComparer, IGenericComparer<TValue> valueComparer)
-	{
-		KeyComparer = keyComparer ?? GenericComparer<TKey>.Default;
-		ValueComparer = valueComparer ?? GenericComparer<TValue>.Default;
-	}
+	[NotNull]
+	public IGenericComparer<TKey> KeyComparer { get; } = keyComparer ?? GenericComparer<TKey>.Default;
 
 	[NotNull]
-	public IGenericComparer<TKey> KeyComparer { get; }
-
-	[NotNull]
-	public IGenericComparer<TValue> ValueComparer { get; }
+	public IGenericComparer<TValue> ValueComparer { get; } = valueComparer ?? GenericComparer<TValue>.Default;
 
 	public int Compare(KeyValuePair<TKey, TValue> x, KeyValuePair<TKey, TValue> y)
 	{

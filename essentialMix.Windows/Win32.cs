@@ -1431,11 +1431,9 @@ public struct CHAR_INFO
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct COLORREF
+public struct COLORREF(uint color)
 {
-	public uint Value;
-
-	public COLORREF(uint color) { Value = color; }
+	public uint Value = color;
 }
 
 [StructLayout(LayoutKind.Sequential)]
@@ -1515,16 +1513,10 @@ public struct ConsoleFont
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct COORD
+public struct COORD(short x, short y)
 {
-	public short X;
-	public short Y;
-
-	public COORD(short x, short y)
-	{
-		X = x;
-		Y = y;
-	}
+	public short X = x;
+	public short Y = y;
 
 	public COORD(POINT pt)
 		: this((short)pt.X, (short)pt.Y)
@@ -1650,29 +1642,17 @@ public struct MOUSE_EVENT_RECORD
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct POINT
+public struct POINT(int x, int y)
 {
-	public int X;
-	public int Y;
-
-	public POINT(int x, int y)
-	{
-		X = x;
-		Y = y;
-	}
+	public int X = x;
+	public int Y = y;
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct SIZE
+public struct SIZE(int cx, int cy)
 {
-	public int CX;
-	public int CY;
-
-	public SIZE(int cx, int cy)
-	{
-		CX = cx;
-		CY = cy;
-	}
+	public int CX = cx;
+	public int CY = cy;
 }
 
 [StructLayout(LayoutKind.Sequential)]
@@ -1685,17 +1665,9 @@ public struct PROCESS_INFORMATION
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct RECT
+public struct RECT(int left, int top, int right, int bottom)
 {
-	public int Left, Top, Right, Bottom;
-
-	public RECT(int left, int top, int right, int bottom)
-	{
-		Left = left;
-		Top = top;
-		Right = right;
-		Bottom = bottom;
-	}
+	public int Left = left, Top = top, Right = right, Bottom = bottom;
 
 	public int X
 	{
@@ -1742,17 +1714,9 @@ public struct RECT
 	}
 }
 
-public struct SMALL_RECT
+public struct SMALL_RECT(short left, short top, short right, short bottom)
 {
-	public short Left, Top, Right, Bottom;
-
-	public SMALL_RECT(short left, short top, short right, short bottom)
-	{
-		Left = left;
-		Top = top;
-		Right = right;
-		Bottom = bottom;
-	}
+	public short Left = left, Top = top, Right = right, Bottom = bottom;
 
 	public SMALL_RECT(SMALL_RECT r)
 		: this(r.Left, r.Top, r.Right, r.Bottom)
@@ -1822,11 +1786,9 @@ public struct SystemTime
 	public ushort Millisecond;
 }
 
-public struct WINDOW_BUFFER_SIZE_RECORD
+public struct WINDOW_BUFFER_SIZE_RECORD(short x, short y)
 {
-	public COORD dwSize;
-
-	public WINDOW_BUFFER_SIZE_RECORD(short x, short y) { dwSize = new COORD(x, y); }
+	public COORD dwSize = new(x, y);
 }
 
 public struct TRUSTEE
@@ -1956,9 +1918,7 @@ public struct SHSTOCKICONINFO
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 public class CONSOLE_FONT_INFO_EX
 {
-	public CONSOLE_FONT_INFO_EX() { cbSize = (uint)Marshal.SizeOf(typeof(CONSOLE_FONT_INFO_EX)); }
-
-	public uint cbSize;
+	public uint cbSize = (uint)Marshal.SizeOf(typeof(CONSOLE_FONT_INFO_EX));
 	public int nIndex;
 	public short nWidth;
 	public short nHeight;
@@ -1972,9 +1932,7 @@ public class CONSOLE_FONT_INFO_EX
 [StructLayout(LayoutKind.Sequential)]
 public class CONSOLE_HISTORY_INFO
 {
-	public CONSOLE_HISTORY_INFO() { cbSize = (ushort)Marshal.SizeOf(typeof(CONSOLE_HISTORY_INFO)); }
-
-	public ushort cbSize;
+	public ushort cbSize = (ushort)Marshal.SizeOf(typeof(CONSOLE_HISTORY_INFO));
 	public ushort HistoryBufferSize;
 	public ushort NumberOfHistoryBuffers;
 	public uint dwFlags;
@@ -1983,9 +1941,7 @@ public class CONSOLE_HISTORY_INFO
 [StructLayout(LayoutKind.Sequential)]
 public class CONSOLE_SCREEN_BUFFER_INFO_EX
 {
-	public CONSOLE_SCREEN_BUFFER_INFO_EX() { cbSize = (uint)Marshal.SizeOf(typeof(CONSOLE_SCREEN_BUFFER_INFO_EX)); }
-
-	public uint cbSize;
+	public uint cbSize = (uint)Marshal.SizeOf(typeof(CONSOLE_SCREEN_BUFFER_INFO_EX));
 	public COORD dwSize;
 	public COORD dwCursorPosition;
 	public short wAttributes;

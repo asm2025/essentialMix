@@ -9,14 +9,10 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
-public class ReadOnlyCollectionTypeDescriptor<TSource, T> : TypeDescriptorBase<TSource>, IReadOnlyCollection<T>, ICollection
+public class ReadOnlyCollectionTypeDescriptor<TSource, T>([NotNull] TSource source)
+	: TypeDescriptorBase<TSource>(source), IReadOnlyCollection<T>, ICollection
 	where TSource : IReadOnlyCollection<T>, ICollection
 {
-	public ReadOnlyCollectionTypeDescriptor([NotNull] TSource source)
-		: base(source)
-	{
-	}
-
 	[NotNull]
 	public override PropertyDescriptorCollection GetProperties()
 	{

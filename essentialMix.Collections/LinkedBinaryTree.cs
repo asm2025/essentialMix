@@ -43,18 +43,14 @@ namespace essentialMix.Collections;
 [Serializable]
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(LinkedBinaryTree<,>.DebugView))]
-public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, IReadOnlyCollection<T>
+public abstract class LinkedBinaryTree<TNode, T>(IComparer<T> comparer)
+	: ICollection<T>, ICollection, IReadOnlyCollection<T>
 	where TNode : LinkedBinaryNode<TNode, T>
 {
 	[DebuggerNonUserCode]
-	internal sealed class DebugView
+	internal sealed class DebugView([NotNull] LinkedBinaryTree<TNode, T> tree)
 	{
-		private readonly LinkedBinaryTree<TNode, T> _tree;
-
-		public DebugView([NotNull] LinkedBinaryTree<TNode, T> tree)
-		{
-			_tree = tree;
-		}
+		private readonly LinkedBinaryTree<TNode, T> _tree = tree;
 
 		[NotNull]
 		public TNode Root => _tree.Root;
@@ -530,11 +526,6 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 	{
 	}
 
-	protected LinkedBinaryTree(IComparer<T> comparer)
-	{
-		Comparer = comparer ?? Comparer<T>.Default;
-	}
-
 	protected LinkedBinaryTree([NotNull] IEnumerable<T> enumerable)
 		: this(enumerable, null)
 	{
@@ -547,7 +538,7 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 	}
 
 	[NotNull]
-	public IComparer<T> Comparer { get; }
+	public IComparer<T> Comparer { get; } = comparer ?? Comparer<T>.Default;
 
 	public TNode Root { get; internal set; }
 
@@ -2020,14 +2011,9 @@ public abstract class LinkedBinaryTree<TNode, T> : ICollection<T>, ICollection, 
 [DebuggerTypeProxy(typeof(LinkedBinaryTree<>.DebugView))]
 public abstract class LinkedBinaryTree<T> : LinkedBinaryTree<LinkedBinaryNode<T>, T>
 {
-	internal new sealed class DebugView
+	internal new sealed class DebugView([NotNull] LinkedBinaryTree<T> tree)
 	{
-		private readonly LinkedBinaryTree<T> _tree;
-
-		public DebugView([NotNull] LinkedBinaryTree<T> tree)
-		{
-			_tree = tree;
-		}
+		private readonly LinkedBinaryTree<T> _tree = tree;
 
 		[NotNull]
 		public LinkedBinaryNode<T> Root => _tree.Root;

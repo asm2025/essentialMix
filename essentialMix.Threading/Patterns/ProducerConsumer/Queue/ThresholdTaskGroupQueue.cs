@@ -20,16 +20,14 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue;
 /// <para>If you need to start a new batch of tasks as soon as the previous batch finishes, then consider using <see cref="TaskGroupQueue{TQueue,T}" /> instead.</para>
 /// <para>If you need to start a new queue as soon as any queued task finishes, then consider using <see cref="TaskQueue{TQueue,T}" /> instead.</para>
 /// </summary>
-public class ThresholdTaskGroupQueue<TQueue, T> : ProducerConsumerThresholdQueue<T>, IProducerQueue<TQueue, T>
+public class ThresholdTaskGroupQueue<TQueue, T>(
+	[NotNull] TQueue queue,
+	[NotNull] ProducerConsumerQueueOptions<T> options,
+	CancellationToken token = default(CancellationToken))
+	: ProducerConsumerThresholdQueue<T>(options, token), IProducerQueue<TQueue, T>
 	where TQueue : ICollection, IReadOnlyCollection<T>
 {
-	private readonly QueueAdapter<TQueue, T> _queue;
-
-	public ThresholdTaskGroupQueue([NotNull] TQueue queue, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
-		: base(options, token)
-	{
-		_queue = new QueueAdapter<TQueue, T>(queue);
-	}
+	private readonly QueueAdapter<TQueue, T> _queue = new(queue);
 
 	/// <inheritdoc />
 	public TQueue Queue => _queue.Queue;

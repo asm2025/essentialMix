@@ -5,14 +5,9 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections;
 
 [TypeConverter(typeof(WrapperEmptyDisplayNameExpandableObjectConverter))]
-public abstract class TypeDescriptorBase<TSource> : ICustomTypeDescriptor, IWrapper<TSource>
+public abstract class TypeDescriptorBase<TSource>([NotNull] TSource source) : ICustomTypeDescriptor, IWrapper<TSource>
 {
-	protected TypeDescriptorBase([NotNull] TSource source)
-	{
-		Source = source;
-	}
-
-	public TSource Source { get; }
+	public TSource Source { get; } = source;
 
 	[NotNull]
 	public virtual AttributeCollection GetAttributes() { return TypeDescriptor.GetAttributes(Source, true); }

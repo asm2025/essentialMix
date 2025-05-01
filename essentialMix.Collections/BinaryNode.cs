@@ -8,16 +8,11 @@ namespace essentialMix.Collections;
 [Serializable]
 [DebuggerDisplay("{Value}")]
 [StructLayout(LayoutKind.Sequential)]
-public abstract class BinaryNodeBase<TNode, T> : ITreeNode<TNode, T>
+public abstract class BinaryNodeBase<TNode, T>(T value) : ITreeNode<TNode, T>
 	where TNode : BinaryNodeBase<TNode, T>
 {
-	protected BinaryNodeBase(T value)
-	{
-		Value = value;
-	}
-
 	/// <inheritdoc />
-	public T Value { get; set; }
+	public T Value { get; set; } = value;
 
 	/// <inheritdoc />
 	[NotNull]

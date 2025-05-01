@@ -19,16 +19,11 @@ namespace essentialMix.Collections;
 /// </remarks>
 public sealed class Lookup<TKey, TElement> : ILookup<TKey, TElement>
 {
-	internal sealed class LookupGrouping : IGrouping<TKey, TElement>
+	internal sealed class LookupGrouping(TKey key) : IGrouping<TKey, TElement>
 	{
 		private readonly List<TElement> _items = new List<TElement>();
 
-		public LookupGrouping(TKey key)
-		{
-			Key = key;
-		}
-
-		public TKey Key { get; }
+		public TKey Key { get; } = key;
 
 		public int Count => _items.Count;
 

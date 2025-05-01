@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Data.SQLite;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -23,16 +22,15 @@ public class DataProvider :
 
 	/// <inheritdoc />
 	public DataProvider()
+		: base(SQLiteFactory.Instance)
 	{
 	}
 
 	/// <inheritdoc />
 	public DataProvider([NotNull] IDbConnection connection)
-		: base(connection)
+		: base(SQLiteFactory.Instance, connection)
 	{
 	}
-
-	public override DbProviderFactory Factory => SQLiteFactory.Instance;
 
 	public override DbType DefaultDbType => DbType.Object;
 

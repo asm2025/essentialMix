@@ -5,37 +5,25 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using JetBrains.Annotations;
-using NotNull = JetBrains.Annotations.NotNullAttribute;
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace essentialMix.Linq;
 
-public abstract class QueryTranslatorProvider : ExpressionVisitor
+public abstract class QueryTranslatorProvider([NotNull] IQueryable source) : ExpressionVisitor
 {
-	protected QueryTranslatorProvider([NotNull] IQueryable source)
-	{
-		Source = source;
-	}
-
-	internal IQueryable Source { get; }
+	internal IQueryable Source { get; } = source;
 }
 
 [SuppressMessage("ReSharper", "UnusedTypeParameter")]
-public class QueryTranslatorProvider<T> : QueryTranslatorProvider, IQueryProvider
+public class QueryTranslatorProvider<T>([NotNull] IQueryable source, [NotNull] IEnumerable<ExpressionVisitor> visitors)
+	: QueryTranslatorProvider(source), IQueryProvider
 {
-	private readonly IEnumerable<ExpressionVisitor> _visitors;
-
-	public QueryTranslatorProvider([NotNull] IQueryable source, [NotNull] IEnumerable<ExpressionVisitor> visitors)
-		: base(source)
-	{
-		_visitors = visitors;
-	}
-
-	public IQueryable<TElement> CreateQuery<TElement>(Expression expression) { return new QueryTranslator<TElement>(Source, expression, _visitors); }
+	public IQueryable<TElement> CreateQuery<TElement>(Expression expression) { return new QueryTranslator<TElement>(Source, expression, visitors); }
 
 	public IQueryable CreateQuery(Expression expression)
 	{
 		Type elementType = expression.Type.GetGenericArguments().First();
-		IQueryable result = (IQueryable)Activator.CreateInstance(typeof(QueryTranslator<>).MakeGenericType(elementType), Source, expression, _visitors);
+		IQueryable result = (IQueryable)Activator.CreateInstance(typeof(QueryTranslator<>).MakeGenericType(elementType), Source, expression, visitors);
 		return result;
 	}
 
@@ -60,10 +48,10 @@ public class QueryTranslatorProvider<T> : QueryTranslatorProvider, IQueryProvide
 	private Expression VisitAll(Expression expression)
 	{
 		// Run all visitors in order
-		IEnumerable<ExpressionVisitor> visitors = new ExpressionVisitor[] { this }.Concat(_visitors);
+		IEnumerable<ExpressionVisitor> visitors1 = new ExpressionVisitor[] { this }.Concat(visitors);
 		Expression result = expression;
 
-		foreach (ExpressionVisitor visitor in visitors)
+		foreach (ExpressionVisitor visitor in visitors1)
 			result = visitor.Visit(result);
 
 		return result;

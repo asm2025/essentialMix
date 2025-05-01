@@ -10,14 +10,9 @@ namespace essentialMix.Collections.DebugView;
 * collections in this solution assemblies.
 */
 [DebuggerNonUserCode]
-public sealed class Dbg_CollectionDebugView<T>
+public sealed class Dbg_CollectionDebugView<T>([NotNull] ICollection<T> collection)
 {
-	private readonly ICollection<T> _collection;
-
-	public Dbg_CollectionDebugView([NotNull] ICollection<T> collection)
-	{
-		_collection = collection;
-	}
+	private readonly ICollection<T> _collection = collection;
 
 	[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 	[NotNull]

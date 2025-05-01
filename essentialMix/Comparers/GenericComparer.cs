@@ -2,7 +2,8 @@ using System.Collections.Generic;
 
 namespace essentialMix.Comparers;
 
-public class GenericComparer<T> : IGenericComparer<T>
+public class GenericComparer<T>(IComparer<T> comparer, IEqualityComparer<T> equalityComparer)
+	: IGenericComparer<T>
 {
 	public static IGenericComparer<T> Default { get; } = new GenericComparer<T>();
 
@@ -16,14 +17,8 @@ public class GenericComparer<T> : IGenericComparer<T>
 	{
 	}
 
-	public GenericComparer(IComparer<T> comparer, IEqualityComparer<T> equalityComparer)
-	{
-		Comparer = comparer ?? Comparer<T>.Default;
-		EqualityComparer = equalityComparer ?? EqualityComparer<T>.Default;
-	}
-
-	protected IComparer<T> Comparer { get; }
-	protected IEqualityComparer<T> EqualityComparer { get; }
+	protected IComparer<T> Comparer { get; } = comparer ?? Comparer<T>.Default;
+	protected IEqualityComparer<T> EqualityComparer { get; } = equalityComparer ?? EqualityComparer<T>.Default;
 
 	public virtual int Compare(T x, T y)
 	{

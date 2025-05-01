@@ -18,17 +18,11 @@ public class DisjointSet<T> : ICollection<T>, ICollection, IReadOnlyCollection<T
 {
 	[DebuggerDisplay("{Parent} :{Rank}")]
 	[StructLayout(LayoutKind.Sequential)]
-	protected sealed class Subset
+	protected sealed class Subset([NotNull] T parent)
 	{
-		public Subset([NotNull] T parent)
-		{
-			Parent = parent;
-			Rank = 0;
-		}
-
-		public int Rank;
+		public int Rank = 0;
 		[NotNull]
-		public T Parent;
+		public T Parent = parent;
 	}
 
 	[NonSerialized]

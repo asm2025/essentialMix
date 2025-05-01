@@ -4,19 +4,15 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Windows.Threading;
 
-public class RunOutput
+public class RunOutput(string fileName)
 {
     public RunOutput()
         : this(null)
     {
     }
 
-    public RunOutput(string fileName)
-    {
-        Name = fileName;
-    }
+    public string Name { get; internal set; } = fileName;
 
-    public string Name { get; internal set; }
     [NotNull]
     public StringBuilder Output { get; } = new StringBuilder(Constants.BUFFER_KB);
     [NotNull]

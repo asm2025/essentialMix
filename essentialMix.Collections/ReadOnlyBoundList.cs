@@ -10,18 +10,13 @@ namespace essentialMix.Collections;
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 [Serializable]
-public class ReadOnlyBoundList<T> : IReadOnlyBoundList<T>
+public class ReadOnlyBoundList<T>([NotNull] IReadOnlyBoundList<T> list) : IReadOnlyBoundList<T>
 {
-	private IReadOnlyBoundList<T> _list;
+	private IReadOnlyBoundList<T> _list = list;
 
 	public ReadOnlyBoundList([NotNull] IBoundList<T> list)
 		: this(list as IReadOnlyBoundList<T> ?? throw new ArgumentException($"Argument does not implement {typeof(IReadOnlyBoundList<T>)}.", nameof(list)))
 	{
-	}
-
-	public ReadOnlyBoundList([NotNull] IReadOnlyBoundList<T> list)
-	{
-		_list = list;
 	}
 
 	public int Capacity => _list.Capacity;

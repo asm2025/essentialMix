@@ -9,14 +9,10 @@ namespace essentialMix.Collections.DebugView;
 * collections in this solution assemblies.
 */
 [DebuggerNonUserCode]
-public sealed class Dbg_KeyedCollectionDebugView<TKey, TValue>
+public sealed class Dbg_KeyedCollectionDebugView<TKey, TValue>(
+	[NotNull] System.Collections.ObjectModel.KeyedCollection<TKey, TValue> keyedCollection)
 {
-	private readonly System.Collections.ObjectModel.KeyedCollection<TKey, TValue> _keyedCollection;
-
-	public Dbg_KeyedCollectionDebugView([NotNull] System.Collections.ObjectModel.KeyedCollection<TKey, TValue> keyedCollection)
-	{
-		_keyedCollection = keyedCollection;
-	}
+	private readonly System.Collections.ObjectModel.KeyedCollection<TKey, TValue> _keyedCollection = keyedCollection;
 
 	[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 	[NotNull]

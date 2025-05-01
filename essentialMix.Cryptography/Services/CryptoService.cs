@@ -8,15 +8,10 @@ using Microsoft.Extensions.Options;
 
 namespace essentialMix.Cryptography.Services;
 
-public class CryptoService : ICryptoService
+public class CryptoService([NotNull] IOptions<CryptoSettings> settings) : ICryptoService
 {
-	public CryptoService([NotNull] IOptions<CryptoSettings> settings)
-	{
-		Settings = settings.Value;
-	}
-
 	[NotNull]
-	public CryptoSettings Settings { get; set; }
+	public CryptoSettings Settings { get; set; } = settings.Value;
 
 	/// <inheritdoc />
 	public string Encrypt(string value)

@@ -8,15 +8,10 @@ namespace essentialMix.Collections.DebugView;
 * assembly. So we need to use different names for collection debug view for
 * collections in this solution assemblies.
 */
-public class Dbg_BinaryHeapDebugView<TNode, TValue>
+public class Dbg_BinaryHeapDebugView<TNode, TValue>([NotNull] BinaryHeapBase<TNode, TValue> heap)
 	where TNode : class, ITreeNode<TNode, TValue>
 {
-	private readonly BinaryHeapBase<TNode, TValue> _heap;
-
-	public Dbg_BinaryHeapDebugView([NotNull] BinaryHeapBase<TNode, TValue> heap)
-	{
-		_heap = heap;
-	}
+	private readonly BinaryHeapBase<TNode, TValue> _heap = heap;
 
 	[NotNull]
 	[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]

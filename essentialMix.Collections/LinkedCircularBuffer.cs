@@ -24,9 +24,9 @@ public class LinkedCircularBuffer<T> : ICircularBuffer<T>, ICollection<T>, IColl
 	[ComVisible(false)]
 	[DebuggerDisplay("{Value}")]
 	[Serializable]
-	private class Node
+	private class Node(LinkedCircularBuffer<T> buffer, T value)
 	{
-		internal LinkedCircularBuffer<T> _buffer;
+		internal LinkedCircularBuffer<T> _buffer = buffer;
 		internal Node _previous;
 		internal Node _next;
 
@@ -35,13 +35,7 @@ public class LinkedCircularBuffer<T> : ICircularBuffer<T>, ICollection<T>, IColl
 		{
 		}
 
-		public Node(LinkedCircularBuffer<T> buffer, T value)
-		{
-			_buffer = buffer;
-			Value = value;
-		}
-
-		public T Value { get; set; }
+		public T Value { get; set; } = value;
 
 		public Node Previous
 		{

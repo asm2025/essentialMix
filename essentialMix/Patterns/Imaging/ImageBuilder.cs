@@ -3,7 +3,7 @@ using essentialMix.Helpers;
 
 namespace essentialMix.Patterns.Imaging;
 
-public class ImageBuilder : IImageBuilder
+public class ImageBuilder(string baseUri, string imageName) : IImageBuilder
 {
 	/// <inheritdoc />
 	public ImageBuilder() 
@@ -17,17 +17,11 @@ public class ImageBuilder : IImageBuilder
 	{
 	}
 
-	public ImageBuilder(string baseUri, string imageName)
-	{
-		BaseUri = baseUri;
-		ImageName = imageName;
-	}
+	/// <inheritdoc />
+	public string BaseUri { get; set; } = baseUri;
 
 	/// <inheritdoc />
-	public string BaseUri { get; set; }
-
-	/// <inheritdoc />
-	public string ImageName { get; set; }
+	public string ImageName { get; set; } = imageName;
 
 	/// <inheritdoc />
 	public ImageSize ImageSize { get; set; }

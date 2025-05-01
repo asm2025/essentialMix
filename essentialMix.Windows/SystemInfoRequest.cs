@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Windows;
 
-public class SystemInfoRequest
+public class SystemInfoRequest(SystemInfoType type)
 {
 	private string _machineName;
 	private string _scope;
@@ -14,12 +14,7 @@ public class SystemInfoRequest
 
 	private string _scopeRoot;
 
-	public SystemInfoRequest(SystemInfoType type)
-	{
-		Type = type;
-	}
-
-	public SystemInfoType Type { get; set; }
+	public SystemInfoType Type { get; set; } = type;
 
 	public string MachineName
 	{

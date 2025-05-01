@@ -9,18 +9,13 @@ namespace essentialMix.Collections;
 [Serializable]
 [DebuggerDisplay("{Value}")]
 [StructLayout(LayoutKind.Sequential)]
-public abstract class LinkedBinaryNode<TNode, T> : ITreeNode<T>
+public abstract class LinkedBinaryNode<TNode, T>(T value) : ITreeNode<T>
 	where TNode : LinkedBinaryNode<TNode, T>
 {
 	private const int LEFT = 0;
 	private const int RIGHT = 1;
 
 	private readonly TNode[] _nodes = new TNode[2];
-
-	protected LinkedBinaryNode(T value)
-	{
-		Value = value;
-	}
 
 	public TNode Left
 	{
@@ -42,7 +37,7 @@ public abstract class LinkedBinaryNode<TNode, T> : ITreeNode<T>
 		}
 	}
 
-	public T Value { get; set; }
+	public T Value { get; set; } = value;
 
 	public bool IsLeaf => _nodes[LEFT] == null && _nodes[RIGHT] == null;
 

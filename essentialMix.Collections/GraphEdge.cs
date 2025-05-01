@@ -8,7 +8,7 @@ namespace essentialMix.Collections;
 [DebuggerDisplay("{To} :{Weight}")]
 [Serializable]
 [StructLayout(LayoutKind.Sequential)]
-public class GraphEdge<T, TWeight>
+public class GraphEdge<T, TWeight>([NotNull] T to, TWeight weight)
 	where TWeight : struct, IComparable, IComparable<TWeight>, IEquatable<TWeight>, IConvertible, IFormattable
 {
 	public GraphEdge([NotNull] T to)
@@ -16,16 +16,10 @@ public class GraphEdge<T, TWeight>
 	{
 	}
 
-	public GraphEdge([NotNull] T to, TWeight weight)
-	{
-		To = to;
-		Weight = weight;
-	}
-
 	[NotNull]
-	public T To { get; }
+	public T To { get; } = to;
 
-	public TWeight Weight { get; set; }
+	public TWeight Weight { get; set; } = weight;
 
 	/// <inheritdoc />
 	[NotNull]

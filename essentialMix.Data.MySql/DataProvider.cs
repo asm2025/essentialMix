@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Numerics;
 using essentialMix.Data.Patterns.Provider;
 using essentialMix.Extensions;
@@ -16,16 +15,15 @@ public class DataProvider
 {
 	/// <inheritdoc />
 	public DataProvider()
+		: base(MySqlClientFactory.Instance)
 	{
 	}
 
 	/// <inheritdoc />
 	public DataProvider([NotNull] IDbConnection connection)
-		: base(connection)
+		: base(MySqlClientFactory.Instance, connection)
 	{
 	}
-
-	public override DbProviderFactory Factory => MySqlClientFactory.Instance;
 
 	public override MySqlDbType DefaultDbType => MySqlDbType.Blob;
 

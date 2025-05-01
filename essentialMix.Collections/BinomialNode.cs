@@ -11,7 +11,7 @@ namespace essentialMix.Collections;
 [Serializable]
 [DebuggerDisplay("{Value} :D{Degree}")]
 [StructLayout(LayoutKind.Sequential)]
-public abstract class BinomialNodeBase<TNode, T> : ISiblingNode<TNode, T>
+public abstract class BinomialNodeBase<TNode, T>(T value) : ISiblingNode<TNode, T>
 	where TNode : BinomialNodeBase<TNode, T>
 {
 	private const int PARENT = 0;
@@ -19,11 +19,6 @@ public abstract class BinomialNodeBase<TNode, T> : ISiblingNode<TNode, T>
 	private const int SIBLING = 2;
 
 	private readonly TNode[] _nodes = new TNode[3];
-
-	protected BinomialNodeBase(T value)
-	{
-		Value = value;
-	}
 
 	public TNode Parent
 	{
@@ -55,7 +50,7 @@ public abstract class BinomialNodeBase<TNode, T> : ISiblingNode<TNode, T>
 		}
 	}
 
-	public T Value { get; set; }
+	public T Value { get; set; } = value;
 
 	public int Degree { get; internal set; }
 

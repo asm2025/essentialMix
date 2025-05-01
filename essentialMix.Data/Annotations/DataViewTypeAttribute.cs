@@ -3,9 +3,7 @@
 namespace essentialMix.Data.Annotations;
 
 [AttributeUsage(AttributeTargets.Property)]
-public class DataViewTypeAttribute : Attribute
+public class DataViewTypeAttribute(DataViewType viewType) : Attribute
 {
-	public DataViewTypeAttribute(DataViewType viewType) { ViewType = viewType; }
-
-	public DataViewType ViewType { get; set; }
+	public DataViewType ViewType { get; set; } = viewType;
 }

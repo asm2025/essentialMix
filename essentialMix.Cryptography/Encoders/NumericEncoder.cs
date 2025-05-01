@@ -4,19 +4,14 @@ using essentialMix.Numeric;
 
 namespace essentialMix.Cryptography.Encoders;
 
-public class NumericEncoder : Encoder<ByteEncoder>, INumericEncoder
+public class NumericEncoder(BitVectorMode mode, Encoding encoding)
+	: Encoder<ByteEncoder>(ByteEncoder.Create(mode, encoding)), INumericEncoder
 {
-	private BitVectorMode _mode;
+	private BitVectorMode _mode = mode;
 
 	public NumericEncoder(BitVectorMode mode)
 		: this(mode, null)
 	{
-	}
-
-	public NumericEncoder(BitVectorMode mode, Encoding encoding) 
-		: base(ByteEncoder.Create(mode, encoding))
-	{
-		_mode = mode;
 	}
 
 	public override object Clone() { return new NumericEncoder(Mode, Encoding); }

@@ -10,7 +10,12 @@ namespace Other.JonSkeet.MiscUtil.Collections;
 /// apply in sequence (i.e. sort by x then y)
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class LinkedComparer<T> : IGenericComparer<T>
+public class LinkedComparer<T>(
+	[NotNull] IComparer<T> firstComparer,
+	[NotNull] IComparer<T> secondComparer,
+	[NotNull] IEqualityComparer<T> firstEqualityComparer,
+	IEqualityComparer<T> secondEqualityComparer)
+	: IGenericComparer<T>
 {
 	public LinkedComparer([NotNull] IComparer<T> firstComparer, [NotNull] IComparer<T> secondComparer)
 		: this(firstComparer, secondComparer, EqualityComparer<T>.Default, null)
@@ -22,24 +27,16 @@ public class LinkedComparer<T> : IGenericComparer<T>
 	{
 	}
 
-	public LinkedComparer([NotNull] IComparer<T> firstComparer, [NotNull] IComparer<T> secondComparer, [NotNull] IEqualityComparer<T> firstEqualityComparer, IEqualityComparer<T> secondEqualityComparer)
-	{
-		FirstComparer = firstComparer;
-		SecondComparer = secondComparer;
-		FirstEqualityComparer = firstEqualityComparer;
-		SecondEqualityComparer = secondEqualityComparer;
-	}
+	[NotNull]
+	public IComparer<T> FirstComparer { get; } = firstComparer;
 
 	[NotNull]
-	public IComparer<T> FirstComparer { get; }
+	public IComparer<T> SecondComparer { get; } = secondComparer;
 
 	[NotNull]
-	public IComparer<T> SecondComparer { get; }
+	public IEqualityComparer<T> FirstEqualityComparer { get; } = firstEqualityComparer;
 
-	[NotNull]
-	public IEqualityComparer<T> FirstEqualityComparer { get; }
-
-	public IEqualityComparer<T> SecondEqualityComparer { get; }
+	public IEqualityComparer<T> SecondEqualityComparer { get; } = secondEqualityComparer;
 
 	public virtual int Compare(T x, T y)
 	{

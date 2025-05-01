@@ -1821,7 +1821,8 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 }
 
 [Serializable]
-public abstract class BinaryHeap<T> : BinaryHeapBase<BinaryNode<T>, T>, IBinaryHeap<BinaryNode<T>, T>
+public abstract class BinaryHeap<T>(int capacity, IComparer<T> comparer)
+	: BinaryHeapBase<BinaryNode<T>, T>(capacity, comparer), IBinaryHeap<BinaryNode<T>, T>
 {
 	/// <inheritdoc />
 	protected BinaryHeap()
@@ -1837,11 +1838,6 @@ public abstract class BinaryHeap<T> : BinaryHeapBase<BinaryNode<T>, T>, IBinaryH
 
 	protected BinaryHeap(IComparer<T> comparer)
 		: this(0, comparer)
-	{
-	}
-
-	protected BinaryHeap(int capacity, IComparer<T> comparer)
-		: base(capacity, comparer)
 	{
 	}
 
@@ -1944,7 +1940,13 @@ public abstract class BinaryHeap<T> : BinaryHeapBase<BinaryNode<T>, T>, IBinaryH
 }
 
 [Serializable]
-public abstract class BinaryHeap<TKey, TValue> : BinaryHeapBase<BinaryNode<TKey, TValue>, TValue>, IBinaryHeap<BinaryNode<TKey, TValue>, TKey, TValue>
+public abstract class BinaryHeap<TKey, TValue>(
+	[NotNull] Func<TValue, TKey> getKeyForItem,
+	int capacity,
+	IComparer<TKey> keyComparer,
+	IComparer<TValue> comparer)
+	: BinaryHeapBase<BinaryNode<TKey, TValue>, TValue>(capacity, comparer),
+		IBinaryHeap<BinaryNode<TKey, TValue>, TKey, TValue>
 {
 	/// <inheritdoc />
 	protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem)
@@ -1963,13 +1965,6 @@ public abstract class BinaryHeap<TKey, TValue> : BinaryHeapBase<BinaryNode<TKey,
 	{
 	}
 
-	protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, int capacity, IComparer<TKey> keyComparer, IComparer<TValue> comparer)
-		: base(capacity, comparer)
-	{
-		GetKeyForItem = getKeyForItem;
-		KeyComparer = keyComparer ?? Comparer<TKey>.Default;
-	}
-
 	protected BinaryHeap([NotNull] Func<TValue, TKey> getKeyForItem, [NotNull] IEnumerable<TValue> enumerable)
 		: this(getKeyForItem, enumerable, null, null)
 	{
@@ -1982,10 +1977,10 @@ public abstract class BinaryHeap<TKey, TValue> : BinaryHeapBase<BinaryNode<TKey,
 	}
 
 	/// <inheritdoc />
-	public IComparer<TKey> KeyComparer { get; }
+	public IComparer<TKey> KeyComparer { get; } = keyComparer ?? Comparer<TKey>.Default;
 
 	[NotNull]
-	protected Func<TValue, TKey> GetKeyForItem { get; }
+	protected Func<TValue, TKey> GetKeyForItem { get; } = getKeyForItem;
 
 	/// <inheritdoc />
 	public sealed override BinaryNode<TKey, TValue> MakeNode(TValue value) { return new BinaryNode<TKey, TValue>(GetKeyForItem(value), value); }

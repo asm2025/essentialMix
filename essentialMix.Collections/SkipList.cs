@@ -29,24 +29,19 @@ namespace essentialMix.Collections;
 */
 [DebuggerDisplay("Count = {Count}, Level = {Level}")]
 [Serializable]
-public sealed class SkipList<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
+public sealed class SkipList<T>(IComparer<T> comparer)
+	: ICollection<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
 {
 	private const int MAX_LEVEL = 32;
 	private const double PROBABILITY = 0.5d;
 
 	[DebuggerDisplay("{Value}")]
-	internal class Node : INode<T>
+	internal class Node(T value, int level) : INode<T>
 	{
 		[NotNull]
-		internal Node[] Forward;
+		internal Node[] Forward = new Node[level + 1];
 
-		public Node(T value, int level)
-		{
-			Value = value;
-			Forward = new Node[level + 1];
-		}
-
-		public T Value { get; set; }
+		public T Value { get; set; } = value;
 
 		/// <inheritdoc />
 		[NotNull]
@@ -143,17 +138,12 @@ public sealed class SkipList<T> : ICollection<T>, ICollection, IReadOnlyCollecti
 	{
 	}
 
-	public SkipList(IComparer<T> comparer)
-	{
-		Comparer = comparer ?? Comparer<T>.Default;
-		Header = new Node(default(T), MAX_LEVEL);
-	}
-
 	[NotNull]
-	public IComparer<T> Comparer { get; }
+	public IComparer<T> Comparer { get; } = comparer ?? Comparer<T>.Default;
+
 	public int Level { get; private set; }
 	[NotNull]
-	internal Node Header { get; private set; }
+	internal Node Header { get; private set; } = new(default(T), MAX_LEVEL);
 
 	/// <inheritdoc cref="ICollection{T}" />
 	public int Count { get; private set; }

@@ -43,7 +43,8 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDi
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_DictionaryKeyCollectionDebugView<,>))]
 	[Serializable]
-	public sealed class KeyCollection : ICollection<TKey>, ICollection, IReadOnlyCollection<TKey>
+	public sealed class KeyCollection([NotNull] ObservableDictionary<TKey, TValue> dictionary)
+		: ICollection<TKey>, ICollection, IReadOnlyCollection<TKey>
 	{
 		/// <inheritdoc cref="IEnumerator{T}" />
 		[Serializable]
@@ -104,12 +105,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDi
 			}
 		}
 
-		private ObservableDictionary<TKey, TValue> _dictionary;
-
-		public KeyCollection([NotNull] ObservableDictionary<TKey, TValue> dictionary)
-		{
-			_dictionary = dictionary;
-		}
+		private ObservableDictionary<TKey, TValue> _dictionary = dictionary;
 
 		bool ICollection.IsSynchronized => false;
 
@@ -177,7 +173,8 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDi
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_DictionaryValueCollectionDebugView<,>))]
 	[Serializable]
-	public sealed class ValueCollection : ICollection<TValue>, ICollection, IReadOnlyCollection<TValue>
+	public sealed class ValueCollection([NotNull] ObservableDictionary<TKey, TValue> dictionary)
+		: ICollection<TValue>, ICollection, IReadOnlyCollection<TValue>
 	{
 		/// <inheritdoc cref="IEnumerator{T}" />
 		[Serializable]
@@ -238,12 +235,7 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDi
 			}
 		}
 
-		private ObservableDictionary<TKey, TValue> _dictionary;
-
-		public ValueCollection([NotNull] ObservableDictionary<TKey, TValue> dictionary)
-		{
-			_dictionary = dictionary;
-		}
+		private ObservableDictionary<TKey, TValue> _dictionary = dictionary;
 
 		bool ICollection.IsSynchronized => false;
 

@@ -7,24 +7,16 @@ using JetBrains.Annotations;
 namespace essentialMix.Patterns.ValueType;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public struct GUID
+public struct GUID()
 {
 	private const int LAST_BYTES_LEN = 8;
 
-	public GUID()
-	{
-		Data1 = 0u;
-		Data2 = 0;
-		Data3 = 0;
-		Data4 = new byte[LAST_BYTES_LEN];
-	}
-
-	public uint Data1 { get; set; }
-	public ushort Data2 { get; set; }
-	public ushort Data3 { get; set; }
+	public uint Data1 { get; set; } = 0u;
+	public ushort Data2 { get; set; } = 0;
+	public ushort Data3 { get; set; } = 0;
 
 	[NotNull]
-	public byte[] Data4 { get; }
+	public byte[] Data4 { get; } = new byte[LAST_BYTES_LEN];
 
 	[NotNull]
 	public override string ToString()

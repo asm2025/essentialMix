@@ -5,20 +5,15 @@ using JetBrains.Annotations;
 namespace essentialMix.Cryptography.Settings;
 
 [Serializable]
-public class Settings
+public class Settings(Encoding encoding)
 {
 	[NotNull]
-	private Encoding _encoding;
+	private Encoding _encoding = encoding ?? Encoding.Unicode;
 
 	/// <inheritdoc />
 	public Settings()
 		: this(Encoding.Unicode)
 	{
-	}
-
-	public Settings(Encoding encoding)
-	{
-		_encoding = encoding ?? Encoding.Unicode;
 	}
 
 	[NotNull]

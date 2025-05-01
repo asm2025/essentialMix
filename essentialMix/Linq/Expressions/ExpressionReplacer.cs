@@ -3,16 +3,11 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Linq.Expressions;
 
-internal class ExpressionReplacer : ExpressionVisitor
+internal class ExpressionReplacer([NotNull] Expression from, [NotNull] Expression to) : ExpressionVisitor
 {
-	private readonly Expression _from;
-	private readonly Expression _to;
+	private readonly Expression _from = from;
+	private readonly Expression _to = to;
 
-	public ExpressionReplacer([NotNull] Expression from, [NotNull] Expression to)
-	{
-		_from = from;
-		_to = to;
-	}
 	public override Expression Visit(Expression node)
 	{
 		return node == _from

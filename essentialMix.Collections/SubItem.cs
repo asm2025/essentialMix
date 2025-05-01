@@ -6,7 +6,9 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections;
 
 [Serializable]
-public class SubItem : Property, IFixable, IComparable<SubItem>, IComparable, IEquatable<SubItem>, INotifyPropertyChanged, ICloneable
+public class SubItem([NotNull] string name, string text, object value, bool isFixed, bool isReadOnly)
+	: Property(name, text, value, isFixed, isReadOnly), IFixable, IComparable<SubItem>, IComparable,
+		IEquatable<SubItem>, INotifyPropertyChanged, ICloneable
 {
 	public SubItem([NotNull] string name)
 		: this(name, null, null, false, false)
@@ -25,11 +27,6 @@ public class SubItem : Property, IFixable, IComparable<SubItem>, IComparable, IE
 
 	public SubItem([NotNull] string name, object value, bool isFixed, bool isReadOnly)
 		: this(name, null, value, isFixed, isReadOnly)
-	{
-	}
-
-	public SubItem([NotNull] string name, string text, object value, bool isFixed, bool isReadOnly) 
-		: base(name, text, value, isFixed, isReadOnly)
 	{
 	}
 

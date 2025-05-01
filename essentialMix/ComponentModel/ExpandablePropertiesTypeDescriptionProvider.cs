@@ -18,17 +18,14 @@ public class ExpandablePropertiesTypeDescriptionProvider : TypeDescriptionProvid
 	/// <summary>
 	/// This class is a modified version of a class from Stephen Taub's NET Matters, ICustomTypeDescriptor article:
 	/// </summary>
-	private class ExpandablePropertiesTypeDescriptor : CustomTypeDescriptor
+	private class ExpandablePropertiesTypeDescriptor(
+		[NotNull] ExpandablePropertiesTypeDescriptionProvider provider,
+		[NotNull] ICustomTypeDescriptor descriptor,
+		[NotNull] Type objectType)
+		: CustomTypeDescriptor(descriptor)
 	{
-		private readonly Type _objectType;
-		private readonly ExpandablePropertiesTypeDescriptionProvider _provider;
-
-		public ExpandablePropertiesTypeDescriptor([NotNull] ExpandablePropertiesTypeDescriptionProvider provider, [NotNull] ICustomTypeDescriptor descriptor, [NotNull] Type objectType)
-			: base(descriptor)
-		{
-			_provider = provider;
-			_objectType = objectType;
-		}
+		private readonly Type _objectType = objectType;
+		private readonly ExpandablePropertiesTypeDescriptionProvider _provider = provider;
 
 		public override PropertyDescriptorCollection GetProperties() { return GetProperties(null); }
 
@@ -77,14 +74,9 @@ public class ExpandablePropertiesTypeDescriptionProvider : TypeDescriptionProvid
 	}
 
 	/// <inheritdoc />
-	public class ExpandablePropertyDescriptor : DefaultPropertyDescriptor
+	public class ExpandablePropertyDescriptor([NotNull] PropertyInfo property) : DefaultPropertyDescriptor(property)
 	{
 		private TypeConverter _converter;
-
-		public ExpandablePropertyDescriptor([NotNull] PropertyInfo property)
-			: base(property)
-		{
-		}
 
 		public override TypeConverter Converter =>
 			_converter ??= base.Converter?.GetType() != typeof(TypeConverter)

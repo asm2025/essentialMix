@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Patterns.DateTime;
 
-public struct TimeRate : IComparable<TimeRate>, IComparable, IEquatable<TimeRate>
+public struct TimeRate(TimeRange range, decimal rate) : IComparable<TimeRate>, IComparable, IEquatable<TimeRate>
 {
 	/// <inheritdoc />
 	public TimeRate(TimeSpan start, TimeSpan end, decimal rate)
@@ -11,14 +11,8 @@ public struct TimeRate : IComparable<TimeRate>, IComparable, IEquatable<TimeRate
 	{
 	}
 
-	public TimeRate(TimeRange range, decimal rate)
-	{
-		Range = range;
-		Rate = rate;
-	}
-
-	public TimeRange Range { get; set; }
-	public decimal Rate { get; set; }
+	public TimeRange Range { get; set; } = range;
+	public decimal Rate { get; set; } = rate;
 
 	/// <inheritdoc />
 	[NotNull]

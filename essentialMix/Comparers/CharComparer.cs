@@ -3,11 +3,10 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Comparers;
 
-public sealed class CharComparer : IGenericComparer<char>
+public sealed class CharComparer([NotNull] CultureInfo culture, bool ignoreCase) : IGenericComparer<char>
 {
 	[NotNull]
-	private readonly TextInfo _textInfo;
-	private readonly bool _ignoreCase;
+	private readonly TextInfo _textInfo = culture.TextInfo;
 
 	public CharComparer()
 		: this(CultureInfo.InvariantCulture, false)
@@ -19,15 +18,9 @@ public sealed class CharComparer : IGenericComparer<char>
 	{
 	}
 
-	public CharComparer([NotNull] CultureInfo culture, bool ignoreCase)
-	{
-		_textInfo = culture.TextInfo;
-		_ignoreCase = ignoreCase;
-	}
-
 	public int Compare(char x, char y)
 	{
-		return _ignoreCase
+		return ignoreCase
 					? _textInfo.ToLower(x).CompareTo(_textInfo.ToLower(y))
 					: x.CompareTo(y);
 	}
@@ -39,7 +32,7 @@ public sealed class CharComparer : IGenericComparer<char>
 
 	public int GetHashCode(char obj)
 	{
-		return _ignoreCase
+		return ignoreCase
 					? _textInfo.ToLower(obj).GetHashCode()
 					: obj.GetHashCode();
 	}

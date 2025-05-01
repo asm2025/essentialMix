@@ -42,7 +42,7 @@ public class User : IUser
 	}
 }
 
-public class User<TKey> : User, IUser<TKey>
+public class User<TKey>(TKey id, string userName, SecureString password) : User(userName, password), IUser<TKey>
 {
 	public User(string userName)
 		: this(default(TKey), userName, null)
@@ -54,12 +54,6 @@ public class User<TKey> : User, IUser<TKey>
 	{
 	}
 
-	public User(TKey id, string userName, SecureString password)
-		: base(userName, password)
-	{
-		Id = id;
-	}
-
-	public TKey Id { get; }
+	public TKey Id { get; } = id;
 	public string Email { get; set; }
 }

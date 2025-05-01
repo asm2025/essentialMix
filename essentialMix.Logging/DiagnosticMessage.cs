@@ -1,18 +1,12 @@
 namespace essentialMix.Logging;
 
-public class DiagnosticMessage
+public class DiagnosticMessage(string message, Severity severity)
 {
 	public DiagnosticMessage(string message)
 		: this(message, Severity.Information)
 	{
 	}
 
-	public DiagnosticMessage(string message, Severity severity)
-	{
-		Message = message;
-		Severity = severity;
-	}
-
-	public string Message { get; }
-	public Severity Severity { get; }
+	public string Message { get; } = message;
+	public Severity Severity { get; } = severity;
 }

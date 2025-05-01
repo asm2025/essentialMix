@@ -5,7 +5,8 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Comparers;
 
-public class DictionaryComparer<TKey, TValue> : IDictionaryComparer<TKey, TValue>
+public class DictionaryComparer<TKey, TValue>(IKeyValueComparer<TKey, TValue> comparer)
+	: IDictionaryComparer<TKey, TValue>
 {
 	public static DictionaryComparer<TKey, TValue> Default { get; } = new DictionaryComparer<TKey, TValue>();
 
@@ -19,13 +20,8 @@ public class DictionaryComparer<TKey, TValue> : IDictionaryComparer<TKey, TValue
 	{
 	}
 
-	public DictionaryComparer(IKeyValueComparer<TKey, TValue> comparer)
-	{
-		Comparer = comparer ?? KeyValueComparer<TKey, TValue>.Default;
-	}
-
 	[NotNull]
-	public IKeyValueComparer<TKey, TValue> Comparer { get; }
+	public IKeyValueComparer<TKey, TValue> Comparer { get; } = comparer ?? KeyValueComparer<TKey, TValue>.Default;
 
 	public int Compare(IDictionary<TKey, TValue> x, IDictionary<TKey, TValue> y)
 	{

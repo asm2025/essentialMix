@@ -6,15 +6,11 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections;
 
 [Serializable]
-public class ReadOnlyKeyedCollection<TKey, TValue> : IReadOnlyKeyedCollection<TKey, TValue>, IReadOnlyList<TValue>, IReadOnlyCollection<TValue>
+public class ReadOnlyKeyedCollection<TKey, TValue>([NotNull] KeyedCollection<TKey, TValue> collection)
+	: IReadOnlyKeyedCollection<TKey, TValue>, IReadOnlyList<TValue>, IReadOnlyCollection<TValue>
 {
-	public ReadOnlyKeyedCollection([NotNull] KeyedCollection<TKey, TValue> collection)
-	{
-		Collection = collection;
-	}
-
 	[NotNull]
-	protected KeyedCollection<TKey, TValue> Collection { get; }
+	protected KeyedCollection<TKey, TValue> Collection { get; } = collection;
 
 	/// <inheritdoc />
 	IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() { return Collection.GetEnumerator(); }

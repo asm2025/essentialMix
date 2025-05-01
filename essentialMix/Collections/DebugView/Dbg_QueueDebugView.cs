@@ -10,14 +10,9 @@ namespace essentialMix.Collections.DebugView;
 * collections in this solution assemblies.
 */
 [DebuggerNonUserCode]
-public sealed class Dbg_QueueDebugView<T>
+public sealed class Dbg_QueueDebugView<T>([NotNull] Queue<T> queue)
 {
-	private readonly Queue<T> _queue;
-
-	public Dbg_QueueDebugView([NotNull] Queue<T> queue)
-	{
-		_queue = queue;
-	}
+	private readonly Queue<T> _queue = queue;
 
 	[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 	[NotNull]

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Numerics;
 using essentialMix.Data.Patterns.Provider;
 using essentialMix.Extensions;
@@ -17,16 +16,15 @@ public class DataProvider
 {
 	/// <inheritdoc />
 	public DataProvider()
+		: base(OracleClientFactory.Instance)
 	{
 	}
 
 	/// <inheritdoc />
 	public DataProvider([NotNull] IDbConnection connection)
-		: base(connection)
+		: base(OracleClientFactory.Instance, connection)
 	{
 	}
-
-	public override DbProviderFactory Factory => OracleClientFactory.Instance;
 
 	public override OracleDbType DefaultDbType => OracleDbType.Blob;
 

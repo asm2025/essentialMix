@@ -137,15 +137,10 @@ public class Collector<T> : Enumerator<T>, IReadOnlyCollection<T>
 	}
 }
 
-public class Collector : Collector<object>
+public class Collector([NotNull] IEnumerable enumerable) : Collector<object>(enumerable.Cast<object>())
 {
 	protected Collector()
 		: this(Array.Empty<object>())
-	{
-	}
-
-	public Collector([NotNull] IEnumerable enumerable)
-		: base(enumerable.Cast<object>())
 	{
 	}
 }

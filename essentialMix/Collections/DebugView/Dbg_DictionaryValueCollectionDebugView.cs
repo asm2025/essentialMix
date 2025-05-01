@@ -11,14 +11,9 @@ namespace essentialMix.Collections.DebugView;
 */
 [DebuggerNonUserCode]
 // ReSharper disable once UnusedTypeParameter
-public sealed class Dbg_DictionaryValueCollectionDebugView<TKey, TValue>
+public sealed class Dbg_DictionaryValueCollectionDebugView<TKey, TValue>([NotNull] ICollection<TValue> collection)
 {
-	private readonly ICollection<TValue> _collection;
-
-	public Dbg_DictionaryValueCollectionDebugView([NotNull] ICollection<TValue> collection)
-	{
-		_collection = collection;
-	}
+	private readonly ICollection<TValue> _collection = collection;
 
 	[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 	[NotNull]

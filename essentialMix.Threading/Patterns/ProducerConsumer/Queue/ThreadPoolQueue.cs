@@ -21,16 +21,14 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue;
 /// stack of the security attributes discovered. ThreadPool.UnsafeQueueUserWorkItem() skips the Capture() call. The thread pool thread will run with the default execution context. This is an optimization, Capture() is not a cheap method. It matters in the kind
 /// of program that depends on TP threads to get stuff done in a hurry.</para>
 /// </summary>
-public class ThreadPoolQueue<TQueue, T> : ProducerConsumerThreadQueue<T>, IProducerQueue<TQueue, T>
+public class ThreadPoolQueue<TQueue, T>(
+	[NotNull] TQueue queue,
+	[NotNull] ProducerConsumerQueueOptions<T> options,
+	CancellationToken token = default(CancellationToken))
+	: ProducerConsumerThreadQueue<T>(options, token), IProducerQueue<TQueue, T>
 	where TQueue : ICollection, IReadOnlyCollection<T>
 {
-	private readonly QueueAdapter<TQueue, T> _queue;
-
-	public ThreadPoolQueue([NotNull] TQueue queue, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
-		: base(options, token)
-	{
-		_queue = new QueueAdapter<TQueue, T>(queue);
-	}
+	private readonly QueueAdapter<TQueue, T> _queue = new(queue);
 
 	/// <inheritdoc />
 	// ReSharper disable once InconsistentlySynchronizedField

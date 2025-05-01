@@ -10,7 +10,7 @@ using essentialMix.Helpers;
 namespace essentialMix.Globalization;
 
 [DebuggerDisplay("{Name}")]
-public class CountryInfo
+public class CountryInfo([NotNull] RegionInfo region)
 {
 	private static ReadOnlyDictionary<string, CountryInfo> __countries;
 
@@ -28,11 +28,6 @@ public class CountryInfo
 	{
 	}
 
-	public CountryInfo([NotNull] RegionInfo region)
-	{
-		Region = region;
-	}
-
 	/// <inheritdoc />
 	[NotNull]
 	public override string ToString() { return Name; }
@@ -46,7 +41,7 @@ public class CountryInfo
 	public string DisplayName => (UseNativeName ? Region.NativeName : Region.DisplayName) ?? Name;
 
 	[NotNull]
-	public RegionInfo Region { get; }
+	public RegionInfo Region { get; } = region;
 
 	[NotNull]
 	public IReadOnlyDictionary<string, CultureInfo> Cultures => _cultures ??= CultureInfoHelper.ListByRegion(Region);

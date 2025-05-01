@@ -536,22 +536,17 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		}
 	}
 
-	internal class Node
+	internal class Node(T value, bool isRed)
 	{
 		public Node(T value)
 			: this(value, true)
 		{
 		}
 
-		public Node(T value, bool isRed)
-		{
-			// The default color will be red, we never need to create a black node directly.
-			Value = value;
-			IsRed = isRed;
-		}
+		// The default color will be red, we never need to create a black node directly.
 
-		public bool IsRed;
-		public T Value;
+		public bool IsRed = isRed;
+		public T Value = value;
 		public Node Left;
 		public Node Right;
 	}
@@ -563,16 +558,11 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 	}
 
 	[DebuggerNonUserCode]
-	internal sealed class DebugView
+	internal sealed class DebugView([NotNull] ObservableSortedSet<T> set)
 	{
-		public DebugView([NotNull] ObservableSortedSet<T> set)
-		{
-			Items = set.ToArray();
-		}
-
 		[NotNull]
 		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-		public T[] Items { get; }
+		public T[] Items { get; } = set.ToArray();
 	}
 
 	private Node _root;

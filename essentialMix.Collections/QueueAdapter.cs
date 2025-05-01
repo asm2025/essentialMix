@@ -18,155 +18,134 @@ public readonly struct QueueAdapter<TQueue, T> : ICollection, IReadOnlyCollectio
 	{
 	}
 
-	private readonly struct QueueProxy : IQueueAdapter
+	private readonly struct QueueProxy(IQueue<T> queue) : IQueueAdapter
 	{
-		private readonly IQueue<T> _queue;
-
 		public QueueProxy([NotNull] Queue<T> queue)
 			: this(new QueueWrapper<T>(queue))
 		{
 		}
 
-		public QueueProxy(IQueue<T> queue)
-		{
-			_queue = queue;
-		}
+		/// <inheritdoc />
+		public int Count => queue.Count;
 
 		/// <inheritdoc />
-		public int Count => _queue.Count;
+		public bool IsSynchronized => queue.IsSynchronized;
 
 		/// <inheritdoc />
-		public bool IsSynchronized => _queue.IsSynchronized;
+		public object SyncRoot => queue.SyncRoot;
 
 		/// <inheritdoc />
-		public object SyncRoot => _queue.SyncRoot;
+		IEnumerator IEnumerable.GetEnumerator() { return queue.GetEnumerator(); }
 
 		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() { return _queue.GetEnumerator(); }
+		public void Enqueue(T item) { queue.Enqueue(item); }
 
 		/// <inheritdoc />
-		public void Enqueue(T item) { _queue.Enqueue(item); }
-
-		/// <inheritdoc />
-		public T Dequeue() { return _queue.Dequeue(); }
+		public T Dequeue() { return queue.Dequeue(); }
 
 		/// <inheritdoc />
 		public bool TryDequeue(out T item)
 		{
-			if (_queue.Count == 0)
+			if (queue.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _queue.Dequeue();
+			item = queue.Dequeue();
 			return true;
 		}
 
 		/// <inheritdoc />
-		public T Peek() { return _queue.Peek(); }
+		public T Peek() { return queue.Peek(); }
 
 		/// <inheritdoc />
 		public bool TryPeek(out T item)
 		{
-			if (_queue.Count == 0)
+			if (queue.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _queue.Peek();
+			item = queue.Peek();
 			return true;
 		}
 
 		/// <inheritdoc />
-		public void Clear() { _queue.Clear(); }
+		public void Clear() { queue.Clear(); }
 
 		/// <inheritdoc />
-		public void CopyTo(Array array, int index) { _queue.CopyTo(array, index); }
+		public void CopyTo(Array array, int index) { queue.CopyTo(array, index); }
 	}
 
-	private readonly struct StackProxy : IQueueAdapter
+	private readonly struct StackProxy(IStack<T> stack) : IQueueAdapter
 	{
-		private readonly IStack<T> _stack;
-
 		public StackProxy([NotNull] Stack<T> stack)
 			: this(new StackWrapper<T>(stack))
 		{
 		}
 
-		public StackProxy(IStack<T> stack)
-		{
-			_stack = stack;
-		}
+		/// <inheritdoc />
+		public int Count => stack.Count;
 
 		/// <inheritdoc />
-		public int Count => _stack.Count;
+		public bool IsSynchronized => stack.IsSynchronized;
 
 		/// <inheritdoc />
-		public bool IsSynchronized => _stack.IsSynchronized;
+		public object SyncRoot => stack.SyncRoot;
 
 		/// <inheritdoc />
-		public object SyncRoot => _stack.SyncRoot;
+		IEnumerator IEnumerable.GetEnumerator() { return stack.GetEnumerator(); }
 
 		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() { return _stack.GetEnumerator(); }
+		public void Enqueue(T item) { stack.Push(item); }
 
 		/// <inheritdoc />
-		public void Enqueue(T item) { _stack.Push(item); }
-
-		/// <inheritdoc />
-		public T Dequeue() { return _stack.Pop(); }
+		public T Dequeue() { return stack.Pop(); }
 
 		/// <inheritdoc />
 		public bool TryDequeue(out T item)
 		{
-			if (_stack.Count == 0)
+			if (stack.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _stack.Pop();
+			item = stack.Pop();
 			return true;
 		}
 
 		/// <inheritdoc />
-		public T Peek() { return _stack.Peek(); }
+		public T Peek() { return stack.Peek(); }
 
 		/// <inheritdoc />
 		public bool TryPeek(out T item)
 		{
-			if (_stack.Count == 0)
+			if (stack.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _stack.Peek();
+			item = stack.Peek();
 			return true;
 		}
 
 		/// <inheritdoc />
-		public void Clear() { _stack.Clear(); }
+		public void Clear() { stack.Clear(); }
 
 		/// <inheritdoc />
-		public void CopyTo(Array array, int index) { _stack.CopyTo(array, index); }
+		public void CopyTo(Array array, int index) { stack.CopyTo(array, index); }
 	}
 
-	private readonly struct ConcurrentQueueProxy : IQueueAdapter
+	private readonly struct ConcurrentQueueProxy(ConcurrentQueue<T> queue) : IQueueAdapter
 	{
-		private readonly ConcurrentQueue<T> _queue;
-		private readonly ICollection _collection;
-
-		public ConcurrentQueueProxy(ConcurrentQueue<T> queue)
-		{
-			_queue = queue;
-			_collection = queue;
-		}
+		private readonly ICollection _collection = queue;
 
 		/// <inheritdoc />
-		public int Count => _queue.Count;
+		public int Count => queue.Count;
 
 		/// <inheritdoc />
 		public bool IsSynchronized => _collection.IsSynchronized;
@@ -178,48 +157,41 @@ public readonly struct QueueAdapter<TQueue, T> : ICollection, IReadOnlyCollectio
 		IEnumerator IEnumerable.GetEnumerator() { return _collection.GetEnumerator(); }
 
 		/// <inheritdoc />
-		public void Enqueue(T item) { _queue.Enqueue(item); }
+		public void Enqueue(T item) { queue.Enqueue(item); }
 
 		/// <inheritdoc />
 		public T Dequeue()
 		{
-			if (!_queue.TryDequeue(out T item)) throw new CollectionIsEmptyException();
+			if (!queue.TryDequeue(out T item)) throw new CollectionIsEmptyException();
 			return item;
 		}
 
 		/// <inheritdoc />
-		public bool TryDequeue(out T item) { return _queue.TryDequeue(out item); }
+		public bool TryDequeue(out T item) { return queue.TryDequeue(out item); }
 
 		/// <inheritdoc />
 		public T Peek()
 		{
-			if (!_queue.TryPeek(out T item)) throw new CollectionIsEmptyException();
+			if (!queue.TryPeek(out T item)) throw new CollectionIsEmptyException();
 			return item;
 		}
 
 		/// <inheritdoc />
-		public bool TryPeek(out T item) { return _queue.TryPeek(out item); }
+		public bool TryPeek(out T item) { return queue.TryPeek(out item); }
 
 		/// <inheritdoc />
-		public void Clear() { _queue.Clear(); }
+		public void Clear() { queue.Clear(); }
 
 		/// <inheritdoc />
 		public void CopyTo(Array array, int index) { _collection.CopyTo(array, index); }
 	}
 
-	private readonly struct ConcurrentStackProxy : IQueueAdapter
+	private readonly struct ConcurrentStackProxy(ConcurrentStack<T> stack) : IQueueAdapter
 	{
-		private readonly ConcurrentStack<T> _stack;
-		private readonly ICollection _collection;
-
-		public ConcurrentStackProxy(ConcurrentStack<T> stack)
-		{
-			_stack = stack;
-			_collection = stack;
-		}
+		private readonly ICollection _collection = stack;
 
 		/// <inheritdoc />
-		public int Count => _stack.Count;
+		public int Count => stack.Count;
 
 		/// <inheritdoc />
 		public bool IsSynchronized => _collection.IsSynchronized;
@@ -231,48 +203,41 @@ public readonly struct QueueAdapter<TQueue, T> : ICollection, IReadOnlyCollectio
 		IEnumerator IEnumerable.GetEnumerator() { return _collection.GetEnumerator(); }
 
 		/// <inheritdoc />
-		public void Enqueue(T item) { _stack.Push(item); }
+		public void Enqueue(T item) { stack.Push(item); }
 
 		/// <inheritdoc />
 		public T Dequeue()
 		{
-			if (!_stack.TryPop(out T item)) throw new CollectionIsEmptyException();
+			if (!stack.TryPop(out T item)) throw new CollectionIsEmptyException();
 			return item;
 		}
 
 		/// <inheritdoc />
-		public bool TryDequeue(out T item) { return _stack.TryPop(out item); }
+		public bool TryDequeue(out T item) { return stack.TryPop(out item); }
 
 		/// <inheritdoc />
 		public T Peek()
 		{
-			if (!_stack.TryPeek(out T item)) throw new CollectionIsEmptyException();
+			if (!stack.TryPeek(out T item)) throw new CollectionIsEmptyException();
 			return item;
 		}
 
 		/// <inheritdoc />
-		public bool TryPeek(out T item) { return _stack.TryPeek(out item); }
+		public bool TryPeek(out T item) { return stack.TryPeek(out item); }
 
 		/// <inheritdoc />
-		public void Clear() { _stack.Clear(); }
+		public void Clear() { stack.Clear(); }
 
 		/// <inheritdoc />
 		public void CopyTo(Array array, int index) { _collection.CopyTo(array, index); }
 	}
 
-	private readonly struct BlockingCollectionProxy : IQueueAdapter
+	private readonly struct BlockingCollectionProxy(BlockingCollection<T> blockingCollection) : IQueueAdapter
 	{
-		private readonly BlockingCollection<T> _blockingCollection;
-		private readonly ICollection _collection;
-
-		public BlockingCollectionProxy(BlockingCollection<T> blockingCollection)
-		{
-			_blockingCollection = blockingCollection;
-			_collection = blockingCollection;
-		}
+		private readonly ICollection _collection = blockingCollection;
 
 		/// <inheritdoc />
-		public int Count => _blockingCollection.Count;
+		public int Count => blockingCollection.Count;
 
 		/// <inheritdoc />
 		public bool IsSynchronized => _collection.IsSynchronized;
@@ -284,17 +249,17 @@ public readonly struct QueueAdapter<TQueue, T> : ICollection, IReadOnlyCollectio
 		IEnumerator IEnumerable.GetEnumerator() { return _collection.GetEnumerator(); }
 
 		/// <inheritdoc />
-		public void Enqueue(T item) { _blockingCollection.Add(item); }
+		public void Enqueue(T item) { blockingCollection.Add(item); }
 
 		/// <inheritdoc />
 		public T Dequeue()
 		{
-			if (!_blockingCollection.TryTake(out T item)) throw new CollectionIsEmptyException();
+			if (!blockingCollection.TryTake(out T item)) throw new CollectionIsEmptyException();
 			return item;
 		}
 
 		/// <inheritdoc />
-		public bool TryDequeue(out T item) { return _blockingCollection.TryTake(out item); }
+		public bool TryDequeue(out T item) { return blockingCollection.TryTake(out item); }
 
 		/// <inheritdoc />
 		public T Peek()
@@ -306,148 +271,127 @@ public readonly struct QueueAdapter<TQueue, T> : ICollection, IReadOnlyCollectio
 		public bool TryPeek(out T item) { throw new NotSupportedException(); }
 
 		/// <inheritdoc />
-		public void Clear() { _blockingCollection.Clear(); }
+		public void Clear() { blockingCollection.Clear(); }
 
 		/// <inheritdoc />
 		public void CopyTo(Array array, int index) { _collection.CopyTo(array, index); }
 	}
 
-	private readonly struct DequeProxy : IQueueAdapter
+	private readonly struct DequeProxy(IDeque<T> deque) : IQueueAdapter
 	{
-		private readonly IDeque<T> _deque;
-
-		public DequeProxy(IDeque<T> deque)
-		{
-			_deque = deque;
-		}
+		/// <inheritdoc />
+		public int Count => deque.Count;
 
 		/// <inheritdoc />
-		public int Count => _deque.Count;
+		public bool IsSynchronized => deque.IsSynchronized;
 
 		/// <inheritdoc />
-		public bool IsSynchronized => _deque.IsSynchronized;
+		public object SyncRoot => deque.SyncRoot;
 
 		/// <inheritdoc />
-		public object SyncRoot => _deque.SyncRoot;
+		IEnumerator IEnumerable.GetEnumerator() { return deque.GetEnumerator(); }
 
 		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() { return _deque.GetEnumerator(); }
+		public void Enqueue(T item) { deque.Enqueue(item); }
 
 		/// <inheritdoc />
-		public void Enqueue(T item) { _deque.Enqueue(item); }
-
-		/// <inheritdoc />
-		public T Dequeue() { return _deque.Dequeue(); }
+		public T Dequeue() { return deque.Dequeue(); }
 
 		/// <inheritdoc />
 		public bool TryDequeue(out T item)
 		{
-			if (_deque.Count == 0)
+			if (deque.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _deque.Dequeue();
+			item = deque.Dequeue();
 			return true;
 		}
 
 		/// <inheritdoc />
-		public T Peek() { return _deque.Peek(); }
+		public T Peek() { return deque.Peek(); }
 
 		/// <inheritdoc />
 		public bool TryPeek(out T item)
 		{
-			if (_deque.Count == 0)
+			if (deque.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _deque.Peek();
+			item = deque.Peek();
 			return true;
 		}
 
 		/// <inheritdoc />
-		public void Clear() { _deque.Clear(); }
+		public void Clear() { deque.Clear(); }
 
 		/// <inheritdoc />
-		public void CopyTo(Array array, int index) { _deque.CopyTo(array, index); }
+		public void CopyTo(Array array, int index) { deque.CopyTo(array, index); }
 	}
 
-	private readonly struct CircularBufferProxy : IQueueAdapter
+	private readonly struct CircularBufferProxy(ICircularBuffer<T> buffer) : IQueueAdapter
 	{
-		private readonly ICircularBuffer<T> _buffer;
-
-		public CircularBufferProxy(ICircularBuffer<T> buffer)
-		{
-			_buffer = buffer;
-		}
+		/// <inheritdoc />
+		public int Count => buffer.Count;
 
 		/// <inheritdoc />
-		public int Count => _buffer.Count;
+		public bool IsSynchronized => buffer.IsSynchronized;
 
 		/// <inheritdoc />
-		public bool IsSynchronized => _buffer.IsSynchronized;
+		public object SyncRoot => buffer.SyncRoot;
 
 		/// <inheritdoc />
-		public object SyncRoot => _buffer.SyncRoot;
+		IEnumerator IEnumerable.GetEnumerator() { return buffer.GetEnumerator(); }
 
 		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() { return _buffer.GetEnumerator(); }
+		public void Enqueue(T item) { buffer.Enqueue(item); }
 
 		/// <inheritdoc />
-		public void Enqueue(T item) { _buffer.Enqueue(item); }
-
-		/// <inheritdoc />
-		public T Dequeue() { return _buffer.Dequeue(); }
+		public T Dequeue() { return buffer.Dequeue(); }
 
 		/// <inheritdoc />
 		public bool TryDequeue(out T item)
 		{
-			if (_buffer.Count == 0)
+			if (buffer.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _buffer.Dequeue();
+			item = buffer.Dequeue();
 			return true;
 		}
 
 		/// <inheritdoc />
-		public T Peek() { return _buffer.Peek(); }
+		public T Peek() { return buffer.Peek(); }
 
 		/// <inheritdoc />
 		public bool TryPeek(out T item)
 		{
-			if (_buffer.Count == 0)
+			if (buffer.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _buffer.Peek();
+			item = buffer.Peek();
 			return true;
 		}
 
 		/// <inheritdoc />
-		public void Clear() { _buffer.Clear(); }
+		public void Clear() { buffer.Clear(); }
 
 		/// <inheritdoc />
-		public void CopyTo(Array array, int index) { _buffer.CopyTo(array, index); }
+		public void CopyTo(Array array, int index) { buffer.CopyTo(array, index); }
 	}
 
-	private readonly struct HeapProxy : IQueueAdapter
+	private readonly struct HeapProxy(IHeap<T> heap) : IQueueAdapter
 	{
-		private readonly IHeap<T> _heap;
-		private readonly ICollection _collection;
-
-		public HeapProxy(IHeap<T> heap)
-		{
-			_heap = heap;
-			_collection = heap as ICollection ?? throw new NotSupportedException();
-		}
+		private readonly ICollection _collection = heap as ICollection ?? throw new NotSupportedException();
 
 		/// <inheritdoc />
 		public int Count => _collection.Count;
@@ -459,65 +403,58 @@ public readonly struct QueueAdapter<TQueue, T> : ICollection, IReadOnlyCollectio
 		public object SyncRoot => _collection.SyncRoot;
 
 		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() { return _heap.GetEnumerator(); }
+		IEnumerator IEnumerable.GetEnumerator() { return heap.GetEnumerator(); }
 
 		/// <inheritdoc />
-		public void Enqueue(T item) { _heap.Add(item); }
+		public void Enqueue(T item) { heap.Add(item); }
 
 		/// <inheritdoc />
 		[NotNull]
-		public T Dequeue() { return _heap.ExtractValue(); }
+		public T Dequeue() { return heap.ExtractValue(); }
 
 		/// <inheritdoc />
 		public bool TryDequeue(out T item)
 		{
-			if (_heap.Count == 0)
+			if (heap.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _heap.ExtractValue();
+			item = heap.ExtractValue();
 			return true;
 		}
 
 		/// <inheritdoc />
 		[NotNull]
-		public T Peek() { return _heap.Value(); }
+		public T Peek() { return heap.Value(); }
 
 		/// <inheritdoc />
 		public bool TryPeek(out T item)
 		{
-			if (_heap.Count == 0)
+			if (heap.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _heap.Value();
+			item = heap.Value();
 			return true;
 		}
 
 		/// <inheritdoc />
-		public void Clear() { _heap.Clear(); }
+		public void Clear() { heap.Clear(); }
 
 		/// <inheritdoc />
 		public void CopyTo(Array array, int index) { _collection.CopyTo(array, index); }
 	}
 
-	private readonly struct LinkedListProxy : IQueueAdapter
+	private readonly struct LinkedListProxy(LinkedList<T> linkedList) : IQueueAdapter
 	{
-		private readonly LinkedList<T> _linkedList;
-		private readonly ICollection _collection;
-
-		public LinkedListProxy(LinkedList<T> linkedList)
-		{
-			_linkedList = linkedList;
-			_collection = linkedList;
-		}
+		private readonly ICollection _collection = linkedList;
 
 		/// <inheritdoc />
-		public int Count => _linkedList.Count;
+		public int Count => linkedList.Count;
 
 		/// <inheritdoc />
 		public bool IsSynchronized => _collection.IsSynchronized;
@@ -526,75 +463,68 @@ public readonly struct QueueAdapter<TQueue, T> : ICollection, IReadOnlyCollectio
 		public object SyncRoot => _collection.SyncRoot;
 
 		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() { return _linkedList.GetEnumerator(); }
+		IEnumerator IEnumerable.GetEnumerator() { return linkedList.GetEnumerator(); }
 
 		/// <inheritdoc />
-		public void Enqueue(T item) { _linkedList.AddLast(item); }
+		public void Enqueue(T item) { linkedList.AddLast(item); }
 
 		/// <inheritdoc />
 		public T Dequeue()
 		{
-			if (_linkedList.Count == 0) throw new CollectionIsEmptyException();
-			T item = _linkedList.First.Value;
-			_linkedList.RemoveFirst();
+			if (linkedList.Count == 0) throw new CollectionIsEmptyException();
+			T item = linkedList.First.Value;
+			linkedList.RemoveFirst();
 			return item;
 		}
 
 		/// <inheritdoc />
 		public bool TryDequeue(out T item)
 		{
-			if (_linkedList.Count == 0)
+			if (linkedList.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _linkedList.First.Value;
-			_linkedList.RemoveFirst();
+			item = linkedList.First.Value;
+			linkedList.RemoveFirst();
 			return true;
 		}
 
 		/// <inheritdoc />
 		public T Peek()
 		{
-			if (_linkedList.Count == 0) throw new CollectionIsEmptyException();
-			T item = _linkedList.First.Value;
+			if (linkedList.Count == 0) throw new CollectionIsEmptyException();
+			T item = linkedList.First.Value;
 			return item;
 		}
 
 		/// <inheritdoc />
 		public bool TryPeek(out T item)
 		{
-			if (_linkedList.Count == 0)
+			if (linkedList.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _linkedList.First.Value;
+			item = linkedList.First.Value;
 			return true;
 		}
 
 		/// <inheritdoc />
-		public void Clear() { _linkedList.Clear(); }
+		public void Clear() { linkedList.Clear(); }
 
 		/// <inheritdoc />
 		public void CopyTo(Array array, int index) { _collection.CopyTo(array, index); }
 	}
 
-	private readonly struct ListProxy : IQueueAdapter
+	private readonly struct ListProxy(List<T> list) : IQueueAdapter
 	{
-		private readonly List<T> _list;
-		private readonly ICollection _collection;
-
-		public ListProxy(List<T> list)
-		{
-			_list = list;
-			_collection = list;
-		}
+		private readonly ICollection _collection = list;
 
 		/// <inheritdoc />
-		public int Count => _list.Count;
+		public int Count => list.Count;
 
 		/// <inheritdoc />
 		public bool IsSynchronized => _collection.IsSynchronized;
@@ -603,56 +533,56 @@ public readonly struct QueueAdapter<TQueue, T> : ICollection, IReadOnlyCollectio
 		public object SyncRoot => _collection.SyncRoot;
 
 		/// <inheritdoc />
-		IEnumerator IEnumerable.GetEnumerator() { return _list.GetEnumerator(); }
+		IEnumerator IEnumerable.GetEnumerator() { return list.GetEnumerator(); }
 
 		/// <inheritdoc />
-		public void Enqueue(T item) { _list.Add(item); }
+		public void Enqueue(T item) { list.Add(item); }
 
 		/// <inheritdoc />
 		public T Dequeue()
 		{
-			if (_list.Count == 0) throw new CollectionIsEmptyException();
-			T item = _list[0];
-			_list.RemoveAt(0);
+			if (list.Count == 0) throw new CollectionIsEmptyException();
+			T item = list[0];
+			list.RemoveAt(0);
 			return item;
 		}
 
 		/// <inheritdoc />
 		public bool TryDequeue(out T item)
 		{
-			if (_list.Count == 0)
+			if (list.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _list[0];
-			_list.RemoveAt(0);
+			item = list[0];
+			list.RemoveAt(0);
 			return true;
 		}
 
 		/// <inheritdoc />
 		public T Peek()
 		{
-			if (_list.Count == 0) throw new CollectionIsEmptyException();
-			return _list[0];
+			if (list.Count == 0) throw new CollectionIsEmptyException();
+			return list[0];
 		}
 
 		/// <inheritdoc />
 		public bool TryPeek(out T item)
 		{
-			if (_list.Count == 0)
+			if (list.Count == 0)
 			{
 				item = default(T);
 				return false;
 			}
 
-			item = _list[0];
+			item = list[0];
 			return true;
 		}
 
 		/// <inheritdoc />
-		public void Clear() { _list.Clear(); }
+		public void Clear() { list.Clear(); }
 
 		/// <inheritdoc />
 		public void CopyTo(Array array, int index) { _collection.CopyTo(array, index); }

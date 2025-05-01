@@ -2,23 +2,18 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Threading;
 
-public class Lockable<T>
+public class Lockable<T>(T value)
 	where T : class
 {
 	[NotNull]
 	private readonly object _syncRoot = new object();
 
-	private T _value;
+	private T _value = value;
 
 	/// <inheritdoc />
 	public Lockable() 
 		: this(null)
 	{
-	}
-
-	public Lockable(T value)
-	{
-		_value = value;
 	}
 
 	public T Value

@@ -4,12 +4,9 @@ using System.Text;
 namespace essentialMix.Text;
 
 [Serializable]
-public class UTF16Encoding : UnicodeEncoding
+public class UTF16Encoding(bool bBigEndian, bool bBom) : UnicodeEncoding(bBigEndian, bBom)
 {
 	private const string ENCODING_NAME = "UTF-16";
-
-	public UTF16Encoding(bool bBigEndian, bool bBOM)
-		: base(bBigEndian, bBOM) { }
 
 	public override string BodyName => ENCODING_NAME;
 

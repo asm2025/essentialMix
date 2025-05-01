@@ -144,15 +144,10 @@ public class Lister<T> : Enumerator<T>, IReadOnlyList<T>
 	}
 }
 
-public class Lister : Lister<object>
+public class Lister([NotNull] IEnumerable enumerable) : Lister<object>(enumerable.Cast<object>())
 {
 	protected Lister()
 		: this(Array.Empty<object>())
-	{
-	}
-
-	public Lister([NotNull] IEnumerable enumerable)
-		: base(enumerable.Cast<object>())
 	{
 	}
 }

@@ -7,13 +7,9 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections;
 
 [Serializable]
-public class LinkedQueue<T> : LinkedList<T>, IDeque<T>, IReadOnlyCollection<T>, ICollection, IEnumerable<T>, IEnumerable
+public class LinkedQueue<T>(DequeuePriority priority)
+	: LinkedList<T>, IDeque<T>, IReadOnlyCollection<T>, ICollection, IEnumerable<T>, IEnumerable
 {
-	public LinkedQueue(DequeuePriority priority)
-	{
-		Priority = priority;
-	}
-
 	/// <inheritdoc />
 	public LinkedQueue(DequeuePriority priority, [NotNull] IEnumerable<T> enumerable)
 		: this(priority)
@@ -24,7 +20,7 @@ public class LinkedQueue<T> : LinkedList<T>, IDeque<T>, IReadOnlyCollection<T>, 
 		}
 	}
 
-	public DequeuePriority Priority { get; }
+	public DequeuePriority Priority { get; } = priority;
 
 	public void Enqueue(T item) { AddLast(item); }
 

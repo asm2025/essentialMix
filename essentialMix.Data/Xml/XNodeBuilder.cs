@@ -7,11 +7,11 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Data.Xml;
 
-public class XNodeBuilder : XmlWriter
+public class XNodeBuilder(XContainer container) : XmlWriter
 {
 	private List<object> _content;
 	private XmlWriterSettings _settings;
-	private XContainer _root;
+	private XContainer _root = container;
 	private XContainer _parent;
 	private XName _attrName;
 	private string _attrValue;
@@ -19,11 +19,6 @@ public class XNodeBuilder : XmlWriter
 	public XNodeBuilder()
 		: this(null)
 	{
-	}
-
-	public XNodeBuilder(XContainer container)
-	{
-		_root = container;
 	}
 
 	[NotNull]

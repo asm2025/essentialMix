@@ -8,7 +8,9 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections;
 
 [Serializable]
-public class Browsable : Item, IBrowsable, IReadOnlyKeyedCollection<string, IItem>, IReadOnlyList<IItem>, IReadOnlyCollection<IItem>, IList<IItem>, IList
+public class Browsable([NotNull] string name, string text, object value, Type type, bool isFixed, bool isReadOnly)
+	: Item(name, text, value, type, isFixed, isReadOnly), IBrowsable, IReadOnlyKeyedCollection<string, IItem>,
+		IReadOnlyList<IItem>, IReadOnlyCollection<IItem>, IList<IItem>, IList
 {
 	[Serializable]
 	public class ColumnsCollection : ObservableKeyedCollectionBase<string, Column>
@@ -110,11 +112,6 @@ public class Browsable : Item, IBrowsable, IReadOnlyKeyedCollection<string, IIte
 
 	public Browsable([NotNull] string name, string text, object value, bool isFixed, bool isReadOnly)
 		: this(name, text, value, null, isFixed, isReadOnly)
-	{
-	}
-
-	public Browsable([NotNull] string name, string text, object value, Type type, bool isFixed, bool isReadOnly)
-		: base(name, text, value, type, isFixed, isReadOnly)
 	{
 	}
 

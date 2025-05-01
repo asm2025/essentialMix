@@ -7,14 +7,9 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Cryptography.Services;
 
-public class NetworkCredentialService : INetworkCredentialService
+public class NetworkCredentialService([NotNull] IQuickCipherService cipherService) : INetworkCredentialService
 {
-	private readonly IQuickCipherService _cipherService;
-
-	public NetworkCredentialService([NotNull] IQuickCipherService cipherService)
-	{
-		_cipherService = cipherService;
-	}
+	private readonly IQuickCipherService _cipherService = cipherService;
 
 	/// <inheritdoc />
 	public NetworkCredential GetCredentials(string name, string token, char separator = '|') { return GetCredentials(name, null, token, separator); }

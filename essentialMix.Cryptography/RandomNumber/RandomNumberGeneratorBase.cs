@@ -12,14 +12,10 @@ namespace essentialMix.Cryptography.RandomNumber;
 		x.GetBytes(byte[], int, int);
 		x.GetNonZeroBytes(byte[]);
 */
-public abstract class RandomNumberGeneratorBase<T> : AlgorithmBase<T>, IRandomNumberGenerator
+public abstract class RandomNumberGeneratorBase<T>([NotNull] T algorithm)
+	: AlgorithmBase<T>(algorithm), IRandomNumberGenerator
 	where T : RandomNumberGenerator
 {
-	protected RandomNumberGeneratorBase([NotNull] T algorithm)
-		: base(algorithm)
-	{
-	}
-
 	public void GetBytes(byte[] buffer) { Algorithm.GetBytes(buffer); }
 	public void GetBytes(byte[] buffer, int offset, int count) { Algorithm.GetBytes(buffer, offset, count); }
 	public void GetNonZeroBytes(byte[] buffer) { Algorithm.GetNonZeroBytes(buffer); }

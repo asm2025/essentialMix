@@ -11,7 +11,7 @@ namespace essentialMix.Collections;
 [Serializable]
 [DebuggerDisplay("{Value}")]
 [StructLayout(LayoutKind.Sequential)]
-public abstract class PairingNodeBase<TNode, TValue> : ISiblingNode<TNode, TValue>
+public abstract class PairingNodeBase<TNode, TValue>(TValue value) : ISiblingNode<TNode, TValue>
 	where TNode : PairingNodeBase<TNode, TValue>
 {
 	private const int CHILD = 0;
@@ -20,12 +20,7 @@ public abstract class PairingNodeBase<TNode, TValue> : ISiblingNode<TNode, TValu
 
 	private readonly TNode[] _nodes = new TNode[3];
 
-	protected PairingNodeBase(TValue value)
-	{
-		Value = value;
-	}
-
-	public TValue Value { get; set; }
+	public TValue Value { get; set; } = value;
 
 	public TNode Child
 	{

@@ -13,16 +13,18 @@ public abstract class DataProvider<TType> : IDataProvider<TType>
 {
 	private IDbConnection _connection;
 
-	protected DataProvider()
+	protected DataProvider([NotNull] DbProviderFactory factory)
 	{
+		Factory = factory;
 	}
 
-	protected DataProvider([NotNull] IDbConnection connection)
+	protected DataProvider([NotNull] DbProviderFactory factory, [NotNull] IDbConnection connection)
 	{
+		Factory = factory;
 		Connection = connection;
 	}
 
-	public abstract DbProviderFactory Factory { get; }
+	public DbProviderFactory Factory { get; }
 
 	public IDbConnection Connection
 	{

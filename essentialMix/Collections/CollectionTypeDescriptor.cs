@@ -9,14 +9,10 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
-public class CollectionTypeDescriptor<TSource> : TypeDescriptorBase<TSource>, ICollection
+public class CollectionTypeDescriptor<TSource>([NotNull] TSource source)
+	: TypeDescriptorBase<TSource>(source), ICollection
 	where TSource : ICollection
 {
-	public CollectionTypeDescriptor([NotNull] TSource source)
-		: base(source)
-	{
-	}
-
 	[NotNull]
 	public override PropertyDescriptorCollection GetProperties()
 	{
@@ -68,14 +64,10 @@ public class CollectionTypeDescriptor<TSource> : TypeDescriptorBase<TSource>, IC
 	public void ForEach([NotNull] Func<object, int, bool> action) { Source.Cast<object>().ForEach(action); }
 }
 
-public class CollectionTypeDescriptor<TSource, TValue> : TypeDescriptorBase<TSource>, ICollection<TValue>, ICollection
+public class CollectionTypeDescriptor<TSource, TValue>([NotNull] TSource source)
+	: TypeDescriptorBase<TSource>(source), ICollection<TValue>, ICollection
 	where TSource : ICollection<TValue>, ICollection
 {
-	public CollectionTypeDescriptor([NotNull] TSource source)
-		: base(source)
-	{
-	}
-
 	[NotNull]
 	public override PropertyDescriptorCollection GetProperties()
 	{

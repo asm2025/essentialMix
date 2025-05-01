@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Data.Odbc;
 using System.Numerics;
 using essentialMix.Data.Patterns.Provider;
@@ -16,16 +15,15 @@ public abstract class DataProvider
 {
 	/// <inheritdoc />
 	protected DataProvider()
+		: base(OdbcFactory.Instance)
 	{
 	}
 
 	/// <inheritdoc />
 	protected DataProvider([NotNull] IDbConnection connection)
-		: base(connection)
+		: base(OdbcFactory.Instance, connection)
 	{
 	}
-
-	public override DbProviderFactory Factory => OdbcFactory.Instance;
 
 	public override OdbcType DefaultDbType => OdbcType.VarBinary;
 

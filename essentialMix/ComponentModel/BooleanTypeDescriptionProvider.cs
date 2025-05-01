@@ -7,39 +7,32 @@ namespace essentialMix.ComponentModel;
 
 public sealed class BooleanTypeDescriptionProvider : TypeDescriptionProvider
 {
-	private sealed class WrappedTypeDescriptor : ICustomTypeDescriptor
+	private sealed class WrappedTypeDescriptor(ICustomTypeDescriptor tail) : ICustomTypeDescriptor
 	{
-		private readonly ICustomTypeDescriptor _tail;
+		public AttributeCollection GetAttributes() { return tail.GetAttributes(); }
 
-		public WrappedTypeDescriptor(ICustomTypeDescriptor tail)
-		{
-			_tail = tail;
-		}
+		public string GetClassName() { return tail.GetClassName(); }
 
-		public AttributeCollection GetAttributes() { return _tail.GetAttributes(); }
-
-		public string GetClassName() { return _tail.GetClassName(); }
-
-		public string GetComponentName() { return _tail.GetComponentName(); }
+		public string GetComponentName() { return tail.GetComponentName(); }
 
 		[NotNull]
 		public TypeConverter GetConverter() { return new BooleanConverter(); }
 
-		public EventDescriptor GetDefaultEvent() { return _tail.GetDefaultEvent(); }
+		public EventDescriptor GetDefaultEvent() { return tail.GetDefaultEvent(); }
 
-		public PropertyDescriptor GetDefaultProperty() { return _tail.GetDefaultProperty(); }
+		public PropertyDescriptor GetDefaultProperty() { return tail.GetDefaultProperty(); }
 
-		public object GetEditor(Type editorBaseType) { return _tail.GetEditor(editorBaseType); }
+		public object GetEditor(Type editorBaseType) { return tail.GetEditor(editorBaseType); }
 
-		public EventDescriptorCollection GetEvents() { return _tail.GetEvents(); }
+		public EventDescriptorCollection GetEvents() { return tail.GetEvents(); }
 
-		public EventDescriptorCollection GetEvents(Attribute[] attributes) { return _tail.GetEvents(attributes); }
+		public EventDescriptorCollection GetEvents(Attribute[] attributes) { return tail.GetEvents(attributes); }
 
-		public PropertyDescriptorCollection GetProperties() { return _tail.GetProperties(); }
+		public PropertyDescriptorCollection GetProperties() { return tail.GetProperties(); }
 
-		public PropertyDescriptorCollection GetProperties(Attribute[] attributes) { return _tail.GetProperties(attributes); }
+		public PropertyDescriptorCollection GetProperties(Attribute[] attributes) { return tail.GetProperties(attributes); }
 
-		public object GetPropertyOwner(PropertyDescriptor pd) { return _tail.GetPropertyOwner(pd); }
+		public object GetPropertyOwner(PropertyDescriptor pd) { return tail.GetPropertyOwner(pd); }
 	}
 
 	private readonly TypeDescriptionProvider _tail;

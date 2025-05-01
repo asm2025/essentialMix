@@ -7,29 +7,17 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Threading.FileSystem;
 
-public struct FileSystemWatcherSettings
+public struct FileSystemWatcherSettings([NotNull] DirectoryInfo directory)
 {
-	private string _filter;
+	private string _filter = "*.*";
 
 	public FileSystemWatcherSettings(string path)
 		: this(new DirectoryInfo(PathHelper.Trim(path) ?? throw new ArgumentNullException(nameof(path))))
 	{
 	}
 
-	public FileSystemWatcherSettings([NotNull] DirectoryInfo directory)
-		: this()
-	{
-		Directory = directory;
-		IncludeSubdirectories = false;
-		_filter = "*.*";
-		ChangeType = WatcherChangeTypes.All;
-		NotifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.LastWrite;
-		IsBackground = true;
-		Priority = ThreadPriority.Normal;
-	}
-
 	[NotNull]
-	public DirectoryInfo Directory { get; }
+	public DirectoryInfo Directory { get; } = directory;
 
 	public string Filter
 	{
@@ -37,14 +25,14 @@ public struct FileSystemWatcherSettings
 		set => _filter = value.ToNullIfEmpty() ?? "*.*";
 	}
 
-	public bool IncludeSubdirectories { get; set; }
+	public bool IncludeSubdirectories { get; set; } = false;
 
-	public WatcherChangeTypes ChangeType { get; set; }
+	public WatcherChangeTypes ChangeType { get; set; } = WatcherChangeTypes.All;
 
-	public NotifyFilters NotifyFilter { get; set; }
-			
-	public bool IsBackground { get; set; }
-	public ThreadPriority Priority { get; set; }
+	public NotifyFilters NotifyFilter { get; set; } = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.LastWrite;
+
+	public bool IsBackground { get; set; } = true;
+	public ThreadPriority Priority { get; set; } = ThreadPriority.Normal;
 	public bool SynchronizeContext { get; set; }
 	public bool WaitOnDispose { get; set; }
 	public Action<FileSystemNotifier> WorkStartedCallback { get; set; }

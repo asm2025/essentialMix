@@ -40,7 +40,8 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_DictionaryKeyCollectionDebugView<,>))]
 	[Serializable]
-	public sealed class KeyCollection : ICollection<TKey>, ICollection, IReadOnlyCollection<TKey>
+	public sealed class KeyCollection([NotNull] KeyedDictionaryBase<TKey, TValue> dictionary)
+		: ICollection<TKey>, ICollection, IReadOnlyCollection<TKey>
 	{
 		/// <inheritdoc cref="IEnumerator{T}" />
 		[Serializable]
@@ -101,12 +102,7 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 			}
 		}
 
-		private readonly KeyedDictionaryBase<TKey, TValue> _dictionary;
-
-		public KeyCollection([NotNull] KeyedDictionaryBase<TKey, TValue> dictionary)
-		{
-			_dictionary = dictionary;
-		}
+		private readonly KeyedDictionaryBase<TKey, TValue> _dictionary = dictionary;
 
 		bool ICollection.IsSynchronized => false;
 
@@ -174,7 +170,8 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(Dbg_DictionaryValueCollectionDebugView<,>))]
 	[Serializable]
-	public sealed class ValueCollection : ICollection<TValue>, ICollection, IReadOnlyCollection<TValue>
+	public sealed class ValueCollection([NotNull] KeyedDictionaryBase<TKey, TValue> dictionary)
+		: ICollection<TValue>, ICollection, IReadOnlyCollection<TValue>
 	{
 		/// <inheritdoc cref="IEnumerator{T}" />
 		[Serializable]
@@ -235,12 +232,7 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 			}
 		}
 
-		private KeyedDictionaryBase<TKey, TValue> _dictionary;
-
-		public ValueCollection([NotNull] KeyedDictionaryBase<TKey, TValue> dictionary)
-		{
-			_dictionary = dictionary;
-		}
+		private KeyedDictionaryBase<TKey, TValue> _dictionary = dictionary;
 
 		bool ICollection.IsSynchronized => false;
 

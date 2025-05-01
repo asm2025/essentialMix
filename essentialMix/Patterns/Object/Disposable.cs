@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
-using NotNull = JetBrains.Annotations.NotNullAttribute;
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace essentialMix.Patterns.Object;
 
@@ -16,16 +16,11 @@ public abstract class Disposable : IDisposable
 	private const int DISPOSAL_STARTED = 1;
 	private const int DISPOSAL_COMPLETE = 2;
 
-	private sealed class DisposableAction : IDisposable
+	private sealed class DisposableAction(Action onDispose) : IDisposable
 	{
 		private readonly object _lock = new object();
 
-		private Action _onDispose;
-
-		public DisposableAction(Action onDispose)
-		{
-			_onDispose = onDispose;
-		}
+		private Action _onDispose = onDispose;
 
 		public void Dispose()
 		{

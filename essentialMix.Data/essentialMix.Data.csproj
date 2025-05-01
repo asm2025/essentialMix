@@ -3,14 +3,14 @@
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-		<TargetFramework>netstandard2.1</TargetFramework>
+		<TargetFramework>netstandard2.0</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<LangVersion>12.0</LangVersion>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<OutputPath>..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
-		<AssemblyVersion>15.0.9.0</AssemblyVersion>
-		<FileVersion>25.04.12</FileVersion>
-		<Version>15.0.9.0</Version>
+		<AssemblyVersion>16.0.1.0</AssemblyVersion>
+		<FileVersion>25.05.01</FileVersion>
+		<Version>16.0.1.0</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -46,7 +46,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>15.0.9.0</PackageVersion>
+		<PackageVersion>16.0.1.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns, database, dbms, orm, xml, serialization</PackageTags>
@@ -71,7 +71,7 @@
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2024.3.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
 		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
 	</ItemGroup>
 

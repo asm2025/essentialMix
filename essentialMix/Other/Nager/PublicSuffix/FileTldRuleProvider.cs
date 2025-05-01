@@ -6,15 +6,8 @@ using System.Threading.Tasks;
 // ReSharper disable once CheckNamespace
 namespace Other.Nager.PublicSuffix;
 
-public class FileTldRuleProvider : ITldRuleProvider
+public class FileTldRuleProvider(string fileName) : ITldRuleProvider
 {
-	private readonly string _fileName;
-
-	public FileTldRuleProvider(string fileName)
-	{
-		_fileName = fileName;
-	}
-
 	public async Task<IEnumerable<TldRule>> BuildAsync()
 	{
 		string ruleData = await LoadFromFile().ConfigureAwait(false);
@@ -26,12 +19,12 @@ public class FileTldRuleProvider : ITldRuleProvider
 
 	private async Task<string> LoadFromFile()
 	{
-		if (!File.Exists(_fileName))
+		if (!File.Exists(fileName))
 		{
 			throw new FileNotFoundException("Rule file does not exist");
 		}
 
-		using (StreamReader reader = File.OpenText(_fileName))
+		using (StreamReader reader = File.OpenText(fileName))
 		{
 			return await reader.ReadToEndAsync().ConfigureAwait(false);
 		}

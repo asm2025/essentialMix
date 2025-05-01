@@ -377,10 +377,8 @@ public abstract class Connector<TSettings>([CanBeNull] IConnectionFactory factor
 	}
 }
 
-public abstract class Connector : Connector<ConnectorSettings>
-{
-	protected Connector([NotNull] IConnectionFactory factory, [NotNull] ConnectorSettings settings, ILogger logger)
-		: base(factory, settings, logger)
-	{
-	}
-}
+public abstract class Connector(
+	[NotNull] IConnectionFactory factory,
+	[NotNull] ConnectorSettings settings,
+	ILogger logger)
+	: Connector<ConnectorSettings>(factory, settings, logger);

@@ -20,7 +20,8 @@ namespace essentialMix.Collections;
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_CollectionDebugView<>))]
 [Serializable]
-public class BitCollection : ICollection<uint>, ICollection, IReadOnlyCollection<uint>, IEnumerable<uint>, IEnumerable
+public class BitCollection(uint maximum)
+	: ICollection<uint>, ICollection, IReadOnlyCollection<uint>, IEnumerable<uint>, IEnumerable
 {
 	private struct Enumerator : IEnumerator<uint>, IEnumerator, IDisposable
 	{
@@ -87,18 +88,12 @@ public class BitCollection : ICollection<uint>, ICollection, IReadOnlyCollection
 	}
 
 	//32 bits for each int. bytes: 4, binary: 11111 (+1), mask: 0x1f, power: 2^5
-	private int[] _flags;
-	private uint _maximum;
+	private int[] _flags = new int[GetCapacity(maximum)];
+	private uint _maximum = maximum;
 	private int _version;
 
 	[NonSerialized]
 	private object _syncRoot;
-
-	public BitCollection(uint maximum)
-	{
-		_maximum = maximum;
-		_flags = new int[GetCapacity(maximum)];
-	}
 
 	/// <summary>
 	/// The maximum value allowed in the collection

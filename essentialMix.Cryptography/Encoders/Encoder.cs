@@ -7,14 +7,9 @@ namespace essentialMix.Cryptography.Encoders;
 		x.Encode(string);
 		x.Decode(encodedText);
 */
-public abstract class Encoder<T> : AlgorithmEncodeBase<T>, IEncode
+public abstract class Encoder<T>([NotNull] T algorithm) : AlgorithmEncodeBase<T>(algorithm), IEncode
 	where T : IEncode
 {
-	protected Encoder([NotNull] T algorithm)
-		: base(algorithm)
-	{
-	}
-
 	/// <inheritdoc />
 	public virtual byte[] EncodeToBytes(string value) { return Algorithm.EncodeToBytes(value); }
 

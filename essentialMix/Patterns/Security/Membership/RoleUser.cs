@@ -4,7 +4,8 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Patterns.Security.Membership;
 
-public class RoleUser<TUser, TKey> : IRoleUser<TUser, TKey>
+public class RoleUser<TUser, TKey>([NotNull] TUser user, [NotNull] ICollection<string> roleNames)
+	: IRoleUser<TUser, TKey>
 	where TUser : IUser<TKey>
 {
 	public RoleUser([NotNull] TUser user)
@@ -12,14 +13,8 @@ public class RoleUser<TUser, TKey> : IRoleUser<TUser, TKey>
 	{
 	}
 
-	public RoleUser([NotNull] TUser user, [NotNull] ICollection<string> roleNames)
-	{
-		User = user;
-		RoleNames = roleNames;
-	}
-
-	public TUser User { get; }
-	public ICollection<string> RoleNames { get; }
+	public TUser User { get; } = user;
+	public ICollection<string> RoleNames { get; } = roleNames;
 }
 
 public class RoleUser<TUser> : RoleUser<TUser, string>, IRoleUser<TUser>

@@ -9,16 +9,9 @@ namespace essentialMix.Collections.DebugView;
 * collections in this solution assemblies.
 */
 [DebuggerNonUserCode]
-public class Dbg_HashSetDebugView<T>
+public class Dbg_HashSetDebugView<T>(HashSetBase<T> set)
 {
-	private readonly HashSetBase<T> _set;
-
-	public Dbg_HashSetDebugView(HashSetBase<T> set)
-	{
-		_set = set;
-	}
-
 	[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 	[NotNull]
-	public T[] Items => _set.ToArray();
+	public T[] Items => set.ToArray();
 }

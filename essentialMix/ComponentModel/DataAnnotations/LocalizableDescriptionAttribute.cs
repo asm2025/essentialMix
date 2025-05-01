@@ -5,10 +5,10 @@ using JetBrains.Annotations;
 
 namespace essentialMix.ComponentModel.DataAnnotations;
 
-public class LocalizableDescriptionAttribute : DescriptionAttribute
+public class LocalizableDescriptionAttribute(string description, Type resourceType) : DescriptionAttribute
 {
-	private readonly string _description;
-	private readonly ResourceManager _resource;
+	private readonly string _description = description?.Trim();
+	private readonly ResourceManager _resource = resourceType == null ? null : new ResourceManager(resourceType);
 
 	private string _descriptionValue;
 
@@ -20,12 +20,6 @@ public class LocalizableDescriptionAttribute : DescriptionAttribute
 	public LocalizableDescriptionAttribute(string description)
 		: this(description, null)
 	{
-	}
-
-	public LocalizableDescriptionAttribute(string description, Type resourceType)
-	{
-		_resource = resourceType == null ? null : new ResourceManager(resourceType);
-		_description = description?.Trim();
 	}
 
 	[NotNull]

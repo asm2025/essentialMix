@@ -18,16 +18,14 @@ namespace essentialMix.Threading.Patterns.ProducerConsumer.Queue;
 /// <para>This queue type runs tasks in a batch and does not move to the next items until this batch is done.</para>
 /// <para>If you need to start a new queue as soon as any queued task finishes, then consider using <see cref="TaskQueue{TQueue,T}" /> instead.</para>
 /// </summary>
-public class TaskGroupQueue<TQueue, T> : ProducerConsumerThreadQueue<T>, IProducerQueue<TQueue, T>
+public class TaskGroupQueue<TQueue, T>(
+	[NotNull] TQueue queue,
+	[NotNull] ProducerConsumerQueueOptions<T> options,
+	CancellationToken token = default(CancellationToken))
+	: ProducerConsumerThreadQueue<T>(options, token), IProducerQueue<TQueue, T>
 	where TQueue : ICollection, IReadOnlyCollection<T>
 {
-	private readonly QueueAdapter<TQueue, T> _queue;
-
-	public TaskGroupQueue([NotNull] TQueue queue, [NotNull] ProducerConsumerQueueOptions<T> options, CancellationToken token = default(CancellationToken))
-		: base(options, token)
-	{
-		_queue = new QueueAdapter<TQueue, T>(queue);
-	}
+	private readonly QueueAdapter<TQueue, T> _queue = new(queue);
 
 	/// <inheritdoc />
 	// ReSharper disable once InconsistentlySynchronizedField

@@ -3,16 +3,11 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Patterns.DateTime;
 
-public readonly struct TimeRange : IComparable<TimeRange>, IComparable, IEquatable<TimeRange>
+public readonly struct TimeRange(TimeSpan start, TimeSpan end)
+	: IComparable<TimeRange>, IComparable, IEquatable<TimeRange>
 {
-	public TimeRange(TimeSpan start, TimeSpan end)
-	{
-		Start = start;
-		End = end;
-	}
-
-	public TimeSpan Start { get; }
-	public TimeSpan End { get; }
+	public TimeSpan Start { get; } = start;
+	public TimeSpan End { get; } = end;
 
 	/// <inheritdoc />
 	[NotNull]

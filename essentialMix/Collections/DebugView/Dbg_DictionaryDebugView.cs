@@ -10,14 +10,9 @@ namespace essentialMix.Collections.DebugView;
 * collections in this solution assemblies.
 */
 [DebuggerNonUserCode]
-public sealed class Dbg_DictionaryDebugView<TKey, TValue>
+public sealed class Dbg_DictionaryDebugView<TKey, TValue>([NotNull] IDictionary<TKey, TValue> dictionary)
 {
-	private readonly IDictionary<TKey, TValue> _dictionary;
-
-	public Dbg_DictionaryDebugView([NotNull] IDictionary<TKey, TValue> dictionary)
-	{
-		_dictionary = dictionary;
-	}
+	private readonly IDictionary<TKey, TValue> _dictionary = dictionary;
 
 	[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 	[NotNull]

@@ -1,12 +1,11 @@
 using essentialMix.Data.Patterns.Provider;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
-using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Numerics;
+using Microsoft.Data.SqlClient;
 
 namespace essentialMix.Data.MSSQL;
 
@@ -16,16 +15,15 @@ public class DataProvider
 {
 	/// <inheritdoc />
 	public DataProvider()
+		: base(SqlClientFactory.Instance)
 	{
 	}
 
 	/// <inheritdoc />
 	public DataProvider([NotNull] IDbConnection connection)
-		: base(connection)
+		: base(SqlClientFactory.Instance, connection)
 	{
 	}
-
-	public override DbProviderFactory Factory => SqlClientFactory.Instance;
 
 	public override SqlDbType DefaultDbType => SqlDbType.Variant;
 

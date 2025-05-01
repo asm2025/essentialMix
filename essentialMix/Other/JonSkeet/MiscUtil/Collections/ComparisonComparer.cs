@@ -10,7 +10,8 @@ namespace Other.JonSkeet.MiscUtil.Collections;
 /// Utility to build an IComparer implementation from a Comparison delegate,
 /// and a static method to do the reverse.
 /// </summary>
-public class ComparisonComparer<T> : IGenericComparer<T>
+public class ComparisonComparer<T>(Comparison<T> comparison, EqualityComparison<T> equalityComparison)
+	: IGenericComparer<T>
 {
 	public static ComparisonComparer<T> Default { get; } = new ComparisonComparer<T>();
 
@@ -20,14 +21,8 @@ public class ComparisonComparer<T> : IGenericComparer<T>
 	public ComparisonComparer(Comparison<T> comparison)
 		: this(comparison, null) { }
 
-	public ComparisonComparer(Comparison<T> comparison, EqualityComparison<T> equalityComparison)
-	{
-		Comparison = comparison ?? ComparisonComparer.CreateComparison(Comparer<T>.Default);
-		EqualityComparison = equalityComparison ?? ComparisonComparer.CreateEqualityComparison(EqualityComparer<T>.Default);
-	}
-
-	protected Comparison<T> Comparison { get; }
-	protected EqualityComparison<T> EqualityComparison { get; }
+	protected Comparison<T> Comparison { get; } = comparison ?? ComparisonComparer.CreateComparison(Comparer<T>.Default);
+	protected EqualityComparison<T> EqualityComparison { get; } = equalityComparison ?? ComparisonComparer.CreateEqualityComparison(EqualityComparer<T>.Default);
 
 	public virtual int Compare(T x, T y)
 	{

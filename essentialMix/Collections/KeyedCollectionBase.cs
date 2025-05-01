@@ -52,6 +52,21 @@ public abstract class KeyedCollectionBase<TKey, TValue> : System.Collections.Obj
 
 	bool IList.Contains(object value) { return value is TKey k && Contains(k); }
 
+	public bool TryGetValue(TKey key, out TValue value)
+	{
+		if (Dictionary != null) return Dictionary.TryGetValue(key, out value);
+	
+		foreach (TValue item in Items)
+		{
+			if (!Comparer.Equals(GetKeyForItem(item), key)) continue;
+			value = item;
+			return true;
+		}
+
+		value = default;
+		return false;
+	}
+
 	public virtual void MoveItem(int index, int newIndex)
 	{
 		TValue value = Items[index];

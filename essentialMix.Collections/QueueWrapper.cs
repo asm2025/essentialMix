@@ -5,10 +5,11 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
-public class QueueWrapper<T> : IQueue<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
+public class QueueWrapper<T>([NotNull] Queue<T> queue)
+	: IQueue<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
 {
-	private readonly Queue<T> _queue;
-	private readonly ICollection _collection;
+	private readonly Queue<T> _queue = queue;
+	private readonly ICollection _collection = queue;
 
 	public QueueWrapper()
 		: this(new Queue<T>())
@@ -23,12 +24,6 @@ public class QueueWrapper<T> : IQueue<T>, ICollection, IReadOnlyCollection<T>, I
 	public QueueWrapper(int capacity)
 		: this(new Queue<T>(capacity))
 	{
-	}
-
-	public QueueWrapper([NotNull] Queue<T> queue)
-	{
-		_queue = queue;
-		_collection = queue;
 	}
 
 	/// <inheritdoc cref="ICollection" />

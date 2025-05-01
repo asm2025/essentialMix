@@ -1,12 +1,7 @@
 namespace essentialMix.Collections;
 
-public class CharLister : StringLister<char>
+public class CharLister(string targetString, char delimiter) : StringLister<char>(targetString, delimiter)
 {
-	public CharLister(string targetString, char delimiter) 
-		: base(targetString, delimiter)
-	{
-	}
-
 	protected override bool FindNext()
 	{
 		if (!IsIterable || Done) return false;

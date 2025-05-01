@@ -5,15 +5,16 @@ using JetBrains.Annotations;
 namespace essentialMix.Drawing;
 
 [Serializable]
-public struct Margin : IEquatable<Margin>
+public struct Margin(int top, int right, int bottom, int left)
+	: IEquatable<Margin>
 {
 	private const string TERM = "margin";
 
-	private string _toString;
-	private int _left;
-	private int _top;
-	private int _right;
-	private int _bottom;
+	private string _toString = null;
+	private int _left = left;
+	private int _top = top;
+	private int _right = right;
+	private int _bottom = bottom;
 
 	public Margin(Point location, Point offset)
 		: this(location.Y, offset.X, offset.Y, location.X)
@@ -28,15 +29,6 @@ public struct Margin : IEquatable<Margin>
 	public Margin(Offset offset)
 		: this(offset.Top, offset.Right, offset.Bottom, offset.Left)
 	{
-	}
-
-	public Margin(int top, int right, int bottom, int left) 
-	{
-		_top = top;
-		_right = right;
-		_bottom = bottom;
-		_left = left;
-		_toString = null;
 	}
 
 	public int Top

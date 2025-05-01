@@ -1,12 +1,7 @@
 namespace essentialMix.Collections;
 
-public class CharEnumerator : StringEnumerator<char>
+public class CharEnumerator(string targetString, char delimiter) : StringEnumerator<char>(targetString, delimiter)
 {
-	public CharEnumerator(string targetString, char delimiter)
-		: base(targetString, delimiter)
-	{
-	}
-
 	protected override bool FindNext()
 	{
 		if (!IsIterable || Done) return false;

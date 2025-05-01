@@ -6,7 +6,11 @@ using JetBrains.Annotations;
 // ReSharper disable once CheckNamespace
 namespace Other.JonSkeet.MiscUtil.Collections;
 
-public class ProjectionComparer<TSource, TKey> : IGenericComparer<TSource>
+public class ProjectionComparer<TSource, TKey>(
+	[NotNull] Func<TSource, TKey> projection,
+	IComparer<TKey> comparer,
+	IEqualityComparer<TKey> equalityComparer)
+	: IGenericComparer<TSource>
 {
 	public ProjectionComparer([NotNull] Func<TSource, TKey> projection)
 		: this(projection, null, null) { }
@@ -14,17 +18,11 @@ public class ProjectionComparer<TSource, TKey> : IGenericComparer<TSource>
 	public ProjectionComparer([NotNull] Func<TSource, TKey> projection, IComparer<TKey> comparer)
 		: this(projection, comparer, null) { }
 
-	public ProjectionComparer([NotNull] Func<TSource, TKey> projection, IComparer<TKey> comparer, IEqualityComparer<TKey> equalityComparer)
-	{
-		Projection = projection;
-		Comparer = comparer ?? Comparer<TKey>.Default;
-		EqualityComparer = equalityComparer ?? EqualityComparer<TKey>.Default;
-	}
-
 	[NotNull]
-	protected Func<TSource, TKey> Projection { get; }
-	protected IComparer<TKey> Comparer { get; }
-	protected IEqualityComparer<TKey> EqualityComparer { get; }
+	protected Func<TSource, TKey> Projection { get; } = projection;
+
+	protected IComparer<TKey> Comparer { get; } = comparer ?? Comparer<TKey>.Default;
+	protected IEqualityComparer<TKey> EqualityComparer { get; } = equalityComparer ?? EqualityComparer<TKey>.Default;
 
 	public virtual int Compare(TSource x, TSource y)
 	{

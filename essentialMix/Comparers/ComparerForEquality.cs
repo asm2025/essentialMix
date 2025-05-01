@@ -2,17 +2,10 @@
 
 namespace essentialMix.Comparers;
 
-public sealed class ComparerForEquality<T> : IEqualityComparer<T>
+public sealed class ComparerForEquality<T>(IComparer<T> comparer) : IEqualityComparer<T>
 {
-	private readonly IComparer<T> _comparer;
-
-	public ComparerForEquality(IComparer<T> comparer)
-	{
-		_comparer = comparer;
-	}
-
 	/// <inheritdoc />
-	public bool Equals(T x, T y) { return _comparer.Compare(x, y) == 0; }
+	public bool Equals(T x, T y) { return comparer.Compare(x, y) == 0; }
 
 	/// <inheritdoc />
 	public int GetHashCode(T obj) { return obj.GetHashCode(); }

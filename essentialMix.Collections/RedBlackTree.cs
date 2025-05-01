@@ -22,14 +22,9 @@ namespace essentialMix.Collections;
 public sealed class RedBlackTree<T> : LinkedBinaryTree<RedBlackNode<T>, T>
 {
 	[DebuggerNonUserCode]
-	internal new sealed class DebugView
+	internal new sealed class DebugView([NotNull] RedBlackTree<T> tree)
 	{
-		private readonly RedBlackTree<T> _tree;
-
-		public DebugView([NotNull] RedBlackTree<T> tree)
-		{
-			_tree = tree;
-		}
+		private readonly RedBlackTree<T> _tree = tree;
 
 		[NotNull]
 		public RedBlackNode<T> Root => _tree.Root;

@@ -5,10 +5,11 @@ using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
-public class StackWrapper<T> : IStack<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
+public class StackWrapper<T>([NotNull] Stack<T> stack)
+	: IStack<T>, ICollection, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
 {
-	private readonly Stack<T> _stack;
-	private readonly ICollection _collection;
+	private readonly Stack<T> _stack = stack;
+	private readonly ICollection _collection = stack;
 
 	public StackWrapper()
 		: this(new Queue<T>())
@@ -23,12 +24,6 @@ public class StackWrapper<T> : IStack<T>, ICollection, IReadOnlyCollection<T>, I
 	public StackWrapper(int capacity)
 		: this(new Stack<T>(capacity))
 	{
-	}
-
-	public StackWrapper([NotNull] Stack<T> stack)
-	{
-		_stack = stack;
-		_collection = stack;
 	}
 
 	/// <inheritdoc cref="ICollection" />

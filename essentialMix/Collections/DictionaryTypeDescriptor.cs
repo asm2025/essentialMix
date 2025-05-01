@@ -7,18 +7,14 @@ using System.Linq;
 using System.Reflection;
 using essentialMix.Extensions;
 using JetBrains.Annotations;
-using NotNull = JetBrains.Annotations.NotNullAttribute;
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace essentialMix.Collections;
 
-public class DictionaryTypeDescriptor<TSource> : TypeDescriptorBase<TSource>, IDictionary
+public class DictionaryTypeDescriptor<TSource>([NotNull] TSource source)
+	: TypeDescriptorBase<TSource>(source), IDictionary
 	where TSource : IDictionary
 {
-	public DictionaryTypeDescriptor([NotNull] TSource source)
-		: base(source)
-	{
-	}
-
 	[NotNull]
 	public override PropertyDescriptorCollection GetProperties()
 	{
@@ -91,14 +87,10 @@ public class DictionaryTypeDescriptor<TSource> : TypeDescriptorBase<TSource>, ID
 	public void ForEach([NotNull] Func<DictionaryEntry, int, bool> action) { Source.Cast<DictionaryEntry>().ForEach(action); }
 }
 
-public class DictionaryTypeDescriptor<TSource, TKey, TValue> : TypeDescriptorBase<TSource>, IDictionary<TKey, TValue>, IDictionary
+public class DictionaryTypeDescriptor<TSource, TKey, TValue>([NotNull] TSource source)
+	: TypeDescriptorBase<TSource>(source), IDictionary<TKey, TValue>, IDictionary
 	where TSource : IDictionary<TKey, TValue>, IDictionary
 {
-	public DictionaryTypeDescriptor([NotNull] TSource source)
-		: base(source)
-	{
-	}
-
 	[NotNull]
 	public override PropertyDescriptorCollection GetProperties()
 	{

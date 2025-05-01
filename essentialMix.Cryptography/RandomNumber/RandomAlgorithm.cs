@@ -4,20 +4,15 @@ using essentialMix.Helpers;
 
 namespace essentialMix.Cryptography.RandomNumber;
 
-public class RandomAlgorithm<T> : RandomNumberGenerator
+public class RandomAlgorithm<T>([NotNull] T random) : RandomNumberGenerator
 	where T : System.Random, new()
 {
 	private readonly object _lock = new object();
-	private readonly T _random;
+	private readonly T _random = random;
 
 	public RandomAlgorithm()
 		: this(new T())
 	{
-	}
-
-	public RandomAlgorithm([NotNull] T random)
-	{
-		_random = random;
 	}
 
 	public override void GetBytes(byte[] data)

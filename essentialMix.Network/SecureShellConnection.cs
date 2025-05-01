@@ -8,12 +8,19 @@ using Renci.SshNet;
 
 namespace essentialMix.Network;
 
-public class SecureShellConnection : Disposable
+public class SecureShellConnection([NotNull] string host, int port, string username, string password, int timeout)
+	: Disposable
 {
 	private const int PORT_DEF = 22;
 	private const int TIMEOUT_DEF = 30000;
 
-	private SshClient _client;
+	private SshClient _client = new(host, port, username, password)
+	{
+		ConnectionInfo =
+		{
+			Timeout = TimeSpan.FromMilliseconds(timeout.NotBelow(0))
+		}
+	};
 
 	public SecureShellConnection([NotNull] string host)
 		: this(host, PORT_DEF, null, null, TIMEOUT_DEF)
@@ -28,17 +35,6 @@ public class SecureShellConnection : Disposable
 	public SecureShellConnection([NotNull] string host, int port, string username, string password)
 		: this(host, port, username, password, TIMEOUT_DEF)
 	{
-	}
-
-	public SecureShellConnection([NotNull] string host, int port, string username, string password, int timeout)
-	{
-		_client = new SshClient(host, port, username, password)
-		{
-			ConnectionInfo =
-			{
-				Timeout = TimeSpan.FromMilliseconds(timeout.NotBelow(0))
-			}
-		};
 	}
 
 	public TimeSpan Ttl

@@ -4,20 +4,14 @@ using Microsoft.Extensions.Logging;
 
 namespace essentialMix.Logging;
 
-public class CombinedLogger<T> : ILogger<T>
+public class CombinedLogger<T>([NotNull] ILogger writer, ILogger logger) : ILogger<T>
 {
-	private readonly ILogger _writer;
-	private ILogger _logger;
+	private readonly ILogger _writer = writer;
+	private ILogger _logger = logger;
 
 	public CombinedLogger([NotNull] ILogger writer)
 		: this(writer, null)
 	{
-	}
-
-	public CombinedLogger([NotNull] ILogger writer, ILogger logger)
-	{
-		_writer = writer;
-		_logger = logger;
 	}
 
 	/// <inheritdoc />

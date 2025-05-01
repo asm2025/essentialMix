@@ -2,12 +2,13 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using JetBrains.Annotations;
-using NotNull = JetBrains.Annotations.NotNullAttribute;
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace essentialMix.Drawing;
 
 [Serializable]
-public struct Offset : IEquatable<Offset>
+public struct Offset(int top, int right, int bottom, int left)
+	: IEquatable<Offset>
 {
 	public Offset(Point location, Point offset)
 		: this(location.Y, offset.X, offset.Y, location.X)
@@ -19,18 +20,10 @@ public struct Offset : IEquatable<Offset>
 	{
 	}
 
-	public Offset(int top, int right, int bottom, int left)
-	{
-		Top = top;
-		Right = right;
-		Bottom = bottom;
-		Left = left;
-	}
-
-	public int Top { get; set; }
-	public int Right { get; set; }
-	public int Bottom { get; set; }
-	public int Left { get; set; }
+	public int Top { get; set; } = top;
+	public int Right { get; set; } = right;
+	public int Bottom { get; set; } = bottom;
+	public int Left { get; set; } = left;
 
 	public static bool operator ==(Offset x, Offset y) { return x.Equals(y); }
 

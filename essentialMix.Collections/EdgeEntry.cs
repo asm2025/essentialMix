@@ -4,16 +4,10 @@ using JetBrains.Annotations;
 namespace essentialMix.Collections;
 
 [DebuggerDisplay("{From} => {Edge}")]
-public class EdgeEntry<T, TEdge>
+public class EdgeEntry<T, TEdge>([NotNull] T from, [NotNull] TEdge edge)
 {
-	public EdgeEntry([NotNull] T from, [NotNull] TEdge edge)
-	{
-		From = from;
-		Edge = edge;
-	}
-
 	[NotNull]
-	public readonly T From;
+	public readonly T From = from;
 	[NotNull]
-	public readonly TEdge Edge;
+	public readonly TEdge Edge = edge;
 }

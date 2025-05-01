@@ -12,7 +12,7 @@ namespace essentialMix.Collections;
 // Udemy - Code With Mosh - Data Structures & Algorithms part 2
 // https://www.geeksforgeeks.org/types-of-tries/?ref=leftbar-rightbar
 [Serializable]
-public class Trie<T>
+public class Trie<T>(IEqualityComparer<T> comparer)
 	where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 {
 	/*
@@ -27,15 +27,10 @@ public class Trie<T>
 	*/
 	[DebuggerDisplay("{Value}, Count = {Count}")]
 	[Serializable]
-	protected sealed class Node : KeyedDictionaryBase<T, Node>, IComparable<Node>, IComparable, IEquatable<Node>
+	protected sealed class Node(T value, IEqualityComparer<T> comparer) : KeyedDictionaryBase<T, Node>(comparer),
+		IComparable<Node>, IComparable, IEquatable<Node>
 	{
-		public Node(T value, IEqualityComparer<T> comparer)
-			: base(comparer)
-		{
-			Value = value;
-		}
-
-		public T Value { get; }
+		public T Value { get; } = value;
 
 		public bool EndOfToken { get; set; }
 
@@ -117,13 +112,8 @@ public class Trie<T>
 	{
 	}
 
-	public Trie(IEqualityComparer<T> comparer)
-	{
-		Comparer = comparer ?? EqualityComparer<T>.Default;
-	}
-
 	[NotNull]
-	public IEqualityComparer<T> Comparer { get; }
+	public IEqualityComparer<T> Comparer { get; } = comparer ?? EqualityComparer<T>.Default;
 
 	[NotNull]
 	protected Node Root => _root ??= MakeNode(default(T));
