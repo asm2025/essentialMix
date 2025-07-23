@@ -655,7 +655,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 		if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
 		Comparer = comparer ?? Comparer<T>.Default;
 		Items = capacity == 0
-					? Array.Empty<TNode>()
+					? []
 					: new TNode[capacity];
 	}
 
@@ -688,7 +688,7 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 			}
 			else
 			{
-				Items = Array.Empty<TNode>();
+				Items = [];
 			}
 
 			_version++;
@@ -1350,9 +1350,9 @@ public abstract class BinaryHeapBase<TNode, T> : IBinaryHeapBase<TNode, T>, ICol
 		switch (Count)
 		{
 			case 0:
-				return Array.Empty<T>();
+				return [];
 			case 1:
-				return new[] { Items[0].Value };
+				return [Items[0].Value];
 			default:
 				int index = 0;
 				T[] array = new T[Count];

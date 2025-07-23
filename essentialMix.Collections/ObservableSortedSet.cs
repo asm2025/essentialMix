@@ -133,7 +133,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 		{
 			if (Count == 0) return;
 
-			List<T> toRemove = new List<T>();
+			List<T> toRemove = [];
 			BreadthFirstTreeWalk(delegate (Node n)
 			{
 				toRemove.Add(n.Value);
@@ -225,10 +225,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 			VersionCheck();
 			if (_root == null) return true;
 
-			List<Node> processQueue = new List<Node>
-			{
-				_root
-			};
+			List<Node> processQueue = [_root];
 
 			while (processQueue.Count != 0)
 			{
@@ -348,7 +345,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 			_min = (T)_sinfo.GetValue(MIN_NAME, typeof(T));
 			_lBoundActive = _sinfo.GetBoolean(L_BOUND_ACTIVE_NAME);
 			_uBoundActive = _sinfo.GetBoolean(U_BOUND_ACTIVE_NAME);
-			_underlying = new ObservableSortedSet<T>();
+			_underlying = [];
 
 			if (savedCount != 0)
 			{
@@ -1702,10 +1699,7 @@ public class ObservableSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IRea
 	{
 		if (_root == null) return true;
 
-		List<Node> processQueue = new List<Node>
-		{
-			_root
-		};
+		List<Node> processQueue = [_root];
 
 		while (processQueue.Count != 0)
 		{

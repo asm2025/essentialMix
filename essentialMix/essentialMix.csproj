@@ -74,7 +74,7 @@
 		<PackageReference Include="JetBrains.Annotations" Version="2024.3.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
-		<PackageReference Include="OpenMcdf" Version="2.4.1" />
+		<PackageReference Include="OpenMcdf" Version="3.0.1" />
 		<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
 		<PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.2" />
 		<PackageReference Include="System.Security.Permissions" Version="8.0.0" />

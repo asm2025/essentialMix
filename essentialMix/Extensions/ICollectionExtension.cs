@@ -14,7 +14,7 @@ public static class ICollectionExtension
 	public static object[] GetRange([NotNull] this ICollection thisValue, int startIndex, int count)
 	{
 		thisValue.Count.ValidateRange(startIndex, ref count);
-		if (count == 0 || thisValue.Count == 0) return Array.Empty<object>();
+		if (count == 0 || thisValue.Count == 0) return [];
 
 		int n = 0;
 		object[] range = new object[count];
@@ -29,7 +29,7 @@ public static class ICollectionExtension
 	public static T[] GetRange<T>([NotNull] this ICollection<T> thisValue, int startIndex, int count)
 	{
 		thisValue.Count.ValidateRange(startIndex, ref count);
-		if (count == 0 || thisValue.Count == 0) return Array.Empty<T>();
+		if (count == 0 || thisValue.Count == 0) return [];
 
 		int n = 0;
 		T[] range = new T[count];
@@ -43,7 +43,7 @@ public static class ICollectionExtension
 	public static IEnumerable<IReadOnlyCollection<T>> Partition<T>([NotNull] this ICollection<T> thisValue, int size, PartitionSize type)
 	{
 		if (size < 0) throw new ArgumentOutOfRangeException(nameof(size));
-		if (size == 0 || thisValue.Count == 0) return Enumerable.Empty<IReadOnlyCollection<T>>();
+		if (size == 0 || thisValue.Count == 0) return [];
 		if (type == PartitionSize.TotalCount) size = (int)Math.Ceiling(thisValue.Count / (double)size);
 		return thisValue.Partition(size);
 	}
@@ -51,7 +51,7 @@ public static class ICollectionExtension
 	public static IEnumerable<IReadOnlyCollection<T>> PartitionUnique<T>([NotNull] this ICollection<T> thisValue, int size, PartitionSize type, IEqualityComparer<T> comparer = null)
 	{
 		if (size < 0) throw new ArgumentOutOfRangeException(nameof(size));
-		if (size == 0 || thisValue.Count == 0) return Enumerable.Empty<IReadOnlyCollection<T>>();
+		if (size == 0 || thisValue.Count == 0) return [];
 		if (type == PartitionSize.TotalCount) size = (int)Math.Ceiling(thisValue.Count / (double)size);
 		return thisValue.PartitionUnique(size, comparer);
 	}

@@ -58,7 +58,7 @@ public static class PathHelper
 
 	public static string Combine([NotNull] string path, [NotNull] params string[] other)
 	{
-		List<string> paths = new List<string>();
+		List<string> paths = [];
 		if (!string.IsNullOrWhiteSpace(path)) paths.Add(path);
 
 		paths.AddRange(other.SkipNullOrEmptyTrim());

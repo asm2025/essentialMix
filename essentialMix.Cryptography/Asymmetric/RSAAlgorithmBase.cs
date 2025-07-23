@@ -179,7 +179,7 @@ public abstract class RSAAlgorithmBase<T> : AsymmetricAlgorithmBase<T>, IRSAAlgo
 	{
 		buffer = ArrayHelper.ValidateAndGetRange(buffer, ref startIndex, ref count);
 		if (buffer.Length == 0) return buffer;
-		if (count == 0) return Array.Empty<byte>();
+		if (count == 0) return [];
 		return Algorithm.Encrypt(buffer, padding);
 	}
 
@@ -192,7 +192,7 @@ public abstract class RSAAlgorithmBase<T> : AsymmetricAlgorithmBase<T>, IRSAAlgo
 	{
 		buffer = ArrayHelper.ValidateAndGetRange(buffer, ref startIndex, ref count);
 		if (buffer.Length == 0) return buffer;
-		if (count == 0) return Array.Empty<byte>();
+		if (count == 0) return [];
 		return Algorithm.Decrypt(buffer, padding);
 	}
 

@@ -49,7 +49,7 @@ public static class IDataProducerExtension
 	public static IFuture<IEnumerable<TSource>> AsFutureEnumerable<TSource>([NotNull] this IDataProducer<TSource> thisValue)
 	{
 		Future<IEnumerable<TSource>> ret = new Future<IEnumerable<TSource>>();
-		List<TSource> list = new List<TSource>();
+		List<TSource> list = [];
 		thisValue.Data += (_, value) => list.Add(value);
 		thisValue.Completed += (_, _) => ret.Value = list;
 		return ret;
@@ -75,7 +75,7 @@ public static class IDataProducerExtension
 	[NotNull]
 	public static List<TSource> ToList<TSource>([NotNull] this IDataProducer<TSource> thisValue)
 	{
-		List<TSource> list = new List<TSource>();
+		List<TSource> list = [];
 		thisValue.Data += (_, value) => list.Add(value);
 		return list;
 	}
@@ -880,7 +880,7 @@ public static class IDataProducerExtension
 
 		// use List (rather than ToList) so we have a List<T> with
 		// Reverse immediately available (more efficient, and 2.0 compatible)
-		List<TSource> results = new List<TSource>();
+		List<TSource> results = [];
 		thisValue.Data += (_, item) => results.Add(item);
 		thisValue.Completed += (_, _) =>
 		{

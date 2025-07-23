@@ -646,7 +646,7 @@ public abstract class ArrayBinaryTree<T> : ICollection<T>, IReadOnlyCollection<T
 		if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
 		Comparer = comparer ?? Comparer<T>.Default;
 		Items = capacity == 0
-					? Array.Empty<T>()
+					? []
 					: new T[capacity];
 	}
 
@@ -666,7 +666,7 @@ public abstract class ArrayBinaryTree<T> : ICollection<T>, IReadOnlyCollection<T
 			}
 			else
 			{
-				Items = Array.Empty<T>();
+				Items = [];
 			}
 
 			_version++;
@@ -1297,9 +1297,9 @@ public abstract class ArrayBinaryTree<T> : ICollection<T>, IReadOnlyCollection<T
 		switch (Count)
 		{
 			case 0:
-				return Array.Empty<T>();
+				return [];
 			case 1:
-				return new[] { Items[0] };
+				return [Items[0]];
 			default:
 				int index = 0;
 				T[] array = new T[Count];

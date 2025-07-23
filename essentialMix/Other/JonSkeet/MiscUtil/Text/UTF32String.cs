@@ -28,7 +28,7 @@ public sealed class UTF32String : IEnumerable, IComparable, ICloneable
 	/// <summary>
 	/// An empty UTF-32 string.
 	/// </summary>
-	public static readonly UTF32String Empty = new UTF32String(Array.Empty<int>());
+	public static readonly UTF32String Empty = new UTF32String([]);
 
 	/// <summary>
 	/// UTF-32 characters making up the string.
@@ -457,11 +457,10 @@ public sealed class UTF32String : IEnumerable, IComparable, ICloneable
 	/// <returns>A string consisting of the first string followed by the second</returns>
 	public static UTF32String Concat(UTF32String strA, UTF32String strB)
 	{
-		return Concat(new[]
-		{
+		return Concat([
 			strA,
 			strB
-		});
+		]);
 	}
 
 	/// <summary>
@@ -476,12 +475,11 @@ public sealed class UTF32String : IEnumerable, IComparable, ICloneable
 	/// </returns>
 	public static UTF32String Concat(UTF32String strA, UTF32String strB, UTF32String strC)
 	{
-		return Concat(new[]
-		{
+		return Concat([
 			strA,
 			strB,
 			strC
-		});
+		]);
 	}
 
 	/// <summary>
@@ -498,12 +496,11 @@ public sealed class UTF32String : IEnumerable, IComparable, ICloneable
 	/// </returns>
 	public static UTF32String Concat(UTF32String strA, UTF32String strB, UTF32String strC, UTF32String strD)
 	{
-		return Concat(new[]
-		{
+		return Concat([
 			strA,
 			strB,
 			strC,
 			strD
-		});
+		]);
 	}
 }

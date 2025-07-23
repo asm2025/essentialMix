@@ -649,7 +649,7 @@ public static class GraphExtension
 		return count < 0
 					? throw new ArgumentOutOfRangeException(nameof(count))
 					: count == 0
-						? Enumerable.Empty<T>()
+						? []
 						: thisValue.Where(e => e.Value != null)
 									.OrderByDescending(e => e.Value.Count)
 									.Take(count)
@@ -666,7 +666,7 @@ public static class GraphExtension
 		return count < 0
 					? throw new ArgumentOutOfRangeException(nameof(count))
 					: count == 0
-						? Enumerable.Empty<T>()
+						? []
 						: thisValue.Where(e => e.Value != null)
 									.OrderBy(e => e.Value.Count)
 									.Take(count)

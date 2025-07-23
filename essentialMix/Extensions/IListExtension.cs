@@ -194,7 +194,7 @@ public static class IListExtension
 	public static object[] GetRange([NotNull] this IList thisValue, int startIndex, int count)
 	{
 		thisValue.Count.ValidateRange(startIndex, ref count);
-		if (thisValue.Count == 0 || count == 0) return Array.Empty<object>();
+		if (thisValue.Count == 0 || count == 0) return [];
 
 		int x = startIndex;
 		object[] range = new object[count];
@@ -209,7 +209,7 @@ public static class IListExtension
 	public static T[] GetRange<T>([NotNull] this IList<T> thisValue, int startIndex, int count)
 	{
 		thisValue.Count.ValidateRange(startIndex, ref count);
-		if (thisValue.Count == 0 || count == 0) return Array.Empty<T>();
+		if (thisValue.Count == 0 || count == 0) return [];
 
 		int x = startIndex;
 		T[] range = new T[count];

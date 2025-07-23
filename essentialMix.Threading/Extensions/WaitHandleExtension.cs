@@ -69,7 +69,7 @@ public static class WaitHandleExtension
 		}
 		else
 		{
-			int n = WaitHandle.WaitAny(new[] { thisValue, token.WaitHandle }, millisecondsTimeout, exitContext);
+			int n = WaitHandle.WaitAny([thisValue, token.WaitHandle], millisecondsTimeout, exitContext);
 			result = n == 0;
 		}
 

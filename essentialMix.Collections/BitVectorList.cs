@@ -155,7 +155,7 @@ public class BitVectorList : ListBase<BitVector>, IList<byte>, IReadOnlyList<byt
 	[NotNull]
 	public byte[] ToByteArray()
 	{
-		if (Count == 0) return Array.Empty<byte>();
+		if (Count == 0) return [];
 
 		byte[] bytes = new byte[Count];
 		CopyTo(bytes);
@@ -447,7 +447,7 @@ public class BitVectorList : ListBase<BitVector>, IList<byte>, IReadOnlyList<byt
 	}
 
 	[NotNull]
-	public static explicit operator byte[](BitVectorList value) { return value?.ToByteArray() ?? Array.Empty<byte>(); }
+	public static explicit operator byte[](BitVectorList value) { return value?.ToByteArray() ?? []; }
 
 	public static explicit operator BitVectorList(bool[] value)
 	{
@@ -459,7 +459,7 @@ public class BitVectorList : ListBase<BitVector>, IList<byte>, IReadOnlyList<byt
 	[NotNull]
 	public static explicit operator bool[](BitVectorList value)
 	{
-		if (value == null || value.Count == 0) return Array.Empty<bool>();
+		if (value == null || value.Count == 0) return [];
 
 		bool[] bits = new bool[value.Count * 8];
 

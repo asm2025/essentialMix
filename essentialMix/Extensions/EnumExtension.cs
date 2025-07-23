@@ -104,7 +104,7 @@ public static class EnumExtension
 		where T : struct, Enum, IComparable
 	{
 		FieldInfo field = GetField(thisValue);
-		return field?.GetAttributes(type) ?? Enumerable.Empty<Attribute>();
+		return field?.GetAttributes(type) ?? [];
 	}
 
 	public static Attribute GetAttribute<T>(this T thisValue, Type type = null)

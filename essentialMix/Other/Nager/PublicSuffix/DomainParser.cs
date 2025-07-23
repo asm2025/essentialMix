@@ -117,7 +117,7 @@ public class DomainParser
 			throw new ParseException("Invalid domain part detected");
 
 		DomainDataStructure structure = _domainDataStructure;
-		List<TldRule> matches = new List<TldRule>();
+		List<TldRule> matches = [];
 		FindMatches(parts, structure, matches);
 
 		//Sort so exceptions are first, then by biggest label count (with wildcards at bottom) 

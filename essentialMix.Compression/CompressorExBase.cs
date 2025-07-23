@@ -51,7 +51,7 @@ public abstract class CompressorExBase : CompressorBase, ICompressorEx
 	public void Compress(string sourcePath, string destinationPath, string password, params string[] files)
 	{
 		ThrowIfDisposed();
-		CompressInternal(sourcePath, destinationPath, password, files ?? Array.Empty<string>());
+		CompressInternal(sourcePath, destinationPath, password, files ?? []);
 	}
 
 	/// <inheritdoc />
@@ -67,7 +67,7 @@ public abstract class CompressorExBase : CompressorBase, ICompressorEx
 	public Task CompressAsync(string sourcePath, string destinationPath, string password, CancellationToken token, params string[] files)
 	{
 		ThrowIfDisposed();
-		return CompressInternalAsync(sourcePath, destinationPath, password, files ?? Array.Empty<string>(), token);
+		return CompressInternalAsync(sourcePath, destinationPath, password, files ?? [], token);
 	}
 
 	/// <inheritdoc />
@@ -112,7 +112,7 @@ public abstract class CompressorExBase : CompressorBase, ICompressorEx
 	public void Decompress(string sourcePath, string destinationPath, string password, params string[] files)
 	{
 		ThrowIfDisposed();
-		DecompressInternal(sourcePath, destinationPath, password, files ?? Array.Empty<string>());
+		DecompressInternal(sourcePath, destinationPath, password, files ?? []);
 	}
 
 	/// <inheritdoc />
@@ -128,7 +128,7 @@ public abstract class CompressorExBase : CompressorBase, ICompressorEx
 	public Task DecompressAsync(string sourcePath, string destinationPath, string password, CancellationToken token, params string[] files)
 	{
 		ThrowIfDisposed();
-		return DecompressInternalAsync(sourcePath, destinationPath, password, files ?? Array.Empty<string>(), token);
+		return DecompressInternalAsync(sourcePath, destinationPath, password, files ?? [], token);
 	}
 
 	/// <inheritdoc />

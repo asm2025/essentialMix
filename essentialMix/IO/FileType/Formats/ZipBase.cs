@@ -25,7 +25,7 @@ public abstract record ZipBase : FileFormatBase
 
 	/// <inheritdoc />
 	protected ZipBase(string extension, string mimeType)
-		: this(extension, mimeType, new byte[] { 0x50, 0x4B, 0x03, 0x04 }, 0)
+		: this(extension, mimeType, [0x50, 0x4B, 0x03, 0x04], 0)
 	{
 	}
 

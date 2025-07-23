@@ -148,7 +148,7 @@ public class WindowHelper
 	[NotNull]
 	public static IList<WindowHelper> FindChildWindows(IntPtr hWndParent, [NotNull] Predicate<WindowHelper> predicate)
 	{
-		List<WindowHelper> target = new List<WindowHelper>();
+		List<WindowHelper> target = [];
 		Win32.EnumChildWindows(hWndParent, (hWnd, _) =>
 		{
 			WindowHelper current = new WindowHelper(hWnd);
@@ -211,7 +211,7 @@ public class WindowHelper
 	[NotNull]
 	public static IEnumerable<WindowHelper> FindThreadWindows([NotNull] ProcessThread thread, [NotNull] Predicate<WindowHelper> predicate)
 	{
-		if (!thread.IsAwaitable()) return Enumerable.Empty<WindowHelper>();
+		if (!thread.IsAwaitable()) return [];
 
 		IList<WindowHelper> list = new List<WindowHelper>();
 		Win32.EnumThreadWindows(thread.Id, (hWnd, _) =>

@@ -173,7 +173,7 @@ public static class AssemblyExtension
 		directoryPath = PathHelper.AddDirectorySeparator(directoryPath);
 		if (!DirectoryHelper.Ensure(directoryPath)) throw new IOException($"Cannot access or create directory '{directoryPath}'");
 
-		if (resourceNames.IsNullOrEmpty()) resourceNames = new[] { string.Empty };
+		if (resourceNames.IsNullOrEmpty()) resourceNames = [string.Empty];
 
 		foreach (string resourceName in resourceNames)
 		{
@@ -243,7 +243,7 @@ public static class AssemblyExtension
 		resourceLocation = resourceLocation?.Trim();
 		if (string.IsNullOrEmpty(resourceLocation)) resourceLocation = thisValue.GetName().Name;
 
-		if (resourceNames.IsNullOrEmpty()) resourceNames = new[] { string.Empty };
+		if (resourceNames.IsNullOrEmpty()) resourceNames = [string.Empty];
 
 		foreach (string resourceName in resourceNames)
 		{
@@ -283,7 +283,7 @@ public static class AssemblyExtension
 		resourceLocation = resourceLocation?.Trim();
 		if (string.IsNullOrEmpty(resourceLocation)) resourceLocation = thisValue.GetName().Name;
 
-		if (resourceNames.IsNullOrEmpty()) resourceNames = new[] { string.Empty };
+		if (resourceNames.IsNullOrEmpty()) resourceNames = [string.Empty];
 
 		foreach (string resourceName in resourceNames)
 		{

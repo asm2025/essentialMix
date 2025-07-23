@@ -223,21 +223,22 @@ public class EnumRange<T> : Range<T>
 	public static EnumRange<T>[] operator -(EnumRange<T> x, EnumRange<T> y)
 	{
 		if (x == null || y == null) return null;
-		if (ReferenceEquals(x, y) || x.IsEmpty || y.IsEmpty || !x.Overlaps(y)) return new[] { x };
-		if (x.Minimum.IsGreaterThanOrEqual(y.Minimum) && x.Maximum.IsLessThanOrEqual(y.Maximum)) return new[] { new EnumRange<T>() };
+		if (ReferenceEquals(x, y) || x.IsEmpty || y.IsEmpty || !x.Overlaps(y)) return [x];
+		if (x.Minimum.IsGreaterThanOrEqual(y.Minimum) && x.Maximum.IsLessThanOrEqual(y.Maximum)) return [new EnumRange<T>()
+		];
 
 		if (x.Minimum.IsLessThan(y.Minimum) && x.Maximum.IsGreaterThan(y.Maximum))
 		{
-			return new[]
-			{
+			return
+			[
 				new EnumRange<T>(x.Minimum, y.Minimum),
 				new EnumRange<T>(y.Maximum, x.Maximum)
-			};
+			];
 		}
 
 		return x.Minimum.IsLessThanOrEqual(y.Minimum)
-					? new[] { new EnumRange<T>(x.Minimum, y.Minimum) }
-					: new[] { new EnumRange<T>(y.Maximum, x.Maximum) };
+					? [new EnumRange<T>(x.Minimum, y.Minimum)]
+					: [new EnumRange<T>(y.Maximum, x.Maximum)];
 	}
 }
 

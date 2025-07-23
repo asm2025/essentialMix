@@ -149,10 +149,10 @@ public static class EncodingHelper
 	{
 		if (input.IsNullOrEmpty())
 		{
-			return new[]
-			{
+			return
+			[
 				Default
-			};
+			];
 		}
 
 		if (maxEncodings < 1) maxEncodings = 1;
@@ -171,7 +171,7 @@ public static class EncodingHelper
 			input = newInput;
 		}
 
-		List<Encoding> result = new List<Encoding>();
+		List<Encoding> result = [];
 
 		// get the IMultiLanguage" interface
 		IMultiLanguage2 multiLang2 = new CMultiLanguageClass();
@@ -325,14 +325,14 @@ public static class EncodingHelper
 		// empty strings can always be encoded as ASCII
 		if (string.IsNullOrEmpty(input))
 		{
-			return new[]
-			{
+			return
+			[
 				Default
-			};
+			];
 		}
 
 		bool bPrefEnc = !preferredEncodings.IsNullOrEmpty();
-		List<Encoding> result = new List<Encoding>();
+		List<Encoding> result = [];
 
 		// get the IMultiLanguage3 interface
 		IMultiLanguage3 multiLang3 = new CMultiLanguageClass();

@@ -130,7 +130,7 @@ public class XNodeBuilder(XContainer container) : XmlWriter
 
 	private void Add(object o)
 	{
-		_content ??= new List<object>();
+		_content ??= [];
 		_content.Add(o);
 	}
 

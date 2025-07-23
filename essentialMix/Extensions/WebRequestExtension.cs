@@ -29,7 +29,10 @@ public static class WebRequestExtension
 
 		try
 		{
-			string[] multiParts = body.Contains(WebRequestHelper.DIVIDER) ? Regex.Split(body, WebRequestHelper.DIVIDER) : new[] { body };
+			string[] multiParts = body.Contains(WebRequestHelper.DIVIDER) ? Regex.Split(body, WebRequestHelper.DIVIDER) :
+			[
+				body
+			];
 			encoding ??= EncodingHelper.Default;
 
 			using (MemoryStream ms = new MemoryStream())

@@ -15,7 +15,7 @@ public static class ServiceBaseHelper
 	{
 		foreach (ServiceBase service in services)
 		{
-			__onStart.Value.Invoke(service, Array.Empty<object>());
+			__onStart.Value.Invoke(service, []);
 		}
 	}
 

@@ -76,7 +76,7 @@ public static class Win32AssemblyExtension
 		directoryPath = EMPathHelper.AddDirectorySeparator(directoryPath);
 		if (!DirectoryHelper.Ensure(directoryPath)) throw new IOException($"Cannot access or create directory '{directoryPath}'");
 
-		if (resourceNames.IsNullOrEmpty()) resourceNames = new[] { string.Empty };
+		if (resourceNames.IsNullOrEmpty()) resourceNames = [string.Empty];
 
 		foreach (string resourceName in resourceNames)
 		{

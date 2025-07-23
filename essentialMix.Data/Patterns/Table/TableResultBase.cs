@@ -25,7 +25,7 @@ public class TableResultBase : ITableResultBase
 	public string Name { get; set; }
 
 	/// <inheritdoc />
-	public TableColumns Columns { get; } = new TableColumns();
+	public TableColumns Columns { get; } = [];
 
 	public virtual bool MapSchemaTable([NotNull] DataTable schema, Func<string, bool> filter = null, Func<string, ITableColumnSettings> onGetSettings = null)
 	{

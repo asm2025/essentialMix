@@ -45,9 +45,9 @@ public abstract class RandomNumberGeneratorBase<T>([NotNull] T algorithm)
 		switch (length)
 		{
 			case 0:
-				return Array.Empty<byte>();
+				return [];
 			case 1:
-				return new[] { (byte)Next(length) };
+				return [(byte)Next(length)];
 			default:
 				ISet<byte> bytes = new HashSet<byte>();
 

@@ -146,7 +146,7 @@ public class WeightedMixedGraphList<T, TWeight> : WeightedGraphList<T, TWeight>
 	public IEnumerable<T> TopologicalSort()
 	{
 		// Udemy - Code With Mosh - Data Structures & Algorithms - Part 2
-		if (Count == 0) return Enumerable.Empty<T>();
+		if (Count == 0) return [];
 
 		// for detecting cycles
 		bool conflictIsSet = false;

@@ -100,7 +100,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	{
 		if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
 		Items = capacity == 0
-					? Array.Empty<T>()
+					? []
 					: new T[capacity];
 	}
 
@@ -109,7 +109,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 	// given collection.
 	public ListBase([NotNull] IEnumerable<T> enumerable)
 	{
-		Items = Array.Empty<T>();
+		Items = [];
 		InsertRange(0, enumerable);
 	}
 
@@ -132,7 +132,7 @@ public class ListBase<T> : IList<T>, IReadOnlyList<T>, IList
 			}
 			else
 			{
-				Items = Array.Empty<T>();
+				Items = [];
 			}
 
 			_version++;

@@ -172,7 +172,8 @@ public static class GenericsExtension
 		if (string.IsNullOrEmpty(str))
 			return defaultValue;
 
-		MethodInfo method = target.GetMethod("Parse", BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string) }, null);
+		MethodInfo method = target.GetMethod("Parse", BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Static, null,
+			[typeof(string)], null);
 		if (method == null || method.ReturnType != target && method.ReturnType != typeof(T))
 			return defaultValue;
 
@@ -181,7 +182,7 @@ public static class GenericsExtension
 
 		try
 		{
-			value = (T)method.Invoke(null, BindingFlags.InvokeMethod, null, new object[] { str }, CultureInfoHelper.Default);
+			value = (T)method.Invoke(null, BindingFlags.InvokeMethod, null, [str], CultureInfoHelper.Default);
 			converted = true;
 		}
 		catch
@@ -252,7 +253,7 @@ public static class GenericsExtension
 	public static T[] Duplicate<T>([NotNull] this T[] thisValue)
 	{
 		if (thisValue.Length == 0)
-			return Array.Empty<T>();
+			return [];
 
 		T[] newValues = new T[thisValue.Length];
 		Array.Copy(thisValue, 0, newValues, 0, newValues.Length);
@@ -326,7 +327,7 @@ public static class GenericsExtension
 		if (length == 0)
 			return thisValue;
 		if (length == thisValue.Length)
-			return Array.Empty<T>();
+			return [];
 
 		T[] newValues = new T[thisValue.Length - length];
 		if (startIndex > 0)
@@ -1805,7 +1806,7 @@ public static class GenericsExtension
 	[NotNull]
 	public static IReadOnlyCollection<(string Key, object Source, MemberInfo Member, bool ShouldSerialize)> GetNameValueMembers<T>(this T thisValue, PropertyInfoType type = PropertyInfoType.All)
 	{
-		List<(string Key, object Source, MemberInfo Member, bool ShouldSerialize)> list = new List<(string Key, object Source, MemberInfo Member, bool ShouldSerialize)>();
+		List<(string Key, object Source, MemberInfo Member, bool ShouldSerialize)> list = [];
 		EnumerateMembersDescriptors(thisValue, type, (source, key, property) =>
 		{
 			if (property.PropertyType.IsPrimitive())
@@ -1834,7 +1835,7 @@ public static class GenericsExtension
 	public static IEnumerable<PropertyDescriptor> GetNameValuePropertyDescriptors<T>(this T thisValue, PropertyInfoType type = PropertyInfoType.All)
 	{
 		if (thisValue.IsNull())
-			return Enumerable.Empty<PropertyDescriptor>();
+			return [];
 
 		IEnumerable<PropertyDescriptor> enumerable = TypeDescriptor.GetProperties(thisValue)
 																	.Cast<PropertyDescriptor>()
@@ -1854,7 +1855,7 @@ public static class GenericsExtension
 	public static IEnumerable<PropertyInfo> GetNameValuePropertyInfo<T>(this T thisValue, PropertyInfoType type = PropertyInfoType.All)
 	{
 		if (thisValue.IsNull())
-			return Enumerable.Empty<PropertyInfo>();
+			return [];
 
 		IEnumerable<PropertyInfo> enumerable = GetNameValuePropertyDescriptors(thisValue, PropertyInfoType.Default)
 												.Select(e => e.ComponentType.GetProperty(e.Name, Constants.BF_PUBLIC_INSTANCE))
@@ -1869,7 +1870,7 @@ public static class GenericsExtension
 	public static IEnumerable<FieldInfo> GetNameValueFields<T>(this T thisValue)
 	{
 		return thisValue.IsNull()
-					? Enumerable.Empty<FieldInfo>()
+					? []
 					: thisValue.GetType().GetFields(Constants.BF_PUBLIC_INSTANCE).Where(e => !e.IsInitOnly);
 	}
 
@@ -2099,7 +2100,7 @@ public static class GenericsExtension
 			ConstructorInfo defaultCtor = type.GetConstructor(Type.EmptyTypes);
 			if (defaultCtor == null) return null;
 
-			DynamicMethod cloneMethod = new DynamicMethod("CloneImplementation", type, new[] { type }, true);
+			DynamicMethod cloneMethod = new DynamicMethod("CloneImplementation", type, [type], true);
 			ILGenerator generator = cloneMethod.GetILGenerator();
 			LocalBuilder builder = generator.DeclareLocal(type);
 
@@ -2146,7 +2147,7 @@ public static class GenericsExtension
 	[NotNull]
 	public static IEnumerable<T> DefaultIfNull<T>(this IEnumerable<T> thisValue)
 	{
-		return thisValue ?? Enumerable.Empty<T>();
+		return thisValue ?? [];
 	}
 
 	public static int ReverseIndexOf<T>([NotNull] this IList<T> thisValue, T search, int startIndex = -1)

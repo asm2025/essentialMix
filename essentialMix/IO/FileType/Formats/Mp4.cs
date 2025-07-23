@@ -6,7 +6,7 @@ namespace essentialMix.IO.FileType.Formats;
 public record Mp4 : IsoBMFFBase
 {
 	public Mp4()
-		: this(new byte[] { 0x69, 0x73 }, 4)
+		: this([0x69, 0x73], 4)
 	{
 	}
 
@@ -21,4 +21,4 @@ public record Mp4 : IsoBMFFBase
 	}
 }
 
-public record Mp4_1() : Mp4(new byte[] { 0x6F, 0x6D }, 4);
+public record Mp4_1() : Mp4([0x6F, 0x6D], 4);

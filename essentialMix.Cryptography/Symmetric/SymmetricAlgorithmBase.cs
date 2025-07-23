@@ -143,7 +143,7 @@ public abstract class SymmetricAlgorithmBase<T> : EncryptBase<T>, ISymmetricAlgo
 	{
 		buffer = ArrayHelper.ValidateAndGetRange(buffer, ref startIndex, ref count);
 		if (buffer.Length == 0) return buffer;
-		if (count == 0) return Array.Empty<byte>();
+		if (count == 0) return [];
 
 		using (MemoryStream ms = new MemoryStream())
 		{
@@ -165,10 +165,10 @@ public abstract class SymmetricAlgorithmBase<T> : EncryptBase<T>, ISymmetricAlgo
 	{
 		buffer = ArrayHelper.ValidateAndGetRange(buffer, ref startIndex, ref count);
 		if (buffer.Length == 0) return buffer;
-		if (count == 0) return Array.Empty<byte>();
+		if (count == 0) return [];
 
 		int ivLen = BlockSize >> 3;
-		byte[] iv = ivLen > 0 ? buffer.GetRange(startIndex, ivLen) : Array.Empty<byte>();
+		byte[] iv = ivLen > 0 ? buffer.GetRange(startIndex, ivLen) : [];
 		startIndex += ivLen;
 		count -= ivLen;
 

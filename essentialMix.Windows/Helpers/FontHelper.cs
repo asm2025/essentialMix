@@ -37,11 +37,11 @@ public static class FontHelper
 		if (__cachedMonospacedFontNames != null) return __cachedMonospacedFontNames;
 
 		FontStyle[] requiredStyles =
-		{
+		[
 			FontStyle.Regular,
 			FontStyle.Bold,
 			FontStyle.Italic
-		};
+		];
 		ISet<string> cachedMonospacedFontNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 		__cachedMonospacedFontNames = new HashSet<string>(cachedMonospacedFontNames);
 

@@ -1384,7 +1384,7 @@ public static class StringBuilderExtension
 		}
 
 		string pattern = string.Format(RegexHelper.RGX_PARTITIONS_P, Regex.Escape(separator.ToString(0)).Replace("-", @"\-"));
-		List<string> parts = new List<string>();
+		List<string> parts = [];
 		Match m = Regex.Match(thisValue.ToString(), pattern, RegexHelper.OPTIONS_I);
 
 		while (m.Success)
@@ -1447,43 +1447,43 @@ public static class StringBuilderExtension
 	[NotNull]
 	public static string[] Split(this StringBuilder thisValue, [NotNull] params char[] separator)
 	{
-		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
-		return separator.IsNullOrEmpty() ? new[] { thisValue.ToString() } : thisValue.ToString().Split(separator);
+		if (IsNullOrEmpty(thisValue)) return [];
+		return separator.IsNullOrEmpty() ? [thisValue.ToString()] : thisValue.ToString().Split(separator);
 	}
 
 	[NotNull]
 	public static string[] Split(this StringBuilder thisValue, char[] separator, int count)
 	{
-		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
-		return separator.IsNullOrEmpty() ? new[] { thisValue.ToString() } : thisValue.ToString().Split(separator, count);
+		if (IsNullOrEmpty(thisValue)) return [];
+		return separator.IsNullOrEmpty() ? [thisValue.ToString()] : thisValue.ToString().Split(separator, count);
 	}
 
 	[NotNull]
 	public static string[] Split(this StringBuilder thisValue, [NotNull] char[] separator, StringSplitOptions options)
 	{
-		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
-		return separator.IsNullOrEmpty() ? new[] { thisValue.ToString() } : thisValue.ToString().Split(separator, options);
+		if (IsNullOrEmpty(thisValue)) return [];
+		return separator.IsNullOrEmpty() ? [thisValue.ToString()] : thisValue.ToString().Split(separator, options);
 	}
 
 	[NotNull]
 	public static string[] Split([NotNull] this StringBuilder thisValue, [NotNull] char[] separator, int count, StringSplitOptions options)
 	{
-		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
-		return separator.IsNullOrEmpty() ? new[] { thisValue.ToString() } : thisValue.ToString().Split(separator, count, options);
+		if (IsNullOrEmpty(thisValue)) return [];
+		return separator.IsNullOrEmpty() ? [thisValue.ToString()] : thisValue.ToString().Split(separator, count, options);
 	}
 
 	[NotNull]
 	public static string[] Split([NotNull] this StringBuilder thisValue, [NotNull] string[] separator, StringSplitOptions options)
 	{
-		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
-		return separator.IsNullOrEmpty() ? new[] { thisValue.ToString() } : thisValue.ToString().Split(separator, options);
+		if (IsNullOrEmpty(thisValue)) return [];
+		return separator.IsNullOrEmpty() ? [thisValue.ToString()] : thisValue.ToString().Split(separator, options);
 	}
 
 	[NotNull]
 	public static string[] Split([NotNull] this StringBuilder thisValue, [NotNull] string[] separator, int count, StringSplitOptions options)
 	{
-		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
-		return separator.IsNullOrEmpty() ? new[] { thisValue.ToString() } : thisValue.ToString().Split(separator, count, options);
+		if (IsNullOrEmpty(thisValue)) return [];
+		return separator.IsNullOrEmpty() ? [thisValue.ToString()] : thisValue.ToString().Split(separator, count, options);
 	}
 
 	[NotNull]
@@ -1492,10 +1492,10 @@ public static class StringBuilderExtension
 	[NotNull]
 	public static string[] Split([NotNull] this StringBuilder thisValue, [NotNull] string pattern, RegexOptions options)
 	{
-		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
+		if (IsNullOrEmpty(thisValue)) return [];
 
 		string value = thisValue.ToString();
-		return string.IsNullOrEmpty(pattern) ? new[] { value } : Regex.Split(value, pattern, options);
+		return string.IsNullOrEmpty(pattern) ? [value] : Regex.Split(value, pattern, options);
 	}
 
 	[NotNull]
@@ -1504,10 +1504,10 @@ public static class StringBuilderExtension
 	[NotNull]
 	public static string[] SplitFind([NotNull] this StringBuilder thisValue, bool splitEach, [NotNull] params char[] ch)
 	{
-		if (IsNullOrEmpty(thisValue)) return Array.Empty<string>();
+		if (IsNullOrEmpty(thisValue)) return [];
 
 		int x = ch.IsNullOrEmpty() ? -1 : thisValue.IndexOfAny(ch);
-		List<string> result = new List<string>();
+		List<string> result = [];
 
 		string str1 = null;
 		string str2 = null;
@@ -1546,12 +1546,12 @@ public static class StringBuilderExtension
 	[NotNull]
 	public static char[] ToCharArray(this StringBuilder thisValue, int startIndex = 0, int length = -1)
 	{
-		if (IsNullOrEmpty(thisValue)) return Array.Empty<char>();
+		if (IsNullOrEmpty(thisValue)) return [];
 		if (startIndex < 0) throw new ArgumentOutOfRangeException(nameof(startIndex));
 		if (length == -1) length = thisValue.Length - startIndex;
 		if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
 		if (startIndex + length > thisValue.Length) length = thisValue.Length - startIndex;
-		if (length == 0) return Array.Empty<char>();
+		if (length == 0) return [];
 
 		char[] chArray = new char[length];
 		if (length > 0) thisValue.CopyTo(startIndex, chArray, 0, length);

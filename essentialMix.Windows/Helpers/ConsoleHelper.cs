@@ -309,10 +309,10 @@ public static class ConsoleHelper
 	[NotNull]
 	public static ConsoleFont[] GetConsoleFonts(IntPtr hConsole)
 	{
-		if (hConsole.IsInvalidHandle()) return Array.Empty<ConsoleFont>();
+		if (hConsole.IsInvalidHandle()) return [];
 
 		int c = GetFontCount();
-		if (c == 0) return Array.Empty<ConsoleFont>();
+		if (c == 0) return [];
 
 		ConsoleFont[] fonts = new ConsoleFont[c];
 		Win32.GetConsoleFontInfo(hConsole, false, (uint)fonts.Length, fonts);
@@ -371,7 +371,7 @@ public static class ConsoleHelper
 
 		__fiOut?.SetValue(null, null);
 		__fiError?.SetValue(null, null);
-		__fiInitializeStdOutError?.Invoke(null, new object[] { true });
+		__fiInitializeStdOutError?.Invoke(null, [true]);
 	}
 
 	private static void SetOutAndErrorNull()

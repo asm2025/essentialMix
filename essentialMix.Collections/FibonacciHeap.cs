@@ -225,7 +225,7 @@ public abstract class FibonacciHeap<T> : SiblingsHeap<FibonacciNode<T>, T>
 		* List where the entry at position i is either null or the 
 		* unique tree of degree i.
 		*/
-		List<FibonacciNode<T>> treeTable = new List<FibonacciNode<T>>();
+		List<FibonacciNode<T>> treeTable = [];
 
 		/*
 		* We need to traverse the entire list, but since we're going to be
@@ -235,7 +235,7 @@ public abstract class FibonacciHeap<T> : SiblingsHeap<FibonacciNode<T>, T>
 		* spend a bit of overhead adding all of the nodes to a list, and
 		* then will visit each element of this list in order.
 		*/
-		List<FibonacciNode<T>> toVisit = new List<FibonacciNode<T>>();
+		List<FibonacciNode<T>> toVisit = [];
 
 		/*
 		* To add everything, we'll iterate across the elements until we
@@ -615,7 +615,7 @@ public abstract class FibonacciHeap<TKey, TValue> : SiblingsHeap<FibonacciNode<T
 		* List where the entry at position i is either null or the 
 		* unique tree of degree i.
 		*/
-		List<FibonacciNode<TKey, TValue>> treeTable = new List<FibonacciNode<TKey, TValue>>();
+		List<FibonacciNode<TKey, TValue>> treeTable = [];
 
 		/*
 		* We need to traverse the entire list, but since we're going to be
@@ -625,7 +625,7 @@ public abstract class FibonacciHeap<TKey, TValue> : SiblingsHeap<FibonacciNode<T
 		* spend a bit of overhead adding all of the nodes to a list, and
 		* then will visit each element of this list in order.
 		*/
-		List<FibonacciNode<TKey, TValue>> toVisit = new List<FibonacciNode<TKey, TValue>>();
+		List<FibonacciNode<TKey, TValue>> toVisit = [];
 
 		/*
 		* To add everything, we'll iterate across the elements until we

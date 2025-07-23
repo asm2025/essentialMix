@@ -41,7 +41,7 @@ public static class PropertyCopy<TTarget>
 		private static Func<TSource, TTarget> BuildCopier()
 		{
 			ParameterExpression sourceParameter = Expression.Parameter(typeof(TSource), "source");
-			List<MemberBinding> bindings = new List<MemberBinding>();
+			List<MemberBinding> bindings = [];
 
 			foreach (PropertyInfo sourceProperty in typeof(TSource).GetProperties())
 			{

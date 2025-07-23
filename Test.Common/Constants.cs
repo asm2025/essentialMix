@@ -13,8 +13,8 @@ public static class Constants
 	public const int MAX_ITERATION_INC = 3;
 	public const int TOP_COUNT = 10;
 
-	private static readonly Lazy<string[]> __sortAlgorithms = new Lazy<string[]>(() => new[]
-	{
+	private static readonly Lazy<string[]> __sortAlgorithms = new Lazy<string[]>(() =>
+	[
 		nameof(IListExtension.SortBubble),
 		nameof(IListExtension.SortSelection),
 		nameof(IListExtension.SortInsertion),
@@ -30,7 +30,7 @@ public static class Constants
 		nameof(IListExtension.SortBinary),
 		nameof(IListExtension.SortGnome),
 		nameof(IListExtension.SortBrick)
-	});
+	]);
 
 	public static string[] SortAlgorithms => __sortAlgorithms.Value;
 

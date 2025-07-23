@@ -47,11 +47,10 @@ public static class NameObjectCollectionBaseExtension
 
 			foreach (KeyValuePair<string, object> pair in values.Where(p => !string.IsNullOrEmpty(p.Key)))
 			{
-				baseAddMethod.Invoke(thisValue, new[]
-				{
+				baseAddMethod.Invoke(thisValue, [
 					pair.Key,
 					pair.Value
-				});
+				]);
 			}
 		}
 		finally
@@ -74,10 +73,9 @@ public static class NameObjectCollectionBaseExtension
 
 			foreach (string key in names.SkipNullOrEmpty())
 			{
-				baseRemoveMethod.Invoke(thisValue, new object[]
-				{
+				baseRemoveMethod.Invoke(thisValue, [
 					key
-				});
+				]);
 			}
 		}
 		finally

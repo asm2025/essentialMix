@@ -369,7 +369,7 @@ public class Desktop : Disposable, ICloneable
 		IntPtr windowStation = Win32.GetProcessWindowStation();
 
 		// check we got a valid handle.
-		if (windowStation == IntPtr.Zero) return Array.Empty<string>();
+		if (windowStation == IntPtr.Zero) return [];
 
 		string[] desktops;
 
@@ -379,7 +379,7 @@ public class Desktop : Disposable, ICloneable
 			bool result = Win32.EnumDesktops(windowStation, DesktopProc, IntPtr.Zero);
 
 			// something went wrong.
-			if (!result) return Array.Empty<string>();
+			if (!result) return [];
 
 			//	// turn the collection into an array.
 			desktops = new string[__stringCollection.Count];

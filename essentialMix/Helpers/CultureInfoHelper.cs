@@ -89,11 +89,11 @@ public static class CultureInfoHelper
 
 		if (string.IsNullOrEmpty(ls))
 		{
-			return new[]
-			{
+			return
+			[
 				',',
 				';'
-			};
+			];
 		}
 
 		char[] separators = new char[ls.Length + 2];

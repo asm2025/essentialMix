@@ -466,22 +466,23 @@ public class Range<T> : IRange<T>, ICollection, IComparable, IComparable<IReadOn
 	public static Range<T>[] operator -(Range<T> x, Range<T> y)
 	{
 		if (x == null || y == null) return null;
-		if (ReferenceEquals(x, y) || x.IsEmpty || y.IsEmpty || !x.Overlaps(y)) return new[] {x};
+		if (ReferenceEquals(x, y) || x.IsEmpty || y.IsEmpty || !x.Overlaps(y)) return [x];
 
-		if (x.Minimum.IsGreaterThanOrEqual(y.Minimum) && x.Maximum.IsLessThanOrEqual(y.Maximum)) return new[] { new Range<T>(default(T), default(T)) };
+		if (x.Minimum.IsGreaterThanOrEqual(y.Minimum) && x.Maximum.IsLessThanOrEqual(y.Maximum)) return [new Range<T>(default(T), default(T))
+		];
 
 		if (x.Minimum.IsLessThan(y.Minimum) && x.Maximum.IsGreaterThan(y.Maximum))
 		{
-			return new[]
-			{
+			return
+			[
 				new Range<T>(x.Minimum, y.Minimum),
-				new Range<T>(y.Maximum, x.Maximum)  
-			};
+				new Range<T>(y.Maximum, x.Maximum)
+			];
 		}
 
 		return x.Minimum.IsLessThanOrEqual(y.Minimum) 
-					? new[] {new Range<T>(x.Minimum, y.Minimum)} 
-					: new[] {new Range<T>(y.Maximum, x.Maximum)};
+					? [new Range<T>(x.Minimum, y.Minimum)]
+					: [new Range<T>(y.Maximum, x.Maximum)];
 	}
 
 	public static Range<T> operator -(Range<T> x, T value)

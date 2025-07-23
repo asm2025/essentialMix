@@ -226,7 +226,7 @@ public static class Math2
 	public static IEnumerable<ulong> GetPrimeFactors(ulong value)
 	{
 		return value == 0ul
-					? Enumerable.Empty<ulong>()
+					? []
 					: GetPrimes(value).Where(prime => value % (double)prime == 0.0d);
 	}
 
@@ -958,17 +958,17 @@ public static class Math2
 		/* Translated from the C version. */
 		/*  a: continued fraction coefficients. */
 		long[] h =
-		{
+		[
 			0,
 			1,
 			0
-		};
+		];
 		long[] k =
-		{
+		[
 			1,
 			0,
 			0
-		};
+		];
 		long n = 1;
 		int i, neg = 0;
 		long numerator;
@@ -1131,7 +1131,7 @@ public static class Math2
 
 		// this can be done using Dynamic Programming as well by caching every calculated fib(n), fib(n - 1), fib(n - 2)
 		// int/unit will run faster than ulong version on 64 bit systems and uint in particular will be faster than smaller data types because of the alignment.
-		uint[] fib = { 0u, 1u };
+		uint[] fib = [0u, 1u];
 		uint result = 0u;
 		uint i = 3u;
 
@@ -1154,7 +1154,7 @@ public static class Math2
 		if (value <= 2ul) return 1ul;
 
 		// this can be done using Dynamic Programming as well by caching every calculated fib(n), fib(n - 1), fib(n - 2)
-		ulong[] fib = { 0ul, 1ul };
+		ulong[] fib = [0ul, 1ul];
 		ulong result = 0ul;
 		ulong i = 3ul;
 

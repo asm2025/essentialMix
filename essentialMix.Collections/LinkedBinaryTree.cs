@@ -1108,9 +1108,9 @@ public abstract class LinkedBinaryTree<TNode, T>(IComparer<T> comparer)
 		switch (Count)
 		{
 			case 0:
-				return Array.Empty<T>();
+				return [];
 			case 1:
-				return new[] { Root.Value };
+				return [Root.Value];
 			default:
 				int index = 0;
 				T[] array = new T[Count];
@@ -2151,7 +2151,7 @@ public static class LinkedBinaryTreeExtension
 		if (thisValue.Root == null) return Array.Empty<T>();
 
 		T runningSum = default(T);
-		List<T> sumsList = new List<T>();
+		List<T> sumsList = [];
 		BranchSumsLocal(thisValue.Root, runningSum, sumsList);
 		return sumsList;
 

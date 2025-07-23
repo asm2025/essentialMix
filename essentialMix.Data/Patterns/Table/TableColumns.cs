@@ -16,7 +16,7 @@ namespace essentialMix.Data.Patterns.Table;
 public class TableColumns : KeyedCollection<string, ITableColumn>
 {
 	private static readonly string[] __columnNames =
-	{
+	[
 		"ColumnName",
 		"DataType",
 		"ColumnSize",
@@ -28,7 +28,7 @@ public class TableColumns : KeyedCollection<string, ITableColumn>
 		"IsAliased",
 		"IsExpression",
 		"IsHidden"
-	};
+	];
 
 	/// <inheritdoc />
 	public TableColumns()

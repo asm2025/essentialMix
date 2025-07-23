@@ -110,7 +110,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 	{
 		if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
 		Items = capacity == 0
-					? Array.Empty<T>()
+					? []
 					: new T[capacity];
 	}
 
@@ -141,7 +141,7 @@ public class Deque<T> : IDeque<T>, IList<T>, IList, IReadOnlyList<T>, IReadOnlyC
 			}
 			else
 			{
-				Items = Array.Empty<T>();
+				Items = [];
 			}
 
 			_version++;

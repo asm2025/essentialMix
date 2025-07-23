@@ -45,7 +45,7 @@ public static class ProcessHelper
 		if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentNullException(nameof(fileName));
 
 		string extension = Path.GetExtension(fileName);
-		if (string.IsNullOrEmpty(extension)) return Array.Empty<string>();
+		if (string.IsNullOrEmpty(extension)) return [];
 
 		ArrayList arrayList = new ArrayList();
 		RegistryKey registryKey = null;
@@ -209,10 +209,10 @@ public static class ProcessHelper
 			if (!awaitableHandle.IsAwaitable()) return false;
 
 			WaitHandle[] waitHandles =
-			{
+			[
 				processFinishedEvent,
 				awaitableHandle
-			};
+			];
 
 			int ndx = waitHandles.WaitAny();
 			if (ndx != 0) return false;
@@ -456,10 +456,10 @@ public static class ProcessHelper
 				if (!awaitableHandle.IsAwaitable()) return false;
 
 				WaitHandle[] waitHandles =
-				{
+				[
 					processFinishedEvent,
 					awaitableHandle
-				};
+				];
 
 				int ndx = waitHandles.WaitAny();
 				if (ndx != 0) return false;
@@ -700,10 +700,10 @@ public static class ProcessHelper
 				if (!awaitableHandle.IsAwaitable()) return null;
 
 				WaitHandle[] waitHandles =
-				{
+				[
 					processFinishedEvent,
 					awaitableHandle
-				};
+				];
 
 				int ndx = waitHandles.WaitAny();
 				if (ndx != 0) return null;
@@ -953,10 +953,10 @@ public static class ProcessHelper
 			if (!awaitableHandle.IsAwaitable()) return Task.FromResult(false);
 
 			WaitHandle[] waitHandles =
-			{
+			[
 				processFinishedEvent,
 				awaitableHandle
-			};
+			];
 
 			bool processReallyExited = false;
 			process.Exited += (_, _) => processReallyExited = true;

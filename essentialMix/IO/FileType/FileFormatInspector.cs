@@ -48,7 +48,7 @@ public class FileFormatInspector : IFileFormatInspector
 	{
 		if (__formats.Count == 0) throw new Exception("Formats are not configured.");
 
-		List<FileFormatBase> candidates = new List<FileFormatBase>();
+		List<FileFormatBase> candidates = [];
 		IDisposable compoundStream = null;
 		int longestSignature = 0;
 

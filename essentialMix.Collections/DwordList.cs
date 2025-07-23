@@ -44,7 +44,7 @@ public class DwordList : List<uint>
 	[NotNull]
 	public byte[] ToByteArray()
 	{
-		if (Count == 0) return Array.Empty<byte>();
+		if (Count == 0) return [];
 			
 		byte[] bytes = new byte[Count * Constants.UINT_SIZE];
 		CopyTo(bytes);
@@ -90,7 +90,7 @@ public class DwordList : List<uint>
 	public static DwordList From<T>([NotNull] IEnumerable<T> enumerable)
 		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 	{
-		DwordList list = new DwordList();
+		DwordList list = [];
 		list.AddRange(enumerable.Select(value => Convert.ToUInt32(value)));
 		return list;
 	}

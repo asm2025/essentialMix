@@ -17,7 +17,7 @@ public class TldRuleParser
 	[NotNull]
 	public IEnumerable<TldRule> ParseRules([NotNull] IEnumerable<string> lines)
 	{
-		List<TldRule> items = new List<TldRule>();
+		List<TldRule> items = [];
 		TldRuleDivision division = TldRuleDivision.Unknown;
 
 		foreach (string line in lines)

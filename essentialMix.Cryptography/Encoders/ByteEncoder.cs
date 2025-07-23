@@ -22,7 +22,7 @@ public sealed class ByteEncoder : IEncode
 	public byte[] EncodeToBytes(string value)
 	{
 		return string.IsNullOrEmpty(value)
-					? Array.Empty<byte>()
+					? []
 					: Encoding.GetBytes(value);
 	}
 
@@ -48,7 +48,7 @@ public sealed class ByteEncoder : IEncode
 	public byte[] DecodeToBytes(string value)
 	{
 		return string.IsNullOrEmpty(value)
-					? Array.Empty<byte>()
+					? []
 					: (byte[])new BitVectorList(Mode)
 					{
 						value

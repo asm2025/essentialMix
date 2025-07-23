@@ -34,10 +34,10 @@ public class TableMasterDetailResult<T> : TableDetailResult<T>, ITableMasterDeta
 	}
 
 	/// <inheritdoc />
-	public TableCollection Details { get; } = new TableCollection();
+	public TableCollection Details { get; } = [];
 
 	/// <inheritdoc />
-	public TableCollection Lookups { get; } = new TableCollection();
+	public TableCollection Lookups { get; } = [];
 }
 
 [Serializable]

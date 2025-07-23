@@ -68,12 +68,13 @@ public static class BitmapHelper
 		if (value == null || value.Width < 2 || value.Height < 2) return null;
 
 		// Getting The Background Color by checking Corners of Original Image
-		Point[] corners = {
+		Point[] corners =
+		[
 			new Point(1, 1),
 			new Point(1, value.Height - 1),
 			new Point(value.Width - 1, 1),
 			new Point(value.Width - 1, value.Height - 1)
-		}; // four corners (Top, Left), (Top, Right), (Bottom, Left), (Bottom, Right)
+		]; // four corners (Top, Left), (Top, Right), (Bottom, Left), (Bottom, Right)
 
 		foreach (Point point in corners)
 		{

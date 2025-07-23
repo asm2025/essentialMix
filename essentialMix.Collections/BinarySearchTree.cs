@@ -118,7 +118,7 @@ public class BinarySearchTree<T> : LinkedBinaryTree<T>
 
 		LinkedBinaryNode<T> parent = null, node = null, next = Root;
 		// will need to use a deque or a linked list instead of the stack because of swap in case 3
-		LinkedDeque<LinkedBinaryNode<T>> deque = new LinkedDeque<LinkedBinaryNode<T>>();
+		LinkedDeque<LinkedBinaryNode<T>> deque = [];
 
 		// find the node. as a general rule: whenever a node's left or right changes, it will be pushed to get updated
 		while (next != null)

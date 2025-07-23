@@ -703,21 +703,22 @@ public class DateRange : Range<DateTime>
 	public static DateRange[] operator -(DateRange x, DateRange y)
 	{
 		if (x == null || y == null) return null;
-		if (ReferenceEquals(x, y) || x.IsEmpty || y.IsEmpty || !x.Overlaps(y)) return new[] { x };
+		if (ReferenceEquals(x, y) || x.IsEmpty || y.IsEmpty || !x.Overlaps(y)) return [x];
 
-		if (x.Minimum.IsGreaterThanOrEqual(y.Minimum) && x.Maximum.IsLessThanOrEqual(y.Maximum)) return new[] { new DateRange(DateTimeUnit.None) };
+		if (x.Minimum.IsGreaterThanOrEqual(y.Minimum) && x.Maximum.IsLessThanOrEqual(y.Maximum)) return [new DateRange(DateTimeUnit.None)
+		];
 
 		if (x.Minimum.IsLessThan(y.Minimum) && x.Maximum.IsGreaterThan(y.Maximum))
 		{
-			return new[]
-			{
+			return
+			[
 				new DateRange(x.Minimum, y.Minimum, x.Unit),
 				new DateRange(y.Maximum, x.Maximum, x.Unit)
-			};
+			];
 		}
 
 		return x.Minimum.IsLessThanOrEqual(y.Minimum)
-					? new[] { new DateRange(x.Minimum, y.Minimum, x.Unit) }
-					: new[] { new DateRange(y.Maximum, x.Maximum, x.Unit) };
+					? [new DateRange(x.Minimum, y.Minimum, x.Unit)]
+					: [new DateRange(y.Maximum, x.Maximum, x.Unit)];
 	}
 }

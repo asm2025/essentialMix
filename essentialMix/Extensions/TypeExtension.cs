@@ -1054,7 +1054,7 @@ public static class TypeExtension
 					return (bool)expr.Method
 									.GetGenericMethodDefinition()
 									.MakeGenericMethod(thisValue, type)
-									.Invoke(null, Array.Empty<object>());
+									.Invoke(null, []);
 				}
 				catch
 				{
@@ -1090,7 +1090,7 @@ public static class TypeExtension
 				return (bool)expr.Method
 								.GetGenericMethodDefinition()
 								.MakeGenericMethod(thisValue, value)
-								.Invoke(null, Array.Empty<object>());
+								.Invoke(null, []);
 			}
 			catch
 			{
@@ -1552,11 +1552,11 @@ public static class TypeExtension
 			// We can't use the above code because it will mimic a cast in a generic method
 			// which doesn't have the same semantics as a cast in a non-generic method
 			List<TTo> list = new List<TTo>(1);
-			CallSiteBinder binder = CSharpBinder.InvokeMember(CSharpBinderFlags.ResultDiscarded, "Add", null, typeof(TypeExtension), new[]
-			{
+			CallSiteBinder binder = CSharpBinder.InvokeMember(CSharpBinderFlags.ResultDiscarded, "Add", null, typeof(TypeExtension),
+			[
 				CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
 				CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null)
-			});
+			]);
 			CallSite<Action<CallSite, object, TFrom>> callSite = CallSite<Action<CallSite, object, TFrom>>.Create(binder);
 			callSite.Target.Invoke(callSite, list, default);
 			return true;

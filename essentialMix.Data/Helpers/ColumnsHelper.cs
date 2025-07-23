@@ -17,7 +17,7 @@ public static class ColumnsHelper
 		switch (obj)
 		{
 			case null:
-				return Enumerable.Empty<TColumn>();
+				return [];
 			case DataTable dt:
 				if (columnFilter != null && !typeof(TColumn).Is<DataColumn>()) throw new ArgumentException($"Column filter must receive an argument of type '{nameof(DataColumn)}' or a type derived from it.");
 				return DataColumns(dt);

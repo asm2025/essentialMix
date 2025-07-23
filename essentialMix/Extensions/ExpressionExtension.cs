@@ -16,7 +16,7 @@ public static class ExpressionExtension
 {
 	private class ArgumentExtractor : ExpressionVisitor
 	{
-		private readonly List<object> _list = new List<object>();
+		private readonly List<object> _list = [];
 		private readonly Expression _expression;
 
 		/// <inheritdoc />
@@ -144,7 +144,7 @@ public static class ExpressionExtension
 			_list.Clear();
 			Visit(_expression);
 			return _list.Count == 0
-						? Array.Empty<object>()
+						? []
 						: _list.ToArray();
 		}
 
@@ -152,7 +152,7 @@ public static class ExpressionExtension
 		public static object[] ExtractValues(Expression expression)
 		{
 			expression = expression.RemoveUnary();
-			if (expression == null) return Array.Empty<object>();
+			if (expression == null) return [];
 			ArgumentExtractor visitor = new ArgumentExtractor(expression);
 			return visitor.ExtractValues();
 		}
@@ -478,9 +478,9 @@ public static class ExpressionExtension
 	public static IEnumerable<Expression> Enumerate(this Expression thisValue, Predicate<Expression> predicate = null)
 	{
 		if (thisValue == null)
-			return Enumerable.Empty<Expression>();
+			return [];
 
-		List<Type> types = new List<Type>();
+		List<Type> types = [];
 		List<Expression> expressions = EnumerateLocal(thisValue, t =>
 										{
 											if (types.Count > 0 && types[types.Count - 1] == t)
@@ -671,7 +671,7 @@ public static class ExpressionExtension
 			{
 				BinaryExpression expression = (BinaryExpression)thisValue;
 				method = expression.Method;
-				arguments = new[] { expression.Right };
+				arguments = [expression.Right];
 				break;
 			}
 			case ExpressionType.Call:
@@ -749,10 +749,10 @@ public static class ExpressionExtension
 			{
 				UnaryExpression expression = (UnaryExpression)thisValue;
 				method = expression.Method;
-				arguments = new[]
-				{
+				arguments =
+				[
 					expression.Operand
-				};
+				];
 				break;
 			}
 			default:
@@ -789,7 +789,7 @@ public static class ExpressionExtension
 	public static object[] GetValues(this Expression thisValue)
 	{
 		return thisValue == null
-					? Array.Empty<object>()
+					? []
 					: ArgumentExtractor.ExtractValues(thisValue);
 	}
 
@@ -1093,7 +1093,7 @@ public static class ExpressionExtension
 
 	internal static PropertyPath MatchPropertyAccess(this Expression thisValue, [NotNull] Expression propertyAccessExpression)
 	{
-		List<PropertyInfo> propertyInfoList = new List<PropertyInfo>();
+		List<PropertyInfo> propertyInfoList = [];
 		MemberExpression memberExpression;
 
 		do

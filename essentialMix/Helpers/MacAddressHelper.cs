@@ -26,13 +26,13 @@ public static class MacAddressHelper
 
 	public static string DefaultFormat { get; }
 
-	public static IReadOnlyList<string> Formats { get; } = new[]
-	{
+	public static IReadOnlyList<string> Formats { get; } =
+	[
 		"XX-XX-XX-XX-XX-XX",
 		"XX:XX:XX:XX:XX:XX",
 		"XXXX.XXXX.XXXX",
 		"XXXXXXXXXXXX"
-	};
+	];
 
 	public static IReadOnlyDictionary<string, string> Masks { get; } =
 		new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -49,30 +49,26 @@ public static class MacAddressHelper
 		new Dictionary<string, Regex[]>(StringComparer.OrdinalIgnoreCase)
 		{
 			{
-				Formats[0], new[]
-				{
+				Formats[0], [
 					new Regex(@"\A(?<mac>[\dA-F]{2}(?<delimiter>-)(?:(?:[\dA-F]{2}-){1,3})(?:[\dA-F]{2}-?))(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I),
 					new Regex(@"\A(?<mac>[\dA-F]{2}(?<delimiter>-)(?:[\dA-F](?:[\dA-F]-?)?)?)(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I)
-				}
+				]
 			},
 			{
-				Formats[1], new[]
-				{
+				Formats[1], [
 					new Regex(@"\A(?<mac>[\dA-F]{2}(?<delimiter>:)(?:(?:[\dA-F]{2}:){1,3})(?:[\dA-F]{2}:?))(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I),
 					new Regex(@"\A(?<mac>[\dA-F]{2}(?<delimiter>:)(?:[\dA-F](?:[\dA-F]:?)?)?)(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I)
-				}
+				]
 			},
 			{
-				Formats[2], new[]
-				{
+				Formats[2], [
 					new Regex(@"\A(?<mac>(?:[\dA-F]{4}(?<delimiter>\.)){1,2}[\dA-F]{0,4})(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I)
-				}
+				]
 			},
 			{
-				Formats[3], new[]
-				{
+				Formats[3], [
 					new Regex(@"\A(?<mac>(?:[\dA-F]{1,12}(?<delimiter>)))(?:\t(?<count>\d+))?\z", RegexHelper.OPTIONS_I)
-				}
+				]
 			}
 		}.AsReadOnly();
 

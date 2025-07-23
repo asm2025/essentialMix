@@ -7,7 +7,7 @@ namespace essentialMix.IO.FileType.Formats;
 // https://en.wikipedia.org/wiki/ISO/IEC_base_media_file_format
 public abstract record IsoBMFFBase : FileFormatBase
 {
-	private static readonly byte[] __signature = { 0x66, 0x74, 0x79, 0x70 };
+	private static readonly byte[] __signature = [0x66, 0x74, 0x79, 0x70];
 
 	/// <inheritdoc />
 	protected IsoBMFFBase(string extension, string mimeType, [NotNull] byte[] prefix)

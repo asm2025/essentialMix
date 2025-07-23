@@ -51,8 +51,8 @@ public sealed class SynchronizedThreads<T> : Disposable
 
 		_mainRoutine = mainRoutine;
 		_workerRoutine = workerRoutine;
-		_workers = new[]
-		{
+		_workers =
+		[
 			new Thread(Main)
 			{
 				IsBackground = IsBackground,
@@ -63,7 +63,7 @@ public sealed class SynchronizedThreads<T> : Disposable
 				IsBackground = IsBackground,
 				Priority = Priority
 			}
-		};
+		];
 	}
 
 	protected override void Dispose(bool disposing)

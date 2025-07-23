@@ -913,7 +913,7 @@ public static class StringExtension
 		}
 
 		string pattern = string.Format(RegexHelper.RGX_PARTITIONS_P, Regex.Escape(separator.ToString(0)).Replace("-", @"\-"));
-		List<string> parts = new List<string>();
+		List<string> parts = [];
 		Match m = Regex.Match(thisValue, pattern, RegexHelper.OPTIONS_I);
 
 		while (m.Success)
@@ -1031,7 +1031,7 @@ public static class StringExtension
 	public static string[] Split([NotNull] this string thisValue, [NotNull] params char[] separator)
 	{
 		return string.IsNullOrEmpty(thisValue)
-					? Array.Empty<string>()
+					? []
 					: thisValue.Split(separator, StringSplitOptions.None);
 	}
 
@@ -1040,7 +1040,7 @@ public static class StringExtension
 	public static string[] Split([NotNull] this string thisValue, StringSplitOptions options, [NotNull] params char[] separator)
 	{
 		return string.IsNullOrEmpty(thisValue)
-					? Array.Empty<string>()
+					? []
 					: thisValue.Split(separator, options);
 	}
 
@@ -1049,7 +1049,7 @@ public static class StringExtension
 	public static string[] Split([NotNull] this string thisValue, int count, [NotNull] params char[] separator)
 	{
 		return string.IsNullOrEmpty(thisValue)
-					? Array.Empty<string>()
+					? []
 					: thisValue.Split(separator, count);
 	}
 
@@ -1058,7 +1058,7 @@ public static class StringExtension
 	public static string[] Split([NotNull] this string thisValue, int count, StringSplitOptions options, [NotNull] params char[] separator)
 	{
 		return string.IsNullOrEmpty(thisValue)
-					? Array.Empty<string>()
+					? []
 					: thisValue.Split(separator, count, options);
 	}
 
@@ -1067,7 +1067,7 @@ public static class StringExtension
 	public static string[] Split([NotNull] this string thisValue, [NotNull] params string[] separator)
 	{
 		return string.IsNullOrEmpty(thisValue)
-					? Array.Empty<string>()
+					? []
 					: thisValue.Split(separator, StringSplitOptions.RemoveEmptyEntries);
 	}
 
@@ -1076,7 +1076,7 @@ public static class StringExtension
 	public static string[] Split([NotNull] this string thisValue, StringSplitOptions options, [NotNull] params string[] separator)
 	{
 		return string.IsNullOrEmpty(thisValue)
-					? Array.Empty<string>()
+					? []
 					: thisValue.Split(separator, options);
 	}
 
@@ -1085,7 +1085,7 @@ public static class StringExtension
 	public static string[] Split([NotNull] this string thisValue, int count, StringSplitOptions options, [NotNull] params string[] separator)
 	{
 		return string.IsNullOrEmpty(thisValue)
-					? Array.Empty<string>()
+					? []
 					: thisValue.Split(separator, count, options);
 	}
 
@@ -1098,7 +1098,7 @@ public static class StringExtension
 	public static string[] Split([NotNull] this string thisValue, [NotNull] string pattern, RegexOptions options)
 	{
 		return string.IsNullOrEmpty(thisValue)
-					? Array.Empty<string>()
+					? []
 					: Regex.Split(thisValue, pattern, options);
 	}
 
@@ -1114,7 +1114,7 @@ public static class StringExtension
 	public static byte[] ToBytes(this string thisValue, Encoding encoding = null)
 	{
 		return string.IsNullOrEmpty(thisValue)
-					? Array.Empty<byte>()
+					? []
 					: (encoding ?? EncodingHelper.Default).GetBytes(thisValue);
 	}
 
@@ -1139,7 +1139,7 @@ public static class StringExtension
 	{
 		if (string.IsNullOrEmpty(thisValue)) return Array.Empty<string>();
 
-		List<string> strings = new List<string>();
+		List<string> strings = [];
 		Match m = Regex.Match(thisValue, RGX_WORDS, RegexHelper.OPTIONS_I);
 
 		while (m.Success)
@@ -1208,7 +1208,7 @@ public static class StringExtension
 	{
 		if (string.IsNullOrEmpty(thisValue)) return defaultValue;
 
-		List<char> separator = new List<char>();
+		List<char> separator = [];
 		if (!separators.IsNullOrEmpty()) separator.AddRange(separators);
 		if (separator.Count == 0) separator.AddRange(CultureInfoHelper.GetDefaultListSeparators());
 

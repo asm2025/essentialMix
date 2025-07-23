@@ -171,7 +171,7 @@ public sealed class ThreadPool
 	/// <summary>
 	/// The queue itself.
 	/// </summary>
-	private readonly RandomAccessQueue<ThreadPoolWorkItem> _queue = new RandomAccessQueue<ThreadPoolWorkItem>();
+	private readonly RandomAccessQueue<ThreadPoolWorkItem> _queue = [];
 
 	private readonly string _name;
 

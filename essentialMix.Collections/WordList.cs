@@ -43,7 +43,7 @@ public class WordList : List<ushort>
 	[NotNull]
 	public byte[] ToByteArray()
 	{
-		if (Count == 0) return Array.Empty<byte>();
+		if (Count == 0) return [];
 
 		byte[] bytes = new byte[Count * Constants.USHORT_SIZE];
 		CopyTo(bytes);
@@ -98,7 +98,7 @@ public class WordList : List<ushort>
 	public static WordList From<T>([NotNull] IEnumerable<T> enumerable)
 		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible
 	{
-		WordList list = new WordList();
+		WordList list = [];
 		list.AddRange(enumerable.Select(value => Convert.ToUInt16(value)));
 		return list;
 	}

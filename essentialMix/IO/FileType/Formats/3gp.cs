@@ -6,7 +6,7 @@ namespace essentialMix.IO.FileType.Formats;
 public record ThreeGp : IsoBMFFBase
 {
 	public ThreeGp()
-		: this(new byte[] { 0x00, 0x00, 0x00, 0x14 })
+		: this([0x00, 0x00, 0x00, 0x14])
 	{
 	}
 
@@ -16,5 +16,5 @@ public record ThreeGp : IsoBMFFBase
 	}
 }
 
-public record ThreeGp_1() : ThreeGp(new byte[] { 0x00, 0x00, 0x00, 0x20 });
-public record ThreeGp5() : ThreeGp(new byte[] { 0x00, 0x00, 0x00, 0x18 });
+public record ThreeGp_1() : ThreeGp([0x00, 0x00, 0x00, 0x20]);
+public record ThreeGp5() : ThreeGp([0x00, 0x00, 0x00, 0x18]);

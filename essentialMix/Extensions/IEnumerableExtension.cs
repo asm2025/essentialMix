@@ -501,9 +501,9 @@ public static class IEnumerableExtension
 					case 0:
 						return Array.Empty<IEnumerable<T>>();
 					case 1:
-						return new[] { new[] { collection.First() } };
+						return [[collection.First()]];
 					default:
-						List<IEnumerable<T>> result = new List<IEnumerable<T>>();
+						List<IEnumerable<T>> result = [];
 						collection.ForEach((e, i) =>
 						{
 							int skip = i + 1;
@@ -526,7 +526,7 @@ public static class IEnumerableExtension
 			{
 				T t = enumerable.FirstOrDefault();
 				if (t.IsNull()) yield break;
-				yield return new[] { t };
+				yield return [t];
 				yield break;
 			}
 
@@ -537,7 +537,7 @@ public static class IEnumerableExtension
 				case 0:
 					yield break;
 				case 1:
-					yield return new[] { collection.First() };
+					yield return [collection.First()];
 					break;
 				default:
 					int i = 0;
@@ -565,9 +565,9 @@ public static class IEnumerableExtension
 	{
 		// https://www.geeksforgeeks.org/heaps-algorithm-for-generating-permutations/
 		IList<T> values = thisValue as IList<T> ?? new List<T>(thisValue);
-		if (values.Count < 2) return new[] { values };
+		if (values.Count < 2) return [values];
 
-		List<IList<T>> results = new List<IList<T>>();
+		List<IList<T>> results = [];
 		Permute(values, results, results.Count);
 		return results;
 
@@ -605,9 +605,9 @@ public static class IEnumerableExtension
 		// https://leetcode.com/problems/permutations-ii/
 		// AlgoExpert - Become An Expert In Algorithms
 		IList<T> values = thisValue as IList<T> ?? new List<T>(thisValue);
-		if (values.Count < 2) return new[] { values };
+		if (values.Count < 2) return [values];
 
-		List<IList<T>> results = new List<IList<T>>();
+		List<IList<T>> results = [];
 		PermutationsLocal(values, 0, results);
 		return results;
 
@@ -640,7 +640,7 @@ public static class IEnumerableExtension
 		where T : struct, IComparable, IComparable<T>, IEquatable<T>, IConvertible, IFormattable
 	{
 		Lister<T> values = new Lister<T>(thisValue);
-		HashSet<T> set = new HashSet<T>();
+		HashSet<T> set = [];
 		T expected = values[0], prev = expected;
 
 		foreach (T value in values)
@@ -661,10 +661,10 @@ public static class IEnumerableExtension
 	{
 		// https://leetcode.com/problems/subsets-ii/
 		// https://leetcode.com/problems/permutations/discuss/18239/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partioning
-		List<T> values = thisValue as List<T> ?? new List<T>(thisValue);
-		if (values.Count < 2) return new[] { values };
+		List<T> values = thisValue as List<T> ?? [..thisValue];
+		if (values.Count < 2) return [values];
 
-		List<IList<T>> results = new List<IList<T>>();
+		List<IList<T>> results = [];
 		values.Sort();
 		Backtrack(values, results, new List<T>(), 0);
 		return results;
@@ -692,11 +692,11 @@ public static class IEnumerableExtension
 	{
 		// https://leetcode.com/problems/combination-sum/
 		// https://leetcode.com/problems/permutations/discuss/18239/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partioning
-		List<T> values = thisValue as List<T> ?? new List<T>(thisValue);
-		if (values.Count < 2) return new[] { values };
+		List<T> values = thisValue as List<T> ?? [..thisValue];
+		if (values.Count < 2) return [values];
 
 		T defaultValue = default(T);
-		List<IList<T>> results = new List<IList<T>>();
+		List<IList<T>> results = [];
 		values.Sort();
 		Backtrack(values, results, new List<T>(), target, defaultValue, 0);
 		return results;
@@ -1187,7 +1187,7 @@ public static class IEnumerableExtension
 
 	public static IEnumerable<T> TakeLastWhile<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] Func<T, bool> predicate)
 	{
-		List<T> buffer = new List<T>();
+		List<T> buffer = [];
 
 		foreach (T item in thisValue)
 		{
@@ -1205,7 +1205,7 @@ public static class IEnumerableExtension
 
 	public static IEnumerable<T> TakeLastWhile<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] Func<T, int, bool> predicate)
 	{
-		List<T> buffer = new List<T>();
+		List<T> buffer = [];
 		int index = 0;
 
 		foreach (T item in thisValue)
@@ -1283,7 +1283,7 @@ public static class IEnumerableExtension
 
 	public static IEnumerable<T> SkipLastWhile<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] Func<T, bool> predicate)
 	{
-		List<T> buffer = new List<T>();
+		List<T> buffer = [];
 
 		foreach (T item in thisValue)
 		{
@@ -1315,7 +1315,7 @@ public static class IEnumerableExtension
 
 	public static IEnumerable<T> SkipLastWhile<T>([NotNull] this IEnumerable<T> thisValue, [NotNull] Func<T, int, bool> predicate)
 	{
-		List<T> buffer = new List<T>();
+		List<T> buffer = [];
 		int index = 0;
 
 		foreach (T item in thisValue)

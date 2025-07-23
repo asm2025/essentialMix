@@ -92,7 +92,7 @@ public static class SystemInfo
 		{
 			ObjectHelper.Dispose(ref collection);
 			ObjectHelper.Dispose(ref searcher);
-			return Enumerable.Empty<ManagementObject>();
+			return [];
 		}
 	}
 

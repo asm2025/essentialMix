@@ -71,11 +71,10 @@ public abstract class HashAlgorithmBase<T> : AlgorithmEncodeBase<T>, IHashAlgori
 	public static byte[] ComputeHash([NotNull] Func<HashAlgorithmBase<T>> creator, string value)
 	{
 		return string.IsNullOrEmpty(value)
-					? Array.Empty<byte>()
-					: ComputeHash(creator, new[]
-						{
+					? []
+					: ComputeHash(creator, [
 							value
-						})
+						])
 						.FirstOrDefault();
 	}
 

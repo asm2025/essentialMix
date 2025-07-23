@@ -17,15 +17,15 @@ public static class RegexHelper
 	private const string RGX_PATTERN_DBL_DOT_RPL = "${2}.";
 		
 	private static readonly string[][] __escapeStrings =
-	{
-		new[] {@"\?", "?"},
-		new[] {@"\*", "*"},
-		new[] {"?*", "*"},
-		new[] {"*?", "*"},
-		new[] {"**", "*"},
-		new[] {"?", "."},
-		new[] {"*", ".*"}
-	};
+	[
+		[@"\?", "?"],
+		[@"\*", "*"],
+		["?*", "*"],
+		["*?", "*"],
+		["**", "*"],
+		["?", "."],
+		["*", ".*"]
+	];
 
 	public static readonly Regex AllAsterisks = new Regex(@"^\^?[*.\\]+\$?$", OPTIONS);
 

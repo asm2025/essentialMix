@@ -49,7 +49,7 @@ public abstract class CompressorCore : Disposable, ICompressorCore
 	protected virtual byte[] CompressInternal([NotNull] byte[] value, int startIndex, int count)
 	{
 		value = ArrayHelper.ValidateAndGetRange(value, ref startIndex, ref count);
-		if (value.Length == 0 || count == 0) return Array.Empty<byte>();
+		if (value.Length == 0 || count == 0) return [];
 
 		MemoryStream source = null, target = null;
 
@@ -131,7 +131,7 @@ public abstract class CompressorCore : Disposable, ICompressorCore
 	protected virtual byte[] DecompressInternal([NotNull] byte[] value, int startIndex, int count)
 	{
 		value = ArrayHelper.ValidateAndGetRange(value, ref startIndex, ref count);
-		if (value.Length == 0 || count == 0) return Array.Empty<byte>();
+		if (value.Length == 0 || count == 0) return [];
 
 		MemoryStream source = null, target = null;
 

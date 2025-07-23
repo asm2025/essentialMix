@@ -28,7 +28,7 @@ namespace essentialMix.IO.FileType.Formats
 
 		/// <inheritdoc />
 		private CompoundFileBinaryBase(string extension, string mimeType)
-			: base(extension, mimeType, new byte[] { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 })
+			: base(extension, mimeType, [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1])
 		{
 		}
 
@@ -93,7 +93,7 @@ namespace essentialMix.IO.FileType.Formats
 		{
 			try
 			{
-				return new CompoundFile(stream, CFSUpdateMode.ReadOnly, CFSConfiguration.LeaveOpen);
+				return RootStorage.Open(stream, StorageModeFlags.LeaveOpen);
 			}
 			catch (EndOfStreamException)
 			{
@@ -102,6 +102,6 @@ namespace essentialMix.IO.FileType.Formats
 		}
 
 		/// <inheritdoc />
-		public bool IsMatch(IDisposable stream) { return stream is CompoundFile cf && cf.RootStorage.TryGetStream(_storage, out _); }
+		public bool IsMatch(IDisposable stream) { return stream is RootStorage cf && cf.TryOpenStream(_storage, out _); }
 	}
 }

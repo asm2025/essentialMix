@@ -6,7 +6,7 @@ namespace essentialMix.IO.FileType.Formats;
 public record Mpg : FileFormatBase
 {
 	public Mpg()
-		: this(new byte[] { 0x00, 0x00, 0x01, 0xBA })
+		: this([0x00, 0x00, 0x01, 0xBA])
 	{
 	}
 
@@ -16,4 +16,4 @@ public record Mpg : FileFormatBase
 	}
 }
 
-public record Mpg_1() : Mpg(new byte[] { 0x00, 0x00, 0x01, 0xB3 });
+public record Mpg_1() : Mpg([0x00, 0x00, 0x01, 0xB3]);

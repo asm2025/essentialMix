@@ -350,7 +350,7 @@ public class EndianBinaryReader : Disposable
 	{
 		ThrowIfDisposed();
 		if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-		if (count == 0) return Array.Empty<byte>();
+		if (count == 0) return [];
 
 		byte[] ret = new byte[count];
 		int index = 0;

@@ -38,7 +38,7 @@ public class NumericRangeCollectionComparer<T> : GenericComparer<ICollection<Num
 		if (obj == null) throw new ArgumentNullException(nameof(obj));
 		if (obj.Count == 0) return defaultValue;
 
-		TResult result = new TResult();
+		TResult result = [];
 		result.AddRange(obj);
 		if (result.Count <= 1) return result;
 

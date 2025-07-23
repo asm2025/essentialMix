@@ -184,19 +184,19 @@ public static class ValueTypeExtension
 	[NotNull]
 	public static byte[] ToBytes(this sbyte thisValue)
 	{
-		return new[]
-		{
+		return
+		[
 			thisValue.ToByte()
-		};
+		];
 	}
 
 	[NotNull]
 	public static byte[] ToBytes(this byte thisValue)
 	{
-		return new[]
-		{
+		return
+		[
 			thisValue
-		};
+		];
 	}
 
 	[NotNull]

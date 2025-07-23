@@ -155,11 +155,11 @@ public static class DbProviderFactoryExtension
 		if (builder == null) return false;
 		builder.RefreshSchema();
 
-		string value = (string)GetParameterNameMethod.Invoke(builder, new object[] {"t"});
+		string value = (string)GetParameterNameMethod.Invoke(builder, ["t"]);
 		if (string.IsNullOrEmpty(value)) return false;
 		nameFormat = value.Length == 1 ? "{0}" : value.Left(value.Length - 1) + "{0}";
 
-		value = (string)GetParameterPlaceholderMethod.Invoke(builder, new object[] {0});
+		value = (string)GetParameterPlaceholderMethod.Invoke(builder, [0]);
 
 		if (string.IsNullOrEmpty(value))
 		{

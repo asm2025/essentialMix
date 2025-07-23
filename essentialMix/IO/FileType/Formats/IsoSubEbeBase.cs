@@ -6,7 +6,7 @@ namespace essentialMix.IO.FileType.Formats;
 
 public abstract record IsoSubEbeBase : FileFormatBase
 {
-	private static readonly byte[] __signature = { 0x93, 0x42, 0x82, 0x88 };
+	private static readonly byte[] __signature = [0x93, 0x42, 0x82, 0x88];
 
 	/// <inheritdoc />
 	protected IsoSubEbeBase(string extension, string mimeType, [NotNull] byte[] prefix)

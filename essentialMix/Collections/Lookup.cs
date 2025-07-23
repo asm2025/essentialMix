@@ -21,7 +21,7 @@ public sealed class Lookup<TKey, TElement> : ILookup<TKey, TElement>
 {
 	internal sealed class LookupGrouping(TKey key) : IGrouping<TKey, TElement>
 	{
-		private readonly List<TElement> _items = new List<TElement>();
+		private readonly List<TElement> _items = [];
 
 		public TKey Key { get; } = key;
 

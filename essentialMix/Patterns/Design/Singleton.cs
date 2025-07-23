@@ -16,7 +16,7 @@ public sealed class Singleton<T> where T : class
 
 		ConstructorInfo ctor = ctors[0];
 		if (ctor.GetParameters().Length > 0) throw new ArgumentException(CTOR_ERR, type.FullName);
-		return (T)ctor.Invoke(Array.Empty<object>());
+		return (T)ctor.Invoke([]);
 	}, LazyThreadSafetyMode.ExecutionAndPublication);
 
 	public static T Instance => __instance.Value;

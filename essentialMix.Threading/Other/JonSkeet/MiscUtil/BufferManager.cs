@@ -165,7 +165,7 @@ public sealed class BufferManager : IBufferManager
 	/// in the list consists of buffers of size MinBufferSize, then
 	/// MinBufferSize*ScalingFactor etc.
 	/// </summary>
-	private readonly List<Buffer[]> _bufferBands = new List<Buffer[]>();
+	private readonly List<Buffer[]> _bufferBands = [];
 
 	/// <summary>
 	/// Lock for member access. 5 seconds should be more than adequate

@@ -19,7 +19,7 @@ public class PropertyPath : IEnumerable<PropertyInfo>, IEnumerable
 
 	public PropertyPath([NotNull] PropertyInfo component)
 	{
-		_components = new []{ component };
+		_components = [component];
 	}
 
 	public PropertyPath([NotNull] IEnumerable<PropertyInfo> components)

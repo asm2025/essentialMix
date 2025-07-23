@@ -102,13 +102,13 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 	{
 		if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
 		Items = capacity == 0
-					? Array.Empty<T>()
+					? []
 					: new T[capacity];
 	}
 
 	public ObservableList([NotNull] IEnumerable<T> enumerable)
 	{
-		Items = Array.Empty<T>();
+		Items = [];
 		InsertRange(0, enumerable);
 	}
 
@@ -128,7 +128,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, IList, INotifyPrope
 			}
 			else
 			{
-				Items = Array.Empty<T>();
+				Items = [];
 			}
 
 			_version++;

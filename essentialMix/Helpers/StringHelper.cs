@@ -26,7 +26,7 @@ public static class StringHelper
 	static StringHelper()
 	{
 		List<char> chars = new List<char>(Path.GetInvalidFileNameChars());
-		chars.AddRange(new[] { '.', ' ', '%', '&', '=', '#', '$', '+', '-'});
+		chars.AddRange(['.', ' ', '%', '&', '=', '#', '$', '+', '-']);
 		__invalidKeyChar = chars.Distinct().ToArray();
 
 		StringBuilder sb = new StringBuilder();
@@ -41,7 +41,7 @@ public static class StringHelper
 
 		__specialChar = sb.ToString().ToCharArray();
 
-		HashSet<char> invalid = new HashSet<char>(Path.GetInvalidFileNameChars()) { ' ' };
+		HashSet<char> invalid = [..Path.GetInvalidFileNameChars(), ' '];
 		__safeSpecialChar = __specialChar.Where(c => !invalid.Contains(c)).ToArray();
 	}
 
@@ -56,7 +56,7 @@ public static class StringHelper
 
 		IList<Func<char>> types = __randomStringType.GetOrAdd(type, t =>
 		{
-			List<Func<char>> list = new List<Func<char>>();
+			List<Func<char>> list = [];
 			if (t.FastHasFlag(RandomStringType.SmallLetters)) list.Add(RandomSmallLetter);
 			if (t.FastHasFlag(RandomStringType.CapitalLetters)) list.Add(RandomCapitalLetter);
 			if (t.FastHasFlag(RandomStringType.Numbers)) list.Add(RandomNumber);
@@ -289,7 +289,7 @@ public static class StringHelper
 
 			if (!result.TryGetValue(sorted, out List<string> list))
 			{
-				list = new List<string>();
+				list = [];
 				result.Add(sorted, list);
 			}
 

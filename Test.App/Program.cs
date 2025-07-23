@@ -197,7 +197,7 @@ work with {Constants.HEAVY} items.");
 		private static void TestBool()
 		{
 			string[] values =
-			{
+			[
 				"true",
 				"anything",
 				"off",
@@ -210,7 +210,7 @@ work with {Constants.HEAVY} items.");
 				"allow",
 				"allowed",
 				"dfgfdgfdg"
-			};
+			];
 
 			Title("Testing bool conversion...");
 			BooleanTypeDescriptionProvider.Register();
@@ -222,14 +222,14 @@ work with {Constants.HEAVY} items.");
 		private static void TestDomainName()
 		{
 			string[] domains =
-			{
+			[
 				"https://stackoverflow.com/questions/4643227/top-level-domain-from-url-in-c-sharp",
 				"https://stackoverflow.com/questions/3121957/how-can-i-do-a-case-insensitive-string-comparison",
 				"https://github.com/nager/Nager.PublicSuffix",
 				"https://docs.microsoft.com/en-us/dotnet/csharp/how-to/compare-strings",
 				"https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/boolean-logical-operators"
-			};
-			List<(string, string)> matchingDomains = new List<(string, string)>();
+			];
+			List<(string, string)> matchingDomains = [];
 			Title("Testing domain names...");
 
 			for (int i = 0; i < domains.Length - 1; i++)
@@ -268,11 +268,11 @@ work with {Constants.HEAVY} items.");
 		private static void TestExpressionExtension()
 		{
 			Expression[] expressions =
-			{
+			[
 				(Expression<Action<Student>>)(s => s.MethodWithInputs(1, "2")),
 				(Expression<Action<Student>>)(s => s.MethodWithArrayInputs(new[]{1, 2}, new[]{"3", "4"})),
 				(Expression<Action<Student>>)(s => s.MethodWithInputs(1, new[]{2, 3}))
-			};
+			];
 
 			Title("Testing expression extension...");
 
@@ -344,17 +344,17 @@ work with {Constants.HEAVY} items.");
 		private static void TestGroupAnagrams()
 		{
 			string[][] allWords =
-			{
+			[
 				null, //null
-				new []{""}, //[]
-				new []{"test"}, // ["test"]
-				new []{"abc", "dabd", "bca", "cab", "ddba"}, //["abc", "bca", "cab"], ["dabd", "ddba"]
-				new []{"abc", "cba", "bca"}, //["abc", "cba", "bca"]
-				new []{"zxc", "asd", "weq", "sda", "qwe", "xcz"}, //["zxc", "xcz"], ["asd", "sda"], ["weq", "qwe"]
-				new []{"yo", "act", "flop", "tac", "cat", "oy", "olfp"}, //["yo", "oy"], ["flop", "olfp"], ["act", "tac", "cat"]
-				new []{"cinema", "a", "flop", "iceman", "meacyne", "lofp", "olfp"}, //["cinema", "iceman"], ["flop", "lofp", "olfp"], ["a"], ["meacyne"]
-				new []{"abc", "abe", "abf", "abg"}, //["abc"], ["abe"], ["abf"], ["abg"]
-			};
+				[""], //[]
+				["test"], // ["test"]
+				["abc", "dabd", "bca", "cab", "ddba"], //["abc", "bca", "cab"], ["dabd", "ddba"]
+				["abc", "cba", "bca"], //["abc", "cba", "bca"]
+				["zxc", "asd", "weq", "sda", "qwe", "xcz"], //["zxc", "xcz"], ["asd", "sda"], ["weq", "qwe"]
+				["yo", "act", "flop", "tac", "cat", "oy", "olfp"], //["yo", "oy"], ["flop", "olfp"], ["act", "tac", "cat"]
+				["cinema", "a", "flop", "iceman", "meacyne", "lofp", "olfp"], //["cinema", "iceman"], ["flop", "lofp", "olfp"], ["a"], ["meacyne"]
+				["abc", "abe", "abf", "abg"] //["abc"], ["abe"], ["abf"], ["abg"]
+			];
 			int i = -1;
 			bool more;
 			Console.Clear();
@@ -391,16 +391,16 @@ work with {Constants.HEAVY} items.");
 		private static void TestKadaneMaximum()
 		{
 			int[][] allNumbers =
-			{
-				Array.Empty<int>(), //0
-				new []{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, //55
-				new []{-1, -2, -3, -4, -5, -6, -7, -8, -9, -10}, //-1
-				new []{-10, -2, -9, -4, -8, -6, -7, -1, -3, -5}, //-1
-				new []{1, 2, 3, 4, 5, 6, -20, 7, 8, 9, 10}, //35
-				new []{1, 2, 3, 4, 5, 6, -22, 7, 8, 9, 10}, //34
-				new []{1, 2, -4, 3, 5, -9, 8, 1, 2}, //11
-				new []{3, 4, -6, 7, 8}, //16
-			};
+			[
+				[], //0
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], //55
+				[-1, -2, -3, -4, -5, -6, -7, -8, -9, -10], //-1
+				[-10, -2, -9, -4, -8, -6, -7, -1, -3, -5], //-1
+				[1, 2, 3, 4, 5, 6, -20, 7, 8, 9, 10], //35
+				[1, 2, 3, 4, 5, 6, -22, 7, 8, 9, 10], //34
+				[1, 2, -4, 3, 5, -9, 8, 1, 2], //11
+				[3, 4, -6, 7, 8] //16
+			];
 			int i = -1;
 			bool more;
 			Console.Clear();
@@ -427,7 +427,7 @@ work with {Constants.HEAVY} items.");
 		private static void TestLevenshteinDistance()
 		{
 			(string First, string Second)[] allStrings =
-			{
+			[
 				(string.Empty, string.Empty), //0
 				(string.Empty, "abc"), //3
 				("abc", "abc"), //0
@@ -442,8 +442,8 @@ work with {Constants.HEAVY} items.");
 				("cereal", "saturdzz"), //7
 				("abbbbbbbbb", "bbbbbbbbba"), //2
 				("abc", "yabd"), //2
-				("xabc", "abcx"), //2
-			};
+				("xabc", "abcx") //2
+			];
 
 			int i = -1;
 			bool more;
@@ -468,26 +468,27 @@ work with {Constants.HEAVY} items.");
 		private static void TestDeepestPit()
 		{
 			(string Label, int[] Array)[] allNumbers =
-			{
-				("Test case none: ", Array.Empty<int>()), //-1
-				("Test case 1: ", new []{0, 1, 3, -2, 0, 1, 0, -3, 2, 3}), //4
-				("Test case 2: ", new []{0, 1, 3, -2, 0, 1, 0, 0, -3, 2, 3}), //3
-				("Test case 3: ", new []{0, 1, 3, -2, 0, 0, 1, 0, 0, -3, 2, 3}), //3
-				("Test case 4: ", new []{0, 1, 3, -2, 0, 0, 1, 0, -3, -1, 1, 2, 3}), //4
-				("Test case 5: ", new []{0, 1, 3, -2, 0, 0, 1, 0, -3, -1, -1, 1, 2, 3}), //2
-				("Monotonically decreasing: ", new []{0, -1, -2, -3, -4, -5, -6, -7, -8, -9}), //-1
-				("Monotonically increasing: ", new []{0, 1, 2, 3}), //-1
-				("All the same, zeros: ", new []{0, 0, 0, 0}), //-1
-				("Extreme no pit, monotonically increasing: ", new []{-100000000, 0, 100000000}), //-1
-				("Extreme depth 1 w/o pit: ", new []{100000000, 0, 0, 100000000}), //-1
-				("Extreme depth 1 w pit: ", new []{100000000, 0, 100000000}), //100000000
-				("Extreme depth 2 w pit: ", new []{100000000, -100000000, 0, 0, 100000000}), //100000000
-				("Extreme depth 3 w pit: ", new []{100000000, -100000000, 100000000, 0, 100000000}), //200000000
-				("Extreme depth 2 w false first pit: ", new []{100000000, -100000000, -100000000, 100000000, 0, 100000000}), //100000000
-				("Volcano shape: ", new []{0, 1, 2, 3, 10, 100, 90, 100, 3, 2, 1, 0}), //10
-				("Mountain shape: ", new []{0, 1, 2, 3, 10, 100, 3, 2, 1, 0}), //-1
-				("Plateau: ", new []{0, 1, 2, 3, 10, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 3, 2, 1, 0}), //-1
-			};
+			[
+				("Test case none: ", []), //-1
+				("Test case 1: ", [0, 1, 3, -2, 0, 1, 0, -3, 2, 3]), //4
+				("Test case 2: ", [0, 1, 3, -2, 0, 1, 0, 0, -3, 2, 3]), //3
+				("Test case 3: ", [0, 1, 3, -2, 0, 0, 1, 0, 0, -3, 2, 3]), //3
+				("Test case 4: ", [0, 1, 3, -2, 0, 0, 1, 0, -3, -1, 1, 2, 3]), //4
+				("Test case 5: ", [0, 1, 3, -2, 0, 0, 1, 0, -3, -1, -1, 1, 2, 3]), //2
+				("Monotonically decreasing: ", [0, -1, -2, -3, -4, -5, -6, -7, -8, -9]), //-1
+				("Monotonically increasing: ", [0, 1, 2, 3]), //-1
+				("All the same, zeros: ", [0, 0, 0, 0]), //-1
+				("Extreme no pit, monotonically increasing: ", [-100000000, 0, 100000000]), //-1
+				("Extreme depth 1 w/o pit: ", [100000000, 0, 0, 100000000]), //-1
+				("Extreme depth 1 w pit: ", [100000000, 0, 100000000]), //100000000
+				("Extreme depth 2 w pit: ", [100000000, -100000000, 0, 0, 100000000]), //100000000
+				("Extreme depth 3 w pit: ", [100000000, -100000000, 100000000, 0, 100000000]), //200000000
+				("Extreme depth 2 w false first pit: ", [100000000, -100000000, -100000000, 100000000, 0, 100000000]), //100000000
+				("Volcano shape: ", [0, 1, 2, 3, 10, 100, 90, 100, 3, 2, 1, 0]), //10
+				("Mountain shape: ", [0, 1, 2, 3, 10, 100, 3, 2, 1, 0]), //-1
+				("Plateau: ", [0, 1, 2, 3, 10, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 3, 2, 1, 0
+				]) //-1
+			];
 			int i = -1;
 			bool more;
 			Console.Clear();
@@ -544,8 +545,8 @@ work with {Constants.HEAVY} items.");
 
 			IReadOnlyList<ThreadQueueMode> modes = EnumHelper<ThreadQueueMode>.GetValues();
 			Queue<ThreadQueueMode> queueModes = new Queue<ThreadQueueMode>(modes);
-			HashSet<int> visited = new HashSet<int>();
-			List<int> duplicates = new List<int>();
+			HashSet<int> visited = [];
+			List<int> duplicates = [];
 			Stopwatch clock = new Stopwatch();
 
 			while (queueModes.Count > 0)
@@ -759,8 +760,8 @@ work with {Constants.HEAVY} items.");
 																.ToArray();
 			Queue<ThreadQueueMode> queueModes = new Queue<ThreadQueueMode>(modes);
 			BinomialHeap<Student> priorityQueue = null;
-			HashSet<Student> visited = new HashSet<Student>();
-			List<Student> duplicates = new List<Student>();
+			HashSet<Student> visited = [];
+			List<Student> duplicates = [];
 			Stopwatch clock = new Stopwatch();
 
 			while (queueModes.Count > 0)
@@ -1650,7 +1651,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			int iteration = 0;
 			Stopwatch clock = new Stopwatch();
 			int[] values = Generator.GetRandomIntegers(true, Constants.START);
-			LinkedDeque<int> deque = new LinkedDeque<int>();
+			LinkedDeque<int> deque = [];
 
 			do
 			{
@@ -3128,7 +3129,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			int tests = 0;
 			Stopwatch clock = new Stopwatch();
 			// this is a RedBlackTree implementation by Microsoft, just testing it.
-			SortedSet<int> sortedSet = new SortedSet<int>();
+			SortedSet<int> sortedSet = [];
 			int[] values = Generator.GetRandomIntegers(true, Constants.START);
 
 			do
@@ -3414,7 +3415,8 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 		private static void TestTrieSimilarWordsRemoval()
 		{
-			string[] values = {
+			string[] values =
+			[
 				"Car",
 				"Care",
 				"calcification",
@@ -3437,7 +3439,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 				"canthaxanthins",
 				"Can",
 				"Canvas"
-			};
+			];
 			Trie<char> trie = new Trie<char>(CharComparer.InvariantCultureIgnoreCase);
 
 			Console.Clear();
@@ -3509,7 +3511,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 		{
 			bool more;
 			Stopwatch clock = new Stopwatch();
-			SkipList<int> skipList = new SkipList<int>();
+			SkipList<int> skipList = [];
 			int[] values = Generator.GetRandomIntegers(true, 200_000);
 
 			do
@@ -3601,7 +3603,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 		{
 			bool more;
 			Stopwatch clock = new Stopwatch();
-			DisjointSet<int> disjointSet = new DisjointSet<int>();
+			DisjointSet<int> disjointSet = [];
 			IList<int> values = Generator.GetRandomIntegers(true, 12/*200_000*/);
 
 			do
@@ -4909,7 +4911,7 @@ The external id reflects the order by which they are scheduled and the -* part i
 			bool more;
 			GraphList<char> graph;
 			WeightedGraphList<char, int> weightedGraph;
-			List<char> values = new List<char>();
+			List<char> values = [];
 			Menu menu = new Menu()
 				.Add("Undirected graph", () =>
 				{
@@ -5359,11 +5361,11 @@ decrypted:
 			const string URI_TEST = "http://example.com/folder path";
 
 			string[] uriParts =
-			{
+			[
 				"/another folder",
 				"more_folders/folder 2",
 				"image file.jpg"
-			};
+			];
 
 			Uri baseUri = UriHelper.ToUri(URI_TEST, UriKind.Absolute);
 			Console.WriteLine($"{URI_TEST} => {baseUri.String()}");
@@ -5383,7 +5385,8 @@ decrypted:
 			uri = UriHelper.ToUri(uriParts[1]);
 			Console.WriteLine($"{uriParts[1]} => {uri.String()}");
 
-			string[] urls = {
+			string[] urls =
+			[
 				"server:8088",
 				"server:8088/func1",
 				"server:8088/func1/SubFunc1",
@@ -5401,8 +5404,8 @@ decrypted:
 				"magnet://server:8088/func1",
 				"magnet://server:8088/func1/SubFunc1",
 				"http://[2001:db8::1]",
-				"http://[2001:db8::1]:80",
-			};
+				"http://[2001:db8::1]:80"
+			];
 
 			foreach (string item in urls)
 			{
@@ -5420,7 +5423,8 @@ decrypted:
 
 		private static void TestJsonUriConverter()
 		{
-			string[] urls = {
+			string[] urls =
+			[
 				"server:8088",
 				"server:8088/func1",
 				"server:8088/func1/SubFunc1",
@@ -5438,8 +5442,8 @@ decrypted:
 				"magnet://server:8088/func1",
 				"magnet://server:8088/func1/SubFunc1",
 				"http://[2001:db8::1]",
-				"http://[2001:db8::1]:80",
-			};
+				"http://[2001:db8::1]:80"
+			];
 
 			JsonSerializerSettings settings = JsonHelper.CreateSettings().AddConverters();
 			UriTestClass uriTest = new UriTestClass();
@@ -5496,15 +5500,15 @@ decrypted:
 			bool more;
 			Title("Testing observable collections");
 
-			ObservableList<int> list = new ObservableList<int>();
+			ObservableList<int> list = [];
 			list.PropertyChanged += onPropertyChanged;
 			list.CollectionChanged += onCollectionChanged;
 
-			ObservableHashSet<int> set = new ObservableHashSet<int>();
+			ObservableHashSet<int> set = [];
 			set.PropertyChanged += onPropertyChanged;
 			set.CollectionChanged += onCollectionChanged;
 
-			ObservableSortedSet<int> sortedSet = new ObservableSortedSet<int>();
+			ObservableSortedSet<int> sortedSet = [];
 			sortedSet.PropertyChanged += onPropertyChanged;
 			sortedSet.CollectionChanged += onCollectionChanged;
 

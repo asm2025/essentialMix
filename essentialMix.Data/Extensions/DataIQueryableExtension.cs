@@ -90,6 +90,6 @@ public static class DataIQueryableExtension
 																										method.GetParameters().Length == 2));
 
 		object result = orderBy.MakeGenericMethod(typeof(T), type)
-								.Invoke(null, new object[] {thisValue, lambda});
+								.Invoke(null, [thisValue, lambda]);
 		return (IOrderedQueryable<T>)result;		}
 }

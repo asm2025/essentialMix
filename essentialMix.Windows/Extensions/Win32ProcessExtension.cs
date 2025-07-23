@@ -30,7 +30,7 @@ public static class Win32ProcessExtension
 	[NotNull]
 	public static IEnumerable<Process> GetChildren(this Process thisValue)
 	{
-		if (!thisValue.IsAwaitable()) return Enumerable.Empty<Process>();
+		if (!thisValue.IsAwaitable()) return [];
 
 		Func<ManagementObject, Process> converter = mo => ProcessHelper.TryGetProcessById(Convert.ToInt32(mo["ProcessID"]), out Process p) ? p : null;
 		SystemInfoRequest<Process> request = new SystemInfoRequest<Process>(SystemInfoType.Win32_Process, converter)
@@ -44,7 +44,7 @@ public static class Win32ProcessExtension
 	[NotNull]
 	public static IEnumerable<Process> GetChildren([NotNull] this Process thisValue, [NotNull] Predicate<Process> predicate)
 	{
-		if (!thisValue.IsAwaitable()) return Enumerable.Empty<Process>();
+		if (!thisValue.IsAwaitable()) return [];
 
 		Func<ManagementObject, Process> converter = mo => ProcessHelper.TryGetProcessById(Convert.ToInt32(mo["ProcessID"]), out Process p) ? p : null;
 		SystemInfoRequest<Process> request = new SystemInfoRequest<Process>(SystemInfoType.Win32_Process, converter)

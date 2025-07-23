@@ -59,7 +59,7 @@ public abstract class AppSettings<TProvider, TDbType>
 			if (resetSchema)
 			{
 				Table.Clear();
-				Table.PrimaryKey = Array.Empty<DataColumn>();
+				Table.PrimaryKey = [];
 				Table.Columns.Clear();
 			}
 

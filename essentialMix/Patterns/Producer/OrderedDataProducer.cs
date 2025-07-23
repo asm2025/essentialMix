@@ -49,7 +49,7 @@ internal class OrderedDataProducer<T> : IOrderedDataProducer<T>
 		if (_dataHasEnded) throw new InvalidOperationException("Completed already occurred");
 		if (Data == null) return;
 		// only get excited if somebody is listening
-		_buffer ??= new List<T>();
+		_buffer ??= [];
 		_buffer.Add(item);
 	}
 

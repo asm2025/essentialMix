@@ -161,7 +161,7 @@ public abstract class PairingHeap<T> : SiblingsHeap<PairingNode<T>, T>
 	{
 		if (node?.Sibling == null) return node;
 
-		List<PairingNode<T>> nodes = new List<PairingNode<T>>();
+		List<PairingNode<T>> nodes = [];
 
 		do
 		{
@@ -361,7 +361,7 @@ public abstract class PairingHeap<TKey, TValue> : SiblingsHeap<PairingNode<TKey,
 	{
 		if (node?.Sibling == null) return node;
 
-		List<PairingNode<TKey, TValue>> nodes = new List<PairingNode<TKey, TValue>>();
+		List<PairingNode<TKey, TValue>> nodes = [];
 
 		do
 		{

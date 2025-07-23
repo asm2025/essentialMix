@@ -195,7 +195,7 @@ public class Trie<T>(IEqualityComparer<T> comparer)
 		if (maximum < 1) throw new ArgumentOutOfRangeException(nameof(maximum));
 
 		Node node = Root;
-		List<T> prefix = new List<T>();
+		List<T> prefix = [];
 
 		foreach (T value in token)
 		{

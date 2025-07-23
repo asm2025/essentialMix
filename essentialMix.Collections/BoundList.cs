@@ -103,7 +103,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 		if (capacity < 0 || capacity > limit) throw new ArgumentOutOfRangeException(nameof(capacity));
 		Limit = limit;
 		_items = capacity == 0
-					? Array.Empty<T>()
+					? []
 					: new T[capacity];
 	}
 
@@ -134,7 +134,7 @@ public class BoundList<T> : IBoundList<T>, IReadOnlyBoundList<T>, IList
 			}
 			else
 			{
-				_items = Array.Empty<T>();
+				_items = [];
 			}
 
 			_version++;

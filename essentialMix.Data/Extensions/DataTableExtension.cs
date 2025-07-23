@@ -39,7 +39,7 @@ public static class DataTableExtension
 	{
 		if (!rowIndex.InRangeRx(0, thisValue.Rows.Count)) throw new ArgumentOutOfRangeException(nameof(rowIndex));
 
-		List<string> fields = new List<string>();
+		List<string> fields = [];
 
 		foreach (string fieldName in fieldNames)
 		{
@@ -58,7 +58,7 @@ public static class DataTableExtension
 
 		if (fields.Count == 0) return null;
 
-		List<object> values = new List<object>();
+		List<object> values = [];
 
 		if (rowIndex > -1)
 		{

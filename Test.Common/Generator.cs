@@ -88,7 +88,7 @@ public static class Generator
 		if (unique)
 		{
 			int i = 0;
-			HashSet<char> set = new HashSet<char>();
+			HashSet<char> set = [];
 
 			while (i < len)
 			{

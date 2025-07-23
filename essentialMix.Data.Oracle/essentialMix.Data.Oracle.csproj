@@ -70,7 +70,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2024.3.0" />
-		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.270" />
+		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.9.1" />
 	</ItemGroup>
 
 	<ItemGroup>

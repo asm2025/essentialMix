@@ -27,7 +27,7 @@ public class LinkedDeque<T> : IDeque<T>, ICollection<T>, ICollection, IReadOnlyC
 
 	public LinkedDeque()
 	{
-		Items = new LinkedList<T>();
+		Items = [];
 		_collection = Items;
 	}
 

@@ -132,7 +132,7 @@ public static class IPAddressHelper
 		try
 		{
 			Match match = __isIPv4Url.Match(value);
-			if (match.Success) return new List<string> { match.Groups["url"]?.Value };
+			if (match.Success) return [match.Groups["url"]?.Value];
 
 			if (value.Contains("/"))
 			{
@@ -144,7 +144,7 @@ public static class IPAddressHelper
 			}
 			else
 			{
-				return new List<string> { IPAddress.Parse(value).ToString() };
+				return [IPAddress.Parse(value).ToString()];
 			}
 		}
 		catch
@@ -152,7 +152,7 @@ public static class IPAddressHelper
 			return null;
 		}
 
-		List<string> list = new List<string>();
+		List<string> list = [];
 
 		for (int i = beginIp[0]; i <= endIp[0]; i++)
 		{
