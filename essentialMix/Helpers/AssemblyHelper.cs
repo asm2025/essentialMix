@@ -39,7 +39,12 @@ public static class AssemblyHelper
 					Assembly assembly = typeCurrent.Assembly;
 
 					// if valid
-					if (!assembly.GlobalAssemblyCache
+#if NETSTANDARD || NETFRAMEWORK
+					bool isGlobalAssemblyCache = assembly.GlobalAssemblyCache;
+#else
+					bool isGlobalAssemblyCache = false;
+#endif
+					if (!isGlobalAssemblyCache
 						&& !assembly.IsDynamic
 						&& !assembly.HasAttribute<GeneratedCodeAttribute>())
 					{

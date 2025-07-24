@@ -9,7 +9,7 @@ using essentialMix.Extensions;
 namespace essentialMix.Numeric;
 
 [Serializable]
-public struct BitVector
+public struct BitVector : IEquatable<BitVector>
 {
 	private byte _data;
 
@@ -125,41 +125,6 @@ public struct BitVector
 		_data = v;
 	}
 
-	[NotNull]
-	public static explicit operator bool[](BitVector value)
-	{
-		/*
-		* the mask initially is: 10000000 then we can test the 7th bit
-		* then it becomes      : 01000000 so we can test the 6th bit
-		*/
-		byte mask = 0x80;
-		byte b = value.Data;
-		bool[] bit = new bool[8];
-
-		for (int i = 7; i >= 0; i--)
-		{
-			bit[i] = (b & mask) > 0;
-			mask >>= 1;
-		}
-
-		return bit;
-	}
-
-	public static explicit operator BitVector([NotNull] BitArray value)
-	{
-		return new BitVector(value);
-	}
-
-	[NotNull]
-	public static explicit operator BitArray(BitVector value)
-	{
-		return new BitArray(new[] { value.Data });
-	}
-
-	public static explicit operator BitVector(BitVector32 value) { return new BitVector(value); }
-
-	public static explicit operator BitVector32(BitVector value) { return new BitVector32(value.Data); }
-
 	public override bool Equals(object obj)
 	{
 		return obj is BitVector vector && Equals(vector);
@@ -191,6 +156,51 @@ public struct BitVector
 		get => _data;
 		set => _data = value;
 	}
+	
+	public static bool operator ==(BitVector left, BitVector right)
+	{
+		return left.Equals(right);
+	}
+
+	public static bool operator !=(BitVector left, BitVector right)
+	{
+		return !left.Equals(right);
+	}
+
+	[NotNull]
+	public static explicit operator bool[](BitVector value)
+	{
+		/*
+		 * the mask initially is: 10000000 then we can test the 7th bit
+		 * then it becomes      : 01000000 so we can test the 6th bit
+		 */
+		byte mask = 0x80;
+		byte b = value.Data;
+		bool[] bit = new bool[8];
+
+		for (int i = 7; i >= 0; i--)
+		{
+			bit[i] = (b & mask) > 0;
+			mask >>= 1;
+		}
+
+		return bit;
+	}
+
+	public static explicit operator BitVector([NotNull] BitArray value)
+	{
+		return new BitVector(value);
+	}
+
+	[NotNull]
+	public static explicit operator BitArray(BitVector value)
+	{
+		return new BitArray(new[] { value.Data });
+	}
+
+	public static explicit operator BitVector(BitVector32 value) { return new BitVector(value); }
+
+	public static explicit operator BitVector32(BitVector value) { return new BitVector32(value.Data); }
 
 	public static byte CreateMask() { return CreateMask(0); }
 

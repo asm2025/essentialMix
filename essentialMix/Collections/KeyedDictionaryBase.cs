@@ -538,7 +538,7 @@ public abstract class KeyedDictionaryBase<TKey, TValue> : ICollection<TValue>, I
 	}
 
 	void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
-	[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+
 	[SecurityCritical]
 	protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 	{

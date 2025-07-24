@@ -462,10 +462,14 @@ public class EndianBinaryReader : Disposable
 	{
 		ThrowIfDisposed();
 
+#if NETSTANDARD || NETFRAMEWORK
 		int index = 0;
 
 		while (index < size)
 			index += BaseStream.ReadExactly(data, index, size - index);
+#else
+		BaseStream.ReadExactly(data.AsSpan(0, size));
+#endif
 	}
 
 	/// <summary>

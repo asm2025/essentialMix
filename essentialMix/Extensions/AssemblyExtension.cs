@@ -92,7 +92,7 @@ public static class AssemblyExtension
 	[NotNull]
 	public static string GetPath([NotNull] this Assembly thisValue)
 	{
-		string codeBase = thisValue.CodeBase; // "pseudo" because it is not properly escaped
+		string codeBase = thisValue.Location; // "pseudo" because it is not properly escaped
 
 		if (string.IsNullOrEmpty(codeBase))
 		{

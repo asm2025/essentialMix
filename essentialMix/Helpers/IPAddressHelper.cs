@@ -1,15 +1,16 @@
+using essentialMix.Extensions;
+using essentialMix.IO;
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using essentialMix.Extensions;
-using essentialMix.IO;
-using JetBrains.Annotations;
 
 namespace essentialMix.Helpers;
 
@@ -196,17 +197,18 @@ public static class IPAddressHelper
 
 			foreach (UnicastIPAddressInformation address in properties.UnicastAddresses)
 			{
-				if (address.Address.AddressFamily != AddressFamily.InterNetwork || !address.IsDnsEligible) continue;
+				if (address.Address.AddressFamily != AddressFamily.InterNetwork) continue;
 
 				if (address.Address.Equals(IPAddress.Any) ||
-					address.Address.Equals(IPAddress.Loopback) ||
-					address.Address.Equals(IPAddress.IPv6Any) ||
-					address.Address.Equals(IPAddress.IPv6Loopback) ||
-					address.Address.Equals(IPAddress.IPv6None))
+				    address.Address.Equals(IPAddress.Loopback) ||
+				    address.Address.Equals(IPAddress.IPv6Any) ||
+				    address.Address.Equals(IPAddress.IPv6Loopback) ||
+				    address.Address.Equals(IPAddress.IPv6None))
 				{
 					continue;
 				}
 
+				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !address.IsDnsEligible) continue;
 				if (address.DuplicateAddressDetectionState is DuplicateAddressDetectionState.Invalid or DuplicateAddressDetectionState.Duplicate) continue;
 				yield return address.Address;
 			}

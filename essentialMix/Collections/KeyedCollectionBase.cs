@@ -52,6 +52,7 @@ public abstract class KeyedCollectionBase<TKey, TValue> : System.Collections.Obj
 
 	bool IList.Contains(object value) { return value is TKey k && Contains(k); }
 
+#if NETSTANDARD || NETFRAMEWORK
 	public bool TryGetValue(TKey key, out TValue value)
 	{
 		if (Dictionary != null) return Dictionary.TryGetValue(key, out value);
@@ -66,6 +67,7 @@ public abstract class KeyedCollectionBase<TKey, TValue> : System.Collections.Obj
 		value = default;
 		return false;
 	}
+#endif
 
 	public virtual void MoveItem(int index, int newIndex)
 	{

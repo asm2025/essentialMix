@@ -1,10 +1,7 @@
 #pragma warning disable 1591, 0612
 using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using essentialMix.Extensions;
-using JetBrains.Annotations;
 using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace essentialMix.Patterns.Object;
@@ -84,8 +81,8 @@ public abstract class Disposable : IDisposable
 	public void Dispose()
 	{
 		if (Interlocked.CompareExchange(ref _disposeStage, DISPOSAL_STARTED, DISPOSAL_NOT_STARTED) != DISPOSAL_NOT_STARTED) return;
-		GC.SuppressFinalize(this);
 		Dispose(true);
+		GC.SuppressFinalize(this);
 		MarkAsDisposed();
 	}
 

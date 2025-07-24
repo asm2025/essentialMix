@@ -1,11 +1,8 @@
 using System;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using essentialMix.Helpers;
 using essentialMix.Numeric;
 using JetBrains.Annotations;
@@ -571,37 +568,6 @@ public static class ValueTypeExtension
 						(*pui << 24);
 			}
 		}
-	}
-
-	public static object Deserialize([NotNull] this byte[] thisValue, int startIndex = 0, int count = -1)
-	{
-		if (startIndex < 0) throw new ArgumentOutOfRangeException(nameof(startIndex));
-		if (count == -1) count = thisValue.Length - startIndex;
-		if (startIndex > thisValue.Length - count) throw new ArgumentOutOfRangeException(nameof(count));
-
-		byte[] buffer;
-
-		if (startIndex == 0 && count == thisValue.Length)
-			buffer = thisValue;
-		else
-		{
-			buffer = new byte[count];
-			Buffer.BlockCopy(thisValue, startIndex, buffer, 0, count);
-		}
-
-		using (MemoryStream stream = new MemoryStream(buffer))
-		{
-			IFormatter formatter = new BinaryFormatter();
-			return formatter.Deserialize(stream);
-		}
-	}
-
-	public static T Deserialize<T>([NotNull] this byte[] thisValue, int startIndex = 0)
-	{
-		Type type = typeof(T);
-		int cb = Marshal.SizeOf(type);
-		if (cb > thisValue.Length - startIndex) throw new ArgumentException("Not enough data to fill the requested type.", nameof(thisValue));
-		return (T)Deserialize(thisValue, startIndex, cb);
 	}
 
 	public static T DeserializeRaw<T>([NotNull] this byte[] thisValue, int startIndex = 0)

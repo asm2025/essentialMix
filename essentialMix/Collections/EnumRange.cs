@@ -16,7 +16,6 @@ public class EnumRange<T> : Range<T>
 {
 	static EnumRange()
 	{
-		if (EnumType.HasAttribute<FlagsAttribute>()) throw new InvalidOperationException($"{EnumType.FullName} has {nameof(FlagsAttribute)} attribute which is not supported.");
 	}
 
 	public EnumRange()
@@ -42,6 +41,7 @@ public class EnumRange<T> : Range<T>
 	public EnumRange(T minimum, T maximum)
 		: base(minimum, maximum)
 	{
+		if (typeof(T).HasAttribute<FlagsAttribute>()) throw new InvalidOperationException($"{EnumType.FullName} has {nameof(FlagsAttribute)} attribute which is not supported.");
 		if (Values.IndexOf(minimum) < 0) throw new ArgumentOutOfRangeException(nameof(minimum));
 		if (Values.IndexOf(maximum) < 0) throw new ArgumentOutOfRangeException(nameof(maximum));
 		Lister = new RangeLister<T>(Values);

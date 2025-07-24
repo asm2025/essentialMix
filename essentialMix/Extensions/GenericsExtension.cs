@@ -340,25 +340,6 @@ public static class GenericsExtension
 		return newValues;
 	}
 
-	public static byte[] SerializeBinary<T>(this T thisValue)
-	{
-		if (ReferenceEquals(thisValue, null))
-			return null;
-
-		using (MemoryStream stream = new MemoryStream())
-		{
-			IFormatter formatter = new BinaryFormatter();
-			formatter.Serialize(stream, thisValue);
-			return stream.ToArray();
-		}
-	}
-
-	[MethodImpl(MethodImplOptions.ForwardRef | MethodImplOptions.AggressiveInlining)]
-	public static bool SerializeBinary<T>([NotNull] this T thisValue, [NotNull] Stream stream, StreamingContextStates contextStates = StreamingContextStates.Persistence, ISurrogateSelector selector = null)
-	{
-		return stream.SerializeBinary(thisValue, contextStates, selector);
-	}
-
 	[NotNull]
 	public static byte[] SerializeRaw<T>(this T thisValue)
 		where T : struct
@@ -1641,21 +1622,6 @@ public static class GenericsExtension
 		}
 	}
 
-	public static T CloneSerializable<T>([NotNull] this T thisValue)
-	{
-		if (!typeof(T).IsSerializable)
-			throw new ArgumentException("Type must be serializable.", nameof(thisValue));
-
-		IFormatter formatter = new BinaryFormatter();
-
-		using (Stream stream = new MemoryStream())
-		{
-			formatter.Serialize(stream, thisValue);
-			stream.Seek(0, SeekOrigin.Begin);
-			return (T)formatter.Deserialize(stream);
-		}
-	}
-
 	[NotNull]
 	public static string ToRangeString<T>(this T thisValue, T maximum, IComparer<T> comparer = null)
 		where T : struct, IComparable
@@ -1979,41 +1945,6 @@ public static class GenericsExtension
 		return !ReferenceEquals(thisValue, null) || values.IsNullOrEmpty()
 					? thisValue
 					: values.FirstOrDefault(value => !ReferenceEquals(value, null));
-	}
-
-	/// <summary>
-	/// It's an efficient method to make a deep clone
-	/// but unfortunately every class has to support ISerializable
-	/// interface or be marked with Serializable attribute for this
-	/// to work; If the object is not marked with Serializable attribute
-	/// or does not implement the interface ISerializable, then it'll not
-	/// be copied.
-	/// If it'll will work for your purposes, then fine but otherwise
-	/// I don't recommend this as a solution because it is slow (!!!)
-	/// I've gone WTF!!! when I first discovered the problem as well.
-	/// </summary>
-	/// <param name="thisValue"></param>
-	/// <param name="contextStates"></param>
-	/// <param name="selector"></param>
-	/// <returns>object</returns>
-	public static T CloneBinary<T>([NotNull] this T thisValue, StreamingContextStates contextStates = StreamingContextStates.Clone, ISurrogateSelector selector = null)
-	{
-		Type type = thisValue.GetType();
-		if (type.IsPrimitive())
-			return thisValue;
-		if (!type.IsSerializable)
-			throw new ArgumentException($"Type {type.Name} is not serializable.", nameof(thisValue));
-
-		IFormatter formatter = new BinaryFormatter { Context = new StreamingContext(contextStates) };
-		if (selector != null)
-			formatter.SurrogateSelector = selector;
-
-		using (Stream stream = new MemoryStream())
-		{
-			formatter.Serialize(stream, thisValue);
-			stream.Position = 0;
-			return (T)formatter.Deserialize(stream);
-		}
 	}
 
 	/// <summary>

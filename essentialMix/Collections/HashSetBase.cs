@@ -20,7 +20,6 @@ namespace essentialMix.Collections;
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Dbg_HashSetDebugView<>))]
 [Serializable]
-[HostProtection(MayLeakOnAbort = true)]
 public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
 {
 	// store lower 31 bits of hash code

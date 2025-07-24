@@ -232,19 +232,10 @@ public static class EncodingHelper
 		if (enc.CodePage != Encoding.Unicode.CodePage) return enc;
 
 		// Unicode.. hmmm... check for smallest encoding
-		int byteCount = Encoding.UTF7.GetByteCount(input);
+		int byteCount = Encoding.UTF8.GetByteCount(input);
 		int bestByteCount = byteCount;
 
-		enc = Encoding.UTF7;
-
-		// utf8 smaller?
-		byteCount = Encoding.UTF8.GetByteCount(input);
-
-		if (byteCount < bestByteCount)
-		{
-			enc = Encoding.UTF8;
-			bestByteCount = byteCount;
-		}
+		enc = Encoding.UTF8;
 
 		// Unicode smaller?
 		byteCount = Encoding.Unicode.GetByteCount(input);

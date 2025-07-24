@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Threading;
 using essentialMix;
@@ -15,7 +14,6 @@ namespace Other.Microsoft;
 
 public class HashCodeHelper
 {
-	private static readonly Lazy<BinaryFormatter> __formatter = new Lazy<BinaryFormatter>(() => new BinaryFormatter(), LazyThreadSafetyMode.ExecutionAndPublication);
 	private static readonly Lazy<HashAlgorithm> __hasher = new Lazy<HashAlgorithm>(() => new SHA384CryptoServiceProvider(), LazyThreadSafetyMode.ExecutionAndPublication);
 	private static readonly Lazy<ConditionalWeakTable<object, SerializationInfo>> __serializationInfoTable = new Lazy<ConditionalWeakTable<object, SerializationInfo>>(() => new ConditionalWeakTable<object, SerializationInfo>(), LazyThreadSafetyMode.ExecutionAndPublication);
 
@@ -176,9 +174,9 @@ public class HashCodeHelper
 			case TypeCode.Char:
 				return BitConverter.GetBytes(Convert.ToChar(value));
 			case TypeCode.Byte:
-				return BitConverter.GetBytes(Convert.ToByte(value));
+				return BitConverter.GetBytes((short)Convert.ToByte(value));
 			case TypeCode.SByte:
-				return BitConverter.GetBytes(Convert.ToSByte(value));
+				return BitConverter.GetBytes((short)Convert.ToSByte(value));
 			case TypeCode.Int16:
 				return BitConverter.GetBytes(Convert.ToInt16(value));
 			case TypeCode.UInt16:
@@ -198,20 +196,7 @@ public class HashCodeHelper
 			case TypeCode.Decimal:
 				return Convert.ToDecimal(value).GetBytes();
 			default:
-				MemoryStream stream = null;
-
-				try
-				{
-					stream = new MemoryStream();
-					__formatter.Value.Serialize(stream, value);
-					stream.Flush();
-					stream.Position = 0;
-					return onStreaming?.Invoke(stream) ?? stream.ToArray();
-				}
-				finally
-				{
-					ObjectHelper.Dispose(ref stream);
-				}
+				throw new NotImplementedException();
 		}
 	}
 }

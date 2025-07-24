@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using JetBrains.Annotations;
 using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace essentialMix.Drawing;

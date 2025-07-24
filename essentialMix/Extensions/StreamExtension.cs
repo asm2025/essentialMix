@@ -59,6 +59,7 @@ public static class StreamExtension
 		return written;
 	}
 
+#if NETSTANDARD || NETFRAMEWORK
 	public static int ReadExactly([NotNull] this Stream thisValue, [NotNull] byte[] buffer, int startIndex = 0, int length = -1)
 	{
 		if (!startIndex.InRangeRx(0, buffer.Length)) throw new ArgumentOutOfRangeException(nameof(startIndex));
@@ -69,6 +70,7 @@ public static class StreamExtension
 		if (read != length) throw new EndOfStreamException($"End of stream reached with {length - read} byte(s) left to read.");
 		return read;
 	}
+#endif
 
 	public static bool TryReadExactly([NotNull] this Stream thisValue, out int read, [NotNull] byte[] buffer, int startIndex = 0, int length = -1)
 	{
@@ -102,50 +104,6 @@ public static class StreamExtension
 		if (thisValue.CanSeek) thisValue.Position = 0;
 
 		return encoding;
-	}
-
-	public static bool SerializeBinary<T>([NotNull] this Stream thisValue, T value, StreamingContextStates contextStates = StreamingContextStates.Persistence, ISurrogateSelector selector = null)
-	{
-		if (value.IsNull()) return false;
-
-		Type type = typeof(T);
-		if (!type.IsSerializable) throw new ArgumentException($"Type {type.Name} is not serializable.", nameof(thisValue));
-
-		IFormatter formatter = new BinaryFormatter { Context = new StreamingContext(contextStates) };
-		if (selector != null) formatter.SurrogateSelector = selector;
-
-		try
-		{
-			formatter.Serialize(thisValue, value);
-			return true;
-		}
-		catch
-		{
-			return false;
-		}
-	}
-
-	public static object DeserializeBinary([NotNull] this Stream thisValue, StreamingContextStates contextStates = StreamingContextStates.Persistence, ISurrogateSelector selector = null)
-	{
-		return DeserializeBinary(thisValue, (object)null, contextStates, selector);
-	}
-
-	public static T DeserializeBinary<T>([NotNull] this Stream thisValue, T defaultValue, StreamingContextStates contextStates = StreamingContextStates.Persistence, ISurrogateSelector selector = null)
-	{
-		IFormatter formatter = new BinaryFormatter { Context = new StreamingContext(contextStates) };
-		if (selector != null) formatter.SurrogateSelector = selector;
-		T value;
-
-		try
-		{
-			value = (T)formatter.Deserialize(thisValue);
-		}
-		catch
-		{
-			value = defaultValue;
-		}
-
-		return value;
 	}
 
 	public static FileStream SaveToStream([NotNull] this Stream thisValue, [NotNull] string fileName, bool overwrite = false)

@@ -20,11 +20,13 @@ public static class IDictionaryExtension
 		return new DictionaryEnumerator<TKey, TValue>(thisValue);
 	}
 
+#if NETSTANDARD || NETFRAMEWORK
 	[NotNull]
 	public static IReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue)
 	{
 		return new ReadOnlyDictionary<TKey, TValue>(thisValue);
 	}
+#endif
 
 	public static TValue Get<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> thisValue, [NotNull] TKey key, [NotNull] Func<TKey, TValue> getValue)
 	{

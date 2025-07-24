@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
-using System.Security.Permissions;
 using System.Threading;
 
 namespace essentialMix.ComponentModel;
 
 /// <inheritdoc />
-[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 public class BooleanConverter : System.ComponentModel.BooleanConverter
 {
 	private static volatile StandardValuesCollection __values;

@@ -48,12 +48,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\essentialMix.Windows\essentialMix.Windows.csproj" />
-		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
-		<ProjectReference Include="..\Test.Common\Test.Common.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<EmbeddedResource Update="TestUSBForm.resx">
 			<DependentUpon>TestUSBForm.cs</DependentUpon>
 		</EmbeddedResource>
@@ -81,6 +75,8 @@
 		<ProjectReference Include="..\essentialMix.NewtonSoft\essentialMix.Newtonsoft.csproj" />
 		<ProjectReference Include="..\essentialMix.Threading\essentialMix.Threading.csproj" />
 		<ProjectReference Include="..\essentialMix\essentialMix.csproj" />
+		<ProjectReference Include="..\essentialMix.Windows\essentialMix.Windows.csproj" />
+		<ProjectReference Include="..\Test.Common\Test.Common.csproj" />
 	</ItemGroup>
 
 </Project>
