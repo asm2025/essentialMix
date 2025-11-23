@@ -7,7 +7,7 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<TargetFramework>net10.0-windows</TargetFramework>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<LangVersion>13.0</LangVersion>
+		<LangVersion>14.0</LangVersion>
 		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
 		<Prefer32Bit>false</Prefer32Bit>
 		<Platforms>AnyCPU;x64;x86</Platforms>

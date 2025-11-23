@@ -5,7 +5,7 @@
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 		<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<LangVersion>13.0</LangVersion>
+		<LangVersion>14.0</LangVersion>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<OutputPath>..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
 		<AssemblyVersion>17.0.0.0</AssemblyVersion>
