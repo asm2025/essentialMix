@@ -63,7 +63,7 @@
 		<PackageReference Include="Bogus" Version="35.6.5" />
 		<PackageReference Include="Crayon" Version="2.0.69" />
 		<PackageReference Include="EasyConsole.Netstandard" Version="1.0.0" />
-		<PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
+		<PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 		<PackageReference Include="System.Formats.Asn1" Version="10.0.0" />
 	</ItemGroup>

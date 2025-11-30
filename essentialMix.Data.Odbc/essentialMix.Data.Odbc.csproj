@@ -9,9 +9,9 @@
 		<PackageTags>utilities, tools, extensions, helpers, database, microsoft odbc</PackageTags>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<OutputPath>..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
-		<AssemblyVersion>17.0.0.0</AssemblyVersion>
-		<FileVersion>25.11.23</FileVersion>
-		<Version>17.0.0.0</Version>
+		<AssemblyVersion>17.0.1.0</AssemblyVersion>
+		<FileVersion>25.11.30</FileVersion>
+		<Version>17.0.1.0</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -47,7 +47,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>17.0.0.0</PackageVersion>
+		<PackageVersion>17.0.1.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns, database, orm, dbms, odbc</PackageTags>
@@ -70,7 +70,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
+		<PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
 		<PackageReference Include="System.Data.Odbc" Version="10.0.0" />
 	</ItemGroup>
 
