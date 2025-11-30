@@ -44,8 +44,6 @@ public static class ThreadExtension
 	{
 		return thisValue.ThreadState.Simplify();
 	}
-
-	[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlThread)]
 	public static void Awake([NotNull] this Thread thisValue)
 	{
 		if (IsSuspending(thisValue)) TimeSpanHelper.WasteTime(TimeSpanHelper.HALF);
@@ -64,7 +62,6 @@ public static class ThreadExtension
 	/// This is a terrible idea, might want to try each and every other solution that might work before coming here.
 	/// </summary>
 	/// <param name="thisValue">The thread.</param>
-	[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlThread)]
 	public static bool Die(this Thread thisValue)
 	{
 		if (!IsAwaitable(thisValue)) return true;

@@ -179,7 +179,6 @@ public class SinglyLinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollect
 	}
 
 	void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
-	[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 	[SecurityCritical]
 	protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 	{

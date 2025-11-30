@@ -590,7 +590,6 @@ public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDi
 
 	void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
 	[SecurityCritical]
-	[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 	protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 	{
 		info.AddValue(nameof(_version), _version);

@@ -447,9 +447,9 @@ public abstract class DictionaryBase<TKey, TValue> : IDictionary<TKey, TValue>, 
 		HashCodeHelper.SerializationInfoTable.Add(this, info);
 	}
 
-	bool ICollection.IsSynchronized => false;
+	public bool IsSynchronized => false;
 
-	object ICollection.SyncRoot
+	public object SyncRoot
 	{
 		get
 		{
@@ -556,7 +556,6 @@ public abstract class DictionaryBase<TKey, TValue> : IDictionary<TKey, TValue>, 
 
 	void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
 	[SecurityCritical]
-	[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 	protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 	{
 		info.AddValue(nameof(_version), _version);

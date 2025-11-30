@@ -74,6 +74,7 @@ public class DomainParser
 
 		List<string> parts = normalizedHost
 							.Split('.')
+							.AsEnumerable()
 							.Reverse()
 							.ToList();
 

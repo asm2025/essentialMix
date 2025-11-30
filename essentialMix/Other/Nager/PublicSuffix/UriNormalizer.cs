@@ -33,6 +33,7 @@ public class UriNormalizer : IDomainNormalizer
 
 		return normalizedHost
 				.Split('.')
+				.AsEnumerable()
 				.Reverse()
 				.ToList();
 	}

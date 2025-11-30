@@ -2,14 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Security.Permissions;
 using JetBrains.Annotations;
 
 namespace essentialMix.Collections;
 
 [Serializable]
 [DebuggerDisplay("Count = {Count}")]
-[HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
 public class ReadOnlyList<T>([NotNull] IList<T> list)
 	: IReadOnlyList<T>, IReadOnlyCollection<T>, IEnumerable<T>, IEnumerable
 {

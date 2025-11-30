@@ -41,7 +41,6 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 	private const string ELEMENTS_NAME = "Elements";
 
 	[Serializable]
-	[HostProtection(MayLeakOnAbort = true)]
 	public struct Enumerator : IEnumerator<T>, IEnumerator
 	{
 		[NonSerialized]
@@ -211,7 +210,6 @@ public abstract class HashSetBase<T> : ISet<T>, IReadOnlyCollection<T>, ISeriali
 
 	void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
 	[SecurityCritical]
-	[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 	protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 	{
 		if (info == null) throw new ArgumentNullException(nameof(info));

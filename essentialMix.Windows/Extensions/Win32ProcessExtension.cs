@@ -87,8 +87,6 @@ public static class Win32ProcessExtension
 
 		return true;
 	}
-
-	[SecurityPermission(SecurityAction.LinkDemand)]
 	public static bool Die(this Process thisValue, int delay = 0)
 	{
 		if (!thisValue.IsAwaitable()) return true;
@@ -111,8 +109,6 @@ public static class Win32ProcessExtension
 			return false;
 		}
 	}
-
-	[SecurityPermission(SecurityAction.LinkDemand)]
 	public static void Die([NotNull] this Process[] thisValue)
 	{
 		foreach (Process process in thisValue)

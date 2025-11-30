@@ -228,7 +228,6 @@ public class ObservableHashSet<T> : ISet<T>, IReadOnlyCollection<T>, ISerializab
 
 	void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) { GetObjectData(info, context); }
 	[SecurityCritical]
-	[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 	protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 	{
 		if (info == null) throw new ArgumentNullException(nameof(info));

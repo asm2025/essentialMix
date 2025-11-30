@@ -129,10 +129,17 @@ public class HttpClientEx : HttpClient
 	public HttpResponseMessage Put(string requestUri, HttpContent content, CancellationToken cancellationToken) { return PutAsync(requestUri, content, cancellationToken).Execute(); }
 	public HttpResponseMessage Put(Uri requestUri, HttpContent content) { return PutAsync(requestUri, content).Execute(); }
 	public HttpResponseMessage Put(Uri requestUri, HttpContent content, CancellationToken cancellationToken) { return PutAsync(requestUri, content, cancellationToken).Execute(); }
+#if NET10_0_OR_GREATER
+	public new HttpResponseMessage Send(HttpRequestMessage request) { return SendAsync(request).Execute(); }
+	public new HttpResponseMessage Send(HttpRequestMessage request, HttpCompletionOption completionOption) { return SendAsync(request, completionOption).Execute(); }
+	public new HttpResponseMessage Send(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken) { return SendAsync(request, completionOption, cancellationToken).Execute(); }
+	public new HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken) { return SendAsync(request, cancellationToken).Execute(); }
+#else
 	public HttpResponseMessage Send(HttpRequestMessage request) { return SendAsync(request).Execute(); }
 	public HttpResponseMessage Send(HttpRequestMessage request, HttpCompletionOption completionOption) { return SendAsync(request, completionOption).Execute(); }
 	public HttpResponseMessage Send(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken) { return SendAsync(request, completionOption, cancellationToken).Execute(); }
 	public HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken) { return SendAsync(request, cancellationToken).Execute(); }
+#endif
 
 	protected virtual bool OnResponse([NotNull] HttpResponseMessage response)
 	{
