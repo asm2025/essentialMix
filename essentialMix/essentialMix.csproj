@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -9,9 +9,9 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<OutputPath>..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
-		<AssemblyVersion>17.0.1.0</AssemblyVersion>
-		<FileVersion>25.11.30</FileVersion>
-		<Version>17.0.1.0</Version>
+		<AssemblyVersion>17.0.2.0</AssemblyVersion>
+		<FileVersion>26.02.13</FileVersion>
+		<Version>17.0.2.0</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -43,11 +43,16 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
+		<!-- Suppress warnings for deliberate use of older APIs needed for netstandard2.0 compatibility -->
+		<NoWarn>$(NoWarn);SYSLIB0014;SYSLIB0021;SYSLIB0023;SYSLIB0027;SYSLIB0028;SYSLIB0050;SYSLIB0051;SYSLIB0057;CA1416;CA2022</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup>
 		<IsPackable>True</IsPackable>
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>17.0.1.0</PackageVersion>
+		<PackageVersion>17.0.2.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns</PackageTags>
@@ -73,13 +78,13 @@
 		<PackageReference Include="Enums.NET" Version="5.0.0" />
 		<PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.3" />
 		<PackageReference Include="OpenMcdf" Version="3.1.0" />
 		<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
-		<PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.0" />
-		<PackageReference Include="System.Security.Permissions" Version="10.0.0" />
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.0" />
-		<PackageReference Include="System.Threading.AccessControl" Version="10.0.0" />
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.3" />
+		<PackageReference Include="System.Security.Permissions" Version="10.0.3" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.3" />
+		<PackageReference Include="System.Threading.AccessControl" Version="10.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>

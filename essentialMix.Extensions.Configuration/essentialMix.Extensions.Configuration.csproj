@@ -9,9 +9,9 @@
 		<RootNamespace>asm</RootNamespace>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<OutputPath>..\bin\$(Configuration)\$(Platform)\$(TargetFramework)\</OutputPath>
-		<AssemblyVersion>17.0.1.0</AssemblyVersion>
-		<FileVersion>25.11.30</FileVersion>
-		<Version>17.0.1.0</Version>
+		<AssemblyVersion>17.0.2.0</AssemblyVersion>
+		<FileVersion>26.02.13</FileVersion>
+		<Version>17.0.2.0</Version>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -47,7 +47,7 @@
 		<PackageId>$(ProjectName)</PackageId>
 		<PackageIcon>buckramega.png</PackageIcon>
 		<PackageOutputPath>$(SolutionDir)nuget</PackageOutputPath>
-		<PackageVersion>17.0.1.0</PackageVersion>
+		<PackageVersion>17.0.2.0</PackageVersion>
 		<Authors>asm</Authors>
 		<Description>Common extensions methods, helper classes, components, nano systems, and common patterns</Description>
 		<PackageTags>utilities, tools, extensions, helpers, components, patterns, configuration</PackageTags>
@@ -71,17 +71,17 @@
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="10.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="10.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>

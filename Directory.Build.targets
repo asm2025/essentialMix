@@ -1,0 +1,8 @@
+<Project>
+	<!-- Clear the obsolete CodeAnalysisRuleSet property.
+	     MinimumRecommendedRules.ruleset was part of legacy FxCop and is no longer
+	     shipped with the .NET 10 SDK. Modern code analysis is handled by .NET analyzers. -->
+	<PropertyGroup>
+		<CodeAnalysisRuleSet />
+	</PropertyGroup>
+</Project>
