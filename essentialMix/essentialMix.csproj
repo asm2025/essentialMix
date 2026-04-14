@@ -76,7 +76,7 @@
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0" />
 		<PackageReference Include="OpenMcdf" Version="3.1.0" />
 		<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
-		<PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.0" />
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.6" />
 		<PackageReference Include="System.Security.Permissions" Version="10.0.0" />
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.0" />
 		<PackageReference Include="System.Threading.AccessControl" Version="10.0.0" />
