@@ -15,6 +15,6 @@ public class TemplateOptions
 		set => _baseDirectory = PathHelper.Trim(value) ?? string.Empty;
 	}
 
-	public LexerOptions? LexerOptions { get; set; }
-	public ParserOptions? ParserOptions { get; set; }
+	public LexerOptions LexerOptions { get; set; }
+	public ParserOptions ParserOptions { get; set; }
 }
