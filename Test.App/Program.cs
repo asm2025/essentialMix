@@ -44,7 +44,6 @@ using static Crayon.Output;
 using AutoResetEvent = essentialMix.Threading.AutoResetEvent;
 using Constants = Test.Common.Constants;
 using ManualResetEvent = essentialMix.Threading.ManualResetEvent;
-using Menu = EasyConsole.Menu;
 using TimeoutException = System.TimeoutException;
 
 namespace Test.App
@@ -4912,70 +4911,70 @@ The external id reflects the order by which they are scheduled and the -* part i
 			GraphList<char> graph;
 			WeightedGraphList<char, int> weightedGraph;
 			List<char> values = [];
-			Menu menu = new Menu()
-				.Add("Undirected graph", () =>
-				{
-					Console.WriteLine();
-					graph = new UndirectedGraphList<char>();
-					if (values.Count == 0) AddValues(values);
-					DoTheTest(graph, values);
-				})
-				.Add("Directed graph", () =>
-				{
-					Console.WriteLine();
-					graph = new DirectedGraphList<char>();
-					if (values.Count == 0) AddValues(values);
-					DoTheTest(graph, values);
-				})
-				.Add("Mixed graph", () =>
-				{
-					Console.WriteLine();
-					graph = new MixedGraphList<char>();
-					if (values.Count == 0) AddValues(values);
-					DoTheTest(graph, values);
-				})
-				.Add("Weighted undirected graph", () =>
-				{
-					Console.WriteLine();
-					weightedGraph = new WeightedUndirectedGraphList<char, int>();
-					if (values.Count == 0) AddValues(values);
-					DoTheTest(weightedGraph, values);
-				})
-				.Add("Weighted directed graph", () =>
-				{
-					Console.WriteLine();
-					weightedGraph = new WeightedDirectedGraphList<char, int>();
-					if (values.Count == 0) AddValues(values);
-					DoTheTest(weightedGraph, values);
-				})
-				.Add("Weighted mixed graph", () =>
-				{
-					Console.WriteLine();
-					weightedGraph = new WeightedMixedGraphList<char, int>();
-					if (values.Count == 0) AddValues(values);
-					DoTheTest(weightedGraph, values);
-				});
+			//Menu menu = new Menu()
+			//	.Add("Undirected graph", () =>
+			//	{
+			//		Console.WriteLine();
+			//		graph = new UndirectedGraphList<char>();
+			//		if (values.Count == 0) AddValues(values);
+			//		DoTheTest(graph, values);
+			//	})
+			//	.Add("Directed graph", () =>
+			//	{
+			//		Console.WriteLine();
+			//		graph = new DirectedGraphList<char>();
+			//		if (values.Count == 0) AddValues(values);
+			//		DoTheTest(graph, values);
+			//	})
+			//	.Add("Mixed graph", () =>
+			//	{
+			//		Console.WriteLine();
+			//		graph = new MixedGraphList<char>();
+			//		if (values.Count == 0) AddValues(values);
+			//		DoTheTest(graph, values);
+			//	})
+			//	.Add("Weighted undirected graph", () =>
+			//	{
+			//		Console.WriteLine();
+			//		weightedGraph = new WeightedUndirectedGraphList<char, int>();
+			//		if (values.Count == 0) AddValues(values);
+			//		DoTheTest(weightedGraph, values);
+			//	})
+			//	.Add("Weighted directed graph", () =>
+			//	{
+			//		Console.WriteLine();
+			//		weightedGraph = new WeightedDirectedGraphList<char, int>();
+			//		if (values.Count == 0) AddValues(values);
+			//		DoTheTest(weightedGraph, values);
+			//	})
+			//	.Add("Weighted mixed graph", () =>
+			//	{
+			//		Console.WriteLine();
+			//		weightedGraph = new WeightedMixedGraphList<char, int>();
+			//		if (values.Count == 0) AddValues(values);
+			//		DoTheTest(weightedGraph, values);
+			//	});
 
-			do
-			{
-				Console.Clear();
-				Title("Testing graph add()");
-				menu.Display();
-				Console.WriteLine();
-				Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
-				ConsoleKeyInfo response = Console.ReadKey(true);
-				Console.WriteLine();
-				more = response.Key == ConsoleKey.Y;
-				if (!more || values.Count >= MAX_LIST) continue;
+			//do
+			//{
+			//	Console.Clear();
+			//	Title("Testing graph add()");
+			//	menu.Display();
+			//	Console.WriteLine();
+			//	Console.Write($"Press {Bright.Green("[Y]")} to make another test or {Dim("any other key")} to exit. ");
+			//	ConsoleKeyInfo response = Console.ReadKey(true);
+			//	Console.WriteLine();
+			//	more = response.Key == ConsoleKey.Y;
+			//	if (!more || values.Count >= MAX_LIST) continue;
 
-				Console.Write($"Would you like to add more character? {Bright.Green("[Y]")} / {Dim("any key")} ");
-				response = Console.ReadKey(true);
-				Console.WriteLine();
-				if (response.Key != ConsoleKey.Y) continue;
-				Console.WriteLine();
-				AddValues(values);
-			}
-			while (more);
+			//	Console.Write($"Would you like to add more character? {Bright.Green("[Y]")} / {Dim("any key")} ");
+			//	response = Console.ReadKey(true);
+			//	Console.WriteLine();
+			//	if (response.Key != ConsoleKey.Y) continue;
+			//	Console.WriteLine();
+			//	AddValues(values);
+			//}
+			//while (more);
 
 			static void AddValues(List<char> list)
 			{
