@@ -4905,12 +4905,12 @@ The external id reflects the order by which they are scheduled and the -* part i
 
 		private static void TestGraph()
 		{
-			const int MAX_LIST = 26;
+			//const int MAX_LIST = 26;
 
-			bool more;
-			GraphList<char> graph;
-			WeightedGraphList<char, int> weightedGraph;
-			List<char> values = [];
+			//bool more;
+			//GraphList<char> graph;
+			//WeightedGraphList<char, int> weightedGraph;
+			//List<char> values = [];
 			//Menu menu = new Menu()
 			//	.Add("Undirected graph", () =>
 			//	{
